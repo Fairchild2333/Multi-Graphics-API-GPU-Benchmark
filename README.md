@@ -54,14 +54,14 @@ See [`docs/report.md`](docs/report.md) for the full analysis.
 See [`docs/building.md`](docs/building.md) for detailed prerequisites and
 platform-specific setup (Windows/Linux/macOS).
 
-**Linux:**
+**Linux (Debian/Ubuntu):**
 ```bash
 sudo apt install build-essential cmake libglfw3-dev libgl-dev  # + libvulkan-dev for Vulkan
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build
 ./build/gpu_benchmark
 ```
 
-**Windows (Developer PowerShell):**
+**Windows:**
 ```powershell
 cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
 cmake --build build --config Release

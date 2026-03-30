@@ -34,11 +34,11 @@
 14. [OpenGL GPU Selection — Platform Limitations](#14-opengl-gpu-selection--platform-limitations)
 15. [DX11 Timestamp Query Failures](#15-dx11-timestamp-query-failures--three-distinct-causes)
 16. [OpenGL Compute Shader Performance on AMD GPUs](#16-opengl-compute-shader-performance-on-amd-gpus)
+17. [Dual Identical GPU Behaviour (Mac Pro 2013)](#17-dual-identical-gpu-behaviour-mac-pro-2013--2-firepro-d700)
 
 ### Part 6 — Conclusion
 
-17. [Summary](#17-summary)
-18. [Dual Identical GPU Behaviour (Mac Pro 2013)](#18-dual-identical-gpu-behaviour-mac-pro-2013--2-firepro-d700)
+18. [Summary](#18-summary)
 
 ### Appendices
 
@@ -85,12 +85,12 @@ including seven discrete GPUs and two integrated GPUs:
 
 | GPU | Architecture | Year | CU / SP | FP32 (TFLOPS) | Memory |
 |-----|-------------|------|---------|---------------|--------|
-| **RX 9070 XT** | RDNA 4 | 2025 | 64 CU (4096 SP) | 48.70 † | 16 GB GDDR6, 640 GB/s |
+| **RX 9070 XT** | RDNA 4 | 2025 | 64 CU (4096 SP) | 48.70 | 16 GB GDDR6, 640 GB/s |
 | **RX 6900 XT** | RDNA 2 | 2020 | 80 CU (5120 SP) | 23.04 | 16 GB GDDR6, 512 GB/s |
 | **RX 6600 XT** | RDNA 2 | 2021 | 32 CU (2048 SP) | 10.60 | 8 GB GDDR6, 256 GB/s |
 | **Vega Frontier Edition** | GCN 5 (Vega) | 2017 | 64 CU (4096 SP) | 13.11 | 16 GB HBM2, 483 GB/s |
-| **RX 580** | GCN 4 (Polaris) | 2017 | 36 CU (2304 SP) | 6.17 | 8 GB GDDR5, 256 GB/s |
-| **FirePro D700** | GCN 1.0 (Tahiti) | 2013 | 32 CU (2048 SP) | 3.48 | 6 GB GDDR5, 264 GB/s |
+| **RX 580** | GCN 4 (Polaris 20) | 2017 | 36 CU (2304 SP) | 6.17 | 8 GB GDDR5, 256 GB/s |
+| **FirePro D700** | GCN 1 (Tahiti) | 2013 | 32 CU (2048 SP) | 3.48 | 6 GB GDDR5, 264 GB/s |
 | **HD 5770** | TeraScale 2 (Juniper) | 2009 | 10 SIMD (800 SP) | 1.36 | 1 GB GDDR5, 77 GB/s |
 | **Ryzen 7 9800X3D iGPU** | RDNA 2 | 2024 | 2 CU (128 SP) | 0.56 | Shared DDR5, ~90 GB/s |
 | **Ryzen 5 7600 iGPU** | RDNA 2 | 2023 | 2 CU (128 SP) | 0.56 | Shared DDR5, ~90 GB/s |
@@ -580,7 +580,11 @@ benchmark results). Charts use a dark colour scheme with API-specific colours
 
 An interesting result: the RX 6900 XT **outperforms the newer RX 9070 XT at 16M particles** (218 vs 111 FPS on Vulkan), despite the 9070 XT scoring **1.4× higher in Time Spy and 1.7× higher in Steel Nomad** — and being faster in both pure compute (headless, Section 5c) and 1M windowed. The compute times are nearly identical (~2.0 ms); the difference is entirely in the **render pass**: 6.4 ms on the 9070 XT vs 2.1 ms on the 6900 XT.
 
-This is a workload-specific result that highlights what this microbenchmark actually measures. Rendering 16M individual point primitives is an extreme stress test for **primitive throughput** — the ability to set up and rasterise millions of tiny primitives per frame. The 6900 XT has 80 CUs with 1.25× more rasterisation hardware than the 9070 XT's 64 CUs, but the render time gap (3.1×) is far larger than the CU ratio alone would suggest. The 6900 XT also benefits from 128 MB Infinity Cache (vs 64 MB on the 9070 XT) and a more mature RDNA 2 driver pipeline for point primitive rendering. Standard game rendering uses far fewer, larger triangles with complex shading — a scenario where the 9070 XT's architectural improvements (higher clocks, better cache hierarchy, ray tracing hardware, improved schedulers) deliver the performance uplift reflected in 3DMark. The lesson is that no single benchmark captures all aspects of GPU performance; this microbenchmark specifically targets compute + primitive throughput, which produces a different ranking than rasterisation-focused benchmarks with complex geometry.
+This is a workload-specific result that highlights what this microbenchmark actually measures. Rendering 16M individual point primitives is an extreme stress test for **primitive throughput** — the ability to set up and rasterise millions of tiny primitives per frame. The 6900 XT has 80 CUs with 1.25× more rasterisation hardware than the 9070 XT's 64 CUs, but the render time gap (3.1×) is far larger than the CU ratio alone would suggest.
+
+**Infinity Cache plays a significant role here.** AMD has progressively reduced Infinity Cache capacity across RDNA generations — 128 MB (RDNA 2) → 96 MB (RDNA 3, e.g. RX 7900 XTX) → 64 MB (RDNA 4) — trading raw capacity for improved per-MB efficiency. However, in this 16M-particle scenario, the 6900 XT's 2× larger cache (128 MB vs 64 MB) is a clear advantage: 16M point primitives generate heavy vertex fetch and rasterisation traffic, and the larger cache keeps more of this data on-die, reducing round-trips to VRAM. The 9070 XT compensates with higher memory bandwidth (640 vs 512 GB/s), but bandwidth cannot fully offset the latency penalty when the working set exceeds the cache. This mirrors a well-known pattern in CPUs — AMD's Ryzen 9800X3D with 3D V-Cache (96 MB L3) dramatically outperforms the standard 9700X (32 MB L3) in cache-sensitive gaming workloads, despite identical core counts and clocks. Whether on a GPU or CPU, **when the working set fits in a larger cache, the raw bandwidth of the smaller-cache part cannot compensate for the hit-rate advantage**.
+
+Beyond cache, the 6900 XT also benefits from a more mature RDNA 2 driver pipeline for point primitive rendering. Standard game rendering uses far fewer, larger triangles with complex shading — a scenario where the 9070 XT's architectural improvements (higher clocks, ray tracing hardware, improved schedulers) deliver the performance uplift reflected in 3DMark. The lesson is that no single benchmark captures all aspects of GPU performance; this microbenchmark specifically targets compute + primitive throughput, which produces a different ranking than rasterisation-focused benchmarks with complex geometry.
 
 **16× particle scaling analysis (1M → 16M) — RX 9070 XT:**
 
@@ -628,6 +632,8 @@ This is a workload-specific result that highlights what this microbenchmark actu
 
 In headless mode, the 9070 XT is consistently **~1.37× faster** than the 6900 XT in pure compute — this is the true generational improvement, free of presentation throttling and render pipeline differences. The 9070 XT achieves this with 64 CUs vs 80 CUs (80% of the CU count), meaning its **per-CU compute efficiency is ~1.7× higher** than RDNA 2. The 6900 XT's OpenGL headless result (341 FPS vs 15K+ on other APIs) confirms the AMD OpenGL compute overhead persists even without a window.
 
+**Why Infinity Cache no longer matters here.** In Section 5b, the 6900 XT's 128 MB Infinity Cache was identified as a key factor in its 16M-particle render advantage over the 9070 XT (64 MB). In headless mode, that advantage disappears entirely — the 9070 XT wins by 1.37×. The reason is a fundamental difference in memory access patterns: the compute shader performs a **streaming** update (each particle reads its own position/velocity, updates, and writes back), where data is touched once and not reused — cache size is irrelevant, and raw bandwidth (640 vs 512 GB/s) and ALU throughput determine performance. By contrast, the 16M-particle render pass involves vertex fetch, primitive assembly, rasterisation, and depth testing across the same memory regions, creating **repeated, overlapping accesses** where a larger cache dramatically improves hit rates. This confirms that Infinity Cache is a render-path advantage in cache-sensitive workloads, not a universal compute advantage. Paradoxically, **headless compute results are a better proxy for traditional gaming rasterisation performance** at this GPU tier than the 16M-particle windowed render test. Real game rendering uses thousands of large, shaded triangles — a workload dominated by ALU throughput, bandwidth, and clock speed rather than raw primitive count. The headless 1.37× advantage for the 9070 XT aligns closely with its 1.4× Time Spy and 1.7× Steel Nomad leads, while the 16M-particle render test — with its extreme small-primitive throughput stress — is an outlier that specifically punishes smaller caches and fewer fixed-function rasterisation units. In other words, the windowed 16M test tells us something real about the hardware, but it is the headless result that better predicts how these GPUs rank in the workloads most users care about.
+
 **RX 9070 XT — Windowed vs Headless comparison:**
 
 | API | Windowed FPS | Headless FPS | Speedup | Windowed Compute | Headless Compute |
@@ -644,6 +650,10 @@ In headless mode, the 9070 XT is consistently **~1.37× faster** than the 6900 X
 
 ### 5d. Flights Test — 1M Particles, Windowed (2 vs 3 Frames-in-Flight)
 
+> **What is "Frames-in-Flight"?** In modern graphics APIs, the CPU does not wait for the GPU to finish one frame before starting the next. Instead, the CPU can prepare N frames ahead while the GPU is still rendering earlier ones — these N in-progress frames are called "frames-in-flight" (also known as "buffered frames" or "frame overlap"). This is essentially a **render queue** — the number of frames simultaneously in-progress in the CPU–GPU pipeline, analogous to the "work-in-progress" slots on a factory assembly line. With 2 flights, the CPU can be building frame N+1 while the GPU renders frame N; with 3 flights, the CPU can be up to 2 frames ahead. A deeper queue improves throughput (the pipeline is less likely to stall), but increases input latency (the displayed frame was prepared further in the past). This is the same concept exposed by NVIDIA's **"Maximum Pre-Rendered Frames"** setting (now called "Low Latency Mode") and targeted by latency-reduction technologies like **NVIDIA Reflex** and **AMD Anti-Lag**, which dynamically shorten the render queue to minimise input-to-display delay at the cost of some throughput. This test compares 2 vs 3 frames-in-flight to measure the throughput impact on each API.
+>
+> **Relationship with V-Sync.** Frames-in-flight and V-Sync are related but distinct concepts. V-Sync locks presentation to the display refresh rate to prevent tearing; frames-in-flight controls how far the CPU can work ahead of the GPU regardless of V-Sync. The two interact most visibly when V-Sync is ON: on a 60 Hz display, 2 flights means the CPU leads by up to 1 frame (~17 ms extra latency), while 3 flights ("triple buffering") allows up to 2 frames ahead (~33 ms extra latency). With V-Sync OFF — the condition used in all tests in this report — flights purely affect CPU–GPU pipeline overlap without any refresh-rate constraint, which is why DX12 can gain +22% throughput simply by moving from 2 to 3 flights: the CPU submits work earlier instead of stalling on a busy swapchain image.
+
 | API | Flights=2 FPS | Flights=3 FPS | Change | Flights=2 Render | Flights=3 Render |
 |-----|-------------|-------------|--------|-----------------|-----------------|
 | Vulkan | 1,750.6 | 1,736.9 | −0.8% | 0.408 ms | 0.409 ms |
@@ -654,6 +664,7 @@ In headless mode, the 9070 XT is consistently **~1.37× faster** than the 6900 X
 - **DX12 benefits most** from an extra frame-in-flight (+22%), suggesting its command pipeline can overlap more work with 3 buffers.
 - **Vulkan shows no improvement** — its presentation engine already manages buffering efficiently at 2 frames.
 - **Render times remain unchanged** across both flight counts, confirming that swapchain semaphore wait pollution is not reduced by adding more swapchain images (as discussed in Section 6d).
+- **Why this benchmark defaults to 2 flights.** For GPU benchmarking, fewer frames-in-flight is generally preferable: it minimises CPU-side pipeline overlap so that the measured frame time more closely reflects actual GPU execution cost. With 3 flights, the CPU can "hide" stalls by working further ahead, which inflates FPS without the GPU doing any more work per unit time — this is a CPU-side throughput optimisation, not a GPU performance improvement. The DX12 +22% gain from 3 flights demonstrates exactly this effect: the GPU render time is unchanged (0.399 → 0.400 ms), meaning the GPU is doing identical work; the extra FPS comes entirely from the CPU submitting commands more efficiently. For a benchmark designed to measure GPU compute and render performance, 2 flights provides a cleaner signal with less CPU-side noise. This section tests 3 flights to quantify the presentation overhead, not to suggest it as a better default.
 
 ### 5e. RX 9070 XT vs Other GPUs — 1M Particles, Vulkan
 
@@ -663,8 +674,8 @@ In headless mode, the 9070 XT is consistently **~1.37× faster** than the 6900 X
 | **RX 9070 XT** | **RDNA 4 (64 CU)** | **0.033** | **0.408** | **0.446** | **1,751** |
 | RX 6900 XT | RDNA 2 (80 CU) | 0.063 | 0.134 | 0.197 | 2,866 |
 | RX 6600 XT | RDNA 2 (32 CU) | 0.270 | 0.379 | 0.649 | 1,239 |
-| Vega FE | GCN 5 (64 CU) | 0.368 | — | — | — |
-| RX 580 | GCN 4 (36 CU) | 0.362 | — | — | — |
+| Vega FE | GCN 5 (64 CU) | 0.219 | 0.275 | 0.495 | 1,370 |
+| RX 580 | GCN 4 (36 CU) | 0.362 | 0.702 | 1.070 | 783 |
 
 **Compute performance ranking** (lower is better):
 
@@ -673,8 +684,9 @@ In headless mode, the 9070 XT is consistently **~1.37× faster** than the 6900 X
 | RTX 5090 | 0.025 | 0.76× | N/A (different arch) |
 | **RX 9070 XT** | **0.033** | **1.00×** | **1.00×** |
 | RX 6900 XT | 0.063 | 1.91× | 0.42× (80 CU → per-CU: 1.91 × 64/80 = 1.53× slower) |
-| RX 6600 XT | 0.270 | 8.18× | 0.24× (32 CU → per-CU: 8.18 × 64/32 ÷ 64 ... = 4.1× slower) |
-| RX 580 | 0.362 | 10.97× | 0.16× (36 CU) |
+| Vega FE | 0.219 | 6.64× | 0.15× (64 CU → per-CU: 6.64× slower) |
+| RX 6600 XT | 0.270 | 8.18× | 0.24× (32 CU → per-CU: 8.18 × 64/32 = 4.1× slower) |
+| RX 580 | 0.362 | 10.97× | 0.16× (36 CU → per-CU: 10.97 × 64/36 = 6.2× slower) |
 
 The 9070 XT is **8.2× faster overall** than the 6600 XT in compute. Since the 9070 XT has 2× the CU count (64 vs 32), the **per-CU efficiency improvement is ~4.1×**, which is still a massive generational leap from RDNA 2 to RDNA 4:
 - Higher clock speed (2,970 MHz vs 2,589 MHz) accounts for ~1.15×
@@ -730,6 +742,8 @@ The **render time** (T3 − T2) therefore measures: `actual render work + semaph
 | **RX 9070 XT** | Compute finishes very fast (0.033 ms), reaches `COLOR_ATTACHMENT_OUTPUT` before the presentation engine has released the image from the previous present. GPU stalls waiting for semaphore. | **High pollution** — ~0.37 ms of the 0.408 ms "render time" is semaphore wait |
 
 The 9070 XT's actual render work is approximately **0.04 ms** (similar to other GPUs), but the timestamp reports 0.408 ms because it includes the swapchain image wait.
+
+Note that at 1M particles, the render timestamp difference is primarily a semaphore wait artefact, not a real GPU performance gap. However, at higher particle counts (16M), the render time difference becomes real — and **Infinity Cache** becomes a significant factor: the 6900 XT's 128 MB cache vs the 9070 XT's 64 MB provides a substantial hit-rate advantage for primitive-heavy rendering (see Section 5b for full analysis).
 
 ### 6d. Swapchain BufferCount vs VSync
 
@@ -844,7 +858,7 @@ This would provide a middle ground between windowed (presentation-throttled) and
 | GPU | Architecture | Generation | CUs / SPs | Core Clock | FP32 TFLOPS | Memory | Bandwidth | Platform | API Coverage |
 |-----|-------------|-----------|-----------|-----------|-------------|--------|-----------|----------|-------------|
 | HD 5770 | TeraScale 2 | 2009 | 800 SPs (VLIW5) | 850 MHz | ~1.36 | 1 GB GDDR5 | 76.8 GB/s | Windows | DX11, OpenGL |
-| FirePro D700 ×2 | GCN 1.0 (Tahiti) | 2013 | 2048 SPs | 850 MHz | ~3.5 | 6 GB GDDR5 | 264 GB/s | Windows | Vulkan, DX12, DX11, OpenGL |
+| FirePro D700 | GCN 1.0 (Tahiti) | 2013 | 2048 SPs | 850 MHz | ~3.5 | 6 GB GDDR5 | 264 GB/s | Windows | Vulkan, DX12, DX11, OpenGL |
 | RX 580 | GCN 4 (Polaris) | 2017 | 36 CUs | 1,340 MHz | ~6.2 | 8 GB GDDR5 | 256 GB/s | Windows | Vulkan, DX12, DX11, OpenGL |
 | Vega Frontier Edition | GCN 5 (Vega) | 2017 | 64 CUs | 1,600 MHz | ~13.1 | 16 GB HBM2 | 483 GB/s | Windows | Vulkan, DX12, DX11, OpenGL |
 | RX 6600 XT | RDNA 2 | 2021 | 32 CUs | 2,589 MHz | ~10.6 | 8 GB GDDR6 | 256 GB/s | Windows | Vulkan, DX12, DX11, OpenGL |
@@ -870,9 +884,12 @@ This would provide a middle ground between windowed (presentation-throttled) and
 | 3 | Vega FE | GCN 5 (64 CU) | DX12 | 1,715.5 | 0.219 | 0.229 | 0.452 | Balanced |
 | 4 | RX 580 | GCN 4 (36 CU) | DX12 | 912.2 | 0.362 | 0.557 | 0.930 | GPU-bound |
 | 5 | FirePro D700 | GCN 1.0 | Vulkan | 554.8 | 0.589 | 0.881 | 1.473 | GPU-bound |
-| 6 | iGPU (2 CU) | RDNA 2 | DX12 | 324.0 | 1.480 | 1.472 | 2.953 | GPU-bound |
+| 6 | Zen4/5 iGPU (2 CU) | RDNA 2 | DX12 | 324.0 | 1.480 | 1.472 | 2.953 | GPU-bound |
 | 7 | HD 5770 | TeraScale 2 | OpenGL | 188.2 | 1.794 | 3.018 | 4.818 | GPU-bound |
-| 8 | WARP (CPU) | Software | DX12 | 86.6 | 1.034 | 10.024 | 11.059 | Software |
+| 8 | WARP on 9800X3D¹ | Software | DX12 | 86.6 | 1.034 | 10.024 | 11.059 | Software |
+| 9 | WARP on 7600¹ | Software | DX12 | 62.2 | 1.810 | 13.369 | 15.181 | Software |
+
+> ¹ WARP runs on the CPU, not a GPU. The two WARP entries show the same software renderer on different CPUs: the **Ryzen 7 9800X3D** (8-core, 96 MB L3 3D V-Cache) is 39% faster than the **Ryzen 5 7600** (6-core, 32 MB L3), demonstrating how CPU core count, clock speed, and cache size directly affect software rendering performance.
 
 **All API results per GPU:**
 
@@ -884,7 +901,7 @@ This would provide a middle ground between windowed (presentation-throttled) and
 | Vega FE | 1,370 FPS | 1,716 FPS | 1,436 FPS | 158 FPS | N/A |
 | RX 580 | 783 FPS | 912 FPS | 755 FPS | 42 FPS | N/A |
 | FirePro D700 | 555 FPS | 516 FPS | 527 FPS | 525 FPS | N/A |
-| iGPU (2 CU) | 238 FPS | 324 FPS | 271 FPS | 229 FPS | N/A |
+| Zen4/5 iGPU (2 CU) | 238 FPS | 324 FPS | 271 FPS | 229 FPS | N/A |
 | HD 5770 | N/A | N/A | 107 FPS | 188 FPS | N/A |
 
 ---
@@ -905,7 +922,7 @@ architectural efficiency from raw CU count.
 | RX 6600 XT | RDNA 2 | 32 | 0.270 | 0.1157 | 1.51× |
 | RX 9070 XT | RDNA 4 | 64 | 0.033 | 0.4735 | 6.17× |
 | RX 6900 XT | RDNA 2 | 80 | 0.063 | 0.1984 | 2.59× |
-| iGPU (2 CU) | RDNA 2 | 2 | 1.257 | 0.3978 | 5.19× |
+| Zen4/5 iGPU (2 CU) | RDNA 2 | 2 | 1.257 | 0.3978 | 5.19× |
 
 > **HD 5770 CU equivalence:** TeraScale 2 does not have CUs. 800 VLIW5
 > stream processors are roughly grouped into 10 SIMD engines. This mapping
@@ -928,7 +945,7 @@ how compute performance scales with CU count within the same architecture.
 
 | GPU | CUs | FPS | Compute (ms) | Scaling vs iGPU (2 CU) | Ideal Scaling (CU ratio) | Efficiency |
 |-----|-----|-----|-------------|------------------------|--------------------------|------------|
-| iGPU (2 CU) | 2 | 238 | 1.257 | 1.00× | 1.00× | 100% |
+| Zen4/5 iGPU (2 CU) | 2 | 238 | 1.257 | 1.00× | 1.00× | 100% |
 | RX 6600 XT | 32 | 1,239 | 0.270 | 4.66× | 16.0× | 29% |
 | RX 6900 XT | 80 | 2,885 | 0.063 | 19.95× | 40.0× | 50% |
 
@@ -994,7 +1011,7 @@ hold across all AMD architectures, or does it change?
 | RX 6600 XT | RDNA 2 | DX12 | 988 | 1,834 | 1,239 | 180 | −20.3% |
 | RX 9070 XT | RDNA 4 | DX11 | 1,774 | 1,609 | 1,751 | 253 | +1.3% |
 | RX 6900 XT | RDNA 2 | DX11 | 4,068 | 3,518 | 2,885 | 229 | +41.0% |
-| iGPU (2 CU) | RDNA 2 | DX12 | 271 | 324 | 238 | 229 | +13.9% |
+| Zen4/5 iGPU (2 CU) | RDNA 2 | DX12 | 271 | 324 | 238 | 229 | +13.9% |
 
 **Analysis:**
 
@@ -1024,7 +1041,7 @@ is bandwidth-bound.
 | RX 6600 XT | 256 | 1,834 | 7.16 |
 | RX 6900 XT | 512 | 4,068 | 7.95 |
 | RX 9070 XT | 640 | 1,774 | 2.77 |
-| iGPU (DDR5) | ~83 | 324 | 3.90 |
+| Zen4/5 iGPU (DDR5) | ~83 | 324 | 3.90 |
 
 **Analysis:**
 
@@ -1052,7 +1069,7 @@ the bottleneck shifts from CPU to GPU.
 | Vega FE | GCN 5 (64 CU) | 1,716 | — | — |
 | RX 580 | GCN 4 (36 CU) | 912 | — | — |
 | HD 5770 | TeraScale 2 | 188 | — | — |
-| iGPU (2 CU) | RDNA 2 | 324 | — | — |
+| Zen4/5 iGPU (2 CU) | RDNA 2 | 324 | — | — |
 
 > *Note: The RTX 5090 ($1,999, flagship tier) is included as a cross-vendor reference point, not as a direct competitor to the mid-range RX 9070 XT ($599) or RX 6900 XT (launched $999, now ~$400 used). Price-performance analysis is in Section 8.*
 
@@ -1085,7 +1102,7 @@ compare per-event GPU timing, barrier cost, and command structure.
 | Vega FE | GCN 5 (64 CU) | 0.219 | 0.001 | 0.275 | 0.495 |
 | RX 580 | GCN 4 (36 CU) | 0.362 | 0.006 | 0.702 | 1.070 |
 | FirePro D700 | GCN 1.0 (12 CU) | 0.589 | 0.003 | 0.881 | 1.473 |
-| iGPU (2 CU) | RDNA 2 | 1.257 | < 0.001 | 1.928 | 3.185 |
+| Zen4/5 iGPU (2 CU) | RDNA 2 | 1.257 | < 0.001 | 1.928 | 3.185 |
 
 > HD 5770 excluded — no Vulkan support. Barrier cost derived from
 > `Total GPU − Compute − Render` (timestamps 1→4 minus timestamps 1→2
@@ -1105,8 +1122,8 @@ compare per-event GPU timing, barrier cost, and command structure.
 | Vega FE | Render | 0.275 | 0.099 | GPU-bound render pass |
 | RX 580 | Compute | 0.362 | 0.004 | CPU recording ≪ GPU execution |
 | RX 580 | Render | 0.702 | 0.075 | GPU-bound render pass |
-| iGPU (2 CU) | Compute | 1.257 | 0.005 | CPU recording ≪ GPU execution |
-| iGPU (2 CU) | Render | 1.928 | 0.107 | GPU-bound render pass |
+| Zen4/5 iGPU (2 CU) | Compute | 1.257 | 0.005 | CPU recording ≪ GPU execution |
+| Zen4/5 iGPU (2 CU) | Render | 1.928 | 0.107 | GPU-bound render pass |
 
 > **Note:** RenderDoc JSON exports record CPU-side API call durations
 > (when each `vkCmd*` was recorded into the command buffer), not GPU
@@ -1127,7 +1144,7 @@ compare per-event GPU timing, barrier cost, and command structure.
 | Vega FE | GCN 5 | 16 GB HBM2 | 0.001 | HBM2 — near-zero |
 | RX 580 | GCN 4 | 8 GB GDDR5 | 0.006 | Highest — GDDR5 L2 flush |
 | FirePro D700 | GCN 1.0 | 6 GB GDDR5 | 0.003 | Moderate — early GCN |
-| iGPU (2 CU) | RDNA 2 | Shared DDR5 | < 0.001 | Unified memory — near-zero |
+| Zen4/5 iGPU (2 CU) | RDNA 2 | Shared DDR5 | < 0.001 | Unified memory — near-zero |
 
 **Analysis:**
 
@@ -1143,7 +1160,7 @@ Barrier cost is negligible across all tested AMD GPUs (< 0.006 ms), confirming t
 | Vega FE | ~130 | 52 | 1 | 1 | 1 | 0 |
 | RX 580 | ~130 | 50 | 1 | 1 | 1 | 0 |
 | FirePro D700 | ~130 | 50 | 1 | 1 | 1 | 0 |
-| iGPU (2 CU) | ~135 | 52 | 1 | 1 | 1 | 0 |
+| Zen4/5 iGPU (2 CU) | ~135 | 52 | 1 | 1 | 1 | 0 |
 
 > All AMD GPUs produce an identical frame structure: 1 compute dispatch,
 > 1 pipeline barrier, 1 render pass (begin + draw + end), 4 timestamp
@@ -1177,7 +1194,7 @@ performance scaling.
 | RX 6600 XT | RDNA 2 (32 CU) | 2.01× | 2.16× | 1.92× | −7.0% | +4.9% |
 | Vega FE | GCN 5 (64 CU) | 1.88× | 1.59× | 1.46× | +18.2% | +28.8% |
 | **RX 580** | **GCN 4 (36 CU)** | **1.00×** | **1.00×** | **1.00×** | **—** | **—** |
-| iGPU (2 CU) | RDNA 2 | 0.36× | 0.16× | 0.15× | +119.2% | +132.0% |
+| Zen4/5 iGPU (2 CU) | RDNA 2 | 0.36× | 0.16× | 0.15× | +119.2% | +132.0% |
 | HD 5770 | TeraScale 2 | 0.21× | N/A | 0.10× | N/A | +106.8% |
 
 > **Deviation** = `(This Benchmark ratio / 3DMark ratio) − 1`.
@@ -1191,7 +1208,7 @@ performance scaling.
 | RX 6900 XT | Near zero (TS) / Positive (FS) | 80 CU + 512 GB/s bandwidth scales well for both workloads; Fire Strike's DX11 overhead less efficient than Vulkan compute |
 | RX 6600 XT | Near zero | Mid-range GPU; balanced for both workload types |
 | Vega FE | Positive (+18–29%) | HBM2's 483 GB/s bandwidth disproportionately benefits bandwidth-bound compute workloads |
-| iGPU (2 CU) | Positive (+119–132%) | Simple compute fits within 2-CU cache; 3DMark's complex workloads expose shader count limit |
+| Zen4/5 iGPU (2 CU) | Positive (+119–132%) | Simple compute fits within 2-CU cache; 3DMark's complex workloads expose shader count limit |
 | HD 5770 | N/A for Time Spy | TeraScale 2 has no DX12; Fire Strike deviation +107% (similar to iGPU — simple compute overperforms) |
 
 #### Correlation Analysis
@@ -1358,7 +1375,7 @@ Baseline: **RX 580** = 1.00×
 | RX 6600 XT | RDNA 2 (32 CU) | 2.01× | 2.16× | 1.92× | −7.0% | +4.9% |
 | Vega FE | GCN 5 (64 CU) | 1.88× | 1.59× | 1.46× | +18.2% | +28.8% |
 | **RX 580** | **GCN 4 (36 CU)** | **1.00×** | **1.00×** | **1.00×** | **—** | **—** |
-| iGPU (2 CU) | RDNA 2 | 0.36× | 0.16× | 0.15× | +119.2% | +132.0% |
+| Zen4/5 iGPU (2 CU) | RDNA 2 | 0.36× | 0.16× | 0.15× | +119.2% | +132.0% |
 | HD 5770 | TeraScale 2 | 0.21× | N/A (no DX12) | 0.10× | N/A | +106.8% |
 
 > **Deviation** = `(This Benchmark ratio / 3DMark ratio) − 1`.
@@ -1377,7 +1394,7 @@ tessellation, post-processing, and full-screen effects. Expected differences:
 | RX 6900 XT | −3.7% | +16.8% | Strong Time Spy correlation; Fire Strike deviation from DX11 overhead differential |
 | RX 6600 XT | −7.0% | +4.9% | Good correlation across both benchmarks |
 | Vega FE | +18.2% | +28.8% | HBM2's 483 GB/s bandwidth disproportionately benefits this bandwidth-bound compute workload; 3DMark's texture-heavy scenes do not leverage raw bandwidth as heavily |
-| iGPU (2 CU) | +119.2% | +132.0% | The iGPU's 2 CUs handle this simple compute workload efficiently (cache-friendly, low contention), but 3DMark's complex geometry/texture workloads expose the severe shader count limitation |
+| Zen4/5 iGPU (2 CU) | +119.2% | +132.0% | The iGPU's 2 CUs handle this simple compute workload efficiently (cache-friendly, low contention), but 3DMark's complex geometry/texture workloads expose the severe shader count limitation |
 | HD 5770 | N/A | +106.8% | TeraScale 2 has no DX12; Fire Strike deviation similar to iGPU — simple compute overperforms relative to 3DMark's complex rasterisation |
 
 GPUs operating in their GPU-bound regime (RTX 5090, RX 6900 XT, RX 6600 XT) show Time Spy deviations within **±10%**, confirming strong correlation. The large deviations for the RX 9070 XT (presentation-limited), Vega FE (bandwidth advantage), iGPU and HD 5770 (workload mismatch) are explainable by workload characteristics and are not indicative of benchmark error.
@@ -1987,9 +2004,43 @@ Additionally, API performance rankings are architecture-dependent: DX11 leads on
 
 ---
 
+## 17. Dual Identical GPU Behaviour (Mac Pro 2013 — 2× FirePro D700)
+
+The Mac Pro (Late 2013) contains two identical AMD FirePro D700 GPUs (GCN 1.0, Tahiti XT). Testing under Windows 11 via Boot Camp revealed notable differences in how each graphics API handles multi-GPU selection for identical cards:
+
+### Per-API GPU Addressability
+
+| API | Sees both GPUs? | Can run on GPU #2 independently? |
+|-----|----------------|----------------------------------|
+| Vulkan | Yes (2 `VkPhysicalDevice`) | **Yes** — Task Manager confirms GPU #2 load |
+| DirectX 12 | Yes (2 DXGI adapters, distinct LUIDs) | **No** — driver routes work to GPU #1 |
+| DirectX 11 | Yes (2 DXGI adapters, distinct LUIDs) | **No** — driver routes work to GPU #1 |
+| OpenGL | No (single context, OS-assigned GPU) | No |
+
+### Key Findings
+
+- **DXGI enumerates both D700s with different LUIDs**, and both report DX12 Feature Level 11_1 support. Creating a D3D12/D3D11 device on either adapter succeeds. However, **the AMD driver routes all DX11/DX12 compute and rendering work to GPU #1** regardless of which adapter was selected. Windows Task Manager shows zero utilisation on GPU #2 during DX11/DX12 benchmarks targeting the second adapter.
+
+- **Only Vulkan can genuinely dispatch work to GPU #2.** When the benchmark selects `VkPhysicalDevice[1]`, Task Manager confirms GPU #2 shows compute and 3D load while GPU #1 remains idle (aside from display output).
+
+- **This is an AMD driver limitation, not a DX11/DX12 API limitation.** The DX11/DX12 APIs fully support multi-GPU independent addressing — DXGI enumerates both adapters with distinct LUIDs, and `D3D12CreateDevice` / `D3D11CreateDevice` succeed on both. The API layer does its job correctly. However, the AMD Windows driver internally routes all DX11/DX12 work to the primary GPU regardless of which adapter was selected. AMD's own Vulkan driver on the same hardware correctly dispatches to GPU #2, proving the hardware is capable. The FirePro D700's Windows driver has been EOL since March 2019, so this behaviour is unlikely to ever be fixed. This is also consistent with 3DMark behaviour: 3DMark Time Spy cannot select between identical GPUs on this system either.
+
+- **Performance is near-identical between the two cards** when properly addressed via Vulkan: GPU #1 averages ~554 FPS while GPU #2 averages ~448 FPS. The ~20% gap is likely due to GPU #1 handling display output overhead being offset by its position as the "primary" adapter, or minor thermal/power delivery asymmetry in the Mac Pro chassis.
+
+### Technical Details
+
+The benchmark uses **DXGI adapter LUID** (Locally Unique Identifier) to match GPUs across different DXGI factory instances. This was necessary because:
+1. DXGI `EnumAdapters1` may return different adapter counts or ordering across factory instances (e.g., the DX12 backend's factory only sees one D700 adapter while the detection-phase factory sees both).
+2. The previous approach of deduplicating by `VendorId + DeviceId + SubSysId` incorrectly merged both D700s into a single entry.
+3. Passing a gpus-array index to backends failed because the array could be reordered by Vulkan device insertion, causing index mismatches (e.g., index 1 pointing to Basic Render Driver instead of GPU #2).
+
+The LUID-based selection resolves all three issues — the benchmark now correctly creates a device on the intended DXGI adapter, even though the driver ultimately routes DX11/DX12 work to the primary GPU.
+
+---
+
 # Part 6 — Conclusion
 
-## 17. Summary
+## 18. Summary
 
 | Observation | Explanation |
 |-------------|-------------|
@@ -2021,40 +2072,6 @@ Additionally, API performance rankings are architecture-dependent: DX11 leads on
 | 9070 XT headless achieves 21K FPS across all APIs | All APIs converge to 0.034 ms compute; windowed mode's 1.7K FPS is 12× slower due to presentation overhead |
 
 These results demonstrate that **API overhead, memory placement, and hardware architecture** all significantly affect GPU compute performance — and that the optimal configuration depends on workload complexity and hardware topology.
-
----
-
-## 18. Dual Identical GPU Behaviour (Mac Pro 2013 — 2× FirePro D700)
-
-The Mac Pro (Late 2013) contains two identical AMD FirePro D700 GPUs (GCN 1.0, Tahiti XT). Testing under Windows 11 via Boot Camp revealed notable differences in how each graphics API handles multi-GPU selection for identical cards:
-
-### Per-API GPU Addressability
-
-| API | Sees both GPUs? | Can run on GPU #2 independently? |
-|-----|----------------|----------------------------------|
-| Vulkan | Yes (2 `VkPhysicalDevice`) | **Yes** — Task Manager confirms GPU #2 load |
-| DirectX 12 | Yes (2 DXGI adapters, distinct LUIDs) | **No** — driver routes work to GPU #1 |
-| DirectX 11 | Yes (2 DXGI adapters, distinct LUIDs) | **No** — driver routes work to GPU #1 |
-| OpenGL | No (single context, OS-assigned GPU) | No |
-
-### Key Findings
-
-- **DXGI enumerates both D700s with different LUIDs**, and both report DX12 Feature Level 11_1 support. Creating a D3D12/D3D11 device on either adapter succeeds. However, **the AMD driver routes all DX11/DX12 compute and rendering work to GPU #1** regardless of which adapter was selected. Windows Task Manager shows zero utilisation on GPU #2 during DX11/DX12 benchmarks targeting the second adapter.
-
-- **Only Vulkan can genuinely dispatch work to GPU #2.** When the benchmark selects `VkPhysicalDevice[1]`, Task Manager confirms GPU #2 shows compute and 3D load while GPU #1 remains idle (aside from display output).
-
-- **This is an AMD driver limitation, not a DX11/DX12 API limitation.** The DX11/DX12 APIs fully support multi-GPU independent addressing — DXGI enumerates both adapters with distinct LUIDs, and `D3D12CreateDevice` / `D3D11CreateDevice` succeed on both. The API layer does its job correctly. However, the AMD Windows driver internally routes all DX11/DX12 work to the primary GPU regardless of which adapter was selected. AMD's own Vulkan driver on the same hardware correctly dispatches to GPU #2, proving the hardware is capable. The FirePro D700's Windows driver has been EOL since March 2019, so this behaviour is unlikely to ever be fixed. This is also consistent with 3DMark behaviour: 3DMark Time Spy cannot select between identical GPUs on this system either.
-
-- **Performance is near-identical between the two cards** when properly addressed via Vulkan: GPU #1 averages ~554 FPS while GPU #2 averages ~448 FPS. The ~20% gap is likely due to GPU #1 handling display output overhead being offset by its position as the "primary" adapter, or minor thermal/power delivery asymmetry in the Mac Pro chassis.
-
-### Technical Details
-
-The benchmark uses **DXGI adapter LUID** (Locally Unique Identifier) to match GPUs across different DXGI factory instances. This was necessary because:
-1. DXGI `EnumAdapters1` may return different adapter counts or ordering across factory instances (e.g., the DX12 backend's factory only sees one D700 adapter while the detection-phase factory sees both).
-2. The previous approach of deduplicating by `VendorId + DeviceId + SubSysId` incorrectly merged both D700s into a single entry.
-3. Passing a gpus-array index to backends failed because the array could be reordered by Vulkan device insertion, causing index mismatches (e.g., index 1 pointing to Basic Render Driver instead of GPU #2).
-
-The LUID-based selection resolves all three issues — the benchmark now correctly creates a device on the intended DXGI adapter, even though the driver ultimately routes DX11/DX12 work to the primary GPU.
 
 ---
 
@@ -2092,7 +2109,29 @@ ATI's **Imageon** was a low-power mobile GPU line designed for handheld devices 
 
 In 2008, AMD divested the Imageon mobile GPU division to Qualcomm for $65 million — a fraction of the $5.4 billion AMD paid for all of ATI. Qualcomm integrated Imageon into its Snapdragon SoC platform and renamed it **Adreno** — an anagram of "Radeon" that preserves the ATI heritage while establishing a distinct brand.
 
-Adreno's architecture has since diverged significantly from Radeon. By the Adreno 600 series (2018), the GPU shares no meaningful silicon design with contemporary Radeon GPUs — the instruction set, memory hierarchy, shader core layout, and driver stack are entirely Qualcomm-designed. However, foundational concepts from ATI's Imageon era (tile-based rendering optimisations, unified shader architecture for mobile power budgets) persist in Adreno's design philosophy.
+Adreno's architecture has since diverged significantly from Radeon. By the Adreno 600 series (2018), the GPU shares no meaningful silicon design with contemporary Radeon GPUs — the instruction set, memory hierarchy, shader core layout, and driver stack are entirely Qualcomm-designed. However, foundational concepts from ATI's Imageon era (TBR, tile-based rendering optimisations, unified shader architecture for mobile power budgets) persist in Adreno's design philosophy.
+
+> **TBR vs IMR — and the modern reality.** The rendering architecture
+> inherited from Imageon is **Tile-Based Rendering (TBR)**: the screen is
+> divided into small tiles (e.g. 16×16 or 32×32 pixels), and each tile is
+> rendered entirely within fast on-chip tile memory before being written to
+> DRAM — minimising bandwidth-hungry framebuffer read/write traffic.
+> Traditional desktop GPUs use **Immediate Mode Rendering (IMR)**: triangles
+> are rasterised and written to the framebuffer in submission order, relying
+> on high memory bandwidth rather than on-chip buffering. In practice,
+> however, **no modern GPU is purely TBR or purely IMR**. Mobile GPUs like
+> Adreno and Apple's M-series use **TBDR** (Tile-Based Deferred Rendering),
+> which adds deferred visibility testing (Hidden Surface Removal) per tile
+> to eliminate overdraw before shading. Meanwhile, desktop GPUs have adopted
+> tile-like techniques: NVIDIA's Maxwell and later use a **tiling rasteriser**
+> that groups fragments into screen-space tiles for more efficient L2 cache
+> usage; AMD's RDNA series introduced **binning passes** (a form of tiling)
+> to reduce bandwidth — the Infinity Cache discussed throughout this report
+> is particularly effective when combined with RDNA's binning, as tiles that
+> fit in cache avoid VRAM round-trips entirely. The distinction today is a
+> **spectrum**: mobile GPUs lean tile-heavy with optional immediate fallback
+> for complex geometry, while desktop GPUs are fundamentally immediate-mode
+> but borrow tiling techniques for bandwidth efficiency.
 
 ### GPUs Tested in This Benchmark — Family Tree
 
@@ -2211,9 +2250,14 @@ The Adreno 640 is fully saturated at 1M particles — there is no CPU overhead h
 | Radeon iGPU (2 CU) | DX12 | 324 | 1.480 | 2.953 | **3× faster** |
 | HD 5770 | OpenGL | 188 | 1.794 | 4.818 | **1.6× faster** |
 | **Adreno 640** | **DX12** | **117** | **3.281** | **8.053** | **1.0× (baseline)** |
-| WARP (CPU) | DX12 | 83 | — | 11.7 | 0.7× (slower) |
+| WARP on 9800X3D¹ | DX12 | 86.6 | 1.034 | 11.059 | 0.7× (slower) |
+| WARP on 7600¹ | DX12 | 62.2 | 1.810 | 15.181 | 0.5× (slower) |
+| WARP on SD 860 (native)¹ | DX12 | 4.2 | 30.416 | 187.321 | 0.036× (slower) |
+| WARP on SD 860 (x64 emulated)¹ | DX12 | 2.9 | 56.804 | 338.073 | 0.025× (slower) |
 
-The Adreno 640 sits between the HD 5770 (a 2009 discrete desktop GPU) and the WARP software renderer in absolute performance. It outperforms WARP by 40%, confirming it is a real hardware GPU despite its mobile origins.
+> ¹ WARP is a CPU software renderer — performance depends entirely on the host CPU. The Ryzen 7 9800X3D (8-core, 96 MB 3D V-Cache) is 39% faster than the Ryzen 5 7600 (6-core, 32 MB L3), and both x86 desktop CPUs are dramatically faster than the Snapdragon 860 (1+3+4 ARM cores). On the SD 860, WARP was tested twice: the native ARM64 build (enumerated as "Microsoft Basic Render Driver") achieves 4.2 FPS, while the x64 emulated build (enumerated as "Microsoft WARP (CPU Software Renderer)", running through Prism translation) achieves only 2.9 FPS — a 45% penalty from binary translation on an already slow CPU. Even the native WARP result is 28× slower than the Adreno 640 hardware GPU on the same device, demonstrating the importance of hardware-accelerated GPU compute on mobile SoCs.
+
+The Adreno 640 sits between the HD 5770 (a 2009 discrete desktop GPU) and the WARP software renderer in absolute performance. It outperforms the fastest WARP result (9800X3D) by 35%, confirming it is a real hardware GPU despite its mobile origins.
 
 ### API Support Limitations on Windows ARM
 
