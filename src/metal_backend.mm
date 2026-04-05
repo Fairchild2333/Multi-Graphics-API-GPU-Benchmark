@@ -12,8 +12,11 @@
 #include <array>
 #include <cstring>
 #include <iostream>
+#include <mutex>
 
 namespace gpu_bench {
+
+static constexpr std::uint32_t kMetalFramesInFlight = 3;
 
 // -----------------------------------------------------------------------
 // Pimpl — all Objective-C objects live here so the header stays pure C++
@@ -27,15 +30,31 @@ struct MetalBackend::Impl {
     id<MTLRenderPipelineState>  renderPSO    = nil;
     id<MTLBuffer>               particleBuf  = nil;
     CAMetalLayer*               metalLayer   = nil;
+    id<MTLTexture>              offscreenTex = nil;
 
     std::string deviceName;
 
+    // Semaphore to limit frames in flight
+    dispatch_semaphore_t frameSemaphore = nullptr;
+
+    // Per-frame timing collected asynchronously via addCompletedHandler
     struct FrameResources {
-        id<MTLCommandBuffer> computeCB = nil;
-        id<MTLCommandBuffer> renderCB  = nil;
+        id<MTLCommandBuffer> cmdBuf = nil;
+        double computeStartTime = 0;
+        double computeEndTime   = 0;
     };
-    std::array<FrameResources, kMaxFramesInFlight> frames{};
+    std::array<FrameResources, kMetalFramesInFlight> frames{};
     std::uint32_t currentFrame = 0;
+    std::uint64_t totalFrames  = 0;
+
+    // Async timing collection
+    std::mutex timingMutex;
+    struct PendingTiming {
+        double computeMs;
+        double renderMs;
+        double totalMs;
+    };
+    std::vector<PendingTiming> pendingTimings;
 };
 
 // -----------------------------------------------------------------------
@@ -116,10 +135,14 @@ void MetalBackend::InitBackend() {
         impl_->metalLayer.pixelFormat  = MTLPixelFormatBGRA8Unorm;
         impl_->metalLayer.drawableSize = CGSizeMake(kWindowWidth, kWindowHeight);
         impl_->metalLayer.framebufferOnly = YES;
+        impl_->metalLayer.maximumDrawableCount = 3;
         impl_->metalLayer.displaySyncEnabled = config_.vsync ? YES : NO;
 
         nsWindow.contentView.layer     = impl_->metalLayer;
         nsWindow.contentView.wantsLayer = YES;
+
+        // --- Frame semaphore (triple buffering) ---------------------------------
+        impl_->frameSemaphore = dispatch_semaphore_create(kMetalFramesInFlight);
 
         // --- Command queue ------------------------------------------------------
         impl_->commandQueue = [impl_->device newCommandQueue];
@@ -208,6 +231,23 @@ void MetalBackend::InitBackend() {
         std::cout << "Created particle buffer: " << config_.particleCount
                   << " particles\n";
         std::cout << "[Profiling] GPU command-buffer timestamps enabled\n";
+
+        // --- Metal always uses offscreen render target to bypass ProMotion VSync -
+        // On macOS, ProMotion displays lock nextDrawable to refresh rate even with
+        // displaySyncEnabled=NO. Use offscreen texture and present periodically.
+        {
+            MTLTextureDescriptor* texDesc =
+                [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
+                                                                  width:kWindowWidth
+                                                                 height:kWindowHeight
+                                                              mipmapped:NO];
+            texDesc.usage = MTLTextureUsageRenderTarget;
+            texDesc.storageMode = MTLStorageModePrivate;
+            impl_->offscreenTex = [impl_->device newTextureWithDescriptor:texDesc];
+            if (!impl_->offscreenTex)
+                throw std::runtime_error("Failed to create offscreen texture");
+            std::cout << "[Metal] Benchmark mode: using offscreen render target to bypass ProMotion VSync\n";
+        }
     }
 }
 
@@ -217,33 +257,43 @@ void MetalBackend::InitBackend() {
 
 void MetalBackend::DrawFrame(float deltaTime) {
     @autoreleasepool {
-        const std::uint32_t frameSlot = impl_->currentFrame;
-
-        // Collect GPU timing from this slot's previous cycle (N-2 frames ago)
-        auto& prev = impl_->frames[frameSlot];
-        if (prev.renderCB != nil) {
-            [prev.renderCB waitUntilCompleted];
-
-            const double cs = prev.computeCB.GPUStartTime;
-            const double ce = prev.computeCB.GPUEndTime;
-            const double rs = prev.renderCB.GPUStartTime;
-            const double re = prev.renderCB.GPUEndTime;
-
-            if (ce > cs && re > rs) {
-                AccumulateTiming((ce - cs) * 1000.0,
-                                 (re - rs) * 1000.0,
-                                 (re - cs) * 1000.0);
+        // Drain any async timing results collected by completed handlers
+        {
+            std::lock_guard<std::mutex> lock(impl_->timingMutex);
+            for (auto& t : impl_->pendingTimings) {
+                AccumulateTiming(t.computeMs, t.renderMs, t.totalMs);
             }
-            prev.computeCB = nil;
-            prev.renderCB  = nil;
+            impl_->pendingTimings.clear();
         }
 
-        id<CAMetalDrawable> drawable = [impl_->metalLayer nextDrawable];
-        if (!drawable) return;
+        // Wait for a frame slot to become available (non-blocking if GPU is fast)
+        dispatch_semaphore_wait(impl_->frameSemaphore, DISPATCH_TIME_FOREVER);
 
-        // --- Compute pass -------------------------------------------------------
-        id<MTLCommandBuffer> computeCB =
-            [impl_->commandQueue commandBuffer];
+        const std::uint32_t frameSlot = impl_->currentFrame;
+
+        // --- Determine render target --------------------------------------------
+        const bool useOffscreen = impl_->offscreenTex != nil;
+        const bool presentThisFrame = !useOffscreen ||
+                                      (impl_->totalFrames % 60 == 0);
+
+        id<CAMetalDrawable> drawable = nil;
+        id<MTLTexture> renderTarget = nil;
+
+        if (presentThisFrame) {
+            drawable = [impl_->metalLayer nextDrawable];
+            if (drawable)
+                renderTarget = drawable.texture;
+        }
+        if (!renderTarget && useOffscreen)
+            renderTarget = impl_->offscreenTex;
+        if (!renderTarget) {
+            dispatch_semaphore_signal(impl_->frameSemaphore);
+            return;
+        }
+
+        // --- Compute command buffer ---------------------------------------------
+        id<MTLCommandBuffer> computeCB = [impl_->commandQueue commandBuffer];
+
         id<MTLComputeCommandEncoder> computeEnc =
             [computeCB computeCommandEncoder];
 
@@ -261,16 +311,15 @@ void MetalBackend::DrawFrame(float deltaTime) {
         [computeEnc endEncoding];
         [computeCB commit];
 
-        // --- Render pass --------------------------------------------------------
+        // --- Render command buffer (queued after compute — GPU executes in order)
         MTLRenderPassDescriptor* rpDesc = [MTLRenderPassDescriptor new];
-        rpDesc.colorAttachments[0].texture    = drawable.texture;
+        rpDesc.colorAttachments[0].texture    = renderTarget;
         rpDesc.colorAttachments[0].loadAction  = MTLLoadActionClear;
         rpDesc.colorAttachments[0].storeAction = MTLStoreActionStore;
         rpDesc.colorAttachments[0].clearColor  =
             MTLClearColorMake(0.04, 0.08, 0.14, 1.0);
 
-        id<MTLCommandBuffer> renderCB =
-            [impl_->commandQueue commandBuffer];
+        id<MTLCommandBuffer> renderCB = [impl_->commandQueue commandBuffer];
         id<MTLRenderCommandEncoder> renderEnc =
             [renderCB renderCommandEncoderWithDescriptor:rpDesc];
 
@@ -281,15 +330,38 @@ void MetalBackend::DrawFrame(float deltaTime) {
                       vertexCount:config_.particleCount];
         [renderEnc endEncoding];
 
-        [renderCB presentDrawable:drawable];
+        if (drawable)
+            [renderCB presentDrawable:drawable];
+
+        // --- Async timing + semaphore signal ------------------------------------
+        __block auto* implPtr = impl_.get();
+        __block id<MTLCommandBuffer> capturedComputeCB = computeCB;
+        dispatch_semaphore_t sem = impl_->frameSemaphore;
+        BenchmarkConfig capturedConfig = config_;
+
+        [renderCB addCompletedHandler:^(id<MTLCommandBuffer> cb) {
+            dispatch_semaphore_signal(sem);
+
+            const double cs = capturedComputeCB.GPUStartTime;
+            const double ce = capturedComputeCB.GPUEndTime;
+            const double rs = cb.GPUStartTime;
+            const double re = cb.GPUEndTime;
+
+            if (ce > cs && re > rs) {
+                const double computeMs = (ce - cs) * 1000.0;
+                const double renderMs  = (re - rs) * 1000.0;
+                const double totalMs   = (re - cs) * 1000.0;
+
+                std::lock_guard<std::mutex> lock(implPtr->timingMutex);
+                implPtr->pendingTimings.push_back({computeMs, renderMs, totalMs});
+            }
+        }];
+
         [renderCB commit];
 
-        // Store command buffers for timing collection next cycle
-        impl_->frames[frameSlot].computeCB = computeCB;
-        impl_->frames[frameSlot].renderCB  = renderCB;
-
+        ++impl_->totalFrames;
         impl_->currentFrame =
-            (frameSlot + 1) % kMaxFramesInFlight;
+            (frameSlot + 1) % kMetalFramesInFlight;
     }
 }
 
@@ -299,13 +371,20 @@ void MetalBackend::DrawFrame(float deltaTime) {
 
 void MetalBackend::WaitIdle() {
     if (!impl_ || !impl_->commandQueue) return;
-    for (auto& fr : impl_->frames) {
-        if (fr.renderCB != nil) {
-            [fr.renderCB waitUntilCompleted];
-            fr.computeCB = nil;
-            fr.renderCB  = nil;
-        }
+    // Wait for all in-flight frames to complete
+    for (std::uint32_t i = 0; i < kMetalFramesInFlight; ++i) {
+        dispatch_semaphore_wait(impl_->frameSemaphore, DISPATCH_TIME_FOREVER);
     }
+    for (std::uint32_t i = 0; i < kMetalFramesInFlight; ++i) {
+        dispatch_semaphore_signal(impl_->frameSemaphore);
+    }
+
+    // Drain remaining timing data
+    std::lock_guard<std::mutex> lock(impl_->timingMutex);
+    for (auto& t : impl_->pendingTimings) {
+        AccumulateTiming(t.computeMs, t.renderMs, t.totalMs);
+    }
+    impl_->pendingTimings.clear();
 }
 
 void MetalBackend::CleanupBackend() {
