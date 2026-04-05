@@ -211,6 +211,25 @@ GPU0:
 If `vulkaninfo` reports no physical devices, your GPU driver may not support
 Vulkan — the application will still work with DirectX or OpenGL backends.
 
+> **Cross-compiling?** The Vulkan SDK installer is architecture-specific. The
+> `VULKAN_SDK` environment variable must point to the SDK matching your
+> **target** architecture, not your host. For example, on an ARM64 machine
+> cross-compiling for x64, you need to install both the ARM64 and x64
+> versions of the Vulkan SDK in separate directories, and set `VULKAN_SDK`
+> accordingly before running CMake:
+>
+> ```powershell
+> # Targeting ARM64 (native on ARM64 host)
+> $env:VULKAN_SDK = "C:\VulkanSDK\1.4.x.x"
+>
+> # Targeting x64 (cross-compiling from ARM64 host)
+> $env:VULKAN_SDK = "C:\VulkanSDK-x64\1.4.x.x"
+> ```
+>
+> If the `VULKAN_SDK` architecture does not match the build target, the
+> linker will fail with `LNK4272: library machine type conflicts with target
+> machine type`.
+
 ### 4. Install Python 3 (required for OpenGL backend)
 
 The OpenGL backend uses [GLAD](https://github.com/Dav1dde/glad) as its
@@ -251,12 +270,24 @@ python --version
 ### 5. Install GLFW via vcpkg
 
 ```powershell
-# x64
+# x64 (default triplet on x64 hosts)
 vcpkg install glfw3
 
 # ARM64
 vcpkg install glfw3:arm64-windows
 ```
+
+> **Cross-compiling?** vcpkg packages are architecture-specific. If you are
+> cross-compiling for a different target (e.g., building x64 on an ARM64
+> machine), you must install the GLFW package for the **target** triplet:
+>
+> ```powershell
+> # On ARM64 host, targeting x64
+> vcpkg install glfw3:x64-windows
+>
+> # On x64 host, targeting ARM64
+> vcpkg install glfw3:arm64-windows
+> ```
 
 The DX12 and DX11 backends only need the Windows SDK (bundled with Visual
 Studio). No additional driver installation is needed — D3D12/D3D11 work
@@ -353,14 +384,44 @@ CMake will print which backends are enabled during configuration:
 
 ```powershell
 # Configure (vcpkg toolchain, all backends auto-detected)
+# By default, CMake targets the host architecture (x64 on x64 machines, ARM64 on ARM64 machines).
 cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
-
-# For ARM64 native builds:
-cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=arm64-windows -A ARM64
 
 # Build
 cmake --build build --config Release
 ```
+
+To explicitly target a specific architecture (e.g., cross-compiling), use `-A`
+and `-DVCPKG_TARGET_TRIPLET`:
+
+```powershell
+# Target x64 (needed when cross-compiling from ARM64)
+$env:VULKAN_SDK = "C:\VulkanSDK-x64\1.4.x.x"   # must point to x64 SDK
+cmake -S . -B build -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
+
+# Target ARM64 (needed when cross-compiling from x64)
+$env:VULKAN_SDK = "C:\VulkanSDK\1.4.x.x"        # must point to ARM64 SDK
+cmake -S . -B build -A ARM64 -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=arm64-windows
+```
+
+> **Cross-compiling checklist:**
+>
+> 1. **Vulkan SDK** — Install the SDK for **both** host and target
+>    architectures. Set `$env:VULKAN_SDK` to the target architecture's SDK
+>    path before running CMake. If the architectures don't match, the linker
+>    will fail with `LNK4272: library machine type conflicts with target
+>    machine type`.
+>
+> 2. **vcpkg packages** — Install GLFW (and any other vcpkg dependencies) for
+>    the **target** triplet:
+>    ```powershell
+>    vcpkg install glfw3:x64-windows       # when targeting x64
+>    vcpkg install glfw3:arm64-windows     # when targeting ARM64
+>    ```
+>
+> 3. **Clean build directory** — When switching target architectures, always
+>    delete the old `build` directory first (`rm -r build`) to avoid stale
+>    CMake cache entries.
 
 ### macOS
 
