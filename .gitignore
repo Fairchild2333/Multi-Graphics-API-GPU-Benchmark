@@ -35,3 +35,7 @@ Makefile
 # OS files
 .DS_Store
 Thumbs.db
+
+# Captured stdout/stderr dumps (empty runtime artifacts)
+stdout.txt
+stderr.txt

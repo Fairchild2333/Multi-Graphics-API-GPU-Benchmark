@@ -260,17 +260,23 @@ void VulkanBackend::PickPhysicalDevice() {
     }
 
     // Try Vulkan 1.2 driver properties for a more descriptive string (only if device supports 1.2+).
+    // Use dynamic lookup to avoid linking against vkGetPhysicalDeviceProperties2,
+    // which doesn't exist in Vulkan 1.0 loaders and would cause a startup crash.
     if (props.apiVersion >= VK_API_VERSION_1_2) {
-        VkPhysicalDeviceDriverProperties driverProps{};
-        driverProps.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES;
-        VkPhysicalDeviceProperties2 props2{};
-        props2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-        props2.pNext = &driverProps;
-        vkGetPhysicalDeviceProperties2(physicalDevice_, &props2);
-        if (driverProps.driverInfo[0] != '\0')
-            driverVersion_ = std::string(driverProps.driverName) + " " + driverProps.driverInfo;
-        else if (driverProps.driverName[0] != '\0')
-            driverVersion_ = std::string(driverProps.driverName) + " " + driverVersion_;
+        auto pfnGetProps2 = reinterpret_cast<PFN_vkGetPhysicalDeviceProperties2>(
+            vkGetInstanceProcAddr(instance_, "vkGetPhysicalDeviceProperties2"));
+        if (pfnGetProps2) {
+            VkPhysicalDeviceDriverProperties driverProps{};
+            driverProps.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES;
+            VkPhysicalDeviceProperties2 props2{};
+            props2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+            props2.pNext = &driverProps;
+            pfnGetProps2(physicalDevice_, &props2);
+            if (driverProps.driverInfo[0] != '\0')
+                driverVersion_ = std::string(driverProps.driverName) + " " + driverProps.driverInfo;
+            else if (driverProps.driverName[0] != '\0')
+                driverVersion_ = std::string(driverProps.driverName) + " " + driverVersion_;
+        }
     }
 
     std::cout << "Selected GPU [" << chosen << "]: " << deviceName_
