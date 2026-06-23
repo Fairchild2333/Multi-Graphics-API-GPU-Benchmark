@@ -42,6 +42,11 @@ private:
     std::uint32_t vao_  = 0;
     std::uint32_t ubo_  = 0;
 
+    // Render3D resources (instanced billboards, default-FBO depth)
+    std::uint32_t quadVbo_     = 0;
+    std::uint32_t render3dVao_ = 0;
+    std::uint32_t cam3dUbo_    = 0;
+
     static constexpr int kTimestampsPerFrame = 4;
     static constexpr int kTimestampSlotCount = 4;
     std::uint32_t timestampQueries_[kTimestampSlotCount][kTimestampsPerFrame]{};
@@ -49,6 +54,7 @@ private:
     bool   timestampsSupported_ = false;
     int    timestampFrameCount_ = 0;
     int    currentFrame_        = 0;
+    float  fractalElapsed_      = 0.0f;   // StressFractal palette time
 };
 
 }  // namespace gpu_bench

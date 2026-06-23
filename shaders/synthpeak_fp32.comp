@@ -1,0 +1,35 @@
+#version 450
+
+// Synthetic peak FP32 throughput (vkpeak-style). Each thread runs a tight
+// register-resident loop of 8 independent fused multiply-adds to hide FMA
+// latency, so the kernel is pure ALU-bound (no memory traffic in the loop).
+// mul/add come from push constants (runtime) to prevent constant folding; the
+// final sum is written out to defeat dead-code elimination.
+//
+// FLOPs = numThreads * iters * 8 * 2.
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+layout(set = 0, binding = 0, std430) buffer OutBuf {
+    float data[];
+} outBuf;
+
+layout(push_constant) uniform PeakParams {
+    uint  iters;
+    float mul;
+    float add;
+} p;
+
+void main() {
+    uint gid = gl_GlobalInvocationID.x;
+    float s = float(gid & 1023u) * 0.001 + 0.5;
+    float a0=s, a1=s+0.1, a2=s+0.2, a3=s+0.3, a4=s+0.4, a5=s+0.5, a6=s+0.6, a7=s+0.7;
+    float m = p.mul, c = p.add;
+
+    for (uint i = 0u; i < p.iters; ++i) {
+        a0 = a0 * m + c; a1 = a1 * m + c; a2 = a2 * m + c; a3 = a3 * m + c;
+        a4 = a4 * m + c; a5 = a5 * m + c; a6 = a6 * m + c; a7 = a7 * m + c;
+    }
+
+    outBuf.data[gid] = a0 + a1 + a2 + a3 + a4 + a5 + a6 + a7;
+}

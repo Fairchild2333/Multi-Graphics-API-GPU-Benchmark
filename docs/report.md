@@ -73,6 +73,99 @@ All five backends share the same `AppBase` class for windowing (GLFW), particle
 initialisation, timing, and benchmark result management. Each backend overrides
 `InitBackend()`, `DrawFrame()`, `CleanupBackend()`, and `WaitIdle()`.
 
+### Benchmark Workload Suite
+
+Beyond the original particle simulation, the benchmark runs **five interchangeable
+workloads**, each isolating a different axis of GPU performance and reporting a
+deterministic, cross-API-comparable metric (not just FPS). Select with
+`--workload`; every backend runs the *same* algorithm so numbers compare directly.
+
+| Axis | Workload (`--workload`) | What it stresses | Metric | Design |
+|------|------------------------|------------------|--------|--------|
+| **Bandwidth** | `stream` (default) | Memory subsystem | GB/s | Particle update — ~0.15 FLOP/byte, bandwidth-bound |
+| **Compute (achievable)** | `nbody` | FP32 ALU + SFU + shared memory | GFLOP/s | All-pairs N-body, tiled through shared memory (`--bodies`) |
+| **Fill / fragment** | `stress` | Rasteriser + fragment ALU/SFU + ROP | G-iter/s | Fullscreen fractal, fixed per-pixel iterations (`--iter`) |
+| **Compute (peak)** | `synthpeak` | Raw ALU throughput per precision | GFLOPS / GIOPS | Register-resident FMA loop, vkpeak-style (`--precision`, `--iter`) |
+| **3D render** | `render3d` | Vertex transform + rasterisation + fill + depth | MQuad/s | Perspective + orbiting camera + depth test; instanced camera-facing billboard quads (`--particles`) |
+
+Why both `nbody` and `synthpeak`? `synthpeak` measures the *theoretical ceiling*
+(near-peak FLOPS), while `nbody` measures *achievable* compute under real data
+dependencies and special-function (rsqrt) load. Together they bracket compute
+performance; `stream` and `stress` add the bandwidth and fill axes; `render3d` adds
+a real 3D graphics pipeline (the others render nothing or only a 2D pass).
+
+#### Cross-API results (RTX 5090, reference run)
+
+**Bandwidth / Compute / Fill** — same workload across APIs:
+
+| Workload | Vulkan | DX12 | DX11 | OpenGL |
+|----------|--------|------|------|--------|
+| N-body (GFLOP/s, 64K bodies) | 46,681 | 36,074 | 49,094¹ | 53,798 |
+| Fractal (G-iter/s, 8000 iter) | 3,681 | 3,450 | 3,445¹ | 3,521 |
+| Render3D (MQuad/s, 1M billboards) | 1,861 | 1,978 | 1,655 | 1,774 |
+
+¹ DX11 figures from **windowed** mode (see DX11 timestamp note below).
+
+The Render3D pass (instanced billboards + depth + perspective) converges across
+APIs much like the fill/peak axes — all four are within ~20%, since the work is
+dominated by hardware vertex/raster/fill throughput rather than API overhead.
+
+**Synthetic peak by precision** (GFLOPS / GIOPS):
+
+| Precision | Vulkan | DX12 | OpenGL | DX11 | Notes |
+|-----------|--------|------|--------|------|-------|
+| FP32 | 112,615 | 109,016 | 98,687 | 109,737 | ≈ 5090's ~105 TFLOPS spec |
+| **FP16** | **122,412** | 119,757 | 118,934 | N/A² | ≈ FP32×1.05 — consumer Blackwell has *no* 2× non-tensor FP16 |
+| FP64 | 1,980 | 1,973 | 1,971 | 1,667 | ≈ 1/57 of FP32 (consumer 1/64 double rate) |
+| INT32 | 61,508 | 56,978 | 61,557 | 63,147 | ~0.55× FP32 (IMAD ≈ half-rate) |
+
+² DX11 cannot run true FP16: Direct3D 11 caps at Shader Model 5, whose
+`min16float` is *minimum-precision* (the driver may run it at FP32), not IEEE FP16.
+True 16-bit needs SM 6.2, which only the DX12 runtime exposes.
+
+> **Key cross-API insight:** the *peak* (`synthpeak`) and *fill* (`stress`) axes
+> converge tightly across APIs (within ~6%) because they are pure
+> hardware-throughput limited — the driver/API barely matters. The *achievable
+> compute* (`nbody`) axis shows a larger spread (~1.5×, OpenGL fastest, DX12
+> slowest on this NVIDIA driver) because dispatch/scheduling overhead is exposed.
+> Running multiple axes is what separates "hardware ceiling" from "API/driver
+> overhead."
+
+![Synthetic peak by precision](images/workload_synthpeak.png)
+![N-body achievable compute](images/workload_nbody.png)
+![Fractal fill rate](images/workload_stress.png)
+![3D render throughput](images/workload_render3d.png)
+
+#### Precision support is bounded by each API, not by effort
+
+FP16 has no single portable path, so each API uses the right tool for true 16-bit:
+
+- **Vulkan** — standard path: `VK_KHR_shader_float16_int8` +
+  `GL_EXT_shader_explicit_arithmetic_types_float16`, packed `f16vec2`. ✅
+- **DX12** — FXC's `min16float` is only *minimum-precision* (often FP32). True FP16
+  needs **Shader Model 6.2**, so the FP16 kernel is precompiled to **signed DXIL**
+  with the Windows SDK **DXC** (`-enable-16bit-types`) at build time and loaded at
+  runtime; the device is checked for `Native16BitShaderOps`. ✅
+- **OpenGL** — desktop GL core has no portable FP16; the FP16 kernel uses
+  `GL_NV_gpu_shader5` (`float16_t`/`f16vec2`), gated at runtime by the extension
+  (NVIDIA). AMD would use `GL_AMD_gpu_shader_half_float`. ✅ (NVIDIA)
+- **DX11** — **impossible**: Direct3D 11 caps at SM 5, which has no true FP16. N/A.
+- **Metal** — `half`/`half2` is native; written but untested here (no macOS). ✅ (code)
+
+Likewise **FP64 is unavailable on Metal** — Apple GPUs have no double-precision units.
+
+#### DX11 SynthPeak: kernel runs, but headless timing is unavailable
+
+`synthpeak` (and the headless compute path generally) forces **headless** mode (no
+window/swapchain). On the test driver, **DX11 never resolves GPU timestamp queries
+in headless mode** — a pre-existing, documented behaviour (see
+[`woa-dx11-timestamp-issue.md`](woa-dx11-timestamp-issue.md)). The DX11 SynthPeak
+kernel *does* execute and produce FPS, but with no GPU-time it cannot report a
+GFLOPS score, so it shows as N/A. DX11 timestamps work normally in **windowed**
+mode — which is why DX11's N-body and Fractal figures above (windowed) are present
+while its headless SynthPeak is not. This is a DX11/driver limitation, not an
+untested path.
+
 ### Test Hardware
 
 All benchmarks in this report were collected on four physical systems using

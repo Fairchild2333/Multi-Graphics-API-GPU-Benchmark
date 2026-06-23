@@ -19,6 +19,57 @@ See [`docs/report.md`](docs/report.md) for the full analysis.
 | OpenGL  | 4.3 Core  | Windows, Linux, macOS (legacy) | Cross-platform fallback; requires `GL_ARB_compute_shader` |
 | Metal   | Metal 2+  | macOS (Apple/Intel) | Native Apple GPU API (Apple/AMD) — highest priority on macOS |
 
+## Benchmark Workloads
+
+The benchmark runs **five interchangeable workloads**, each isolating one axis of
+GPU performance and reporting a deterministic, **cross-API-comparable** metric
+(not just FPS). Every backend runs the *same* algorithm, so results compare
+directly across Vulkan / DX12 / DX11 / OpenGL / Metal.
+
+| Axis | `--workload` | Stresses | Metric | Knobs |
+|------|--------------|----------|--------|-------|
+| **Bandwidth** | `stream` (default) | Memory subsystem | GB/s | `--particles` |
+| **Compute (achievable)** | `nbody` | FP32 ALU + SFU + shared memory | GFLOP/s | `--bodies` |
+| **Fill / fragment** | `stress` | Rasteriser + fragment ALU + ROP | G-iter/s | `--iter` |
+| **Compute (peak)** | `synthpeak` | Raw ALU throughput per precision | GFLOPS / GIOPS | `--precision`, `--iter` |
+| **3D render** | `render3d` | Vertex transform + raster + fill + depth | MQuad/s | `--particles` |
+
+```bash
+./build/gpu_benchmark --benchmark --headless                          # Stream — bandwidth (GB/s)
+./build/gpu_benchmark --benchmark --workload nbody --bodies 65536      # N-body — achievable GFLOP/s
+./build/gpu_benchmark --benchmark --workload stress --iter 8000        # Fractal — fill rate (G-iter/s)
+./build/gpu_benchmark --benchmark --workload synthpeak --precision fp32  # Peak FLOPS (fp32|fp16|fp64|int32)
+./build/gpu_benchmark --benchmark --workload render3d                 # True-3D billboards (MQuad/s)
+```
+
+- `stream` is bandwidth-bound (~0.15 FLOP/byte); `nbody` is a shared-memory-tiled
+  all-pairs simulation that is genuinely ALU/SFU-bound; `stress` is a fixed-iteration
+  fullscreen fractal (FurMark-style sustained load); `synthpeak` is a vkpeak-style
+  register-resident FMA loop measuring near-theoretical peak per data type;
+  `render3d` is a real 3D pipeline — perspective + orbiting camera + depth test,
+  particles drawn as instanced camera-facing billboard quads (vertex transform +
+  rasterisation + fill + ROP).
+- **Precision support** (`synthpeak`): FP32/FP64/INT32 work on Vulkan, DX12, DX11, OpenGL.
+  **FP16** works on **Vulkan** (`VK_KHR_shader_float16_int8`), **DX12** (precompiled
+  SM 6.2 DXIL via the Windows SDK DXC), **OpenGL** (`GL_NV_gpu_shader5`, NVIDIA), and
+  **Metal** (`half`); it is **not possible on DX11** (Direct3D 11 caps at SM 5, no true
+  FP16). **FP64 is unavailable on Metal** (Apple GPUs have no doubles). Unsupported
+  combinations report a clear message instead of a misleading number.
+- **DX11 + `synthpeak`**: the kernel runs, but DX11 doesn't resolve GPU timestamps in
+  the required headless mode (a known driver limitation — see
+  [`docs/woa-dx11-timestamp-issue.md`](docs/woa-dx11-timestamp-issue.md)), so it
+  reports no score. DX11 timing works in windowed mode (used for its `nbody`/`stress`).
+
+Each run records its axis metric (`score` + `scoreUnit`) to the results file.
+Generate cross-API comparison charts with:
+
+```bash
+python scripts/plot_workloads.py        # writes docs/images/workload_*.png
+```
+
+See [`docs/benchmark-workload-suite.md`](docs/benchmark-workload-suite.md) for the
+full design (algorithms, scoring formulas, scaling, risks).
+
 ## Project Structure
 
 ```text
@@ -152,6 +203,9 @@ It uses `VK_OHOS_surface` + XComponent instead of GLFW. See
 | Document | Description |
 |----------|-------------|
 | [`docs/report.md`](docs/report.md) | Full cross-platform & cross-GPU performance analysis |
+| [`docs/benchmark-workload-suite.md`](docs/benchmark-workload-suite.md) | Workload suite design — bandwidth / compute / fill / peak axes, scoring |
+| [`docs/nbody-workload-plan.md`](docs/nbody-workload-plan.md) | N-body compute workload — algorithm, scaling, integration |
+| [`docs/winui3-render3d-plan.md`](docs/winui3-render3d-plan.md) | WinUI3 integration, true-3D rendering, and RenderDoc plan |
 | [`docs/building.md`](docs/building.md) | Detailed build prerequisites and platform setup |
 | [`docs/roadmap.md`](docs/roadmap.md) | Completed features, in-progress work, and planned enhancements |
 | [`docs/renderdoc-capture-guide.md`](docs/renderdoc-capture-guide.md) | Step-by-step RenderDoc capture instructions |

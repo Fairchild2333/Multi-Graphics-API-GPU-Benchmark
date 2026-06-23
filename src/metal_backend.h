@@ -30,6 +30,7 @@ protected:
 private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
+    float fractalElapsed_ = 0.0f;   // StressFractal palette time
 };
 
 }  // namespace gpu_bench

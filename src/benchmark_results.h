@@ -10,6 +10,7 @@ struct BenchmarkResult {
     std::string id;
     std::string timestamp;
 
+    std::string workload = "stream";   // "stream" (bandwidth) or "nbody" (compute)
     std::string graphicsApi;
     std::string deviceName;
     std::string driverVersion;
@@ -38,6 +39,11 @@ struct BenchmarkResult {
     double avgFrameTimeMs  = 0.0;
     double gpuUtilisation  = 0.0;
     std::string bottleneck;
+
+    // Derived per-workload axis metric (bandwidth / compute / fill / peak).
+    double      score      = 0.0;
+    std::string scoreUnit;        // e.g. "GB/s", "GFLOP/s", "G-iter/s", "GFLOPS", "GIOPS"
+    std::string precision;        // SynthPeak only: "FP32"/"FP16"/"FP64"/"INT32"
 };
 
 std::string ResultsFilePath();

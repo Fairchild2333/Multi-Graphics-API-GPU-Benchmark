@@ -1,6 +1,7 @@
 #ifdef HAVE_OPENGL
 
 #include "opengl_backend.h"
+#include "mini_mat.h"
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
@@ -108,12 +109,31 @@ void OpenGLBackend::InitBackend() {
 
 void OpenGLBackend::CreateShaders() {
     {
-        auto cs = CompileShaderGL(shaderDir_ + "compute_gl.comp", GL_COMPUTE_SHADER);
+        std::string csFile;
+        if (config_.workload == Workload::SynthPeak) {
+            if (config_.peakPrecision == Precision::FP16) {
+                // Desktop GL has no portable FP16; use the NVIDIA extension when present.
+                if (!GLAD_GL_NV_gpu_shader5)
+                    throw std::runtime_error("SynthPeak FP16 on OpenGL requires GL_NV_gpu_shader5 (NVIDIA); use Vulkan/Metal elsewhere");
+                csFile = "synthpeak_fp16_gl.comp";
+            } else {
+                csFile = (config_.peakPrecision == Precision::FP64)  ? "synthpeak_fp64_gl.comp"
+                       : (config_.peakPrecision == Precision::INT32) ? "synthpeak_int32_gl.comp"
+                       :                                               "synthpeak_fp32_gl.comp";
+            }
+        } else {
+            csFile = (config_.workload == Workload::NBody) ? "nbody_gl.comp" : "compute_gl.comp";
+        }
+        auto cs = CompileShaderGL(shaderDir_ + csFile, GL_COMPUTE_SHADER);
         computeProgram_ = LinkProgramGL(cs, 0);
     }
     if (!config_.headless) {
-        auto vs = CompileShaderGL(shaderDir_ + "particle_gl.vert", GL_VERTEX_SHADER);
-        auto fs = CompileShaderGL(shaderDir_ + "particle_gl.frag", GL_FRAGMENT_SHADER);
+        const char* vsf = "particle_gl.vert";
+        const char* fsf = "particle_gl.frag";
+        if (config_.workload == Workload::StressFractal) { vsf = "fractal_gl.vert";  fsf = "fractal_gl.frag"; }
+        else if (config_.workload == Workload::Render3D) { vsf = "render3d_gl.vert"; fsf = "render3d_gl.frag"; }
+        auto vs = CompileShaderGL(shaderDir_ + vsf, GL_VERTEX_SHADER);
+        auto fs = CompileShaderGL(shaderDir_ + fsf, GL_FRAGMENT_SHADER);
         renderProgram_ = LinkProgramGL(vs, fs);
     }
 }
@@ -159,6 +179,35 @@ void OpenGLBackend::CreateParticleBuffers() {
     glBindBuffer(GL_UNIFORM_BUFFER, ubo_);
     float params[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     glBufferData(GL_UNIFORM_BUFFER, sizeof(params), params, GL_DYNAMIC_DRAW);
+
+    // Render3D: quad VBO + instanced VAO + camera UBO (default FBO supplies depth)
+    if (config_.workload == Workload::Render3D && !config_.headless) {
+        const float quad[12] = { -1,-1, 1,-1, 1,1, -1,-1, 1,1, -1,1 };
+        glGenBuffers(1, &quadVbo_);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVbo_);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
+
+        glGenVertexArrays(1, &render3dVao_);
+        glBindVertexArray(render3dVao_);
+        // location 0 = quad corner (per-vertex)
+        glBindBuffer(GL_ARRAY_BUFFER, quadVbo_);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, reinterpret_cast<void*>(0));
+        // location 1/2 = particle position/velocity (per-instance)
+        glBindBuffer(GL_ARRAY_BUFFER, ssbo_);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), reinterpret_cast<void*>(0));
+        glVertexAttribDivisor(1, 1);
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Particle),
+                              reinterpret_cast<void*>(offsetof(Particle, vx)));
+        glVertexAttribDivisor(2, 1);
+        glBindVertexArray(0);
+
+        glGenBuffers(1, &cam3dUbo_);
+        glBindBuffer(GL_UNIFORM_BUFFER, cam3dUbo_);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(Render3DParams), nullptr, GL_DYNAMIC_DRAW);
+    }
 }
 
 void OpenGLBackend::CreateTimestampQueries() {
@@ -192,10 +241,60 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
     if (timestampsSupported_)
         glQueryCounter(timestampQueries_[slot][0], GL_TIMESTAMP);
 
+    // -- Fractal stress: fragment-only fullscreen pass (no compute) --
+    if (config_.workload == Workload::StressFractal) {
+        if (timestampsSupported_)
+            glQueryCounter(timestampQueries_[slot][1], GL_TIMESTAMP);  // compute ~0
+
+        glClearColor(0.0f, 0.0f, 0.02f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        if (timestampsSupported_)
+            glQueryCounter(timestampQueries_[slot][2], GL_TIMESTAMP);
+
+        // 16-byte UBO: {time, zoom, maxIter(uint bits), _}
+        unsigned char pb[16] = {0};
+        float fp[2] = { fractalElapsed_, 1.0f };
+        std::memcpy(pb, fp, sizeof(fp));
+        std::memcpy(pb + 8, &config_.fractalIter, sizeof(std::uint32_t));
+        fractalElapsed_ += deltaTime;
+        glBindBuffer(GL_UNIFORM_BUFFER, ubo_);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(pb), pb);
+
+        glUseProgram(renderProgram_);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_);
+        glBindVertexArray(vao_);                 // empty fetch; VS uses gl_VertexID
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        if (timestampsSupported_)
+            glQueryCounter(timestampQueries_[slot][3], GL_TIMESTAMP);
+
+        glfwSwapBuffers(window_);
+        ++currentFrame_;
+        if (timestampsSupported_ && timestampFrameCount_ < kTimestampSlotCount)
+            ++timestampFrameCount_;
+        return;
+    }
+
     // -- Compute dispatch --
-    float params[4] = {deltaTime, 1.0f, 0.0f, 0.0f};
+    // 16-byte UBO. Stream: {deltaTime, bounds, _, _}.
+    // N-body: {deltaTime, softening, numBodies(uint bits), _}.
+    unsigned char paramBytes[16] = {0};
+    if (config_.workload == Workload::SynthPeak) {
+        // {iters(uint), mul, add}
+        std::memcpy(paramBytes, &config_.peakIters, sizeof(std::uint32_t));
+        float fparams[2] = {0.9999f, 0.0001f};
+        std::memcpy(paramBytes + 4, fparams, sizeof(fparams));
+    } else if (config_.workload == Workload::NBody) {
+        float fparams[2] = {deltaTime, config_.softening};
+        std::memcpy(paramBytes, fparams, sizeof(fparams));
+        std::memcpy(paramBytes + 8, &config_.particleCount, sizeof(std::uint32_t));
+    } else {
+        float fparams[4] = {deltaTime, 1.0f, 0.0f, 0.0f};
+        std::memcpy(paramBytes, fparams, sizeof(fparams));
+    }
     glBindBuffer(GL_UNIFORM_BUFFER, ubo_);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(params), params);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(paramBytes), paramBytes);
 
     glUseProgram(computeProgram_);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_);
@@ -227,6 +326,41 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
             frameFences_[slot] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
             glFlush();
         }
+    } else if (config_.workload == Workload::Render3D) {
+        // Barrier: compute writes visible to vertex fetch
+        glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glClearColor(0.04f, 0.08f, 0.14f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        if (timestampsSupported_)
+            glQueryCounter(timestampQueries_[slot][2], GL_TIMESTAMP);
+
+        fractalElapsed_ += deltaTime;
+        Render3DParams r3{};
+        const float aspect = static_cast<float>(kWindowWidth) / static_cast<float>(kWindowHeight);
+        render3dCamera(fractalElapsed_, aspect, /*flipY*/false, /*z01*/false,
+                       r3.viewProj, r3.camRight, r3.camUp);
+        r3.pointSize = 0.02f;
+        glBindBuffer(GL_UNIFORM_BUFFER, cam3dUbo_);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Render3DParams), &r3);
+
+        glUseProgram(renderProgram_);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, cam3dUbo_);
+        glBindVertexArray(render3dVao_);
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(config_.particleCount));
+
+        if (timestampsSupported_)
+            glQueryCounter(timestampQueries_[slot][3], GL_TIMESTAMP);
+
+        glDisable(GL_DEPTH_TEST);
+        glfwSwapBuffers(window_);
+        ++currentFrame_;
+        if (timestampsSupported_ && timestampFrameCount_ < kTimestampSlotCount)
+            ++timestampFrameCount_;
+        return;
     } else {
         // Barrier: ensure compute writes are visible to vertex fetch
         glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);

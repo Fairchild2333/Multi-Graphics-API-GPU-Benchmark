@@ -1,8 +1,10 @@
 #ifdef HAVE_VULKAN
 
 #include "vulkan_backend.h"
+#include "mini_mat.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <iostream>
 #include <limits>
@@ -19,12 +21,21 @@ void VulkanBackend::InitBackend() {
     if (!config_.headless) {
         CreateSwapChain();
         CreateImageViews();
+        if (config_.workload == Workload::Render3D)
+            CreateDepthResources();
         CreateRenderPass();
-        CreateGraphicsPipeline();
+        if (config_.workload == Workload::StressFractal)
+            CreateFractalPipeline();
+        else if (config_.workload == Workload::Render3D)
+            CreateRender3DPipeline();
+        else
+            CreateGraphicsPipeline();
     }
     CreateComputeDescriptorSetLayout();
     CreateCommandPool();
     CreateParticleBuffer();
+    if (config_.workload == Workload::Render3D && !config_.headless)
+        CreateQuadBuffer();
     CreateComputeDescriptorResources();
     CreateComputePipeline();
     if (!config_.headless) {
@@ -301,16 +312,37 @@ void VulkanBackend::CreateLogicalDevice() {
     vkGetPhysicalDeviceFeatures(physicalDevice_, &supported);
     VkPhysicalDeviceFeatures features{};
     if (!config_.headless && supported.largePoints) features.largePoints = VK_TRUE;
+    // SynthPeak FP64 variant needs double support in shaders.
+    if (supported.shaderFloat64) features.shaderFloat64 = VK_TRUE;
+
+    // Query FP16 (shaderFloat16) support for the SynthPeak FP16 variant.
+    VkPhysicalDeviceShaderFloat16Int8FeaturesKHR f16query{};
+    f16query.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR;
+    VkPhysicalDeviceFeatures2 feats2{};
+    feats2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    feats2.pNext = &f16query;
+    vkGetPhysicalDeviceFeatures2(physicalDevice_, &feats2);
+    const bool fp16Supported = (f16query.shaderFloat16 == VK_TRUE);
+
+    std::vector<const char*> deviceExts;
+    if (!config_.headless)
+        deviceExts.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    if (fp16Supported)
+        deviceExts.push_back(VK_KHR_SHADER_FLOAT16_INT8_EXTENSION_NAME);
+
+    VkPhysicalDeviceShaderFloat16Int8FeaturesKHR f16enable{};
+    f16enable.sType         = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR;
+    f16enable.shaderFloat16 = VK_TRUE;
 
     VkDeviceCreateInfo ci{};
     ci.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     ci.queueCreateInfoCount    = static_cast<std::uint32_t>(queueCIs.size());
     ci.pQueueCreateInfos       = queueCIs.data();
     ci.pEnabledFeatures        = &features;
-    if (!config_.headless) {
-        ci.enabledExtensionCount   = static_cast<std::uint32_t>(std::size(kRequiredDeviceExtensions));
-        ci.ppEnabledExtensionNames = kRequiredDeviceExtensions;
-    }
+    ci.enabledExtensionCount   = static_cast<std::uint32_t>(deviceExts.size());
+    ci.ppEnabledExtensionNames = deviceExts.empty() ? nullptr : deviceExts.data();
+    if (fp16Supported)
+        ci.pNext = &f16enable;
 
     if (vkCreateDevice(physicalDevice_, &ci, nullptr, &device_) != VK_SUCCESS)
         throw std::runtime_error("vkCreateDevice failed");
@@ -551,21 +583,40 @@ void VulkanBackend::CreateRenderPass() {
 
     VkAttachmentReference ref{ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
 
+    const bool useDepth = (config_.workload == Workload::Render3D);
+
+    VkAttachmentDescription depth{};
+    depth.format         = depthFormat_;
+    depth.samples        = VK_SAMPLE_COUNT_1_BIT;
+    depth.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depth.storeOp        = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depth.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depth.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+    depth.finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    VkAttachmentReference depthRef{ 1, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
+
     VkSubpassDescription subpass{};
     subpass.pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments    = &ref;
+    if (useDepth)
+        subpass.pDepthStencilAttachment = &depthRef;
 
     VkSubpassDependency dep{};
     dep.srcSubpass    = VK_SUBPASS_EXTERNAL;
     dep.dstSubpass    = 0;
-    dep.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dep.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dep.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    dep.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+                      | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dep.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+                      | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dep.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
+                      | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
+    VkAttachmentDescription atts[2] = { color, depth };
     VkRenderPassCreateInfo ci{};
     ci.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    ci.attachmentCount = 1; ci.pAttachments  = &color;
+    ci.attachmentCount = useDepth ? 2u : 1u; ci.pAttachments = atts;
     ci.subpassCount    = 1; ci.pSubpasses    = &subpass;
     ci.dependencyCount = 1; ci.pDependencies = &dep;
 
@@ -574,13 +625,14 @@ void VulkanBackend::CreateRenderPass() {
 }
 
 void VulkanBackend::CreateFramebuffers() {
+    const bool useDepth = (config_.workload == Workload::Render3D);
     swapChainFramebuffers_.resize(swapChainImageViews_.size());
     for (std::size_t i = 0; i < swapChainImageViews_.size(); ++i) {
-        VkImageView att[] = { swapChainImageViews_[i] };
+        VkImageView att[] = { swapChainImageViews_[i], depthImageView_ };
         VkFramebufferCreateInfo ci{};
         ci.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         ci.renderPass      = renderPass_;
-        ci.attachmentCount = 1;
+        ci.attachmentCount = useDepth ? 2u : 1u;
         ci.pAttachments    = att;
         ci.width           = swapChainExtent_.width;
         ci.height          = swapChainExtent_.height;
@@ -683,6 +735,263 @@ void VulkanBackend::CreateGraphicsPipeline() {
     vkDestroyShaderModule(device_, vertMod, nullptr);
 }
 
+// Fractal stress-test pipeline: fullscreen triangle (no vertex input) + heavy
+// fragment shader. Reuses graphicsPipeline_/graphicsPipelineLayout_ slots so
+// the existing cleanup path applies.
+void VulkanBackend::CreateFractalPipeline() {
+    auto vertCode = ReadFileBytes(shaderDir_ + "fractal.vert.spv");
+    auto fragCode = ReadFileBytes(shaderDir_ + "fractal.frag.spv");
+    VkShaderModule vertMod = CreateShaderModule(vertCode);
+    VkShaderModule fragMod = CreateShaderModule(fragCode);
+
+    VkPipelineShaderStageCreateInfo stages[2]{};
+    stages[0].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    stages[0].stage  = VK_SHADER_STAGE_VERTEX_BIT;
+    stages[0].module = vertMod;
+    stages[0].pName  = "main";
+    stages[1].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    stages[1].stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
+    stages[1].module = fragMod;
+    stages[1].pName  = "main";
+
+    // No vertex input — the vertex shader generates positions from the index.
+    VkPipelineVertexInputStateCreateInfo vertIn{};
+    vertIn.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+
+    VkPipelineInputAssemblyStateCreateInfo ia{};
+    ia.sType    = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    ia.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+    VkViewport vp{ 0, 0, (float)swapChainExtent_.width, (float)swapChainExtent_.height, 0, 1 };
+    VkRect2D sc{ {0,0}, swapChainExtent_ };
+    VkPipelineViewportStateCreateInfo vs{};
+    vs.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    vs.viewportCount = 1; vs.pViewports = &vp;
+    vs.scissorCount  = 1; vs.pScissors  = &sc;
+
+    VkPipelineRasterizationStateCreateInfo rs{};
+    rs.sType       = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    rs.polygonMode = VK_POLYGON_MODE_FILL;
+    rs.lineWidth   = 1.0f;
+    rs.cullMode    = VK_CULL_MODE_NONE;
+
+    VkPipelineMultisampleStateCreateInfo ms{};
+    ms.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+    ms.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+    VkPipelineColorBlendAttachmentState cba{};
+    cba.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT
+                       | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    cba.blendEnable = VK_FALSE;
+
+    VkPipelineColorBlendStateCreateInfo cb{};
+    cb.sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    cb.attachmentCount = 1;
+    cb.pAttachments    = &cba;
+
+    VkPushConstantRange pcr{};
+    pcr.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    pcr.size       = sizeof(FractalParams);
+
+    VkPipelineLayoutCreateInfo pli{};
+    pli.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pli.pushConstantRangeCount = 1;
+    pli.pPushConstantRanges    = &pcr;
+    if (vkCreatePipelineLayout(device_, &pli, nullptr, &graphicsPipelineLayout_) != VK_SUCCESS)
+        throw std::runtime_error("vkCreatePipelineLayout (fractal) failed");
+
+    VkGraphicsPipelineCreateInfo pi{};
+    pi.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pi.stageCount          = 2;
+    pi.pStages             = stages;
+    pi.pVertexInputState   = &vertIn;
+    pi.pInputAssemblyState = &ia;
+    pi.pViewportState      = &vs;
+    pi.pRasterizationState = &rs;
+    pi.pMultisampleState   = &ms;
+    pi.pColorBlendState    = &cb;
+    pi.layout              = graphicsPipelineLayout_;
+    pi.renderPass          = renderPass_;
+    pi.subpass             = 0;
+
+    if (vkCreateGraphicsPipelines(device_, VK_NULL_HANDLE, 1, &pi, nullptr, &graphicsPipeline_) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateGraphicsPipelines (fractal) failed");
+
+    vkDestroyShaderModule(device_, fragMod, nullptr);
+    vkDestroyShaderModule(device_, vertMod, nullptr);
+}
+
+void VulkanBackend::CreateDepthResources() {
+    VkImageCreateInfo ic{};
+    ic.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    ic.imageType     = VK_IMAGE_TYPE_2D;
+    ic.extent        = { swapChainExtent_.width, swapChainExtent_.height, 1 };
+    ic.mipLevels     = 1;
+    ic.arrayLayers   = 1;
+    ic.format        = depthFormat_;
+    ic.tiling        = VK_IMAGE_TILING_OPTIMAL;
+    ic.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    ic.usage         = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    ic.samples       = VK_SAMPLE_COUNT_1_BIT;
+    ic.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
+    if (vkCreateImage(device_, &ic, nullptr, &depthImage_) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateImage (depth) failed");
+
+    VkMemoryRequirements mr{};
+    vkGetImageMemoryRequirements(device_, depthImage_, &mr);
+    VkMemoryAllocateInfo ai{};
+    ai.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    ai.allocationSize  = mr.size;
+    ai.memoryTypeIndex = FindMemoryType(mr.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    if (vkAllocateMemory(device_, &ai, nullptr, &depthImageMemory_) != VK_SUCCESS)
+        throw std::runtime_error("vkAllocateMemory (depth) failed");
+    vkBindImageMemory(device_, depthImage_, depthImageMemory_, 0);
+
+    VkImageViewCreateInfo vi{};
+    vi.sType            = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    vi.image            = depthImage_;
+    vi.viewType         = VK_IMAGE_VIEW_TYPE_2D;
+    vi.format           = depthFormat_;
+    vi.subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
+    if (vkCreateImageView(device_, &vi, nullptr, &depthImageView_) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateImageView (depth) failed");
+}
+
+void VulkanBackend::CreateQuadBuffer() {
+    // 6 corners (two triangles) spanning [-1,1]^2 — the billboard quad.
+    const float quad[12] = { -1,-1,  1,-1,  1,1,   -1,-1,  1,1,  -1,1 };
+    const VkDeviceSize size = sizeof(quad);
+
+    VkBufferCreateInfo bi{};
+    bi.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bi.size        = size;
+    bi.usage       = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    bi.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    if (vkCreateBuffer(device_, &bi, nullptr, &quadBuffer_) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateBuffer (quad) failed");
+
+    VkMemoryRequirements mr{};
+    vkGetBufferMemoryRequirements(device_, quadBuffer_, &mr);
+    VkMemoryAllocateInfo ai{};
+    ai.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    ai.allocationSize  = mr.size;
+    ai.memoryTypeIndex = FindMemoryType(mr.memoryTypeBits,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    if (vkAllocateMemory(device_, &ai, nullptr, &quadBufferMemory_) != VK_SUCCESS)
+        throw std::runtime_error("vkAllocateMemory (quad) failed");
+    vkBindBufferMemory(device_, quadBuffer_, quadBufferMemory_, 0);
+
+    void* p = nullptr;
+    vkMapMemory(device_, quadBufferMemory_, 0, size, 0, &p);
+    std::memcpy(p, quad, sizeof(quad));
+    vkUnmapMemory(device_, quadBufferMemory_);
+}
+
+// True-3D instanced billboard pipeline: quad corners (per-vertex) + particle
+// position/velocity (per-instance), depth-tested, MVP via push constants.
+void VulkanBackend::CreateRender3DPipeline() {
+    auto vertCode = ReadFileBytes(shaderDir_ + "render3d.vert.spv");
+    auto fragCode = ReadFileBytes(shaderDir_ + "render3d.frag.spv");
+    VkShaderModule vertMod = CreateShaderModule(vertCode);
+    VkShaderModule fragMod = CreateShaderModule(fragCode);
+
+    VkPipelineShaderStageCreateInfo stages[2]{};
+    stages[0].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    stages[0].stage  = VK_SHADER_STAGE_VERTEX_BIT;
+    stages[0].module = vertMod; stages[0].pName = "main";
+    stages[1].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    stages[1].stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
+    stages[1].module = fragMod; stages[1].pName = "main";
+
+    VkVertexInputBindingDescription binds[2]{};
+    binds[0] = { 0, sizeof(float) * 2, VK_VERTEX_INPUT_RATE_VERTEX };      // quad corner
+    binds[1] = { 1, sizeof(Particle), VK_VERTEX_INPUT_RATE_INSTANCE };    // particle
+    VkVertexInputAttributeDescription attrs[3]{};
+    attrs[0] = { 0, 0, VK_FORMAT_R32G32_SFLOAT,          0 };
+    attrs[1] = { 1, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Particle, px) };
+    attrs[2] = { 2, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Particle, vx) };
+
+    VkPipelineVertexInputStateCreateInfo vertIn{};
+    vertIn.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    vertIn.vertexBindingDescriptionCount   = 2; vertIn.pVertexBindingDescriptions   = binds;
+    vertIn.vertexAttributeDescriptionCount = 3; vertIn.pVertexAttributeDescriptions = attrs;
+
+    VkPipelineInputAssemblyStateCreateInfo ia{};
+    ia.sType    = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    ia.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+    VkViewport vp{ 0, 0, (float)swapChainExtent_.width, (float)swapChainExtent_.height, 0, 1 };
+    VkRect2D sc{ {0,0}, swapChainExtent_ };
+    VkPipelineViewportStateCreateInfo vs{};
+    vs.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    vs.viewportCount = 1; vs.pViewports = &vp;
+    vs.scissorCount  = 1; vs.pScissors  = &sc;
+
+    VkPipelineRasterizationStateCreateInfo rs{};
+    rs.sType       = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    rs.polygonMode = VK_POLYGON_MODE_FILL;
+    rs.lineWidth   = 1.0f;
+    rs.cullMode    = VK_CULL_MODE_NONE;
+
+    VkPipelineMultisampleStateCreateInfo ms{};
+    ms.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+    ms.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+    VkPipelineDepthStencilStateCreateInfo ds{};
+    ds.sType            = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    ds.depthTestEnable  = VK_TRUE;
+    ds.depthWriteEnable = VK_TRUE;
+    ds.depthCompareOp   = VK_COMPARE_OP_LESS;
+
+    VkPipelineColorBlendAttachmentState cba{};
+    cba.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT
+                       | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    cba.blendEnable         = VK_TRUE;
+    cba.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+    cba.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    cba.colorBlendOp        = VK_BLEND_OP_ADD;
+    cba.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+    cba.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+    cba.alphaBlendOp        = VK_BLEND_OP_ADD;
+
+    VkPipelineColorBlendStateCreateInfo cb{};
+    cb.sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    cb.attachmentCount = 1;
+    cb.pAttachments    = &cba;
+
+    VkPushConstantRange pcr{};
+    pcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    pcr.size       = sizeof(Render3DParams);
+
+    VkPipelineLayoutCreateInfo pli{};
+    pli.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pli.pushConstantRangeCount = 1;
+    pli.pPushConstantRanges    = &pcr;
+    if (vkCreatePipelineLayout(device_, &pli, nullptr, &graphicsPipelineLayout_) != VK_SUCCESS)
+        throw std::runtime_error("vkCreatePipelineLayout (render3d) failed");
+
+    VkGraphicsPipelineCreateInfo pi{};
+    pi.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pi.stageCount          = 2;
+    pi.pStages             = stages;
+    pi.pVertexInputState   = &vertIn;
+    pi.pInputAssemblyState = &ia;
+    pi.pViewportState      = &vs;
+    pi.pRasterizationState = &rs;
+    pi.pMultisampleState   = &ms;
+    pi.pDepthStencilState  = &ds;
+    pi.pColorBlendState    = &cb;
+    pi.layout              = graphicsPipelineLayout_;
+    pi.renderPass          = renderPass_;
+    pi.subpass             = 0;
+
+    if (vkCreateGraphicsPipelines(device_, VK_NULL_HANDLE, 1, &pi, nullptr, &graphicsPipeline_) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateGraphicsPipelines (render3d) failed");
+
+    vkDestroyShaderModule(device_, fragMod, nullptr);
+    vkDestroyShaderModule(device_, vertMod, nullptr);
+}
+
 void VulkanBackend::CreateComputeDescriptorSetLayout() {
     VkDescriptorSetLayoutBinding ssbo{};
     ssbo.binding         = 0;
@@ -728,7 +1037,18 @@ void VulkanBackend::CreateComputeDescriptorResources() {
 }
 
 void VulkanBackend::CreateComputePipeline() {
-    auto code = ReadFileBytes(shaderDir_ + "compute.comp.spv");
+    const bool nbody = (config_.workload == Workload::NBody);
+    const bool synth = (config_.workload == Workload::SynthPeak);
+    std::string csFile;
+    if (synth) {
+        csFile = (config_.peakPrecision == Precision::FP64)  ? "synthpeak_fp64.comp.spv"
+               : (config_.peakPrecision == Precision::FP16)  ? "synthpeak_fp16.comp.spv"
+               : (config_.peakPrecision == Precision::INT32) ? "synthpeak_int32.comp.spv"
+               :                                               "synthpeak_fp32.comp.spv";
+    } else {
+        csFile = nbody ? "nbody.comp.spv" : "compute.comp.spv";
+    }
+    auto code = ReadFileBytes(shaderDir_ + csFile);
     VkShaderModule mod = CreateShaderModule(code);
 
     VkPipelineShaderStageCreateInfo si{};
@@ -739,7 +1059,9 @@ void VulkanBackend::CreateComputePipeline() {
 
     VkPushConstantRange pcr{};
     pcr.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-    pcr.size       = sizeof(ComputeParams);
+    pcr.size       = synth ? sizeof(PeakParams)
+                   : nbody ? sizeof(NBodyParams)
+                   :         sizeof(ComputeParams);
 
     VkPipelineLayoutCreateInfo li{};
     li.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -878,14 +1200,29 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
     if (timestampsSupported_)
         vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, timestampQueryPool_, tsBase);
 
+    if (config_.workload == Workload::StressFractal) {
+        // Fractal is a fragment-only pass: no compute, no particle barrier.
+        if (timestampsSupported_)
+            vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, timestampQueryPool_, tsBase + 1);
+    } else {
     // --- Compute pass ---
     BeginDebugLabel(cmd, "Particle Compute", 0.2f, 0.8f, 0.2f);
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline_);
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
                             computePipelineLayout_, 0, 1, &computeDescriptorSet_, 0, nullptr);
-    ComputeParams params{ deltaTime, 0.9f };
-    vkCmdPushConstants(cmd, computePipelineLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0,
-                       sizeof(ComputeParams), &params);
+    if (config_.workload == Workload::SynthPeak) {
+        PeakParams params{ config_.peakIters, 0.9999f, 0.0001f, 0 };
+        vkCmdPushConstants(cmd, computePipelineLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0,
+                           sizeof(PeakParams), &params);
+    } else if (config_.workload == Workload::NBody) {
+        NBodyParams params{ deltaTime, config_.softening, config_.particleCount, 0 };
+        vkCmdPushConstants(cmd, computePipelineLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0,
+                           sizeof(NBodyParams), &params);
+    } else {
+        ComputeParams params{ deltaTime, 0.9f };
+        vkCmdPushConstants(cmd, computePipelineLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0,
+                           sizeof(ComputeParams), &params);
+    }
     vkCmdDispatch(cmd, config_.particleCount / kComputeWorkGroupSize, 1, 1);
     EndDebugLabel(cmd);
 
@@ -906,27 +1243,52 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
         0, 0, nullptr, 1, &barrier, 0, nullptr);
     EndDebugLabel(cmd);
+    }
 
     if (timestampsSupported_)
         vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, timestampQueryPool_, tsBase + 2);
 
     // --- Render pass ---
     BeginDebugLabel(cmd, "Particle Render", 0.2f, 0.4f, 0.9f);
-    VkClearValue clear = {{{0.04f, 0.08f, 0.14f, 1.0f}}};
+    const bool render3d = (config_.workload == Workload::Render3D);
+    VkClearValue clears[2];
+    clears[0].color        = {{0.04f, 0.08f, 0.14f, 1.0f}};
+    clears[1].depthStencil = {1.0f, 0};
     VkRenderPassBeginInfo rp{};
     rp.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     rp.renderPass        = renderPass_;
     rp.framebuffer       = swapChainFramebuffers_[imageIndex];
     rp.renderArea.extent = swapChainExtent_;
-    rp.clearValueCount   = 1;
-    rp.pClearValues      = &clear;
+    rp.clearValueCount   = render3d ? 2u : 1u;
+    rp.pClearValues      = clears;
 
     vkCmdBeginRenderPass(cmd, &rp, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline_);
-    VkBuffer     bufs[] = { particleBuffer_ };
-    VkDeviceSize offs[] = { 0 };
-    vkCmdBindVertexBuffers(cmd, 0, 1, bufs, offs);
-    vkCmdDraw(cmd, config_.particleCount, 1, 0, 0);
+    if (config_.workload == Workload::StressFractal) {
+        fractalElapsed_ += deltaTime;
+        FractalParams fp{ fractalElapsed_, 1.0f, config_.fractalIter, 0 };
+        vkCmdPushConstants(cmd, graphicsPipelineLayout_, VK_SHADER_STAGE_FRAGMENT_BIT, 0,
+                           sizeof(FractalParams), &fp);
+        vkCmdDraw(cmd, 3, 1, 0, 0);   // fullscreen triangle, no vertex buffer
+    } else if (render3d) {
+        fractalElapsed_ += deltaTime;   // reused as camera orbit time
+        Render3DParams r3{};
+        const float aspect = (float)swapChainExtent_.width / (float)swapChainExtent_.height;
+        render3dCamera(fractalElapsed_, aspect, /*flipY*/true, /*z01*/true,
+                       r3.viewProj, r3.camRight, r3.camUp);
+        r3.pointSize = 0.02f;
+        vkCmdPushConstants(cmd, graphicsPipelineLayout_, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                           sizeof(Render3DParams), &r3);
+        VkBuffer     bufs[] = { quadBuffer_, particleBuffer_ };
+        VkDeviceSize offs[] = { 0, 0 };
+        vkCmdBindVertexBuffers(cmd, 0, 2, bufs, offs);
+        vkCmdDraw(cmd, 6, config_.particleCount, 0, 0);  // 6 verts x N instances
+    } else {
+        VkBuffer     bufs[] = { particleBuffer_ };
+        VkDeviceSize offs[] = { 0 };
+        vkCmdBindVertexBuffers(cmd, 0, 1, bufs, offs);
+        vkCmdDraw(cmd, config_.particleCount, 1, 0, 0);
+    }
     vkCmdEndRenderPass(cmd);
     EndDebugLabel(cmd);
 
@@ -978,9 +1340,19 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline_);
         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
                                 computePipelineLayout_, 0, 1, &computeDescriptorSet_, 0, nullptr);
-        ComputeParams params{ deltaTime, 0.9f };
-        vkCmdPushConstants(cmd, computePipelineLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0,
-                           sizeof(ComputeParams), &params);
+        if (config_.workload == Workload::SynthPeak) {
+            PeakParams params{ config_.peakIters, 0.9999f, 0.0001f, 0 };
+            vkCmdPushConstants(cmd, computePipelineLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0,
+                               sizeof(PeakParams), &params);
+        } else if (config_.workload == Workload::NBody) {
+            NBodyParams params{ deltaTime, config_.softening, config_.particleCount, 0 };
+            vkCmdPushConstants(cmd, computePipelineLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0,
+                               sizeof(NBodyParams), &params);
+        } else {
+            ComputeParams params{ deltaTime, 0.9f };
+            vkCmdPushConstants(cmd, computePipelineLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0,
+                               sizeof(ComputeParams), &params);
+        }
         vkCmdDispatch(cmd, config_.particleCount / kComputeWorkGroupSize, 1, 1);
 
         if (timestampsSupported_)
@@ -1062,6 +1434,9 @@ void VulkanBackend::CleanupSwapChain() {
     swapChainFramebuffers_.clear();
     for (auto iv : swapChainImageViews_)   vkDestroyImageView(device_, iv, nullptr);
     swapChainImageViews_.clear();
+    if (depthImageView_)   { vkDestroyImageView(device_, depthImageView_, nullptr); depthImageView_ = VK_NULL_HANDLE; }
+    if (depthImage_)       { vkDestroyImage(device_, depthImage_, nullptr); depthImage_ = VK_NULL_HANDLE; }
+    if (depthImageMemory_) { vkFreeMemory(device_, depthImageMemory_, nullptr); depthImageMemory_ = VK_NULL_HANDLE; }
     imagesInFlight_.clear();
     if (renderPass_ != VK_NULL_HANDLE) { vkDestroyRenderPass(device_, renderPass_, nullptr); renderPass_ = VK_NULL_HANDLE; }
     if (swapChain_  != VK_NULL_HANDLE) { vkDestroySwapchainKHR(device_, swapChain_, nullptr); swapChain_ = VK_NULL_HANDLE; }
@@ -1078,6 +1453,8 @@ void VulkanBackend::CleanupBackend() {
     if (commandPool_)               { vkDestroyCommandPool(device_, commandPool_, nullptr); }
     if (particleBuffer_)            { vkDestroyBuffer(device_, particleBuffer_, nullptr); }
     if (particleBufferMemory_)      { vkFreeMemory(device_, particleBufferMemory_, nullptr); }
+    if (quadBuffer_)                { vkDestroyBuffer(device_, quadBuffer_, nullptr); }
+    if (quadBufferMemory_)          { vkFreeMemory(device_, quadBufferMemory_, nullptr); }
     if (computePipeline_)           { vkDestroyPipeline(device_, computePipeline_, nullptr); }
     if (computePipelineLayout_)     { vkDestroyPipelineLayout(device_, computePipelineLayout_, nullptr); }
     if (descriptorPool_)            { vkDestroyDescriptorPool(device_, descriptorPool_, nullptr); }

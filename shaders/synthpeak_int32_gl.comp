@@ -1,0 +1,16 @@
+#version 430
+// Synthetic peak INT32 (OpenGL). See synthpeak_int32.comp for notes.
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+layout(binding = 0, std430) buffer OutBuf { int data[]; } outBuf;
+layout(binding = 1, std140) uniform PeakParams { uint iters; float mul; float add; };
+void main() {
+    uint gid = gl_GlobalInvocationID.x;
+    int s = int(gid & 1023u) + 1;
+    int a0=s, a1=s+1, a2=s+2, a3=s+3, a4=s+4, a5=s+5, a6=s+6, a7=s+7;
+    int m = int(mul*1000.0)+3, c = int(add*1000.0)+1;
+    for (uint i = 0u; i < iters; ++i) {
+        a0=a0*m+c; a1=a1*m+c; a2=a2*m+c; a3=a3*m+c;
+        a4=a4*m+c; a5=a5*m+c; a6=a6*m+c; a7=a7*m+c;
+    }
+    outBuf.data[gid] = a0+a1+a2+a3+a4+a5+a6+a7;
+}

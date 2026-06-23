@@ -1,6 +1,7 @@
 #ifdef HAVE_DX12
 
 #include "dx12_backend.h"
+#include "mini_mat.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>
@@ -334,6 +335,14 @@ void DX12Backend::CreateDescriptorHeaps() {
     uavDesc.Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
     ThrowIfFailed(device_->CreateDescriptorHeap(&uavDesc, IID_PPV_ARGS(&cbvSrvUavHeap_)),
                   "CreateDescriptorHeap CBV/SRV/UAV failed");
+
+    if (config_.workload == Workload::Render3D && !config_.headless) {
+        D3D12_DESCRIPTOR_HEAP_DESC dsvDesc{};
+        dsvDesc.NumDescriptors = 1;
+        dsvDesc.Type           = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+        ThrowIfFailed(device_->CreateDescriptorHeap(&dsvDesc, IID_PPV_ARGS(&dsvHeap_)),
+                      "CreateDescriptorHeap DSV failed");
+    }
 }
 
 void DX12Backend::CreateRenderTargets() {
@@ -343,6 +352,25 @@ void DX12Backend::CreateRenderTargets() {
                       "GetBuffer failed");
         device_->CreateRenderTargetView(renderTargets_[i].Get(), nullptr, handle);
         handle.ptr += rtvDescriptorSize_;
+    }
+
+    if (config_.workload == Workload::Render3D) {
+        D3D12_HEAP_PROPERTIES dp{}; dp.Type = D3D12_HEAP_TYPE_DEFAULT;
+        D3D12_RESOURCE_DESC rd{};
+        rd.Dimension        = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+        rd.Width            = kWindowWidth;
+        rd.Height           = kWindowHeight;
+        rd.DepthOrArraySize = 1;
+        rd.MipLevels        = 1;
+        rd.Format           = DXGI_FORMAT_D32_FLOAT;
+        rd.SampleDesc.Count = 1;
+        rd.Flags            = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+        D3D12_CLEAR_VALUE cv{}; cv.Format = DXGI_FORMAT_D32_FLOAT; cv.DepthStencil.Depth = 1.0f;
+        ThrowIfFailed(device_->CreateCommittedResource(
+            &dp, D3D12_HEAP_FLAG_NONE, &rd, D3D12_RESOURCE_STATE_DEPTH_WRITE, &cv,
+            IID_PPV_ARGS(&depthBuffer_)), "CreateCommittedResource (depth) failed");
+        device_->CreateDepthStencilView(depthBuffer_.Get(), nullptr,
+            dsvHeap_->GetCPUDescriptorHandleForHeapStart());
     }
 }
 
@@ -379,7 +407,7 @@ void DX12Backend::CreateRootSignatures() {
 
         params[1].ParameterType            = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
         params[1].Constants.ShaderRegister = 0;
-        params[1].Constants.Num32BitValues = 2;
+        params[1].Constants.Num32BitValues = 3;  // max(ComputeParams=2, NBodyParams=3)
         params[1].ShaderVisibility         = D3D12_SHADER_VISIBILITY_ALL;
 
         D3D12_ROOT_SIGNATURE_DESC desc{};
@@ -396,10 +424,27 @@ void DX12Backend::CreateRootSignatures() {
                       "CreateRootSignature (compute) failed");
     }
 
-    // Graphics root signature: empty, allows input assembler
+    // Graphics root signature: empty (particles) or PS root constants (fractal)
     if (!config_.headless) {
         D3D12_ROOT_SIGNATURE_DESC desc{};
         desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+        D3D12_ROOT_PARAMETER fparam{};
+        if (config_.workload == Workload::StressFractal) {
+            fparam.ParameterType            = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+            fparam.Constants.ShaderRegister = 0;
+            fparam.Constants.Num32BitValues = 3;   // FractalParams
+            fparam.ShaderVisibility         = D3D12_SHADER_VISIBILITY_PIXEL;
+            desc.NumParameters = 1;
+            desc.pParameters   = &fparam;
+        } else if (config_.workload == Workload::Render3D) {
+            fparam.ParameterType            = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+            fparam.Constants.ShaderRegister = 0;
+            fparam.Constants.Num32BitValues = sizeof(Render3DParams) / 4;  // 28 DWORDs
+            fparam.ShaderVisibility         = D3D12_SHADER_VISIBILITY_VERTEX;
+            desc.NumParameters = 1;
+            desc.pParameters   = &fparam;
+        }
 
         ComPtr<ID3DBlob> sig, err;
         ThrowIfFailed(D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1,
@@ -413,10 +458,41 @@ void DX12Backend::CreateRootSignatures() {
 }
 
 void DX12Backend::CreatePipelineStates() {
-    auto csBlob = CompileShader(shaderDir_ + "compute.hlsl",    "CSMain", "cs_5_1");
+    const bool fp16Peak = (config_.workload == Workload::SynthPeak
+                           && config_.peakPrecision == Precision::FP16);
+    if (fp16Peak) {
+        // FXC has no true float16_t; load the precompiled signed DXIL (SM 6.2,
+        // -enable-16bit-types) and verify the device supports native 16-bit ops.
+        D3D12_FEATURE_DATA_SHADER_MODEL sm{ D3D_SHADER_MODEL_6_2 };
+        bool sm62 = SUCCEEDED(device_->CheckFeatureSupport(
+            D3D12_FEATURE_SHADER_MODEL, &sm, sizeof(sm)))
+            && sm.HighestShaderModel >= D3D_SHADER_MODEL_6_2;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS4 o4{};
+        device_->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4, &o4, sizeof(o4));
+        if (!sm62 || !o4.Native16BitShaderOpsSupported)
+            throw std::runtime_error("DX12 FP16 SynthPeak needs Shader Model 6.2 + Native16BitShaderOps");
 
-    // Compute PSO
-    {
+        std::vector<char> cso;
+        try { cso = ReadFileBytes(shaderDir_ + "synthpeak_fp16.cso"); }
+        catch (...) {
+            throw std::runtime_error("synthpeak_fp16.cso missing (Windows SDK dxc.exe not found at build time)");
+        }
+        D3D12_COMPUTE_PIPELINE_STATE_DESC d{};
+        d.pRootSignature = computeRootSig_.Get();
+        d.CS = { cso.data(), cso.size() };
+        ThrowIfFailed(device_->CreateComputePipelineState(&d, IID_PPV_ARGS(&computePSO_)),
+                      "CreateComputePipelineState (fp16) failed");
+    } else {
+        std::string csFile;
+        if (config_.workload == Workload::SynthPeak) {
+            csFile = (config_.peakPrecision == Precision::FP64)  ? "synthpeak_fp64.hlsl"
+                   : (config_.peakPrecision == Precision::INT32) ? "synthpeak_int32.hlsl"
+                   :                                               "synthpeak_fp32.hlsl";
+        } else {
+            csFile = (config_.workload == Workload::NBody) ? "nbody.hlsl" : "compute.hlsl";
+        }
+        auto csBlob = CompileShader(shaderDir_ + csFile, "CSMain", "cs_5_1");
+
         D3D12_COMPUTE_PIPELINE_STATE_DESC d{};
         d.pRootSignature = computeRootSig_.Get();
         d.CS = { csBlob->GetBufferPointer(), csBlob->GetBufferSize() };
@@ -426,8 +502,12 @@ void DX12Backend::CreatePipelineStates() {
 
     if (config_.headless) return;
 
-    auto vsBlob = CompileShader(shaderDir_ + "particle_vs.hlsl","VSMain", "vs_5_1");
-    auto psBlob = CompileShader(shaderDir_ + "particle_ps.hlsl","PSMain", "ps_5_1");
+    const bool fractal  = (config_.workload == Workload::StressFractal);
+    const bool render3d = (config_.workload == Workload::Render3D);
+    const char* gvs = fractal ? "fractal.hlsl" : render3d ? "render3d.hlsl" : "particle_vs.hlsl";
+    const char* gps = fractal ? "fractal.hlsl" : render3d ? "render3d.hlsl" : "particle_ps.hlsl";
+    auto vsBlob = CompileShader(shaderDir_ + gvs, "VSMain", "vs_5_1");
+    auto psBlob = CompileShader(shaderDir_ + gps, "PSMain", "ps_5_1");
 
     // Graphics PSO
     {
@@ -435,9 +515,16 @@ void DX12Backend::CreatePipelineStates() {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
             { "VELOCITY", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
         };
+        // Render3D: slot 0 corner (per-vertex), slot 1 pos/vel (per-instance).
+        D3D12_INPUT_ELEMENT_DESC layout3d[] = {
+            { "CORNER",   0, DXGI_FORMAT_R32G32_FLOAT,       0,  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,   0 },
+            { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1,  0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 },
+            { "VELOCITY", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 },
+        };
 
         D3D12_GRAPHICS_PIPELINE_STATE_DESC d{};
-        d.InputLayout    = { layout, _countof(layout) };
+        if (render3d)      d.InputLayout = { layout3d, _countof(layout3d) };
+        else if (!fractal) d.InputLayout = { layout, _countof(layout) };  // fractal uses SV_VertexID
         d.pRootSignature = graphicsRootSig_.Get();
         d.VS = { vsBlob->GetBufferPointer(), vsBlob->GetBufferSize() };
         d.PS = { psBlob->GetBufferPointer(), psBlob->GetBufferSize() };
@@ -456,8 +543,16 @@ void DX12Backend::CreatePipelineStates() {
         d.BlendState.RenderTarget[0].BlendOpAlpha           = D3D12_BLEND_OP_ADD;
         d.BlendState.RenderTarget[0].RenderTargetWriteMask  = D3D12_COLOR_WRITE_ENABLE_ALL;
 
+        if (render3d) {
+            d.DepthStencilState.DepthEnable    = TRUE;
+            d.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+            d.DepthStencilState.DepthFunc      = D3D12_COMPARISON_FUNC_LESS;
+            d.DSVFormat                        = DXGI_FORMAT_D32_FLOAT;
+        }
+
         d.SampleMask            = UINT_MAX;
-        d.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+        d.PrimitiveTopologyType = (fractal || render3d) ? D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE
+                                                        : D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
         d.NumRenderTargets      = 1;
         d.RTVFormats[0]         = DXGI_FORMAT_R8G8B8A8_UNORM;
         d.SampleDesc.Count      = 1;
@@ -543,6 +638,28 @@ void DX12Backend::CreateParticleBuffer() {
     vbView_.BufferLocation = particleBuffer_->GetGPUVirtualAddress();
     vbView_.SizeInBytes    = bufferSize;
     vbView_.StrideInBytes  = sizeof(Particle);
+
+    // Render3D: static quad in an upload-heap buffer (tiny, CPU-written once).
+    if (config_.workload == Workload::Render3D && !config_.headless) {
+        const float quad[12] = { -1,-1, 1,-1, 1,1, -1,-1, 1,1, -1,1 };
+        D3D12_HEAP_PROPERTIES uh{}; uh.Type = D3D12_HEAP_TYPE_UPLOAD;
+        D3D12_RESOURCE_DESC qd{};
+        qd.Dimension        = D3D12_RESOURCE_DIMENSION_BUFFER;
+        qd.Width            = sizeof(quad);
+        qd.Height           = 1; qd.DepthOrArraySize = 1; qd.MipLevels = 1;
+        qd.SampleDesc.Count = 1;
+        qd.Layout           = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        ThrowIfFailed(device_->CreateCommittedResource(
+            &uh, D3D12_HEAP_FLAG_NONE, &qd, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+            IID_PPV_ARGS(&quadBuffer_)), "CreateCommittedResource (quad) failed");
+        void* qm = nullptr;
+        quadBuffer_->Map(0, nullptr, &qm);
+        std::memcpy(qm, quad, sizeof(quad));
+        quadBuffer_->Unmap(0, nullptr);
+        quadView_.BufferLocation = quadBuffer_->GetGPUVirtualAddress();
+        quadView_.SizeInBytes    = sizeof(quad);
+        quadView_.StrideInBytes  = sizeof(float) * 2;
+    }
 
     std::cout << "Created particle buffer: " << config_.particleCount << " particles\n";
 }
@@ -667,8 +784,16 @@ void DX12Backend::DrawFrame(float deltaTime) {
         commandList_->SetDescriptorHeaps(1, heaps);
         commandList_->SetComputeRootDescriptorTable(0,
             cbvSrvUavHeap_->GetGPUDescriptorHandleForHeapStart());
-        ComputeParams params{ deltaTime, 0.9f };
-        commandList_->SetComputeRoot32BitConstants(1, 2, &params, 0);
+        if (config_.workload == Workload::SynthPeak) {
+            PeakParams params{ config_.peakIters, 0.9999f, 0.0001f, 0 };
+            commandList_->SetComputeRoot32BitConstants(1, 3, &params, 0);
+        } else if (config_.workload == Workload::NBody) {
+            NBodyParams params{ deltaTime, config_.softening, config_.particleCount, 0 };
+            commandList_->SetComputeRoot32BitConstants(1, 3, &params, 0);
+        } else {
+            ComputeParams params{ deltaTime, 0.9f };
+            commandList_->SetComputeRoot32BitConstants(1, 2, &params, 0);
+        }
         commandList_->Dispatch(config_.particleCount / kComputeWorkGroupSize, 1, 1);
 
         if (timestampsSupported_)
@@ -708,8 +833,16 @@ void DX12Backend::DrawFrame(float deltaTime) {
 
     // --- Normal (windowed) path ---
 
-    // --- Transition particle buffer VBV -> UAV ---
     D3D12_RESOURCE_BARRIER barriers[2]{};
+
+    if (config_.workload == Workload::StressFractal) {
+        // Fractal: fragment-only — no compute pass, no particle buffer use.
+        if (timestampsSupported_) {
+            commandList_->EndQuery(timestampHeap_.Get(), D3D12_QUERY_TYPE_TIMESTAMP, tsBase + 0);
+            commandList_->EndQuery(timestampHeap_.Get(), D3D12_QUERY_TYPE_TIMESTAMP, tsBase + 1);
+        }
+    } else {
+    // --- Transition particle buffer VBV -> UAV ---
     barriers[0].Type                   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
     barriers[0].Transition.pResource   = particleBuffer_.Get();
     barriers[0].Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
@@ -729,8 +862,16 @@ void DX12Backend::DrawFrame(float deltaTime) {
     commandList_->SetComputeRootDescriptorTable(0,
         cbvSrvUavHeap_->GetGPUDescriptorHandleForHeapStart());
 
-    ComputeParams params{ deltaTime, 0.9f };
-    commandList_->SetComputeRoot32BitConstants(1, 2, &params, 0);
+    if (config_.workload == Workload::SynthPeak) {
+        PeakParams params{ config_.peakIters, 0.9999f, 0.0001f, 0 };
+        commandList_->SetComputeRoot32BitConstants(1, 3, &params, 0);
+    } else if (config_.workload == Workload::NBody) {
+        NBodyParams params{ deltaTime, config_.softening, config_.particleCount, 0 };
+        commandList_->SetComputeRoot32BitConstants(1, 3, &params, 0);
+    } else {
+        ComputeParams params{ deltaTime, 0.9f };
+        commandList_->SetComputeRoot32BitConstants(1, 2, &params, 0);
+    }
     commandList_->Dispatch(config_.particleCount / kComputeWorkGroupSize, 1, 1);
 
     if (timestampsSupported_)
@@ -745,6 +886,7 @@ void DX12Backend::DrawFrame(float deltaTime) {
     barriers[0].Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
     barriers[0].Transition.StateAfter  = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
     commandList_->ResourceBarrier(1, &barriers[0]);
+    }
 
     // --- Transition render target PRESENT -> RT ---
     barriers[0].Transition.pResource   = renderTargets_[frameIndex_].Get();
@@ -761,7 +903,13 @@ void DX12Backend::DrawFrame(float deltaTime) {
 
     const float clearColor[] = { 0.04f, 0.08f, 0.14f, 1.0f };
     commandList_->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-    commandList_->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+    if (config_.workload == Workload::Render3D) {
+        D3D12_CPU_DESCRIPTOR_HANDLE dsv = dsvHeap_->GetCPUDescriptorHandleForHeapStart();
+        commandList_->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        commandList_->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsv);
+    } else {
+        commandList_->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+    }
 
     D3D12_VIEWPORT vp{ 0, 0, static_cast<float>(kWindowWidth),
                        static_cast<float>(kWindowHeight), 0.0f, 1.0f };
@@ -772,9 +920,29 @@ void DX12Backend::DrawFrame(float deltaTime) {
 
     commandList_->SetGraphicsRootSignature(graphicsRootSig_.Get());
     commandList_->SetPipelineState(graphicsPSO_.Get());
-    commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
-    commandList_->IASetVertexBuffers(0, 1, &vbView_);
-    commandList_->DrawInstanced(config_.particleCount, 1, 0, 0);
+    if (config_.workload == Workload::StressFractal) {
+        fractalElapsed_ += deltaTime;
+        FractalParams fp{ fractalElapsed_, 1.0f, config_.fractalIter, 0 };
+        commandList_->SetGraphicsRoot32BitConstants(0, 3, &fp, 0);
+        commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        commandList_->DrawInstanced(3, 1, 0, 0);   // fullscreen triangle, no VB
+    } else if (config_.workload == Workload::Render3D) {
+        fractalElapsed_ += deltaTime;
+        Render3DParams r3{};
+        const float aspect = static_cast<float>(kWindowWidth) / static_cast<float>(kWindowHeight);
+        render3dCamera(fractalElapsed_, aspect, /*flipY*/false, /*z01*/true,
+                       r3.viewProj, r3.camRight, r3.camUp);
+        r3.pointSize = 0.02f;
+        commandList_->SetGraphicsRoot32BitConstants(0, sizeof(Render3DParams) / 4, &r3, 0);
+        commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        D3D12_VERTEX_BUFFER_VIEW vbs[2] = { quadView_, vbView_ };
+        commandList_->IASetVertexBuffers(0, 2, vbs);
+        commandList_->DrawInstanced(6, config_.particleCount, 0, 0);
+    } else {
+        commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+        commandList_->IASetVertexBuffers(0, 1, &vbView_);
+        commandList_->DrawInstanced(config_.particleCount, 1, 0, 0);
+    }
 
     if (timestampsSupported_)
         commandList_->EndQuery(timestampHeap_.Get(), D3D12_QUERY_TYPE_TIMESTAMP, tsBase + 3);

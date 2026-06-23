@@ -1,6 +1,7 @@
 #ifdef HAVE_METAL
 
 #include "metal_backend.h"
+#include "mini_mat.h"
 
 #define GLFW_EXPOSE_NATIVE_COCOA
 #include <GLFW/glfw3.h>
@@ -27,6 +28,8 @@ struct MetalBackend::Impl {
     id<MTLRenderPipelineState>  renderPSO    = nil;
     id<MTLBuffer>               particleBuf  = nil;
     CAMetalLayer*               metalLayer   = nil;
+    id<MTLTexture>              depthTex     = nil;   // Render3D
+    id<MTLDepthStencilState>    depthState   = nil;   // Render3D
 
     std::string deviceName;
 
@@ -147,10 +150,22 @@ void MetalBackend::InitBackend() {
         }
 
         // --- Compute pipeline ---------------------------------------------------
+        NSString* kernelName = @"computeMain";
+        if (config_.workload == Workload::NBody) {
+            kernelName = @"nbodyMain";
+        } else if (config_.workload == Workload::SynthPeak) {
+            switch (config_.peakPrecision) {
+                case Precision::FP16:  kernelName = @"synthFp16";  break;
+                case Precision::INT32: kernelName = @"synthInt32"; break;
+                case Precision::FP64:
+                    throw std::runtime_error("SynthPeak FP64 is not supported on Apple GPUs (no double); use Vulkan");
+                default:               kernelName = @"synthFp32";  break;
+            }
+        }
         id<MTLFunction> computeFunc =
-            [impl_->library newFunctionWithName:@"computeMain"];
+            [impl_->library newFunctionWithName:kernelName];
         if (!computeFunc)
-            throw std::runtime_error("computeMain function not found in shader");
+            throw std::runtime_error("compute kernel function not found in shader");
 
         impl_->computePSO =
             [impl_->device newComputePipelineStateWithFunction:computeFunc
@@ -163,10 +178,12 @@ void MetalBackend::InitBackend() {
         }
 
         // --- Render pipeline ----------------------------------------------------
-        id<MTLFunction> vertFunc =
-            [impl_->library newFunctionWithName:@"vertexMain"];
-        id<MTLFunction> fragFunc =
-            [impl_->library newFunctionWithName:@"fragmentMain"];
+        const bool fractal  = (config_.workload == Workload::StressFractal);
+        const bool render3d = (config_.workload == Workload::Render3D);
+        NSString* vfn = fractal ? @"fractalVertex" : render3d ? @"render3dVertex" : @"vertexMain";
+        NSString* ffn = fractal ? @"fractalFragment" : render3d ? @"render3dFragment" : @"fragmentMain";
+        id<MTLFunction> vertFunc = [impl_->library newFunctionWithName:vfn];
+        id<MTLFunction> fragFunc = [impl_->library newFunctionWithName:ffn];
         if (!vertFunc || !fragFunc)
             throw std::runtime_error("Vertex/fragment functions not found");
 
@@ -174,6 +191,8 @@ void MetalBackend::InitBackend() {
             [[MTLRenderPipelineDescriptor alloc] init];
         rpDesc.vertexFunction   = vertFunc;
         rpDesc.fragmentFunction = fragFunc;
+        if (render3d)
+            rpDesc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
 
         MTLRenderPipelineColorAttachmentDescriptor* ca =
             rpDesc.colorAttachments[0];
@@ -194,6 +213,23 @@ void MetalBackend::InitBackend() {
                 ? [[error localizedDescription] UTF8String]
                 : "unknown error";
             throw std::runtime_error("Render pipeline creation failed: " + msg);
+        }
+
+        // --- Render3D depth resources ------------------------------------------
+        if (render3d) {
+            MTLTextureDescriptor* dtd =
+                [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float
+                                                                   width:kWindowWidth
+                                                                  height:kWindowHeight
+                                                               mipmapped:NO];
+            dtd.usage       = MTLTextureUsageRenderTarget;
+            dtd.storageMode = MTLStorageModePrivate;
+            impl_->depthTex = [impl_->device newTextureWithDescriptor:dtd];
+
+            MTLDepthStencilDescriptor* dsd = [[MTLDepthStencilDescriptor alloc] init];
+            dsd.depthCompareFunction = MTLCompareFunctionLess;
+            dsd.depthWriteEnabled    = YES;
+            impl_->depthState = [impl_->device newDepthStencilStateWithDescriptor:dsd];
         }
 
         // --- Particle buffer (shared memory — ideal for Apple Silicon) ----------
@@ -250,8 +286,16 @@ void MetalBackend::DrawFrame(float deltaTime) {
         [computeEnc setComputePipelineState:impl_->computePSO];
         [computeEnc setBuffer:impl_->particleBuf offset:0 atIndex:0];
 
-        ComputeParams params{ deltaTime, 0.9f };
-        [computeEnc setBytes:&params length:sizeof(ComputeParams) atIndex:1];
+        if (config_.workload == Workload::SynthPeak) {
+            PeakParams params{ config_.peakIters, 0.9999f, 0.0001f, 0 };
+            [computeEnc setBytes:&params length:sizeof(PeakParams) atIndex:1];
+        } else if (config_.workload == Workload::NBody) {
+            NBodyParams params{ deltaTime, config_.softening, config_.particleCount, 0 };
+            [computeEnc setBytes:&params length:sizeof(NBodyParams) atIndex:1];
+        } else {
+            ComputeParams params{ deltaTime, 0.9f };
+            [computeEnc setBytes:&params length:sizeof(ComputeParams) atIndex:1];
+        }
 
         const MTLSize tgSize  = MTLSizeMake(kComputeWorkGroupSize, 1, 1);
         const MTLSize tgCount = MTLSizeMake(
@@ -262,12 +306,19 @@ void MetalBackend::DrawFrame(float deltaTime) {
         [computeCB commit];
 
         // --- Render pass --------------------------------------------------------
+        const bool render3d = (config_.workload == Workload::Render3D);
         MTLRenderPassDescriptor* rpDesc = [MTLRenderPassDescriptor new];
         rpDesc.colorAttachments[0].texture    = drawable.texture;
         rpDesc.colorAttachments[0].loadAction  = MTLLoadActionClear;
         rpDesc.colorAttachments[0].storeAction = MTLStoreActionStore;
         rpDesc.colorAttachments[0].clearColor  =
             MTLClearColorMake(0.04, 0.08, 0.14, 1.0);
+        if (render3d) {
+            rpDesc.depthAttachment.texture     = impl_->depthTex;
+            rpDesc.depthAttachment.loadAction  = MTLLoadActionClear;
+            rpDesc.depthAttachment.storeAction = MTLStoreActionDontCare;
+            rpDesc.depthAttachment.clearDepth  = 1.0;
+        }
 
         id<MTLCommandBuffer> renderCB =
             [impl_->commandQueue commandBuffer];
@@ -275,10 +326,33 @@ void MetalBackend::DrawFrame(float deltaTime) {
             [renderCB renderCommandEncoderWithDescriptor:rpDesc];
 
         [renderEnc setRenderPipelineState:impl_->renderPSO];
-        [renderEnc setVertexBuffer:impl_->particleBuf offset:0 atIndex:0];
-        [renderEnc drawPrimitives:MTLPrimitiveTypePoint
-                      vertexStart:0
-                      vertexCount:config_.particleCount];
+        if (config_.workload == Workload::StressFractal) {
+            fractalElapsed_ += deltaTime;
+            FractalParams fp{ fractalElapsed_, 1.0f, config_.fractalIter, 0 };
+            [renderEnc setFragmentBytes:&fp length:sizeof(FractalParams) atIndex:0];
+            [renderEnc drawPrimitives:MTLPrimitiveTypeTriangle
+                          vertexStart:0
+                          vertexCount:3];   // fullscreen triangle, no vertex buffer
+        } else if (render3d) {
+            [renderEnc setDepthStencilState:impl_->depthState];
+            fractalElapsed_ += deltaTime;
+            Render3DParams r3{};
+            const float aspect = (float)kWindowWidth / (float)kWindowHeight;
+            render3dCamera(fractalElapsed_, aspect, /*flipY*/false, /*z01*/true,
+                           r3.viewProj, r3.camRight, r3.camUp);
+            r3.pointSize = 0.02f;
+            [renderEnc setVertexBuffer:impl_->particleBuf offset:0 atIndex:1];
+            [renderEnc setVertexBytes:&r3 length:sizeof(Render3DParams) atIndex:2];
+            [renderEnc drawPrimitives:MTLPrimitiveTypeTriangle
+                          vertexStart:0
+                          vertexCount:6
+                        instanceCount:config_.particleCount];
+        } else {
+            [renderEnc setVertexBuffer:impl_->particleBuf offset:0 atIndex:0];
+            [renderEnc drawPrimitives:MTLPrimitiveTypePoint
+                          vertexStart:0
+                          vertexCount:config_.particleCount];
+        }
         [renderEnc endEncoding];
 
         [renderCB presentDrawable:drawable];

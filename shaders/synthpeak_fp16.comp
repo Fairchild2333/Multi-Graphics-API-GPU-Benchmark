@@ -1,0 +1,45 @@
+#version 450
+
+// Synthetic peak FP16 throughput. Uses packed f16vec2 accumulators so the
+// compiler can emit packed half FMAs (2 lanes/op) where the hardware supports
+// it. Requires the shaderFloat16 device feature (VK_KHR_shader_float16_int8).
+// Result is converted to fp32 for storage, so no 16-bit storage is needed.
+//
+// FLOPs = numThreads * iters * 8(vec2) * 2(lanes) * 2(fma).
+
+#extension GL_EXT_shader_explicit_arithmetic_types_float16 : require
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+layout(set = 0, binding = 0, std430) buffer OutBuf {
+    float data[];
+} outBuf;
+
+layout(push_constant) uniform PeakParams {
+    uint  iters;
+    float mul;
+    float add;
+} p;
+
+void main() {
+    uint gid = gl_GlobalInvocationID.x;
+    float16_t s = float16_t(float(gid & 1023u) * 0.001 + 0.5);
+    f16vec2 a0 = f16vec2(s, s + float16_t(0.1));
+    f16vec2 a1 = f16vec2(s + float16_t(0.2), s + float16_t(0.3));
+    f16vec2 a2 = f16vec2(s + float16_t(0.4), s + float16_t(0.5));
+    f16vec2 a3 = f16vec2(s + float16_t(0.6), s + float16_t(0.7));
+    f16vec2 a4 = f16vec2(s + float16_t(0.8), s + float16_t(0.9));
+    f16vec2 a5 = f16vec2(s + float16_t(1.0), s + float16_t(1.1));
+    f16vec2 a6 = f16vec2(s + float16_t(1.2), s + float16_t(1.3));
+    f16vec2 a7 = f16vec2(s + float16_t(1.4), s + float16_t(1.5));
+    f16vec2 m = f16vec2(float16_t(p.mul));
+    f16vec2 c = f16vec2(float16_t(p.add));
+
+    for (uint i = 0u; i < p.iters; ++i) {
+        a0 = a0 * m + c; a1 = a1 * m + c; a2 = a2 * m + c; a3 = a3 * m + c;
+        a4 = a4 * m + c; a5 = a5 * m + c; a6 = a6 * m + c; a7 = a7 * m + c;
+    }
+
+    f16vec2 sum = a0 + a1 + a2 + a3 + a4 + a5 + a6 + a7;
+    outBuf.data[gid] = float(sum.x + sum.y);
+}

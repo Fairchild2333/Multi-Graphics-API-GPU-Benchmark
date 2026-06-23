@@ -1,6 +1,7 @@
 #ifdef HAVE_DX11
 
 #include "dx11_backend.h"
+#include "mini_mat.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>
@@ -312,17 +313,55 @@ void DX11Backend::CreateRenderTarget() {
                   "GetBuffer failed");
     ThrowIfFailed(device_->CreateRenderTargetView(backBuffer.Get(), nullptr, &rtv_),
                   "CreateRenderTargetView failed");
+
+    // Render3D needs a depth buffer for occlusion.
+    if (config_.workload == Workload::Render3D) {
+        D3D11_TEXTURE2D_DESC dd{};
+        dd.Width      = kWindowWidth;
+        dd.Height     = kWindowHeight;
+        dd.MipLevels  = 1;
+        dd.ArraySize  = 1;
+        dd.Format     = DXGI_FORMAT_D32_FLOAT;
+        dd.SampleDesc.Count = 1;
+        dd.Usage      = D3D11_USAGE_DEFAULT;
+        dd.BindFlags  = D3D11_BIND_DEPTH_STENCIL;
+        ThrowIfFailed(device_->CreateTexture2D(&dd, nullptr, &depthTex_),
+                      "CreateTexture2D (depth) failed");
+        ThrowIfFailed(device_->CreateDepthStencilView(depthTex_.Get(), nullptr, &depthView_),
+                      "CreateDepthStencilView failed");
+
+        D3D11_DEPTH_STENCIL_DESC dsd{};
+        dsd.DepthEnable    = TRUE;
+        dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+        dsd.DepthFunc      = D3D11_COMPARISON_LESS;
+        ThrowIfFailed(device_->CreateDepthStencilState(&dsd, &depthState_),
+                      "CreateDepthStencilState failed");
+    }
 }
 
 void DX11Backend::CreateShaders() {
-    auto csBlob = CompileShader(shaderDir_ + "compute.hlsl",    "CSMain", "cs_5_0");
+    std::string csFile;
+    if (config_.workload == Workload::SynthPeak) {
+        if (config_.peakPrecision == Precision::FP16)
+            throw std::runtime_error("SynthPeak FP16 is not supported on the DX backend (FXC); use Vulkan/Metal");
+        csFile = (config_.peakPrecision == Precision::FP64)  ? "synthpeak_fp64.hlsl"
+               : (config_.peakPrecision == Precision::INT32) ? "synthpeak_int32.hlsl"
+               :                                               "synthpeak_fp32.hlsl";
+    } else {
+        csFile = (config_.workload == Workload::NBody) ? "nbody.hlsl" : "compute.hlsl";
+    }
+    auto csBlob = CompileShader(shaderDir_ + csFile, "CSMain", "cs_5_0");
     ThrowIfFailed(device_->CreateComputeShader(
         csBlob->GetBufferPointer(), csBlob->GetBufferSize(), nullptr, &computeShader_),
         "CreateComputeShader failed");
 
     if (!config_.headless) {
-        auto vsBlob = CompileShader(shaderDir_ + "particle_vs.hlsl","VSMain", "vs_5_0");
-        auto psBlob = CompileShader(shaderDir_ + "particle_ps.hlsl","PSMain", "ps_5_0");
+        const bool fractal  = (config_.workload == Workload::StressFractal);
+        const bool render3d = (config_.workload == Workload::Render3D);
+        const char* vsFile = fractal ? "fractal.hlsl" : render3d ? "render3d.hlsl" : "particle_vs.hlsl";
+        const char* psFile = fractal ? "fractal.hlsl" : render3d ? "render3d.hlsl" : "particle_ps.hlsl";
+        auto vsBlob = CompileShader(shaderDir_ + vsFile, "VSMain", "vs_5_0");
+        auto psBlob = CompileShader(shaderDir_ + psFile, "PSMain", "ps_5_0");
 
         ThrowIfFailed(device_->CreateVertexShader(
             vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &vertexShader_),
@@ -332,6 +371,18 @@ void DX11Backend::CreateShaders() {
             psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &pixelShader_),
             "CreatePixelShader failed");
 
+        if (render3d) {
+            // Slot 0 = quad corner (per-vertex); slot 1 = particle (per-instance).
+            D3D11_INPUT_ELEMENT_DESC layout[] = {
+                { "CORNER",   0, DXGI_FORMAT_R32G32_FLOAT,       0,  0, D3D11_INPUT_PER_VERTEX_DATA,   0 },
+                { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1,  0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+                { "VELOCITY", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+            };
+            ThrowIfFailed(device_->CreateInputLayout(
+                layout, _countof(layout),
+                vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &inputLayout_),
+                "CreateInputLayout (render3d) failed");
+        } else if (!fractal) {
         D3D11_INPUT_ELEMENT_DESC layout[] = {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
             { "VELOCITY", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -340,6 +391,7 @@ void DX11Backend::CreateShaders() {
             layout, _countof(layout),
             vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &inputLayout_),
             "CreateInputLayout failed");
+        }
 
         // Blend state (alpha blending)
         D3D11_BLEND_DESC bd{};
@@ -395,6 +447,26 @@ void DX11Backend::CreateParticleBuffers() {
         vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
         ThrowIfFailed(device_->CreateBuffer(&vbd, &initData, &vertexBuffer_),
                       "CreateBuffer (vertex) failed");
+    }
+
+    // Render3D: static quad VBO + dynamic camera cbuffer.
+    if (config_.workload == Workload::Render3D && !config_.headless) {
+        const float quad[12] = { -1,-1, 1,-1, 1,1, -1,-1, 1,1, -1,1 };
+        D3D11_BUFFER_DESC qd{};
+        qd.ByteWidth = sizeof(quad);
+        qd.Usage     = D3D11_USAGE_IMMUTABLE;
+        qd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        D3D11_SUBRESOURCE_DATA qinit{}; qinit.pSysMem = quad;
+        ThrowIfFailed(device_->CreateBuffer(&qd, &qinit, &quadBuffer_),
+                      "CreateBuffer (quad) failed");
+
+        D3D11_BUFFER_DESC ccb{};
+        ccb.ByteWidth      = sizeof(Render3DParams);   // 112, multiple of 16
+        ccb.Usage          = D3D11_USAGE_DYNAMIC;
+        ccb.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
+        ccb.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        ThrowIfFailed(device_->CreateBuffer(&ccb, nullptr, &cam3dCB_),
+                      "CreateBuffer (cam3d) failed");
     }
 
     std::cout << "Created particle buffers: " << config_.particleCount << " particles\n";
@@ -525,23 +597,34 @@ void DX11Backend::DrawFrame(float deltaTime) {
     if (timestampsSupported_)
         context_->End(timestampQueries_[slot][0].Get());
 
-    // Update compute params
-    D3D11_MAPPED_SUBRESOURCE mapped{};
-    context_->Map(computeParamsCB_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-    ComputeParams params{ deltaTime, 0.9f };
-    std::memcpy(mapped.pData, &params, sizeof(params));
-    context_->Unmap(computeParamsCB_.Get(), 0);
+    // Compute pass — skipped entirely for the fractal (fragment-only) workload.
+    if (config_.workload != Workload::StressFractal) {
+        // Update compute params
+        D3D11_MAPPED_SUBRESOURCE mapped{};
+        context_->Map(computeParamsCB_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+        if (config_.workload == Workload::SynthPeak) {
+            PeakParams params{ config_.peakIters, 0.9999f, 0.0001f, 0 };
+            std::memcpy(mapped.pData, &params, sizeof(params));
+        } else if (config_.workload == Workload::NBody) {
+            NBodyParams params{ deltaTime, config_.softening, config_.particleCount, 0 };
+            std::memcpy(mapped.pData, &params, sizeof(params));
+        } else {
+            ComputeParams params{ deltaTime, 0.9f };
+            std::memcpy(mapped.pData, &params, sizeof(params));
+        }
+        context_->Unmap(computeParamsCB_.Get(), 0);
 
-    context_->CSSetShader(computeShader_.Get(), nullptr, 0);
-    ID3D11UnorderedAccessView* uavs[] = { computeUAV_.Get() };
-    context_->CSSetUnorderedAccessViews(0, 1, uavs, nullptr);
-    ID3D11Buffer* cbs[] = { computeParamsCB_.Get() };
-    context_->CSSetConstantBuffers(0, 1, cbs);
-    context_->Dispatch(config_.particleCount / kComputeWorkGroupSize, 1, 1);
+        context_->CSSetShader(computeShader_.Get(), nullptr, 0);
+        ID3D11UnorderedAccessView* uavs[] = { computeUAV_.Get() };
+        context_->CSSetUnorderedAccessViews(0, 1, uavs, nullptr);
+        ID3D11Buffer* cbs[] = { computeParamsCB_.Get() };
+        context_->CSSetConstantBuffers(0, 1, cbs);
+        context_->Dispatch(config_.particleCount / kComputeWorkGroupSize, 1, 1);
 
-    // Unbind UAV
-    ID3D11UnorderedAccessView* nullUav[] = { nullptr };
-    context_->CSSetUnorderedAccessViews(0, 1, nullUav, nullptr);
+        // Unbind UAV
+        ID3D11UnorderedAccessView* nullUav[] = { nullptr };
+        context_->CSSetUnorderedAccessViews(0, 1, nullUav, nullptr);
+    }
 
     if (timestampsSupported_)
         context_->End(timestampQueries_[slot][1].Get());
@@ -552,6 +635,86 @@ void DX11Backend::DrawFrame(float deltaTime) {
             context_->End(timestampQueries_[slot][2].Get());
             context_->End(timestampQueries_[slot][3].Get());
         }
+    } else if (config_.workload == Workload::StressFractal) {
+        // --- Fractal stress pass (fullscreen triangle, no compute/VB) ---
+        if (timestampsSupported_)
+            context_->End(timestampQueries_[slot][2].Get());
+
+        const float clearColor[] = { 0.04f, 0.08f, 0.14f, 1.0f };
+        context_->ClearRenderTargetView(rtv_.Get(), clearColor);
+        context_->OMSetRenderTargets(1, rtv_.GetAddressOf(), nullptr);
+        context_->RSSetState(rasterizerState_.Get());
+
+        D3D11_VIEWPORT vp{ 0, 0, static_cast<float>(kWindowWidth),
+                           static_cast<float>(kWindowHeight), 0.0f, 1.0f };
+        context_->RSSetViewports(1, &vp);
+
+        // Reuse computeParamsCB_ (16 bytes) for the pixel-shader params.
+        fractalElapsed_ += deltaTime;
+        D3D11_MAPPED_SUBRESOURCE fm{};
+        context_->Map(computeParamsCB_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &fm);
+        FractalParams fp{ fractalElapsed_, 1.0f, config_.fractalIter, 0 };
+        std::memcpy(fm.pData, &fp, sizeof(fp));
+        context_->Unmap(computeParamsCB_.Get(), 0);
+
+        context_->IASetInputLayout(nullptr);
+        context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        context_->VSSetShader(vertexShader_.Get(), nullptr, 0);
+        context_->PSSetShader(pixelShader_.Get(), nullptr, 0);
+        ID3D11Buffer* pscb[] = { computeParamsCB_.Get() };
+        context_->PSSetConstantBuffers(0, 1, pscb);
+        context_->Draw(3, 0);
+
+        if (timestampsSupported_)
+            context_->End(timestampQueries_[slot][3].Get());
+    } else if (config_.workload == Workload::Render3D) {
+        // Copy compute buffer (updated particles) to the per-instance buffer.
+        context_->CopyResource(vertexBuffer_.Get(), computeBuffer_.Get());
+
+        if (timestampsSupported_)
+            context_->End(timestampQueries_[slot][2].Get());
+
+        const float clearColor[] = { 0.04f, 0.08f, 0.14f, 1.0f };
+        context_->ClearRenderTargetView(rtv_.Get(), clearColor);
+        context_->ClearDepthStencilView(depthView_.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+        context_->OMSetRenderTargets(1, rtv_.GetAddressOf(), depthView_.Get());
+        context_->OMSetDepthStencilState(depthState_.Get(), 0);
+        context_->OMSetBlendState(blendState_.Get(), nullptr, 0xFFFFFFFF);
+        context_->RSSetState(rasterizerState_.Get());
+
+        D3D11_VIEWPORT vp{ 0, 0, static_cast<float>(kWindowWidth),
+                           static_cast<float>(kWindowHeight), 0.0f, 1.0f };
+        context_->RSSetViewports(1, &vp);
+
+        // Update camera cbuffer.
+        fractalElapsed_ += deltaTime;
+        Render3DParams r3{};
+        const float aspect = static_cast<float>(kWindowWidth) / static_cast<float>(kWindowHeight);
+        render3dCamera(fractalElapsed_, aspect, /*flipY*/false, /*z01*/true,
+                       r3.viewProj, r3.camRight, r3.camUp);
+        r3.pointSize = 0.02f;
+        D3D11_MAPPED_SUBRESOURCE cm{};
+        context_->Map(cam3dCB_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &cm);
+        std::memcpy(cm.pData, &r3, sizeof(r3));
+        context_->Unmap(cam3dCB_.Get(), 0);
+
+        context_->IASetInputLayout(inputLayout_.Get());
+        ID3D11Buffer* vbs[2] = { quadBuffer_.Get(), vertexBuffer_.Get() };
+        UINT strides[2] = { sizeof(float) * 2, sizeof(Particle) };
+        UINT offsets[2] = { 0, 0 };
+        context_->IASetVertexBuffers(0, 2, vbs, strides, offsets);
+        context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+        context_->VSSetShader(vertexShader_.Get(), nullptr, 0);
+        context_->VSSetConstantBuffers(0, 1, cam3dCB_.GetAddressOf());
+        context_->PSSetShader(pixelShader_.Get(), nullptr, 0);
+        context_->DrawInstanced(6, config_.particleCount, 0, 0);
+
+        // Restore default (no depth) for any other passes.
+        context_->OMSetDepthStencilState(nullptr, 0);
+
+        if (timestampsSupported_)
+            context_->End(timestampQueries_[slot][3].Get());
     } else {
         // Copy compute buffer to vertex buffer
         context_->CopyResource(vertexBuffer_.Get(), computeBuffer_.Get());

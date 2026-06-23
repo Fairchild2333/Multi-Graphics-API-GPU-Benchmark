@@ -77,6 +77,14 @@ private:
     VkBuffer       particleBuffer_       = VK_NULL_HANDLE;
     VkDeviceMemory particleBufferMemory_ = VK_NULL_HANDLE;
 
+    // Render3D resources (true-3D billboard pass with depth)
+    VkBuffer       quadBuffer_           = VK_NULL_HANDLE;
+    VkDeviceMemory quadBufferMemory_     = VK_NULL_HANDLE;
+    VkImage        depthImage_           = VK_NULL_HANDLE;
+    VkDeviceMemory depthImageMemory_     = VK_NULL_HANDLE;
+    VkImageView    depthImageView_       = VK_NULL_HANDLE;
+    VkFormat       depthFormat_          = VK_FORMAT_D32_SFLOAT;
+
     VkCommandPool              commandPool_ = VK_NULL_HANDLE;
     std::vector<VkCommandBuffer> commandBuffers_;
     std::vector<VkCommandBuffer> headlessCmdBuffers_;
@@ -86,6 +94,7 @@ private:
     std::vector<VkFence>     inFlightFences_;
     std::vector<VkFence>                        imagesInFlight_;
     std::uint32_t currentFrame_ = 0;
+    float         fractalElapsed_ = 0.0f;   // StressFractal palette animation time
 
     static constexpr std::uint32_t kTimestampsPerFrame = 4;
     VkQueryPool timestampQueryPool_ = VK_NULL_HANDLE;
@@ -119,6 +128,10 @@ private:
     void CreateLogicalDevice();
     void CreateParticleBuffer();
     void CreateGraphicsPipeline();
+    void CreateFractalPipeline();
+    void CreateRender3DPipeline();
+    void CreateDepthResources();
+    void CreateQuadBuffer();
     void CreateComputeDescriptorSetLayout();
     void CreateComputeDescriptorResources();
     void CreateComputePipeline();

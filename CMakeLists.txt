@@ -152,6 +152,15 @@ if(ENABLE_VULKAN AND Vulkan_FOUND)
             ${CMAKE_SOURCE_DIR}/shaders/particle.vert
             ${CMAKE_SOURCE_DIR}/shaders/particle.frag
             ${CMAKE_SOURCE_DIR}/shaders/compute.comp
+            ${CMAKE_SOURCE_DIR}/shaders/nbody.comp
+            ${CMAKE_SOURCE_DIR}/shaders/fractal.vert
+            ${CMAKE_SOURCE_DIR}/shaders/fractal.frag
+            ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp32.comp
+            ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp64.comp
+            ${CMAKE_SOURCE_DIR}/shaders/synthpeak_int32.comp
+            ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp16.comp
+            ${CMAKE_SOURCE_DIR}/shaders/render3d.vert
+            ${CMAKE_SOURCE_DIR}/shaders/render3d.frag
         )
         set(SPV_OUTPUTS "")
         foreach(SHADER ${GLSL_SOURCES})
@@ -159,7 +168,7 @@ if(ENABLE_VULKAN AND Vulkan_FOUND)
             set(SPV_FILE ${CMAKE_BINARY_DIR}/${SHADER_NAME}.spv)
             add_custom_command(
                 OUTPUT  ${SPV_FILE}
-                COMMAND ${GLSLC_EXECUTABLE} ${SHADER} -o ${SPV_FILE}
+                COMMAND ${GLSLC_EXECUTABLE} --target-env=vulkan1.1 ${SHADER} -o ${SPV_FILE}
                 DEPENDS ${SHADER}
                 COMMENT "Compiling ${SHADER_NAME} -> SPIR-V"
             )
@@ -182,6 +191,12 @@ endif()
 if((ENABLE_DX12 AND WIN32) OR (ENABLE_DX11 AND WIN32))
     set(HLSL_SOURCES
         ${CMAKE_SOURCE_DIR}/shaders/compute.hlsl
+        ${CMAKE_SOURCE_DIR}/shaders/nbody.hlsl
+        ${CMAKE_SOURCE_DIR}/shaders/fractal.hlsl
+        ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp32.hlsl
+        ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp64.hlsl
+        ${CMAKE_SOURCE_DIR}/shaders/synthpeak_int32.hlsl
+        ${CMAKE_SOURCE_DIR}/shaders/render3d.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/particle_vs.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/particle_ps.hlsl
     )
@@ -189,6 +204,28 @@ if((ENABLE_DX12 AND WIN32) OR (ENABLE_DX11 AND WIN32))
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HLSL_SOURCES} $<TARGET_FILE_DIR:gpu_benchmark>
         COMMENT "Copying HLSL shader files next to executable"
     )
+endif()
+
+# ---- DX12 FP16 SynthPeak: precompile to signed DXIL (.cso) via the Windows SDK
+#      dxc.exe (FXC has no true float16_t; SM 6.2 + DXC is required). The SDK dxc
+#      sits next to dxil.dll so the blob is signed and accepted by D3D12. ----
+if(ENABLE_DX12 AND WIN32)
+    file(GLOB _sdk_dxc
+        "C:/Program Files (x86)/Windows Kits/10/bin/*/x64/dxc.exe"
+        "C:/Program Files/Windows Kits/10/bin/*/x64/dxc.exe")
+    if(_sdk_dxc)
+        list(SORT _sdk_dxc)
+        list(GET _sdk_dxc -1 SDK_DXC)
+        message(STATUS "DX12 FP16: using DXC ${SDK_DXC}")
+        add_custom_command(TARGET gpu_benchmark POST_BUILD
+            COMMAND "${SDK_DXC}" -T cs_6_2 -E CSMain -enable-16bit-types
+                    -Fo $<TARGET_FILE_DIR:gpu_benchmark>/synthpeak_fp16.cso
+                    ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp16.hlsl
+            COMMENT "Compiling synthpeak_fp16.hlsl -> signed DXIL (.cso) for DX12 FP16"
+        )
+    else()
+        message(STATUS "DX12 FP16: Windows SDK dxc.exe not found -- FP16 SynthPeak unavailable on DX12")
+    endif()
 endif()
 
 # ---- Copy Metal shader source file next to executable (macOS) ----
@@ -205,8 +242,17 @@ endif()
 if(ENABLE_OPENGL AND OpenGL_FOUND)
     set(GL_SHADERS
         ${CMAKE_SOURCE_DIR}/shaders/compute_gl.comp
+        ${CMAKE_SOURCE_DIR}/shaders/nbody_gl.comp
         ${CMAKE_SOURCE_DIR}/shaders/particle_gl.vert
         ${CMAKE_SOURCE_DIR}/shaders/particle_gl.frag
+        ${CMAKE_SOURCE_DIR}/shaders/fractal_gl.vert
+        ${CMAKE_SOURCE_DIR}/shaders/fractal_gl.frag
+        ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp32_gl.comp
+        ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp64_gl.comp
+        ${CMAKE_SOURCE_DIR}/shaders/synthpeak_int32_gl.comp
+        ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp16_gl.comp
+        ${CMAKE_SOURCE_DIR}/shaders/render3d_gl.vert
+        ${CMAKE_SOURCE_DIR}/shaders/render3d_gl.frag
     )
     add_custom_command(TARGET gpu_benchmark POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GL_SHADERS} $<TARGET_FILE_DIR:gpu_benchmark>

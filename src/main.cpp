@@ -563,6 +563,36 @@ int main(int argc, char* argv[]) {
             const std::uint32_t wg = gpu_bench::kComputeWorkGroupSize;
             benchCfg.particleCount = ((n + wg - 1) / wg) * wg;
             benchCfg.particlesOverridden = true;
+        } else if (std::strcmp(argv[i], "--workload") == 0 && i + 1 < argc) {
+            std::string w = argv[++i];
+            if (w == "nbody")        benchCfg.workload = gpu_bench::Workload::NBody;
+            else if (w == "stream")  benchCfg.workload = gpu_bench::Workload::Stream;
+            else if (w == "stress" || w == "fractal")
+                                     benchCfg.workload = gpu_bench::Workload::StressFractal;
+            else if (w == "synthpeak" || w == "peak")
+                                     benchCfg.workload = gpu_bench::Workload::SynthPeak;
+            else if (w == "render3d" || w == "3d")
+                                     benchCfg.workload = gpu_bench::Workload::Render3D;
+            else std::cerr << "Unknown workload '" << w << "' (use stream|nbody|stress|synthpeak|render3d)\n";
+        } else if (std::strcmp(argv[i], "--precision") == 0 && i + 1 < argc) {
+            std::string pr = argv[++i];
+            if (pr == "fp32")       benchCfg.peakPrecision = gpu_bench::Precision::FP32;
+            else if (pr == "fp16")  benchCfg.peakPrecision = gpu_bench::Precision::FP16;
+            else if (pr == "fp64")  benchCfg.peakPrecision = gpu_bench::Precision::FP64;
+            else if (pr == "int32") benchCfg.peakPrecision = gpu_bench::Precision::INT32;
+            else std::cerr << "Unknown precision '" << pr << "' (use fp32|fp16|fp64|int32)\n";
+        } else if (std::strcmp(argv[i], "--iter") == 0 && i + 1 < argc) {
+            auto n = static_cast<std::uint32_t>(std::stoi(argv[++i]));
+            if (n == 0) n = 1;
+            benchCfg.fractalIter = n;   // fractal per-pixel iterations
+            benchCfg.peakIters   = n;   // synthpeak loop passes (same flag)
+        } else if (std::strcmp(argv[i], "--bodies") == 0 && i + 1 < argc) {
+            auto n = static_cast<std::uint32_t>(std::stoi(argv[++i]));
+            const std::uint32_t wg = gpu_bench::kComputeWorkGroupSize;
+            benchCfg.workload = gpu_bench::Workload::NBody;
+            benchCfg.particleCount = ((n + wg - 1) / wg) * wg;
+            if (benchCfg.particleCount == 0) benchCfg.particleCount = wg;
+            benchCfg.particlesOverridden = true;
         } else if (std::strcmp(argv[i], "--results") == 0) {
             auto results = gpu_bench::LoadResults();
             gpu_bench::PrintResultsTable(results);
@@ -629,6 +659,10 @@ int main(int argc, char* argv[]) {
                       << "  --flights <N>                       Set frames-in-flight count (default: 2, max: 16)\n"
                       << "  --headless                           Pure compute mode (no window/rendering/present)\n"
                       << "  --particles <count>                 Particle count (skips difficulty menu, rounded to 256)\n"
+                      << "  --workload <stream|nbody|stress|synthpeak|render3d>  bandwidth / compute / fractal fill / peak FLOPS / true-3D render\n"
+                      << "  --bodies <count>                    N-body body count (implies --workload nbody; default 65536)\n"
+                      << "  --iter <count>                      Fractal per-pixel iters / SynthPeak loop passes\n"
+                      << "  --precision <fp32|fp16|fp64|int32>  SynthPeak data type (default fp32)\n"
                       << "  --time <seconds>                    Auto-stop after N seconds (default: 15)\n"
                       << "  --no-time-limit                     Run until window is closed\n"
                       << "  --benchmark [frames]                Run benchmark (default: 2000 frames), then exit\n"
@@ -661,6 +695,69 @@ int main(int argc, char* argv[]) {
             std::cout << '\n';
             return 0;
         }
+    }
+
+    // ---- N-body workload normalisation ----
+    // N-body is O(N^2): never inherit the 1M Stream default. Pick a sane body
+    // count and skip the difficulty menu when the user didn't set one.
+    if (benchCfg.workload == gpu_bench::Workload::NBody) {
+        if (!benchCfg.particlesOverridden) {
+            benchCfg.particleCount = gpu_bench::kNBodyDefaultBodies;
+            benchCfg.difficultyLabel = "N-body 64K";
+            benchCfg.particlesOverridden = true;
+        } else {
+            benchCfg.difficultyLabel = "N-body";
+        }
+        if (benchCfg.particleCount > 262144u) {
+            std::cerr << "[warn] N-body is O(N^2): " << benchCfg.particleCount
+                      << " bodies may run very slowly or trigger a GPU TDR/watchdog reset.\n";
+        }
+    }
+
+    // ---- Fractal stress workload normalisation ----
+    // It is a fragment-only render pass: needs a window (no headless), and the
+    // particle buffer is unused so keep it tiny.
+    if (benchCfg.workload == gpu_bench::Workload::StressFractal) {
+        if (benchCfg.headless) {
+            std::cerr << "[warn] Stress/Fractal requires rendering; ignoring --headless.\n";
+            benchCfg.headless = false;
+        }
+        benchCfg.particleCount = gpu_bench::kComputeWorkGroupSize;  // unused; minimal alloc
+        benchCfg.particlesOverridden = true;
+        benchCfg.difficultyLabel = "Fractal";
+    }
+
+    // ---- SynthPeak workload normalisation ----
+    // Pure compute; thread count = particleCount (reuses the buffer as scratch
+    // output). Headless by default, EXCEPT DX11 whose driver never resolves
+    // timestamp queries headless — it runs windowed so GPU timing is available
+    // (it harmlessly renders the scratch buffer as points).
+    if (benchCfg.workload == gpu_bench::Workload::SynthPeak) {
+        benchCfg.headless = (backend != "dx11");
+        if (!benchCfg.particlesOverridden) {
+            benchCfg.particleCount = gpu_bench::kSynthPeakDefaultThreads;
+            benchCfg.particlesOverridden = true;
+        }
+        benchCfg.difficultyLabel =
+            (benchCfg.peakPrecision == gpu_bench::Precision::FP64)  ? "Peak FP64"
+          : (benchCfg.peakPrecision == gpu_bench::Precision::FP16)  ? "Peak FP16"
+          : (benchCfg.peakPrecision == gpu_bench::Precision::INT32) ? "Peak INT32"
+          :                                                           "Peak FP32";
+    }
+
+    // ---- Render3D workload normalisation ----
+    // True-3D billboard rendering needs a window (no headless); moderate default
+    // instance count to keep overdraw reasonable.
+    if (benchCfg.workload == gpu_bench::Workload::Render3D) {
+        if (benchCfg.headless) {
+            std::cerr << "[warn] Render3D requires rendering; ignoring --headless.\n";
+            benchCfg.headless = false;
+        }
+        if (!benchCfg.particlesOverridden) {
+            benchCfg.particleCount = gpu_bench::kRender3DDefaultParticles;
+            benchCfg.particlesOverridden = true;
+        }
+        benchCfg.difficultyLabel = "3D";
     }
 
     const std::string shaderDir = ExeDirectory(argv[0]);

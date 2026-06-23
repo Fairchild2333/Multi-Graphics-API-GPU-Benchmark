@@ -75,6 +75,12 @@ private:
     ComPtr<ID3D12Resource>          particleUpload_;
     D3D12_VERTEX_BUFFER_VIEW        vbView_{};
 
+    // Render3D resources (instanced billboards with depth)
+    ComPtr<ID3D12Resource>          quadBuffer_;
+    D3D12_VERTEX_BUFFER_VIEW        quadView_{};
+    ComPtr<ID3D12DescriptorHeap>    dsvHeap_;
+    ComPtr<ID3D12Resource>          depthBuffer_;
+
     ComPtr<ID3D12QueryHeap>         timestampHeap_;
     ComPtr<ID3D12Resource>          timestampReadback_;
     UINT64                          gpuFrequency_ = 0;
@@ -86,6 +92,7 @@ private:
     std::vector<UINT64>             frameFenceValues_;
     UINT                            frameIndex_ = 0;
     bool                            tearingSupported_ = false;
+    float                           fractalElapsed_ = 0.0f;   // StressFractal palette time
 };
 
 }  // namespace gpu_bench

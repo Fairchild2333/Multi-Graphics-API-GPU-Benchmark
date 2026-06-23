@@ -1,0 +1,69 @@
+#version 450
+
+// All-pairs gravitational N-body compute shader (compute-bound subtest).
+//
+// Each invocation owns one body and accumulates the gravitational pull from
+// every other body, then integrates (semi-implicit Euler). Positions of a
+// tile of bodies are cooperatively staged into shared memory so each global
+// position is read once per tile instead of once per pair — this is what
+// makes the kernel ALU/SFU-bound (inversesqrt) rather than bandwidth-bound.
+//
+// The SSBO layout is identical to the Stream kernel (Particle = 2 x vec4),
+// so this reuses the same particle buffer — no extra buffers/descriptors.
+//
+// NOTE: this is a throughput benchmark, not a physically exact integrator.
+// Bodies are updated in place, so positions read across workgroups within a
+// single dispatch may be a mix of old/new values. That does not change the
+// amount of work performed, which is what the GPU timestamps measure.
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+struct Particle {
+    vec4 position;   // xyz used; w spare
+    vec4 velocity;   // xyz used; w spare
+};
+
+layout(set = 0, binding = 0, std430) buffer ParticleBuffer {
+    Particle particles[];
+} particleBuffer;
+
+layout(push_constant) uniform NBodyParams {
+    float deltaTime;
+    float softening;
+    uint  numBodies;
+} params;
+
+const uint TILE = 256u;   // == local_size_x == kComputeWorkGroupSize
+shared vec4 sharedPos[TILE];
+
+void main() {
+    uint gid = gl_GlobalInvocationID.x;
+    uint lid = gl_LocalInvocationID.x;
+
+    vec3  myPos = particleBuffer.particles[gid].position.xyz;
+    vec3  acc   = vec3(0.0);
+    float soft2 = params.softening * params.softening;
+
+    uint tiles = params.numBodies / TILE;
+    for (uint t = 0u; t < tiles; ++t) {
+        // Cooperatively stage one tile of positions into shared memory.
+        sharedPos[lid] = particleBuffer.particles[t * TILE + lid].position;
+        barrier();
+
+        for (uint j = 0u; j < TILE; ++j) {
+            vec3  d        = sharedPos[j].xyz - myPos;
+            float distSq   = dot(d, d) + soft2;
+            float invDist  = inversesqrt(distSq);
+            float invDist3 = invDist * invDist * invDist;
+            acc += d * invDist3;            // unit mass
+        }
+        barrier();
+    }
+
+    // Semi-implicit Euler integration.
+    vec3 vel = particleBuffer.particles[gid].velocity.xyz + acc * params.deltaTime;
+    vec3 pos = myPos + vel * params.deltaTime;
+
+    particleBuffer.particles[gid].velocity.xyz = vel;
+    particleBuffer.particles[gid].position.xyz = pos;
+}

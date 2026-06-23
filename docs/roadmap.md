@@ -18,6 +18,17 @@
 - [x] Configurable frames-in-flight (`--flights N`) — test swapchain depth impact
 - [x] Configurable particle count — preset sizes (65K–16M) or custom values
 - [x] RX 9070 XT (RDNA 4) benchmarks — cross-API, particle scaling, headless analysis
+- [x] Multi-workload suite — five cross-API axes selectable via `--workload`:
+      `stream` (bandwidth, GB/s), `nbody` (achievable compute, GFLOP/s),
+      `stress` (fractal fill, G-iter/s), `synthpeak` (peak FLOPS by precision
+      fp32/fp16/fp64/int32), `render3d` (true-3D instanced billboards with
+      depth, MQuad/s). Per-axis `score`/`scoreUnit` persisted to results;
+      cross-API charts via `scripts/plot_workloads.py`. See
+      [`benchmark-workload-suite.md`](benchmark-workload-suite.md).
+      (Vulkan/DX12/DX11/OpenGL implemented & validated on RTX 5090; Metal
+      written, untested — no macOS. FP16 synthpeak works on Vulkan,
+      DX12 (precompiled SM 6.2 DXIL via SDK DXC), OpenGL (GL_NV_gpu_shader5,
+      NVIDIA) and Metal; impossible on DX11 (SM 5 cap). FP64 unavailable on Metal.)
 
 ### Benchmark Result History
 

@@ -139,6 +139,7 @@ static std::string ResultToJson(const BenchmarkResult& r, int indent = 4) {
 
     str("id",          r.id);
     str("timestamp",   r.timestamp);
+    str("workload",       r.workload);
     str("graphicsApi",    r.graphicsApi);
     str("deviceName",     r.deviceName);
     str("driverVersion",  r.driverVersion);
@@ -173,6 +174,9 @@ static std::string ResultToJson(const BenchmarkResult& r, int indent = 4) {
     dbl("avgFrameTimeMs", r.avgFrameTimeMs);
     dbl("gpuUtilisation", r.gpuUtilisation, 1);
 
+    dbl("score",          r.score, 3);
+    str("scoreUnit",      r.scoreUnit);
+    str("precision",      r.precision);
     o << pad << "  \"bottleneck\": \"" << JsonEscape(r.bottleneck) << "\"\n";
     o << pad << "}";
     return o.str();
@@ -222,6 +226,8 @@ static BenchmarkResult JsonToResult(const std::string& json) {
 
     r.id            = findStr("id");
     r.timestamp     = findStr("timestamp");
+    r.workload       = findStr("workload");
+    if (r.workload.empty()) r.workload = "stream";   // default for old results
     r.graphicsApi    = findStr("graphicsApi");
     r.deviceName     = findStr("deviceName");
     r.driverVersion  = findStr("driverVersion");
@@ -256,6 +262,9 @@ static BenchmarkResult JsonToResult(const std::string& json) {
     r.avgFps         = findNum("avgFps");
     r.avgFrameTimeMs = findNum("avgFrameTimeMs");
     r.gpuUtilisation = findNum("gpuUtilisation");
+    r.score          = findNum("score");
+    r.scoreUnit      = findStr("scoreUnit");
+    r.precision      = findStr("precision");
     r.bottleneck     = findStr("bottleneck");
 
     return r;

@@ -67,6 +67,13 @@ private:
     ComPtr<ID3D11BlendState>       blendState_;
     ComPtr<ID3D11RasterizerState>  rasterizerState_;
 
+    // Render3D resources (instanced billboards with depth)
+    ComPtr<ID3D11Buffer>             quadBuffer_;
+    ComPtr<ID3D11Buffer>             cam3dCB_;
+    ComPtr<ID3D11Texture2D>          depthTex_;
+    ComPtr<ID3D11DepthStencilView>   depthView_;
+    ComPtr<ID3D11DepthStencilState>  depthState_;
+
     // Timestamp queries -- deeper ring buffer so slow GPUs have time to finish
     static constexpr UINT kTimestampsPerFrame = 4;
     static constexpr UINT kTimestampSlotCount = 8;
@@ -79,6 +86,7 @@ private:
     UINT disjointFailCount_      = 0;
     UINT64 lastGoodFrequency_    = 0;
     std::uint32_t currentFrame_  = 0;
+    float fractalElapsed_        = 0.0f;   // StressFractal palette time
 };
 
 }  // namespace gpu_bench

@@ -302,10 +302,13 @@ void AppBase::GenerateInitialParticles() {
     std::uniform_real_distribution<float> posDist(-0.8f, 0.8f);
     std::uniform_real_distribution<float> velDist(-0.2f, 0.2f);
 
+    // Render3D spreads particles through a 3D volume (z populated); the other
+    // workloads keep the original planar (z = 0) layout.
+    const bool volume3d = (config_.workload == Workload::Render3D);
     for (std::uint32_t i = 0; i < config_.particleCount; ++i) {
         initialParticles_[i] = {
-            posDist(rng), posDist(rng), 0.0f, 1.0f,
-            velDist(rng), velDist(rng), 0.0f, 0.0f,
+            posDist(rng), posDist(rng), volume3d ? posDist(rng) : 0.0f, 1.0f,
+            velDist(rng), velDist(rng), volume3d ? velDist(rng) : 0.0f, 0.0f,
         };
     }
 }
@@ -563,6 +566,62 @@ void AppBase::PrintSummary() const {
         std::cout << "\n--- Throughput ---\n"
             << "Avg FPS:      " << static_cast<int>(avgFps) << "\n";
 
+        if (config_.workload == Workload::NBody && avgCompute > 0.0) {
+            const double n            = static_cast<double>(config_.particleCount);
+            const double interactions = n * n;                 // per step (all-pairs)
+            const double computeSec   = avgCompute / 1000.0;
+            const double gflops = interactions * kNBodyFlopsPerInteraction
+                                  / computeSec / 1e9;
+            const double ginteractions = interactions / computeSec / 1e9;
+            std::cout << "Bodies:       " << config_.particleCount << "\n"
+                << std::setprecision(2)
+                << "Compute rate: " << gflops << " GFLOP/s  ("
+                << ginteractions << " G-interactions/s)\n"
+                << "  (" << config_.particleCount << "^2 pairs x "
+                << static_cast<int>(kNBodyFlopsPerInteraction)
+                << " flop / " << std::setprecision(3) << avgCompute << " ms compute)\n";
+        }
+
+        if (config_.workload == Workload::SynthPeak && avgCompute > 0.0) {
+            const double threads = static_cast<double>(config_.particleCount);
+            // FP16 uses packed f16vec2 accumulators: 2 lanes per op.
+            const double lanes = (config_.peakPrecision == Precision::FP16) ? 2.0 : 1.0;
+            const double ops = threads * config_.peakIters * kSynthPeakUnroll * lanes * 2.0;
+            const double computeSec = avgCompute / 1000.0;
+            const double rate = ops / computeSec / 1e9;
+            const bool isInt = (config_.peakPrecision == Precision::INT32);
+            const char* prec = (config_.peakPrecision == Precision::FP64)  ? "FP64"
+                             : (config_.peakPrecision == Precision::FP16)  ? "FP16"
+                             : (config_.peakPrecision == Precision::INT32) ? "INT32"
+                             :                                               "FP32";
+            std::cout << "Threads:      " << config_.particleCount
+                << " x " << config_.peakIters << " iters x "
+                << kSynthPeakUnroll << " FMA\n"
+                << std::setprecision(1)
+                << "Peak " << prec << ":    " << rate
+                << (isInt ? " GIOPS" : " GFLOPS")
+                << "  (" << std::setprecision(3) << avgCompute << " ms compute)\n";
+        }
+
+        if (config_.workload == Workload::Render3D && avgRender > 0.0) {
+            const double mquad = config_.particleCount / (avgRender / 1000.0) / 1e6;
+            std::cout << "Billboards:   " << config_.particleCount << " instances\n"
+                << std::setprecision(1)
+                << "Render rate:  " << mquad << " MQuad/s  ("
+                << std::setprecision(3) << avgRender << " ms render)\n";
+        }
+
+        if (config_.workload == Workload::StressFractal && avgRender > 0.0) {
+            const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+            const double renderSec = avgRender / 1000.0;
+            const double giters = pixels * config_.fractalIter / renderSec / 1e9;
+            std::cout << "Iterations:   " << config_.fractalIter << " /pixel  ("
+                << kWindowWidth << "x" << kWindowHeight << " px)\n"
+                << std::setprecision(2)
+                << "Fill rate:    " << giters << " G-iter/s  ("
+                << std::setprecision(3) << avgRender << " ms render)\n";
+        }
+
         const double avgFrameMs = (avgFps > 0.0) ? 1000.0 / avgFps : 0.0;
         const double devUtil = (avgFrameMs > 0.0) ? avgTotal / avgFrameMs : 0.0;
 
@@ -600,6 +659,11 @@ BenchmarkResult AppBase::CollectResult() const {
     BenchmarkResult r;
     r.id          = GenerateResultId();
     r.timestamp   = GenerateTimestamp();
+    r.workload    = (config_.workload == Workload::NBody)         ? "nbody"
+                  : (config_.workload == Workload::StressFractal) ? "stress"
+                  : (config_.workload == Workload::SynthPeak)     ? "synthpeak"
+                  : (config_.workload == Workload::Render3D)      ? "render3d"
+                  :                                                 "stream";
     r.graphicsApi    = GetBackendName();
     r.deviceName     = config_.gpuDisplayName.empty() ? GetDeviceName() : config_.gpuDisplayName;
     r.driverVersion  = GetDriverVersion();
@@ -653,6 +717,33 @@ BenchmarkResult AppBase::CollectResult() const {
         r.bottleneck = "GPU-bound";
     else
         r.bottleneck = "Balanced";
+
+    // ---- Derived axis metric (mirrors the per-workload summary lines) ----
+    const double n          = static_cast<double>(config_.particleCount);
+    const double computeSec = r.avgComputeMs / 1000.0;
+    const double renderSec  = r.avgRenderMs  / 1000.0;
+    if (config_.workload == Workload::Stream && computeSec > 0.0) {
+        r.score = 40.0 * n / computeSec / 1e9;   // ~40 bytes moved per particle
+        r.scoreUnit = "GB/s";
+    } else if (config_.workload == Workload::NBody && computeSec > 0.0) {
+        r.score = n * n * kNBodyFlopsPerInteraction / computeSec / 1e9;
+        r.scoreUnit = "GFLOP/s";
+    } else if (config_.workload == Workload::StressFractal && renderSec > 0.0) {
+        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        r.score = pixels * config_.fractalIter / renderSec / 1e9;
+        r.scoreUnit = "G-iter/s";
+    } else if (config_.workload == Workload::Render3D && renderSec > 0.0) {
+        r.score = n / renderSec / 1e6;   // million billboards per second
+        r.scoreUnit = "MQuad/s";
+    } else if (config_.workload == Workload::SynthPeak && computeSec > 0.0) {
+        const double lanes = (config_.peakPrecision == Precision::FP16) ? 2.0 : 1.0;
+        r.score = n * config_.peakIters * kSynthPeakUnroll * lanes * 2.0 / computeSec / 1e9;
+        r.scoreUnit = (config_.peakPrecision == Precision::INT32) ? "GIOPS" : "GFLOPS";
+        r.precision = (config_.peakPrecision == Precision::FP64)  ? "FP64"
+                    : (config_.peakPrecision == Precision::FP16)  ? "FP16"
+                    : (config_.peakPrecision == Precision::INT32) ? "INT32"
+                    :                                               "FP32";
+    }
 
     return r;
 }
