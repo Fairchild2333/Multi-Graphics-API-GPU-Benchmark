@@ -8,6 +8,8 @@ rendering, with GPU timestamp profiling. Runs on **Windows**, **Linux**, and
 **macOS**.
 
 See [`docs/report.md`](docs/report.md) for the full analysis.
+See [`docs/TODO.md`](docs/TODO.md) for the roadmap and planned features.
+See [`docs/macos-notes.md`](docs/macos-notes.md) for macOS platform notes and limitations.
 
 ## Supported Graphics APIs
 

@@ -166,6 +166,7 @@ void AppBase::InitRenderDoc() {
     return;
 #endif
 
+#if defined(_WIN32) || defined(__linux__)
     if (!RENDERDOC_GetAPI) return;
     RENDERDOC_API_1_6_0* api = nullptr;
     int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_6_0, reinterpret_cast<void**>(&api));
@@ -194,6 +195,7 @@ void AppBase::InitRenderDoc() {
               << "  Press F12 during rendering to capture a frame.\n"
               << "  Captures saved to: " << capDir << "\n"
               << "============================================\n\n" << std::flush;
+#endif
 }
 
 void AppBase::TriggerRenderDocCapture() {
