@@ -1,0 +1,5 @@
+// App icon for the GUI binary. 101 is the lowest-numbered icon, so Explorer /
+// the taskbar pick it up; it's also loaded explicitly in MainWindow's ctor for
+// the caption, title-bar logo and About card.
+#define IDI_APPICON 101
+IDI_APPICON ICON "app.ico"

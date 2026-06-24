@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7F2C9A41-3B8D-4E6F-9C12-AB34CD56EF78}</ProjectGuid>
+    <RootNamespace>gpu_bench_gui</RootNamespace>
+    <TargetName>gpu_bench_gui</TargetName>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformMinVersion>10.0.17763.0</WindowsTargetPlatformMinVersion>
+    <TargetPlatformVersion>10.0.26100.0</TargetPlatformVersion>
+    <AppxPackage>false</AppxPackage>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <UseWinUI>true</UseWinUI>
+    <WinUISDKReferences>true</WinUISDKReferences>
+    <XamlLanguage>CppWinRT</XamlLanguage>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <AppContainerApplication>false</AppContainerApplication>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)x64\Debug\</OutDir>
+    <IntDir>$(ProjectDir)x64\Debug\obj\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)x64\Release\</OutDir>
+    <IntDir>$(ProjectDir)x64\Release\obj\</IntDir>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+
+  <PropertyGroup Label="UserMacros">
+    <GpuBuildDir Condition="'$(GpuBuildDir)'==''">$(ProjectDir)..\build</GpuBuildDir>
+    <GpuSourceDir Condition="'$(GpuSourceDir)'==''">$(ProjectDir)..</GpuSourceDir>
+    <VcpkgLib Condition="'$(VcpkgLib)'==''">C:\vcpkg\installed\x64-windows\lib</VcpkgLib>
+    <VcpkgBin Condition="'$(VcpkgBin)'==''">C:\vcpkg\installed\x64-windows\bin</VcpkgBin>
+  </PropertyGroup>
+
+  <!-- Native WinUI 3: wire the XAML compiler into the MSVC build. -->
+  <PropertyGroup>
+    <GeneratedFilesDir Condition="'$(GeneratedFilesDir)' == ''">$(IntDir)Generated Files\</GeneratedFilesDir>
+    <XamlGeneratedOutputPath Condition="'$(XamlGeneratedOutputPath)' == ''">$(IntDir)</XamlGeneratedOutputPath>
+    <BeforeClCompileTargets>
+      GpuBenchPrepareXaml;
+      $(BeforeClCompileTargets)
+    </BeforeClCompileTargets>
+    <MarkupCompilePass1DependsOn>
+      ResolveReferences;
+      $(MarkupCompilePass1DependsOn)
+    </MarkupCompilePass1DependsOn>
+    <MarkupCompilePass2DependsOn>
+      ResolveReferences;
+      CppWinRTSetXamlLocalAssembly;
+      $(MarkupCompilePass2DependsOn)
+    </MarkupCompilePass2DependsOn>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(GpuSourceDir)\src;$(ProjectDir);$(IntDir);$(GeneratedFilesDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>$(GpuBuildDir)\$(Configuration);$(GpuBuildDir);$(VULKAN_SDK)\Lib;$(VcpkgLib);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>gpu_engine.lib;glad_gl43.lib;glfw3dll.lib;vulkan-1.lib;d3d12.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <!-- Copy glfw3.dll (vcpkg, dynamic) next to the exe. The engine finds its
+       shaders via argv[0] -> the CMake build's gpu_benchmark.exe directory. -->
+  <ItemDefinitionGroup>
+    <PostBuildEvent>
+      <Command>copy /Y "$(VcpkgBin)\glfw3.dll" "$(OutDir)" &gt;nul</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <Midl Include="MainWindow.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="App.xaml.h" />
+    <ClInclude Include="MainWindow.h" />
+    <ClInclude Include="MainWindow.xaml.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="App.xaml.cpp" />
+    <ClCompile Include="MainWindow.xaml.cpp" />
+    <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="XamlTypeInfo.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml" />
+    <Page Include="MainWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="app.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- App icon (id 101) embedded in the GUI exe; loaded in MainWindow's ctor. -->
+    <ResourceCompile Include="app.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.CppWinRT" Version="2.0.240405.15" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.260224002" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
+  </ItemGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+
+  <Target Name="AddWinUIWinMDToXamlReferencePath"
+          BeforeTargets="MarkupCompilePass1;MarkupCompilePass2"
+          DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <ReferencePath Include="@(WinMDReferenceToCompile)" Condition="'%(WinMDReferenceToCompile.WinMDFile)' == 'true'" />
+      <XamlReferencesToCompile Include="@(WinMDReferenceToCompile)" Condition="'%(WinMDReferenceToCompile.WinMDFile)' == 'true'" />
+      <_WinUiWinMD Include="$(PkgMicrosoft_WindowsAppSDK)\lib\uap10.0\*.winmd" />
+      <_WinUiWinMD Include="$(PkgMicrosoft_WindowsAppSDK)\lib\uap10.0.17763\*.winmd" />
+      <ReferencePath Include="@(_WinUiWinMD)" Condition="Exists('$(PkgMicrosoft_WindowsAppSDK)\lib\uap10.0\Microsoft.UI.Xaml.winmd')" />
+      <XamlReferencesToCompile Include="@(_WinUiWinMD)" Condition="Exists('$(PkgMicrosoft_WindowsAppSDK)\lib\uap10.0\Microsoft.UI.Xaml.winmd')" />
+      <ReferencePath Include="$(FacadeWinmdPath)" Condition="Exists('$(FacadeWinmdPath)')" />
+      <XamlReferencesToCompile Include="$(FacadeWinmdPath)" Condition="Exists('$(FacadeWinmdPath)')" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="GpuBenchPrepareXaml"
+          DependsOnTargets="MarkupCompilePass1;_Midl;CppWinRTMergeProjectWinMDInputs;CppWinRTCopyWinMDToOutputDirectory;CppWinRTAddXamlMetaDataProviderCpp;CppWinRTMakeProjections;MarkupCompilePass2" />
+  <Target Name="AddProcessedXamlFilesToCopyLocal" />
+</Project>

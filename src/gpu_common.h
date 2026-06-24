@@ -119,6 +119,7 @@ struct BenchmarkConfig {
     const char*   difficultyLabel    = "Medium";
     double        captureAtSec       = -1.0;
     std::string   gpuDisplayName;           // if set, overrides deviceName_ for results/RenderDoc
+    std::uint32_t vramMB             = 0;   // selected GPU's dedicated VRAM (MB, for results)
     // DXGI adapter LUID for precise GPU selection across factory instances.
     // When both are 0, backends fall back to index-based selection.
     std::int64_t  adapterLuidHigh   = 0;

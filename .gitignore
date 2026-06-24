@@ -3,6 +3,11 @@
 /build-*/
 /out/
 /bin/
+# Native C++/WinRT GUI (MSBuild) artifacts
+gui/x64/
+gui/obj/
+gui/Generated Files/
+gui/*.winmd
 *.obj
 *.o
 *.pdb

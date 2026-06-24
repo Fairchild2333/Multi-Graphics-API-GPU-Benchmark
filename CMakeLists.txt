@@ -129,16 +129,22 @@ else()
     message(STATUS "OpenGL backend: DISABLED (by option)")
 endif()
 
-# ---- Executable ----
-add_executable(gpu_benchmark ${COMMON_SOURCES} ${BACKEND_SOURCES})
+# ---- Engine library (shared by the CLI and the WinUI3 C++/WinRT GUI) ----
+# COMMON_SOURCES includes main.cpp, which now defines gpu_bench::cliMain (not
+# main); the GUI links gpu_engine and calls cliMain in-process on a worker thread.
+add_library(gpu_engine STATIC ${COMMON_SOURCES} ${BACKEND_SOURCES})
+target_link_libraries(gpu_engine PUBLIC glfw ${BACKEND_LIBS})
+target_compile_definitions(gpu_engine PUBLIC ${BACKEND_DEFS})
+target_include_directories(gpu_engine PUBLIC ${CMAKE_SOURCE_DIR}/src)
 
-target_link_libraries(gpu_benchmark PRIVATE glfw ${BACKEND_LIBS})
-target_compile_definitions(gpu_benchmark PRIVATE ${BACKEND_DEFS})
+# ---- CLI executable (thin entry point -> gpu_bench::cliMain) ----
+add_executable(gpu_benchmark src/cli_main.cpp)
+target_link_libraries(gpu_benchmark PRIVATE gpu_engine)
 
 if(MSVC)
-    target_compile_options(gpu_benchmark PRIVATE /W4 /permissive- /utf-8)
+    target_compile_options(gpu_engine PRIVATE /W4 /permissive- /utf-8)
 else()
-    target_compile_options(gpu_benchmark PRIVATE
+    target_compile_options(gpu_engine PRIVATE
         $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wpedantic>
         $<$<COMPILE_LANGUAGE:OBJCXX>:-Wall -Wextra>
     )

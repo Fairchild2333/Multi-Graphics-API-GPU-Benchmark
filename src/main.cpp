@@ -1,5 +1,6 @@
 #include "app_base.h"
 #include "benchmark_results.h"
+#include "gpu_engine.h"
 
 #ifdef HAVE_VULKAN
 #include "vulkan_backend.h"
@@ -518,7 +519,7 @@ static void PrintGpuTable(const std::vector<GpuInfo>& gpus) {
 
 // ---------------------------------------------------------------------------
 
-int main(int argc, char* argv[]) {
+int gpu_bench::cliMain(int argc, char* argv[]) {
 #ifdef _WIN32
     SetUnhandledExceptionFilter(CrashHandler);
 #endif
@@ -528,6 +529,7 @@ int main(int argc, char* argv[]) {
     bool useWarp = false;
     bool runAll = false;
     bool fullAnalysis = false;
+    bool listGpus = false;
     gpu_bench::BenchmarkConfig benchCfg;
 
     for (int i = 1; i < argc; ++i) {
@@ -645,6 +647,8 @@ int main(int argc, char* argv[]) {
             } else {
                 benchCfg.captureAtSec = 5.0;
             }
+        } else if (std::strcmp(argv[i], "--list-gpus") == 0) {
+            listGpus = true;
         } else if (std::strcmp(argv[i], "--run-all") == 0) {
             runAll = true;
         } else if (std::strcmp(argv[i], "--full-analysis") == 0) {
@@ -764,6 +768,21 @@ int main(int argc, char* argv[]) {
 
     // ---- Phase 1: Probe all GPUs and APIs ----
     auto gpus = ProbeGpus();
+
+    // Machine-readable GPU list for external front-ends (WinUI launcher).
+    // One line per GPU:  GPU<TAB>index<TAB>name<TAB>vk<TAB>dx12<TAB>dx11<TAB>ogl
+    if (listGpus) {
+        for (std::size_t i = 0; i < gpus.size(); ++i) {
+            const auto& g = gpus[i];
+            std::cout << "GPU\t" << i << '\t' << g.name << '\t'
+                      << (g.supportsVulkan ? 1 : 0) << '\t'
+                      << (g.supportsDX12   ? 1 : 0) << '\t'
+                      << (g.supportsDX11   ? 1 : 0) << '\t'
+                      << (g.supportsOpenGL ? 1 : 0) << '\n';
+        }
+        return 0;
+    }
+
     PrintGpuTable(gpus);
 
     bool directBenchmark = (backend != "auto") || benchCfg.benchmarkMode || runAll;
@@ -862,6 +881,7 @@ int main(int argc, char* argv[]) {
             std::string  apiLabel;
             std::int64_t luidHigh = 0;
             std::int64_t luidLow  = 0;
+            std::uint32_t vramMB  = 0;
         };
         // Map gpus-array index + backend to the raw index each backend expects.
         auto rawIdx = [&](std::uint32_t gi, const std::string& bid) -> std::int32_t {
@@ -876,23 +896,23 @@ int main(int argc, char* argv[]) {
             const auto& g = gpus[gi];
 #ifdef HAVE_VULKAN
             if (g.supportsVulkan)
-                entries.push_back({rawIdx(gi, "vulkan"), "vulkan", g.name, "Vulkan", g.luidHigh, g.luidLow});
+                entries.push_back({rawIdx(gi, "vulkan"), "vulkan", g.name, "Vulkan", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
 #ifdef HAVE_DX12
             if (g.supportsDX12)
-                entries.push_back({rawIdx(gi, "dx12"), "dx12", g.name, "DirectX 12", g.luidHigh, g.luidLow});
+                entries.push_back({rawIdx(gi, "dx12"), "dx12", g.name, "DirectX 12", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
 #ifdef HAVE_DX11
             if (g.supportsDX11)
-                entries.push_back({rawIdx(gi, "dx11"), "dx11", g.name, "DirectX 11", g.luidHigh, g.luidLow});
+                entries.push_back({rawIdx(gi, "dx11"), "dx11", g.name, "DirectX 11", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
 #ifdef HAVE_METAL
             if (g.supportsMetal)
-                entries.push_back({rawIdx(gi, "metal"), "metal", g.name, "Metal", g.luidHigh, g.luidLow});
+                entries.push_back({rawIdx(gi, "metal"), "metal", g.name, "Metal", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
 #ifdef HAVE_OPENGL
             if (g.supportsOpenGL)
-                entries.push_back({rawIdx(gi, "opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow});
+                entries.push_back({rawIdx(gi, "opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
         }
 
@@ -914,7 +934,16 @@ int main(int argc, char* argv[]) {
         allCfg.difficultyLabel = benchCfg.particlesOverridden
             ? benchCfg.difficultyLabel : "Medium";
         allCfg.particlesOverridden = true;
-        allCfg.vsync = false;
+        allCfg.vsync = benchCfg.vsync;
+        // Carry the selected workload through to every GPU x API run.
+        allCfg.workload      = benchCfg.workload;
+        allCfg.peakPrecision = benchCfg.peakPrecision;
+        allCfg.peakIters     = benchCfg.peakIters;
+        allCfg.fractalIter   = benchCfg.fractalIter;
+        allCfg.softening     = benchCfg.softening;
+        allCfg.headless      = benchCfg.headless;
+        allCfg.framesInFlight = benchCfg.framesInFlight;
+        allCfg.hostMemory    = benchCfg.hostMemory;
         if (benchCfg.maxRunTimeSec != 15.0)
             allCfg.maxRunTimeSec = benchCfg.maxRunTimeSec;
         if (benchCfg.benchmarkMode) {
@@ -928,6 +957,7 @@ int main(int argc, char* argv[]) {
             allCfg.gpuDisplayName = e.gpuName;
             allCfg.adapterLuidHigh = e.luidHigh;
             allCfg.adapterLuidLow  = e.luidLow;
+            allCfg.vramMB          = e.vramMB;
             std::cout << "\n>>> [" << (i + 1) << "/" << entries.size()
                       << "] " << e.apiLabel << " / " << e.gpuName << " <<<\n";
             try {
@@ -1163,6 +1193,7 @@ int main(int argc, char* argv[]) {
                     std::string  apiLabel;
                     std::int64_t luidHigh = 0;
                     std::int64_t luidLow  = 0;
+                    std::uint32_t vramMB  = 0;
                 };
 
                 std::int32_t selectedGpuForAll = -1;
@@ -1198,27 +1229,27 @@ int main(int argc, char* argv[]) {
                     };
 #ifdef HAVE_METAL
                     if (g.supportsMetal)
-                        entries.push_back({faRawIdx("metal"), "metal", g.name, "Metal", g.luidHigh, g.luidLow});
+                        entries.push_back({faRawIdx("metal"), "metal", g.name, "Metal", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
 #ifdef HAVE_VULKAN
                     if (g.supportsVulkan)
-                        entries.push_back({faRawIdx("vulkan"), "vulkan", g.name, "Vulkan", g.luidHigh, g.luidLow});
+                        entries.push_back({faRawIdx("vulkan"), "vulkan", g.name, "Vulkan", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
 #ifdef HAVE_DX12
                     if (g.supportsDX12)
-                        entries.push_back({faRawIdx("dx12"), "dx12", g.name, "DirectX 12", g.luidHigh, g.luidLow});
+                        entries.push_back({faRawIdx("dx12"), "dx12", g.name, "DirectX 12", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
 #ifdef HAVE_DX11
                     if (g.supportsDX11)
-                        entries.push_back({faRawIdx("dx11"), "dx11", g.name, "DirectX 11", g.luidHigh, g.luidLow});
+                        entries.push_back({faRawIdx("dx11"), "dx11", g.name, "DirectX 11", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
 #ifdef HAVE_OPENGL
                     if (g.supportsOpenGL) {
 #ifdef _WIN32
                         if (gi == 0)
-                            entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow});
+                            entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #else
-                        entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow});
+                        entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
                     }
 #endif
@@ -1265,6 +1296,7 @@ int main(int argc, char* argv[]) {
                     faCfg.gpuDisplayName = e.gpuName;
                     faCfg.adapterLuidHigh = e.luidHigh;
                     faCfg.adapterLuidLow  = e.luidLow;
+                    faCfg.vramMB          = e.vramMB;
                     std::cout << "\n>>> [" << (i + 1) << "/" << entries.size()
                               << "] " << e.apiLabel << " / " << e.gpuName
                               << " (15s + RenderDoc @ 5s) <<<\n";
@@ -1459,6 +1491,7 @@ int main(int argc, char* argv[]) {
                     std::string  apiLabel;
                     std::int64_t luidHigh = 0;
                     std::int64_t luidLow  = 0;
+                    std::uint32_t vramMB  = 0;
                 };
 
                 PrintGpuTable(gpus);
@@ -1550,27 +1583,27 @@ int main(int argc, char* argv[]) {
                     };
 #ifdef HAVE_METAL
                     if (g.supportsMetal)
-                        entries.push_back({faRawIdx("metal"), "metal", g.name, "Metal", g.luidHigh, g.luidLow});
+                        entries.push_back({faRawIdx("metal"), "metal", g.name, "Metal", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
 #ifdef HAVE_VULKAN
                     if (g.supportsVulkan)
-                        entries.push_back({faRawIdx("vulkan"), "vulkan", g.name, "Vulkan", g.luidHigh, g.luidLow});
+                        entries.push_back({faRawIdx("vulkan"), "vulkan", g.name, "Vulkan", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
 #ifdef HAVE_DX12
                     if (g.supportsDX12)
-                        entries.push_back({faRawIdx("dx12"), "dx12", g.name, "DirectX 12", g.luidHigh, g.luidLow});
+                        entries.push_back({faRawIdx("dx12"), "dx12", g.name, "DirectX 12", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
 #ifdef HAVE_DX11
                     if (g.supportsDX11)
-                        entries.push_back({faRawIdx("dx11"), "dx11", g.name, "DirectX 11", g.luidHigh, g.luidLow});
+                        entries.push_back({faRawIdx("dx11"), "dx11", g.name, "DirectX 11", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
 #ifdef HAVE_OPENGL
                     if (g.supportsOpenGL) {
 #ifdef _WIN32
                         if (gchoice == 0)
-                            entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow});
+                            entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #else
-                        entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow});
+                        entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
 #endif
                     }
 #endif
@@ -1606,6 +1639,7 @@ int main(int argc, char* argv[]) {
                     testCfg.gpuDisplayName = e.gpuName;
                     testCfg.adapterLuidHigh = e.luidHigh;
                     testCfg.adapterLuidLow  = e.luidLow;
+                    testCfg.vramMB          = e.vramMB;
                     std::cout << "\n>>> [" << (i + 1) << "/" << entries.size()
                               << "] " << e.apiLabel << " / " << e.gpuName
                               << " (" << testLabel << ", 15s";
@@ -1878,6 +1912,7 @@ int main(int argc, char* argv[]) {
             benchCfg.gpuDisplayName = gpus[gpuIndex].name;
             benchCfg.adapterLuidHigh = gpus[gpuIndex].luidHigh;
             benchCfg.adapterLuidLow  = gpus[gpuIndex].luidLow;
+            benchCfg.vramMB          = static_cast<std::uint32_t>(gpus[gpuIndex].vramMB);
         }
 
         // -- Create and run the backend --

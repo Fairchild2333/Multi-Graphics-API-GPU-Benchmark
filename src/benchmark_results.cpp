@@ -146,6 +146,7 @@ static std::string ResultToJson(const BenchmarkResult& r, int indent = 4) {
     str("cpuName",        r.cpuName);
     str("osVersion",      r.osVersion);
     str("memory",         r.memory);
+    u32("vramMB",         r.vramMB);
     u32("resWidth",    r.resWidth);
     u32("resHeight",   r.resHeight);
     u32("particleCount", r.particleCount);
@@ -232,6 +233,7 @@ static BenchmarkResult JsonToResult(const std::string& json) {
     r.deviceName     = findStr("deviceName");
     r.driverVersion  = findStr("driverVersion");
     r.cpuName        = findStr("cpuName");
+    r.vramMB         = static_cast<std::uint32_t>(findNum("vramMB"));
     r.osVersion      = findStr("osVersion");
     r.memory         = findStr("memory");
     r.resWidth      = static_cast<std::uint32_t>(findNum("resWidth"));

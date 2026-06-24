@@ -17,6 +17,7 @@ struct BenchmarkResult {
     std::string cpuName;
     std::string osVersion;
     std::string memory;
+    std::uint32_t vramMB = 0;          // dedicated VRAM (0 = unknown / shared)
     std::uint32_t resWidth  = 0;
     std::uint32_t resHeight = 0;
     std::uint32_t particleCount = 0;

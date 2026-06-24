@@ -672,6 +672,7 @@ BenchmarkResult AppBase::CollectResult() const {
     r.cpuName        = GetCpuName();
     r.osVersion      = GetOsVersion();
     r.memory      = config_.hostMemory ? "Host-visible" : "Device-local";
+    r.vramMB      = config_.vramMB;
     r.resWidth    = kWindowWidth;
     r.resHeight   = kWindowHeight;
     r.particleCount = config_.particleCount;
