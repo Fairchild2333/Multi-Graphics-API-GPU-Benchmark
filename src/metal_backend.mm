@@ -17,8 +17,6 @@
 
 namespace gpu_bench {
 
-static constexpr std::uint32_t kMetalFramesInFlight = 3;
-
 // -----------------------------------------------------------------------
 // Pimpl — all Objective-C objects live here so the header stays pure C++
 // -----------------------------------------------------------------------
@@ -36,6 +34,7 @@ struct MetalBackend::Impl {
     id<MTLTexture>              offscreenTex = nil;
 
     std::string deviceName;
+    std::uint32_t framesInFlight = kMaxFramesInFlight;
 
     // Semaphore to limit frames in flight
     dispatch_semaphore_t frameSemaphore = nullptr;
@@ -46,7 +45,7 @@ struct MetalBackend::Impl {
         double computeStartTime = 0;
         double computeEndTime   = 0;
     };
-    std::array<FrameResources, kMetalFramesInFlight> frames{};
+    std::vector<FrameResources> frames{};
     std::uint32_t currentFrame = 0;
     std::uint64_t totalFrames  = 0;
 
@@ -131,21 +130,27 @@ void MetalBackend::InitBackend() {
         std::cout << "Selected GPU [" << chosen << "]: " << impl_->deviceName
                   << std::endl;
 
-        // --- CAMetalLayer on the GLFW window ------------------------------------
-        NSWindow* nsWindow = glfwGetCocoaWindow(window_);
-        impl_->metalLayer  = [CAMetalLayer layer];
-        impl_->metalLayer.device       = impl_->device;
-        impl_->metalLayer.pixelFormat  = MTLPixelFormatBGRA8Unorm;
-        impl_->metalLayer.drawableSize = CGSizeMake(kWindowWidth, kWindowHeight);
-        impl_->metalLayer.framebufferOnly = YES;
-        impl_->metalLayer.maximumDrawableCount = 3;
-        impl_->metalLayer.displaySyncEnabled = config_.vsync ? YES : NO;
+        // --- Frames-in-flight from config (respects --flights) ------------------
+        impl_->framesInFlight = config_.framesInFlight;
+        impl_->frames.resize(impl_->framesInFlight);
 
-        nsWindow.contentView.layer     = impl_->metalLayer;
-        nsWindow.contentView.wantsLayer = YES;
+        // --- CAMetalLayer (skipped in headless mode) ----------------------------
+        if (!config_.headless) {
+            NSWindow* nsWindow = glfwGetCocoaWindow(window_);
+            impl_->metalLayer  = [CAMetalLayer layer];
+            impl_->metalLayer.device       = impl_->device;
+            impl_->metalLayer.pixelFormat  = MTLPixelFormatBGRA8Unorm;
+            impl_->metalLayer.drawableSize = CGSizeMake(kWindowWidth, kWindowHeight);
+            impl_->metalLayer.framebufferOnly = YES;
+            impl_->metalLayer.maximumDrawableCount = 3;
+            impl_->metalLayer.displaySyncEnabled = config_.vsync ? YES : NO;
 
-        // --- Frame semaphore (triple buffering) ---------------------------------
-        impl_->frameSemaphore = dispatch_semaphore_create(kMetalFramesInFlight);
+            nsWindow.contentView.layer     = impl_->metalLayer;
+            nsWindow.contentView.wantsLayer = YES;
+        }
+
+        // --- Frame semaphore ----------------------------------------------------
+        impl_->frameSemaphore = dispatch_semaphore_create(impl_->framesInFlight);
 
         // --- Command queue ------------------------------------------------------
         impl_->commandQueue = [impl_->device newCommandQueue];
@@ -200,59 +205,61 @@ void MetalBackend::InitBackend() {
             throw std::runtime_error("Compute pipeline creation failed: " + msg);
         }
 
-        // --- Render pipeline ----------------------------------------------------
-        const bool fractal  = (config_.workload == Workload::StressFractal);
-        const bool render3d = (config_.workload == Workload::Render3D);
-        NSString* vfn = fractal ? @"fractalVertex" : render3d ? @"render3dVertex" : @"vertexMain";
-        NSString* ffn = fractal ? @"fractalFragment" : render3d ? @"render3dFragment" : @"fragmentMain";
-        id<MTLFunction> vertFunc = [impl_->library newFunctionWithName:vfn];
-        id<MTLFunction> fragFunc = [impl_->library newFunctionWithName:ffn];
-        if (!vertFunc || !fragFunc)
-            throw std::runtime_error("Vertex/fragment functions not found");
+        // --- Render pipeline (skipped in headless mode) -------------------------
+        if (!config_.headless) {
+            const bool fractal  = (config_.workload == Workload::StressFractal);
+            const bool render3d = (config_.workload == Workload::Render3D);
+            NSString* vfn = fractal ? @"fractalVertex" : render3d ? @"render3dVertex" : @"vertexMain";
+            NSString* ffn = fractal ? @"fractalFragment" : render3d ? @"render3dFragment" : @"fragmentMain";
+            id<MTLFunction> vertFunc = [impl_->library newFunctionWithName:vfn];
+            id<MTLFunction> fragFunc = [impl_->library newFunctionWithName:ffn];
+            if (!vertFunc || !fragFunc)
+                throw std::runtime_error("Vertex/fragment functions not found");
 
-        MTLRenderPipelineDescriptor* rpDesc =
-            [[MTLRenderPipelineDescriptor alloc] init];
-        rpDesc.vertexFunction   = vertFunc;
-        rpDesc.fragmentFunction = fragFunc;
-        if (render3d)
-            rpDesc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
+            MTLRenderPipelineDescriptor* rpDesc =
+                [[MTLRenderPipelineDescriptor alloc] init];
+            rpDesc.vertexFunction   = vertFunc;
+            rpDesc.fragmentFunction = fragFunc;
+            if (render3d)
+                rpDesc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
 
-        MTLRenderPipelineColorAttachmentDescriptor* ca =
-            rpDesc.colorAttachments[0];
-        ca.pixelFormat                 = MTLPixelFormatBGRA8Unorm;
-        ca.blendingEnabled             = YES;
-        ca.sourceRGBBlendFactor        = MTLBlendFactorSourceAlpha;
-        ca.destinationRGBBlendFactor   = MTLBlendFactorOneMinusSourceAlpha;
-        ca.rgbBlendOperation           = MTLBlendOperationAdd;
-        ca.sourceAlphaBlendFactor      = MTLBlendFactorOne;
-        ca.destinationAlphaBlendFactor = MTLBlendFactorZero;
-        ca.alphaBlendOperation         = MTLBlendOperationAdd;
+            MTLRenderPipelineColorAttachmentDescriptor* ca =
+                rpDesc.colorAttachments[0];
+            ca.pixelFormat                 = MTLPixelFormatBGRA8Unorm;
+            ca.blendingEnabled             = YES;
+            ca.sourceRGBBlendFactor        = MTLBlendFactorSourceAlpha;
+            ca.destinationRGBBlendFactor   = MTLBlendFactorOneMinusSourceAlpha;
+            ca.rgbBlendOperation           = MTLBlendOperationAdd;
+            ca.sourceAlphaBlendFactor      = MTLBlendFactorOne;
+            ca.destinationAlphaBlendFactor = MTLBlendFactorZero;
+            ca.alphaBlendOperation         = MTLBlendOperationAdd;
 
-        impl_->renderPSO =
-            [impl_->device newRenderPipelineStateWithDescriptor:rpDesc
-                                                          error:&error];
-        if (!impl_->renderPSO) {
-            std::string msg = error
-                ? [[error localizedDescription] UTF8String]
-                : "unknown error";
-            throw std::runtime_error("Render pipeline creation failed: " + msg);
-        }
+            impl_->renderPSO =
+                [impl_->device newRenderPipelineStateWithDescriptor:rpDesc
+                                                              error:&error];
+            if (!impl_->renderPSO) {
+                std::string msg = error
+                    ? [[error localizedDescription] UTF8String]
+                    : "unknown error";
+                throw std::runtime_error("Render pipeline creation failed: " + msg);
+            }
 
-        // --- Render3D depth resources ------------------------------------------
-        if (render3d) {
-            MTLTextureDescriptor* dtd =
-                [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float
-                                                                   width:kWindowWidth
-                                                                  height:kWindowHeight
-                                                               mipmapped:NO];
-            dtd.usage       = MTLTextureUsageRenderTarget;
-            dtd.storageMode = MTLStorageModePrivate;
-            impl_->depthTex = [impl_->device newTextureWithDescriptor:dtd];
+            // --- Render3D depth resources ----------------------------------------
+            if (render3d) {
+                MTLTextureDescriptor* dtd =
+                    [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float
+                                                                       width:kWindowWidth
+                                                                      height:kWindowHeight
+                                                                   mipmapped:NO];
+                dtd.usage       = MTLTextureUsageRenderTarget;
+                dtd.storageMode = MTLStorageModePrivate;
+                impl_->depthTex = [impl_->device newTextureWithDescriptor:dtd];
 
-            MTLDepthStencilDescriptor* dsd = [[MTLDepthStencilDescriptor alloc] init];
-            dsd.depthCompareFunction = MTLCompareFunctionLess;
-            dsd.depthWriteEnabled    = YES;
-            impl_->depthState = [impl_->device newDepthStencilStateWithDescriptor:dsd];
+                MTLDepthStencilDescriptor* dsd = [[MTLDepthStencilDescriptor alloc] init];
+                dsd.depthCompareFunction = MTLCompareFunctionLess;
+                dsd.depthWriteEnabled    = YES;
+                impl_->depthState = [impl_->device newDepthStencilStateWithDescriptor:dsd];
+            }
         }
 
         // --- Particle buffer (shared memory — ideal for Apple Silicon) ----------
@@ -268,10 +275,12 @@ void MetalBackend::InitBackend() {
                   << " particles\n";
         std::cout << "[Profiling] GPU command-buffer timestamps enabled\n";
 
-        // --- Metal always uses offscreen render target to bypass ProMotion VSync -
+        // --- Offscreen render target (benchmark mode only) ----------------------
         // On macOS, ProMotion displays lock nextDrawable to refresh rate even with
-        // displaySyncEnabled=NO. Use offscreen texture and present periodically.
-        {
+        // displaySyncEnabled=NO. In benchmark mode, use offscreen texture and
+        // present periodically to avoid VSync throttling.
+        // In interactive (non-benchmark) mode, present every frame normally.
+        if (!config_.headless && config_.benchmarkMode && !config_.vsync) {
             MTLTextureDescriptor* texDesc =
                 [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
                                                                   width:kWindowWidth
@@ -284,6 +293,9 @@ void MetalBackend::InitBackend() {
                 throw std::runtime_error("Failed to create offscreen texture");
             std::cout << "[Metal] Benchmark mode: using offscreen render target to bypass ProMotion VSync\n";
         }
+
+        if (config_.headless)
+            std::cout << "[Metal] Headless mode: pure compute, no rendering\n";
     }
 }
 
@@ -306,6 +318,62 @@ void MetalBackend::DrawFrame(float deltaTime) {
         dispatch_semaphore_wait(impl_->frameSemaphore, DISPATCH_TIME_FOREVER);
 
         const std::uint32_t frameSlot = impl_->currentFrame;
+
+        // === HEADLESS PATH: compute only, no render =============================
+        if (config_.headless) {
+            id<MTLCommandBuffer> computeCB = [impl_->commandQueue commandBuffer];
+
+            id<MTLComputeCommandEncoder> computeEnc =
+                [computeCB computeCommandEncoder];
+
+            [computeEnc setComputePipelineState:impl_->computePSO];
+            [computeEnc setBuffer:impl_->particleBuf offset:0 atIndex:0];
+
+            if (config_.workload == Workload::SynthPeak) {
+                PeakParams params{ config_.peakIters, 0.9999f, 0.0001f, 0 };
+                [computeEnc setBytes:&params length:sizeof(PeakParams) atIndex:1];
+            } else if (config_.workload == Workload::NBody) {
+                NBodyParams params{ deltaTime, config_.softening, config_.particleCount, 0 };
+                [computeEnc setBytes:&params length:sizeof(NBodyParams) atIndex:1];
+            } else {
+                ComputeParams params{ deltaTime, 0.9f };
+                [computeEnc setBytes:&params length:sizeof(ComputeParams) atIndex:1];
+            }
+
+            const MTLSize tgSize  = MTLSizeMake(kComputeWorkGroupSize, 1, 1);
+            const MTLSize tgCount = MTLSizeMake(
+                config_.particleCount / kComputeWorkGroupSize, 1, 1);
+            [computeEnc dispatchThreadgroups:tgCount
+                       threadsPerThreadgroup:tgSize];
+            [computeEnc endEncoding];
+
+            // Async timing + semaphore signal for headless
+            __block auto* implPtr = impl_.get();
+            dispatch_semaphore_t sem = impl_->frameSemaphore;
+
+            [computeCB addCompletedHandler:^(id<MTLCommandBuffer> cb) {
+                dispatch_semaphore_signal(sem);
+
+                const double cs = cb.GPUStartTime;
+                const double ce = cb.GPUEndTime;
+
+                if (ce > cs) {
+                    const double computeMs = (ce - cs) * 1000.0;
+                    // Headless: no render, timing mirrors compute
+                    std::lock_guard<std::mutex> lock(implPtr->timingMutex);
+                    implPtr->pendingTimings.push_back({computeMs, 0.0, computeMs});
+                }
+            }];
+
+            [computeCB commit];
+
+            ++impl_->totalFrames;
+            impl_->currentFrame =
+                (frameSlot + 1) % impl_->framesInFlight;
+            return;
+        }
+
+        // === WINDOWED PATH: compute + render ====================================
 
         // --- Determine render target --------------------------------------------
         const bool useOffscreen = impl_->offscreenTex != nil;
@@ -411,7 +479,6 @@ void MetalBackend::DrawFrame(float deltaTime) {
         __block auto* implPtr = impl_.get();
         __block id<MTLCommandBuffer> capturedComputeCB = computeCB;
         dispatch_semaphore_t sem = impl_->frameSemaphore;
-        BenchmarkConfig capturedConfig = config_;
 
         [renderCB addCompletedHandler:^(id<MTLCommandBuffer> cb) {
             dispatch_semaphore_signal(sem);
@@ -435,7 +502,7 @@ void MetalBackend::DrawFrame(float deltaTime) {
 
         ++impl_->totalFrames;
         impl_->currentFrame =
-            (frameSlot + 1) % kMetalFramesInFlight;
+            (frameSlot + 1) % impl_->framesInFlight;
     }
 }
 
@@ -446,10 +513,10 @@ void MetalBackend::DrawFrame(float deltaTime) {
 void MetalBackend::WaitIdle() {
     if (!impl_ || !impl_->commandQueue) return;
     // Wait for all in-flight frames to complete
-    for (std::uint32_t i = 0; i < kMetalFramesInFlight; ++i) {
+    for (std::uint32_t i = 0; i < impl_->framesInFlight; ++i) {
         dispatch_semaphore_wait(impl_->frameSemaphore, DISPATCH_TIME_FOREVER);
     }
-    for (std::uint32_t i = 0; i < kMetalFramesInFlight; ++i) {
+    for (std::uint32_t i = 0; i < impl_->framesInFlight; ++i) {
         dispatch_semaphore_signal(impl_->frameSemaphore);
     }
 

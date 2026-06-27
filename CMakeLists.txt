@@ -1,4 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
+
+# macOS: support 10.15+ (Catalina) — minimum for Metal GPUStartTime/GPUEndTime
+# and MTLMathModeFast. Covers all Intel + Apple Silicon Macs from 2019 onward.
+if(APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum macOS version")
+endif()
+
 project(GpuComputeBenchmark LANGUAGES C CXX OBJCXX)
 
 set(CMAKE_CXX_STANDARD 17)

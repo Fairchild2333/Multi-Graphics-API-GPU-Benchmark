@@ -854,7 +854,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     }
     std::string recommendedGpuName = gpus[recommendedGpuIdx].name;
 
-    // Best API for the recommended GPU: Vulkan > DX12 > DX11 > Metal.
+    // Best API for the recommended GPU: Metal (macOS) > Vulkan > DX12 > DX11 > OpenGL.
     const auto& recGpu = gpus[recommendedGpuIdx];
     std::string recommendedApi;
     if (recGpu.supportsMetal)       recommendedApi = "metal";
@@ -1908,11 +1908,16 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         }
 
         // Set display name and LUID for multi-GPU disambiguation.
-        if (gpuIndex >= 0 && static_cast<std::size_t>(gpuIndex) < gpus.size()) {
-            benchCfg.gpuDisplayName = gpus[gpuIndex].name;
-            benchCfg.adapterLuidHigh = gpus[gpuIndex].luidHigh;
-            benchCfg.adapterLuidLow  = gpus[gpuIndex].luidLow;
-            benchCfg.vramMB          = static_cast<std::uint32_t>(gpus[gpuIndex].vramMB);
+        // When no --gpu is given (gpuIndex == -1), fall back to the auto-
+        // recommended GPU so that VRAM and display name are always populated.
+        std::int32_t resolvedIdx = gpuIndex;
+        if (resolvedIdx < 0 && !gpus.empty())
+            resolvedIdx = recommendedGpuIdx;
+        if (resolvedIdx >= 0 && static_cast<std::size_t>(resolvedIdx) < gpus.size()) {
+            benchCfg.gpuDisplayName = gpus[resolvedIdx].name;
+            benchCfg.adapterLuidHigh = gpus[resolvedIdx].luidHigh;
+            benchCfg.adapterLuidLow  = gpus[resolvedIdx].luidLow;
+            benchCfg.vramMB          = static_cast<std::uint32_t>(gpus[resolvedIdx].vramMB);
         }
 
         // -- Create and run the backend --

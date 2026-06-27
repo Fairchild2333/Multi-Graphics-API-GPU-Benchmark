@@ -1,0 +1,70 @@
+name: GPUBenchmark
+options:
+  bundleIdPrefix: com.fairchild
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "26.0"
+  createIntermediateGroups: true
+  defaultConfig: Debug
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    CLANG_CXX_LANGUAGE_STANDARD: "c++17"
+
+targets:
+  GPUBenchmark:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: GPUBenchmark
+        excludes:
+          - "**/*.xcassets"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fairchild.GPUBenchmark
+        INFOPLIST_GENERATION_CLASS: GPUBenchmarkApp
+        SWIFT_OBJC_BRIDGING_HEADER: GPUBenchmark/Engine/GPUBenchmark-Bridging-Header.h
+        HEADER_SEARCH_PATHS:
+          - "$(PROJECT_DIR)/../src"
+        LIBRARY_SEARCH_PATHS:
+          - "$(PROJECT_DIR)/../build"
+        OTHER_LDFLAGS:
+          - "-lgpu_engine"
+          - "-lglad_gl43"
+          - "-lglfw"
+          - "-lvulkan"
+          - "-framework Metal"
+          - "-framework MetalKit"
+          - "-framework QuartzCore"
+          - "-framework Cocoa"
+          - "-framework OpenGL"
+          - "-framework CoreFoundation"
+          - "-framework Foundation"
+          - "-framework IOKit"
+          - "-framework IOSurface"
+        CLANG_CXX_LANGUAGE_STANDARD: "c++17"
+        # Let Xcode find Homebrew libraries
+        LIBRARY_SEARCH_PATHS[arch=arm64]:
+          - "$(PROJECT_DIR)/../build"
+          - "/opt/homebrew/lib"
+        LIBRARY_SEARCH_PATHS[arch=x86_64]:
+          - "$(PROJECT_DIR)/../build"
+          - "/usr/local/lib"
+        HEADER_SEARCH_PATHS:
+          - "$(PROJECT_DIR)/../src"
+          - "/opt/homebrew/include"
+        LD_RUNPATH_SEARCH_PATHS:
+          - "@executable_path/../Frameworks"
+          - "/opt/homebrew/lib"
+    info:
+      path: Info.plist
+      properties:
+        CFBundleName: GPU Benchmark
+        CFBundleDisplayName: GPU Benchmark
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        LSMinimumSystemVersion: "14.0"
+        NSHighResolutionCapable: true
