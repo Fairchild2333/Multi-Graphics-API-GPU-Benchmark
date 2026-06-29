@@ -530,6 +530,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     bool runAll = false;
     bool fullAnalysis = false;
     bool listGpus = false;
+    bool timeArgGiven = false;   // explicit --time => run directly (no menu)
     gpu_bench::BenchmarkConfig benchCfg;
 
     for (int i = 1; i < argc; ++i) {
@@ -558,6 +559,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             benchCfg.headless = true;
         } else if (std::strcmp(argv[i], "--time") == 0 && i + 1 < argc) {
             benchCfg.maxRunTimeSec = std::stod(argv[++i]);
+            timeArgGiven = true;
         } else if (std::strcmp(argv[i], "--no-time-limit") == 0) {
             benchCfg.maxRunTimeSec = 0.0;
         } else if (std::strcmp(argv[i], "--particles") == 0 && i + 1 < argc) {
@@ -785,7 +787,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
 
     PrintGpuTable(gpus);
 
-    bool directBenchmark = (backend != "auto") || benchCfg.benchmarkMode || runAll;
+    bool directBenchmark = (backend != "auto") || benchCfg.benchmarkMode || runAll || timeArgGiven;
 
     // ---- Build available backends ----
     struct BackendEntry { std::string id; bool hwOnly; };

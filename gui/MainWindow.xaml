@@ -75,34 +75,71 @@
                                         <ComboBoxItem x:Name="PresetParticles">Particle test — one GPU (all APIs, custom particles)</ComboBoxItem>
                                         <ComboBoxItem x:Name="PresetHeadless">Headless compute — one GPU (all APIs, pure compute)</ComboBoxItem>
                                     </ComboBox>
-                                    <StackPanel Orientation="Horizontal" Spacing="16">
-                                        <ComboBox x:Name="GpuBox" Header="GPU" MinWidth="240"/>
-                                        <ComboBox x:Name="BackendBox" Header="Graphics API" Width="150" SelectedIndex="0">
-                                            <ComboBoxItem>Auto</ComboBoxItem>
-                                            <ComboBoxItem>Vulkan</ComboBoxItem>
-                                            <ComboBoxItem>DX12</ComboBoxItem>
-                                            <ComboBoxItem>DX11</ComboBoxItem>
-                                            <ComboBoxItem>OpenGL</ComboBoxItem>
+                                    <!-- Responsive: star columns shrink to fit so nothing clips at min width. -->
+                                    <Grid ColumnSpacing="16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1.8*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox x:Name="GpuBox" Grid.Column="0" Header="GPU" MinWidth="160"
+                                                  HorizontalAlignment="Stretch"/>
+                                        <ComboBox x:Name="BackendBox" Grid.Column="1" Header="Graphics API" MinWidth="130"
+                                                  HorizontalAlignment="Stretch" SelectedIndex="0">
+                                            <ComboBoxItem x:Name="BackendAuto" Tag="">Auto</ComboBoxItem>
+                                            <ComboBoxItem x:Name="BackendVulkan" Tag="vulkan">Vulkan</ComboBoxItem>
+                                            <ComboBoxItem x:Name="BackendDx12" Tag="dx12">DirectX 12</ComboBoxItem>
+                                            <ComboBoxItem x:Name="BackendDx11" Tag="dx11">DirectX 11</ComboBoxItem>
+                                            <ComboBoxItem x:Name="BackendOpenGL" Tag="opengl">OpenGL</ComboBoxItem>
                                         </ComboBox>
-                                        <ComboBox x:Name="WorkloadBox" Header="Workload" Width="150" SelectedIndex="0"
+                                        <ComboBox x:Name="WorkloadBox" Grid.Column="2" Header="Workload" MinWidth="120"
+                                                  HorizontalAlignment="Stretch" SelectedIndex="0"
                                                   SelectionChanged="OnWorkloadChanged">
-                                            <ComboBoxItem>stream</ComboBoxItem>
-                                            <ComboBoxItem>nbody</ComboBoxItem>
-                                            <ComboBoxItem>stress</ComboBoxItem>
-                                            <ComboBoxItem>synthpeak</ComboBoxItem>
-                                            <ComboBoxItem>render3d</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadStream" Tag="stream">stream — bandwidth (GB/s)</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadNBody" Tag="nbody">nbody — FP32 compute (GFLOP/s)</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadStress" Tag="stress">stress — fragment fill (G-iter/s)</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadSynthPeak" Tag="synthpeak">synthpeak — peak ALU (GFLOPS/GIOPS)</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadRender3D" Tag="render3d">render3d — 3D billboards (MQuad/s)</ComboBoxItem>
                                         </ComboBox>
-                                        <ComboBox x:Name="PrecisionBox" Width="120" SelectedIndex="0" IsEnabled="False">
-                                            <ComboBoxItem>fp32</ComboBoxItem>
-                                            <ComboBoxItem>fp16</ComboBoxItem>
-                                            <ComboBoxItem>fp64</ComboBoxItem>
-                                            <ComboBoxItem>int32</ComboBoxItem>
+                                        <ComboBox x:Name="PrecisionBox" Grid.Column="3" MinWidth="100"
+                                                  HorizontalAlignment="Stretch" SelectedIndex="0" IsEnabled="False">
+                                            <ComboBoxItem x:Name="PrecisionFp32" Tag="fp32">fp32 — standard float</ComboBoxItem>
+                                            <ComboBoxItem x:Name="PrecisionFp16" Tag="fp16">fp16 — half precision</ComboBoxItem>
+                                            <ComboBoxItem x:Name="PrecisionFp64" Tag="fp64">fp64 — double precision</ComboBoxItem>
+                                            <ComboBoxItem x:Name="PrecisionInt32" Tag="int32">int32 — integer ops</ComboBoxItem>
                                         </ComboBox>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="16">
-                                        <TextBox x:Name="FramesBox" Header="Frames" Text="600" Width="120"/>
-                                        <TextBox x:Name="ExtraBox" Header="Extra" PlaceholderText="optional" Width="320"/>
-                                    </StackPanel>
+                                    </Grid>
+                                    <!-- Responsive: Extra stretches/shrinks so it never clips at min width. -->
+                                    <Grid ColumnSpacing="16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox x:Name="DurationUnitBox" Grid.Column="0" Header="Duration" MinWidth="120"
+                                                  SelectedIndex="0" SelectionChanged="OnDurationUnitChanged">
+                                            <ComboBoxItem x:Name="DurationSeconds">Seconds</ComboBoxItem>
+                                            <ComboBoxItem x:Name="DurationFrames">Frames</ComboBoxItem>
+                                        </ComboBox>
+                                        <TextBox x:Name="DurationValueBox" Grid.Column="1" Header="Value" Text="15" Width="110"/>
+                                        <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
+                                            <ComboBox x:Name="ParticlePresetBox" Header="Particles" Width="220"
+                                                      SelectedIndex="1" SelectionChanged="OnParticlePresetChanged">
+                                                <ComboBoxItem x:Name="ParticlesLight" Tag="65536">Light — 65K</ComboBoxItem>
+                                                <ComboBoxItem x:Name="ParticlesMedium" Tag="1048576">Medium — 1M</ComboBoxItem>
+                                                <ComboBoxItem x:Name="ParticlesHeavy" Tag="4194304">Heavy — 4M</ComboBoxItem>
+                                                <ComboBoxItem x:Name="ParticlesExtreme" Tag="16777216">Extreme — 16M</ComboBoxItem>
+                                                <ComboBoxItem x:Name="ParticlesCustom" Tag="custom">Custom…</ComboBoxItem>
+                                            </ComboBox>
+                                            <TextBox x:Name="CustomParticleBox" Header="Custom particles" Width="220"
+                                                     PlaceholderText="multiple of 256" Visibility="Collapsed"/>
+                                        </StackPanel>
+                                        <TextBox x:Name="ExtraBox" Grid.Column="2" Grid.ColumnSpan="2" Header="Extra" PlaceholderText="optional"
+                                                 Visibility="Collapsed"
+                                                 HorizontalAlignment="Stretch"/>
+                                    </Grid>
                                 </StackPanel>
                             </Border>
 
@@ -114,10 +151,19 @@
                                 <StackPanel Spacing="8">
                                     <TextBlock x:Name="AdvancedLabel" Text="Advanced" FontWeight="SemiBold"/>
                                     <StackPanel Orientation="Horizontal" Spacing="20">
-                                        <CheckBox x:Name="HeadlessBox" Content="Headless"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <CheckBox x:Name="HeadlessBox" Content="Headless" MinWidth="0"/>
+                                            <FontIcon x:Name="HeadlessInfo" Glyph="&#xE946;" FontSize="14"
+                                                      VerticalAlignment="Center"
+                                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        </StackPanel>
                                         <CheckBox x:Name="VsyncBox" Content="V-Sync"/>
-                                        <CheckBox x:Name="HostMemBox" Content="Host memory"/>
-                                        <CheckBox x:Name="WarpBox" Content="WARP"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <CheckBox x:Name="HostMemBox" Content="Host memory" MinWidth="0"/>
+                                            <FontIcon x:Name="HostMemInfo" Glyph="&#xE946;" FontSize="14"
+                                                      VerticalAlignment="Center"
+                                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -164,10 +210,79 @@
                                 VerticalAlignment="Bottom" Background="#C42B1C" Foreground="White"/>
                     </StackPanel>
 
-                    <!-- Sort + GPU filter (grouped dropdown) + time range -->
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="16" Margin="0,0,0,8"
-                                VerticalAlignment="Bottom">
-                        <ComboBox x:Name="SortBox" Header="Sort by" Width="180" SelectedIndex="0"
+                    <!-- Sort + workload/particle/GPU filters + time range -->
+                    <Grid Grid.Row="1" ColumnSpacing="16" Margin="0,0,0,8"
+                          VerticalAlignment="Bottom">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.2*"/>
+                            <ColumnDefinition Width="0.9*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Bottom">
+                            <TextBlock x:Name="ApiFilterLabel" Text="Graphics API" Margin="1,0,0,0"/>
+                            <DropDownButton x:Name="ApiFilterButton" Content="Graphics API" MinWidth="160" Height="32"
+                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                            VerticalContentAlignment="Center">
+                                <DropDownButton.Flyout>
+                                    <Flyout x:Name="ApiFilterFlyout" Placement="Bottom">
+                                        <StackPanel Width="260" Spacing="8">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Button x:Name="SelectAllApis" Content="All"/>
+                                                <Button x:Name="ClearAllApis" Content="None"/>
+                                            </StackPanel>
+                                            <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
+                                                <StackPanel x:Name="ApiFilterPanel" Spacing="2"/>
+                                            </ScrollViewer>
+                                        </StackPanel>
+                                    </Flyout>
+                                </DropDownButton.Flyout>
+                            </DropDownButton>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Bottom">
+                            <TextBlock x:Name="WorkloadFilterLabel" Text="Workload" Margin="1,0,0,0"/>
+                            <DropDownButton x:Name="WorkloadFilterButton" Content="All workloads" MinWidth="160" Height="32"
+                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                            VerticalContentAlignment="Center">
+                                <DropDownButton.Flyout>
+                                    <Flyout x:Name="WorkloadFilterFlyout" Placement="Bottom">
+                                        <StackPanel Width="300" Spacing="8">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Button x:Name="SelectAllWorkloads" Content="All"/>
+                                                <Button x:Name="ClearAllWorkloads" Content="None"/>
+                                            </StackPanel>
+                                            <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
+                                                <StackPanel x:Name="WorkloadFilterPanel" Spacing="2"/>
+                                            </ScrollViewer>
+                                        </StackPanel>
+                                    </Flyout>
+                                </DropDownButton.Flyout>
+                            </DropDownButton>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Bottom">
+                            <TextBlock x:Name="ParticleFilterLabel" Text="Particles" Margin="1,0,0,0"/>
+                            <DropDownButton x:Name="ParticleFilterButton" Content="All particle counts" MinWidth="170" Height="32"
+                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                            VerticalContentAlignment="Center">
+                                <DropDownButton.Flyout>
+                                    <Flyout x:Name="ParticleFilterFlyout" Placement="Bottom">
+                                        <StackPanel Width="300" Spacing="8">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Button x:Name="SelectAllParticles" Content="All"/>
+                                                <Button x:Name="ClearAllParticles" Content="None"/>
+                                            </StackPanel>
+                                            <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
+                                                <StackPanel x:Name="ParticleFilterPanel" Spacing="2"/>
+                                            </ScrollViewer>
+                                        </StackPanel>
+                                    </Flyout>
+                                </DropDownButton.Flyout>
+                            </DropDownButton>
+                        </StackPanel>
+                        <ComboBox x:Name="SortBox" Header="Sort by" Width="180" SelectedIndex="0" Visibility="Collapsed"
                                   VerticalAlignment="Bottom" SelectionChanged="OnHistoryViewChanged">
                             <ComboBoxItem x:Name="SortTime">Time (newest)</ComboBoxItem>
                             <ComboBoxItem x:Name="SortScore">Score (high→low)</ComboBoxItem>
@@ -175,10 +290,19 @@
                             <ComboBoxItem x:Name="SortDevice">GPU / Renderer</ComboBoxItem>
                             <ComboBoxItem x:Name="SortWorkload">Workload</ComboBoxItem>
                         </ComboBox>
-                        <StackPanel Spacing="4" VerticalAlignment="Bottom">
+                        <ComboBox x:Name="WorkloadFilterBox" Header="Workload" Width="170" SelectedIndex="0" Visibility="Collapsed"
+                                  VerticalAlignment="Bottom" SelectionChanged="OnHistoryViewChanged">
+                            <ComboBoxItem x:Name="WorkloadFilterAll" Tag="*">All workloads</ComboBoxItem>
+                        </ComboBox>
+                        <ComboBox x:Name="ParticleFilterBox" Header="Particles" Width="190" SelectedIndex="0" Visibility="Collapsed"
+                                  VerticalAlignment="Bottom" SelectionChanged="OnHistoryViewChanged">
+                            <ComboBoxItem x:Name="ParticleFilterAll" Tag="0">All particle counts</ComboBoxItem>
+                        </ComboBox>
+                        <StackPanel Grid.Column="3" Spacing="4" VerticalAlignment="Bottom">
                             <TextBlock x:Name="GpuFilterLabel" Text="GPUs" Margin="1,0,0,0"/>
                             <DropDownButton x:Name="GpuFilterButton" Content="All GPUs" MinWidth="220" Height="32"
-                                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center">
+                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                            VerticalContentAlignment="Center">
                                 <DropDownButton.Flyout>
                                     <Flyout x:Name="GpuFilterFlyout" Placement="Bottom">
                                         <StackPanel Width="300" Spacing="8">
@@ -194,7 +318,8 @@
                                 </DropDownButton.Flyout>
                             </DropDownButton>
                         </StackPanel>
-                        <ComboBox x:Name="TimeRangeBox" Header="Time range" Width="160" SelectedIndex="0"
+                        <ComboBox x:Name="TimeRangeBox" Grid.Column="4" Header="Time range" MinWidth="150" SelectedIndex="0"
+                                  HorizontalAlignment="Stretch"
                                   VerticalAlignment="Bottom" SelectionChanged="OnHistoryViewChanged">
                             <ComboBoxItem x:Name="RangeAll">All</ComboBoxItem>
                             <ComboBoxItem x:Name="RangeToday">Today</ComboBoxItem>
@@ -202,7 +327,7 @@
                             <ComboBoxItem x:Name="Range30">Last 30 days</ComboBoxItem>
                             <ComboBoxItem x:Name="RangeCustom">Custom range…</ComboBoxItem>
                         </ComboBox>
-                    </StackPanel>
+                    </Grid>
 
                     <!-- Custom date range (only shown for "Custom range…") -->
                     <StackPanel x:Name="DateRangeRow" Grid.Row="2" Orientation="Horizontal" Spacing="16"
@@ -226,8 +351,9 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
-                                <TextBlock x:Name="HistoryHeader" Grid.Row="0" FontFamily="Consolas"
-                                           Opacity="0.7" Margin="60,10,16,6"/>
+                                <TextBlock x:Name="HistoryHeader" Grid.Row="0" Visibility="Collapsed"/>
+                                <StackPanel x:Name="HistoryHeaderPanel" Grid.Row="0" Orientation="Horizontal"
+                                            Margin="60,10,16,6" Spacing="0"/>
                                 <ListView x:Name="HistoryList" Grid.Row="1" SelectionMode="Multiple"
                                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                                           ScrollViewer.HorizontalScrollMode="Disabled"/>

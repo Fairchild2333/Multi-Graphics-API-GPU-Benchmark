@@ -3,6 +3,7 @@
 #include "MainWindow.g.h"
 #include "benchmark_results.h"
 #include <winrt/Microsoft.UI.Dispatching.h>
+#include <array>
 #include <string>
 #include <vector>
 
@@ -32,6 +33,12 @@ namespace winrt::gpu_bench_gui::implementation
         void OnWorkloadChanged(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
+        void OnDurationUnitChanged(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
+        void OnParticlePresetChanged(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
 
         // History / charts
         void OnRefreshHistory(winrt::Windows::Foundation::IInspectable const& sender,
@@ -59,8 +66,12 @@ namespace winrt::gpu_bench_gui::implementation
         void refreshHistory();         // (re)load from disk + rebuild filters + render
         void applyHistoryView();       // filter + sort + render m_results
         void rebuildGpuFilter();       // distinct-device toggle menu items
+        void rebuildHistoryFilters();  // API + workload + particle-count toggle menus
         std::string selected(winrt::Microsoft::UI::Xaml::Controls::ComboBox const& box);
         std::string backendValue();    // capitalized display -> engine token
+        std::string particleValue();   // "" means use engine default
+        // Duration as engine args: {"--time","<s>"} (default) or {"--benchmark","<frames>"}.
+        std::vector<std::string> durationArgs();
         std::vector<std::string> buildArgs(bool runAll);
         // Build the cliMain invocation(s) for the selected preset (sets needCharts).
         std::vector<std::vector<std::string>> buildPresetJobs(bool& needCharts);
@@ -73,10 +84,14 @@ namespace winrt::gpu_bench_gui::implementation
         bool  m_suppressCombo{ false };
         std::string m_enginePath;          // build/Release/gpu_benchmark.exe (shader dir)
         std::vector<int> m_gpuIndices;     // engine GPU index per GpuBox row after "(auto)"
+        std::vector<std::array<bool, 4>> m_gpuApiSupport;  // {vulkan,dx12,dx11,opengl} per row
         std::string m_cpuName;             // for relabelling the software (WARP) renderer
 
         std::vector<gpu_bench::BenchmarkResult> m_results;   // loaded history
         std::vector<std::string> m_displayedIds;             // result id per visible row
+        bool m_historyFiltersInitialized{ false };
+        std::string m_historySortColumn{ "time" };
+        bool m_historySortAscending{ false };
     };
 }
 
