@@ -19,10 +19,12 @@
 #include <winrt/Windows.UI.Text.h>
 
 #include <algorithm>
+#include <cctype>
 #include <ctime>
 #include <filesystem>
 #include <iostream>
 #include <map>
+#include <mutex>
 #include <set>
 #include <sstream>
 #include <string>
@@ -135,17 +137,50 @@ namespace
         return {};
     }
 
+    // Serialise in-process cliMain calls: the function redirects the global
+    // std::cout / std::cerr stream buffers, which is inherently not thread-safe.
+    static std::mutex g_cliMutex;
+
     // Run gpu_bench::cliMain in-process with synthesized argv, capturing stdout.
-    std::string captureCli(std::vector<std::string> args)
+    struct CliResult { std::string output; int exitCode; };
+    CliResult captureCli(std::vector<std::string> args)
     {
+        std::lock_guard<std::mutex> lock(g_cliMutex);
         std::vector<char*> argv;
         argv.reserve(args.size());
         for (auto& a : args) argv.push_back(a.data());
+
+        // Read the current process-wide SEH filter so we can restore it after
+        // cliMain returns. cliMain installs its own CrashHandler which would
+        // otherwise permanently replace WinUI's exception handling.
+        // SetUnhandledExceptionFilter(nullptr) is the only API to read the
+        // current value; it also clears the filter momentarily, so we restore
+        // it immediately to minimise the unprotected window.
+        auto prevSEH = ::SetUnhandledExceptionFilter(nullptr);
+        ::SetUnhandledExceptionFilter(prevSEH);  // restore while we set up
+
         std::ostringstream cap;
         std::streambuf* old = std::cout.rdbuf(cap.rdbuf());
-        try { gpu_bench::cliMain((int)argv.size(), argv.data()); } catch (...) {}
+        std::streambuf* old_err = std::cerr.rdbuf(cap.rdbuf());
+        // Tell cliMain not to call glfwTerminate() -- we may have more jobs to
+        // run and the GUI manages the overall GLFW lifetime.
+        gpu_bench::skipGlfwTerminate = true;
+
+        int rc = -1;
+        try { rc = gpu_bench::cliMain((int)argv.size(), argv.data()); }
+        catch (std::exception const& ex) {
+            cap << "\n[GUI captureCli] exception: " << ex.what() << "\n";
+        }
+        catch (...) {
+            cap << "\n[GUI captureCli] unknown exception\n";
+        }
         std::cout.rdbuf(old);
-        return cap.str();
+        std::cerr.rdbuf(old_err);
+
+        // Restore the SEH filter that cliMain replaced with its own CrashHandler.
+        ::SetUnhandledExceptionFilter(prevSEH);
+
+        return { cap.str(), rc };
     }
 
     std::string extractScore(std::string const& out)
@@ -737,7 +772,7 @@ void MainWindow::applyLanguage()
     PresetQuick().Content(locContent("Quick run (best API / GPU, Medium)",
                                      "快速运行（最佳 API / GPU，中等）"));
     PresetCustom().Content(locContent("Custom run (choose API / GPU / workload)",
-                                      "自定义运行（选择 API / GPU / 负载）"));
+                                      "自定义运行（选择 API / GPU / 测试项目）"));
     PresetFullOne().Content(locContent("Full analysis — one GPU (all APIs + RenderDoc + charts)",
                                        "完整分析 —— 单 GPU（全部 API + RenderDoc + 图表）"));
     PresetFullAll().Content(locContent("Full analysis — all GPUs × APIs (+ RenderDoc + charts)",
@@ -755,7 +790,7 @@ void MainWindow::applyLanguage()
     BackendDx12().Content(locContent("DirectX 12", "DirectX 12"));
     BackendDx11().Content(locContent("DirectX 11", "DirectX 11"));
     BackendOpenGL().Content(locContent("OpenGL", "OpenGL"));
-    WorkloadBox().Header(locContent("Workload", "负载"));
+    WorkloadBox().Header(locContent("Workload", "测试项目"));
     WorkloadStream().Content(locContent("stream — bandwidth (GB/s)",
                                         "stream —— 显存带宽 (GB/s)"));
     WorkloadNBody().Content(locContent("nbody — FP32 compute (GFLOP/s)",
@@ -811,9 +846,9 @@ void MainWindow::applyLanguage()
     SortScore().Content(locContent("Score (high→low)", "分数（高→低）"));
     SortApi().Content(locContent("Graphics API", "图形 API"));
     SortDevice().Content(locContent("GPU / Renderer", "GPU / 渲染器"));
-    SortWorkload().Content(locContent("Workload", "负载"));
-    WorkloadFilterBox().Header(locContent("Workload", "负载"));
-    WorkloadFilterAll().Content(locContent("All workloads", "全部负载"));
+    SortWorkload().Content(locContent("Workload", "测试项目"));
+    WorkloadFilterBox().Header(locContent("Workload", "测试项目"));
+    WorkloadFilterAll().Content(locContent("All workloads", "全部项目"));
     ParticleFilterBox().Header(locContent("Particles", "粒子数"));
     ParticleFilterAll().Content(locContent("All particle counts", "全部粒子数"));
     TimeRangeBox().Header(locContent("Time range", "时间范围"));
@@ -885,6 +920,10 @@ void MainWindow::updateExtraLabel()
     bool showParticles = particleTest || (customRun && particleWorkload);
     bool showExtra = flightsTest || (customRun && !particleWorkload);
 
+    // Only custom run honours the workload / precision dropdowns.
+    WorkloadBox().IsEnabled(customRun);
+    PrecisionBox().IsEnabled(customRun && wl == "synthpeak");
+
     ParticlePresetBox().Visibility(showParticles ? Visibility::Visible : Visibility::Collapsed);
     CustomParticleBox().Visibility(showParticles && selected(ParticlePresetBox()) == "custom"
         ? Visibility::Visible : Visibility::Collapsed);
@@ -916,7 +955,7 @@ void MainWindow::populateGpus()
     std::string engine = m_enginePath;
     std::thread([this, strong, disp, engine]()
     {
-        std::string out = captureCli({ engine, "--list-gpus" });
+        std::string out = captureCli({ engine, "--list-gpus" }).output;
         std::vector<GpuRow> gpus;
         std::istringstream ss(out); std::string line;
         while (std::getline(ss, line))
@@ -954,7 +993,8 @@ void MainWindow::populateGpus()
 void MainWindow::OnWorkloadChanged(IInspectable const&, SelectionChangedEventArgs const&)
 {
     if (!m_uiReady) return;
-    PrecisionBox().IsEnabled(selected(WorkloadBox()) == "synthpeak");
+    // PrecisionBox enable state is handled inside updateExtraLabel() which
+    // correctly checks customRun; doing it here would bypass that guard.
     updateExtraLabel();
 }
 
@@ -978,7 +1018,7 @@ void MainWindow::OnDurationUnitChanged(IInspectable const&, SelectionChangedEven
 // ---- run -------------------------------------------------------------------
 std::string MainWindow::backendValue()
 {
-    return selected(BackendBox());       // "" = Auto
+    return selected(BackendBox());       // "auto" when Auto is selected (Tag-based)
 }
 
 std::string MainWindow::particleValue()
@@ -1143,11 +1183,13 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
     std::thread([this, strong, disp, jobs, needCharts, repo]()
     {
         std::string all, lastScore;
+        bool anyFailed = false;
         for (auto const& job : jobs)
         {
-            std::string out = captureCli(job);
-            all += out; all += "\n";
-            std::string sc = extractScore(out);
+            auto res = captureCli(job);
+            all += res.output; all += "\n";
+            if (res.exitCode != 0) anyFailed = true;
+            std::string sc = extractScore(res.output);
             if (!sc.empty()) lastScore = sc;
         }
 
@@ -1186,14 +1228,22 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
             }
         }
 
-        disp.TryEnqueue([this, strong, all, lastScore, needCharts]()
+        disp.TryEnqueue([this, strong, all, lastScore, needCharts, anyFailed]()
         {
             OutputBox().Text(u8(all));
-            ResultText().Text(lastScore.empty()
-                ? locText("Done — see output / History.", "完成 —— 见输出/历史。")
-                : u8(lastScore));
-            Status().Text(needCharts ? locText("Done (charts & report regenerated).", "完成（已重新生成图表与报告）。")
-                                     : locText("Done.", "完成。"));
+            if (anyFailed)
+            {
+                ResultText().Text(locText("Error — see output.", "出错 —— 见输出。"));
+                Status().Text(locText("Failed.", "运行失败。"));
+            }
+            else
+            {
+                ResultText().Text(lastScore.empty()
+                    ? locText("Done — see output / History.", "完成 —— 见输出/历史。")
+                    : u8(lastScore));
+                Status().Text(needCharts ? locText("Done (charts & report regenerated).", "完成（已重新生成图表与报告）。")
+                                         : locText("Done.", "完成。"));
+            }
             RunButton().IsEnabled(true);
             Busy().IsActive(false);
             refreshHistory();
@@ -1234,7 +1284,7 @@ void MainWindow::rebuildHistoryFilters()
 {
     {
         ApiFilterLabel().Text(locText("Graphics API", "图形 API"));
-        WorkloadFilterLabel().Text(locText("Workload", "负载"));
+        WorkloadFilterLabel().Text(locText("Workload", "测试项目"));
         ParticleFilterLabel().Text(locText("Particles", "粒子数"));
         GpuFilterLabel().Text(locText("GPUs", "显卡"));
         SelectAllApis().Content(locContent("All", "全选"));
@@ -1316,7 +1366,7 @@ void MainWindow::rebuildHistoryFilters()
     std::string currentParticles = selected(ParticleFilterBox());
 
     WorkloadFilterBox().Items().Clear();
-    WorkloadFilterAll().Content(locContent("All workloads", "全部负载"));
+    WorkloadFilterAll().Content(locContent("All workloads", "全部项目"));
     WorkloadFilterAll().Tag(box_value(L"*"));
     WorkloadFilterBox().Items().Append(WorkloadFilterAll());
 
@@ -1494,7 +1544,7 @@ void MainWindow::applyHistoryView()
         auto allowedApis = collect(ApiFilterPanel(), ApiFilterButton(),
                                    locText("All APIs", "全部 API"), locText("None", "无"));
         auto allowedWorkloads = collect(WorkloadFilterPanel(), WorkloadFilterButton(),
-                                        locText("All workloads", "全部负载"), locText("None", "无"));
+                                        locText("All workloads", "全部项目"), locText("None", "无"));
         auto allowedParticles = collect(ParticleFilterPanel(), ParticleFilterButton(),
                                         locText("All particle counts", "全部粒子数"), locText("None", "无"));
         auto allowedGpus = collect(GpuFilterPanel(), GpuFilterButton(),

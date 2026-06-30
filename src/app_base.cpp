@@ -485,15 +485,42 @@ void AppBase::ReportTimingIfDue(double deltaTime) {
     }
 
     if (!config_.headless && window_) {
-        std::string title = GetBackendName() + " Particle Sim  |  FPS: "
-                          + std::to_string(static_cast<int>(fps));
-        if (timingSampleCount_ > 0) {
-            std::ostringstream oss;
-            oss << std::fixed << std::setprecision(2)
-                << "  |  GPU: " << (accumTotalGpuMs_ / timingSampleCount_) << " ms";
-            title += oss.str();
+        const double elapsed = glfwGetTime() - runStartTime_;
+        std::ostringstream oss;
+        oss << GetBackendName();
+
+        // Workload label
+        switch (config_.workload) {
+            case gpu_bench::Workload::Stream:        oss << " | Stream";    break;
+            case gpu_bench::Workload::NBody:         oss << " | N-Body";    break;
+            case gpu_bench::Workload::StressFractal: oss << " | Stress";    break;
+            case gpu_bench::Workload::SynthPeak:     oss << " | SynthPeak"; break;
+            case gpu_bench::Workload::Render3D:      oss << " | Render3D";  break;
         }
-        glfwSetWindowTitle(window_, title.c_str());
+
+        oss << "  |  FPS: " << static_cast<int>(fps);
+
+        if (timingSampleCount_ > 0) {
+            const double avgCompute = accumComputeMs_  / timingSampleCount_;
+            const double avgRender  = accumRenderMs_   / timingSampleCount_;
+            const double avgTotal   = accumTotalGpuMs_ / timingSampleCount_;
+            oss << std::fixed << std::setprecision(2)
+                << "  |  Compute: " << avgCompute << " ms"
+                << "  Render: "     << avgRender  << " ms"
+                << "  Total: "      << avgTotal   << " ms";
+        }
+
+        // Use static_cast<int> rather than setprecision(0) to avoid polluting
+        // the stream's precision state for any code that follows.
+        oss << "  |  " << static_cast<int>(elapsed) << "s";
+        if (config_.maxRunTimeSec > 0.0) {
+            oss << " / " << static_cast<int>(config_.maxRunTimeSec) << "s";
+        } else if (config_.benchmarkMode) {
+            oss << "  Frame " << totalFrameCount_ << "/"
+                << (config_.benchFrames + config_.warmupFrames);
+        }
+
+        glfwSetWindowTitle(window_, oss.str().c_str());
     }
 
     accumComputeMs_    = 0.0;

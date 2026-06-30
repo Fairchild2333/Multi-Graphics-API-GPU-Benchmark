@@ -87,7 +87,7 @@
                                                   HorizontalAlignment="Stretch"/>
                                         <ComboBox x:Name="BackendBox" Grid.Column="1" Header="Graphics API" MinWidth="130"
                                                   HorizontalAlignment="Stretch" SelectedIndex="0">
-                                            <ComboBoxItem x:Name="BackendAuto" Tag="">Auto</ComboBoxItem>
+                                            <ComboBoxItem x:Name="BackendAuto" Tag="auto">Auto</ComboBoxItem>
                                             <ComboBoxItem x:Name="BackendVulkan" Tag="vulkan">Vulkan</ComboBoxItem>
                                             <ComboBoxItem x:Name="BackendDx12" Tag="dx12">DirectX 12</ComboBoxItem>
                                             <ComboBoxItem x:Name="BackendDx11" Tag="dx11">DirectX 11</ComboBoxItem>

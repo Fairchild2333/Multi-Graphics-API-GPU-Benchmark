@@ -1015,7 +1015,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         if (!allResults.empty())
             gpu_bench::PrintComparisonTable(allResults);
 
-        glfwTerminate();
+        if (!gpu_bench::skipGlfwTerminate)
+            glfwTerminate();
         return (failed == entries.size()) ? 1 : 0;
     }
 
@@ -1992,6 +1993,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         }
     }
 
-    glfwTerminate();
+    if (!gpu_bench::skipGlfwTerminate)
+        glfwTerminate();
     return 0;
 }
