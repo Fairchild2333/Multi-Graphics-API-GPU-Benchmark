@@ -25,17 +25,21 @@ void VulkanBackend::InitBackend() {
             CreateDepthResources();
         CreateRenderPass();
         if (config_.workload == Workload::StressFractal)
-            CreateFractalPipeline();
+            CreateFullscreenPipeline("fractal.vert.spv", "fractal.frag.spv");
+        else if (config_.workload == Workload::Volumetric)
+            CreateFullscreenPipeline("volumetric.vert.spv", "volumetric.frag.spv");
         else if (config_.workload == Workload::Render3D)
             CreateRender3DPipeline();
-        else
-            CreateGraphicsPipeline();
+        else if (config_.workload != Workload::Fluid)
+            CreateGraphicsPipeline();   // Fluid builds its own render pipeline in CreateFluidResources()
     }
     CreateComputeDescriptorSetLayout();
     CreateCommandPool();
     CreateParticleBuffer();
     if (config_.workload == Workload::Render3D && !config_.headless)
         CreateQuadBuffer();
+    if (config_.workload == Workload::Fluid)
+        CreateFluidResources();
     CreateComputeDescriptorResources();
     CreateComputePipeline();
     if (!config_.headless) {
@@ -741,12 +745,15 @@ void VulkanBackend::CreateGraphicsPipeline() {
     vkDestroyShaderModule(device_, vertMod, nullptr);
 }
 
-// Fractal stress-test pipeline: fullscreen triangle (no vertex input) + heavy
-// fragment shader. Reuses graphicsPipeline_/graphicsPipelineLayout_ slots so
-// the existing cleanup path applies.
-void VulkanBackend::CreateFractalPipeline() {
-    auto vertCode = ReadFileBytes(shaderDir_ + "fractal.vert.spv");
-    auto fragCode = ReadFileBytes(shaderDir_ + "fractal.frag.spv");
+// Fractal / Volumetric stress-test pipeline: fullscreen triangle (no vertex
+// input) + heavy fragment shader, driven by a 16-byte fragment push constant.
+// Both StressFractal and Volumetric workloads share this exact pipeline shape
+// (they differ only in which shader files are loaded and which params struct
+// is pushed), so we parameterise the loader and reuse the same builder.
+void VulkanBackend::CreateFullscreenPipeline(const char* vertSpv,
+                                             const char* fragSpv) {
+    auto vertCode = ReadFileBytes(shaderDir_ + vertSpv);
+    auto fragCode = ReadFileBytes(shaderDir_ + fragSpv);
     VkShaderModule vertMod = CreateShaderModule(vertCode);
     VkShaderModule fragMod = CreateShaderModule(fragCode);
 
@@ -797,7 +804,9 @@ void VulkanBackend::CreateFractalPipeline() {
 
     VkPushConstantRange pcr{};
     pcr.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    pcr.size       = sizeof(FractalParams);
+    // Both FractalParams and VolumetricParams are 16 bytes (4 x uint32); the
+    // pipeline layout is shared between the two fullscreen-pipeline workloads.
+    pcr.size       = 16;
 
     VkPipelineLayoutCreateInfo pli{};
     pli.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -1206,8 +1215,26 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
     if (timestampsSupported_)
         vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, timestampQueryPool_, tsBase);
 
-    if (config_.workload == Workload::StressFractal) {
-        // Fractal is a fragment-only pass: no compute, no particle barrier.
+    if (config_.workload == Workload::Fluid) {
+        // Fluid: 4 compute passes + 1 fullscreen render pass. Records its own
+        // timestamps and never touches the particle buffer / standard pipeline.
+        // The whole-fluid time is reported as "compute" since the multi-pass
+        // solve is the dominant work; render (a single fullscreen tri) is
+        // folded into the same interval for scoring purposes.
+        RecordFluidFrame(cmd, deltaTime, imageIndex);
+        if (timestampsSupported_) {
+            vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, timestampQueryPool_, tsBase + 1);
+            vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,    timestampQueryPool_, tsBase + 2);
+            vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, timestampQueryPool_, tsBase + 3);
+        }
+        if (vkEndCommandBuffer(cmd) != VK_SUCCESS)
+            throw std::runtime_error("vkEndCommandBuffer failed");
+        return;
+    }
+
+    if (config_.workload == Workload::StressFractal
+        || config_.workload == Workload::Volumetric) {
+        // Fragment-only pass: no compute, no particle barrier.
         if (timestampsSupported_)
             vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, timestampQueryPool_, tsBase + 1);
     } else {
@@ -1275,6 +1302,12 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
         FractalParams fp{ fractalElapsed_, 1.0f, config_.fractalIter, 0 };
         vkCmdPushConstants(cmd, graphicsPipelineLayout_, VK_SHADER_STAGE_FRAGMENT_BIT, 0,
                            sizeof(FractalParams), &fp);
+        vkCmdDraw(cmd, 3, 1, 0, 0);   // fullscreen triangle, no vertex buffer
+    } else if (config_.workload == Workload::Volumetric) {
+        fractalElapsed_ += deltaTime;   // reused as noise-field animation time
+        VolumetricParams vp{ fractalElapsed_, 0.05f, config_.volumetricSteps, 0 };
+        vkCmdPushConstants(cmd, graphicsPipelineLayout_, VK_SHADER_STAGE_FRAGMENT_BIT, 0,
+                           sizeof(VolumetricParams), &vp);
         vkCmdDraw(cmd, 3, 1, 0, 0);   // fullscreen triangle, no vertex buffer
     } else if (render3d) {
         fractalElapsed_ += deltaTime;   // reused as camera orbit time
@@ -1457,6 +1490,9 @@ void VulkanBackend::CleanupBackend() {
         if (fen) vkDestroyFence(device_, fen, nullptr);
     if (timestampQueryPool_)        { vkDestroyQueryPool(device_, timestampQueryPool_, nullptr); }
     if (commandPool_)               { vkDestroyCommandPool(device_, commandPool_, nullptr); }
+    // Fluid cleanup must run BEFORE the generic graphicsPipeline_ destroy
+    // below, because the fluid render pipeline is aliased into that slot.
+    CleanupFluidResources();
     if (particleBuffer_)            { vkDestroyBuffer(device_, particleBuffer_, nullptr); }
     if (particleBufferMemory_)      { vkFreeMemory(device_, particleBufferMemory_, nullptr); }
     if (quadBuffer_)                { vkDestroyBuffer(device_, quadBuffer_, nullptr); }
@@ -1471,6 +1507,498 @@ void VulkanBackend::CleanupBackend() {
     if (device_)   vkDestroyDevice(device_, nullptr);
     if (surface_)  vkDestroySurfaceKHR(instance_, surface_, nullptr);
     if (instance_) vkDestroyInstance(instance_, nullptr);
+}
+
+// -----------------------------------------------------------------------
+// Fluid (Stam 2D Eulerian) — isolated resource set + per-pass orchestration.
+// -----------------------------------------------------------------------
+
+namespace {
+// Helper: create a device-local buffer + backing memory of the given size and
+// usage. Returns the buffer/handle via out-params; caller owns lifetime.
+void CreateFluidBuffer(VkDevice device, VkPhysicalDeviceMemoryProperties memProps,
+                       VkDeviceSize size, VkBufferUsageFlags usage,
+                       VkBuffer* outBuf, VkDeviceMemory* outMem) {
+    VkBufferCreateInfo bci{};
+    bci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bci.size  = size;
+    bci.usage = usage;
+    bci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    if (vkCreateBuffer(device, &bci, nullptr, outBuf) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateBuffer (fluid) failed");
+
+    VkMemoryRequirements mr{};
+    vkGetBufferMemoryRequirements(device, *outBuf, &mr);
+
+    // Find a memory type matching the requirements in either device-local or
+    // host-visible, preferring device-local.
+    std::uint32_t typeIndex = ~0u;
+    for (std::uint32_t i = 0; i < memProps.memoryTypeCount; ++i) {
+        if ((mr.memoryTypeBits & (1u << i)) &&
+            (memProps.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
+            typeIndex = i; break;
+        }
+    }
+    if (typeIndex == ~0u) {
+        for (std::uint32_t i = 0; i < memProps.memoryTypeCount; ++i) {
+            if ((mr.memoryTypeBits & (1u << i)) &&
+                (memProps.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
+                typeIndex = i; break;
+            }
+        }
+    }
+    if (typeIndex == ~0u)
+        throw std::runtime_error("No suitable memory type for fluid buffer");
+
+    VkMemoryAllocateInfo mai{};
+    mai.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    mai.allocationSize  = mr.size;
+    mai.memoryTypeIndex = typeIndex;
+    if (vkAllocateMemory(device, &mai, nullptr, outMem) != VK_SUCCESS)
+        throw std::runtime_error("vkAllocateMemory (fluid) failed");
+    vkBindBufferMemory(device, *outBuf, *outMem, 0);
+}
+} // namespace
+
+void VulkanBackend::CreateFluidResources() {
+    fluid_.gridSize = config_.fluidGridSize;
+    const std::uint32_t N = fluid_.gridSize;
+    const VkDeviceSize stateSize = sizeof(float) * 4 * N * N;   // vec4 per cell
+    const VkDeviceSize pressSize = sizeof(float) * N * N;
+
+    VkPhysicalDeviceMemoryProperties memProps{};
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice_, &memProps);
+
+    const VkBufferUsageFlags computeUsage =
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    CreateFluidBuffer(device_, memProps, stateSize, computeUsage, &fluid_.stateA, &fluid_.stateAMem);
+    CreateFluidBuffer(device_, memProps, stateSize, computeUsage, &fluid_.stateB, &fluid_.stateBMem);
+    CreateFluidBuffer(device_, memProps, pressSize, computeUsage, &fluid_.pressA, &fluid_.pressAMem);
+    CreateFluidBuffer(device_, memProps, pressSize, computeUsage, &fluid_.pressB, &fluid_.pressBMem);
+    CreateFluidBuffer(device_, memProps, pressSize, computeUsage, &fluid_.divBuf, &fluid_.divMem);
+
+    // ---- Seed the state buffer with a swirling initial velocity + dye spot.
+    {
+        std::vector<float> init(static_cast<size_t>(stateSize / sizeof(float)));
+        for (std::uint32_t y = 0; y < N; ++y)
+            for (std::uint32_t x = 0; x < N; ++x) {
+                const size_t i = (size_t(y) * N + x) * 4;
+                const float fx = float(x) / N - 0.5f;
+                const float fy = float(y) / N - 0.5f;
+                init[i + 0] = -fy * 4.0f;             // vel.x = swirl
+                init[i + 1] =  fx * 4.0f;             // vel.y
+                const float d = std::sqrt(fx*fx + fy*fy);
+                init[i + 2] = std::max(0.0f, 1.0f - d * 4.0f);   // dye blob centre
+                init[i + 3] = 0.0f;
+            }
+        // Upload via a staging buffer + a one-shot command buffer allocated
+        // from commandPool_ (commandBuffers_[] doesn't exist yet — it is
+        // created later in InitBackend).
+        VkBuffer       staging = VK_NULL_HANDLE;
+        VkDeviceMemory stagingMem = VK_NULL_HANDLE;
+        VkBufferCreateInfo sbci{};
+        sbci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        sbci.size  = stateSize;
+        sbci.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        sbci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        vkCreateBuffer(device_, &sbci, nullptr, &staging);
+        VkMemoryRequirements mr{}; vkGetBufferMemoryRequirements(device_, staging, &mr);
+        std::uint32_t ht = ~0u;
+        for (std::uint32_t i = 0; i < memProps.memoryTypeCount; ++i)
+            if ((mr.memoryTypeBits & (1u << i)) &&
+                (memProps.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) { ht = i; break; }
+        VkMemoryAllocateInfo mai{};
+        mai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        mai.allocationSize  = mr.size;
+        mai.memoryTypeIndex = ht;
+        vkAllocateMemory(device_, &mai, nullptr, &stagingMem);
+        vkBindBufferMemory(device_, staging, stagingMem, 0);
+        void* mapped = nullptr; vkMapMemory(device_, stagingMem, 0, stateSize, 0, &mapped);
+        std::memcpy(mapped, init.data(), init.size() * sizeof(float));
+        vkUnmapMemory(device_, stagingMem);
+
+        VkCommandBuffer cmd = VK_NULL_HANDLE;
+        VkCommandBufferAllocateInfo aci{};
+        aci.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        aci.commandPool = commandPool_;
+        aci.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        aci.commandBufferCount = 1;
+        vkAllocateCommandBuffers(device_, &aci, &cmd);
+        VkCommandBufferBeginInfo bi{}; bi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        vkBeginCommandBuffer(cmd, &bi);
+        VkBufferCopy cp{ 0, 0, stateSize };
+        vkCmdCopyBuffer(cmd, staging, fluid_.stateA, 1, &cp);
+        vkCmdFillBuffer(cmd, fluid_.pressA, 0, VK_WHOLE_SIZE, 0);
+        vkCmdFillBuffer(cmd, fluid_.pressB, 0, VK_WHOLE_SIZE, 0);
+        vkCmdFillBuffer(cmd, fluid_.divBuf, 0, VK_WHOLE_SIZE, 0);
+        vkEndCommandBuffer(cmd);
+        VkSubmitInfo si{}; si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        si.commandBufferCount = 1; si.pCommandBuffers = &cmd;
+        vkQueueSubmit(graphicsQueue_, 1, &si, VK_NULL_HANDLE);
+        vkQueueWaitIdle(graphicsQueue_);
+        vkFreeCommandBuffers(device_, commandPool_, 1, &cmd);
+        vkDestroyBuffer(device_, staging, nullptr);
+        vkFreeMemory(device_, stagingMem, nullptr);
+    }
+
+    // ---- Compute descriptor set layout: 5 bindings (inCells, outCells,
+    // inP, outP, div) — every pass uses the subset it needs.
+    {
+        VkDescriptorSetLayoutBinding b[5]{};
+        const VkShaderStageFlags cs = VK_SHADER_STAGE_COMPUTE_BIT;
+        for (int i = 0; i < 5; ++i) {
+            b[i].binding = i;
+            b[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            b[i].descriptorCount = 1;
+            b[i].stageFlags = cs;
+        }
+        VkDescriptorSetLayoutCreateInfo ci{};
+        ci.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        ci.bindingCount = 5; ci.pBindings = b;
+        if (vkCreateDescriptorSetLayout(device_, &ci, nullptr, &fluid_.computeSetLayout) != VK_SUCCESS)
+            throw std::runtime_error("vkCreateDescriptorSetLayout (fluid compute) failed");
+    }
+
+    // ---- Allocate descriptor pool + sets (advect/div/jacA/jacB/sub).
+    {
+        VkDescriptorPoolSize ps{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 5 * 5 };  // 5 sets x 5 bindings
+        VkDescriptorPoolCreateInfo pi{};
+        pi.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        pi.poolSizeCount = 1; pi.pPoolSizes = &ps;
+        pi.maxSets = 5;
+        vkCreateDescriptorPool(device_, &pi, nullptr, &fluid_.computePool);
+
+        VkDescriptorSetLayout layouts[5] = {
+            fluid_.computeSetLayout, fluid_.computeSetLayout, fluid_.computeSetLayout,
+            fluid_.computeSetLayout, fluid_.computeSetLayout
+        };
+        VkDescriptorSetAllocateInfo ai{};
+        ai.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        ai.descriptorPool = fluid_.computePool;
+        ai.descriptorSetCount = 5;
+        ai.pSetLayouts = layouts;
+        VkDescriptorSet sets[5];
+        vkAllocateDescriptorSets(device_, &ai, sets);
+        fluid_.setAdvect = sets[0];
+        fluid_.setDiv    = sets[1];
+        fluid_.setJacA   = sets[2];
+        fluid_.setJacB   = sets[3];
+        fluid_.setSub    = sets[4];
+
+        auto writeSet = [&](VkDescriptorSet s, std::uint32_t binding, VkBuffer buf) {
+            VkDescriptorBufferInfo bi{ buf, 0, VK_WHOLE_SIZE };
+            VkWriteDescriptorSet w{};
+            w.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            w.dstSet = s; w.dstBinding = binding;
+            w.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            w.descriptorCount = 1; w.pBufferInfo = &bi;
+            vkUpdateDescriptorSets(device_, 1, &w, 0, nullptr);
+        };
+        // Advect: in=A (0), out=B (1)
+        writeSet(fluid_.setAdvect, 0, fluid_.stateA);
+        writeSet(fluid_.setAdvect, 1, fluid_.stateB);
+        // Divergence: in=A (0), out=div (3 -> writes to binding 3 = outP slot)
+        writeSet(fluid_.setDiv, 0, fluid_.stateA);
+        writeSet(fluid_.setDiv, 3, fluid_.divBuf);
+        // Jacobi A: in=pressA (2), out=pressB (3), div (4)
+        writeSet(fluid_.setJacA, 2, fluid_.pressA);
+        writeSet(fluid_.setJacA, 3, fluid_.pressB);
+        writeSet(fluid_.setJacA, 4, fluid_.divBuf);
+        // Jacobi B: in=pressB (2), out=pressA (3), div (4)
+        writeSet(fluid_.setJacB, 2, fluid_.pressB);
+        writeSet(fluid_.setJacB, 3, fluid_.pressA);
+        writeSet(fluid_.setJacB, 4, fluid_.divBuf);
+        // Subtract: in=A (0), out=B (1), inP=pressA (2)
+        writeSet(fluid_.setSub, 0, fluid_.stateA);
+        writeSet(fluid_.setSub, 1, fluid_.stateB);
+        writeSet(fluid_.setSub, 2, fluid_.pressA);
+    }
+
+    // ---- Compute pipeline layout (shared across the 4 passes; push constants
+    // carry FluidParams).
+    {
+        VkPushConstantRange pcr{};
+        pcr.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+        pcr.size = sizeof(FluidParams);
+        VkPipelineLayoutCreateInfo li{};
+        li.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        li.setLayoutCount = 1; li.pSetLayouts = &fluid_.computeSetLayout;
+        li.pushConstantRangeCount = 1; li.pPushConstantRanges = &pcr;
+        vkCreatePipelineLayout(device_, &li, nullptr, &fluid_.computeLayout);
+    }
+
+    // ---- 4 compute pipelines (one per pass).
+    auto createComputePipe = [&](const char* spvName, VkPipeline* pipeOut) {
+        auto code = ReadFileBytes(shaderDir_ + spvName);
+        VkShaderModule mod = CreateShaderModule(code);
+        VkPipelineShaderStageCreateInfo si{};
+        si.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        si.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+        si.module = mod; si.pName = "main";
+        VkComputePipelineCreateInfo ci{};
+        ci.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+        ci.stage = si; ci.layout = fluid_.computeLayout;
+        VkResult rc = vkCreateComputePipelines(device_, VK_NULL_HANDLE, 1, &ci, nullptr, pipeOut);
+        vkDestroyShaderModule(device_, mod, nullptr);
+        if (rc != VK_SUCCESS)
+            throw std::runtime_error(std::string("vkCreateComputePipelines (") + spvName + ") failed");
+    };
+    createComputePipe("fluid_advect.comp.spv",    &fluid_.advectPipe);
+    createComputePipe("fluid_divergence.comp.spv", &fluid_.divPipe);
+    createComputePipe("fluid_jacobi.comp.spv",    &fluid_.jacobiPipe);
+    createComputePipe("fluid_subtract.comp.spv",  &fluid_.subtractPipe);
+
+    // ---- Render pipeline: fullscreen tri + fragment reads the dye SSBO.
+    if (!config_.headless) {
+        VkDescriptorSetLayoutBinding rb{};
+        rb.binding = 0;
+        rb.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        rb.descriptorCount = 1;
+        rb.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        VkDescriptorSetLayoutCreateInfo rci{};
+        rci.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        rci.bindingCount = 1; rci.pBindings = &rb;
+        vkCreateDescriptorSetLayout(device_, &rci, nullptr, &fluid_.renderSetLayout);
+
+        // Render descriptor pool — separate from the compute pool so we don't
+        // overwrite its handle (which would leak the compute pool).
+        VkDescriptorPoolSize rps{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 };
+        VkDescriptorPoolCreateInfo rpi{};
+        rpi.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        rpi.poolSizeCount = 1; rpi.pPoolSizes = &rps;
+        rpi.maxSets = 1;
+        vkCreateDescriptorPool(device_, &rpi, nullptr, &fluid_.renderPool);
+
+        VkDescriptorSetAllocateInfo rai{};
+        rai.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        rai.descriptorPool = fluid_.renderPool;
+        rai.descriptorSetCount = 1;
+        rai.pSetLayouts = &fluid_.renderSetLayout;
+        vkAllocateDescriptorSets(device_, &rai, &fluid_.setRender);
+        VkDescriptorBufferInfo bi{ fluid_.stateA, 0, VK_WHOLE_SIZE };
+        VkWriteDescriptorSet w{};
+        w.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        w.dstSet = fluid_.setRender; w.dstBinding = 0;
+        w.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        w.descriptorCount = 1; w.pBufferInfo = &bi;
+        vkUpdateDescriptorSets(device_, 1, &w, 0, nullptr);
+
+        // Render pipeline layout: render descriptor set + 16-byte fragment/vertex push constant.
+        VkPushConstantRange rpcr{};
+        rpcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        rpcr.size = sizeof(FluidRenderParams);
+        VkPipelineLayoutCreateInfo rli{};
+        rli.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        rli.setLayoutCount = 1; rli.pSetLayouts = &fluid_.renderSetLayout;
+        rli.pushConstantRangeCount = 1; rli.pPushConstantRanges = &rpcr;
+        vkCreatePipelineLayout(device_, &rli, nullptr, &fluid_.renderLayout);
+
+        auto vcode = ReadFileBytes(shaderDir_ + "fluid_render.vert.spv");
+        auto fcode = ReadFileBytes(shaderDir_ + "fluid_render.frag.spv");
+        VkShaderModule vmod = CreateShaderModule(vcode);
+        VkShaderModule fmod = CreateShaderModule(fcode);
+
+        VkPipelineShaderStageCreateInfo stages[2]{};
+        stages[0].sType = stages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        stages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;   stages[0].module = vmod; stages[0].pName = "main";
+        stages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT; stages[1].module = fmod; stages[1].pName = "main";
+
+        VkPipelineVertexInputStateCreateInfo vi{};
+        vi.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+        VkPipelineInputAssemblyStateCreateInfo ia{};
+        ia.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+        ia.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        VkViewport vp{ 0, 0, (float)swapChainExtent_.width, (float)swapChainExtent_.height, 0, 1 };
+        VkRect2D sc{ {0,0}, swapChainExtent_ };
+        VkPipelineViewportStateCreateInfo vs{};
+        vs.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        vs.viewportCount = 1; vs.pViewports = &vp; vs.scissorCount = 1; vs.pScissors = &sc;
+        VkPipelineRasterizationStateCreateInfo rs{};
+        rs.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+        rs.polygonMode = VK_POLYGON_MODE_FILL; rs.lineWidth = 1.0f; rs.cullMode = VK_CULL_MODE_NONE;
+        VkPipelineMultisampleStateCreateInfo ms{};
+        ms.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        ms.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+        VkPipelineColorBlendAttachmentState cba{};
+        cba.colorWriteMask = 0xF;
+        cba.blendEnable = VK_FALSE;
+        VkPipelineColorBlendStateCreateInfo cb{};
+        cb.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+        cb.attachmentCount = 1; cb.pAttachments = &cba;
+
+        VkGraphicsPipelineCreateInfo pi{};
+        pi.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+        pi.stageCount = 2; pi.pStages = stages;
+        pi.pVertexInputState = &vi; pi.pInputAssemblyState = &ia;
+        pi.pViewportState = &vs; pi.pRasterizationState = &rs;
+        pi.pMultisampleState = &ms; pi.pColorBlendState = &cb;
+        pi.layout = fluid_.renderLayout; pi.renderPass = renderPass_; pi.subpass = 0;
+        if (vkCreateGraphicsPipelines(device_, VK_NULL_HANDLE, 1, &pi, nullptr, &fluid_.renderPipe) != VK_SUCCESS)
+            throw std::runtime_error("vkCreateGraphicsPipelines (fluid render) failed");
+        vkDestroyShaderModule(device_, vmod, nullptr);
+        vkDestroyShaderModule(device_, fmod, nullptr);
+
+        // Use the fluid render pipeline as the "graphics" pipeline for the
+        // command-buffer recording path's bind point.
+        graphicsPipeline_ = fluid_.renderPipe;
+        graphicsPipelineLayout_ = fluid_.renderLayout;
+    }
+}
+
+void VulkanBackend::CleanupFluidResources() {
+    if (device_ == VK_NULL_HANDLE) return;
+    vkDeviceWaitIdle(device_);
+    // The fluid render pipeline was assigned to graphicsPipeline_ so the
+    // shared command-recording path binds it; clear that alias before the
+    // fluid-specific destroy below to avoid a double-free.
+    if (graphicsPipeline_ == fluid_.renderPipe)    graphicsPipeline_ = VK_NULL_HANDLE;
+    if (graphicsPipelineLayout_ == fluid_.renderLayout) graphicsPipelineLayout_ = VK_NULL_HANDLE;
+    auto destroyPipe = [](VkDevice d, VkPipeline& p) { if (p) { vkDestroyPipeline(d, p, nullptr); p = VK_NULL_HANDLE; } };
+    destroyPipe(device_, fluid_.advectPipe);
+    destroyPipe(device_, fluid_.divPipe);
+    destroyPipe(device_, fluid_.jacobiPipe);
+    destroyPipe(device_, fluid_.subtractPipe);
+    destroyPipe(device_, fluid_.renderPipe);
+    if (fluid_.computeLayout) { vkDestroyPipelineLayout(device_, fluid_.computeLayout, nullptr); fluid_.computeLayout = VK_NULL_HANDLE; }
+    if (fluid_.renderLayout)  { vkDestroyPipelineLayout(device_, fluid_.renderLayout,  nullptr); fluid_.renderLayout  = VK_NULL_HANDLE; }
+    if (fluid_.computePool)   { vkDestroyDescriptorPool(device_, fluid_.computePool,   nullptr); fluid_.computePool   = VK_NULL_HANDLE; }
+    if (fluid_.renderPool)    { vkDestroyDescriptorPool(device_, fluid_.renderPool,    nullptr); fluid_.renderPool    = VK_NULL_HANDLE; }
+    if (fluid_.computeSetLayout) { vkDestroyDescriptorSetLayout(device_, fluid_.computeSetLayout, nullptr); fluid_.computeSetLayout = VK_NULL_HANDLE; }
+    if (fluid_.renderSetLayout)  { vkDestroyDescriptorSetLayout(device_, fluid_.renderSetLayout,  nullptr); fluid_.renderSetLayout  = VK_NULL_HANDLE; }
+
+    auto destroyBuf = [](VkDevice d, VkBuffer& b, VkDeviceMemory& m) {
+        if (b) { vkDestroyBuffer(d, b, nullptr); b = VK_NULL_HANDLE; }
+        if (m) { vkFreeMemory(d, m, nullptr); m = VK_NULL_HANDLE; }
+    };
+    destroyBuf(device_, fluid_.stateA, fluid_.stateAMem);
+    destroyBuf(device_, fluid_.stateB, fluid_.stateBMem);
+    destroyBuf(device_, fluid_.pressA, fluid_.pressAMem);
+    destroyBuf(device_, fluid_.pressB, fluid_.pressBMem);
+    destroyBuf(device_, fluid_.divBuf, fluid_.divMem);
+}
+
+void VulkanBackend::RecordFluidFrame(VkCommandBuffer cmd, float deltaTime, std::uint32_t imageIndex) {
+    const std::uint32_t N = fluid_.gridSize;
+    const FluidParams fp{ deltaTime, 1.0f / float(N), N, 0 };
+    const std::uint32_t groups = N / 16;
+
+    auto barrier = [&](VkBuffer b) {
+        VkBufferMemoryBarrier bm{};
+        bm.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+        bm.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        bm.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        bm.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        bm.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        bm.buffer = b; bm.size = VK_WHOLE_SIZE;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                                  VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                                  0, 0, nullptr, 1, &bm, 0, nullptr);
+    };
+
+    // Pass 1: advect  (in=stateA, out=stateB)
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, fluid_.advectPipe);
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, fluid_.computeLayout, 0, 1, &fluid_.setAdvect, 0, nullptr);
+    vkCmdPushConstants(cmd, fluid_.computeLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(fp), &fp);
+    vkCmdDispatch(cmd, groups, groups, 1);
+    barrier(fluid_.stateB);
+
+    // The simulation ping-pongs stateA <-> stateB each frame. After advect the
+    // "current" state is stateB. To keep descriptor bindings stable, swap A/B
+    // pointers conceptually: rebind the divergence pass to read stateB.
+    // (We achieve this by writing the divergence pass's binding 0 to stateB
+    // once at init time is not possible — the buffer that holds "post-advect"
+    // alternates. Instead we update the descriptor on the fly each frame.)
+
+    auto rebind = [](VkDevice d, VkDescriptorSet s, std::uint32_t binding, VkBuffer b) {
+        VkDescriptorBufferInfo bi{ b, 0, VK_WHOLE_SIZE };
+        VkWriteDescriptorSet w{};
+        w.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        w.dstSet = s; w.dstBinding = binding;
+        w.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        w.descriptorCount = 1; w.pBufferInfo = &bi;
+        vkUpdateDescriptorSets(d, 1, &w, 0, nullptr);
+    };
+
+    // Determine which state buffer holds the advected field this frame:
+    // even frames -> stateB, odd frames -> stateA (because we swap at the end).
+    // Use a local frame counter so we don't depend on AppBase::totalFrameCount_
+    // (which is private). The counter is monotonic across fluid frames.
+    fluid_.simTime += deltaTime;
+    const std::uint32_t fluidFrame = static_cast<std::uint32_t>(fluid_.simTime * 60.0f);
+    const bool evenFrame = (fluidFrame & 1u) == 0u;
+    VkBuffer advectedBuf = evenFrame ? fluid_.stateB : fluid_.stateA;
+    VkBuffer finalBuf    = evenFrame ? fluid_.stateA : fluid_.stateB;
+
+    // Pass 2: divergence (in=advectedBuf, out=div)
+    rebind(device_, fluid_.setDiv, 0, advectedBuf);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, fluid_.divPipe);
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, fluid_.computeLayout, 0, 1, &fluid_.setDiv, 0, nullptr);
+    vkCmdPushConstants(cmd, fluid_.computeLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(fp), &fp);
+    vkCmdDispatch(cmd, groups, groups, 1);
+    barrier(fluid_.divBuf);
+
+    // Pass 3: Jacobi pressure (N iterations, ping-pong pressA <-> pressB).
+    // Before iteration 0, clear pressA (the "previous" pressure) to zero so
+    // the first Jacobi step is well-defined.
+    vkCmdFillBuffer(cmd, fluid_.pressA, 0, VK_WHOLE_SIZE, 0);
+    VkBufferMemoryBarrier clearBm{};
+    clearBm.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    clearBm.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    clearBm.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    clearBm.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    clearBm.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    clearBm.buffer = fluid_.pressA; clearBm.size = VK_WHOLE_SIZE;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                              VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                              0, 0, nullptr, 1, &clearBm, 0, nullptr);
+
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, fluid_.jacobiPipe);
+    vkCmdPushConstants(cmd, fluid_.computeLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(fp), &fp);
+    VkDescriptorSet sets[2] = { fluid_.setJacA, fluid_.setJacB };
+    for (std::uint32_t i = 0; i < config_.fluidJacobiIters; ++i) {
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, fluid_.computeLayout,
+                                0, 1, &sets[i & 1u], 0, nullptr);
+        vkCmdDispatch(cmd, groups, groups, 1);
+        VkBuffer out = (i & 1u) ? fluid_.pressA : fluid_.pressB;
+        barrier(out);
+    }
+    // After N iterations the latest pressure is in pressA if N is odd, pressB
+    // if N is even. We bind that to the subtract pass's binding 2.
+    VkBuffer finalPressure = (config_.fluidJacobiIters & 1u) ? fluid_.pressA : fluid_.pressB;
+
+    // Pass 4: gradient subtract (in=advectedBuf, out=finalBuf, inP=finalPressure)
+    rebind(device_, fluid_.setSub, 0, advectedBuf);
+    rebind(device_, fluid_.setSub, 1, finalBuf);
+    rebind(device_, fluid_.setSub, 2, finalPressure);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, fluid_.subtractPipe);
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, fluid_.computeLayout, 0, 1, &fluid_.setSub, 0, nullptr);
+    vkCmdPushConstants(cmd, fluid_.computeLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(fp), &fp);
+    vkCmdDispatch(cmd, groups, groups, 1);
+    barrier(finalBuf);
+
+    // Render pass: read the dye field from finalBuf and present.
+    if (!config_.headless) {
+        rebind(device_, fluid_.setRender, 0, finalBuf);
+
+        VkClearValue clear{};
+        clear.color = {{0.04f, 0.08f, 0.14f, 1.0f}};
+        VkRenderPassBeginInfo rp{};
+        rp.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        rp.renderPass = renderPass_;
+        rp.framebuffer = swapChainFramebuffers_[imageIndex];
+        rp.renderArea.extent = swapChainExtent_;
+        rp.clearValueCount = 1; rp.pClearValues = &clear;
+        vkCmdBeginRenderPass(cmd, &rp, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, fluid_.renderPipe);
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, fluid_.renderLayout, 0, 1, &fluid_.setRender, 0, nullptr);
+        FluidRenderParams rparam{ N, 0, 0, 0 };
+        vkCmdPushConstants(cmd, fluid_.renderLayout,
+                           VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                           0, sizeof(rparam), &rparam);
+        vkCmdDraw(cmd, 3, 1, 0, 0);
+        vkCmdEndRenderPass(cmd);
+    }
 }
 
 }  // namespace gpu_bench

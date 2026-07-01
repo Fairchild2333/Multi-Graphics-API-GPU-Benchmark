@@ -480,6 +480,10 @@ void AppBase::ReportTimingIfDue(double deltaTime) {
                       << (config_.benchFrames + config_.warmupFrames);
         }
         std::cout << std::endl;
+
+        // Thermal-stability tracking: push a window sample once warmup is done.
+        if (warmupDone_)
+            recordWindowSample(avgCompute, avgRender);
     } else {
         std::cout << "[FPS] " << static_cast<int>(fps) << std::endl;
     }
@@ -496,6 +500,8 @@ void AppBase::ReportTimingIfDue(double deltaTime) {
             case gpu_bench::Workload::StressFractal: oss << " | Stress";    break;
             case gpu_bench::Workload::SynthPeak:     oss << " | SynthPeak"; break;
             case gpu_bench::Workload::Render3D:      oss << " | Render3D";  break;
+            case gpu_bench::Workload::Volumetric:    oss << " | Volumetric"; break;
+            case gpu_bench::Workload::Fluid:         oss << " | Fluid";     break;
         }
 
         oss << "  |  FPS: " << static_cast<int>(fps);
@@ -651,6 +657,31 @@ void AppBase::PrintSummary() const {
                 << std::setprecision(3) << avgRender << " ms render)\n";
         }
 
+        if (config_.workload == Workload::Volumetric && avgRender > 0.0) {
+            const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+            const double renderSec = avgRender / 1000.0;
+            const double gsamples = pixels * config_.volumetricSteps / renderSec / 1e9;
+            std::cout << "Steps:        " << config_.volumetricSteps << " /pixel  ("
+                << kWindowWidth << "x" << kWindowHeight << " px)\n"
+                << std::setprecision(2)
+                << "Vol rate:     " << gsamples << " GSample/s  ("
+                << std::setprecision(3) << avgRender << " ms render)\n";
+        }
+
+        if (config_.workload == Workload::Fluid && avgCompute > 0.0) {
+            // Total cells updated per frame = gridSize^2 * (4 fixed passes +
+            // N Jacobi iterations). Divided by compute time -> GCell/s.
+            const double g  = static_cast<double>(config_.fluidGridSize);
+            const double cellsPerFrame = g * g * (4.0 + config_.fluidJacobiIters);
+            const double computeSec = avgCompute / 1000.0;
+            const double gcells = cellsPerFrame / computeSec / 1e9;
+            std::cout << "Grid:         " << config_.fluidGridSize << "x" << config_.fluidGridSize
+                << "  Jacobi iters: " << config_.fluidJacobiIters << "\n"
+                << std::setprecision(2)
+                << "Fluid rate:   " << gcells << " GCell/s  ("
+                << std::setprecision(3) << avgCompute << " ms compute)\n";
+        }
+
         const double avgFrameMs = (avgFps > 0.0) ? 1000.0 / avgFps : 0.0;
         const double devUtil = (avgFrameMs > 0.0) ? avgTotal / avgFrameMs : 0.0;
 
@@ -680,6 +711,46 @@ void AppBase::PrintSummary() const {
             << "\n(No timestamp data available for analysis.)\n";
     }
 
+    // ---- Thermal-stability analysis ----------------------------------------
+    // Only meaningful with >=5 1-second samples (i.e. >=5s of measured run).
+    if (windowScores_.size() >= 5) {
+        // Recover the axis unit string for the active workload.
+        std::string unit;
+        switch (config_.workload) {
+            case Workload::Stream:        unit = "GB/s";      break;
+            case Workload::NBody:         unit = "GFLOP/s";   break;
+            case Workload::StressFractal: unit = "G-iter/s";  break;
+            case Workload::Volumetric:    unit = "GSample/s"; break;
+            case Workload::Render3D:      unit = "MQuad/s";   break;
+            case Workload::Fluid:         unit = "GCell/s";   break;
+            case Workload::SynthPeak:     unit = (config_.peakPrecision == Precision::INT32) ? "GIOPS" : "GFLOPS"; break;
+        }
+        std::cout << "\n--- Thermal Stability ---\n"
+            << "Windows:      " << windowScores_.size() << " x 1s\n";
+        if (thermalStable_) {
+            std::cout << std::setprecision(2)
+                      << "Stable score: " << stableScore_ << " " << unit
+                      << "  (CV " << stableVariancePct_ << "%)\n";
+        } else {
+            std::cout << "Stable score: not reached — keep running to detect throttling.\n";
+        }
+        if (throttlePct_ > 0.0) {
+            std::cout << std::setprecision(1)
+                      << "Throttling:   early vs late mean dropped " << throttlePct_ << "%";
+            if (throttlePct_ > 5.0) {
+                std::cout << "  (>> sustained throttle / thermal limit)";
+            } else if (throttlePct_ > 2.0) {
+                std::cout << "  (mild — likely normal warmup drift)";
+            }
+            std::cout << "\n";
+        }
+        if (thermalStable_ && throttlePct_ < 2.0) {
+            std::cout << ">> Thermally stable; stableScore is a fair comparison metric.\n";
+        } else if (throttlePct_ > 5.0) {
+            std::cout << ">> Throttled: report stableScore (post-throttle), not peak.\n";
+        }
+    }
+
     std::cout << "==========================================================\n"
         << std::endl;
 }
@@ -692,6 +763,8 @@ BenchmarkResult AppBase::CollectResult() const {
                   : (config_.workload == Workload::StressFractal) ? "stress"
                   : (config_.workload == Workload::SynthPeak)     ? "synthpeak"
                   : (config_.workload == Workload::Render3D)      ? "render3d"
+                  : (config_.workload == Workload::Volumetric)    ? "volumetric"
+                  : (config_.workload == Workload::Fluid)         ? "fluid"
                   :                                                 "stream";
     r.graphicsApi    = GetBackendName();
     r.deviceName     = config_.gpuDisplayName.empty() ? GetDeviceName() : config_.gpuDisplayName;
@@ -762,9 +835,17 @@ BenchmarkResult AppBase::CollectResult() const {
         const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
         r.score = pixels * config_.fractalIter / renderSec / 1e9;
         r.scoreUnit = "G-iter/s";
+    } else if (config_.workload == Workload::Volumetric && renderSec > 0.0) {
+        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        r.score = pixels * config_.volumetricSteps / renderSec / 1e9;
+        r.scoreUnit = "GSample/s";
     } else if (config_.workload == Workload::Render3D && renderSec > 0.0) {
         r.score = n / renderSec / 1e6;   // million billboards per second
         r.scoreUnit = "MQuad/s";
+    } else if (config_.workload == Workload::Fluid && computeSec > 0.0) {
+        const double g  = static_cast<double>(config_.fluidGridSize);
+        r.score = g * g * (4.0 + config_.fluidJacobiIters) / computeSec / 1e9;
+        r.scoreUnit = "GCell/s";
     } else if (config_.workload == Workload::SynthPeak && computeSec > 0.0) {
         const double lanes = (config_.peakPrecision == Precision::FP16) ? 2.0 : 1.0;
         r.score = n * config_.peakIters * kSynthPeakUnroll * lanes * 2.0 / computeSec / 1e9;
@@ -775,7 +856,88 @@ BenchmarkResult AppBase::CollectResult() const {
                     :                                               "FP32";
     }
 
+    // Thermal-stability telemetry (only meaningful with >=5 1s windows).
+    if (windowScores_.size() >= 5) {
+        r.stableScore       = stableScore_;
+        r.stableVariancePct = stableVariancePct_;
+        r.throttlePct       = throttlePct_;
+    }
+
     return r;
+}
+
+// Same per-workload formula as CollectResult's derived score, factored out so
+// we can apply it to a single 1-second timing window for thermal-stability
+// tracking. Returns 0.0 if the window has no usable timing (e.g. compute=0
+// on a fragment-only workload uses render instead).
+double AppBase::computeAxisScore(double computeMs, double renderMs) const {
+    const double n          = static_cast<double>(config_.particleCount);
+    const double computeSec = computeMs / 1000.0;
+    const double renderSec  = renderMs  / 1000.0;
+    if (config_.workload == Workload::Stream && computeSec > 0.0) {
+        return 40.0 * n / computeSec / 1e9;
+    } else if (config_.workload == Workload::NBody && computeSec > 0.0) {
+        return n * n * kNBodyFlopsPerInteraction / computeSec / 1e9;
+    } else if (config_.workload == Workload::StressFractal && renderSec > 0.0) {
+        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        return pixels * config_.fractalIter / renderSec / 1e9;
+    } else if (config_.workload == Workload::Volumetric && renderSec > 0.0) {
+        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        return pixels * config_.volumetricSteps / renderSec / 1e9;
+    } else if (config_.workload == Workload::Render3D && renderSec > 0.0) {
+        return n / renderSec / 1e6;
+    } else if (config_.workload == Workload::Fluid && computeSec > 0.0) {
+        const double g = static_cast<double>(config_.fluidGridSize);
+        return g * g * (4.0 + config_.fluidJacobiIters) / computeSec / 1e9;
+    } else if (config_.workload == Workload::SynthPeak && computeSec > 0.0) {
+        const double lanes = (config_.peakPrecision == Precision::FP16) ? 2.0 : 1.0;
+        return n * config_.peakIters * kSynthPeakUnroll * lanes * 2.0 / computeSec / 1e9;
+    }
+    return 0.0;
+}
+
+void AppBase::recordWindowSample(double avgComputeMs, double avgRenderMs) {
+    const double s = computeAxisScore(avgComputeMs, avgRenderMs);
+    if (s <= 0.0) return;
+    windowScores_.push_back(s);
+    windowRenderMs_.push_back(avgRenderMs);
+    // Keep up to 30 samples (covers ~30s — the typical mobile throttle window).
+    if (windowScores_.size() > 30) {
+        windowScores_.erase(windowScores_.begin());
+        windowRenderMs_.erase(windowRenderMs_.begin());
+    }
+
+    const size_t n = windowScores_.size();
+    if (n < 5) return;
+
+    // Coefficient of variation over the trailing 5 windows.
+    auto meanVar = [](const std::vector<double>& v, size_t end) {
+        const size_t start = (end >= 5) ? end - 5 : 0;
+        double sum = 0.0, sum2 = 0.0; size_t k = 0;
+        for (size_t i = start; i < end; ++i) { sum += v[i]; sum2 += v[i]*v[i]; ++k; }
+        const double mean = sum / k;
+        const double var  = (sum2 / k) - mean * mean;
+        return std::make_pair(mean, std::sqrt(std::max(0.0, var)));
+    };
+    auto [mean, sd] = meanVar(windowScores_, n);
+    const double cvPct = (mean > 0.0) ? (sd / mean * 100.0) : 0.0;
+
+    // Stable = trailing-5 CV < 2%. Record once; later windows may overwrite
+    // with a fresher stable point if it stays stable.
+    if (cvPct < 2.0) {
+        thermalStable_     = true;
+        stableScore_       = mean;
+        stableVariancePct_ = cvPct;
+    }
+
+    // Throttle detection: compare earliest 5 vs latest 5 (only meaningful once
+    // we have >=10 windows). Positive = throttled.
+    if (n >= 10) {
+        auto [earlyMean,  eSd] = meanVar(windowScores_, 5);
+        auto [lateMean,   lSd] = meanVar(windowScores_, n);
+        if (earlyMean > 0.0)
+            throttlePct_ = (earlyMean - lateMean) / earlyMean * 100.0;
+    }
 }
 
 std::vector<char> AppBase::ReadFileBytes(const std::string& filename) {

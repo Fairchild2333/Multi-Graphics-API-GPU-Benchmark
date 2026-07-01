@@ -356,10 +356,13 @@ void DX11Backend::CreateShaders() {
         "CreateComputeShader failed");
 
     if (!config_.headless) {
-        const bool fractal  = (config_.workload == Workload::StressFractal);
-        const bool render3d = (config_.workload == Workload::Render3D);
-        const char* vsFile = fractal ? "fractal.hlsl" : render3d ? "render3d.hlsl" : "particle_vs.hlsl";
-        const char* psFile = fractal ? "fractal.hlsl" : render3d ? "render3d.hlsl" : "particle_ps.hlsl";
+        const bool fractal   = (config_.workload == Workload::StressFractal);
+        const bool volumetric= (config_.workload == Workload::Volumetric);
+        const bool render3d  = (config_.workload == Workload::Render3D);
+        const char* vsFile = (fractal || volumetric) ? (fractal ? "fractal.hlsl" : "volumetric.hlsl")
+                            : render3d ? "render3d.hlsl" : "particle_vs.hlsl";
+        const char* psFile = (fractal || volumetric) ? (fractal ? "fractal.hlsl" : "volumetric.hlsl")
+                            : render3d ? "render3d.hlsl" : "particle_ps.hlsl";
         auto vsBlob = CompileShader(shaderDir_ + vsFile, "VSMain", "vs_5_0");
         auto psBlob = CompileShader(shaderDir_ + psFile, "PSMain", "ps_5_0");
 
@@ -382,7 +385,7 @@ void DX11Backend::CreateShaders() {
                 layout, _countof(layout),
                 vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &inputLayout_),
                 "CreateInputLayout (render3d) failed");
-        } else if (!fractal) {
+        } else if (!fractal && !volumetric) {
         D3D11_INPUT_ELEMENT_DESC layout[] = {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
             { "VELOCITY", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -597,8 +600,9 @@ void DX11Backend::DrawFrame(float deltaTime) {
     if (timestampsSupported_)
         context_->End(timestampQueries_[slot][0].Get());
 
-    // Compute pass — skipped entirely for the fractal (fragment-only) workload.
-    if (config_.workload != Workload::StressFractal) {
+    // Compute pass — skipped entirely for the fragment-only workloads.
+    if (config_.workload != Workload::StressFractal
+        && config_.workload != Workload::Volumetric) {
         // Update compute params
         D3D11_MAPPED_SUBRESOURCE mapped{};
         context_->Map(computeParamsCB_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
@@ -635,8 +639,9 @@ void DX11Backend::DrawFrame(float deltaTime) {
             context_->End(timestampQueries_[slot][2].Get());
             context_->End(timestampQueries_[slot][3].Get());
         }
-    } else if (config_.workload == Workload::StressFractal) {
-        // --- Fractal stress pass (fullscreen triangle, no compute/VB) ---
+    } else if (config_.workload == Workload::StressFractal
+               || config_.workload == Workload::Volumetric) {
+        // --- Fragment-only pass (fullscreen triangle, no compute/VB) ---
         if (timestampsSupported_)
             context_->End(timestampQueries_[slot][2].Get());
 
@@ -653,8 +658,13 @@ void DX11Backend::DrawFrame(float deltaTime) {
         fractalElapsed_ += deltaTime;
         D3D11_MAPPED_SUBRESOURCE fm{};
         context_->Map(computeParamsCB_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &fm);
-        FractalParams fp{ fractalElapsed_, 1.0f, config_.fractalIter, 0 };
-        std::memcpy(fm.pData, &fp, sizeof(fp));
+        if (config_.workload == Workload::Volumetric) {
+            VolumetricParams vol{ fractalElapsed_, 0.05f, config_.volumetricSteps, 0 };
+            std::memcpy(fm.pData, &vol, sizeof(vol));
+        } else {
+            FractalParams fp{ fractalElapsed_, 1.0f, config_.fractalIter, 0 };
+            std::memcpy(fm.pData, &fp, sizeof(fp));
+        }
         context_->Unmap(computeParamsCB_.Get(), 0);
 
         context_->IASetInputLayout(nullptr);

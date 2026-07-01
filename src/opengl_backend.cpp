@@ -131,6 +131,7 @@ void OpenGLBackend::CreateShaders() {
         const char* vsf = "particle_gl.vert";
         const char* fsf = "particle_gl.frag";
         if (config_.workload == Workload::StressFractal) { vsf = "fractal_gl.vert";  fsf = "fractal_gl.frag"; }
+        else if (config_.workload == Workload::Volumetric) { vsf = "volumetric_gl.vert"; fsf = "volumetric_gl.frag"; }
         else if (config_.workload == Workload::Render3D) { vsf = "render3d_gl.vert"; fsf = "render3d_gl.frag"; }
         auto vs = CompileShaderGL(shaderDir_ + vsf, GL_VERTEX_SHADER);
         auto fs = CompileShaderGL(shaderDir_ + fsf, GL_FRAGMENT_SHADER);
@@ -241,8 +242,9 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
     if (timestampsSupported_)
         glQueryCounter(timestampQueries_[slot][0], GL_TIMESTAMP);
 
-    // -- Fractal stress: fragment-only fullscreen pass (no compute) --
-    if (config_.workload == Workload::StressFractal) {
+    // -- Fragment-only fullscreen pass (fractal / volumetric): no compute --
+    if (config_.workload == Workload::StressFractal
+        || config_.workload == Workload::Volumetric) {
         if (timestampsSupported_)
             glQueryCounter(timestampQueries_[slot][1], GL_TIMESTAMP);  // compute ~0
 
@@ -252,12 +254,21 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
         if (timestampsSupported_)
             glQueryCounter(timestampQueries_[slot][2], GL_TIMESTAMP);
 
-        // 16-byte UBO: {time, zoom, maxIter(uint bits), _}
+        // 16-byte UBO layout (matches both FractalParams and VolumetricParams):
+        //   { time(f), scalar(f), count(u32), _ }
         unsigned char pb[16] = {0};
-        float fp[2] = { fractalElapsed_, 1.0f };
-        std::memcpy(pb, fp, sizeof(fp));
-        std::memcpy(pb + 8, &config_.fractalIter, sizeof(std::uint32_t));
         fractalElapsed_ += deltaTime;
+        float fp[2];
+        std::uint32_t count;
+        if (config_.workload == Workload::Volumetric) {
+            fp[0] = fractalElapsed_; fp[1] = 0.05f;       // stepSize
+            count = config_.volumetricSteps;
+        } else {
+            fp[0] = fractalElapsed_; fp[1] = 1.0f;        // zoom
+            count = config_.fractalIter;
+        }
+        std::memcpy(pb,        fp,    sizeof(fp));
+        std::memcpy(pb + 8,    &count, sizeof(count));
         glBindBuffer(GL_UNIFORM_BUFFER, ubo_);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(pb), pb);
 

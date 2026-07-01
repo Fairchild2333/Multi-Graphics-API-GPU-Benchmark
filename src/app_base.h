@@ -63,6 +63,15 @@ private:
     BenchmarkResult CollectResult() const;
     void CleanupWindow();
 
+    // Thermal-stability analysis helpers.
+    // computeAxisScore: same formula as CollectResult's derived score, but
+    // factored out so we can recompute it for a single timing window.
+    double computeAxisScore(double computeMs, double renderMs) const;
+    // recordWindowSample: called from ReportTimingIfDue at each 1s boundary
+    // once warmup is done. Pushes the window score and runs the stable/
+    // throttled detection over the trailing samples.
+    void recordWindowSample(double avgComputeMs, double avgRenderMs);
+
     void* rdocApi_ = nullptr;
     std::string rdocCaptureDir_;
     bool     rdocCaptureRequested_ = false;
@@ -96,6 +105,18 @@ private:
     double benchEndTime_       = 0.0;
     std::uint32_t benchMeasuredFrames_ = 0;
     double benchMinFrameTime_  = std::numeric_limits<double>::max();
+
+    // ---- Thermal-stability tracking --------------------------------------
+    // Per-window axis score (GB/s, GFLOP/s, GSample/s, ...). A new sample is
+    // pushed every kTimingReportIntervalSec (1s) once warmup is done. The
+    // trailing 30 samples (~30s) feed a rolling mean + coefficient-of-variation
+    // used to detect throttling and to report a "stable score".
+    std::vector<double> windowScores_;
+    std::vector<double> windowRenderMs_;
+    double stableScore_        = 0.0;   // last mean of a stable 5-window stretch
+    double stableVariancePct_  = -1.0;  // CV (%) at the stable point; -1 = never
+    bool   thermalStable_      = false;
+    double throttlePct_        = 0.0;   // (earlyMean - lateMean) / earlyMean
 };
 
 }  // namespace gpu_bench

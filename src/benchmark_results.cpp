@@ -178,7 +178,10 @@ static std::string ResultToJson(const BenchmarkResult& r, int indent = 4) {
     dbl("score",          r.score, 3);
     str("scoreUnit",      r.scoreUnit);
     str("precision",      r.precision);
-    o << pad << "  \"bottleneck\": \"" << JsonEscape(r.bottleneck) << "\"\n";
+    o << pad << "  \"bottleneck\": \"" << JsonEscape(r.bottleneck) << "\",\n";
+    dbl("stableScore",       r.stableScore,       3);
+    dbl("stableVariancePct", r.stableVariancePct, 2);
+    o << pad << "  \"throttlePct\": " << std::setprecision(2) << r.throttlePct << "\n";
     o << pad << "}";
     return o.str();
 }
@@ -267,6 +270,9 @@ static BenchmarkResult JsonToResult(const std::string& json) {
     r.score          = findNum("score");
     r.scoreUnit      = findStr("scoreUnit");
     r.precision      = findStr("precision");
+    r.stableScore       = findNum("stableScore");
+    r.stableVariancePct = findNum("stableVariancePct");
+    r.throttlePct       = findNum("throttlePct");
     r.bottleneck     = findStr("bottleneck");
 
     return r;

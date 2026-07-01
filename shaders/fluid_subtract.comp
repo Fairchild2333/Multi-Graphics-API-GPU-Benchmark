@@ -1,0 +1,48 @@
+#version 450
+
+// Fluid: gradient subtract (4/4). v_new = v_advected - nabla(pressure).
+// Reads the converged pressure from inP and the advected velocity from
+// inCells; writes the divergence-free velocity to outCells. The dye field
+// (inCells.z) is preserved verbatim.
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(set = 0, binding = 0, std430) readonly buffer InBuf {
+    vec4 inCells[];
+};
+layout(set = 0, binding = 1, std430) writeonly buffer OutBuf {
+    vec4 outCells[];
+};
+layout(set = 0, binding = 2, std430) readonly buffer InPressure {
+    float inP[];
+};
+
+layout(push_constant) uniform FluidParams {
+    float dt;
+    float dx;
+    uint  gridSize;
+    uint  _pad;
+} p;
+
+uint cellIdx(uvec2 c) { return c.y * p.gridSize + c.x; }
+
+void main() {
+    uvec2 c = gl_GlobalInvocationID.xy;
+    if (c.x >= p.gridSize || c.y >= p.gridSize) return;
+
+    if (c.x == 0u || c.y == 0u || c.x == p.gridSize - 1u || c.y == p.gridSize - 1u) {
+        outCells[cellIdx(c)] = inCells[cellIdx(c)];
+        return;
+    }
+
+    float pL = inP[cellIdx(c - uvec2(1u, 0u))];
+    float pR = inP[cellIdx(c + uvec2(1u, 0u))];
+    float pD = inP[cellIdx(c - uvec2(0u, 1u))];
+    float pU = inP[cellIdx(c + uvec2(0u, 1u))];
+
+    vec2 gradP = 0.5 * vec2(pR - pL, pU - pD) / p.dx;
+
+    vec4 src = inCells[cellIdx(c)];
+    src.xy -= gradP;
+    outCells[cellIdx(c)] = src;
+}

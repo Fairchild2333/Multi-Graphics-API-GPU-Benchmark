@@ -85,6 +85,43 @@ private:
     VkImageView    depthImageView_       = VK_NULL_HANDLE;
     VkFormat       depthFormat_          = VK_FORMAT_D32_SFLOAT;
 
+    // Fluid (Stam 2D Eulerian) resources — all isolated in this struct so the
+    // main compute/graphics slots stay untouched. Two state buffers (vel+dye
+    // as vec4) and two pressure buffers ping-pong across passes; the jacobi
+    // pass additionally reads a divergence buffer (binding 4).
+    struct FluidResources {
+        VkBuffer       stateA = VK_NULL_HANDLE, stateB = VK_NULL_HANDLE;
+        VkDeviceMemory stateAMem = VK_NULL_HANDLE, stateBMem = VK_NULL_HANDLE;
+        VkBuffer       pressA = VK_NULL_HANDLE, pressB = VK_NULL_HANDLE;
+        VkDeviceMemory pressAMem = VK_NULL_HANDLE, pressBMem = VK_NULL_HANDLE;
+        VkBuffer       divBuf = VK_NULL_HANDLE;
+        VkDeviceMemory divMem = VK_NULL_HANDLE;
+
+        VkDescriptorSetLayout computeSetLayout = VK_NULL_HANDLE;
+        VkDescriptorPool      computePool      = VK_NULL_HANDLE;
+        // Two sets so we can swap in/out bindings between passes without
+        // re-writing descriptor updates each frame.
+        VkDescriptorSet       setAdvect  = VK_NULL_HANDLE;  // in=A, out=B, press unused
+        VkDescriptorSet       setDiv     = VK_NULL_HANDLE;  // in=A, out=div
+        VkDescriptorSet       setJacA    = VK_NULL_HANDLE;  // in=pressA, out=pressB, div
+        VkDescriptorSet       setJacB    = VK_NULL_HANDLE;  // in=pressB, out=pressA, div
+        VkDescriptorSet       setSub     = VK_NULL_HANDLE;  // in=A, out=B, press=final
+        VkDescriptorSetLayout renderSetLayout = VK_NULL_HANDLE;
+        VkDescriptorPool      renderPool      = VK_NULL_HANDLE;
+        VkDescriptorSet       setRender  = VK_NULL_HANDLE;
+
+        VkPipelineLayout computeLayout = VK_NULL_HANDLE;
+        VkPipeline       advectPipe    = VK_NULL_HANDLE;
+        VkPipeline       divPipe       = VK_NULL_HANDLE;
+        VkPipeline       jacobiPipe    = VK_NULL_HANDLE;
+        VkPipeline       subtractPipe  = VK_NULL_HANDLE;
+        VkPipelineLayout renderLayout  = VK_NULL_HANDLE;
+        VkPipeline       renderPipe    = VK_NULL_HANDLE;
+
+        std::uint32_t gridSize = 0;
+        float         simTime  = 0.0f;
+    } fluid_;
+
     VkCommandPool              commandPool_ = VK_NULL_HANDLE;
     std::vector<VkCommandBuffer> commandBuffers_;
     std::vector<VkCommandBuffer> headlessCmdBuffers_;
@@ -128,8 +165,14 @@ private:
     void CreateLogicalDevice();
     void CreateParticleBuffer();
     void CreateGraphicsPipeline();
-    void CreateFractalPipeline();
+    void CreateFullscreenPipeline(const char* vertSpv, const char* fragSpv);
     void CreateRender3DPipeline();
+    // Fluid (Stam 2D Eulerian): 4 compute passes + 1 fullscreen render pass.
+    // All fluid resources are isolated from the other workloads' pipeline
+    // slots so existing paths are untouched.
+    void CreateFluidResources();
+    void CleanupFluidResources();
+    void RecordFluidFrame(VkCommandBuffer cmd, float deltaTime, std::uint32_t imageIndex);
     void CreateDepthResources();
     void CreateQuadBuffer();
     void CreateComputeDescriptorSetLayout();

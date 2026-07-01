@@ -45,6 +45,14 @@ struct BenchmarkResult {
     double      score      = 0.0;
     std::string scoreUnit;        // e.g. "GB/s", "GFLOP/s", "G-iter/s", "GFLOPS", "GIOPS"
     std::string precision;        // SynthPeak only: "FP32"/"FP16"/"FP64"/"INT32"
+
+    // Thermal-stability telemetry (only populated when the run had >=5 1s windows).
+    // stableScore: trailing-5 mean once CV<2%; 0.0 if never stable.
+    // stableVariancePct: CV(%) at the stable point; -1 if never stable.
+    // throttlePct: (early5Mean - late5Mean)/early5Mean * 100; positive = throttled.
+    double stableScore        = 0.0;
+    double stableVariancePct  = -1.0;
+    double throttlePct        = 0.0;
 };
 
 std::string ResultsFilePath();

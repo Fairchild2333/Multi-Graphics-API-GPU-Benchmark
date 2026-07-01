@@ -577,7 +577,11 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                                      benchCfg.workload = gpu_bench::Workload::SynthPeak;
             else if (w == "render3d" || w == "3d")
                                      benchCfg.workload = gpu_bench::Workload::Render3D;
-            else std::cerr << "Unknown workload '" << w << "' (use stream|nbody|stress|synthpeak|render3d)\n";
+            else if (w == "volumetric" || w == "volume")
+                                     benchCfg.workload = gpu_bench::Workload::Volumetric;
+            else if (w == "fluid")
+                                     benchCfg.workload = gpu_bench::Workload::Fluid;
+            else std::cerr << "Unknown workload '" << w << "' (use stream|nbody|stress|synthpeak|render3d|volumetric|fluid)\n";
         } else if (std::strcmp(argv[i], "--precision") == 0 && i + 1 < argc) {
             std::string pr = argv[++i];
             if (pr == "fp32")       benchCfg.peakPrecision = gpu_bench::Precision::FP32;
@@ -590,6 +594,19 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             if (n == 0) n = 1;
             benchCfg.fractalIter = n;   // fractal per-pixel iterations
             benchCfg.peakIters   = n;   // synthpeak loop passes (same flag)
+        } else if (std::strcmp(argv[i], "--steps") == 0 && i + 1 < argc) {
+            auto n = static_cast<std::uint32_t>(std::stoi(argv[++i]));
+            if (n == 0) n = 1;
+            benchCfg.volumetricSteps = n;   // volumetric per-pixel ray samples
+        } else if (std::strcmp(argv[i], "--grid") == 0 && i + 1 < argc) {
+            auto n = static_cast<std::uint32_t>(std::stoi(argv[++i]));
+            // Round up to a multiple of 16 (the compute workgroup size).
+            n = ((n + 15u) / 16u) * 16u;
+            if (n < 16u) n = 16u;
+            benchCfg.fluidGridSize = n;     // fluid: 2D grid side length
+        } else if (std::strcmp(argv[i], "--jacobi") == 0 && i + 1 < argc) {
+            auto n = static_cast<std::uint32_t>(std::stoi(argv[++i]));
+            benchCfg.fluidJacobiIters = n;  // fluid: pressure iterations
         } else if (std::strcmp(argv[i], "--bodies") == 0 && i + 1 < argc) {
             auto n = static_cast<std::uint32_t>(std::stoi(argv[++i]));
             const std::uint32_t wg = gpu_bench::kComputeWorkGroupSize;
@@ -665,9 +682,12 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --flights <N>                       Set frames-in-flight count (default: 2, max: 16)\n"
                       << "  --headless                           Pure compute mode (no window/rendering/present)\n"
                       << "  --particles <count>                 Particle count (skips difficulty menu, rounded to 256)\n"
-                      << "  --workload <stream|nbody|stress|synthpeak|render3d>  bandwidth / compute / fractal fill / peak FLOPS / true-3D render\n"
+                      << "  --workload <stream|nbody|stress|synthpeak|render3d|volumetric|fluid>  bandwidth / compute / fractal fill / peak FLOPS / true-3D / volume raymarch / 2D fluid\n"
                       << "  --bodies <count>                    N-body body count (implies --workload nbody; default 65536)\n"
                       << "  --iter <count>                      Fractal per-pixel iters / SynthPeak loop passes\n"
+                      << "  --steps <count>                     Volumetric per-pixel ray samples (default 96)\n"
+                      << "  --grid <count>                      Fluid 2D grid side length (default 256, rounded to 16)\n"
+                      << "  --jacobi <count>                    Fluid pressure-projection iterations (default 30)\n"
                       << "  --precision <fp32|fp16|fp64|int32>  SynthPeak data type (default fp32)\n"
                       << "  --time <seconds>                    Auto-stop after N seconds (default: 15)\n"
                       << "  --no-time-limit                     Run until window is closed\n"
@@ -731,6 +751,32 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         benchCfg.particleCount = gpu_bench::kComputeWorkGroupSize;  // unused; minimal alloc
         benchCfg.particlesOverridden = true;
         benchCfg.difficultyLabel = "Fractal";
+    }
+
+    // ---- Volumetric workload normalisation ----
+    // Same fragment-only shape as StressFractal: needs a window, particle buffer
+    // unused. The per-pixel ray step count (config_.volumetricSteps) is the
+    // sole knob and drives the score formula `pixels * steps / renderSec`.
+    if (benchCfg.workload == gpu_bench::Workload::Volumetric) {
+        if (benchCfg.headless) {
+            std::cerr << "[warn] Volumetric requires rendering; ignoring --headless.\n";
+            benchCfg.headless = false;
+        }
+        benchCfg.particleCount = gpu_bench::kComputeWorkGroupSize;  // unused; minimal alloc
+        benchCfg.particlesOverridden = true;
+        benchCfg.difficultyLabel = "Volumetric";
+    }
+
+    // ---- Fluid workload normalisation ----
+    // 2D Eulerian fluid simulation. The particle buffer is unused; the grid
+    // size + Jacobi iteration count drive the score formula
+    // `gridSize^2 * (4 + jacobiIters) / computeSec`. Headless is allowed on
+    // Vulkan (compute-only) but disabled on DX11 (driver doesn't resolve
+    // timestamps headless) — same as SynthPeak.
+    if (benchCfg.workload == gpu_bench::Workload::Fluid) {
+        benchCfg.particleCount = gpu_bench::kComputeWorkGroupSize;  // unused; minimal alloc
+        benchCfg.particlesOverridden = true;
+        benchCfg.difficultyLabel = "Fluid";
     }
 
     // ---- SynthPeak workload normalisation ----
@@ -942,6 +988,9 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         allCfg.peakPrecision = benchCfg.peakPrecision;
         allCfg.peakIters     = benchCfg.peakIters;
         allCfg.fractalIter   = benchCfg.fractalIter;
+        allCfg.volumetricSteps = benchCfg.volumetricSteps;
+        allCfg.fluidGridSize   = benchCfg.fluidGridSize;
+        allCfg.fluidJacobiIters= benchCfg.fluidJacobiIters;
         allCfg.softening     = benchCfg.softening;
         allCfg.headless      = benchCfg.headless;
         allCfg.framesInFlight = benchCfg.framesInFlight;

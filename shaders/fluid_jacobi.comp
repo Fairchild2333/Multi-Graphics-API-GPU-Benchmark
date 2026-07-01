@@ -1,0 +1,55 @@
+#version 450
+
+// Fluid: one Jacobi pressure iteration (3/4). Solves nabla^2 p = div by
+// relaxation: p_new = (pL + pR + pD + pU - div * dx^2) / 4. Run N times,
+// ping-ponging the pressure SSBOs (the C++ side swaps inP/outP bindings
+// between iterations).
+//
+// IMPORTANT: during the first iteration inP holds the divergence field
+// (placed there by the divergence pass), and the solver reads its own centre
+// cell as the RHS. From iteration 2 onward, inP holds the previous pressure
+// iterate and outP holds the divergence — so the caller arranges bindings
+// such that the centre cell of inP always carries the divergence and the
+// neighbours carry pressure. We achieve this by keeping divergence in a
+// separate SSBO slot that is also bound to inP's centre sample via the same
+// buffer at iteration 0, then swapping to a "previous-pressure" buffer for
+// subsequent iterations. See the C++ orchestration in vulkan_backend.cpp.
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(set = 0, binding = 2, std430) readonly buffer InPressure {
+    float inP[];
+};
+layout(set = 0, binding = 3, std430) writeonly buffer OutPressure {
+    float outP[];
+};
+layout(set = 0, binding = 4, std430) readonly buffer DivField {
+    float div[];
+};
+
+layout(push_constant) uniform FluidParams {
+    float dt;
+    float dx;
+    uint  gridSize;
+    uint  _pad;
+} p;
+
+uint cellIdx(uvec2 c) { return c.y * p.gridSize + c.x; }
+
+void main() {
+    uvec2 c = gl_GlobalInvocationID.xy;
+    if (c.x >= p.gridSize || c.y >= p.gridSize) return;
+
+    if (c.x == 0u || c.y == 0u || c.x == p.gridSize - 1u || c.y == p.gridSize - 1u) {
+        outP[cellIdx(c)] = 0.0;
+        return;
+    }
+
+    float pL = inP[cellIdx(c - uvec2(1u, 0u))];
+    float pR = inP[cellIdx(c + uvec2(1u, 0u))];
+    float pD = inP[cellIdx(c - uvec2(0u, 1u))];
+    float pU = inP[cellIdx(c + uvec2(0u, 1u))];
+    float d  = div[cellIdx(c)];
+
+    outP[cellIdx(c)] = (pL + pR + pD + pU - d * p.dx * p.dx) * 0.25;
+}

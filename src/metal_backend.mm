@@ -207,10 +207,15 @@ void MetalBackend::InitBackend() {
 
         // --- Render pipeline (skipped in headless mode) -------------------------
         if (!config_.headless) {
-            const bool fractal  = (config_.workload == Workload::StressFractal);
-            const bool render3d = (config_.workload == Workload::Render3D);
-            NSString* vfn = fractal ? @"fractalVertex" : render3d ? @"render3dVertex" : @"vertexMain";
-            NSString* ffn = fractal ? @"fractalFragment" : render3d ? @"render3dFragment" : @"fragmentMain";
+            const bool fractal   = (config_.workload == Workload::StressFractal);
+            const bool volumetric= (config_.workload == Workload::Volumetric);
+            const bool render3d  = (config_.workload == Workload::Render3D);
+            NSString* vfn = fractal ? @"fractalVertex"
+                         : volumetric ? @"volumetricVertex"
+                         : render3d ? @"render3dVertex" : @"vertexMain";
+            NSString* ffn = fractal ? @"fractalFragment"
+                         : volumetric ? @"volumetricFragment"
+                         : render3d ? @"render3dFragment" : @"fragmentMain";
             id<MTLFunction> vertFunc = [impl_->library newFunctionWithName:vfn];
             id<MTLFunction> fragFunc = [impl_->library newFunctionWithName:ffn];
             if (!vertFunc || !fragFunc)
@@ -447,6 +452,13 @@ void MetalBackend::DrawFrame(float deltaTime) {
             fractalElapsed_ += deltaTime;
             FractalParams fp{ fractalElapsed_, 1.0f, config_.fractalIter, 0 };
             [renderEnc setFragmentBytes:&fp length:sizeof(FractalParams) atIndex:0];
+            [renderEnc drawPrimitives:MTLPrimitiveTypeTriangle
+                          vertexStart:0
+                          vertexCount:3];   // fullscreen triangle, no vertex buffer
+        } else if (config_.workload == Workload::Volumetric) {
+            fractalElapsed_ += deltaTime;   // reused as noise-field animation time
+            VolumetricParams vp{ fractalElapsed_, 0.05f, config_.volumetricSteps, 0 };
+            [renderEnc setFragmentBytes:&vp length:sizeof(VolumetricParams) atIndex:0];
             [renderEnc drawPrimitives:MTLPrimitiveTypeTriangle
                           vertexStart:0
                           vertexCount:3];   // fullscreen triangle, no vertex buffer

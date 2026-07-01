@@ -168,6 +168,14 @@ if(ENABLE_VULKAN AND Vulkan_FOUND)
             ${CMAKE_SOURCE_DIR}/shaders/nbody.comp
             ${CMAKE_SOURCE_DIR}/shaders/fractal.vert
             ${CMAKE_SOURCE_DIR}/shaders/fractal.frag
+            ${CMAKE_SOURCE_DIR}/shaders/volumetric.vert
+            ${CMAKE_SOURCE_DIR}/shaders/volumetric.frag
+            ${CMAKE_SOURCE_DIR}/shaders/fluid_advect.comp
+            ${CMAKE_SOURCE_DIR}/shaders/fluid_divergence.comp
+            ${CMAKE_SOURCE_DIR}/shaders/fluid_jacobi.comp
+            ${CMAKE_SOURCE_DIR}/shaders/fluid_subtract.comp
+            ${CMAKE_SOURCE_DIR}/shaders/fluid_render.vert
+            ${CMAKE_SOURCE_DIR}/shaders/fluid_render.frag
             ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp32.comp
             ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp64.comp
             ${CMAKE_SOURCE_DIR}/shaders/synthpeak_int32.comp
@@ -206,6 +214,7 @@ if((ENABLE_DX12 AND WIN32) OR (ENABLE_DX11 AND WIN32))
         ${CMAKE_SOURCE_DIR}/shaders/compute.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/nbody.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/fractal.hlsl
+        ${CMAKE_SOURCE_DIR}/shaders/volumetric.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp32.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp64.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_int32.hlsl
@@ -260,6 +269,8 @@ if(ENABLE_OPENGL AND OpenGL_FOUND)
         ${CMAKE_SOURCE_DIR}/shaders/particle_gl.frag
         ${CMAKE_SOURCE_DIR}/shaders/fractal_gl.vert
         ${CMAKE_SOURCE_DIR}/shaders/fractal_gl.frag
+        ${CMAKE_SOURCE_DIR}/shaders/volumetric_gl.vert
+        ${CMAKE_SOURCE_DIR}/shaders/volumetric_gl.frag
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp32_gl.comp
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp64_gl.comp
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_int32_gl.comp

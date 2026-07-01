@@ -1,0 +1,54 @@
+#version 450
+
+// Fluid: semi-Lagrangian advection of velocity + dye. See shaders/fluid.comp
+// (the shared header) for the full algorithm description. This file is one
+// pass; the C++ side loads each pass as a separate shader module.
+//
+// Pass 1/4: trace each cell's velocity backward in time, bilinearly sample
+// the source field, write the result. Unconditionally stable (CFL-free)
+// because the backtrace is a single sample, not a finite-difference step.
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(set = 0, binding = 0, std430) readonly buffer InBuf {
+    vec4 inCells[];
+};
+layout(set = 0, binding = 1, std430) writeonly buffer OutBuf {
+    vec4 outCells[];
+};
+
+layout(push_constant) uniform FluidParams {
+    float dt;
+    float dx;
+    uint  gridSize;
+    uint  _pad;
+} p;
+
+uint cellIdx(uvec2 c) { return c.y * p.gridSize + c.x; }
+uvec2 clampCoord(uvec2 c) {
+    return clamp(c, uvec2(0u), uvec2(p.gridSize - 1u));
+}
+
+void main() {
+    uvec2 c = gl_GlobalInvocationID.xy;
+    if (c.x >= p.gridSize || c.y >= p.gridSize) return;
+
+    vec2 vel = inCells[cellIdx(c)].xy;
+    vec2 pos = vec2(c) - vel * p.dt / p.dx;
+    pos = clamp(pos, vec2(0.0), vec2(p.gridSize - 1u));
+
+    uvec2 i0 = uvec2(floor(pos));
+    vec2 f = pos - vec2(i0);
+    uvec2 i1 = i0 + uvec2(1u);
+    i0 = clampCoord(i0);
+    i1 = clampCoord(i1);
+
+    vec4 v00 = inCells[cellIdx(i0)];
+    vec4 v10 = inCells[cellIdx(uvec2(i1.x, i0.y))];
+    vec4 v01 = inCells[cellIdx(uvec2(i0.x, i1.y))];
+    vec4 v11 = inCells[cellIdx(i1)];
+
+    vec4 a = mix(v00, v10, f.x);
+    vec4 b = mix(v01, v11, f.x);
+    outCells[cellIdx(c)] = mix(a, b, f.y);
+}
