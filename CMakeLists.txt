@@ -115,15 +115,13 @@ endif()
 if(ENABLE_OPENGL)
     find_package(OpenGL QUIET)
     if(OpenGL_FOUND)
-        include(FetchContent)
-        FetchContent_Declare(
-            glad
-            GIT_REPOSITORY https://github.com/Dav1dde/glad.git
-            GIT_TAG        v2.0.8
-            SOURCE_SUBDIR  cmake
-        )
-        FetchContent_MakeAvailable(glad)
-        glad_add_library(glad_gl43 STATIC API gl:core=4.3)
+        # Reproducibly generated with glad v2.0.8:
+        #   glad --api gl:core=4.3 --reproducible --out-path third_party/glad c
+        # Keeping the generated loader in-tree removes configure-time network
+        # access and the implicit Python/Jinja2 build dependency.
+        add_library(glad_gl43 STATIC third_party/glad/src/gl.c)
+        target_include_directories(glad_gl43 PUBLIC
+            ${CMAKE_SOURCE_DIR}/third_party/glad/include)
 
         list(APPEND BACKEND_SOURCES src/opengl_backend.cpp)
         list(APPEND BACKEND_LIBS    OpenGL::GL glad_gl43)
