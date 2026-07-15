@@ -1,56 +1,210 @@
 # GPU Compute & Rendering Pipeline — Multi-Graphics API
 
-A real-time particle simulation using GPU compute shaders with five
-interchangeable graphics API backends: **Vulkan**, **DirectX 12**,
-**DirectX 11**, **OpenGL 4.3**, and **Metal**. Each backend implements the
-same particle physics (Euler integration in a compute shader) and point-cloud
-rendering, with GPU timestamp profiling. Runs on **Windows**, **Linux**, and
-**macOS**.
+A cross-API GPU benchmark suite that retains its original real-time particle
+simulation and adds versioned compute and graphics workloads. The engine has
+five interchangeable graphics API backends: **Vulkan**, **DirectX 12**,
+**DirectX 11**, **OpenGL 4.3**, and **Metal**, with GPU timestamp profiling.
+Runs on **Windows**, **Linux**, and **macOS**; individual workload support is
+listed below and in [`HANDOFF.md`](HANDOFF.md).
 
 See [`docs/report.md`](docs/report.md) for the full analysis.
-See [`docs/TODO.md`](docs/TODO.md) for the roadmap and planned features.
+See [`HANDOFF.md`](HANDOFF.md) first for the authoritative current status, the
+two active product goals, verified blockers, and the next implementation slice.
+See [`docs/TODO.md`](docs/TODO.md) and [`docs/roadmap.md`](docs/roadmap.md) for
+older specialised plans and historical context.
 See [`docs/macos-notes.md`](docs/macos-notes.md) for macOS platform notes and limitations.
 
 ## Supported Graphics APIs
 
 | Graphics API | API Level | Platforms | Notes |
 |---------|-----------|-----------|-------|
-| Vulkan  | 1.1+       | Windows, Linux, HarmonyOS | Requires Vulkan SDK + ICD driver |
+| Vulkan  | 1.1+       | Windows, Linux, HarmonyOS; optional MoltenVK on macOS | SDK is a build-time dependency; runtime still needs a Vulkan loader/ICD |
 | DirectX 12 | Feature Level 11_0+ | Windows 10+ | Tries FL 12_1→12_0→11_1→11_0; works on older GPUs too |
-| DirectX 11 | Feature Level 11_0 | Windows 7+  | Simplest, broadest Windows support |
-| OpenGL  | 4.3 Core  | Windows, Linux, macOS (legacy) | Cross-platform fallback; requires `GL_ARB_compute_shader` |
+| DirectX 11 | Feature Level 10_0+ | Native backend: Windows 7+; packaged WinUI app: Windows 10 1809+ | FL11 uses SM5; FL10 uses SM4 and genuine optional DirectCompute 4.x when the driver exposes it |
+| OpenGL  | 4.3 Core  | Windows, Linux | Cross-platform fallback; macOS stops at OpenGL 4.1 and cannot run this compute path |
 | Metal   | Metal 2+  | macOS (Apple/Intel) | Native Apple GPU API (Apple/AMD) — highest priority on macOS |
+
+The Windows binary now probes the real DX11 feature level and DirectCompute
+capability instead of assuming every DXGI adapter is FL11. This is the intended
+path for DirectX 10-era cards such as the GeForce GT 120: use DX11 FL10/SM4,
+not a new DX9 backend. All production SM4 shader entries compile, but the GT 120
+still needs physical-card acceptance; its safe N-body profile is limited to
+4,096 bodies. Vulkan is delay-loaded, so a DirectX-only machine can start even
+when no `vulkan-1.dll` is installed.
+
+## Platform Porting Priority (user-locked 2026-07-16)
+
+Planned porting order after the current Windows x64 work settles. Ports land
+as their own result groups (new `workloadVersion` whenever the timing or
+capture model differs), so existing Windows score comparisons are never
+affected. None of these full product ports has started; HarmonyOS already has
+an isolated Vulkan particle prototype, but it is not the current benchmark
+suite.
+
+1. **Windows on ARM (ARM64)** — expected to be a build/packaging port only:
+   ARM64 CLI/WinUI targets (currently x64-only), vcpkg `arm64-windows`
+   triplet, WinAppSDK ARM64 payload, on-device validation of Vulkan
+   (Adreno), DX12/DX11, WARP and the OpenGL compatibility layer.
+2. **macOS** — Metal backend currently covers only the particle workload;
+   needs Metal ports of the main workloads, SwiftUI GUI alignment with the
+   shared workload registry, and `MTLCaptureManager` (.gputrace) replacing
+   RenderDoc capture.
+3. **Android** — reuses the Vulkan backend; GLFW does not support Android, so
+   a NativeActivity/ANativeWindow surface layer and a new frontend are
+   required. RenderDoc supports Android remote capture. Thermal throttling
+   may require a separate mobile duration contract.
+4. **iOS** — Metal (or MoltenVK) only; no RenderDoc, capture via
+   `MTLCaptureManager`; shares the SwiftUI frontend with macOS; App Store
+   distribution constraints apply.
+5. **Debian Linux** — technically the lowest-friction port: Vulkan/OpenGL
+   backends, GLFW, RenderDoc and the XDG data path already exist; mostly
+   build fixes, `.deb` packaging, CI and real-machine validation.
+6. **WebGPU** — per the established plan: unified capability registry first,
+   then a native Dawn-pinned backend porting Stream → GPU Burn → Cinematic
+   Liquid, then a `/web` browser frontend. Results use separate version ids
+   (e.g. `stream_webgpu_v1`) and record the underlying implementation; no
+   formal score without reliable GPU timestamps, and browser runs have no
+   RenderDoc capture.
+7. **HarmonyOS PC / 鸿蒙** — promote the existing standalone `ohos/` Vulkan
+   particle demo into a real product port: align the workload registry, CLI/GUI,
+   result contracts and platform-appropriate capture path with the main suite.
+   The current prototype has none of that full-suite integration, so this item
+   remains unstarted.
+8. **PS3 (exploratory, out of the score system)** — homebrew only
+   (PSL1GHT/RSXGL); the RSX GPU has no compute/SSBO/atomics/GPU timestamps
+   and PSGL is OpenGL ES 1.0 + Cg, not desktop GL 4.3, so none of the main
+   workloads can be ported directly. At most a fixed-function novelty demo in
+   a separate repository; it must never enter the formal score contracts or
+   the GUI main page.
+9. **Dual-GPU Aggregate (feature, not an OS port; first validation target:
+   dual FirePro D700 in a Mac Pro 2013 under Boot Camp Windows)** — explicit
+   engine-level multi-GPU; driver CrossFire never accelerates a custom
+   engine and is not relied upon. Slices: (a) `stream` headless dual-device
+   aggregate (each device simulates half the particles, CPU frame-boundary
+   sync, summed throughput as new group `stream_dualgpu_v1` recording both
+   adapters), (b) dual-GPU N-body with per-step position exchange,
+   (c) split-frame or AFR GPU Burn via DX12 unlinked multi-adapter with a
+   cross-adapter heap. No DX12 LDA / Vulkan device-group dependency (unclear
+   on the final GCN 1.0 drivers) and no liquid domain decomposition.
+   Thermal caution: sustained dual-GPU load is the Mac Pro 2013's known
+   weakness — 15-second bursts only, no dual-GPU long soak.
 
 ## Benchmark Workloads
 
-The benchmark runs **five interchangeable workloads**, each isolating one axis of
-GPU performance and reporting a deterministic, **cross-API-comparable** metric
-(not just FPS). Every backend runs the *same* algorithm, so results compare
-directly across Vulkan / DX12 / DX11 / OpenGL / Metal.
+The engine currently exposes **ten stable workload ids**. `gpu_burn` is the
+new primary visual graphics-burn path; `gpu_stress` remains an advanced
+GraphicsBurn component score, and the original `stress` path is retained as
+`Legacy Stress v1`. `cinematic_liquid` is the real 3D Vulkan liquid test. Its
+validated v1 score contract is preserved, while the current working tree adds
+the separately versioned v2 surface-splat implementation described below. The
+unrelated old `fluid` dye prototype is retained under Legacy/Other and must not
+be used for cross-API comparison.
+See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated support.
 
 | Axis | `--workload` | Stresses | Metric | Knobs |
 |------|--------------|----------|--------|-------|
-| **Bandwidth** | `stream` (default) | Memory subsystem | GB/s | `--particles` |
+| **Bandwidth** | `stream` (default) | Particle working-set memory traffic | GB/s | `--particles` |
 | **Compute (achievable)** | `nbody` | FP32 ALU + SFU + shared memory | GFLOP/s | `--bodies` |
-| **Fill / fragment** | `stress` | Rasteriser + fragment ALU + ROP | G-iter/s | `--iter` |
+| **Primary visual GPU burn** | `gpu_burn` | Original Plasma Bloom core; fixed-step fragment FP32/SFU/INT + overdraw | Gpix-step/s | safe auto-tune (recommended), or fixed `--iter 16..32` |
+| **Advanced GraphicsBurn component** | `gpu_stress` | Fragment FP32/SFU/INT ALU + four-pass overdraw | Gpix-iter/s | auto-tuned, or `--iter` |
+| **Legacy fill test** | `stress` | Fractal fragment ALU + fill | G-iter/s | `--iter` |
 | **Compute (peak)** | `synthpeak` | Raw ALU throughput per precision | GFLOPS / GIOPS | `--precision`, `--iter` |
 | **3D render** | `render3d` | Vertex transform + raster + fill + depth | MQuad/s | `--particles` |
+| **Volume raymarch** | `volumetric` | Fragment ALU/SFU + register pressure | GSample/s | `--steps` |
+| **3D cinematic liquid** | `cinematic_liquid` | 320,920-particle MLS-MPM + particle-splatted 3D density volume + iterative free-surface optics | MParticle-step/s | current physical-scene v7 is Vulkan-only and smoke-tested; historical optics_v4 formal run passed; formal v7 and GUI acceptance pending |
+| **Legacy 2D fluid** | `fluid` | Multi-pass compute + fullscreen dye render | unverified legacy | `--grid`, `--jacobi` |
 
 ```bash
 ./build/gpu_benchmark --benchmark --headless                          # Stream — bandwidth (GB/s)
 ./build/gpu_benchmark --benchmark --workload nbody --bodies 65536      # N-body — achievable GFLOP/s
-./build/gpu_benchmark --benchmark --workload stress --iter 8000        # Fractal — fill rate (G-iter/s)
+./build/gpu_benchmark --time 15 --workload gpu_burn --capture 5        # Primary 15 s Plasma Bloom visual burn
+./build/gpu_benchmark --time 15 --workload gpu_stress --capture 5      # Advanced GraphicsBurn component
+./build/gpu_benchmark --benchmark --workload stress --iter 8000        # Legacy fractal fill test
 ./build/gpu_benchmark --benchmark --workload synthpeak --precision fp32  # Peak FLOPS (fp32|fp16|fp64|int32)
 ./build/gpu_benchmark --benchmark --workload render3d                 # True-3D billboards (MQuad/s)
+./build/gpu_benchmark --time 15 --workload volumetric --steps 96      # Experimental raymarch
+./build/gpu_benchmark --backend vulkan --time 15 --workload cinematic_liquid --capture 5
+# The old `fluid` id is retained only as a legacy 2D prototype.
 ```
 
-- `stream` is bandwidth-bound (~0.15 FLOP/byte); `nbody` is a shared-memory-tiled
-  all-pairs simulation that is genuinely ALU/SFU-bound; `stress` is a fixed-iteration
-  fullscreen fractal (FurMark-style sustained load); `synthpeak` is a vkpeak-style
+- `stream` is bandwidth-dominated (~0.15 FLOP/byte), so its GB/s score is mainly
+  a working-set memory-throughput result rather than a complete GPU-performance
+  score. `nbody` is a shared-memory-tiled all-pairs simulation that is genuinely
+  ALU/SFU-bound. `gpu_burn` is a versioned, auto-tuned visual GraphicsBurn: two
+  fixed-step fullscreen passes render an original rotating Plasma Bloom: an
+  irregular energy core with crystalline spikes and electric HDR corona, while
+  consuming FP32/SFU/INT work. It is
+  implemented on Vulkan, DX12, DX11 and OpenGL (including DX WARP), with Metal
+  explicitly unsupported for v1. `gpu_stress` retains the earlier four-pass
+  GraphicsBurn component score under its original result contract. Neither is
+  currently a hardware-error detector. `stress` is the unchanged legacy fractal test;
+  `synthpeak` is a vkpeak-style
   register-resident FMA loop measuring near-theoretical peak per data type;
   `render3d` is a real 3D pipeline — perspective + orbiting camera + depth test,
   particles drawn as instanced camera-facing billboard quads (vertex transform +
   rasterisation + fill + ROP).
+- `cinematic_liquid_v1` is separate from the old 2D dye solver. It runs a true
+  3D MLS-MPM particle/grid simulation, resolves grid mass to an R32F 3D density
+  volume, and raymarches a refractive free surface with Fresnel reflection,
+  Beer-Lambert absorption, a collision sphere, floor and sky. Its fixed
+  96x56x64 grid, 181,216 particles, 10 substeps and 160 ray steps make results
+  comparable within v1. It is currently Vulkan-only and therefore is not yet a
+  cross-API 3DMark replacement.
+- The current Vulkan v2 implementation uses a fixed 128x64x96 MLS-MPM grid,
+  320,920 particles (142x14x98 base plus a 48x37x71 dam), ten substeps,
+  stiffness 45,000, viscosity 0.035 and an 8-unit/s speed cap. The current
+  result contract is `cinematic_liquid_v2_physical_scene_v7`, shader version 9
+  and scene version 4. It preserves the user's duck-family geometry and the
+  seven-body index ABI: the boat remains body 2, the sinking sphere remains
+  body 3, and the three ducklings remain appended as bodies 4-6. The boat is no
+  longer hard-anchored: it is a finite 34 kg rigid body with a soft mooring, so
+  fluid forces and propeller reaction can drive and rock it; its exact motion
+  has not yet received visual acceptance. The body-3 sealed sphere has density
+  ratio 1.06, releases at 4.28 s, uses -9.81 gravity and 0.015 air damping, and
+  gates material water drag by immersion fraction using displaced mass.
+- The pool now has finite-height embedded walls inset by 0.22 and a limited
+  outer simulation catch band, allowing particles to cross the rim and fall to
+  the ground without pretending the fluid domain is infinite. A separate thin
+  foreground soft-PVC film uses IOR 1.50, Fresnel reflection, weak absorption
+  and procedural wrinkles; it is a dedicated material approximation, not a
+  complete multi-medium PVC ray path. The rendered pool floor, PVC bottom,
+  liner, grass and physical particle floor now share ground `y=0`; ring spacing
+  is derived from twice the tube radius. The surrounding scene adds an infinite
+  procedural grass field and atmospheric sky/clouds without cubemap assets.
+  Surface reconstruction still uses a 5x5x5 binomial kernel, but adaptively
+  preserves low-support spray/drop cells. The sinking sphere's entry crown and
+  whitewater are driven from the real GPU rigid-body state and local fluid
+  response rather than a fragment-only fake splash; secondary spray particles
+  are not implemented yet.
+- The renderer retains the v6 four-interface Fresnel/Snell path, per-segment
+  Beer-Lambert attenuation, opaque-scene depth sorting, `extinction=(30,10,8)`,
+  linear exposure and zero density at volume boundaries. Historical v1,
+  `cinematic_liquid_v2_surface_splat_optics_v4` (shader version 6),
+  `cinematic_liquid_v2_duck_family_v5` (shader version 7), and
+  `cinematic_liquid_v2_iterative_optics_v6` (shader version 8) results/previews
+  remain isolated and must not be scored as v7.
+  The optics_v4 RTX 5090 Vulkan formal 15-second run plus 5.1-second RenderDoc
+  capture passed at 263.98 MParticle-step/s (result `20260715-170629-492`). The
+  historical v6 has only a six-second preview: result `20260715-221447-024`, 257.01
+  MParticle-step/s, image
+  `rdoc_captures/cinematic-liquid-v2-5s-iterative-optics-v6-final-preview.png`.
+  Current v7 has passed shader compilation, all six final SPIR-V validations,
+  CLI Release and WinUI Release x64 builds. Its independently versioned SPH
+  successor now runs 318,464 particles and has completed a 15-second
+  RTX 5090/Vulkan visual run: the pool, water, duck family, balls, boat and grass
+  remained stable, the process stopped normally, and the user accepted the
+  current appearance. This closes visual iteration only; it is not a formal
+  fifth-second capture/score acceptance.
+  The transient console value `241.13` is neither formal nor persisted. A smoke
+  window closing after a few seconds is the test script's `--time 8` lifecycle,
+  not evidence of a crash. Interactive WinUI run/history acceptance,
+  fixed-timestep cross-GPU trajectory and DX12/DX11/OpenGL/Metal v2 ports remain
+  open. V7 remains MLS-MPM; use `--liquid-solver sph` for the experimental SPH
+  slice inspired by [jeantimex/fluid](https://github.com/jeantimex/fluid).
+  Before that slice can produce a formal score, its simulation must be decoupled
+  from render rate, rigid-body impulses must be cleared between substeps, and
+  the in-place viscosity SSBO race must be removed. No upstream assets are
+  vendored.
 - **Precision support** (`synthpeak`): FP32/FP64/INT32 work on Vulkan, DX12, DX11, OpenGL.
   **FP16** works on **Vulkan** (`VK_KHR_shader_float16_int8`), **DX12** (precompiled
   SM 6.2 DXIL via the Windows SDK DXC), **OpenGL** (`GL_NV_gpu_shader5`, NVIDIA), and
@@ -72,6 +226,51 @@ python scripts/plot_workloads.py        # writes docs/images/workload_*.png
 See [`docs/benchmark-workload-suite.md`](docs/benchmark-workload-suite.md) for the
 full design (algorithms, scoring formulas, scaling, risks).
 
+## Supplementary CPU Benchmark
+
+The CPU benchmark is deliberately supplementary: it is native C++, opens no 3D
+window and never invokes RenderDoc. The CLI and dedicated WinUI page provide
+`per-core`, `multi` and `all`. `per-core` sequentially tests every available
+**logical processor**; `multi` starts one worker for every available logical
+processor; `all` runs those two stages in that order. The kernel mixes dependent
+integer, branch, FP32 and FP64 work, reports `MWork/s`, and selects the median of
+three rounds. Its checksum prevents dead-code elimination; it is not a known-answer
+correctness test.
+
+The formal `cpu_mixed_v1` contract is exactly 15.0 seconds of total measurement
+per test, split across three rounds, plus a 0.2-second warm-up. All other timings
+are labelled preview. Stored versions include affinity capability, formal/preview,
+timings, round count and whether multi-core ran standalone or after the per-core
+sweep, preventing those unlike conditions from sharing a comparison group.
+
+Windows x64 is the only verified slice. On a Ryzen 7 9800X3D the Release CLI
+enumerated 16 logical processors / 8 physical cores through Windows CPU Sets,
+strictly pinned every per-core and multi-core worker, and completed with exit 0.
+Windows falls back to processor-core relationships when CPU Sets are unavailable;
+strict-affinity failure makes the result invalid, returns exit code 3 and is not
+persisted. Performance/Efficiency/Middle/LPE names are explicitly **inferred
+rank labels** derived from OS metadata, not authoritative microarchitecture
+identification.
+
+Successful CLI/GUI runs append only the per-core average and multi-core summary
+to `results.json`; detailed logical-processor rows remain in the live page and
+machine-readable stdout protocol. Use:
+
+```text
+gpu_benchmark.exe --cpu-benchmark per-core|multi|all
+                  [--cpu-time <seconds>] [--cpu-warmup <seconds>]
+                  [--cpu-no-save]
+```
+
+Linux enumerates the process's allowed CPU set and attempts per-thread pinning,
+but remains best-effort until native build/topology/container testing is complete.
+macOS is `scheduler_managed`: its logical-to-physical mapping is only an estimate
+and it has no strict public per-core binding equivalent. Android/iOS and Web/WASM
+CPU modes have not been built or accepted; a browser can expose only logical
+concurrency, not reliable host-core selection or P/E classification. Affinity
+capability is part of the result identity, so these paths cannot silently mix
+with verified Windows strict-affinity scores.
+
 ## Project Structure
 
 ```text
@@ -82,6 +281,7 @@ full design (algorithms, scoring formulas, scaling, risks).
 │   ├── main.cpp                # Entry point — interactive menu, GPU selection, CLI
 │   ├── app_base.h/cpp          # Shared base class (window, particles, timing)
 │   ├── benchmark_results.h/cpp # Result persistence, comparison tables, CSV export
+│   ├── cpu_benchmark.h/cpp     # In-progress headless CPU kernel/topology runner
 │   ├── gpu_common.h            # Shared types (BenchmarkConfig, BackToMenuException)
 │   ├── vulkan_backend.h/cpp    # Vulkan
 │   ├── dx12_backend.h/cpp      # DirectX 12
@@ -106,6 +306,15 @@ full design (algorithms, scoring formulas, scaling, risks).
 
 See [`docs/building.md`](docs/building.md) for detailed prerequisites and
 platform-specific setup (Windows/Linux/macOS).
+
+For a Windows GUI-first GitHub Release candidate, use
+[`scripts/build-windows-github-release.ps1`](scripts/build-windows-github-release.ps1).
+It rebuilds CLI/WinUI, verifies a pinned RenderDoc portable input, audits PE
+imports, inventories and rechecks the ZIP, then emits the portable ZIP, Inno
+Setup EXE, `SHA256SUMS.txt` and `release-assets.json` under
+`out/release/windows-x64`. The current repository still needs a root project
+license, signing, frozen report worker and clean-machine acceptance before a
+public release; see [`packaging/PACKAGE_LIMITATIONS.md`](packaging/PACKAGE_LIMITATIONS.md).
 
 **Linux (Debian/Ubuntu):**
 ```bash

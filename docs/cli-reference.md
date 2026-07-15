@@ -29,7 +29,8 @@ tools it invokes. Source: [`src/main.cpp`](../src/main.cpp), defaults in
 - **Frame mode** (`benchmarkMode=true`, only via `--benchmark [frames]`): runs
   `benchFrames` (default 2000) frames, ignores the time limit.
 
-Every run appends its result to `results.json`.
+Every successful GPU run appends its result to `results.json`. Successful CPU
+runs append summary rows unless `--cpu-no-save` is supplied.
 
 ## 2. Interactive menu [0]–[10] (main.cpp:1026-1041)
 
@@ -103,6 +104,11 @@ Every run appends its result to `results.json`.
 | `--full-analysis` | same as menu [5] |
 | `--results` / `--results-delete <id>` / `--results-clear` / `--results-export <csv>` | result management |
 | `--compare [id1 id2]` / `--list-gpus` / `--help` | compare / list GPUs / help |
+| `--cpu-benchmark [per-core\|multi\|all]` | run the native CPU-only path and exit before GLFW/GPU probing; default mode is `all` |
+| `--cpu-mode <per-core\|multi\|all>` | explicit mode alias used by the WinUI CPU page |
+| `--cpu-time <seconds>` | total measurement budget per CPU test, split across three rounds; default `1`, range `0.03..3600` |
+| `--cpu-warmup <seconds>` | warm-up before each logical-processor test and before multi-core; default `0.15`, range `0..60` |
+| `--cpu-no-save` | run the CPU test without appending successful summaries to `results.json` |
 
 > `--run-all` (main.cpp:924): iterates every GPU×API, inherits command-line
 > workload/precision/iter/headless/flights/hostMemory; default 15s time mode,
@@ -111,6 +117,40 @@ Every run appends its result to `results.json`.
 >
 > Explicit `--time` also counts as a "direct run" (no menu) — this is what lets
 > the GUI's time-mode presets work in-process (main.cpp:788).
+
+### Native CPU-only path
+
+```powershell
+# Quick preview; writes isolated preview summaries
+gpu_benchmark.exe --cpu-benchmark all --cpu-time 1 --cpu-warmup 0.15
+
+# Formal contract: 15.0 s total measurement per test, 0.2 s warm-up, 3 rounds
+gpu_benchmark.exe --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2
+
+# Diagnostic smoke without result persistence
+gpu_benchmark.exe --cpu-benchmark per-core --cpu-time 0.09 --cpu-warmup 0 --cpu-no-save
+```
+
+`per-core` means a sequential test of every available **logical processor**, not
+one representative thread per physical core. `multi` starts one worker for every
+available logical processor; `all` runs per-core first and multi second. Each
+test splits its measurement budget into three rounds and selects the median.
+The per-core summary is the arithmetic mean of those logical-processor medians.
+
+The machine protocol consists of tab-separated `CPU_META`, `CPU_TOPOLOGY`,
+`CPU_PROGRESS`, `CPU_RESULT` and `CPU_ERROR` records. It includes affinity,
+formal/preview status, validity, round/median metadata and topology/classification
+sources. The checksum is a dead-code-elimination sink, not a correctness oracle.
+Successful persistence stores per-core average and multi-core summary rows;
+detailed logical-processor rows remain in stdout/the current GUI session.
+
+Windows formal results require strict group affinity. A failed strict bind marks
+the affected result invalid, returns exit code 3 and prevents persistence. Linux
+currently reports best-effort affinity and macOS reports `scheduler_managed`;
+affinity capability, timing and `multi` sequence are part of the stored result
+identity, so unlike contracts do not share a comparison group. Core-class names
+prefixed with `Inferred` are OS-metadata ranks, not authoritative P/E/Mid/LPE
+microarchitecture identification.
 
 ## 4. External tools summary
 

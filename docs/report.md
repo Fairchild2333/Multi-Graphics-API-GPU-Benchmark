@@ -1981,61 +1981,71 @@ On the RTX 5090, DX11 is the fastest API (7736 FPS). On the GTX 970, it is the *
 
 This demonstrates that **API performance rankings are not universal — they depend on GPU architecture and driver maturity**. DX11's implicit driver model excels on modern NVIDIA hardware (where the driver has been refined over a decade) but introduces overhead on older architectures where compute–render transitions were not as optimised. The RX 9070 XT (RDNA 4) shows yet another pattern: DX11 ≈ Vulkan ≈ DX12, with only OpenGL significantly behind — AMD's DX11 advantage over explicit APIs is negligible compared to NVIDIA's.
 
-### Pre-Compute-Shader GPUs: Why the GT 120 / 9500 GT Cannot Run This Benchmark
+### Direct3D 10-era GPUs: GT 120 / 9500 GT Downlevel Path
 
-I also have a GeForce GT 120 (2009) — a Mac Edition card that Windows detects as a **GeForce 9500 GT**, since both use the identical G96 GPU die. I planned to include it in this project, but during testing it was detected with only **DX11 API at Feature Level 10_0**. The benchmark failed immediately:
+The earlier version of this report incorrectly concluded that Feature Level 10_0
+could not execute compute shaders at all. The observed failure was real, but its
+cause was in this benchmark: the DX11 backend created an FL10_0 device and then
+unconditionally compiled `cs_5_0`, `vs_5_0`, and `ps_5_0`. Naturally,
+`CreateComputeShader` rejected that Shader Model 5 bytecode on an SM4 device.
 
-```
-Feature Level: 10_0
-FAILED: CreateComputeShader failed
-```
+Direct3D 11 exposes an optional, genuine DirectCompute 4.x path for Direct3D
+10.0/10.1 hardware. Microsoft requires applications to query
+`D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS` and specifically
+`ComputeShaders_Plus_RawAndStructuredBuffers_Via_Shader_4_x`; support cannot be
+assumed from the model name alone. See Microsoft's
+[downlevel compute documentation](https://learn.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-devices-downlevel-compute-shaders)
+and the
+[feature-query structure](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ns-d3d11-d3d11_feature_data_d3d10_x_hardware_options).
 
-Compute shaders require **Feature Level 11_0** (DX11-class hardware). The 9500 GT, despite having a **unified shader architecture** (introduced with G80 / GeForce 8800 in 2006), lacks the hardware features that compute shaders need:
+The current backend now:
 
-- **UAV (Unordered Access Views)**: random read/write to arbitrary buffer addresses
-- **Thread Group Shared Memory**: fast on-chip memory shared between threads in a workgroup
-- **Atomic operations**: thread-safe read-modify-write to shared data
-- **Independent dispatch**: ability to execute work outside the rendering pipeline
+- stores the device's actual feature level;
+- queries the optional DirectCompute 4.x capability on FL10 hardware;
+- compiles SM4.0 compute/vertex/pixel profiles on FL10 and SM5.0 on FL11;
+- completely skips compute shaders and UAV particle buffers for fragment-only
+  workloads, so those tests remain available even when the optional compute bit
+  is absent;
+- rejects FP64 SynthPeak and oversized dispatches cleanly on the downlevel path;
+- records feature level, shader model, and DirectCompute availability with the
+  saved driver metadata.
 
-The evolution of GPU programmability, rendering pipeline, and Shader Model follows a clear progression:
+SM4 downlevel compute is constrained but real: only one compute UAV can be
+bound, typed UAVs are unavailable, thread-group shared memory is limited to
+16 KiB, and a group is limited to 768 threads. The original Stream shader uses
+256 threads and one `RWStructuredBuffer`, so it fits this contract. N-body now
+uses `SV_GroupIndex`, allowing its small configurations to compile for SM4;
+SynthPeak FP32/INT32 also compiles, while FP16/FP64 remain excluded.
 
-| Era | DirectX | Shader Model | Pipeline | Key Capability | NVIDIA Example | AMD Example |
-|-----|---------|-------------|----------|---------------|----------------|-------------|
-| Fixed-function | DX5–7 | — | Fixed T&L | Parameters only, no programmable shaders | GeForce 256 (1999) | Radeon DDR (2000) |
-| Early programmable | DX8 | SM 1.x | Programmable VS/PS (dedicated HW) | Simple vertex/pixel shaders, limited instructions | GeForce 3 (2001) | Radeon 8500 (2001) |
-| Full programmable | DX9 | SM 2.0 | Programmable VS/PS (dedicated HW) | Branching, longer programs, FP32 pixel shaders | GeForce FX (2003) | Radeon 9700 (2002) |
-| Advanced shaders | DX9.0c | SM 3.0 | Programmable VS/PS (dedicated HW) | Dynamic branching, HDR, vertex texture fetch | GeForce 6800 (2004) | Radeon X1800 (2005) |
-| Unified + geometry | DX10 | SM 4.0 | **Unified architecture** + geometry shader | VS/PS/GS share same ALUs, stream output | GeForce 8800 (2006) | Radeon HD 2900 (2007) |
-| Compute shaders | DX10.1 | SM 4.1 | Unified + limited compute | Gather4, MSAA improvements | GeForce GT 120 (2008) | Radeon HD 3870 (2007) |
-| Full compute | **DX11** | **SM 5.0** | **Unified + compute shader** | UAV, thread group shared memory, atomics, tessellation | GeForce GTX 480 (2010) | Radeon HD 5870 (2009) |
-| Explicit APIs | DX12 / Vulkan | SM 5.1 / SPIR-V | Explicit command recording | Multi-queue, async compute, low CPU overhead | GeForce GTX 900+ (2014) | Radeon GCN 1.0+ (2012) |
-| Mesh shaders | DX12 Ultimate | SM 6.5+ | Mesh + amplification shaders | Mesh shading, ray tracing, variable rate shading | GeForce RTX 20+ (2018) | Radeon RX 6000+ (2020) |
+| Era | DirectX / FL | Shader Model | Relevant capability |
+|-----|--------------|--------------|---------------------|
+| Advanced raster | DX9.0c | SM 3.0 | VS/PS, dynamic branching; no compute/UAV |
+| Unified raster | DX10 / FL10_0 | SM 4.0 | VS/PS/GS and optional DirectCompute 4.x through the D3D11 runtime |
+| Refined unified | DX10.1 / FL10_1 | SM 4.1 | SM4.1 raster additions and optional DirectCompute 4.x |
+| Full DX11 compute | DX11 / FL11_0 | SM 5.0 | Standard compute, richer UAV/TGSM/atomic/tessellation feature set |
+| Explicit APIs | DX12 / Vulkan | SM 5.1+ / SPIR-V | Explicit command recording, queues, and modern resource control |
 
-The **9500 GT** (SM 4.0, DX10 Feature Level 10_0) sits at the "unified architecture" stage. While its shader processors can flexibly run vertex, pixel, or geometry shaders on the same ALUs, the hardware predates the memory access model (UAV, shared memory, atomics) and independent dispatch mechanism required by compute shaders (SM 5.0 / Feature Level 11_0).
+This does **not** mean every workload is safe to launch at its modern default on
+a GT 120. First acceptance should use Stream/Particle Light or Medium and small
+N-body/Render3D configurations. Large SynthPeak loops, GPU Burn/Stress, and
+Volumetric need a separately versioned `legacy_sm4` calibration to avoid Windows
+TDRs. FP16, FP64, Vulkan, DX12, OpenGL 4.3, Fluid, and Cinematic Liquid are not
+part of the GT 120 contract.
 
-Note: NVIDIA's proprietary **CUDA** (2007) brought general-purpose compute to unified architectures two years before DX11 standardised compute shaders. The G80 (GeForce 8800) could run CUDA compute workloads despite being a DX10/SM 4.0 GPU — CUDA bypasses the graphics API entirely and accesses the hardware directly. However, this benchmark targets cross-vendor standards (Vulkan, DX12, DX11, OpenGL) rather than vendor-specific APIs.
+#### Why a new DX9 backend is not the GT 120 solution
 
-Even if a pixel-shader fallback were implemented to simulate compute on FL 10.0 hardware, the results would be **meaningless for comparison**: the workload would run through the rendering pipeline (rasterisation → fragment output) rather than as a true compute dispatch, measuring an entirely different code path with different bottlenecks. The benchmark's value lies in comparing the **same compute workload** across APIs and hardware — a pixel-shader workaround would break that comparability.
+DX9 could be implemented as a separate raster backend, but it has no compute
+shader/UAV path and would require a new D3D9 device, presentation, timestamp,
+resource, and SM3 shader implementation. Its results could not share the Stream,
+N-body, or SynthPeak contracts. RenderDoc also does not support D3D9 capture, so
+it would break this project's fixed fifth-second capture workflow. Because the
+GT 120 already exposes FL10_0, D3D11 downlevel is both the more capable and the
+more comparable route.
 
-#### DX11 API vs. DX11 Hardware: A Common Misconception
-
-A point of confusion encountered during testing: Windows' `dxdiag` utility reports the 9500 GT as supporting "DirectX 11", yet it cannot run DX11-class workloads like compute shaders or 3DMark Fire Strike. This is because **DX11 API support ≠ DX11 hardware capability**:
-
-- **dxdiag reports "DirectX 11"** = the Windows operating system has the **DX11 runtime** installed. This is a software component, not a hardware feature.
-- **GPU actual capability** = **Feature Level 10_0** (DX10-class hardware). This is what the GPU silicon physically supports.
-
-The DX11 API is **backwards-compatible by design**: it can create a device on any GPU from FL 9_1 upwards, but the available features are limited to what the hardware's Feature Level supports. This benchmark successfully creates a DX11 device on the 9500 GT (the device reports FL 10_0), but `CreateComputeShader` fails because compute shaders require FL 11_0.
-
-```
-D3D11CreateDevice()          → succeeds (DX11 API can drive FL 10_0 hardware)
-CreateComputeShader()        → FAILS   (compute shaders need FL 11_0)
-CreateVertexShader()         → succeeds (vertex shaders available since FL 9_1)
-CreatePixelShader()          → succeeds (pixel shaders available since FL 9_1)
-CreateGeometryShader()       → succeeds (geometry shaders available since FL 10_0)
-CreateHullShader()           → would FAIL (tessellation needs FL 11_0)
-```
-
-This same distinction explains 3DMark compatibility: tests like **Fire Strike** (DX11) require FL 11_0 features (tessellation, compute-based post-processing) and will not run on the 9500 GT. Tests like **Cloud Gate** (DX11/FL 10_0) use only vertex, pixel, and geometry shaders, and run successfully. The "DX11" label in both cases refers to the API version used for rendering, not the minimum hardware requirement — which is determined by the Feature Level.
+The code and all SM4 profiles have been compiled on the development machine,
+but the optional DirectCompute bit, driver timing behavior, safe calibration,
+and fifth-second RenderDoc capture still require validation on the physical GT
+120 before any result is called formal.
 
 ### Shader Model, Shading Languages, and the Rendering Pipeline
 
@@ -2079,13 +2089,17 @@ The Shader Model version determines what a GPU can do, but different APIs expose
 |----|-----------------|----------------|--------------|-------------|
 | SM 2.0 | 9_1 – 9_3 | 2.1 | 120 | Basic VS/PS, FP32 |
 | SM 3.0 | — | 3.0 | 130 | Dynamic branching |
-| SM 4.0 | 10_0 | 3.3 | 330 | Unified shaders, geometry shader, integer ops |
-| SM 4.1 | 10_1 | — | — | Gather4, MSAA read |
-| SM 5.0 | **11_0** | **4.3** | **430** | **Compute shader, UAV, tessellation** |
+| SM 4.0 | 10_0 | 3.3 | 330 | Unified shaders, geometry shader, integer ops; optional DirectCompute 4.x through D3D11 |
+| SM 4.1 | 10_1 | — | — | Gather4/MSAA additions; optional DirectCompute 4.x through D3D11 |
+| SM 5.0 | **11_0** | **4.3** | **430** | Standard full compute/UAV feature set and tessellation |
 | SM 5.1 | 11_1 / 12_0 | 4.5+ | 450 | Bindless-style resource indexing |
 | SM 6.0+ | 12_0+ | — (Vulkan SPIR-V) | — | Wave intrinsics, ray tracing, mesh shaders |
 
-This benchmark requires **SM 5.0 / Feature Level 11_0 / OpenGL 4.3** as the minimum — the point where compute shaders became a standard, cross-vendor feature. The 9500 GT's SM 4.0 / FL 10_0 hardware falls one generation short of this requirement.
+The modern cross-API comparison matrix still starts at **SM 5.0 / Feature Level
+11_0 / OpenGL 4.3**. A new, explicitly separated DX11-downlevel contract can
+include FL10_0/SM4 hardware when its driver exposes DirectCompute 4.x. Those
+results must record the feature level and shader profile and must not be mixed
+with Vulkan/DX12/OpenGL 4.3 coverage claims.
 
 ### Conclusion
 
