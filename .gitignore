@@ -30,9 +30,12 @@ Makefile
 .vscode/
 .claude/
 .cursor/
+.agents/
 
 # RenderDoc captures (large binary files, keep JSON traces)
 /rdoc_captures/*.rdc
+# RenderDoc PNG exports: keep only the curated reference set checked in
+/rdoc_captures/*.png
 
 # Keep results tracked
 # /results/
