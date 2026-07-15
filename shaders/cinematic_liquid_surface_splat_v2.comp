@@ -1,0 +1,99 @@
+#version 450
+
+// Cinematic Liquid v2 render-density reconstruction, pass 2/3.
+//
+// One invocation splats one simulation particle into an independent density
+// volume.  Density is accumulated as unsigned fixed point because Vulkan 1.1
+// does not guarantee floating-point image atomics.
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+// Five vec4 members deliberately preserve the 80-byte v2 Particle ABI.
+struct Particle {
+    vec4 position;
+    vec4 velocity;
+    vec4 C0;
+    vec4 C1;
+    vec4 C2;
+};
+
+layout(set = 0, binding = 0, std430) readonly buffer ParticleBuffer {
+    Particle particles[];
+} particleBuffer;
+
+layout(set = 0, binding = 1, std430) buffer SurfaceAtomicBuffer {
+    uint densityFixed[];
+} surfaceAtomicBuffer;
+
+layout(r32f, set = 0, binding = 2) uniform writeonly image3D surfaceVolume;
+
+// Shared 64-byte ABI for all three surface-reconstruction passes.
+layout(push_constant) uniform SurfaceReconstructionParams {
+    uvec4 volumeSizeAndCount; // xyz: volume size, w: particle count
+    vec4 volumeMinVoxel;      // xyz: world-space minimum, w: voxel size
+    vec4 kernel;              // x: h, y: mass/restDensity, z: fixedScale, w: maxDensity
+    uvec4 contract;            // host-defined reconstruction contract/version
+} pc;
+
+const float PI = 3.14159265358979323846;
+
+uint volumeIndex(uvec3 coord) {
+    return coord.x + pc.volumeSizeAndCount.x *
+        (coord.y + pc.volumeSizeAndCount.y * coord.z);
+}
+
+vec3 voxelCenter(ivec3 coord, float voxelSize) {
+    return pc.volumeMinVoxel.xyz +
+        (vec3(coord) + vec3(0.5)) * voxelSize;
+}
+
+void main() {
+    uint particleIndex = gl_GlobalInvocationID.x;
+    if (particleIndex >= pc.volumeSizeAndCount.w) return;
+
+    float h = pc.kernel.x;
+    float particleMassOverRestDensity = pc.kernel.y;
+    float fixedScale = pc.kernel.z;
+    float voxelSize = pc.volumeMinVoxel.w;
+    if (h <= 0.0 || particleMassOverRestDensity <= 0.0 ||
+        fixedScale <= 0.0 || voxelSize <= 0.0 ||
+        any(equal(pc.volumeSizeAndCount.xyz, uvec3(0u)))) return;
+
+    vec3 particlePosition = particleBuffer.particles[particleIndex].position.xyz;
+
+    // A voxel contributes when its exact world-space centre lies inside the
+    // particle kernel.  These bounds are derived from that same centre map:
+    //     centre = volumeMin + (index + 0.5) * voxelSize
+    vec3 lowerCoordinate =
+        (particlePosition - vec3(h) - pc.volumeMinVoxel.xyz) / voxelSize - vec3(0.5);
+    vec3 upperCoordinate =
+        (particlePosition + vec3(h) - pc.volumeMinVoxel.xyz) / voxelSize - vec3(0.5);
+    ivec3 first = ivec3(ceil(lowerCoordinate));
+    ivec3 last = ivec3(floor(upperCoordinate));
+    ivec3 volumeMax = ivec3(pc.volumeSizeAndCount.xyz) - ivec3(1);
+    first = clamp(first, ivec3(0), volumeMax);
+    last = clamp(last, ivec3(0), volumeMax);
+    if (any(greaterThan(first, last))) return;
+
+    float kernelCoefficient = 15.0 / (2.0 * PI * h * h * h * h * h);
+    for (int z = first.z; z <= last.z; ++z) {
+        for (int y = first.y; y <= last.y; ++y) {
+            for (int x = first.x; x <= last.x; ++x) {
+                ivec3 coord = ivec3(x, y, z);
+                float distanceToParticle =
+                    length(voxelCenter(coord, voxelSize) - particlePosition);
+                if (distanceToParticle > h) continue;
+
+                float hMinusR = h - distanceToParticle;
+                float spikySquared = kernelCoefficient * hMinusR * hMinusR;
+                float normalizedDensity =
+                    particleMassOverRestDensity * spikySquared;
+                uint encodedDensity = uint(round(normalizedDensity * fixedScale));
+                if (encodedDensity == 0u) continue;
+
+                atomicAdd(surfaceAtomicBuffer.densityFixed[
+                    volumeIndex(uvec3(coord))], encodedDensity);
+            }
+        }
+    }
+}

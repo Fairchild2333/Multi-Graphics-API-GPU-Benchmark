@@ -1,0 +1,40 @@
+#version 450
+
+// Cinematic Liquid SPH slice, pass 3b: add scanned block offsets back down.
+//   level 1: scanSums[i]   += scanSums2[i / 256]
+//   level 0: cellStarts[i] += scanSums[i / 256]
+// After the level-0 add, cellStarts is the exclusive prefix sum of the full
+// cellCounts table: each cell's first slot in the sorted index list.
+
+layout(local_size_x = 256) in;
+
+layout(set = 0, binding = 6, std430) buffer SphCellStartBuffer {
+    uint starts[];
+} sphCellStarts;
+layout(set = 0, binding = 9, std430) buffer SphScanSumsBuffer {
+    uint sums[];
+} sphScanSums;
+layout(set = 0, binding = 10, std430) buffer SphScanSums2Buffer {
+    uint sums2[];
+} sphScanSums2;
+
+layout(push_constant) uniform SphParams {
+    uvec4 counts;    // z = element count for this dispatch, w = scan level
+    vec4 sim;
+    vec4 fluid;
+    vec4 kernels;
+    vec4 boundsMin;
+    vec4 boundsMax;
+    vec4 world;
+    vec4 coupling;
+} pc;
+
+void main() {
+    uint global = gl_GlobalInvocationID.x;
+    if (global >= pc.counts.z) return;
+    uint block = global >> 8u;
+    if (pc.counts.w == 0u)
+        sphCellStarts.starts[global] += sphScanSums.sums[block];
+    else
+        sphScanSums.sums[global] += sphScanSums2.sums2[block];
+}

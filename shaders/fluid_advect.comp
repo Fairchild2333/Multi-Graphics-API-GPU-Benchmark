@@ -5,8 +5,8 @@
 // pass; the C++ side loads each pass as a separate shader module.
 //
 // Pass 1/4: trace each cell's velocity backward in time, bilinearly sample
-// the source field, write the result. Unconditionally stable (CFL-free)
-// because the backtrace is a single sample, not a finite-difference step.
+// the source field, then add the deterministic dual-vortex emitters used by
+// Cinematic Fluid v1. xy stores velocity; z/w are independent pigments.
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
@@ -21,7 +21,7 @@ layout(push_constant) uniform FluidParams {
     float dt;
     float dx;
     uint  gridSize;
-    uint  _pad;
+    float time;
 } p;
 
 uint cellIdx(uvec2 c) { return c.y * p.gridSize + c.x; }
@@ -50,5 +50,59 @@ void main() {
 
     vec4 a = mix(v00, v10, f.x);
     vec4 b = mix(v01, v11, f.x);
-    outCells[cellIdx(c)] = mix(a, b, f.y);
+    vec4 fluid = mix(a, b, f.y);
+
+    // A small amount of dissipation keeps a long-running test statistically
+    // stationary instead of eventually filling the whole domain with dye.
+    fluid.xy *= exp(-0.22 * p.dt);
+    fluid.zw *= exp(-0.72 * p.dt);
+
+    // Two moving injectors push contrasting pigments towards one another.
+    // The motion is deterministic, so benchmark captures remain reproducible.
+    vec2 q = (vec2(c) + 0.5) / float(p.gridSize) - 0.5;
+    float phase = p.time * 0.72;
+    vec2 emitterA = vec2(-0.40, -0.025 + 0.018 * sin(phase));
+    vec2 emitterB = vec2( 0.40,  0.025 - 0.018 * sin(phase * 0.91 + 1.2));
+    vec2 impact = vec2(0.025 * sin(phase * 0.43),
+                       0.018 * cos(phase * 0.37));
+    vec2 da = q - emitterA;
+    vec2 db = q - emitterB;
+    float jetA = exp(-dot(da, da) * 720.0);
+    float jetB = exp(-dot(db, db) * 720.0);
+
+    vec2 forceA = normalize(impact - emitterA) * 0.88;
+    vec2 forceB = normalize(impact - emitterB) * 0.88;
+
+    // A broad, breathing rotational field folds the colliding streams into
+    // layered ribbons without forming the familiar FurMark torus silhouette.
+    float r2 = dot(q, q);
+    // Keep rotation concentrated around the impact zone: the streams first
+    // collide head-on, then peel into a broken spiral rather than orbiting as
+    // two disconnected blobs.
+    float vortexWeight = exp(-r2 * 65.0);
+    vec2 vortex = vec2(-q.y, q.x) *
+                  (0.26 + 0.05 * sin(phase * 0.63)) * vortexWeight;
+    vec2 breathing = (impact - q) * (0.11 + 0.03 * sin(phase * 0.47)) *
+                     exp(-r2 * 12.0);
+    // Small counter-moving eddies break up the broad plume into readable
+    // filaments. Projection removes their compressible component next.
+    vec2 eddyA = vec2(cos(q.y * 43.0 - phase * 1.37),
+                      sin(q.x * 39.0 + phase * 1.11)) * 0.035;
+    vec2 eddyB = vec2(sin(q.y * 67.0 + phase * 0.83),
+                     -sin(q.x * 55.0 - phase * 0.96)) * 0.045;
+    vec2 eddies = (eddyA + eddyB) * exp(-r2 * 13.0);
+
+    fluid.xy += (jetA * forceA + jetB * forceB + vortex + breathing + eddies) * p.dt;
+    float speed = length(fluid.xy);
+    if (speed > 1.0)
+        fluid.xy *= 1.0 / speed;
+    fluid.z = min(fluid.z + jetA * (3.8 * p.dt), 1.8);
+    fluid.w = min(fluid.w + jetB * (3.8 * p.dt), 1.8);
+
+    // Hard walls are enforced again by the projection pass. Clearing their
+    // velocity here prevents the backtrace from continuously feeding edges.
+    if (c.x == 0u || c.y == 0u || c.x == p.gridSize - 1u || c.y == p.gridSize - 1u)
+        fluid.xy = vec2(0.0);
+
+    outCells[cellIdx(c)] = fluid;
 }

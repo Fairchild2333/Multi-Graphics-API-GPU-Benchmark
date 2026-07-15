@@ -1,0 +1,39 @@
+#version 450
+
+// Cinematic Liquid SPH slice, pass 4: counting-sort scatter.
+//
+// cellCursor starts as a copy of cellStarts (host buffer copy); atomically
+// bumping it hands every particle a unique slot inside its cell's contiguous
+// range.  Order within a cell is race-dependent, which perturbs float
+// summation order at the ULP level; acceptable for this experimental slice
+// and recorded as an open determinism item in HANDOFF.
+
+layout(local_size_x = 256) in;
+
+layout(set = 0, binding = 4, std430) readonly buffer SphKeyBuffer {
+    uint keys[];
+} sphKeys;
+layout(set = 0, binding = 7, std430) buffer SphCellCursorBuffer {
+    uint cursor[];
+} sphCellCursor;
+layout(set = 0, binding = 8, std430) buffer SphSortedIndexBuffer {
+    uint sortedIndices[];
+} sphSortedIndices;
+
+layout(push_constant) uniform SphParams {
+    uvec4 counts;
+    vec4 sim;
+    vec4 fluid;
+    vec4 kernels;
+    vec4 boundsMin;
+    vec4 boundsMax;
+    vec4 world;
+    vec4 coupling;
+} pc;
+
+void main() {
+    uint index = gl_GlobalInvocationID.x;
+    if (index >= pc.counts.x) return;
+    uint slot = atomicAdd(sphCellCursor.cursor[sphKeys.keys[index]], 1u);
+    sphSortedIndices.sortedIndices[slot] = index;
+}

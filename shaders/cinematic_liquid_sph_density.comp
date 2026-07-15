@@ -1,0 +1,108 @@
+#version 450
+
+// Cinematic Liquid SPH slice, pass 5: dual density (Clavet et al. 2005).
+//
+// Standard density (Spiky^2 kernel) drives incompressibility; near-density
+// (Spiky^3) provides the short-range anti-clustering that gives the
+// reference its lively droplets instead of MLS-MPM's viscous sheets.
+// Ported from jeantimex/fluid density.wgsl with identical kernels and the
+// 3x3x3-cell neighbour walk; the cell list is (starts, counts, sortedIndices)
+// from the counting sort instead of the reference's physically reordered
+// arrays, which changes memory layout but not the mathematics.
+
+layout(local_size_x = 256) in;
+
+layout(set = 0, binding = 2, std430) readonly buffer SphPredictedBuffer {
+    vec4 predicted[];
+} sphPredicted;
+layout(set = 0, binding = 3, std430) buffer SphDensityBuffer {
+    vec2 densities[];
+} sphDensities;
+layout(set = 0, binding = 5, std430) readonly buffer SphCellCountBuffer {
+    uint counts[];
+} sphCellCounts;
+layout(set = 0, binding = 6, std430) readonly buffer SphCellStartBuffer {
+    uint starts[];
+} sphCellStarts;
+layout(set = 0, binding = 8, std430) readonly buffer SphSortedIndexBuffer {
+    uint sortedIndices[];
+} sphSortedIndices;
+
+layout(push_constant) uniform SphParams {
+    uvec4 counts;
+    vec4 sim;
+    vec4 fluid;
+    vec4 kernels;
+    vec4 boundsMin;
+    vec4 boundsMax;
+    vec4 world;
+    vec4 coupling;
+} pc;
+
+uint hashCell3D(int cellX, int cellY, int cellZ) {
+    const uint blockSize = 50u;
+    uvec3 ucell = uvec3(uint(cellX + int(blockSize / 2u)),
+                        uint(cellY + int(blockSize / 2u)),
+                        uint(cellZ + int(blockSize / 2u)));
+    uvec3 localCell = ucell % blockSize;
+    uvec3 blockId = ucell / blockSize;
+    uint blockHash = blockId.x * 15823u + blockId.y * 9737333u +
+                     blockId.z * 440817757u;
+    return localCell.x + blockSize * (localCell.y + blockSize * localCell.z) +
+           blockHash;
+}
+
+float spikyPow2(float dst, float radius, float scale) {
+    if (dst < radius) {
+        float v = radius - dst;
+        return v * v * scale;
+    }
+    return 0.0;
+}
+
+float spikyPow3(float dst, float radius, float scale) {
+    if (dst < radius) {
+        float v = radius - dst;
+        return v * v * v * scale;
+    }
+    return 0.0;
+}
+
+void main() {
+    uint index = gl_GlobalInvocationID.x;
+    uint particleCount = pc.counts.x;
+    if (index >= particleCount) return;
+
+    vec3 position = sphPredicted.predicted[index].xyz;
+    float radius = max(pc.sim.z, 1.0e-5);
+    float radiusSq = radius * radius;
+    int originX = int(floor(position.x / radius));
+    int originY = int(floor(position.y / radius));
+    int originZ = int(floor(position.z / radius));
+
+    float density = 0.0;
+    float nearDensity = 0.0;
+
+    for (int z = -1; z <= 1; ++z) {
+        for (int y = -1; y <= 1; ++y) {
+            for (int x = -1; x <= 1; ++x) {
+                uint key = hashCell3D(originX + x, originY + y, originZ + z) %
+                           max(pc.counts.y, 1u);
+                uint start = sphCellStarts.starts[key];
+                uint end = start + sphCellCounts.counts[key];
+                for (uint slot = start; slot < end; ++slot) {
+                    uint neighbor = sphSortedIndices.sortedIndices[slot];
+                    vec3 offset = sphPredicted.predicted[neighbor].xyz - position;
+                    float dstSq = dot(offset, offset);
+                    if (dstSq > radiusSq) continue;
+                    float dst = sqrt(dstSq);
+                    // Self-contribution (neighbor == index) is intentional.
+                    density += spikyPow2(dst, radius, pc.kernels.x);
+                    nearDensity += spikyPow3(dst, radius, pc.kernels.y);
+                }
+            }
+        }
+    }
+
+    sphDensities.densities[index] = vec2(density, nearDensity);
+}

@@ -1,0 +1,467 @@
+#version 450
+
+// Cinematic Liquid v2 pass 4: convert nodal momentum to velocity, enforce the
+// finite pool and moving compound-body boundaries, inject the motor-boat
+// propeller wake, and atomically return equal-and-opposite impulses to the
+// rigid bodies.
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 4) in;
+
+const int BODY_DUCK = 0;
+const int BODY_PLAY_BALL = 1;
+const int BODY_ANCHORED_BOAT = 2;
+const int BODY_SINK_BALL = 3;
+const uint MAX_BODIES = 32u;
+const float DAM_GATE_X = -0.66;
+const float DAM_GATE_HALF_Z = 1.36;
+const float DAM_GATE_TOP = 1.72;
+// Keep this identical to mls_mpm_g2p_v2.comp.  A one-time 4 s GPU-state reset
+// in the host stages the high block; it then collapses immediately and
+// physically, matching the reference scene rather than a delayed gate trick.
+const float DAM_GATE_RELEASE_TIME = 0.0;
+const float kFixedContributionLimit = 536870911.0;
+const float kBodyContributionLimit = 16777215.0;
+
+struct Particle { vec4 position; vec4 velocity; vec4 C0; vec4 C1; vec4 C2; };
+struct GridCell { int vx; int vy; int vz; int mass; };
+struct BodyState {
+    vec4 positionType;
+    vec4 orientation;
+    vec4 linearVelocityInvMass;
+    vec4 angularVelocityInvInertia;
+    vec4 shape0;
+    vec4 shape1;
+    vec4 material;
+    vec4 color;
+};
+struct BodyImpulse { ivec4 linear; ivec4 angular; };
+
+layout(set = 0, binding = 0, std430) readonly buffer ParticleBuffer {
+    Particle particles[];
+} particleBuffer;
+layout(set = 0, binding = 1, std430) buffer GridBuffer {
+    GridCell cells[];
+} gridBuffer;
+layout(r32f, set = 0, binding = 2) uniform writeonly image3D densityVolume;
+layout(set = 0, binding = 3, std430) readonly buffer BodyStateBuffer {
+    BodyState bodies[];
+} bodyStateBuffer;
+layout(set = 0, binding = 4, std430) buffer BodyImpulseBuffer {
+    BodyImpulse impulses[];
+} bodyImpulseBuffer;
+
+layout(push_constant) uniform LiquidV2Params {
+    uvec4 gridSizeAndCount;
+    vec4 simulation;
+    vec4 material;
+    vec4 gridOriginDx;
+    vec4 collision;
+    vec4 coupling;
+    uvec4 scene;
+    vec4 pool;
+} pc;
+
+float gridFixedScale() { return max(abs(pc.material.z), 1.0); }
+float bodyFixedScale() { return max(abs(pc.coupling.x), 1.0); }
+float decodeGrid(int v) { return float(v) / gridFixedScale(); }
+int encodeGrid(float v) {
+    return int(round(clamp(v * gridFixedScale(),
+                           -kFixedContributionLimit,
+                            kFixedContributionLimit)));
+}
+int encodeBody(float v) {
+    return int(round(clamp(v * bodyFixedScale(),
+                           -kBodyContributionLimit,
+                            kBodyContributionLimit)));
+}
+uint gridIndex(uvec3 c) {
+    return c.x + pc.gridSizeAndCount.x *
+                 (c.y + pc.gridSizeAndCount.y * c.z);
+}
+
+vec4 safeQuaternion(vec4 q) {
+    float q2 = dot(q, q);
+    return q2 > 1.0e-10 ? q * inversesqrt(q2) : vec4(0.0, 0.0, 0.0, 1.0);
+}
+vec3 rotateByQuaternion(vec4 q, vec3 v) {
+    q = safeQuaternion(q);
+    return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+}
+vec3 inverseRotateByQuaternion(vec4 q, vec3 v) {
+    q = safeQuaternion(q);
+    q.xyz = -q.xyz;
+    return rotateByQuaternion(q, v);
+}
+
+float sdSphere(vec3 p, float r) { return length(p) - max(r, 1.0e-4); }
+float sdEllipsoid(vec3 p, vec3 r) {
+    r = max(abs(r), vec3(1.0e-4));
+    float k0 = length(p / r);
+    float k1 = length(p / (r * r));
+    return k0 * (k0 - 1.0) / max(k1, 1.0e-5);
+}
+float sdCapsule(vec3 p, vec3 a, vec3 b, float r) {
+    vec3 pa = p - a;
+    vec3 ba = b - a;
+    float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1.0e-8), 0.0, 1.0);
+    return length(pa - ba * h) - max(r, 1.0e-4);
+}
+float smoothUnion(float a, float b, float k) {
+    float h = clamp(0.5 + 0.5 * (b - a) / max(k, 1.0e-5), 0.0, 1.0);
+    return mix(b, a, h) - k * h * (1.0 - h);
+}
+
+// Keep this in sync with mls_mpm_g2p_v2.comp and the duck maths in
+// cinematic_liquid_render_v2.frag: every displaced lobe is also the visible
+// surface.  shape0.xyz is the belly envelope, shape0.w the righting strength,
+// shape1 = (head radius, head forward, head height, beak length).
+float duckSdf(vec3 p, vec4 shape0, vec4 shape1) {
+    vec3 bodyRadius = max(abs(shape0.xyz), vec3(0.02));
+    float headRadius = max(shape1.x, 0.02);
+    vec3 headCenter = vec3(shape1.y, shape1.z, 0.0);
+    float beakLength = max(shape1.w, 0.02);
+
+    float belly = sdEllipsoid(
+        p - vec3(0.0, -0.04 * bodyRadius.y, 0.0),
+        vec3(bodyRadius.x, 0.84 * bodyRadius.y, bodyRadius.z));
+    float tail = sdEllipsoid(
+        p - vec3(-0.72 * bodyRadius.x, 0.28 * bodyRadius.y, 0.0),
+        bodyRadius * vec3(0.44, 0.30, 0.42));
+    float duck = smoothUnion(belly, tail, 0.30 * bodyRadius.y);
+    duck = smoothUnion(duck, sdSphere(p - headCenter, headRadius),
+                       0.45 * headRadius);
+    vec3 beakCenter = headCenter +
+        vec3(headRadius + 0.30 * beakLength, -0.20 * headRadius, 0.0);
+    float beak = sdEllipsoid(
+        p - beakCenter,
+        vec3(0.60 * beakLength, 0.24 * headRadius, 0.46 * headRadius));
+    return smoothUnion(duck, beak, 0.12 * headRadius);
+}
+
+float bodyBoundingRadius(BodyState body) {
+    int type = int(round(body.positionType.w));
+    if (type == BODY_PLAY_BALL || type == BODY_SINK_BALL)
+        return max(body.shape0.x, 0.01);
+    if (type == BODY_DUCK) {
+        vec3 bodyRadius = max(abs(body.shape0.xyz), vec3(0.02));
+        float headReach = length(vec2(body.shape1.y, body.shape1.z)) +
+                          max(body.shape1.x, 0.02) + max(body.shape1.w, 0.02);
+        return max(length(bodyRadius), headReach);
+    }
+    if (type == BODY_ANCHORED_BOAT) {
+        vec3 h = max(abs(body.shape0.xyz), vec3(0.02));
+        float aftReach = length(vec2(max(body.shape1.y, h.x), 1.15 * h.y)) +
+                         0.25 * max(body.shape1.x, 0.02);
+        return max(length(h), aftReach);
+    }
+    return 0.01;
+}
+
+float bodySdf(BodyState body, vec3 worldPoint) {
+    vec3 p = inverseRotateByQuaternion(
+        body.orientation, worldPoint - body.positionType.xyz);
+    int type = int(round(body.positionType.w));
+
+    if (type == BODY_PLAY_BALL || type == BODY_SINK_BALL)
+        return sdSphere(p, body.shape0.x);
+
+    if (type == BODY_DUCK)
+        return duckSdf(p, body.shape0, body.shape1);
+
+    if (type == BODY_ANCHORED_BOAT) {
+        vec3 h = max(abs(body.shape0.xyz), vec3(0.02));
+        float hullDistance = sdEllipsoid(
+            p + vec3(0.0, 0.28 * h.y, 0.0), h);
+        float propRadius = max(body.shape1.x, 0.02);
+        float aft = max(body.shape1.y, h.x);
+        vec3 shaftA = vec3(-0.62 * h.x, -1.15 * h.y, 0.0);
+        vec3 shaftB = vec3(-aft, -1.15 * h.y, 0.0);
+        float shaftDistance = sdCapsule(
+            p, shaftA, shaftB, 0.12 * propRadius);
+        float hubDistance = sdSphere(p - shaftB, 0.22 * propRadius);
+        return min(hullDistance, min(shaftDistance, hubDistance));
+    }
+
+    return 1.0e6;
+}
+
+vec3 bodyNormal(BodyState body, vec3 worldPoint, float epsilon) {
+    vec3 e = vec3(max(epsilon, 1.0e-4), 0.0, 0.0);
+    vec3 gradient = vec3(
+        bodySdf(body, worldPoint + e.xyy) - bodySdf(body, worldPoint - e.xyy),
+        bodySdf(body, worldPoint + e.yxy) - bodySdf(body, worldPoint - e.yxy),
+        bodySdf(body, worldPoint + e.yyx) - bodySdf(body, worldPoint - e.yyx));
+    float g2 = dot(gradient, gradient);
+    return g2 > 1.0e-12 ? gradient * inversesqrt(g2) : vec3(0.0, 1.0, 0.0);
+}
+
+vec3 collideStationary(vec3 velocity, vec3 inwardNormal) {
+    float normalSpeed = dot(velocity, inwardNormal);
+    if (normalSpeed >= 0.0) return velocity;
+    float restitution = clamp(pc.collision.x, 0.0, 1.0);
+    float tangentialScale = 1.0 - clamp(pc.collision.y, 0.0, 1.0);
+    vec3 tangential = velocity - normalSpeed * inwardNormal;
+    return tangential * tangentialScale -
+           restitution * normalSpeed * inwardNormal;
+}
+
+vec3 collideBody(vec3 velocity, vec3 surfaceVelocity, vec3 outwardNormal,
+                 BodyState body) {
+    vec3 relative = velocity - surfaceVelocity;
+    float normalSpeed = dot(relative, outwardNormal);
+    if (normalSpeed >= 0.0) return velocity;
+    float restitution = clamp(max(pc.collision.x, body.material.x), 0.0, 1.0);
+    float friction = clamp(max(pc.collision.y, body.material.y) *
+                           max(pc.coupling.z, 0.0), 0.0, 1.0);
+    vec3 tangential = relative - normalSpeed * outwardNormal;
+    relative = tangential * (1.0 - friction) -
+               restitution * normalSpeed * outwardNormal;
+    return surfaceVelocity + relative;
+}
+
+void addBodyImpulse(uint index, vec3 impulse, vec3 torque,
+                    float displacedMass, bool contact) {
+    atomicAdd(bodyImpulseBuffer.impulses[index].linear.x, encodeBody(impulse.x));
+    atomicAdd(bodyImpulseBuffer.impulses[index].linear.y, encodeBody(impulse.y));
+    atomicAdd(bodyImpulseBuffer.impulses[index].linear.z, encodeBody(impulse.z));
+    if (displacedMass > 0.0)
+        atomicAdd(bodyImpulseBuffer.impulses[index].linear.w,
+                  max(encodeBody(displacedMass), 0));
+    atomicAdd(bodyImpulseBuffer.impulses[index].angular.x, encodeBody(torque.x));
+    atomicAdd(bodyImpulseBuffer.impulses[index].angular.y, encodeBody(torque.y));
+    atomicAdd(bodyImpulseBuffer.impulses[index].angular.z, encodeBody(torque.z));
+    if (contact)
+        atomicAdd(bodyImpulseBuffer.impulses[index].angular.w, 1);
+}
+
+float roundedRectangleDistance(vec2 p, vec2 halfExtent, float radius) {
+    radius = clamp(radius, 0.0, min(halfExtent.x, halfExtent.y));
+    vec2 q = abs(p) - halfExtent + vec2(radius);
+    return length(max(q, vec2(0.0))) +
+           min(max(q.x, q.y), 0.0) - radius;
+}
+
+vec2 roundedRectangleNormal(vec2 p, vec2 halfExtent,
+                            float radius, float epsilon) {
+    vec2 ex = vec2(max(epsilon, 1.0e-4), 0.0);
+    vec2 gradient = vec2(
+        roundedRectangleDistance(p + ex, halfExtent, radius) -
+        roundedRectangleDistance(p - ex, halfExtent, radius),
+        roundedRectangleDistance(p + ex.yx, halfExtent, radius) -
+        roundedRectangleDistance(p - ex.yx, halfExtent, radius));
+    float g2 = dot(gradient, gradient);
+    return g2 > 1.0e-12 ? gradient * inversesqrt(g2) : vec2(1.0, 0.0);
+}
+
+void applySimulationDomainBoundary(vec3 worldPosition, float dx,
+                                   inout vec3 velocity) {
+    float boundary = max(pc.material.w, 0.0) * dx;
+    vec3 domainMin = pc.gridOriginDx.xyz + vec3(boundary);
+    vec3 domainMax = pc.gridOriginDx.xyz +
+        vec3(pc.gridSizeAndCount.xyz - uvec3(1u)) * dx - vec3(boundary);
+
+    if (worldPosition.x < domainMin.x + dx)
+        velocity = collideStationary(velocity, vec3(1.0, 0.0, 0.0));
+    if (worldPosition.x > domainMax.x - dx)
+        velocity = collideStationary(velocity, vec3(-1.0, 0.0, 0.0));
+    if (worldPosition.y < max(domainMin.y, pc.pool.z) + dx)
+        velocity = collideStationary(velocity, vec3(0.0, 1.0, 0.0));
+    if (worldPosition.y > domainMax.y - dx)
+        velocity = collideStationary(velocity, vec3(0.0, -1.0, 0.0));
+    if (worldPosition.z < domainMin.z + dx)
+        velocity = collideStationary(velocity, vec3(0.0, 0.0, 1.0));
+    if (worldPosition.z > domainMax.z - dx)
+        velocity = collideStationary(velocity, vec3(0.0, 0.0, -1.0));
+}
+
+void applyFinitePoolWall(vec3 worldPosition, float dx,
+                         inout vec3 velocity) {
+    vec3 rawMin = pc.gridOriginDx.xyz;
+    vec3 rawMax = pc.gridOriginDx.xyz +
+        vec3(pc.gridSizeAndCount.xyz - uvec3(1u)) * dx;
+    float wallTop = mix(rawMin.y, rawMax.y, 0.42);
+    if (worldPosition.y > wallTop + 1.25 * dx ||
+        worldPosition.y < pc.pool.z - dx) return;
+
+    vec2 centre = 0.5 * (rawMin.xz + rawMax.xz);
+    vec2 halfExtent = max(0.5 * (rawMax.xz - rawMin.xz) -
+                          vec2(max(pc.pool.y, 0.0)), vec2(2.0 * dx));
+    float radius = clamp(pc.pool.x, 0.0,
+                         max(min(halfExtent.x, halfExtent.y) - dx, 0.0));
+    vec2 relative = worldPosition.xz - centre;
+    float wallDistance = roundedRectangleDistance(relative, halfExtent, radius);
+    float contactBand = 1.35 * dx;
+    if (abs(wallDistance) > contactBand) return;
+
+    vec2 outward2 = roundedRectangleNormal(relative, halfExtent,
+                                            radius, 0.25 * dx);
+    vec3 outward = vec3(outward2.x, 0.0, outward2.y);
+    float outwardSpeed = dot(velocity, outward);
+    if (wallDistance <= 0.0 && outwardSpeed > 0.0)
+        velocity = collideStationary(velocity, -outward);
+    else if (wallDistance > 0.0 && outwardSpeed < 0.0)
+        velocity = collideStationary(velocity, outward);
+}
+
+void applyDamGate(vec3 worldPosition, float dx, inout vec3 velocity) {
+    if (pc.pool.w >= DAM_GATE_RELEASE_TIME ||
+        abs(worldPosition.z) > DAM_GATE_HALF_Z ||
+        worldPosition.y > DAM_GATE_TOP ||
+        abs(worldPosition.x - DAM_GATE_X) > 1.35 * dx) return;
+
+    // A two-sided temporary wall stores the tall left reservoir.  Removing
+    // this constraint releases a genuine MLS-MPM dam-break; no render-only
+    // displacement or procedural wave is added.
+    if (worldPosition.x <= DAM_GATE_X && velocity.x > 0.0)
+        velocity = collideStationary(velocity, vec3(-1.0, 0.0, 0.0));
+    else if (worldPosition.x > DAM_GATE_X && velocity.x < 0.0)
+        velocity = collideStationary(velocity, vec3(1.0, 0.0, 0.0));
+}
+
+void applyPropeller(BodyState boat, uint bodyIndex, vec3 worldPosition,
+                    float cellMass, float dt, inout vec3 velocity) {
+    float radius = max(boat.shape1.x, 0.0);
+    if (radius <= 0.0 || pc.coupling.w <= 0.0) return;
+
+    vec3 axis = rotateByQuaternion(boat.orientation, vec3(-1.0, 0.0, 0.0));
+    vec3 propellerCentre = boat.positionType.xyz + rotateByQuaternion(
+        boat.orientation,
+        vec3(-max(boat.shape1.y, boat.shape0.x),
+             -1.15 * boat.shape0.y, 0.0));
+    vec3 delta = worldPosition - propellerCentre;
+    float axial = dot(delta, axis);
+    vec3 radialVector = delta - axis * axial;
+    float radialDistance = length(radialVector);
+    float wakeLength = 5.0 * radius;
+    float wakeRadius = radius * (1.0 + 0.18 * max(axial, 0.0) /
+                                 max(radius, 1.0e-4));
+    if (axial < -0.20 * radius || axial > wakeLength ||
+        radialDistance >= wakeRadius) return;
+
+    float diskFade = 1.0 - smoothstep(0.55 * wakeRadius,
+                                      wakeRadius, radialDistance);
+    float axialFade = exp(-1.7 * max(axial, 0.0) / max(wakeLength, 1.0e-4));
+    float influence = diskFade * axialFade;
+    vec3 radialDirection = radialDistance > 1.0e-5
+        ? radialVector / radialDistance
+        : rotateByQuaternion(boat.orientation, vec3(0.0, 0.0, 1.0));
+    vec3 swirlDirection = normalize(cross(axis, radialDirection));
+    float axialAcceleration = max(boat.shape1.z, 0.0) * pc.coupling.w;
+    float swirlAcceleration = abs(boat.shape1.w) * radius *
+                              pc.coupling.w * 0.28;
+    vec3 deltaVelocity = (axis * axialAcceleration +
+                          swirlDirection * swirlAcceleration) *
+                         (dt * influence);
+    velocity += deltaVelocity;
+
+    vec3 fluidImpulse = cellMass * deltaVelocity;
+    vec3 bodyImpulse = -fluidImpulse;
+    addBodyImpulse(bodyIndex, bodyImpulse,
+                   cross(propellerCentre - boat.positionType.xyz, bodyImpulse),
+                   0.0, length(deltaVelocity) > 1.0e-6);
+}
+
+void main() {
+    uvec3 coord = gl_GlobalInvocationID.xyz;
+    if (any(greaterThanEqual(coord, pc.gridSizeAndCount.xyz))) return;
+
+    uint index = gridIndex(coord);
+    float mass = decodeGrid(gridBuffer.cells[index].mass);
+    if (mass <= 0.0) {
+        gridBuffer.cells[index].vx = 0;
+        gridBuffer.cells[index].vy = 0;
+        gridBuffer.cells[index].vz = 0;
+        return;
+    }
+
+    float dt = max(pc.simulation.x, 0.0);
+    float dx = max(abs(pc.gridOriginDx.w), 1.0e-6);
+    vec3 worldPosition = pc.gridOriginDx.xyz + vec3(coord) * dx;
+    vec3 velocity = vec3(decodeGrid(gridBuffer.cells[index].vx),
+                         decodeGrid(gridBuffer.cells[index].vy),
+                         decodeGrid(gridBuffer.cells[index].vz)) / mass;
+    velocity.y += pc.simulation.y * dt;
+    applySimulationDomainBoundary(worldPosition, dx, velocity);
+    applyFinitePoolWall(worldPosition, dx, velocity);
+    applyDamGate(worldPosition, dx, velocity);
+
+    uint bodyCount = min(pc.scene.x, MAX_BODIES);
+    float restDensity = max(pc.simulation.z, 1.0e-6);
+    float restMassPerCell = restDensity * dx * dx * dx;
+    float contactBand = 0.75 * dx;
+
+    for (uint bodyIndex = 0u; bodyIndex < bodyCount; ++bodyIndex) {
+        BodyState body = bodyStateBuffer.bodies[bodyIndex];
+        int type = int(round(body.positionType.w));
+
+        if (type == BODY_ANCHORED_BOAT && bodyIndex == pc.scene.y)
+            applyPropeller(body, bodyIndex, worldPosition, mass, dt, velocity);
+
+        // Conservative sphere cull: with the duck family the body list grew
+        // to seven, so only evaluate the full compound SDF for nodes that can
+        // actually be within the contact band (margin covers the smooth-min
+        // and ellipsoid-distance approximations).
+        vec3 toBody = worldPosition - body.positionType.xyz;
+        float cullRadius = bodyBoundingRadius(body) + 2.0 * contactBand + dx;
+        if (dot(toBody, toBody) > cullRadius * cullRadius) continue;
+
+        float distance = bodySdf(body, worldPosition);
+        if (distance >= contactBand) continue;
+
+        vec3 before = velocity;
+        vec3 normal = bodyNormal(body, worldPosition, 0.25 * dx);
+        vec3 arm = worldPosition - body.positionType.xyz;
+        vec3 surfaceVelocity = body.linearVelocityInvMass.xyz +
+            cross(body.angularVelocityInvInertia.xyz, arm);
+
+        // Occupied mass nodes approximate displaced volume.  The upward body
+        // impulse is paired with an equal downward impulse on the liquid.
+        float solidWeight = 1.0 - smoothstep(-contactBand,
+                                             contactBand, distance);
+        float occupancy = clamp(mass / restMassPerCell, 0.0, 1.0);
+        float displacedVolume = dx * dx * dx * solidWeight * occupancy;
+        vec3 buoyancyImpulse = vec3(
+            0.0,
+            -pc.simulation.y * restDensity * displacedVolume * dt *
+                max(pc.coupling.y, 0.0),
+            0.0);
+        if (mass > 1.0e-8)
+            velocity -= buoyancyImpulse / mass;
+
+        velocity = collideBody(velocity, surfaceVelocity, normal, body);
+
+        if (type == BODY_SINK_BALL && body.linearVelocityInvMass.y < -0.75) {
+            // PIC/APIC damps the high-frequency ring jet of a sphere entry.
+            // Restore that missing pressure redirection in simulation space:
+            // nodes around the moving equator receive an outward/upward crown
+            // impulse, with the exact opposite included in bodyImpulse below.
+            float impactSpeed = -body.linearVelocityInvMass.y;
+            float equatorWeight = smoothstep(0.18, 0.88,
+                                             1.0 - abs(normal.y));
+            vec3 lateral = vec3(normal.x, 0.0, normal.z);
+            float lateralLength = length(lateral);
+            if (lateralLength > 1.0e-5 && equatorWeight > 0.0) {
+                lateral /= lateralLength;
+                vec3 crownDirection = normalize(lateral +
+                                                vec3(0.0, 0.72, 0.0));
+                velocity += crownDirection *
+                    (0.075 * impactSpeed * solidWeight * equatorWeight);
+            }
+        }
+        // `velocity - before` already contains the explicit downward liquid
+        // buoyancy reaction, so its opposite is the complete body impulse.
+        // Adding buoyancyImpulse again here would violate momentum balance.
+        vec3 bodyImpulse = -mass * (velocity - before);
+        addBodyImpulse(bodyIndex, bodyImpulse,
+                       cross(arm, bodyImpulse),
+                       restDensity * displacedVolume, true);
+    }
+
+    float speed = length(velocity);
+    if (pc.collision.w > 0.0 && speed > pc.collision.w)
+        velocity *= pc.collision.w / max(speed, 1.0e-6);
+
+    gridBuffer.cells[index].vx = encodeGrid(velocity.x);
+    gridBuffer.cells[index].vy = encodeGrid(velocity.y);
+    gridBuffer.cells[index].vz = encodeGrid(velocity.z);
+}

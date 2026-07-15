@@ -1,0 +1,48 @@
+#version 450
+
+// Convert the MLS-MPM grid's fixed-point cell mass into a filterable 3D
+// density texture.  Keeping this as a separate pass makes the simulation and
+// presentation independently visible in RenderDoc.
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 4) in;
+
+struct GridCell {
+    int vx;
+    int vy;
+    int vz;
+    int mass;
+};
+
+layout(set = 0, binding = 1, std430) readonly buffer GridBuffer {
+    GridCell cells[];
+} grid;
+
+layout(r32f, set = 0, binding = 2) uniform writeonly image3D densityVolume;
+
+layout(push_constant) uniform MlsMpmParams {
+    uvec4 gridSizeAndCount; // xyz = grid dimensions, w = particle count
+    vec4  simulation;      // dt, gravityY, restDensity, stiffness
+    vec4  material;        // viscosity, particleMass, fixedPointScale, boundaryCells
+    vec4  gridOriginDx;    // world-space origin xyz, cell size
+    vec4  sphere;          // center xyz, radius
+    vec4  collision;       // restitution, friction, densityFloorRatio, maxVelocity
+} pc;
+
+uint cellIndex(uvec3 c) {
+    return c.x + pc.gridSizeAndCount.x *
+           (c.y + pc.gridSizeAndCount.y * c.z);
+}
+
+void main() {
+    uvec3 c = gl_GlobalInvocationID.xyz;
+    if (any(greaterThanEqual(c, pc.gridSizeAndCount.xyz))) {
+        return;
+    }
+
+    float fixedScale = max(pc.material.z, 1.0);
+    float cellVolume = pc.gridOriginDx.w * pc.gridOriginDx.w * pc.gridOriginDx.w;
+    float restMassPerCell = max(pc.simulation.z * cellVolume, 1e-8);
+    float cellMass = float(max(grid.cells[cellIndex(c)].mass, 0)) / fixedScale;
+    float normalizedDensity = clamp(cellMass / restMassPerCell, 0.0, 4.0);
+    imageStore(densityVolume, ivec3(c), vec4(normalizedDensity, 0.0, 0.0, 1.0));
+}

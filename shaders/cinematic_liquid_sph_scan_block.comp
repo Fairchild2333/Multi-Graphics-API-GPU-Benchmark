@@ -1,0 +1,77 @@
+#version 450
+
+// Cinematic Liquid SPH slice, pass 3a: per-workgroup exclusive scan.
+//
+// One shader serves all three levels of the counting-sort prefix sum; the
+// push-constant scanLevel selects which buffers act as source/destination:
+//   level 0: cellCounts -> cellStarts, block totals -> scanSums
+//   level 1: scanSums   -> scanSums (in place), block totals -> scanSums2
+//   level 2: scanSums2  -> scanSums2 (in place), no higher level
+// In-place levels are safe because each element is read and written by
+// exactly one workgroup, with reads completed before the write-back.
+
+layout(local_size_x = 256) in;
+
+layout(set = 0, binding = 5, std430) buffer SphCellCountBuffer {
+    uint counts[];
+} sphCellCounts;
+layout(set = 0, binding = 6, std430) buffer SphCellStartBuffer {
+    uint starts[];
+} sphCellStarts;
+layout(set = 0, binding = 9, std430) buffer SphScanSumsBuffer {
+    uint sums[];
+} sphScanSums;
+layout(set = 0, binding = 10, std430) buffer SphScanSums2Buffer {
+    uint sums2[];
+} sphScanSums2;
+
+layout(push_constant) uniform SphParams {
+    uvec4 counts;    // z = element count for this dispatch, w = scan level
+    vec4 sim;
+    vec4 fluid;
+    vec4 kernels;
+    vec4 boundsMin;
+    vec4 boundsMax;
+    vec4 world;
+    vec4 coupling;
+} pc;
+
+shared uint temp[256];
+
+void main() {
+    uint local = gl_LocalInvocationID.x;
+    uint global = gl_GlobalInvocationID.x;
+    uint elementCount = pc.counts.z;
+    uint level = pc.counts.w;
+
+    uint value = 0u;
+    if (global < elementCount) {
+        value = level == 0u ? sphCellCounts.counts[global]
+              : level == 1u ? sphScanSums.sums[global]
+                            : sphScanSums2.sums2[global];
+    }
+
+    // Hillis-Steele inclusive scan in shared memory.
+    uint running = value;
+    temp[local] = running;
+    barrier();
+    for (uint offset = 1u; offset < 256u; offset <<= 1u) {
+        uint addend = local >= offset ? temp[local - offset] : 0u;
+        barrier();
+        running += addend;
+        temp[local] = running;
+        barrier();
+    }
+
+    if (global < elementCount) {
+        uint exclusive = running - value;
+        if (level == 0u)      sphCellStarts.starts[global] = exclusive;
+        else if (level == 1u) sphScanSums.sums[global] = exclusive;
+        else                  sphScanSums2.sums2[global] = exclusive;
+    }
+    // temp[255] now holds this block's total (zero-padded past elementCount).
+    if (local == 255u) {
+        if (level == 0u)      sphScanSums.sums[gl_WorkGroupID.x] = temp[255];
+        else if (level == 1u) sphScanSums2.sums2[gl_WorkGroupID.x] = temp[255];
+    }
+}

@@ -61,6 +61,10 @@ Microsoft::WRL::ComPtr<ID3DBlob> DX12Backend::CompileShader(const std::string& p
 // -----------------------------------------------------------------------
 
 void DX12Backend::InitBackend() {
+    if (config_.workload == Workload::Fluid) {
+        throw std::runtime_error(
+            "Fluid is an unverified Vulkan-only Developer Preview; DX12 fallback is disabled");
+    }
     frameCount_ = config_.framesInFlight;
     frameFenceValues_.resize(frameCount_, 0);
     renderTargets_.resize(frameCount_);
@@ -430,10 +434,18 @@ void DX12Backend::CreateRootSignatures() {
         desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
         D3D12_ROOT_PARAMETER fparam{};
-        // FractalParams and VolumetricParams both = 3 x 32-bit constants
-        // (time + scalar + uint) pushed to the pixel shader via root constants.
-        if (config_.workload == Workload::StressFractal
-            || config_.workload == Workload::Volumetric) {
+        // GPU Stress v1 has a dedicated 16-byte parameter block. Legacy
+        // Fractal/Volumetric retain their original 3-constant signatures.
+        if (config_.workload == Workload::GpuStressV1 ||
+            config_.workload == Workload::GpuBurnV1) {
+            fparam.ParameterType            = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+            fparam.Constants.ShaderRegister = 0;
+            fparam.Constants.Num32BitValues = 4;
+            fparam.ShaderVisibility         = D3D12_SHADER_VISIBILITY_PIXEL;
+            desc.NumParameters = 1;
+            desc.pParameters   = &fparam;
+        } else if (config_.workload == Workload::StressFractal
+                   || config_.workload == Workload::Volumetric) {
             fparam.ParameterType            = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
             fparam.Constants.ShaderRegister = 0;
             fparam.Constants.Num32BitValues = 3;
@@ -506,14 +518,20 @@ void DX12Backend::CreatePipelineStates() {
     if (config_.headless) return;
 
     const bool fractal   = (config_.workload == Workload::StressFractal);
+    const bool gpuStress = (config_.workload == Workload::GpuStressV1);
+    const bool gpuBurn   = (config_.workload == Workload::GpuBurnV1);
     const bool volumetric= (config_.workload == Workload::Volumetric);
     const bool render3d  = (config_.workload == Workload::Render3D);
     // Fractal and Volumetric both use a single HLSL file with VSMain + PSMain
     // and rely on SV_VertexID (no vertex buffer / input layout).
-    const char* gvs = (fractal || volumetric) ? (fractal ? "fractal.hlsl" : "volumetric.hlsl")
-                   : render3d ? "render3d.hlsl" : "particle_vs.hlsl";
-    const char* gps = (fractal || volumetric) ? (fractal ? "fractal.hlsl" : "volumetric.hlsl")
-                   : render3d ? "render3d.hlsl" : "particle_ps.hlsl";
+    const char* gvs = gpuBurn ? "gpu_burn.hlsl"
+                    : gpuStress ? "gpu_stress.hlsl"
+                    : (fractal || volumetric) ? (fractal ? "fractal.hlsl" : "volumetric.hlsl")
+                    : render3d ? "render3d.hlsl" : "particle_vs.hlsl";
+    const char* gps = gpuBurn ? "gpu_burn.hlsl"
+                    : gpuStress ? "gpu_stress.hlsl"
+                    : (fractal || volumetric) ? (fractal ? "fractal.hlsl" : "volumetric.hlsl")
+                    : render3d ? "render3d.hlsl" : "particle_ps.hlsl";
     auto vsBlob = CompileShader(shaderDir_ + gvs, "VSMain", "vs_5_1");
     auto psBlob = CompileShader(shaderDir_ + gps, "PSMain", "ps_5_1");
 
@@ -532,7 +550,7 @@ void DX12Backend::CreatePipelineStates() {
 
         D3D12_GRAPHICS_PIPELINE_STATE_DESC d{};
         if (render3d)             d.InputLayout = { layout3d, _countof(layout3d) };
-        else if (!fractal && !volumetric) d.InputLayout = { layout, _countof(layout) };  // fractal/volumetric use SV_VertexID
+        else if (!fractal && !gpuStress && !gpuBurn && !volumetric) d.InputLayout = { layout, _countof(layout) };  // fullscreen workloads use SV_VertexID
         d.pRootSignature = graphicsRootSig_.Get();
         d.VS = { vsBlob->GetBufferPointer(), vsBlob->GetBufferSize() };
         d.PS = { psBlob->GetBufferPointer(), psBlob->GetBufferSize() };
@@ -543,7 +561,7 @@ void DX12Backend::CreatePipelineStates() {
         d.RasterizerState.FrontCounterClockwise = FALSE;
 
         // Fractal/Volumetric write opaque colour; particle/render3d use alpha blend.
-        const bool opaque = (fractal || volumetric);
+        const bool opaque = (fractal || gpuStress || gpuBurn || volumetric);
         d.BlendState.RenderTarget[0].BlendEnable           = opaque ? FALSE : TRUE;
         d.BlendState.RenderTarget[0].SrcBlend               = D3D12_BLEND_SRC_ALPHA;
         d.BlendState.RenderTarget[0].DestBlend              = D3D12_BLEND_INV_SRC_ALPHA;
@@ -561,7 +579,7 @@ void DX12Backend::CreatePipelineStates() {
         }
 
         d.SampleMask            = UINT_MAX;
-        d.PrimitiveTopologyType = (fractal || volumetric || render3d) ? D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE
+        d.PrimitiveTopologyType = (fractal || gpuStress || gpuBurn || volumetric || render3d) ? D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE
                                                                        : D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
         d.NumRenderTargets      = 1;
         d.RTVFormats[0]         = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -845,8 +863,7 @@ void DX12Backend::DrawFrame(float deltaTime) {
 
     D3D12_RESOURCE_BARRIER barriers[2]{};
 
-    if (config_.workload == Workload::StressFractal
-        || config_.workload == Workload::Volumetric) {
+    if (isFragmentOnlyWorkload(config_.workload)) {
         // Fragment-only: no compute pass, no particle buffer use.
         if (timestampsSupported_) {
             commandList_->EndQuery(timestampHeap_.Get(), D3D12_QUERY_TYPE_TIMESTAMP, tsBase + 0);
@@ -937,6 +954,23 @@ void DX12Backend::DrawFrame(float deltaTime) {
         commandList_->SetGraphicsRoot32BitConstants(0, 3, &fp, 0);
         commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         commandList_->DrawInstanced(3, 1, 0, 0);   // fullscreen triangle, no VB
+    } else if (config_.workload == Workload::GpuStressV1) {
+        commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        for (std::uint32_t pass = 0; pass < kGpuStressV1DrawsPerFrame; ++pass) {
+            GpuStressV1Params sp{ static_cast<float>(pass), 1.0f,
+                                  config_.gpuStressIter, kGpuStressV1ShaderVersion };
+            commandList_->SetGraphicsRoot32BitConstants(0, 4, &sp, 0);
+            commandList_->DrawInstanced(3, 1, 0, 0);
+        }
+    } else if (config_.workload == Workload::GpuBurnV1) {
+        fractalElapsed_ += deltaTime;
+        commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        for (std::uint32_t pass = 0; pass < kGpuBurnV1DrawsPerFrame; ++pass) {
+            GpuBurnV1Params bp{ fractalElapsed_, static_cast<float>(pass),
+                                config_.gpuBurnIter, kGpuBurnV1ShaderVersion };
+            commandList_->SetGraphicsRoot32BitConstants(0, 4, &bp, 0);
+            commandList_->DrawInstanced(3, 1, 0, 0);
+        }
     } else if (config_.workload == Workload::Volumetric) {
         fractalElapsed_ += deltaTime;   // reused as noise-field animation time
         VolumetricParams vol{ fractalElapsed_, 0.05f, config_.volumetricSteps, 0 };

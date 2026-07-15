@@ -47,6 +47,8 @@ private:
     ComPtr<ID3D11Device>           device_;
     ComPtr<ID3D11DeviceContext>    context_;
     ComPtr<IDXGISwapChain1>        swapChain_;
+    D3D_FEATURE_LEVEL              featureLevel_ = D3D_FEATURE_LEVEL_11_0;
+    bool                           computeShadersSupported_ = true;
 
     ComPtr<ID3D11RenderTargetView> rtv_;
 

@@ -14,6 +14,18 @@
 namespace gpu_bench {
 
 void VulkanBackend::InitBackend() {
+    if (config_.workload == Workload::Fluid ||
+        isCinematicLiquidWorkload(config_.workload)) {
+        if (config_.headless)
+            throw std::invalid_argument("The selected fluid workload requires the windowed Vulkan render path");
+        // The simulation has a deliberate frame-to-frame state dependency.
+        // One in-flight submission preserves that order and avoids shared-state
+        // hazards without duplicating the entire simulation per swapchain slot.
+        if (config_.framesInFlight != 1) {
+            std::cout << "[Fluid] forcing frames-in-flight=1 for ordered simulation state\n";
+            config_.framesInFlight = 1;
+        }
+    }
     CreateInstance();
     if (!config_.headless) CreateSurface();
     PickPhysicalDevice();
@@ -26,12 +38,17 @@ void VulkanBackend::InitBackend() {
         CreateRenderPass();
         if (config_.workload == Workload::StressFractal)
             CreateFullscreenPipeline("fractal.vert.spv", "fractal.frag.spv");
+        else if (config_.workload == Workload::GpuStressV1)
+            CreateFullscreenPipeline("fractal.vert.spv", "gpu_stress.frag.spv");
+        else if (config_.workload == Workload::GpuBurnV1)
+            CreateFullscreenPipeline("fractal.vert.spv", "gpu_burn.frag.spv");
         else if (config_.workload == Workload::Volumetric)
             CreateFullscreenPipeline("volumetric.vert.spv", "volumetric.frag.spv");
         else if (config_.workload == Workload::Render3D)
             CreateRender3DPipeline();
-        else if (config_.workload != Workload::Fluid)
-            CreateGraphicsPipeline();   // Fluid builds its own render pipeline in CreateFluidResources()
+        else if (config_.workload != Workload::Fluid &&
+                 !isCinematicLiquidWorkload(config_.workload))
+            CreateGraphicsPipeline();   // Stateful fluid workloads build isolated render pipelines.
     }
     CreateComputeDescriptorSetLayout();
     CreateCommandPool();
@@ -40,6 +57,10 @@ void VulkanBackend::InitBackend() {
         CreateQuadBuffer();
     if (config_.workload == Workload::Fluid)
         CreateFluidResources();
+    if (config_.workload == Workload::CinematicLiquid)
+        CreateCinematicLiquidV2Resources();
+    else if (config_.workload == Workload::CinematicLiquidV1)
+        CreateCinematicLiquidResources();
     CreateComputeDescriptorResources();
     CreateComputePipeline();
     if (!config_.headless) {
@@ -81,7 +102,19 @@ void VulkanBackend::CreateInstance() {
         const char** glfwExts = glfwGetRequiredInstanceExtensions(&glfwExtCount);
         extensions.assign(glfwExts, glfwExts + glfwExtCount);
     }
-    extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    std::uint32_t availableExtensionCount = 0;
+    vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, nullptr);
+    std::vector<VkExtensionProperties> availableExtensions(availableExtensionCount);
+    vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount,
+                                           availableExtensions.data());
+    const bool hasDebugUtils = std::any_of(
+        availableExtensions.begin(), availableExtensions.end(),
+        [](const VkExtensionProperties& ext) {
+            return std::strcmp(ext.extensionName,
+                               VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0;
+        });
+    if (hasDebugUtils)
+        extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
     VkInstanceCreateInfo ci{};
     ci.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -152,18 +185,51 @@ QueueFamilyIndices VulkanBackend::FindQueueFamilies(VkPhysicalDevice device) con
     std::vector<VkQueueFamilyProperties> families(count);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &count, families.data());
 
+    // This backend records compute and graphics into the same command buffer
+    // and submits it to graphicsQueue_. Therefore its command-pool family must
+    // support both capabilities; accepting separate graphics-only/compute-only
+    // families would create an invalid submission on otherwise legal devices.
+    std::optional<std::uint32_t> combinedFamily;
     for (std::uint32_t i = 0; i < count; ++i) {
-        if (families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) indices.graphicsFamily = i;
-        if (families[i].queueFlags & VK_QUEUE_COMPUTE_BIT)  indices.computeFamily  = i;
-        if (config_.headless) {
-            // No surface in headless mode; reuse graphics family as present stand-in
-            if (families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) indices.presentFamily = i;
-        } else {
+        const VkQueueFlags required = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT;
+        if ((families[i].queueFlags & required) != required)
+            continue;
+        if (!combinedFamily) combinedFamily = i;
+        if (!config_.headless) {
             VkBool32 present = VK_FALSE;
             vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface_, &present);
-            if (present) indices.presentFamily = i;
+            if (present) {
+                combinedFamily = i;
+                break;
+            }
         }
-        if (indices.IsComplete()) break;
+    }
+
+    if (!combinedFamily)
+        return indices;
+
+    indices.graphicsFamily = combinedFamily;
+    indices.computeFamily = combinedFamily;
+    if (config_.headless) {
+        // No surface in headless mode; keep IsComplete() and queue creation on
+        // the same combined family.
+        indices.presentFamily = combinedFamily;
+    } else {
+        VkBool32 combinedCanPresent = VK_FALSE;
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, *combinedFamily, surface_,
+                                             &combinedCanPresent);
+        if (combinedCanPresent) {
+            indices.presentFamily = combinedFamily;
+        } else {
+            for (std::uint32_t i = 0; i < count; ++i) {
+                VkBool32 present = VK_FALSE;
+                vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface_, &present);
+                if (present) {
+                    indices.presentFamily = i;
+                    break;
+                }
+            }
+        }
     }
     return indices;
 }
@@ -1216,24 +1282,30 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
         vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, timestampQueryPool_, tsBase);
 
     if (config_.workload == Workload::Fluid) {
-        // Fluid: 4 compute passes + 1 fullscreen render pass. Records its own
-        // timestamps and never touches the particle buffer / standard pipeline.
-        // The whole-fluid time is reported as "compute" since the multi-pass
-        // solve is the dominant work; render (a single fullscreen tri) is
-        // folded into the same interval for scoring purposes.
-        RecordFluidFrame(cmd, deltaTime, imageIndex);
-        if (timestampsSupported_) {
-            vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, timestampQueryPool_, tsBase + 1);
-            vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,    timestampQueryPool_, tsBase + 2);
-            vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, timestampQueryPool_, tsBase + 3);
+        // Fluid places its compute-end/render-start/render-end timestamps at
+        // the actual pass boundaries inside RecordFluidFrame.
+        RecordFluidFrame(cmd, deltaTime, imageIndex, tsBase);
+        if (vkEndCommandBuffer(cmd) != VK_SUCCESS)
+            throw std::runtime_error("vkEndCommandBuffer failed");
+        return;
+    }
+    if (isCinematicLiquidWorkload(config_.workload)) {
+        // Each version owns its complete MLS-MPM/resolve/raymarch sequence.
+        // Keeping the v1 recorder untouched protects the old score contract.
+        if (config_.workload == Workload::CinematicLiquid) {
+            if (cinematicLiquid_.isSph)
+                RecordCinematicLiquidSphFrame(cmd, deltaTime, imageIndex, tsBase);
+            else
+                RecordCinematicLiquidV2Frame(cmd, deltaTime, imageIndex, tsBase);
+        } else {
+            RecordCinematicLiquidFrame(cmd, deltaTime, imageIndex, tsBase);
         }
         if (vkEndCommandBuffer(cmd) != VK_SUCCESS)
             throw std::runtime_error("vkEndCommandBuffer failed");
         return;
     }
 
-    if (config_.workload == Workload::StressFractal
-        || config_.workload == Workload::Volumetric) {
+    if (isFragmentOnlyWorkload(config_.workload)) {
         // Fragment-only pass: no compute, no particle barrier.
         if (timestampsSupported_)
             vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, timestampQueryPool_, tsBase + 1);
@@ -1303,6 +1375,23 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
         vkCmdPushConstants(cmd, graphicsPipelineLayout_, VK_SHADER_STAGE_FRAGMENT_BIT, 0,
                            sizeof(FractalParams), &fp);
         vkCmdDraw(cmd, 3, 1, 0, 0);   // fullscreen triangle, no vertex buffer
+    } else if (config_.workload == Workload::GpuStressV1) {
+        for (std::uint32_t pass = 0; pass < kGpuStressV1DrawsPerFrame; ++pass) {
+            GpuStressV1Params sp{ static_cast<float>(pass), 1.0f,
+                                  config_.gpuStressIter, kGpuStressV1ShaderVersion };
+            vkCmdPushConstants(cmd, graphicsPipelineLayout_, VK_SHADER_STAGE_FRAGMENT_BIT, 0,
+                               sizeof(GpuStressV1Params), &sp);
+            vkCmdDraw(cmd, 3, 1, 0, 0);  // bounded overdraw; deterministic pass salt
+        }
+    } else if (config_.workload == Workload::GpuBurnV1) {
+        fractalElapsed_ += deltaTime;
+        for (std::uint32_t pass = 0; pass < kGpuBurnV1DrawsPerFrame; ++pass) {
+            GpuBurnV1Params bp{ fractalElapsed_, static_cast<float>(pass),
+                                config_.gpuBurnIter, kGpuBurnV1ShaderVersion };
+            vkCmdPushConstants(cmd, graphicsPipelineLayout_, VK_SHADER_STAGE_FRAGMENT_BIT, 0,
+                               sizeof(GpuBurnV1Params), &bp);
+            vkCmdDraw(cmd, 3, 1, 0, 0);
+        }
     } else if (config_.workload == Workload::Volumetric) {
         fractalElapsed_ += deltaTime;   // reused as noise-field animation time
         VolumetricParams vp{ fractalElapsed_, 0.05f, config_.volumetricSteps, 0 };
@@ -1423,7 +1512,8 @@ void VulkanBackend::DrawFrame(float deltaTime) {
     VkResult res = vkAcquireNextImageKHR(device_, swapChain_, UINT64_MAX,
                                          imageAvailableSemaphores_[currentFrame_],
                                          VK_NULL_HANDLE, &imageIndex);
-    if (res == VK_ERROR_OUT_OF_DATE_KHR) return;
+    if (res == VK_ERROR_OUT_OF_DATE_KHR)
+        throw std::runtime_error("Vulkan swapchain became out of date; restart the fixed-resolution benchmark after resizing");
     if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR)
         throw std::runtime_error("vkAcquireNextImageKHR failed");
 
@@ -1459,7 +1549,12 @@ void VulkanBackend::DrawFrame(float deltaTime) {
     pi.waitSemaphoreCount = 1; pi.pWaitSemaphores = sigSem;
     pi.swapchainCount     = 1; pi.pSwapchains     = chains;
     pi.pImageIndices      = &imageIndex;
-    vkQueuePresentKHR(presentQueue_, &pi);
+    const VkResult presentResult = vkQueuePresentKHR(presentQueue_, &pi);
+    if (presentResult == VK_ERROR_OUT_OF_DATE_KHR)
+        throw std::runtime_error("Vulkan swapchain became out of date; restart the fixed-resolution benchmark after resizing");
+    if (presentResult != VK_SUCCESS && presentResult != VK_SUBOPTIMAL_KHR)
+        throw std::runtime_error("vkQueuePresentKHR failed (VkResult " +
+                                 std::to_string(static_cast<int>(presentResult)) + ")");
 
     currentFrame_ = (currentFrame_ + 1) % config_.framesInFlight;
 }
@@ -1489,10 +1584,11 @@ void VulkanBackend::CleanupBackend() {
     for (auto fen : inFlightFences_)
         if (fen) vkDestroyFence(device_, fen, nullptr);
     if (timestampQueryPool_)        { vkDestroyQueryPool(device_, timestampQueryPool_, nullptr); }
-    if (commandPool_)               { vkDestroyCommandPool(device_, commandPool_, nullptr); }
-    // Fluid cleanup must run BEFORE the generic graphicsPipeline_ destroy
-    // below, because the fluid render pipeline is aliased into that slot.
+    // Stateful workload cleanup must run BEFORE the generic pipeline destroy
+    // because their render pipelines are aliased into the generic slots.
+    CleanupCinematicLiquidResources();
     CleanupFluidResources();
+    if (commandPool_)               { vkDestroyCommandPool(device_, commandPool_, nullptr); commandPool_ = VK_NULL_HANDLE; }
     if (particleBuffer_)            { vkDestroyBuffer(device_, particleBuffer_, nullptr); }
     if (particleBufferMemory_)      { vkFreeMemory(device_, particleBufferMemory_, nullptr); }
     if (quadBuffer_)                { vkDestroyBuffer(device_, quadBuffer_, nullptr); }
@@ -1556,13 +1652,18 @@ void CreateFluidBuffer(VkDevice device, VkPhysicalDeviceMemoryProperties memProp
     mai.memoryTypeIndex = typeIndex;
     if (vkAllocateMemory(device, &mai, nullptr, outMem) != VK_SUCCESS)
         throw std::runtime_error("vkAllocateMemory (fluid) failed");
-    vkBindBufferMemory(device, *outBuf, *outMem, 0);
+    if (vkBindBufferMemory(device, *outBuf, *outMem, 0) != VK_SUCCESS)
+        throw std::runtime_error("vkBindBufferMemory (fluid) failed");
 }
 } // namespace
 
 void VulkanBackend::CreateFluidResources() {
     fluid_.gridSize = config_.fluidGridSize;
     const std::uint32_t N = fluid_.gridSize;
+    if (N < 64 || N > 512)
+        throw std::invalid_argument("Fluid --grid must be between 64 and 512");
+    if (config_.fluidJacobiIters < 1 || config_.fluidJacobiIters > 64)
+        throw std::invalid_argument("Fluid --jacobi must be between 1 and 64");
     const VkDeviceSize stateSize = sizeof(float) * 4 * N * N;   // vec4 per cell
     const VkDeviceSize pressSize = sizeof(float) * N * N;
 
@@ -1577,19 +1678,22 @@ void VulkanBackend::CreateFluidResources() {
     CreateFluidBuffer(device_, memProps, pressSize, computeUsage, &fluid_.pressB, &fluid_.pressBMem);
     CreateFluidBuffer(device_, memProps, pressSize, computeUsage, &fluid_.divBuf, &fluid_.divMem);
 
-    // ---- Seed the state buffer with a swirling initial velocity + dye spot.
+    // ---- Seed the canonical state with two pigment wisps and a restrained
+    // rotational field. The advect pass continuously replenishes both sources.
     {
         std::vector<float> init(static_cast<size_t>(stateSize / sizeof(float)));
         for (std::uint32_t y = 0; y < N; ++y)
             for (std::uint32_t x = 0; x < N; ++x) {
                 const size_t i = (size_t(y) * N + x) * 4;
-                const float fx = float(x) / N - 0.5f;
-                const float fy = float(y) / N - 0.5f;
-                init[i + 0] = -fy * 4.0f;             // vel.x = swirl
-                init[i + 1] =  fx * 4.0f;             // vel.y
-                const float d = std::sqrt(fx*fx + fy*fy);
-                init[i + 2] = std::max(0.0f, 1.0f - d * 4.0f);   // dye blob centre
-                init[i + 3] = 0.0f;
+                const float fx = (float(x) + 0.5f) / float(N) - 0.5f;
+                const float fy = (float(y) + 0.5f) / float(N) - 0.5f;
+                const float envelope = std::exp(-(fx * fx + fy * fy) * 7.0f);
+                init[i + 0] = -fy * 0.32f * envelope;
+                init[i + 1] =  fx * 0.32f * envelope;
+                const float ax = fx + 0.25f, ay = fy - 0.04f;
+                const float bx = fx - 0.25f, by = fy + 0.04f;
+                init[i + 2] = std::exp(-(ax * ax + ay * ay) * 120.0f);
+                init[i + 3] = std::exp(-(bx * bx + by * by) * 120.0f);
             }
         // Upload via a staging buffer + a one-shot command buffer allocated
         // from commandPool_ (commandBuffers_[] doesn't exist yet — it is
@@ -1606,14 +1710,24 @@ void VulkanBackend::CreateFluidResources() {
         std::uint32_t ht = ~0u;
         for (std::uint32_t i = 0; i < memProps.memoryTypeCount; ++i)
             if ((mr.memoryTypeBits & (1u << i)) &&
-                (memProps.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) { ht = i; break; }
+                ((memProps.memoryTypes[i].propertyFlags &
+                  (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) ==
+                 (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))) {
+                ht = i; break;
+            }
+        if (ht == ~0u)
+            throw std::runtime_error("No host-visible coherent memory for fluid staging");
         VkMemoryAllocateInfo mai{};
         mai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         mai.allocationSize  = mr.size;
         mai.memoryTypeIndex = ht;
-        vkAllocateMemory(device_, &mai, nullptr, &stagingMem);
-        vkBindBufferMemory(device_, staging, stagingMem, 0);
-        void* mapped = nullptr; vkMapMemory(device_, stagingMem, 0, stateSize, 0, &mapped);
+        if (vkAllocateMemory(device_, &mai, nullptr, &stagingMem) != VK_SUCCESS)
+            throw std::runtime_error("vkAllocateMemory (fluid staging) failed");
+        if (vkBindBufferMemory(device_, staging, stagingMem, 0) != VK_SUCCESS)
+            throw std::runtime_error("vkBindBufferMemory (fluid staging) failed");
+        void* mapped = nullptr;
+        if (vkMapMemory(device_, stagingMem, 0, stateSize, 0, &mapped) != VK_SUCCESS)
+            throw std::runtime_error("vkMapMemory (fluid staging) failed");
         std::memcpy(mapped, init.data(), init.size() * sizeof(float));
         vkUnmapMemory(device_, stagingMem);
 
@@ -1698,9 +1812,9 @@ void VulkanBackend::CreateFluidResources() {
         // Advect: in=A (0), out=B (1)
         writeSet(fluid_.setAdvect, 0, fluid_.stateA);
         writeSet(fluid_.setAdvect, 1, fluid_.stateB);
-        // Divergence: in=A (0), out=div (3 -> writes to binding 3 = outP slot)
-        writeSet(fluid_.setDiv, 0, fluid_.stateA);
-        writeSet(fluid_.setDiv, 3, fluid_.divBuf);
+        // Divergence: in=B (0), out=div (4)
+        writeSet(fluid_.setDiv, 0, fluid_.stateB);
+        writeSet(fluid_.setDiv, 4, fluid_.divBuf);
         // Jacobi A: in=pressA (2), out=pressB (3), div (4)
         writeSet(fluid_.setJacA, 2, fluid_.pressA);
         writeSet(fluid_.setJacA, 3, fluid_.pressB);
@@ -1709,10 +1823,14 @@ void VulkanBackend::CreateFluidResources() {
         writeSet(fluid_.setJacB, 2, fluid_.pressB);
         writeSet(fluid_.setJacB, 3, fluid_.pressA);
         writeSet(fluid_.setJacB, 4, fluid_.divBuf);
-        // Subtract: in=A (0), out=B (1), inP=pressA (2)
-        writeSet(fluid_.setSub, 0, fluid_.stateA);
-        writeSet(fluid_.setSub, 1, fluid_.stateB);
-        writeSet(fluid_.setSub, 2, fluid_.pressA);
+        // Iteration zero writes B, so odd counts finish in B and even counts
+        // finish in A. This choice is immutable for the lifetime of the run.
+        VkBuffer finalPressure = (config_.fluidJacobiIters & 1u)
+                               ? fluid_.pressB : fluid_.pressA;
+        // Subtract: in=B (0), out=A (1), inP=final pressure (2)
+        writeSet(fluid_.setSub, 0, fluid_.stateB);
+        writeSet(fluid_.setSub, 1, fluid_.stateA);
+        writeSet(fluid_.setSub, 2, finalPressure);
     }
 
     // ---- Compute pipeline layout (shared across the 4 passes; push constants
@@ -1878,12 +1996,15 @@ void VulkanBackend::CleanupFluidResources() {
     destroyBuf(device_, fluid_.divBuf, fluid_.divMem);
 }
 
-void VulkanBackend::RecordFluidFrame(VkCommandBuffer cmd, float deltaTime, std::uint32_t imageIndex) {
+void VulkanBackend::RecordFluidFrame(VkCommandBuffer cmd, float deltaTime,
+                                     std::uint32_t imageIndex, std::uint32_t timestampBase) {
     const std::uint32_t N = fluid_.gridSize;
-    const FluidParams fp{ deltaTime, 1.0f / float(N), N, 0 };
-    const std::uint32_t groups = N / 16;
+    const float stepDt = std::clamp(deltaTime, 0.0f, 1.0f / 30.0f);
+    fluid_.simTime += std::clamp(deltaTime, 0.0f, 0.1f);
+    const FluidParams fp{ stepDt, 1.0f / float(N), N, fluid_.simTime };
+    const std::uint32_t groups = (N + 15u) / 16u;
 
-    auto barrier = [&](VkBuffer b) {
+    auto barrier = [&](VkBuffer b, VkPipelineStageFlags dstStages = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT) {
         VkBufferMemoryBarrier bm{};
         bm.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
         bm.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
@@ -1892,7 +2013,7 @@ void VulkanBackend::RecordFluidFrame(VkCommandBuffer cmd, float deltaTime, std::
         bm.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         bm.buffer = b; bm.size = VK_WHOLE_SIZE;
         vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-                                  VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                                  dstStages,
                                   0, 0, nullptr, 1, &bm, 0, nullptr);
     };
 
@@ -1903,35 +2024,9 @@ void VulkanBackend::RecordFluidFrame(VkCommandBuffer cmd, float deltaTime, std::
     vkCmdDispatch(cmd, groups, groups, 1);
     barrier(fluid_.stateB);
 
-    // The simulation ping-pongs stateA <-> stateB each frame. After advect the
-    // "current" state is stateB. To keep descriptor bindings stable, swap A/B
-    // pointers conceptually: rebind the divergence pass to read stateB.
-    // (We achieve this by writing the divergence pass's binding 0 to stateB
-    // once at init time is not possible — the buffer that holds "post-advect"
-    // alternates. Instead we update the descriptor on the fly each frame.)
-
-    auto rebind = [](VkDevice d, VkDescriptorSet s, std::uint32_t binding, VkBuffer b) {
-        VkDescriptorBufferInfo bi{ b, 0, VK_WHOLE_SIZE };
-        VkWriteDescriptorSet w{};
-        w.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        w.dstSet = s; w.dstBinding = binding;
-        w.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        w.descriptorCount = 1; w.pBufferInfo = &bi;
-        vkUpdateDescriptorSets(d, 1, &w, 0, nullptr);
-    };
-
-    // Determine which state buffer holds the advected field this frame:
-    // even frames -> stateB, odd frames -> stateA (because we swap at the end).
-    // Use a local frame counter so we don't depend on AppBase::totalFrameCount_
-    // (which is private). The counter is monotonic across fluid frames.
-    fluid_.simTime += deltaTime;
-    const std::uint32_t fluidFrame = static_cast<std::uint32_t>(fluid_.simTime * 60.0f);
-    const bool evenFrame = (fluidFrame & 1u) == 0u;
-    VkBuffer advectedBuf = evenFrame ? fluid_.stateB : fluid_.stateA;
-    VkBuffer finalBuf    = evenFrame ? fluid_.stateA : fluid_.stateB;
-
-    // Pass 2: divergence (in=advectedBuf, out=div)
-    rebind(device_, fluid_.setDiv, 0, advectedBuf);
+    // stateA is canonical at frame entry; advect always writes the complete
+    // stateB scratch field. No descriptor mutation or frame-parity guessing.
+    // Pass 2: divergence (in=stateB, out=div)
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, fluid_.divPipe);
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, fluid_.computeLayout, 0, 1, &fluid_.setDiv, 0, nullptr);
     vkCmdPushConstants(cmd, fluid_.computeLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(fp), &fp);
@@ -1963,24 +2058,24 @@ void VulkanBackend::RecordFluidFrame(VkCommandBuffer cmd, float deltaTime, std::
         VkBuffer out = (i & 1u) ? fluid_.pressA : fluid_.pressB;
         barrier(out);
     }
-    // After N iterations the latest pressure is in pressA if N is odd, pressB
-    // if N is even. We bind that to the subtract pass's binding 2.
-    VkBuffer finalPressure = (config_.fluidJacobiIters & 1u) ? fluid_.pressA : fluid_.pressB;
-
-    // Pass 4: gradient subtract (in=advectedBuf, out=finalBuf, inP=finalPressure)
-    rebind(device_, fluid_.setSub, 0, advectedBuf);
-    rebind(device_, fluid_.setSub, 1, finalBuf);
-    rebind(device_, fluid_.setSub, 2, finalPressure);
+    // Pass 4: gradient subtract (in=stateB, out=canonical stateA). The final
+    // pressure buffer was selected once when the immutable set was created.
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, fluid_.subtractPipe);
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, fluid_.computeLayout, 0, 1, &fluid_.setSub, 0, nullptr);
     vkCmdPushConstants(cmd, fluid_.computeLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(fp), &fp);
     vkCmdDispatch(cmd, groups, groups, 1);
-    barrier(finalBuf);
+    barrier(fluid_.stateA, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT |
+                           VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
 
-    // Render pass: read the dye field from finalBuf and present.
+    if (timestampsSupported_) {
+        vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                            timestampQueryPool_, timestampBase + 1);
+        vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                            timestampQueryPool_, timestampBase + 2);
+    }
+
+    // Render pass: read the canonical stateA and present.
     if (!config_.headless) {
-        rebind(device_, fluid_.setRender, 0, finalBuf);
-
         VkClearValue clear{};
         clear.color = {{0.04f, 0.08f, 0.14f, 1.0f}};
         VkRenderPassBeginInfo rp{};
@@ -1992,13 +2087,2818 @@ void VulkanBackend::RecordFluidFrame(VkCommandBuffer cmd, float deltaTime, std::
         vkCmdBeginRenderPass(cmd, &rp, VK_SUBPASS_CONTENTS_INLINE);
         vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, fluid_.renderPipe);
         vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, fluid_.renderLayout, 0, 1, &fluid_.setRender, 0, nullptr);
-        FluidRenderParams rparam{ N, 0, 0, 0 };
+        FluidRenderParams rparam{ N, fluid_.simTime, 0.88f, 1u };
         vkCmdPushConstants(cmd, fluid_.renderLayout,
                            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                            0, sizeof(rparam), &rparam);
         vkCmdDraw(cmd, 3, 1, 0, 0);
         vkCmdEndRenderPass(cmd);
     }
+    if (timestampsSupported_)
+        vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                            timestampQueryPool_, timestampBase + 3);
+}
+
+// -----------------------------------------------------------------------
+// Cinematic Liquid v1: 3D MLS-MPM + density-volume free-surface raymarch.
+// -----------------------------------------------------------------------
+
+namespace {
+
+struct alignas(16) MlsMpmParticleGpu {
+    float position[4];
+    float velocity[4];
+    float c0[4];
+    float c1[4];
+    float c2[4];
+};
+static_assert(sizeof(MlsMpmParticleGpu) == 80,
+              "MLS-MPM particle layout must match the GLSL std430 ABI");
+
+struct alignas(16) MlsMpmPushConstants {
+    std::uint32_t gridSizeAndCount[4];
+    float simulation[4];
+    float material[4];
+    float gridOriginDx[4];
+    float sphere[4];
+    float collision[4];
+};
+static_assert(sizeof(MlsMpmPushConstants) == 96,
+              "MLS-MPM push constants must match all compute shaders");
+
+struct alignas(16) CinematicLiquidRenderPushConstants {
+    float cameraTime[4];
+    float targetAspect[4];
+    float volumeMinIso[4];
+    float volumeMaxStep[4];
+    float sphere[4];
+    std::uint32_t render[4];
+};
+static_assert(sizeof(CinematicLiquidRenderPushConstants) == 96,
+              "Cinematic Liquid render push constants must match GLSL");
+
+// V2 deliberately uses an independent ABI.  Every field is a full vec4 so
+// std430 and C++ agree without compiler-specific packing rules.
+struct alignas(16) CinematicLiquidBodyStateGpu {
+    float positionType[4];
+    float orientation[4];
+    float linearVelocityInvMass[4];
+    float angularVelocityInvInertia[4];
+    float shape0[4];
+    float shape1[4];
+    float material[4];
+    float color[4];
+};
+static_assert(sizeof(CinematicLiquidBodyStateGpu) == 128,
+              "Cinematic Liquid v2 body state must match GLSL std430");
+
+struct alignas(16) CinematicLiquidBodyImpulseGpu {
+    std::int32_t linear[4];
+    std::int32_t angular[4];
+};
+static_assert(sizeof(CinematicLiquidBodyImpulseGpu) == 32,
+              "Cinematic Liquid v2 body impulse must match GLSL std430");
+
+struct alignas(16) CinematicLiquidV2PushConstants {
+    std::uint32_t gridSizeAndCount[4];
+    float simulation[4];
+    float material[4];
+    float gridOriginDx[4];
+    float collision[4];
+    float coupling[4];
+    std::uint32_t scene[4];
+    float pool[4];
+};
+static_assert(sizeof(CinematicLiquidV2PushConstants) == 128,
+              "Cinematic Liquid v2 compute push constants must match GLSL");
+
+struct alignas(16) CinematicLiquidV2RenderPushConstants {
+    float cameraTime[4];
+    float targetAspect[4];
+    float volumeMinIso[4];
+    float volumeMaxStep[4];
+    float pool[4];
+    float lighting[4];
+    std::uint32_t render[4];
+    std::uint32_t scene[4];
+};
+static_assert(sizeof(CinematicLiquidV2RenderPushConstants) == 128,
+              "Cinematic Liquid v2 render push constants must match GLSL");
+
+struct alignas(16) CinematicLiquidV2SurfacePushConstants {
+    std::uint32_t volumeSizeAndCount[4];
+    float volumeMinVoxel[4];
+    float kernel[4];
+    std::uint32_t contract[4];
+};
+static_assert(sizeof(CinematicLiquidV2SurfacePushConstants) == 64,
+              "Cinematic Liquid v2 surface push constants must match GLSL");
+
+// Shared 128-byte ABI for every cinematic_liquid_sph_* pass.
+struct alignas(16) CinematicLiquidSphPushConstants {
+    std::uint32_t counts[4];   // particleCount, tableSize, scanCount, scanLevel/bodyCount
+    float sim[4];              // dtSim, gravitySim, smoothingRadius, collisionDamping
+    float fluid[4];            // targetDensity, pressureMult, nearPressureMult, viscosity
+    float kernels[4];          // spikyPow2, spikyPow3, spikyPow2Deriv, spikyPow3Deriv
+    float boundsMin[4];        // sim bounds min, w = poly6Scale
+    float boundsMax[4];        // sim bounds max, w = worldScale
+    float world[4];            // world origin, w = dtWorld
+    float coupling[4];         // impulseFixedScale, particleMassWorld, restitution, friction
+};
+static_assert(sizeof(CinematicLiquidSphPushConstants) == 128,
+              "Cinematic Liquid SPH push constants must match GLSL");
+
+constexpr float kLiquidOriginX = -1.68f;
+constexpr float kLiquidOriginY = -0.08f;
+constexpr float kLiquidOriginZ = -1.12f;
+constexpr float kLiquidRestDensity = 1000.0f;
+constexpr float kLiquidFixedPointScale = 65'536.0f;
+constexpr float kLiquidSphereX = 0.0f;
+constexpr float kLiquidSphereY = 0.62f;
+constexpr float kLiquidSphereZ = 0.0f;
+constexpr float kLiquidSphereRadius = 0.34f;
+
+constexpr float kLiquidV2OriginX = -2.56f;
+constexpr float kLiquidV2OriginY = -0.12f;
+constexpr float kLiquidV2OriginZ = -1.92f;
+constexpr float kLiquidV2RestDensity = 1000.0f;
+constexpr float kLiquidV2FixedPointScale = 65'536.0f;
+constexpr float kLiquidV2BodyImpulseScale = 8'192.0f;
+
+std::uint32_t liquidHash(std::uint32_t x) {
+    x ^= x >> 16;
+    x *= 0x7feb352du;
+    x ^= x >> 15;
+    x *= 0x846ca68bu;
+    return x ^ (x >> 16);
+}
+
+float liquidJitter(std::uint32_t seed) {
+    return (float(liquidHash(seed) & 0xffffu) / 65535.0f - 0.5f);
+}
+
+void appendLiquidBlock(std::vector<MlsMpmParticleGpu>& particles,
+                       V3 lo, V3 hi, float spacing, V3 initialVelocity,
+                       std::uint32_t seedBase) {
+    std::uint32_t serial = 0;
+    for (float z = lo.z; z <= hi.z; z += spacing) {
+        for (float y = lo.y; y <= hi.y; y += spacing) {
+            for (float x = lo.x; x <= hi.x; x += spacing, ++serial) {
+                const float jitterScale = spacing * 0.045f;
+                MlsMpmParticleGpu p{};
+                p.position[0] = x + liquidJitter(seedBase + serial * 3u + 0u) * jitterScale;
+                p.position[1] = y + liquidJitter(seedBase + serial * 3u + 1u) * jitterScale;
+                p.position[2] = z + liquidJitter(seedBase + serial * 3u + 2u) * jitterScale;
+                p.position[3] = 1.0f;
+                p.velocity[0] = initialVelocity.x;
+                p.velocity[1] = initialVelocity.y;
+                p.velocity[2] = initialVelocity.z + 0.08f * std::sin(x * 7.0f + z * 5.0f);
+                p.velocity[3] = 0.0f;
+                particles.push_back(p);
+            }
+        }
+    }
+}
+
+} // namespace
+
+void VulkanBackend::CreateCinematicLiquidResources() {
+    auto& r = cinematicLiquid_;
+    r.gridX = kCinematicLiquidGridX;
+    r.gridY = kCinematicLiquidGridY;
+    r.gridZ = kCinematicLiquidGridZ;
+    r.dx = kCinematicLiquidDx;
+    r.particleSpacing = kCinematicLiquidDx * 0.72f;
+    r.particleMass = kLiquidRestDensity * r.particleSpacing *
+                     r.particleSpacing * r.particleSpacing;
+
+    std::vector<MlsMpmParticleGpu> initial;
+    initial.reserve(300'000);
+    // Two asymmetrical reservoirs collide around the central obstacle.  The
+    // result is a recognisable dam-break/splash scene instead of a generic
+    // blob or a FurMark-like torus silhouette.
+    appendLiquidBlock(initial,
+        V3{-1.45f, 0.10f, -0.75f}, V3{-0.40f, 1.45f, 0.75f},
+        r.particleSpacing, V3{1.40f, 0.0f, 0.0f}, 0x10203040u);
+    appendLiquidBlock(initial,
+        V3{0.65f, 0.80f, -0.65f}, V3{1.42f, 1.50f, 0.65f},
+        r.particleSpacing, V3{-1.20f, -0.24f, 0.0f}, 0x90abcdefu);
+    r.particleCount = static_cast<std::uint32_t>(initial.size());
+    // Publish the true internal particle count to AppBase after the generic
+    // compatibility buffer has already been created. Result metadata and the
+    // integrated score must never report that tiny unused buffer instead.
+    config_.particleCount = r.particleCount;
+
+    const std::uint64_t gridCellCount64 = std::uint64_t(r.gridX) * r.gridY * r.gridZ;
+    if (gridCellCount64 > std::numeric_limits<std::uint32_t>::max())
+        throw std::runtime_error("Cinematic Liquid grid is too large");
+    const VkDeviceSize particleBytes = VkDeviceSize(initial.size()) * sizeof(MlsMpmParticleGpu);
+    const VkDeviceSize gridBytes = VkDeviceSize(gridCellCount64) * sizeof(std::int32_t) * 4u;
+
+    VkPhysicalDeviceMemoryProperties memProps{};
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice_, &memProps);
+    CreateFluidBuffer(device_, memProps, particleBytes,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        &r.particles, &r.particlesMem);
+    CreateFluidBuffer(device_, memProps, particleBytes,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        &r.seedParticles, &r.seedParticlesMem);
+    CreateFluidBuffer(device_, memProps, gridBytes,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        &r.grid, &r.gridMem);
+
+    // R32F is both a storage target for the resolve pass and a filtered 3D
+    // texture for the raymarch.  Fall back to nearest filtering only if a
+    // device lacks linear filtering for this otherwise core format.
+    const VkFormat volumeFormat = VK_FORMAT_R32_SFLOAT;
+    VkFormatProperties formatProps{};
+    vkGetPhysicalDeviceFormatProperties(physicalDevice_, volumeFormat, &formatProps);
+    if ((formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT) == 0 ||
+        (formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) == 0) {
+        throw std::runtime_error("Cinematic Liquid requires sampled+storage R32_SFLOAT 3D images");
+    }
+    const bool linearFilter =
+        (formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT) != 0;
+    VkImageCreateInfo imageInfo{};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = VK_IMAGE_TYPE_3D;
+    imageInfo.format = volumeFormat;
+    imageInfo.extent = { r.gridX, r.gridY, r.gridZ };
+    imageInfo.mipLevels = 1;
+    imageInfo.arrayLayers = 1;
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageInfo.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    if (vkCreateImage(device_, &imageInfo, nullptr, &r.densityImage) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateImage (Cinematic Liquid density) failed");
+
+    VkMemoryRequirements imageReq{};
+    vkGetImageMemoryRequirements(device_, r.densityImage, &imageReq);
+    VkMemoryAllocateInfo imageAlloc{};
+    imageAlloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    imageAlloc.allocationSize = imageReq.size;
+    imageAlloc.memoryTypeIndex = FindMemoryType(imageReq.memoryTypeBits,
+                                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    if (vkAllocateMemory(device_, &imageAlloc, nullptr, &r.densityImageMem) != VK_SUCCESS ||
+        vkBindImageMemory(device_, r.densityImage, r.densityImageMem, 0) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid density image allocation failed");
+
+    VkImageViewCreateInfo viewInfo{};
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.image = r.densityImage;
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_3D;
+    viewInfo.format = volumeFormat;
+    viewInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+    if (vkCreateImageView(device_, &viewInfo, nullptr, &r.densityImageView) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateImageView (Cinematic Liquid density) failed");
+
+    VkSamplerCreateInfo samplerInfo{};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = linearFilter ? VK_FILTER_LINEAR : VK_FILTER_NEAREST;
+    samplerInfo.minFilter = linearFilter ? VK_FILTER_LINEAR : VK_FILTER_NEAREST;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.maxLod = 0.0f;
+    if (vkCreateSampler(device_, &samplerInfo, nullptr, &r.densitySampler) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateSampler (Cinematic Liquid density) failed");
+
+    // Host-visible staging upload, copied into both the live particle buffer
+    // and an immutable device-local seed used for periodic long-run resets.
+    VkBuffer staging = VK_NULL_HANDLE;
+    VkDeviceMemory stagingMem = VK_NULL_HANDLE;
+    VkBufferCreateInfo stagingInfo{};
+    stagingInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    stagingInfo.size = particleBytes;
+    stagingInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    stagingInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    if (vkCreateBuffer(device_, &stagingInfo, nullptr, &staging) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateBuffer (Cinematic Liquid staging) failed");
+    VkMemoryRequirements stagingReq{};
+    vkGetBufferMemoryRequirements(device_, staging, &stagingReq);
+    VkMemoryAllocateInfo stagingAlloc{};
+    stagingAlloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    stagingAlloc.allocationSize = stagingReq.size;
+    stagingAlloc.memoryTypeIndex = FindMemoryType(stagingReq.memoryTypeBits,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    if (vkAllocateMemory(device_, &stagingAlloc, nullptr, &stagingMem) != VK_SUCCESS ||
+        vkBindBufferMemory(device_, staging, stagingMem, 0) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid staging allocation failed");
+    void* mapped = nullptr;
+    if (vkMapMemory(device_, stagingMem, 0, particleBytes, 0, &mapped) != VK_SUCCESS)
+        throw std::runtime_error("vkMapMemory (Cinematic Liquid staging) failed");
+    std::memcpy(mapped, initial.data(), static_cast<std::size_t>(particleBytes));
+    vkUnmapMemory(device_, stagingMem);
+
+    VkCommandBufferAllocateInfo cmdAlloc{};
+    cmdAlloc.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    cmdAlloc.commandPool = commandPool_;
+    cmdAlloc.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    cmdAlloc.commandBufferCount = 1;
+    VkCommandBuffer uploadCmd = VK_NULL_HANDLE;
+    if (vkAllocateCommandBuffers(device_, &cmdAlloc, &uploadCmd) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid upload command allocation failed");
+    VkCommandBufferBeginInfo begin{};
+    begin.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    vkBeginCommandBuffer(uploadCmd, &begin);
+    VkBufferCopy copy{ 0, 0, particleBytes };
+    vkCmdCopyBuffer(uploadCmd, staging, r.particles, 1, &copy);
+    vkCmdCopyBuffer(uploadCmd, staging, r.seedParticles, 1, &copy);
+    vkCmdFillBuffer(uploadCmd, r.grid, 0, VK_WHOLE_SIZE, 0);
+    VkMemoryBarrier initialBufferBarrier{};
+    initialBufferBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+    initialBufferBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    initialBufferBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT |
+                                         VK_ACCESS_SHADER_WRITE_BIT |
+                                         VK_ACCESS_TRANSFER_READ_BIT;
+    vkCmdPipelineBarrier(uploadCmd, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT |
+                         VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
+                         1, &initialBufferBarrier, 0, nullptr, 0, nullptr);
+    VkImageMemoryBarrier initialImageBarrier{};
+    initialImageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    initialImageBarrier.srcAccessMask = 0;
+    initialImageBarrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    initialImageBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    initialImageBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+    initialImageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    initialImageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    initialImageBarrier.image = r.densityImage;
+    initialImageBarrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+    vkCmdPipelineBarrier(uploadCmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                         0, nullptr, 0, nullptr, 1, &initialImageBarrier);
+    vkEndCommandBuffer(uploadCmd);
+    VkSubmitInfo submit{};
+    submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submit.commandBufferCount = 1;
+    submit.pCommandBuffers = &uploadCmd;
+    if (vkQueueSubmit(graphicsQueue_, 1, &submit, VK_NULL_HANDLE) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid upload submit failed");
+    vkQueueWaitIdle(graphicsQueue_);
+    vkFreeCommandBuffers(device_, commandPool_, 1, &uploadCmd);
+    vkDestroyBuffer(device_, staging, nullptr);
+    vkFreeMemory(device_, stagingMem, nullptr);
+
+    // Compute descriptors are shared by every MLS-MPM pass and the density
+    // resolve: binding 0 particles, binding 1 fixed-point grid, binding 2 R32F
+    // storage image.  Each shader declares only the subset it consumes.
+    VkDescriptorSetLayoutBinding computeBindings[3]{};
+    computeBindings[0].binding = 0;
+    computeBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    computeBindings[0].descriptorCount = 1;
+    computeBindings[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+    computeBindings[1] = computeBindings[0];
+    computeBindings[1].binding = 1;
+    computeBindings[2].binding = 2;
+    computeBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    computeBindings[2].descriptorCount = 1;
+    computeBindings[2].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+    VkDescriptorSetLayoutCreateInfo computeLayoutInfo{};
+    computeLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    computeLayoutInfo.bindingCount = 3;
+    computeLayoutInfo.pBindings = computeBindings;
+    if (vkCreateDescriptorSetLayout(device_, &computeLayoutInfo, nullptr,
+                                    &r.computeSetLayout) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid compute descriptor layout failed");
+
+    VkDescriptorPoolSize computePoolSizes[2]{};
+    computePoolSizes[0] = { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 2 };
+    computePoolSizes[1] = { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 };
+    VkDescriptorPoolCreateInfo computePoolInfo{};
+    computePoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    computePoolInfo.poolSizeCount = 2;
+    computePoolInfo.pPoolSizes = computePoolSizes;
+    computePoolInfo.maxSets = 1;
+    if (vkCreateDescriptorPool(device_, &computePoolInfo, nullptr, &r.computePool) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid compute descriptor pool failed");
+    VkDescriptorSetAllocateInfo computeSetAlloc{};
+    computeSetAlloc.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    computeSetAlloc.descriptorPool = r.computePool;
+    computeSetAlloc.descriptorSetCount = 1;
+    computeSetAlloc.pSetLayouts = &r.computeSetLayout;
+    if (vkAllocateDescriptorSets(device_, &computeSetAlloc, &r.computeSet) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid compute descriptor set failed");
+
+    VkDescriptorBufferInfo particleInfo{ r.particles, 0, VK_WHOLE_SIZE };
+    VkDescriptorBufferInfo gridInfo{ r.grid, 0, VK_WHOLE_SIZE };
+    VkDescriptorImageInfo storageImageInfo{};
+    storageImageInfo.imageView = r.densityImageView;
+    storageImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+    VkWriteDescriptorSet computeWrites[3]{};
+    for (auto& write : computeWrites) {
+        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        write.dstSet = r.computeSet;
+        write.descriptorCount = 1;
+    }
+    computeWrites[0].dstBinding = 0;
+    computeWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    computeWrites[0].pBufferInfo = &particleInfo;
+    computeWrites[1].dstBinding = 1;
+    computeWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    computeWrites[1].pBufferInfo = &gridInfo;
+    computeWrites[2].dstBinding = 2;
+    computeWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    computeWrites[2].pImageInfo = &storageImageInfo;
+    vkUpdateDescriptorSets(device_, 3, computeWrites, 0, nullptr);
+
+    VkPushConstantRange computePushRange{};
+    computePushRange.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+    computePushRange.size = sizeof(MlsMpmPushConstants);
+    VkPipelineLayoutCreateInfo computePipelineLayoutInfo{};
+    computePipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    computePipelineLayoutInfo.setLayoutCount = 1;
+    computePipelineLayoutInfo.pSetLayouts = &r.computeSetLayout;
+    computePipelineLayoutInfo.pushConstantRangeCount = 1;
+    computePipelineLayoutInfo.pPushConstantRanges = &computePushRange;
+    if (vkCreatePipelineLayout(device_, &computePipelineLayoutInfo, nullptr,
+                               &r.computeLayout) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid compute pipeline layout failed");
+
+    auto createComputePipeline = [&](const char* file, VkPipeline* out) {
+        const auto code = ReadFileBytes(shaderDir_ + file);
+        VkShaderModule module = CreateShaderModule(code);
+        VkPipelineShaderStageCreateInfo stage{};
+        stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+        stage.module = module;
+        stage.pName = "main";
+        VkComputePipelineCreateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+        info.stage = stage;
+        info.layout = r.computeLayout;
+        const VkResult result = vkCreateComputePipelines(device_, VK_NULL_HANDLE, 1,
+                                                          &info, nullptr, out);
+        vkDestroyShaderModule(device_, module, nullptr);
+        if (result != VK_SUCCESS)
+            throw std::runtime_error(std::string("Cinematic Liquid compute pipeline failed: ") + file);
+    };
+    createComputePipeline("mls_mpm_clear_grid.comp.spv", &r.clearGridPipe);
+    createComputePipeline("mls_mpm_p2g_mass_momentum.comp.spv", &r.p2gMassPipe);
+    createComputePipeline("mls_mpm_p2g_density_stress.comp.spv", &r.p2gStressPipe);
+    createComputePipeline("mls_mpm_grid_update.comp.spv", &r.gridUpdatePipe);
+    createComputePipeline("mls_mpm_g2p.comp.spv", &r.g2pPipe);
+    createComputePipeline("cinematic_liquid_resolve.comp.spv", &r.resolveDensityPipe);
+
+    // The raymarch has one combined sampler descriptor and a 96-byte fragment
+    // push block containing camera/domain data.  No vertex buffers are used.
+    VkDescriptorSetLayoutBinding renderBinding{};
+    renderBinding.binding = 0;
+    renderBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    renderBinding.descriptorCount = 1;
+    renderBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    VkDescriptorSetLayoutCreateInfo renderLayoutInfo{};
+    renderLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    renderLayoutInfo.bindingCount = 1;
+    renderLayoutInfo.pBindings = &renderBinding;
+    if (vkCreateDescriptorSetLayout(device_, &renderLayoutInfo, nullptr,
+                                    &r.renderSetLayout) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid render descriptor layout failed");
+    VkDescriptorPoolSize renderPoolSize{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 };
+    VkDescriptorPoolCreateInfo renderPoolInfo{};
+    renderPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    renderPoolInfo.poolSizeCount = 1;
+    renderPoolInfo.pPoolSizes = &renderPoolSize;
+    renderPoolInfo.maxSets = 1;
+    if (vkCreateDescriptorPool(device_, &renderPoolInfo, nullptr, &r.renderPool) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid render descriptor pool failed");
+    VkDescriptorSetAllocateInfo renderSetAlloc{};
+    renderSetAlloc.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    renderSetAlloc.descriptorPool = r.renderPool;
+    renderSetAlloc.descriptorSetCount = 1;
+    renderSetAlloc.pSetLayouts = &r.renderSetLayout;
+    if (vkAllocateDescriptorSets(device_, &renderSetAlloc, &r.renderSet) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid render descriptor set failed");
+    VkDescriptorImageInfo sampledImageInfo{};
+    sampledImageInfo.sampler = r.densitySampler;
+    sampledImageInfo.imageView = r.densityImageView;
+    sampledImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+    VkWriteDescriptorSet renderWrite{};
+    renderWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    renderWrite.dstSet = r.renderSet;
+    renderWrite.dstBinding = 0;
+    renderWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    renderWrite.descriptorCount = 1;
+    renderWrite.pImageInfo = &sampledImageInfo;
+    vkUpdateDescriptorSets(device_, 1, &renderWrite, 0, nullptr);
+
+    VkPushConstantRange renderPushRange{};
+    renderPushRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    renderPushRange.size = sizeof(CinematicLiquidRenderPushConstants);
+    VkPipelineLayoutCreateInfo renderPipelineLayoutInfo{};
+    renderPipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    renderPipelineLayoutInfo.setLayoutCount = 1;
+    renderPipelineLayoutInfo.pSetLayouts = &r.renderSetLayout;
+    renderPipelineLayoutInfo.pushConstantRangeCount = 1;
+    renderPipelineLayoutInfo.pPushConstantRanges = &renderPushRange;
+    if (vkCreatePipelineLayout(device_, &renderPipelineLayoutInfo, nullptr,
+                               &r.renderLayout) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid render pipeline layout failed");
+
+    const auto vertexCode = ReadFileBytes(shaderDir_ + "cinematic_liquid_render.vert.spv");
+    const auto fragmentCode = ReadFileBytes(shaderDir_ + "cinematic_liquid_render.frag.spv");
+    VkShaderModule vertexModule = CreateShaderModule(vertexCode);
+    VkShaderModule fragmentModule = CreateShaderModule(fragmentCode);
+    VkPipelineShaderStageCreateInfo renderStages[2]{};
+    renderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    renderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+    renderStages[0].module = vertexModule;
+    renderStages[0].pName = "main";
+    renderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    renderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    renderStages[1].module = fragmentModule;
+    renderStages[1].pName = "main";
+    VkPipelineVertexInputStateCreateInfo vertexInput{};
+    vertexInput.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    VkPipelineInputAssemblyStateCreateInfo assembly{};
+    assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    VkViewport viewport{ 0.0f, 0.0f, float(swapChainExtent_.width),
+                         float(swapChainExtent_.height), 0.0f, 1.0f };
+    VkRect2D scissor{ {0, 0}, swapChainExtent_ };
+    VkPipelineViewportStateCreateInfo viewportState{};
+    viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewportState.viewportCount = 1;
+    viewportState.pViewports = &viewport;
+    viewportState.scissorCount = 1;
+    viewportState.pScissors = &scissor;
+    VkPipelineRasterizationStateCreateInfo raster{};
+    raster.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    raster.polygonMode = VK_POLYGON_MODE_FILL;
+    raster.cullMode = VK_CULL_MODE_NONE;
+    raster.lineWidth = 1.0f;
+    VkPipelineMultisampleStateCreateInfo multisample{};
+    multisample.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+    multisample.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    VkPipelineColorBlendAttachmentState blendAttachment{};
+    blendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+                                     VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    VkPipelineColorBlendStateCreateInfo blend{};
+    blend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    blend.attachmentCount = 1;
+    blend.pAttachments = &blendAttachment;
+    VkGraphicsPipelineCreateInfo renderPipelineInfo{};
+    renderPipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    renderPipelineInfo.stageCount = 2;
+    renderPipelineInfo.pStages = renderStages;
+    renderPipelineInfo.pVertexInputState = &vertexInput;
+    renderPipelineInfo.pInputAssemblyState = &assembly;
+    renderPipelineInfo.pViewportState = &viewportState;
+    renderPipelineInfo.pRasterizationState = &raster;
+    renderPipelineInfo.pMultisampleState = &multisample;
+    renderPipelineInfo.pColorBlendState = &blend;
+    renderPipelineInfo.layout = r.renderLayout;
+    renderPipelineInfo.renderPass = renderPass_;
+    renderPipelineInfo.subpass = 0;
+    const VkResult renderResult = vkCreateGraphicsPipelines(device_, VK_NULL_HANDLE, 1,
+        &renderPipelineInfo, nullptr, &r.renderPipe);
+    vkDestroyShaderModule(device_, fragmentModule, nullptr);
+    vkDestroyShaderModule(device_, vertexModule, nullptr);
+    if (renderResult != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid raymarch pipeline failed");
+
+    graphicsPipeline_ = r.renderPipe;
+    graphicsPipelineLayout_ = r.renderLayout;
+
+    std::cout << "[Cinematic Liquid] MLS-MPM " << r.particleCount
+              << " particles, grid " << r.gridX << "x" << r.gridY << "x" << r.gridZ
+              << ", density raymarch " << (linearFilter ? "linear" : "nearest")
+              << " filtering\n";
+}
+
+void VulkanBackend::CreateCinematicLiquidV2Resources() {
+    auto& r = cinematicLiquid_;
+    r.isV2 = true;
+    r.isSph = config_.liquidSolverSph;
+    r.gridX = kCinematicLiquidV2GridX;
+    r.gridY = kCinematicLiquidV2GridY;
+    r.gridZ = kCinematicLiquidV2GridZ;
+    r.surfaceX = kCinematicLiquidV2SurfaceX;
+    r.surfaceY = kCinematicLiquidV2SurfaceY;
+    r.surfaceZ = kCinematicLiquidV2SurfaceZ;
+    r.substeps = r.isSph ? kCinematicLiquidSphSubsteps
+                         : kCinematicLiquidV2Substeps;
+    r.raySteps = kCinematicLiquidV2RaySteps;
+    r.shaderVersion = r.isSph ? kCinematicLiquidSphShaderVersion
+                              : kCinematicLiquidV2ShaderVersion;
+    r.bodyCount = kCinematicLiquidV2BodyCount;
+    r.dx = kCinematicLiquidV2Dx;
+    if (r.isSph) {
+        // The SPH slice reconstructs its surface from the same shared
+        // particle buffer; spacing/mass describe the world-space footprint of
+        // one reference particle (spawn density 600 per sim unit^3).
+        r.particleSpacing = kCinematicLiquidSphSpawnSpacing *
+                            kCinematicLiquidSphWorldScale;
+    } else {
+        r.particleSpacing = r.dx * 0.72f;
+    }
+    r.particleMass = kLiquidV2RestDensity * r.particleSpacing *
+                     r.particleSpacing * r.particleSpacing;
+
+    // The reference raymarch scene gets its thin sheets and spray from a real
+    // dam-break, not from shading a calm surface.  V2 keeps a shallow pool bed
+    // under the toys and places the remaining particles in a tall left-hand
+    // reservoir.  A deterministic GPU gate releases that wall during the
+    // scored camera path.  Integer lattice counts keep the score contract
+    // identical on every compiler. V7 redistributes the same ~321k budget into
+    // a deeper 14-layer play pool so the 0.40 m sink sphere can generate a
+    // resolved entry crown, while retaining a tall dam reservoir:
+    // 142*14*98 + 48*37*71 = 320,920 particles.
+    std::vector<MlsMpmParticleGpu> initial;
+    // SPH slice only: sim-space seed positions (4 floats per particle) that
+    // parallel `initial`'s world-space presentation copies.
+    std::vector<float> sphInitial;
+    if (r.isSph) {
+        // Deterministic SPH lattice in the reference units: a deep bed plus a
+        // left dam column that collapses at t=0 and again after the 4 s
+        // restage.  148*16*98 + 30*30*96 = 318,464.  Every lattice point
+        // sits inside the physical pool wall (sim-space rounded rect centre
+        // (11.906, 8.906), half extents (9.328, 6.328) = drawn-ring inset
+        // 0.45 plus a 0.10 m reconstruction-inflation allowance, corner
+        // radius 1.406, corner margin 0.50); the water body must start
+        // inside the visible pool, and only spray that clears the rim may
+        // land on the grass outside.  Sixteen bed layers put the resting
+        // waterline near 0.49 m so the 0.40 m sink sphere reads as fully
+        // submerged; the raised 0.42 wall keeps the deeper fill contained
+        // while the column still tops out near the rim for a visible surge.
+        constexpr std::uint32_t bedX = 148, bedY = 16, bedZ = 98;
+        constexpr std::uint32_t colX = 30, colY = 30, colZ = 96;
+        constexpr std::size_t expectedParticles =
+            std::size_t(bedX) * bedY * bedZ + std::size_t(colX) * colY * colZ;
+        initial.reserve(expectedParticles);
+        sphInitial.reserve(expectedParticles * 4u);
+        const float spacing = kCinematicLiquidSphSpawnSpacing;
+        const float worldScale = kCinematicLiquidSphWorldScale;
+        std::uint32_t serial = 0;
+        auto appendSimLattice = [&](std::uint32_t nx, std::uint32_t ny,
+                                    std::uint32_t nz, float x0, float y0,
+                                    float z0) {
+            for (std::uint32_t iz = 0; iz < nz; ++iz) {
+                for (std::uint32_t iy = 0; iy < ny; ++iy) {
+                    for (std::uint32_t ix = 0; ix < nx; ++ix, ++serial) {
+                        const float jitter = spacing * 0.20f;
+                        const float x = x0 + float(ix) * spacing +
+                            liquidJitter(0x5b17aa01u + serial * 3u) * jitter;
+                        const float y = y0 + float(iy) * spacing +
+                            liquidJitter(0x5b17aa02u + serial * 3u) * jitter;
+                        const float z = z0 + float(iz) * spacing +
+                            liquidJitter(0x5b17aa03u + serial * 3u) * jitter;
+                        sphInitial.push_back(x);
+                        sphInitial.push_back(y);
+                        sphInitial.push_back(z);
+                        sphInitial.push_back(1.0f);
+                        MlsMpmParticleGpu particle{};
+                        particle.position[0] = kLiquidV2OriginX + x * worldScale;
+                        particle.position[1] = kLiquidV2OriginY + y * worldScale;
+                        particle.position[2] = kLiquidV2OriginZ + z * worldScale;
+                        particle.position[3] = 1.0f;
+                        initial.push_back(particle);
+                    }
+                }
+            }
+        };
+        appendSimLattice(bedX, bedY, bedZ, 3.08f, 0.66f, 3.08f);
+        appendSimLattice(colX, colY, colZ, 3.08f, 2.55f, 3.08f);
+        if (initial.size() != expectedParticles)
+            throw std::runtime_error(
+                "Cinematic Liquid SPH deterministic seed drifted");
+        r.particleCount = static_cast<std::uint32_t>(initial.size());
+        config_.particleCount = r.particleCount;
+    } else {
+    constexpr std::uint32_t baseX = 142, baseY = 14, baseZ = 98;
+    constexpr std::uint32_t damX = 48, damY = 37, damZ = 71;
+    constexpr std::size_t expectedParticles =
+        std::size_t(baseX) * baseY * baseZ +
+        std::size_t(damX) * damY * damZ;
+    initial.reserve(expectedParticles);
+    std::uint32_t serial = 0;
+    auto appendLattice = [&](std::uint32_t countX, std::uint32_t countY,
+                             std::uint32_t countZ, float centreX,
+                             float startY, float centreZ) {
+        for (std::uint32_t iz = 0; iz < countZ; ++iz) {
+            for (std::uint32_t iy = 0; iy < countY; ++iy) {
+                for (std::uint32_t ix = 0; ix < countX; ++ix, ++serial) {
+                    const float x = centreX +
+                        (float(ix) - 0.5f * float(countX - 1u)) * r.particleSpacing;
+                    const float y = startY + float(iy) * r.particleSpacing;
+                    const float z = centreZ +
+                        (float(iz) - 0.5f * float(countZ - 1u)) * r.particleSpacing;
+                    const float jitterScale = r.particleSpacing * 0.035f;
+                    MlsMpmParticleGpu particle{};
+                    particle.position[0] = x + liquidJitter(0x51a7c0deu + serial * 3u) * jitterScale;
+                    particle.position[1] = y + liquidJitter(0x51a7c0dfu + serial * 3u) * jitterScale;
+                    particle.position[2] = z + liquidJitter(0x51a7c0e0u + serial * 3u) * jitterScale;
+                    particle.position[3] = 1.0f;
+                    initial.push_back(particle);
+                }
+            }
+        }
+    };
+    appendLattice(baseX, baseY, baseZ, 0.0f, 0.10f, 0.0f);
+    appendLattice(damX, damY, damZ, -1.63f, 0.46f, 0.0f);
+    if (initial.size() != expectedParticles)
+        throw std::runtime_error("Cinematic Liquid v2 deterministic dam-break seed drifted");
+    r.particleCount = static_cast<std::uint32_t>(initial.size());
+    if (r.particleCount < 310'000u || r.particleCount > 330'000u)
+        throw std::runtime_error("Cinematic Liquid v2 particle contract drifted outside 310k-330k");
+    config_.particleCount = r.particleCount;
+    }
+
+    auto set4 = [](float (&dst)[4], float x, float y, float z, float w) {
+        dst[0] = x; dst[1] = y; dst[2] = z; dst[3] = w;
+    };
+    std::vector<CinematicLiquidBodyStateGpu> bodies(r.bodyCount);
+    // 0: mother rubber duck.  shape0.xyz is the plump belly envelope and
+    // shape0.w the upright-righting strength; shape1 packs (head radius,
+    // head forward, head height, beak length).  The SDF/render shaders blend
+    // belly, upswept tail, head and flat beak with smooth-min so the toy
+    // reads as one continuous classic bath duck rather than ellipsoid lobes.
+    set4(bodies[0].positionType, 0.05f, 0.56f, 0.30f, 0.0f);
+    set4(bodies[0].orientation, 0.0f, -0.30071f, 0.0f, 0.95372f);
+    set4(bodies[0].linearVelocityInvMass, 0.0f, 0.0f, 0.0f, 1.0f / 20.0f);
+    set4(bodies[0].angularVelocityInvInertia, 0.0f, 0.0f, 0.0f, 1.2f);
+    set4(bodies[0].shape0, 0.30f, 0.21f, 0.26f, 18.0f);
+    set4(bodies[0].shape1, 0.15f, 0.12f, 0.26f, 0.12f);
+    set4(bodies[0].material, 0.08f, 0.28f, 1.35f, 2.60f);
+    set4(bodies[0].color, 1.00f, 0.66f, 0.035f, 0.30f);
+
+    // 1: hollow play ball (about 12% of displaced-water density).
+    set4(bodies[1].positionType, 0.78f, 0.55f, -0.32f, 1.0f);
+    set4(bodies[1].orientation, 0.0f, 0.0f, 0.0f, 1.0f);
+    set4(bodies[1].linearVelocityInvMass, 0.0f, 0.0f, 0.0f, 1.0f / 5.4f);
+    set4(bodies[1].angularVelocityInvInertia, 0.0f, 0.0f, 0.0f, 4.0f);
+    set4(bodies[1].shape0, 0.22f, 0.0f, 0.0f, 0.0f);
+    set4(bodies[1].shape1, 0.0f, 0.0f, 0.0f, 0.0f);
+    set4(bodies[1].material, 0.34f, 0.20f, 0.85f, 1.10f);
+    set4(bodies[1].color, 0.96f, 0.10f, 0.18f, 0.24f);
+
+    // 2: motorized toy boat on a compliant mooring. Local -X is aft; the
+    // raised centre leaves a readable painted hull above the shallow base while
+    // the lower shaft and propeller remain submerged. Finite mass/inertia let
+    // the actuator disk's equal-and-opposite impulse drive, bob and yaw the
+    // boat; the shader-side soft tether keeps it in the fixed hero scene.
+    set4(bodies[2].positionType, 1.25f, 0.47f, 0.50f, 2.0f);
+    set4(bodies[2].orientation, 0.0f, -0.08716f, 0.0f, 0.99619f);
+    set4(bodies[2].linearVelocityInvMass, 0.0f, 0.0f, 0.0f, 1.0f / 34.0f);
+    set4(bodies[2].angularVelocityInvInertia, 0.0f, 0.0f, 0.0f, 0.62f);
+    set4(bodies[2].shape0, 0.52f, 0.16f, 0.24f, 0.10f);
+    set4(bodies[2].shape1, 0.14f, 0.62f, 3.2f, 12.0f);
+    set4(bodies[2].material, 0.04f, 0.34f, 0.90f, 1.70f);
+    set4(bodies[2].color, 0.045f, 0.22f, 0.82f, 0.30f);
+
+    // 3: 1.06x-water-density solid sphere. It is held above open water until
+    // 4.28s, then released to gravity so the formal 5s capture records a real
+    // fluid-coupled impact rather than a zero-velocity crane placement.
+    // Keep the formal entry clear of the duck in the 5s hero camera while
+    // retaining enough open water around the sphere for a readable splash.
+    set4(bodies[3].positionType, 0.38f, 1.65f, -1.25f, 3.0f);
+    set4(bodies[3].orientation, 0.0f, 0.0f, 0.0f, 1.0f);
+    set4(bodies[3].linearVelocityInvMass, 0.0f, 0.0f, 0.0f, 1.0f / 35.52f);
+    set4(bodies[3].angularVelocityInvInertia, 0.0f, 0.0f, 0.0f, 1.76f);
+    set4(bodies[3].shape0, 0.20f, 0.0f, 0.0f, 0.0f);
+    set4(bodies[3].shape1, 0.0f, 0.0f, 0.0f, 0.0f);
+    set4(bodies[3].material, 0.0f, 0.42f, 4.00f, 1.40f);
+    set4(bodies[3].color, 0.12f, 0.15f, 0.19f, 0.20f);
+
+    // 4-6: duckling trio (the reference "子母鸭" family) at ~0.45 mother
+    // scale, staggered between the mother and the 5 s hero camera with varied
+    // headings.  Appended after index 3 because the sink sphere's release is
+    // keyed to lane 3 in the rigid integrate shader.  Spawn spacing exceeds
+    // every pairwise bounding-radius sum, so the pair solver applies no
+    // start-up pop.  Lighter bodies right faster (stronger shape0.w) and get
+    // extra linear/angular drag so the dam wave rocks them without spinning
+    // them like tops.
+    constexpr struct { float x, z, qy, qw; } kDucklings[3] = {
+        {-0.62f, 0.78f,  0.21644f, 0.97630f},
+        { 0.42f, 1.10f, -0.46175f, 0.88701f},
+        {-0.20f, 1.15f, -0.60876f, 0.79335f},
+    };
+    for (std::size_t i = 0; i < 3; ++i) {
+        auto& duckling = bodies[4 + i];
+        set4(duckling.positionType, kDucklings[i].x, 0.52f, kDucklings[i].z, 0.0f);
+        set4(duckling.orientation, 0.0f, kDucklings[i].qy, 0.0f, kDucklings[i].qw);
+        set4(duckling.linearVelocityInvMass, 0.0f, 0.0f, 0.0f, 1.0f / 1.82f);
+        set4(duckling.angularVelocityInvInertia, 0.0f, 0.0f, 0.0f, 9.0f);
+        set4(duckling.shape0, 0.14f, 0.095f, 0.12f, 26.0f);
+        set4(duckling.shape1, 0.068f, 0.054f, 0.118f, 0.055f);
+        set4(duckling.material, 0.10f, 0.30f, 1.60f, 3.20f);
+        set4(duckling.color, 1.00f, 0.66f, 0.035f, 0.30f);
+    }
+
+    const std::uint64_t gridCellCount64 = std::uint64_t(r.gridX) * r.gridY * r.gridZ;
+    const std::uint64_t surfaceCellCount64 =
+        std::uint64_t(r.surfaceX) * r.surfaceY * r.surfaceZ;
+    const VkDeviceSize particleBytes = VkDeviceSize(initial.size()) * sizeof(MlsMpmParticleGpu);
+    const VkDeviceSize gridBytes = VkDeviceSize(gridCellCount64) * sizeof(std::int32_t) * 4u;
+    const VkDeviceSize bodyBytes = VkDeviceSize(bodies.size()) * sizeof(CinematicLiquidBodyStateGpu);
+    const VkDeviceSize impulseBytes = VkDeviceSize(bodies.size()) * sizeof(CinematicLiquidBodyImpulseGpu);
+    const VkDeviceSize densityAtomicBytes =
+        VkDeviceSize(surfaceCellCount64) * sizeof(std::uint32_t);
+
+    VkPhysicalDeviceMemoryProperties memProps{};
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice_, &memProps);
+    CreateFluidBuffer(device_, memProps, particleBytes,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        &r.particles, &r.particlesMem);
+    CreateFluidBuffer(device_, memProps, particleBytes,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        &r.seedParticles, &r.seedParticlesMem);
+    CreateFluidBuffer(device_, memProps, gridBytes,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        &r.grid, &r.gridMem);
+    CreateFluidBuffer(device_, memProps, bodyBytes,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        &r.bodies, &r.bodiesMem);
+    CreateFluidBuffer(device_, memProps, bodyBytes,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        &r.seedBodies, &r.seedBodiesMem);
+    CreateFluidBuffer(device_, memProps, impulseBytes,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        &r.bodyImpulses, &r.bodyImpulsesMem);
+    CreateFluidBuffer(device_, memProps, densityAtomicBytes,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        &r.densityAtomicBuffer, &r.densityAtomicBufferMem);
+
+    const VkFormat volumeFormat = VK_FORMAT_R32_SFLOAT;
+    VkFormatProperties formatProps{};
+    vkGetPhysicalDeviceFormatProperties(physicalDevice_, volumeFormat, &formatProps);
+    if ((formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT) == 0 ||
+        (formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) == 0)
+        throw std::runtime_error("Cinematic Liquid v2 requires sampled+storage R32_SFLOAT 3D images");
+    const bool linearFilter =
+        (formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT) != 0;
+    if (!linearFilter)
+        throw std::runtime_error(
+            "Cinematic Liquid v2 fixed score requires linear-filterable R32_SFLOAT 3D images");
+
+    VkImageCreateInfo imageInfo{};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = VK_IMAGE_TYPE_3D;
+    imageInfo.format = volumeFormat;
+    imageInfo.extent = {r.surfaceX, r.surfaceY, r.surfaceZ};
+    imageInfo.mipLevels = 1;
+    imageInfo.arrayLayers = 1;
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageInfo.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    if (vkCreateImage(device_, &imageInfo, nullptr, &r.densityImage) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateImage (Cinematic Liquid v2 density) failed");
+    VkMemoryRequirements imageReq{};
+    vkGetImageMemoryRequirements(device_, r.densityImage, &imageReq);
+    VkMemoryAllocateInfo imageAlloc{};
+    imageAlloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    imageAlloc.allocationSize = imageReq.size;
+    imageAlloc.memoryTypeIndex = FindMemoryType(imageReq.memoryTypeBits,
+                                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    if (vkAllocateMemory(device_, &imageAlloc, nullptr, &r.densityImageMem) != VK_SUCCESS ||
+        vkBindImageMemory(device_, r.densityImage, r.densityImageMem, 0) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 density allocation failed");
+    VkImageViewCreateInfo viewInfo{};
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.image = r.densityImage;
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_3D;
+    viewInfo.format = volumeFormat;
+    viewInfo.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    if (vkCreateImageView(device_, &viewInfo, nullptr, &r.densityImageView) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateImageView (Cinematic Liquid v2 density) failed");
+
+    // Keep whitewater independent from density.  Packing it into the density
+    // scalar would move the iso-surface and turn a presentation feature into
+    // a simulation/score change.  The second R32F volume is written by the
+    // same deterministic resolve dispatch and sampled by the raymarch.
+    VkImageCreateInfo whitewaterImageInfo = imageInfo;
+    whitewaterImageInfo.extent = {r.gridX, r.gridY, r.gridZ};
+    if (vkCreateImage(device_, &whitewaterImageInfo, nullptr, &r.whitewaterImage) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateImage (Cinematic Liquid v2 whitewater) failed");
+    vkGetImageMemoryRequirements(device_, r.whitewaterImage, &imageReq);
+    imageAlloc.allocationSize = imageReq.size;
+    imageAlloc.memoryTypeIndex = FindMemoryType(imageReq.memoryTypeBits,
+                                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    if (vkAllocateMemory(device_, &imageAlloc, nullptr,
+                         &r.whitewaterImageMem) != VK_SUCCESS ||
+        vkBindImageMemory(device_, r.whitewaterImage,
+                          r.whitewaterImageMem, 0) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 whitewater allocation failed");
+    viewInfo.image = r.whitewaterImage;
+    if (vkCreateImageView(device_, &viewInfo, nullptr,
+                          &r.whitewaterImageView) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateImageView (Cinematic Liquid v2 whitewater) failed");
+    VkSamplerCreateInfo samplerInfo{};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = linearFilter ? VK_FILTER_LINEAR : VK_FILTER_NEAREST;
+    samplerInfo.minFilter = linearFilter ? VK_FILTER_LINEAR : VK_FILTER_NEAREST;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.maxLod = 0.0f;
+    if (vkCreateSampler(device_, &samplerInfo, nullptr, &r.densitySampler) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateSampler (Cinematic Liquid v2 density) failed");
+
+    auto makeStaging = [&](const void* data, VkDeviceSize bytes,
+                           VkBuffer& buffer, VkDeviceMemory& memory) {
+        VkBufferCreateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        info.size = bytes;
+        info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        if (vkCreateBuffer(device_, &info, nullptr, &buffer) != VK_SUCCESS)
+            throw std::runtime_error("Cinematic Liquid v2 staging buffer failed");
+        VkMemoryRequirements req{};
+        vkGetBufferMemoryRequirements(device_, buffer, &req);
+        VkMemoryAllocateInfo alloc{};
+        alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        alloc.allocationSize = req.size;
+        alloc.memoryTypeIndex = FindMemoryType(req.memoryTypeBits,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        if (vkAllocateMemory(device_, &alloc, nullptr, &memory) != VK_SUCCESS ||
+            vkBindBufferMemory(device_, buffer, memory, 0) != VK_SUCCESS)
+            throw std::runtime_error("Cinematic Liquid v2 staging allocation failed");
+        void* mapped = nullptr;
+        if (vkMapMemory(device_, memory, 0, bytes, 0, &mapped) != VK_SUCCESS)
+            throw std::runtime_error("Cinematic Liquid v2 staging map failed");
+        std::memcpy(mapped, data, static_cast<std::size_t>(bytes));
+        vkUnmapMemory(device_, memory);
+    };
+    VkBuffer particleStaging = VK_NULL_HANDLE, bodyStaging = VK_NULL_HANDLE;
+    VkDeviceMemory particleStagingMem = VK_NULL_HANDLE, bodyStagingMem = VK_NULL_HANDLE;
+    makeStaging(initial.data(), particleBytes, particleStaging, particleStagingMem);
+    makeStaging(bodies.data(), bodyBytes, bodyStaging, bodyStagingMem);
+
+    VkCommandBufferAllocateInfo cmdAlloc{};
+    cmdAlloc.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    cmdAlloc.commandPool = commandPool_;
+    cmdAlloc.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    cmdAlloc.commandBufferCount = 1;
+    VkCommandBuffer uploadCmd = VK_NULL_HANDLE;
+    if (vkAllocateCommandBuffers(device_, &cmdAlloc, &uploadCmd) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 upload command allocation failed");
+    VkCommandBufferBeginInfo begin{};
+    begin.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    vkBeginCommandBuffer(uploadCmd, &begin);
+    VkBufferCopy particleCopy{0, 0, particleBytes};
+    VkBufferCopy bodyCopy{0, 0, bodyBytes};
+    vkCmdCopyBuffer(uploadCmd, particleStaging, r.particles, 1, &particleCopy);
+    vkCmdCopyBuffer(uploadCmd, particleStaging, r.seedParticles, 1, &particleCopy);
+    vkCmdCopyBuffer(uploadCmd, bodyStaging, r.bodies, 1, &bodyCopy);
+    vkCmdCopyBuffer(uploadCmd, bodyStaging, r.seedBodies, 1, &bodyCopy);
+    vkCmdFillBuffer(uploadCmd, r.grid, 0, VK_WHOLE_SIZE, 0);
+    vkCmdFillBuffer(uploadCmd, r.bodyImpulses, 0, VK_WHOLE_SIZE, 0);
+    vkCmdFillBuffer(uploadCmd, r.densityAtomicBuffer, 0, VK_WHOLE_SIZE, 0);
+    VkMemoryBarrier initialBufferBarrier{};
+    initialBufferBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+    initialBufferBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    initialBufferBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT |
+                                         VK_ACCESS_SHADER_WRITE_BIT |
+                                         VK_ACCESS_TRANSFER_READ_BIT;
+    vkCmdPipelineBarrier(uploadCmd, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT |
+                         VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
+                         1, &initialBufferBarrier, 0, nullptr, 0, nullptr);
+    VkImageMemoryBarrier initialImageBarriers[2]{};
+    for (std::uint32_t i = 0; i < 2; ++i) {
+        initialImageBarriers[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        initialImageBarriers[i].dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        initialImageBarriers[i].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        initialImageBarriers[i].newLayout = VK_IMAGE_LAYOUT_GENERAL;
+        initialImageBarriers[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        initialImageBarriers[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        initialImageBarriers[i].subresourceRange =
+            {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    }
+    initialImageBarriers[0].image = r.densityImage;
+    initialImageBarriers[1].image = r.whitewaterImage;
+    vkCmdPipelineBarrier(uploadCmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                         0, nullptr, 0, nullptr, 2, initialImageBarriers);
+    vkEndCommandBuffer(uploadCmd);
+    VkSubmitInfo submit{};
+    submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submit.commandBufferCount = 1;
+    submit.pCommandBuffers = &uploadCmd;
+    if (vkQueueSubmit(graphicsQueue_, 1, &submit, VK_NULL_HANDLE) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 upload submit failed");
+    vkQueueWaitIdle(graphicsQueue_);
+    vkFreeCommandBuffers(device_, commandPool_, 1, &uploadCmd);
+    vkDestroyBuffer(device_, particleStaging, nullptr);
+    vkFreeMemory(device_, particleStagingMem, nullptr);
+    vkDestroyBuffer(device_, bodyStaging, nullptr);
+    vkFreeMemory(device_, bodyStagingMem, nullptr);
+
+    // Compute set: particles, fixed-point grid, density volume, body state,
+    // atomic body impulses and the independent whitewater volume.  The
+    // 128-byte push range remains the fixed v2 ABI.
+    VkDescriptorSetLayoutBinding computeBindings[6]{};
+    for (std::uint32_t i = 0; i < 6; ++i) {
+        computeBindings[i].binding = i;
+        computeBindings[i].descriptorCount = 1;
+        computeBindings[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+        computeBindings[i].descriptorType = (i == 2 || i == 5)
+            ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    }
+    VkDescriptorSetLayoutCreateInfo computeLayoutInfo{};
+    computeLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    computeLayoutInfo.bindingCount = 6;
+    computeLayoutInfo.pBindings = computeBindings;
+    if (vkCreateDescriptorSetLayout(device_, &computeLayoutInfo, nullptr,
+                                    &r.computeSetLayout) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 compute descriptor layout failed");
+    VkDescriptorPoolSize computePoolSizes[2] = {
+        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 4},
+        {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 2}
+    };
+    VkDescriptorPoolCreateInfo computePoolInfo{};
+    computePoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    computePoolInfo.poolSizeCount = 2;
+    computePoolInfo.pPoolSizes = computePoolSizes;
+    computePoolInfo.maxSets = 1;
+    if (vkCreateDescriptorPool(device_, &computePoolInfo, nullptr, &r.computePool) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 compute descriptor pool failed");
+    VkDescriptorSetAllocateInfo computeSetAlloc{};
+    computeSetAlloc.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    computeSetAlloc.descriptorPool = r.computePool;
+    computeSetAlloc.descriptorSetCount = 1;
+    computeSetAlloc.pSetLayouts = &r.computeSetLayout;
+    if (vkAllocateDescriptorSets(device_, &computeSetAlloc, &r.computeSet) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 compute descriptor set failed");
+
+    VkDescriptorBufferInfo particleInfo{r.particles, 0, VK_WHOLE_SIZE};
+    VkDescriptorBufferInfo gridInfo{r.grid, 0, VK_WHOLE_SIZE};
+    VkDescriptorBufferInfo bodyInfo{r.bodies, 0, VK_WHOLE_SIZE};
+    VkDescriptorBufferInfo impulseInfo{r.bodyImpulses, 0, VK_WHOLE_SIZE};
+    VkDescriptorImageInfo storageImageInfo{};
+    storageImageInfo.imageView = r.densityImageView;
+    storageImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+    VkDescriptorImageInfo storageWhitewaterInfo{};
+    storageWhitewaterInfo.imageView = r.whitewaterImageView;
+    storageWhitewaterInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+    VkWriteDescriptorSet computeWrites[6]{};
+    for (std::uint32_t i = 0; i < 6; ++i) {
+        computeWrites[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        computeWrites[i].dstSet = r.computeSet;
+        computeWrites[i].dstBinding = i;
+        computeWrites[i].descriptorCount = 1;
+        computeWrites[i].descriptorType = computeBindings[i].descriptorType;
+    }
+    computeWrites[0].pBufferInfo = &particleInfo;
+    computeWrites[1].pBufferInfo = &gridInfo;
+    computeWrites[2].pImageInfo = &storageImageInfo;
+    computeWrites[3].pBufferInfo = &bodyInfo;
+    computeWrites[4].pBufferInfo = &impulseInfo;
+    computeWrites[5].pImageInfo = &storageWhitewaterInfo;
+    vkUpdateDescriptorSets(device_, 6, computeWrites, 0, nullptr);
+
+    VkPushConstantRange computePushRange{};
+    computePushRange.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+    computePushRange.size = sizeof(CinematicLiquidV2PushConstants);
+    VkPipelineLayoutCreateInfo computePipelineLayoutInfo{};
+    computePipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    computePipelineLayoutInfo.setLayoutCount = 1;
+    computePipelineLayoutInfo.pSetLayouts = &r.computeSetLayout;
+    computePipelineLayoutInfo.pushConstantRangeCount = 1;
+    computePipelineLayoutInfo.pPushConstantRanges = &computePushRange;
+    if (vkCreatePipelineLayout(device_, &computePipelineLayoutInfo, nullptr,
+                               &r.computeLayout) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 compute pipeline layout failed");
+    auto createComputePipeline = [&](const char* file, VkPipeline* out) {
+        const auto code = ReadFileBytes(shaderDir_ + file);
+        VkShaderModule module = CreateShaderModule(code);
+        VkPipelineShaderStageCreateInfo stage{};
+        stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+        stage.module = module;
+        stage.pName = "main";
+        VkComputePipelineCreateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+        info.stage = stage;
+        info.layout = r.computeLayout;
+        const VkResult result = vkCreateComputePipelines(device_, VK_NULL_HANDLE, 1,
+                                                          &info, nullptr, out);
+        vkDestroyShaderModule(device_, module, nullptr);
+        if (result != VK_SUCCESS)
+            throw std::runtime_error(std::string("Cinematic Liquid v2 pipeline failed: ") + file);
+    };
+    createComputePipeline("mls_mpm_clear_grid_v2.comp.spv", &r.clearGridPipe);
+    createComputePipeline("mls_mpm_p2g_mass_momentum_v2.comp.spv", &r.p2gMassPipe);
+    createComputePipeline("mls_mpm_p2g_density_stress_v2.comp.spv", &r.p2gStressPipe);
+    createComputePipeline("mls_mpm_grid_update_v2.comp.spv", &r.gridUpdatePipe);
+    createComputePipeline("mls_mpm_g2p_v2.comp.spv", &r.g2pPipe);
+    createComputePipeline("cinematic_liquid_rigid_integrate_v2.comp.spv", &r.rigidIntegratePipe);
+    createComputePipeline("cinematic_liquid_resolve_v2.comp.spv", &r.resolveDensityPipe);
+
+    // Independent particle-to-density reconstruction.  Its ABI is separate
+    // from the simulation set so the render volume can evolve without
+    // changing the MLS-MPM pass bindings or 128-byte push contract.
+    VkDescriptorSetLayoutBinding surfaceBindings[3]{};
+    surfaceBindings[0].binding = 0;
+    surfaceBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    surfaceBindings[0].descriptorCount = 1;
+    surfaceBindings[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+    surfaceBindings[1] = surfaceBindings[0];
+    surfaceBindings[1].binding = 1;
+    surfaceBindings[2].binding = 2;
+    surfaceBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    surfaceBindings[2].descriptorCount = 1;
+    surfaceBindings[2].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+    VkDescriptorSetLayoutCreateInfo surfaceSetLayoutInfo{};
+    surfaceSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    surfaceSetLayoutInfo.bindingCount = 3;
+    surfaceSetLayoutInfo.pBindings = surfaceBindings;
+    if (vkCreateDescriptorSetLayout(device_, &surfaceSetLayoutInfo, nullptr,
+                                    &r.surfaceSetLayout) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 surface descriptor layout failed");
+
+    VkDescriptorPoolSize surfacePoolSizes[2] = {
+        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 2},
+        {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1}
+    };
+    VkDescriptorPoolCreateInfo surfacePoolInfo{};
+    surfacePoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    surfacePoolInfo.poolSizeCount = 2;
+    surfacePoolInfo.pPoolSizes = surfacePoolSizes;
+    surfacePoolInfo.maxSets = 1;
+    if (vkCreateDescriptorPool(device_, &surfacePoolInfo, nullptr,
+                               &r.surfacePool) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 surface descriptor pool failed");
+    VkDescriptorSetAllocateInfo surfaceSetAlloc{};
+    surfaceSetAlloc.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    surfaceSetAlloc.descriptorPool = r.surfacePool;
+    surfaceSetAlloc.descriptorSetCount = 1;
+    surfaceSetAlloc.pSetLayouts = &r.surfaceSetLayout;
+    if (vkAllocateDescriptorSets(device_, &surfaceSetAlloc,
+                                 &r.surfaceSet) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 surface descriptor set failed");
+
+    VkDescriptorBufferInfo surfaceAtomicInfo{
+        r.densityAtomicBuffer, 0, VK_WHOLE_SIZE};
+    VkWriteDescriptorSet surfaceWrites[3]{};
+    for (std::uint32_t i = 0; i < 3; ++i) {
+        surfaceWrites[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        surfaceWrites[i].dstSet = r.surfaceSet;
+        surfaceWrites[i].dstBinding = i;
+        surfaceWrites[i].descriptorCount = 1;
+        surfaceWrites[i].descriptorType = surfaceBindings[i].descriptorType;
+    }
+    surfaceWrites[0].pBufferInfo = &particleInfo;
+    surfaceWrites[1].pBufferInfo = &surfaceAtomicInfo;
+    surfaceWrites[2].pImageInfo = &storageImageInfo;
+    vkUpdateDescriptorSets(device_, 3, surfaceWrites, 0, nullptr);
+
+    VkPushConstantRange surfacePushRange{};
+    surfacePushRange.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+    surfacePushRange.size = sizeof(CinematicLiquidV2SurfacePushConstants);
+    VkPipelineLayoutCreateInfo surfacePipelineLayoutInfo{};
+    surfacePipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    surfacePipelineLayoutInfo.setLayoutCount = 1;
+    surfacePipelineLayoutInfo.pSetLayouts = &r.surfaceSetLayout;
+    surfacePipelineLayoutInfo.pushConstantRangeCount = 1;
+    surfacePipelineLayoutInfo.pPushConstantRanges = &surfacePushRange;
+    if (vkCreatePipelineLayout(device_, &surfacePipelineLayoutInfo, nullptr,
+                               &r.surfaceLayout) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 surface pipeline layout failed");
+    auto createSurfacePipeline = [&](const char* file, VkPipeline* out) {
+        const auto code = ReadFileBytes(shaderDir_ + file);
+        VkShaderModule module = CreateShaderModule(code);
+        VkPipelineShaderStageCreateInfo stage{};
+        stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+        stage.module = module;
+        stage.pName = "main";
+        VkComputePipelineCreateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+        info.stage = stage;
+        info.layout = r.surfaceLayout;
+        const VkResult result = vkCreateComputePipelines(
+            device_, VK_NULL_HANDLE, 1, &info, nullptr, out);
+        vkDestroyShaderModule(device_, module, nullptr);
+        if (result != VK_SUCCESS)
+            throw std::runtime_error(
+                std::string("Cinematic Liquid v2 surface pipeline failed: ") + file);
+    };
+    createSurfacePipeline("cinematic_liquid_surface_clear_v2.comp.spv",
+                          &r.surfaceClearPipe);
+    createSurfacePipeline("cinematic_liquid_surface_splat_v2.comp.spv",
+                          &r.surfaceSplatPipe);
+    createSurfacePipeline("cinematic_liquid_surface_resolve_v2.comp.spv",
+                          &r.surfaceResolvePipe);
+
+    // Render set intentionally retains binding numbers 2/3/4: density, body
+    // state, then the derived whitewater volume.
+    VkDescriptorSetLayoutBinding renderBindings[3]{};
+    renderBindings[0].binding = 2;
+    renderBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    renderBindings[0].descriptorCount = 1;
+    renderBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    renderBindings[1].binding = 3;
+    renderBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    renderBindings[1].descriptorCount = 1;
+    renderBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    renderBindings[2].binding = 4;
+    renderBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    renderBindings[2].descriptorCount = 1;
+    renderBindings[2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    VkDescriptorSetLayoutCreateInfo renderLayoutInfo{};
+    renderLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    renderLayoutInfo.bindingCount = 3;
+    renderLayoutInfo.pBindings = renderBindings;
+    if (vkCreateDescriptorSetLayout(device_, &renderLayoutInfo, nullptr,
+                                    &r.renderSetLayout) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 render descriptor layout failed");
+    VkDescriptorPoolSize renderPoolSizes[2] = {
+        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2},
+        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1}
+    };
+    VkDescriptorPoolCreateInfo renderPoolInfo{};
+    renderPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    renderPoolInfo.poolSizeCount = 2;
+    renderPoolInfo.pPoolSizes = renderPoolSizes;
+    renderPoolInfo.maxSets = 1;
+    if (vkCreateDescriptorPool(device_, &renderPoolInfo, nullptr, &r.renderPool) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 render descriptor pool failed");
+    VkDescriptorSetAllocateInfo renderSetAlloc{};
+    renderSetAlloc.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    renderSetAlloc.descriptorPool = r.renderPool;
+    renderSetAlloc.descriptorSetCount = 1;
+    renderSetAlloc.pSetLayouts = &r.renderSetLayout;
+    if (vkAllocateDescriptorSets(device_, &renderSetAlloc, &r.renderSet) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 render descriptor set failed");
+    VkDescriptorImageInfo sampledImageInfo{};
+    sampledImageInfo.sampler = r.densitySampler;
+    sampledImageInfo.imageView = r.densityImageView;
+    sampledImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+    VkDescriptorImageInfo sampledWhitewaterInfo{};
+    sampledWhitewaterInfo.sampler = r.densitySampler;
+    sampledWhitewaterInfo.imageView = r.whitewaterImageView;
+    sampledWhitewaterInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+    VkWriteDescriptorSet renderWrites[3]{};
+    renderWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    renderWrites[0].dstSet = r.renderSet;
+    renderWrites[0].dstBinding = 2;
+    renderWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    renderWrites[0].descriptorCount = 1;
+    renderWrites[0].pImageInfo = &sampledImageInfo;
+    renderWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    renderWrites[1].dstSet = r.renderSet;
+    renderWrites[1].dstBinding = 3;
+    renderWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    renderWrites[1].descriptorCount = 1;
+    renderWrites[1].pBufferInfo = &bodyInfo;
+    renderWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    renderWrites[2].dstSet = r.renderSet;
+    renderWrites[2].dstBinding = 4;
+    renderWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    renderWrites[2].descriptorCount = 1;
+    renderWrites[2].pImageInfo = &sampledWhitewaterInfo;
+    vkUpdateDescriptorSets(device_, 3, renderWrites, 0, nullptr);
+
+    VkPushConstantRange renderPushRange{};
+    renderPushRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    renderPushRange.size = sizeof(CinematicLiquidV2RenderPushConstants);
+    VkPipelineLayoutCreateInfo renderPipelineLayoutInfo{};
+    renderPipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    renderPipelineLayoutInfo.setLayoutCount = 1;
+    renderPipelineLayoutInfo.pSetLayouts = &r.renderSetLayout;
+    renderPipelineLayoutInfo.pushConstantRangeCount = 1;
+    renderPipelineLayoutInfo.pPushConstantRanges = &renderPushRange;
+    if (vkCreatePipelineLayout(device_, &renderPipelineLayoutInfo, nullptr,
+                               &r.renderLayout) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 render pipeline layout failed");
+
+    const auto vertexCode = ReadFileBytes(shaderDir_ + "cinematic_liquid_render_v2.vert.spv");
+    const auto fragmentCode = ReadFileBytes(shaderDir_ + "cinematic_liquid_render_v2.frag.spv");
+    VkShaderModule vertexModule = CreateShaderModule(vertexCode);
+    VkShaderModule fragmentModule = CreateShaderModule(fragmentCode);
+    VkPipelineShaderStageCreateInfo renderStages[2]{};
+    renderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    renderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+    renderStages[0].module = vertexModule;
+    renderStages[0].pName = "main";
+    renderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    renderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    renderStages[1].module = fragmentModule;
+    renderStages[1].pName = "main";
+    VkPipelineVertexInputStateCreateInfo vertexInput{};
+    vertexInput.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    VkPipelineInputAssemblyStateCreateInfo assembly{};
+    assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    VkViewport viewport{0.0f, 0.0f, float(swapChainExtent_.width),
+                        float(swapChainExtent_.height), 0.0f, 1.0f};
+    VkRect2D scissor{{0, 0}, swapChainExtent_};
+    VkPipelineViewportStateCreateInfo viewportState{};
+    viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewportState.viewportCount = 1;
+    viewportState.pViewports = &viewport;
+    viewportState.scissorCount = 1;
+    viewportState.pScissors = &scissor;
+    VkPipelineRasterizationStateCreateInfo raster{};
+    raster.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    raster.polygonMode = VK_POLYGON_MODE_FILL;
+    raster.cullMode = VK_CULL_MODE_NONE;
+    raster.lineWidth = 1.0f;
+    VkPipelineMultisampleStateCreateInfo multisample{};
+    multisample.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+    multisample.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    VkPipelineColorBlendAttachmentState blendAttachment{};
+    blendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+                                     VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    VkPipelineColorBlendStateCreateInfo blend{};
+    blend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    blend.attachmentCount = 1;
+    blend.pAttachments = &blendAttachment;
+    VkGraphicsPipelineCreateInfo renderPipelineInfo{};
+    renderPipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    renderPipelineInfo.stageCount = 2;
+    renderPipelineInfo.pStages = renderStages;
+    renderPipelineInfo.pVertexInputState = &vertexInput;
+    renderPipelineInfo.pInputAssemblyState = &assembly;
+    renderPipelineInfo.pViewportState = &viewportState;
+    renderPipelineInfo.pRasterizationState = &raster;
+    renderPipelineInfo.pMultisampleState = &multisample;
+    renderPipelineInfo.pColorBlendState = &blend;
+    renderPipelineInfo.layout = r.renderLayout;
+    renderPipelineInfo.renderPass = renderPass_;
+    renderPipelineInfo.subpass = 0;
+    const VkResult renderResult = vkCreateGraphicsPipelines(device_, VK_NULL_HANDLE, 1,
+        &renderPipelineInfo, nullptr, &r.renderPipe);
+    vkDestroyShaderModule(device_, fragmentModule, nullptr);
+    vkDestroyShaderModule(device_, vertexModule, nullptr);
+    if (renderResult != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid v2 raymarch pipeline failed");
+
+    graphicsPipeline_ = r.renderPipe;
+    graphicsPipelineLayout_ = r.renderLayout;
+    if (r.isSph) {
+        CreateCinematicLiquidSphResources(sphInitial);
+        std::cout << "[Cinematic Liquid SPH] dual-density SPH " << r.particleCount
+                  << " particles, h " << kCinematicLiquidSphSmoothingRadius
+                  << " (sim units), counting-sort neighbours, "
+                  << r.bodyCount << " coupled bodies, particle-splat surface "
+                  << r.surfaceX << "x" << r.surfaceY << "x" << r.surfaceZ
+                  << ", raymarch " << (linearFilter ? "linear" : "nearest")
+                  << " filtering\n";
+        return;
+    }
+    std::cout << "[Cinematic Liquid v2] MLS-MPM " << r.particleCount
+              << " particles, grid " << r.gridX << "x" << r.gridY << "x" << r.gridZ
+              << ", particle-splat surface " << r.surfaceX << "x"
+              << r.surfaceY << "x" << r.surfaceZ
+              << ", " << r.bodyCount << " coupled bodies, whitewater raymarch "
+              << (linearFilter ? "linear" : "nearest") << " filtering\n";
+}
+
+void VulkanBackend::CleanupCinematicLiquidResources() {
+    if (device_ == VK_NULL_HANDLE) return;
+    auto& r = cinematicLiquid_;
+    if (graphicsPipeline_ == r.renderPipe) graphicsPipeline_ = VK_NULL_HANDLE;
+    if (graphicsPipelineLayout_ == r.renderLayout) graphicsPipelineLayout_ = VK_NULL_HANDLE;
+
+    auto destroyPipeline = [&](VkPipeline& pipeline) {
+        if (pipeline) {
+            vkDestroyPipeline(device_, pipeline, nullptr);
+            pipeline = VK_NULL_HANDLE;
+        }
+    };
+    destroyPipeline(r.clearGridPipe);
+    destroyPipeline(r.p2gMassPipe);
+    destroyPipeline(r.p2gStressPipe);
+    destroyPipeline(r.gridUpdatePipe);
+    destroyPipeline(r.g2pPipe);
+    destroyPipeline(r.rigidIntegratePipe);
+    destroyPipeline(r.resolveDensityPipe);
+    destroyPipeline(r.surfaceClearPipe);
+    destroyPipeline(r.surfaceSplatPipe);
+    destroyPipeline(r.surfaceResolvePipe);
+    destroyPipeline(r.renderPipe);
+    destroyPipeline(r.sphExternalPipe);
+    destroyPipeline(r.sphHashCountPipe);
+    destroyPipeline(r.sphScanBlockPipe);
+    destroyPipeline(r.sphScanAddPipe);
+    destroyPipeline(r.sphScatterPipe);
+    destroyPipeline(r.sphDensityPipe);
+    destroyPipeline(r.sphPressurePipe);
+    destroyPipeline(r.sphViscosityPipe);
+    destroyPipeline(r.sphIntegratePipe);
+    if (r.sphLayout) {
+        vkDestroyPipelineLayout(device_, r.sphLayout, nullptr);
+        r.sphLayout = VK_NULL_HANDLE;
+    }
+    if (r.sphPool) {
+        vkDestroyDescriptorPool(device_, r.sphPool, nullptr);
+        r.sphPool = VK_NULL_HANDLE;
+    }
+    if (r.sphSetLayout) {
+        vkDestroyDescriptorSetLayout(device_, r.sphSetLayout, nullptr);
+        r.sphSetLayout = VK_NULL_HANDLE;
+    }
+    if (r.computeLayout) {
+        vkDestroyPipelineLayout(device_, r.computeLayout, nullptr);
+        r.computeLayout = VK_NULL_HANDLE;
+    }
+    if (r.renderLayout) {
+        vkDestroyPipelineLayout(device_, r.renderLayout, nullptr);
+        r.renderLayout = VK_NULL_HANDLE;
+    }
+    if (r.surfaceLayout) {
+        vkDestroyPipelineLayout(device_, r.surfaceLayout, nullptr);
+        r.surfaceLayout = VK_NULL_HANDLE;
+    }
+    if (r.computePool) {
+        vkDestroyDescriptorPool(device_, r.computePool, nullptr);
+        r.computePool = VK_NULL_HANDLE;
+    }
+    if (r.renderPool) {
+        vkDestroyDescriptorPool(device_, r.renderPool, nullptr);
+        r.renderPool = VK_NULL_HANDLE;
+    }
+    if (r.surfacePool) {
+        vkDestroyDescriptorPool(device_, r.surfacePool, nullptr);
+        r.surfacePool = VK_NULL_HANDLE;
+    }
+    if (r.computeSetLayout) {
+        vkDestroyDescriptorSetLayout(device_, r.computeSetLayout, nullptr);
+        r.computeSetLayout = VK_NULL_HANDLE;
+    }
+    if (r.renderSetLayout) {
+        vkDestroyDescriptorSetLayout(device_, r.renderSetLayout, nullptr);
+        r.renderSetLayout = VK_NULL_HANDLE;
+    }
+    if (r.surfaceSetLayout) {
+        vkDestroyDescriptorSetLayout(device_, r.surfaceSetLayout, nullptr);
+        r.surfaceSetLayout = VK_NULL_HANDLE;
+    }
+    if (r.densitySampler) {
+        vkDestroySampler(device_, r.densitySampler, nullptr);
+        r.densitySampler = VK_NULL_HANDLE;
+    }
+    if (r.densityImageView) {
+        vkDestroyImageView(device_, r.densityImageView, nullptr);
+        r.densityImageView = VK_NULL_HANDLE;
+    }
+    if (r.densityImage) {
+        vkDestroyImage(device_, r.densityImage, nullptr);
+        r.densityImage = VK_NULL_HANDLE;
+    }
+    if (r.densityImageMem) {
+        vkFreeMemory(device_, r.densityImageMem, nullptr);
+        r.densityImageMem = VK_NULL_HANDLE;
+    }
+    if (r.whitewaterImageView) {
+        vkDestroyImageView(device_, r.whitewaterImageView, nullptr);
+        r.whitewaterImageView = VK_NULL_HANDLE;
+    }
+    if (r.whitewaterImage) {
+        vkDestroyImage(device_, r.whitewaterImage, nullptr);
+        r.whitewaterImage = VK_NULL_HANDLE;
+    }
+    if (r.whitewaterImageMem) {
+        vkFreeMemory(device_, r.whitewaterImageMem, nullptr);
+        r.whitewaterImageMem = VK_NULL_HANDLE;
+    }
+    auto destroyBuffer = [&](VkBuffer& buffer, VkDeviceMemory& memory) {
+        if (buffer) {
+            vkDestroyBuffer(device_, buffer, nullptr);
+            buffer = VK_NULL_HANDLE;
+        }
+        if (memory) {
+            vkFreeMemory(device_, memory, nullptr);
+            memory = VK_NULL_HANDLE;
+        }
+    };
+    destroyBuffer(r.particles, r.particlesMem);
+    destroyBuffer(r.seedParticles, r.seedParticlesMem);
+    destroyBuffer(r.grid, r.gridMem);
+    destroyBuffer(r.bodies, r.bodiesMem);
+    destroyBuffer(r.seedBodies, r.seedBodiesMem);
+    destroyBuffer(r.bodyImpulses, r.bodyImpulsesMem);
+    destroyBuffer(r.densityAtomicBuffer, r.densityAtomicBufferMem);
+    destroyBuffer(r.sphPositions, r.sphPositionsMem);
+    destroyBuffer(r.sphVelocities, r.sphVelocitiesMem);
+    destroyBuffer(r.sphPredicted, r.sphPredictedMem);
+    destroyBuffer(r.sphDensities, r.sphDensitiesMem);
+    destroyBuffer(r.sphKeys, r.sphKeysMem);
+    destroyBuffer(r.sphCellCounts, r.sphCellCountsMem);
+    destroyBuffer(r.sphCellStarts, r.sphCellStartsMem);
+    destroyBuffer(r.sphCellCursor, r.sphCellCursorMem);
+    destroyBuffer(r.sphSortedIndices, r.sphSortedIndicesMem);
+    destroyBuffer(r.sphScanSums, r.sphScanSumsMem);
+    destroyBuffer(r.sphScanSums2, r.sphScanSums2Mem);
+    destroyBuffer(r.sphSeedPositions, r.sphSeedPositionsMem);
+}
+
+void VulkanBackend::RecordCinematicLiquidV2Frame(VkCommandBuffer cmd, float deltaTime,
+                                                  std::uint32_t imageIndex,
+                                                  std::uint32_t timestampBase) {
+    auto& r = cinematicLiquid_;
+    const std::uint32_t gridCellCount = r.gridX * r.gridY * r.gridZ;
+    const std::uint32_t particleGroups = (r.particleCount + 255u) / 256u;
+    const std::uint32_t gridClearGroups = (gridCellCount + 255u) / 256u;
+    const float wallDt = std::max(deltaTime, 0.0f);
+    // Ten substeps keep a 30 Hz wall-clock frame stable while preserving the
+    // same dispatch count. This prevents the 5s choreography from running at
+    // half speed on GPUs that render between 30 and 60 FPS.
+    const float frameDt = std::clamp(wallDt, 0.0f, 1.0f / 30.0f);
+    const float substepDt = std::max(frameDt / float(r.substeps), 1e-6f);
+    // Keep capture choreography on real elapsed time, not on the stability-
+    // clamped simulation clock.  This clock is never reset with particles.
+    r.presentationTime += wallDt;
+    r.simTime += frameDt;
+
+    CinematicLiquidV2PushConstants pc{};
+    pc.gridSizeAndCount[0] = r.gridX;
+    pc.gridSizeAndCount[1] = r.gridY;
+    pc.gridSizeAndCount[2] = r.gridZ;
+    pc.gridSizeAndCount[3] = r.particleCount;
+    pc.simulation[0] = substepDt;
+    pc.simulation[1] = -9.81f;
+    pc.simulation[2] = kLiquidV2RestDensity;
+    pc.simulation[3] = 45'000.0f;
+    pc.material[0] = 0.035f;
+    pc.material[1] = r.particleMass;
+    pc.material[2] = kLiquidV2FixedPointScale;
+    pc.material[3] = 2.5f;
+    pc.gridOriginDx[0] = kLiquidV2OriginX;
+    pc.gridOriginDx[1] = kLiquidV2OriginY;
+    pc.gridOriginDx[2] = kLiquidV2OriginZ;
+    pc.gridOriginDx[3] = r.dx;
+    pc.collision[0] = 0.45f;
+    pc.collision[1] = 0.035f;
+    pc.collision[2] = 0.035f;
+    pc.collision[3] = 8.0f;
+    pc.coupling[0] = kLiquidV2BodyImpulseScale;
+    pc.coupling[1] = 1.0f;
+    pc.coupling[2] = 1.0f;
+    pc.coupling[3] = 1.0f;
+    pc.scene[0] = r.bodyCount;
+    pc.scene[1] = 2u;
+    pc.scene[2] = 1u;  // two-way coupling + deterministic choreography
+    pc.scene[3] = r.shaderVersion;
+    pc.pool[0] = 0.30f;
+    // Inset of the finite-height physical pool wall from the outer simulation
+    // domain. The remaining catch band lets real spray cross the rim and land
+    // on the ground instead of hitting an invisible infinite wall.  0.45
+    // (user-widened from 0.22) must stay in sync with the render frag's
+    // poolInset and the SPH wall constants.
+    pc.pool[1] = 0.45f;
+    pc.pool[2] = 0.00f;
+    pc.pool[3] = r.presentationTime;
+
+    BeginDebugLabel(cmd, "Cinematic Liquid v2: Coupled MLS-MPM", 0.02f, 0.62f, 0.82f);
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.computeLayout,
+                            0, 1, &r.computeSet, 0, nullptr);
+    vkCmdPushConstants(cmd, r.computeLayout, VK_SHADER_STAGE_COMPUTE_BIT,
+                       0, sizeof(pc), &pc);
+
+    auto bufferBarrier = [&](VkBuffer buffer,
+                             VkAccessFlags srcAccess = VK_ACCESS_SHADER_WRITE_BIT,
+                             VkAccessFlags dstAccess = VK_ACCESS_SHADER_READ_BIT |
+                                                       VK_ACCESS_SHADER_WRITE_BIT) {
+        VkBufferMemoryBarrier barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+        barrier.srcAccessMask = srcAccess;
+        barrier.dstAccessMask = dstAccess;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.buffer = buffer;
+        barrier.size = VK_WHOLE_SIZE;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                             0, nullptr, 1, &barrier, 0, nullptr);
+    };
+
+    // Complete the previous frame's fragment reads before rigid integration
+    // can update body transforms for this frame.
+    VkBufferMemoryBarrier bodyFromRender{};
+    bodyFromRender.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    bodyFromRender.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    bodyFromRender.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+    bodyFromRender.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    bodyFromRender.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    bodyFromRender.buffer = r.bodies;
+    bodyFromRender.size = VK_WHOLE_SIZE;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                         0, nullptr, 1, &bodyFromRender, 0, nullptr);
+
+    // Stage one fresh, high-potential-energy dam break immediately before the
+    // formal 5 s capture.  Holding only a vertical gate was insufficient: the
+    // column first collapsed downward and had already become a deep, calm
+    // reservoir by the time the gate opened.  Reset particles and coupled
+    // bodies together so the wave/toy interaction remains deterministic.
+    if (!r.captureChoreographyResetDone && r.presentationTime >= 4.0f) {
+        VkBufferMemoryBarrier toTransfer[3]{};
+        const VkBuffer resetTargets[3] = {r.particles, r.bodies, r.bodyImpulses};
+        for (std::uint32_t i = 0; i < 3; ++i) {
+            toTransfer[i].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+            toTransfer[i].srcAccessMask = VK_ACCESS_SHADER_READ_BIT |
+                                           VK_ACCESS_SHADER_WRITE_BIT;
+            toTransfer[i].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            toTransfer[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            toTransfer[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            toTransfer[i].buffer = resetTargets[i];
+            toTransfer[i].size = VK_WHOLE_SIZE;
+        }
+        vkCmdPipelineBarrier(cmd,
+            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT |
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
+            0, nullptr, 3, toTransfer, 0, nullptr);
+
+        const VkDeviceSize particleBytes =
+            VkDeviceSize(r.particleCount) * sizeof(MlsMpmParticleGpu);
+        const VkDeviceSize bodyBytes =
+            VkDeviceSize(r.bodyCount) * sizeof(CinematicLiquidBodyStateGpu);
+        VkBufferCopy particleCopy{0, 0, particleBytes};
+        VkBufferCopy bodyCopy{0, 0, bodyBytes};
+        vkCmdCopyBuffer(cmd, r.seedParticles, r.particles, 1, &particleCopy);
+        vkCmdCopyBuffer(cmd, r.seedBodies, r.bodies, 1, &bodyCopy);
+        vkCmdFillBuffer(cmd, r.bodyImpulses, 0, VK_WHOLE_SIZE, 0);
+
+        VkBufferMemoryBarrier fromTransfer[3]{};
+        for (std::uint32_t i = 0; i < 3; ++i) {
+            fromTransfer[i].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+            fromTransfer[i].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            fromTransfer[i].dstAccessMask = VK_ACCESS_SHADER_READ_BIT |
+                                             VK_ACCESS_SHADER_WRITE_BIT;
+            fromTransfer[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            fromTransfer[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            fromTransfer[i].buffer = resetTargets[i];
+            fromTransfer[i].size = VK_WHOLE_SIZE;
+        }
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                             0, nullptr, 3, fromTransfer, 0, nullptr);
+        r.simTime = 0.0f;
+        r.captureChoreographyResetDone = true;
+    }
+
+    for (std::uint32_t substep = 0; substep < r.substeps; ++substep) {
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.clearGridPipe);
+        vkCmdDispatch(cmd, gridClearGroups, 1, 1);
+        bufferBarrier(r.grid);
+        bufferBarrier(r.bodyImpulses);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.p2gMassPipe);
+        vkCmdDispatch(cmd, particleGroups, 1, 1);
+        bufferBarrier(r.grid);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.p2gStressPipe);
+        vkCmdDispatch(cmd, particleGroups, 1, 1);
+        bufferBarrier(r.grid);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.gridUpdatePipe);
+        vkCmdDispatch(cmd, (r.gridX + 7u) / 8u,
+                      (r.gridY + 7u) / 8u, (r.gridZ + 3u) / 4u);
+        bufferBarrier(r.grid);
+        bufferBarrier(r.bodyImpulses);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.g2pPipe);
+        vkCmdDispatch(cmd, particleGroups, 1, 1);
+        bufferBarrier(r.particles);
+        bufferBarrier(r.bodyImpulses);
+
+        // One 32-lane workgroup owns every rigid state, so all pairwise
+        // contacts (21 pairs with the seven-body duck-family scene) are
+        // resolved from a shared snapshot without cross-invocation races.
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.rigidIntegratePipe);
+        vkCmdDispatch(cmd, 1, 1, 1);
+        bufferBarrier(r.bodies);
+        bufferBarrier(r.bodyImpulses);
+    }
+
+    VkImageMemoryBarrier beforeResolve[2]{};
+    for (std::uint32_t i = 0; i < 2; ++i) {
+        beforeResolve[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        beforeResolve[i].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        beforeResolve[i].dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        beforeResolve[i].oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+        beforeResolve[i].newLayout = VK_IMAGE_LAYOUT_GENERAL;
+        beforeResolve[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        beforeResolve[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        beforeResolve[i].subresourceRange =
+            {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    }
+    beforeResolve[0].image = r.densityImage;
+    beforeResolve[1].image = r.whitewaterImage;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                         0, nullptr, 0, nullptr, 2, beforeResolve);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.resolveDensityPipe);
+    vkCmdDispatch(cmd, (r.gridX + 7u) / 8u,
+                  (r.gridY + 7u) / 8u, (r.gridZ + 3u) / 4u);
+
+    const float surfaceVoxelSize =
+        (float(r.gridX) * r.dx) / float(r.surfaceX);
+    CinematicLiquidV2SurfacePushConstants surfacePc{};
+    surfacePc.volumeSizeAndCount[0] = r.surfaceX;
+    surfacePc.volumeSizeAndCount[1] = r.surfaceY;
+    surfacePc.volumeSizeAndCount[2] = r.surfaceZ;
+    surfacePc.volumeSizeAndCount[3] = r.particleCount;
+    surfacePc.volumeMinVoxel[0] = kLiquidV2OriginX;
+    surfacePc.volumeMinVoxel[1] = kLiquidV2OriginY;
+    surfacePc.volumeMinVoxel[2] = kLiquidV2OriginZ;
+    surfacePc.volumeMinVoxel[3] = surfaceVoxelSize;
+    surfacePc.kernel[0] = 1.70f * r.particleSpacing;
+    surfacePc.kernel[1] = r.particleMass / kLiquidV2RestDensity;
+    surfacePc.kernel[2] = kLiquidV2FixedPointScale;
+    surfacePc.kernel[3] = 4.0f;
+    surfacePc.contract[0] = r.shaderVersion;
+    surfacePc.contract[1] = 1u;  // normalized Spiky^2 particle reconstruction
+
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+                            r.surfaceLayout, 0, 1, &r.surfaceSet, 0, nullptr);
+    vkCmdPushConstants(cmd, r.surfaceLayout, VK_SHADER_STAGE_COMPUTE_BIT,
+                       0, sizeof(surfacePc), &surfacePc);
+    bufferBarrier(r.densityAtomicBuffer, VK_ACCESS_SHADER_READ_BIT,
+                  VK_ACCESS_SHADER_WRITE_BIT);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.surfaceClearPipe);
+    vkCmdDispatch(cmd, (r.surfaceX + 7u) / 8u,
+                  (r.surfaceY + 7u) / 8u, (r.surfaceZ + 3u) / 4u);
+    bufferBarrier(r.densityAtomicBuffer);
+
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.surfaceSplatPipe);
+    vkCmdDispatch(cmd, particleGroups, 1, 1);
+    bufferBarrier(r.densityAtomicBuffer);
+
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.surfaceResolvePipe);
+    vkCmdDispatch(cmd, (r.surfaceX + 7u) / 8u,
+                  (r.surfaceY + 7u) / 8u, (r.surfaceZ + 3u) / 4u);
+
+    VkImageMemoryBarrier afterResolve[2]{};
+    for (std::uint32_t i = 0; i < 2; ++i) {
+        afterResolve[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        afterResolve[i].srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        afterResolve[i].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        afterResolve[i].oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+        afterResolve[i].newLayout = VK_IMAGE_LAYOUT_GENERAL;
+        afterResolve[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        afterResolve[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        afterResolve[i].subresourceRange =
+            {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    }
+    afterResolve[0].image = r.densityImage;
+    afterResolve[1].image = r.whitewaterImage;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                         0, nullptr, 0, nullptr, 2, afterResolve);
+    VkBufferMemoryBarrier bodyToRender{};
+    bodyToRender.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    bodyToRender.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    bodyToRender.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    bodyToRender.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    bodyToRender.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    bodyToRender.buffer = r.bodies;
+    bodyToRender.size = VK_WHOLE_SIZE;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                         0, nullptr, 1, &bodyToRender, 0, nullptr);
+    EndDebugLabel(cmd);
+
+    if (timestampsSupported_) {
+        vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                            timestampQueryPool_, timestampBase + 1);
+        vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                            timestampQueryPool_, timestampBase + 2);
+    }
+
+    // Piecewise smoothstep path: overview -> low side-on 5 s hero hold ->
+    // propeller side -> high rear.  The side view exposes the height and curl
+    // of the released water wall; the old high three-quarter view flattened it
+    // into what looked like a calm blue sheet. Segment derivatives reach zero
+    // at joins, so the camera is C1.
+    struct CameraKey { float t, degrees, radius, height; };
+    constexpr CameraKey keys[] = {
+        {0.0f,  -35.0f, 5.35f, 2.05f},
+        {3.0f,   34.0f, 5.00f, 1.78f},
+        {4.6f,   72.0f, 4.25f, 1.76f},
+        {5.5f,   84.0f, 4.30f, 1.82f},
+        {10.0f, 105.0f, 4.85f, 2.30f},
+        {15.0f, 165.0f, 5.35f, 2.65f}
+    };
+    constexpr std::size_t keyCount = sizeof(keys) / sizeof(keys[0]);
+    const float cameraT = std::clamp(r.presentationTime, 0.0f, 15.0f);
+    CameraKey camera = keys[keyCount - 1u];
+    for (std::size_t i = 0; i + 1u < keyCount; ++i) {
+        if (cameraT <= keys[i + 1u].t) {
+            float u = (cameraT - keys[i].t) / (keys[i + 1u].t - keys[i].t);
+            u = std::clamp(u, 0.0f, 1.0f);
+            u = u * u * (3.0f - 2.0f * u);
+            camera.t = cameraT;
+            camera.degrees = keys[i].degrees + (keys[i + 1u].degrees - keys[i].degrees) * u;
+            camera.radius = keys[i].radius + (keys[i + 1u].radius - keys[i].radius) * u;
+            camera.height = keys[i].height + (keys[i + 1u].height - keys[i].height) * u;
+            break;
+        }
+    }
+    const float angle = camera.degrees * 3.14159265359f / 180.0f;
+    const float cameraX = std::cos(angle) * camera.radius;
+    const float cameraZ = std::sin(angle) * camera.radius;
+
+    BeginDebugLabel(cmd, "Cinematic Liquid v2: Pool Raymarch", 0.03f, 0.36f, 0.94f);
+    VkClearValue clear{};
+    clear.color = {{0.045f, 0.16f, 0.36f, 1.0f}};
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = renderPass_;
+    renderPassInfo.framebuffer = swapChainFramebuffers_[imageIndex];
+    renderPassInfo.renderArea.extent = swapChainExtent_;
+    renderPassInfo.clearValueCount = 1;
+    renderPassInfo.pClearValues = &clear;
+    vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, r.renderPipe);
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, r.renderLayout,
+                            0, 1, &r.renderSet, 0, nullptr);
+
+    CinematicLiquidV2RenderPushConstants renderPc{};
+    renderPc.cameraTime[0] = cameraX;
+    renderPc.cameraTime[1] = camera.height;
+    renderPc.cameraTime[2] = cameraZ;
+    renderPc.cameraTime[3] = r.presentationTime;
+    renderPc.targetAspect[0] = 0.0f;
+    renderPc.targetAspect[1] = 0.82f;
+    renderPc.targetAspect[2] = 0.0f;
+    renderPc.targetAspect[3] = float(swapChainExtent_.width) /
+                               float(std::max(swapChainExtent_.height, 1u));
+    renderPc.volumeMinIso[0] = kLiquidV2OriginX;
+    renderPc.volumeMinIso[1] = kLiquidV2OriginY;
+    renderPc.volumeMinIso[2] = kLiquidV2OriginZ;
+    // jeantimex/fluid uses densityOffset/targetDensity ~= 200/630.
+    // Preserve that dimensionless threshold for the Spiky^2 particle splat.
+    renderPc.volumeMinIso[3] = 0.32f;
+    renderPc.volumeMaxStep[0] = kLiquidV2OriginX + float(r.gridX) * r.dx;
+    renderPc.volumeMaxStep[1] = kLiquidV2OriginY + float(r.gridY) * r.dx;
+    renderPc.volumeMaxStep[2] = kLiquidV2OriginZ + float(r.gridZ) * r.dx;
+    renderPc.volumeMaxStep[3] = 1.0f;
+    renderPc.pool[0] = 0.30f;
+    renderPc.pool[1] = 0.085f;
+    renderPc.pool[2] = 0.00f;  // physical pool/grass ground height
+    renderPc.pool[3] = 0.025f;
+    renderPc.lighting[0] = -0.42f;
+    renderPc.lighting[1] = 0.78f;
+    renderPc.lighting[2] = 0.46f;
+    renderPc.lighting[3] = 1.08f;
+    renderPc.render[0] = r.raySteps;
+    renderPc.render[1] = r.shaderVersion;
+    renderPc.render[2] = swapChainExtent_.width;
+    renderPc.render[3] = swapChainExtent_.height;
+    renderPc.scene[0] = r.bodyCount;
+    renderPc.scene[1] = 2u;
+    const bool swapchainIsSrgb =
+        swapChainImageFormat_ == VK_FORMAT_B8G8R8A8_SRGB ||
+        swapChainImageFormat_ == VK_FORMAT_R8G8B8A8_SRGB ||
+        swapChainImageFormat_ == VK_FORMAT_A8B8G8R8_SRGB_PACK32;
+    renderPc.scene[2] = swapchainIsSrgb ? 1u : 0u;
+    renderPc.scene[3] = r.shaderVersion;
+    vkCmdPushConstants(cmd, r.renderLayout, VK_SHADER_STAGE_FRAGMENT_BIT,
+                       0, sizeof(renderPc), &renderPc);
+    vkCmdDraw(cmd, 3, 1, 0, 0);
+    vkCmdEndRenderPass(cmd);
+    EndDebugLabel(cmd);
+
+    if (timestampsSupported_)
+        vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                            timestampQueryPool_, timestampBase + 3);
+}
+
+void VulkanBackend::CreateCinematicLiquidSphResources(
+        const std::vector<float>& simSeed) {
+    auto& r = cinematicLiquid_;
+    const std::uint32_t particleCount = r.particleCount;
+    // Hash table size equals particle count, exactly like the reference.
+    r.sphTableSize = particleCount;
+    const VkDeviceSize vec4Bytes = VkDeviceSize(particleCount) * 16u;
+    const VkDeviceSize vec2Bytes = VkDeviceSize(particleCount) * 8u;
+    const VkDeviceSize uintBytes = VkDeviceSize(particleCount) * 4u;
+    const std::uint32_t scanBlocks = (particleCount + 255u) / 256u;
+    const VkDeviceSize scanSumsBytes =
+        VkDeviceSize(std::max(scanBlocks, 256u)) * 4u;
+
+    VkPhysicalDeviceMemoryProperties memProps{};
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice_, &memProps);
+    const VkBufferUsageFlags storageDst =
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    CreateFluidBuffer(device_, memProps, vec4Bytes, storageDst,
+                      &r.sphPositions, &r.sphPositionsMem);
+    CreateFluidBuffer(device_, memProps, vec4Bytes, storageDst,
+                      &r.sphVelocities, &r.sphVelocitiesMem);
+    CreateFluidBuffer(device_, memProps, vec4Bytes, storageDst,
+                      &r.sphPredicted, &r.sphPredictedMem);
+    CreateFluidBuffer(device_, memProps, vec2Bytes, storageDst,
+                      &r.sphDensities, &r.sphDensitiesMem);
+    CreateFluidBuffer(device_, memProps, uintBytes, storageDst,
+                      &r.sphKeys, &r.sphKeysMem);
+    CreateFluidBuffer(device_, memProps, uintBytes, storageDst,
+                      &r.sphCellCounts, &r.sphCellCountsMem);
+    CreateFluidBuffer(device_, memProps, uintBytes,
+                      storageDst | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                      &r.sphCellStarts, &r.sphCellStartsMem);
+    CreateFluidBuffer(device_, memProps, uintBytes, storageDst,
+                      &r.sphCellCursor, &r.sphCellCursorMem);
+    CreateFluidBuffer(device_, memProps, uintBytes, storageDst,
+                      &r.sphSortedIndices, &r.sphSortedIndicesMem);
+    CreateFluidBuffer(device_, memProps, scanSumsBytes, storageDst,
+                      &r.sphScanSums, &r.sphScanSumsMem);
+    CreateFluidBuffer(device_, memProps, scanSumsBytes, storageDst,
+                      &r.sphScanSums2, &r.sphScanSums2Mem);
+    CreateFluidBuffer(device_, memProps, vec4Bytes,
+                      VK_BUFFER_USAGE_TRANSFER_SRC_BIT |
+                      VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                      &r.sphSeedPositions, &r.sphSeedPositionsMem);
+
+    // Upload the sim-space seed and zero every derived buffer.
+    VkBuffer staging = VK_NULL_HANDLE;
+    VkDeviceMemory stagingMem = VK_NULL_HANDLE;
+    {
+        VkBufferCreateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        info.size = vec4Bytes;
+        info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        if (vkCreateBuffer(device_, &info, nullptr, &staging) != VK_SUCCESS)
+            throw std::runtime_error("Cinematic Liquid SPH staging failed");
+        VkMemoryRequirements req{};
+        vkGetBufferMemoryRequirements(device_, staging, &req);
+        VkMemoryAllocateInfo alloc{};
+        alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        alloc.allocationSize = req.size;
+        alloc.memoryTypeIndex = FindMemoryType(req.memoryTypeBits,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        if (vkAllocateMemory(device_, &alloc, nullptr, &stagingMem) != VK_SUCCESS ||
+            vkBindBufferMemory(device_, staging, stagingMem, 0) != VK_SUCCESS)
+            throw std::runtime_error("Cinematic Liquid SPH staging alloc failed");
+        void* mapped = nullptr;
+        if (vkMapMemory(device_, stagingMem, 0, vec4Bytes, 0, &mapped) != VK_SUCCESS)
+            throw std::runtime_error("Cinematic Liquid SPH staging map failed");
+        std::memcpy(mapped, simSeed.data(),
+                    static_cast<std::size_t>(vec4Bytes));
+        vkUnmapMemory(device_, stagingMem);
+    }
+    VkCommandBufferAllocateInfo cmdAlloc{};
+    cmdAlloc.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    cmdAlloc.commandPool = commandPool_;
+    cmdAlloc.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    cmdAlloc.commandBufferCount = 1;
+    VkCommandBuffer uploadCmd = VK_NULL_HANDLE;
+    if (vkAllocateCommandBuffers(device_, &cmdAlloc, &uploadCmd) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid SPH upload alloc failed");
+    VkCommandBufferBeginInfo begin{};
+    begin.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    vkBeginCommandBuffer(uploadCmd, &begin);
+    VkBufferCopy seedCopy{0, 0, vec4Bytes};
+    vkCmdCopyBuffer(uploadCmd, staging, r.sphPositions, 1, &seedCopy);
+    vkCmdCopyBuffer(uploadCmd, staging, r.sphSeedPositions, 1, &seedCopy);
+    vkCmdCopyBuffer(uploadCmd, staging, r.sphPredicted, 1, &seedCopy);
+    vkCmdFillBuffer(uploadCmd, r.sphVelocities, 0, VK_WHOLE_SIZE, 0);
+    vkCmdFillBuffer(uploadCmd, r.sphDensities, 0, VK_WHOLE_SIZE, 0);
+    vkCmdFillBuffer(uploadCmd, r.sphKeys, 0, VK_WHOLE_SIZE, 0);
+    vkCmdFillBuffer(uploadCmd, r.sphCellCounts, 0, VK_WHOLE_SIZE, 0);
+    vkCmdFillBuffer(uploadCmd, r.sphCellStarts, 0, VK_WHOLE_SIZE, 0);
+    vkCmdFillBuffer(uploadCmd, r.sphCellCursor, 0, VK_WHOLE_SIZE, 0);
+    vkCmdFillBuffer(uploadCmd, r.sphSortedIndices, 0, VK_WHOLE_SIZE, 0);
+    vkCmdFillBuffer(uploadCmd, r.sphScanSums, 0, VK_WHOLE_SIZE, 0);
+    vkCmdFillBuffer(uploadCmd, r.sphScanSums2, 0, VK_WHOLE_SIZE, 0);
+    VkMemoryBarrier uploadBarrier{};
+    uploadBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+    uploadBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    uploadBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT |
+                                  VK_ACCESS_SHADER_WRITE_BIT;
+    vkCmdPipelineBarrier(uploadCmd, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                         1, &uploadBarrier, 0, nullptr, 0, nullptr);
+    vkEndCommandBuffer(uploadCmd);
+    VkSubmitInfo submit{};
+    submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submit.commandBufferCount = 1;
+    submit.pCommandBuffers = &uploadCmd;
+    if (vkQueueSubmit(graphicsQueue_, 1, &submit, VK_NULL_HANDLE) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid SPH upload submit failed");
+    vkQueueWaitIdle(graphicsQueue_);
+    vkFreeCommandBuffers(device_, commandPool_, 1, &uploadCmd);
+    vkDestroyBuffer(device_, staging, nullptr);
+    vkFreeMemory(device_, stagingMem, nullptr);
+
+    // One 14-binding storage set shared by all nine SPH pipelines; bindings
+    // 11-13 alias the shared particle/body/impulse buffers so presentation
+    // and rigid integration stay solver-agnostic.
+    VkDescriptorSetLayoutBinding sphBindings[14]{};
+    for (std::uint32_t i = 0; i < 14; ++i) {
+        sphBindings[i].binding = i;
+        sphBindings[i].descriptorCount = 1;
+        sphBindings[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+        sphBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    }
+    VkDescriptorSetLayoutCreateInfo sphLayoutInfo{};
+    sphLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    sphLayoutInfo.bindingCount = 14;
+    sphLayoutInfo.pBindings = sphBindings;
+    if (vkCreateDescriptorSetLayout(device_, &sphLayoutInfo, nullptr,
+                                    &r.sphSetLayout) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid SPH descriptor layout failed");
+    VkDescriptorPoolSize sphPoolSize{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 14};
+    VkDescriptorPoolCreateInfo sphPoolInfo{};
+    sphPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    sphPoolInfo.poolSizeCount = 1;
+    sphPoolInfo.pPoolSizes = &sphPoolSize;
+    sphPoolInfo.maxSets = 1;
+    if (vkCreateDescriptorPool(device_, &sphPoolInfo, nullptr,
+                               &r.sphPool) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid SPH descriptor pool failed");
+    VkDescriptorSetAllocateInfo sphSetAlloc{};
+    sphSetAlloc.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    sphSetAlloc.descriptorPool = r.sphPool;
+    sphSetAlloc.descriptorSetCount = 1;
+    sphSetAlloc.pSetLayouts = &r.sphSetLayout;
+    if (vkAllocateDescriptorSets(device_, &sphSetAlloc, &r.sphSet) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid SPH descriptor set failed");
+
+    const VkBuffer sphBuffers[14] = {
+        r.sphPositions, r.sphVelocities, r.sphPredicted, r.sphDensities,
+        r.sphKeys, r.sphCellCounts, r.sphCellStarts, r.sphCellCursor,
+        r.sphSortedIndices, r.sphScanSums, r.sphScanSums2,
+        r.particles, r.bodies, r.bodyImpulses};
+    VkDescriptorBufferInfo sphBufferInfos[14]{};
+    VkWriteDescriptorSet sphWrites[14]{};
+    for (std::uint32_t i = 0; i < 14; ++i) {
+        sphBufferInfos[i] = {sphBuffers[i], 0, VK_WHOLE_SIZE};
+        sphWrites[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        sphWrites[i].dstSet = r.sphSet;
+        sphWrites[i].dstBinding = i;
+        sphWrites[i].descriptorCount = 1;
+        sphWrites[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        sphWrites[i].pBufferInfo = &sphBufferInfos[i];
+    }
+    vkUpdateDescriptorSets(device_, 14, sphWrites, 0, nullptr);
+
+    VkPushConstantRange sphPushRange{};
+    sphPushRange.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+    sphPushRange.size = sizeof(CinematicLiquidSphPushConstants);
+    VkPipelineLayoutCreateInfo sphPipelineLayoutInfo{};
+    sphPipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    sphPipelineLayoutInfo.setLayoutCount = 1;
+    sphPipelineLayoutInfo.pSetLayouts = &r.sphSetLayout;
+    sphPipelineLayoutInfo.pushConstantRangeCount = 1;
+    sphPipelineLayoutInfo.pPushConstantRanges = &sphPushRange;
+    if (vkCreatePipelineLayout(device_, &sphPipelineLayoutInfo, nullptr,
+                               &r.sphLayout) != VK_SUCCESS)
+        throw std::runtime_error("Cinematic Liquid SPH pipeline layout failed");
+    auto createSphPipeline = [&](const char* file, VkPipeline* out) {
+        const auto code = ReadFileBytes(shaderDir_ + file);
+        VkShaderModule module = CreateShaderModule(code);
+        VkPipelineShaderStageCreateInfo stage{};
+        stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+        stage.module = module;
+        stage.pName = "main";
+        VkComputePipelineCreateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+        info.stage = stage;
+        info.layout = r.sphLayout;
+        const VkResult result = vkCreateComputePipelines(
+            device_, VK_NULL_HANDLE, 1, &info, nullptr, out);
+        vkDestroyShaderModule(device_, module, nullptr);
+        if (result != VK_SUCCESS)
+            throw std::runtime_error(
+                std::string("Cinematic Liquid SPH pipeline failed: ") + file);
+    };
+    createSphPipeline("cinematic_liquid_sph_external.comp.spv", &r.sphExternalPipe);
+    createSphPipeline("cinematic_liquid_sph_hash_count.comp.spv", &r.sphHashCountPipe);
+    createSphPipeline("cinematic_liquid_sph_scan_block.comp.spv", &r.sphScanBlockPipe);
+    createSphPipeline("cinematic_liquid_sph_scan_add.comp.spv", &r.sphScanAddPipe);
+    createSphPipeline("cinematic_liquid_sph_scatter.comp.spv", &r.sphScatterPipe);
+    createSphPipeline("cinematic_liquid_sph_density.comp.spv", &r.sphDensityPipe);
+    createSphPipeline("cinematic_liquid_sph_pressure.comp.spv", &r.sphPressurePipe);
+    createSphPipeline("cinematic_liquid_sph_viscosity.comp.spv", &r.sphViscosityPipe);
+    createSphPipeline("cinematic_liquid_sph_integrate.comp.spv", &r.sphIntegratePipe);
+}
+
+void VulkanBackend::RecordCinematicLiquidSphFrame(VkCommandBuffer cmd,
+                                                  float deltaTime,
+                                                  std::uint32_t imageIndex,
+                                                  std::uint32_t timestampBase) {
+    auto& r = cinematicLiquid_;
+    const std::uint32_t particleGroups = (r.particleCount + 255u) / 256u;
+    const std::uint32_t gridCellCount = r.gridX * r.gridY * r.gridZ;
+    const std::uint32_t gridClearGroups = (gridCellCount + 255u) / 256u;
+    const std::uint32_t tableSize = std::max(r.sphTableSize, 1u);
+    const std::uint32_t scanBlocksL0 = (tableSize + 255u) / 256u;
+    const std::uint32_t scanBlocksL1 = (scanBlocksL0 + 255u) / 256u;
+    const float wallDt = std::max(deltaTime, 0.0f);
+
+    // Fixed per-frame advance: exactly kCinematicLiquidSphSubsteps reference
+    // ticks per rendered frame, decoupled from wall-clock jitter.  The world
+    // time map keeps reference gravity (-10 sim) at -9.81 m/s^2 in the pool.
+    const float dtSim = kCinematicLiquidSphDtSim;
+    const float worldScale = kCinematicLiquidSphWorldScale;
+    const float timeScale = std::sqrt(worldScale *
+        (-kCinematicLiquidSphGravitySim) / 9.81f);
+    const float dtWorld = dtSim * timeScale;
+    r.presentationTime += wallDt;
+    r.simTime += dtWorld * float(r.substeps);
+
+    // Reused fixed-point/rigid ABI for the shared rigid-integrate, grid-clear
+    // and whitewater-resolve passes (grid stays zeroed: SPH has no P2G).
+    CinematicLiquidV2PushConstants pc{};
+    pc.gridSizeAndCount[0] = r.gridX;
+    pc.gridSizeAndCount[1] = r.gridY;
+    pc.gridSizeAndCount[2] = r.gridZ;
+    pc.gridSizeAndCount[3] = r.particleCount;
+    pc.simulation[0] = dtWorld;
+    pc.simulation[1] = -9.81f;
+    pc.simulation[2] = kLiquidV2RestDensity;
+    pc.simulation[3] = 45'000.0f;
+    pc.material[0] = 0.035f;
+    pc.material[1] = r.particleMass;
+    pc.material[2] = kLiquidV2FixedPointScale;
+    pc.material[3] = 2.5f;
+    pc.gridOriginDx[0] = kLiquidV2OriginX;
+    pc.gridOriginDx[1] = kLiquidV2OriginY;
+    pc.gridOriginDx[2] = kLiquidV2OriginZ;
+    pc.gridOriginDx[3] = r.dx;
+    pc.collision[0] = 0.45f;
+    pc.collision[1] = 0.035f;
+    pc.collision[2] = 0.035f;
+    pc.collision[3] = 8.0f;
+    pc.coupling[0] = kLiquidV2BodyImpulseScale;
+    pc.coupling[1] = 1.0f;
+    pc.coupling[2] = 1.0f;
+    pc.coupling[3] = 1.0f;
+    pc.scene[0] = r.bodyCount;
+    pc.scene[1] = 2u;
+    pc.scene[2] = 1u;
+    pc.scene[3] = r.shaderVersion;
+    pc.pool[0] = 0.30f;
+    pc.pool[1] = 0.45f;  // wall inset; must match the SPH wall constants
+    pc.pool[2] = 0.00f;
+    pc.pool[3] = r.presentationTime;
+
+    const float h = kCinematicLiquidSphSmoothingRadius;
+    const float pi = 3.14159265358979323846f;
+    CinematicLiquidSphPushConstants sph{};
+    sph.counts[0] = r.particleCount;
+    sph.counts[1] = tableSize;
+    sph.counts[2] = 0u;
+    sph.counts[3] = 0u;
+    sph.sim[0] = dtSim;
+    sph.sim[1] = kCinematicLiquidSphGravitySim;
+    sph.sim[2] = h;
+    sph.sim[3] = kCinematicLiquidSphCollisionDamping;
+    sph.fluid[0] = kCinematicLiquidSphTargetDensity;
+    sph.fluid[1] = kCinematicLiquidSphPressureMultiplier;
+    sph.fluid[2] = kCinematicLiquidSphNearPressureMultiplier;
+    sph.fluid[3] = kCinematicLiquidSphViscosityStrength;
+    sph.kernels[0] = 15.0f / (2.0f * pi * std::pow(h, 5.0f));
+    sph.kernels[1] = 15.0f / (pi * std::pow(h, 6.0f));
+    sph.kernels[2] = 15.0f / (pi * std::pow(h, 5.0f));
+    sph.kernels[3] = 45.0f / (pi * std::pow(h, 6.0f));
+    // Sim-space bounds: pool floor (world y = 0) and the physical wall inset.
+    sph.boundsMin[0] = 0.5f;
+    sph.boundsMin[1] = 0.5625f;
+    sph.boundsMin[2] = 0.5f;
+    sph.boundsMin[3] = 315.0f / (64.0f * pi * std::pow(h, 9.0f));
+    sph.boundsMax[0] = 23.5f;
+    sph.boundsMax[1] = 11.5f;
+    sph.boundsMax[2] = 17.5f;
+    sph.boundsMax[3] = worldScale;
+    sph.world[0] = kLiquidV2OriginX;
+    sph.world[1] = kLiquidV2OriginY;
+    sph.world[2] = kLiquidV2OriginZ;
+    sph.world[3] = dtWorld;
+    sph.coupling[0] = kLiquidV2BodyImpulseScale;
+    sph.coupling[1] = r.particleMass;
+    sph.coupling[2] = 0.45f;
+    sph.coupling[3] = 0.035f;
+
+    BeginDebugLabel(cmd, "Cinematic Liquid SPH: Dual-Density Solver",
+                    0.05f, 0.55f, 0.90f);
+
+    auto bufferBarrier = [&](VkBuffer buffer,
+                             VkAccessFlags srcAccess = VK_ACCESS_SHADER_WRITE_BIT,
+                             VkAccessFlags dstAccess = VK_ACCESS_SHADER_READ_BIT |
+                                                       VK_ACCESS_SHADER_WRITE_BIT) {
+        VkBufferMemoryBarrier barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+        barrier.srcAccessMask = srcAccess;
+        barrier.dstAccessMask = dstAccess;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.buffer = buffer;
+        barrier.size = VK_WHOLE_SIZE;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                             0, nullptr, 1, &barrier, 0, nullptr);
+    };
+    auto computeToTransfer = [&](VkBuffer buffer) {
+        VkBufferMemoryBarrier barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+        barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT |
+                                VK_ACCESS_SHADER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT |
+                                VK_ACCESS_TRANSFER_READ_BIT;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.buffer = buffer;
+        barrier.size = VK_WHOLE_SIZE;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                             VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
+                             0, nullptr, 1, &barrier, 0, nullptr);
+    };
+    auto transferToCompute = [&](VkBuffer buffer) {
+        VkBufferMemoryBarrier barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT |
+                                VK_ACCESS_SHADER_WRITE_BIT;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.buffer = buffer;
+        barrier.size = VK_WHOLE_SIZE;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                             0, nullptr, 1, &barrier, 0, nullptr);
+    };
+    auto pushSph = [&]() {
+        vkCmdPushConstants(cmd, r.sphLayout, VK_SHADER_STAGE_COMPUTE_BIT,
+                           0, sizeof(sph), &sph);
+    };
+
+    // Complete the previous frame's fragment reads before rigid integration.
+    VkBufferMemoryBarrier bodyFromRender{};
+    bodyFromRender.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    bodyFromRender.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    bodyFromRender.dstAccessMask = VK_ACCESS_SHADER_READ_BIT |
+                                   VK_ACCESS_SHADER_WRITE_BIT;
+    bodyFromRender.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    bodyFromRender.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    bodyFromRender.buffer = r.bodies;
+    bodyFromRender.size = VK_WHOLE_SIZE;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                         0, nullptr, 1, &bodyFromRender, 0, nullptr);
+
+    // Restage the dam and every coupled body at 4 s, exactly like v2, so the
+    // fixed 5 s capture lands on a fresh, deterministic collapse.
+    if (!r.captureChoreographyResetDone && r.presentationTime >= 4.0f) {
+        const VkBuffer resetTargets[5] = {r.particles, r.bodies,
+                                          r.bodyImpulses, r.sphPositions,
+                                          r.sphVelocities};
+        VkBufferMemoryBarrier toTransfer[5]{};
+        for (std::uint32_t i = 0; i < 5; ++i) {
+            toTransfer[i].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+            toTransfer[i].srcAccessMask = VK_ACCESS_SHADER_READ_BIT |
+                                          VK_ACCESS_SHADER_WRITE_BIT;
+            toTransfer[i].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            toTransfer[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            toTransfer[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            toTransfer[i].buffer = resetTargets[i];
+            toTransfer[i].size = VK_WHOLE_SIZE;
+        }
+        vkCmdPipelineBarrier(cmd,
+            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT |
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
+            0, nullptr, 5, toTransfer, 0, nullptr);
+
+        const VkDeviceSize particleBytes =
+            VkDeviceSize(r.particleCount) * sizeof(MlsMpmParticleGpu);
+        const VkDeviceSize bodyBytes =
+            VkDeviceSize(r.bodyCount) * sizeof(CinematicLiquidBodyStateGpu);
+        const VkDeviceSize simBytes = VkDeviceSize(r.particleCount) * 16u;
+        VkBufferCopy particleCopy{0, 0, particleBytes};
+        VkBufferCopy bodyCopy{0, 0, bodyBytes};
+        VkBufferCopy simCopy{0, 0, simBytes};
+        vkCmdCopyBuffer(cmd, r.seedParticles, r.particles, 1, &particleCopy);
+        vkCmdCopyBuffer(cmd, r.seedBodies, r.bodies, 1, &bodyCopy);
+        vkCmdCopyBuffer(cmd, r.sphSeedPositions, r.sphPositions, 1, &simCopy);
+        vkCmdFillBuffer(cmd, r.sphVelocities, 0, VK_WHOLE_SIZE, 0);
+        vkCmdFillBuffer(cmd, r.bodyImpulses, 0, VK_WHOLE_SIZE, 0);
+
+        VkBufferMemoryBarrier fromTransfer[5]{};
+        for (std::uint32_t i = 0; i < 5; ++i) {
+            fromTransfer[i].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+            fromTransfer[i].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            fromTransfer[i].dstAccessMask = VK_ACCESS_SHADER_READ_BIT |
+                                            VK_ACCESS_SHADER_WRITE_BIT;
+            fromTransfer[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            fromTransfer[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            fromTransfer[i].buffer = resetTargets[i];
+            fromTransfer[i].size = VK_WHOLE_SIZE;
+        }
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                             0, nullptr, 5, fromTransfer, 0, nullptr);
+        r.simTime = 0.0f;
+        r.captureChoreographyResetDone = true;
+    }
+
+    for (std::uint32_t substep = 0; substep < r.substeps; ++substep) {
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+                                r.sphLayout, 0, 1, &r.sphSet, 0, nullptr);
+        sph.counts[2] = 0u;
+        sph.counts[3] = 0u;
+        pushSph();
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.sphExternalPipe);
+        vkCmdDispatch(cmd, particleGroups, 1, 1);
+        bufferBarrier(r.sphVelocities);
+        bufferBarrier(r.sphPredicted);
+
+        computeToTransfer(r.sphCellCounts);
+        vkCmdFillBuffer(cmd, r.sphCellCounts, 0, VK_WHOLE_SIZE, 0);
+        transferToCompute(r.sphCellCounts);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.sphHashCountPipe);
+        vkCmdDispatch(cmd, particleGroups, 1, 1);
+        bufferBarrier(r.sphKeys);
+        bufferBarrier(r.sphCellCounts);
+
+        // Three-level exclusive scan of the cell counts.
+        sph.counts[2] = tableSize;
+        sph.counts[3] = 0u;
+        pushSph();
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.sphScanBlockPipe);
+        vkCmdDispatch(cmd, scanBlocksL0, 1, 1);
+        bufferBarrier(r.sphCellStarts);
+        bufferBarrier(r.sphScanSums);
+        sph.counts[2] = scanBlocksL0;
+        sph.counts[3] = 1u;
+        pushSph();
+        vkCmdDispatch(cmd, scanBlocksL1, 1, 1);
+        bufferBarrier(r.sphScanSums);
+        bufferBarrier(r.sphScanSums2);
+        sph.counts[2] = scanBlocksL1;
+        sph.counts[3] = 2u;
+        pushSph();
+        vkCmdDispatch(cmd, 1, 1, 1);
+        bufferBarrier(r.sphScanSums2);
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.sphScanAddPipe);
+        sph.counts[2] = scanBlocksL0;
+        sph.counts[3] = 1u;
+        pushSph();
+        vkCmdDispatch(cmd, scanBlocksL1, 1, 1);
+        bufferBarrier(r.sphScanSums);
+        sph.counts[2] = tableSize;
+        sph.counts[3] = 0u;
+        pushSph();
+        vkCmdDispatch(cmd, scanBlocksL0, 1, 1);
+        bufferBarrier(r.sphCellStarts);
+
+        // cursor := starts, then the scatter hands out unique sorted slots.
+        computeToTransfer(r.sphCellStarts);
+        computeToTransfer(r.sphCellCursor);
+        VkBufferCopy cursorCopy{0, 0, VkDeviceSize(tableSize) * 4u};
+        vkCmdCopyBuffer(cmd, r.sphCellStarts, r.sphCellCursor, 1, &cursorCopy);
+        transferToCompute(r.sphCellCursor);
+        transferToCompute(r.sphCellStarts);
+
+        sph.counts[2] = 0u;
+        sph.counts[3] = 0u;
+        pushSph();
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.sphScatterPipe);
+        vkCmdDispatch(cmd, particleGroups, 1, 1);
+        bufferBarrier(r.sphSortedIndices);
+        bufferBarrier(r.sphCellCursor);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.sphDensityPipe);
+        vkCmdDispatch(cmd, particleGroups, 1, 1);
+        bufferBarrier(r.sphDensities);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.sphPressurePipe);
+        vkCmdDispatch(cmd, particleGroups, 1, 1);
+        bufferBarrier(r.sphVelocities);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.sphViscosityPipe);
+        vkCmdDispatch(cmd, particleGroups, 1, 1);
+        bufferBarrier(r.sphVelocities);
+
+        sph.counts[2] = 0u;
+        sph.counts[3] = r.bodyCount;
+        pushSph();
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.sphIntegratePipe);
+        vkCmdDispatch(cmd, particleGroups, 1, 1);
+        bufferBarrier(r.sphPositions);
+        bufferBarrier(r.sphVelocities);
+        bufferBarrier(r.particles);
+        bufferBarrier(r.bodyImpulses);
+
+        // Shared rigid integrate consumes the SPH impulse sums unchanged.
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+                                r.computeLayout, 0, 1, &r.computeSet, 0, nullptr);
+        vkCmdPushConstants(cmd, r.computeLayout, VK_SHADER_STAGE_COMPUTE_BIT,
+                           0, sizeof(pc), &pc);
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+                          r.rigidIntegratePipe);
+        vkCmdDispatch(cmd, 1, 1, 1);
+        bufferBarrier(r.bodies);
+        bufferBarrier(r.bodyImpulses);
+    }
+
+    // Presentation: identical to v2.  The grid is cleared (never fed by SPH)
+    // so the grid-derived whitewater resolves to zero, then the particle
+    // splat reconstructs the render density volume from world positions.
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+                            r.computeLayout, 0, 1, &r.computeSet, 0, nullptr);
+    vkCmdPushConstants(cmd, r.computeLayout, VK_SHADER_STAGE_COMPUTE_BIT,
+                       0, sizeof(pc), &pc);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.clearGridPipe);
+    vkCmdDispatch(cmd, gridClearGroups, 1, 1);
+    bufferBarrier(r.grid);
+
+    VkImageMemoryBarrier beforeResolve[2]{};
+    for (std::uint32_t i = 0; i < 2; ++i) {
+        beforeResolve[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        beforeResolve[i].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        beforeResolve[i].dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        beforeResolve[i].oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+        beforeResolve[i].newLayout = VK_IMAGE_LAYOUT_GENERAL;
+        beforeResolve[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        beforeResolve[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        beforeResolve[i].subresourceRange =
+            {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    }
+    beforeResolve[0].image = r.densityImage;
+    beforeResolve[1].image = r.whitewaterImage;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                         0, nullptr, 0, nullptr, 2, beforeResolve);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.resolveDensityPipe);
+    vkCmdDispatch(cmd, (r.gridX + 7u) / 8u,
+                  (r.gridY + 7u) / 8u, (r.gridZ + 3u) / 4u);
+
+    const float surfaceVoxelSize =
+        (float(r.gridX) * r.dx) / float(r.surfaceX);
+    CinematicLiquidV2SurfacePushConstants surfacePc{};
+    surfacePc.volumeSizeAndCount[0] = r.surfaceX;
+    surfacePc.volumeSizeAndCount[1] = r.surfaceY;
+    surfacePc.volumeSizeAndCount[2] = r.surfaceZ;
+    surfacePc.volumeSizeAndCount[3] = r.particleCount;
+    surfacePc.volumeMinVoxel[0] = kLiquidV2OriginX;
+    surfacePc.volumeMinVoxel[1] = kLiquidV2OriginY;
+    surfacePc.volumeMinVoxel[2] = kLiquidV2OriginZ;
+    surfacePc.volumeMinVoxel[3] = surfaceVoxelSize;
+    surfacePc.kernel[0] = 1.70f * r.particleSpacing;
+    surfacePc.kernel[1] = r.particleMass / kLiquidV2RestDensity;
+    surfacePc.kernel[2] = kLiquidV2FixedPointScale;
+    surfacePc.kernel[3] = 4.0f;
+    surfacePc.contract[0] = r.shaderVersion;
+    surfacePc.contract[1] = 1u;
+
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
+                            r.surfaceLayout, 0, 1, &r.surfaceSet, 0, nullptr);
+    vkCmdPushConstants(cmd, r.surfaceLayout, VK_SHADER_STAGE_COMPUTE_BIT,
+                       0, sizeof(surfacePc), &surfacePc);
+    bufferBarrier(r.densityAtomicBuffer, VK_ACCESS_SHADER_READ_BIT,
+                  VK_ACCESS_SHADER_WRITE_BIT);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.surfaceClearPipe);
+    vkCmdDispatch(cmd, (r.surfaceX + 7u) / 8u,
+                  (r.surfaceY + 7u) / 8u, (r.surfaceZ + 3u) / 4u);
+    bufferBarrier(r.densityAtomicBuffer);
+
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.surfaceSplatPipe);
+    vkCmdDispatch(cmd, particleGroups, 1, 1);
+    bufferBarrier(r.densityAtomicBuffer);
+
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.surfaceResolvePipe);
+    vkCmdDispatch(cmd, (r.surfaceX + 7u) / 8u,
+                  (r.surfaceY + 7u) / 8u, (r.surfaceZ + 3u) / 4u);
+
+    VkImageMemoryBarrier afterResolve[2]{};
+    for (std::uint32_t i = 0; i < 2; ++i) {
+        afterResolve[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        afterResolve[i].srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        afterResolve[i].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        afterResolve[i].oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+        afterResolve[i].newLayout = VK_IMAGE_LAYOUT_GENERAL;
+        afterResolve[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        afterResolve[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        afterResolve[i].subresourceRange =
+            {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    }
+    afterResolve[0].image = r.densityImage;
+    afterResolve[1].image = r.whitewaterImage;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                         0, nullptr, 0, nullptr, 2, afterResolve);
+    VkBufferMemoryBarrier bodyToRender{};
+    bodyToRender.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    bodyToRender.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    bodyToRender.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    bodyToRender.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    bodyToRender.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    bodyToRender.buffer = r.bodies;
+    bodyToRender.size = VK_WHOLE_SIZE;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                         0, nullptr, 1, &bodyToRender, 0, nullptr);
+    EndDebugLabel(cmd);
+
+    if (timestampsSupported_) {
+        vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                            timestampQueryPool_, timestampBase + 1);
+        vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                            timestampQueryPool_, timestampBase + 2);
+    }
+
+    // Camera path and raymarch identical to v2 so the SPH slice can be
+    // compared frame-for-frame against the MLS-MPM captures.
+    struct CameraKey { float t, degrees, radius, height; };
+    constexpr CameraKey keys[] = {
+        {0.0f,  -35.0f, 5.35f, 2.05f},
+        {3.0f,   34.0f, 5.00f, 1.78f},
+        {4.6f,   72.0f, 4.25f, 1.76f},
+        {5.5f,   84.0f, 4.30f, 1.82f},
+        {10.0f, 105.0f, 4.85f, 2.30f},
+        {15.0f, 165.0f, 5.35f, 2.65f}
+    };
+    constexpr std::size_t keyCount = sizeof(keys) / sizeof(keys[0]);
+    const float cameraT = std::clamp(r.presentationTime, 0.0f, 15.0f);
+    CameraKey camera = keys[keyCount - 1u];
+    for (std::size_t i = 0; i + 1u < keyCount; ++i) {
+        if (cameraT <= keys[i + 1u].t) {
+            float u = (cameraT - keys[i].t) / (keys[i + 1u].t - keys[i].t);
+            u = std::clamp(u, 0.0f, 1.0f);
+            u = u * u * (3.0f - 2.0f * u);
+            camera.t = cameraT;
+            camera.degrees = keys[i].degrees + (keys[i + 1u].degrees - keys[i].degrees) * u;
+            camera.radius = keys[i].radius + (keys[i + 1u].radius - keys[i].radius) * u;
+            camera.height = keys[i].height + (keys[i + 1u].height - keys[i].height) * u;
+            break;
+        }
+    }
+    const float angle = camera.degrees * 3.14159265359f / 180.0f;
+    const float cameraX = std::cos(angle) * camera.radius;
+    const float cameraZ = std::sin(angle) * camera.radius;
+
+    BeginDebugLabel(cmd, "Cinematic Liquid SPH: Pool Raymarch", 0.03f, 0.36f, 0.94f);
+    VkClearValue clear{};
+    clear.color = {{0.045f, 0.16f, 0.36f, 1.0f}};
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = renderPass_;
+    renderPassInfo.framebuffer = swapChainFramebuffers_[imageIndex];
+    renderPassInfo.renderArea.extent = swapChainExtent_;
+    renderPassInfo.clearValueCount = 1;
+    renderPassInfo.pClearValues = &clear;
+    vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, r.renderPipe);
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, r.renderLayout,
+                            0, 1, &r.renderSet, 0, nullptr);
+
+    CinematicLiquidV2RenderPushConstants renderPc{};
+    renderPc.cameraTime[0] = cameraX;
+    renderPc.cameraTime[1] = camera.height;
+    renderPc.cameraTime[2] = cameraZ;
+    renderPc.cameraTime[3] = r.presentationTime;
+    renderPc.targetAspect[0] = 0.0f;
+    renderPc.targetAspect[1] = 0.82f;
+    renderPc.targetAspect[2] = 0.0f;
+    renderPc.targetAspect[3] = float(swapChainExtent_.width) /
+                               float(std::max(swapChainExtent_.height, 1u));
+    renderPc.volumeMinIso[0] = kLiquidV2OriginX;
+    renderPc.volumeMinIso[1] = kLiquidV2OriginY;
+    renderPc.volumeMinIso[2] = kLiquidV2OriginZ;
+    renderPc.volumeMinIso[3] = 0.32f;
+    renderPc.volumeMaxStep[0] = kLiquidV2OriginX + float(r.gridX) * r.dx;
+    renderPc.volumeMaxStep[1] = kLiquidV2OriginY + float(r.gridY) * r.dx;
+    renderPc.volumeMaxStep[2] = kLiquidV2OriginZ + float(r.gridZ) * r.dx;
+    renderPc.volumeMaxStep[3] = 1.0f;
+    renderPc.pool[0] = 0.30f;
+    renderPc.pool[1] = 0.085f;
+    renderPc.pool[2] = 0.00f;
+    renderPc.pool[3] = 0.025f;
+    renderPc.lighting[0] = -0.42f;
+    renderPc.lighting[1] = 0.78f;
+    renderPc.lighting[2] = 0.46f;
+    renderPc.lighting[3] = 1.08f;
+    renderPc.render[0] = r.raySteps;
+    renderPc.render[1] = r.shaderVersion;
+    renderPc.render[2] = swapChainExtent_.width;
+    renderPc.render[3] = swapChainExtent_.height;
+    renderPc.scene[0] = r.bodyCount;
+    renderPc.scene[1] = 2u;
+    const bool swapchainIsSrgb =
+        swapChainImageFormat_ == VK_FORMAT_B8G8R8A8_SRGB ||
+        swapChainImageFormat_ == VK_FORMAT_R8G8B8A8_SRGB ||
+        swapChainImageFormat_ == VK_FORMAT_A8B8G8R8_SRGB_PACK32;
+    renderPc.scene[2] = swapchainIsSrgb ? 1u : 0u;
+    renderPc.scene[3] = r.shaderVersion;
+    vkCmdPushConstants(cmd, r.renderLayout, VK_SHADER_STAGE_FRAGMENT_BIT,
+                       0, sizeof(renderPc), &renderPc);
+    vkCmdDraw(cmd, 3, 1, 0, 0);
+    vkCmdEndRenderPass(cmd);
+    EndDebugLabel(cmd);
+
+    if (timestampsSupported_)
+        vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                            timestampQueryPool_, timestampBase + 3);
+}
+
+void VulkanBackend::RecordCinematicLiquidFrame(VkCommandBuffer cmd, float deltaTime,
+                                                std::uint32_t imageIndex,
+                                                std::uint32_t timestampBase) {
+    auto& r = cinematicLiquid_;
+    const std::uint32_t gridCellCount = r.gridX * r.gridY * r.gridZ;
+    const std::uint32_t particleGroups = (r.particleCount + 255u) / 256u;
+    const std::uint32_t gridClearGroups = (gridCellCount + 255u) / 256u;
+    const float frameDt = std::clamp(deltaTime, 0.0f, 1.0f / 60.0f);
+    const float substepDt = std::max(frameDt / float(kCinematicLiquidSubsteps), 1e-6f);
+
+    BeginDebugLabel(cmd, "Cinematic Liquid: MLS-MPM", 0.03f, 0.58f, 0.78f);
+
+    // The first short loop deliberately re-stages the dam break at 3.55 s so
+    // the product's fixed 5 s RenderDoc capture lands on the most informative
+    // collision/spray phase. Subsequent 11.5 s loops keep an eventual long
+    // run visually active without changing the fixed per-frame workload.
+    const float resetAt = r.captureChoreographyResetDone ? 11.5f : 3.55f;
+    if (r.simTime >= resetAt) {
+        const VkDeviceSize particleBytes = VkDeviceSize(r.particleCount) * sizeof(MlsMpmParticleGpu);
+        VkBufferCopy copy{ 0, 0, particleBytes };
+        vkCmdCopyBuffer(cmd, r.seedParticles, r.particles, 1, &copy);
+        VkBufferMemoryBarrier resetBarrier{};
+        resetBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+        resetBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        resetBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+        resetBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        resetBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        resetBarrier.buffer = r.particles;
+        resetBarrier.size = VK_WHOLE_SIZE;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                             0, nullptr, 1, &resetBarrier, 0, nullptr);
+        r.simTime = 0.0f;
+        r.captureChoreographyResetDone = true;
+    }
+    r.simTime += frameDt;
+
+    MlsMpmPushConstants pc{};
+    pc.gridSizeAndCount[0] = r.gridX;
+    pc.gridSizeAndCount[1] = r.gridY;
+    pc.gridSizeAndCount[2] = r.gridZ;
+    pc.gridSizeAndCount[3] = r.particleCount;
+    pc.simulation[0] = substepDt;
+    pc.simulation[1] = -9.81f;
+    pc.simulation[2] = kLiquidRestDensity;
+    pc.simulation[3] = 15'000.0f;
+    pc.material[0] = 0.50f;
+    pc.material[1] = r.particleMass;
+    pc.material[2] = kLiquidFixedPointScale;
+    pc.material[3] = 2.5f;
+    pc.gridOriginDx[0] = kLiquidOriginX;
+    pc.gridOriginDx[1] = kLiquidOriginY;
+    pc.gridOriginDx[2] = kLiquidOriginZ;
+    pc.gridOriginDx[3] = r.dx;
+    pc.sphere[0] = kLiquidSphereX;
+    pc.sphere[1] = kLiquidSphereY;
+    pc.sphere[2] = kLiquidSphereZ;
+    pc.sphere[3] = kLiquidSphereRadius;
+    pc.collision[0] = 0.0f;
+    pc.collision[1] = 0.05f;
+    pc.collision[2] = 0.05f;
+    pc.collision[3] = 12.0f;
+
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.computeLayout,
+                            0, 1, &r.computeSet, 0, nullptr);
+    vkCmdPushConstants(cmd, r.computeLayout, VK_SHADER_STAGE_COMPUTE_BIT,
+                       0, sizeof(pc), &pc);
+
+    auto computeBufferBarrier = [&](VkBuffer buffer) {
+        VkBufferMemoryBarrier barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+        barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.buffer = buffer;
+        barrier.size = VK_WHOLE_SIZE;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                             0, nullptr, 1, &barrier, 0, nullptr);
+    };
+
+    for (std::uint32_t substep = 0; substep < kCinematicLiquidSubsteps; ++substep) {
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.clearGridPipe);
+        vkCmdDispatch(cmd, gridClearGroups, 1, 1);
+        computeBufferBarrier(r.grid);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.p2gMassPipe);
+        vkCmdDispatch(cmd, particleGroups, 1, 1);
+        computeBufferBarrier(r.grid);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.p2gStressPipe);
+        vkCmdDispatch(cmd, particleGroups, 1, 1);
+        computeBufferBarrier(r.grid);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.gridUpdatePipe);
+        vkCmdDispatch(cmd, (r.gridX + 7u) / 8u,
+                      (r.gridY + 7u) / 8u, (r.gridZ + 3u) / 4u);
+        computeBufferBarrier(r.grid);
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.g2pPipe);
+        vkCmdDispatch(cmd, particleGroups, 1, 1);
+        computeBufferBarrier(r.particles);
+    }
+
+    // The previous frame sampled this GENERAL-layout image in the fragment
+    // stage.  Make that read complete before overwriting it with the current
+    // density resolve, then publish the new voxels to this frame's raymarch.
+    VkImageMemoryBarrier beforeResolve{};
+    beforeResolve.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    beforeResolve.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    beforeResolve.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    beforeResolve.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+    beforeResolve.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+    beforeResolve.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    beforeResolve.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    beforeResolve.image = r.densityImage;
+    beforeResolve.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0,
+                         0, nullptr, 0, nullptr, 1, &beforeResolve);
+
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.resolveDensityPipe);
+    vkCmdDispatch(cmd, (r.gridX + 7u) / 8u,
+                  (r.gridY + 7u) / 8u, (r.gridZ + 3u) / 4u);
+
+    VkImageMemoryBarrier afterResolve{};
+    afterResolve.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    afterResolve.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    afterResolve.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    afterResolve.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+    afterResolve.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+    afterResolve.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    afterResolve.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    afterResolve.image = r.densityImage;
+    afterResolve.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                         0, nullptr, 0, nullptr, 1, &afterResolve);
+    EndDebugLabel(cmd);
+
+    if (timestampsSupported_) {
+        vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                            timestampQueryPool_, timestampBase + 1);
+        vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                            timestampQueryPool_, timestampBase + 2);
+    }
+
+    BeginDebugLabel(cmd, "Cinematic Liquid: Density Raymarch", 0.04f, 0.35f, 0.92f);
+    VkClearValue clear{};
+    clear.color = {{0.055f, 0.18f, 0.42f, 1.0f}};
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = renderPass_;
+    renderPassInfo.framebuffer = swapChainFramebuffers_[imageIndex];
+    renderPassInfo.renderArea.extent = swapChainExtent_;
+    renderPassInfo.clearValueCount = 1;
+    renderPassInfo.pClearValues = &clear;
+    vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, r.renderPipe);
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, r.renderLayout,
+                            0, 1, &r.renderSet, 0, nullptr);
+
+    CinematicLiquidRenderPushConstants renderPc{};
+    renderPc.cameraTime[0] = 2.75f;
+    renderPc.cameraTime[1] = 1.48f;
+    renderPc.cameraTime[2] = 2.95f;
+    renderPc.cameraTime[3] = r.simTime;
+    renderPc.targetAspect[0] = 0.0f;
+    renderPc.targetAspect[1] = 0.66f;
+    renderPc.targetAspect[2] = 0.0f;
+    renderPc.targetAspect[3] = float(swapChainExtent_.width) /
+                               float(std::max(swapChainExtent_.height, 1u));
+    renderPc.volumeMinIso[0] = kLiquidOriginX;
+    renderPc.volumeMinIso[1] = kLiquidOriginY;
+    renderPc.volumeMinIso[2] = kLiquidOriginZ;
+    renderPc.volumeMinIso[3] = 0.22f;
+    renderPc.volumeMaxStep[0] = kLiquidOriginX + float(r.gridX) * r.dx;
+    renderPc.volumeMaxStep[1] = kLiquidOriginY + float(r.gridY) * r.dx;
+    renderPc.volumeMaxStep[2] = kLiquidOriginZ + float(r.gridZ) * r.dx;
+    renderPc.volumeMaxStep[3] = 1.0f;
+    renderPc.sphere[0] = kLiquidSphereX;
+    renderPc.sphere[1] = kLiquidSphereY;
+    renderPc.sphere[2] = kLiquidSphereZ;
+    renderPc.sphere[3] = kLiquidSphereRadius;
+    renderPc.render[0] = kCinematicLiquidRaySteps;
+    renderPc.render[1] = kCinematicLiquidShaderVersion;
+    renderPc.render[2] = swapChainExtent_.width;
+    renderPc.render[3] = swapChainExtent_.height;
+    vkCmdPushConstants(cmd, r.renderLayout, VK_SHADER_STAGE_FRAGMENT_BIT,
+                       0, sizeof(renderPc), &renderPc);
+    vkCmdDraw(cmd, 3, 1, 0, 0);
+    vkCmdEndRenderPass(cmd);
+    EndDebugLabel(cmd);
+
+    if (timestampsSupported_)
+        vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                            timestampQueryPool_, timestampBase + 3);
 }
 
 }  // namespace gpu_bench

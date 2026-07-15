@@ -87,6 +87,18 @@ std::string MetalBackend::GetDriverVersion() const {
 // -----------------------------------------------------------------------
 
 void MetalBackend::InitBackend() {
+    if (config_.workload == Workload::Fluid) {
+        throw std::runtime_error(
+            "Fluid is an unverified Vulkan-only Developer Preview; Metal fallback is disabled");
+    }
+    if (config_.workload == Workload::GpuStressV1) {
+        throw std::runtime_error(
+            "GPU Stress v1 is not supported on Metal; use Vulkan, DX12, DX11, or OpenGL");
+    }
+    if (config_.workload == Workload::GpuBurnV1) {
+        throw std::runtime_error(
+            "GPU Burn v1 is not supported on Metal; use Vulkan, DX12, DX11, or OpenGL");
+    }
     @autoreleasepool {
         // --- Device selection ---------------------------------------------------
 #pragma clang diagnostic push

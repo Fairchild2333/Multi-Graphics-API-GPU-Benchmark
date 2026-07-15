@@ -3,7 +3,10 @@
 #include "MainWindow.g.h"
 #include "benchmark_results.h"
 #include <winrt/Microsoft.UI.Dispatching.h>
+#include <atomic>
 #include <array>
+#include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -40,6 +43,18 @@ namespace winrt::gpu_bench_gui::implementation
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
 
+        // CPU page
+        void OnCpuRun(winrt::Windows::Foundation::IInspectable const& sender,
+                      winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void OnCpuCancel(winrt::Windows::Foundation::IInspectable const& sender,
+                         winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void OnCpuDurationPresetChanged(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
+        void OnCpuTimeChanged(
+            winrt::Microsoft::UI::Xaml::Controls::NumberBox const& sender,
+            winrt::Microsoft::UI::Xaml::Controls::NumberBoxValueChangedEventArgs const& args);
+
         // History / charts
         void OnRefreshHistory(winrt::Windows::Foundation::IInspectable const& sender,
                               winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
@@ -53,6 +68,10 @@ namespace winrt::gpu_bench_gui::implementation
             winrt::Microsoft::UI::Xaml::Controls::CalendarDatePickerDateChangedEventArgs const& args);
         void OnGenerateCharts(winrt::Windows::Foundation::IInspectable const& sender,
                               winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void OnOpenResultsFolder(winrt::Windows::Foundation::IInspectable const& sender,
+                                 winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void OnOpenCapturesFolder(winrt::Windows::Foundation::IInspectable const& sender,
+                                  winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
 
     private:
         void applyLanguage();
@@ -76,6 +95,8 @@ namespace winrt::gpu_bench_gui::implementation
         // Build the cliMain invocation(s) for the selected preset (sets needCharts).
         std::vector<std::vector<std::string>> buildPresetJobs(bool& needCharts);
         void launchJobs(std::vector<std::vector<std::string>> jobs, bool needCharts);
+        void launchCpuBenchmark(std::string mode, double seconds, double warmupSeconds);
+        void cancelCpuBenchmark();
 
         Microsoft::UI::Dispatching::DispatcherQueue m_dispatcher{ nullptr };
         HWND  m_hwnd{ nullptr };
@@ -84,8 +105,15 @@ namespace winrt::gpu_bench_gui::implementation
         bool  m_suppressCombo{ false };
         std::string m_enginePath;          // build/Release/gpu_benchmark.exe (shader dir)
         std::vector<int> m_gpuIndices;     // engine GPU index per GpuBox row after "(auto)"
-        std::vector<std::array<bool, 4>> m_gpuApiSupport;  // {vulkan,dx12,dx11,opengl} per row
+        std::vector<std::array<bool, 5>> m_gpuApiSupport;  // {vulkan,dx12,dx11,opengl,dx11Compute}
         std::string m_cpuName;             // for relabelling the software (WARP) renderer
+
+        std::atomic_bool m_cpuRunning{ false };
+        std::atomic_bool m_cpuCancelRequested{ false };
+        std::mutex m_cpuProcessMutex;
+        HANDLE m_cpuProcess{ nullptr };    // owned and closed by the CPU worker thread
+        std::map<int, std::string> m_cpuCoreLabels; // populated from CPU_TOPOLOGY on the UI thread
+        bool m_cpuHadProtocolError{ false }; // UI-thread only
 
         std::vector<gpu_bench::BenchmarkResult> m_results;   // loaded history
         std::vector<std::string> m_displayedIds;             // result id per visible row

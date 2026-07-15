@@ -5,15 +5,8 @@
 // ping-ponging the pressure SSBOs (the C++ side swaps inP/outP bindings
 // between iterations).
 //
-// IMPORTANT: during the first iteration inP holds the divergence field
-// (placed there by the divergence pass), and the solver reads its own centre
-// cell as the RHS. From iteration 2 onward, inP holds the previous pressure
-// iterate and outP holds the divergence — so the caller arranges bindings
-// such that the centre cell of inP always carries the divergence and the
-// neighbours carry pressure. We achieve this by keeping divergence in a
-// separate SSBO slot that is also bound to inP's centre sample via the same
-// buffer at iteration 0, then swapping to a "previous-pressure" buffer for
-// subsequent iterations. See the C++ orchestration in vulkan_backend.cpp.
+// Divergence remains in a separate immutable SSBO while pressure ping-pongs
+// between two buffers. The first input pressure buffer is cleared each frame.
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
@@ -31,7 +24,7 @@ layout(push_constant) uniform FluidParams {
     float dt;
     float dx;
     uint  gridSize;
-    uint  _pad;
+    float time;
 } p;
 
 uint cellIdx(uvec2 c) { return c.y * p.gridSize + c.x; }

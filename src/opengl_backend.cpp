@@ -65,6 +65,10 @@ std::uint32_t OpenGLBackend::LinkProgramGL(std::uint32_t s1, std::uint32_t s2) {
 // -----------------------------------------------------------------------
 
 void OpenGLBackend::InitBackend() {
+    if (config_.workload == Workload::Fluid) {
+        throw std::runtime_error(
+            "Fluid is an unverified Vulkan-only Developer Preview; OpenGL fallback is disabled");
+    }
     std::cout << "[OpenGL Init] Loading GL functions..." << std::endl;
     glfwMakeContextCurrent(window_);
     int gladVer = gladLoadGL(glfwGetProcAddress);
@@ -97,8 +101,12 @@ void OpenGLBackend::InitBackend() {
     CreateTimestampQueries();
 
     if (!config_.headless) {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        if (shapeOfWorkload(config_.workload) == WorkloadShape::FullscreenTriangle) {
+            glDisable(GL_BLEND);
+        } else {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        }
         glEnable(GL_PROGRAM_POINT_SIZE);
         glViewport(0, 0, static_cast<GLsizei>(kWindowWidth),
                    static_cast<GLsizei>(kWindowHeight));
@@ -130,7 +138,15 @@ void OpenGLBackend::CreateShaders() {
     if (!config_.headless) {
         const char* vsf = "particle_gl.vert";
         const char* fsf = "particle_gl.frag";
-        if (config_.workload == Workload::StressFractal) { vsf = "fractal_gl.vert";  fsf = "fractal_gl.frag"; }
+        if (config_.workload == Workload::StressFractal
+            || config_.workload == Workload::GpuStressV1
+            || config_.workload == Workload::GpuBurnV1) {
+            vsf = "fractal_gl.vert";
+            fsf = (config_.workload == Workload::GpuBurnV1)
+                ? "gpu_burn_gl.frag"
+                : (config_.workload == Workload::GpuStressV1)
+                    ? "gpu_stress_gl.frag" : "fractal_gl.frag";
+        }
         else if (config_.workload == Workload::Volumetric) { vsf = "volumetric_gl.vert"; fsf = "volumetric_gl.frag"; }
         else if (config_.workload == Workload::Render3D) { vsf = "render3d_gl.vert"; fsf = "render3d_gl.frag"; }
         auto vs = CompileShaderGL(shaderDir_ + vsf, GL_VERTEX_SHADER);
@@ -243,8 +259,7 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
         glQueryCounter(timestampQueries_[slot][0], GL_TIMESTAMP);
 
     // -- Fragment-only fullscreen pass (fractal / volumetric): no compute --
-    if (config_.workload == Workload::StressFractal
-        || config_.workload == Workload::Volumetric) {
+    if (isFragmentOnlyWorkload(config_.workload)) {
         if (timestampsSupported_)
             glQueryCounter(timestampQueries_[slot][1], GL_TIMESTAMP);  // compute ~0
 
@@ -254,28 +269,45 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
         if (timestampsSupported_)
             glQueryCounter(timestampQueries_[slot][2], GL_TIMESTAMP);
 
-        // 16-byte UBO layout (matches both FractalParams and VolumetricParams):
-        //   { time(f), scalar(f), count(u32), _ }
-        unsigned char pb[16] = {0};
-        fractalElapsed_ += deltaTime;
-        float fp[2];
-        std::uint32_t count;
-        if (config_.workload == Workload::Volumetric) {
-            fp[0] = fractalElapsed_; fp[1] = 0.05f;       // stepSize
-            count = config_.volumetricSteps;
-        } else {
-            fp[0] = fractalElapsed_; fp[1] = 1.0f;        // zoom
-            count = config_.fractalIter;
-        }
-        std::memcpy(pb,        fp,    sizeof(fp));
-        std::memcpy(pb + 8,    &count, sizeof(count));
-        glBindBuffer(GL_UNIFORM_BUFFER, ubo_);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(pb), pb);
-
         glUseProgram(renderProgram_);
         glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_);
         glBindVertexArray(vao_);                 // empty fetch; VS uses gl_VertexID
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        glBindBuffer(GL_UNIFORM_BUFFER, ubo_);
+        if (config_.workload == Workload::GpuStressV1) {
+            for (std::uint32_t pass = 0; pass < kGpuStressV1DrawsPerFrame; ++pass) {
+                const GpuStressV1Params sp{ static_cast<float>(pass), 1.0f,
+                                            config_.gpuStressIter, kGpuStressV1ShaderVersion };
+                glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(sp), &sp);
+                glDrawArrays(GL_TRIANGLES, 0, 3);
+            }
+        } else if (config_.workload == Workload::GpuBurnV1) {
+            fractalElapsed_ += deltaTime;
+            for (std::uint32_t pass = 0; pass < kGpuBurnV1DrawsPerFrame; ++pass) {
+                const GpuBurnV1Params bp{ fractalElapsed_, static_cast<float>(pass),
+                                          config_.gpuBurnIter, kGpuBurnV1ShaderVersion };
+                glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(bp), &bp);
+                glDrawArrays(GL_TRIANGLES, 0, 3);
+            }
+        } else {
+            // 16-byte UBO layout (FractalParams / VolumetricParams):
+            //   { time(f), scalar(f), count(u32), mode/pad(u32) }
+            unsigned char pb[16] = {0};
+            fractalElapsed_ += deltaTime;
+            float fp[2];
+            std::uint32_t count;
+            if (config_.workload == Workload::Volumetric) {
+                fp[0] = fractalElapsed_; fp[1] = 0.05f;       // stepSize
+                count = config_.volumetricSteps;
+            } else {
+                fp[0] = fractalElapsed_; fp[1] = 1.0f;        // zoom
+                count = config_.fractalIter;
+            }
+            std::memcpy(pb,        fp,     sizeof(fp));
+            std::memcpy(pb + 8,    &count, sizeof(count));
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(pb), pb);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+        }
 
         if (timestampsSupported_)
             glQueryCounter(timestampQueries_[slot][3], GL_TIMESTAMP);

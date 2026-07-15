@@ -10,7 +10,10 @@ struct BenchmarkResult {
     std::string id;
     std::string timestamp;
 
-    std::string workload = "stream";   // "stream" (bandwidth) or "nbody" (compute)
+    std::uint32_t resultSchemaVersion = 1;
+    std::string workload = "stream";
+    std::string workloadVersion;  // stable score contract, e.g. "gpu_stress_v1"
+    std::string workloadConfig;   // reproducibility parameters, key=value pairs
     std::string graphicsApi;
     std::string deviceName;
     std::string driverVersion;

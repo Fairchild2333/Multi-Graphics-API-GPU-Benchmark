@@ -99,13 +99,13 @@ private:
 
         VkDescriptorSetLayout computeSetLayout = VK_NULL_HANDLE;
         VkDescriptorPool      computePool      = VK_NULL_HANDLE;
-        // Two sets so we can swap in/out bindings between passes without
-        // re-writing descriptor updates each frame.
+        // Immutable per-pass sets. stateA is canonical at every frame boundary:
+        // advect A->B, project B->A, render A.
         VkDescriptorSet       setAdvect  = VK_NULL_HANDLE;  // in=A, out=B, press unused
-        VkDescriptorSet       setDiv     = VK_NULL_HANDLE;  // in=A, out=div
+        VkDescriptorSet       setDiv     = VK_NULL_HANDLE;  // in=B, out=div
         VkDescriptorSet       setJacA    = VK_NULL_HANDLE;  // in=pressA, out=pressB, div
         VkDescriptorSet       setJacB    = VK_NULL_HANDLE;  // in=pressB, out=pressA, div
-        VkDescriptorSet       setSub     = VK_NULL_HANDLE;  // in=A, out=B, press=final
+        VkDescriptorSet       setSub     = VK_NULL_HANDLE;  // in=B, out=A, press=final
         VkDescriptorSetLayout renderSetLayout = VK_NULL_HANDLE;
         VkDescriptorPool      renderPool      = VK_NULL_HANDLE;
         VkDescriptorSet       setRender  = VK_NULL_HANDLE;
@@ -121,6 +121,127 @@ private:
         std::uint32_t gridSize = 0;
         float         simTime  = 0.0f;
     } fluid_;
+
+    // Cinematic Liquid: true 3D MLS-MPM simulation plus a filterable density
+    // volume consumed by a fullscreen free-surface raymarch.  This is kept
+    // separate from the legacy 2D Eulerian dye workload above so neither its
+    // resources nor its score contract can be confused with the old test.
+    struct CinematicLiquidResources {
+        VkBuffer       particles = VK_NULL_HANDLE;
+        VkDeviceMemory particlesMem = VK_NULL_HANDLE;
+        VkBuffer       seedParticles = VK_NULL_HANDLE;
+        VkDeviceMemory seedParticlesMem = VK_NULL_HANDLE;
+        VkBuffer       grid = VK_NULL_HANDLE;
+        VkDeviceMemory gridMem = VK_NULL_HANDLE;
+        VkBuffer       bodies = VK_NULL_HANDLE;
+        VkDeviceMemory bodiesMem = VK_NULL_HANDLE;
+        VkBuffer       seedBodies = VK_NULL_HANDLE;
+        VkDeviceMemory seedBodiesMem = VK_NULL_HANDLE;
+        VkBuffer       bodyImpulses = VK_NULL_HANDLE;
+        VkDeviceMemory bodyImpulsesMem = VK_NULL_HANDLE;
+
+        VkImage        densityImage = VK_NULL_HANDLE;
+        VkDeviceMemory densityImageMem = VK_NULL_HANDLE;
+        VkImageView    densityImageView = VK_NULL_HANDLE;
+        VkSampler      densitySampler = VK_NULL_HANDLE;
+        // V2-only physically-derived whitewater field.  The resolve pass
+        // derives it from free-surface density, kinetic energy and the APIC
+        // grid velocity gradient; v1 leaves these handles null.
+        VkImage        whitewaterImage = VK_NULL_HANDLE;
+        VkDeviceMemory whitewaterImageMem = VK_NULL_HANDLE;
+        VkImageView    whitewaterImageView = VK_NULL_HANDLE;
+
+        // V2 surface reconstruction is deliberately decoupled from the
+        // 4 cm MLS-MPM dynamics grid.  Particles splat a normalized Spiky^2
+        // density into this fixed-point buffer, then resolve it to the
+        // independently reconstructed R32F density image above.
+        VkBuffer       densityAtomicBuffer = VK_NULL_HANDLE;
+        VkDeviceMemory densityAtomicBufferMem = VK_NULL_HANDLE;
+        VkDescriptorSetLayout surfaceSetLayout = VK_NULL_HANDLE;
+        VkDescriptorPool      surfacePool = VK_NULL_HANDLE;
+        VkDescriptorSet       surfaceSet = VK_NULL_HANDLE;
+        VkPipelineLayout      surfaceLayout = VK_NULL_HANDLE;
+        VkPipeline            surfaceClearPipe = VK_NULL_HANDLE;
+        VkPipeline            surfaceSplatPipe = VK_NULL_HANDLE;
+        VkPipeline            surfaceResolvePipe = VK_NULL_HANDLE;
+
+        VkDescriptorSetLayout computeSetLayout = VK_NULL_HANDLE;
+        VkDescriptorPool      computePool = VK_NULL_HANDLE;
+        VkDescriptorSet       computeSet = VK_NULL_HANDLE;
+        VkPipelineLayout      computeLayout = VK_NULL_HANDLE;
+        VkPipeline            clearGridPipe = VK_NULL_HANDLE;
+        VkPipeline            p2gMassPipe = VK_NULL_HANDLE;
+        VkPipeline            p2gStressPipe = VK_NULL_HANDLE;
+        VkPipeline            gridUpdatePipe = VK_NULL_HANDLE;
+        VkPipeline            g2pPipe = VK_NULL_HANDLE;
+        VkPipeline            rigidIntegratePipe = VK_NULL_HANDLE;
+        VkPipeline            resolveDensityPipe = VK_NULL_HANDLE;
+
+        VkDescriptorSetLayout renderSetLayout = VK_NULL_HANDLE;
+        VkDescriptorPool      renderPool = VK_NULL_HANDLE;
+        VkDescriptorSet       renderSet = VK_NULL_HANDLE;
+        VkPipelineLayout      renderLayout = VK_NULL_HANDLE;
+        VkPipeline            renderPipe = VK_NULL_HANDLE;
+
+        // Experimental SPH vertical slice (`--liquid-solver sph`).  Solver
+        // buffers live in the reference simulation units; the shared 80-byte
+        // particle buffer above remains the world-space presentation ABI, so
+        // the surface splat/raymarch and rigid pipelines are reused as-is.
+        bool           isSph = false;
+        std::uint32_t  sphTableSize = 0;
+        VkBuffer       sphPositions = VK_NULL_HANDLE;
+        VkDeviceMemory sphPositionsMem = VK_NULL_HANDLE;
+        VkBuffer       sphVelocities = VK_NULL_HANDLE;
+        VkDeviceMemory sphVelocitiesMem = VK_NULL_HANDLE;
+        VkBuffer       sphPredicted = VK_NULL_HANDLE;
+        VkDeviceMemory sphPredictedMem = VK_NULL_HANDLE;
+        VkBuffer       sphDensities = VK_NULL_HANDLE;
+        VkDeviceMemory sphDensitiesMem = VK_NULL_HANDLE;
+        VkBuffer       sphKeys = VK_NULL_HANDLE;
+        VkDeviceMemory sphKeysMem = VK_NULL_HANDLE;
+        VkBuffer       sphCellCounts = VK_NULL_HANDLE;
+        VkDeviceMemory sphCellCountsMem = VK_NULL_HANDLE;
+        VkBuffer       sphCellStarts = VK_NULL_HANDLE;
+        VkDeviceMemory sphCellStartsMem = VK_NULL_HANDLE;
+        VkBuffer       sphCellCursor = VK_NULL_HANDLE;
+        VkDeviceMemory sphCellCursorMem = VK_NULL_HANDLE;
+        VkBuffer       sphSortedIndices = VK_NULL_HANDLE;
+        VkDeviceMemory sphSortedIndicesMem = VK_NULL_HANDLE;
+        VkBuffer       sphScanSums = VK_NULL_HANDLE;
+        VkDeviceMemory sphScanSumsMem = VK_NULL_HANDLE;
+        VkBuffer       sphScanSums2 = VK_NULL_HANDLE;
+        VkDeviceMemory sphScanSums2Mem = VK_NULL_HANDLE;
+        VkBuffer       sphSeedPositions = VK_NULL_HANDLE;
+        VkDeviceMemory sphSeedPositionsMem = VK_NULL_HANDLE;
+        VkDescriptorSetLayout sphSetLayout = VK_NULL_HANDLE;
+        VkDescriptorPool      sphPool = VK_NULL_HANDLE;
+        VkDescriptorSet       sphSet = VK_NULL_HANDLE;
+        VkPipelineLayout      sphLayout = VK_NULL_HANDLE;
+        VkPipeline sphExternalPipe = VK_NULL_HANDLE;
+        VkPipeline sphHashCountPipe = VK_NULL_HANDLE;
+        VkPipeline sphScanBlockPipe = VK_NULL_HANDLE;
+        VkPipeline sphScanAddPipe = VK_NULL_HANDLE;
+        VkPipeline sphScatterPipe = VK_NULL_HANDLE;
+        VkPipeline sphDensityPipe = VK_NULL_HANDLE;
+        VkPipeline sphPressurePipe = VK_NULL_HANDLE;
+        VkPipeline sphViscosityPipe = VK_NULL_HANDLE;
+        VkPipeline sphIntegratePipe = VK_NULL_HANDLE;
+
+        std::uint32_t gridX = 0, gridY = 0, gridZ = 0;
+        std::uint32_t surfaceX = 0, surfaceY = 0, surfaceZ = 0;
+        std::uint32_t particleCount = 0;
+        std::uint32_t bodyCount = 0;
+        std::uint32_t substeps = 0;
+        std::uint32_t raySteps = 0;
+        std::uint32_t shaderVersion = 0;
+        float dx = 0.0f;
+        float particleSpacing = 0.0f;
+        float particleMass = 0.0f;
+        float simTime = 0.0f;
+        float presentationTime = 0.0f;
+        bool isV2 = false;
+        bool captureChoreographyResetDone = false;
+    } cinematicLiquid_;
 
     VkCommandPool              commandPool_ = VK_NULL_HANDLE;
     std::vector<VkCommandBuffer> commandBuffers_;
@@ -172,7 +293,21 @@ private:
     // slots so existing paths are untouched.
     void CreateFluidResources();
     void CleanupFluidResources();
-    void RecordFluidFrame(VkCommandBuffer cmd, float deltaTime, std::uint32_t imageIndex);
+    void RecordFluidFrame(VkCommandBuffer cmd, float deltaTime,
+                          std::uint32_t imageIndex, std::uint32_t timestampBase);
+    void CreateCinematicLiquidResources();
+    void CreateCinematicLiquidV2Resources();
+    void CreateCinematicLiquidSphResources(const std::vector<float>& simSeed);
+    void RecordCinematicLiquidSphFrame(VkCommandBuffer cmd, float deltaTime,
+                                       std::uint32_t imageIndex,
+                                       std::uint32_t timestampBase);
+    void CleanupCinematicLiquidResources();
+    void RecordCinematicLiquidFrame(VkCommandBuffer cmd, float deltaTime,
+                                    std::uint32_t imageIndex,
+                                    std::uint32_t timestampBase);
+    void RecordCinematicLiquidV2Frame(VkCommandBuffer cmd, float deltaTime,
+                                      std::uint32_t imageIndex,
+                                      std::uint32_t timestampBase);
     void CreateDepthResources();
     void CreateQuadBuffer();
     void CreateComputeDescriptorSetLayout();

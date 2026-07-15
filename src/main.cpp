@@ -1,5 +1,6 @@
 #include "app_base.h"
 #include "benchmark_results.h"
+#include "cpu_benchmark.h"
 #include "gpu_engine.h"
 
 #ifdef HAVE_VULKAN
@@ -20,11 +21,14 @@
 #endif
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -33,6 +37,9 @@
 #include <GLFW/glfw3.h>
 
 #ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
 #include <dxgi1_6.h>
 #include <wrl/client.h>
@@ -50,9 +57,146 @@ extern "C" {
 #include <vulkan/vulkan.h>
 #endif
 
+#ifdef HAVE_VULKAN
+// On Windows the release binary delay-loads vulkan-1.dll.  Older systems can
+// therefore still launch and use Direct3D even when their display driver did
+// not install a Vulkan runtime (for example, Direct3D 10-era adapters).  Keep
+// the module loaded once found so the delay-import thunk resolves against the
+// same process-local loader.  Other platforms retain their normal link model.
+static bool VulkanLoaderAvailable() {
+#ifdef _WIN32
+    static HMODULE loader = LoadLibraryW(L"vulkan-1.dll");
+    return loader != nullptr;
+#else
+    return true;
+#endif
+}
+#endif
+
 static bool SafeStoi(const std::string& s, int& out) {
     try { out = std::stoi(s); return true; }
     catch (...) { return false; }
+}
+
+static bool SafeStod(const std::string& s, double& out) {
+    try {
+        std::size_t consumed = 0;
+        out = std::stod(s, &consumed);
+        return consumed == s.size() && std::isfinite(out);
+    } catch (...) {
+        return false;
+    }
+}
+
+static bool ParseCpuBenchmarkMode(const std::string& value,
+                                  gpu_bench::CpuBenchmarkMode& mode) {
+    if (value == "per-core" || value == "per_core" || value == "percore" ||
+        value == "single") {
+        mode = gpu_bench::CpuBenchmarkMode::PerCore;
+        return true;
+    }
+    if (value == "multi" || value == "multi-core" || value == "multi_core") {
+        mode = gpu_bench::CpuBenchmarkMode::MultiCore;
+        return true;
+    }
+    if (value == "all") {
+        mode = gpu_bench::CpuBenchmarkMode::All;
+        return true;
+    }
+    return false;
+}
+
+static gpu_bench::BenchmarkResult MakeStoredCpuResult(
+    const gpu_bench::CpuBenchmarkReport& report,
+    const gpu_bench::CpuBenchmarkConfig& config,
+    bool multiCore) {
+    gpu_bench::BenchmarkResult stored;
+    stored.id = gpu_bench::GenerateResultId() +
+                (multiCore ? "-cpu-multi" : "-cpu-single");
+    stored.timestamp = gpu_bench::GenerateTimestamp();
+    stored.resultSchemaVersion = 2;
+    stored.workload = multiCore ? "cpu_multi_core" : "cpu_single_core";
+    const auto measureMs = static_cast<long long>(std::llround(config.measureSeconds * 1000.0));
+    const auto warmupMs = static_cast<long long>(std::llround(config.warmupSeconds * 1000.0));
+    const bool formalContract = measureMs == 15000 && warmupMs == 200 &&
+                                config.roundCount == 3;
+    const bool afterPerCore = multiCore && config.mode == gpu_bench::CpuBenchmarkMode::All;
+    std::ostringstream storedVersion;
+    storedVersion << report.workloadVersion
+                  << (formalContract ? "_formal" : "_preview")
+                  << "_r" << config.roundCount
+                  << "_t" << measureMs << "ms"
+                  << "_w" << warmupMs << "ms"
+                  << "_sequence_" << (afterPerCore ? "after_percore" : "standalone");
+    stored.workloadVersion = storedVersion.str();
+    stored.graphicsApi = "CPU";
+    stored.deviceName = report.cpuName;
+    stored.cpuName = report.cpuName;
+    stored.difficulty = multiCore ? "Multi-core" : "Per-core";
+    stored.headless = true;
+    stored.framesInFlight = 0;
+    stored.scoreUnit = "MWork/s";
+    stored.precision = "Mixed";
+    stored.bottleneck = "Native mixed CPU kernel";
+
+    std::uint32_t physicalCount = 0;
+    for (const auto& cpu : report.processors)
+        physicalCount = (std::max)(physicalCount, cpu.physicalCore + 1u);
+
+    std::ostringstream contract;
+    contract << "kernel=" << gpu_bench::kCpuBenchmarkWorkloadVersion
+             << ";rounds=" << config.roundCount
+             << ";totalMeasureSeconds=" << config.measureSeconds
+             << ";roundSeconds="
+             << (config.measureSeconds / static_cast<double>(config.roundCount))
+             << ";warmupSeconds=" << config.warmupSeconds
+             << ";topologySource=" << report.topologySource
+             << ";affinityCapability=" << report.affinityCapability
+             << ";logicalProcessors=" << report.processors.size()
+             << ";physicalCores=" << physicalCount
+             << ";coreClassLabels=inferred_rank_not_architectural_identity"
+             << ";checksumRole=dce_sink";
+    contract << ";scoreContract=" << (formalContract ? "formal" : "preview")
+             << ";sequence=" << (afterPerCore ? "after_percore" : "standalone");
+
+    if (multiCore) {
+        stored.score = report.multiCore.scoreMWorkPerSec;
+        stored.durationSec = config.measureSeconds;
+        stored.warmupSec = config.warmupSeconds;
+        stored.timingSamples = report.multiCore.roundCount;
+        contract << ";aggregation=median"
+                 << ";affinityMode=" << report.multiCore.affinityMode
+                 << ";threads=" << report.multiCore.threadCount
+                 << ";pinnedThreads=" << report.multiCore.pinnedThreadCount;
+    } else {
+        double sum = 0.0;
+        std::vector<std::string> affinityModes;
+        for (const auto& item : report.perCore) {
+            sum += item.scoreMWorkPerSec;
+            if (std::find(affinityModes.begin(), affinityModes.end(), item.affinityMode) ==
+                affinityModes.end()) {
+                affinityModes.push_back(item.affinityMode);
+            }
+        }
+        stored.score = report.perCore.empty()
+            ? 0.0 : sum / static_cast<double>(report.perCore.size());
+        stored.durationSec = config.measureSeconds * report.perCore.size();
+        stored.warmupSec = config.warmupSeconds * report.perCore.size();
+        stored.timingSamples = static_cast<std::uint32_t>(
+            report.perCore.size() * config.roundCount);
+        contract << ";aggregation=arithmetic_mean_of_per_core_medians"
+                 << ";affinityModes=";
+        if (affinityModes.empty()) {
+            contract << "unavailable";
+        } else {
+            for (std::size_t i = 0; i < affinityModes.size(); ++i) {
+                if (i != 0) contract << ',';
+                contract << affinityModes[i];
+            }
+        }
+    }
+    stored.workloadConfig = contract.str();
+    return stored;
 }
 
 static std::string ExeDirectory(const char* argv0) {
@@ -60,6 +204,47 @@ static std::string ExeDirectory(const char* argv0) {
     auto pos = path.find_last_of("\\/");
     return pos != std::string::npos ? path.substr(0, pos + 1) : "";
 }
+
+#ifdef _WIN32
+// A copied RenderDoc DLL can hook DirectX directly, but Vulkan discovers its
+// capture layer through a manifest. Point the loader at the bundled manifest
+// before the early GPU probe creates a Vulkan instance. This is process-local:
+// no SDK, installer, administrator rights, or registry mutation is required.
+static void ConfigureBundledRenderDocLayer(const std::string& shaderDir,
+                                           bool captureRequested) {
+    if (!captureRequested) return;
+
+    std::error_code ec;
+    auto exeDir = std::filesystem::absolute(
+        std::filesystem::u8path(shaderDir.empty() ? "." : shaderDir), ec);
+    if (ec) return;
+
+    const std::filesystem::path candidates[] = {
+        exeDir / "tools" / "RenderDoc",
+        exeDir / ".." / "tools" / "RenderDoc",
+        exeDir / ".." / ".." / "tools" / "RenderDoc",
+    };
+    for (const auto& candidate : candidates) {
+        const auto dir = candidate.lexically_normal();
+        if (!std::filesystem::is_regular_file(dir / "renderdoc.json", ec) || ec) {
+            ec.clear();
+            continue;
+        }
+        if (!std::filesystem::is_regular_file(dir / "renderdoc.dll", ec) || ec) {
+            ec.clear();
+            continue;
+        }
+
+        // Override only the implicit-layer search for this capture process so
+        // the manifest and DLL always come from the same packaged version.
+        SetEnvironmentVariableW(L"VK_IMPLICIT_LAYER_PATH", dir.wstring().c_str());
+        SetEnvironmentVariableW(L"ENABLE_VULKAN_RENDERDOC_CAPTURE", L"1");
+        std::cout << "[RenderDoc] Configured bundled Vulkan layer: "
+                  << dir.u8string() << "\n";
+        return;
+    }
+}
+#endif
 
 #ifdef _WIN32
 static LONG WINAPI CrashHandler(EXCEPTION_POINTERS* ep) {
@@ -94,7 +279,9 @@ struct GpuInfo {
     std::uint64_t vramMB = 0;
     bool supportsVulkan = false;
     bool supportsDX12   = false;
-    bool supportsDX11   = true;   // virtually everything supports DX11
+    bool supportsDX11   = false;
+    bool supportsDX11Compute = false;
+    std::uint32_t dx11FeatureLevel = 0;
     bool supportsMetal  = false;
     bool supportsOpenGL = false;
     std::int32_t dxgiRawIndex = -1;  // DXGI EnumAdapters1 index (stable across reordering)
@@ -172,6 +359,49 @@ static std::vector<GpuInfo> ProbeGpus() {
             {
                 extern bool ProbeDX12Support(IDXGIAdapter1*);
                 info.supportsDX12 = ProbeDX12Support(adapter.Get());
+            }
+#endif
+#ifdef HAVE_DX11
+            {
+                D3D_FEATURE_LEVEL requested[] = {
+                    D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0,
+                    D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0
+                };
+                D3D_FEATURE_LEVEL actual{};
+                Microsoft::WRL::ComPtr<ID3D11Device> probeDevice;
+                Microsoft::WRL::ComPtr<ID3D11DeviceContext> probeContext;
+                const D3D_DRIVER_TYPE driverType = info.isSoftware
+                    ? D3D_DRIVER_TYPE_WARP : D3D_DRIVER_TYPE_UNKNOWN;
+                IDXGIAdapter* probeAdapter = info.isSoftware ? nullptr : adapter.Get();
+                HRESULT probeHr = D3D11CreateDevice(
+                    probeAdapter, driverType, nullptr, 0,
+                    requested, _countof(requested), D3D11_SDK_VERSION,
+                    &probeDevice, &actual, &probeContext);
+                // The Windows 7 platform update's D3D11.0 runtime rejects an
+                // array containing FL11_1 with E_INVALIDARG. Retry without it
+                // so the native backend probe remains accurate there too.
+                if (probeHr == E_INVALIDARG) {
+                    probeDevice.Reset();
+                    probeContext.Reset();
+                    probeHr = D3D11CreateDevice(
+                        probeAdapter, driverType, nullptr, 0,
+                        requested + 1, _countof(requested) - 1,
+                        D3D11_SDK_VERSION,
+                        &probeDevice, &actual, &probeContext);
+                }
+                if (SUCCEEDED(probeHr) && actual >= D3D_FEATURE_LEVEL_10_0) {
+                    info.supportsDX11 = true;
+                    info.dx11FeatureLevel = static_cast<std::uint32_t>(actual);
+                    info.supportsDX11Compute = actual >= D3D_FEATURE_LEVEL_11_0;
+                    if (!info.supportsDX11Compute) {
+                        D3D11_FEATURE_DATA_D3D10_X_HARDWARE_OPTIONS options{};
+                        info.supportsDX11Compute = SUCCEEDED(
+                            probeDevice->CheckFeatureSupport(
+                                D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS,
+                                &options, sizeof(options))) &&
+                            options.ComputeShaders_Plus_RawAndStructuredBuffers_Via_Shader_4_x;
+                    }
+                }
             }
 #endif
             gpus.push_back(info);
@@ -252,7 +482,7 @@ static std::vector<GpuInfo> ProbeGpus() {
 
     // --- Vulkan probe (if compiled in) ---
 #ifdef HAVE_VULKAN
-    {
+    if (VulkanLoaderAvailable()) {
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.apiVersion = VK_API_VERSION_1_1;
@@ -389,23 +619,39 @@ static std::vector<GpuInfo> ProbeGpus() {
                 glRenderer.find("lavapipe") != std::string::npos ||
                 glRenderer.find("Software") != std::string::npos;
 
-            // Mark all existing hardware GPUs as OpenGL-capable.
-            for (auto& gpu : gpus)
-                if (!gpu.isSoftware)
-                    gpu.supportsOpenGL = true;
-
-            // Mark existing software GPUs if the GL renderer is software-based.
-            if (isSoftwareGL) {
-                for (auto& gpu : gpus)
-                    if (gpu.isSoftware)
+            // A GLFW context identifies only the OS-assigned OpenGL adapter;
+            // Windows has no standard per-context adapter selector. Do not mark
+            // every enumerated GPU as GL-capable or run-all will repeat the same
+            // default adapter and mislabel those results. Match one renderer
+            // entry; the fallback below creates a truthful GL-only row when the
+            // Vulkan/DXGI name cannot be correlated.
+            bool matchedOpenGlGpu = false;
+            if (!glRenderer.empty()) {
+                for (auto& gpu : gpus) {
+                    if (gpu.isSoftware != isSoftwareGL) continue;
+                    if (glRenderer.find(gpu.name) != std::string::npos ||
+                        gpu.name.find(glRenderer) != std::string::npos) {
                         gpu.supportsOpenGL = true;
+                        matchedOpenGlGpu = true;
+                        break;
+                    }
+                }
+            }
+            if (!matchedOpenGlGpu && glRenderer.empty()) {
+                for (auto& gpu : gpus) {
+                    if (gpu.isSoftware == isSoftwareGL) {
+                        gpu.supportsOpenGL = true;
+                        matchedOpenGlGpu = true;
+                        break;
+                    }
+                }
             }
 
             // On Linux without DXGI, gpus may be empty if no Vulkan SDK
             // is installed.  Create a GPU entry from GL_RENDERER so the
             // application has at least one usable device.
             if (!glRenderer.empty()) {
-                bool alreadyListed = false;
+                bool alreadyListed = matchedOpenGlGpu;
                 for (const auto& gpu : gpus) {
                     if (glRenderer.find(gpu.name) != std::string::npos ||
                         gpu.name.find(glRenderer) != std::string::npos) {
@@ -507,12 +753,19 @@ static void PrintGpuTable(const std::vector<GpuInfo>& gpus) {
             std::cout << "     - ";
 
         auto yn = [](bool v) { return v ? "  YES " : "   -  "; };
+        const char* dx11 = !g.supportsDX11 ? "   -  "
+                           : g.supportsDX11Compute ? "  YES " : "  GFX ";
         std::cout << yn(g.supportsVulkan)
                   << yn(g.supportsDX12)
-                  << yn(g.supportsDX11)
+                  << dx11
                   << yn(g.supportsMetal)
                   << yn(g.supportsOpenGL)
                   << "\n";
+    }
+    if (std::any_of(gpus.begin(), gpus.end(), [](const GpuInfo& g) {
+            return g.supportsDX11 && !g.supportsDX11Compute;
+        })) {
+        std::cout << "  DX11 GFX = raster workloads only; DirectCompute 4.x was not exposed.\n";
     }
     std::cout << "============================================================\n\n";
 }
@@ -531,10 +784,55 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     bool fullAnalysis = false;
     bool listGpus = false;
     bool timeArgGiven = false;   // explicit --time => run directly (no menu)
+    bool benchmarkArgGiven = false; // remains true if an auto-tuned workload switches to timed mode
+    bool cpuBenchmarkRequested = false;
+    bool saveCpuResults = true;
+    gpu_bench::CpuBenchmarkConfig cpuCfg;
     gpu_bench::BenchmarkConfig benchCfg;
 
     for (int i = 1; i < argc; ++i) {
-        if (std::strcmp(argv[i], "--backend") == 0 && i + 1 < argc) {
+        if (std::strcmp(argv[i], "--cpu-benchmark") == 0) {
+            cpuBenchmarkRequested = true;
+            // Preferred compact form: --cpu-benchmark per-core|multi|all.
+            // Keep --cpu-benchmark --cpu-mode ... compatible with the GUI.
+            if (i + 1 < argc && argv[i + 1][0] != '-') {
+                if (!ParseCpuBenchmarkMode(argv[i + 1], cpuCfg.mode)) {
+                    std::cerr << "Unknown CPU benchmark mode '" << argv[i + 1]
+                              << "' (expected per-core, multi, or all).\n";
+                    return 2;
+                }
+                ++i;
+            }
+        } else if (std::strcmp(argv[i], "--cpu-mode") == 0 && i + 1 < argc) {
+            cpuBenchmarkRequested = true;
+            if (!ParseCpuBenchmarkMode(argv[++i], cpuCfg.mode)) {
+                std::cerr << "Unknown CPU benchmark mode '" << argv[i]
+                          << "' (expected per-core, multi, or all).\n";
+                return 2;
+            }
+        } else if (std::strcmp(argv[i], "--cpu-time") == 0 && i + 1 < argc) {
+            cpuBenchmarkRequested = true;
+            if (!SafeStod(argv[++i], cpuCfg.measureSeconds) ||
+                cpuCfg.measureSeconds < 0.03 || cpuCfg.measureSeconds > 3600.0) {
+                std::cerr << "--cpu-time must be a finite value from 0.03 to 3600 seconds.\n";
+                return 2;
+            }
+        } else if (std::strcmp(argv[i], "--cpu-warmup") == 0 && i + 1 < argc) {
+            cpuBenchmarkRequested = true;
+            if (!SafeStod(argv[++i], cpuCfg.warmupSeconds) ||
+                cpuCfg.warmupSeconds < 0.0 || cpuCfg.warmupSeconds > 60.0) {
+                std::cerr << "--cpu-warmup must be a finite value from 0 to 60 seconds.\n";
+                return 2;
+            }
+        } else if (std::strcmp(argv[i], "--cpu-no-save") == 0) {
+            cpuBenchmarkRequested = true;
+            saveCpuResults = false;
+        } else if (std::strcmp(argv[i], "--cpu-mode") == 0 ||
+                   std::strcmp(argv[i], "--cpu-time") == 0 ||
+                   std::strcmp(argv[i], "--cpu-warmup") == 0) {
+            std::cerr << argv[i] << " requires a value.\n";
+            return 2;
+        } else if (std::strcmp(argv[i], "--backend") == 0 && i + 1 < argc) {
             backend = argv[++i];
         } else if (std::strcmp(argv[i], "--gpu") == 0 && i + 1 < argc) {
             gpuIndex = std::stoi(argv[++i]);
@@ -543,6 +841,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         } else if (std::strcmp(argv[i], "--vsync") == 0) {
             benchCfg.vsync = true;
         } else if (std::strcmp(argv[i], "--benchmark") == 0) {
+            benchmarkArgGiven = true;
             benchCfg.benchmarkMode = true;
             if (i + 1 < argc && argv[i + 1][0] != '-') {
                 benchCfg.benchFrames = static_cast<std::uint32_t>(
@@ -571,6 +870,10 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             std::string w = argv[++i];
             if (w == "nbody")        benchCfg.workload = gpu_bench::Workload::NBody;
             else if (w == "stream")  benchCfg.workload = gpu_bench::Workload::Stream;
+            else if (w == "gpu_stress" || w == "gpu-stress")
+                                     benchCfg.workload = gpu_bench::Workload::GpuStressV1;
+            else if (w == "gpu_burn" || w == "gpu-burn" || w == "burn")
+                                     benchCfg.workload = gpu_bench::Workload::GpuBurnV1;
             else if (w == "stress" || w == "fractal")
                                      benchCfg.workload = gpu_bench::Workload::StressFractal;
             else if (w == "synthpeak" || w == "peak")
@@ -579,9 +882,13 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                                      benchCfg.workload = gpu_bench::Workload::Render3D;
             else if (w == "volumetric" || w == "volume")
                                      benchCfg.workload = gpu_bench::Workload::Volumetric;
+            else if (w == "cinematic_liquid" || w == "cinematic-liquid" || w == "liquid")
+                                     benchCfg.workload = gpu_bench::Workload::CinematicLiquid;
+            else if (w == "cinematic_liquid_v1" || w == "cinematic-liquid-v1" || w == "liquid_v1")
+                                     benchCfg.workload = gpu_bench::Workload::CinematicLiquidV1;
             else if (w == "fluid")
                                      benchCfg.workload = gpu_bench::Workload::Fluid;
-            else std::cerr << "Unknown workload '" << w << "' (use stream|nbody|stress|synthpeak|render3d|volumetric|fluid)\n";
+            else std::cerr << "Unknown workload '" << w << "' (use stream|nbody|gpu_burn|gpu_stress|stress|synthpeak|render3d|volumetric|cinematic_liquid|cinematic_liquid_v1|fluid)\n";
         } else if (std::strcmp(argv[i], "--precision") == 0 && i + 1 < argc) {
             std::string pr = argv[++i];
             if (pr == "fp32")       benchCfg.peakPrecision = gpu_bench::Precision::FP32;
@@ -590,9 +897,13 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             else if (pr == "int32") benchCfg.peakPrecision = gpu_bench::Precision::INT32;
             else std::cerr << "Unknown precision '" << pr << "' (use fp32|fp16|fp64|int32)\n";
         } else if (std::strcmp(argv[i], "--iter") == 0 && i + 1 < argc) {
-            auto n = static_cast<std::uint32_t>(std::stoi(argv[++i]));
-            if (n == 0) n = 1;
+            const int requested = std::stoi(argv[++i]);
+            const auto n = static_cast<std::uint32_t>((std::max)(1, requested));
             benchCfg.fractalIter = n;   // fractal per-pixel iterations
+            benchCfg.gpuStressIter = (std::min)(n, gpu_bench::kGpuStressV1MaxIter);
+            benchCfg.gpuStressAutoTune = false;
+            benchCfg.gpuBurnIter = (std::min)(n, gpu_bench::kGpuBurnV1MaxIter);
+            benchCfg.gpuBurnAutoTune = false;
             benchCfg.peakIters   = n;   // synthpeak loop passes (same flag)
         } else if (std::strcmp(argv[i], "--steps") == 0 && i + 1 < argc) {
             auto n = static_cast<std::uint32_t>(std::stoi(argv[++i]));
@@ -603,10 +914,19 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             // Round up to a multiple of 16 (the compute workgroup size).
             n = ((n + 15u) / 16u) * 16u;
             if (n < 16u) n = 16u;
-            benchCfg.fluidGridSize = n;     // fluid: 2D grid side length
+            benchCfg.fluidGridSize = n;     // legacy fluid: 2D grid side length
         } else if (std::strcmp(argv[i], "--jacobi") == 0 && i + 1 < argc) {
             auto n = static_cast<std::uint32_t>(std::stoi(argv[++i]));
-            benchCfg.fluidJacobiIters = n;  // fluid: pressure iterations
+            benchCfg.fluidJacobiIters = n;  // legacy fluid: pressure iterations
+        } else if (std::strcmp(argv[i], "--liquid-solver") == 0 && i + 1 < argc) {
+            const std::string solver = argv[++i];
+            if (solver == "sph") {
+                benchCfg.liquidSolverSph = true;
+            } else if (solver != "mpm") {
+                std::cerr << "Unknown --liquid-solver '" << solver
+                          << "' (expected mpm or sph)\n";
+                return 1;
+            }
         } else if (std::strcmp(argv[i], "--bodies") == 0 && i + 1 < argc) {
             auto n = static_cast<std::uint32_t>(std::stoi(argv[++i]));
             const std::uint32_t wg = gpu_bench::kComputeWorkGroupSize;
@@ -681,13 +1001,20 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --host-memory                        Keep particle buffer in host-visible RAM (slower on dGPU)\n"
                       << "  --flights <N>                       Set frames-in-flight count (default: 2, max: 16)\n"
                       << "  --headless                           Pure compute mode (no window/rendering/present)\n"
+                      << "  --cpu-benchmark [per-core|multi|all] Run native CPU-only benchmark (default: all)\n"
+                      << "  --cpu-mode <per-core|multi|all>      CPU mode alias used by the GUI\n"
+                      << "  --cpu-time <seconds>                 Total measurement time per CPU test (default: 1)\n"
+                      << "  --cpu-warmup <seconds>               CPU warm-up time per test (default: 0.15)\n"
+                      << "  --cpu-no-save                        Do not append successful CPU summaries to results.json\n"
                       << "  --particles <count>                 Particle count (skips difficulty menu, rounded to 256)\n"
-                      << "  --workload <stream|nbody|stress|synthpeak|render3d|volumetric|fluid>  bandwidth / compute / fractal fill / peak FLOPS / true-3D / volume raymarch / 2D fluid\n"
+                      << "  --workload <stream|nbody|gpu_burn|gpu_stress|stress|synthpeak|render3d|volumetric|cinematic_liquid|cinematic_liquid_v1|fluid>\n"
+                      << "                                      particle / N-body / visual GPU Burn / GraphicsBurn component / legacy fractal / peak / 3D / volume / 3D liquid / legacy 2D fluid\n"
                       << "  --bodies <count>                    N-body body count (implies --workload nbody; default 65536)\n"
-                      << "  --iter <count>                      Fractal per-pixel iters / SynthPeak loop passes\n"
+                      << "  --iter <count>                      GPU Burn fixed steps (16-32; auto may tune higher) / GraphicsBurn / legacy fractal / SynthPeak\n"
                       << "  --steps <count>                     Volumetric per-pixel ray samples (default 96)\n"
-                      << "  --grid <count>                      Fluid 2D grid side length (default 256, rounded to 16)\n"
-                      << "  --jacobi <count>                    Fluid pressure-projection iterations (default 30)\n"
+                      << "  --grid <count>                      Legacy 2D fluid grid side length (default 256, rounded to 16)\n"
+                      << "  --jacobi <count>                    Legacy 2D fluid pressure iterations (default 30)\n"
+                      << "  --liquid-solver <mpm|sph>           Cinematic Liquid v2 solver (default mpm; sph = experimental preview slice)\n"
                       << "  --precision <fp32|fp16|fp64|int32>  SynthPeak data type (default fp32)\n"
                       << "  --time <seconds>                    Auto-stop after N seconds (default: 15)\n"
                       << "  --no-time-limit                     Run until window is closed\n"
@@ -699,7 +1026,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --run-all                            Benchmark every GPU x API combination, then exit\n"
                       << "  --capture [seconds]                 Auto-capture via RenderDoc at T seconds (default: 5)\n"
                       << "  --full-analysis                     Run all APIs + RenderDoc capture + Python charts (interactive)\n"
-                      << "  --compare                           Compare all saved results (ranked by FPS)\n"
+                      << "  --compare                           Compare saved results by workload/version score groups\n"
                       << "  --compare <id1> <id2>               Detailed side-by-side comparison of two results\n"
                       << "  --help                              Show this help\n\n"
                       << "Available Graphics APIs:";
@@ -721,6 +1048,57 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             std::cout << '\n';
             return 0;
         }
+    }
+
+    // CPU benchmarking is a fully separate path. Return before GLFW, GPU/API
+    // probing, shader discovery, or a graphics window is initialised.
+    if (cpuBenchmarkRequested) {
+        const auto report = gpu_bench::RunCpuBenchmark(cpuCfg, std::cout);
+        const bool perCoreRequested = cpuCfg.mode == gpu_bench::CpuBenchmarkMode::PerCore ||
+                                      cpuCfg.mode == gpu_bench::CpuBenchmarkMode::All;
+        const bool multiRequested = cpuCfg.mode == gpu_bench::CpuBenchmarkMode::MultiCore ||
+                                    cpuCfg.mode == gpu_bench::CpuBenchmarkMode::All;
+        const bool perCoreValid = !perCoreRequested ||
+            (report.perCore.size() == report.processors.size() &&
+             !report.perCore.empty() &&
+             std::all_of(report.perCore.begin(), report.perCore.end(),
+                         [](const gpu_bench::CpuCoreResult& item) { return item.valid; }));
+        const bool multiValid = !multiRequested || report.multiCore.valid;
+        if (!perCoreValid || !multiValid) {
+            std::cerr << "CPU benchmark did not meet its affinity/completion contract; "
+                         "see CPU_ERROR and valid=0 records above.\n";
+            return 3;
+        }
+        if (saveCpuResults) {
+            bool saved = true;
+            bool storageExceptionReported = false;
+            try {
+                if (perCoreRequested) {
+                    const auto stored = MakeStoredCpuResult(report, cpuCfg, false);
+                    const bool thisSaved = gpu_bench::AppendResult(stored);
+                    saved = thisSaved && saved;
+                    if (thisSaved)
+                        std::cout << "[Results] Saved CPU per-core summary as " << stored.id
+                                  << " -> " << gpu_bench::ResultsFilePath() << '\n';
+                }
+                if (multiRequested) {
+                    const auto stored = MakeStoredCpuResult(report, cpuCfg, true);
+                    const bool thisSaved = gpu_bench::AppendResult(stored);
+                    saved = thisSaved && saved;
+                    if (thisSaved)
+                        std::cout << "[Results] Saved CPU multi-core summary as " << stored.id
+                                  << " -> " << gpu_bench::ResultsFilePath() << '\n';
+                }
+            } catch (const std::exception& e) {
+                saved = false;
+                storageExceptionReported = true;
+                std::cerr << "[Results] Warning: CPU result storage failed: "
+                          << e.what() << '\n';
+            }
+            if (!saved && !storageExceptionReported)
+                std::cerr << "[Results] Warning: failed to append one or more CPU summaries.\n";
+        }
+        return 0;
     }
 
     // ---- N-body workload normalisation ----
@@ -753,6 +1131,66 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         benchCfg.difficultyLabel = "Fractal";
     }
 
+    // ---- Versioned GPU Stress v1 normalisation ----
+    // Four bounded fullscreen draws keep the GPU continuously occupied without
+    // turning a frame into one monolithic dispatch/draw. The particle buffer is
+    // unused and remains at the minimum legal allocation size.
+    if (benchCfg.workload == gpu_bench::Workload::GpuStressV1) {
+        if (benchCfg.headless) {
+            std::cerr << "[warn] GPU Stress v1 requires rendering; ignoring --headless.\n";
+            benchCfg.headless = false;
+        }
+        if (benchCfg.gpuStressIter > gpu_bench::kGpuStressV1MaxIter) {
+            std::cerr << "[warn] GPU Stress v1 clamps --iter to "
+                      << gpu_bench::kGpuStressV1MaxIter
+                      << " to keep each draw below watchdog-scale work.\n";
+            benchCfg.gpuStressIter = gpu_bench::kGpuStressV1MaxIter;
+        }
+        benchCfg.particleCount = gpu_bench::kComputeWorkGroupSize;  // unused; minimal alloc
+        benchCfg.particlesOverridden = true;
+        benchCfg.difficultyLabel = "GPU Stress v1";
+    }
+
+    // ---- GPU Burn v1 visual workload normalisation ----
+    // The procedural Plasma Bloom is a fragment-only fixed-step raymarch. It never
+    // consumes the particle buffer; gpu_stress_v1 remains a separate component
+    // score and historical result contract.
+    if (benchCfg.workload == gpu_bench::Workload::GpuBurnV1) {
+        if (benchCfg.headless) {
+            std::cerr << "[warn] GPU Burn v1 requires rendering; ignoring --headless.\n";
+            benchCfg.headless = false;
+        }
+        if (!benchCfg.gpuBurnAutoTune &&
+            benchCfg.gpuBurnIter > gpu_bench::kGpuBurnV1MaxFixedIter) {
+            std::cerr << "[warn] GPU Burn fixed --iter is capped at "
+                      << gpu_bench::kGpuBurnV1MaxFixedIter
+                      << " because an unprobed high value can create multi-second "
+                         "draws on slow GPUs/WARP. Leave --iter unset to auto-tune "
+                         "safely from a 16-step probe.\n";
+            benchCfg.gpuBurnIter = gpu_bench::kGpuBurnV1MaxFixedIter;
+        }
+        if (benchCfg.gpuBurnIter < gpu_bench::kGpuBurnV1DefaultIter) {
+            std::cerr << "[warn] GPU Burn requires at least "
+                      << gpu_bench::kGpuBurnV1DefaultIter
+                      << " fixed steps to preserve the visual workload; clamping --iter.\n";
+            benchCfg.gpuBurnIter = gpu_bench::kGpuBurnV1DefaultIter;
+        }
+        benchCfg.particleCount = gpu_bench::kComputeWorkGroupSize;
+        benchCfg.particlesOverridden = true;
+        benchCfg.difficultyLabel = "GPU Burn v1";
+        // A fast GPU can finish the frame-count warmup before the first
+        // one-second timing window, leaving auto-tune at its deliberately low
+        // probe value. Use the product's timed 15 s flow whenever auto-tune is
+        // requested; an explicit --iter remains available for deterministic
+        // frame-count benchmarking.
+        if (benchCfg.benchmarkMode && benchCfg.gpuBurnAutoTune) {
+            std::cerr << "[warn] Auto-tuned GPU Burn uses timed mode so calibration "
+                         "completes before scoring; use --iter with --benchmark for "
+                         "a fixed frame-count run.\n";
+            benchCfg.benchmarkMode = false;
+        }
+    }
+
     // ---- Volumetric workload normalisation ----
     // Same fragment-only shape as StressFractal: needs a window, particle buffer
     // unused. The per-pixel ray step count (config_.volumetricSteps) is the
@@ -767,16 +1205,55 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         benchCfg.difficultyLabel = "Volumetric";
     }
 
-    // ---- Fluid workload normalisation ----
-    // 2D Eulerian fluid simulation. The particle buffer is unused; the grid
-    // size + Jacobi iteration count drive the score formula
-    // `gridSize^2 * (4 + jacobiIters) / computeSec`. Headless is allowed on
-    // Vulkan (compute-only) but disabled on DX11 (driver doesn't resolve
-    // timestamps headless) — same as SynthPeak.
+    // ---- Cinematic Liquid normalisation ----
+    // Both score contracts use an isolated Vulkan MLS-MPM + density-raymarch
+    // path. V1 is the preserved dam break; the primary id selects the larger
+    // v2 pool with two-way GPU rigid-body coupling.
+    if (gpu_bench::isCinematicLiquidWorkload(benchCfg.workload)) {
+        const bool liquidV2 = benchCfg.workload == gpu_bench::Workload::CinematicLiquid;
+        const char* liquidName = liquidV2 ? "Cinematic Liquid v2" : "Cinematic Liquid v1";
+        if (backend == "auto") {
+            backend = "vulkan";
+        } else if (backend != "vulkan") {
+            std::cerr << liquidName << " is currently Vulkan-only; select --backend vulkan.\n";
+            return 2;
+        }
+        if (runAll || fullAnalysis) {
+            std::cerr << liquidName << " cannot run in a cross-API suite yet; use a Vulkan custom run.\n";
+            return 2;
+        }
+        if (useWarp) {
+            std::cerr << liquidName << " does not support DXGI WARP; select a Vulkan GPU.\n";
+            return 2;
+        }
+        if (benchCfg.headless) {
+            std::cerr << "[warn] Cinematic Liquid requires its raymarched presentation; ignoring --headless.\n";
+            benchCfg.headless = false;
+        }
+        if (benchCfg.hostMemory) {
+            std::cerr << "[warn] " << liquidName
+                      << " uses fixed device-local particle/grid storage; ignoring --host-memory.\n";
+            benchCfg.hostMemory = false;
+        }
+        benchCfg.particleCount = gpu_bench::kComputeWorkGroupSize;  // generic buffer unused
+        benchCfg.particlesOverridden = true;
+        benchCfg.framesInFlight = 1;
+        benchCfg.difficultyLabel = liquidName;
+    }
+
+    // ---- Legacy 2D fluid workload normalisation ----
+    // The historical fluid prototype is a stateful Vulkan compute + render workload. The
+    // particle buffer is unused; one in-flight windowed submission preserves
+    // the simulation chain and exposes the cinematic render pass.
     if (benchCfg.workload == gpu_bench::Workload::Fluid) {
+        if (benchCfg.headless) {
+            std::cerr << "[warn] Legacy 2D Fluid requires rendering; ignoring --headless.\n";
+            benchCfg.headless = false;
+        }
         benchCfg.particleCount = gpu_bench::kComputeWorkGroupSize;  // unused; minimal alloc
         benchCfg.particlesOverridden = true;
-        benchCfg.difficultyLabel = "Fluid";
+        benchCfg.framesInFlight = 1;
+        benchCfg.difficultyLabel = "Legacy 2D Fluid";
     }
 
     // ---- SynthPeak workload normalisation ----
@@ -814,11 +1291,17 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
 
     const std::string shaderDir = ExeDirectory(argv[0]);
 
+#ifdef _WIN32
+    ConfigureBundledRenderDocLayer(shaderDir, benchCfg.captureAtSec > 0.0);
+#endif
+
     // ---- Phase 1: Probe all GPUs and APIs ----
     auto gpus = ProbeGpus();
 
     // Machine-readable GPU list for external front-ends (WinUI launcher).
-    // One line per GPU:  GPU<TAB>index<TAB>name<TAB>vk<TAB>dx12<TAB>dx11<TAB>ogl
+    // One line per GPU: GPU<TAB>index<TAB>name<TAB>vk<TAB>dx12<TAB>dx11<TAB>ogl
+    // followed by optional downlevel DX11 metadata. Older GUI builds safely
+    // ignore the appended fields.
     if (listGpus) {
         for (std::size_t i = 0; i < gpus.size(); ++i) {
             const auto& g = gpus[i];
@@ -826,14 +1309,16 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << (g.supportsVulkan ? 1 : 0) << '\t'
                       << (g.supportsDX12   ? 1 : 0) << '\t'
                       << (g.supportsDX11   ? 1 : 0) << '\t'
-                      << (g.supportsOpenGL ? 1 : 0) << '\n';
+                      << (g.supportsOpenGL ? 1 : 0) << '\t'
+                      << g.dx11FeatureLevel << '\t'
+                      << (g.supportsDX11Compute ? 1 : 0) << '\n';
         }
         return 0;
     }
 
     PrintGpuTable(gpus);
 
-    bool directBenchmark = (backend != "auto") || benchCfg.benchmarkMode || runAll || timeArgGiven;
+    bool directBenchmark = (backend != "auto") || benchmarkArgGiven || runAll || timeArgGiven;
 
     // ---- Build available backends ----
     struct BackendEntry { std::string id; bool hwOnly; };
@@ -988,6 +1473,10 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         allCfg.peakPrecision = benchCfg.peakPrecision;
         allCfg.peakIters     = benchCfg.peakIters;
         allCfg.fractalIter   = benchCfg.fractalIter;
+        allCfg.gpuStressIter = benchCfg.gpuStressIter;
+        allCfg.gpuStressAutoTune = benchCfg.gpuStressAutoTune;
+        allCfg.gpuBurnIter = benchCfg.gpuBurnIter;
+        allCfg.gpuBurnAutoTune = benchCfg.gpuBurnAutoTune;
         allCfg.volumetricSteps = benchCfg.volumetricSteps;
         allCfg.fluidGridSize   = benchCfg.fluidGridSize;
         allCfg.fluidJacobiIters= benchCfg.fluidJacobiIters;
@@ -995,6 +1484,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         allCfg.headless      = benchCfg.headless;
         allCfg.framesInFlight = benchCfg.framesInFlight;
         allCfg.hostMemory    = benchCfg.hostMemory;
+        allCfg.captureAtSec  = benchCfg.captureAtSec;
         if (benchCfg.maxRunTimeSec != 15.0)
             allCfg.maxRunTimeSec = benchCfg.maxRunTimeSec;
         if (benchCfg.benchmarkMode) {
@@ -1005,10 +1495,12 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         std::uint32_t passed = 0, failed = 0;
         for (std::uint32_t i = 0; i < entries.size(); ++i) {
             const auto& e = entries[i];
-            allCfg.gpuDisplayName = e.gpuName;
-            allCfg.adapterLuidHigh = e.luidHigh;
-            allCfg.adapterLuidLow  = e.luidLow;
-            allCfg.vramMB          = e.vramMB;
+            const bool runtimeNamedDevice =
+                e.gpuIdx == -2 || e.backendId == "opengl";
+            allCfg.gpuDisplayName = runtimeNamedDevice ? std::string{} : e.gpuName;
+            allCfg.adapterLuidHigh = runtimeNamedDevice ? 0 : e.luidHigh;
+            allCfg.adapterLuidLow  = runtimeNamedDevice ? 0 : e.luidLow;
+            allCfg.vramMB          = e.gpuIdx == -2 ? 0 : e.vramMB;
             std::cout << "\n>>> [" << (i + 1) << "/" << entries.size()
                       << "] " << e.apiLabel << " / " << e.gpuName << " <<<\n";
             try {
@@ -1066,7 +1558,11 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
 
         if (!gpu_bench::skipGlfwTerminate)
             glfwTerminate();
-        return (failed == entries.size()) ? 1 : 0;
+        // GUI Full Analysis treats the worker exit code as its success signal.
+        // A partial matrix is not a successful full analysis: preserve the
+        // per-entry diagnostics above, but return non-zero if any run failed or
+        // was cancelled instead of silently presenting incomplete charts.
+        return failed > 0 ? 1 : 0;
     }
 
     // ---- Unified main loop ----
@@ -1808,6 +2304,39 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         std::string selectedBackend = backend;
         bool warp = useWarp;
 
+        // Non-interactive callers (notably the WinUI front-end) may select a
+        // GPU while leaving the API on Auto. Resolve against that GPU's actual
+        // capability set instead of choosing the first globally available
+        // hardware API. A selected DXGI software adapter means WARP.
+        if (selectedBackend == "auto" && directBenchmark) {
+            std::int32_t targetIdx = gpuIndex;
+            if (targetIdx < 0 || static_cast<std::size_t>(targetIdx) >= gpus.size())
+                targetIdx = recommendedGpuIdx;
+            if (targetIdx < 0 || static_cast<std::size_t>(targetIdx) >= gpus.size()) {
+                std::cerr << "No GPU is available for automatic API selection.\n";
+                return 1;
+            }
+
+            const auto& target = gpus[static_cast<std::size_t>(targetIdx)];
+            if (target.supportsMetal)         selectedBackend = "metal";
+            else if (target.supportsVulkan)   selectedBackend = "vulkan";
+            else if (target.supportsDX12)     selectedBackend = "dx12";
+            else if (target.supportsDX11 &&
+                     (gpu_bench::isFragmentOnlyWorkload(benchCfg.workload) ||
+                      target.supportsDX11Compute))
+                                                selectedBackend = "dx11";
+            else if (target.supportsOpenGL)   selectedBackend = "opengl";
+            else {
+                std::cerr << "The selected GPU exposes no supported graphics API.\n";
+                return 1;
+            }
+            if (target.isSoftware &&
+                (selectedBackend == "dx11" || selectedBackend == "dx12"))
+                warp = true;
+            std::cout << "[Graphics API] Auto-selected " << selectedBackend
+                      << " for " << target.name << "\n";
+        }
+
         if (selectedBackend == "auto") {
             if (available.empty()) {
                 std::cerr << "No Graphics API available.\n";
@@ -1853,9 +2382,45 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             std::cout << "[Graphics API] Selected: " << selectedBackend << std::endl;
         }
 
+        if (!warp && gpuIndex >= 0 &&
+            static_cast<std::size_t>(gpuIndex) < gpus.size() &&
+            gpus[static_cast<std::size_t>(gpuIndex)].isSoftware &&
+            (selectedBackend == "dx11" || selectedBackend == "dx12")) {
+            warp = true;
+        }
+
         if (warp && selectedBackend != "dx11" && selectedBackend != "dx12") {
             warp = false;
         }
+
+#ifdef _WIN32
+        if (selectedBackend == "opengl") {
+            // WGL exposes the renderer chosen by Windows/the driver but has no
+            // standard API for selecting an adapter by our DXGI/Vulkan index.
+            // ProbeGpuApis marks only the adapter whose name matched
+            // GL_RENDERER.  Reject a contradictory --gpu selection instead of
+            // running the default renderer and saving it under the wrong GPU.
+            auto glGpu = std::find_if(gpus.begin(), gpus.end(),
+                [](const GpuInfo& g) { return g.supportsOpenGL; });
+            if (glGpu == gpus.end()) {
+                std::cerr << "OpenGL was selected, but no probed adapter matches GL_RENDERER.\n";
+                if (directBenchmark) return 1;
+                continue;
+            }
+            const auto actualGlIndex = static_cast<std::int32_t>(
+                std::distance(gpus.begin(), glGpu));
+            if (gpuIndex >= 0 && gpuIndex != actualGlIndex) {
+                std::cerr << "OpenGL on Windows cannot select GPU index " << gpuIndex
+                          << "; the active GL_RENDERER is " << glGpu->name
+                          << " (GPU index " << actualGlIndex << ").\n"
+                          << "Use Windows Graphics settings to change the GPU assigned "
+                             "to this executable, then re-run detection.\n";
+                if (directBenchmark) return 1;
+                continue;
+            }
+            gpuIndex = actualGlIndex;
+        }
+#endif
 
 #ifdef __linux__
         // On Linux, let users interactively choose a GPU for OpenGL
@@ -1924,8 +2489,17 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                 effectiveGpuIndex = gpus[gpuIndex].vkPhysDevIndex;
             } else if (selectedBackend == "dx11" || selectedBackend == "dx12") {
                 effectiveGpuIndex = gpus[gpuIndex].dxgiRawIndex;
+            } else if (selectedBackend == "opengl") {
+#ifdef _WIN32
+                // WGL adapter selection is controlled by Windows, not by an
+                // application-visible GPU index. Metadata was resolved above
+                // from the adapter that matched GL_RENDERER.
+                effectiveGpuIndex = -1;
+#else
+                effectiveGpuIndex = gpuIndex;
+#endif
             } else {
-                effectiveGpuIndex = gpuIndex;  // Metal / OpenGL: use as-is
+                effectiveGpuIndex = gpuIndex;  // Metal: use as-is
             }
         }
 
@@ -1948,28 +2522,34 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             // NvOptimusEnablement / AmdPowerXpressRequestHighPerformance
             // (exported above) hint the driver on Optimus/PowerXpress laptops,
             // but have no effect on desktop multi-GPU systems.
-            if (gpuIndex < 0) {
-                std::cout << "\n[OpenGL] Note: OpenGL uses the OS-assigned GPU "
-                             "(typically the discrete GPU).\n"
-                          << "  To override, go to Windows Settings > System > "
-                             "Display > Graphics\n"
-                          << "  and assign this executable to the desired GPU.\n"
-                          << std::endl;
-            }
+            std::cout << "\n[OpenGL] Windows assigned GL_RENDERER to "
+                      << gpus[static_cast<std::size_t>(gpuIndex)].name << ".\n"
+                      << "  To change it, use Windows Settings > System > "
+                         "Display > Graphics, then re-run detection.\n"
+                      << std::endl;
 #endif
         }
 
         // Set display name and LUID for multi-GPU disambiguation.
         // When no --gpu is given (gpuIndex == -1), fall back to the auto-
         // recommended GPU so that VRAM and display name are always populated.
-        std::int32_t resolvedIdx = gpuIndex;
-        if (resolvedIdx < 0 && !gpus.empty())
-            resolvedIdx = recommendedGpuIdx;
-        if (resolvedIdx >= 0 && static_cast<std::size_t>(resolvedIdx) < gpus.size()) {
-            benchCfg.gpuDisplayName = gpus[resolvedIdx].name;
-            benchCfg.adapterLuidHigh = gpus[resolvedIdx].luidHigh;
-            benchCfg.adapterLuidLow  = gpus[resolvedIdx].luidLow;
-            benchCfg.vramMB          = static_cast<std::uint32_t>(gpus[resolvedIdx].vramMB);
+        if (warp) {
+            // Let the backend's real WARP device string populate the result;
+            // never inherit a previously recommended hardware GPU name/LUID.
+            benchCfg.gpuDisplayName.clear();
+            benchCfg.adapterLuidHigh = 0;
+            benchCfg.adapterLuidLow = 0;
+            benchCfg.vramMB = 0;
+        } else {
+            std::int32_t resolvedIdx = gpuIndex;
+            if (resolvedIdx < 0 && !gpus.empty())
+                resolvedIdx = recommendedGpuIdx;
+            if (resolvedIdx >= 0 && static_cast<std::size_t>(resolvedIdx) < gpus.size()) {
+                benchCfg.gpuDisplayName = gpus[resolvedIdx].name;
+                benchCfg.adapterLuidHigh = gpus[resolvedIdx].luidHigh;
+                benchCfg.adapterLuidLow  = gpus[resolvedIdx].luidLow;
+                benchCfg.vramMB          = static_cast<std::uint32_t>(gpus[resolvedIdx].vramMB);
+            }
         }
 
         // -- Create and run the backend --
@@ -1977,9 +2557,15 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             std::unique_ptr<gpu_bench::AppBase> app;
 
 #ifdef HAVE_VULKAN
-            if (selectedBackend == "vulkan")
+            if (selectedBackend == "vulkan") {
+                if (!VulkanLoaderAvailable()) {
+                    throw std::runtime_error(
+                        "Vulkan was selected, but vulkan-1.dll is not installed. "
+                        "Install a Vulkan-capable display driver or select DirectX 11/12.");
+                }
                 app = std::make_unique<gpu_bench::VulkanBackend>(
                     effectiveGpuIndex, shaderDir, benchCfg);
+            }
 #endif
 #ifdef HAVE_DX12
             if (selectedBackend == "dx12")
@@ -2010,9 +2596,16 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
 
             std::cout << "Backend: " << app->GetBackendName()
                       << "  |  V-Sync: " << (benchCfg.vsync ? "ON" : "OFF")
-                      << "  |  Memory: " << (benchCfg.hostMemory ? "Host-visible" : "Device-local")
-                      << "  |  Particles: " << benchCfg.particleCount
-                      << " (" << benchCfg.difficultyLabel << ")";
+                      << "  |  Memory: " << (benchCfg.hostMemory ? "Host-visible" : "Device-local");
+            if (benchCfg.workload == gpu_bench::Workload::GpuBurnV1)
+                std::cout << "  |  Workload: GPU Burn v1";
+            else if (benchCfg.workload == gpu_bench::Workload::CinematicLiquid)
+                std::cout << "  |  Workload: Cinematic Liquid v2 (fixed pool quality)";
+            else if (benchCfg.workload == gpu_bench::Workload::CinematicLiquidV1)
+                std::cout << "  |  Workload: Cinematic Liquid v1 (legacy fixed quality)";
+            else
+                std::cout << "  |  Particles: " << benchCfg.particleCount
+                          << " (" << benchCfg.difficultyLabel << ")";
             if (benchCfg.benchmarkMode)
                 std::cout << "  |  Benchmark: " << benchCfg.benchFrames << " frames";
             else if (benchCfg.maxRunTimeSec > 0.0)

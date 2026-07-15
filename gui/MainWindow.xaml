@@ -32,6 +32,9 @@
                 <NavigationViewItem x:Name="NavRun" Content="Run" Tag="0" IsSelected="True">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE768;"/></NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem x:Name="NavCpu" Content="CPU" Tag="5">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE950;"/></NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem x:Name="NavHistory" Content="History" Tag="1">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE81C;"/></NavigationViewItem.Icon>
                 </NavigationViewItem>
@@ -69,8 +72,8 @@
                                               SelectedIndex="1" SelectionChanged="OnPresetChanged">
                                         <ComboBoxItem x:Name="PresetQuick">Quick run (best API / GPU, Medium)</ComboBoxItem>
                                         <ComboBoxItem x:Name="PresetCustom">Custom run (choose API / GPU / workload)</ComboBoxItem>
-                                        <ComboBoxItem x:Name="PresetFullOne">Full analysis — one GPU (all APIs + RenderDoc + charts)</ComboBoxItem>
-                                        <ComboBoxItem x:Name="PresetFullAll">Full analysis — all GPUs × APIs (+ RenderDoc + charts)</ComboBoxItem>
+                                        <ComboBoxItem x:Name="PresetFullOne">Full analysis — selected workload / one GPU (all APIs + RenderDoc + charts)</ComboBoxItem>
+                                        <ComboBoxItem x:Name="PresetFullAll">Full analysis — selected workload / all GPUs × APIs (+ RenderDoc + charts)</ComboBoxItem>
                                         <ComboBoxItem x:Name="PresetFlights">Flights test — one GPU (all APIs, custom flights)</ComboBoxItem>
                                         <ComboBoxItem x:Name="PresetParticles">Particle test — one GPU (all APIs, custom particles)</ComboBoxItem>
                                         <ComboBoxItem x:Name="PresetHeadless">Headless compute — one GPU (all APIs, pure compute)</ComboBoxItem>
@@ -96,11 +99,17 @@
                                         <ComboBox x:Name="WorkloadBox" Grid.Column="2" Header="Workload" MinWidth="120"
                                                   HorizontalAlignment="Stretch" SelectedIndex="0"
                                                   SelectionChanged="OnWorkloadChanged">
-                                            <ComboBoxItem x:Name="WorkloadStream" Tag="stream">stream — bandwidth (GB/s)</ComboBoxItem>
-                                            <ComboBoxItem x:Name="WorkloadNBody" Tag="nbody">nbody — FP32 compute (GFLOP/s)</ComboBoxItem>
-                                            <ComboBoxItem x:Name="WorkloadStress" Tag="stress">stress — fragment fill (G-iter/s)</ComboBoxItem>
-                                            <ComboBoxItem x:Name="WorkloadSynthPeak" Tag="synthpeak">synthpeak — peak ALU (GFLOPS/GIOPS)</ComboBoxItem>
-                                            <ComboBoxItem x:Name="WorkloadRender3D" Tag="render3d">render3d — 3D billboards (MQuad/s)</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadStream" Tag="stream">Particle — Memory Throughput</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadGpuBurn" Tag="gpu_burn">GPU Burn — Plasma Bloom</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadCinematicLiquid" Tag="cinematic_liquid">Cinematic Liquid v2 — Interactive Pool</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadGpuStress" Tag="gpu_stress">GraphicsBurn v1 / Component (Advanced)</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadNBody" Tag="nbody">N-Body — Advanced Compute</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadSynthPeak" Tag="synthpeak">SynthPeak — Advanced Synthetic</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadStress" Tag="stress">Legacy Stress v1 — Fragment ALU/SFU</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadRender3D" Tag="render3d">Legacy 3D Prototype — Billboards</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadVolumetric" Tag="volumetric">Volumetric — Experimental Raymarch</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadFluid" Tag="fluid">Other / Legacy 2D Fluid — Vulkan-only</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadCinematicLiquidV1" Tag="cinematic_liquid_v1">Other / Legacy Cinematic Liquid v1 — Dam Break</ComboBoxItem>
                                         </ComboBox>
                                         <ComboBox x:Name="PrecisionBox" Grid.Column="3" MinWidth="100"
                                                   HorizontalAlignment="Stretch" SelectedIndex="0" IsEnabled="False">
@@ -110,6 +119,8 @@
                                             <ComboBoxItem x:Name="PrecisionInt32" Tag="int32">int32 — integer ops</ComboBoxItem>
                                         </ComboBox>
                                     </Grid>
+                                    <InfoBar x:Name="WorkloadInfo" IsOpen="True" IsClosable="False"
+                                             Severity="Informational"/>
                                     <!-- Responsive: Extra stretches/shrinks so it never clips at min width. -->
                                     <Grid ColumnSpacing="16">
                                         <Grid.ColumnDefinitions>
@@ -137,6 +148,10 @@
                                                      PlaceholderText="multiple of 256" Visibility="Collapsed"/>
                                         </StackPanel>
                                         <TextBox x:Name="ExtraBox" Grid.Column="2" Grid.ColumnSpan="2" Header="Extra" PlaceholderText="optional"
+                                                 Visibility="Collapsed"
+                                                 HorizontalAlignment="Stretch"/>
+                                        <TextBox x:Name="FluidJacobiBox" Grid.Column="3" Header="Jacobi iterations"
+                                                 PlaceholderText="optional; default 30"
                                                  Visibility="Collapsed"
                                                  HorizontalAlignment="Stretch"/>
                                     </Grid>
@@ -193,6 +208,135 @@
                     </StackPanel>
                 </Grid>
 
+                <!-- ===================== CPU page ===================== -->
+                <Grid x:Name="CpuPage" Visibility="Collapsed" Margin="28,12,28,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,12">
+                        <TextBlock x:Name="CpuTitle" Text="CPU Benchmark"
+                                   Style="{StaticResource TitleTextBlockStyle}"/>
+                        <TextBlock x:Name="CpuNameText" Text="CPU" Opacity="0.72"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <Border Grid.Row="1" Padding="20" Margin="0,0,0,12"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="8">
+                        <StackPanel Spacing="14">
+                            <InfoBar x:Name="CpuInfo" IsOpen="True" IsClosable="False"
+                                     Severity="Informational"
+                                     Message="Headless CPU test. No 3D render window is opened."/>
+                            <Grid ColumnSpacing="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1.5*"/>
+                                    <ColumnDefinition Width="1.3*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ComboBox x:Name="CpuModeBox" Grid.Column="0" Header="Test mode"
+                                          SelectedIndex="2" HorizontalAlignment="Stretch">
+                                    <ComboBoxItem x:Name="CpuModePerCore" Tag="per-core">Each logical processor</ComboBoxItem>
+                                    <ComboBoxItem x:Name="CpuModeMulti" Tag="multi">All cores together</ComboBoxItem>
+                                    <ComboBoxItem x:Name="CpuModeAll" Tag="all">Per-core + all-core</ComboBoxItem>
+                                </ComboBox>
+                                <ComboBox x:Name="CpuDurationPresetBox" Grid.Column="1" Header="Duration preset"
+                                          SelectedIndex="0" HorizontalAlignment="Stretch"
+                                          SelectionChanged="OnCpuDurationPresetChanged">
+                                    <ComboBoxItem x:Name="CpuDurationQuick" Tag="1">Quick (1 s)</ComboBoxItem>
+                                    <ComboBoxItem x:Name="CpuDurationFormal" Tag="15">Formal (15 s)</ComboBoxItem>
+                                </ComboBox>
+                                <NumberBox x:Name="CpuTimeBox" Grid.Column="2" Header="Seconds per test"
+                                           Value="1" Minimum="0.1" Maximum="3600" SmallChange="0.5"
+                                           SpinButtonPlacementMode="Compact"
+                                           ValueChanged="OnCpuTimeChanged"/>
+                                <NumberBox x:Name="CpuWarmupBox" Grid.Column="3" Header="Warm-up seconds"
+                                           Value="0.2" Minimum="0" Maximum="60" SmallChange="0.1"
+                                           SpinButtonPlacementMode="Compact"/>
+                            </Grid>
+                            <TextBlock x:Name="CpuDurationHint" Opacity="0.72" TextWrapping="Wrap"
+                                       Text="Per-core duration is applied separately to every logical processor; the formal preset can take a long time."/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="2" Padding="16" Margin="0,0,0,12"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="8">
+                        <StackPanel Spacing="8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="CpuCurrentCoreText" Text="Ready" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="CpuProgressText" Grid.Column="1" Text="0%" Opacity="0.72"/>
+                            </Grid>
+                            <ProgressBar x:Name="CpuProgressBar" Minimum="0" Maximum="100" Value="0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid Grid.Row="3" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Padding="16"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1" CornerRadius="8">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock x:Name="CpuPerCoreTitle" Text="Per-logical-processor results"
+                                           FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                <ListView x:Name="CpuCoreResultsList" Grid.Row="1" SelectionMode="None"
+                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            </Grid>
+                        </Border>
+                        <Border Grid.Column="1" Padding="16"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1" CornerRadius="8">
+                            <StackPanel Spacing="14">
+                                <TextBlock x:Name="CpuSummaryTitle" Text="Summary" FontWeight="SemiBold"/>
+                                <StackPanel Spacing="4">
+                                    <TextBlock x:Name="CpuAverageLabel" Text="Per-core average" Opacity="0.72"/>
+                                    <TextBlock x:Name="CpuAverageResult" Text="&#x2014;" FontSize="20" FontWeight="SemiBold"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <StackPanel Spacing="4">
+                                    <TextBlock x:Name="CpuMultiLabel" Text="All-core result" Opacity="0.72"/>
+                                    <TextBlock x:Name="CpuMultiResult" Text="&#x2014;" FontSize="20" FontWeight="SemiBold"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <Expander x:Name="CpuOutputExpander" Header="Raw CLI output">
+                                    <TextBox x:Name="CpuOutputBox" IsReadOnly="True" AcceptsReturn="True"
+                                             Height="160" FontFamily="Consolas" TextWrapping="NoWrap"
+                                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                             ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                </Expander>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="12"
+                                Margin="0,12,0,0" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <TextBlock x:Name="CpuStatusText" Text="Ready" VerticalAlignment="Center"/>
+                        <Button x:Name="CpuCancelButton" Content="Cancel" Click="OnCpuCancel" IsEnabled="False"/>
+                        <Button x:Name="CpuRunButton" Content="Run CPU Benchmark" Click="OnCpuRun"
+                                Style="{StaticResource AccentButtonStyle}"/>
+                    </StackPanel>
+                </Grid>
+
                 <!-- ===================== History page ===================== -->
                 <Grid x:Name="HistoryPage" Visibility="Collapsed" Margin="28,12,28,12">
                     <Grid.RowDefinitions>
@@ -208,6 +352,10 @@
                         <Button x:Name="RefreshButton" Content="Refresh" Click="OnRefreshHistory" VerticalAlignment="Bottom"/>
                         <Button x:Name="DeleteButton" Content="Delete selected" Click="OnDeleteSelected"
                                 VerticalAlignment="Bottom" Background="#C42B1C" Foreground="White"/>
+                        <Button x:Name="OpenResultsFolderButton" Content="Open results folder"
+                                Click="OnOpenResultsFolder" VerticalAlignment="Bottom"/>
+                        <Button x:Name="OpenCapturesFolderButton" Content="Open captures folder"
+                                Click="OnOpenCapturesFolder" VerticalAlignment="Bottom"/>
                     </StackPanel>
 
                     <!-- Sort + workload/particle/GPU filters + time range -->

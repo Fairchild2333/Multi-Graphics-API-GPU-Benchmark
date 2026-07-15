@@ -1,0 +1,133 @@
+#version 450
+
+// Cinematic Liquid v2 pass 3: density estimate and pressure/viscous stress
+// scatter.  The stress model and APIC kernel intentionally match v1 so a v2
+// score increase reflects the larger scene and rigid coupling, not a changed
+// constitutive model.
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+struct Particle { vec4 position; vec4 velocity; vec4 C0; vec4 C1; vec4 C2; };
+struct GridCell { int vx; int vy; int vz; int mass; };
+struct BodyState {
+    vec4 positionType; vec4 orientation;
+    vec4 linearVelocityInvMass; vec4 angularVelocityInvInertia;
+    vec4 shape0; vec4 shape1; vec4 material; vec4 color;
+};
+struct BodyImpulse { ivec4 linear; ivec4 angular; };
+
+layout(set = 0, binding = 0, std430) readonly buffer ParticleBuffer {
+    Particle particles[];
+} particleBuffer;
+layout(set = 0, binding = 1, std430) buffer GridBuffer {
+    GridCell cells[];
+} gridBuffer;
+layout(r32f, set = 0, binding = 2) uniform writeonly image3D densityVolume;
+layout(set = 0, binding = 3, std430) readonly buffer BodyStateBuffer {
+    BodyState bodies[];
+} bodyStateBuffer;
+layout(set = 0, binding = 4, std430) buffer BodyImpulseBuffer {
+    BodyImpulse impulses[];
+} bodyImpulseBuffer;
+
+layout(push_constant) uniform LiquidV2Params {
+    uvec4 gridSizeAndCount;
+    vec4 simulation;
+    vec4 material;
+    vec4 gridOriginDx;
+    vec4 collision;
+    vec4 coupling;
+    uvec4 scene;
+    vec4 pool;
+} pc;
+
+const float kFixedContributionLimit = 536870911.0;
+
+float fixedScale() { return max(abs(pc.material.z), 1.0); }
+float decodeFixed(int v) { return float(v) / fixedScale(); }
+int encodeFixedSigned(float v) {
+    return int(round(clamp(v * fixedScale(),
+                           -kFixedContributionLimit,
+                            kFixedContributionLimit)));
+}
+vec3 quadraticWeights(float x) {
+    float a = 1.5 - x;
+    float b = x - 1.0;
+    float c = x - 0.5;
+    return vec3(0.5 * a * a, 0.75 - b * b, 0.5 * c * c);
+}
+bool insideGrid(ivec3 n, ivec3 s) {
+    return all(greaterThanEqual(n, ivec3(0))) && all(lessThan(n, s));
+}
+uint gridIndex(ivec3 n) {
+    uvec3 c = uvec3(n);
+    return c.x + pc.gridSizeAndCount.x *
+                 (c.y + pc.gridSizeAndCount.y * c.z);
+}
+
+void main() {
+    uint particleIndex = gl_GlobalInvocationID.x;
+    if (particleIndex >= pc.gridSizeAndCount.w ||
+        any(lessThan(pc.gridSizeAndCount.xyz, uvec3(3u)))) return;
+
+    float dt = max(pc.simulation.x, 0.0);
+    float restDensity = max(pc.simulation.z, 1.0e-6);
+    float stiffness = max(pc.simulation.w, 0.0);
+    float viscosity = max(pc.material.x, 0.0);
+    float particleMass = max(pc.material.y, 0.0);
+    float dx = max(abs(pc.gridOriginDx.w), 1.0e-6);
+    if (particleMass == 0.0 || dt == 0.0) return;
+
+    Particle particle = particleBuffer.particles[particleIndex];
+    vec3 gridPosition = (particle.position.xyz - pc.gridOriginDx.xyz) / dx;
+    ivec3 base = ivec3(floor(gridPosition - vec3(0.5)));
+    vec3 fractional = gridPosition - vec3(base);
+    vec3 wx = quadraticWeights(fractional.x);
+    vec3 wy = quadraticWeights(fractional.y);
+    vec3 wz = quadraticWeights(fractional.z);
+    ivec3 gridSize = ivec3(pc.gridSizeAndCount.xyz);
+
+    float interpolatedMass = 0.0;
+    for (int z = 0; z < 3; ++z) {
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 3; ++x) {
+                ivec3 node = base + ivec3(x, y, z);
+                if (!insideGrid(node, gridSize)) continue;
+                float weight = wx[x] * wy[y] * wz[z];
+                interpolatedMass += weight * max(
+                    decodeFixed(gridBuffer.cells[gridIndex(node)].mass), 0.0);
+            }
+        }
+    }
+
+    float density = interpolatedMass / max(dx * dx * dx, 1.0e-12);
+    float densityFloor = restDensity * max(pc.collision.z, 1.0e-3);
+    float particleVolume = particleMass / max(density, densityFloor);
+    float compression = max(density / restDensity - 1.0, 0.0);
+    float pressure = stiffness * compression;
+
+    mat3 C = mat3(particle.C0.xyz, particle.C1.xyz, particle.C2.xyz);
+    mat3 stress = -pressure * mat3(1.0) + viscosity * (C + transpose(C));
+    mat3 impulseMatrix = (-dt * particleVolume * 4.0 / (dx * dx)) * stress;
+
+    for (int z = 0; z < 3; ++z) {
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 3; ++x) {
+                ivec3 offset = ivec3(x, y, z);
+                ivec3 node = base + offset;
+                if (!insideGrid(node, gridSize)) continue;
+                float weight = wx[x] * wy[y] * wz[z];
+                if (weight <= 0.0) continue;
+                vec3 dpos = (vec3(offset) - fractional) * dx;
+                vec3 impulse = weight * (impulseMatrix * dpos);
+                uint index = gridIndex(node);
+                atomicAdd(gridBuffer.cells[index].vx,
+                          encodeFixedSigned(impulse.x));
+                atomicAdd(gridBuffer.cells[index].vy,
+                          encodeFixedSigned(impulse.y));
+                atomicAdd(gridBuffer.cells[index].vz,
+                          encodeFixedSigned(impulse.z));
+            }
+        }
+    }
+}

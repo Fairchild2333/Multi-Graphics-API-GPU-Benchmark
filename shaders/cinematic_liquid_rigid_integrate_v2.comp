@@ -1,0 +1,370 @@
+#version 450
+
+// Cinematic Liquid v2 rigid integration.  Exactly one 32-lane workgroup must
+// be dispatched.  All body states are snapshotted in shared memory before
+// integration and again before pair contacts, avoiding cross-workgroup races.
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+const int BODY_DUCK = 0;
+const int BODY_PLAY_BALL = 1;
+const int BODY_ANCHORED_BOAT = 2;
+const int BODY_SINK_BALL = 3;
+const uint MAX_BODIES = 32u;
+// The sphere must have enough real free-fall time to strike the shallow pool
+// before the fixed 5 s capture.  Air drag is handled separately below; this is
+// a genuine gravity release, not a prescribed crane trajectory.
+const float SINK_BALL_RELEASE_TIME = 4.28;
+const float SINK_BALL_START_Y = 1.65;
+const vec2 BOAT_TETHER_ANCHOR_XZ = vec2(1.25, 0.50);
+
+struct Particle { vec4 position; vec4 velocity; vec4 C0; vec4 C1; vec4 C2; };
+struct GridCell { int vx; int vy; int vz; int mass; };
+struct BodyState {
+    vec4 positionType;
+    vec4 orientation;
+    vec4 linearVelocityInvMass;
+    vec4 angularVelocityInvInertia;
+    vec4 shape0;
+    vec4 shape1;
+    vec4 material;
+    vec4 color;
+};
+struct BodyImpulse { ivec4 linear; ivec4 angular; };
+
+layout(set = 0, binding = 0, std430) readonly buffer ParticleBuffer {
+    Particle particles[];
+} particleBuffer;
+layout(set = 0, binding = 1, std430) readonly buffer GridBuffer {
+    GridCell cells[];
+} gridBuffer;
+layout(r32f, set = 0, binding = 2) uniform writeonly image3D densityVolume;
+layout(set = 0, binding = 3, std430) buffer BodyStateBuffer {
+    BodyState bodies[];
+} bodyStateBuffer;
+layout(set = 0, binding = 4, std430) readonly buffer BodyImpulseBuffer {
+    BodyImpulse impulses[];
+} bodyImpulseBuffer;
+
+layout(push_constant) uniform LiquidV2Params {
+    uvec4 gridSizeAndCount;
+    vec4 simulation;
+    vec4 material;
+    vec4 gridOriginDx;
+    vec4 collision;
+    vec4 coupling;
+    uvec4 scene;
+    vec4 pool;
+} pc;
+
+shared BodyState initialStates[32];
+shared BodyState predictedStates[32];
+
+float bodyFixedScale() { return max(abs(pc.coupling.x), 1.0); }
+vec3 decodeImpulse(ivec3 v) { return vec3(v) / bodyFixedScale(); }
+
+vec4 safeQuaternion(vec4 q) {
+    float q2 = dot(q, q);
+    return q2 > 1.0e-10 ? q * inversesqrt(q2) : vec4(0.0, 0.0, 0.0, 1.0);
+}
+vec4 quaternionMultiply(vec4 a, vec4 b) {
+    return vec4(a.w * b.xyz + b.w * a.xyz + cross(a.xyz, b.xyz),
+                a.w * b.w - dot(a.xyz, b.xyz));
+}
+vec3 rotateByQuaternion(vec4 q, vec3 v) {
+    q = safeQuaternion(q);
+    return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+}
+vec4 integrateOrientation(vec4 q, vec3 worldAngularVelocity, float dt) {
+    q = safeQuaternion(q);
+    q += 0.5 * dt * quaternionMultiply(vec4(worldAngularVelocity, 0.0), q);
+    return safeQuaternion(q);
+}
+
+float bodyBoundingRadius(BodyState body) {
+    int type = int(round(body.positionType.w));
+    if (type == BODY_PLAY_BALL || type == BODY_SINK_BALL)
+        return max(body.shape0.x, 0.01);
+    if (type == BODY_DUCK) {
+        float bodyRadius = length(max(abs(body.shape0.xyz), vec3(0.01)));
+        float headRadius = max(body.shape1.x, 0.01);
+        float headReach = length(vec2(body.shape1.y, body.shape1.z)) +
+                          headRadius + max(body.shape1.w, 0.0);
+        return max(bodyRadius, headReach);
+    }
+    if (type == BODY_ANCHORED_BOAT)
+        return length(max(abs(body.shape0.xyz), vec3(0.01)));
+    return 0.01;
+}
+
+float bodyBottomExtent(BodyState body) {
+    int type = int(round(body.positionType.w));
+    if (type == BODY_PLAY_BALL || type == BODY_SINK_BALL)
+        return max(body.shape0.x, 0.01);
+    if (type == BODY_ANCHORED_BOAT)
+        return max(1.36 * abs(body.shape0.y), 0.04);
+    if (type == BODY_DUCK)
+        return max(abs(body.shape0.y), 0.04);
+    return 0.01;
+}
+
+vec3 collideVelocity(vec3 velocity, vec3 normal,
+                     float restitution, float friction) {
+    float normalSpeed = dot(velocity, normal);
+    if (normalSpeed >= 0.0) return velocity;
+    vec3 tangent = velocity - normalSpeed * normal;
+    return tangent * (1.0 - clamp(friction, 0.0, 1.0)) -
+           clamp(restitution, 0.0, 1.0) * normalSpeed * normal;
+}
+
+void solveBodyPair(uint selfIndex, BodyState other,
+                   inout BodyState current) {
+    float inverseMassA = max(current.linearVelocityInvMass.w, 0.0);
+    float inverseMassB = max(other.linearVelocityInvMass.w, 0.0);
+    float inverseMassSum = inverseMassA + inverseMassB;
+    if (inverseMassA <= 0.0 || inverseMassSum <= 0.0) return;
+
+    vec3 delta = current.positionType.xyz - other.positionType.xyz;
+    float distanceSquared = dot(delta, delta);
+    float minimumDistance = bodyBoundingRadius(current) +
+                            bodyBoundingRadius(other);
+    if (distanceSquared >= minimumDistance * minimumDistance) return;
+
+    float distance = sqrt(max(distanceSquared, 1.0e-12));
+    vec3 normal = distance > 1.0e-5
+        ? delta / distance
+        : normalize(vec3(0.37 + float(selfIndex) * 0.11, 0.71, 0.43));
+    vec3 relativeVelocity = current.linearVelocityInvMass.xyz -
+                            other.linearVelocityInvMass.xyz;
+    float normalSpeed = dot(relativeVelocity, normal);
+
+    if (normalSpeed < 0.0) {
+        float restitution = clamp(max(current.material.x, other.material.x),
+                                  0.0, 1.0);
+        float normalImpulse = -(1.0 + restitution) * normalSpeed /
+                              inverseMassSum;
+        current.linearVelocityInvMass.xyz +=
+            normal * (normalImpulse * inverseMassA);
+
+        vec3 tangent = relativeVelocity - normalSpeed * normal;
+        float tangentLength = length(tangent);
+        if (tangentLength > 1.0e-6) {
+            tangent /= tangentLength;
+            float friction = clamp(sqrt(max(current.material.y, 0.0) *
+                                        max(other.material.y, 0.0)), 0.0, 1.0);
+            float tangentImpulse = min(tangentLength / inverseMassSum,
+                                       normalImpulse * friction);
+            current.linearVelocityInvMass.xyz -=
+                tangent * (tangentImpulse * inverseMassA);
+        }
+    }
+
+    float penetration = minimumDistance - distance;
+    current.positionType.xyz += normal * penetration *
+        (inverseMassA / inverseMassSum) * 0.72;
+}
+
+void constrainToPool(float horizontalRadius, float bottomExtent,
+                     inout BodyState body) {
+    float dx = max(abs(pc.gridOriginDx.w), 1.0e-6);
+    float padding = max(pc.material.w, 0.0) * dx;
+    vec3 domainMinimum = pc.gridOriginDx.xyz + vec3(padding);
+    vec3 domainMaximum = pc.gridOriginDx.xyz +
+        vec3(pc.gridSizeAndCount.xyz - uvec3(1u)) * dx -
+        vec3(padding);
+    vec3 rawMaximum = pc.gridOriginDx.xyz +
+        vec3(pc.gridSizeAndCount.xyz - uvec3(1u)) * dx;
+    vec2 centre = 0.5 * (pc.gridOriginDx.xz + rawMaximum.xz);
+    vec2 halfExtent = max(0.5 * (rawMaximum.xz - pc.gridOriginDx.xz) -
+                          vec2(max(pc.pool.y, 0.0) + horizontalRadius),
+                          vec2(dx));
+    vec3 minimum = vec3(centre.x - halfExtent.x,
+                        max(domainMinimum.y + bottomExtent,
+                            pc.pool.z + bottomExtent),
+                        centre.y - halfExtent.y);
+    vec3 maximum = vec3(centre.x + halfExtent.x,
+                        domainMaximum.y - bottomExtent,
+                        centre.y + halfExtent.y);
+
+    float e = max(body.material.x, pc.collision.x);
+    float f = max(body.material.y, pc.collision.y);
+    if (body.positionType.x < minimum.x) {
+        body.positionType.x = minimum.x;
+        body.linearVelocityInvMass.xyz = collideVelocity(
+            body.linearVelocityInvMass.xyz, vec3(1,0,0), e, f);
+    } else if (body.positionType.x > maximum.x) {
+        body.positionType.x = maximum.x;
+        body.linearVelocityInvMass.xyz = collideVelocity(
+            body.linearVelocityInvMass.xyz, vec3(-1,0,0), e, f);
+    }
+    if (body.positionType.z < minimum.z) {
+        body.positionType.z = minimum.z;
+        body.linearVelocityInvMass.xyz = collideVelocity(
+            body.linearVelocityInvMass.xyz, vec3(0,0,1), e, f);
+    } else if (body.positionType.z > maximum.z) {
+        body.positionType.z = maximum.z;
+        body.linearVelocityInvMass.xyz = collideVelocity(
+            body.linearVelocityInvMass.xyz, vec3(0,0,-1), e, f);
+    }
+    if (body.positionType.y < minimum.y) {
+        body.positionType.y = minimum.y;
+        body.linearVelocityInvMass.xyz = collideVelocity(
+            body.linearVelocityInvMass.xyz, vec3(0,1,0), e, f);
+        body.angularVelocityInvInertia.xyz *= 1.0 - clamp(f, 0.0, 0.95);
+    }
+
+    float cornerRadius = clamp(pc.pool.x - horizontalRadius, 0.0,
+        max(min(halfExtent.x, halfExtent.y), 0.0));
+    if (cornerRadius > dx) {
+        vec2 relative = body.positionType.xz - centre;
+        vec2 cornerCentre = sign(relative) *
+            max(halfExtent - vec2(cornerRadius), vec2(0.0));
+        vec2 radial = relative - cornerCentre;
+        if (abs(relative.x) > halfExtent.x - cornerRadius &&
+            abs(relative.y) > halfExtent.y - cornerRadius &&
+            length(radial) > cornerRadius) {
+            vec2 inward = -normalize(radial + vec2(1.0e-8));
+            body.positionType.xz = centre + cornerCentre -
+                                   inward * cornerRadius;
+            body.linearVelocityInvMass.xyz = collideVelocity(
+                body.linearVelocityInvMass.xyz,
+                vec3(inward.x, 0.0, inward.y), e, f);
+        }
+    }
+}
+
+bool finiteVector(vec3 v) {
+    return !any(isnan(v)) && !any(isinf(v));
+}
+
+void main() {
+    if (gl_WorkGroupID.x != 0u || gl_WorkGroupID.y != 0u ||
+        gl_WorkGroupID.z != 0u) return;
+
+    uint lane = gl_LocalInvocationID.x;
+    uint bodyCount = min(pc.scene.x, MAX_BODIES);
+    if (lane < bodyCount)
+        initialStates[lane] = bodyStateBuffer.bodies[lane];
+    barrier();
+
+    if (lane < bodyCount) {
+        BodyState body = initialStates[lane];
+        int type = int(round(body.positionType.w));
+        float inverseMass = max(body.linearVelocityInvMass.w, 0.0);
+        float inverseInertia = max(body.angularVelocityInvInertia.w, 0.0);
+        float dt = clamp(pc.simulation.x, 0.0, 1.0 / 30.0);
+
+        bool heldSinkBall = lane == 3u && type == BODY_SINK_BALL &&
+                            pc.pool.w < SINK_BALL_RELEASE_TIME;
+        // A zero inverse mass is the only hard anchor.  The motor boat now has
+        // finite mass and receives the equal-and-opposite propeller impulse;
+        // a soft horizontal tether below keeps it in the hero composition.
+        bool anchored = inverseMass <= 0.0;
+        if (heldSinkBall || anchored) {
+            if (heldSinkBall) {
+                // Hold the solid sphere above the pool, then hand it to
+                // gravity.  The previous smoothstep crane reached the water
+                // with zero velocity, so it displaced water slowly instead of
+                // producing a physically coupled entry splash.
+                body.positionType.y = SINK_BALL_START_Y;
+                body.linearVelocityInvMass.xyz = vec3(0.0);
+            } else {
+                body.linearVelocityInvMass.xyz = vec3(0.0);
+            }
+            body.angularVelocityInvInertia.xyz = vec3(0.0);
+            predictedStates[lane] = body;
+        } else {
+            BodyImpulse encoded = bodyImpulseBuffer.impulses[lane];
+            vec3 impulse = decodeImpulse(encoded.linear.xyz);
+            vec3 angularImpulse = decodeImpulse(encoded.angular.xyz);
+            float displacedMass = max(float(encoded.linear.w) /
+                                      bodyFixedScale(), 0.0);
+            float submergedFraction = clamp(displacedMass * inverseMass,
+                                             0.0, 1.0);
+            body.linearVelocityInvMass.xyz += impulse * inverseMass;
+            body.angularVelocityInvInertia.xyz += angularImpulse * inverseInertia;
+            body.linearVelocityInvMass.y += pc.simulation.y * dt;
+
+            if (type == BODY_DUCK && body.shape0.w > 0.0) {
+                vec3 bodyUp = rotateByQuaternion(body.orientation,
+                                                 vec3(0.0, 1.0, 0.0));
+                vec3 restoringAxis = cross(bodyUp, vec3(0.0, 1.0, 0.0));
+                body.angularVelocityInvInertia.xyz += restoringAxis *
+                    (body.shape0.w * inverseInertia * dt);
+            }
+
+            if (type == BODY_ANCHORED_BOAT) {
+                vec2 offset = body.positionType.xz - BOAT_TETHER_ANCHOR_XZ;
+                // A compliant mooring permits visible thrust, bob and yaw but
+                // avoids a deterministic benchmark scene losing the boat.
+                vec2 tetherForce = -18.0 * offset -
+                                   5.0 * body.linearVelocityInvMass.xz;
+                body.linearVelocityInvMass.xz +=
+                    tetherForce * (inverseMass * dt);
+                vec3 bodyUp = rotateByQuaternion(body.orientation,
+                                                 vec3(0.0, 1.0, 0.0));
+                vec3 restoringAxis = cross(bodyUp, vec3(0.0, 1.0, 0.0));
+                body.angularVelocityInvInertia.xyz += restoringAxis *
+                    (24.0 * inverseInertia * dt);
+            }
+
+            float linearDamping = max(body.material.z, 0.0);
+            float angularDamping = max(body.material.w, 0.0);
+            if (type == BODY_SINK_BALL) {
+                // material.z/w describe water drag.  Applying them in air gave
+                // the ball a fake 2.45 m/s terminal velocity despite -9.81 m/s².
+                linearDamping = 0.015 + linearDamping * submergedFraction;
+                angularDamping = 0.025 + angularDamping * submergedFraction;
+            } else if (type == BODY_ANCHORED_BOAT) {
+                linearDamping = 0.04 + linearDamping * submergedFraction;
+                angularDamping = 0.06 + angularDamping * submergedFraction;
+            }
+            body.linearVelocityInvMass.xyz *= exp(-linearDamping * dt);
+            body.angularVelocityInvInertia.xyz *= exp(-angularDamping * dt);
+
+            float maximumSpeed = max(pc.collision.w, 0.0);
+            float speed = length(body.linearVelocityInvMass.xyz);
+            if (maximumSpeed > 0.0 && speed > maximumSpeed)
+                body.linearVelocityInvMass.xyz *= maximumSpeed / speed;
+            float angularSpeed = length(body.angularVelocityInvInertia.xyz);
+            float maximumAngularSpeed = 16.0;
+            if (angularSpeed > maximumAngularSpeed)
+                body.angularVelocityInvInertia.xyz *= maximumAngularSpeed /
+                                                       angularSpeed;
+
+            body.positionType.xyz += body.linearVelocityInvMass.xyz * dt;
+            body.orientation = integrateOrientation(
+                body.orientation, body.angularVelocityInvInertia.xyz, dt);
+            predictedStates[lane] = body;
+        }
+    }
+    barrier();
+
+    if (lane >= bodyCount) return;
+    BodyState current = predictedStates[lane];
+    int type = int(round(current.positionType.w));
+    bool heldSinkBall = lane == 3u && type == BODY_SINK_BALL &&
+                        pc.pool.w < SINK_BALL_RELEASE_TIME;
+    bool anchored = current.linearVelocityInvMass.w <= 0.0;
+
+    if (!heldSinkBall && !anchored) {
+        for (uint otherIndex = 0u; otherIndex < bodyCount; ++otherIndex) {
+            if (otherIndex == lane) continue;
+            solveBodyPair(lane, predictedStates[otherIndex], current);
+        }
+        constrainToPool(bodyBoundingRadius(current),
+                        bodyBottomExtent(current), current);
+    }
+
+    if (!finiteVector(current.positionType.xyz) ||
+        !finiteVector(current.linearVelocityInvMass.xyz) ||
+        !finiteVector(current.angularVelocityInvInertia.xyz) ||
+        any(isnan(current.orientation)) || any(isinf(current.orientation))) {
+        current = initialStates[lane];
+        current.linearVelocityInvMass.xyz = vec3(0.0);
+        current.angularVelocityInvInertia.xyz = vec3(0.0);
+        current.orientation = safeQuaternion(current.orientation);
+    }
+
+    bodyStateBuffer.bodies[lane] = current;
+}

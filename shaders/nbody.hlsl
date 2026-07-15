@@ -19,9 +19,9 @@ RWStructuredBuffer<Particle> particles : register(u0);
 groupshared float3 sharedPos[TILE];
 
 [numthreads(256, 1, 1)]
-void CSMain(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID) {
+void CSMain(uint3 DTid : SV_DispatchThreadID, uint GI : SV_GroupIndex) {
     uint  gid   = DTid.x;
-    uint  lid   = GTid.x;
+    uint  lid   = GI;
     float3 myPos = particles[gid].position.xyz;
     float3 acc   = float3(0.0, 0.0, 0.0);
     float  soft2 = softening * softening;

@@ -36,6 +36,8 @@ set(COMMON_SOURCES
     src/main.cpp
     src/app_base.cpp
     src/benchmark_results.cpp
+    src/cpu_benchmark.cpp
+    src/path_service.cpp
 )
 
 set(BACKEND_SOURCES "")
@@ -142,6 +144,15 @@ target_link_libraries(gpu_engine PUBLIC glfw ${BACKEND_LIBS})
 target_compile_definitions(gpu_engine PUBLIC ${BACKEND_DEFS})
 target_include_directories(gpu_engine PUBLIC ${CMAKE_SOURCE_DIR}/src)
 
+# A Vulkan-capable build must still start on Windows machines whose driver did
+# not install vulkan-1.dll.  main.cpp probes the loader before issuing any
+# Vulkan call; delayimp prevents the process loader from failing before that
+# capability check can select Direct3D instead.
+if(MSVC AND ENABLE_VULKAN AND Vulkan_FOUND)
+    target_link_libraries(gpu_engine PUBLIC delayimp)
+    target_link_options(gpu_engine INTERFACE "/DELAYLOAD:vulkan-1.dll")
+endif()
+
 # ---- CLI executable (thin entry point -> gpu_bench::cliMain) ----
 add_executable(gpu_benchmark src/cli_main.cpp)
 target_link_libraries(gpu_benchmark PRIVATE gpu_engine)
@@ -166,6 +177,8 @@ if(ENABLE_VULKAN AND Vulkan_FOUND)
             ${CMAKE_SOURCE_DIR}/shaders/nbody.comp
             ${CMAKE_SOURCE_DIR}/shaders/fractal.vert
             ${CMAKE_SOURCE_DIR}/shaders/fractal.frag
+            ${CMAKE_SOURCE_DIR}/shaders/gpu_stress.frag
+            ${CMAKE_SOURCE_DIR}/shaders/gpu_burn.frag
             ${CMAKE_SOURCE_DIR}/shaders/volumetric.vert
             ${CMAKE_SOURCE_DIR}/shaders/volumetric.frag
             ${CMAKE_SOURCE_DIR}/shaders/fluid_advect.comp
@@ -174,6 +187,35 @@ if(ENABLE_VULKAN AND Vulkan_FOUND)
             ${CMAKE_SOURCE_DIR}/shaders/fluid_subtract.comp
             ${CMAKE_SOURCE_DIR}/shaders/fluid_render.vert
             ${CMAKE_SOURCE_DIR}/shaders/fluid_render.frag
+            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_clear_grid.comp
+            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_p2g_mass_momentum.comp
+            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_p2g_density_stress.comp
+            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_grid_update.comp
+            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_g2p.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_resolve.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_render.vert
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_render.frag
+            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_clear_grid_v2.comp
+            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_p2g_mass_momentum_v2.comp
+            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_p2g_density_stress_v2.comp
+            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_grid_update_v2.comp
+            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_g2p_v2.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_rigid_integrate_v2.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_resolve_v2.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_surface_clear_v2.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_surface_splat_v2.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_surface_resolve_v2.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_render_v2.vert
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_render_v2.frag
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_external.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_hash_count.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_scan_block.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_scan_add.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_scatter.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_density.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_pressure.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_viscosity.comp
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_integrate.comp
             ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp32.comp
             ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp64.comp
             ${CMAKE_SOURCE_DIR}/shaders/synthpeak_int32.comp
@@ -212,6 +254,8 @@ if((ENABLE_DX12 AND WIN32) OR (ENABLE_DX11 AND WIN32))
         ${CMAKE_SOURCE_DIR}/shaders/compute.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/nbody.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/fractal.hlsl
+        ${CMAKE_SOURCE_DIR}/shaders/gpu_stress.hlsl
+        ${CMAKE_SOURCE_DIR}/shaders/gpu_burn.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/volumetric.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp32.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp64.hlsl
@@ -267,6 +311,8 @@ if(ENABLE_OPENGL AND OpenGL_FOUND)
         ${CMAKE_SOURCE_DIR}/shaders/particle_gl.frag
         ${CMAKE_SOURCE_DIR}/shaders/fractal_gl.vert
         ${CMAKE_SOURCE_DIR}/shaders/fractal_gl.frag
+        ${CMAKE_SOURCE_DIR}/shaders/gpu_stress_gl.frag
+        ${CMAKE_SOURCE_DIR}/shaders/gpu_burn_gl.frag
         ${CMAKE_SOURCE_DIR}/shaders/volumetric_gl.vert
         ${CMAKE_SOURCE_DIR}/shaders/volumetric_gl.frag
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp32_gl.comp

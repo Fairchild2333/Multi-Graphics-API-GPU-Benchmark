@@ -1,22 +1,13 @@
 #include "benchmark_results.h"
+#include "path_service.h"
 
 #include <algorithm>
 #include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <map>
 #include <sstream>
-
-#ifdef _WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <direct.h>
-#include <shlobj.h>
-#else
-#include <sys/stat.h>
-#include <cstdlib>
-#endif
 
 namespace gpu_bench {
 
@@ -24,17 +15,32 @@ namespace gpu_bench {
 // Paths
 // ---------------------------------------------------------------------------
 
-static std::string ResultsDir() {
-#ifdef _WIN32
-    _mkdir("results");
-#else
-    mkdir("results", 0755);
-#endif
-    return "results";
-}
-
 std::string ResultsFilePath() {
-    return ResultsDir() + "/results.json";
+    const auto destination = paths::ResultsDirectory() / "results.json";
+
+    // One-time compatibility migration for existing source-tree installs.
+    // A packaged application never relies on this relative path, but developers
+    // keep their historical results when upgrading to the installed layout.
+    static const bool migrated = [&] {
+        std::error_code ec;
+        const auto legacy = std::filesystem::absolute(
+            std::filesystem::path("results") / "results.json", ec);
+        if (ec || std::filesystem::exists(destination) ||
+            !std::filesystem::is_regular_file(legacy)) {
+            return false;
+        }
+        if (legacy.lexically_normal() ==
+            std::filesystem::absolute(destination, ec).lexically_normal()) {
+            return false;
+        }
+        std::filesystem::copy_file(legacy, destination,
+                                   std::filesystem::copy_options::skip_existing,
+                                   ec);
+        return !ec;
+    }();
+    (void)migrated;
+
+    return destination.u8string();
 }
 
 // ---------------------------------------------------------------------------
@@ -139,7 +145,10 @@ static std::string ResultToJson(const BenchmarkResult& r, int indent = 4) {
 
     str("id",          r.id);
     str("timestamp",   r.timestamp);
+    u32("resultSchemaVersion", r.resultSchemaVersion);
     str("workload",       r.workload);
+    str("workloadVersion", r.workloadVersion);
+    str("workloadConfig",  r.workloadConfig);
     str("graphicsApi",    r.graphicsApi);
     str("deviceName",     r.deviceName);
     str("driverVersion",  r.driverVersion);
@@ -230,8 +239,12 @@ static BenchmarkResult JsonToResult(const std::string& json) {
 
     r.id            = findStr("id");
     r.timestamp     = findStr("timestamp");
+    r.resultSchemaVersion = static_cast<std::uint32_t>(findNum("resultSchemaVersion"));
+    if (r.resultSchemaVersion == 0) r.resultSchemaVersion = 1;
     r.workload       = findStr("workload");
     if (r.workload.empty()) r.workload = "stream";   // default for old results
+    r.workloadVersion = findStr("workloadVersion");
+    r.workloadConfig  = findStr("workloadConfig");
     r.graphicsApi    = findStr("graphicsApi");
     r.deviceName     = findStr("deviceName");
     r.driverVersion  = findStr("driverVersion");
@@ -311,7 +324,6 @@ std::vector<BenchmarkResult> LoadResults() {
 }
 
 bool SaveResults(const std::vector<BenchmarkResult>& results) {
-    ResultsDir();
     std::ofstream out(ResultsFilePath());
     if (!out.is_open()) return false;
 
@@ -423,59 +435,96 @@ void PrintComparisonTable(const std::vector<BenchmarkResult>& results) {
         return;
     }
 
-    auto sorted = results;
-    std::sort(sorted.begin(), sorted.end(),
-        [](const BenchmarkResult& a, const BenchmarkResult& b) {
-            return a.avgFps > b.avgFps;
-        });
-
-    const double baselineFps = sorted[0].avgFps;
-
     std::cout << "\n"
         "==========================================================\n"
         "                  Benchmark Comparison\n"
         "==========================================================\n\n";
 
-    std::cout << std::left
-              << std::setw(4)  << "#"
-              << std::setw(8)  << "API"
-              << std::setw(26) << "GPU"
-              << std::setw(10) << "Diff."
-              << std::right
-              << std::setw(9)  << "Avg FPS"
-              << std::setw(12) << "GPU ms"
-              << std::setw(10) << "Delta"
-              << "\n";
-    std::cout << std::string(79, '-') << "\n";
+    // Scores from different workloads, algorithm versions, units or
+    // precisions are not comparable.  In particular, GPU Burn deliberately
+    // auto-tunes frame time, so an all-workload FPS ranking is misleading.
+    std::map<std::string, std::vector<BenchmarkResult>> groups;
+    for (const auto& r : results) {
+        const std::string workload = r.workload.empty() ? "stream" : r.workload;
+        const std::string version = r.workloadVersion.empty() ? "legacy" : r.workloadVersion;
+        const std::string unit = r.scoreUnit.empty() ? "Avg FPS" : r.scoreUnit;
+        const std::string precision = r.precision.empty() ? "default" : r.precision;
+        groups[workload + "\x1f" + version + "\x1f" + unit + "\x1f" + precision]
+            .push_back(r);
+    }
 
-    for (size_t i = 0; i < sorted.size(); ++i) {
-        const auto& r = sorted[i];
-        std::string dev = r.deviceName;
-        if (dev.size() > 24) dev = dev.substr(0, 21) + "...";
+    for (auto& [key, group] : groups) {
+        const auto& first = group.front();
+        const std::string workload = first.workload.empty() ? "stream" : first.workload;
+        const std::string version = first.workloadVersion.empty() ? "legacy" : first.workloadVersion;
+        const bool useScore = !first.scoreUnit.empty() &&
+            std::all_of(group.begin(), group.end(), [](const BenchmarkResult& r) {
+                return r.score > 0.0;
+            });
+        const bool useStable = useScore &&
+            std::all_of(group.begin(), group.end(), [](const BenchmarkResult& r) {
+                return r.stableScore > 0.0;
+            });
+        auto metric = [useScore, useStable](const BenchmarkResult& r) {
+            if (useStable) return r.stableScore;
+            if (useScore) return r.score;
+            return r.avgFps;
+        };
 
+        std::sort(group.begin(), group.end(), [&](const BenchmarkResult& a,
+                                                   const BenchmarkResult& b) {
+            return metric(a) > metric(b);
+        });
+        const double baseline = metric(group.front());
+        const std::string metricLabel = useStable ? "Stable score" :
+            (useScore ? "Score" : "Avg FPS");
+        const std::string metricUnit = useScore ? first.scoreUnit : "FPS";
+
+        std::cout << "Workload: " << workload
+                  << "  |  Version: " << version
+                  << "  |  Metric: " << metricLabel << " (" << metricUnit << ")";
+        if (!first.precision.empty()) std::cout << "  |  Precision: " << first.precision;
+        std::cout << "\n";
         std::cout << std::left
-                  << std::setw(4)  << (i + 1)
-                  << std::setw(8)  << r.graphicsApi
-                  << std::setw(26) << dev
-                  << std::setw(10) << r.difficulty
+                  << std::setw(4)  << "#"
+                  << std::setw(8)  << "API"
+                  << std::setw(26) << "GPU"
+                  << std::setw(10) << "Diff."
                   << std::right
-                  << std::setw(9)  << static_cast<int>(r.avgFps);
+                  << std::setw(15) << metricLabel
+                  << std::setw(12) << "GPU ms"
+                  << std::setw(10) << "Delta"
+                  << "\n";
+        std::cout << std::string(85, '-') << "\n";
 
-        if (r.timingSamples > 0)
-            std::cout << std::fixed << std::setprecision(3)
-                      << std::setw(12) << r.avgTotalGpuMs;
-        else
-            std::cout << std::setw(12) << "N/A";
+        for (size_t i = 0; i < group.size(); ++i) {
+            const auto& r = group[i];
+            std::string dev = r.deviceName;
+            if (dev.size() > 24) dev = dev.substr(0, 21) + "...";
 
-        if (i == 0)
-            std::cout << std::setw(10) << "baseline";
-        else
-            std::cout << std::setw(10) << DeltaStr(baselineFps, r.avgFps, true);
+            std::cout << std::left
+                      << std::setw(4)  << (i + 1)
+                      << std::setw(8)  << r.graphicsApi
+                      << std::setw(26) << dev
+                      << std::setw(10) << r.difficulty
+                      << std::right << std::fixed << std::setprecision(useScore ? 3 : 0)
+                      << std::setw(15) << metric(r);
 
+            if (r.timingSamples > 0)
+                std::cout << std::fixed << std::setprecision(3)
+                          << std::setw(12) << r.avgTotalGpuMs;
+            else
+                std::cout << std::setw(12) << "N/A";
+
+            std::cout << std::setw(10)
+                      << (i == 0 ? "baseline" : DeltaStr(baseline, metric(r), true))
+                      << "\n";
+        }
         std::cout << "\n";
     }
 
-    std::cout << "\nTotal: " << sorted.size() << " result(s), ranked by Avg FPS (descending)\n"
+    std::cout << "Total: " << results.size() << " result(s) in " << groups.size()
+              << " comparable group(s). Rows are never ranked across workload/version/unit/precision.\n"
               << "==========================================================\n\n";
 }
 
@@ -532,6 +581,18 @@ void PrintDetailedComparison(const BenchmarkResult& a, const BenchmarkResult& b)
                   << "\n";
     };
 
+    auto rowMetric = [&](const char* label, double va, double vb,
+                         const std::string& unit) {
+        std::ostringstream oa, ob;
+        oa << std::fixed << std::setprecision(3) << va << " " << unit;
+        ob << std::fixed << std::setprecision(3) << vb << " " << unit;
+        std::cout << std::left << std::setw(w1) << label
+                  << std::setw(w2) << oa.str()
+                  << std::setw(w3) << ob.str()
+                  << std::setw(w4) << DeltaStr(va, vb, true)
+                  << "\n";
+    };
+
     rowStr("ID:",          a.id,          b.id);
     rowStr("Timestamp:",   a.timestamp,   b.timestamp);
     std::cout << "\n";
@@ -542,6 +603,9 @@ void PrintDetailedComparison(const BenchmarkResult& a, const BenchmarkResult& b)
     rowStr("CPU:",          a.cpuName,     b.cpuName);
     rowStr("OS:",           a.osVersion,   b.osVersion);
     rowStr("Memory:",       a.memory,      b.memory);
+    rowStr("Workload:",     a.workload,    b.workload);
+    rowStr("Version:",      a.workloadVersion, b.workloadVersion);
+    rowStr("Config:",       a.workloadConfig, b.workloadConfig);
 
     std::string resA = std::to_string(a.resWidth) + "x" + std::to_string(a.resHeight);
     std::string resB = std::to_string(b.resWidth) + "x" + std::to_string(b.resHeight);
@@ -553,6 +617,20 @@ void PrintDetailedComparison(const BenchmarkResult& a, const BenchmarkResult& b)
 
     rowStr("V-Sync:",       a.vsync ? "ON" : "OFF", b.vsync ? "ON" : "OFF");
     std::cout << "\n";
+
+    const bool comparableScore = a.score > 0.0 && b.score > 0.0 &&
+        a.workload == b.workload &&
+        a.workloadVersion == b.workloadVersion &&
+        a.scoreUnit == b.scoreUnit &&
+        a.precision == b.precision;
+    if (comparableScore) {
+        rowMetric("Score:", a.score, b.score, a.scoreUnit);
+        if (a.stableScore > 0.0 && b.stableScore > 0.0)
+            rowMetric("Stable score:", a.stableScore, b.stableScore, a.scoreUnit);
+    } else {
+        std::cout << "Score delta omitted: workload/version/unit/precision differ "
+                     "or a result has no axis score.\n";
+    }
 
     rowFps("Avg FPS:",      a.avgFps, b.avgFps);
     rowMs ("Frame Time:",   a.avgFrameTimeMs, b.avgFrameTimeMs);
@@ -580,13 +658,15 @@ bool ExportResultsCsv(const std::string& path,
     std::ofstream out(path);
     if (!out.is_open()) return false;
 
-    out << "id,timestamp,graphicsApi,deviceName,driverVersion,cpuName,osVersion,memory,"
-           "resolution,particleCount,difficulty,vsync,isSoftware,"
+    out << "id,timestamp,resultSchemaVersion,workload,workloadVersion,workloadConfig,"
+           "graphicsApi,deviceName,driverVersion,cpuName,osVersion,memory,vramMB,"
+           "resolution,particleCount,difficulty,vsync,isSoftware,headless,framesInFlight,"
            "durationSec,warmupSec,measuredFrames,timingSamples,"
            "avgComputeMs,minComputeMs,maxComputeMs,"
            "avgRenderMs,minRenderMs,maxRenderMs,"
            "avgTotalGpuMs,minTotalGpuMs,maxTotalGpuMs,"
-           "avgFps,avgFrameTimeMs,gpuUtilisation,bottleneck\n";
+           "avgFps,avgFrameTimeMs,gpuUtilisation,bottleneck,"
+           "score,scoreUnit,precision,stableScore,stableVariancePct,throttlePct\n";
 
     for (const auto& r : results) {
         auto q = [](const std::string& s) {
@@ -595,17 +675,24 @@ bool ExportResultsCsv(const std::string& path,
         out << std::fixed << std::setprecision(3)
             << q(r.id) << ","
             << q(r.timestamp) << ","
+            << r.resultSchemaVersion << ","
+            << q(r.workload) << ","
+            << q(r.workloadVersion) << ","
+            << q(r.workloadConfig) << ","
             << q(r.graphicsApi) << ","
             << q(r.deviceName) << ","
             << q(r.driverVersion) << ","
             << q(r.cpuName) << ","
             << q(r.osVersion) << ","
             << q(r.memory) << ","
+            << r.vramMB << ","
             << r.resWidth << "x" << r.resHeight << ","
             << r.particleCount << ","
             << q(r.difficulty) << ","
             << (r.vsync ? "true" : "false") << ","
             << (r.isSoftware ? "true" : "false") << ","
+            << (r.headless ? "true" : "false") << ","
+            << r.framesInFlight << ","
             << std::setprecision(1) << r.durationSec << ","
             << r.warmupSec << ","
             << r.measuredFrames << ","
@@ -623,7 +710,13 @@ bool ExportResultsCsv(const std::string& path,
             << std::setprecision(1) << r.avgFps << ","
             << std::setprecision(3) << r.avgFrameTimeMs << ","
             << std::setprecision(1) << r.gpuUtilisation << ","
-            << q(r.bottleneck) << "\n";
+            << q(r.bottleneck) << ","
+            << std::setprecision(3) << r.score << ","
+            << q(r.scoreUnit) << ","
+            << q(r.precision) << ","
+            << r.stableScore << ","
+            << std::setprecision(2) << r.stableVariancePct << ","
+            << r.throttlePct << "\n";
     }
 
     out.close();

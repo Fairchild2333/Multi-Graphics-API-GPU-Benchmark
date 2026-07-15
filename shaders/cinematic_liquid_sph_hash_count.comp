@@ -1,0 +1,60 @@
+#version 450
+
+// Cinematic Liquid SPH slice, pass 2: spatial hash + per-cell counting.
+//
+// Uses jeantimex/fluid's Unity-style block spatial hash exactly (block size
+// 50) so cell assignment matches the reference tuning.  The host clears
+// cellCounts with vkCmdFillBuffer before this dispatch; the following
+// scan/scatter passes turn the counts into a counting-sorted index list.
+
+layout(local_size_x = 256) in;
+
+layout(set = 0, binding = 2, std430) readonly buffer SphPredictedBuffer {
+    vec4 predicted[];
+} sphPredicted;
+layout(set = 0, binding = 4, std430) buffer SphKeyBuffer {
+    uint keys[];
+} sphKeys;
+layout(set = 0, binding = 5, std430) buffer SphCellCountBuffer {
+    uint counts[];
+} sphCellCounts;
+
+layout(push_constant) uniform SphParams {
+    uvec4 counts;
+    vec4 sim;
+    vec4 fluid;
+    vec4 kernels;
+    vec4 boundsMin;
+    vec4 boundsMax;
+    vec4 world;
+    vec4 coupling;
+} pc;
+
+// Must match every neighbour-search pass bit-for-bit.
+uint hashCell3D(int cellX, int cellY, int cellZ) {
+    const uint blockSize = 50u;
+    uvec3 ucell = uvec3(uint(cellX + int(blockSize / 2u)),
+                        uint(cellY + int(blockSize / 2u)),
+                        uint(cellZ + int(blockSize / 2u)));
+    uvec3 localCell = ucell % blockSize;
+    uvec3 blockId = ucell / blockSize;
+    uint blockHash = blockId.x * 15823u + blockId.y * 9737333u +
+                     blockId.z * 440817757u;
+    return localCell.x + blockSize * (localCell.y + blockSize * localCell.z) +
+           blockHash;
+}
+
+void main() {
+    uint index = gl_GlobalInvocationID.x;
+    if (index >= pc.counts.x) return;
+
+    vec3 position = sphPredicted.predicted[index].xyz;
+    float radius = max(pc.sim.z, 1.0e-5);
+    int cellX = int(floor(position.x / radius));
+    int cellY = int(floor(position.y / radius));
+    int cellZ = int(floor(position.z / radius));
+
+    uint key = hashCell3D(cellX, cellY, cellZ) % max(pc.counts.y, 1u);
+    sphKeys.keys[index] = key;
+    atomicAdd(sphCellCounts.counts[key], 1u);
+}

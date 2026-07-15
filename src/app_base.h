@@ -76,6 +76,8 @@ private:
     std::string rdocCaptureDir_;
     bool     rdocCaptureRequested_ = false;
     uint32_t rdocCaptureCount_     = 0;
+    uint32_t rdocCaptureAttemptCount_ = 0;
+    bool     rdocCaptureAttemptExcluded_ = false;
     std::string lastCapturePath_;
 
     double        lastFrameTime_      = 0.0;
@@ -89,6 +91,8 @@ private:
     bool          warmupDone_         = false;
 
     std::uint32_t totalFrameCount_    = 0;
+    std::uint32_t timingSamplesToSkip_ = 0;
+    double        excludedCaptureSec_  = 0.0;
 
     double benchMinComputeMs_  = std::numeric_limits<double>::max();
     double benchMaxComputeMs_  = 0.0;
@@ -117,6 +121,8 @@ private:
     double stableVariancePct_  = -1.0;  // CV (%) at the stable point; -1 = never
     bool   thermalStable_      = false;
     double throttlePct_        = 0.0;   // (earlyMean - lateMean) / earlyMean
+    bool   gpuStressCalibrationDone_ = false;
+    bool   gpuBurnCalibrationDone_   = false;
 };
 
 }  // namespace gpu_bench

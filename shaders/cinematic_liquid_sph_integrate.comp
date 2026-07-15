@@ -1,0 +1,419 @@
+#version 450
+
+// Cinematic Liquid SPH slice, pass 8: integration, boundary, rigid coupling.
+//
+// Positions integrate in reference simulation units (box bounce with the
+// reference's collision damping), then each particle is mapped into world
+// space for two-way rigid-body coupling against the shared BodyState set
+// (duck family, play ball, boat, sink sphere).  Coupling reuses the exact
+// compound SDFs from mls_mpm_g2p_v2.comp plus the displaced-volume buoyancy
+// exchange from mls_mpm_grid_update_v2.comp, expressed per particle: the
+// rigid integrate pass consumes the same fixed-point impulse ABI unchanged.
+//
+// World mapping: worldPos = worldOrigin + simPos * worldScale, and
+// worldVel = simVel * worldScale * dtSim / dtWorld.  dtWorld is chosen by
+// the host so reference gravity (-10 sim) lands on -9.81 m/s^2 in world
+// units, keeping fluid and rigid free-fall consistent.
+
+layout(local_size_x = 256) in;
+
+const int BODY_DUCK = 0;
+const int BODY_PLAY_BALL = 1;
+const int BODY_ANCHORED_BOAT = 2;
+const int BODY_SINK_BALL = 3;
+const uint MAX_BODIES = 32u;
+const float GRAVITY_WORLD = -9.81;
+const float WATER_REST_DENSITY = 1000.0;
+const float kBodyContributionLimit = 16777215.0;
+
+struct Particle { vec4 position; vec4 velocity; vec4 C0; vec4 C1; vec4 C2; };
+struct BodyState {
+    vec4 positionType;
+    vec4 orientation;
+    vec4 linearVelocityInvMass;
+    vec4 angularVelocityInvInertia;
+    vec4 shape0;
+    vec4 shape1;
+    vec4 material;
+    vec4 color;
+};
+struct BodyImpulse { ivec4 linear; ivec4 angular; };
+
+layout(set = 0, binding = 0, std430) buffer SphPositionBuffer {
+    vec4 positions[];
+} sphPositions;
+layout(set = 0, binding = 1, std430) buffer SphVelocityBuffer {
+    vec4 velocities[];
+} sphVelocities;
+layout(set = 0, binding = 11, std430) buffer ParticleBuffer {
+    Particle particles[];
+} particleBuffer;
+layout(set = 0, binding = 12, std430) readonly buffer BodyStateBuffer {
+    BodyState bodies[];
+} bodyStateBuffer;
+layout(set = 0, binding = 13, std430) buffer BodyImpulseBuffer {
+    BodyImpulse impulses[];
+} bodyImpulseBuffer;
+
+layout(push_constant) uniform SphParams {
+    uvec4 counts;    // x particleCount, w bodyCount
+    vec4 sim;        // x dtSim, y gravitySim, z smoothingRadius, w collisionDamping
+    vec4 fluid;
+    vec4 kernels;
+    vec4 boundsMin;  // xyz sim bounds min
+    vec4 boundsMax;  // xyz sim bounds max, w worldScale
+    vec4 world;      // xyz world origin, w dtWorld
+    vec4 coupling;   // x impulseFixedScale, y particleMassWorld, z restitution, w friction
+} pc;
+
+int encodeBody(float v) {
+    return int(round(clamp(v * max(abs(pc.coupling.x), 1.0),
+                           -kBodyContributionLimit,
+                            kBodyContributionLimit)));
+}
+
+float hash01(uint x) {
+    x ^= x >> 16; x *= 0x7feb352du;
+    x ^= x >> 15; x *= 0x846ca68bu;
+    x ^= x >> 16;
+    return float(x & 0x00ffffffu) / 16777215.0;
+}
+
+vec4 safeQuaternion(vec4 q) {
+    float q2 = dot(q, q);
+    return q2 > 1.0e-10 ? q * inversesqrt(q2) : vec4(0.0, 0.0, 0.0, 1.0);
+}
+vec3 rotateByQuaternion(vec4 q, vec3 v) {
+    q = safeQuaternion(q);
+    return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+}
+vec3 inverseRotateByQuaternion(vec4 q, vec3 v) {
+    q = safeQuaternion(q);
+    q.xyz = -q.xyz;
+    return rotateByQuaternion(q, v);
+}
+float sdSphere(vec3 p, float r) { return length(p) - max(r, 1.0e-4); }
+float sdEllipsoid(vec3 p, vec3 r) {
+    r = max(abs(r), vec3(1.0e-4));
+    float k0 = length(p / r);
+    float k1 = length(p / (r * r));
+    return k0 * (k0 - 1.0) / max(k1, 1.0e-5);
+}
+float sdCapsule(vec3 p, vec3 a, vec3 b, float r) {
+    vec3 pa = p - a;
+    vec3 ba = b - a;
+    float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1.0e-8), 0.0, 1.0);
+    return length(pa - ba * h) - max(r, 1.0e-4);
+}
+float smoothUnion(float a, float b, float k) {
+    float h = clamp(0.5 + 0.5 * (b - a) / max(k, 1.0e-5), 0.0, 1.0);
+    return mix(b, a, h) - k * h * (1.0 - h);
+}
+// Keep identical to mls_mpm_g2p_v2.comp / mls_mpm_grid_update_v2.comp and
+// the render frag: what the SPH slice's liquid feels is what is drawn.
+float duckSdf(vec3 p, vec4 shape0, vec4 shape1) {
+    vec3 bodyRadius = max(abs(shape0.xyz), vec3(0.02));
+    float headRadius = max(shape1.x, 0.02);
+    vec3 headCenter = vec3(shape1.y, shape1.z, 0.0);
+    float beakLength = max(shape1.w, 0.02);
+
+    float belly = sdEllipsoid(
+        p - vec3(0.0, -0.04 * bodyRadius.y, 0.0),
+        vec3(bodyRadius.x, 0.84 * bodyRadius.y, bodyRadius.z));
+    float tail = sdEllipsoid(
+        p - vec3(-0.72 * bodyRadius.x, 0.28 * bodyRadius.y, 0.0),
+        bodyRadius * vec3(0.44, 0.30, 0.42));
+    float duck = smoothUnion(belly, tail, 0.30 * bodyRadius.y);
+    duck = smoothUnion(duck, sdSphere(p - headCenter, headRadius),
+                       0.45 * headRadius);
+    vec3 beakCenter = headCenter +
+        vec3(headRadius + 0.30 * beakLength, -0.20 * headRadius, 0.0);
+    float beak = sdEllipsoid(
+        p - beakCenter,
+        vec3(0.60 * beakLength, 0.24 * headRadius, 0.46 * headRadius));
+    return smoothUnion(duck, beak, 0.12 * headRadius);
+}
+float bodyBoundingRadius(BodyState body) {
+    int type = int(round(body.positionType.w));
+    if (type == BODY_PLAY_BALL || type == BODY_SINK_BALL)
+        return max(body.shape0.x, 0.01);
+    if (type == BODY_DUCK) {
+        vec3 bodyRadius = max(abs(body.shape0.xyz), vec3(0.02));
+        float headReach = length(vec2(body.shape1.y, body.shape1.z)) +
+                          max(body.shape1.x, 0.02) + max(body.shape1.w, 0.02);
+        return max(length(bodyRadius), headReach);
+    }
+    if (type == BODY_ANCHORED_BOAT) {
+        vec3 h = max(abs(body.shape0.xyz), vec3(0.02));
+        float aftReach = length(vec2(max(body.shape1.y, h.x), 1.15 * h.y)) +
+                         0.25 * max(body.shape1.x, 0.02);
+        return max(length(h), aftReach);
+    }
+    return 0.01;
+}
+float bodySdf(BodyState body, vec3 worldPoint) {
+    vec3 p = inverseRotateByQuaternion(
+        body.orientation, worldPoint - body.positionType.xyz);
+    int type = int(round(body.positionType.w));
+    if (type == BODY_PLAY_BALL || type == BODY_SINK_BALL)
+        return sdSphere(p, body.shape0.x);
+    if (type == BODY_DUCK)
+        return duckSdf(p, body.shape0, body.shape1);
+    if (type == BODY_ANCHORED_BOAT) {
+        vec3 h = max(abs(body.shape0.xyz), vec3(0.02));
+        float propRadius = max(body.shape1.x, 0.02);
+        float aft = max(body.shape1.y, h.x);
+        vec3 a = vec3(-0.62 * h.x, -1.15 * h.y, 0.0);
+        vec3 b = vec3(-aft, -1.15 * h.y, 0.0);
+        return min(sdEllipsoid(p + vec3(0.0, 0.28 * h.y, 0.0), h),
+               min(sdCapsule(p, a, b, 0.12 * propRadius),
+                   sdSphere(p - b, 0.22 * propRadius)));
+    }
+    return 1.0e6;
+}
+vec3 bodyNormal(BodyState body, vec3 p, float e) {
+    vec3 d = vec3(max(e, 1.0e-4), 0.0, 0.0);
+    vec3 g = vec3(
+        bodySdf(body, p + d.xyy) - bodySdf(body, p - d.xyy),
+        bodySdf(body, p + d.yxy) - bodySdf(body, p - d.yxy),
+        bodySdf(body, p + d.yyx) - bodySdf(body, p - d.yyx));
+    return dot(g, g) > 1.0e-12 ? normalize(g) : vec3(0.0, 1.0, 0.0);
+}
+vec3 collideVelocity(vec3 velocity, vec3 surfaceVelocity, vec3 normal,
+                     float restitution, float friction) {
+    vec3 relative = velocity - surfaceVelocity;
+    float normalSpeed = dot(relative, normal);
+    if (normalSpeed >= 0.0) return velocity;
+    vec3 tangential = relative - normalSpeed * normal;
+    relative = tangential * (1.0 - clamp(friction, 0.0, 1.0)) -
+               clamp(restitution, 0.0, 1.0) * normalSpeed * normal;
+    return surfaceVelocity + relative;
+}
+float roundedRectangleDistance(vec2 p, vec2 halfExtent, float radius) {
+    radius = clamp(radius, 0.0, min(halfExtent.x, halfExtent.y));
+    vec2 q = abs(p) - halfExtent + vec2(radius);
+    return length(max(q, vec2(0.0))) +
+           min(max(q.x, q.y), 0.0) - radius;
+}
+
+vec2 roundedRectangleNormal(vec2 p, vec2 halfExtent,
+                            float radius, float epsilon) {
+    vec2 ex = vec2(max(epsilon, 1.0e-4), 0.0);
+    vec2 gradient = vec2(
+        roundedRectangleDistance(p + ex, halfExtent, radius) -
+        roundedRectangleDistance(p - ex, halfExtent, radius),
+        roundedRectangleDistance(p + ex.yx, halfExtent, radius) -
+        roundedRectangleDistance(p - ex.yx, halfExtent, radius));
+    float g2 = dot(gradient, gradient);
+    return g2 > 1.0e-12 ? gradient * inversesqrt(g2) : vec2(1.0, 0.0);
+}
+
+// v7's finite-height inset pool wall, expressed in SPH sim units.  Constants
+// derive from the world geometry in mls_mpm_g2p_v2.comp (inset pool.y = 0.45,
+// corner radius pool.x = 0.30, wallTop = mix(domainMinY, domainMaxY, 0.34))
+// divided by worldScale 0.21333.  The physical wall sits a further 0.10 m
+// (0.47 sim) inside the drawn ring: the splat kernel plus the 5x5x5 resolve
+// filter inflate the reconstructed surface by roughly that much, so aligning
+// the wall with the ring centre-line made the water read as bulging past the
+// rim.  Particles that clear the rim fall freely onto the grass; the outer
+// simulation AABB stays as the safety catch band.
+const vec2 POOL_WALL_CENTRE_SIM = vec2(11.906, 8.906);
+const vec2 POOL_WALL_HALF_SIM = vec2(9.328, 6.328);
+const float POOL_WALL_CORNER_SIM = 1.406;
+// wallTop = mix(domainMinY, domainMaxY, 0.42) in world, in sim units.
+const float POOL_WALL_TOP_SIM = 4.962;
+
+void constrainFinitePoolWall(vec3 previousPosition, inout vec3 position,
+                             inout vec3 velocity, float damping) {
+    const float particleRadius = 0.06;  // ~half spawn spacing, sim units
+    if (position.y > POOL_WALL_TOP_SIM + particleRadius ||
+        (previousPosition.y > POOL_WALL_TOP_SIM + particleRadius &&
+         position.y <= POOL_WALL_TOP_SIM + particleRadius)) return;
+
+    float previousDistance = roundedRectangleDistance(
+        previousPosition.xz - POOL_WALL_CENTRE_SIM, POOL_WALL_HALF_SIM,
+        POOL_WALL_CORNER_SIM);
+    float nextDistance = roundedRectangleDistance(
+        position.xz - POOL_WALL_CENTRE_SIM, POOL_WALL_HALF_SIM,
+        POOL_WALL_CORNER_SIM);
+    vec2 outward = roundedRectangleNormal(
+        position.xz - POOL_WALL_CENTRE_SIM, POOL_WALL_HALF_SIM,
+        POOL_WALL_CORNER_SIM, 0.02);
+
+    if (previousDistance <= 0.0 && nextDistance > -particleRadius) {
+        // Inside trying to leave below the rim: reflect off the inner face.
+        position.xz -= outward * (nextDistance + particleRadius);
+        float normalSpeed = dot(velocity.xz, outward);
+        if (normalSpeed > 0.0)
+            velocity.xz -= (1.0 + damping) * normalSpeed * outward;
+    } else if (previousDistance > 0.0 && nextDistance < particleRadius) {
+        // Landed spray outside pushing back in: reflect off the outer face.
+        position.xz += outward * (particleRadius - nextDistance);
+        float normalSpeed = dot(velocity.xz, outward);
+        if (normalSpeed < 0.0)
+            velocity.xz -= (1.0 + damping) * normalSpeed * outward;
+    }
+}
+
+void addBodyImpulse(uint index, vec3 impulse, vec3 torque,
+                    float displacedMass) {
+    atomicAdd(bodyImpulseBuffer.impulses[index].linear.x, encodeBody(impulse.x));
+    atomicAdd(bodyImpulseBuffer.impulses[index].linear.y, encodeBody(impulse.y));
+    atomicAdd(bodyImpulseBuffer.impulses[index].linear.z, encodeBody(impulse.z));
+    if (displacedMass > 0.0)
+        atomicAdd(bodyImpulseBuffer.impulses[index].linear.w,
+                  max(encodeBody(displacedMass), 0));
+    atomicAdd(bodyImpulseBuffer.impulses[index].angular.x, encodeBody(torque.x));
+    atomicAdd(bodyImpulseBuffer.impulses[index].angular.y, encodeBody(torque.y));
+    atomicAdd(bodyImpulseBuffer.impulses[index].angular.z, encodeBody(torque.z));
+    atomicAdd(bodyImpulseBuffer.impulses[index].angular.w, 1);
+}
+
+void main() {
+    uint index = gl_GlobalInvocationID.x;
+    if (index >= pc.counts.x) return;
+
+    float dtSim = pc.sim.x;
+    vec3 previousPosition = sphPositions.positions[index].xyz;
+    vec3 position = previousPosition;
+    vec3 velocity = sphVelocities.velocities[index].xyz;
+    position += velocity * dtSim;
+
+    // Floor and ceiling keep the reference bounce.  The outer x/z domain
+    // faces are only reachable by escaped spray; a reflective wall there
+    // reads as a glass box in mid-air, so they became "sticky air": clamp
+    // position, kill only the outward velocity component, and let the grass
+    // absorption below retire the particle quickly.
+    float damping = clamp(pc.sim.w, 0.0, 1.0);
+    vec3 lo = pc.boundsMin.xyz;
+    vec3 hi = pc.boundsMax.xyz;
+    bool hitDomainEdge = false;
+    if (position.x < lo.x) {
+        position.x = lo.x;
+        if (velocity.x < 0.0) velocity.x = 0.0;
+        hitDomainEdge = true;
+    } else if (position.x > hi.x) {
+        position.x = hi.x;
+        if (velocity.x > 0.0) velocity.x = 0.0;
+        hitDomainEdge = true;
+    }
+    if (position.y < lo.y) { position.y = lo.y; velocity.y = -velocity.y * damping; }
+    else if (position.y > hi.y) { position.y = hi.y; velocity.y = -velocity.y * damping; }
+    if (position.z < lo.z) {
+        position.z = lo.z;
+        if (velocity.z < 0.0) velocity.z = 0.0;
+        hitDomainEdge = true;
+    } else if (position.z > hi.z) {
+        position.z = hi.z;
+        if (velocity.z > 0.0) velocity.z = 0.0;
+        hitDomainEdge = true;
+    }
+
+    // ---- world-space rigid coupling ----
+    float worldScale = max(pc.boundsMax.w, 1.0e-5);
+    float dtWorld = max(pc.world.w, 1.0e-6);
+    float velocityScale = worldScale * dtSim / dtWorld;
+    vec3 worldPosition = pc.world.xyz + position * worldScale;
+    vec3 worldVelocity = velocity * velocityScale;
+
+    float particleMass = max(pc.coupling.y, 1.0e-6);
+    float particleVolume = particleMass / WATER_REST_DENSITY;
+    float particleRadius = 0.30 * pc.sim.z * worldScale;
+    float contactBand = 0.75 * pc.sim.z * worldScale;
+    uint bodyCount = min(pc.counts.w, MAX_BODIES);
+
+    for (uint bodyIndex = 0u; bodyIndex < bodyCount; ++bodyIndex) {
+        BodyState body = bodyStateBuffer.bodies[bodyIndex];
+        vec3 toBody = worldPosition - body.positionType.xyz;
+        float cullRadius = bodyBoundingRadius(body) + contactBand +
+                           particleRadius;
+        if (dot(toBody, toBody) > cullRadius * cullRadius) continue;
+
+        float distance = bodySdf(body, worldPosition);
+        if (distance >= contactBand) continue;
+        vec3 normal = bodyNormal(body, worldPosition, 0.5 * particleRadius);
+        if (distance < particleRadius)
+            worldPosition += normal * (particleRadius - distance);
+
+        vec3 arm = worldPosition - body.positionType.xyz;
+        vec3 surfaceVelocity = body.linearVelocityInvMass.xyz +
+            cross(body.angularVelocityInvInertia.xyz, arm);
+        vec3 before = worldVelocity;
+
+        // Per-particle displaced-volume buoyancy, mirroring the momentum
+        // exchange of mls_mpm_grid_update_v2.comp: the particle takes the
+        // downward reaction, the body receives the upward share via the
+        // combined impulse below, and displaced mass gates submersion drag
+        // in the rigid integrate pass.
+        float solidWeight = 1.0 - smoothstep(-contactBand, contactBand,
+                                             distance);
+        float displacedVolume = particleVolume * solidWeight;
+        vec3 buoyancyImpulse = vec3(
+            0.0, -GRAVITY_WORLD * WATER_REST_DENSITY * displacedVolume *
+                 dtWorld, 0.0);
+        worldVelocity -= buoyancyImpulse / particleMass;
+
+        worldVelocity = collideVelocity(
+            worldVelocity, surfaceVelocity, normal,
+            max(pc.coupling.z, body.material.x),
+            max(pc.coupling.w, body.material.y));
+        vec3 bodyImpulse = -particleMass * (worldVelocity - before);
+        if (dot(bodyImpulse, bodyImpulse) > 1.0e-18 || displacedVolume > 0.0)
+            addBodyImpulse(bodyIndex, bodyImpulse, cross(arm, bodyImpulse),
+                           WATER_REST_DENSITY * displacedVolume);
+    }
+
+    // Map the coupled state back to simulation units and cap runaway speeds.
+    position = (worldPosition - pc.world.xyz) / worldScale;
+    velocity = worldVelocity / velocityScale;
+    float speed = length(velocity);
+    const float maxSimSpeed = 80.0;
+    if (speed > maxSimSpeed) velocity *= maxSimSpeed / speed;
+
+    // The resting water body must stay inside the visible inset pool; only
+    // spray that clears the rim may land on the grass catch band outside.
+    constrainFinitePoolWall(previousPosition, position, velocity, damping);
+
+    position = clamp(position, lo, hi);
+
+    // Grass absorption: escaped spray must not accumulate against the outer
+    // simulation faces as a visible air wall.  Landed catch-band water lingers
+    // briefly as a puddle (staggered per-particle countdown in position.w,
+    // 1.0 = free), spray pressed against a domain edge fades fast, and soaked
+    // particles are recycled below the pool waterline so the particle count
+    // (and the score contract) never changes.
+    float soak = sphPositions.positions[index].w;
+    float wallDistance = roundedRectangleDistance(
+        position.xz - POOL_WALL_CENTRE_SIM, POOL_WALL_HALF_SIM,
+        POOL_WALL_CORNER_SIM);
+    bool outsidePool = wallDistance > 0.2;
+    bool landedOnGrass = position.y < lo.y + 0.45;
+    if (outsidePool && (landedOnGrass || hitDomainEdge)) {
+        if (soak >= 0.999) soak = 0.50 + 1.30 * hash01(index);
+        else soak -= dtSim;
+        if (hitDomainEdge) soak = min(soak, 0.10);
+        if (soak <= 0.0) {
+            position = vec3(
+                POOL_WALL_CENTRE_SIM.x +
+                    (hash01(index * 2u + 17u) - 0.5) * 1.5 * POOL_WALL_HALF_SIM.x,
+                0.85 + 0.90 * hash01(index * 5u + 3u),
+                POOL_WALL_CENTRE_SIM.y +
+                    (hash01(index * 3u + 91u) - 0.5) * 1.5 * POOL_WALL_HALF_SIM.y);
+            velocity = vec3(0.0);
+            soak = 1.0;
+        }
+    } else if (!outsidePool) {
+        soak = 1.0;
+    }
+
+    sphPositions.positions[index] = vec4(position, soak);
+    sphVelocities.velocities[index] = vec4(velocity, 0.0);
+
+    // Publish world-space state into the shared 80-byte particle buffer so
+    // the unchanged surface splat/raymarch presentation consumes SPH output
+    // exactly as it consumes MLS-MPM output.
+    particleBuffer.particles[index].position =
+        vec4(pc.world.xyz + position * worldScale, 1.0);
+    particleBuffer.particles[index].velocity =
+        vec4(velocity * velocityScale, 0.0);
+}

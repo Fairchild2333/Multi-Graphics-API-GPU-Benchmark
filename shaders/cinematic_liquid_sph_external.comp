@@ -1,0 +1,47 @@
+#version 450
+
+// Cinematic Liquid SPH slice, pass 1: external forces + position prediction.
+//
+// Faithful port of jeantimex/fluid (MIT) `external_forces.wgsl` minus the
+// mouse-interaction branch: gravity integrates velocity, then a fixed 1/120 s
+// look-ahead writes the predicted position used by every neighbour search in
+// this substep.  The whole SPH solver runs in the reference simulation units
+// (bounds ~24x12x18, h = 0.2); only the integrate pass maps into world space.
+
+layout(local_size_x = 256) in;
+
+layout(set = 0, binding = 0, std430) buffer SphPositionBuffer {
+    vec4 positions[];
+} sphPositions;
+layout(set = 0, binding = 1, std430) buffer SphVelocityBuffer {
+    vec4 velocities[];
+} sphVelocities;
+layout(set = 0, binding = 2, std430) buffer SphPredictedBuffer {
+    vec4 predicted[];
+} sphPredicted;
+
+// Shared 128-byte ABI for every cinematic_liquid_sph_* pass.
+layout(push_constant) uniform SphParams {
+    uvec4 counts;    // x particleCount, y tableSize, z scanCount, w scanLevel/bodyCount
+    vec4 sim;        // x dtSim, y gravitySim, z smoothingRadius, w collisionDamping
+    vec4 fluid;      // x targetDensity, y pressureMultiplier, z nearPressureMultiplier, w viscosityStrength
+    vec4 kernels;    // x spikyPow2Scale, y spikyPow3Scale, z spikyPow2DerivScale, w spikyPow3DerivScale
+    vec4 boundsMin;  // xyz sim-space bounds minimum, w poly6Scale
+    vec4 boundsMax;  // xyz sim-space bounds maximum, w worldScale (sim -> world length)
+    vec4 world;      // xyz world-space origin of sim (0,0,0), w dtWorld
+    vec4 coupling;   // x impulseFixedScale, y particleMassWorld, z restitution, w friction
+} pc;
+
+void main() {
+    uint index = gl_GlobalInvocationID.x;
+    if (index >= pc.counts.x) return;
+
+    vec3 velocity = sphVelocities.velocities[index].xyz +
+                    vec3(0.0, pc.sim.y, 0.0) * pc.sim.x;
+    sphVelocities.velocities[index] = vec4(velocity, 0.0);
+
+    // The reference predicts one 120 Hz tick ahead regardless of dt; the
+    // prediction only feeds neighbour search, not the committed motion.
+    sphPredicted.predicted[index] = vec4(
+        sphPositions.positions[index].xyz + velocity * (1.0 / 120.0), 1.0);
+}

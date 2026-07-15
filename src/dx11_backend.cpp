@@ -48,16 +48,50 @@ Microsoft::WRL::ComPtr<ID3DBlob> DX11Backend::CompileShader(const std::string& p
 // -----------------------------------------------------------------------
 
 void DX11Backend::InitBackend() {
+    if (config_.workload == Workload::Fluid) {
+        throw std::runtime_error(
+            "Fluid is an unverified Vulkan-only Developer Preview; DX11 fallback is disabled");
+    }
+    if (!isFragmentOnlyWorkload(config_.workload) &&
+        (config_.particleCount == 0 ||
+         config_.particleCount % kComputeWorkGroupSize != 0)) {
+        throw std::runtime_error(
+            "DX11 compute workloads require a non-zero particle/body count "
+            "aligned to the 256-thread workgroup size.");
+    }
     std::cout << "[DX11 Init] Creating device" << (config_.headless ? " (headless)..." : " and swap chain...") << std::endl;
     CreateDeviceAndSwapChain();
+    if (featureLevel_ < D3D_FEATURE_LEVEL_11_0 &&
+        config_.workload == Workload::NBody &&
+        config_.particleCount > 4096u) {
+        throw std::runtime_error(
+            "The DX11 SM4 safety profile limits N-body to 4,096 bodies to "
+            "avoid a watchdog/TDR-length dispatch. Select 4096 or fewer bodies.");
+    }
+    if (!isFragmentOnlyWorkload(config_.workload) &&
+        !computeShadersSupported_) {
+        throw std::runtime_error(
+            "This Direct3D feature-level 10 device/driver does not expose "
+            "DirectCompute 4.x. Fragment-only DX11 workloads remain available.");
+    }
+    const std::uint64_t dispatchGroups =
+        std::uint64_t(config_.particleCount) / kComputeWorkGroupSize;
+    if (!isFragmentOnlyWorkload(config_.workload) &&
+        dispatchGroups > D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION) {
+        throw std::runtime_error(
+            "DX11 workload exceeds the 65,535 thread-group Dispatch limit; "
+            "select a smaller particle count/difficulty.");
+    }
     if (!config_.headless) {
         std::cout << "[DX11 Init] Creating render target..." << std::endl;
         CreateRenderTarget();
     }
     std::cout << "[DX11 Init] Compiling shaders..." << std::endl;
     CreateShaders();
-    std::cout << "[DX11 Init] Creating particle buffers..." << std::endl;
-    CreateParticleBuffers();
+    if (!isFragmentOnlyWorkload(config_.workload)) {
+        std::cout << "[DX11 Init] Creating particle buffers..." << std::endl;
+        CreateParticleBuffers();
+    }
     std::cout << "[DX11 Init] Creating compute params CB..." << std::endl;
     CreateComputeParamsCB();
     std::cout << "[DX11 Init] Creating timestamp queries..." << std::endl;
@@ -88,6 +122,9 @@ void DX11Backend::CreateDeviceAndSwapChain() {
             featureLevels, _countof(featureLevels), D3D11_SDK_VERSION,
             &device_, &actualFL, &context_),
             "D3D11CreateDevice (WARP) failed");
+
+        featureLevel_ = actualFL;
+        computeShadersSupported_ = true;
 
         deviceName_ = "Microsoft WARP (CPU Software Renderer)";
         driverVersion_ = "WARP";
@@ -226,6 +263,16 @@ void DX11Backend::CreateDeviceAndSwapChain() {
         &device_, &actualFeatureLevel, &context_),
         "D3D11CreateDevice failed");
 
+    featureLevel_ = actualFeatureLevel;
+    computeShadersSupported_ = actualFeatureLevel >= D3D_FEATURE_LEVEL_11_0;
+    if (!computeShadersSupported_) {
+        D3D11_FEATURE_DATA_D3D10_X_HARDWARE_OPTIONS options{};
+        computeShadersSupported_ = SUCCEEDED(device_->CheckFeatureSupport(
+            D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS,
+            &options, sizeof(options))) &&
+            options.ComputeShaders_Plus_RawAndStructuredBuffers_Via_Shader_4_x;
+    }
+
     // Query the actual adapter the device is using via DXGI
     ComPtr<IDXGIDevice> dxgiDevice;
     ComPtr<IDXGIAdapter> actualAdapter;
@@ -274,7 +321,19 @@ void DX11Backend::CreateDeviceAndSwapChain() {
 
     std::cout << "Selected GPU: " << deviceName_ << '\n'
               << "  Driver type:   " << adapterType << '\n'
-              << "  Feature Level: " << flName(actualFeatureLevel) << '\n';
+              << "  Feature Level: " << flName(actualFeatureLevel) << '\n'
+              << "  Shader Model:  "
+              << (actualFeatureLevel >= D3D_FEATURE_LEVEL_11_0 ? "5.0" : "4.0")
+              << '\n'
+              << "  DirectCompute: "
+              << (computeShadersSupported_ ? "available" : "not exposed")
+              << '\n';
+    const std::string capabilityTag = std::string("D3D_FL=") +
+        flName(actualFeatureLevel) + ";SM=" +
+        (actualFeatureLevel >= D3D_FEATURE_LEVEL_11_0 ? "5.0" : "4.0") +
+        ";DirectCompute=" + (computeShadersSupported_ ? "yes" : "no");
+    driverVersion_ = driverVersion_.empty()
+        ? capabilityTag : driverVersion_ + ";" + capabilityTag;
     if (!driverVersion_.empty())
         std::cout << "  Driver:        " << driverVersion_ << '\n';
     std::cout << std::flush;
@@ -340,31 +399,45 @@ void DX11Backend::CreateRenderTarget() {
 }
 
 void DX11Backend::CreateShaders() {
-    std::string csFile;
-    if (config_.workload == Workload::SynthPeak) {
-        if (config_.peakPrecision == Precision::FP16)
-            throw std::runtime_error("SynthPeak FP16 is not supported on the DX backend (FXC); use Vulkan/Metal");
-        csFile = (config_.peakPrecision == Precision::FP64)  ? "synthpeak_fp64.hlsl"
-               : (config_.peakPrecision == Precision::INT32) ? "synthpeak_int32.hlsl"
-               :                                               "synthpeak_fp32.hlsl";
-    } else {
-        csFile = (config_.workload == Workload::NBody) ? "nbody.hlsl" : "compute.hlsl";
+    const bool downlevel = featureLevel_ < D3D_FEATURE_LEVEL_11_0;
+    if (!isFragmentOnlyWorkload(config_.workload)) {
+        std::string csFile;
+        if (config_.workload == Workload::SynthPeak) {
+            if (config_.peakPrecision == Precision::FP16)
+                throw std::runtime_error("SynthPeak FP16 is not supported on the DX backend (FXC); use Vulkan/Metal");
+            if (downlevel && config_.peakPrecision == Precision::FP64)
+                throw std::runtime_error("SynthPeak FP64 requires DX11 feature level 11_0 / shader model 5.0");
+            csFile = (config_.peakPrecision == Precision::FP64)  ? "synthpeak_fp64.hlsl"
+                   : (config_.peakPrecision == Precision::INT32) ? "synthpeak_int32.hlsl"
+                   :                                               "synthpeak_fp32.hlsl";
+        } else {
+            csFile = (config_.workload == Workload::NBody) ? "nbody.hlsl" : "compute.hlsl";
+        }
+        auto csBlob = CompileShader(shaderDir_ + csFile, "CSMain",
+                                    downlevel ? "cs_4_0" : "cs_5_0");
+        ThrowIfFailed(device_->CreateComputeShader(
+            csBlob->GetBufferPointer(), csBlob->GetBufferSize(), nullptr, &computeShader_),
+            "CreateComputeShader failed");
     }
-    auto csBlob = CompileShader(shaderDir_ + csFile, "CSMain", "cs_5_0");
-    ThrowIfFailed(device_->CreateComputeShader(
-        csBlob->GetBufferPointer(), csBlob->GetBufferSize(), nullptr, &computeShader_),
-        "CreateComputeShader failed");
 
     if (!config_.headless) {
         const bool fractal   = (config_.workload == Workload::StressFractal);
+        const bool gpuStress = (config_.workload == Workload::GpuStressV1);
+        const bool gpuBurn   = (config_.workload == Workload::GpuBurnV1);
         const bool volumetric= (config_.workload == Workload::Volumetric);
         const bool render3d  = (config_.workload == Workload::Render3D);
-        const char* vsFile = (fractal || volumetric) ? (fractal ? "fractal.hlsl" : "volumetric.hlsl")
+        const char* vsFile = gpuBurn ? "gpu_burn.hlsl"
+                             : gpuStress ? "gpu_stress.hlsl"
+                            : (fractal || volumetric) ? (fractal ? "fractal.hlsl" : "volumetric.hlsl")
                             : render3d ? "render3d.hlsl" : "particle_vs.hlsl";
-        const char* psFile = (fractal || volumetric) ? (fractal ? "fractal.hlsl" : "volumetric.hlsl")
+        const char* psFile = gpuBurn ? "gpu_burn.hlsl"
+                             : gpuStress ? "gpu_stress.hlsl"
+                            : (fractal || volumetric) ? (fractal ? "fractal.hlsl" : "volumetric.hlsl")
                             : render3d ? "render3d.hlsl" : "particle_ps.hlsl";
-        auto vsBlob = CompileShader(shaderDir_ + vsFile, "VSMain", "vs_5_0");
-        auto psBlob = CompileShader(shaderDir_ + psFile, "PSMain", "ps_5_0");
+        auto vsBlob = CompileShader(shaderDir_ + vsFile, "VSMain",
+                                    downlevel ? "vs_4_0" : "vs_5_0");
+        auto psBlob = CompileShader(shaderDir_ + psFile, "PSMain",
+                                    downlevel ? "ps_4_0" : "ps_5_0");
 
         ThrowIfFailed(device_->CreateVertexShader(
             vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &vertexShader_),
@@ -385,7 +458,7 @@ void DX11Backend::CreateShaders() {
                 layout, _countof(layout),
                 vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &inputLayout_),
                 "CreateInputLayout (render3d) failed");
-        } else if (!fractal && !volumetric) {
+        } else if (!fractal && !gpuStress && !gpuBurn && !volumetric) {
         D3D11_INPUT_ELEMENT_DESC layout[] = {
             { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
             { "VELOCITY", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -601,8 +674,7 @@ void DX11Backend::DrawFrame(float deltaTime) {
         context_->End(timestampQueries_[slot][0].Get());
 
     // Compute pass — skipped entirely for the fragment-only workloads.
-    if (config_.workload != Workload::StressFractal
-        && config_.workload != Workload::Volumetric) {
+    if (!isFragmentOnlyWorkload(config_.workload)) {
         // Update compute params
         D3D11_MAPPED_SUBRESOURCE mapped{};
         context_->Map(computeParamsCB_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
@@ -639,8 +711,7 @@ void DX11Backend::DrawFrame(float deltaTime) {
             context_->End(timestampQueries_[slot][2].Get());
             context_->End(timestampQueries_[slot][3].Get());
         }
-    } else if (config_.workload == Workload::StressFractal
-               || config_.workload == Workload::Volumetric) {
+    } else if (isFragmentOnlyWorkload(config_.workload)) {
         // --- Fragment-only pass (fullscreen triangle, no compute/VB) ---
         if (timestampsSupported_)
             context_->End(timestampQueries_[slot][2].Get());
@@ -654,26 +725,49 @@ void DX11Backend::DrawFrame(float deltaTime) {
                            static_cast<float>(kWindowHeight), 0.0f, 1.0f };
         context_->RSSetViewports(1, &vp);
 
-        // Reuse computeParamsCB_ (16 bytes) for the pixel-shader params.
-        fractalElapsed_ += deltaTime;
-        D3D11_MAPPED_SUBRESOURCE fm{};
-        context_->Map(computeParamsCB_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &fm);
-        if (config_.workload == Workload::Volumetric) {
-            VolumetricParams vol{ fractalElapsed_, 0.05f, config_.volumetricSteps, 0 };
-            std::memcpy(fm.pData, &vol, sizeof(vol));
-        } else {
-            FractalParams fp{ fractalElapsed_, 1.0f, config_.fractalIter, 0 };
-            std::memcpy(fm.pData, &fp, sizeof(fp));
-        }
-        context_->Unmap(computeParamsCB_.Get(), 0);
-
         context_->IASetInputLayout(nullptr);
         context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         context_->VSSetShader(vertexShader_.Get(), nullptr, 0);
         context_->PSSetShader(pixelShader_.Get(), nullptr, 0);
         ID3D11Buffer* pscb[] = { computeParamsCB_.Get() };
         context_->PSSetConstantBuffers(0, 1, pscb);
-        context_->Draw(3, 0);
+
+        // Reuse computeParamsCB_ (16 bytes) for the pixel-shader params.
+        if (config_.workload == Workload::GpuStressV1) {
+            for (std::uint32_t pass = 0; pass < kGpuStressV1DrawsPerFrame; ++pass) {
+                GpuStressV1Params sp{ static_cast<float>(pass), 1.0f,
+                                      config_.gpuStressIter, kGpuStressV1ShaderVersion };
+                D3D11_MAPPED_SUBRESOURCE fm{};
+                context_->Map(computeParamsCB_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &fm);
+                std::memcpy(fm.pData, &sp, sizeof(sp));
+                context_->Unmap(computeParamsCB_.Get(), 0);
+                context_->Draw(3, 0);
+            }
+        } else if (config_.workload == Workload::GpuBurnV1) {
+            fractalElapsed_ += deltaTime;
+            for (std::uint32_t pass = 0; pass < kGpuBurnV1DrawsPerFrame; ++pass) {
+                GpuBurnV1Params bp{ fractalElapsed_, static_cast<float>(pass),
+                                    config_.gpuBurnIter, kGpuBurnV1ShaderVersion };
+                D3D11_MAPPED_SUBRESOURCE fm{};
+                context_->Map(computeParamsCB_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &fm);
+                std::memcpy(fm.pData, &bp, sizeof(bp));
+                context_->Unmap(computeParamsCB_.Get(), 0);
+                context_->Draw(3, 0);
+            }
+        } else {
+            fractalElapsed_ += deltaTime;
+            D3D11_MAPPED_SUBRESOURCE fm{};
+            context_->Map(computeParamsCB_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &fm);
+            if (config_.workload == Workload::Volumetric) {
+                VolumetricParams vol{ fractalElapsed_, 0.05f, config_.volumetricSteps, 0 };
+                std::memcpy(fm.pData, &vol, sizeof(vol));
+            } else {
+                FractalParams fp{ fractalElapsed_, 1.0f, config_.fractalIter, 0 };
+                std::memcpy(fm.pData, &fp, sizeof(fp));
+            }
+            context_->Unmap(computeParamsCB_.Get(), 0);
+            context_->Draw(3, 0);
+        }
 
         if (timestampsSupported_)
             context_->End(timestampQueries_[slot][3].Get());

@@ -1,0 +1,48 @@
+#version 450
+
+// MLS-MPM pass 1/5: clear the fixed-point grid.
+//
+// Descriptor ABI reserved for the complete pipeline:
+//   set 0, binding 0: Particle[] (unused by this pass)
+//   set 0, binding 1: GridCell[]
+//   set 0, binding 2: reserved for a future r32f storage volume
+//
+// A compute-to-compute barrier is required before P2G starts.
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+struct GridCell {
+    int vx;
+    int vy;
+    int vz;
+    int mass;
+};
+
+layout(set = 0, binding = 1, std430) buffer GridBuffer {
+    GridCell cells[];
+} gridBuffer;
+
+// Shared 96-byte push-constant ABI. Every MLS-MPM shader declares the same
+// fields in the same order, even when a pass only consumes a subset.
+layout(push_constant) uniform MpmParams {
+    uvec4 gridSizeAndCount; // xyz: grid dimensions, w: particle count
+    vec4  simulation;       // x: dt, y: gravityY, z: restDensity, w: stiffness
+    vec4  material;         // x: viscosity, y: particleMass, z: fixedScale, w: boundaryCells
+    vec4  gridOriginDx;     // xyz: world-space grid origin, w: cell width dx
+    vec4  sphere;           // xyz: obstacle centre, w: radius (<= 0 disables)
+    vec4  collision;        // x: restitution, y: friction, z: density floor ratio, w: max speed
+} p;
+
+void main() {
+    uint index = gl_GlobalInvocationID.x;
+    uint totalCells = p.gridSizeAndCount.x *
+                      p.gridSizeAndCount.y *
+                      p.gridSizeAndCount.z;
+    if (index >= totalCells)
+        return;
+
+    gridBuffer.cells[index].vx = 0;
+    gridBuffer.cells[index].vy = 0;
+    gridBuffer.cells[index].vz = 0;
+    gridBuffer.cells[index].mass = 0;
+}

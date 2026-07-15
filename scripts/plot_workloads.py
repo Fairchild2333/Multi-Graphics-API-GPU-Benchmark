@@ -5,11 +5,17 @@ Reads the benchmark results JSON and produces one bar chart per workload:
 
   * stream    -> memory bandwidth   (GB/s)      by API
   * nbody     -> achievable compute (GFLOP/s)   by API
+  * gpu_burn  -> Plasma Bloom burn rate         by device and API
+  * cinematic_liquid -> future 3D liquid score  by device and API
+
+The historical ``fluid`` workload is a legacy 2D projected-dye prototype and
+is deliberately excluded from formal charts.
   * stress    -> fill rate          (G-iter/s)  by API
   * synthpeak -> peak throughput    (GFLOPS/GIOPS) by precision, grouped by API
 
-Each (API, precision) pair is reduced to its best (max) score so repeated runs
-don't clutter the chart. Saves PNGs to the output directory (default docs/images).
+Simple workloads use the newest workload contract and keep device/API identity;
+precision charts reduce repeated runs to the best score. Saves PNGs to the
+output directory (default docs/images).
 
 Usage:
     python scripts/plot_workloads.py                  # auto-find results, save to docs/images
@@ -34,8 +40,13 @@ API_COLORS = {
 WORKLOAD_TITLES = {
     "stream":    "Memory Bandwidth (Stream)",
     "nbody":     "Achievable Compute (N-body)",
+    "gpu_burn":  "GPU Burn (Plasma Bloom)",
+    "gpu_stress": "GraphicsBurn v1 / Component (Advanced)",
     "stress":    "Fill Rate (Fractal Stress)",
     "render3d":  "3D Render Throughput (Billboards)",
+    "volumetric": "Volumetric Throughput (Experimental)",
+    "cinematic_liquid": "Cinematic Liquid (3D)",
+    "fluid":     "Legacy 2D Fluid (Unverified)",
     "synthpeak": "Peak Throughput (Synthetic)",
 }
 PRECISION_ORDER = ["FP16", "FP32", "FP64", "INT32"]
@@ -77,22 +88,46 @@ def color_for(api: str) -> str:
 
 
 def plot_simple(rows, workload, out_dir):
-    """One bar per API (stream / nbody / stress)."""
-    best = best_by(rows, lambda r: r.get("graphicsApi", "?"))
+    """One honest bar per device/API for the newest workload contract."""
+    scored = [r for r in rows if float(r.get("score", 0) or 0) > 0]
+    if not scored:
+        return None
+
+    # Never mix algorithm revisions into one chart. Schema-v1 history has no
+    # workloadVersion; in that case retain the unversioned rows. Otherwise use
+    # the contract attached to the newest result.
+    newest = max(scored, key=lambda r: r.get("timestamp", ""))
+    version = newest.get("workloadVersion", "") or ""
+    compatible = [r for r in scored
+                  if (r.get("workloadVersion", "") or "") == version]
+    best = best_by(compatible, lambda r: (r.get("deviceName", "(unknown)"),
+                                          r.get("graphicsApi", "?")))
     if not best:
         return None
-    apis = sorted(best.keys(), key=lambda a: -float(best[a]["score"]))
-    scores = [float(best[a]["score"]) for a in apis]
-    unit = best[apis[0]].get("scoreUnit", "")
-    dev = best[apis[0]].get("deviceName", "")
 
-    fig, ax = plt.subplots(figsize=(7, 4.5))
-    bars = ax.bar(apis, scores, color=[color_for(a) for a in apis])
+    api_order = {name: index for index, name in enumerate(API_COLORS)}
+    keys = sorted(best, key=lambda k: (k[0], api_order.get(k[1], 99), k[1]))
+    scores = [float(best[k]["score"]) for k in keys]
+    unit = best[keys[0]].get("scoreUnit", "")
+    labels = []
+    for device, api in keys:
+        short_device = device if len(device) <= 28 else device[:25] + "..."
+        labels.append(f"{api}\n{short_device}")
+
+    fig_width = max(7.0, min(16.0, 1.25 * len(keys)))
+    fig, ax = plt.subplots(figsize=(fig_width, 4.8))
+    bars = ax.bar(range(len(keys)), scores,
+                  color=[color_for(api) for _, api in keys])
+    ax.set_xticks(range(len(keys)))
+    ax.set_xticklabels(labels, rotation=20, ha="right", fontsize=8)
     ax.set_ylabel(unit)
-    ax.set_title(f"{WORKLOAD_TITLES.get(workload, workload)}\n{dev}")
+    contract = f" — {version}" if version else ""
+    ax.set_title(f"{WORKLOAD_TITLES.get(workload, workload)}{contract}\n"
+                 "Best normalised score per device/API")
     ax.grid(axis="y", alpha=0.3)
     for b, s in zip(bars, scores):
-        ax.text(b.get_x() + b.get_width() / 2, s, f"{s:,.0f}",
+        value = f"{s:,.1f}" if s < 1000 else f"{s:,.0f}"
+        ax.text(b.get_x() + b.get_width() / 2, s, value,
                 ha="center", va="bottom", fontsize=9)
     fig.tight_layout()
     out = out_dir / f"workload_{workload}.png"
@@ -157,7 +192,7 @@ def main() -> int:
         by_wl.setdefault(r.get("workload", "stream"), []).append(r)
 
     written = []
-    for wl in ("stream", "nbody", "stress", "render3d"):
+    for wl in ("stream", "gpu_burn", "cinematic_liquid", "gpu_stress", "nbody", "stress", "render3d", "volumetric"):
         if wl in by_wl:
             out = plot_simple(by_wl[wl], wl, out_dir)
             if out:

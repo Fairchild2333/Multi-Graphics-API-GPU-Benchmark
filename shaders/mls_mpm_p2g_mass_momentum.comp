@@ -1,0 +1,136 @@
+#version 450
+
+// MLS-MPM pass 2/5: particle-to-grid transfer of mass and APIC momentum.
+// Each particle scatters to a 3x3x3 quadratic B-spline neighbourhood. Grid
+// writes use signed integer atomics because portable Vulkan 1.1 does not
+// provide core floating-point atomic add.
+//
+// Grid phase semantics after this pass:
+//   vx/vy/vz = fixed-point momentum, mass = fixed-point mass.
+// A compute write/read barrier is required before density/stress P2G.
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+struct Particle {
+    vec4 position;
+    vec4 velocity;
+    vec4 C0;
+    vec4 C1;
+    vec4 C2;
+};
+
+struct GridCell {
+    int vx;
+    int vy;
+    int vz;
+    int mass;
+};
+
+layout(set = 0, binding = 0, std430) readonly buffer ParticleBuffer {
+    Particle particles[];
+} particleBuffer;
+
+layout(set = 0, binding = 1, std430) buffer GridBuffer {
+    GridCell cells[];
+} gridBuffer;
+
+layout(push_constant) uniform MpmParams {
+    uvec4 gridSizeAndCount;
+    vec4  simulation;
+    vec4  material;
+    vec4  gridOriginDx;
+    vec4  sphere;
+    vec4  collision;
+} p;
+
+const float kFixedContributionLimit = 536870911.0; // 2^29 - 1
+
+float fixedScale() {
+    return max(abs(p.material.z), 1.0);
+}
+
+int encodeFixedSigned(float value) {
+    float scaled = clamp(value * fixedScale(),
+                         -kFixedContributionLimit,
+                          kFixedContributionLimit);
+    return int(round(scaled));
+}
+
+int encodeFixedPositive(float value) {
+    float scaled = clamp(value * fixedScale(), 0.0,
+                         kFixedContributionLimit);
+    return int(round(scaled));
+}
+
+vec3 quadraticWeights(float x) {
+    float a = 1.5 - x;
+    float b = x - 1.0;
+    float c = x - 0.5;
+    return vec3(0.5 * a * a,
+                0.75 - b * b,
+                0.5 * c * c);
+}
+
+bool insideGrid(ivec3 node, ivec3 size) {
+    return all(greaterThanEqual(node, ivec3(0))) &&
+           all(lessThan(node, size));
+}
+
+uint gridIndex(ivec3 node) {
+    uvec3 c = uvec3(node);
+    return c.x + p.gridSizeAndCount.x *
+                 (c.y + p.gridSizeAndCount.y * c.z);
+}
+
+void main() {
+    uint particleIndex = gl_GlobalInvocationID.x;
+    if (particleIndex >= p.gridSizeAndCount.w)
+        return;
+    if (any(lessThan(p.gridSizeAndCount.xyz, uvec3(3u))))
+        return;
+
+    float dx = max(abs(p.gridOriginDx.w), 1.0e-6);
+    float particleMass = max(p.material.y, 0.0);
+    if (particleMass == 0.0)
+        return;
+
+    Particle particle = particleBuffer.particles[particleIndex];
+    vec3 gridPosition = (particle.position.xyz - p.gridOriginDx.xyz) / dx;
+    ivec3 base = ivec3(floor(gridPosition - vec3(0.5)));
+    vec3 fractional = gridPosition - vec3(base);
+    vec3 wx = quadraticWeights(fractional.x);
+    vec3 wy = quadraticWeights(fractional.y);
+    vec3 wz = quadraticWeights(fractional.z);
+    mat3 C = mat3(particle.C0.xyz, particle.C1.xyz, particle.C2.xyz);
+    ivec3 gridSize = ivec3(p.gridSizeAndCount.xyz);
+
+    for (int z = 0; z < 3; ++z) {
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 3; ++x) {
+                ivec3 offset = ivec3(x, y, z);
+                ivec3 node = base + offset;
+                if (!insideGrid(node, gridSize))
+                    continue;
+
+                float weight = wx[x] * wy[y] * wz[z];
+                if (weight <= 0.0)
+                    continue;
+
+                vec3 dpos = (vec3(offset) - fractional) * dx;
+                vec3 affineVelocity = particle.velocity.xyz + C * dpos;
+                vec3 momentum = weight * particleMass * affineVelocity;
+                float mass = weight * particleMass;
+                uint index = gridIndex(node);
+
+                atomicAdd(gridBuffer.cells[index].vx,
+                          encodeFixedSigned(momentum.x));
+                atomicAdd(gridBuffer.cells[index].vy,
+                          encodeFixedSigned(momentum.y));
+                atomicAdd(gridBuffer.cells[index].vz,
+                          encodeFixedSigned(momentum.z));
+                atomicAdd(gridBuffer.cells[index].mass,
+                          encodeFixedPositive(mass));
+            }
+        }
+    }
+}

@@ -1,8 +1,10 @@
 #include "app_base.h"
+#include "path_service.h"
 #include "renderdoc_app.h"
 
 #include <GLFW/glfw3.h>
 
+#include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <random>
@@ -13,17 +15,26 @@
 #define NOMINMAX
 #include <windows.h>
 #include <winnt.h>
-#include <direct.h>
 #elif defined(__linux__)
 #include <dlfcn.h>
 #include <fstream>
-#include <sys/stat.h>
 #include <sys/utsname.h>
 #elif defined(__APPLE__)
 #include <sys/sysctl.h>
 #endif
 
 namespace gpu_bench {
+
+namespace {
+
+// Backend timestamp queries are deliberately buffered. DX11 currently uses an
+// eight-slot query ring and OpenGL uses four slots, so frames-in-flight alone
+// is not a sufficient drain after RenderDoc captures a frame. Keep this above
+// the largest backend ring (plus margin) so the captured query never reaches
+// the formal benchmark accumulator.
+constexpr std::uint32_t kCaptureTimingDrainSamples = 16;
+
+}  // namespace
 
 std::string AppBase::GetCpuName() {
 #ifdef _WIN32
@@ -148,11 +159,31 @@ AppBase::~AppBase() {
 // -----------------------------------------------------------------------
 
 void AppBase::InitRenderDoc() {
+    std::string rdocModulePath;
 #ifdef _WIN32
     HMODULE mod = GetModuleHandleA("renderdoc.dll");
-    if (!mod)
-        mod = LoadLibraryA("C:\\Program Files\\RenderDoc\\renderdoc.dll");
+    if (!mod) {
+        const std::filesystem::path exeDir = std::filesystem::u8path(shaderDir_);
+        const std::filesystem::path candidates[] = {
+            exeDir / "tools" / "RenderDoc" / "renderdoc.dll",
+            exeDir / ".." / "tools" / "RenderDoc" / "renderdoc.dll",
+            exeDir / ".." / ".." / "tools" / "RenderDoc" / "renderdoc.dll",
+            exeDir / "renderdoc.dll",
+            "C:\\Program Files\\RenderDoc\\renderdoc.dll",
+        };
+        for (const auto& candidate : candidates) {
+            mod = LoadLibraryW(candidate.lexically_normal().wstring().c_str());
+            if (mod) break;
+        }
+    }
     if (!mod) return;
+    wchar_t modulePath[32768]{};
+    const DWORD modulePathLength = GetModuleFileNameW(
+        mod, modulePath, static_cast<DWORD>(std::size(modulePath)));
+    if (modulePathLength > 0 && modulePathLength < std::size(modulePath)) {
+        rdocModulePath = std::filesystem::path(
+            std::wstring(modulePath, modulePathLength)).u8string();
+    }
     auto RENDERDOC_GetAPI =
         reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(mod, "RENDERDOC_GetAPI"));
 #elif defined(__linux__)
@@ -177,14 +208,12 @@ void AppBase::InitRenderDoc() {
     api->SetCaptureOptionU32(eRENDERDOC_Option_RefAllResources, 1);
     api->SetCaptureOptionU32(eRENDERDOC_Option_SaveAllInitials, 1);
 
-#ifdef _WIN32
-    std::string capDir = shaderDir_ + "..\\..\\rdoc_captures\\";
-    _mkdir(capDir.c_str());
-#else
-    std::string capDir = shaderDir_ + "../../rdoc_captures/";
-    mkdir(capDir.c_str(), 0755);
-#endif
-    rdocCaptureDir_ = capDir;
+    const auto captureDir = paths::CapturesDirectory();
+    rdocCaptureDir_ = captureDir.u8string();
+    if (!rdocCaptureDir_.empty() &&
+        rdocCaptureDir_.back() != '/' && rdocCaptureDir_.back() != '\\') {
+        rdocCaptureDir_ += std::filesystem::path::preferred_separator;
+    }
 
     int major = 0, minor = 0, patch = 0;
     api->GetAPIVersion(&major, &minor, &patch);
@@ -192,8 +221,9 @@ void AppBase::InitRenderDoc() {
     std::cout << "\n============================================\n"
               << "  RenderDoc detected! (API "
               << major << "." << minor << "." << patch << ")\n"
+              << (rdocModulePath.empty() ? "" : "  Loaded from: " + rdocModulePath + "\n")
               << "  Press F12 during rendering to capture a frame.\n"
-              << "  Captures saved to: " << capDir << "\n"
+              << "  Captures saved to: " << rdocCaptureDir_ << "\n"
               << "============================================\n\n" << std::flush;
 #endif
 }
@@ -222,18 +252,31 @@ void AppBase::UpdateRenderDocCapturePath() {
         if (ch == ' ' || ch == '.' || ch == '(' || ch == ')' || ch == '/') ch = '_';
     while (!gpuTag.empty() && gpuTag.back() == '_') gpuTag.pop_back();
 
-    std::string pathTemplate = rdocCaptureDir_ + backendTag + "_" + gpuTag;
+    std::string pathTemplate = rdocCaptureDir_ + backendTag + "_" + gpuTag
+                             + "_" + workloadId(config_.workload);
+    if (config_.workload == Workload::CinematicLiquidV1)
+        pathTemplate += "_v1_shader" +
+                        std::to_string(kCinematicLiquidShaderVersion);
+    else if (config_.workload == Workload::CinematicLiquid)
+        pathTemplate += "_v2_shader" +
+                        std::to_string(kCinematicLiquidV2ShaderVersion);
 
     // Append flights/particles info when overridden
     if (config_.framesInFlight != kMaxFramesInFlight)
         pathTemplate += "_flights" + std::to_string(config_.framesInFlight);
-    if (config_.particlesOverridden)
+    if (config_.particlesOverridden &&
+        (config_.workload == Workload::Stream ||
+         config_.workload == Workload::Render3D))
         pathTemplate += "_particles" + std::to_string(config_.particleCount);
 
     api->SetCaptureFilePathTemplate(pathTemplate.c_str());
 }
 
 void AppBase::Run() {
+    if ((config_.workload == Workload::GpuStressV1 ||
+         config_.workload == Workload::GpuBurnV1) && config_.headless) {
+        throw std::runtime_error("GPU Stress/Burn is a graphics workload and does not support headless mode");
+    }
     if (!config_.headless)
         InitRenderDoc();
 
@@ -324,6 +367,8 @@ void AppBase::MainLoop() {
 
     bool f12WasPressed = false;
     bool timeCaptureTriggered = false;
+    double captureWallStart = 0.0;
+    bool captureDuringMeasurement = false;
 
     auto shouldContinue = [&]() -> bool {
         if (config_.headless) return true;  // headless: exit via time/frame limit only
@@ -351,6 +396,8 @@ void AppBase::MainLoop() {
 
         bool capturing = false;
         if (rdoc && rdocCaptureRequested_) {
+            captureWallStart = glfwGetTime();
+            captureDuringMeasurement = warmupDone_;
             rdoc->StartFrameCapture(nullptr, nullptr);
             capturing = true;
             rdocCaptureRequested_ = false;
@@ -364,25 +411,47 @@ void AppBase::MainLoop() {
         ++totalFrameCount_;
 
         if (capturing && rdoc) {
-            rdoc->EndFrameCapture(nullptr, nullptr);
-            ++rdocCaptureCount_;
-
-            // Use global capture count (not per-instance) since RenderDoc
-            // accumulates captures across multiple backend runs in one session.
-            uint32_t numCaptures = rdoc->GetNumCaptures();
-            uint32_t idx = (numCaptures > 0) ? numCaptures - 1 : 0;
-            char filePath[512] = {};
-            uint32_t pathLen = sizeof(filePath);
-            uint64_t timestamp = 0;
-            if (rdoc->GetCapture(idx, filePath, &pathLen, &timestamp))
-                lastCapturePath_ = filePath;
-
+            const std::uint32_t captureResult =
+                rdoc->EndFrameCapture(nullptr, nullptr);
+            const double captureWallEnd = glfwGetTime();
+            ++rdocCaptureAttemptCount_;
+            if (captureDuringMeasurement) {
+                excludedCaptureSec_ += captureWallEnd - captureWallStart;
+                rdocCaptureAttemptExcluded_ = true;
+            }
+            // Timestamp query results arrive asynchronously through backend-
+            // specific query rings. Drain the largest ring, not only the
+            // configured frames-in-flight window, so the captured command
+            // buffer cannot leak into the formal GPU score.
+            timingSamplesToSkip_ = (std::max)(
+                timingSamplesToSkip_,
+                (std::max)(kCaptureTimingDrainSamples,
+                           config_.framesInFlight + 1u));
             double capTime = glfwGetTime() - runStartTime_;
-            std::cout << "[RenderDoc] Captured at " << std::fixed
-                      << std::setprecision(1) << capTime << "s (frame "
-                      << totalFrameCount_ << ")\n";
-            if (!lastCapturePath_.empty())
-                std::cout << "  -> " << lastCapturePath_ << "\n";
+            if (captureResult == 1u) {
+                ++rdocCaptureCount_;
+
+                // Use global capture count (not per-instance) since RenderDoc
+                // accumulates captures across multiple backend runs in one session.
+                uint32_t numCaptures = rdoc->GetNumCaptures();
+                uint32_t idx = (numCaptures > 0) ? numCaptures - 1 : 0;
+                char filePath[512] = {};
+                uint32_t pathLen = sizeof(filePath);
+                uint64_t timestamp = 0;
+                if (rdoc->GetCapture(idx, filePath, &pathLen, &timestamp))
+                    lastCapturePath_ = filePath;
+
+                std::cout << "[RenderDoc] Captured at " << std::fixed
+                          << std::setprecision(1) << capTime << "s (frame "
+                          << totalFrameCount_ << ")\n";
+                if (!lastCapturePath_.empty())
+                    std::cout << "  -> " << lastCapturePath_ << "\n";
+            } else {
+                std::cout << "[RenderDoc] Capture failed at " << std::fixed
+                          << std::setprecision(1) << capTime << "s (frame "
+                          << totalFrameCount_ << ", EndFrameCapture returned "
+                          << captureResult << ")\n";
+            }
             std::cout << std::flush;
         }
 
@@ -393,7 +462,7 @@ void AppBase::MainLoop() {
                 benchStartTime_ = glfwGetTime();
                 warmupDone_ = true;
             }
-            if (totalFrameCount_ > config_.warmupFrames) {
+            if (totalFrameCount_ > config_.warmupFrames && !capturing) {
                 ++benchMeasuredFrames_;
                 benchMinFrameTime_ =
                     std::min(benchMinFrameTime_,
@@ -408,7 +477,7 @@ void AppBase::MainLoop() {
                 warmupDone_ = true;
                 benchStartTime_ = currentTime;
             }
-            if (warmupDone_) {
+            if (warmupDone_ && !capturing) {
                 ++benchMeasuredFrames_;
                 benchMinFrameTime_ =
                     std::min(benchMinFrameTime_,
@@ -431,6 +500,10 @@ void AppBase::MainLoop() {
 
 void AppBase::AccumulateTiming(double computeMs, double renderMs,
                                double totalGpuMs) {
+    if (timingSamplesToSkip_ > 0) {
+        --timingSamplesToSkip_;
+        return;
+    }
     accumComputeMs_  += computeMs;
     accumRenderMs_   += renderMs;
     accumTotalGpuMs_ += totalGpuMs;
@@ -481,6 +554,58 @@ void AppBase::ReportTimingIfDue(double deltaTime) {
         }
         std::cout << std::endl;
 
+        // Calibrate GraphicsBurn exactly once during the first warmup window.
+        // The target is long enough to keep fast GPUs occupied, while four
+        // independent draws retain pre-emption points and avoid a monolithic
+        // watchdog-scale command on slower hardware. Explicit --iter disables
+        // this path and remains fully deterministic.
+        if (config_.workload == Workload::GpuStressV1 &&
+            config_.gpuStressAutoTune && !gpuStressCalibrationDone_ &&
+            !warmupDone_ && avgRender > 0.001) {
+            const auto previous = config_.gpuStressIter;
+            const double scaled = static_cast<double>(previous) *
+                                  kGpuStressV1TargetFrameMs / avgRender;
+            auto tuned = static_cast<std::uint32_t>(std::max(1.0, std::round(scaled)));
+            tuned = std::min(tuned, kGpuStressV1MaxIter);
+            if (tuned >= 8u)
+                tuned = std::min(kGpuStressV1MaxIter, ((tuned + 7u) / 8u) * 8u);
+            config_.gpuStressIter = tuned;
+            gpuStressCalibrationDone_ = true;
+            std::cout << "[GPU Stress auto-tune] " << previous << " -> " << tuned
+                      << " iterations/draw (observed " << std::fixed
+                      << std::setprecision(3) << avgRender << " ms, target "
+                      << kGpuStressV1TargetFrameMs << " ms)\n";
+        }
+
+        // GPU Burn v1 has its own score contract and calibration bounds. Its
+        // maxIter controls exact Plasma Bloom field samples rather than the register
+        // recurrence used by GraphicsBurn v1.
+        if (config_.workload == Workload::GpuBurnV1 &&
+            config_.gpuBurnAutoTune && !gpuBurnCalibrationDone_ &&
+            !warmupDone_ && avgRender > 0.001) {
+            const auto previous = config_.gpuBurnIter;
+            // Besides maxIter scored samples, v1 evaluates the field roughly
+            // seven more times for its surface material/normal. Include that
+            // fixed shader cost in the one-shot estimate; otherwise the low
+            // 16-step probe systematically under-tunes fast GPUs. Never tune
+            // below 16: that is the minimum which preserves the visible core.
+            constexpr double kFixedSampleEquivalent = 7.0;
+            const double scaled =
+                (static_cast<double>(previous) + kFixedSampleEquivalent) *
+                kGpuBurnV1TargetFrameMs / avgRender - kFixedSampleEquivalent;
+            auto tuned = static_cast<std::uint32_t>(std::max(
+                static_cast<double>(kGpuBurnV1DefaultIter), std::round(scaled)));
+            tuned = std::min(tuned, kGpuBurnV1MaxIter);
+            if (tuned >= 4u)
+                tuned = std::min(kGpuBurnV1MaxIter, ((tuned + 3u) / 4u) * 4u);
+            config_.gpuBurnIter = tuned;
+            gpuBurnCalibrationDone_ = true;
+            std::cout << "[GPU Burn auto-tune] " << previous << " -> " << tuned
+                      << " steps/draw (observed " << std::fixed
+                      << std::setprecision(3) << avgRender << " ms, target "
+                      << kGpuBurnV1TargetFrameMs << " ms)\n";
+        }
+
         // Thermal-stability tracking: push a window sample once warmup is done.
         if (warmupDone_)
             recordWindowSample(avgCompute, avgRender);
@@ -498,10 +623,14 @@ void AppBase::ReportTimingIfDue(double deltaTime) {
             case gpu_bench::Workload::Stream:        oss << " | Stream";    break;
             case gpu_bench::Workload::NBody:         oss << " | N-Body";    break;
             case gpu_bench::Workload::StressFractal: oss << " | Stress";    break;
+            case gpu_bench::Workload::GpuStressV1:   oss << " | GPU Stress v1"; break;
+            case gpu_bench::Workload::GpuBurnV1:     oss << " | GPU Burn v1"; break;
             case gpu_bench::Workload::SynthPeak:     oss << " | SynthPeak"; break;
             case gpu_bench::Workload::Render3D:      oss << " | Render3D";  break;
             case gpu_bench::Workload::Volumetric:    oss << " | Volumetric"; break;
-            case gpu_bench::Workload::Fluid:         oss << " | Fluid";     break;
+            case gpu_bench::Workload::Fluid:         oss << " | Legacy 2D Fluid"; break;
+            case gpu_bench::Workload::CinematicLiquidV1: oss << " | Cinematic Liquid v1"; break;
+            case gpu_bench::Workload::CinematicLiquid: oss << " | Cinematic Liquid v2"; break;
         }
 
         oss << "  |  FPS: " << static_cast<int>(fps);
@@ -538,7 +667,8 @@ void AppBase::ReportTimingIfDue(double deltaTime) {
 }
 
 void AppBase::PrintSummary() const {
-    const double duration = benchEndTime_ - benchStartTime_;
+    const double duration = std::max(0.0,
+        benchEndTime_ - benchStartTime_ - excludedCaptureSec_);
     const double avgFps   = (duration > 0.0)
         ? static_cast<double>(benchMeasuredFrames_) / duration
         : 0.0;
@@ -568,15 +698,26 @@ void AppBase::PrintSummary() const {
         << std::setw(14) << "OS:"         << GetOsVersion() << "\n"
         << std::setw(14) << "Memory:"     << (config_.hostMemory ? "Host-visible (System RAM)" : "Device-local") << "\n"
         << std::setw(14) << "Mode:"       << (config_.headless ? "Headless (compute only)" : "Windowed") << "\n"
-        << std::setw(14) << "Resolution:" << kWindowWidth << "x" << kWindowHeight << "\n"
-        << std::setw(14) << "Particles:"  << config_.particleCount
-            << " (" << config_.difficultyLabel << ")\n"
+        << std::setw(14) << "Resolution:" << kWindowWidth << "x" << kWindowHeight << "\n";
+    if (config_.workload == Workload::GpuBurnV1)
+        std::cout << std::setw(14) << "Workload:" << "GPU Burn v1 (no particle data)\n";
+    else
+        std::cout << std::setw(14) << "Particles:" << config_.particleCount
+                  << " (" << config_.difficultyLabel << ")\n";
+    std::cout
         << std::setw(14) << "Flights:"    << config_.framesInFlight << "\n"
         << std::setw(14) << "V-Sync:"     << (config_.vsync ? "ON" : "OFF") << "\n"
         << std::setw(14) << "Duration:"
             << std::setprecision(1) << duration << " s"
             << " (warmup: " << std::setprecision(1) << config_.warmupTimeSec << " s"
             << ", measured: " << benchMeasuredFrames_ << " frames)\n";
+    if (excludedCaptureSec_ > 0.0) {
+        std::cout << std::setw(14) << "Capture:"
+                  << std::setprecision(3) << excludedCaptureSec_
+                  << " s excluded from score; async samples discarded ("
+                  << rdocCaptureAttemptCount_ << " attempt(s), "
+                  << rdocCaptureCount_ << " saved)\n";
+    }
 
     if (benchSampleCount_ > 0) {
         const double avgCompute  = benchSumComputeMs_  / benchSampleCount_;
@@ -600,6 +741,18 @@ void AppBase::PrintSummary() const {
 
         std::cout << "\n--- Throughput ---\n"
             << "Avg FPS:      " << static_cast<int>(avgFps) << "\n";
+
+        if (config_.workload == Workload::Stream && avgCompute > 0.0) {
+            const double n = static_cast<double>(config_.particleCount);
+            const double computeSec = avgCompute / 1000.0;
+            const double memoryRate = 40.0 * n / computeSec / 1e9;
+            const double workingSetMiB = n * sizeof(Particle) / (1024.0 * 1024.0);
+            std::cout << "Particles:    " << config_.particleCount << "\n"
+                << std::setprecision(2)
+                << "Working set:  " << workingSetMiB << " MiB\n"
+                << "Memory rate:  " << memoryRate << " GB/s  ("
+                << std::setprecision(3) << avgCompute << " ms compute)\n";
+        }
 
         if (config_.workload == Workload::NBody && avgCompute > 0.0) {
             const double n            = static_cast<double>(config_.particleCount);
@@ -657,6 +810,34 @@ void AppBase::PrintSummary() const {
                 << std::setprecision(3) << avgRender << " ms render)\n";
         }
 
+        if (config_.workload == Workload::GpuStressV1 && avgRender > 0.0) {
+            const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+            const double renderSec = avgRender / 1000.0;
+            const double giters = pixels * config_.gpuStressIter
+                                * kGpuStressV1DrawsPerFrame / renderSec / 1e9;
+            std::cout << "GPU Stress:   v1, " << kGpuStressV1DrawsPerFrame
+                << " draws x " << config_.gpuStressIter << " iterations/pixel  ("
+                << kWindowWidth << "x" << kWindowHeight << " px)\n"
+                << "Anti-DCE signal: uint checksum in R/G + FP recurrence in B\n"
+                << std::setprecision(2)
+                << "Stress rate:  " << giters << " Gpix-iter/s  ("
+                << std::setprecision(3) << avgRender << " ms render)\n";
+        }
+
+        if (config_.workload == Workload::GpuBurnV1 && avgRender > 0.0) {
+            const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+            const double renderSec = avgRender / 1000.0;
+            const double gsteps = pixels * config_.gpuBurnIter
+                                * kGpuBurnV1DrawsPerFrame / renderSec / 1e9;
+            std::cout << "GPU Burn:     v1 Plasma Bloom, " << kGpuBurnV1DrawsPerFrame
+                << " draws x " << config_.gpuBurnIter << " fixed steps/pixel  ("
+                << kWindowWidth << "x" << kWindowHeight << " px)\n"
+                << "Visual:       rotating plasma core + crystalline spikes/electric corona\n"
+                << std::setprecision(2)
+                << "Burn rate:    " << gsteps << " Gpix-step/s  ("
+                << std::setprecision(3) << avgRender << " ms render)\n";
+        }
+
         if (config_.workload == Workload::Volumetric && avgRender > 0.0) {
             const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
             const double renderSec = avgRender / 1000.0;
@@ -680,6 +861,44 @@ void AppBase::PrintSummary() const {
                 << std::setprecision(2)
                 << "Fluid rate:   " << gcells << " GCell/s  ("
                 << std::setprecision(3) << avgCompute << " ms compute)\n";
+        }
+
+        if (isCinematicLiquidWorkload(config_.workload) &&
+            avgCompute > 0.0 && avgRender > 0.0) {
+            const bool v2 = config_.workload == Workload::CinematicLiquid;
+            const std::uint32_t gridX = v2 ? kCinematicLiquidV2GridX : kCinematicLiquidGridX;
+            const std::uint32_t gridY = v2 ? kCinematicLiquidV2GridY : kCinematicLiquidGridY;
+            const std::uint32_t gridZ = v2 ? kCinematicLiquidV2GridZ : kCinematicLiquidGridZ;
+            const std::uint32_t substeps =
+                v2 ? (config_.liquidSolverSph ? kCinematicLiquidSphSubsteps
+                                              : kCinematicLiquidV2Substeps)
+                   : kCinematicLiquidSubsteps;
+            const std::uint32_t raySteps = v2 ? kCinematicLiquidV2RaySteps : kCinematicLiquidRaySteps;
+            const double integratedSec = (avgCompute + avgRender) / 1000.0;
+            const double particleSteps = double(config_.particleCount) * substeps;
+            const double rate = particleSteps / integratedSec / 1e6;
+            std::cout << "Liquid:       " << config_.particleCount
+                << " particles, " << gridX << "x" << gridY << "x" << gridZ
+                << " grid, " << substeps << " substeps\n"
+                << "Surface:      R32F density volume, "
+                << raySteps << "-step raymarch";
+            if (v2) {
+                std::cout << ", particle Spiky^2 splat "
+                    << kCinematicLiquidV2SurfaceX << "x"
+                    << kCinematicLiquidV2SurfaceY << "x"
+                    << kCinematicLiquidV2SurfaceZ
+                    << " + adaptive 5x5x5 filter, 4-interface optics"
+                    << ", finite pool overflow + clear PVC environment"
+                    << ", " << kCinematicLiquidV2BodyCount
+                    << " coupled rigid bodies\n";
+            } else {
+                std::cout << "\n";
+            }
+            std::cout
+                << std::setprecision(2)
+                << "Liquid rate:  " << rate << " MParticle-step/s  ("
+                << std::setprecision(3) << avgCompute << " ms compute + "
+                << avgRender << " ms render)\n";
         }
 
         const double avgFrameMs = (avgFps > 0.0) ? 1000.0 / avgFps : 0.0;
@@ -720,9 +939,13 @@ void AppBase::PrintSummary() const {
             case Workload::Stream:        unit = "GB/s";      break;
             case Workload::NBody:         unit = "GFLOP/s";   break;
             case Workload::StressFractal: unit = "G-iter/s";  break;
+            case Workload::GpuStressV1:   unit = "Gpix-iter/s"; break;
+            case Workload::GpuBurnV1:     unit = "Gpix-step/s"; break;
             case Workload::Volumetric:    unit = "GSample/s"; break;
             case Workload::Render3D:      unit = "MQuad/s";   break;
             case Workload::Fluid:         unit = "GCell/s";   break;
+            case Workload::CinematicLiquidV1:
+            case Workload::CinematicLiquid: unit = "MParticle-step/s"; break;
             case Workload::SynthPeak:     unit = (config_.peakPrecision == Precision::INT32) ? "GIOPS" : "GFLOPS"; break;
         }
         std::cout << "\n--- Thermal Stability ---\n"
@@ -759,13 +982,177 @@ BenchmarkResult AppBase::CollectResult() const {
     BenchmarkResult r;
     r.id          = GenerateResultId();
     r.timestamp   = GenerateTimestamp();
-    r.workload    = (config_.workload == Workload::NBody)         ? "nbody"
-                  : (config_.workload == Workload::StressFractal) ? "stress"
-                  : (config_.workload == Workload::SynthPeak)     ? "synthpeak"
-                  : (config_.workload == Workload::Render3D)      ? "render3d"
-                  : (config_.workload == Workload::Volumetric)    ? "volumetric"
-                  : (config_.workload == Workload::Fluid)         ? "fluid"
-                  :                                                 "stream";
+    r.workload    = workloadId(config_.workload);
+    r.resultSchemaVersion = 2;
+    std::ostringstream workloadConfig;
+    switch (config_.workload) {
+        case Workload::Stream:
+            r.workloadVersion = "stream_v1";
+            workloadConfig << "particles=" << config_.particleCount
+                           << ";bytesPerParticle=40";
+            break;
+        case Workload::NBody:
+            r.workloadVersion = "nbody_v1";
+            workloadConfig << "bodies=" << config_.particleCount
+                           << ";softening=" << config_.softening;
+            break;
+        case Workload::GpuStressV1:
+            r.workloadVersion = "gpu_stress_v1";
+            workloadConfig << "iterations=" << config_.gpuStressIter
+                           << ";draws=" << kGpuStressV1DrawsPerFrame
+                           << ";shaderVersion=" << kGpuStressV1ShaderVersion
+                           << ";autoTune=" << (config_.gpuStressAutoTune ? "true" : "false");
+            break;
+        case Workload::GpuBurnV1:
+            r.workloadVersion = "gpu_burn_v1";
+            workloadConfig << "steps=" << config_.gpuBurnIter
+                           << ";draws=" << kGpuBurnV1DrawsPerFrame
+                           << ";shaderVersion=" << kGpuBurnV1ShaderVersion
+                           << ";autoTune=" << (config_.gpuBurnAutoTune ? "true" : "false")
+                           << ";visual=plasma_bloom_core";
+            break;
+        case Workload::StressFractal:
+            r.workloadVersion = "stress_legacy_v1";
+            workloadConfig << "iterations=" << config_.fractalIter;
+            break;
+        case Workload::SynthPeak:
+            r.workloadVersion = "synthpeak_v1";
+            workloadConfig << "iterations=" << config_.peakIters;
+            break;
+        case Workload::Render3D:
+            r.workloadVersion = "render3d_legacy_v1";
+            workloadConfig << "instances=" << config_.particleCount;
+            break;
+        case Workload::Volumetric:
+            r.workloadVersion = "volumetric_experimental_v1";
+            workloadConfig << "steps=" << config_.volumetricSteps;
+            break;
+        case Workload::Fluid:
+            r.workloadVersion = "fluid_legacy_v1";
+            workloadConfig << "grid=" << config_.fluidGridSize
+                           << ";jacobi=" << config_.fluidJacobiIters
+                           << ";fixedCellPasses=4"
+                           << ";solver=stable_fluids_2d"
+                           << ";renderer=projected_dye"
+                           << ";status=legacy"
+                           << ";apiScope=vulkan_only";
+            break;
+        case Workload::CinematicLiquidV1:
+            r.workloadVersion = "cinematic_liquid_v1";
+            workloadConfig << "solver=mls_mpm_3d"
+                           << ";particles=" << config_.particleCount
+                           << ";particleLayoutBytes=80"
+                           << ";grid=" << kCinematicLiquidGridX << "x"
+                           << kCinematicLiquidGridY << "x" << kCinematicLiquidGridZ
+                           << ";dx=" << kCinematicLiquidDx
+                           << ";substeps=" << kCinematicLiquidSubsteps
+                           << ";p2g=fixed_point_atomic"
+                           << ";renderer=density_volume_raymarch"
+                           << ";raySteps=" << kCinematicLiquidRaySteps
+                           << ";shaderVersion=" << kCinematicLiquidShaderVersion
+                           << ";apiScope=vulkan_only";
+            break;
+        case Workload::CinematicLiquid:
+            if (config_.liquidSolverSph) {
+                // Experimental SPH vertical slice: an independent solver and
+                // score group.  It reuses the scene/rigid/presentation stack
+                // but its dynamics are the Lague-style dual-density SPH from
+                // MIT jeantimex/fluid, run in the reference's own units and
+                // affinely mapped into the pool.  Never rank beside MLS-MPM.
+                r.workloadVersion =
+                    std::abs(config_.maxRunTimeSec - 15.0) < 0.001
+                        ? "cinematic_liquid_sph_slice_v1"
+                        : "cinematic_liquid_sph_slice_v1_preview";
+                workloadConfig << "solver=sph_dual_density_lague"
+                               << ";particles=" << config_.particleCount
+                               << ";particleLayoutBytes=80"
+                               << ";rigidBodies=" << kCinematicLiquidV2BodyCount
+                               << ";coupling=per_particle_sdf_buoyancy_fixed_point"
+                               << ";grassAbsorb=catch_band_soak_recycle"
+                               << ";neighborSearch=block_hash50_counting_sort"
+                               << ";determinism=cell_order_race_ulp_open"
+                               << ";smoothingRadius=" << kCinematicLiquidSphSmoothingRadius
+                               << ";dtSim=1/120"
+                               << ";substeps=" << kCinematicLiquidSphSubsteps
+                               << ";targetDensity=" << kCinematicLiquidSphTargetDensity
+                               << ";pressureMultiplier=" << kCinematicLiquidSphPressureMultiplier
+                               << ";nearPressureMultiplier=" << kCinematicLiquidSphNearPressureMultiplier
+                               << ";viscosityStrength=" << kCinematicLiquidSphViscosityStrength
+                               << ";worldScale=" << kCinematicLiquidSphWorldScale
+                               << ";scene=clear_pvc_pool_dam_break_duck_family_motor_boat_sink_sphere_grass"
+                               << ";sceneVersion=4"
+                               << ";seed=sph_dam_restage_4s_v1"
+                               << ";renderer=particle_spiky2_density_raymarch_iterative_fresnel4"
+                               << ";surfaceVolume=" << kCinematicLiquidV2SurfaceX << "x"
+                               << kCinematicLiquidV2SurfaceY << "x"
+                               << kCinematicLiquidV2SurfaceZ
+                               << ";raySteps=" << kCinematicLiquidV2RaySteps
+                               << ";shaderVersion=" << kCinematicLiquidSphShaderVersion
+                               << ";apiScope=vulkan_only";
+                break;
+            }
+            // Only the product's fixed 15-second run belongs to the formal
+            // score group. Developer visual probes (--time 3/6/11) must not
+            // rank beside a run that traverses the complete choreography.
+            // Every physical/optical scene revision has an isolated score
+            // contract. V7 preserves the duck-family ABI but changes the water
+            // distribution, boat dynamics, sink entry and finite pool wall.
+            r.workloadVersion =
+                std::abs(config_.maxRunTimeSec - 15.0) < 0.001
+                    ? "cinematic_liquid_v2_physical_scene_v7"
+                    : "cinematic_liquid_v2_physical_scene_v7_preview";
+            workloadConfig << "solver=mls_mpm_3d_rigid_coupled"
+                           << ";particles=" << config_.particleCount
+                           << ";particleLayoutBytes=80"
+                           << ";grid=" << kCinematicLiquidV2GridX << "x"
+                           << kCinematicLiquidV2GridY << "x" << kCinematicLiquidV2GridZ
+                           << ";dx=" << kCinematicLiquidV2Dx
+                           << ";substeps=" << kCinematicLiquidV2Substeps
+                           << ";rigidBodies=" << kCinematicLiquidV2BodyCount
+                           << ";coupling=gpu_fixed_point_two_way"
+                           << ";scene=clear_pvc_pool_dam_break_duck_family_motor_boat_sink_sphere_grass"
+                           << ";sceneVersion=4"
+                           << ";seed=deep_pool_dam_restage_4s_v2"
+                           << ";cameraPathVersion=3"
+                           << ";heroCamera=low_side_5s_v2"
+                           << ";durationContractSec=15"
+                           << ";poolType=inflatable_clear_pvc_finite_wall"
+                           << ";poolWallInset=0.22"
+                           << ";overflow=finite_height_inner_wall_catch_band"
+                           << ";boat=finite_mass_soft_tether_propeller_reaction"
+                           << ";sinkBall=gravity_9.81_air_drag_0.015_water_drag_displaced_mass"
+                           << ";stiffness=45000"
+                           << ";viscosity=0.035"
+                           << ";maxVelocity=8"
+                           << ";renderer=particle_spiky2_density_raymarch_iterative_fresnel4"
+                           << ";surfaceVolume=" << kCinematicLiquidV2SurfaceX << "x"
+                           << kCinematicLiquidV2SurfaceY << "x"
+                           << kCinematicLiquidV2SurfaceZ
+                           << ";surfaceKernelRadiusToSpacing=1.70"
+                           << ";surfaceIso=0.32"
+                           << ";surfaceFixedScale=65536"
+                           << ";surfaceFilter=binomial5x5x5_adaptive_spray_preserve"
+                           << ";refraction=multi_interface_fresnel_path_v2"
+                           << ";maxOpticalInterfaces=4"
+                           << ";extinction=30,10,8"
+                           << ";normalGradientVoxels=1.0_to_2.5"
+                           << ";toneMap=linear_exposure"
+                           << ";densityBoundary=zero_clamped"
+                           << ";whitewater=grid_derived_sink_entry_crown"
+                           << ";environment=procedural_grass_atmosphere_clouds"
+                           << ";raySteps=" << kCinematicLiquidV2RaySteps
+                           << ";shaderVersion=" << kCinematicLiquidV2ShaderVersion
+                           << ";apiScope=vulkan_only";
+            break;
+    }
+    if (config_.captureAtSec > 0.0) {
+        workloadConfig << ";captureAtSec=" << config_.captureAtSec
+                       << ";captureAttempts=" << rdocCaptureAttemptCount_
+                       << ";captureExcluded="
+                       << (rdocCaptureAttemptExcluded_ ? "true" : "false")
+                       << ";captureCount=" << rdocCaptureCount_;
+    }
+    r.workloadConfig = workloadConfig.str();
     r.graphicsApi    = GetBackendName();
     r.deviceName     = config_.gpuDisplayName.empty() ? GetDeviceName() : config_.gpuDisplayName;
     r.driverVersion  = GetDriverVersion();
@@ -775,7 +1162,11 @@ BenchmarkResult AppBase::CollectResult() const {
     r.vramMB      = config_.vramMB;
     r.resWidth    = kWindowWidth;
     r.resHeight   = kWindowHeight;
-    r.particleCount = config_.particleCount;
+    // GPU Burn allocates a tiny internal compatibility buffer but does not
+    // process particles. Persist zero so History/capture metadata cannot imply
+    // that the visual burn score came from a 256-particle workload.
+    r.particleCount = config_.workload == Workload::GpuBurnV1
+        ? 0u : config_.particleCount;
     r.difficulty  = config_.difficultyLabel;
     r.vsync       = config_.vsync;
     r.headless    = config_.headless;
@@ -786,7 +1177,8 @@ BenchmarkResult AppBase::CollectResult() const {
                     devName.find("WARP") != std::string::npos ||
                     devName.find("Software") != std::string::npos);
 
-    const double duration = benchEndTime_ - benchStartTime_;
+    const double duration = std::max(0.0,
+        benchEndTime_ - benchStartTime_ - excludedCaptureSec_);
     r.durationSec    = duration;
     r.warmupSec      = config_.warmupTimeSec;
     r.measuredFrames = benchMeasuredFrames_;
@@ -835,6 +1227,16 @@ BenchmarkResult AppBase::CollectResult() const {
         const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
         r.score = pixels * config_.fractalIter / renderSec / 1e9;
         r.scoreUnit = "G-iter/s";
+    } else if (config_.workload == Workload::GpuStressV1 && renderSec > 0.0) {
+        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        r.score = pixels * config_.gpuStressIter * kGpuStressV1DrawsPerFrame
+                / renderSec / 1e9;
+        r.scoreUnit = "Gpix-iter/s";
+    } else if (config_.workload == Workload::GpuBurnV1 && renderSec > 0.0) {
+        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        r.score = pixels * config_.gpuBurnIter * kGpuBurnV1DrawsPerFrame
+                / renderSec / 1e9;
+        r.scoreUnit = "Gpix-step/s";
     } else if (config_.workload == Workload::Volumetric && renderSec > 0.0) {
         const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
         r.score = pixels * config_.volumetricSteps / renderSec / 1e9;
@@ -846,6 +1248,17 @@ BenchmarkResult AppBase::CollectResult() const {
         const double g  = static_cast<double>(config_.fluidGridSize);
         r.score = g * g * (4.0 + config_.fluidJacobiIters) / computeSec / 1e9;
         r.scoreUnit = "GCell/s";
+    } else if (isCinematicLiquidWorkload(config_.workload) &&
+               computeSec > 0.0 && renderSec > 0.0) {
+        // Integrated score: the denominator includes both the fixed solver
+        // simulation and the fixed-quality density raymarch presentation.
+        // The SPH slice advances 2 reference ticks per frame, not 10.
+        const std::uint32_t substeps = config_.workload == Workload::CinematicLiquid
+            ? (config_.liquidSolverSph ? kCinematicLiquidSphSubsteps
+                                       : kCinematicLiquidV2Substeps)
+            : kCinematicLiquidSubsteps;
+        r.score = n * substeps / (computeSec + renderSec) / 1e6;
+        r.scoreUnit = "MParticle-step/s";
     } else if (config_.workload == Workload::SynthPeak && computeSec > 0.0) {
         const double lanes = (config_.peakPrecision == Precision::FP16) ? 2.0 : 1.0;
         r.score = n * config_.peakIters * kSynthPeakUnroll * lanes * 2.0 / computeSec / 1e9;
@@ -881,6 +1294,14 @@ double AppBase::computeAxisScore(double computeMs, double renderMs) const {
     } else if (config_.workload == Workload::StressFractal && renderSec > 0.0) {
         const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
         return pixels * config_.fractalIter / renderSec / 1e9;
+    } else if (config_.workload == Workload::GpuStressV1 && renderSec > 0.0) {
+        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        return pixels * config_.gpuStressIter * kGpuStressV1DrawsPerFrame
+             / renderSec / 1e9;
+    } else if (config_.workload == Workload::GpuBurnV1 && renderSec > 0.0) {
+        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        return pixels * config_.gpuBurnIter * kGpuBurnV1DrawsPerFrame
+             / renderSec / 1e9;
     } else if (config_.workload == Workload::Volumetric && renderSec > 0.0) {
         const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
         return pixels * config_.volumetricSteps / renderSec / 1e9;
@@ -889,6 +1310,13 @@ double AppBase::computeAxisScore(double computeMs, double renderMs) const {
     } else if (config_.workload == Workload::Fluid && computeSec > 0.0) {
         const double g = static_cast<double>(config_.fluidGridSize);
         return g * g * (4.0 + config_.fluidJacobiIters) / computeSec / 1e9;
+    } else if (isCinematicLiquidWorkload(config_.workload) &&
+               computeSec > 0.0 && renderSec > 0.0) {
+        const std::uint32_t substeps = config_.workload == Workload::CinematicLiquid
+            ? (config_.liquidSolverSph ? kCinematicLiquidSphSubsteps
+                                       : kCinematicLiquidV2Substeps)
+            : kCinematicLiquidSubsteps;
+        return n * substeps / (computeSec + renderSec) / 1e6;
     } else if (config_.workload == Workload::SynthPeak && computeSec > 0.0) {
         const double lanes = (config_.peakPrecision == Precision::FP16) ? 2.0 : 1.0;
         return n * config_.peakIters * kSynthPeakUnroll * lanes * 2.0 / computeSec / 1e9;
@@ -897,6 +1325,11 @@ double AppBase::computeAxisScore(double computeMs, double renderMs) const {
 }
 
 void AppBase::recordWindowSample(double avgComputeMs, double avgRenderMs) {
+    // Liquid cost legitimately evolves as spray and the propeller wake occupy
+    // more grid cells. A falling per-second score is therefore scene-state
+    // drift, not evidence of thermal throttling; only report the fixed-run
+    // integrated average for these workloads.
+    if (isCinematicLiquidWorkload(config_.workload)) return;
     const double s = computeAxisScore(avgComputeMs, avgRenderMs);
     if (s <= 0.0) return;
     windowScores_.push_back(s);

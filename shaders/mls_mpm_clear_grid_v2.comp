@@ -1,0 +1,88 @@
+#version 450
+
+// Cinematic Liquid v2 pass 1: clear the MLS-MPM grid and the fixed-point
+// rigid-body reaction accumulators.  Dispatch enough x workgroups to cover
+// gridSize.x * gridSize.y * gridSize.z; that is always larger than bodyCount
+// for the fixed 128x64x96 scene.
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+struct Particle {
+    vec4 position;
+    vec4 velocity;
+    vec4 C0;
+    vec4 C1;
+    vec4 C2;
+};
+
+struct GridCell {
+    int vx;
+    int vy;
+    int vz;
+    int mass;
+};
+
+struct BodyState {
+    vec4 positionType;
+    vec4 orientation;
+    vec4 linearVelocityInvMass;
+    vec4 angularVelocityInvInertia;
+    vec4 shape0;
+    vec4 shape1;
+    vec4 material;
+    vec4 color;
+};
+
+struct BodyImpulse {
+    ivec4 linear;
+    ivec4 angular;
+};
+
+layout(set = 0, binding = 0, std430) readonly buffer ParticleBuffer {
+    Particle particles[];
+} particleBuffer;
+
+layout(set = 0, binding = 1, std430) buffer GridBuffer {
+    GridCell cells[];
+} gridBuffer;
+
+layout(r32f, set = 0, binding = 2) uniform writeonly image3D densityVolume;
+
+layout(set = 0, binding = 3, std430) readonly buffer BodyStateBuffer {
+    BodyState bodies[];
+} bodyStateBuffer;
+
+layout(set = 0, binding = 4, std430) buffer BodyImpulseBuffer {
+    BodyImpulse impulses[];
+} bodyImpulseBuffer;
+
+// Shared 128-byte compute ABI for every Cinematic Liquid v2 pass.
+layout(push_constant) uniform LiquidV2Params {
+    uvec4 gridSizeAndCount;
+    vec4  simulation;
+    vec4  material;
+    vec4  gridOriginDx;
+    vec4  collision;
+    vec4  coupling;
+    uvec4 scene;
+    vec4  pool;
+} pc;
+
+void main() {
+    uint index = gl_GlobalInvocationID.x;
+    uint totalCells = pc.gridSizeAndCount.x *
+                      pc.gridSizeAndCount.y *
+                      pc.gridSizeAndCount.z;
+
+    if (index < totalCells) {
+        gridBuffer.cells[index].vx = 0;
+        gridBuffer.cells[index].vy = 0;
+        gridBuffer.cells[index].vz = 0;
+        gridBuffer.cells[index].mass = 0;
+    }
+
+    if (index < min(pc.scene.x, 32u)) {
+        bodyImpulseBuffer.impulses[index].linear = ivec4(0);
+        bodyImpulseBuffer.impulses[index].angular = ivec4(0);
+    }
+}

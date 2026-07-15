@@ -1,0 +1,198 @@
+#version 450
+
+// MLS-MPM pass 5/5: grid-to-particle velocity/APIC transfer and advection.
+// The 3x3x3 quadratic B-spline is identical to both P2G passes. Neighbourhoods
+// are explicitly clipped, and clipped/empty support is renormalized.
+//
+// Input grid phase: vx/vy/vz are fixed-point velocities after grid_update;
+// mass remains fixed-point nodal mass. A barrier is required before this pass.
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+struct Particle {
+    vec4 position;
+    vec4 velocity;
+    vec4 C0;
+    vec4 C1;
+    vec4 C2;
+};
+
+struct GridCell {
+    int vx;
+    int vy;
+    int vz;
+    int mass;
+};
+
+layout(set = 0, binding = 0, std430) buffer ParticleBuffer {
+    Particle particles[];
+} particleBuffer;
+
+layout(set = 0, binding = 1, std430) readonly buffer GridBuffer {
+    GridCell cells[];
+} gridBuffer;
+
+layout(push_constant) uniform MpmParams {
+    uvec4 gridSizeAndCount;
+    vec4  simulation;
+    vec4  material;
+    vec4  gridOriginDx;
+    vec4  sphere;
+    vec4  collision;
+} p;
+
+float fixedScale() {
+    return max(abs(p.material.z), 1.0);
+}
+
+float decodeFixed(int value) {
+    return float(value) / fixedScale();
+}
+
+vec3 quadraticWeights(float x) {
+    float a = 1.5 - x;
+    float b = x - 1.0;
+    float c = x - 0.5;
+    return vec3(0.5 * a * a,
+                0.75 - b * b,
+                0.5 * c * c);
+}
+
+bool insideGrid(ivec3 node, ivec3 size) {
+    return all(greaterThanEqual(node, ivec3(0))) &&
+           all(lessThan(node, size));
+}
+
+uint gridIndex(ivec3 node) {
+    uvec3 c = uvec3(node);
+    return c.x + p.gridSizeAndCount.x *
+                 (c.y + p.gridSizeAndCount.y * c.z);
+}
+
+vec3 collideVelocity(vec3 velocity, vec3 outwardNormal) {
+    float normalSpeed = dot(velocity, outwardNormal);
+    if (normalSpeed >= 0.0)
+        return velocity;
+
+    float restitution = clamp(p.collision.x, 0.0, 1.0);
+    float tangentialScale = 1.0 - clamp(p.collision.y, 0.0, 1.0);
+    vec3 tangential = velocity - normalSpeed * outwardNormal;
+    return tangential * tangentialScale -
+           restitution * normalSpeed * outwardNormal;
+}
+
+void main() {
+    uint particleIndex = gl_GlobalInvocationID.x;
+    if (particleIndex >= p.gridSizeAndCount.w)
+        return;
+    if (any(lessThan(p.gridSizeAndCount.xyz, uvec3(3u))))
+        return;
+
+    float dx = max(abs(p.gridOriginDx.w), 1.0e-6);
+    float dt = max(p.simulation.x, 0.0);
+    Particle particle = particleBuffer.particles[particleIndex];
+    vec3 gridPosition = (particle.position.xyz - p.gridOriginDx.xyz) / dx;
+    ivec3 base = ivec3(floor(gridPosition - vec3(0.5)));
+    vec3 fractional = gridPosition - vec3(base);
+    vec3 wx = quadraticWeights(fractional.x);
+    vec3 wy = quadraticWeights(fractional.y);
+    vec3 wz = quadraticWeights(fractional.z);
+    ivec3 gridSize = ivec3(p.gridSizeAndCount.xyz);
+
+    vec3 newVelocity = vec3(0.0);
+    mat3 newC = mat3(0.0);
+    float validWeight = 0.0;
+    float affineScale = 4.0 / (dx * dx);
+
+    for (int z = 0; z < 3; ++z) {
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 3; ++x) {
+                ivec3 offset = ivec3(x, y, z);
+                ivec3 node = base + offset;
+                if (!insideGrid(node, gridSize))
+                    continue;
+
+                uint index = gridIndex(node);
+                if (gridBuffer.cells[index].mass <= 0)
+                    continue;
+
+                float weight = wx[x] * wy[y] * wz[z];
+                vec3 gridVelocity = vec3(
+                    decodeFixed(gridBuffer.cells[index].vx),
+                    decodeFixed(gridBuffer.cells[index].vy),
+                    decodeFixed(gridBuffer.cells[index].vz));
+                vec3 dpos = (vec3(offset) - fractional) * dx;
+                newVelocity += weight * gridVelocity;
+                newC += affineScale * weight *
+                        outerProduct(gridVelocity, dpos);
+                validWeight += weight;
+            }
+        }
+    }
+
+    if (validWeight > 1.0e-6) {
+        newVelocity /= validWeight;
+        newC /= validWeight;
+    } else {
+        newVelocity = vec3(0.0);
+        newC = mat3(0.0);
+    }
+
+    vec3 newPosition = particle.position.xyz + dt * newVelocity;
+
+    // Project particle centres out of the stationary sphere. The grid-level
+    // constraint handles ordinary contact; this second check prevents a fast
+    // particle from tunnelling through the coarse collision band.
+    if (p.sphere.w > 0.0) {
+        vec3 delta = newPosition - p.sphere.xyz;
+        float distanceToCentre = length(delta);
+        float contactRadius = p.sphere.w + 0.5 * dx;
+        if (distanceToCentre < contactRadius) {
+            vec3 normal = distanceToCentre > 1.0e-6
+                ? delta / distanceToCentre
+                : vec3(0.0, 1.0, 0.0);
+            newPosition = p.sphere.xyz + normal * contactRadius;
+            newVelocity = collideVelocity(newVelocity, normal);
+        }
+    }
+
+    // Keep enough padding for the quadratic kernel. Neighbour clipping above
+    // remains a hard safety net for malformed initial data.
+    float marginCells = max(p.material.w, 1.5);
+    vec3 domainMin = p.gridOriginDx.xyz + vec3(marginCells * dx);
+    vec3 domainMax = p.gridOriginDx.xyz +
+        (vec3(p.gridSizeAndCount.xyz - uvec3(1u)) - vec3(marginCells)) * dx;
+
+    if (newPosition.x < domainMin.x) {
+        newPosition.x = domainMin.x;
+        newVelocity = collideVelocity(newVelocity, vec3(1.0, 0.0, 0.0));
+    } else if (newPosition.x > domainMax.x) {
+        newPosition.x = domainMax.x;
+        newVelocity = collideVelocity(newVelocity, vec3(-1.0, 0.0, 0.0));
+    }
+    if (newPosition.y < domainMin.y) {
+        newPosition.y = domainMin.y;
+        newVelocity = collideVelocity(newVelocity, vec3(0.0, 1.0, 0.0));
+    } else if (newPosition.y > domainMax.y) {
+        newPosition.y = domainMax.y;
+        newVelocity = collideVelocity(newVelocity, vec3(0.0, -1.0, 0.0));
+    }
+    if (newPosition.z < domainMin.z) {
+        newPosition.z = domainMin.z;
+        newVelocity = collideVelocity(newVelocity, vec3(0.0, 0.0, 1.0));
+    } else if (newPosition.z > domainMax.z) {
+        newPosition.z = domainMax.z;
+        newVelocity = collideVelocity(newVelocity, vec3(0.0, 0.0, -1.0));
+    }
+
+    float maxVelocity = p.collision.w;
+    float speed = length(newVelocity);
+    if (maxVelocity > 0.0 && speed > maxVelocity)
+        newVelocity *= maxVelocity / max(speed, 1.0e-6);
+
+    particleBuffer.particles[particleIndex].position.xyz = newPosition;
+    particleBuffer.particles[particleIndex].velocity.xyz = newVelocity;
+    particleBuffer.particles[particleIndex].C0 = vec4(newC[0], 0.0);
+    particleBuffer.particles[particleIndex].C1 = vec4(newC[1], 0.0);
+    particleBuffer.particles[particleIndex].C2 = vec4(newC[2], 0.0);
+}

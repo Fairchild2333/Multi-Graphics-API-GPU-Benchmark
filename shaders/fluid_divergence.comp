@@ -8,7 +8,7 @@ layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 layout(set = 0, binding = 0, std430) readonly buffer InBuf {
     vec4 inCells[];
 };
-layout(set = 0, binding = 2, std430) writeonly buffer OutPressure {
+layout(set = 0, binding = 4, std430) writeonly buffer DivergenceField {
     float outP[];
 };
 
@@ -16,7 +16,7 @@ layout(push_constant) uniform FluidParams {
     float dt;
     float dx;
     uint  gridSize;
-    uint  _pad;
+    float time;
 } p;
 
 uint cellIdx(uvec2 c) { return c.y * p.gridSize + c.x; }

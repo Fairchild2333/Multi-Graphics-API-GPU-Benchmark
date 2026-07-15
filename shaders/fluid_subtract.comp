@@ -3,7 +3,7 @@
 // Fluid: gradient subtract (4/4). v_new = v_advected - nabla(pressure).
 // Reads the converged pressure from inP and the advected velocity from
 // inCells; writes the divergence-free velocity to outCells. The dye field
-// (inCells.z) is preserved verbatim.
+// (inCells.zw) is preserved verbatim.
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
@@ -21,7 +21,7 @@ layout(push_constant) uniform FluidParams {
     float dt;
     float dx;
     uint  gridSize;
-    uint  _pad;
+    float time;
 } p;
 
 uint cellIdx(uvec2 c) { return c.y * p.gridSize + c.x; }
@@ -31,7 +31,9 @@ void main() {
     if (c.x >= p.gridSize || c.y >= p.gridSize) return;
 
     if (c.x == 0u || c.y == 0u || c.x == p.gridSize - 1u || c.y == p.gridSize - 1u) {
-        outCells[cellIdx(c)] = inCells[cellIdx(c)];
+        vec4 edge = inCells[cellIdx(c)];
+        edge.xy = vec2(0.0);
+        outCells[cellIdx(c)] = edge;
         return;
     }
 
