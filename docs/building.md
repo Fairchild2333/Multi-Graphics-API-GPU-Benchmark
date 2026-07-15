@@ -4,9 +4,8 @@
 
 | Dependency | Install |
 |---|---|
-| **CMake 3.20+** | https://cmake.org/download/ or system package manager |
+| **CMake 3.25+** | https://cmake.org/download/ or system package manager |
 | **C++17 compiler** | MSVC (Visual Studio 2019+), GCC 8+, Clang, or Apple Clang |
-| **Python 3** | Required by [GLAD](https://github.com/Dav1dde/glad) (OpenGL loader generator) at build time. [python.org](https://www.python.org/downloads/) / `sudo apt install python3` / `brew install python` |
 | **GLFW** | `vcpkg install glfw3` / `brew install glfw` / `sudo apt install libglfw3-dev` |
 | **Vulkan SDK** (optional) | [LunarG](https://vulkan.lunarg.com/sdk/home) or `sudo apt install libvulkan-dev` |
 | **Windows SDK** (for DX) | Included with Visual Studio |
@@ -128,52 +127,25 @@ ls "C:\Program Files\Microsoft Visual Studio\<year>\Community\VC\Tools\MSVC"
 Reopen your terminal, then verify:
 
 ```powershell
-cmake --version   # Should be 3.20+
+cmake --version   # Should be 3.25+
 cl                # Should print MSVC version information
 ```
 
-### 2. Install Standalone vcpkg
+### 2. Install vcpkg (manifest mode)
 
-> **Why not the Visual Studio bundled vcpkg?**
-> Visual Studio 2022 17.6+ ships with a bundled vcpkg, but it only supports
-> **manifest mode** (requires a `vcpkg.json` in the project). Running
-> `vcpkg install <package>` with the bundled version will fail with:
->
-> ```
-> error: Could not locate a manifest (vcpkg.json) above the current working directory.
-> This vcpkg distribution does not have a classic mode instance.
-> ```
->
-> To use **classic mode** (`vcpkg install glfw3`), you need a standalone
-> vcpkg installation.
-
-Clone and bootstrap the standalone vcpkg:
+The repository now contains `vcpkg.json` with a pinned builtin baseline and a
+declared GLFW dependency. Do not manually mutate a shared classic-mode package
+set for release builds. Clone and bootstrap vcpkg, then expose its root to
+CMake:
 
 ```powershell
 git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
 C:\vcpkg\bootstrap-vcpkg.bat
+$env:VCPKG_ROOT = 'C:\vcpkg'
+& "$env:VCPKG_ROOT\vcpkg.exe" version
 ```
 
-Then add `C:\vcpkg` to your User PATH so it is available globally:
-
-```powershell
-$vcpkgDir = "C:\vcpkg"
-
-$currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
-if ($currentPath -notlike "*$vcpkgDir*") {
-    [Environment]::SetEnvironmentVariable("Path", "$currentPath;$vcpkgDir", "User")
-    Write-Host "vcpkg added to User PATH. Reopen your terminal for the change to take effect."
-} else {
-    Write-Host "vcpkg is already in User PATH."
-}
-```
-
-Reopen your terminal, then verify:
-
-```powershell
-vcpkg --version
-# Expected: vcpkg package management program version ...
-```
+The target computer never needs vcpkg; this is only a build-machine input.
 
 ### 3. Install Vulkan SDK (optional — required for Vulkan API)
 
@@ -230,64 +202,18 @@ Vulkan — the application will still work with DirectX or OpenGL backends.
 > linker will fail with `LNK4272: library machine type conflicts with target
 > machine type`.
 
-### 4. Install Python 3 (required for OpenGL backend)
+### 4. Python 3 (optional report tooling only)
 
-The OpenGL backend uses [GLAD](https://github.com/Dav1dde/glad) as its
-loader generator. GLAD's CMake build invokes Python at configure time to
-generate the OpenGL function loader source code. Without Python, CMake will
-fail with:
+OpenGL no longer downloads or generates GLAD during configure: a reproducible
+GLAD 2.0.8 OpenGL 4.3 loader is checked into `third_party/glad`. Python is only
+needed on the development machine for the legacy chart/report scripts under
+`scripts/`; it is not needed to compile or run the CLI/GUI.
 
-```
-Could NOT find Python (missing: Python_EXECUTABLE Interpreter)
-```
+### 5. Restore GLFW via vcpkg
 
-Download and install Python from [python.org](https://www.python.org/downloads/).
-During installation, make sure to check **"Add python.exe to PATH"**.
-
-GLAD also depends on the **jinja2** Python package. Install it after Python
-is set up:
-
-```powershell
-pip install jinja2
-```
-
-Without `jinja2`, the build will fail with:
-
-```
-ModuleNotFoundError: No module named 'jinja2'
-```
-
-After installation, reopen your terminal and verify:
-
-```powershell
-python --version
-# Expected: Python 3.x.x
-```
-
-> **Note:** If you do not need the OpenGL backend, you can skip this step
-> and disable it with `-DENABLE_OPENGL=OFF` during CMake configuration.
-
-### 5. Install GLFW via vcpkg
-
-```powershell
-# x64 (default triplet on x64 hosts)
-vcpkg install glfw3
-
-# ARM64
-vcpkg install glfw3:arm64-windows
-```
-
-> **Cross-compiling?** vcpkg packages are architecture-specific. If you are
-> cross-compiling for a different target (e.g., building x64 on an ARM64
-> machine), you must install the GLFW package for the **target** triplet:
->
-> ```powershell
-> # On ARM64 host, targeting x64
-> vcpkg install glfw3:x64-windows
->
-> # On x64 host, targeting ARM64
-> vcpkg install glfw3:arm64-windows
-> ```
+No separate `vcpkg install glfw3` command is required. The CMake toolchain
+restores the architecture-specific dependency from `vcpkg.json`. Select it with
+`VCPKG_TARGET_TRIPLET=x64-windows` or `arm64-windows` while configuring.
 
 The DX12 and DX11 backends only need the Windows SDK (bundled with Visual
 Studio). No additional driver installation is needed — D3D12/D3D11 work
@@ -438,3 +364,161 @@ cmake --build build --config Release
 ```bash
 cmake -S . -B build -DENABLE_VULKAN=OFF -DENABLE_DX12=ON -DENABLE_DX11=ON -DENABLE_METAL=OFF ...
 ```
+
+## Native CPU benchmark build and smoke
+
+The supplementary CPU benchmark is compiled into the same `gpu_benchmark`
+target; it has no additional runtime dependency, graphics window, shader or
+RenderDoc requirement. On Windows the WinUI project also contains the dedicated
+CPU page and starts the adjacent CLI as a no-window child process.
+
+After a Release build, run a non-persistent smoke first:
+
+```powershell
+.\build\Release\gpu_benchmark.exe `
+  --cpu-benchmark all `
+  --cpu-time 0.09 `
+  --cpu-warmup 0 `
+  --cpu-no-save
+```
+
+Expected Windows acceptance signals are exit code 0, `CPU_META` reporting
+`strict_group_affinity`, one valid `CPU_RESULT kind=core` for every available
+logical processor, and a valid multi result with `pinned_threads=thread_count`.
+Exit code 3 means the strict affinity/completion contract failed; such results
+must not be packaged as validation data or persisted.
+
+The formal score command is intentionally long, especially on high-thread-count
+systems: 15 seconds is applied separately to every logical processor and then to
+the multi-core stage, with a 0.2-second warm-up per test and three median rounds.
+
+```powershell
+.\build\Release\gpu_benchmark.exe `
+  --cpu-benchmark all `
+  --cpu-time 15 `
+  --cpu-warmup 0.2
+```
+
+Only Windows x64 is currently validated. Linux enumerates the process allowed
+CPU set and attempts pthread affinity, but remains a best-effort build target
+until native and container/cpuset tests pass. macOS is scheduler-managed and its
+logical-to-physical mapping is estimated. Android, iOS and Web/WASM CPU modes are
+not release targets yet.
+
+## Windows x64 release staging
+
+Release staging is intentionally separate from a developer build. It installs
+only runtime files into a deterministic tree, verifies the tree, creates a ZIP,
+and emits a SHA-256 file. User results, captures, reports, logs, PDBs, SDKs,
+vcpkg, Python, and shader compilers are not copied.
+
+For a complete GitHub Release candidate, use the umbrella command. It rebuilds
+the CMake CLI/engine and self-contained WinUI GUI, validates and bundles the
+official RenderDoc portable x64 tree, creates the ZIP and Inno Setup installer,
+then writes a unified asset manifest and `SHA256SUMS.txt`:
+
+```powershell
+$env:VCPKG_ROOT = 'C:\vcpkg'
+powershell -NoProfile -ExecutionPolicy Bypass `
+  -File scripts\build-windows-github-release.ps1 `
+  -RenderDocArchive C:\release-inputs\RenderDoc_<version>_64.zip `
+  -RenderDocSha256 <sha256> `
+  -ProjectLicenseFile C:\release-inputs\LICENSE.txt
+```
+
+Use `-RenderDocDownloadUrl <pinned-https-zip> -RenderDocSha256 <sha256>`
+instead for an online build. A mutable unverified "latest" download is never
+accepted. Add `-SignToolCommand '<Inno command containing $f>' -RequireSigned`
+in signed release CI. Final assets are placed in `out/release/windows-x64`.
+The wrapper requires a clean Git worktree; use `-AllowDirtySource` only for a
+non-publishable local engineering candidate.
+
+`-BuildGui` creates a fresh self-contained WinUI payload and then reconfigures
+the install rules around it. `-GuiPayloadDir` selects an externally prepared
+self-contained output when a separate CI job owns the GUI build.
+
+```powershell
+$env:VCPKG_ROOT = 'C:\vcpkg'
+powershell -NoProfile -ExecutionPolicy Bypass `
+  -File scripts\stage-windows-release.ps1 `
+  -BuildGui `
+  -RenderDocDir out\dependencies\RenderDoc
+```
+
+Outputs are written below `out/`:
+
+```text
+out/stage/windows-x64/                 verified install tree
+out/packages/GpuComputeBenchmark-*.zip
+out/packages/GpuComputeBenchmark-*.zip.sha256
+```
+
+For an explicit CLI-only smoke artifact, pass `-SkipGui`. This is not the
+intended final GUI product. To add prebuilt portable tools:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass `
+  -File scripts\stage-windows-release.ps1 `
+  -RenderDocDir C:\release-inputs\RenderDoc `
+  -ReportWorkerDir C:\release-inputs\report_worker
+```
+
+The RenderDoc input must be the complete portable distribution with its
+license, not a copied `renderdoc.dll`. The report-worker input must contain a
+frozen `report_worker.exe`; packaged `.py` files alone are not a portable
+report feature.
+
+The equivalent CMake commands inspect the raw install/CPack rules:
+
+```powershell
+cmake --preset windows-x64-release
+cmake --build --preset windows-x64-release
+cmake --install out/build/windows-x64-release --config Release `
+  --prefix out/stage/windows-x64
+cpack --preset windows-x64-zip
+powershell -NoProfile -ExecutionPolicy Bypass `
+  -File scripts\verify-windows-stage.ps1 `
+  -StageDir out\stage\windows-x64 -SmokeTest
+```
+
+Raw CMake/CPack output does not contain the post-install `files.sha256`
+inventory or GitHub `release-assets.json`; use the PowerShell staging/release
+flow for anything intended for distribution.
+
+The preset does not guess a GUI output; pass
+`-DGPU_BENCH_GUI_PAYLOAD_DIR=<absolute-directory>` during configuration when
+using the lower-level commands.
+
+### Current release gates
+
+Normal verification checks that the core staged artifact is internally
+complete and prints unresolved portability warnings. `-RequirePortable` turns
+those warnings into CI failures. It currently fails by design until all of the
+following are true:
+
+- delay-loaded Vulkan fallback starts successfully on a clean DirectX-only
+  machine with no `vulkan-1.dll`;
+- a frozen report worker is present and integrated into the GUI, and a complete
+  portable RenderDoc bundle is present;
+- the staged GUI and fifth-second capture flow pass a clean-machine test;
+- an approved project distribution license exists (dependency notices are now
+  staged under `licenses/`);
+- VC runtime redistribution and installer signing have been reviewed.
+
+The target computer does not need Visual Studio, vcpkg, Python, a Vulkan SDK,
+or a shader compiler. Windows builds delay-load and probe `vulkan-1.dll`, so its
+absence is designed to disable Vulkan while leaving DirectX/WARP available;
+that exact no-loader path remains a clean-machine release test.
+
+The CPU engine adds no new redistributable, so the normal install rules include
+it automatically through `gpu_benchmark.exe`. However, any ZIP/Inno Setup built
+before the CPU page/engine changes predates this feature. Rebuild the CLI and
+self-contained GUI, regenerate the stage and installer, then add an installed-
+location CPU smoke to release acceptance: the GUI must find
+`app/bin/gpu_benchmark.exe`, complete Quick, cancel a longer run cleanly, and
+append its isolated preview/formal summary under the user-data results path.
+
+CPack ZIP is the supported fallback. The same install rules can feed CPack WIX,
+but MSI generation is blocked unless `GPU_BENCH_PACKAGE_LICENSE_FILE` points to
+the approved license. See `packaging/README.md` and the generated
+`PACKAGE_LIMITATIONS.md` for the complete gates.

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 2,
+  "product": "GpuComputeBenchmark",
+  "version": "@PROJECT_VERSION@",
+  "architecture": "@GPU_BENCH_MANIFEST_ARCH@",
+  "layout": {
+    "cli": "app/bin/gpu_benchmark.exe",
+    "gui": "app/bin/gpu_bench_gui.exe",
+    "runtimeShaders": "app/bin",
+    "shaderAssetMirror": "assets/shaders",
+    "legacyReportScripts": "scripts",
+    "renderDoc": "tools/RenderDoc",
+    "reportWorker": "tools/report_worker"
+  },
+  "compiledBackends": {
+    "vulkan": @GPU_BENCH_MANIFEST_VULKAN_COMPILED@,
+    "directX12": @GPU_BENCH_MANIFEST_DX12_COMPILED@,
+    "directX11": @GPU_BENCH_MANIFEST_DX11_COMPILED@,
+    "openGL": @GPU_BENCH_MANIFEST_OPENGL_COMPILED@
+  },
+  "bundled": {
+    "guiSelfContainedPayload": @GPU_BENCH_MANIFEST_GUI_BUNDLED@,
+    "msvcRuntime": @GPU_BENCH_MANIFEST_MSVC_RUNTIME_BUNDLED@,
+    "renderDocPortable": @GPU_BENCH_MANIFEST_RENDERDOC_BUNDLED@,
+    "frozenReportWorker": @GPU_BENCH_MANIFEST_REPORT_WORKER_BUNDLED@,
+    "projectDistributionLicense": @GPU_BENCH_MANIFEST_PROJECT_LICENSE_BUNDLED@,
+    "dx12Fp16Shader": @GPU_BENCH_MANIFEST_DX12_FP16_ASSET@
+  },
+  "portabilityGates": {
+    "vulkanLoaderIsDelayLoadedOnWindows": true,
+    "directXStartupWithoutVulkanLoaderNeedsCleanMachineValidation": true,
+    "frozenReportWorkerRequiresApplicationIntegration": true,
+    "bundledRenderDocLookupImplementedButCleanMachineCaptureNotValidated": true,
+    "projectDistributionLicenseRequiresReleaseReview": true,
+    "guiInstallLayoutRequiresFreshMachineValidation": true
+  }
+}

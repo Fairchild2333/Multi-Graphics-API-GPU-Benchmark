@@ -1,0 +1,49 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "windows-x64-release",
+      "displayName": "Windows x64 release staging",
+      "description": "Pinned x64 manifest-mode build used by release staging",
+      "generator": "Visual Studio 18 2026",
+      "binaryDir": "${sourceDir}/out/build/windows-x64-release",
+      "architecture": "x64",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "GPU_BENCH_ENABLE_PACKAGING": "ON",
+        "GPU_BENCH_STRICT_RELEASE_ASSETS": "ON",
+        "GPU_BENCH_CPACK_GENERATORS": "ZIP"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows-x64-release",
+      "configurePreset": "windows-x64-release",
+      "configuration": "Release"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "windows-x64-zip",
+      "configurePreset": "windows-x64-release",
+      "generators": [
+        "ZIP"
+      ],
+      "configurations": [
+        "Release"
+      ]
+    }
+  ]
+}

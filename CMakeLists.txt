@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 
 # macOS: support 10.15+ (Catalina) — minimum for Metal GPUStartTime/GPUEndTime
 # and MTLMathModeFast. Covers all Intel + Apple Silicon Macs from 2019 onward.
@@ -6,7 +6,7 @@ if(APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum macOS version")
 endif()
 
-project(GpuComputeBenchmark LANGUAGES C CXX OBJCXX)
+project(GpuComputeBenchmark VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -326,4 +326,14 @@ if(ENABLE_OPENGL AND OpenGL_FOUND)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GL_SHADERS} $<TARGET_FILE_DIR:gpu_benchmark>
         COMMENT "Copying OpenGL GLSL shader files next to executable"
     )
+endif()
+
+# ---- Install / release staging / CPack ----
+# Packaging is kept in a separate module so normal developer builds and the
+# release payload use the same target and shader lists. The first deliverable
+# is the Windows x64 CLI core; GUI, RenderDoc and the frozen report worker are
+# optional payloads until their remaining path/runtime blockers are removed.
+option(GPU_BENCH_ENABLE_PACKAGING "Generate install and CPack release rules" ON)
+if(GPU_BENCH_ENABLE_PACKAGING)
+    include(cmake/Packaging.cmake)
 endif()
