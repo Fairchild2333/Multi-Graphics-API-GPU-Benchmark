@@ -90,9 +90,9 @@ void VulkanBackend::WaitIdle() {
 void VulkanBackend::CreateInstance() {
     VkApplicationInfo appInfo{};
     appInfo.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName   = "GpuComputeBenchmark";
+    appInfo.pApplicationName   = "Mangekyo";
     appInfo.applicationVersion = VK_MAKE_VERSION(0, 2, 0);
-    appInfo.pEngineName        = "NoEngine";
+    appInfo.pEngineName        = "Mangekyo";
     appInfo.engineVersion      = VK_MAKE_VERSION(0, 1, 0);
     appInfo.apiVersion         = VK_API_VERSION_1_1;
 

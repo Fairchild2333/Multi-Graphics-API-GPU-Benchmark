@@ -993,7 +993,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         } else if (std::strcmp(argv[i], "--full-analysis") == 0) {
             fullAnalysis = true;
         } else if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
-            std::cout << "Usage: " << argv[0] << " [options]\n"
+            std::cout << "Mangekyo - Cross-API CPU & GPU Benchmark Suite\n\n"
+                      << "Usage: " << argv[0] << " [options]\n"
                       << "  --backend <vulkan|dx12|dx11|metal|opengl>  Select rendering backend (default: auto)\n"
                       << "  --gpu <index>                       Select GPU by index\n"
                       << "  --warp                               Use WARP software renderer (DX11/DX12 only)\n"
@@ -1571,7 +1572,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         if (!directBenchmark) {
             auto saved = gpu_bench::LoadResults();
 
-            std::cout << "\n========== GPU Benchmark ==========\n"
+            std::cout << "\n======= Mangekyo | GPU Benchmark =======\n"
                       << "  [0] Quick run (" << recommendedApiLabel
                       << " / " << recommendedGpuName << " / Medium)  <- default\n"
                       << "  [1] Custom run (choose API / GPU / difficulty)\n";
@@ -1586,7 +1587,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  [8] Particle test - one GPU (all APIs + RenderDoc, custom particles)\n"
                       << "  [9] Headless compute - one GPU (all APIs, pure compute, no rendering)\n"
                       << "  [10] Exit\n"
-                      << "====================================\n"
+                      << "========================================\n"
                       << "Select (default: 0): " << std::flush;
 
             std::string mline;

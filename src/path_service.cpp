@@ -41,7 +41,7 @@ std::filesystem::path EnsureDirectory(const std::filesystem::path& path) {
     std::error_code ec;
     std::filesystem::create_directories(path, ec);
     if (ec) {
-        throw std::runtime_error("Unable to create GPU benchmark data directory '" +
+        throw std::runtime_error("Unable to create Mangekyo data directory '" +
                                  path.u8string() + "': " + ec.message());
     }
     return path;

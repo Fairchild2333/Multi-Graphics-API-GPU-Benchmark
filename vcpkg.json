@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-  "name": "gpu-compute-benchmark",
+  "name": "mangekyo",
   "version-semver": "0.1.0",
   "builtin-baseline": "57987637aac17d62bac535bc839baca3754490e6",
   "dependencies": [
