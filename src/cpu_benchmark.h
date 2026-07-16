@@ -80,7 +80,9 @@ void PrintCpuTopology(const CpuBenchmarkReport& topology, std::ostream& out);
 
 // Runs the requested CPU-only benchmark and emits human-readable output plus
 // TAB-separated CPU_PROGRESS / CPU_RESULT records. Every record is flushed so
-// an in-process GUI can drive a live progress bar from redirected stdout.
+// an in-process GUI can drive a live progress bar from redirected stdout.  The
+// timed worker never formats or flushes output; progress is emitted by a
+// low-frequency observer outside the measured hot path.
 CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
                                    std::ostream& out);
 

@@ -12,6 +12,7 @@
 #include <map>
 #include <mutex>
 #include <numeric>
+#include <optional>
 #include <set>
 #include <sstream>
 #include <thread>
@@ -41,7 +42,12 @@ namespace {
 
 using Clock = std::chrono::steady_clock;
 constexpr std::uint64_t kKernelBatch = 4096;
-constexpr auto kProgressPeriod = std::chrono::milliseconds(100);
+constexpr std::uint64_t kPerCoreKernelSeed = 0x4350555f53494e47ull;
+constexpr auto kSingleProgressPeriod = std::chrono::milliseconds(250);
+// Covers the 64-byte cache lines common on x86 and the 128-byte lines used by
+// current Apple silicon.  Each multi-core worker publishes only once after the
+// timed loop, but isolation also prevents the final writes from ping-ponging.
+constexpr std::size_t kWorkerIsolationBytes = 128;
 std::atomic<std::uint64_t> g_cpuBenchmarkSink{0};
 
 struct KernelState {
@@ -423,7 +429,12 @@ public:
         requested.Group = cpu.group;
         if (cpu.logicalIndex < sizeof(KAFFINITY) * 8u) {
             requested.Mask = static_cast<KAFFINITY>(1) << cpu.logicalIndex;
-            applied_ = SetThreadGroupAffinity(GetCurrentThread(), &requested, &previous_) != FALSE;
+            changed_ = SetThreadGroupAffinity(GetCurrentThread(), &requested, &previous_) != FALSE;
+            if (changed_) {
+                GROUP_AFFINITY actual{};
+                applied_ = GetThreadGroupAffinity(GetCurrentThread(), &actual) != FALSE &&
+                           actual.Group == requested.Group && actual.Mask == requested.Mask;
+            }
         }
 #elif defined(__linux__) || defined(__ANDROID__)
         CPU_ZERO(&previous_);
@@ -432,7 +443,18 @@ public:
         CPU_ZERO(&requested);
         if (cpu.logicalIndex < CPU_SETSIZE) {
             CPU_SET(cpu.logicalIndex, &requested);
-            applied_ = pthread_setaffinity_np(pthread_self(), sizeof(requested), &requested) == 0;
+            changed_ = pthread_setaffinity_np(
+                           pthread_self(), sizeof(requested), &requested) == 0;
+            if (changed_) {
+                cpu_set_t actual;
+                CPU_ZERO(&actual);
+                if (pthread_getaffinity_np(pthread_self(), sizeof(actual), &actual) == 0) {
+                    int selected = 0;
+                    for (int i = 0; i < CPU_SETSIZE; ++i)
+                        selected += CPU_ISSET(i, &actual) ? 1 : 0;
+                    applied_ = selected == 1 && CPU_ISSET(cpu.logicalIndex, &actual);
+                }
+            }
         }
 #else
         (void)cpu;
@@ -441,9 +463,9 @@ public:
 
     ~ThreadAffinityScope() {
 #ifdef _WIN32
-        if (applied_) SetThreadGroupAffinity(GetCurrentThread(), &previous_, nullptr);
+        if (changed_) SetThreadGroupAffinity(GetCurrentThread(), &previous_, nullptr);
 #elif defined(__linux__) || defined(__ANDROID__)
-        if (applied_ && havePrevious_)
+        if (changed_ && havePrevious_)
             pthread_setaffinity_np(pthread_self(), sizeof(previous_), &previous_);
 #endif
     }
@@ -452,6 +474,7 @@ public:
 
 private:
     bool applied_ = false;
+    bool changed_ = false;
 #ifdef _WIN32
     GROUP_AFFINITY previous_{};
 #elif defined(__linux__) || defined(__ANDROID__)
@@ -464,7 +487,10 @@ static std::string PlatformAffinityCapability() {
 #if defined(_WIN32)
     return "strict_group_affinity";
 #elif defined(__linux__) || defined(__ANDROID__)
-    return "best_effort_sched_affinity";
+    // pthread_setaffinity_np/sched affinity is verifiable.  Failure is a hard
+    // invalid result, so successful scores form a strict, separately versioned
+    // contract rather than silently mixing pinned and unpinned samples.
+    return "strict_sched_affinity";
 #elif defined(__APPLE__)
     return "scheduler_managed";
 #else
@@ -476,7 +502,7 @@ static std::string SingleAffinityMode(bool applied) {
 #if defined(_WIN32)
     return applied ? "strict" : "failed";
 #elif defined(__linux__) || defined(__ANDROID__)
-    return applied ? "best_effort_pinned" : "best_effort_unpinned";
+    return applied ? "strict" : "failed";
 #elif defined(__APPLE__)
     (void)applied;
     return "scheduler_managed";
@@ -487,7 +513,7 @@ static std::string SingleAffinityMode(bool applied) {
 }
 
 static bool SingleAffinityIsValid(bool applied) {
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__linux__) || defined(__ANDROID__)
     return applied;
 #else
     (void)applied;
@@ -540,31 +566,41 @@ struct TimedKernelResult {
 };
 
 static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+                                        const CpuLogicalProcessor* observerCpu,
                                         const CpuBenchmarkConfig& config,
                                         std::size_t coreCount,
                                         std::size_t stageIndex,
                                         std::size_t totalStages,
                                         std::ostream& out) {
     TimedKernelResult result;
+
+    enum class Phase { Starting, Warmup, Measure, Complete };
+    struct ProgressState {
+        std::mutex mutex;
+        std::condition_variable cv;
+        Phase phase = Phase::Starting;
+        std::uint32_t round = 0;
+        Clock::time_point phaseStart{};
+        bool done = false;
+    } progress;
+
     std::thread worker([&] {
         ThreadAffinityScope affinity(cpu);
         result.strictAffinity = affinity.strict();
-        KernelState state = MakeKernelState(static_cast<std::uint64_t>(cpu.ordinal) + 1u);
+        // Every logical processor and every scored round must execute exactly
+        // the same dependency chain.  Core identity is metadata, not a seed.
+        KernelState state = MakeKernelState(kPerCoreKernelSeed);
         const auto warmupStart = Clock::now();
         const auto warmupEnd = warmupStart + std::chrono::duration_cast<Clock::duration>(
             std::chrono::duration<double>(config.warmupSeconds));
-        auto nextProgress = warmupStart;
+        {
+            std::lock_guard<std::mutex> lock(progress.mutex);
+            progress.phase = Phase::Warmup;
+            progress.phaseStart = warmupStart;
+        }
+        progress.cv.notify_one();
         while (Clock::now() < warmupEnd) {
             RunKernelBatch(state);
-            const auto now = Clock::now();
-            if (now >= nextProgress) {
-                const double warmElapsed = std::chrono::duration<double>(now - warmupStart).count();
-                EmitProgress(out, "per_core", "warmup", static_cast<int>(cpu.ordinal),
-                             coreCount, 0.0,
-                             static_cast<double>(stageIndex) / static_cast<double>(totalStages),
-                             warmElapsed, -1, config.roundCount);
-                nextProgress = now + kProgressPeriod;
-            }
         }
 
         const std::uint32_t roundCount = (std::max)(1u, config.roundCount);
@@ -572,29 +608,25 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
         std::vector<KernelRoundResult> rounds;
         rounds.reserve(roundCount);
         for (std::uint32_t round = 0; round < roundCount; ++round) {
-            state = MakeKernelState(static_cast<std::uint64_t>(cpu.ordinal) + 1u);
+            state = MakeKernelState(kPerCoreKernelSeed);
+            {
+                std::lock_guard<std::mutex> lock(progress.mutex);
+                progress.phase = Phase::Measure;
+                progress.round = round;
+                progress.phaseStart = Clock::now();
+            }
+            progress.cv.notify_one();
+            // Start timing only after all progress-state bookkeeping.  The
+            // observer may format concurrently, but the measured worker's own
+            // instruction stream is now kernel + deadline checks only.
             const auto start = Clock::now();
             const auto end = start + std::chrono::duration_cast<Clock::duration>(
                 std::chrono::duration<double>(roundSeconds));
-            nextProgress = start;
             KernelRoundResult sample;
             while (true) {
                 RunKernelBatch(state);
                 sample.workUnits += kKernelBatch;
                 const auto now = Clock::now();
-                if (now >= nextProgress) {
-                    const double elapsed = std::chrono::duration<double>(now - start).count();
-                    const double roundFraction = elapsed / roundSeconds;
-                    const double fraction = (static_cast<double>(round) +
-                        std::clamp(roundFraction, 0.0, 1.0)) / static_cast<double>(roundCount);
-                    EmitProgress(out, "per_core", "measure", static_cast<int>(cpu.ordinal),
-                                 coreCount, fraction,
-                                 (static_cast<double>(stageIndex) + fraction) /
-                                     static_cast<double>(totalStages),
-                                 static_cast<double>(round) * roundSeconds + elapsed,
-                                 static_cast<int>(round), roundCount);
-                    nextProgress = now + kProgressPeriod;
-                }
                 if (now >= end) break;
             }
             sample.seconds = std::chrono::duration<double>(Clock::now() - start).count();
@@ -609,7 +641,71 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
         result.seconds = rounds[median].seconds;
         result.roundCount = static_cast<std::uint32_t>(rounds.size());
         result.medianRound = static_cast<std::uint32_t>(median + 1u);
+
+        {
+            std::lock_guard<std::mutex> lock(progress.mutex);
+            progress.phase = Phase::Complete;
+            progress.done = true;
+        }
+        progress.cv.notify_one();
     });
+
+    // Keep the low-frequency observer off the physical core under test when
+    // topology and affinity APIs make that possible.  This is deliberately not
+    // part of the result-validity contract: only the measured worker must pin.
+    std::optional<ThreadAffinityScope> observerAffinity;
+    if (observerCpu) observerAffinity.emplace(*observerCpu);
+
+    // Keep formatting, flushing, and progress bookkeeping entirely outside the
+    // measured thread.  The condition variable wakes immediately at phase
+    // transitions and otherwise limits GUI updates to four per second.
+    Phase lastPhase = Phase::Starting;
+    std::uint32_t lastRound = std::numeric_limits<std::uint32_t>::max();
+    auto nextPeriodicUpdate = Clock::now();
+    std::unique_lock<std::mutex> lock(progress.mutex);
+    while (!progress.done) {
+        progress.cv.wait_until(lock, nextPeriodicUpdate);
+        const Phase phase = progress.phase;
+        const std::uint32_t round = progress.round;
+        const auto phaseStart = progress.phaseStart;
+        const bool transition = phase != lastPhase || round != lastRound;
+        const auto now = Clock::now();
+        const bool periodic = now >= nextPeriodicUpdate;
+        const bool done = progress.done;
+        lock.unlock();
+
+        if (!done && (transition || periodic)) {
+            if (phase == Phase::Warmup) {
+                const double elapsed =
+                    std::chrono::duration<double>(now - phaseStart).count();
+                EmitProgress(out, "per_core", "warmup", static_cast<int>(cpu.ordinal),
+                             coreCount, 0.0,
+                             static_cast<double>(stageIndex) /
+                                 static_cast<double>(totalStages),
+                             elapsed, -1, config.roundCount);
+            } else if (phase == Phase::Measure) {
+                const std::uint32_t roundCount = (std::max)(1u, config.roundCount);
+                const double roundSeconds =
+                    config.measureSeconds / static_cast<double>(roundCount);
+                const double elapsed =
+                    std::chrono::duration<double>(now - phaseStart).count();
+                const double fraction = (static_cast<double>(round) +
+                    std::clamp(elapsed / roundSeconds, 0.0, 1.0)) /
+                    static_cast<double>(roundCount);
+                EmitProgress(out, "per_core", "measure",
+                             static_cast<int>(cpu.ordinal), coreCount, fraction,
+                             (static_cast<double>(stageIndex) + fraction) /
+                                 static_cast<double>(totalStages),
+                             static_cast<double>(round) * roundSeconds + elapsed,
+                             static_cast<int>(round), roundCount);
+            }
+            lastPhase = phase;
+            lastRound = round;
+            nextPeriodicUpdate = now + kSingleProgressPeriod;
+        }
+        lock.lock();
+    }
+    lock.unlock();
     worker.join();
     EmitProgress(out, "per_core", "complete", static_cast<int>(cpu.ordinal),
                  coreCount, 1.0,
@@ -623,8 +719,7 @@ static std::string MultiAffinityMode(std::uint32_t pinned, std::uint32_t threads
 #if defined(_WIN32)
     return pinned == threads ? "strict" : (pinned == 0 ? "failed" : "partial");
 #elif defined(__linux__) || defined(__ANDROID__)
-    return pinned == threads ? "best_effort_all_pinned"
-        : (pinned == 0 ? "best_effort_unpinned" : "best_effort_partial");
+    return pinned == threads ? "strict" : (pinned == 0 ? "failed" : "partial");
 #elif defined(__APPLE__)
     (void)pinned;
     (void)threads;
@@ -637,7 +732,7 @@ static std::string MultiAffinityMode(std::uint32_t pinned, std::uint32_t threads
 }
 
 static bool MultiAffinityIsValid(std::uint32_t pinned, std::uint32_t threads) {
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__linux__) || defined(__ANDROID__)
     return pinned == threads;
 #else
     (void)pinned;
@@ -654,7 +749,7 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
     CpuMultiCoreResult result;
     if (cpus.empty()) return result;
 
-    struct WorkerResult {
+    struct alignas(kWorkerIsolationBytes) WorkerResult {
         std::uint64_t units = 0;
         std::uint64_t checksum = 0;
         Clock::time_point finished{};
@@ -686,7 +781,7 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
         for (std::size_t i = 0; i < cpus.size(); ++i) {
             workers.emplace_back([&, i] {
                 ThreadAffinityScope affinity(cpus[i]);
-                workerResults[i].strict = affinity.strict();
+                const bool strict = affinity.strict();
                 KernelState state = MakeKernelState(static_cast<std::uint64_t>(i) + 0x10001u);
                 {
                     std::unique_lock<std::mutex> lock(gate.mutex);
@@ -696,24 +791,41 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
                 }
                 while (Clock::now() < gate.warmupEnd) RunKernelBatch(state);
                 state = MakeKernelState(static_cast<std::uint64_t>(i) + 0x10001u);
+                std::uint64_t units = 0;
                 while (true) {
                     RunKernelBatch(state);
-                    workerResults[i].units += kKernelBatch;
+                    units += kKernelBatch;
                     if (Clock::now() >= gate.measureEnd) break;
                 }
-                workerResults[i].finished = Clock::now();
-                workerResults[i].checksum = state.checksum ^ state.a ^ RotL(state.b, 13);
-                g_cpuBenchmarkSink.fetch_xor(workerResults[i].checksum,
-                                             std::memory_order_relaxed);
+                const auto finished = Clock::now();
+                const std::uint64_t checksum =
+                    state.checksum ^ state.a ^ RotL(state.b, 13);
+                // One isolated publication after timing: the hot loop performs
+                // no shared writes and cannot false-share with adjacent workers.
+                auto& published = workerResults[i];
+                published.units = units;
+                published.finished = finished;
+                published.checksum = checksum;
+                published.strict = strict;
+                g_cpuBenchmarkSink.fetch_xor(checksum, std::memory_order_relaxed);
             });
         }
 
         Clock::time_point start;
+        const double warmup = round == 0 ? config.warmupSeconds : 0.0;
+        // Emit the phase boundary before starting the common timer so stdout
+        // formatting is never charged to the benchmark.
+        if (round == 0) {
+            EmitProgress(out, "multi", warmup > 0.0 ? "warmup" : "measure", -1,
+                         cpus.size(), 0.0,
+                         static_cast<double>(stageIndex) /
+                             static_cast<double>(totalStages),
+                         0.0, warmup > 0.0 ? -1 : 0, roundCount);
+        }
         {
             std::unique_lock<std::mutex> lock(gate.mutex);
             gate.cv.wait(lock, [&] { return gate.ready == cpus.size(); });
             start = Clock::now();
-            const double warmup = round == 0 ? config.warmupSeconds : 0.0;
             gate.warmupEnd = start + std::chrono::duration_cast<Clock::duration>(
                 std::chrono::duration<double>(warmup));
             gate.measureEnd = gate.warmupEnd + std::chrono::duration_cast<Clock::duration>(
@@ -722,34 +834,10 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
         }
         gate.cv.notify_all();
 
-        auto nextProgress = start;
-        while (Clock::now() < gate.measureEnd) {
-            const auto now = Clock::now();
-            if (now >= nextProgress) {
-                if (now < gate.warmupEnd) {
-                    const double elapsed = std::chrono::duration<double>(now - start).count();
-                    EmitProgress(out, "multi", "warmup", -1, cpus.size(),
-                                 static_cast<double>(round) / static_cast<double>(roundCount),
-                                 static_cast<double>(stageIndex) /
-                                     static_cast<double>(totalStages),
-                                 elapsed, -1, roundCount);
-                } else {
-                    const double elapsed =
-                        std::chrono::duration<double>(now - gate.warmupEnd).count();
-                    const double roundFraction = elapsed / roundSeconds;
-                    const double fraction = (static_cast<double>(round) +
-                        std::clamp(roundFraction, 0.0, 1.0)) /
-                        static_cast<double>(roundCount);
-                    EmitProgress(out, "multi", "measure", -1, cpus.size(), fraction,
-                                 (static_cast<double>(stageIndex) + fraction) /
-                                     static_cast<double>(totalStages),
-                                 static_cast<double>(round) * roundSeconds + elapsed,
-                                 static_cast<int>(round), roundCount);
-                }
-                nextProgress = now + kProgressPeriod;
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        }
+        // The observer does no stdout work at all while every logical CPU is
+        // saturated.  Formal runs still update the GUI at each five-second
+        // round boundary, after all workers have joined and timing has stopped.
+        std::this_thread::sleep_until(gate.measureEnd);
         for (auto& worker : workers) worker.join();
 
         MultiRoundResult sample;
@@ -768,6 +856,14 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
         sample.kernel.seconds =
             std::chrono::duration<double>(lastFinish - gate.warmupEnd).count();
         rounds.push_back(sample);
+
+        const double roundComplete =
+            static_cast<double>(round + 1u) / static_cast<double>(roundCount);
+        EmitProgress(out, "multi", "measure", -1, cpus.size(), roundComplete,
+                     (static_cast<double>(stageIndex) + roundComplete) /
+                         static_cast<double>(totalStages),
+                     static_cast<double>(round + 1u) * roundSeconds,
+                     static_cast<int>(round), roundCount);
     }
 
     std::vector<KernelRoundResult> scoreRounds;
@@ -895,8 +991,16 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
     if (runPerCore) {
         report.perCore.reserve(report.processors.size());
         for (const auto& cpu : report.processors) {
-            const auto timed = RunSingleTimed(cpu, config, report.processors.size(),
-                                              stage, totalStages, out);
+            const CpuLogicalProcessor* observerCpu = nullptr;
+            for (const auto& candidate : report.processors) {
+                if (candidate.physicalCore != cpu.physicalCore) {
+                    observerCpu = &candidate;
+                    break;
+                }
+            }
+            const auto timed = RunSingleTimed(cpu, observerCpu, config,
+                                              report.processors.size(), stage,
+                                              totalStages, out);
             CpuCoreResult result;
             result.processor = cpu;
             result.workUnits = timed.workUnits;
@@ -982,9 +1086,9 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
             << "\tround_count=" << config.roundCount
             << "\tchecksum=" << Hex64(summaryChecksum)
             << "\tchecksum_role=dce_sink\n" << std::flush;
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__linux__) || defined(__ANDROID__)
         if (!summaryValid) {
-            out << "CPU_ERROR\tmessage=strict_affinity_failed"
+            out << "CPU_ERROR\tmessage=required_affinity_failed"
                 << "\tinvalid_count=" << invalidCount << '\n' << std::flush;
         }
 #endif
@@ -1016,9 +1120,9 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
             << "\tmedian_round=" << report.multiCore.medianRound
             << "\tchecksum=" << Hex64(report.multiCore.checksum)
             << "\tchecksum_role=dce_sink" << '\n' << std::flush;
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__linux__) || defined(__ANDROID__)
         if (!report.multiCore.valid) {
-            out << "CPU_ERROR\tmessage=strict_multicore_affinity_failed"
+            out << "CPU_ERROR\tmessage=required_multicore_affinity_failed"
                 << "\tpinned_threads=" << report.multiCore.pinnedThreadCount
                 << "\tthread_count=" << report.multiCore.threadCount << '\n' << std::flush;
         }
