@@ -1,4 +1,4 @@
-# macOS Platform Notes
+# Mangekyo macOS Platform Notes
 
 ## Graphics API Availability
 

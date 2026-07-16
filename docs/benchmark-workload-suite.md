@@ -1,4 +1,4 @@
-# GPU Benchmark 负载套件方案
+# Mangekyo GPU Benchmark 负载套件方案
 
 > 本项目的跑分负载从"单一粒子流"扩展为**一套覆盖 GPU 四大性能轴的子项**。
 > 每个子项都复用现有框架（`AppBase` / 计时 / 结果持久化），通过 `Workload` 枚举切换。

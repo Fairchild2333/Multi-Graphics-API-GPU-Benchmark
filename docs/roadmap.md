@@ -1,4 +1,4 @@
-# Roadmap
+# Mangekyo Roadmap
 
 > Status note: read [`HANDOFF.md`](../HANDOFF.md) first. It is the authoritative source for current findings, the two active product goals, P0 blockers, and the next implementation slice. This roadmap retains historical context and must be updated only after the handoff.
 
@@ -64,7 +64,7 @@ timing breakdown (compute / render / total GPU), FPS, and bottleneck analysis.
 On startup (when no CLI flags are given), the application presents:
 
 ```
-========== GPU Benchmark ==========
+========== Mangekyo GPU Benchmark ==========
   [0] Quick run (Vulkan 1.2 / RTX 5090 / Medium)  <- default
   [1] Custom run (choose API / GPU / difficulty)
   [2] Run again (same settings)
@@ -113,22 +113,26 @@ On startup (when no CLI flags are given), the application presents:
 
 ### Near-term product order (updated 2026-07-15)
 
-Current `cinematic_liquid_v2` acceptance status:
+Current `cinematic_liquid_v2` acceptance status (v7 history preserved; shared-scene changes now use v8):
 
-- [x] Current Vulkan physical-scene slice: 128x64x96 MLS-MPM, ten substeps and
+- [x] Vulkan physical-scene slice: 128x64x96 MLS-MPM, ten substeps and
       320,920 particles (142x14x98 base + 48x37x71 dam), with stiffness 45,000,
       viscosity 0.035 and max speed 8. The result identity is
-      `cinematic_liquid_v2_physical_scene_v7`, shader version 9 and scene
-      version 4. The user's adjusted mother duck and three ducklings are
+      now `cinematic_liquid_v2_physical_scene_v8`, shader version 9 and scene
+      version 5. V8 isolates the later shared-scene changes: pool inset 0.45,
+      wall-top fraction 0.42 and extinction `(12,3.6,2.5)`. Historical v7
+      remains unchanged and has no formal score. The user's adjusted mother
+      duck and three ducklings are
       preserved together with the seven-body index ABI: boat=2, sink sphere=3,
       ducklings=4-6.
 - [x] Surface/optics slice: fixed-u32 Spiky-squared particle splat into an
       independent 128x64x96 R32F volume, then a 5x5x5 binomial blend with
       `mix = 0.90`. The current renderer follows at most four medium interfaces,
       applying Fresnel/Snell, per-segment Beer-Lambert attenuation and opaque
-      scene depth sorting. It uses `extinction=(30,10,8)`, linear exposure and
+      scene depth sorting. Current v8 uses `extinction=(12,3.6,2.5)`, linear exposure and
       zero density at volume boundaries. The reconstruction now adaptively
-      preserves low-support spray/drop cells instead of erasing them.
+      preserves low-support spray/drop cells instead of erasing them. Historical
+      iterative-optics v6 keeps its original `(30,10,8)` metadata.
 - [x] Physical scene response: body-2 is now a finite 34 kg boat with a soft
       mooring; propeller reaction and fluid forces can drive and rock it, but
       its trajectory has not yet received visual acceptance. Body-3 remains a
@@ -137,7 +141,8 @@ Current `cinematic_liquid_v2` acceptance status:
       displaced mass. Its entry crown and whitewater come from the GPU body
       state and local fluid rather than a fragment-only fake; no secondary
       spray-particle pass exists yet.
-- [x] Finite-height pool walls are embedded with inset 0.22. A limited outer
+- [x] Finite-height pool walls are embedded with inset 0.45 and wall top at
+      fraction 0.42 of the simulation-domain height. A limited outer
       simulation catch band lets particles cross the rim and fall to the
       ground, but it is not an infinite fluid domain. The foreground soft-PVC
       film is a separate IOR-1.50 Fresnel/weak-absorption/wrinkle approximation,
@@ -149,8 +154,8 @@ Current `cinematic_liquid_v2` acceptance status:
 - [x] Historical identities remain isolated: v1;
       `cinematic_liquid_v2_surface_splat_optics_v4` / shader version 6 formal;
       `cinematic_liquid_v2_duck_family_v5` / shader version 7 previews; and
-      `cinematic_liquid_v2_iterative_optics_v6` / shader version 8 previews.
-      None may be scored as current physical-scene v7. The
+      `cinematic_liquid_v2_iterative_optics_v6` / shader version 8 previews;
+      physical-scene v7 is also historical and isolated from current v8. The
       implementation uses only architecture and parameter proportions from MIT-licensed
       [jeantimex/fluid](https://github.com/jeantimex/fluid); no upstream code or
       assets are vendored.
@@ -165,7 +170,7 @@ Current `cinematic_liquid_v2` acceptance status:
       257.01 MParticle-step/s and 284 measured frames. Its excluded 0.117-second
       capture is `rdoc_captures/cinematic-liquid-v2-5s-iterative-optics-v6-final-preview.png`.
       This is a six-second `_preview`; v6 has no formal 15-second score.
-- [x] Current v7 shader compilation, all six final SPIR-V validations, CLI
+- [x] Historical v7 shader compilation, all six final SPIR-V validations, CLI
       Release and WinUI Release x64 builds passed. WinUI produced zero errors
       and only existing MSB8027/C4996/LNK4042-class warnings (two duplicate
       WinAppSDK warnings in the latest incremental build; four when affected
@@ -175,8 +180,8 @@ Current `cinematic_liquid_v2` acceptance status:
       visual acceptance; transient console value `241.13` is not a formal or
       persisted result. A window closing after a few seconds is the smoke
       script's `--time 8` lifecycle, not an established crash.
-- [ ] Run the v7 formal 15-second + five-second capture flow only after the
-      fixed-timestep trajectory contract is frozen; do not reuse any v4/v6 score.
+- [ ] Run the v8 formal 15-second + five-second capture flow only after the
+      fixed-timestep trajectory contract is frozen; do not reuse any v4/v6/v7 score.
 - [ ] Exercise WinUI selection/run/history on the final build and record exact
       boat, sink-sphere and overflow-particle trajectories. Build success and
       short smoke runs are not GUI or visual acceptance.
@@ -190,13 +195,19 @@ The independently versioned SPH vertical slice is now implemented at 318,464
 particles. A complete 15-second RTX 5090/Vulkan visual run kept the pool, water,
 duck family, balls, boat and environment stable; it stopped normally and the
 user accepted the current appearance. Visual iteration is therefore closed for
-this slice. Formal scoring is still blocked by render-frame-driven simulation,
-missing per-substep rigid-body impulse clearing and the in-place viscosity SSBO
-race; secondary spray/foam and SPH propeller wake remain later enhancements.
+this slice. Every duration is therefore forced into
+`cinematic_liquid_sph_slice_v1_preview`. Formal scoring is still blocked by
+render-frame-driven simulation, missing per-substep rigid-body impulse clearing,
+the in-place viscosity SSBO race and nondeterministic atomic-scatter cell order;
+secondary spray/foam and SPH propeller wake remain later enhancements. The
+accepted scene uses pool inset 0.45, wall-top fraction 0.42,
+`extinction=(12,3.6,2.5)` and a staggered 0.50–1.80 simulation-second grass-soak
+countdown.
 
 1. Keep the accepted SPH appearance fixed while closing its correctness contract:
    decouple simulation time from render rate, clear body impulses every substep,
-   remove the viscosity race, then run the formal 15-second + fifth-second
+   remove the viscosity race, make atomic-scatter ordering deterministic, then
+   run the formal 15-second + fifth-second
    RenderDoc/timestamp acceptance. Preserve all MLS-MPM versions unchanged and
    isolated.
 2. Immediately add three non-scored modes: Liquid Lab with a free camera and
@@ -223,26 +234,33 @@ passed their acceptance checks and the user explicitly raises its priority.
 
 - [x] Native `cpu_mixed_v1` kernel with integer/branch/FP32/FP64 work, fixed
       three-round median aggregation, per-logical-processor sweep and all-logical-
-      processor throughput. It opens no graphics window and invokes no RenderDoc.
+      processor throughput. Every per-core target uses the same seed; measured
+      workers perform no stdout work, multi emits nothing inside a timing window,
+      and worker publications do not false-share. It opens no graphics window and
+      invokes no RenderDoc.
 - [x] CLI flags: `--cpu-benchmark [per-core|multi|all]`, `--cpu-time`,
       `--cpu-warmup`, and `--cpu-no-save`; the CPU path exits before GLFW/GPU
       probing. The WinUI CPU page provides Quick/Formal, live progress, detailed
-      logical-processor rows, summary, raw output and Run/Cancel.
+      logical-processor rows, summary, raw output and Run/Cancel. CPU/GPU/Charts
+      launches are mutually exclusive; the complete formal pair is 15.0/0.2,
+      live output is batched and an incomplete child protocol is rejected.
 - [x] Successful summaries persist to `results.json`. Formal is exactly 15.0 s
       measurement + 0.2 s warm-up + three rounds; previews, affinity capability,
       timing and multi standalone/after-percore sequence receive separate result
       identities.
 - [x] Windows Release smoke on a Ryzen 7 9800X3D: 16 logical / 8 physical / SMT2,
       Windows CPU Set topology, 16/16 per-core and 16/16 multi workers strict-
-      pinned, exit 0. The short smoke is not a formal score.
+      pinned, exit 0. An isolated 0.1-second WinUI E2E also produced 16 rows,
+      both summaries and 100%/Done. These short smokes are not formal scores.
 - [ ] Rebuild and clean-machine-test the ZIP/Inno installer with this CPU slice;
       verify installed GUI-to-CLI discovery, Run/Cancel and History persistence.
 - [ ] Validate >64-logical processor groups and a real hybrid CPU. Core-class
       names remain inferred OS-metadata ranks, not authoritative P/E/Mid/LPE
       identities.
-- [ ] Native-test Linux as best-effort affinity and macOS as scheduler-managed;
-      implement/validate Android, iOS and Web/WASM separately. Their results must
-      never mix with Windows strict-affinity groups.
+- [ ] Native-test Linux/Android `strict_sched_affinity` (set plus readback; failure
+      is invalid/exit 3) across host/container/cpuset/device cases, and macOS as
+      scheduler-managed; implement/validate iOS and Web/WASM separately. Their
+      results must never mix with Windows strict-affinity groups.
 
 ### DirectX 10-era compatibility (implemented, physical validation pending)
 

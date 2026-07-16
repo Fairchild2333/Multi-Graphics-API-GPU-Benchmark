@@ -1,4 +1,4 @@
-# Multi-Graphics API GPU Benchmark Report
+# Mangekyo — Multi-Graphics API GPU Benchmark Report
 
 ---
 

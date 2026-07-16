@@ -1,11 +1,18 @@
-# GPU Compute & Rendering Pipeline — Multi-Graphics API
+# Mangekyo — Cross-API CPU & GPU Benchmark Suite
 
-A cross-API GPU benchmark suite that retains its original real-time particle
-simulation and adds versioned compute and graphics workloads. The engine has
-five interchangeable graphics API backends: **Vulkan**, **DirectX 12**,
+**Mangekyo** is a cross-API benchmark suite whose primary product is GPU
+testing, with a native CPU benchmark as a supplementary test. It retains the
+original real-time particle simulation and adds versioned compute, graphics,
+stress, cinematic-liquid, per-logical-CPU and all-core workloads. The GPU engine
+has five interchangeable graphics API backends: **Vulkan**, **DirectX 12**,
 **DirectX 11**, **OpenGL 4.3**, and **Metal**, with GPU timestamp profiling.
-Runs on **Windows**, **Linux**, and **macOS**; individual workload support is
-listed below and in [`HANDOFF.md`](HANDOFF.md).
+It runs on **Windows**, **Linux**, and **macOS**; individual workload and CPU
+affinity support is listed below and in [`HANDOFF.md`](HANDOFF.md).
+
+`gpu_benchmark` remains the internal executable/target and CLI command for
+compatibility. The stable Windows installer AppId and existing
+`GpuComputeBenchmark` user-data directory also remain unchanged, so adopting the
+Mangekyo display name does not orphan installations or historical results.
 
 See [`docs/report.md`](docs/report.md) for the full analysis.
 See [`HANDOFF.md`](HANDOFF.md) first for the authoritative current status, the
@@ -91,7 +98,7 @@ suite.
 
 ## Benchmark Workloads
 
-The engine currently exposes **ten stable workload ids**. `gpu_burn` is the
+The engine currently exposes **eleven public workload selections**. `gpu_burn` is the
 new primary visual graphics-burn path; `gpu_stress` remains an advanced
 GraphicsBurn component score, and the original `stress` path is retained as
 `Legacy Stress v1`. `cinematic_liquid` is the real 3D Vulkan liquid test. Its
@@ -111,7 +118,8 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
 | **Compute (peak)** | `synthpeak` | Raw ALU throughput per precision | GFLOPS / GIOPS | `--precision`, `--iter` |
 | **3D render** | `render3d` | Vertex transform + raster + fill + depth | MQuad/s | `--particles` |
 | **Volume raymarch** | `volumetric` | Fragment ALU/SFU + register pressure | GSample/s | `--steps` |
-| **3D cinematic liquid** | `cinematic_liquid` | 320,920-particle MLS-MPM + particle-splatted 3D density volume + iterative free-surface optics | MParticle-step/s | current physical-scene v7 is Vulkan-only and smoke-tested; historical optics_v4 formal run passed; formal v7 and GUI acceptance pending |
+| **3D cinematic liquid** | `cinematic_liquid` | 320,920-particle MLS-MPM + particle-splatted 3D density volume + iterative free-surface optics; optional SPH preview | MParticle-step/s | current physical-scene v8 is Vulkan-only and unscored; `--liquid-solver mpm\|sph` |
+| **Legacy cinematic liquid v1** | `cinematic_liquid_v1` | Original 181,216-particle MLS-MPM dam-break contract | MParticle-step/s | fixed v1 Vulkan-only contract |
 | **Legacy 2D fluid** | `fluid` | Multi-pass compute + fullscreen dye render | unverified legacy | `--grid`, `--jacobi` |
 
 ```bash
@@ -124,7 +132,8 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
 ./build/gpu_benchmark --benchmark --workload render3d                 # True-3D billboards (MQuad/s)
 ./build/gpu_benchmark --time 15 --workload volumetric --steps 96      # Experimental raymarch
 ./build/gpu_benchmark --backend vulkan --time 15 --workload cinematic_liquid --capture 5
-# The old `fluid` id is retained only as a legacy 2D prototype.
+./build/gpu_benchmark --backend vulkan --time 15 --workload cinematic_liquid --liquid-solver sph
+# `cinematic_liquid_v1` and `fluid` remain public legacy selections.
 ```
 
 - `stream` is bandwidth-dominated (~0.15 FLOP/byte), so its GB/s score is mainly
@@ -150,11 +159,14 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
   96x56x64 grid, 181,216 particles, 10 substeps and 160 ray steps make results
   comparable within v1. It is currently Vulkan-only and therefore is not yet a
   cross-API 3DMark replacement.
-- The current Vulkan v2 implementation uses a fixed 128x64x96 MLS-MPM grid,
+- The current Vulkan v2 MPM implementation uses a fixed 128x64x96 grid,
   320,920 particles (142x14x98 base plus a 48x37x71 dam), ten substeps,
   stiffness 45,000, viscosity 0.035 and an 8-unit/s speed cap. The current
-  result contract is `cinematic_liquid_v2_physical_scene_v7`, shader version 9
-  and scene version 4. It preserves the user's duck-family geometry and the
+  result contract is `cinematic_liquid_v2_physical_scene_v8`, shader version 9
+  and scene version 5. V8 was required because the shared scene changed after
+  v7: the pool-wall inset is now 0.45, the wall-top fraction is 0.42 and water
+  extinction is `(12,3.6,2.5)`. No v8 formal score has been run. It preserves
+  the user's duck-family geometry and the
   seven-body index ABI: the boat remains body 2, the sinking sphere remains
   body 3, and the three ducklings remain appended as bodies 4-6. The boat is no
   longer hard-anchored: it is a finite 34 kg rigid body with a soft mooring, so
@@ -162,7 +174,8 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
   has not yet received visual acceptance. The body-3 sealed sphere has density
   ratio 1.06, releases at 4.28 s, uses -9.81 gravity and 0.015 air damping, and
   gates material water drag by immersion fraction using displaced mass.
-- The pool now has finite-height embedded walls inset by 0.22 and a limited
+- The pool now has finite-height embedded walls inset by 0.45, with wall top at
+  0.42 of the simulation-domain height, and a limited
   outer simulation catch band, allowing particles to cross the rim and fall to
   the ground without pretending the fluid domain is infinite. A separate thin
   foreground soft-PVC film uses IOR 1.50, Fresnel reflection, weak absorption
@@ -177,18 +190,19 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
   response rather than a fragment-only fake splash; secondary spray particles
   are not implemented yet.
 - The renderer retains the v6 four-interface Fresnel/Snell path, per-segment
-  Beer-Lambert attenuation, opaque-scene depth sorting, `extinction=(30,10,8)`,
+  Beer-Lambert attenuation and opaque-scene depth sorting; current v8 uses
+  `extinction=(12,3.6,2.5)`,
   linear exposure and zero density at volume boundaries. Historical v1,
   `cinematic_liquid_v2_surface_splat_optics_v4` (shader version 6),
   `cinematic_liquid_v2_duck_family_v5` (shader version 7), and
   `cinematic_liquid_v2_iterative_optics_v6` (shader version 8) results/previews
-  remain isolated and must not be scored as v7.
+  plus physical-scene v7 results remain historical and isolated from v8.
   The optics_v4 RTX 5090 Vulkan formal 15-second run plus 5.1-second RenderDoc
   capture passed at 263.98 MParticle-step/s (result `20260715-170629-492`). The
   historical v6 has only a six-second preview: result `20260715-221447-024`, 257.01
   MParticle-step/s, image
   `rdoc_captures/cinematic-liquid-v2-5s-iterative-optics-v6-final-preview.png`.
-  Current v7 has passed shader compilation, all six final SPIR-V validations,
+  Historical v7 passed shader compilation, all six final SPIR-V validations,
   CLI Release and WinUI Release x64 builds. Its independently versioned SPH
   successor now runs 318,464 particles and has completed a 15-second
   RTX 5090/Vulkan visual run: the pool, water, duck family, balls, boat and grass
@@ -199,12 +213,15 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
   window closing after a few seconds is the test script's `--time 8` lifecycle,
   not evidence of a crash. Interactive WinUI run/history acceptance,
   fixed-timestep cross-GPU trajectory and DX12/DX11/OpenGL/Metal v2 ports remain
-  open. V7 remains MLS-MPM; use `--liquid-solver sph` for the experimental SPH
+  open. V8 remains MLS-MPM; use `--liquid-solver sph` for the experimental SPH
   slice inspired by [jeantimex/fluid](https://github.com/jeantimex/fluid).
-  Before that slice can produce a formal score, its simulation must be decoupled
-  from render rate, rigid-body impulses must be cleared between substeps, and
-  the in-place viscosity SSBO race must be removed. No upstream assets are
-  vendored.
+  Every SPH duration, including 15 seconds, is forcibly recorded as
+  `cinematic_liquid_sph_slice_v1_preview`. Before it can produce a formal score,
+  its simulation must be decoupled from render rate, rigid-body impulses must be
+  cleared between substeps, the in-place viscosity SSBO race must be removed,
+  and atomic scatter must have a deterministic cell order. Grass soak/recycle
+  uses a staggered 0.50–1.80 simulation-second countdown. No upstream assets
+  are vendored.
 - **Precision support** (`synthpeak`): FP32/FP64/INT32 work on Vulkan, DX12, DX11, OpenGL.
   **FP16** works on **Vulkan** (`VK_KHR_shader_float16_int8`), **DX12** (precompiled
   SM 6.2 DXIL via the Windows SDK DXC), **OpenGL** (`GL_NV_gpu_shader5`, NVIDIA), and
@@ -252,6 +269,15 @@ persisted. Performance/Efficiency/Middle/LPE names are explicitly **inferred
 rank labels** derived from OS metadata, not authoritative microarchitecture
 identification.
 
+The scored per-core rounds now use the same seed and dependency trace on every
+logical processor. The measured worker performs no stdout formatting or flushing,
+and the all-core stage emits no output inside a measurement window. The WinUI
+page also prevents CPU/GPU/chart jobs from overlapping, sets the complete
+`15.0 + 0.2` formal preset, batches live output and rejects an incomplete or
+incompatible child protocol even when the child exits with code 0. An isolated
+0.1-second GUI preview completed all 16 rows, the per-core summary and the
+16-thread result at 100%; it is an orchestration smoke, not a formal score.
+
 Successful CLI/GUI runs append only the per-core average and multi-core summary
 to `results.json`; detailed logical-processor rows remain in the live page and
 machine-readable stdout protocol. Use:
@@ -262,14 +288,16 @@ gpu_benchmark.exe --cpu-benchmark per-core|multi|all
                   [--cpu-no-save]
 ```
 
-Linux enumerates the process's allowed CPU set and attempts per-thread pinning,
-but remains best-effort until native build/topology/container testing is complete.
-macOS is `scheduler_managed`: its logical-to-physical mapping is only an estimate
-and it has no strict public per-core binding equivalent. Android/iOS and Web/WASM
-CPU modes have not been built or accepted; a browser can expose only logical
-concurrency, not reliable host-core selection or P/E classification. Affinity
-capability is part of the result identity, so these paths cannot silently mix
-with verified Windows strict-affinity scores.
+Linux/Android enumerate the process's allowed CPU set and require pthread
+affinity to succeed and read back as the requested single CPU; success uses the
+separate `strict_sched_affinity` identity, while failure is invalid and exits 3.
+Those paths still need native/container/device builds before release. macOS is
+`scheduler_managed`: its logical-to-physical mapping is only an estimate and it
+has no strict public per-core binding equivalent. iOS and Web/WASM CPU modes have
+not been built or accepted; a browser can expose only logical concurrency, not
+reliable host-core selection or P/E classification. Affinity capability is part
+of the result identity, so these paths cannot silently mix with verified Windows
+strict-affinity scores.
 
 ## Project Structure
 
@@ -281,7 +309,7 @@ with verified Windows strict-affinity scores.
 │   ├── main.cpp                # Entry point — interactive menu, GPU selection, CLI
 │   ├── app_base.h/cpp          # Shared base class (window, particles, timing)
 │   ├── benchmark_results.h/cpp # Result persistence, comparison tables, CSV export
-│   ├── cpu_benchmark.h/cpp     # In-progress headless CPU kernel/topology runner
+│   ├── cpu_benchmark.h/cpp     # Native supplementary CPU kernel/topology runner
 │   ├── gpu_common.h            # Shared types (BenchmarkConfig, BackToMenuException)
 │   ├── vulkan_backend.h/cpp    # Vulkan
 │   ├── dx12_backend.h/cpp      # DirectX 12
@@ -339,7 +367,18 @@ cmake -S . -B build && cmake --build build --config Release
 
 Toggle individual backends with `-DENABLE_VULKAN=OFF`, `-DENABLE_DX12=ON`, etc.
 
-## Run
+## Run Mangekyo
+
+### Windows GUI: separate GPU and CPU navigation
+
+The WinUI application now separates the main **GPU** benchmark page from the
+supplementary **CPU** benchmark page. Use GPU for graphics API/device/workload
+runs, including the fixed 15-second + fifth-second capture flow. Use CPU for the
+sequential per-logical-processor sweep, the all-core run, or both; it opens no
+3D window and never invokes RenderDoc. History and Charts remain separate
+navigation destinations, and CPU/GPU/chart jobs are mutually exclusive.
+
+### GPU benchmark CLI
 
 ```bash
 ./build/gpu_benchmark                          # interactive menu
@@ -350,7 +389,24 @@ Toggle individual backends with `-DENABLE_VULKAN=OFF`, `-DENABLE_DX12=ON`, etc.
 ./build/gpu_benchmark --help                   # all options
 ```
 
-### Backend Auto-Selection
+### Supplementary CPU benchmark CLI
+
+```bash
+# Quick preview: per-logical-CPU sweep followed by all-core
+./build/gpu_benchmark --cpu-benchmark all --cpu-time 1 --cpu-warmup 0.15
+
+# Formal contract: 15.0 s measurement per item + 0.2 s warm-up, three rounds
+./build/gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2
+
+# Run only one stage
+./build/gpu_benchmark --cpu-benchmark per-core
+./build/gpu_benchmark --cpu-benchmark multi
+```
+
+`--cpu-mode` remains a compatibility alias; new scripts should prefer the
+compact `--cpu-benchmark <per-core|multi|all>` form.
+
+### GPU backend auto-selection
 
 When no `--backend` is specified, the application probes in order:
 
@@ -358,7 +414,7 @@ When no `--backend` is specified, the application probes in order:
 - **Linux:** Vulkan → OpenGL
 - **Windows:** Vulkan → DX12 → DX11 → OpenGL
 
-### Result Management
+### Result management
 
 ```bash
 ./build/gpu_benchmark --results                # list saved results

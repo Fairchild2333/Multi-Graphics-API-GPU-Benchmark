@@ -1,4 +1,4 @@
-# macOS GUI 实施计划(SwiftUI + Liquid Glass)
+# Mangekyo macOS GUI 实施计划（SwiftUI + Liquid Glass）
 
 > 目标:为本项目做一个原生 macOS 图形前端,功能对齐现有的 Windows
 > WinUI 3 GUI([`gui/`](../gui/)),并采用 **macOS Tahoe (macOS 26) 的

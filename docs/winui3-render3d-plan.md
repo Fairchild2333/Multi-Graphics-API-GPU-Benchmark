@@ -1,4 +1,4 @@
-# WinUI3 对接 + 真 3D 渲染 架构方案
+# Mangekyo WinUI 3 对接 + 真 3D 渲染架构方案
 
 > 配套文档：[`nbody-workload-plan.md`](nbody-workload-plan.md)（compute 算力子项）。
 > 本文覆盖三件事：**① 真 3D 渲染负载、② WinUI3 对接所需的架构解耦、③ RenderDoc 进 WinUI3 的可行性**。

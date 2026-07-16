@@ -1,14 +1,15 @@
-# CLI Reference — `gpu_benchmark`
+# Mangekyo CLI Reference — `gpu_benchmark`
 
-Complete record of every CLI test: parameters, what it runs, and which external
-tools it invokes. Source: [`src/main.cpp`](../src/main.cpp), defaults in
+Complete record of every Mangekyo CLI test: parameters, what it runs, and which
+external tools it invokes. The product name changed, but the compatible internal
+command remains `gpu_benchmark`. Source: [`src/main.cpp`](../src/main.cpp), defaults in
 [`src/gpu_common.h`](../src/gpu_common.h).
 
 ## 1. Default config (`BenchmarkConfig`, gpu_common.h:103-120)
 
 | Field | Default | Notes |
 |---|---|---|
-| `workload` | `Stream` (bandwidth) | one of stream/nbody/stress/synthpeak/render3d |
+| `workload` | `Stream` (bandwidth) | one of the 11 public selections listed under `--workload` below |
 | `particleCount` | `1048576` (= Medium) | 1M particles |
 | `maxRunTimeSec` | `15.0` | time-mode duration |
 | `warmupTimeSec` | `2.0` | time-mode warmup |
@@ -92,10 +93,14 @@ runs append summary rows unless `--cpu-no-save` is supplied.
 | `--flights <N>` | frames-in-flight (1–16) |
 | `--headless` | pure compute, no window |
 | `--particles <count>` | particle count (rounded to 256, skips difficulty menu) |
-| `--workload <stream\|nbody\|stress\|synthpeak\|render3d>` | select workload |
+| `--workload <id>` | select one of 11 public ids: `stream`, `nbody`, `gpu_burn`, `gpu_stress`, `stress`, `synthpeak`, `render3d`, `volumetric`, `cinematic_liquid`, `cinematic_liquid_v1`, `fluid` |
 | `--bodies <count>` | n-body bodies (implies nbody, default 65536) |
-| `--iter <count>` | stress per-pixel iters / synthpeak loop passes |
+| `--iter <count>` | fixed iteration/step request shared by `stress`, `gpu_stress`, `gpu_burn` and `synthpeak` (burn/stress values are safety-clamped and disable auto-tune) |
 | `--precision <fp32\|fp16\|fp64\|int32>` | synthpeak data type |
+| `--steps <count>` | `volumetric` per-pixel ray samples (default 96; minimum 1) |
+| `--grid <count>` | legacy `fluid` square-grid side; rounded up to a multiple of 16 (minimum 16) |
+| `--jacobi <count>` | legacy `fluid` pressure iterations (default 30) |
+| `--liquid-solver <mpm\|sph>` | solver for `cinematic_liquid`; default `mpm`; `sph` is the independent preview-only slice |
 | `--time <sec>` | time-mode auto-stop (default 15) |
 | `--no-time-limit` | run until window closed |
 | `--benchmark [frames]` | **frame mode** (default 2000), then exit |
@@ -105,7 +110,7 @@ runs append summary rows unless `--cpu-no-save` is supplied.
 | `--results` / `--results-delete <id>` / `--results-clear` / `--results-export <csv>` | result management |
 | `--compare [id1 id2]` / `--list-gpus` / `--help` | compare / list GPUs / help |
 | `--cpu-benchmark [per-core\|multi\|all]` | run the native CPU-only path and exit before GLFW/GPU probing; default mode is `all` |
-| `--cpu-mode <per-core\|multi\|all>` | explicit mode alias used by the WinUI CPU page |
+| `--cpu-mode <per-core\|multi\|all>` | compatibility alias for the preferred compact `--cpu-benchmark <mode>` form; it also selects the CPU-only path |
 | `--cpu-time <seconds>` | total measurement budget per CPU test, split across three rounds; default `1`, range `0.03..3600` |
 | `--cpu-warmup <seconds>` | warm-up before each logical-processor test and before multi-core; default `0.15`, range `0..60` |
 | `--cpu-no-save` | run the CPU test without appending successful summaries to `results.json` |
@@ -117,6 +122,13 @@ runs append summary rows unless `--cpu-no-save` is supplied.
 >
 > Explicit `--time` also counts as a "direct run" (no menu) — this is what lets
 > the GUI's time-mode presets work in-process (main.cpp:788).
+
+`cinematic_liquid_v1` is a public selector for the preserved original liquid
+implementation even though persisted rows retain the historical workload id
+`cinematic_liquid` and are separated by `workloadVersion=cinematic_liquid_v1`.
+For `--liquid-solver sph`, every duration—including 15 seconds—is currently
+saved as `cinematic_liquid_sph_slice_v1_preview`; changing only the duration
+does not make the four open correctness contracts formal.
 
 ### Native CPU-only path
 
@@ -144,13 +156,14 @@ sources. The checksum is a dead-code-elimination sink, not a correctness oracle.
 Successful persistence stores per-core average and multi-core summary rows;
 detailed logical-processor rows remain in stdout/the current GUI session.
 
-Windows formal results require strict group affinity. A failed strict bind marks
-the affected result invalid, returns exit code 3 and prevents persistence. Linux
-currently reports best-effort affinity and macOS reports `scheduler_managed`;
-affinity capability, timing and `multi` sequence are part of the stored result
-identity, so unlike contracts do not share a comparison group. Core-class names
-prefixed with `Inferred` are OS-metadata ranks, not authoritative P/E/Mid/LPE
-microarchitecture identification.
+Windows formal results require strict group affinity. Linux/Android require
+pthread affinity to succeed and read back as the requested sole CPU under the
+separate `strict_sched_affinity` identity. A failed required bind marks the
+affected result invalid, returns exit code 3 and prevents persistence. macOS
+reports `scheduler_managed`; affinity capability, timing and `multi` sequence are
+part of the stored result identity, so unlike contracts do not share a comparison
+group. Core-class names prefixed with `Inferred` are OS-metadata ranks, not
+authoritative P/E/Mid/LPE microarchitecture identification.
 
 ## 4. External tools summary
 
@@ -165,6 +178,11 @@ microarchitecture identification.
 ## 5. GUI parity
 
 The WinUI 3 GUI presets mirror these CLI flows (`gui/MainWindow.xaml.cpp`):
+
+The Workload dropdown exposes the same **11 selections**: `stream`, `gpu_burn`,
+`cinematic_liquid`, `gpu_stress`, `nbody`, `synthpeak`, `stress`, `render3d`,
+`volumetric`, `fluid`, and `cinematic_liquid_v1` (display order differs from the
+CLI list but the ids are identical).
 
 | GUI preset | CLI equivalent | Notes |
 |---|---|---|

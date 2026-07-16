@@ -1,4 +1,7 @@
-# Building from Source
+# Building Mangekyo from Source
+
+Mangekyo's internal CMake target and command remain `gpu_benchmark`; the display
+brand does not require downstream build scripts to rename the executable.
 
 ## Prerequisites
 
@@ -399,11 +402,12 @@ the multi-core stage, with a 0.2-second warm-up per test and three median rounds
   --cpu-warmup 0.2
 ```
 
-Only Windows x64 is currently validated. Linux enumerates the process allowed
-CPU set and attempts pthread affinity, but remains a best-effort build target
-until native and container/cpuset tests pass. macOS is scheduler-managed and its
-logical-to-physical mapping is estimated. Android, iOS and Web/WASM CPU modes are
-not release targets yet.
+Only Windows x64 is currently validated. Linux/Android enumerate the process
+allowed CPU set and require pthread affinity to read back as the requested sole
+CPU; successful results use `strict_sched_affinity`, while failure is invalid and
+returns 3. Native Linux/container/cpuset and Android device tests are still
+required. macOS is scheduler-managed and its logical-to-physical mapping is
+estimated. iOS and Web/WASM CPU modes are not release targets yet.
 
 ## Windows x64 release staging
 
@@ -449,8 +453,8 @@ Outputs are written below `out/`:
 
 ```text
 out/stage/windows-x64/                 verified install tree
-out/packages/GpuComputeBenchmark-*.zip
-out/packages/GpuComputeBenchmark-*.zip.sha256
+out/packages/Mangekyo-*.zip
+out/packages/Mangekyo-*.zip.sha256
 ```
 
 For an explicit CLI-only smoke artifact, pass `-SkipGui`. This is not the
