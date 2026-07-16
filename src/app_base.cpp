@@ -330,7 +330,7 @@ void AppBase::InitWindow() {
     glfwWindowHint(GLFW_RESIZABLE,  GLFW_FALSE);
     glfwWindowHint(GLFW_VISIBLE,    GLFW_FALSE);
 
-    const std::string title = GetBackendName() + " GPU Compute & Rendering Pipeline";
+    const std::string title = "Mangekyo | " + GetBackendName() + " GPU Workload";
     window_ = glfwCreateWindow(static_cast<int>(kWindowWidth),
                                static_cast<int>(kWindowHeight),
                                title.c_str(), nullptr, nullptr);
@@ -1059,10 +1059,13 @@ BenchmarkResult AppBase::CollectResult() const {
                 // but its dynamics are the Lague-style dual-density SPH from
                 // MIT jeantimex/fluid, run in the reference's own units and
                 // affinely mapped into the pool.  Never rank beside MLS-MPM.
-                r.workloadVersion =
-                    std::abs(config_.maxRunTimeSec - 15.0) < 0.001
-                        ? "cinematic_liquid_sph_slice_v1"
-                        : "cinematic_liquid_sph_slice_v1_preview";
+                // This slice is not eligible for a formal score at any
+                // duration yet.  A 15-second visual run does not close the
+                // frame-rate-driven timestep, per-substep body-impulse clear,
+                // in-place viscosity data race or atomic-scatter ordering
+                // blockers.  Keep every SPH result in the preview group until
+                // all four correctness contracts are implemented and tested.
+                r.workloadVersion = "cinematic_liquid_sph_slice_v1_preview";
                 workloadConfig << "solver=sph_dual_density_lague"
                                << ";particles=" << config_.particleCount
                                << ";particleLayoutBytes=80"
@@ -1071,6 +1074,7 @@ BenchmarkResult AppBase::CollectResult() const {
                                << ";grassAbsorb=catch_band_soak_recycle"
                                << ";neighborSearch=block_hash50_counting_sort"
                                << ";determinism=cell_order_race_ulp_open"
+                               << ";formalEligibility=blocked_four_correctness_contracts"
                                << ";smoothingRadius=" << kCinematicLiquidSphSmoothingRadius
                                << ";dtSim=1/120"
                                << ";substeps=" << kCinematicLiquidSphSubsteps
@@ -1080,13 +1084,17 @@ BenchmarkResult AppBase::CollectResult() const {
                                << ";viscosityStrength=" << kCinematicLiquidSphViscosityStrength
                                << ";worldScale=" << kCinematicLiquidSphWorldScale
                                << ";scene=clear_pvc_pool_dam_break_duck_family_motor_boat_sink_sphere_grass"
-                               << ";sceneVersion=4"
+                               << ";sceneVersion=5"
                                << ";seed=sph_dam_restage_4s_v1"
+                               << ";poolWallInset=0.45"
+                               << ";poolWallTopFraction=0.42"
+                               << ";grassSoakCountdownSimSec=0.50..1.80"
                                << ";renderer=particle_spiky2_density_raymarch_iterative_fresnel4"
                                << ";surfaceVolume=" << kCinematicLiquidV2SurfaceX << "x"
                                << kCinematicLiquidV2SurfaceY << "x"
                                << kCinematicLiquidV2SurfaceZ
                                << ";raySteps=" << kCinematicLiquidV2RaySteps
+                               << ";extinction=12,3.6,2.5"
                                << ";shaderVersion=" << kCinematicLiquidSphShaderVersion
                                << ";apiScope=vulkan_only";
                 break;
@@ -1095,12 +1103,15 @@ BenchmarkResult AppBase::CollectResult() const {
             // score group. Developer visual probes (--time 3/6/11) must not
             // rank beside a run that traverses the complete choreography.
             // Every physical/optical scene revision has an isolated score
-            // contract. V7 preserves the duck-family ABI but changes the water
-            // distribution, boat dynamics, sink entry and finite pool wall.
+            // contract. V7 preserved the duck-family ABI while changing the
+            // water distribution, boat dynamics, sink entry and finite pool
+            // wall.  The later 0.45 inset, 0.42 wall-top fraction and lighter
+            // extinction changed the shared scene again, so the current MPM
+            // contract is V8 and must not rank with any V7 smoke result.
             r.workloadVersion =
                 std::abs(config_.maxRunTimeSec - 15.0) < 0.001
-                    ? "cinematic_liquid_v2_physical_scene_v7"
-                    : "cinematic_liquid_v2_physical_scene_v7_preview";
+                    ? "cinematic_liquid_v2_physical_scene_v8"
+                    : "cinematic_liquid_v2_physical_scene_v8_preview";
             workloadConfig << "solver=mls_mpm_3d_rigid_coupled"
                            << ";particles=" << config_.particleCount
                            << ";particleLayoutBytes=80"
@@ -1111,13 +1122,14 @@ BenchmarkResult AppBase::CollectResult() const {
                            << ";rigidBodies=" << kCinematicLiquidV2BodyCount
                            << ";coupling=gpu_fixed_point_two_way"
                            << ";scene=clear_pvc_pool_dam_break_duck_family_motor_boat_sink_sphere_grass"
-                           << ";sceneVersion=4"
+                           << ";sceneVersion=5"
                            << ";seed=deep_pool_dam_restage_4s_v2"
                            << ";cameraPathVersion=3"
                            << ";heroCamera=low_side_5s_v2"
                            << ";durationContractSec=15"
                            << ";poolType=inflatable_clear_pvc_finite_wall"
-                           << ";poolWallInset=0.22"
+                           << ";poolWallInset=0.45"
+                           << ";poolWallTopFraction=0.42"
                            << ";overflow=finite_height_inner_wall_catch_band"
                            << ";boat=finite_mass_soft_tether_propeller_reaction"
                            << ";sinkBall=gravity_9.81_air_drag_0.015_water_drag_displaced_mass"
@@ -1134,7 +1146,7 @@ BenchmarkResult AppBase::CollectResult() const {
                            << ";surfaceFilter=binomial5x5x5_adaptive_spray_preserve"
                            << ";refraction=multi_interface_fresnel_path_v2"
                            << ";maxOpticalInterfaces=4"
-                           << ";extinction=30,10,8"
+                           << ";extinction=12,3.6,2.5"
                            << ";normalGradientVoxels=1.0_to_2.5"
                            << ";toneMap=linear_exposure"
                            << ";densityBoundary=zero_clamped"
