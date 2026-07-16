@@ -257,19 +257,83 @@ namespace
         SECURITY_ATTRIBUTES security{};
         security.nLength = sizeof(security);
         security.bInheritHandle = TRUE;
-        HANDLE readPipe = nullptr;
-        HANDLE writePipe = nullptr;
-        if (!::CreatePipe(&readPipe, &writePipe, &security, 0))
-            return { "[Process] CreatePipe failed (" +
+
+        // CreatePipe cannot produce an overlapped read handle. Use a private
+        // byte-mode named pipe so the reader can always be stopped with an
+        // event + CancelIoEx, even if a crashed driver leaves a writer alive.
+        static std::atomic_uint64_t nextPipeId{ 0 };
+        const std::wstring pipeName = L"\\\\.\\pipe\\Mangekyo.GuiCapture." +
+            std::to_wstring(::GetCurrentProcessId()) + L"." +
+            std::to_wstring(nextPipeId.fetch_add(1, std::memory_order_relaxed));
+        HANDLE readPipe = ::CreateNamedPipeW(
+            pipeName.c_str(),
+            PIPE_ACCESS_INBOUND | FILE_FLAG_OVERLAPPED |
+                FILE_FLAG_FIRST_PIPE_INSTANCE,
+            PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
+            1, 64u * 1024u, 64u * 1024u, 0, nullptr);
+        if (readPipe == INVALID_HANDLE_VALUE)
+            return { "[Process] CreateNamedPipe failed (" +
                      std::to_string(::GetLastError()) + ").\n", -1 };
-        if (!::SetHandleInformation(readPipe, HANDLE_FLAG_INHERIT, 0))
+
+        HANDLE connectEvent = ::CreateEventW(nullptr, TRUE, FALSE, nullptr);
+        if (!connectEvent)
         {
             const DWORD error = ::GetLastError();
-            ::CloseHandle(writePipe);
             ::CloseHandle(readPipe);
-            return { "[Process] SetHandleInformation failed (" +
+            return { "[Process] Create pipe connect event failed (" +
                      std::to_string(error) + ").\n", -1 };
         }
+        OVERLAPPED connection{};
+        connection.hEvent = connectEvent;
+        const BOOL connectedImmediately = ::ConnectNamedPipe(readPipe, &connection);
+        const DWORD connectError = connectedImmediately
+            ? ERROR_SUCCESS : ::GetLastError();
+        if (!connectedImmediately && connectError != ERROR_IO_PENDING)
+        {
+            ::CloseHandle(connectEvent);
+            ::CloseHandle(readPipe);
+            return { "[Process] ConnectNamedPipe failed (" +
+                     std::to_string(connectError) + ").\n", -1 };
+        }
+
+        HANDLE writePipe = ::CreateFileW(
+            pipeName.c_str(), GENERIC_WRITE, 0, &security, OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (writePipe == INVALID_HANDLE_VALUE)
+        {
+            const DWORD error = ::GetLastError();
+            if (!connectedImmediately)
+            {
+                ::CancelIoEx(readPipe, &connection);
+                DWORD ignored = 0;
+                ::GetOverlappedResult(readPipe, &connection, &ignored, TRUE);
+            }
+            ::CloseHandle(connectEvent);
+            ::CloseHandle(readPipe);
+            return { "[Process] Open capture pipe writer failed (" +
+                     std::to_string(error) + ").\n", -1 };
+        }
+        if (!connectedImmediately)
+        {
+            const DWORD connected = ::WaitForSingleObject(connectEvent, 5000);
+            DWORD ignored = 0;
+            if (connected != WAIT_OBJECT_0 ||
+                !::GetOverlappedResult(
+                    readPipe, &connection, &ignored, FALSE))
+            {
+                const DWORD error = connected == WAIT_TIMEOUT ? ERROR_TIMEOUT
+                    : connected == WAIT_FAILED ? ::GetLastError()
+                    : ::GetLastError();
+                ::CancelIoEx(readPipe, &connection);
+                ::GetOverlappedResult(readPipe, &connection, &ignored, TRUE);
+                ::CloseHandle(writePipe);
+                ::CloseHandle(connectEvent);
+                ::CloseHandle(readPipe);
+                return { "[Process] Capture pipe connection failed (" +
+                         std::to_string(error) + ").\n", -1 };
+            }
+        }
+        ::CloseHandle(connectEvent);
 
         HANDLE nullInput = ::CreateFileW(
             L"NUL", GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -402,46 +466,132 @@ namespace
         std::string output;
         DWORD readError = ERROR_SUCCESS;
         bool outputTruncated = false;
-        std::atomic<bool> stopReader{ false };
+        HANDLE stopReaderEvent = ::CreateEventW(nullptr, TRUE, FALSE, nullptr);
+        HANDLE readEvent = ::CreateEventW(nullptr, TRUE, FALSE, nullptr);
+        if (!stopReaderEvent || !readEvent)
+        {
+            const DWORD error = ::GetLastError();
+            ::TerminateJobObject(job, error);
+            ::WaitForSingleObject(process.hProcess, 5000);
+            if (readEvent) ::CloseHandle(readEvent);
+            if (stopReaderEvent) ::CloseHandle(stopReaderEvent);
+            ::CloseHandle(process.hProcess);
+            ::CloseHandle(job);
+            ::CloseHandle(readPipe);
+            return { "[Process] Create reader event failed (" +
+                     std::to_string(error) + ").\n", -1 };
+        }
+
         std::thread reader([&]()
         {
             constexpr std::size_t kMaxOutputBytes = 4u * 1024u * 1024u;
+            constexpr ULONGLONG kStopDrainMs = 1000;
             std::array<char, 8192> buffer{};
-            for (;;)
-            {
-                DWORD available = 0;
-                if (!::PeekNamedPipe(readPipe, nullptr, 0, nullptr,
-                                     &available, nullptr))
-                {
-                    readError = ::GetLastError();
-                    break;
-                }
-                if (available == 0)
-                {
-                    // Once the parent has completed and the Job has been
-                    // closed, drain what is already buffered and stop. Polling
-                    // avoids a blocking ReadFile, so even an unkillable driver
-                    // process that retains the writer cannot deadlock join().
-                    if (stopReader.load(std::memory_order_acquire)) break;
-                    ::Sleep(5);
-                    continue;
-                }
+            ULONGLONG stopDeadline = 0;
 
-                DWORD bytesRead = 0;
-                if (!::ReadFile(readPipe, buffer.data(),
-                                (std::min)(available,
-                                    static_cast<DWORD>(buffer.size())),
-                                &bytesRead, nullptr))
-                {
-                    readError = ::GetLastError();
-                    break;
-                }
-                if (bytesRead == 0) break;
+            auto appendOutput = [&](DWORD bytesRead)
+            {
                 output.append(buffer.data(), bytesRead);
                 if (output.size() > kMaxOutputBytes)
                 {
                     output.erase(0, output.size() - kMaxOutputBytes);
                     outputTruncated = true;
+                }
+            };
+
+            for (;;)
+            {
+                const bool stopping =
+                    ::WaitForSingleObject(stopReaderEvent, 0) == WAIT_OBJECT_0;
+                DWORD requestBytes = static_cast<DWORD>(buffer.size());
+                if (stopping)
+                {
+                    if (stopDeadline == 0)
+                        stopDeadline = ::GetTickCount64() + kStopDrainMs;
+                    if (::GetTickCount64() >= stopDeadline) break;
+
+                    DWORD available = 0;
+                    if (!::PeekNamedPipe(readPipe, nullptr, 0, nullptr,
+                                         &available, nullptr))
+                    {
+                        readError = ::GetLastError();
+                        break;
+                    }
+                    if (available == 0) break;
+                    requestBytes = (std::min)(available, requestBytes);
+                }
+
+                ::ResetEvent(readEvent);
+                OVERLAPPED readOperation{};
+                readOperation.hEvent = readEvent;
+                DWORD bytesRead = 0;
+                if (::ReadFile(readPipe, buffer.data(), requestBytes,
+                               &bytesRead, &readOperation))
+                {
+                    if (bytesRead == 0) break;
+                    appendOutput(bytesRead);
+                    continue;
+                }
+
+                const DWORD startError = ::GetLastError();
+                if (startError == ERROR_BROKEN_PIPE || startError == ERROR_NO_DATA)
+                {
+                    readError = startError;
+                    break;
+                }
+                if (startError != ERROR_IO_PENDING)
+                {
+                    readError = startError;
+                    break;
+                }
+
+                // Put the read event first so simultaneous read/stop signals
+                // preserve already-completed output before entering drain mode.
+                HANDLE waits[] = { readEvent, stopReaderEvent };
+                const DWORD wait = ::WaitForMultipleObjects(
+                    static_cast<DWORD>(std::size(waits)), waits, FALSE, INFINITE);
+                if (wait == WAIT_OBJECT_0)
+                {
+                    if (!::GetOverlappedResult(
+                            readPipe, &readOperation, &bytesRead, FALSE))
+                    {
+                        const DWORD error = ::GetLastError();
+                        if (error == ERROR_BROKEN_PIPE || error == ERROR_NO_DATA)
+                            readError = error;
+                        else if (error != ERROR_OPERATION_ABORTED)
+                            readError = error;
+                        if (error != ERROR_OPERATION_ABORTED) break;
+                    }
+                    else if (bytesRead != 0)
+                    {
+                        appendOutput(bytesRead);
+                    }
+                    continue;
+                }
+
+                // A stop or wait failure cancels this exact overlapped read.
+                // The named-pipe provider, rather than the GPU driver, owns the
+                // request; wait for its cancellation completion before the
+                // stack OVERLAPPED is reused or destroyed.
+                const DWORD waitError = wait == WAIT_FAILED
+                    ? ::GetLastError() : ERROR_SUCCESS;
+                ::CancelIoEx(readPipe, &readOperation);
+                if (::GetOverlappedResult(
+                        readPipe, &readOperation, &bytesRead, TRUE))
+                {
+                    if (bytesRead != 0) appendOutput(bytesRead);
+                }
+                else
+                {
+                    const DWORD error = ::GetLastError();
+                    if (error != ERROR_OPERATION_ABORTED &&
+                        error != ERROR_BROKEN_PIPE && error != ERROR_NO_DATA)
+                        readError = error;
+                }
+                if (wait == WAIT_FAILED)
+                {
+                    readError = waitError;
+                    break;
                 }
             }
         });
@@ -459,15 +609,18 @@ namespace
         ::GetExitCodeProcess(process.hProcess, &exitCode);
 
         // Closing the job first terminates any RenderDoc Bug Reporter child.
-        // The polling reader then drains buffered bytes and exits without ever
-        // waiting on a pipe writer that a wedged kernel driver failed to close.
+        // Signal the overlapped reader to cancel a pending read, drain buffered
+        // bytes for a bounded interval, and exit even if a writer escaped.
         ::CloseHandle(job);
-        stopReader.store(true, std::memory_order_release);
+        ::SetEvent(stopReaderEvent);
         reader.join();
+        ::CloseHandle(readEvent);
+        ::CloseHandle(stopReaderEvent);
         ::CloseHandle(readPipe);
         ::CloseHandle(process.hProcess);
 
-        if (readError != ERROR_SUCCESS && readError != ERROR_BROKEN_PIPE)
+        if (readError != ERROR_SUCCESS && readError != ERROR_BROKEN_PIPE &&
+            readError != ERROR_NO_DATA)
             output += "\n[Process] stdout pipe failed (" +
                       std::to_string(readError) + ").\n";
         if (outputTruncated)
