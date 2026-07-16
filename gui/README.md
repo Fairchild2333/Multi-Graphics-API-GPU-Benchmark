@@ -1,4 +1,4 @@
-# GPU Benchmark GUI (WinUI 3 / C++/WinRT)
+# Mangekyo GUI (WinUI 3 / C++/WinRT)
 
 A **native C++/WinRT** WinUI 3 control panel, structured like a standard
 C++/WinRT app (`App.xaml` + `MainWindow.xaml`/`.idl`/`.h`/`.cpp`, `pch.h`,

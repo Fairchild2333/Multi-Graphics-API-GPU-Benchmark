@@ -74,6 +74,14 @@ namespace winrt::gpu_bench_gui::implementation
                                   winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
 
     private:
+        enum class ActiveTask : int
+        {
+            None = 0,
+            GpuBenchmark,
+            CpuBenchmark,
+            Charts,
+        };
+
         void applyLanguage();
         void applyTheme(int index);
         void updateCaptionButtonColors();
@@ -97,6 +105,8 @@ namespace winrt::gpu_bench_gui::implementation
         void launchJobs(std::vector<std::vector<std::string>> jobs, bool needCharts);
         void launchCpuBenchmark(std::string mode, double seconds, double warmupSeconds);
         void cancelCpuBenchmark();
+        bool tryBeginTask(ActiveTask task);
+        void endTask(ActiveTask task);
 
         Microsoft::UI::Dispatching::DispatcherQueue m_dispatcher{ nullptr };
         HWND  m_hwnd{ nullptr };
@@ -108,6 +118,7 @@ namespace winrt::gpu_bench_gui::implementation
         std::vector<std::array<bool, 5>> m_gpuApiSupport;  // {vulkan,dx12,dx11,opengl,dx11Compute}
         std::string m_cpuName;             // for relabelling the software (WARP) renderer
 
+        std::atomic<ActiveTask> m_activeTask{ ActiveTask::None };
         std::atomic_bool m_cpuRunning{ false };
         std::atomic_bool m_cpuCancelRequested{ false };
         std::mutex m_cpuProcessMutex;

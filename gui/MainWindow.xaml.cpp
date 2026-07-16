@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <chrono>
 #include <cwctype>
 #include <cmath>
 #include <ctime>
@@ -413,6 +414,132 @@ namespace
             *value > static_cast<double>(INT_MAX)) return std::nullopt;
         return static_cast<int>(*value);
     }
+
+    // Validate the child protocol on the reader thread.  Exit code 0 alone is
+    // not sufficient: a truncated pipe or an incompatible executable must not
+    // be presented as a completed benchmark.
+    struct CpuProtocolAudit
+    {
+        bool sawMeta{ false };
+        bool sawSummary{ false };
+        bool sawMulti{ false };
+        bool sawEngineError{ false };
+        int expectedCores{ -1 };
+        std::string workloadVersion;
+        std::set<int> topology;
+        std::set<int> coreResults;
+        std::string error;
+
+        void fail(std::string message)
+        {
+            if (error.empty()) error = std::move(message);
+        }
+
+        bool countMatches(CpuProtocolLine const& line)
+        {
+            const auto count = cpuInteger(line, { "core_count" });
+            if (!count || *count != expectedCores)
+            {
+                fail("CPU protocol core_count does not match CPU_META");
+                return false;
+            }
+            return true;
+        }
+
+        void observe(CpuProtocolLine const& line)
+        {
+            if (line.type == CpuLineType::Other || line.type == CpuLineType::Progress)
+                return;
+            if (line.type == CpuLineType::Error)
+            {
+                sawEngineError = true;
+                return;
+            }
+            if (line.type == CpuLineType::Meta)
+            {
+                if (sawMeta)
+                {
+                    fail("CPU protocol contains duplicate CPU_META records");
+                    return;
+                }
+                sawMeta = true;
+                workloadVersion = cpuField(line, { "workload_version" });
+                expectedCores = cpuInteger(line, { "logical_count" }).value_or(-1);
+                if (workloadVersion.rfind("cpu_mixed_v1_", 0) != 0)
+                    fail("CPU protocol workload_version is missing or incompatible");
+                if (expectedCores <= 0)
+                    fail("CPU protocol logical_count is missing or invalid");
+                return;
+            }
+
+            if (!sawMeta)
+            {
+                fail("CPU protocol data arrived before CPU_META");
+                return;
+            }
+            if (line.type == CpuLineType::Topology)
+            {
+                const int core = cpuInteger(line, { "core_index" }).value_or(-1);
+                if (core < 0 || core >= expectedCores || !topology.insert(core).second)
+                    fail("CPU protocol topology is incomplete or contains duplicate cores");
+                return;
+            }
+            if (line.type != CpuLineType::Result) return;
+
+            const auto version = cpuField(line, { "workload_version" });
+            if (version != workloadVersion)
+                fail("CPU_RESULT workload_version does not match CPU_META");
+
+            const auto kind = cpuField(line, { "kind", "type" });
+            if (kind == "core")
+            {
+                countMatches(line);
+                const int core = cpuInteger(line, { "core_index" }).value_or(-1);
+                if (core < 0 || core >= expectedCores || !coreResults.insert(core).second)
+                    fail("CPU protocol contains an invalid or duplicate core result");
+                if (cpuInteger(line, { "valid" }).value_or(0) != 1)
+                    fail("CPU protocol contains an invalid per-core result");
+            }
+            else if (kind == "summary")
+            {
+                if (sawSummary) fail("CPU protocol contains duplicate per-core summaries");
+                sawSummary = true;
+                countMatches(line);
+                if (cpuInteger(line, { "completed" }).value_or(-1) != expectedCores ||
+                    cpuInteger(line, { "invalid_count" }).value_or(-1) != 0 ||
+                    cpuInteger(line, { "valid" }).value_or(0) != 1)
+                    fail("CPU per-core summary is incomplete or invalid");
+            }
+            else if (kind == "multi")
+            {
+                if (sawMulti) fail("CPU protocol contains duplicate all-core results");
+                sawMulti = true;
+                countMatches(line);
+                if (cpuInteger(line, { "thread_count" }).value_or(-1) != expectedCores ||
+                    cpuInteger(line, { "valid" }).value_or(0) != 1)
+                    fail("CPU all-core result is incomplete or invalid");
+            }
+        }
+
+        std::string validate(std::string const& selectedMode)
+        {
+            if (!error.empty()) return error;
+            if (!sawMeta) return "CPU protocol is missing CPU_META";
+            if (static_cast<int>(topology.size()) != expectedCores)
+                return "CPU protocol topology count does not match CPU_META";
+            if (sawEngineError) return "CPU engine reported an error";
+
+            const bool needPerCore = selectedMode == "per-core" || selectedMode == "all";
+            const bool needMulti = selectedMode == "multi" || selectedMode == "all";
+            if (needPerCore && static_cast<int>(coreResults.size()) != expectedCores)
+                return "CPU protocol is missing one or more per-core results";
+            if (needPerCore && !sawSummary)
+                return "CPU protocol is missing the per-core summary";
+            if (needMulti && !sawMulti)
+                return "CPU protocol is missing the all-core result";
+            return {};
+        }
+    };
 
     std::string formatCpuScore(double score, std::string const& unit)
     {
@@ -1049,13 +1176,13 @@ void MainWindow::applyLanguage()
     CpuRunButton().Content(locContent("Run CPU Benchmark", "开始 CPU 跑分"));
     if (!m_cpuRunning.load()) CpuStatusText().Text(locText("Ready", "就绪"));
 
-    NavRun().Content(locContent("Run", "运行"));
+    NavRun().Content(locContent("GPU", "GPU"));
     NavHistory().Content(locContent("History", "历史"));
     NavCharts().Content(locContent("Charts", "图表"));
     NavSettings().Content(locContent("Settings", "设置"));
     NavAbout().Content(locContent("About", "关于"));
 
-    RunTitle().Text(locText("Run", "运行"));
+    RunTitle().Text(locText("GPU Benchmark", "GPU 跑分"));
     PresetBox().Header(locContent("Preset", "预设"));
     PresetQuick().Content(locContent("Quick run (best API / GPU, Medium)",
                                      "快速运行（最佳 API / GPU，中等）"));
@@ -1135,7 +1262,7 @@ void MainWindow::applyLanguage()
         "用于测试非显存 / UMA 访问。");
     ToolTipService::SetToolTip(HostMemBox(), hostMemTip);
     ToolTipService::SetToolTip(HostMemInfo(), hostMemTip);
-    RunButton().Content(locContent("Run Benchmark", "运行测试"));
+    RunButton().Content(locContent("Run GPU Benchmark", "开始 GPU 跑分"));
     Status().Text(locText("Ready", "就绪"));
 
     HistoryTitle().Text(locText("History", "历史"));
@@ -1182,8 +1309,8 @@ void MainWindow::applyLanguage()
     ThemeDark().Content(locContent("Dark", "深色"));
     LangBox().Header(locContent("Language", "语言"));
     AboutTitle().Text(locText("About", "关于"));
-    AboutDesc().Text(locText("Multi-API GPU benchmark — native C++/WinRT front-end driving the engine in-process.",
-                             "多 API GPU 跑分 —— 原生 C++/WinRT 前端，进程内驱动引擎。"));
+    AboutDesc().Text(locText("Cross-API CPU & GPU Benchmark Suite — native C++/WinRT frontend.",
+                             "跨 API CPU 与 GPU 跑分套件 —— 原生 C++/WinRT 前端。"));
 
     {
         const wchar_t* sys = (i18n::detectOsLang() == i18n::Lang::Zh) ? L"中文" : L"English";
@@ -1214,6 +1341,25 @@ void MainWindow::applyLanguage()
 }
 
 // ---- CPU benchmark page ----------------------------------------------------
+bool MainWindow::tryBeginTask(ActiveTask task)
+{
+    auto expected = ActiveTask::None;
+    if (!m_activeTask.compare_exchange_strong(expected, task)) return false;
+    RunButton().IsEnabled(false);
+    CpuRunButton().IsEnabled(false);
+    GenChartsButton().IsEnabled(false);
+    return true;
+}
+
+void MainWindow::endTask(ActiveTask task)
+{
+    auto expected = task;
+    if (!m_activeTask.compare_exchange_strong(expected, ActiveTask::None)) return;
+    RunButton().IsEnabled(true);
+    CpuRunButton().IsEnabled(true);
+    GenChartsButton().IsEnabled(true);
+}
+
 void MainWindow::OnCpuDurationPresetChanged(IInspectable const&,
                                              SelectionChangedEventArgs const&)
 {
@@ -1223,19 +1369,32 @@ void MainWindow::OnCpuDurationPresetChanged(IInspectable const&,
     try
     {
         const double seconds = std::stod(value);
-        if (std::isfinite(seconds) && seconds > 0.0) CpuTimeBox().Value(seconds);
+        if (std::isfinite(seconds) && seconds > 0.0)
+        {
+            m_suppressCombo = true;
+            CpuTimeBox().Value(seconds);
+            // The published formal contract is exactly 15.0 s + 0.2 s
+            // warm-up. Presets set the complete pair, not only duration.
+            CpuWarmupBox().Value(0.2);
+            m_suppressCombo = false;
+        }
     }
     catch (...) {}
 }
 
 void MainWindow::OnCpuTimeChanged(NumberBox const&,
-                                  NumberBoxValueChangedEventArgs const& args)
+                                  NumberBoxValueChangedEventArgs const&)
 {
     if (!m_uiReady || m_suppressCombo || m_cpuRunning.load()) return;
-    const double value = args.NewValue();
+    const double value = CpuTimeBox().Value();
+    const double warmup = CpuWarmupBox().Value();
     int preset = -1;
-    if (std::isfinite(value) && std::abs(value - 1.0) < 0.0001) preset = 0;
-    else if (std::isfinite(value) && std::abs(value - 15.0) < 0.0001) preset = 1;
+    if (std::isfinite(value) && std::isfinite(warmup) &&
+        std::abs(warmup - 0.2) < 0.0001)
+    {
+        if (std::abs(value - 1.0) < 0.0001) preset = 0;
+        else if (std::abs(value - 15.0) < 0.0001) preset = 1;
+    }
 
     m_suppressCombo = true;
     CpuDurationPresetBox().SelectedIndex(preset);
@@ -1293,7 +1452,14 @@ void MainWindow::cancelCpuBenchmark()
 void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                                     double warmupSeconds)
 {
-    if (m_cpuRunning.exchange(true)) return;
+    if (!tryBeginTask(ActiveTask::CpuBenchmark))
+    {
+        CpuStatusText().Text(locText(
+            "Another benchmark or report task is already running.",
+            "另一个跑分或报告任务正在运行。"));
+        return;
+    }
+    m_cpuRunning.store(true);
     m_cpuCancelRequested.store(false);
     m_cpuHadProtocolError = false;
     m_cpuCoreLabels.clear();
@@ -1306,7 +1472,6 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
     CpuProgressText().Text(L"0%");
     CpuCurrentCoreText().Text(locText("Starting CPU worker...", "正在启动 CPU 测试进程…"));
     CpuStatusText().Text(locText("Running", "运行中"));
-    CpuRunButton().IsEnabled(false);
     CpuCancelButton().IsEnabled(true);
     CpuModeBox().IsEnabled(false);
     CpuDurationPresetBox().IsEnabled(false);
@@ -1321,15 +1486,20 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
     std::thread([this, strong, dispatcher, engine, workingDirectory,
                  mode = std::move(mode), seconds, warmupSeconds]()
     {
+        CpuProtocolAudit protocolAudit;
         auto finish = [this, strong, dispatcher](DWORD exitCode,
                                                  std::string errorMessage)
         {
-            const bool cancelled = m_cpuCancelRequested.load();
-            dispatcher.TryEnqueue([this, strong, exitCode, cancelled,
+            dispatcher.TryEnqueue([this, strong, exitCode,
                                    errorMessage = std::move(errorMessage)]()
             {
+                // A late Cancel click must not turn an already-successful exit
+                // into "Cancelled" while this callback waits in the UI queue.
+                // TerminateProcess uses ERROR_CANCELLED as the exit code.
+                const bool cancelled = exitCode == ERROR_CANCELLED ||
+                    (exitCode != 0 && m_cpuCancelRequested.load());
                 m_cpuRunning.store(false);
-                CpuRunButton().IsEnabled(true);
+                endTask(ActiveTask::CpuBenchmark);
                 CpuCancelButton().IsEnabled(false);
                 CpuModeBox().IsEnabled(true);
                 CpuDurationPresetBox().IsEnabled(true);
@@ -1432,17 +1602,20 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                 ::TerminateProcess(process.hProcess, ERROR_CANCELLED);
         }
 
-        auto dispatchLine = [this, strong, dispatcher](std::string line)
+        auto dispatchLines = [this, strong, dispatcher](std::vector<std::string> lines)
         {
-            if (!line.empty() && line.back() == '\r') line.pop_back();
-            dispatcher.TryEnqueue([this, strong, line = std::move(line)]()
+            if (lines.empty()) return;
+            dispatcher.TryEnqueue([this, strong, lines = std::move(lines)]()
             {
                 auto raw = std::wstring(CpuOutputBox().Text().c_str());
-                raw += u8(line).c_str();
-                raw += L"\r\n";
+                for (auto const& line : lines)
+                {
+                    raw += u8(line).c_str();
+                    raw += L"\r\n";
+                }
                 // A formal per-core run can emit tens of thousands of progress
-                // records. Keep a useful live tail without making every TextBox
-                // update copy an ever-growing multi-megabyte string.
+                // records. Lines are batched on the reader thread so this
+                // growing TextBox is copied at most a few times per second.
                 constexpr std::size_t kMaxVisibleCpuOutput = 256u * 1024u;
                 if (raw.size() > kMaxVisibleCpuOutput)
                 {
@@ -1452,6 +1625,13 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                 }
                 CpuOutputBox().Text(raw);
 
+                std::size_t lastProgress = lines.size();
+                for (std::size_t i = 0; i < lines.size(); ++i)
+                    if (parseCpuProtocolLine(lines[i]).type == CpuLineType::Progress)
+                        lastProgress = i;
+
+                auto processLine = [this](std::string const& line)
+                {
                 const auto parsed = parseCpuProtocolLine(line);
                 if (parsed.type == CpuLineType::Other) return;
 
@@ -1580,10 +1760,42 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                         !contract.empty()) value += "  [" + contract + "]";
                     CpuMultiResult().Text(u8(value));
                 }
+                };
+
+                // Apply only the newest progress record in this batch. Meta,
+                // topology, errors and result records are never dropped.
+                for (std::size_t i = 0; i < lines.size(); ++i)
+                {
+                    if (parseCpuProtocolLine(lines[i]).type == CpuLineType::Progress &&
+                        i != lastProgress) continue;
+                    processLine(lines[i]);
+                }
             });
         };
 
         std::string pending;
+        std::vector<std::string> uiBatch;
+        auto lastUiDispatch = std::chrono::steady_clock::now();
+        auto flushUiBatch = [&]()
+        {
+            if (uiBatch.empty()) return;
+            dispatchLines(std::move(uiBatch));
+            uiBatch.clear();
+            lastUiDispatch = std::chrono::steady_clock::now();
+        };
+        auto queueLine = [&](std::string line)
+        {
+            if (!line.empty() && line.back() == '\r') line.pop_back();
+            const auto parsed = parseCpuProtocolLine(line);
+            protocolAudit.observe(parsed);
+            uiBatch.push_back(std::move(line));
+            const auto now = std::chrono::steady_clock::now();
+            const bool important = parsed.type == CpuLineType::Result ||
+                                   parsed.type == CpuLineType::Error;
+            if (important || uiBatch.size() >= 128 ||
+                now - lastUiDispatch >= std::chrono::milliseconds(250))
+                flushUiBatch();
+        };
         std::array<char, 4096> buffer{};
         DWORD bytesRead = 0;
         DWORD readError = ERROR_SUCCESS;
@@ -1595,12 +1807,13 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
             {
                 const auto newline = pending.find('\n');
                 if (newline == std::string::npos) break;
-                dispatchLine(pending.substr(0, newline));
+                queueLine(pending.substr(0, newline));
                 pending.erase(0, newline + 1);
             }
         }
         readError = ::GetLastError();
-        if (!pending.empty()) dispatchLine(std::move(pending));
+        if (!pending.empty()) queueLine(std::move(pending));
+        flushUiBatch();
         ::CloseHandle(readPipe);
 
         ::WaitForSingleObject(process.hProcess, INFINITE);
@@ -1615,6 +1828,11 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
         std::string pipeError;
         if (readError != ERROR_SUCCESS && readError != ERROR_BROKEN_PIPE)
             pipeError = "stdout pipe failed: " + win32ErrorText(readError);
+        // A normal exit is always audited, even if Cancel was clicked after
+        // the process had already ended. Late UI input cannot bypass protocol
+        // completeness checks.
+        if (exitCode == 0 && pipeError.empty())
+            pipeError = protocolAudit.validate(mode);
         finish(exitCode, std::move(pipeError));
     }).detach();
 }
@@ -2045,7 +2263,13 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needChar
 
 void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool needCharts)
 {
-    RunButton().IsEnabled(false);
+    if (!tryBeginTask(ActiveTask::GpuBenchmark))
+    {
+        Status().Text(locText(
+            "Another benchmark or report task is already running.",
+            "另一个跑分或报告任务正在运行。"));
+        return;
+    }
     Busy().IsActive(true);
     Status().Text(jobs.size() > 1
         ? locText("Running… (multiple passes; render windows may appear)", "运行中…（多趟；可能弹出渲染窗口）")
@@ -2231,7 +2455,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                     Status().Text(needCharts ? locText("Done (charts & report regenerated).", "完成（已重新生成图表与报告）。")
                                              : locText("Done.", "完成。"));
             }
-            RunButton().IsEnabled(true);
+            endTask(ActiveTask::GpuBenchmark);
             Busy().IsActive(false);
             refreshHistory();
         });
@@ -2975,7 +3199,14 @@ void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
         return;
     }
 
-    GenChartsButton().IsEnabled(false); ChartsBusy().IsActive(true);
+    if (!tryBeginTask(ActiveTask::Charts))
+    {
+        ChartsStatus().Text(locText(
+            "Another benchmark or report task is already running.",
+            "另一个跑分或报告任务正在运行。"));
+        return;
+    }
+    ChartsBusy().IsActive(true);
     ChartsStatus().Text(locText("Running plot_workloads.py…", "正在运行 plot_workloads.py…"));
 
     auto strong = get_strong();
@@ -3012,7 +3243,7 @@ void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
             }
             ChartsStatus().Text(rc == 0 ? u8("Done — " + std::to_string(shown) + " chart(s).")
                                         : u8("python exited with " + std::to_string(rc) + "."));
-            GenChartsButton().IsEnabled(true); ChartsBusy().IsActive(false);
+            endTask(ActiveTask::Charts); ChartsBusy().IsActive(false);
         });
     }).detach();
 }
