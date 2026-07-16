@@ -2,7 +2,7 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "GPU Compute Benchmark — Vulkan particle simulation"
+      "value": "Mangekyo — Cross-API CPU & GPU Benchmark Suite"
     },
     {
       "name": "ability_desc",
@@ -10,7 +10,7 @@
     },
     {
       "name": "ability_label",
-      "value": "GPU Benchmark"
+      "value": "Mangekyo"
     }
   ],
   "color": [

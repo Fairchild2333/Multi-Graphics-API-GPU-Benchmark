@@ -1,4 +1,4 @@
-# GPU Compute Benchmark — HarmonyOS (OHOS) Vulkan Build
+# Mangekyo — HarmonyOS (OHOS) Vulkan Build
 
 [中文](README.zh-CN.md)
 

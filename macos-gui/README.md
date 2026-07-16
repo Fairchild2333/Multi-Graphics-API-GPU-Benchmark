@@ -1,6 +1,6 @@
-# macOS GUI — GPU Benchmark (SwiftUI + Liquid Glass)
+# Mangekyo for macOS (SwiftUI + Liquid Glass)
 
-Native macOS SwiftUI front-end for the GPU Compute & Rendering Benchmark.
+Native macOS SwiftUI front-end for Mangekyo — the Cross-API CPU & GPU Benchmark Suite.
 Uses **Liquid Glass** on macOS 26 (Tahoe) with graceful fallback to Material
 on macOS 14–15.
 

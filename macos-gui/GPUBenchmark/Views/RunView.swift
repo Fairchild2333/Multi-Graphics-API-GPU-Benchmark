@@ -44,7 +44,7 @@ struct RunView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    Text(Localization.tr("Run", "运行"))
+                    Text(Localization.tr("GPU Benchmark", "GPU 跑分"))
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .padding(.bottom, 4)
@@ -207,7 +207,7 @@ struct RunView: View {
                         .controlSize(.small)
                 }
                 Button(action: runBenchmark) {
-                    Text(Localization.tr("Run Benchmark", "运行基准测试"))
+                    Text(Localization.tr("Run GPU Benchmark", "开始 GPU 跑分"))
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)

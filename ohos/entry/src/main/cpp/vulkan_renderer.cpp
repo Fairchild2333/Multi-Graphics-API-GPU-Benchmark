@@ -156,9 +156,9 @@ std::vector<char> VulkanRenderer::ReadRawFile(const std::string& filename) const
 void VulkanRenderer::CreateInstance() {
     VkApplicationInfo appInfo{};
     appInfo.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName   = "GpuComputeBenchmark";
+    appInfo.pApplicationName   = "Mangekyo";
     appInfo.applicationVersion = VK_MAKE_VERSION(0, 3, 0);
-    appInfo.pEngineName        = "NoEngine";
+    appInfo.pEngineName        = "Mangekyo";
     appInfo.engineVersion      = VK_MAKE_VERSION(0, 1, 0);
     appInfo.apiVersion         = VK_API_VERSION_1_2;
 

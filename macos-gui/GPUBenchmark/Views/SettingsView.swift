@@ -100,8 +100,8 @@ struct SettingsView: View {
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
         panel.message = Localization.tr(
-            "Select the GPU benchmark repository root directory",
-            "选择 GPU 基准测试仓库根目录")
+            "Select the Mangekyo repository root directory",
+            "选择 Mangekyo 仓库根目录")
 
         if panel.runModal() == .OK, let url = panel.url {
             engine.setWorkingDirectory(url.path)

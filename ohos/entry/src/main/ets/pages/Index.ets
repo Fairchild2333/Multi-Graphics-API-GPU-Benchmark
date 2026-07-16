@@ -24,7 +24,7 @@ struct Index {
         .width('100%')
         .height('100%')
 
-      Text('GPU Compute Benchmark — Vulkan')
+      Text('Mangekyo — Cross-API CPU & GPU Benchmark Suite')
         .fontSize(16)
         .fontColor('#88FFFFFF')
         .position({ x: 16, y: 16 })

@@ -1,4 +1,4 @@
-# GPU Compute Benchmark — HarmonyOS（鸿蒙）Vulkan 版本
+# Mangekyo — HarmonyOS（鸿蒙）Vulkan 版本
 
 [English](README.md)
 

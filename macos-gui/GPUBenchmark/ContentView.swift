@@ -23,7 +23,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
 
     var localizedName: String {
         switch self {
-        case .run:      return Localization.tr("Run", "运行")
+        case .run:      return Localization.tr("GPU", "GPU")
         case .history:  return Localization.tr("History", "历史")
         case .charts:   return Localization.tr("Charts", "图表")
         case .settings: return Localization.tr("Settings", "设置")
@@ -52,7 +52,7 @@ struct ContentView: View {
             .padding(.top, 16)
             .padding(.horizontal, 12)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .navigationTitle("GPU Benchmark")
+            .navigationTitle("Mangekyo")
         } detail: {
             Group {
                 switch selection {

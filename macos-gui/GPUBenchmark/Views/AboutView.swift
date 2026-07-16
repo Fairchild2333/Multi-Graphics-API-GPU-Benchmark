@@ -17,9 +17,14 @@ struct AboutView: View {
                                 .font(.system(size: 48))
                                 .foregroundStyle(.tint)
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("GPU Compute & Rendering Benchmark")
+                                Text("Mangekyo")
                                     .font(.title2)
                                     .fontWeight(.bold)
+                                Text(Localization.tr(
+                                    "Cross-API CPU & GPU Benchmark Suite",
+                                    "跨 API CPU 与 GPU 跑分套件"))
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
                                 Text("v1.0 — macOS Edition")
                                     .font(.callout)
                                     .foregroundStyle(.secondary)
@@ -30,7 +35,7 @@ struct AboutView: View {
 
                         Text(Localization.tr(
                             """
-                            Multi-API GPU benchmark for measuring compute and rendering \
+                            Native macOS GPU frontend for Mangekyo, measuring compute and rendering \
                             performance across Metal, Vulkan, and OpenGL. Features multiple \
                             workloads (particle stream, N-body simulation, stress fractal, \
                             synthetic peak throughput, 3D rendering) with real-time GPU timing.
@@ -39,7 +44,7 @@ struct AboutView: View {
                             in-process — no subprocess or shell invocation required.
                             """,
                             """
-                            多 API GPU 基准测试工具，用于测量 Metal、Vulkan 和 OpenGL 的计算与渲染\
+                            Mangekyo 的原生 macOS GPU 前端，用于测量 Metal、Vulkan 和 OpenGL 的计算与渲染\
                             性能。包含多种负载（粒子流、N 体模拟、压力分形、合成峰值吞吐、3D 渲染），\
                             配有实时 GPU 计时。
                             
