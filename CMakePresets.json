@@ -8,8 +8,8 @@
   "configurePresets": [
     {
       "name": "windows-x64-release",
-      "displayName": "Windows x64 release staging",
-      "description": "Pinned x64 manifest-mode build used by release staging",
+      "displayName": "Mangekyo Windows x64 release staging",
+      "description": "Pinned x64 manifest-mode build used for Mangekyo release staging",
       "generator": "Visual Studio 18 2026",
       "binaryDir": "${sourceDir}/out/build/windows-x64-release",
       "architecture": "x64",

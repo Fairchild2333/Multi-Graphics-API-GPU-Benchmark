@@ -176,7 +176,7 @@ def generate_html(results: list[dict]) -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GPU Benchmark Report</title>
+<title>Mangekyo GPU Benchmark Report</title>
 <style>
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
   body {{
@@ -210,7 +210,7 @@ def generate_html(results: list[dict]) -> str:
 </style>
 </head>
 <body>
-<h1>GPU Compute Microbenchmark Report</h1>
+<h1>Mangekyo GPU Benchmark Report</h1>
 <p class="meta">
   Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')} &bull;
   {len(results_sorted)} result(s) &bull;
@@ -227,7 +227,7 @@ def generate_html(results: list[dict]) -> str:
 </tbody>
 </table>
 <footer>
-  GPU Compute Microbenchmark &mdash; github.com/your-repo
+  Mangekyo &mdash; Cross-API CPU &amp; GPU Benchmark Suite
 </footer>
 <script>
 document.querySelectorAll('#results th').forEach((th, col) => {{

@@ -230,7 +230,7 @@ if (-not $SkipPackage) {
     Invoke-Checked cpack '--config' (Join-Path $BuildDir 'CPackConfig.cmake') `
         '-C' $Configuration '-G' 'ZIP' '-B' $PackageDir
     $manifest = Get-Content -LiteralPath (Join-Path $StageDir 'release-manifest.json') -Raw -Encoding utf8 | ConvertFrom-Json
-    $expectedName = "GpuComputeBenchmark-$($manifest.version)-windows-x64.zip"
+    $expectedName = "Mangekyo-$($manifest.version)-windows-x64.zip"
     $package = Get-Item -LiteralPath (Join-Path $PackageDir $expectedName) -ErrorAction SilentlyContinue
     if (-not $package) { throw "CPack completed but the expected ZIP was not found: $expectedName" }
     # files.sha256 is generated after cmake --install, so it is not part of

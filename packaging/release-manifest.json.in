@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "product": "GpuComputeBenchmark",
+  "product": "Mangekyo",
   "version": "@PROJECT_VERSION@",
   "architecture": "@GPU_BENCH_MANIFEST_ARCH@",
   "layout": {

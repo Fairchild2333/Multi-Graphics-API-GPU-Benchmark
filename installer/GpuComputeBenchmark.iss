@@ -1,8 +1,8 @@
-; GPU Compute Benchmark - Windows x64 engineering installer
+; Mangekyo - Windows x64 engineering installer
 ; Input is an already verified CMake stage. This script never discovers or
 ; copies dependencies from the build machine.
 
-#define MyAppName "GPU Compute Benchmark"
+#define MyAppName "Mangekyo"
 #define MyAppExeName "gpu_bench_gui.exe"
 #define MyAppId "{{9DBD8675-1CE2-45DF-83BB-2E62EB71796B}"
 
@@ -16,10 +16,10 @@
   #define OutputDir AddBackslash(SourcePath) + "..\out\installer"
 #endif
 #ifndef AllowCliOnly
-  #define AllowCliOnly 0
+  #define AllowCliOnly "0"
 #endif
 #ifndef EnableSigning
-  #define EnableSigning 0
+  #define EnableSigning "0"
 #endif
 
 #ifnexist StageDir + "\release-manifest.json"
@@ -28,7 +28,7 @@
 #ifnexist StageDir + "\app\bin\gpu_benchmark.exe"
   #error The staged x64 CLI is missing.
 #endif
-#if AllowCliOnly == 0
+#if AllowCliOnly == "0"
   #ifnexist StageDir + "\app\bin\gpu_bench_gui.exe"
     #error The GUI-first installer requires app\bin\gpu_bench_gui.exe. Use AllowCliOnly=1 only for engineering smoke packages.
   #endif
@@ -64,11 +64,11 @@ AppId={#MyAppId}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
-AppPublisher=GpuComputeBenchmark contributors
+AppPublisher=Mangekyo contributors
 VersionInfoVersion={#MyAppVersion}
 VersionInfoDescription={#MyAppName} Setup
 VersionInfoProductName={#MyAppName}
-DefaultDirName={localappdata}\Programs\GpuComputeBenchmark
+DefaultDirName={localappdata}\Programs\Mangekyo
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
@@ -76,7 +76,7 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0.17763
 OutputDir={#OutputDir}
-OutputBaseFilename=GpuComputeBenchmark-{#MyAppVersion}-windows-x64-setup
+OutputBaseFilename=Mangekyo-{#MyAppVersion}-windows-x64-setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
@@ -90,14 +90,14 @@ UninstallDisplayIcon={app}\app\bin\{#MyAppExeName}
 UninstallDisplayIcon={app}\app\bin\gpu_benchmark.exe
 #endif
 UsePreviousAppDir=yes
-UsePreviousGroup=yes
+UsePreviousGroup=no
 UsePreviousTasks=yes
 CloseApplications=yes
 RestartApplications=no
 InfoBeforeFile={#StageDir}\PACKAGE_LIMITATIONS.md
 ChangesAssociations=no
 ChangesEnvironment=no
-#if EnableSigning
+#if EnableSigning == "1"
 SignTool=release
 SignedUninstaller=yes
 #endif
@@ -108,7 +108,7 @@ Name: "compact"; Description: "Core benchmark only"
 Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
 [Components]
-Name: "core"; Description: "GPU Compute Benchmark"; Types: full compact custom; Flags: fixed
+Name: "core"; Description: "Mangekyo"; Types: full compact custom; Flags: fixed
 #if HasRenderDoc
 Name: "renderdoc"; Description: "RenderDoc capture tools"; Types: full custom
 #endif
@@ -137,6 +137,15 @@ Source: "{#StageDir}\tools\RenderDoc\*"; DestDir: "{app}\tools\RenderDoc"; Compo
 Source: "{#StageDir}\tools\report_worker\*"; DestDir: "{app}\tools\report_worker"; Components: reports; Flags: ignoreversion recursesubdirs createallsubdirs
 #endif
 
+[InstallDelete]
+; The stable AppId upgrades legacy installations in place. Remove only the old
+; product shortcuts; the historical application-data directory is preserved.
+Type: files; Name: "{autoprograms}\GPU Compute Benchmark.lnk"
+Type: files; Name: "{autoprograms}\GPU Compute Benchmark CLI.lnk"
+Type: files; Name: "{autoprograms}\GPU Compute Benchmark\RenderDoc.lnk"
+Type: dirifempty; Name: "{autoprograms}\GPU Compute Benchmark"
+Type: files; Name: "{autodesktop}\GPU Compute Benchmark.lnk"
+
 [Icons]
 #if HasGui
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\app\bin\{#MyAppExeName}"; WorkingDir: "{app}\app\bin"
@@ -154,4 +163,5 @@ Filename: "{app}\app\bin\{#MyAppExeName}"; Description: "Launch {#MyAppName}"; W
 #endif
 
 ; No [UninstallDelete] entry is intentional. Results, captures, reports and
-; logs live under %LOCALAPPDATA%\GpuComputeBenchmark and survive uninstall.
+; logs continue to live under the legacy %LOCALAPPDATA%\GpuComputeBenchmark
+; data contract and survive uninstall and product-brand upgrades.

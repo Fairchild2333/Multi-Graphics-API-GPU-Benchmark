@@ -150,7 +150,7 @@ if (-not $SkipInstaller) {
 if (-not $NoClean) { Reset-SafeReleaseDirectory $ReleaseDir }
 else { New-Item -ItemType Directory -Force -Path $ReleaseDir | Out-Null }
 
-$zipName = "GpuComputeBenchmark-$Version-windows-x64.zip"
+$zipName = "Mangekyo-$Version-windows-x64.zip"
 $assets = [Collections.Generic.List[IO.FileInfo]]::new()
 $zip = Get-Item -LiteralPath (Join-Path $PackageDir $zipName) -ErrorAction Stop
 Copy-Item -LiteralPath $zip.FullName -Destination (Join-Path $ReleaseDir $zip.Name) -Force
@@ -222,7 +222,7 @@ try {
     }
 } finally { $zipAudit.Dispose() }
 if (-not $SkipInstaller) {
-    $setupName = "GpuComputeBenchmark-$Version-windows-x64-setup.exe"
+    $setupName = "Mangekyo-$Version-windows-x64-setup.exe"
     $setup = Get-Item -LiteralPath (Join-Path $InstallerDir $setupName) -ErrorAction Stop
     Copy-Item -LiteralPath $setup.FullName -Destination (Join-Path $ReleaseDir $setup.Name) -Force
     $assets.Add((Get-Item -LiteralPath (Join-Path $ReleaseDir $setup.Name)))

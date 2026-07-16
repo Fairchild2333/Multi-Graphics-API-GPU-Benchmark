@@ -41,6 +41,9 @@ Require-File 'licenses/THIRD_PARTY_NOTICES.md' | Out-Null
 Require-File 'files.sha256' | Out-Null
 
 $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+if ($manifest.product -ne 'Mangekyo') {
+    throw "Inno installer requires manifest product=Mangekyo; got '$($manifest.product)'."
+}
 if ($manifest.architecture -ne 'x64') {
     throw "Inno x64 installer requires manifest architecture=x64; got '$($manifest.architecture)'."
 }
@@ -80,9 +83,11 @@ $iss = Get-Content -LiteralPath $issPath -Raw -Encoding utf8
 $requiredInstallerTokens = @(
     '{{9DBD8675-1CE2-45DF-83BB-2E62EB71796B}',
     'AppId={#MyAppId}',
+    '#define MyAppName "Mangekyo"',
     'ArchitecturesAllowed=x64compatible',
     'ArchitecturesInstallIn64BitMode=x64compatible',
-    'DefaultDirName={localappdata}\Programs\GpuComputeBenchmark',
+    'DefaultDirName={localappdata}\Programs\Mangekyo',
+    'OutputBaseFilename=Mangekyo-{#MyAppVersion}-windows-x64-setup',
     'PrivilegesRequired=lowest',
     'SetupIconFile=',
     'Uninstallable=yes',
@@ -91,7 +96,9 @@ $requiredInstallerTokens = @(
     'qrenderdoc.exe',
     '[Icons]',
     'Name: "desktopicon"',
-    'No [UninstallDelete] entry is intentional'
+    'UsePreviousAppDir=yes',
+    'UsePreviousGroup=no',
+    'legacy %LOCALAPPDATA%\GpuComputeBenchmark'
 )
 foreach ($token in $requiredInstallerTokens) {
     if (-not $iss.Contains($token)) { throw "Installer invariant is missing: $token" }
@@ -146,7 +153,7 @@ $arguments += $issPath
 & $IsccPath @arguments
 if ($LASTEXITCODE -ne 0) { throw "ISCC failed with exit code $LASTEXITCODE" }
 
-$setup = Get-ChildItem -LiteralPath $OutputDir -Filter "GpuComputeBenchmark-$Version-windows-x64-setup.exe" -File |
+$setup = Get-ChildItem -LiteralPath $OutputDir -Filter "Mangekyo-$Version-windows-x64-setup.exe" -File |
     Select-Object -First 1
 if (-not $setup) { throw "ISCC succeeded but the expected Setup executable was not found in $OutputDir" }
 $signature = Get-AuthenticodeSignature -LiteralPath $setup.FullName

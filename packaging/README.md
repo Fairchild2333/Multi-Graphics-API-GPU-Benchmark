@@ -6,7 +6,7 @@ all shaders, adds a pinned RenderDoc portable tree, verifies PE architecture and
 Vulkan delay imports, and inventories every staged file with SHA-256:
 
 ```text
-GpuComputeBenchmark-<version>-windows-x64/
+Mangekyo-<version>-windows-x64/
   app/bin/             CLI, optional GUI, DLLs, and shader compatibility copies
   assets/shaders/      canonical read-only shader mirror
   scripts/             legacy Python report sources (not a bundled Python runtime)
@@ -135,7 +135,8 @@ powershell -NoProfile -ExecutionPolicy Bypass `
   -Version 0.1.0
 ```
 
-The source is `installer/GpuComputeBenchmark.iss`. It uses a stable AppId,
+The source is `installer/GpuComputeBenchmark.iss` (the legacy source filename
+is internal and does not affect the Mangekyo Setup name). It uses a stable AppId,
 provides Start Menu and optional desktop shortcuts, and supports normal Inno
 upgrade/uninstall behavior. A complete staged `tools/RenderDoc` payload becomes
 an optional installer component; the script never copies from a developer's

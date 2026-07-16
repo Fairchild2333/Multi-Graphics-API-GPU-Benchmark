@@ -199,7 +199,7 @@ if ($manifest) {
     if ([int]$manifest.schemaVersion -lt 2) {
         Add-ErrorMessage "release-manifest.json schemaVersion must be at least 2."
     }
-    if ($manifest.product -ne 'GpuComputeBenchmark') {
+    if ($manifest.product -ne 'Mangekyo') {
         Add-ErrorMessage "Unexpected manifest product: '$($manifest.product)'"
     }
     if ($manifest.architecture -ne 'x64') {

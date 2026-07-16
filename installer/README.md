@@ -1,7 +1,8 @@
 # Inno Setup installer
 
-`GpuComputeBenchmark.iss` turns an existing verified Windows x64 stage into a
-per-user Setup executable. It does not build C++, compile shaders, inspect
+`GpuComputeBenchmark.iss` (retained as an internal legacy source filename)
+turns an existing verified Mangekyo Windows x64 stage into a per-user Setup
+executable. It does not build C++, compile shaders, inspect
 `C:\Program Files\RenderDoc`, or copy anything from vcpkg/Visual Studio.
 
 ## Input contract
@@ -51,9 +52,12 @@ version is rejected so the Setup filename cannot mislabel its staged payload.
 The stable AppId is `{9DBD8675-1CE2-45DF-83BB-2E62EB71796B}`. Never change it
 for normal upgrades: Inno uses AppId to associate subsequent versions with the
 same uninstall record. The installer accepts only x64-compatible Windows and
-uses 64-bit install mode. It installs below
-`%LOCALAPPDATA%\Programs\GpuComputeBenchmark`, creates Start Menu and optional
-desktop shortcuts, and supplies automatic uninstall support.
+uses 64-bit install mode. A fresh install uses
+`%LOCALAPPDATA%\Programs\Mangekyo`, creates Mangekyo Start Menu and optional
+desktop shortcuts, and supplies automatic uninstall support. `UsePreviousAppDir`
+is intentionally retained, so an in-place upgrade from an older branded build
+can keep its existing program directory instead of breaking the uninstall
+record.
 
 For a signed public artifact, pass an Inno sign-tool command containing its
 `$f` filename placeholder and make a valid signature mandatory:
@@ -70,8 +74,10 @@ This signs both Setup and its generated uninstaller. Certificate selection and
 timestamp-server policy belong to release CI; do not put certificate passwords
 in the repository or command history.
 
-Uninstall deliberately preserves
-`%LOCALAPPDATA%\GpuComputeBenchmark\{results,captures,reports,logs}`. Add a
+Uninstall deliberately preserves the existing data contract at
+`%LOCALAPPDATA%\GpuComputeBenchmark\{results,captures,reports,logs}`. Mangekyo
+continues using that legacy directory for compatibility; this branding change
+does not migrate, duplicate, or delete historical results. Add a
 separate, explicit user-data deletion UX if that policy changes; do not silently
 add those directories to `[UninstallDelete]`.
 
