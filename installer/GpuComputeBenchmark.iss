@@ -1,4 +1,4 @@
-; Mangekyo - Windows x64 engineering installer
+; Mangekyo - Windows engineering installer
 ; Input is an already verified CMake stage. This script never discovers or
 ; copies dependencies from the build machine.
 
@@ -6,11 +6,21 @@
 #define MyAppExeName "gpu_bench_gui.exe"
 #define MyAppId "{{9DBD8675-1CE2-45DF-83BB-2E62EB71796B}"
 
+#ifndef MyAppArch
+  #define MyAppArch "x64"
+#endif
+
+#if MyAppArch == "arm64"
+  #define MyAppArchAllowed "arm64"
+#else
+  #define MyAppArchAllowed "x64compatible"
+#endif
+
 #ifndef MyAppVersion
   #define MyAppVersion "0.1.0"
 #endif
 #ifndef StageDir
-  #define StageDir AddBackslash(SourcePath) + "..\out\stage\windows-x64"
+  #define StageDir AddBackslash(SourcePath) + "..\out\stage\windows-" + MyAppArch
 #endif
 #ifndef OutputDir
   #define OutputDir AddBackslash(SourcePath) + "..\out\installer"
@@ -26,7 +36,7 @@
   #error The staged release-manifest.json is missing. Run stage-windows-release.ps1 first.
 #endif
 #ifnexist StageDir + "\app\bin\gpu_benchmark.exe"
-  #error The staged x64 CLI is missing.
+  #error The staged CLI is missing.
 #endif
 #if AllowCliOnly == "0"
   #ifnexist StageDir + "\app\bin\gpu_bench_gui.exe"
@@ -72,11 +82,11 @@ DefaultDirName={localappdata}\Programs\Mangekyo
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
-ArchitecturesAllowed=x64compatible
-ArchitecturesInstallIn64BitMode=x64compatible
+ArchitecturesAllowed={#MyAppArchAllowed}
+ArchitecturesInstallIn64BitMode={#MyAppArchAllowed}
 MinVersion=10.0.17763
 OutputDir={#OutputDir}
-OutputBaseFilename=Mangekyo-{#MyAppVersion}-windows-x64-setup
+OutputBaseFilename=Mangekyo-{#MyAppVersion}-windows-{#MyAppArch}-setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern

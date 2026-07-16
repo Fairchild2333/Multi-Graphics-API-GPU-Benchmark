@@ -5,6 +5,8 @@ param(
     [string]$Version,
     [string]$IsccPath,
     [string]$SignToolCommand,
+    [ValidateSet('x64', 'ARM64')]
+    [string]$Arch = 'x64',
     [switch]$AllowCliOnly,
     [switch]$StaticOnly,
     [switch]$SkipStageVerification,
@@ -15,7 +17,8 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 3.0
 
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
-if (-not $StageDir) { $StageDir = Join-Path $projectRoot 'out/stage/windows-x64' }
+$archLower = $Arch.ToLowerInvariant()
+if (-not $StageDir) { $StageDir = Join-Path $projectRoot "out/stage/windows-$archLower" }
 if (-not $OutputDir) { $OutputDir = Join-Path $projectRoot 'out/installer' }
 $StageDir = [IO.Path]::GetFullPath($StageDir)
 $OutputDir = [IO.Path]::GetFullPath($OutputDir)
@@ -44,8 +47,8 @@ $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding utf8 | Convert
 if ($manifest.product -ne 'Mangekyo') {
     throw "Inno installer requires manifest product=Mangekyo; got '$($manifest.product)'."
 }
-if ($manifest.architecture -ne 'x64') {
-    throw "Inno x64 installer requires manifest architecture=x64; got '$($manifest.architecture)'."
+if ($manifest.architecture.ToLowerInvariant() -ne $archLower) {
+    throw "Inno $Arch installer requires manifest architecture=$archLower; got '$($manifest.architecture)'."
 }
 $manifestVersion = [string]$manifest.version
 if ([string]::IsNullOrWhiteSpace($manifestVersion)) {
@@ -84,10 +87,10 @@ $requiredInstallerTokens = @(
     '{{9DBD8675-1CE2-45DF-83BB-2E62EB71796B}',
     'AppId={#MyAppId}',
     '#define MyAppName "Mangekyo"',
-    'ArchitecturesAllowed=x64compatible',
-    'ArchitecturesInstallIn64BitMode=x64compatible',
+    'ArchitecturesAllowed={#MyAppArchAllowed}',
+    'ArchitecturesInstallIn64BitMode={#MyAppArchAllowed}',
     'DefaultDirName={localappdata}\Programs\Mangekyo',
-    'OutputBaseFilename=Mangekyo-{#MyAppVersion}-windows-x64-setup',
+    'OutputBaseFilename=Mangekyo-{#MyAppVersion}-windows-{#MyAppArch}-setup',
     'PrivilegesRequired=lowest',
     'SetupIconFile=',
     'Uninstallable=yes',
@@ -142,7 +145,8 @@ $arguments = @(
     '/Qp',
     "/DStageDir=$StageDir",
     "/DOutputDir=$OutputDir",
-    "/DMyAppVersion=$Version"
+    "/DMyAppVersion=$Version",
+    "/DMyAppArch=$archLower"
 )
 if ($AllowCliOnly) { $arguments += '/DAllowCliOnly=1' }
 if ($SignToolCommand) {
@@ -153,7 +157,7 @@ $arguments += $issPath
 & $IsccPath @arguments
 if ($LASTEXITCODE -ne 0) { throw "ISCC failed with exit code $LASTEXITCODE" }
 
-$setup = Get-ChildItem -LiteralPath $OutputDir -Filter "Mangekyo-$Version-windows-x64-setup.exe" -File |
+$setup = Get-ChildItem -LiteralPath $OutputDir -Filter "Mangekyo-$Version-windows-$archLower-setup.exe" -File |
     Select-Object -First 1
 if (-not $setup) { throw "ISCC succeeded but the expected Setup executable was not found in $OutputDir" }
 $signature = Get-AuthenticodeSignature -LiteralPath $setup.FullName

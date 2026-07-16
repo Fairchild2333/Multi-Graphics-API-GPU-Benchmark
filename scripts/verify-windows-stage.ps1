@@ -188,12 +188,8 @@ if (Test-Path -LiteralPath $manifestPath) {
     catch { Add-ErrorMessage "release-manifest.json is invalid JSON: $($_.Exception.Message)" }
 }
 
-if (Test-Path -LiteralPath $cliPath) {
-    $machine = Get-PeMachine $cliPath
-    if ($machine -ne 0x8664) {
-        Add-ErrorMessage ('CLI is not an x64 PE image (machine=0x{0:X4})' -f $machine)
-    }
-}
+$expectedMachine = 0x8664
+$expectedArch = 'x64'
 
 if ($manifest) {
     if ([int]$manifest.schemaVersion -lt 2) {
@@ -202,9 +198,11 @@ if ($manifest) {
     if ($manifest.product -ne 'Mangekyo') {
         Add-ErrorMessage "Unexpected manifest product: '$($manifest.product)'"
     }
-    if ($manifest.architecture -ne 'x64') {
-        Add-ErrorMessage "Unexpected manifest architecture: '$($manifest.architecture)'"
+    $expectedArch = $manifest.architecture
+    if ($expectedArch -notin @('x64', 'arm64', 'ARM64')) {
+        Add-ErrorMessage "Unexpected manifest architecture: '$expectedArch'"
     }
+    $expectedMachine = if ($expectedArch -eq 'x64') { 0x8664 } else { 0xAA64 }
     $shaderNames = [Collections.Generic.List[string]]::new()
     if ($manifest.compiledBackends.directX11 -or $manifest.compiledBackends.directX12) {
         @('compute.hlsl','nbody.hlsl','fractal.hlsl','gpu_stress.hlsl','gpu_burn.hlsl','volumetric.hlsl',
@@ -269,8 +267,8 @@ if ($manifest) {
         Require-File 'app/bin/resources.pri' | Out-Null
         if (Test-Path -LiteralPath $guiPath) {
             $guiMachine = Get-PeMachine $guiPath
-            if ($guiMachine -ne 0x8664) {
-                Add-ErrorMessage ('GUI is not an x64 PE image (machine=0x{0:X4})' -f $guiMachine)
+            if ($guiMachine -ne $expectedMachine) {
+                Add-ErrorMessage ("GUI is not a {0} PE image (machine=0x{1:X4})" -f $expectedArch, $guiMachine)
             }
             if ($manifest.compiledBackends.vulkan) {
                 Test-DelayLoadedVulkan $guiPath 'GUI'
@@ -318,6 +316,25 @@ if ($manifest) {
     }
     if (-not $manifest.bundled.projectDistributionLicense) {
         Add-PortabilityGate 'No approved project distribution license is bundled; public redistribution is blocked.'
+    }
+
+    # Audit machine architecture of all DLL/EXE files under app/bin
+    $binDir = Join-Path $StageDir 'app/bin'
+    if (Test-Path -LiteralPath $binDir -PathType Container) {
+        Get-ChildItem -LiteralPath $binDir -File |
+            Where-Object { $_.Extension -in @('.exe', '.dll') } |
+            ForEach-Object {
+                $binMachine = Get-PeMachine $_.FullName
+                if ($binMachine -ne 0 -and $binMachine -ne $expectedMachine) {
+                    if ($expectedArch -eq 'x64' -and $_.Name.EndsWith('_ec.dll', [StringComparison]::OrdinalIgnoreCase)) {
+                        return
+                    }
+                    if ($expectedArch -in @('arm64', 'ARM64') -and $_.Name.Equals('vcruntime140_1.dll', [StringComparison]::OrdinalIgnoreCase) -and $binMachine -eq 0x8664) {
+                        return
+                    }
+                    Add-ErrorMessage ("$($_.Name) is not a $expectedArch PE image (machine=0x{0:X4})" -f $binMachine)
+                }
+            }
     }
 }
 
@@ -375,16 +392,28 @@ foreach ($userDataDir in @('results','captures','reports','logs','rdoc_captures'
 }
 
 if ($SmokeTest -and (Test-Path -LiteralPath $cliPath)) {
-    Push-Location (Split-Path -Parent $cliPath)
-    try {
-        $smokeOutput = & $cliPath '--help' 2>&1
-        if ($LASTEXITCODE -ne 0) {
-            Add-ErrorMessage "CLI --help smoke test failed with exit code ${LASTEXITCODE}: $smokeOutput"
+    $canRun = $false
+    $hostArch = $env:PROCESSOR_ARCHITECTURE
+    if ($expectedArch -eq 'x64') {
+        if ($hostArch -in @('AMD64', 'ARM64')) { $canRun = $true }
+    } elseif ($expectedArch -in @('arm64', 'ARM64')) {
+        if ($hostArch -eq 'ARM64') { $canRun = $true }
+    }
+    
+    if ($canRun) {
+        Push-Location (Split-Path -Parent $cliPath)
+        try {
+            $smokeOutput = & $cliPath '--help' 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                Add-ErrorMessage "CLI --help smoke test failed with exit code ${LASTEXITCODE}: $smokeOutput"
+            }
+        } catch {
+            Add-ErrorMessage "CLI --help smoke test could not start: $($_.Exception.Message)"
+        } finally {
+            Pop-Location
         }
-    } catch {
-        Add-ErrorMessage "CLI --help smoke test could not start: $($_.Exception.Message)"
-    } finally {
-        Pop-Location
+    } else {
+        Add-WarningMessage "Skipping CLI smoke test because host architecture ($hostArch) cannot run target architecture ($expectedArch)."
     }
 }
 

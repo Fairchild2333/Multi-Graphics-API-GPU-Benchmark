@@ -18,6 +18,8 @@ param(
     [string]$IsccPath,
     [string]$SignToolCommand,
     [string]$Version,
+    [ValidateSet('x64', 'ARM64')]
+    [string]$Arch = 'x64',
     [switch]$SkipRenderDoc,
     [switch]$SkipCompilation,
     [switch]$SkipInstaller,
@@ -32,11 +34,13 @@ Set-StrictMode -Version 3.0
 
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $outRoot = [IO.Path]::GetFullPath((Join-Path $projectRoot 'out'))
-if (-not $BuildDir) { $BuildDir = Join-Path $outRoot 'build/windows-x64-release' }
-if (-not $StageDir) { $StageDir = Join-Path $outRoot 'stage/windows-x64' }
+
+$archLower = $Arch.ToLowerInvariant()
+if (-not $BuildDir) { $BuildDir = Join-Path $outRoot "build/windows-$archLower-release" }
+if (-not $StageDir) { $StageDir = Join-Path $outRoot "stage/windows-$archLower" }
 if (-not $PackageDir) { $PackageDir = Join-Path $outRoot 'packages' }
 if (-not $InstallerDir) { $InstallerDir = Join-Path $outRoot 'installer' }
-if (-not $ReleaseDir) { $ReleaseDir = Join-Path $outRoot 'release/windows-x64' }
+if (-not $ReleaseDir) { $ReleaseDir = Join-Path $outRoot "release/windows-$archLower" }
 $BuildDir = [IO.Path]::GetFullPath($BuildDir)
 $StageDir = [IO.Path]::GetFullPath($StageDir)
 $PackageDir = [IO.Path]::GetFullPath($PackageDir)
@@ -110,7 +114,8 @@ $stageScript = Join-Path $PSScriptRoot 'stage-windows-release.ps1'
 $stageArgs = @(
     '-BuildDir', $BuildDir,
     '-StageDir', $StageDir,
-    '-PackageDir', $PackageDir)
+    '-PackageDir', $PackageDir,
+    '-Arch', $Arch)
 if ($ToolchainFile) { $stageArgs += @('-ToolchainFile', $ToolchainFile) }
 if ($MsBuildPath) { $stageArgs += @('-MsBuildPath', $MsBuildPath) }
 if ($RenderDocDir) { $stageArgs += @('-RenderDocDir', $RenderDocDir) }
@@ -122,7 +127,7 @@ if ($SkipCompilation) {
     # Reconfigure even when reusing compiled binaries so GUI/RenderDoc/license
     # install inputs cannot silently come from an older CMake cache.
     $stageArgs += '-SkipBuild'
-    if (-not $GuiPayloadDir) { $GuiPayloadDir = Join-Path $outRoot 'gui/windows-x64-release' }
+    if (-not $GuiPayloadDir) { $GuiPayloadDir = Join-Path $outRoot "gui/windows-$archLower-release" }
     $stageArgs += @('-GuiPayloadDir', $GuiPayloadDir)
 } elseif ($GuiPayloadDir) {
     $stageArgs += @('-GuiPayloadDir', $GuiPayloadDir)
@@ -140,7 +145,7 @@ $Version = $manifestVersion
 
 if (-not $SkipInstaller) {
     $installerScript = Join-Path $PSScriptRoot 'build-inno-installer.ps1'
-    $installerArgs = @('-StageDir', $StageDir, '-OutputDir', $InstallerDir, '-Version', $Version)
+    $installerArgs = @('-StageDir', $StageDir, '-OutputDir', $InstallerDir, '-Version', $Version, '-Arch', $Arch)
     if ($IsccPath) { $installerArgs += @('-IsccPath', $IsccPath) }
     if ($SignToolCommand) { $installerArgs += @('-SignToolCommand', $SignToolCommand) }
     if ($RequireSigned) { $installerArgs += '-RequireSigned' }
@@ -150,7 +155,7 @@ if (-not $SkipInstaller) {
 if (-not $NoClean) { Reset-SafeReleaseDirectory $ReleaseDir }
 else { New-Item -ItemType Directory -Force -Path $ReleaseDir | Out-Null }
 
-$zipName = "Mangekyo-$Version-windows-x64.zip"
+$zipName = "Mangekyo-$Version-windows-$archLower.zip"
 $assets = [Collections.Generic.List[IO.FileInfo]]::new()
 $zip = Get-Item -LiteralPath (Join-Path $PackageDir $zipName) -ErrorAction Stop
 Copy-Item -LiteralPath $zip.FullName -Destination (Join-Path $ReleaseDir $zip.Name) -Force
@@ -222,7 +227,7 @@ try {
     }
 } finally { $zipAudit.Dispose() }
 if (-not $SkipInstaller) {
-    $setupName = "Mangekyo-$Version-windows-x64-setup.exe"
+    $setupName = "Mangekyo-$Version-windows-$archLower-setup.exe"
     $setup = Get-Item -LiteralPath (Join-Path $InstallerDir $setupName) -ErrorAction Stop
     Copy-Item -LiteralPath $setup.FullName -Destination (Join-Path $ReleaseDir $setup.Name) -Force
     $assets.Add((Get-Item -LiteralPath (Join-Path $ReleaseDir $setup.Name)))
@@ -257,7 +262,7 @@ $releaseManifest = [ordered]@{
     schemaVersion = 1
     product = [string]$manifest.product
     version = $Version
-    architecture = 'x64'
+    architecture = $archLower
     sourceRevision = $sourceRevision
     sourceTreeDirty = $sourceTreeDirty
     stageManifest = 'release-manifest.json'

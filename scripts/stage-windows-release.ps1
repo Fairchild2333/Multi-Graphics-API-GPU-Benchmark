@@ -11,6 +11,8 @@ param(
     [string]$ProjectLicenseFile,
     [ValidateSet('Release')]
     [string]$Configuration = 'Release',
+    [ValidateSet('x64', 'ARM64')]
+    [string]$Arch = 'x64',
     [switch]$SkipGui,
     [switch]$BuildGui,
     [switch]$SkipConfigure,
@@ -25,8 +27,10 @@ Set-StrictMode -Version 3.0
 
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $outRoot = [IO.Path]::GetFullPath((Join-Path $projectRoot 'out'))
-if (-not $BuildDir) { $BuildDir = Join-Path $outRoot 'build/windows-x64-release' }
-if (-not $StageDir) { $StageDir = Join-Path $outRoot 'stage/windows-x64' }
+
+$archLower = $Arch.ToLowerInvariant()
+if (-not $BuildDir) { $BuildDir = Join-Path $outRoot "build/windows-$archLower-release" }
+if (-not $StageDir) { $StageDir = Join-Path $outRoot "stage/windows-$archLower" }
 if (-not $PackageDir) { $PackageDir = Join-Path $outRoot 'packages' }
 $BuildDir = [IO.Path]::GetFullPath($BuildDir)
 $StageDir = [IO.Path]::GetFullPath($StageDir)
@@ -87,16 +91,22 @@ function Find-MsBuild {
 }
 
 function Invoke-CMakeConfigure([string]$GuiDirectory) {
+    $triplet = if ($Arch -eq 'ARM64') { 'arm64-windows' } else { 'x64-windows' }
     $configureArgs = @(
         '-S', $projectRoot,
         '-B', $BuildDir,
-        '-A', 'x64',
+        '-A', $Arch,
         "-DCMAKE_TOOLCHAIN_FILE=$ToolchainFile",
-        '-DVCPKG_TARGET_TRIPLET=x64-windows',
+        "-DVCPKG_TARGET_TRIPLET=$triplet",
         '-DGPU_BENCH_ENABLE_PACKAGING=ON',
         '-DGPU_BENCH_STRICT_RELEASE_ASSETS=ON',
         '-DGPU_BENCH_CPACK_GENERATORS=ZIP'
     )
+    if ($Arch -eq 'ARM64') {
+        $genScript = Join-Path $PSScriptRoot 'gen-vulkan-arm64-lib.ps1'
+        Invoke-Checked powershell '-NoProfile' '-ExecutionPolicy' 'Bypass' '-File' $genScript '-OutDir' $BuildDir
+        $configureArgs += "-DVulkan_LIBRARY=$(Join-Path $BuildDir 'vulkan-1.lib')"
+    }
     if ($GuiDirectory) { $configureArgs += "-DGPU_BENCH_GUI_PAYLOAD_DIR=$GuiDirectory" }
     else { $configureArgs += '-DGPU_BENCH_GUI_PAYLOAD_DIR=' }
     if ($RenderDocDir) { $configureArgs += "-DGPU_BENCH_RENDERDOC_DIR=$([IO.Path]::GetFullPath($RenderDocDir))" }
@@ -140,10 +150,10 @@ if (-not $SkipConfigure) {
 }
 
 if ($BuildGui -and -not $GuiPayloadDir) {
-    $GuiPayloadDir = Join-Path $outRoot 'gui/windows-x64-release'
+    $GuiPayloadDir = Join-Path $outRoot "gui/windows-$archLower-release"
 }
 if (-not $SkipGui -and -not $BuildGui -and -not $GuiPayloadDir) {
-    $candidate = Join-Path $projectRoot 'gui/x64/Release'
+    $candidate = Join-Path $projectRoot "gui/$Arch/Release"
     if (Test-Path -LiteralPath (Join-Path $candidate 'gpu_bench_gui.exe')) {
         $GuiPayloadDir = $candidate
     }
@@ -181,15 +191,19 @@ if ($BuildGui) {
     } else {
         [IO.Path]::GetFullPath((Join-Path (Split-Path -Parent (Split-Path -Parent $ToolchainFile)) '..'))
     }
-    $vcpkgLib = Join-Path $vcpkgRoot 'installed/x64-windows/lib'
-    $vcpkgBin = Join-Path $vcpkgRoot 'installed/x64-windows/bin'
+    $vcpkgLib = Join-Path $vcpkgRoot "installed/$archLower-windows/lib"
+    $vcpkgBin = Join-Path $vcpkgRoot "installed/$archLower-windows/bin"
     if (-not (Test-Path -LiteralPath (Join-Path $vcpkgBin 'glfw3.dll') -PathType Leaf)) {
-        throw "The x64 vcpkg GLFW runtime was not found under $vcpkgBin"
+        $vcpkgLib = Join-Path $BuildDir "vcpkg_installed/$archLower-windows/lib"
+        $vcpkgBin = Join-Path $BuildDir "vcpkg_installed/$archLower-windows/bin"
+    }
+    if (-not (Test-Path -LiteralPath (Join-Path $vcpkgBin 'glfw3.dll') -PathType Leaf)) {
+        throw "The $Arch vcpkg GLFW runtime was not found under $vcpkgBin"
     }
 
     if (-not $NoClean) { Reset-SafeOutputDirectory $GuiPayloadDir }
     else { New-Item -ItemType Directory -Force -Path $GuiPayloadDir | Out-Null }
-    $guiIntermediate = Join-Path $outRoot 'build/gui-windows-x64-release'
+    $guiIntermediate = Join-Path $outRoot "build/gui-windows-$archLower-release"
     if (-not $NoClean) { Reset-SafeOutputDirectory $guiIntermediate }
     else { New-Item -ItemType Directory -Force -Path $guiIntermediate | Out-Null }
 
@@ -201,7 +215,7 @@ if ($BuildGui) {
     $outWithSlash = $GuiPayloadDir.Replace('\', '/').TrimEnd('/') + '/'
     $intWithSlash = $guiIntermediate.Replace('\', '/').TrimEnd('/') + '/'
     Invoke-Checked $msbuild $guiProject '/restore' '/m:1' `
-        "/p:Configuration=$Configuration" '/p:Platform=x64' `
+        "/p:Configuration=$Configuration" "/p:Platform=$Arch" `
         "/p:GpuBuildDir=$BuildDir" "/p:GpuSourceDir=$projectRoot" `
         "/p:VcpkgLib=$vcpkgLib" "/p:VcpkgBin=$vcpkgBin" `
         "/p:OutDir=$outWithSlash" "/p:IntDir=$intWithSlash"
@@ -230,7 +244,7 @@ if (-not $SkipPackage) {
     Invoke-Checked cpack '--config' (Join-Path $BuildDir 'CPackConfig.cmake') `
         '-C' $Configuration '-G' 'ZIP' '-B' $PackageDir
     $manifest = Get-Content -LiteralPath (Join-Path $StageDir 'release-manifest.json') -Raw -Encoding utf8 | ConvertFrom-Json
-    $expectedName = "Mangekyo-$($manifest.version)-windows-x64.zip"
+    $expectedName = "Mangekyo-$($manifest.version)-windows-$archLower.zip"
     $package = Get-Item -LiteralPath (Join-Path $PackageDir $expectedName) -ErrorAction SilentlyContinue
     if (-not $package) { throw "CPack completed but the expected ZIP was not found: $expectedName" }
     # files.sha256 is generated after cmake --install, so it is not part of
