@@ -291,6 +291,18 @@ if ($manifest) {
         $qrenderdocPath = Require-File 'tools/RenderDoc/qrenderdoc.exe'
         Require-File 'tools/RenderDoc/renderdoc.dll' | Out-Null
         Require-File 'tools/RenderDoc/renderdoc.json' | Out-Null
+        $cryptoSource = Require-File 'tools/RenderDoc/libcrypto-1_1-x64.dll'
+        $cryptoAlias = Require-File 'tools/RenderDoc/libcrypto-1_1-64.dll'
+        $sslSource = Require-File 'tools/RenderDoc/libssl-1_1-x64.dll'
+        $sslAlias = Require-File 'tools/RenderDoc/libssl-1_1-64.dll'
+        foreach ($pair in @(@($cryptoSource, $cryptoAlias), @($sslSource, $sslAlias))) {
+            if ((Test-Path -LiteralPath $pair[0] -PathType Leaf) -and
+                (Test-Path -LiteralPath $pair[1] -PathType Leaf) -and
+                (Get-FileHash -LiteralPath $pair[0] -Algorithm SHA256).Hash -ne
+                (Get-FileHash -LiteralPath $pair[1] -Algorithm SHA256).Hash) {
+                Add-ErrorMessage "RenderDoc Bug Reporter SSL alias is not byte-identical: $($pair[1])"
+            }
+        }
         $renderDocLicense = Get-ChildItem -LiteralPath (Join-Path $StageDir 'tools/RenderDoc') `
             -Filter 'LICENSE*' -File -ErrorAction SilentlyContinue | Select-Object -First 1
         if (-not $renderDocLicense) {

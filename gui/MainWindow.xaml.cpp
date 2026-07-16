@@ -2,7 +2,7 @@
 #include "MainWindow.xaml.h"
 #include "MainWindow.xaml.g.hpp"
 
-#include "gpu_engine.h"          // gpu_bench::cliMain
+#include "gpu_engine.h"          // shared result/engine declarations
 #include "benchmark_results.h"   // gpu_bench::LoadResults
 #include "path_service.h"        // gpu_bench::paths::{Results,Captures}Directory
 #include "i18n.h"
@@ -20,6 +20,7 @@
 #include <winrt/Windows.UI.Text.h>
 
 #include <algorithm>
+#include <atomic>
 #include <cctype>
 #include <chrono>
 #include <cwctype>
@@ -126,6 +127,16 @@ namespace
         return hstring(w);
     }
 
+    std::filesystem::path pathFromUtf8(std::string const& value)
+    {
+        return std::filesystem::path(u8(value).c_str());
+    }
+
+    std::string pathToUtf8(std::filesystem::path const& value)
+    {
+        return winrt::to_string(hstring(value.wstring()));
+    }
+
     std::string findEngineExe()
     {
         wchar_t buf[MAX_PATH]{};
@@ -133,10 +144,9 @@ namespace
         const std::filesystem::path modulePath(buf);
         std::filesystem::path dir = modulePath.parent_path();
 
-        // Installed/staged builds keep the CLI and GUI together. cliMain runs
-        // in-process, but argv[0] is also the anchor used to find shaders.
+        // Installed/staged builds keep the CLI worker and GUI together.
         auto adjacent = dir / L"gpu_benchmark.exe";
-        if (std::filesystem::exists(adjacent)) return adjacent.string();
+        if (std::filesystem::exists(adjacent)) return pathToUtf8(adjacent);
 
         // Developer-tree compatibility for an IDE-launched GUI.
         for (int i = 0; i < 8; ++i)
@@ -144,49 +154,22 @@ namespace
             for (auto rel : { L"build\\Release\\gpu_benchmark.exe", L"build\\gpu_benchmark.exe" })
             {
                 auto cand = dir / rel;
-                if (std::filesystem::exists(cand)) return cand.string();
+                if (std::filesystem::exists(cand)) return pathToUtf8(cand);
             }
             if (!dir.has_parent_path()) break;
             dir = dir.parent_path();
         }
 
-        // gpu_engine is statically linked, so the GUI can still call cliMain
-        // without a separate CLI. This also anchors assets beside the GUI.
-        return modulePath.string();
-    }
-
-    void configureBundledRenderDocLayer(std::string const& enginePath)
-    {
-        std::error_code ec;
-        const auto binDir = std::filesystem::absolute(
-            std::filesystem::path(enginePath), ec).parent_path();
-        if (ec) return;
-        const std::filesystem::path candidates[] = {
-            binDir / L"tools" / L"RenderDoc",
-            binDir / L".." / L"tools" / L"RenderDoc",
-            binDir / L".." / L".." / L"tools" / L"RenderDoc",
-        };
-        for (auto const& candidate : candidates)
-        {
-            const auto dir = candidate.lexically_normal();
-            if (std::filesystem::is_regular_file(dir / L"renderdoc.json", ec) && !ec &&
-                std::filesystem::is_regular_file(dir / L"renderdoc.dll", ec) && !ec)
-            {
-                // The GUI probes Vulkan before its first benchmark job. Make
-                // the portable layer visible now, not after that first probe.
-                ::SetEnvironmentVariableW(L"VK_IMPLICIT_LAYER_PATH", dir.c_str());
-                ::SetEnvironmentVariableW(L"ENABLE_VULKAN_RENDERDOC_CAPTURE", L"1");
-                return;
-            }
-            ec.clear();
-        }
+        // Benchmarks and driver probing require process isolation. Returning
+        // the GUI itself here would recursively launch another GUI worker.
+        return {};
     }
 
     std::filesystem::path findRenderDocCommand(std::string const& enginePath)
     {
         std::error_code ec;
         const auto binDir = std::filesystem::absolute(
-            std::filesystem::path(enginePath), ec).parent_path();
+            pathFromUtf8(enginePath), ec).parent_path();
         if (!ec)
         {
             const std::filesystem::path candidates[] = {
@@ -231,50 +214,329 @@ namespace
         return {};
     }
 
-    // Serialise in-process cliMain calls: the function redirects the global
-    // std::cout / std::cerr stream buffers, which is inherently not thread-safe.
-    static std::mutex g_cliMutex;
-
-    // Run gpu_bench::cliMain in-process with synthesized argv, capturing stdout.
     struct CliResult { std::string output; int exitCode; };
-    CliResult captureCli(std::vector<std::string> args)
+
+    // CommandLineToArgvW-compatible quoting for one Windows command-line
+    // argument.  GPU workers are real child processes so a driver fault or a
+    // RenderDoc hook failure cannot terminate the WinUI orchestrator.
+    std::wstring quoteWindowsArg(std::wstring const& arg)
     {
-        std::lock_guard<std::mutex> lock(g_cliMutex);
-        std::vector<char*> argv;
-        argv.reserve(args.size());
-        for (auto& a : args) argv.push_back(a.data());
+        if (!arg.empty() && arg.find_first_of(L" \t\n\v\"") == std::wstring::npos)
+            return arg;
 
-        // Read the current process-wide SEH filter so we can restore it after
-        // cliMain returns. cliMain installs its own CrashHandler which would
-        // otherwise permanently replace WinUI's exception handling.
-        // SetUnhandledExceptionFilter(nullptr) is the only API to read the
-        // current value; it also clears the filter momentarily, so we restore
-        // it immediately to minimise the unprotected window.
-        auto prevSEH = ::SetUnhandledExceptionFilter(nullptr);
-        ::SetUnhandledExceptionFilter(prevSEH);  // restore while we set up
-
-        std::ostringstream cap;
-        std::streambuf* old = std::cout.rdbuf(cap.rdbuf());
-        std::streambuf* old_err = std::cerr.rdbuf(cap.rdbuf());
-        // Tell cliMain not to call glfwTerminate() -- we may have more jobs to
-        // run and the GUI manages the overall GLFW lifetime.
-        gpu_bench::skipGlfwTerminate = true;
-
-        int rc = -1;
-        try { rc = gpu_bench::cliMain((int)argv.size(), argv.data()); }
-        catch (std::exception const& ex) {
-            cap << "\n[GUI captureCli] exception: " << ex.what() << "\n";
+        std::wstring quoted{ L'\"' };
+        size_t slashes = 0;
+        for (wchar_t ch : arg)
+        {
+            if (ch == L'\\')
+            {
+                ++slashes;
+                continue;
+            }
+            if (ch == L'\"')
+            {
+                quoted.append(slashes * 2 + 1, L'\\');
+                quoted.push_back(L'\"');
+                slashes = 0;
+                continue;
+            }
+            quoted.append(slashes, L'\\');
+            slashes = 0;
+            quoted.push_back(ch);
         }
-        catch (...) {
-            cap << "\n[GUI captureCli] unknown exception\n";
+        quoted.append(slashes * 2, L'\\');
+        quoted.push_back(L'\"');
+        return quoted;
+    }
+
+    CliResult captureProcess(std::filesystem::path const* application,
+                             std::wstring command,
+                             std::wstring const& cwd,
+                             DWORD timeoutMs)
+    {
+        SECURITY_ATTRIBUTES security{};
+        security.nLength = sizeof(security);
+        security.bInheritHandle = TRUE;
+        HANDLE readPipe = nullptr;
+        HANDLE writePipe = nullptr;
+        if (!::CreatePipe(&readPipe, &writePipe, &security, 0))
+            return { "[Process] CreatePipe failed (" +
+                     std::to_string(::GetLastError()) + ").\n", -1 };
+        if (!::SetHandleInformation(readPipe, HANDLE_FLAG_INHERIT, 0))
+        {
+            const DWORD error = ::GetLastError();
+            ::CloseHandle(writePipe);
+            ::CloseHandle(readPipe);
+            return { "[Process] SetHandleInformation failed (" +
+                     std::to_string(error) + ").\n", -1 };
         }
-        std::cout.rdbuf(old);
-        std::cerr.rdbuf(old_err);
 
-        // Restore the SEH filter that cliMain replaced with its own CrashHandler.
-        ::SetUnhandledExceptionFilter(prevSEH);
+        HANDLE nullInput = ::CreateFileW(
+            L"NUL", GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+            &security, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (nullInput == INVALID_HANDLE_VALUE)
+        {
+            const DWORD error = ::GetLastError();
+            ::CloseHandle(writePipe);
+            ::CloseHandle(readPipe);
+            return { "[Process] Could not open NUL for stdin (" +
+                     std::to_string(error) + ").\n", -1 };
+        }
 
-        return { cap.str(), rc };
+        // Create containment before the process. Starting suspended and
+        // assigning the job before ResumeThread closes the crash-before-assign
+        // race that otherwise lets a modal crash reporter escape the GUI.
+        HANDLE job = ::CreateJobObjectW(nullptr, nullptr);
+        if (!job)
+        {
+            const DWORD error = ::GetLastError();
+            ::CloseHandle(nullInput);
+            ::CloseHandle(writePipe);
+            ::CloseHandle(readPipe);
+            return { "[Process] CreateJobObject failed (" +
+                     std::to_string(error) + ").\n", -1 };
+        }
+        JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};
+        limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+        if (!::SetInformationJobObject(
+                job, JobObjectExtendedLimitInformation, &limits, sizeof(limits)))
+        {
+            const DWORD error = ::GetLastError();
+            ::CloseHandle(job);
+            ::CloseHandle(nullInput);
+            ::CloseHandle(writePipe);
+            ::CloseHandle(readPipe);
+            return { "[Process] SetInformationJobObject failed (" +
+                     std::to_string(error) + ").\n", -1 };
+        }
+
+        // Restrict inheritance to the three redirected standard handles.  A
+        // plain bInheritHandles=TRUE can leak unrelated WinUI/COM handles into
+        // a worker and keep GUI resources (or this pipe) alive indefinitely.
+        SIZE_T attributeBytes = 0;
+        ::InitializeProcThreadAttributeList(nullptr, 1, 0, &attributeBytes);
+        std::vector<std::byte> attributeStorage(attributeBytes);
+        STARTUPINFOEXW startup{};
+        startup.StartupInfo.cb = sizeof(startup);
+        startup.StartupInfo.dwFlags = STARTF_USESTDHANDLES;
+        startup.StartupInfo.hStdInput = nullInput;
+        startup.StartupInfo.hStdOutput = writePipe;
+        startup.StartupInfo.hStdError = writePipe;
+        startup.lpAttributeList = reinterpret_cast<LPPROC_THREAD_ATTRIBUTE_LIST>(
+            attributeStorage.data());
+        if (attributeBytes == 0 || !::InitializeProcThreadAttributeList(
+                startup.lpAttributeList, 1, 0, &attributeBytes))
+        {
+            const DWORD error = ::GetLastError();
+            ::CloseHandle(job);
+            ::CloseHandle(nullInput);
+            ::CloseHandle(writePipe);
+            ::CloseHandle(readPipe);
+            return { "[Process] InitializeProcThreadAttributeList failed (" +
+                     std::to_string(error) + ").\n", -1 };
+        }
+        HANDLE inheritedHandles[] = { nullInput, writePipe };
+        if (!::UpdateProcThreadAttribute(
+                startup.lpAttributeList, 0,
+                PROC_THREAD_ATTRIBUTE_HANDLE_LIST,
+                inheritedHandles, sizeof(inheritedHandles), nullptr, nullptr))
+        {
+            const DWORD error = ::GetLastError();
+            ::DeleteProcThreadAttributeList(startup.lpAttributeList);
+            ::CloseHandle(job);
+            ::CloseHandle(nullInput);
+            ::CloseHandle(writePipe);
+            ::CloseHandle(readPipe);
+            return { "[Process] UpdateProcThreadAttribute failed (" +
+                     std::to_string(error) + ").\n", -1 };
+        }
+        PROCESS_INFORMATION process{};
+        std::vector<wchar_t> mutableCommand(command.begin(), command.end());
+        mutableCommand.push_back(L'\0');
+        const BOOL created = ::CreateProcessW(
+            application && !application->empty() ? application->c_str() : nullptr,
+            mutableCommand.data(), nullptr, nullptr, TRUE,
+            CREATE_NO_WINDOW | CREATE_SUSPENDED | EXTENDED_STARTUPINFO_PRESENT,
+            nullptr,
+            cwd.empty() ? nullptr : cwd.c_str(),
+            &startup.StartupInfo, &process);
+        const DWORD createError = created ? ERROR_SUCCESS : ::GetLastError();
+        ::DeleteProcThreadAttributeList(startup.lpAttributeList);
+        ::CloseHandle(nullInput);
+        ::CloseHandle(writePipe);
+
+        if (!created)
+        {
+            ::CloseHandle(job);
+            ::CloseHandle(readPipe);
+            return { "[Process] CreateProcess failed (" +
+                     std::to_string(createError) + ").\n", -1 };
+        }
+
+        if (!::AssignProcessToJobObject(job, process.hProcess))
+        {
+            const DWORD error = ::GetLastError();
+            ::TerminateProcess(process.hProcess, error);
+            ::WaitForSingleObject(process.hProcess, 5000);
+            ::CloseHandle(process.hThread);
+            ::CloseHandle(process.hProcess);
+            ::CloseHandle(job);
+            ::CloseHandle(readPipe);
+            return { "[Process] AssignProcessToJobObject failed (" +
+                     std::to_string(error) + ").\n", -1 };
+        }
+        if (::ResumeThread(process.hThread) == static_cast<DWORD>(-1))
+        {
+            const DWORD error = ::GetLastError();
+            ::TerminateJobObject(job, error);
+            ::WaitForSingleObject(process.hProcess, 5000);
+            ::CloseHandle(process.hThread);
+            ::CloseHandle(process.hProcess);
+            ::CloseHandle(job);
+            ::CloseHandle(readPipe);
+            return { "[Process] ResumeThread failed (" +
+                     std::to_string(error) + ").\n", -1 };
+        }
+        ::CloseHandle(process.hThread);
+
+        std::string output;
+        DWORD readError = ERROR_SUCCESS;
+        bool outputTruncated = false;
+        std::atomic<bool> stopReader{ false };
+        std::thread reader([&]()
+        {
+            constexpr std::size_t kMaxOutputBytes = 4u * 1024u * 1024u;
+            std::array<char, 8192> buffer{};
+            for (;;)
+            {
+                DWORD available = 0;
+                if (!::PeekNamedPipe(readPipe, nullptr, 0, nullptr,
+                                     &available, nullptr))
+                {
+                    readError = ::GetLastError();
+                    break;
+                }
+                if (available == 0)
+                {
+                    // Once the parent has completed and the Job has been
+                    // closed, drain what is already buffered and stop. Polling
+                    // avoids a blocking ReadFile, so even an unkillable driver
+                    // process that retains the writer cannot deadlock join().
+                    if (stopReader.load(std::memory_order_acquire)) break;
+                    ::Sleep(5);
+                    continue;
+                }
+
+                DWORD bytesRead = 0;
+                if (!::ReadFile(readPipe, buffer.data(),
+                                (std::min)(available,
+                                    static_cast<DWORD>(buffer.size())),
+                                &bytesRead, nullptr))
+                {
+                    readError = ::GetLastError();
+                    break;
+                }
+                if (bytesRead == 0) break;
+                output.append(buffer.data(), bytesRead);
+                if (output.size() > kMaxOutputBytes)
+                {
+                    output.erase(0, output.size() - kMaxOutputBytes);
+                    outputTruncated = true;
+                }
+            }
+        });
+
+        const DWORD waitResult = ::WaitForSingleObject(process.hProcess, timeoutMs);
+        const DWORD waitError = waitResult == WAIT_FAILED ? ::GetLastError() : ERROR_SUCCESS;
+        const bool timedOut = waitResult == WAIT_TIMEOUT;
+        if (timedOut || waitResult == WAIT_FAILED)
+        {
+            ::TerminateJobObject(job, timedOut ? ERROR_TIMEOUT : waitError);
+            ::WaitForSingleObject(process.hProcess, 5000);
+        }
+
+        DWORD exitCode = 1;
+        ::GetExitCodeProcess(process.hProcess, &exitCode);
+
+        // Closing the job first terminates any RenderDoc Bug Reporter child.
+        // The polling reader then drains buffered bytes and exits without ever
+        // waiting on a pipe writer that a wedged kernel driver failed to close.
+        ::CloseHandle(job);
+        stopReader.store(true, std::memory_order_release);
+        reader.join();
+        ::CloseHandle(readPipe);
+        ::CloseHandle(process.hProcess);
+
+        if (readError != ERROR_SUCCESS && readError != ERROR_BROKEN_PIPE)
+            output += "\n[Process] stdout pipe failed (" +
+                      std::to_string(readError) + ").\n";
+        if (outputTruncated)
+            output.insert(0, "[Process] Output truncated to the last 4 MiB.\n");
+        if (timedOut)
+        {
+            output += "\n[Process] Timed out and terminated.\n";
+            return { std::move(output), -2 };
+        }
+        if (waitResult == WAIT_FAILED)
+        {
+            output += "\n[Process] WaitForSingleObject failed (" +
+                      std::to_string(waitError) + ").\n";
+            return { std::move(output), -3 };
+        }
+        return { std::move(output), static_cast<int>(exitCode) };
+    }
+
+    CliResult captureCliProcess(std::vector<std::string> const& args,
+                                DWORD timeoutMs = 60u * 60u * 1000u)
+    {
+        if (args.empty()) return { "[GUI worker] Empty command.\n", -1 };
+
+        const std::filesystem::path executable = pathFromUtf8(args.front());
+        std::wstring command = quoteWindowsArg(executable.wstring());
+        for (size_t i = 1; i < args.size(); ++i)
+        {
+            command += L' ';
+            command += quoteWindowsArg(std::wstring(u8(args[i]).c_str()));
+        }
+        return captureProcess(&executable, std::move(command),
+                              executable.parent_path().wstring(), timeoutMs);
+    }
+
+    // Every GUI benchmark carries either --time or --benchmark. Give timed
+    // workloads their requested duration plus a generous startup/capture
+    // allowance, while fixed-frame workloads receive a finite one-hour
+    // watchdog. This keeps a VMware driver or RenderDoc failure from hanging a
+    // full GPU matrix forever without penalising intentionally long timed runs.
+    DWORD gpuWorkerTimeoutMs(std::vector<std::string> const& args)
+    {
+        constexpr std::uint64_t kMinuteMs = 60u * 1000u;
+        constexpr std::uint64_t kDefaultMs = 60u * kMinuteMs;
+        constexpr std::uint64_t kGraceMs = 5u * kMinuteMs;
+        constexpr std::uint64_t kMinimumMs = 6u * kMinuteMs;
+        constexpr std::uint64_t kMaximumMs = 24u * 60u * kMinuteMs;
+
+        std::uint64_t timeout = kDefaultMs;
+        for (size_t i = 0; i + 1 < args.size(); ++i)
+        {
+            if (args[i] != "--time") continue;
+            try
+            {
+                size_t consumed = 0;
+                const double seconds = std::stod(args[i + 1], &consumed);
+                if (consumed == args[i + 1].size() &&
+                    std::isfinite(seconds) && seconds >= 0.0)
+                {
+                    const auto requested = static_cast<std::uint64_t>(
+                        (std::min)(seconds * 1000.0,
+                                   static_cast<double>(kMaximumMs)));
+                    timeout = (std::max)(kMinimumMs,
+                        (std::min)(kMaximumMs, requested + kGraceMs));
+                }
+            }
+            catch (...) {}
+            break;
+        }
+        return static_cast<DWORD>(timeout);
     }
 
     std::string extractScore(std::string const& out)
@@ -304,19 +566,10 @@ namespace
         return s;
     }
 
-    int runProcess(std::wstring cmd, std::wstring const& cwd)
+    CliResult runProcess(std::wstring cmd, std::wstring const& cwd,
+                         DWORD timeoutMs = 10u * 60u * 1000u)
     {
-        STARTUPINFOW si{}; si.cb = sizeof(si);
-        PROCESS_INFORMATION pi{};
-        std::vector<wchar_t> mut(cmd.begin(), cmd.end()); mut.push_back(0);
-        if (!::CreateProcessW(nullptr, mut.data(), nullptr, nullptr, FALSE,
-                              CREATE_NO_WINDOW, nullptr,
-                              cwd.empty() ? nullptr : cwd.c_str(), &si, &pi))
-            return -1;
-        ::WaitForSingleObject(pi.hProcess, INFINITE);
-        DWORD code = 0; ::GetExitCodeProcess(pi.hProcess, &code);
-        ::CloseHandle(pi.hProcess); ::CloseHandle(pi.hThread);
-        return (int)code;
+        return captureProcess(nullptr, std::move(cmd), cwd, timeoutMs);
     }
 
     enum class CpuLineType { Other, Progress, Result, Error, Meta, Topology };
@@ -843,14 +1096,14 @@ namespace
     std::string workloadLabel(std::string const& id)
     {
         if (id == "stream")     return i18n::tr("Particle — Memory Throughput", "粒子 —— 内存吞吐");
-        if (id == "gpu_burn")   return i18n::tr("GPU Burn — Plasma Bloom", "GPU Burn —— 等离子晶核");
+        if (id == "gpu_burn")   return i18n::tr("Plasma Bloom — GPU Burn", "等离子晶核 —— GPU Burn");
         if (id == "gpu_stress") return i18n::tr("GraphicsBurn v1 / Component (Advanced)", "GraphicsBurn v1 / 分项（高级）");
         if (id == "nbody")      return i18n::tr("N-Body — Advanced Compute", "N-Body —— 高级计算");
         if (id == "synthpeak")  return i18n::tr("SynthPeak — Advanced Synthetic", "SynthPeak —— 高级合成测试");
         if (id == "stress")     return i18n::tr("Legacy Stress v1 — Fragment ALU/SFU", "旧版压力测试 v1 —— 片元 ALU/SFU");
         if (id == "render3d")   return i18n::tr("Legacy 3D Prototype — Billboards", "旧版 3D 原型 —— Billboard");
         if (id == "volumetric") return i18n::tr("Volumetric — Experimental Raymarch", "体积渲染 —— 实验性 Raymarch");
-        if (id == "cinematic_liquid") return i18n::tr("Cinematic Liquid v2 — Interactive Pool", "电影化液体 v2 —— 互动水池");
+        if (id == "cinematic_liquid") return i18n::tr("Fluid — Interactive Pool", "流体 —— 互动水池");
         if (id == "cinematic_liquid_v1") return i18n::tr("Legacy Cinematic Liquid v1 — Dam Break", "旧版电影化液体 v1 —— 溃坝");
         if (id == "fluid")      return i18n::tr("Other / Legacy 2D Fluid — Vulkan-only", "其他 / 旧版 2D 流体 —— 仅 Vulkan");
         return id;
@@ -936,6 +1189,20 @@ namespace
         cb.Margin(margin);
         panel.Children().Append(cb);
     }
+
+    struct RunApiDefinition
+    {
+        const char* token;
+        const char* label;
+        size_t supportIndex;
+    };
+
+    constexpr RunApiDefinition kRunApis[] = {
+        { "vulkan", "Vulkan",     0 },
+        { "dx12",   "DirectX 12", 1 },
+        { "dx11",   "DirectX 11", 2 },
+        { "opengl", "OpenGL",     3 },
+    };
 }
 
 MainWindow::MainWindow()
@@ -1000,6 +1267,20 @@ MainWindow::MainWindow()
     ParticleFilterFlyout().Closed(applyOnClose);
     GpuFilterFlyout().Closed(applyOnClose);
 
+    ApiPickerFlyout().Closed([this](auto&&, auto&&) {
+        if (m_uiReady) updateApiPickerSummary();
+    });
+    SelectAllRunApis().Click([this](auto&&, auto&&) {
+        setPanelChecks(SupportedApisPanel(), true);
+        setPanelChecks(UnsupportedApisPanel(), true);
+        updateApiPickerSummary();
+    });
+    ClearAllRunApis().Click([this](auto&&, auto&&) {
+        setPanelChecks(SupportedApisPanel(), false);
+        setPanelChecks(UnsupportedApisPanel(), false);
+        updateApiPickerSummary();
+    });
+
     SelectAllApis().Click([this](auto&&, auto&&) { setPanelChecks(ApiFilterPanel(), true); });
     ClearAllApis().Click([this](auto&&, auto&&) { setPanelChecks(ApiFilterPanel(), false); });
     SelectAllWorkloads().Click([this](auto&&, auto&&) { setPanelChecks(WorkloadFilterPanel(), true); });
@@ -1022,8 +1303,36 @@ MainWindow::MainWindow()
     if (auto bmp = loadAppIconBitmap(128)) AboutIcon().Source(bmp);
 
     m_uiReady = true;
+    applyWorkloadVisibility();
     populateGpus();
     refreshHistory();
+}
+
+// Only the three primary tests are listed by default; everything else stays
+// hidden behind the explicit legacy/advanced toggle so the daily dropdown is
+// Particle / Plasma Bloom / Fluid.
+void MainWindow::applyWorkloadVisibility()
+{
+    const bool showLegacy = ShowLegacyToggle().IsOn();
+    const auto visibility = showLegacy ? Visibility::Visible
+                                       : Visibility::Collapsed;
+    ComboBoxItem legacyItems[] = {
+        WorkloadGpuStress(), WorkloadNBody(), WorkloadSynthPeak(),
+        WorkloadStress(), WorkloadRender3D(), WorkloadVolumetric(),
+        WorkloadFluid(), WorkloadCinematicLiquidV1()};
+    for (auto const& item : legacyItems) item.Visibility(visibility);
+
+    if (!showLegacy)
+    {
+        auto current = WorkloadBox().SelectedItem().try_as<ComboBoxItem>();
+        if (current && current.Visibility() == Visibility::Collapsed)
+            WorkloadBox().SelectedIndex(0);
+    }
+}
+
+void MainWindow::OnShowLegacyToggled(IInspectable const&, RoutedEventArgs const&)
+{
+    if (m_uiReady) applyWorkloadVisibility();
 }
 
 std::string MainWindow::selected(ComboBox const& box)
@@ -1150,7 +1459,7 @@ void MainWindow::OnLangChanged(IInspectable const&, SelectionChangedEventArgs co
 void MainWindow::applyLanguage()
 {
     NavCpu().Content(locContent("CPU", "CPU"));
-    CpuTitle().Text(locText("CPU Benchmark", "CPU 跑分"));
+    CpuTitle().Text(locText("CPU Benchmark", "CPU 测试"));
     CpuNameText().Text(u8(m_cpuName));
     CpuInfo().Message(locText(
         "Headless CPU test. No 3D render window is opened.",
@@ -1173,7 +1482,7 @@ void MainWindow::applyLanguage()
     CpuMultiLabel().Text(locText("All-core result", "多核成绩"));
     CpuOutputExpander().Header(locContent("Raw CLI output (live tail)", "原始 CLI 输出（实时尾部）"));
     CpuCancelButton().Content(locContent("Cancel", "取消"));
-    CpuRunButton().Content(locContent("Run CPU Benchmark", "开始 CPU 跑分"));
+    CpuRunButton().Content(locContent("Run CPU Benchmark", "开始 CPU 测试"));
     if (!m_cpuRunning.load()) CpuStatusText().Text(locText("Ready", "就绪"));
 
     NavRun().Content(locContent("GPU", "GPU"));
@@ -1182,36 +1491,44 @@ void MainWindow::applyLanguage()
     NavSettings().Content(locContent("Settings", "设置"));
     NavAbout().Content(locContent("About", "关于"));
 
-    RunTitle().Text(locText("GPU Benchmark", "GPU 跑分"));
+    RunTitle().Text(locText("GPU Benchmark", "GPU 测试"));
     PresetBox().Header(locContent("Preset", "预设"));
     PresetQuick().Content(locContent("Quick run (best API / GPU, Medium)",
                                      "快速运行（最佳 API / GPU，中等）"));
     PresetCustom().Content(locContent("Custom run (choose API / GPU / workload)",
                                       "自定义运行（选择 API / GPU / 测试项目）"));
-    PresetFullOne().Content(locContent("Full analysis — selected workload / one GPU (all APIs + RenderDoc + charts)",
-                                       "完整分析 —— 所选测试 / 单 GPU（全部 API + RenderDoc + 图表）"));
-    PresetFullAll().Content(locContent("Full analysis — selected workload / all GPUs × APIs (+ RenderDoc + charts)",
-                                       "完整分析 —— 所选测试 / 全部 GPU × API（+ RenderDoc + 图表）"));
-    PresetFlights().Content(locContent("Flights test — one GPU (all APIs, custom flights)",
-                                       "Flights 测试 —— 单 GPU（全部 API，自定义 flights）"));
-    PresetParticles().Content(locContent("Particle test — one GPU (all APIs, custom particles)",
-                                         "粒子测试 —— 单 GPU（全部 API，自定义粒子数）"));
-    PresetHeadless().Content(locContent("Headless compute — one GPU (all APIs, pure compute)",
-                                        "无头计算 —— 单 GPU（全部 API，纯计算）"));
+    PresetFullOne().Content(locContent("Full analysis — selected workload / one GPU (selected APIs + RenderDoc + charts)",
+                                       "完整分析 —— 所选测试 / 单 GPU（所选 API + RenderDoc + 图表）"));
+    PresetFullAll().Content(locContent("Full analysis — selected workload / all GPUs × selected APIs (+ RenderDoc + charts)",
+                                       "完整分析 —— 所选测试 / 全部 GPU × 所选 API（+ RenderDoc + 图表）"));
+    PresetFlights().Content(locContent("Flights test — one GPU (selected APIs, custom flights)",
+                                       "Flights 测试 —— 单 GPU（所选 API，自定义 flights）"));
+    PresetParticles().Content(locContent("Particle test — one GPU (selected APIs, custom particles)",
+                                         "粒子测试 —— 单 GPU（所选 API，自定义粒子数）"));
+    PresetHeadless().Content(locContent("Headless compute — one GPU (selected APIs, pure compute)",
+                                        "无头计算 —— 单 GPU（所选 API，纯计算）"));
     GpuBox().Header(locContent("GPU / Renderer", "GPU / 渲染器"));
-    BackendBox().Header(locContent("Graphics API", "图形 API"));
-    BackendAuto().Content(locContent("Auto", "自动"));
-    BackendVulkan().Content(locContent("Vulkan", "Vulkan"));
-    BackendDx12().Content(locContent("DirectX 12", "DirectX 12"));
-    BackendDx11().Content(locContent("DirectX 11", "DirectX 11"));
-    BackendOpenGL().Content(locContent("OpenGL", "OpenGL"));
+    ApiPickerLabel().Text(locText("Graphics API", "图形 API"));
+    Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
+        ApiPickerButton(), locText("Graphics API", "图形 API"));
+    SelectAllRunApis().Content(locContent("Select all", "全选"));
+    ClearAllRunApis().Content(locContent("Select none", "全不选"));
+    SupportedApisLabel().Text(locText("Supported", "支持"));
+    UnsupportedApisLabel().Text(locText("Not reported as supported", "未报告支持"));
+    Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
+        SupportedApisGroup(), locText("Supported APIs", "支持的 API"));
+    Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
+        UnsupportedApisGroup(), locText("Unsupported APIs", "不支持的 API"));
+    UnsupportedApisHint().Text(locText(
+        "Unsupported selections remain available and will be reported by the CLI.",
+        "不支持的 API 仍可勾选；运行后由 CLI 返回明确错误。"));
     WorkloadBox().Header(locContent("Workload", "测试项目"));
     WorkloadStream().Content(locContent("Particle — Memory Throughput",
                                         "粒子 —— 内存吞吐"));
-    WorkloadGpuBurn().Content(locContent("GPU Burn — Plasma Bloom",
-                                          "GPU Burn —— 等离子晶核"));
-    WorkloadCinematicLiquid().Content(locContent("Cinematic Liquid v2 — Interactive Pool",
-                                                  "电影化液体 v2 —— 互动水池"));
+    WorkloadGpuBurn().Content(locContent("Plasma Bloom — GPU Burn",
+                                          "等离子晶核 —— GPU Burn"));
+    WorkloadCinematicLiquid().Content(locContent("Fluid — Interactive Pool",
+                                                  "流体 —— 互动水池"));
     WorkloadCinematicLiquidV1().Content(locContent("Other / Legacy Cinematic Liquid v1 — Dam Break",
                                                     "其他 / 旧版电影化液体 v1 —— 溃坝"));
     WorkloadGpuStress().Content(locContent("GraphicsBurn v1 / Component (Advanced)",
@@ -1228,6 +1545,10 @@ void MainWindow::applyLanguage()
                                              "体积渲染 —— 实验性 Raymarch"));
     WorkloadFluid().Content(locContent("Other / Legacy 2D Fluid — Vulkan-only",
                                         "其他 / 旧版 2D 流体 —— 仅 Vulkan"));
+    ShowLegacyToggle().Header(locContent("Show legacy & advanced tests",
+                                          "显示旧版 / 高级测试"));
+    ShowLegacyToggle().OffContent(locContent("Hidden", "隐藏"));
+    ShowLegacyToggle().OnContent(locContent("Shown", "显示"));
     PrecisionBox().Header(locContent("Precision", "精度"));
     PrecisionFp32().Content(locContent("fp32 — standard float", "fp32 —— 标准浮点"));
     PrecisionFp16().Content(locContent("fp16 — half precision", "fp16 —— 半精度"));
@@ -1262,7 +1583,7 @@ void MainWindow::applyLanguage()
         "用于测试非显存 / UMA 访问。");
     ToolTipService::SetToolTip(HostMemBox(), hostMemTip);
     ToolTipService::SetToolTip(HostMemInfo(), hostMemTip);
-    RunButton().Content(locContent("Run GPU Benchmark", "开始 GPU 跑分"));
+    RunButton().Content(locContent("Run GPU Benchmark", "开始 GPU 测试"));
     Status().Text(locText("Ready", "就绪"));
 
     HistoryTitle().Text(locText("History", "历史"));
@@ -1310,7 +1631,7 @@ void MainWindow::applyLanguage()
     LangBox().Header(locContent("Language", "语言"));
     AboutTitle().Text(locText("About", "关于"));
     AboutDesc().Text(locText("Cross-API CPU & GPU Benchmark Suite — native C++/WinRT frontend.",
-                             "跨 API CPU 与 GPU 跑分套件 —— 原生 C++/WinRT 前端。"));
+                             "跨 API CPU 与 GPU 测试套件 —— 原生 C++/WinRT 前端。"));
 
     {
         const wchar_t* sys = (i18n::detectOsLang() == i18n::Lang::Zh) ? L"中文" : L"English";
@@ -1328,7 +1649,6 @@ void MainWindow::applyLanguage()
     refreshCombo(TimeRangeBox());
     refreshCombo(PresetBox());
     refreshCombo(DurationUnitBox());
-    refreshCombo(BackendBox());
     refreshCombo(WorkloadBox());
     refreshCombo(PrecisionBox());
     refreshCombo(ParticlePresetBox());
@@ -1337,6 +1657,7 @@ void MainWindow::applyLanguage()
     m_suppressCombo = false;
 
     rebuildHistoryFilters();
+    if (m_gpuEnumerationComplete) rebuildApiPicker(true);
     updateExtraLabel();
 }
 
@@ -1418,7 +1739,7 @@ void MainWindow::OnCpuRun(IInspectable const&, RoutedEventArgs const&)
         return;
     }
 
-    const std::filesystem::path engine(m_enginePath);
+    const std::filesystem::path engine = pathFromUtf8(m_enginePath);
     std::error_code ec;
     if (!std::filesystem::is_regular_file(engine, ec) ||
         _wcsicmp(engine.filename().c_str(), L"gpu_benchmark.exe") != 0)
@@ -1456,7 +1777,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
     {
         CpuStatusText().Text(locText(
             "Another benchmark or report task is already running.",
-            "另一个跑分或报告任务正在运行。"));
+            "另一个测试或报告任务正在运行。"));
         return;
     }
     m_cpuRunning.store(true);
@@ -1478,7 +1799,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
     CpuTimeBox().IsEnabled(false);
     CpuWarmupBox().IsEnabled(false);
 
-    const auto engine = std::filesystem::absolute(std::filesystem::path(m_enginePath));
+    const auto engine = std::filesystem::absolute(pathFromUtf8(m_enginePath));
     const auto workingDirectory = engine.parent_path();
     auto strong = get_strong();
     auto dispatcher = m_dispatcher;
@@ -1509,7 +1830,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                 if (cancelled)
                 {
                     CpuStatusText().Text(locText("Cancelled", "已取消"));
-                    CpuCurrentCoreText().Text(locText("Benchmark cancelled", "CPU 跑分已取消"));
+                    CpuCurrentCoreText().Text(locText("Benchmark cancelled", "CPU 测试已取消"));
                     return;
                 }
                 if (exitCode != 0 || !errorMessage.empty() || m_cpuHadProtocolError)
@@ -1523,14 +1844,14 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                         CpuOutputBox().Text(output);
                     }
                     CpuStatusText().Text(locText("Failed; see raw output", "失败；请查看原始输出"));
-                    CpuCurrentCoreText().Text(locText("CPU benchmark failed", "CPU 跑分失败"));
+                    CpuCurrentCoreText().Text(locText("CPU benchmark failed", "CPU 测试失败"));
                     return;
                 }
 
                 CpuProgressBar().Value(100.0);
                 CpuProgressText().Text(L"100%");
                 CpuStatusText().Text(locText("Done", "完成"));
-                CpuCurrentCoreText().Text(locText("CPU benchmark completed", "CPU 跑分完成"));
+                CpuCurrentCoreText().Text(locText("CPU benchmark completed", "CPU 测试完成"));
             });
         };
 
@@ -1857,6 +2178,11 @@ void MainWindow::updateExtraLabel()
     // Custom and Full Analysis both honour the selected workload. Other
     // specialised presets retain their historical Stream-only behaviour.
     WorkloadBox().IsEnabled(workloadSelectable);
+    // Quick chooses automatically; Full-All schedules every enumerated GPU.
+    // Disable a selector that those presets intentionally do not consume.
+    GpuBox().IsEnabled(m_gpuEnumerationComplete && preset != 0 && preset != 3);
+    ApiPickerButton().IsEnabled(m_gpuEnumerationComplete && preset != 0);
+    updateApiPickerSummary();
     PrecisionBox().IsEnabled(workloadSelectable && wl == "synthpeak");
     bool headlessSupported = customRun && !(wl == "gpu_burn" || wl == "gpu_stress" || wl == "stress"
         || wl == "render3d" || wl == "volumetric" || wl == "fluid"
@@ -1973,16 +2299,167 @@ void MainWindow::updateExtraLabel()
     }
 }
 
+std::vector<std::string> MainWindow::selectedApis()
+{
+    auto selected = checkedTags(SupportedApisPanel());
+    auto unsupported = checkedTags(UnsupportedApisPanel());
+    selected.insert(unsupported.begin(), unsupported.end());
+
+    std::vector<std::string> ordered;
+    for (auto const& api : kRunApis)
+        if (selected.find(api.token) != selected.end())
+            ordered.emplace_back(api.token);
+    return ordered;
+}
+
+void MainWindow::updateApiPickerSummary()
+{
+    hstring summary;
+    if (!m_gpuEnumerationComplete)
+    {
+        summary = locText("Detecting…", "检测中…");
+    }
+    else if (PresetBox().SelectedIndex() == 0)
+    {
+        summary = locText("Automatic (quick preset)", "自动（快速预设）");
+    }
+    else
+    {
+        const auto apis = selectedApis();
+        if (apis.empty())
+            summary = locText("Select APIs", "选择 API");
+        else if (apis.size() == std::size(kRunApis))
+            summary = locText("All APIs (4)", "全部 API（4）");
+        else if (apis.size() == 1)
+        {
+            for (auto const& api : kRunApis)
+                if (apis.front() == api.token)
+                {
+                    summary = u8(api.label);
+                    break;
+                }
+        }
+        else
+        {
+            const auto count = std::to_string(apis.size());
+            summary = i18n::currentLang() == i18n::Lang::Zh
+                ? u8("已选 " + count + " 个 API")
+                : u8(count + " APIs selected");
+        }
+    }
+
+    ApiPickerButton().Content(box_value(summary));
+    std::wstring accessible = locText("Graphics API", "图形 API").c_str();
+    accessible += L": ";
+    accessible += summary.c_str();
+    Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
+        ApiPickerButton(), hstring(accessible));
+}
+
+void MainWindow::rebuildApiPicker(bool preserveSelection)
+{
+    if (!m_gpuEnumerationComplete) return;
+
+    const bool allGpusPreset = PresetBox().SelectedIndex() == 3;
+    const bool hasAllGpuTargets = allGpusPreset && !m_gpuApiSupport.empty();
+    const auto supportedHeading = hasAllGpuTargets
+        ? locText("Supported by every GPU", "所有 GPU 均支持")
+        : locText("Supported", "支持");
+    const auto unsupportedHeading = hasAllGpuTargets
+        ? locText("Unavailable on one or more GPUs", "至少一个 GPU 不支持")
+        : locText("Not reported as supported", "未报告支持");
+    SupportedApisLabel().Text(supportedHeading);
+    UnsupportedApisLabel().Text(unsupportedHeading);
+    Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
+        SupportedApisGroup(), supportedHeading);
+    Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
+        UnsupportedApisGroup(), unsupportedHeading);
+
+    std::set<std::string> previous;
+    if (preserveSelection && m_apiSelectionInitialized)
+    {
+        auto supported = checkedTags(SupportedApisPanel());
+        auto unsupported = checkedTags(UnsupportedApisPanel());
+        previous.insert(supported.begin(), supported.end());
+        previous.insert(unsupported.begin(), unsupported.end());
+    }
+
+    SupportedApisPanel().Children().Clear();
+    UnsupportedApisPanel().Children().Clear();
+    const int gpuRow = allGpusPreset ? 0 : GpuBox().SelectedIndex();
+    for (auto const& api : kRunApis)
+    {
+        bool supported = false;
+        std::size_t supportCount = 0;
+        for (auto const& capabilities : m_gpuApiSupport)
+            if (capabilities[api.supportIndex]) ++supportCount;
+
+        if (allGpusPreset)
+        {
+            supported = !m_gpuApiSupport.empty() &&
+                        supportCount == m_gpuApiSupport.size();
+        }
+        else if (gpuRow > 0 && static_cast<size_t>(gpuRow - 1) < m_gpuApiSupport.size())
+        {
+            supported = m_gpuApiSupport[gpuRow - 1][api.supportIndex];
+        }
+        else
+        {
+            // "Auto" can choose the best adapter independently for each API.
+            for (auto const& capabilities : m_gpuApiSupport)
+                supported = supported || capabilities[api.supportIndex];
+        }
+
+        const bool checked = m_apiSelectionInitialized
+            ? previous.find(api.token) != previous.end()
+            : supported;
+        std::string label = api.label;
+        if (allGpusPreset && supportCount > 0 && supportCount < m_gpuApiSupport.size())
+            label += " (" + std::to_string(supportCount) + "/" +
+                     std::to_string(m_gpuApiSupport.size()) +
+                     (i18n::currentLang() == i18n::Lang::Zh ? " 个 GPU)" : " GPUs)");
+        appendFilterCheckBox(
+            supported ? SupportedApisPanel() : UnsupportedApisPanel(),
+            label, api.token, checked);
+    }
+
+    SupportedApisGroup().Visibility(
+        SupportedApisPanel().Children().Size() > 0
+            ? Visibility::Visible : Visibility::Collapsed);
+    UnsupportedApisGroup().Visibility(
+        UnsupportedApisPanel().Children().Size() > 0
+            ? Visibility::Visible : Visibility::Collapsed);
+    m_apiSelectionInitialized = true;
+    updateApiPickerSummary();
+}
+
+void MainWindow::OnGpuSelectionChanged(IInspectable const&, SelectionChangedEventArgs const&)
+{
+    if (!m_uiReady || !m_gpuEnumerationComplete) return;
+    rebuildApiPicker(true);
+}
+
 // ---- GPU enumeration -------------------------------------------------------
 void MainWindow::populateGpus()
 {
+    m_gpuEnumerationComplete = false;
+    m_apiSelectionInitialized = false;
     GpuBox().Items().Clear();
     m_gpuIndices.clear();
     m_gpuApiSupport.clear();
+    SupportedApisPanel().Children().Clear();
+    UnsupportedApisPanel().Children().Clear();
+    ApiPickerButton().IsEnabled(false);
+    GpuBox().IsEnabled(false);
+    ApiPickerButton().Content(locContent("Detecting…", "检测中…"));
     auto autoItem = ComboBoxItem(); autoItem.Content(locContent("(auto)", "（自动）"));
     GpuBox().Items().Append(autoItem);
     GpuBox().SelectedIndex(0);
-    if (m_enginePath.empty()) return;
+    if (m_enginePath.empty())
+    {
+        ApiPickerButton().Content(locContent("Engine not found", "未找到引擎"));
+        return;
+    }
 
     // One row of `--list-gpus`: GPU \t idx \t name \t vk \t dx12 \t dx11
     // \t opengl \t dx11FeatureLevel \t dx11Compute. The last two fields are
@@ -1992,10 +2469,10 @@ void MainWindow::populateGpus()
     auto strong = get_strong();
     auto disp = m_dispatcher;
     std::string engine = m_enginePath;
-    configureBundledRenderDocLayer(engine);
     std::thread([this, strong, disp, engine]()
     {
-        std::string out = captureCli({ engine, "--list-gpus" }).output;
+        auto detection = captureCliProcess({ engine, "--list-gpus" }, 60u * 1000u);
+        std::string const& out = detection.output;
         std::vector<GpuRow> gpus;
         std::istringstream ss(out); std::string line;
         while (std::getline(ss, line))
@@ -2014,7 +2491,7 @@ void MainWindow::populateGpus()
             r.api[4] = f.size() > 8 ? (f[8] == "1") : r.api[2];
             gpus.push_back(std::move(r));
         }
-        disp.TryEnqueue([this, strong, gpus]()
+        disp.TryEnqueue([this, strong, gpus, detection = std::move(detection)]()
         {
             for (auto& g : gpus)
             {
@@ -2026,6 +2503,18 @@ void MainWindow::populateGpus()
                 auto it = ComboBoxItem();
                 it.Content(box_value(u8(label)));
                 GpuBox().Items().Append(it);
+            }
+            m_gpuEnumerationComplete = true;
+            rebuildApiPicker(false);
+            updateExtraLabel();
+            if (detection.exitCode != 0)
+            {
+                OutputBox().Text(u8(detection.output));
+                Status().Text(detection.exitCode == -2
+                    ? locText("GPU detection timed out; APIs remain manually selectable.",
+                              "GPU 检测超时；仍可手动勾选 API。")
+                    : locText("GPU detection failed; APIs remain manually selectable.",
+                              "GPU 检测失败；仍可手动勾选 API。"));
             }
         });
     }).detach();
@@ -2064,11 +2553,6 @@ void MainWindow::OnDurationUnitChanged(IInspectable const&, SelectionChangedEven
 }
 
 // ---- run -------------------------------------------------------------------
-std::string MainWindow::backendValue()
-{
-    return selected(BackendBox());       // "auto" when Auto is selected (Tag-based)
-}
-
 std::string MainWindow::particleValue()
 {
     auto p = selected(ParticlePresetBox());
@@ -2088,61 +2572,7 @@ std::vector<std::string> MainWindow::durationArgs()
                    : std::vector<std::string>{ "--benchmark", val };
 }
 
-std::vector<std::string> MainWindow::buildArgs(bool runAll)
-{
-    std::vector<std::string> args = { m_enginePath };
-    for (auto& d : durationArgs()) args.push_back(d);
-
-    if (runAll)
-    {
-        args.push_back("--run-all");     // iterates every GPU x API; no --gpu/--backend
-    }
-    else
-    {
-        auto b = backendValue();
-        if (!b.empty()) { args.push_back("--backend"); args.push_back(b); }
-        // Software / WARP renderer is just another entry in the GPU dropdown.
-        int sel = GpuBox().SelectedIndex();
-        if (sel > 0 && (size_t)(sel - 1) < m_gpuIndices.size())
-        { args.push_back("--gpu"); args.push_back(std::to_string(m_gpuIndices[sel - 1])); }
-    }
-
-    auto wl = selected(WorkloadBox());
-    if (wl != "stream") { args.push_back("--workload"); args.push_back(wl); }
-    if (wl == "synthpeak") { args.push_back("--precision"); args.push_back(selected(PrecisionBox())); }
-
-    auto extra = to_string(ExtraBox().Text());
-    auto particles = particleValue();
-    if ((wl == "stream" || wl == "render3d") && !particles.empty())
-    {
-        args.push_back("--particles"); args.push_back(particles);
-    }
-    else if (!extra.empty())
-    {
-        std::string flag = (wl == "nbody") ? "--bodies"
-                         : (wl == "gpu_burn" || wl == "gpu_stress" || wl == "stress" || wl == "synthpeak") ? "--iter"
-                         : (wl == "volumetric") ? "--steps"
-                         : (wl == "fluid") ? "--grid" : "--particles";
-        args.push_back(flag); args.push_back(extra);
-    }
-    if (wl == "fluid")
-    {
-        auto jacobi = to_string(FluidJacobiBox().Text());
-        if (!jacobi.empty()) { args.push_back("--jacobi"); args.push_back(jacobi); }
-    }
-
-    const bool headless = HeadlessBox().IsChecked() && HeadlessBox().IsChecked().Value();
-    if (headless) args.push_back("--headless");
-    if (VsyncBox().IsChecked() && VsyncBox().IsChecked().Value())       args.push_back("--vsync");
-    if (HostMemBox().IsChecked() && HostMemBox().IsChecked().Value())   args.push_back("--host-memory");
-    if (!headless) {
-        args.push_back("--capture");
-        args.push_back("5");
-    }
-    return args;
-}
-
-// Build the cliMain invocation(s) for the selected preset (the CLI menu items).
+// Build child-process CLI invocation(s) for the selected preset.
 std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needCharts)
 {
     needCharts = false;
@@ -2182,36 +2612,37 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needChar
         return ex;
     };
 
-    int gpuRow = GpuBox().SelectedIndex();   // 0 = (auto)
-    int gpuArg = -1;   // engine GPU index for one-GPU presets; -1 = auto
-    const std::array<bool, 5>* sup = nullptr;   // {vulkan,dx12,dx11,opengl,dx11Compute}
-    if (gpuRow > 0 && (size_t)(gpuRow - 1) < m_gpuIndices.size())
-    {
-        gpuArg = m_gpuIndices[gpuRow - 1];
-        if ((size_t)(gpuRow - 1) < m_gpuApiSupport.size()) sup = &m_gpuApiSupport[gpuRow - 1];
-    }
+    const int gpuRow = GpuBox().SelectedIndex();   // 0 = automatic adapter
+    int selectedGpu = -1;
+    if (gpuRow > 0 && static_cast<size_t>(gpuRow - 1) < m_gpuIndices.size())
+        selectedGpu = m_gpuIndices[gpuRow - 1];
 
-    // One GPU, every graphics API the GPU supports. Windows OpenGL cannot pick
-    // an adapter, so it only runs when the selected row is the default GPU.
-    auto multiApi = [&](std::vector<std::string> extraArgs) {
-        const char* apis[4] = { "vulkan", "dx12", "dx11", "opengl" };
-        const auto workload = selected(WorkloadBox());
-        const bool needsDx11Compute = workload != "gpu_burn" &&
-            workload != "gpu_stress" && workload != "stress" &&
-            workload != "volumetric";
+    // Each API×GPU combination gets a fresh process. Unsupported choices are
+    // deliberately retained: the CLI reports a precise capability error and
+    // the remaining jobs continue.
+    auto makeJobs = [&](std::vector<std::string> extraArgs, bool everyGpu) {
         std::vector<std::vector<std::string>> jobs;
-        for (int k = 0; k < 4; ++k)
+        std::vector<int> targets;
+        if (everyGpu)
         {
-            if (sup && !(*sup)[k]) continue;            // GPU doesn't support this API
-            if (sup && k == 2 && needsDx11Compute && !(*sup)[4]) continue;
-            if (k == 3 && gpuArg > 0) continue;         // OpenGL: Windows uses default GPU only
-            std::vector<std::string> a = { m_enginePath };
+            targets = m_gpuIndices;
+            if (targets.empty()) targets.push_back(-1);
+        }
+        else
+        {
+            targets.push_back(selectedGpu);
+        }
+
+        for (int gpu : targets)
+            for (auto const& api : selectedApis())
+            {
+            std::vector<std::string> a = { m_enginePath, "--gui-worker" };
             for (auto& d : dur) a.push_back(d);
-            a.push_back("--backend"); a.push_back(apis[k]);
-            if (gpuArg >= 0) { a.push_back("--gpu"); a.push_back(std::to_string(gpuArg)); }
+            a.push_back("--backend"); a.push_back(api);
+            if (gpu >= 0) { a.push_back("--gpu"); a.push_back(std::to_string(gpu)); }
             for (auto& e : extraArgs) a.push_back(e);
             jobs.push_back(std::move(a));
-        }
+            }
         return jobs;
     };
 
@@ -2219,46 +2650,60 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needChar
     {
         case 0:  // [0] Quick run — best API / GPU, Medium, stream
         {
-            std::vector<std::string> a = { m_enginePath };
+            std::vector<std::string> a = { m_enginePath, "--gui-worker" };
             for (auto& d : dur) a.push_back(d);
             a.push_back("--capture"); a.push_back("5");
             return { a };
         }
 
-        case 1:  // [1] Custom run — honour the visible controls
-            return { buildArgs(false) };
+        case 1:  // [1] Custom run — honour every visible control
+        {
+            auto ex = selectedWorkloadArgs();
+            const bool headless = HeadlessBox().IsChecked() &&
+                                  HeadlessBox().IsChecked().Value();
+            if (headless)
+                ex.push_back("--headless");
+            else
+            {
+                ex.push_back("--capture");
+                ex.push_back("5");
+            }
+            return makeJobs(std::move(ex), false);
+        }
 
-        case 2:  // [5] Full analysis, one GPU (all APIs + RenderDoc + charts)
+        case 2:  // [5] Full analysis, one GPU × selected APIs
         {
             needCharts = true;
             auto ex = selectedWorkloadArgs();
             ex.push_back("--capture"); ex.push_back("5");
-            return multiApi(std::move(ex));
+            return makeJobs(std::move(ex), false);
         }
 
-        case 3:  // [6] Selected workload, all GPUs x APIs (+ RenderDoc + charts)
+        case 3:  // [6] Selected workload, all GPUs × selected APIs
         {
             needCharts = true;
-            return { buildArgs(true) };
+            auto ex = selectedWorkloadArgs();
+            ex.push_back("--capture"); ex.push_back("5");
+            return makeJobs(std::move(ex), true);
         }
-        case 4:  // [7] Flights test, one GPU (all APIs, custom flights + RenderDoc)
+        case 4:  // [7] Flights test, one GPU × selected APIs
         {
             std::vector<std::string> ex;
             if (!extra.empty()) { ex.push_back("--flights"); ex.push_back(extra); }
             ex.push_back("--capture"); ex.push_back("5");
-            return multiApi(ex);
+            return makeJobs(std::move(ex), false);
         }
-        case 5:  // [8] Particle test, one GPU (all APIs, custom particles + RenderDoc)
+        case 5:  // [8] Particle test, one GPU × selected APIs
         {
             std::vector<std::string> ex;
             if (!particles.empty()) { ex.push_back("--particles"); ex.push_back(particles); }
             ex.push_back("--capture"); ex.push_back("5");
-            return multiApi(ex);
+            return makeJobs(std::move(ex), false);
         }
-        case 6:  // [9] Headless compute, one GPU (all APIs, pure compute)
-            return multiApi({ "--headless" });
+        case 6:  // [9] Headless compute, one GPU × selected APIs
+            return makeJobs({ "--headless" }, false);
     }
-    return { buildArgs(false) };
+    return {};
 }
 
 void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool needCharts)
@@ -2267,7 +2712,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
     {
         Status().Text(locText(
             "Another benchmark or report task is already running.",
-            "另一个跑分或报告任务正在运行。"));
+            "另一个测试或报告任务正在运行。"));
         return;
     }
     Busy().IsActive(true);
@@ -2278,24 +2723,47 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
     OutputBox().Text({});
 
     std::string repo = m_enginePath.empty() ? std::string{}
-        : std::filesystem::path(m_enginePath).parent_path().parent_path().parent_path().string();
+        : pathToUtf8(pathFromUtf8(m_enginePath)
+            .parent_path().parent_path().parent_path());
 
     auto strong = get_strong();
     auto disp = m_dispatcher;
     std::thread([this, strong, disp, jobs, needCharts, repo]()
     {
         std::string all, lastScore;
-        bool anyFailed = false;
-        for (auto const& job : jobs)
+        size_t failedJobs = 0;
+        size_t succeededJobs = 0;
+        std::vector<std::string> caps;
+        for (size_t jobIndex = 0; jobIndex < jobs.size(); ++jobIndex)
         {
-            auto res = captureCli(job);
+            auto const& job = jobs[jobIndex];
+            all += "\n========== Worker " + std::to_string(jobIndex + 1) +
+                   "/" + std::to_string(jobs.size()) + " ==========";
+            for (size_t i = 1; i < job.size(); ++i) all += " " + job[i];
+            all += "\n";
+
+            auto res = captureCliProcess(job, gpuWorkerTimeoutMs(job));
             all += res.output; all += "\n";
-            if (res.exitCode != 0) anyFailed = true;
-            std::string sc = extractScore(res.output);
-            if (!sc.empty()) lastScore = sc;
+            if (res.exitCode != 0)
+            {
+                ++failedJobs;
+                std::ostringstream code;
+                code << "[GUI worker] Exited with code 0x" << std::hex
+                     << static_cast<std::uint32_t>(res.exitCode) << std::dec << ".\n";
+                all += code.str();
+            }
+            else
+            {
+                ++succeededJobs;
+                auto workerCaps = parseCapturePaths(res.output);
+                caps.insert(caps.end(), workerCaps.begin(), workerCaps.end());
+                std::string sc = extractScore(res.output);
+                if (!sc.empty()) lastScore = sc;
+            }
         }
 
         bool postProcessFailed = false;
+        bool renderDocConversionFailed = false;
         std::string postProcessStatus;
         auto recordPostProcessFailure = [&](std::string const& message)
         {
@@ -2307,10 +2775,9 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
 
         // Post-processing mirrors the CLI Full-Analysis / Flights / Particle
         // paths, but all optional-tool failures are reported truthfully.
-        auto caps = parseCapturePaths(all);
         if (!repo.empty())
         {
-            const auto repoPath = std::filesystem::path(repo);
+            const auto repoPath = pathFromUtf8(repo);
             const auto repoW = repoPath.wstring();
             const std::string enginePath = jobs.empty() || jobs.front().empty()
                 ? std::string{} : jobs.front().front();
@@ -2322,23 +2789,87 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                 const auto rdccmd = findRenderDocCommand(enginePath);
                 if (rdccmd.empty())
                 {
+                    renderDocConversionFailed = true;
                     recordPostProcessFailure(
                         "RenderDoc capture conversion unavailable: renderdoccmd.exe was not found.");
                 }
                 else
                 {
+                    std::size_t conversionIndex = 0;
                     for (auto const& rdc : caps)
                     {
-                        std::filesystem::path rdcP(rdc), jsonOut = rdcP;
+                        std::filesystem::path rdcP = pathFromUtf8(rdc);
+                        std::filesystem::path jsonOut = rdcP;
                         jsonOut.replace_extension(L".json");
-                        const int rc = runProcess(
+
+                        std::error_code fileError;
+                        const bool validCapture =
+                            std::filesystem::is_regular_file(rdcP, fileError) &&
+                            !fileError && std::filesystem::file_size(rdcP, fileError) > 0 &&
+                            !fileError;
+                        if (!validCapture)
+                        {
+                            renderDocConversionFailed = true;
+                            recordPostProcessFailure(
+                                "RenderDoc capture is missing or empty: " +
+                                pathToUtf8(rdcP.filename()) + ".");
+                            ++conversionIndex;
+                            continue;
+                        }
+
+                        std::filesystem::path tempJson = jsonOut.parent_path() /
+                            (jsonOut.stem().wstring() + L".tmp-" +
+                             std::to_wstring(::GetCurrentProcessId()) + L"-" +
+                             std::to_wstring(conversionIndex++) + L".json");
+                        auto converted = runProcess(
                             L"\"" + rdccmd.wstring() + L"\" convert -f \""
                             + rdcP.wstring() + L"\" -c chrome.json -o \""
-                            + jsonOut.wstring() + L"\"", repoW);
-                        if (rc != 0)
+                            + tempJson.wstring() + L"\"", repoW,
+                            5u * 60u * 1000u);
+                        if (!converted.output.empty())
+                        {
+                            all += "[RenderDoc converter: " +
+                                   pathToUtf8(rdcP.filename()) + "]\n";
+                            all += converted.output;
+                            if (all.empty() || all.back() != '\n') all += '\n';
+                        }
+
+                        bool convertedFileValid = false;
+                        fileError.clear();
+                        if (converted.exitCode == 0)
+                            convertedFileValid =
+                                std::filesystem::is_regular_file(tempJson, fileError) &&
+                                !fileError &&
+                                std::filesystem::file_size(tempJson, fileError) > 0 &&
+                                !fileError;
+
+                        bool committed = false;
+                        if (convertedFileValid)
+                            committed = ::MoveFileExW(
+                                tempJson.c_str(), jsonOut.c_str(),
+                                MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != FALSE;
+
+                        if (converted.exitCode != 0 || !convertedFileValid || !committed)
+                        {
+                            renderDocConversionFailed = true;
+                            std::ostringstream failure;
+                            if (converted.exitCode == -2)
+                                failure << "RenderDoc capture conversion timed out.";
+                            else if (converted.exitCode != 0)
+                                failure << "RenderDoc capture conversion failed (exit "
+                                        << converted.exitCode << ", 0x" << std::hex
+                                        << static_cast<std::uint32_t>(converted.exitCode)
+                                        << std::dec << ").";
+                            else if (!convertedFileValid)
+                                failure << "RenderDoc conversion produced no valid JSON output.";
+                            else
+                                failure << "RenderDoc JSON could not be committed (Win32 "
+                                        << ::GetLastError() << ").";
                             recordPostProcessFailure(
-                                "RenderDoc capture conversion failed (exit "
-                                + std::to_string(rc) + ").");
+                                failure.str());
+                            fileError.clear();
+                            std::filesystem::remove(tempJson, fileError);
+                        }
                     }
                 }
             }
@@ -2378,7 +2909,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                 else
                 {
                     const auto resultsPath =
-                        std::filesystem::path(gpu_bench::ResultsFilePath());
+                        pathFromUtf8(gpu_bench::ResultsFilePath());
                     const auto dataRoot = resultsPath.parent_path().parent_path();
                     const auto reportsDir = dataRoot / L"reports";
                     const auto imagesDir = reportsDir / L"images";
@@ -2394,17 +2925,22 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                         auto runReport = [&](std::wstring const& command,
                                              char const* label)
                         {
-                            const int rc = runProcess(command, repoW);
-                            if (rc != 0)
+                            auto report = runProcess(command, repoW);
+                            if (!report.output.empty())
+                            {
+                                all += std::string("[") + label + "]\n" + report.output;
+                                if (all.empty() || all.back() != '\n') all += '\n';
+                            }
+                            if (report.exitCode != 0)
                                 recordPostProcessFailure(
                                     std::string(label) + " failed (exit "
-                                    + std::to_string(rc) + ").");
+                                    + std::to_string(report.exitCode) + ").");
                         };
 
-                        if (!caps.empty())
+                        if (!caps.empty() && !renderDocConversionFailed)
                         {
                             const auto captureDir =
-                                std::filesystem::path(caps.front()).parent_path();
+                                pathFromUtf8(caps.front()).parent_path();
                             runReport(
                                 py + L"\"scripts\\rdoc_analyse.py\" --captures \""
                                 + captureDir.wstring() + L"\" --results \""
@@ -2435,14 +2971,26 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
             }
         }
 
-        disp.TryEnqueue([this, strong, all, lastScore, needCharts, anyFailed,
-                         postProcessFailed, postProcessStatus]()
+        disp.TryEnqueue([this, strong, all, lastScore, needCharts, failedJobs,
+                         succeededJobs, postProcessFailed, postProcessStatus]()
         {
             OutputBox().Text(u8(all));
-            if (anyFailed)
+            if (failedJobs > 0 && succeededJobs == 0)
             {
                 ResultText().Text(locText("Error — see output.", "出错 —— 见输出。"));
                 Status().Text(locText("Failed.", "运行失败。"));
+            }
+            else if (failedJobs > 0)
+            {
+                ResultText().Text(lastScore.empty()
+                    ? locText("Completed with errors — see output.",
+                              "部分完成 —— 请查看错误输出。")
+                    : u8(lastScore));
+                const auto ok = std::to_string(succeededJobs);
+                const auto failed = std::to_string(failedJobs);
+                Status().Text(i18n::currentLang() == i18n::Lang::Zh
+                    ? u8("完成 " + ok + " 项，失败 " + failed + " 项。")
+                    : u8(ok + " completed; " + failed + " failed."));
             }
             else
             {
@@ -2471,6 +3019,14 @@ void MainWindow::OnRun(IInspectable const&, RoutedEventArgs const&)
         return;
     }
     const int preset = PresetBox().SelectedIndex();
+    if (preset != 0 && selectedApis().empty())
+    {
+        ResultText().Text(locText(
+            "Select at least one graphics API. Unsupported APIs may also be selected.",
+            "请至少选择一个图形 API；未报告支持的 API 也可以勾选。"));
+        Status().Text(locText("No graphics API selected.", "尚未选择图形 API。"));
+        return;
+    }
     const bool workloadSelectable = preset == 1 || preset == 2 || preset == 3;
     const auto workload = selected(WorkloadBox());
     const auto burnIterText = to_string(ExtraBox().Text());
@@ -2503,58 +3059,13 @@ void MainWindow::OnRun(IInspectable const&, RoutedEventArgs const&)
                               "请检查 GPU Burn 设置。"));
         return;
     }
-    const bool vulkanOnlyFluid = workload == "fluid" || workload == "cinematic_liquid"
-        || workload == "cinematic_liquid_v1";
-    if ((preset == 2 || preset == 3) && vulkanOnlyFluid)
-    {
-        ResultText().Text(locText(
-            "This fluid workload is Vulkan-only in v1 and cannot run as cross-API Full Analysis.",
-            "这个流体测试在 v1 中仅支持 Vulkan，不能用于跨 API 完整分析。"));
-        Status().Text(locText("Vulkan-only workload blocked for Full Analysis.",
-                              "完整分析已阻止仅支持 Vulkan 的项目。"));
-        return;
-    }
-    if (preset == 1 && vulkanOnlyFluid)
-    {
-        if (backendValue() != "vulkan")
-        {
-            ResultText().Text(locText(
-                "This fluid workload is Vulkan-only. Select Vulkan explicitly to run it.",
-                "这个流体测试仅支持 Vulkan。请显式选择 Vulkan 后再运行。"));
-            Status().Text(locText("Vulkan-only workload blocked on this API.",
-                                  "当前 API 已阻止仅支持 Vulkan 的项目。"));
-            return;
-        }
-        int gpuRow = GpuBox().SelectedIndex();
-        if (gpuRow > 0 && static_cast<size_t>(gpuRow - 1) < m_gpuApiSupport.size()
-            && !m_gpuApiSupport[gpuRow - 1][0])
-        {
-            ResultText().Text(locText("The selected GPU does not report Vulkan support.",
-                                      "所选 GPU 未报告 Vulkan 支持。"));
-            Status().Text(locText("Vulkan-only workload blocked on this GPU.",
-                                  "所选 GPU 不支持这个 Vulkan 项目。"));
-            return;
-        }
-    }
-    const bool needsDx11Compute = workload != "gpu_burn" &&
-        workload != "gpu_stress" && workload != "stress" &&
-        workload != "volumetric";
-    if (preset == 1 && backendValue() == "dx11" && needsDx11Compute)
-    {
-        const int gpuRow = GpuBox().SelectedIndex();
-        if (gpuRow > 0 && static_cast<size_t>(gpuRow - 1) < m_gpuApiSupport.size() &&
-            !m_gpuApiSupport[gpuRow - 1][4])
-        {
-            ResultText().Text(locText(
-                "The selected DX11 adapter supports raster workloads but does not expose DirectCompute 4.x/5.0.",
-                "所选 DX11 适配器支持光栅负载，但没有提供 DirectCompute 4.x/5.0。"));
-            Status().Text(locText("This workload needs DX11 compute support.",
-                                  "这个负载需要 DX11 计算支持。"));
-            return;
-        }
-    }
     bool needCharts = false;
     auto jobs = buildPresetJobs(needCharts);
+    if (jobs.empty())
+    {
+        Status().Text(locText("No benchmark jobs were generated.", "没有生成任何测试任务。"));
+        return;
+    }
     launchJobs(std::move(jobs), needCharts);
 }
 
@@ -2562,6 +3073,7 @@ void MainWindow::OnPresetChanged(IInspectable const&, SelectionChangedEventArgs 
 {
     if (!m_uiReady) return;
     updateExtraLabel();
+    if (m_gpuEnumerationComplete) rebuildApiPicker(true);
 }
 
 // ---- history (via gpu_bench::LoadResults, in-process) ----------------------
@@ -3176,7 +3688,7 @@ void MainWindow::OnOpenCapturesFolder(IInspectable const&, RoutedEventArgs const
 void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
 {
     if (m_enginePath.empty()) { ChartsStatus().Text(locText("Engine/repo not found.", "未找到引擎/仓库。")); return; }
-    auto repo = std::filesystem::path(m_enginePath).parent_path().parent_path().parent_path();
+    auto repo = pathFromUtf8(m_enginePath).parent_path().parent_path().parent_path();
     if (!std::filesystem::exists(repo / "scripts" / "plot_workloads.py"))
     { ChartsStatus().Text(locText("scripts/plot_workloads.py not found.", "未找到 scripts/plot_workloads.py。")); return; }
     const auto python = findPythonExecutable();
@@ -3188,7 +3700,7 @@ void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
         return;
     }
 
-    const auto resultsPath = std::filesystem::path(gpu_bench::ResultsFilePath());
+    const auto resultsPath = pathFromUtf8(gpu_bench::ResultsFilePath());
     const auto imageDir = resultsPath.parent_path().parent_path() / L"reports" / L"images";
     std::error_code ec;
     std::filesystem::create_directories(imageDir, ec);
@@ -3203,7 +3715,7 @@ void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
     {
         ChartsStatus().Text(locText(
             "Another benchmark or report task is already running.",
-            "另一个跑分或报告任务正在运行。"));
+            "另一个测试或报告任务正在运行。"));
         return;
     }
     ChartsBusy().IsActive(true);
@@ -3217,10 +3729,10 @@ void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
     const auto imageDirW = imageDir.wstring();
     std::thread([this, strong, disp, repoW, pythonW, resultsW, imageDirW]()
     {
-        int rc = runProcess(
+        auto result = runProcess(
             L"\"" + pythonW + L"\" \"scripts\\plot_workloads.py\" --input \""
             + resultsW + L"\" --out \"" + imageDirW + L"\"", repoW);
-        disp.TryEnqueue([this, strong, imageDirW, rc]()
+        disp.TryEnqueue([this, strong, imageDirW, result = std::move(result)]()
         {
             ChartsPanel().Children().Clear();
             std::filesystem::path imgDir(imageDirW);
@@ -3241,8 +3753,9 @@ void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
                 ChartsPanel().Children().Append(img);
                 ++shown;
             }
-            ChartsStatus().Text(rc == 0 ? u8("Done — " + std::to_string(shown) + " chart(s).")
-                                        : u8("python exited with " + std::to_string(rc) + "."));
+            ChartsStatus().Text(result.exitCode == 0
+                ? u8("Done — " + std::to_string(shown) + " chart(s).")
+                : u8("python exited with " + std::to_string(result.exitCode) + "."));
             endTask(ActiveTask::Charts); ChartsBusy().IsActive(false);
         });
     }).detach();

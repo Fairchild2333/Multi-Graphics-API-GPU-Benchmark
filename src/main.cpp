@@ -3,6 +3,10 @@
 #include "cpu_benchmark.h"
 #include "gpu_engine.h"
 
+#if defined(_WIN32) && defined(HAVE_VULKAN)
+#include "renderdoc_app.h"
+#endif
+
 #ifdef HAVE_VULKAN
 #include "vulkan_backend.h"
 #endif
@@ -200,6 +204,24 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
 }
 
 static std::string ExeDirectory(const char* argv0) {
+#ifdef _WIN32
+    // argv is encoded with the active ANSI code page for a narrow main(), so
+    // it cannot faithfully represent every valid Windows installation path.
+    // Query the process image through the Unicode API and keep the project's
+    // existing UTF-8 string contract for backend shader paths.
+    std::wstring modulePath(32768, L'\0');
+    const DWORD length = GetModuleFileNameW(
+        nullptr, modulePath.data(), static_cast<DWORD>(modulePath.size()));
+    if (length > 0 && length < modulePath.size()) {
+        modulePath.resize(length);
+        std::string directory =
+            std::filesystem::path(modulePath).parent_path().u8string();
+        if (!directory.empty() && directory.back() != '/' && directory.back() != '\\')
+            directory += std::filesystem::path::preferred_separator;
+        return directory;
+    }
+#endif
+
     std::string path(argv0);
     auto pos = path.find_last_of("\\/");
     return pos != std::string::npos ? path.substr(0, pos + 1) : "";
@@ -210,14 +232,14 @@ static std::string ExeDirectory(const char* argv0) {
 // capture layer through a manifest. Point the loader at the bundled manifest
 // before the early GPU probe creates a Vulkan instance. This is process-local:
 // no SDK, installer, administrator rights, or registry mutation is required.
-static void ConfigureBundledRenderDocLayer(const std::string& shaderDir,
-                                           bool captureRequested) {
-    if (!captureRequested) return;
+static std::filesystem::path ConfigureBundledRenderDocLayer(
+    const std::string& shaderDir, bool captureRequested) {
+    if (!captureRequested) return {};
 
     std::error_code ec;
     auto exeDir = std::filesystem::absolute(
         std::filesystem::u8path(shaderDir.empty() ? "." : shaderDir), ec);
-    if (ec) return;
+    if (ec) return {};
 
     const std::filesystem::path candidates[] = {
         exeDir / "tools" / "RenderDoc",
@@ -241,9 +263,49 @@ static void ConfigureBundledRenderDocLayer(const std::string& shaderDir,
         SetEnvironmentVariableW(L"ENABLE_VULKAN_RENDERDOC_CAPTURE", L"1");
         std::cout << "[RenderDoc] Configured bundled Vulkan layer: "
                   << dir.u8string() << "\n";
-        return;
+        return dir / "renderdoc.dll";
     }
+    return {};
 }
+
+#ifdef HAVE_VULKAN
+// The bundled Vulkan layer is loaded by the early vkCreateInstance probe, well
+// before AppBase::InitRenderDoc normally obtains the in-application API.  GUI
+// workers must disable RenderDoc's modal crash reporter before that probe can
+// fault. Keep this explicit reference for the worker lifetime so the Vulkan
+// loader reuses the exact DLL selected by ConfigureBundledRenderDocLayer.
+static HMODULE g_guiWorkerRenderDocModule = nullptr;
+
+static bool PrepareGuiWorkerRenderDocForVulkanProbe(
+    const std::filesystem::path& renderDocDll) {
+    if (renderDocDll.empty() || g_guiWorkerRenderDocModule)
+        return true;
+
+    HMODULE module = LoadLibraryW(renderDocDll.c_str());
+    if (!module) {
+        std::cerr << "[RenderDoc] Could not preload the bundled DLL before GPU probe (Win32 "
+                  << GetLastError() << ").\n";
+        return false;
+    }
+
+    auto getApi = reinterpret_cast<pRENDERDOC_GetAPI>(
+        GetProcAddress(module, "RENDERDOC_GetAPI"));
+    RENDERDOC_API_1_6_0* api = nullptr;
+    if (!getApi || getApi(eRENDERDOC_API_Version_1_6_0,
+                          reinterpret_cast<void**>(&api)) != 1 ||
+        !api || !api->UnloadCrashHandler) {
+        std::cerr << "[RenderDoc] Bundled DLL did not expose the expected in-application API; "
+                     "the early crash handler could not be disabled.\n";
+        FreeLibrary(module);
+        return false;
+    }
+
+    api->UnloadCrashHandler();
+    g_guiWorkerRenderDocModule = module;
+    std::cout << "[RenderDoc] Disabled the GUI worker crash handler before Vulkan GPU probe.\n";
+    return true;
+}
+#endif
 #endif
 
 #ifdef _WIN32
@@ -319,7 +381,8 @@ static bool NameLooksIntegrated(const std::string& name) {
     return false;  // unknown vendor, assume discrete
 }
 
-static std::vector<GpuInfo> ProbeGpus() {
+static std::vector<GpuInfo> ProbeGpus(
+    [[maybe_unused]] const std::filesystem::path& guiWorkerRenderDocDll = {}) {
     std::vector<GpuInfo> gpus;
 
 #ifdef _WIN32
@@ -483,6 +546,13 @@ static std::vector<GpuInfo> ProbeGpus() {
     // --- Vulkan probe (if compiled in) ---
 #ifdef HAVE_VULKAN
     if (VulkanLoaderAvailable()) {
+#ifdef _WIN32
+        // Delay the explicit preload until after DXGI/D3D probing. Loading
+        // RenderDoc any earlier would unnecessarily change those probes by
+        // installing its D3D hooks; this is the last safe point before the
+        // Vulkan implicit layer can initialise its crash handler.
+        PrepareGuiWorkerRenderDocForVulkanProbe(guiWorkerRenderDocDll);
+#endif
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.apiVersion = VK_API_VERSION_1_1;
@@ -558,6 +628,7 @@ static std::vector<GpuInfo> ProbeGpus() {
                                 std::string shortVk = vkName.substr(0, vkName.size() / 2);
                                 if (gpu.name.find(shortVk) != std::string::npos) {
                                     gpu.supportsVulkan = true;
+                                    gpu.vkPhysDevIndex = static_cast<std::int32_t>(di);
                                     if (vkIsDiscrete) gpu.isDiscrete = true;
                                     matched = true;
                                     break;
@@ -574,6 +645,7 @@ static std::vector<GpuInfo> ProbeGpus() {
                     info.isDiscrete = vkIsDiscrete;
                     info.supportsDX11 = false;
                     info.supportsDX12 = false;
+                    info.vkPhysDevIndex = static_cast<std::int32_t>(di);
                     gpus.push_back(info);
                 }
             }
@@ -856,6 +928,11 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             benchCfg.framesInFlight = static_cast<std::uint32_t>(n);
         } else if (std::strcmp(argv[i], "--headless") == 0) {
             benchCfg.headless = true;
+        } else if (std::strcmp(argv[i], "--gui-worker") == 0) {
+            // Internal WinUI orchestration marker. GPU work is isolated in a
+            // child process, so RenderDoc must not replace the worker's own
+            // crash reporting with a separate modal Bug Reporter.
+            benchCfg.guiWorker = true;
         } else if (std::strcmp(argv[i], "--time") == 0 && i + 1 < argc) {
             benchCfg.maxRunTimeSec = std::stod(argv[++i]);
             timeArgGiven = true;
@@ -1293,11 +1370,16 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     const std::string shaderDir = ExeDirectory(argv[0]);
 
 #ifdef _WIN32
-    ConfigureBundledRenderDocLayer(shaderDir, benchCfg.captureAtSec > 0.0);
+    const auto bundledRenderDocDll = ConfigureBundledRenderDocLayer(
+        shaderDir, benchCfg.captureAtSec > 0.0);
+    const auto guiWorkerRenderDocDll = benchCfg.guiWorker
+        ? bundledRenderDocDll : std::filesystem::path{};
+#else
+    const std::filesystem::path guiWorkerRenderDocDll;
 #endif
 
     // ---- Phase 1: Probe all GPUs and APIs ----
-    auto gpus = ProbeGpus();
+    auto gpus = ProbeGpus(guiWorkerRenderDocDll);
 
     // Machine-readable GPU list for external front-ends (WinUI launcher).
     // One line per GPU: GPU<TAB>index<TAB>name<TAB>vk<TAB>dx12<TAB>dx11<TAB>ogl
@@ -1486,6 +1568,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         allCfg.framesInFlight = benchCfg.framesInFlight;
         allCfg.hostMemory    = benchCfg.hostMemory;
         allCfg.captureAtSec  = benchCfg.captureAtSec;
+        allCfg.guiWorker     = benchCfg.guiWorker;
         if (benchCfg.maxRunTimeSec != 15.0)
             allCfg.maxRunTimeSec = benchCfg.maxRunTimeSec;
         if (benchCfg.benchmarkMode) {
@@ -2383,15 +2466,43 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             std::cout << "[Graphics API] Selected: " << selectedBackend << std::endl;
         }
 
+        // --warp only has meaning for D3D. Normalize it before validating an
+        // explicit GPU/API pair so it cannot bypass the capability check for
+        // Vulkan, Metal, or OpenGL.
+        if (warp && selectedBackend != "dx11" && selectedBackend != "dx12") {
+            warp = false;
+        }
+
+        // A GUI may deliberately schedule an unsupported GPU/API pair so the
+        // result matrix records a clear failure. Never translate a missing
+        // backend-specific index (-1) into "automatic" and silently run a
+        // different adapter.
+        if (!warp && gpuIndex >= 0) {
+            if (static_cast<std::size_t>(gpuIndex) >= gpus.size()) {
+                std::cerr << "GPU index " << gpuIndex << " is out of range (0-"
+                          << (gpus.empty() ? 0 : gpus.size() - 1) << ").\n";
+                return 1;
+            }
+            const auto& requested = gpus[static_cast<std::size_t>(gpuIndex)];
+            bool reportedSupport = false;
+            if (selectedBackend == "vulkan")      reportedSupport = requested.supportsVulkan;
+            else if (selectedBackend == "dx12")  reportedSupport = requested.supportsDX12;
+            else if (selectedBackend == "dx11")  reportedSupport = requested.supportsDX11;
+            else if (selectedBackend == "metal") reportedSupport = requested.supportsMetal;
+            else if (selectedBackend == "opengl") reportedSupport = requested.supportsOpenGL;
+            if (!reportedSupport) {
+                std::cerr << "GPU index " << gpuIndex << " (" << requested.name
+                          << ") does not report support for backend '"
+                          << selectedBackend << "'.\n";
+                return 1;
+            }
+        }
+
         if (!warp && gpuIndex >= 0 &&
             static_cast<std::size_t>(gpuIndex) < gpus.size() &&
             gpus[static_cast<std::size_t>(gpuIndex)].isSoftware &&
             (selectedBackend == "dx11" || selectedBackend == "dx12")) {
             warp = true;
-        }
-
-        if (warp && selectedBackend != "dx11" && selectedBackend != "dx12") {
-            warp = false;
         }
 
 #ifdef _WIN32
@@ -2502,6 +2613,15 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             } else {
                 effectiveGpuIndex = gpuIndex;  // Metal: use as-is
             }
+        }
+
+        if (!warp && gpuIndex >= 0 && effectiveGpuIndex < 0 &&
+            (selectedBackend == "vulkan" || selectedBackend == "dx11" ||
+             selectedBackend == "dx12")) {
+            std::cerr << "GPU index " << gpuIndex
+                      << " has no usable backend device index for '"
+                      << selectedBackend << "'.\n";
+            return 1;
         }
 
         if (selectedBackend == "opengl" && gpus.size() > 1) {

@@ -30,7 +30,12 @@
                         SelectionChanged="OnNavSelectionChanged">
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Name="NavRun" Content="GPU" Tag="0" IsSelected="True">
-                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE768;"/></NavigationViewItem.Icon>
+                    <NavigationViewItem.Icon>
+                        <!-- Fluent TV/graphics display glyph.  Keeping this in the
+                             system icon font matches every other navigation icon. -->
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                  Glyph="&#xE7F4;" FontSize="20"/>
+                    </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem x:Name="NavCpu" Content="CPU" Tag="5">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE950;"/></NavigationViewItem.Icon>
@@ -72,11 +77,11 @@
                                               SelectedIndex="1" SelectionChanged="OnPresetChanged">
                                         <ComboBoxItem x:Name="PresetQuick">Quick run (best API / GPU, Medium)</ComboBoxItem>
                                         <ComboBoxItem x:Name="PresetCustom">Custom run (choose API / GPU / workload)</ComboBoxItem>
-                                        <ComboBoxItem x:Name="PresetFullOne">Full analysis — selected workload / one GPU (all APIs + RenderDoc + charts)</ComboBoxItem>
-                                        <ComboBoxItem x:Name="PresetFullAll">Full analysis — selected workload / all GPUs × APIs (+ RenderDoc + charts)</ComboBoxItem>
-                                        <ComboBoxItem x:Name="PresetFlights">Flights test — one GPU (all APIs, custom flights)</ComboBoxItem>
-                                        <ComboBoxItem x:Name="PresetParticles">Particle test — one GPU (all APIs, custom particles)</ComboBoxItem>
-                                        <ComboBoxItem x:Name="PresetHeadless">Headless compute — one GPU (all APIs, pure compute)</ComboBoxItem>
+                                        <ComboBoxItem x:Name="PresetFullOne">Full analysis — selected workload / one GPU (selected APIs + RenderDoc + charts)</ComboBoxItem>
+                                        <ComboBoxItem x:Name="PresetFullAll">Full analysis — selected workload / all GPUs × selected APIs (+ RenderDoc + charts)</ComboBoxItem>
+                                        <ComboBoxItem x:Name="PresetFlights">Flights test — one GPU (selected APIs, custom flights)</ComboBoxItem>
+                                        <ComboBoxItem x:Name="PresetParticles">Particle test — one GPU (selected APIs, custom particles)</ComboBoxItem>
+                                        <ComboBoxItem x:Name="PresetHeadless">Headless compute — one GPU (selected APIs, pure compute)</ComboBoxItem>
                                     </ComboBox>
                                     <!-- Responsive: star columns shrink to fit so nothing clips at min width. -->
                                     <Grid ColumnSpacing="16">
@@ -87,21 +92,63 @@
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <ComboBox x:Name="GpuBox" Grid.Column="0" Header="GPU" MinWidth="160"
-                                                  HorizontalAlignment="Stretch"/>
-                                        <ComboBox x:Name="BackendBox" Grid.Column="1" Header="Graphics API" MinWidth="130"
-                                                  HorizontalAlignment="Stretch" SelectedIndex="0">
-                                            <ComboBoxItem x:Name="BackendAuto" Tag="auto">Auto</ComboBoxItem>
-                                            <ComboBoxItem x:Name="BackendVulkan" Tag="vulkan">Vulkan</ComboBoxItem>
-                                            <ComboBoxItem x:Name="BackendDx12" Tag="dx12">DirectX 12</ComboBoxItem>
-                                            <ComboBoxItem x:Name="BackendDx11" Tag="dx11">DirectX 11</ComboBoxItem>
-                                            <ComboBoxItem x:Name="BackendOpenGL" Tag="opengl">OpenGL</ComboBoxItem>
-                                        </ComboBox>
+                                                  HorizontalAlignment="Stretch"
+                                                  SelectionChanged="OnGpuSelectionChanged"
+                                                  Background="{ThemeResource ControlFillColorDefaultBrush}"
+                                                  BorderBrush="{ThemeResource ControlStrongStrokeColorDefaultBrush}"
+                                                  BorderThickness="1"/>
+                                        <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Bottom">
+                                            <TextBlock x:Name="ApiPickerLabel" Text="Graphics API" Margin="1,0,0,0"/>
+                                            <DropDownButton x:Name="ApiPickerButton" Content="Detecting…" MinWidth="130" Height="32"
+                                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                                            VerticalContentAlignment="Center"
+                                                            AutomationProperties.Name="Graphics API"
+                                                            Background="{ThemeResource ControlFillColorDefaultBrush}"
+                                                            BorderBrush="{ThemeResource ControlStrongStrokeColorDefaultBrush}"
+                                                            BorderThickness="1">
+                                                <DropDownButton.Flyout>
+                                                    <Flyout x:Name="ApiPickerFlyout" Placement="Bottom">
+                                                        <StackPanel Width="300" Spacing="10">
+                                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                                <Button x:Name="SelectAllRunApis" Content="All"/>
+                                                                <Button x:Name="ClearAllRunApis" Content="None"/>
+                                                            </StackPanel>
+                                                            <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
+                                                                <StackPanel Spacing="12">
+                                                                    <StackPanel x:Name="SupportedApisGroup" Spacing="4"
+                                                                                AutomationProperties.Name="Supported APIs">
+                                                                        <TextBlock x:Name="SupportedApisLabel" Text="Supported"
+                                                                                   FontWeight="SemiBold"
+                                                                                   AutomationProperties.HeadingLevel="Level2"/>
+                                                                        <StackPanel x:Name="SupportedApisPanel" Spacing="2"/>
+                                                                    </StackPanel>
+                                                                    <StackPanel x:Name="UnsupportedApisGroup" Spacing="4"
+                                                                                AutomationProperties.Name="Unsupported APIs">
+                                                                        <TextBlock x:Name="UnsupportedApisLabel" Text="Not reported as supported"
+                                                                                   FontWeight="SemiBold"
+                                                                                   AutomationProperties.HeadingLevel="Level2"/>
+                                                                        <StackPanel x:Name="UnsupportedApisPanel" Spacing="2"/>
+                                                                    </StackPanel>
+                                                                </StackPanel>
+                                                            </ScrollViewer>
+                                                            <TextBlock x:Name="UnsupportedApisHint"
+                                                                       Text="Unsupported selections remain available and will be reported by the CLI."
+                                                                       TextWrapping="Wrap" FontSize="12"
+                                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                                        </StackPanel>
+                                                    </Flyout>
+                                                </DropDownButton.Flyout>
+                                            </DropDownButton>
+                                        </StackPanel>
                                         <ComboBox x:Name="WorkloadBox" Grid.Column="2" Header="Workload" MinWidth="120"
                                                   HorizontalAlignment="Stretch" SelectedIndex="0"
-                                                  SelectionChanged="OnWorkloadChanged">
+                                                  SelectionChanged="OnWorkloadChanged"
+                                                  Background="{ThemeResource ControlFillColorDefaultBrush}"
+                                                  BorderBrush="{ThemeResource ControlStrongStrokeColorDefaultBrush}"
+                                                  BorderThickness="1">
                                             <ComboBoxItem x:Name="WorkloadStream" Tag="stream">Particle — Memory Throughput</ComboBoxItem>
-                                            <ComboBoxItem x:Name="WorkloadGpuBurn" Tag="gpu_burn">GPU Burn — Plasma Bloom</ComboBoxItem>
-                                            <ComboBoxItem x:Name="WorkloadCinematicLiquid" Tag="cinematic_liquid">Cinematic Liquid v2 — Interactive Pool</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadGpuBurn" Tag="gpu_burn">Plasma Bloom — GPU Burn</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadCinematicLiquid" Tag="cinematic_liquid">Fluid — Interactive Pool</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadGpuStress" Tag="gpu_stress">GraphicsBurn v1 / Component (Advanced)</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadNBody" Tag="nbody">N-Body — Advanced Compute</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadSynthPeak" Tag="synthpeak">SynthPeak — Advanced Synthetic</ComboBoxItem>
@@ -119,6 +166,12 @@
                                             <ComboBoxItem x:Name="PrecisionInt32" Tag="int32">int32 — integer ops</ComboBoxItem>
                                         </ComboBox>
                                     </Grid>
+                                    <!-- A full ToggleSwitch makes the hidden/visible state discoverable
+                                         even on light backgrounds where an unchecked box is too subtle. -->
+                                    <ToggleSwitch x:Name="ShowLegacyToggle"
+                                                  Header="Show legacy &amp; advanced tests"
+                                                  OffContent="Hidden" OnContent="Shown"
+                                                  Toggled="OnShowLegacyToggled"/>
                                     <InfoBar x:Name="WorkloadInfo" IsOpen="True" IsClosable="False"
                                              Severity="Informational"/>
                                     <!-- Responsive: Extra stretches/shrinks so it never clips at min width. -->
@@ -165,14 +218,14 @@
                                     BorderThickness="1" CornerRadius="8">
                                 <StackPanel Spacing="8">
                                     <TextBlock x:Name="AdvancedLabel" Text="Advanced" FontWeight="SemiBold"/>
-                                    <StackPanel Orientation="Horizontal" Spacing="20">
+                                    <StackPanel Orientation="Horizontal" Spacing="14">
                                         <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                             <CheckBox x:Name="HeadlessBox" Content="Headless" MinWidth="0"/>
                                             <FontIcon x:Name="HeadlessInfo" Glyph="&#xE946;" FontSize="14"
                                                       VerticalAlignment="Center"
                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                         </StackPanel>
-                                        <CheckBox x:Name="VsyncBox" Content="V-Sync"/>
+                                        <CheckBox x:Name="VsyncBox" Content="V-Sync" MinWidth="0"/>
                                         <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                             <CheckBox x:Name="HostMemBox" Content="Host memory" MinWidth="0"/>
                                             <FontIcon x:Name="HostMemInfo" Glyph="&#xE946;" FontSize="14"

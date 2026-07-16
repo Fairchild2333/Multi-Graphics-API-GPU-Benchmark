@@ -69,7 +69,9 @@ if ([IO.Path]::GetExtension($ArchivePath) -ne '.zip') {
 }
 $archiveHash = (Get-FileHash -LiteralPath $ArchivePath -Algorithm SHA256).Hash.ToLowerInvariant()
 if ($Sha256 -and $archiveHash -ne $Sha256.ToLowerInvariant()) {
-    Remove-Item -LiteralPath $ArchivePath -Force
+    if ($PSCmdlet.ParameterSetName -eq 'Download') {
+        Remove-Item -LiteralPath $ArchivePath -Force
+    }
     throw "RenderDoc SHA-256 mismatch. Expected $($Sha256.ToLowerInvariant()), got $archiveHash."
 }
 
@@ -105,6 +107,34 @@ if (-not $NoClean) { Reset-SafeOutputDirectory $OutputDir }
 else { New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null }
 Copy-Item -Path (Join-Path $payloadRoot '*') -Destination $OutputDir -Recurse -Force
 
+# RenderDoc's crash Bug Reporter probes OpenSSL as libcrypto-1_1-64.dll /
+# libssl-1_1-64.dll, but the official archive only ships the -x64-suffixed
+# names.  On a machine with no system OpenSSL (e.g. a clean VM) the reporter
+# then fails to initialise SSL and shows a broken-reporter dialog on top of
+# whatever crashed.  Ship byte-identical alias copies so the bundled reporter
+# can at least start; noted in BUNDLE_SOURCE.json below.
+$sslAliases = @(
+    @{ Source = 'libcrypto-1_1-x64.dll'; Alias = 'libcrypto-1_1-64.dll' },
+    @{ Source = 'libssl-1_1-x64.dll';    Alias = 'libssl-1_1-64.dll' })
+$aliasedSsl = [Collections.Generic.List[string]]::new()
+foreach ($entry in $sslAliases) {
+    $sourcePath = Join-Path $OutputDir $entry.Source
+    $aliasPath = Join-Path $OutputDir $entry.Alias
+    if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
+        throw "RenderDoc payload is missing the OpenSSL source DLL: $($entry.Source)"
+    }
+    if (Test-Path -LiteralPath $aliasPath -PathType Leaf) {
+        $sourceHash = (Get-FileHash -LiteralPath $sourcePath -Algorithm SHA256).Hash
+        $aliasHash = (Get-FileHash -LiteralPath $aliasPath -Algorithm SHA256).Hash
+        if ($sourceHash -ne $aliasHash) {
+            throw "RenderDoc already contains a non-identical SSL alias: $($entry.Alias)"
+        }
+    } else {
+        Copy-Item -LiteralPath $sourcePath -Destination $aliasPath
+        $aliasedSsl.Add($entry.Alias)
+    }
+}
+
 $fileVersion = (Get-Item -LiteralPath (Join-Path $OutputDir 'qrenderdoc.exe')).VersionInfo.FileVersion
 $source = [ordered]@{
     schemaVersion = 1
@@ -113,6 +143,12 @@ $source = [ordered]@{
     archiveName = [IO.Path]::GetFileName($ArchivePath)
     archiveSha256 = $archiveHash
     sourceUrl = if ($PSCmdlet.ParameterSetName -eq 'Download') { $DownloadUrl } else { $null }
+    localModifications = @()
+}
+if ($aliasedSsl.Count -gt 0) {
+    $source.localModifications = [object[]]@(
+        "Added byte-identical OpenSSL alias copies for the bug reporter: " +
+        ($aliasedSsl -join ', '))
 }
 $source | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $OutputDir 'BUNDLE_SOURCE.json') -Encoding utf8
 

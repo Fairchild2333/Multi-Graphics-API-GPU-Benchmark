@@ -33,9 +33,15 @@ namespace winrt::gpu_bench_gui::implementation
         void OnPresetChanged(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
+        void OnGpuSelectionChanged(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
         void OnWorkloadChanged(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
+        void OnShowLegacyToggled(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void OnDurationUnitChanged(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
@@ -83,24 +89,26 @@ namespace winrt::gpu_bench_gui::implementation
         };
 
         void applyLanguage();
+        void applyWorkloadVisibility();
         void applyTheme(int index);
         void updateCaptionButtonColors();
         void updateResizeBackdropColor();
         void animatePageIn(winrt::Microsoft::UI::Xaml::FrameworkElement const& page);
         void showPage(int index);
         void populateGpus();
+        void rebuildApiPicker(bool preserveSelection);
+        void updateApiPickerSummary();
         void updateExtraLabel();
         void refreshHistory();         // (re)load from disk + rebuild filters + render
         void applyHistoryView();       // filter + sort + render m_results
         void rebuildGpuFilter();       // distinct-device toggle menu items
         void rebuildHistoryFilters();  // API + workload + particle-count toggle menus
         std::string selected(winrt::Microsoft::UI::Xaml::Controls::ComboBox const& box);
-        std::string backendValue();    // capitalized display -> engine token
+        std::vector<std::string> selectedApis();
         std::string particleValue();   // "" means use engine default
         // Duration as engine args: {"--time","<s>"} (default) or {"--benchmark","<frames>"}.
         std::vector<std::string> durationArgs();
-        std::vector<std::string> buildArgs(bool runAll);
-        // Build the cliMain invocation(s) for the selected preset (sets needCharts).
+        // Build child-process CLI invocation(s) for the selected preset (sets needCharts).
         std::vector<std::vector<std::string>> buildPresetJobs(bool& needCharts);
         void launchJobs(std::vector<std::vector<std::string>> jobs, bool needCharts);
         void launchCpuBenchmark(std::string mode, double seconds, double warmupSeconds);
@@ -113,9 +121,11 @@ namespace winrt::gpu_bench_gui::implementation
         HBRUSH m_bgBrush{ nullptr };
         bool  m_uiReady{ false };
         bool  m_suppressCombo{ false };
-        std::string m_enginePath;          // build/Release/gpu_benchmark.exe (shader dir)
+        std::string m_enginePath;          // UTF-8 path to isolated gpu_benchmark.exe worker
         std::vector<int> m_gpuIndices;     // engine GPU index per GpuBox row after "(auto)"
         std::vector<std::array<bool, 5>> m_gpuApiSupport;  // {vulkan,dx12,dx11,opengl,dx11Compute}
+        bool m_gpuEnumerationComplete{ false };
+        bool m_apiSelectionInitialized{ false };
         std::string m_cpuName;             // for relabelling the software (WARP) renderer
 
         std::atomic<ActiveTask> m_activeTask{ ActiveTask::None };

@@ -17,7 +17,7 @@
 #endif
 
 #ifndef MyAppVersion
-  #define MyAppVersion "0.1.0"
+  #define MyAppVersion "0.1.1"
 #endif
 #ifndef StageDir
   #define StageDir AddBackslash(SourcePath) + "..\out\stage\windows-" + MyAppArch
@@ -78,10 +78,16 @@ AppPublisher=Mangekyo contributors
 VersionInfoVersion={#MyAppVersion}
 VersionInfoDescription={#MyAppName} Setup
 VersionInfoProductName={#MyAppName}
-DefaultDirName={localappdata}\Programs\Mangekyo
+; Install into Program Files for all users.  Use the explicit {pf}/{pf32}
+; constants (resolved by ArchitecturesInstallIn64BitMode) instead of {autopf}:
+; {autopf} defers to the privileges dialog and can silently fall back to a
+; per-user %LOCALAPPDATA%\Programs path, which is not what we want.  A hard
+; admin install keeps {app} in Program Files; app data still lives in
+; %LOCALAPPDATA%, so the install directory stays read-only at run time.
+DefaultDirName={pf}\Mangekyo
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-PrivilegesRequired=lowest
+PrivilegesRequired=admin
 ArchitecturesAllowed={#MyAppArchAllowed}
 ArchitecturesInstallIn64BitMode={#MyAppArchAllowed}
 MinVersion=10.0.17763

@@ -204,6 +204,13 @@ void AppBase::InitRenderDoc() {
     if (ret != 1 || !api) return;
     rdocApi_ = api;
 
+    // The CLI installs its own unhandled-exception filter. For an isolated GUI
+    // worker, let that worker report a driver/device fault through stdout and
+    // its exit code instead of opening RenderDoc's separate modal reporter.
+    // Standalone CLI users retain RenderDoc's normal crash-reporting behaviour.
+    if (config_.guiWorker)
+        api->UnloadCrashHandler();
+
     api->SetCaptureOptionU32(eRENDERDOC_Option_CaptureCallstacks, 1);
     api->SetCaptureOptionU32(eRENDERDOC_Option_RefAllResources, 1);
     api->SetCaptureOptionU32(eRENDERDOC_Option_SaveAllInitials, 1);
@@ -243,14 +250,44 @@ void AppBase::UpdateRenderDocCapturePath() {
     if (!rdocApi_) return;
     auto* api = static_cast<RENDERDOC_API_1_6_0*>(rdocApi_);
 
-    std::string backendTag = GetBackendName();
-    for (auto& ch : backendTag)
-        if (ch == ' ' || ch == '.') ch = '_';
+    auto captureTag = [](std::string value, const char* fallback) {
+        const std::string original = value;
+        for (auto& ch : value) {
+            const auto byte = static_cast<unsigned char>(ch);
+            if (byte < 0x20 || ch == ' ' || ch == '.' || ch == '(' || ch == ')' ||
+                std::strchr("<>:\"/\\|?*", ch) != nullptr)
+                ch = '_';
+        }
+        value.erase(std::unique(value.begin(), value.end(),
+            [](char a, char b) { return a == '_' && b == '_'; }), value.end());
+        while (!value.empty() && value.front() == '_') value.erase(value.begin());
+        while (!value.empty() && value.back() == '_') value.pop_back();
+        if (value.empty()) value = fallback;
 
-    std::string gpuTag = config_.gpuDisplayName.empty() ? GetDeviceName() : config_.gpuDisplayName;
-    for (auto& ch : gpuTag)
-        if (ch == ' ' || ch == '.' || ch == '(' || ch == ')' || ch == '/') ch = '_';
-    while (!gpuTag.empty() && gpuTag.back() == '_') gpuTag.pop_back();
+        // Keep the complete capture path comfortably below legacy MAX_PATH,
+        // while a stable suffix prevents two long GPU names from colliding.
+        if (value.size() > 80) {
+            std::uint32_t hash = 2166136261u;
+            for (unsigned char byte : original) {
+                hash ^= byte;
+                hash *= 16777619u;
+            }
+            std::size_t cut = 64;
+            while (cut > 0 && cut < value.size() &&
+                   (static_cast<unsigned char>(value[cut]) & 0xC0u) == 0x80u)
+                --cut;
+            value.resize(cut);
+            std::ostringstream suffix;
+            suffix << '_' << std::hex << std::setw(8) << std::setfill('0') << hash;
+            value += suffix.str();
+        }
+        return value;
+    };
+
+    std::string backendTag = captureTag(GetBackendName(), "api");
+    std::string gpuTag = captureTag(
+        config_.gpuDisplayName.empty() ? GetDeviceName() : config_.gpuDisplayName,
+        "gpu");
 
     std::string pathTemplate = rdocCaptureDir_ + backendTag + "_" + gpuTag
                              + "_" + workloadId(config_.workload);
@@ -303,12 +340,15 @@ void AppBase::Run() {
     PrintSummary();
 
     auto result = CollectResult();
+
+    // Commit the sample only after backend/RenderDoc cleanup succeeds. A
+    // driver fault during teardown must not leave a false-success history row.
+    CleanupBackend();
+
     if (AppendResult(result)) {
         std::cout << "[Results] Saved as " << result.id
                   << " -> " << ResultsFilePath() << std::endl;
     }
-
-    CleanupBackend();
 }
 
 void AppBase::InitWindow() {
@@ -1386,7 +1426,8 @@ void AppBase::recordWindowSample(double avgComputeMs, double avgRenderMs) {
 }
 
 std::vector<char> AppBase::ReadFileBytes(const std::string& filename) {
-    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+    std::ifstream file(std::filesystem::u8path(filename),
+                       std::ios::ate | std::ios::binary);
     if (!file.is_open()) {
         throw std::runtime_error("Failed to open file: " + filename);
     }

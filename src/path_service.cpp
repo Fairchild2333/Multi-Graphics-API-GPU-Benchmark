@@ -4,13 +4,41 @@
 #include <stdexcept>
 #include <string>
 
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
 namespace gpu_bench::paths {
 namespace {
 
 std::filesystem::path EnvPath(const char* name) {
+#ifdef _WIN32
+    // Environment variables returned by getenv() use the active ANSI code
+    // page. Read them as UTF-16 so Chinese user profiles and overrides remain
+    // valid native filesystem paths.
+    std::wstring wideName;
+    while (*name != '\0')
+        wideName.push_back(static_cast<unsigned char>(*name++));
+
+    const DWORD required = GetEnvironmentVariableW(wideName.c_str(), nullptr, 0);
+    if (required == 0)
+        return {};
+
+    std::wstring value(required, L'\0');
+    const DWORD length = GetEnvironmentVariableW(
+        wideName.c_str(), value.data(), static_cast<DWORD>(value.size()));
+    if (length == 0 || length >= value.size())
+        return {};
+    value.resize(length);
+    return std::filesystem::path(value);
+#else
     const char* value = std::getenv(name);
     return value && *value ? std::filesystem::u8path(value)
                            : std::filesystem::path{};
+#endif
 }
 
 std::filesystem::path PlatformDataRoot() {

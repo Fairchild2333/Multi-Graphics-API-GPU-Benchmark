@@ -377,6 +377,7 @@ struct BenchmarkConfig {
     bool          hostMemory         = false;
     bool          particlesOverridden = false;
     bool          headless           = false;    // pure compute, no window/swapchain/present
+    bool          guiWorker          = false;    // internal: isolated WinUI child process
     Workload      workload           = Workload::Stream;
     float         softening          = 0.01f;     // N-body: avoids 1/0 singularity
     std::uint32_t fractalIter        = kFractalDefaultIter;  // StressFractal per-pixel iterations

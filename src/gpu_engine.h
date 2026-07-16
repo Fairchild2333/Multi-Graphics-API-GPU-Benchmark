@@ -1,9 +1,9 @@
 #pragma once
 
-// Public entry point of the gpu_engine static library. Both the CLI executable
-// and the WinUI 3 (C++/WinRT) GUI link gpu_engine and call cliMain in-process --
-// the GUI runs it on a worker thread with synthesized argv, so the benchmark
-// runs in the GUI's own process (no subprocess). See winui/ and docs/.
+// Public entry point of the gpu_engine static library. The CLI executable uses
+// this directly, and the WinUI executable keeps it for explicit command-line
+// forwarding. Interactive GUI benchmarks are isolated gpu_benchmark.exe child
+// processes so driver/capture-tool faults cannot take down the WinUI shell.
 
 namespace gpu_bench {
 
@@ -11,9 +11,7 @@ namespace gpu_bench {
 // argv/argc follow the usual C convention. Returns a process-style exit code.
 int cliMain(int argc, char* argv[]);
 
-// When true, cliMain() skips glfwTerminate() on exit. Set by the GUI so that
-// sequential in-process benchmark jobs can re-use GLFW without a full
-// teardown/re-init cycle between each run.
+// Legacy embedding hook: when true, cliMain() skips glfwTerminate() on exit.
 inline bool skipGlfwTerminate = false;
 
 }  // namespace gpu_bench

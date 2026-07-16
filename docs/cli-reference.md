@@ -121,7 +121,7 @@ runs append summary rows unless `--cpu-no-save` is supplied.
 > comparison table afterward; does **not** run Python.
 >
 > Explicit `--time` also counts as a "direct run" (no menu) — this is what lets
-> the GUI's time-mode presets work in-process (main.cpp:788).
+> the GUI's isolated benchmark workers use time-mode presets (main.cpp:788).
 
 `cinematic_liquid_v1` is a public selector for the preserved original liquid
 implementation even though persisted rows retain the historical workload id
