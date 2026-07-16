@@ -57,13 +57,18 @@
             <Grid x:Name="RootGrid" Padding="0,4,0,0">
 
                 <!-- ===================== Run page ===================== -->
-                <Grid x:Name="RunPage" Visibility="Visible" Margin="28,12,28,0">
+                <Grid x:Name="RunPage" Visibility="Visible" Margin="28,12,28,0"
+                      IsTabStop="True"
+                      PointerPressed="OnGpuPagePointerPressed">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="0,0,4,0">
+                    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  HorizontalScrollMode="Disabled"
+                                  Padding="0,0,4,0">
                         <StackPanel Spacing="12">
                             <TextBlock x:Name="RunTitle" Text="GPU Benchmark" Style="{StaticResource TitleTextBlockStyle}"/>
 
@@ -93,59 +98,49 @@
                                         </Grid.ColumnDefinitions>
                                         <ComboBox x:Name="GpuBox" Grid.Column="0" Header="GPU" MinWidth="160"
                                                   HorizontalAlignment="Stretch"
-                                                  SelectionChanged="OnGpuSelectionChanged"
-                                                  Background="{ThemeResource ControlFillColorDefaultBrush}"
-                                                  BorderBrush="{ThemeResource ControlStrongStrokeColorDefaultBrush}"
-                                                  BorderThickness="1"/>
-                                        <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Bottom">
-                                            <TextBlock x:Name="ApiPickerLabel" Text="Graphics API" Margin="1,0,0,0"/>
-                                            <DropDownButton x:Name="ApiPickerButton" Content="Detecting…" MinWidth="130" Height="32"
-                                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                                            VerticalContentAlignment="Center"
-                                                            AutomationProperties.Name="Graphics API"
-                                                            Background="{ThemeResource ControlFillColorDefaultBrush}"
-                                                            BorderBrush="{ThemeResource ControlStrongStrokeColorDefaultBrush}"
-                                                            BorderThickness="1">
-                                                <DropDownButton.Flyout>
-                                                    <Flyout x:Name="ApiPickerFlyout" Placement="Bottom">
-                                                        <StackPanel Width="300" Spacing="10">
-                                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                                <Button x:Name="SelectAllRunApis" Content="All"/>
-                                                                <Button x:Name="ClearAllRunApis" Content="None"/>
-                                                            </StackPanel>
-                                                            <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
-                                                                <StackPanel Spacing="12">
-                                                                    <StackPanel x:Name="SupportedApisGroup" Spacing="4"
-                                                                                AutomationProperties.Name="Supported APIs">
-                                                                        <TextBlock x:Name="SupportedApisLabel" Text="Supported"
-                                                                                   FontWeight="SemiBold"
-                                                                                   AutomationProperties.HeadingLevel="Level2"/>
-                                                                        <StackPanel x:Name="SupportedApisPanel" Spacing="2"/>
-                                                                    </StackPanel>
-                                                                    <StackPanel x:Name="UnsupportedApisGroup" Spacing="4"
-                                                                                AutomationProperties.Name="Unsupported APIs">
-                                                                        <TextBlock x:Name="UnsupportedApisLabel" Text="Not reported as supported"
-                                                                                   FontWeight="SemiBold"
-                                                                                   AutomationProperties.HeadingLevel="Level2"/>
-                                                                        <StackPanel x:Name="UnsupportedApisPanel" Spacing="2"/>
-                                                                    </StackPanel>
-                                                                </StackPanel>
-                                                            </ScrollViewer>
-                                                            <TextBlock x:Name="UnsupportedApisHint"
-                                                                       Text="Unsupported selections remain available and will be reported by the CLI."
-                                                                       TextWrapping="Wrap" FontSize="12"
-                                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                                  SelectionChanged="OnGpuSelectionChanged"/>
+                                        <!-- ComboBox shell shows the summary; DropDownOpened opens the multi-select flyout. -->
+                                        <ComboBox x:Name="ApiPickerBox" Grid.Column="1" Header="Graphics API" MinWidth="130"
+                                                  HorizontalAlignment="Stretch"
+                                                  DropDownOpened="OnApiPickerDropDownOpened"
+                                                  AutomationProperties.Name="Graphics API">
+                                            <ComboBoxItem x:Name="ApiPickerSummaryItem" Content="Detecting…"/>
+                                            <FlyoutBase.AttachedFlyout>
+                                                <Flyout x:Name="ApiPickerFlyout" Placement="Bottom">
+                                                    <StackPanel Width="300" Spacing="10">
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <Button x:Name="SelectAllRunApis" Content="All"/>
+                                                            <Button x:Name="ClearAllRunApis" Content="None"/>
                                                         </StackPanel>
-                                                    </Flyout>
-                                                </DropDownButton.Flyout>
-                                            </DropDownButton>
-                                        </StackPanel>
+                                                        <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
+                                                            <StackPanel Spacing="12">
+                                                                <StackPanel x:Name="SupportedApisGroup" Spacing="4"
+                                                                            AutomationProperties.Name="Supported APIs">
+                                                                    <TextBlock x:Name="SupportedApisLabel" Text="Supported"
+                                                                               FontWeight="SemiBold"
+                                                                               AutomationProperties.HeadingLevel="Level2"/>
+                                                                    <StackPanel x:Name="SupportedApisPanel" Spacing="2"/>
+                                                                </StackPanel>
+                                                                <StackPanel x:Name="UnsupportedApisGroup" Spacing="4"
+                                                                            AutomationProperties.Name="Unsupported APIs">
+                                                                    <TextBlock x:Name="UnsupportedApisLabel" Text="Not reported as supported"
+                                                                               FontWeight="SemiBold"
+                                                                               AutomationProperties.HeadingLevel="Level2"/>
+                                                                    <StackPanel x:Name="UnsupportedApisPanel" Spacing="2"/>
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                        </ScrollViewer>
+                                                        <TextBlock x:Name="UnsupportedApisHint"
+                                                                   Text="Unsupported selections remain available and will be reported by the CLI."
+                                                                   TextWrapping="Wrap" FontSize="12"
+                                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                                    </StackPanel>
+                                                </Flyout>
+                                            </FlyoutBase.AttachedFlyout>
+                                        </ComboBox>
                                         <ComboBox x:Name="WorkloadBox" Grid.Column="2" Header="Workload" MinWidth="120"
                                                   HorizontalAlignment="Stretch" SelectedIndex="0"
-                                                  SelectionChanged="OnWorkloadChanged"
-                                                  Background="{ThemeResource ControlFillColorDefaultBrush}"
-                                                  BorderBrush="{ThemeResource ControlStrongStrokeColorDefaultBrush}"
-                                                  BorderThickness="1">
+                                                  SelectionChanged="OnWorkloadChanged">
                                             <ComboBoxItem x:Name="WorkloadStream" Tag="stream">Particle — Memory Throughput</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadGpuBurn" Tag="gpu_burn">Plasma Bloom — GPU Burn</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadCinematicLiquid" Tag="cinematic_liquid">Fluid — Interactive Pool</ComboBoxItem>
@@ -166,12 +161,6 @@
                                             <ComboBoxItem x:Name="PrecisionInt32" Tag="int32">int32 — integer ops</ComboBoxItem>
                                         </ComboBox>
                                     </Grid>
-                                    <!-- A full ToggleSwitch makes the hidden/visible state discoverable
-                                         even on light backgrounds where an unchecked box is too subtle. -->
-                                    <ToggleSwitch x:Name="ShowLegacyToggle"
-                                                  Header="Show legacy &amp; advanced tests"
-                                                  OffContent="Hidden" OnContent="Shown"
-                                                  Toggled="OnShowLegacyToggled"/>
                                     <InfoBar x:Name="WorkloadInfo" IsOpen="True" IsClosable="False"
                                              Severity="Informational"/>
                                     <!-- Responsive: Extra stretches/shrinks so it never clips at min width. -->
@@ -200,13 +189,14 @@
                                             <TextBox x:Name="CustomParticleBox" Header="Custom particles" Width="220"
                                                      PlaceholderText="multiple of 256" Visibility="Collapsed"/>
                                         </StackPanel>
-                                        <TextBox x:Name="ExtraBox" Grid.Column="2" Grid.ColumnSpan="2" Header="Extra" PlaceholderText="optional"
-                                                 Visibility="Collapsed"
-                                                 HorizontalAlignment="Stretch"/>
+                                        <!-- Fixed width: only a short optional number; do not span the row. -->
+                                        <TextBox x:Name="ExtraBox" Grid.Column="2" Header="Extra" PlaceholderText="optional"
+                                                 Visibility="Collapsed" Width="260"
+                                                 HorizontalAlignment="Left"/>
                                         <TextBox x:Name="FluidJacobiBox" Grid.Column="3" Header="Jacobi iterations"
                                                  PlaceholderText="optional; default 30"
-                                                 Visibility="Collapsed"
-                                                 HorizontalAlignment="Stretch"/>
+                                                 Visibility="Collapsed" Width="220"
+                                                 HorizontalAlignment="Left"/>
                                     </Grid>
                                 </StackPanel>
                             </Border>
@@ -232,11 +222,13 @@
                                                       VerticalAlignment="Center"
                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                         </StackPanel>
+                                        <CheckBox x:Name="ShowLegacyBox" Content="Show legacy &amp; advanced tests"
+                                                  MinWidth="0" Checked="OnShowLegacyChecked" Unchecked="OnShowLegacyChecked"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
 
-                            <!-- Result -->
+                            <!-- Result score -->
                             <Border Padding="16"
                                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -244,157 +236,206 @@
                                 <TextBlock x:Name="ResultText" FontSize="18" FontWeight="SemiBold" Text="—" TextWrapping="Wrap"/>
                             </Border>
 
-                            <TextBox x:Name="OutputBox" IsReadOnly="True" AcceptsReturn="True" Height="200"
-                                     FontFamily="Consolas" TextWrapping="NoWrap"
-                                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                     ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                            <!-- CLI follows page content (not pinned above the action bar). -->
+                            <Border x:Name="GpuCliHost" Padding="12" MinWidth="0"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="8"
+                                    SizeChanged="OnGpuCliHostSizeChanged">
+                                <Expander x:Name="GpuOutputExpander" Header="Raw CLI output"
+                                          IsExpanded="False"
+                                          HorizontalAlignment="Stretch"
+                                          HorizontalContentAlignment="Stretch"
+                                          MinWidth="0">
+                                    <TextBox x:Name="OutputBox" IsReadOnly="True" AcceptsReturn="True"
+                                             Height="200" FontFamily="Consolas" TextWrapping="NoWrap"
+                                             HorizontalAlignment="Stretch" MinWidth="0"
+                                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                             ScrollViewer.HorizontalScrollMode="Enabled"
+                                             ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                </Expander>
+                            </Border>
                         </StackPanel>
                     </ScrollViewer>
 
                     <!-- Action bar -->
                     <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12"
                                 Margin="0,10,0,12" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <TextBlock x:Name="Status" Text="Ready" VerticalAlignment="Center"/>
-                        <ProgressRing x:Name="Busy" IsActive="False" Width="22" Height="22"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Ellipse x:Name="GpuStatusLight" Width="10" Height="10"
+                                     Fill="#6CCB5F" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="Status" Text="Ready" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <!-- Kept for code that toggles IsActive; traffic light is the visible status. -->
+                        <ProgressRing x:Name="Busy" IsActive="False" Width="22" Height="22"
+                                      Visibility="Collapsed"/>
+                        <Button x:Name="GpuCancelButton" Content="Cancel" Click="OnGpuCancel"
+                                IsEnabled="False"/>
                         <Button x:Name="RunButton" Content="Run GPU Benchmark" Click="OnRun"
                                 Style="{StaticResource AccentButtonStyle}"/>
                     </StackPanel>
                 </Grid>
 
                 <!-- ===================== CPU page ===================== -->
-                <ScrollViewer x:Name="CpuPage" Visibility="Collapsed"
-                              Padding="28,12,28,12"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Auto">
-                  <Grid MinWidth="720">
+                <!-- Same shell as GPU: scrollable body (incl. CLI) + pinned action bar. -->
+                <Grid x:Name="CpuPage" Visibility="Collapsed" Margin="28,12,28,0"
+                      IsTabStop="True"
+                      PointerPressed="OnCpuPagePointerPressed">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,12">
-                        <TextBlock x:Name="CpuTitle" Text="CPU Benchmark"
-                                   Style="{StaticResource TitleTextBlockStyle}"/>
-                        <TextBlock x:Name="CpuNameText" Text="CPU" Opacity="0.72"
-                                   TextWrapping="Wrap"/>
-                    </StackPanel>
+                    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  HorizontalScrollMode="Disabled"
+                                  Padding="0,0,4,0">
+                        <StackPanel Spacing="12">
+                            <StackPanel Spacing="4">
+                                <TextBlock x:Name="CpuTitle" Text="CPU Benchmark"
+                                           Style="{StaticResource TitleTextBlockStyle}"/>
+                                <TextBlock x:Name="CpuNameText" Text="CPU" Opacity="0.72"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
 
-                    <Border Grid.Row="1" Padding="20" Margin="0,0,0,12"
-                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
-                        <StackPanel Spacing="14">
-                            <InfoBar x:Name="CpuInfo" IsOpen="True" IsClosable="False"
-                                     Severity="Informational"
-                                     Message="Headless CPU test. No 3D render window is opened."/>
-                            <Grid ColumnSpacing="16">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="1.5*"/>
-                                    <ColumnDefinition Width="1.3*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <ComboBox x:Name="CpuModeBox" Grid.Column="0" Header="Test mode"
-                                          SelectedIndex="2" HorizontalAlignment="Stretch">
-                                    <ComboBoxItem x:Name="CpuModePerCore" Tag="per-core">Each logical processor</ComboBoxItem>
-                                    <ComboBoxItem x:Name="CpuModeMulti" Tag="multi">All cores together</ComboBoxItem>
-                                    <ComboBoxItem x:Name="CpuModeAll" Tag="all">Per-core + all-core</ComboBoxItem>
-                                </ComboBox>
-                                <ComboBox x:Name="CpuDurationPresetBox" Grid.Column="1" Header="Duration preset"
-                                          SelectedIndex="0" HorizontalAlignment="Stretch"
-                                          SelectionChanged="OnCpuDurationPresetChanged">
-                                    <ComboBoxItem x:Name="CpuDurationQuick" Tag="1">Quick (1 s)</ComboBoxItem>
-                                    <ComboBoxItem x:Name="CpuDurationFormal" Tag="15">Formal (15 s)</ComboBoxItem>
-                                </ComboBox>
-                                <NumberBox x:Name="CpuTimeBox" Grid.Column="2" Header="Seconds per test"
-                                           Value="1" Minimum="0.1" Maximum="3600" SmallChange="0.5"
-                                           SpinButtonPlacementMode="Compact"
-                                           ValueChanged="OnCpuTimeChanged"/>
-                                <NumberBox x:Name="CpuWarmupBox" Grid.Column="3" Header="Warm-up seconds"
-                                           Value="0.2" Minimum="0" Maximum="60" SmallChange="0.1"
-                                           SpinButtonPlacementMode="Compact"
-                                           ValueChanged="OnCpuTimeChanged"/>
-                            </Grid>
-                            <TextBlock x:Name="CpuDurationHint" Opacity="0.72" TextWrapping="Wrap"
-                                       Text="Per-core duration is applied separately to every logical processor; the formal preset can take a long time."/>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Row="2" Padding="16" Margin="0,0,0,12"
-                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
-                        <StackPanel Spacing="8">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock x:Name="CpuCurrentCoreText" Text="Ready" FontWeight="SemiBold"/>
-                                <TextBlock x:Name="CpuProgressText" Grid.Column="1" Text="0%" Opacity="0.72"/>
-                            </Grid>
-                            <ProgressBar x:Name="CpuProgressBar" Minimum="0" Maximum="100" Value="0"/>
-                        </StackPanel>
-                    </Border>
-
-                    <Grid Grid.Row="3" ColumnSpacing="12" MinHeight="260" MaxHeight="420">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Padding="16"
-                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1" CornerRadius="8">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock x:Name="CpuPerCoreTitle" Text="Per-logical-processor results"
-                                           FontWeight="SemiBold" Margin="0,0,0,8"/>
-                                <ListView x:Name="CpuCoreResultsList" Grid.Row="1" SelectionMode="None"
-                                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-                            </Grid>
-                        </Border>
-                        <Border Grid.Column="1" Padding="16"
-                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1" CornerRadius="8">
-                            <StackPanel Spacing="14">
-                                <TextBlock x:Name="CpuSummaryTitle" Text="Summary" FontWeight="SemiBold"/>
-                                <StackPanel Spacing="4">
-                                    <TextBlock x:Name="CpuAverageLabel" Text="Per-core average" Opacity="0.72"/>
-                                    <TextBlock x:Name="CpuAverageResult" Text="&#x2014;" FontSize="20" FontWeight="SemiBold"
-                                               TextWrapping="Wrap"/>
+                            <Border Padding="20"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="8">
+                                <StackPanel Spacing="14">
+                                    <InfoBar x:Name="CpuInfo" IsOpen="True" IsClosable="False"
+                                             Severity="Informational"
+                                             Message="Measures CPU compute throughput with dense math loops on logical processors (single-core and multi-core)."/>
+                                    <Grid ColumnSpacing="16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1.5*" MinWidth="0"/>
+                                            <ColumnDefinition Width="1.3*" MinWidth="0"/>
+                                            <ColumnDefinition Width="*" MinWidth="0"/>
+                                            <ColumnDefinition Width="*" MinWidth="0"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox x:Name="CpuModeBox" Grid.Column="0" Header="Test mode"
+                                                  SelectedIndex="2" HorizontalAlignment="Stretch">
+                                            <ComboBoxItem x:Name="CpuModePerCore" Tag="per-core">Each logical processor</ComboBoxItem>
+                                            <ComboBoxItem x:Name="CpuModeMulti" Tag="multi">All cores together</ComboBoxItem>
+                                            <ComboBoxItem x:Name="CpuModeAll" Tag="all">Per-core + all-core</ComboBoxItem>
+                                        </ComboBox>
+                                        <ComboBox x:Name="CpuDurationPresetBox" Grid.Column="1" Header="Duration preset"
+                                                  SelectedIndex="0" HorizontalAlignment="Stretch"
+                                                  SelectionChanged="OnCpuDurationPresetChanged">
+                                            <ComboBoxItem x:Name="CpuDurationQuick" Tag="1">Quick (1 s)</ComboBoxItem>
+                                            <ComboBoxItem x:Name="CpuDurationFormal" Tag="15">Formal (15 s)</ComboBoxItem>
+                                        </ComboBox>
+                                        <NumberBox x:Name="CpuTimeBox" Grid.Column="2" Header="Seconds per test"
+                                                   Value="1" Minimum="0.1" Maximum="3600" SmallChange="0.5"
+                                                   SpinButtonPlacementMode="Compact"
+                                                   ValueChanged="OnCpuTimeChanged"/>
+                                        <NumberBox x:Name="CpuWarmupBox" Grid.Column="3" Header="Warm-up seconds"
+                                                   Value="0.2" Minimum="0" Maximum="60" SmallChange="0.1"
+                                                   SpinButtonPlacementMode="Compact"
+                                                   ValueChanged="OnCpuTimeChanged"/>
+                                    </Grid>
+                                    <TextBlock x:Name="CpuDurationHint" Opacity="0.72" TextWrapping="Wrap"
+                                               Text="Per-core duration is applied separately to every logical processor; the formal preset can take a long time."/>
                                 </StackPanel>
-                                <StackPanel Spacing="4">
-                                    <TextBlock x:Name="CpuMultiLabel" Text="All-core result" Opacity="0.72"/>
-                                    <TextBlock x:Name="CpuMultiResult" Text="&#x2014;" FontSize="20" FontWeight="SemiBold"
-                                               TextWrapping="Wrap"/>
+                            </Border>
+
+                            <Border Padding="16"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="8">
+                                <StackPanel Spacing="8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="CpuCurrentCoreText" Text="Ready" FontWeight="SemiBold"/>
+                                        <TextBlock x:Name="CpuProgressText" Grid.Column="1" Text="0%" Opacity="0.72"/>
+                                    </Grid>
+                                    <ProgressBar x:Name="CpuProgressBar" Minimum="0" Maximum="100" Value="0"/>
                                 </StackPanel>
-                                <Expander x:Name="CpuOutputExpander" Header="Raw CLI output">
+                            </Border>
+
+                            <!-- Fixed height so ListView can scroll inside the page ScrollViewer. -->
+                            <Grid ColumnSpacing="12" Height="260"
+                                  HorizontalAlignment="Stretch">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*" MinWidth="0"/>
+                                    <ColumnDefinition Width="*" MinWidth="0"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Padding="16" MinWidth="0"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1" CornerRadius="8">
+                                    <Grid MinWidth="0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock x:Name="CpuPerCoreTitle" Text="Per-logical-processor results"
+                                                   FontWeight="SemiBold" Margin="0,0,0,8"
+                                                   TextWrapping="Wrap"/>
+                                        <ListView x:Name="CpuCoreResultsList" Grid.Row="1" SelectionMode="None"
+                                                  MinWidth="0"
+                                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                                  ScrollViewer.HorizontalScrollMode="Enabled"
+                                                  ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                                    </Grid>
+                                </Border>
+                                <Border x:Name="CpuSummaryCard" Grid.Column="1" Padding="16" MinWidth="0"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1" CornerRadius="8">
+                                    <StackPanel Spacing="14" MinWidth="0">
+                                        <TextBlock x:Name="CpuSummaryTitle" Text="Summary" FontWeight="SemiBold"/>
+                                        <StackPanel Spacing="4">
+                                            <TextBlock x:Name="CpuAverageLabel" Text="Per-core average" Opacity="0.72"/>
+                                            <TextBlock x:Name="CpuAverageResult" Text="&#x2014;" FontSize="20" FontWeight="SemiBold"
+                                                       TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                        <StackPanel Spacing="4">
+                                            <TextBlock x:Name="CpuMultiLabel" Text="All-core result" Opacity="0.72"/>
+                                            <TextBlock x:Name="CpuMultiResult" Text="&#x2014;" FontSize="20" FontWeight="SemiBold"
+                                                       TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <!-- CLI follows page content (not pinned above the action bar). -->
+                            <Border x:Name="CpuCliHost" Padding="12" MinWidth="0"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="8"
+                                    SizeChanged="OnCpuCliHostSizeChanged">
+                                <Expander x:Name="CpuOutputExpander" Header="Raw CLI output"
+                                          IsExpanded="False"
+                                          HorizontalAlignment="Stretch"
+                                          HorizontalContentAlignment="Stretch"
+                                          MinWidth="0">
                                     <TextBox x:Name="CpuOutputBox" IsReadOnly="True" AcceptsReturn="True"
-                                             Height="160" FontFamily="Consolas" TextWrapping="NoWrap"
+                                             Height="200" FontFamily="Consolas" TextWrapping="NoWrap"
+                                             HorizontalAlignment="Stretch" MinWidth="0"
                                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                             ScrollViewer.HorizontalScrollMode="Enabled"
                                              ScrollViewer.VerticalScrollBarVisibility="Auto"/>
                                 </Expander>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
 
-                    <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="12"
-                                Margin="0,12,0,0" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <TextBlock x:Name="CpuStatusText" Text="Ready" VerticalAlignment="Center"/>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12"
+                                Margin="0,10,0,12" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Ellipse x:Name="CpuStatusLight" Width="10" Height="10"
+                                     Fill="#6CCB5F" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="CpuStatusText" Text="Ready" VerticalAlignment="Center"/>
+                        </StackPanel>
                         <Button x:Name="CpuCancelButton" Content="Cancel" Click="OnCpuCancel" IsEnabled="False"/>
                         <Button x:Name="CpuRunButton" Content="Run CPU Benchmark" Click="OnCpuRun"
                                 Style="{StaticResource AccentButtonStyle}"/>
                     </StackPanel>
-                  </Grid>
-                </ScrollViewer>
+                </Grid>
 
                 <!-- ===================== History page ===================== -->
                 <Grid x:Name="HistoryPage" Visibility="Collapsed" Margin="28,12,28,12">
@@ -417,17 +458,40 @@
                                 Click="OnOpenCapturesFolder" VerticalAlignment="Bottom"/>
                     </StackPanel>
 
+                    <!-- Compact browser-style category tabs + one-line legacy filter. -->
+                    <Grid Grid.Row="1" ColumnSpacing="16" Margin="0,0,0,10"
+                          Height="40" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TabView x:Name="HistoryCategoryTabs" Grid.Column="0"
+                                 Height="40" SelectedIndex="0"
+                                 IsAddTabButtonVisible="False" TabWidthMode="Equal"
+                                 CanDragTabs="False" CanReorderTabs="False"
+                                 SelectionChanged="OnHistoryCategoryChanged">
+                            <TabViewItem x:Name="HistoryGpuTab" Header="GPU" IsClosable="False"/>
+                            <TabViewItem x:Name="HistoryCpuTab" Header="CPU" IsClosable="False"/>
+                        </TabView>
+                        <CheckBox x:Name="HistoryLegacyBox" Grid.Column="1"
+                                  Content="Show legacy tests" VerticalAlignment="Center"
+                                  Checked="OnHistoryLegacyChecked"
+                                  Unchecked="OnHistoryLegacyChecked"/>
+                    </Grid>
+
                     <!-- Sort + workload/particle/GPU filters + time range -->
-                    <Grid Grid.Row="1" ColumnSpacing="16" Margin="0,0,0,8"
+                    <Grid Grid.Row="2" ColumnSpacing="16" Margin="0,0,0,8"
                           VerticalAlignment="Bottom">
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="1.2*"/>
                             <ColumnDefinition Width="0.9*"/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Bottom">
+                        <StackPanel x:Name="ApiFilterColumn" Grid.Column="0" Spacing="4" VerticalAlignment="Bottom">
                             <TextBlock x:Name="ApiFilterLabel" Text="Graphics API" Margin="1,0,0,0"/>
                             <DropDownButton x:Name="ApiFilterButton" Content="Graphics API" MinWidth="160" Height="32"
                                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
@@ -448,7 +512,7 @@
                             </DropDownButton>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Bottom">
+                        <StackPanel x:Name="WorkloadFilterColumn" Grid.Column="1" Spacing="4" VerticalAlignment="Bottom">
                             <TextBlock x:Name="WorkloadFilterLabel" Text="Workload" Margin="1,0,0,0"/>
                             <DropDownButton x:Name="WorkloadFilterButton" Content="All workloads" MinWidth="160" Height="32"
                                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
@@ -469,7 +533,7 @@
                             </DropDownButton>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Bottom">
+                        <StackPanel x:Name="ParticleFilterColumn" Grid.Column="2" Spacing="4" VerticalAlignment="Bottom">
                             <TextBlock x:Name="ParticleFilterLabel" Text="Particles" Margin="1,0,0,0"/>
                             <DropDownButton x:Name="ParticleFilterButton" Content="All particle counts" MinWidth="170" Height="32"
                                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
@@ -483,6 +547,28 @@
                                             </StackPanel>
                                             <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
                                                 <StackPanel x:Name="ParticleFilterPanel" Spacing="2"/>
+                                            </ScrollViewer>
+                                        </StackPanel>
+                                    </Flyout>
+                                </DropDownButton.Flyout>
+                            </DropDownButton>
+                        </StackPanel>
+                        <!-- Plasma Bloom / GPU Burn step counts (from workloadConfig steps=). -->
+                        <StackPanel x:Name="StepsFilterColumn" Grid.Column="3" Spacing="4" VerticalAlignment="Bottom"
+                                    Visibility="Collapsed">
+                            <TextBlock x:Name="StepsFilterLabel" Text="Steps" Margin="1,0,0,0"/>
+                            <DropDownButton x:Name="StepsFilterButton" Content="All step counts" MinWidth="140" Height="32"
+                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                            VerticalContentAlignment="Center">
+                                <DropDownButton.Flyout>
+                                    <Flyout x:Name="StepsFilterFlyout" Placement="Bottom">
+                                        <StackPanel Width="260" Spacing="8">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Button x:Name="SelectAllSteps" Content="All"/>
+                                                <Button x:Name="ClearAllSteps" Content="None"/>
+                                            </StackPanel>
+                                            <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
+                                                <StackPanel x:Name="StepsFilterPanel" Spacing="2"/>
                                             </ScrollViewer>
                                         </StackPanel>
                                     </Flyout>
@@ -505,7 +591,7 @@
                                   VerticalAlignment="Bottom" SelectionChanged="OnHistoryViewChanged">
                             <ComboBoxItem x:Name="ParticleFilterAll" Tag="0">All particle counts</ComboBoxItem>
                         </ComboBox>
-                        <StackPanel Grid.Column="3" Spacing="4" VerticalAlignment="Bottom">
+                        <StackPanel x:Name="DeviceFilterColumn" Grid.Column="4" Spacing="4" VerticalAlignment="Bottom">
                             <TextBlock x:Name="GpuFilterLabel" Text="GPUs" Margin="1,0,0,0"/>
                             <DropDownButton x:Name="GpuFilterButton" Content="All GPUs" MinWidth="220" Height="32"
                                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
@@ -525,7 +611,7 @@
                                 </DropDownButton.Flyout>
                             </DropDownButton>
                         </StackPanel>
-                        <ComboBox x:Name="TimeRangeBox" Grid.Column="4" Header="Time range" MinWidth="150" SelectedIndex="0"
+                        <ComboBox x:Name="TimeRangeBox" Grid.Column="5" Header="Time range" MinWidth="150" SelectedIndex="0"
                                   HorizontalAlignment="Stretch"
                                   VerticalAlignment="Bottom" SelectionChanged="OnHistoryViewChanged">
                             <ComboBoxItem x:Name="RangeAll">All</ComboBoxItem>
@@ -537,7 +623,7 @@
                     </Grid>
 
                     <!-- Custom date range (only shown for "Custom range…") -->
-                    <StackPanel x:Name="DateRangeRow" Grid.Row="2" Orientation="Horizontal" Spacing="16"
+                    <StackPanel x:Name="DateRangeRow" Grid.Row="3" Orientation="Horizontal" Spacing="16"
                                 Margin="0,0,0,8" Visibility="Collapsed">
                         <CalendarDatePicker x:Name="FromDate" Header="From" MinWidth="200"
                                             DateChanged="OnDateRangeChanged"/>
@@ -545,7 +631,7 @@
                                             DateChanged="OnDateRangeChanged"/>
                     </StackPanel>
 
-                    <Border Grid.Row="3" Grid.RowSpan="2"
+                    <Border Grid.Row="4"
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                             BorderThickness="1" CornerRadius="8">

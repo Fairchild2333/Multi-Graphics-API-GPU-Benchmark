@@ -30,6 +30,8 @@ namespace winrt::gpu_bench_gui::implementation
         // Run page
         void OnRun(winrt::Windows::Foundation::IInspectable const& sender,
                    winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void OnGpuCancel(winrt::Windows::Foundation::IInspectable const& sender,
+                         winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void OnPresetChanged(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
@@ -39,9 +41,12 @@ namespace winrt::gpu_bench_gui::implementation
         void OnWorkloadChanged(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
-        void OnShowLegacyToggled(
+        void OnShowLegacyChecked(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void OnApiPickerDropDownOpened(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Windows::Foundation::IInspectable const& args);
         void OnDurationUnitChanged(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
@@ -60,6 +65,18 @@ namespace winrt::gpu_bench_gui::implementation
         void OnCpuTimeChanged(
             winrt::Microsoft::UI::Xaml::Controls::NumberBox const& sender,
             winrt::Microsoft::UI::Xaml::Controls::NumberBoxValueChangedEventArgs const& args);
+        void OnGpuCliHostSizeChanged(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::SizeChangedEventArgs const& args);
+        void OnCpuCliHostSizeChanged(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::SizeChangedEventArgs const& args);
+        void OnGpuPagePointerPressed(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args);
+        void OnCpuPagePointerPressed(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args);
 
         // History / charts
         void OnRefreshHistory(winrt::Windows::Foundation::IInspectable const& sender,
@@ -78,6 +95,12 @@ namespace winrt::gpu_bench_gui::implementation
                                  winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void OnOpenCapturesFolder(winrt::Windows::Foundation::IInspectable const& sender,
                                   winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void OnHistoryCategoryChanged(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
+        void OnHistoryLegacyChecked(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
 
     private:
         enum class ActiveTask : int
@@ -88,7 +111,26 @@ namespace winrt::gpu_bench_gui::implementation
             Charts,
         };
 
+        // Footer traffic light: green=ready/success, yellow=running, red=error/fail.
+        enum class StatusLight : int
+        {
+            Ready = 0,
+            Running,
+            Error,
+        };
+
+        enum class HistoryCategory : int
+        {
+            Gpu = 0,
+            Cpu,
+        };
+
         void applyLanguage();
+        void configureCpuNumberBoxes();
+        void setStatusLight(winrt::Microsoft::UI::Xaml::Shapes::Ellipse const& light,
+                            StatusLight kind);
+        void setGpuStatus(StatusLight kind, winrt::hstring const& text);
+        void setCpuStatus(StatusLight kind, winrt::hstring const& text);
         void applyWorkloadVisibility();
         void applyTheme(int index);
         void updateCaptionButtonColors();
@@ -101,8 +143,10 @@ namespace winrt::gpu_bench_gui::implementation
         void updateExtraLabel();
         void refreshHistory();         // (re)load from disk + rebuild filters + render
         void applyHistoryView();       // filter + sort + render m_results
-        void rebuildGpuFilter();       // distinct-device toggle menu items
-        void rebuildHistoryFilters();  // API + workload + particle-count toggle menus
+        void rebuildGpuFilter(bool preserveSelection = true);       // GPU tree or CPU list
+        void rebuildHistoryFilters(bool preserveSelection = true);  // API + workload + particles/steps
+        void updateHistoryFilterVisibility();
+        void syncHistoryCategoryFromUi();
         std::string selected(winrt::Microsoft::UI::Xaml::Controls::ComboBox const& box);
         std::vector<std::string> selectedApis();
         std::string particleValue();   // "" means use engine default
@@ -113,6 +157,7 @@ namespace winrt::gpu_bench_gui::implementation
         void launchJobs(std::vector<std::vector<std::string>> jobs, bool needCharts);
         void launchCpuBenchmark(std::string mode, double seconds, double warmupSeconds);
         void cancelCpuBenchmark();
+        void cancelGpuBenchmark();
         bool tryBeginTask(ActiveTask task);
         void endTask(ActiveTask task);
 
@@ -131,14 +176,18 @@ namespace winrt::gpu_bench_gui::implementation
         std::atomic<ActiveTask> m_activeTask{ ActiveTask::None };
         std::atomic_bool m_cpuRunning{ false };
         std::atomic_bool m_cpuCancelRequested{ false };
+        std::atomic_bool m_gpuCancelRequested{ false };
         std::mutex m_cpuProcessMutex;
         HANDLE m_cpuProcess{ nullptr };    // owned and closed by the CPU worker thread
+        HANDLE m_gpuCancelEvent{ nullptr }; // manual-reset; signals captureProcess to stop
         std::map<int, std::string> m_cpuCoreLabels; // populated from CPU_TOPOLOGY on the UI thread
         bool m_cpuHadProtocolError{ false }; // UI-thread only
 
         std::vector<gpu_bench::BenchmarkResult> m_results;   // loaded history
         std::vector<std::string> m_displayedIds;             // result id per visible row
         bool m_historyFiltersInitialized{ false };
+        HistoryCategory m_historyCategory{ HistoryCategory::Gpu };
+        bool m_showLegacyHistory{ false };
         std::string m_historySortColumn{ "time" };
         bool m_historySortAscending{ false };
     };
