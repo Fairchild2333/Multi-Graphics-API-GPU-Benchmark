@@ -11,6 +11,8 @@
 #include <unknwn.h>
 #include <restrictederrorinfo.h>
 #include <hstring.h>
+#include <shobjidl_core.h>   // ITaskbarList3 (taskbar progress)
+#pragma comment(lib, "ole32.lib")
 
 #include <winrt/base.h>
 #include <winrt/Windows.Foundation.h>
@@ -23,6 +25,7 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.Primitives.h>
 #include <winrt/Microsoft.UI.Xaml.Data.h>
+#include <winrt/Microsoft.UI.Xaml.Documents.h>
 #include <winrt/Microsoft.UI.Xaml.Interop.h>
 #include <winrt/Microsoft.UI.Xaml.Markup.h>
 #include <winrt/Microsoft.UI.Xaml.Media.h>
@@ -32,6 +35,7 @@
 
 #include <microsoft.ui.xaml.window.h>
 
+#include <chrono>
 #include <string>
 #include <vector>
 #include <sstream>

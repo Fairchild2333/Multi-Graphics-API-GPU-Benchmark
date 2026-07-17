@@ -1085,7 +1085,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --gpu <index>                       Select GPU by index\n"
                       << "  --warp                               Use WARP software renderer (DX11/DX12 only)\n"
                       << "  --vsync                              Enable vertical sync (default: off)\n"
-                      << "  --host-memory                        Keep particle buffer in host-visible RAM (slower on dGPU)\n"
+                      << "  --host-memory                        Keep particle buffer in system RAM (slower on dGPU)\n"
                       << "  --flights <N>                       Set frames-in-flight count (default: 2, max: 16)\n"
                       << "  --headless                           Pure compute mode (no window/rendering/present)\n"
                       << "  --cpu-benchmark [per-core|multi|all] Run native CPU-only benchmark (default: all)\n"
@@ -1603,30 +1603,40 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "] " << e.apiLabel << " / " << e.gpuName << " <<<\n";
             try {
                 std::unique_ptr<gpu_bench::AppBase> app;
+                // Same host-memory fallback as the single-run path: only
+                // Vulkan/OpenGL implement it; report other passes honestly.
+                gpu_bench::BenchmarkConfig entryCfg = allCfg;
+                if (entryCfg.hostMemory &&
+                    e.backendId != "vulkan" && e.backendId != "opengl") {
+                    std::cerr << "[warn] --host-memory (system memory) is not implemented for "
+                              << e.backendId
+                              << "; this pass runs device-local (VRAM) instead.\n";
+                    entryCfg.hostMemory = false;
+                }
 #ifdef HAVE_VULKAN
                 if (e.backendId == "vulkan")
                     app = std::make_unique<gpu_bench::VulkanBackend>(
-                        e.gpuIdx, shaderDir, allCfg);
+                        e.gpuIdx, shaderDir, entryCfg);
 #endif
 #ifdef HAVE_DX12
                 if (e.backendId == "dx12")
                     app = std::make_unique<gpu_bench::DX12Backend>(
-                        e.gpuIdx, shaderDir, allCfg);
+                        e.gpuIdx, shaderDir, entryCfg);
 #endif
 #ifdef HAVE_DX11
                 if (e.backendId == "dx11")
                     app = std::make_unique<gpu_bench::DX11Backend>(
-                        e.gpuIdx, shaderDir, allCfg);
+                        e.gpuIdx, shaderDir, entryCfg);
 #endif
 #ifdef HAVE_METAL
                 if (e.backendId == "metal")
                     app = std::make_unique<gpu_bench::MetalBackend>(
-                        e.gpuIdx, shaderDir, allCfg);
+                        e.gpuIdx, shaderDir, entryCfg);
 #endif
 #ifdef HAVE_OPENGL
                 if (e.backendId == "opengl")
                     app = std::make_unique<gpu_bench::OpenGLBackend>(
-                        e.gpuIdx, shaderDir, allCfg);
+                        e.gpuIdx, shaderDir, entryCfg);
 #endif
                 if (!app) {
                     std::cout << "  SKIPPED (backend not available)\n";
@@ -2691,6 +2701,19 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         try {
             std::unique_ptr<gpu_bench::AppBase> app;
 
+            // Only the Vulkan and OpenGL backends place the particle buffer in
+            // system memory; DX11/DX12/Metal would silently run device-local
+            // and report a misleading "RAM rate". Fall back honestly.
+            gpu_bench::BenchmarkConfig runCfg = benchCfg;
+            const bool hostMemorySupported =
+                selectedBackend == "vulkan" || selectedBackend == "opengl";
+            if (runCfg.hostMemory && !hostMemorySupported) {
+                std::cerr << "[warn] --host-memory (system memory) is not implemented for "
+                          << selectedBackend
+                          << "; this pass runs device-local (VRAM) instead.\n";
+                runCfg.hostMemory = false;
+            }
+
 #ifdef HAVE_VULKAN
             if (selectedBackend == "vulkan") {
                 if (!VulkanLoaderAvailable()) {
@@ -2699,28 +2722,28 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                         "Install a Vulkan-capable display driver or select DirectX 11/12.");
                 }
                 app = std::make_unique<gpu_bench::VulkanBackend>(
-                    effectiveGpuIndex, shaderDir, benchCfg);
+                    effectiveGpuIndex, shaderDir, runCfg);
             }
 #endif
 #ifdef HAVE_DX12
             if (selectedBackend == "dx12")
                 app = std::make_unique<gpu_bench::DX12Backend>(
-                    effectiveGpuIndex, shaderDir, benchCfg);
+                    effectiveGpuIndex, shaderDir, runCfg);
 #endif
 #ifdef HAVE_DX11
             if (selectedBackend == "dx11")
                 app = std::make_unique<gpu_bench::DX11Backend>(
-                    effectiveGpuIndex, shaderDir, benchCfg);
+                    effectiveGpuIndex, shaderDir, runCfg);
 #endif
 #ifdef HAVE_METAL
             if (selectedBackend == "metal")
                 app = std::make_unique<gpu_bench::MetalBackend>(
-                    effectiveGpuIndex, shaderDir, benchCfg);
+                    effectiveGpuIndex, shaderDir, runCfg);
 #endif
 #ifdef HAVE_OPENGL
             if (selectedBackend == "opengl")
                 app = std::make_unique<gpu_bench::OpenGLBackend>(
-                    effectiveGpuIndex, shaderDir, benchCfg);
+                    effectiveGpuIndex, shaderDir, runCfg);
 #endif
 
             if (!app) {
@@ -2731,7 +2754,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
 
             std::cout << "Backend: " << app->GetBackendName()
                       << "  |  V-Sync: " << (benchCfg.vsync ? "ON" : "OFF")
-                      << "  |  Memory: " << (benchCfg.hostMemory ? "Host-visible" : "Device-local");
+                      << "  |  Memory: " << (runCfg.hostMemory ? "Host-visible" : "Device-local");
             if (gpu_bench::isGpuBurnWorkload(benchCfg.workload))
                 std::cout << "  |  Workload: GPU Burn v1 r2 / Plasma x Kaleidoscope";
             else if (benchCfg.workload == gpu_bench::Workload::CinematicLiquid)

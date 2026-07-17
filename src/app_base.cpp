@@ -805,7 +805,7 @@ void AppBase::PrintSummary() const {
     std::cout
         << std::setw(14) << "CPU:"        << GetCpuName() << "\n"
         << std::setw(14) << "OS:"         << GetOsVersion() << "\n"
-        << std::setw(14) << "Memory:"     << (config_.hostMemory ? "Host-visible (System RAM)" : "Device-local") << "\n"
+        << std::setw(14) << "Memory:"     << (config_.hostMemory ? "System RAM (host-visible)" : "Device-local VRAM") << "\n"
         << std::setw(14) << "Mode:"       << (config_.headless ? "Headless (compute only)" : "Windowed") << "\n"
         << std::setw(14) << "Resolution:" << kWindowWidth << "x" << kWindowHeight << "\n";
     if (isGpuBurnWorkload(config_.workload))
@@ -857,10 +857,11 @@ void AppBase::PrintSummary() const {
             const double computeSec = avgCompute / 1000.0;
             const double memoryRate = 40.0 * n / computeSec / 1e9;
             const double workingSetMiB = n * sizeof(Particle) / (1024.0 * 1024.0);
+            const char* rateLabel = config_.hostMemory ? "RAM rate:    " : "VRAM rate:   ";
             std::cout << "Particles:    " << config_.particleCount << "\n"
                 << std::setprecision(2)
                 << "Working set:  " << workingSetMiB << " MiB\n"
-                << "Memory rate:  " << memoryRate << " GB/s  ("
+                << rateLabel << memoryRate << " GB/s  ("
                 << std::setprecision(3) << avgCompute << " ms compute)\n";
         }
 
@@ -1290,7 +1291,7 @@ BenchmarkResult AppBase::CollectResult() const {
     r.driverVersion  = GetDriverVersion();
     r.cpuName        = GetCpuName();
     r.osVersion      = GetOsVersion();
-    r.memory      = config_.hostMemory ? "Host-visible" : "Device-local";
+    r.memory      = config_.hostMemory ? "System-RAM" : "Device-local";
     r.vramMB      = config_.vramMB;
     r.resWidth    = kWindowWidth;
     r.resHeight   = kWindowHeight;

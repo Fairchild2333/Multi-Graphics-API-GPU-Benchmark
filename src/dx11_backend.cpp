@@ -592,76 +592,85 @@ void DX11Backend::CreateTimestampQueries() {
 
 void DX11Backend::CollectTimestampResults() {
     if (!timestampsSupported_) return;
-    if (timestampFrameCount_ < kTimestampSlotCount) return;
 
-    UINT readSlot = (currentFrame_ + 1) % kTimestampSlotCount;
+    // Non-blocking: poll every in-flight slot once per frame and free the
+    // ones that resolved. Pending slots stay reserved (DrawFrame does not
+    // reissue them), so results are never discarded. Headless has no
+    // Present() to pace the CPU — the old retry/Sleep scheme either stalled
+    // the frame loop or gave up and reused slots before they resolved,
+    // permanently disabling timing at high frame rates.
+    const auto declareUnavailable = [this] {
+        timestampsSupported_ = false;
+        std::cout << "[Profiling] DX11 timestamps permanently unavailable "
+                     "(driver never resolves queries).\n";
+    };
 
-    // --- Read disjoint query (with retries + Sleep for slow drivers) ---
-    D3D11_QUERY_DATA_TIMESTAMP_DISJOINT disjoint{};
-    HRESULT hr = context_->GetData(disjointQueries_[readSlot].Get(),
-                                   &disjoint, sizeof(disjoint), 0);
-    for (int retry = 0; retry < 128 && hr == S_FALSE; ++retry) {
-        // Sleep only in windowed mode; headless uses pure spin-wait
-        // to avoid Windows Sleep() granularity (~4ms) killing FPS.
-        if (!config_.headless && retry % 32 == 31) Sleep(1);
-        hr = context_->GetData(disjointQueries_[readSlot].Get(),
-                               &disjoint, sizeof(disjoint),
-                               D3D11_ASYNC_GETDATA_DONOTFLUSH);
-    }
+    for (UINT slot = 0; slot < kTimestampSlotCount; ++slot) {
+        if (!slotPending_[slot]) continue;
 
-    if (hr != S_OK) {
-        ++disjointFailCount_;
-        if (disjointFailCount_ > kTimestampSlotCount * 4) {
-            // Driver never produces results — stop trying.
-            timestampsSupported_ = false;
-            std::cout << "[Profiling] DX11 timestamps permanently unavailable "
-                         "(driver never resolves queries).\n";
+        D3D11_QUERY_DATA_TIMESTAMP_DISJOINT disjoint{};
+        HRESULT hr = context_->GetData(disjointQueries_[slot].Get(),
+                                       &disjoint, sizeof(disjoint),
+                                       D3D11_ASYNC_GETDATA_DONOTFLUSH);
+        if (hr == S_FALSE) {
+            if (++slotAge_[slot] > 8192) { declareUnavailable(); return; }
+            continue;
         }
-        return;
-    }
-    disjointFailCount_ = 0;
+        if (FAILED(hr)) {
+            slotPending_[slot] = false;
+            slotAge_[slot] = 0;
+            continue;
+        }
 
-    // Determine frequency: prefer this frame's, fall back to last good one.
-    UINT64 freq = disjoint.Frequency;
-    if (disjoint.Disjoint) {
-        // GPU clock changed mid-frame.  Timestamps may be less accurate
-        // but are still usable with the last known stable frequency.
-        if (lastGoodFrequency_ > 0)
-            freq = lastGoodFrequency_;
-        // else: first frame and already disjoint — use reported freq anyway
-    } else {
-        lastGoodFrequency_ = freq;
-    }
-
-    if (freq == 0) return;
-
-    // --- Read individual timestamps (with retries) ---
-    UINT64 ts[kTimestampsPerFrame]{};
-    for (UINT i = 0; i < kTimestampsPerFrame; ++i) {
-        hr = context_->GetData(timestampQueries_[readSlot][i].Get(),
-                               &ts[i], sizeof(UINT64), 0);
-        for (int retry = 0; retry < 128 && hr == S_FALSE; ++retry) {
-            if (!config_.headless && retry % 32 == 31) Sleep(1);
-            hr = context_->GetData(timestampQueries_[readSlot][i].Get(),
+        UINT64 ts[kTimestampsPerFrame]{};
+        bool ready = true, failed = false;
+        for (UINT i = 0; i < kTimestampsPerFrame && ready && !failed; ++i) {
+            hr = context_->GetData(timestampQueries_[slot][i].Get(),
                                    &ts[i], sizeof(UINT64),
                                    D3D11_ASYNC_GETDATA_DONOTFLUSH);
+            if (hr == S_FALSE) ready = false;
+            else if (FAILED(hr)) failed = true;
         }
-        if (hr != S_OK) return;
+        if (failed) {
+            slotPending_[slot] = false;
+            slotAge_[slot] = 0;
+            continue;
+        }
+        if (!ready) {
+            if (++slotAge_[slot] > 8192) { declareUnavailable(); return; }
+            continue;
+        }
+
+        slotPending_[slot] = false;
+        slotAge_[slot] = 0;
+
+        // Determine frequency: prefer this frame's, fall back to last good one.
+        UINT64 freq = disjoint.Frequency;
+        if (disjoint.Disjoint) {
+            // GPU clock changed mid-frame.  Timestamps may be less accurate
+            // but are still usable with the last known stable frequency.
+            if (lastGoodFrequency_ > 0)
+                freq = lastGoodFrequency_;
+            // else: first frame and already disjoint — use reported freq anyway
+        } else {
+            lastGoodFrequency_ = freq;
+        }
+        if (freq == 0) continue;
+
+        double toMs = 1000.0 / static_cast<double>(freq);
+        double computeMs = static_cast<double>(ts[1] - ts[0]) * toMs;
+        double renderMs  = static_cast<double>(ts[3] - ts[2]) * toMs;
+        double totalMs   = static_cast<double>(ts[3] - ts[0]) * toMs;
+
+        // Sanity check: discard obviously bogus samples (DX11 headless can
+        // produce garbage when the driver mixes up query data across frames).
+        if (computeMs > 1000.0 || renderMs > 1000.0 || totalMs > 1000.0)
+            continue;
+        if (computeMs < 0.0 || renderMs < 0.0 || totalMs < 0.0)
+            continue;
+
+        AccumulateTiming(computeMs, renderMs, totalMs);
     }
-
-    double toMs = 1000.0 / static_cast<double>(freq);
-    double computeMs = static_cast<double>(ts[1] - ts[0]) * toMs;
-    double renderMs  = static_cast<double>(ts[3] - ts[2]) * toMs;
-    double totalMs   = static_cast<double>(ts[3] - ts[0]) * toMs;
-
-    // Sanity check: discard obviously bogus samples (DX11 headless can
-    // produce garbage when the driver mixes up query data across frames).
-    if (computeMs > 1000.0 || renderMs > 1000.0 || totalMs > 1000.0)
-        return;
-    if (computeMs < 0.0 || renderMs < 0.0 || totalMs < 0.0)
-        return;
-
-    AccumulateTiming(computeMs, renderMs, totalMs);
 }
 
 // -----------------------------------------------------------------------
@@ -672,13 +681,15 @@ void DX11Backend::DrawFrame(float deltaTime) {
     CollectTimestampResults();
 
     UINT slot = currentFrame_;
+    // Reserve the slot only if its previous queries have been consumed.
+    const bool issueTimestamps = timestampsSupported_ && !slotPending_[slot];
 
     // Begin timestamp disjoint
-    if (timestampsSupported_)
+    if (issueTimestamps)
         context_->Begin(disjointQueries_[slot].Get());
 
     // --- Compute pass ---
-    if (timestampsSupported_)
+    if (issueTimestamps)
         context_->End(timestampQueries_[slot][0].Get());
 
     if (fluid_.active) {
@@ -715,18 +726,18 @@ void DX11Backend::DrawFrame(float deltaTime) {
         context_->CSSetUnorderedAccessViews(0, 1, nullUav, nullptr);
     }
 
-    if (timestampsSupported_)
+    if (issueTimestamps)
         context_->End(timestampQueries_[slot][1].Get());
 
     if (config_.headless) {
         // Headless: mirror compute timestamps as render timestamps
-        if (timestampsSupported_) {
+        if (issueTimestamps) {
             context_->End(timestampQueries_[slot][2].Get());
             context_->End(timestampQueries_[slot][3].Get());
         }
     } else if (isFragmentOnlyWorkload(config_.workload)) {
         // --- Fragment-only pass (fullscreen triangle, no compute/VB) ---
-        if (timestampsSupported_)
+        if (issueTimestamps)
             context_->End(timestampQueries_[slot][2].Get());
 
         const float clearColor[] = { 0.04f, 0.08f, 0.14f, 1.0f };
@@ -782,13 +793,13 @@ void DX11Backend::DrawFrame(float deltaTime) {
             context_->Draw(3, 0);
         }
 
-        if (timestampsSupported_)
+        if (issueTimestamps)
             context_->End(timestampQueries_[slot][3].Get());
     } else if (config_.workload == Workload::Render3D) {
         // Copy compute buffer (updated particles) to the per-instance buffer.
         context_->CopyResource(vertexBuffer_.Get(), computeBuffer_.Get());
 
-        if (timestampsSupported_)
+        if (issueTimestamps)
             context_->End(timestampQueries_[slot][2].Get());
 
         const float clearColor[] = { 0.04f, 0.08f, 0.14f, 1.0f };
@@ -830,14 +841,14 @@ void DX11Backend::DrawFrame(float deltaTime) {
         // Restore default (no depth) for any other passes.
         context_->OMSetDepthStencilState(nullptr, 0);
 
-        if (timestampsSupported_)
+        if (issueTimestamps)
             context_->End(timestampQueries_[slot][3].Get());
     } else {
         // Copy compute buffer to vertex buffer
         context_->CopyResource(vertexBuffer_.Get(), computeBuffer_.Get());
 
         // --- Graphics pass ---
-        if (timestampsSupported_)
+        if (issueTimestamps)
             context_->End(timestampQueries_[slot][2].Get());
 
         const float clearColor[] = { 0.04f, 0.08f, 0.14f, 1.0f };
@@ -860,12 +871,12 @@ void DX11Backend::DrawFrame(float deltaTime) {
         context_->PSSetShader(pixelShader_.Get(), nullptr, 0);
         context_->Draw(config_.particleCount, 0);
 
-        if (timestampsSupported_)
+        if (issueTimestamps)
             context_->End(timestampQueries_[slot][3].Get());
     }
 
     // End timestamp disjoint
-    if (timestampsSupported_)
+    if (issueTimestamps)
         context_->End(disjointQueries_[slot].Get());
 
     if (config_.headless) {
@@ -879,8 +890,7 @@ void DX11Backend::DrawFrame(float deltaTime) {
         swapChain_->Present(config_.vsync ? 1 : 0, presentFlags);
     }
 
-    if (timestampsSupported_ && timestampFrameCount_ < kTimestampSlotCount)
-        ++timestampFrameCount_;
+    if (issueTimestamps) slotPending_[slot] = true;
     currentFrame_ = (currentFrame_ + 1) % kTimestampSlotCount;
 }
 
@@ -1013,6 +1023,8 @@ void DX11Backend::CleanupFluidResources() {
 
 void DX11Backend::RecordFluidFrame(float deltaTime) {
     UINT slot = currentFrame_;
+    // Reserve the slot only if its previous queries have been consumed.
+    const bool issueTimestamps = timestampsSupported_ && !slotPending_[slot];
     const std::uint32_t N = fluid_.gridSize;
     const float stepDt = (std::min)((std::max)(deltaTime, 0.0f), 1.0f / 30.0f);
     fluid_.simTime += (std::min)((std::max)(deltaTime, 0.0f), 0.1f);
@@ -1072,14 +1084,14 @@ void DX11Backend::RecordFluidFrame(float deltaTime) {
     context_->Dispatch(groups, groups, 1);
     unbindCs();
 
-    if (timestampsSupported_)
+    if (issueTimestamps)
         context_->End(timestampQueries_[slot][1].Get());
 
     const float clearColor[] = { 0.04f, 0.08f, 0.14f, 1.0f };
     context_->OMSetRenderTargets(1, rtv_.GetAddressOf(), nullptr);
     context_->ClearRenderTargetView(rtv_.Get(), clearColor);
 
-    if (timestampsSupported_)
+    if (issueTimestamps)
         context_->End(timestampQueries_[slot][2].Get());
 
     D3D11_VIEWPORT vp{};
@@ -1111,9 +1123,9 @@ void DX11Backend::RecordFluidFrame(float deltaTime) {
     ID3D11ShaderResourceView* nullSrv[] = { nullptr };
     context_->PSSetShaderResources(0, 1, nullSrv);
 
-    if (timestampsSupported_)
+    if (issueTimestamps)
         context_->End(timestampQueries_[slot][3].Get());
-    if (timestampsSupported_)
+    if (issueTimestamps)
         context_->End(disjointQueries_[slot].Get());
 
     UINT presentFlags = 0;
@@ -1121,8 +1133,7 @@ void DX11Backend::RecordFluidFrame(float deltaTime) {
         presentFlags = DXGI_PRESENT_ALLOW_TEARING;
     swapChain_->Present(config_.vsync ? 1 : 0, presentFlags);
 
-    if (timestampsSupported_ && timestampFrameCount_ < kTimestampSlotCount)
-        ++timestampFrameCount_;
+    if (issueTimestamps) slotPending_[slot] = true;
     currentFrame_ = (currentFrame_ + 1) % kTimestampSlotCount;
 }
 

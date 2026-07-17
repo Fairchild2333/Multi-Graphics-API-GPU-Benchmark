@@ -855,16 +855,21 @@ namespace
         return b == std::string::npos ? std::string{} : line.substr(b);
     }
 
-    std::string localizeScoreLine(std::string line)
+    std::string localizeScoreLineOne(std::string line)
     {
-        // CLI says "Memory rate:"; UI shows "显存速率:" (Zh) or "VRAM rate:" (En).
-        {
-            auto pos = line.find("Memory rate:");
+        // CLI prints "VRAM rate:" (device-local) or "RAM rate:" (system memory).
+        // Older builds used "Memory rate:" — treat those as VRAM for display.
+        auto replaceRate = [&](char const* from, char const* en, char const* zh) {
+            auto pos = line.find(from);
             if (pos != std::string::npos)
-                line.replace(pos, std::strlen("Memory rate:"),
-                             i18n::currentLang() == i18n::Lang::Zh
-                                 ? "显存速率:" : "VRAM rate:");
-        }
+                line.replace(pos, std::strlen(from),
+                             i18n::currentLang() == i18n::Lang::Zh ? zh : en);
+        };
+        // VRAM must be handled before RAM: "VRAM rate:" contains "RAM rate:"
+        // as a substring, so the reverse order produced "V内存速率:".
+        replaceRate("VRAM rate:", "VRAM rate:", "显存速率:");
+        replaceRate("RAM rate:", "RAM rate:", "内存速率:");
+        replaceRate("Memory rate:", "VRAM rate:", "显存速率:");
         if (i18n::currentLang() != i18n::Lang::Zh) return line;
         struct Pair { char const* en; char const* zh; };
         constexpr Pair pairs[] = {
@@ -889,10 +894,27 @@ namespace
         return line;
     }
 
+    // Multi-API runs show one score line per worker; localise each line.
+    std::string localizeScoreLine(std::string const& text)
+    {
+        std::string out;
+        size_t start = 0;
+        while (true)
+        {
+            const auto nl = text.find('\n', start);
+            out += localizeScoreLineOne(text.substr(
+                start, nl == std::string::npos ? std::string::npos : nl - start));
+            if (nl == std::string::npos) break;
+            out += '\n';
+            start = nl + 1;
+        }
+        return out;
+    }
+
     // Returns an English score line (CLI wording). Call localizeScoreLine() for UI.
     std::string extractScore(std::string const& out)
     {
-        const char* keys[] = { "Memory rate:", "Compute rate:", "Burn rate:", "Stress rate:", "Fill rate:", "Render rate:", "Vol rate:", "Fluid rate:", "Liquid rate:", "Peak FP", "Peak INT" };
+        const char* keys[] = { "RAM rate:", "VRAM rate:", "Memory rate:", "Compute rate:", "Burn rate:", "Stress rate:", "Fill rate:", "Render rate:", "Vol rate:", "Fluid rate:", "Liquid rate:", "Peak FP", "Peak INT" };
         std::istringstream ss(out);
         std::string line, rate, fps;
         while (std::getline(ss, line))
@@ -930,6 +952,44 @@ namespace
             combined += fpsLabel;
         }
         return combined;
+    }
+
+    // Stream summary's "Working set:  512.00 MiB"; 0 when absent.
+    double extractWorkingSetMiB(std::string const& out)
+    {
+        double v = 0.0;
+        std::istringstream ss(out);
+        std::string line;
+        while (std::getline(ss, line))
+        {
+            auto t = trimScoreLine(line);
+            if (t.rfind("Working set:", 0) == 0)
+            {
+                try { v = std::stod(t.substr(12)); } catch (...) {}
+            }
+        }
+        return v;
+    }
+
+    // Adapter the worker actually used, from the last "GPU:" summary line.
+    std::string extractGpuName(std::string const& out)
+    {
+        std::istringstream ss(out);
+        std::string line, name;
+        while (std::getline(ss, line))
+        {
+            auto trimmed = trimScoreLine(line);
+            if (trimmed.rfind("GPU:", 0) == 0)
+            {
+                auto value = trimmed.substr(4);
+                auto b = value.find_first_not_of(" \t");
+                if (b != std::string::npos) name = value.substr(b);
+            }
+        }
+        // Drop the DX feature-level suffix, e.g. "… (FL 12_1)".
+        auto fl = name.find(" (FL ");
+        if (fl != std::string::npos) name.resize(fl);
+        return name;
     }
 
     std::string padCol(std::string s, size_t w)
@@ -1849,6 +1909,11 @@ MainWindow::MainWindow()
     ApiPickerFlyout().Closed([this](auto&&, auto&&) {
         if (m_uiReady) updateApiPickerSummary();
     });
+    // Headless disables RenderDoc capture (the engine never triggers captures
+    // without a window); grey the controls to match.
+    auto syncOnHeadlessToggle = [this](auto&&, auto&&) { syncCaptureControls(); };
+    HeadlessBox().Checked(syncOnHeadlessToggle);
+    HeadlessBox().Unchecked(syncOnHeadlessToggle);
     SelectAllRunApis().Click([this](auto&&, auto&&) {
         setPanelChecks(SupportedApisPanel(), true);
         setPanelChecks(UnsupportedApisPanel(), true);
@@ -1987,15 +2052,15 @@ void MainWindow::OnCaptureValueChanged(NumberBox const&, NumberBoxValueChangedEv
     double cur = CaptureValueBox().Value();
     if (std::isnan(cur)) return;
     double clamped = (std::min)(maxVal, (std::max)(minVal, cur));
-    if (durationUnitTag() == "frames")
-        clamped = std::floor(clamped + 1e-9);
+    clamped = std::floor(clamped + 1e-9); // integer steps for every unit
     if (clamped == cur) return;
     m_suppressRenderDocUi = true;
     CaptureValueBox().Value(clamped);
     m_suppressRenderDocUi = false;
 }
 
-void MainWindow::OnDurationValueChanged(IInspectable const&, TextChangedEventArgs const&)
+void MainWindow::OnDurationValueChanged(NumberBox const&,
+                                        NumberBoxValueChangedEventArgs const&)
 {
     if (!m_uiReady || m_suppressCombo) return;
     syncCaptureControls();
@@ -2003,16 +2068,199 @@ void MainWindow::OnDurationValueChanged(IInspectable const&, TextChangedEventArg
 
 void MainWindow::OnApiPickerDropDownOpened(IInspectable const&, IInspectable const&)
 {
-    // MaxDropDownHeight=0 already suppresses the list; keep it closed so a
-    // zero-height popup cannot linger as a "All APIs (4)" ghost.
-    ApiPickerBox().IsDropDownOpen(false);
+    // MaxDropDownHeight=0 already suppresses the list, but closing the dropdown
+    // synchronously inside DropDownOpened interrupts the open transition and can
+    // leave the popup stuck on screen. Close it on the next dispatcher pass.
+    closeApiPickerDropDown();
+}
+
+void MainWindow::closeApiPickerDropDown()
+{
+    if (!m_dispatcher) return;
+    m_dispatcher.TryEnqueue(
+        Microsoft::UI::Dispatching::DispatcherQueuePriority::Low,
+        [this, strong = get_strong()]()
+    {
+        if (!uiAlive()) return;
+        ApiPickerBox().IsDropDownOpen(false);
+        // Belt and braces: the property write alone can leave the template
+        // popup visible; force-close any open popup owned by the ComboBox.
+        auto xamlRoot = ApiPickerBox().XamlRoot();
+        if (!xamlRoot) return;
+        DependencyObject owner = ApiPickerBox();
+        for (auto const& popup : VisualTreeHelper::GetOpenPopupsForXamlRoot(xamlRoot))
+        {
+            for (auto walk = popup.as<DependencyObject>(); walk;
+                 walk = VisualTreeHelper::GetParent(walk))
+            {
+                if (walk == owner) { popup.IsOpen(false); break; }
+            }
+        }
+    });
+}
+
+void MainWindow::setTaskbarProgress(bool active, double fraction, bool indeterminate)
+{
+    if (!m_hwnd) return;
+    if (!m_taskbar && !m_taskbarInitTried)
+    {
+        m_taskbarInitTried = true;
+        winrt::com_ptr<ITaskbarList3> tb;
+        if (SUCCEEDED(CoCreateInstance(CLSID_TaskbarList, nullptr,
+                                       CLSCTX_INPROC_SERVER, IID_PPV_ARGS(tb.put()))) &&
+            SUCCEEDED(tb->HrInit()))
+            m_taskbar = tb;
+    }
+    if (!m_taskbar) return;
+    if (!active)
+    {
+        m_taskbar->SetProgressState(m_hwnd, TBPF_NOPROGRESS);
+        return;
+    }
+    if (indeterminate)
+    {
+        m_taskbar->SetProgressState(m_hwnd, TBPF_INDETERMINATE);
+        return;
+    }
+    m_taskbar->SetProgressState(m_hwnd, TBPF_NORMAL);
+    const auto v = static_cast<ULONGLONG>(
+        (std::min)(1.0, (std::max)(0.0, fraction)) * 1000.0);
+    m_taskbar->SetProgressValue(m_hwnd, v, 1000ull);
+}
+
+void MainWindow::updateGpuProgressTick()
+{
+    if (m_gpuProgressJobs == 0) return;
+    if (m_gpuProgressIndeterminate)
+    {
+        setTaskbarProgress(true, 0.0, true);
+        return;
+    }
+    const double elapsed = std::chrono::duration<double>(
+        std::chrono::steady_clock::now() - m_gpuProgressJobStart).count();
+    // Cap the within-job estimate below 100% — the worker finishes when it
+    // finishes; only real completion may show 100%.
+    const double within =
+        (std::min)(elapsed / (std::max)(m_gpuProgressJobExpectedSec, 1.0), 0.98);
+    const double fraction = (std::min)(0.99,
+        (static_cast<double>(m_gpuProgressJobIndex) + within) /
+            static_cast<double>(m_gpuProgressJobs));
+    GpuProgressBar().Value(fraction * 100.0);
+    std::wostringstream pct;
+    pct << static_cast<int>(fraction * 100.0) << L'%';
+    GpuProgressText().Text(hstring(pct.str()));
+    setTaskbarProgress(true, fraction);
+}
+
+void MainWindow::stopGpuProgress(hstring const& stage, bool complete)
+{
+    if (m_gpuProgressTimer) m_gpuProgressTimer.Stop();
+    m_gpuProgressJobs = 0;
+    GpuProgressBar().IsIndeterminate(false);
+    if (complete)
+    {
+        GpuProgressBar().Value(100.0);
+        GpuProgressText().Text(L"100%");
+    }
+    GpuStageText().Text(stage);
+    setTaskbarProgress(false, 0.0);
+}
+
+void MainWindow::renderResultScore()
+{
+    // Score text uses "# <GPU name>" marker lines to open per-adapter groups;
+    // render those as small secondary eyebrows above the bold score lines.
+    using winrt::Microsoft::UI::Xaml::Documents::LineBreak;
+    using winrt::Microsoft::UI::Xaml::Documents::Run;
+    auto inlines = ResultText().Inlines();
+    inlines.Clear();
+    if (m_lastScoreEn.empty()) return;
+
+    Brush secondary{ nullptr };
+    if (auto res = Application::Current().Resources().TryLookup(
+            box_value(L"TextFillColorSecondaryBrush")))
+        secondary = res.try_as<Brush>();
+
+    const std::string text = localizeScoreLine(m_lastScoreEn);
+    bool firstLine = true;
+    size_t start = 0;
+    while (start <= text.size())
+    {
+        const auto nl = text.find('\n', start);
+        const std::string line = text.substr(
+            start, nl == std::string::npos ? std::string::npos : nl - start);
+        const bool isHeader = line.rfind("# ", 0) == 0;
+        if (!firstLine)
+        {
+            inlines.Append(LineBreak{});
+            if (isHeader) inlines.Append(LineBreak{}); // blank line between groups
+        }
+        Run run;
+        if (isHeader)
+        {
+            run.Text(u8(line.substr(2)));
+            run.FontSize(12.0);
+            run.FontWeight(winrt::Windows::UI::Text::FontWeights::Normal());
+            if (secondary) run.Foreground(secondary);
+        }
+        else
+        {
+            run.Text(u8(line));
+        }
+        inlines.Append(run);
+        firstLine = false;
+        if (nl == std::string::npos) break;
+        start = nl + 1;
+    }
+}
+
+void MainWindow::updateResultHint()
+{
+    // Host-memory runs report "RAM rate:" (see localizeScoreLine). The number is
+    // latency-bound PCIe zero-copy access, not RAM bandwidth — explain the low
+    // score so it does not look like a broken result. Match must exclude
+    // "VRAM rate:", which contains "RAM rate:" as a substring.
+    bool hostMem = false;
+    for (auto pos = m_lastScoreEn.find("RAM rate:"); pos != std::string::npos;
+         pos = m_lastScoreEn.find("RAM rate:", pos + 1))
+        if (pos == 0 || m_lastScoreEn[pos - 1] != 'V') { hostMem = true; break; }
+    const bool cacheHint = !m_lastScoreEn.empty() && m_lastScoreCacheHint;
+
+    hstring text;
+    if (hostMem)
+        text = locText(
+            "System memory mode: the GPU reads and writes system RAM directly over PCIe "
+            "in small per-particle transactions. Each one pays the full PCIe round-trip "
+            "latency and bypasses the GPU caches, so the rate is latency-bound — typically "
+            "only a few percent of PCIe link bandwidth, far below both PCIe and RAM limits. "
+            "A much lower score than VRAM mode is expected.",
+            "系统内存模式：GPU 经 PCIe 以逐粒子的小块读写直接访问系统内存，"
+            "每次访问都要承担完整的 PCIe 往返延迟，且无法被 GPU 缓存，"
+            "因此速率受延迟而非带宽限制——通常只有 PCIe 链路带宽的百分之几，"
+            "远低于 PCIe 和内存的带宽上限；成绩比显存模式低很多属正常现象。");
+    if (cacheHint)
+    {
+        auto cacheText = locText(
+            "Small working set (under 128 MB): it can sit entirely in the GPU's L2 cache, "
+            "so this rate mixes cache bandwidth with per-dispatch overhead — it may exceed "
+            "the theoretical VRAM limit yet stay well below true L2 bandwidth, and does not "
+            "represent either. For a real VRAM measurement choose Heavy (4M) particles or "
+            "above.",
+            "工作集较小（不足 128 MB）：可能整个驻留在 GPU 的 L2 缓存中，"
+            "此时速率是缓存带宽与每次调度开销的混合值——可能超过显存理论带宽、"
+            "又远低于真实 L2 带宽，两者都不代表。"
+            "要测真实显存带宽，请选择重载（4M）及以上的粒子档。");
+        text = text.empty() ? cacheText : text + L"\n" + cacheText;
+    }
+    if (!text.empty()) ResultHint().Text(text);
+    ResultHint().Visibility(text.empty() ? Visibility::Collapsed : Visibility::Visible);
 }
 
 void MainWindow::OnApiPickerTapped(IInspectable const&,
                                    Microsoft::UI::Xaml::Input::TappedRoutedEventArgs const&)
 {
     if (!uiAlive() || !ApiPickerBox().IsEnabled()) return;
-    ApiPickerBox().IsDropDownOpen(false);
+    closeApiPickerDropDown();
     Microsoft::UI::Xaml::Controls::Primitives::FlyoutBase::ShowAttachedFlyout(ApiPickerBox());
 }
 
@@ -2159,6 +2407,7 @@ void MainWindow::applyLanguage()
         "该时长会分别应用到每个逻辑处理器；正式逐核测试可能需要较长时间。"));
     CpuPerCoreTitle().Text(locText("Per-logical-processor results", "逐逻辑处理器成绩"));
     CpuSummaryTitle().Text(locText("Summary", "汇总"));
+    GpuSummaryTitle().Text(locText("Summary", "汇总"));
     CpuAverageLabel().Text(locText("Per-core average", "逐核平均"));
     CpuMultiLabel().Text(locText("All-core result", "多核成绩"));
     CpuOutputExpander().Header(locContent("Raw CLI output (live tail)", "原始 CLI 输出（实时尾部）"));
@@ -2213,8 +2462,19 @@ void MainWindow::applyLanguage()
                                           "等离子晶核 × 万花镜 —— GPU Burn"));
     WorkloadCinematicLiquid().Content(locContent("Fluid — Interactive Pool",
                                                   "流体 —— 互动水池"));
+    WorkloadCinematicLiquid().Tag(box_value(hstring(L"cinematic_liquid")));
     WorkloadCinematicLiquidV1().Content(locContent("Other / Legacy Cinematic Liquid v1 — Dam Break",
                                                     "其他 / 旧版电影化液体 v1 —— 溃坝"));
+    WorkloadCinematicLiquidV1().Tag(box_value(hstring(L"cinematic_liquid_v1")));
+    WorkloadStream().Tag(box_value(hstring(L"stream")));
+    WorkloadGpuBurn().Tag(box_value(hstring(L"gpu_burn")));
+    WorkloadGpuStress().Tag(box_value(hstring(L"gpu_stress")));
+    WorkloadNBody().Tag(box_value(hstring(L"nbody")));
+    WorkloadSynthPeak().Tag(box_value(hstring(L"synthpeak")));
+    WorkloadStress().Tag(box_value(hstring(L"stress")));
+    WorkloadRender3D().Tag(box_value(hstring(L"render3d")));
+    WorkloadVolumetric().Tag(box_value(hstring(L"volumetric")));
+    WorkloadFluid().Tag(box_value(hstring(L"fluid")));
     WorkloadGpuStress().Content(locContent("GraphicsBurn v1 / Component (Advanced)",
                                            "GraphicsBurn v1 / 分项（高级）"));
     WorkloadNBody().Content(locContent("N-Body — Advanced Compute",
@@ -2260,12 +2520,19 @@ void MainWindow::applyLanguage()
     ToolTipService::SetToolTip(HeadlessBox(), headlessTip);
     ToolTipService::SetToolTip(HeadlessInfo(), headlessTip);
     VsyncBox().Content(locContent("V-Sync", "垂直同步"));
-    HostMemBox().Content(locContent("Host memory", "主机内存"));
+    HostMemBox().Content(locContent("System memory", "系统内存"));
     auto hostMemTip = locContent(
-        "Keep the particle buffer in host-visible (CPU) RAM instead of VRAM — "
-        "slower on discrete GPUs; for testing non-device-local / UMA memory.",
-        "把粒子缓冲放在主机可见 (CPU) 内存而非显存 —— 独显上更慢；"
-        "用于测试非显存 / UMA 访问。");
+        "Keep the particle buffer in system RAM instead of VRAM. This reproduces the "
+        "access path a real game hits when VRAM overflows and resources are demoted "
+        "to system memory — representative of that failure mode, though not identical "
+        "to a full game pipeline (games also stream in large DMA blocks and keep hot "
+        "resources resident). The rate is PCIe-latency-bound, not a RAM/PCIe bandwidth "
+        "measurement. Vulkan and OpenGL only — DirectX passes fall back to VRAM with "
+        "a warning.",
+        "把粒子缓冲放在系统内存而非显存。这复现了真实游戏爆显存、资源被降级到系统内存后的"
+        "访问路径——能反映这种故障形态，但不完全等同于游戏管线（游戏还会用 DMA 大块流送、"
+        "并优先把热点资源留在显存）。速率受 PCIe 延迟限制，并非内存 / PCIe 带宽测试。"
+        "仅 Vulkan 和 OpenGL 支持 —— DirectX 会回退到显存并输出警告。");
     ToolTipService::SetToolTip(HostMemBox(), hostMemTip);
     ToolTipService::SetToolTip(HostMemInfo(), hostMemTip);
     RenderDocBox().Content(locContent("RenderDoc", "RenderDoc"));
@@ -2293,6 +2560,8 @@ void MainWindow::applyLanguage()
     DeleteButton().Content(locContent("Delete selected", "删除所选"));
     OpenResultsFolderButton().Content(locContent("Open results folder", "打开成绩目录"));
     OpenCapturesFolderButton().Content(locContent("Open captures folder", "打开抓帧目录"));
+    GpuOpenResultsButton().Content(locContent("Open results folder", "打开成绩目录"));
+    GpuOpenCapturesButton().Content(locContent("Open RenderDoc captures", "打开 RenderDoc 抓帧目录"));
     SortBox().Header(locContent("Sort by", "排序"));
     SortTime().Content(locContent("Time (newest)", "时间（最新）"));
     SortScore().Content(locContent("Score (high→low)", "分数（高→低）"));
@@ -2382,7 +2651,12 @@ void MainWindow::applyLanguage()
     updateExtraLabel();
     updateDurationValueEnabled();
     if (!m_lastScoreEn.empty())
-        ResultText().Text(u8(localizeScoreLine(m_lastScoreEn)));
+        renderResultScore();
+    updateResultHint();
+    // Mid-run language switch: refresh progress / status that were baked in the
+    // previous language when the worker started.
+    if (m_activeTask.load() == ActiveTask::GpuBenchmark)
+        refreshActiveGpuStatusLanguage();
     // updateExtraLabel → updateApiPickerSummary already localises Detecting/All APIs;
     // re-apply disabled greying after the SelectedItem dance.
     {
@@ -2421,8 +2695,11 @@ void MainWindow::configureCpuNumberBoxes()
         return formatter;
     };
 
-    CpuTimeBox().NumberFormatter(makeFormatter(0.1, 1));
+    // Integer seconds for test durations; warm-up keeps one decimal because
+    // the published formal contract is exactly 15.0 s + 0.2 s warm-up.
+    CpuTimeBox().NumberFormatter(makeFormatter(1.0, 0));
     CpuWarmupBox().NumberFormatter(makeFormatter(0.1, 1));
+    DurationValueBox().NumberFormatter(makeFormatter(1.0, 0));
     // Refresh so the formatter applies to the XAML default Value="0.2".
     CpuWarmupBox().Value(0.2);
     CpuTimeBox().Value(CpuTimeBox().Value());
@@ -2460,6 +2737,32 @@ void MainWindow::setCpuStatus(StatusLight kind, hstring const& text)
 {
     setStatusLight(CpuStatusLight(), kind);
     CpuStatusText().Text(text);
+}
+
+hstring MainWindow::gpuRunningStatusText() const
+{
+    if (m_gpuProgressJobs == 0) return locText("Running…", "运行中…");
+    const auto progress = std::to_string(m_gpuProgressJobIndex + 1) + "/" +
+                          std::to_string(m_gpuProgressJobs);
+    const std::string api = m_gpuProgressApiLabel.empty() ? "?" : m_gpuProgressApiLabel;
+    return i18n::currentLang() == i18n::Lang::Zh
+        ? u8("运行中… (" + progress + "：" + api + ")")
+        : u8("Running… (" + progress + ": " + api + ")");
+}
+
+void MainWindow::refreshActiveGpuStatusLanguage()
+{
+    if (m_activeTask.load() != ActiveTask::GpuBenchmark) return;
+    if (m_gpuCancelRequested.load())
+    {
+        const auto text = locText("Cancelling...", "正在取消…");
+        setGpuStatus(StatusLight::Running, text);
+        GpuStageText().Text(text);
+        return;
+    }
+    const auto text = gpuRunningStatusText();
+    setGpuStatus(StatusLight::Running, text);
+    GpuStageText().Text(text);
 }
 
 bool MainWindow::uiAlive() const
@@ -2674,6 +2977,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
     CpuOutputBox().Text(L"");
     CpuProgressBar().Value(0.0);
     CpuProgressText().Text(L"0%");
+    setTaskbarProgress(true, 0.0);
     CpuCurrentCoreText().Text(locText("Starting CPU worker...", "正在启动 CPU 测试进程…"));
     setCpuStatus(StatusLight::Running, locText("Running", "运行中"));
     CpuCancelButton().IsEnabled(true);
@@ -2706,6 +3010,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                     (exitCode != 0 && m_cpuCancelRequested.load());
                 m_cpuRunning.store(false);
                 endTask(ActiveTask::CpuBenchmark);
+                setTaskbarProgress(false, 0.0);
                 CpuCancelButton().IsEnabled(false);
                 CpuModeBox().IsEnabled(true);
                 CpuDurationPresetBox().IsEnabled(true);
@@ -2884,6 +3189,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                     std::wostringstream progress;
                     progress << std::fixed << std::setprecision(1) << percent << L'%';
                     CpuProgressText().Text(progress.str());
+                    setTaskbarProgress(true, percent / 100.0);
 
                     const auto modeName = cpuField(parsed, { "mode" });
                     const auto phase = cpuField(parsed, { "phase" });
@@ -3311,8 +3617,14 @@ void MainWindow::rebuildApiPicker(bool preserveSelection)
     UnsupportedApisPanel().Children().Clear();
     const int gpuRow = allGpusPreset ? 0 : GpuBox().SelectedIndex();
     const auto workload = selected(WorkloadBox());
+    // Prefer named ComboBoxItem identity: Tag can be lost after Content-only
+    // language refresh, which previously left all four APIs selectable on Fluid.
+    auto workloadItem = WorkloadBox().SelectedItem().try_as<ComboBoxItem>();
     const bool vulkanOnlyWorkload =
-        workload == "cinematic_liquid" || workload == "cinematic_liquid_v1";
+        workload == "cinematic_liquid" || workload == "cinematic_liquid_v1" ||
+        (workloadItem &&
+         (workloadItem == WorkloadCinematicLiquid() ||
+          workloadItem == WorkloadCinematicLiquidV1()));
     for (auto const& api : kRunApis)
     {
         if (vulkanOnlyWorkload && api.token != "vulkan")
@@ -3351,9 +3663,23 @@ void MainWindow::rebuildApiPicker(bool preserveSelection)
             label += " (" + std::to_string(supportCount) + "/" +
                      std::to_string(m_gpuApiSupport.size()) +
                      (i18n::currentLang() == i18n::Lang::Zh ? " 个 GPU)" : " GPUs)");
+        // Vulkan-only workloads never list other APIs, even as "unsupported"
+        // checkboxes — those entries made it look like DX12/11/GL were still options.
         appendFilterCheckBox(
             supported ? SupportedApisPanel() : UnsupportedApisPanel(),
             label, api.token, checked);
+    }
+
+    if (vulkanOnlyWorkload)
+    {
+        UnsupportedApisPanel().Children().Clear();
+        SelectAllRunApis().IsEnabled(false);
+        ClearAllRunApis().IsEnabled(false);
+    }
+    else
+    {
+        SelectAllRunApis().IsEnabled(true);
+        ClearAllRunApis().IsEnabled(true);
     }
 
     SupportedApisGroup().Visibility(
@@ -3620,19 +3946,21 @@ void MainWindow::syncCaptureControls()
     else
         CaptureUnitLabel().Text(locText("s", "秒"));
 
-    const double minVal = frames ? 1.0 : 0.1;
-    double maxVal = unlimited ? minVal : durationAmountValue();
+    // Integer capture points for every unit — fractional seconds added noise
+    // and the decimal formatter confused more than it helped.
+    const double minVal = 1.0;
+    double maxVal = unlimited ? minVal : std::floor(durationAmountValue() + 1e-9);
     if (!(maxVal >= minVal)) maxVal = minVal;
 
     using Windows::Globalization::NumberFormatting::DecimalFormatter;
     using Windows::Globalization::NumberFormatting::IncrementNumberRounder;
     using Windows::Globalization::NumberFormatting::RoundingAlgorithm;
     IncrementNumberRounder rounder;
-    rounder.Increment(frames ? 1.0 : 0.1);
+    rounder.Increment(1.0);
     rounder.RoundingAlgorithm(RoundingAlgorithm::RoundHalfUp);
     DecimalFormatter formatter;
     formatter.IntegerDigits(1);
-    formatter.FractionDigits(frames ? 0 : 1);
+    formatter.FractionDigits(0);
     formatter.IsGrouped(false);
     formatter.NumberRounder(rounder);
 
@@ -3640,17 +3968,20 @@ void MainWindow::syncCaptureControls()
     if (std::isnan(cur) || cur < minVal)
         cur = (std::min)(5.0, maxVal);
     if (cur > maxVal) cur = maxVal;
-    if (frames) cur = std::floor(cur + 1e-9);
+    cur = std::floor(cur + 1e-9);
 
     m_suppressRenderDocUi = true;
     CaptureValueBox().NumberFormatter(formatter);
     CaptureValueBox().Minimum(minVal);
     CaptureValueBox().Maximum(maxVal);
-    CaptureValueBox().SmallChange(frames ? 1.0 : 0.1);
-    CaptureValueBox().LargeChange(frames ? 10.0 : 1.0);
+    CaptureValueBox().SmallChange(1.0);
+    CaptureValueBox().LargeChange(frames ? 10.0 : 5.0);
     CaptureValueBox().Value(cur);
 
-    const bool canCapture = renderDocOn && !unlimited;
+    const bool headlessOn = HeadlessBox().IsChecked() &&
+                            HeadlessBox().IsChecked().Value();
+    RenderDocBox().IsEnabled(!headlessOn);
+    const bool canCapture = renderDocOn && !unlimited && !headlessOn;
     CaptureBox().IsEnabled(canCapture);
     CaptureValueBox().IsEnabled(canCapture && captureOn);
     m_suppressRenderDocUi = false;
@@ -3659,6 +3990,8 @@ void MainWindow::syncCaptureControls()
 void MainWindow::appendCaptureArgs(std::vector<std::string>& dest)
 {
     if (isUnlimitedDuration()) return;
+    // Headless runs never trigger captures in the engine — don't pass the args.
+    if (HeadlessBox().IsChecked() && HeadlessBox().IsChecked().Value()) return;
     if (!(RenderDocBox().IsChecked() && RenderDocBox().IsChecked().Value())) return;
     if (!(CaptureBox().IsChecked() && CaptureBox().IsChecked().Value())) return;
 
@@ -3915,8 +4248,42 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
         ? locText("Running… (multiple passes; render windows may appear)", "运行中…（多次；可能弹出渲染窗口）")
         : locText("Running… (a separate render window may appear)", "运行中…（可能弹出独立渲染窗口）"));
     m_lastScoreEn.clear();
+    m_lastScoreCacheHint = false;
     ResultText().Text(L"—");
+    updateResultHint();
     OutputBox().Text({});
+
+    // Progress: workers report no live protocol, so estimate per-job duration
+    // from the configured run length and advance a timer between job starts.
+    {
+        const auto unit = durationUnitTag();
+        const double amount = durationAmountValue();
+        double sec = 15.0; // frames / unknown units: rough estimate
+        if (unit == "seconds")      sec = amount;
+        else if (unit == "minutes") sec = amount * 60.0;
+        else if (unit == "hours")   sec = amount * 3600.0;
+        m_gpuProgressIndeterminate = isUnlimitedDuration();
+        m_gpuProgressJobExpectedSec = sec + 6.0; // warmup + init + save overhead
+        m_gpuProgressJobs = jobs.size();
+        m_gpuProgressJobIndex = 0;
+        m_gpuProgressApiLabel.clear();
+        m_gpuProgressJobStart = std::chrono::steady_clock::now();
+        GpuProgressBar().IsIndeterminate(m_gpuProgressIndeterminate);
+        GpuProgressBar().Value(0.0);
+        GpuProgressText().Text(m_gpuProgressIndeterminate ? L"—" : L"0%");
+        GpuStageText().Text(locText("Starting…", "正在启动…"));
+        if (!m_gpuProgressTimer)
+        {
+            m_gpuProgressTimer = DispatcherTimer{};
+            m_gpuProgressTimer.Interval(std::chrono::milliseconds(250));
+            m_gpuProgressTimer.Tick([this](auto&&, auto&&)
+            {
+                if (uiAlive()) updateGpuProgressTick();
+            });
+        }
+        m_gpuProgressTimer.Start();
+        setTaskbarProgress(true, 0.0, m_gpuProgressIndeterminate);
+    }
 
     std::string repo = m_enginePath.empty() ? std::string{}
         : pathToUtf8(pathFromUtf8(m_enginePath)
@@ -3935,6 +4302,18 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
         size_t succeededJobs = 0;
         bool cancelled = false;
         std::vector<std::string> caps;
+        // Scores accumulate grouped by adapter: a "# <GPU name>" header line
+        // opens each group (rendered as an eyebrow by renderResultScore), and
+        // multi-worker runs label each score line with its API.
+        auto jobArgValue = [](std::vector<std::string> const& job,
+                              char const* key) -> std::string
+        {
+            for (size_t i = 1; i + 1 < job.size(); ++i)
+                if (job[i] == key) return job[i + 1];
+            return {};
+        };
+        std::string currentGpuGroup;
+        bool cacheResident = false;
         for (size_t jobIndex = 0; jobIndex < jobs.size(); ++jobIndex)
         {
             if (m_gpuCancelRequested.load())
@@ -3949,6 +4328,25 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                    "/" + std::to_string(jobs.size()) + " ==========";
             for (size_t i = 1; i < job.size(); ++i) all += " " + job[i];
             all += "\n";
+
+            // Live progress in the status bar — headless runs have no window,
+            // so this is the only sign that anything is happening.
+            if (disp)
+            {
+                std::string apiLabel = jobArgValue(job, "--backend");
+                for (auto const& api : kRunApis)
+                    if (apiLabel == api.token) { apiLabel = api.label; break; }
+                disp.TryEnqueue([this, strong, apiLabel, jobIndex]()
+                {
+                    if (!uiAlive()) return;
+                    m_gpuProgressApiLabel = apiLabel;
+                    m_gpuProgressJobIndex = jobIndex;
+                    m_gpuProgressJobStart = std::chrono::steady_clock::now();
+                    const auto text = gpuRunningStatusText();
+                    setGpuStatus(StatusLight::Running, text);
+                    GpuStageText().Text(text);
+                });
+            }
 
             auto res = captureCliProcess(job, gpuWorkerTimeoutMs(job), cancelHandle);
             all += res.output; all += "\n";
@@ -3975,7 +4373,37 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                 auto workerCaps = parseCapturePaths(res.output);
                 caps.insert(caps.end(), workerCaps.begin(), workerCaps.end());
                 std::string sc = extractScore(res.output);
-                if (!sc.empty()) lastScore = sc;
+                if (!sc.empty())
+                {
+                    // Small VRAM working sets can sit entirely in a big GPU L2
+                    // (e.g. 96 MB on GB202), inflating the apparent bandwidth.
+                    if (res.output.find("VRAM rate:") != std::string::npos)
+                    {
+                        const double ws = extractWorkingSetMiB(res.output);
+                        if (ws > 0.0 && ws < 128.0) cacheResident = true;
+                    }
+                    if (jobs.size() > 1)
+                    {
+                        std::string label = jobArgValue(job, "--backend");
+                        for (auto const& api : kRunApis)
+                            if (label == api.token) { label = api.label; break; }
+                        sc = label + " — " + sc;
+                    }
+                    std::string gpuName = normalizeGpuName(extractGpuName(res.output));
+                    if (gpuName.empty() || gpuName == "(unknown)")
+                    {
+                        const auto g = jobArgValue(job, "--gpu");
+                        gpuName = g.empty() ? "GPU" : "GPU " + g;
+                    }
+                    if (gpuName != currentGpuGroup)
+                    {
+                        currentGpuGroup = gpuName;
+                        if (!lastScore.empty()) lastScore += '\n';
+                        lastScore += "# " + gpuName;
+                    }
+                    lastScore += '\n';
+                    lastScore += sc;
+                }
             }
         }
 
@@ -4228,7 +4656,8 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
             all += "\n[GUI] Cancelled by user.\n";
 
         all = clipForUi(std::move(all));
-        if (!disp || !disp.TryEnqueue([this, strong, all, lastScore, needCharts, failedJobs,
+        if (!disp || !disp.TryEnqueue([this, strong, all, lastScore, cacheResident,
+                         needCharts, failedJobs,
                          succeededJobs, postProcessFailed, postProcessStatus,
                          cancelled]()
         {
@@ -4241,6 +4670,15 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
             {
                 OutputBox().Text(u8(all));
                 GpuCancelButton().IsEnabled(false);
+                m_lastScoreCacheHint = cacheResident;
+                if (cancelled)
+                    stopGpuProgress(locText("Cancelled", "已取消"), false);
+                else if (failedJobs > 0 && succeededJobs == 0)
+                    stopGpuProgress(locText("Failed", "运行失败"), false);
+                else if (failedJobs > 0)
+                    stopGpuProgress(locText("Completed with errors", "部分完成"), true);
+                else
+                    stopGpuProgress(locText("Done", "完成"), true);
                 auto showScoreOr = [&](hstring const& fallback)
                 {
                     if (lastScore.empty())
@@ -4251,8 +4689,9 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                     else
                     {
                         m_lastScoreEn = lastScore;
-                        ResultText().Text(u8(localizeScoreLine(lastScore)));
+                        renderResultScore();
                     }
+                    updateResultHint();
                 };
                 if (cancelled)
                 {
@@ -4263,6 +4702,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                 {
                     m_lastScoreEn.clear();
                     ResultText().Text(locText("Error — see output", "出错 —— 见输出"));
+                    updateResultHint();
                     setGpuStatus(StatusLight::Error, locText("Failed", "运行失败"));
                 }
                 else if (failedJobs > 0)
@@ -4328,6 +4768,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                   OutputBox().Text(u8(std::string("[GUI] Worker exception: ") + msg));
                   ResultText().Text(locText("Error — see output", "出错 —— 见输出"));
                   setGpuStatus(StatusLight::Error, locText("Failed", "运行失败"));
+                  stopGpuProgress(locText("Failed", "运行失败"), false);
                   endTask(ActiveTask::GpuBenchmark);
                   Busy().IsActive(false);
                   GpuCancelButton().IsEnabled(false);
@@ -4350,6 +4791,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                                            "[GUI] 工作线程发生未知异常。"));
                   ResultText().Text(locText("Error — see output", "出错 —— 见输出"));
                   setGpuStatus(StatusLight::Error, locText("Failed", "运行失败"));
+                  stopGpuProgress(locText("Failed", "运行失败"), false);
                   endTask(ActiveTask::GpuBenchmark);
                   Busy().IsActive(false);
                   GpuCancelButton().IsEnabled(false);
@@ -4382,10 +4824,44 @@ void MainWindow::OnRun(IInspectable const&, RoutedEventArgs const&)
     const int preset = PresetBox().SelectedIndex();
     if (preset != 0 && selectedApis().empty())
     {
-        ResultText().Text(locText(
-            "Select at least one graphics API. Unsupported APIs may also be selected.",
-            "请至少选择一个图形 API；未报告支持的 API 也可以勾选。"));
-        setGpuStatus(StatusLight::Error, locText("No graphics API selected.", "尚未选择图形 API。"));
+        // Mirror rebuildApiPicker's Vulkan-only test: for the fluid workloads the
+        // API panel lists Vulkan or nothing, so the generic "unsupported APIs may
+        // also be selected" wording would be wrong here.
+        const auto wl = selected(WorkloadBox());
+        auto wlItem = WorkloadBox().SelectedItem().try_as<ComboBoxItem>();
+        const bool vulkanOnly =
+            wl == "cinematic_liquid" || wl == "cinematic_liquid_v1" ||
+            (wlItem && (wlItem == WorkloadCinematicLiquid() ||
+                        wlItem == WorkloadCinematicLiquidV1()));
+        bool vulkanDetected = false;
+        for (auto const& capabilities : m_gpuApiSupport)
+            vulkanDetected = vulkanDetected || capabilities[0]; // {vulkan,...}
+        if (vulkanOnly && !vulkanDetected)
+        {
+            ResultText().Text(locText(
+                "This fluid workload requires Vulkan, and no Vulkan support was "
+                "detected on this device.",
+                "该流体测试仅支持 Vulkan，当前设备未检测到 Vulkan 支持。"));
+            setGpuStatus(StatusLight::Error,
+                         locText("Vulkan not available.", "Vulkan 不可用。"));
+        }
+        else if (vulkanOnly)
+        {
+            ResultText().Text(locText(
+                "This fluid workload runs on Vulkan only — select Vulkan in the "
+                "Graphics API list.",
+                "该流体测试仅支持 Vulkan，请在图形 API 中勾选 Vulkan。"));
+            setGpuStatus(StatusLight::Error,
+                         locText("No graphics API selected.", "尚未选择图形 API。"));
+        }
+        else
+        {
+            ResultText().Text(locText(
+                "Select at least one graphics API. Unsupported APIs may also be selected.",
+                "请至少选择一个图形 API；未报告支持的 API 也可以勾选。"));
+            setGpuStatus(StatusLight::Error,
+                         locText("No graphics API selected.", "尚未选择图形 API。"));
+        }
         return;
     }
     const bool workloadSelectable = preset == 1 || preset == 2 || preset == 3;

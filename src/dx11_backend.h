@@ -87,8 +87,10 @@ private:
     bool timestampsSupported_    = false;
     bool tearingSupported_       = false;
     bool timestampDiagPrinted_   = false;
-    UINT timestampFrameCount_    = 0;
-    UINT disjointFailCount_      = 0;
+    // A slot stays reserved (not reissued) until its queries resolve; results
+    // are polled non-blocking, so headless frame rates are not throttled.
+    bool slotPending_[kTimestampSlotCount]{};
+    UINT slotAge_[kTimestampSlotCount]{};
     UINT64 lastGoodFrequency_    = 0;
     std::uint32_t currentFrame_  = 0;
     float fractalElapsed_        = 0.0f;   // StressFractal palette time

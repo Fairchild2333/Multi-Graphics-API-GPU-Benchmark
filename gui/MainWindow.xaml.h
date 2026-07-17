@@ -64,8 +64,8 @@ namespace winrt::gpu_bench_gui::implementation
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
         void OnDurationValueChanged(
-            winrt::Windows::Foundation::IInspectable const& sender,
-            winrt::Microsoft::UI::Xaml::Controls::TextChangedEventArgs const& args);
+            winrt::Microsoft::UI::Xaml::Controls::NumberBox const& sender,
+            winrt::Microsoft::UI::Xaml::Controls::NumberBoxValueChangedEventArgs const& args);
         void OnParticlePresetChanged(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
@@ -147,6 +147,8 @@ namespace winrt::gpu_bench_gui::implementation
                             StatusLight kind);
         void setGpuStatus(StatusLight kind, winrt::hstring const& text);
         void setCpuStatus(StatusLight kind, winrt::hstring const& text);
+        winrt::hstring gpuRunningStatusText() const;
+        void refreshActiveGpuStatusLanguage();
         void applyWorkloadVisibility();
         void applyTheme(int index);
         void updateCaptionButtonColors();
@@ -156,6 +158,13 @@ namespace winrt::gpu_bench_gui::implementation
         void populateGpus();
         void rebuildApiPicker(bool preserveSelection);
         void updateApiPickerSummary();
+        void closeApiPickerDropDown();
+        void updateResultHint();
+        void renderResultScore();
+        void setTaskbarProgress(bool active, double fraction,
+                                bool indeterminate = false);
+        void updateGpuProgressTick();
+        void stopGpuProgress(winrt::hstring const& stage, bool complete);
         void updateExtraLabel();
         void updateDurationValueEnabled();
         bool isUnlimitedDuration();
@@ -189,6 +198,18 @@ namespace winrt::gpu_bench_gui::implementation
 
         Microsoft::UI::Dispatching::DispatcherQueue m_dispatcher{ nullptr };
         HWND  m_hwnd{ nullptr };
+
+        // Taskbar progress (ITaskbarList3) + GPU run progress estimation.
+        // GPU progress state is only touched on the UI thread.
+        winrt::com_ptr<ITaskbarList3> m_taskbar{ nullptr };
+        bool m_taskbarInitTried{ false };
+        Microsoft::UI::Xaml::DispatcherTimer m_gpuProgressTimer{ nullptr };
+        size_t m_gpuProgressJobs{ 0 };
+        size_t m_gpuProgressJobIndex{ 0 };
+        double m_gpuProgressJobExpectedSec{ 15.0 };
+        bool   m_gpuProgressIndeterminate{ false };
+        std::string m_gpuProgressApiLabel; // English API label for mid-run language refresh
+        std::chrono::steady_clock::time_point m_gpuProgressJobStart{};
         HBRUSH m_bgBrush{ nullptr };
         bool  m_uiReady{ false };
         bool  m_suppressCombo{ false };
@@ -220,6 +241,7 @@ namespace winrt::gpu_bench_gui::implementation
         std::string m_historySortColumn{ "time" };
         bool m_historySortAscending{ false };
         std::string m_lastScoreEn; // English score line; re-localised on language change
+        bool m_lastScoreCacheHint{ false }; // VRAM run with a working set small enough for L2
         bool m_suppressRenderDocUi{ false };
     };
 }

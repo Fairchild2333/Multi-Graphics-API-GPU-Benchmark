@@ -207,8 +207,10 @@
                                             <ComboBoxItem x:Name="DurationFrames" Tag="frames">Frames</ComboBoxItem>
                                             <ComboBoxItem x:Name="DurationUnlimited" Tag="unlimited">Until Cancel</ComboBoxItem>
                                         </ComboBox>
-                                        <TextBox x:Name="DurationValueBox" Grid.Column="1" Header="Value" Text="15" Width="110"
-                                                 TextChanged="OnDurationValueChanged"/>
+                                        <NumberBox x:Name="DurationValueBox" Grid.Column="1" Header="Value" Value="15" Width="150"
+                                                   Minimum="1" Maximum="360000" SmallChange="1"
+                                                   SpinButtonPlacementMode="Inline"
+                                                   ValueChanged="OnDurationValueChanged"/>
                                         <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
                                             <ComboBox x:Name="ParticlePresetBox" Header="Particles" Width="220"
                                                       SelectedIndex="1" SelectionChanged="OnParticlePresetChanged">
@@ -249,7 +251,7 @@
                                         </StackPanel>
                                         <CheckBox x:Name="VsyncBox" Content="V-Sync" MinWidth="0"/>
                                         <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                            <CheckBox x:Name="HostMemBox" Content="Host memory" MinWidth="0"/>
+                                            <CheckBox x:Name="HostMemBox" Content="System memory" MinWidth="0"/>
                                             <FontIcon x:Name="HostMemInfo" Glyph="&#xE946;" FontSize="14"
                                                       VerticalAlignment="Center"
                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
@@ -270,9 +272,11 @@
                                             <CheckBox x:Name="CaptureBox" Content="Capture at" MinWidth="0"
                                                       IsChecked="True"
                                                       Checked="OnCaptureChecked" Unchecked="OnCaptureChecked"/>
-                                            <NumberBox x:Name="CaptureValueBox" Width="96" Minimum="0.1"
-                                                       Maximum="15" Value="5"
-                                                       SpinButtonPlacementMode="Compact"
+                                            <!-- Inline spin buttons (the Compact popup could get stuck on
+                                                 screen); wide enough that the input stays usable. -->
+                                            <NumberBox x:Name="CaptureValueBox" Width="160" Minimum="1"
+                                                       Maximum="15" Value="5" SmallChange="1"
+                                                       SpinButtonPlacementMode="Inline"
                                                        ValueChanged="OnCaptureValueChanged"/>
                                             <TextBlock x:Name="CaptureUnitLabel" Text="s"
                                                        VerticalAlignment="Center"/>
@@ -284,14 +288,46 @@
                                 </StackPanel>
                             </Border>
 
+                            <!-- Run progress: worker index + elapsed-time estimate
+                                 (GPU workers report no live progress protocol). -->
+                            <Border Padding="16"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="8">
+                                <StackPanel Spacing="8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="GpuStageText" Text="Ready" FontWeight="SemiBold"/>
+                                        <TextBlock x:Name="GpuProgressText" Grid.Column="1" Text="0%" Opacity="0.72"/>
+                                    </Grid>
+                                    <ProgressBar x:Name="GpuProgressBar" Minimum="0" Maximum="100" Value="0"/>
+                                </StackPanel>
+                            </Border>
+
                             <!-- Result score -->
                             <Border Padding="16,12,16,14"
                                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1" CornerRadius="8">
-                                <TextBlock x:Name="ResultText" FontSize="18" FontWeight="SemiBold" Text="—"
-                                           TextWrapping="Wrap" VerticalAlignment="Center"
-                                           OpticalMarginAlignment="TrimSideBearings"/>
+                                <StackPanel Spacing="6">
+                                    <TextBlock x:Name="GpuSummaryTitle" Text="Summary" FontWeight="SemiBold"
+                                               Margin="0,0,0,2"/>
+                                    <TextBlock x:Name="ResultText" FontSize="20" FontWeight="SemiBold" Text="—"
+                                               TextWrapping="Wrap" VerticalAlignment="Center"
+                                               OpticalMarginAlignment="TrimSideBearings"/>
+                                    <TextBlock x:Name="ResultHint" Visibility="Collapsed"
+                                               FontSize="12" TextWrapping="Wrap"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <Button x:Name="GpuOpenResultsButton" Content="Open results folder"
+                                                Click="OnOpenResultsFolder"/>
+                                        <Button x:Name="GpuOpenCapturesButton" Content="Open RenderDoc captures"
+                                                Click="OnOpenCapturesFolder"/>
+                                    </StackPanel>
+                                </StackPanel>
                             </Border>
 
                             <!-- CLI follows page content (not pinned above the action bar). -->
@@ -384,13 +420,15 @@
                                             <ComboBoxItem x:Name="CpuDurationQuick" Tag="1">Quick (1 s)</ComboBoxItem>
                                             <ComboBoxItem x:Name="CpuDurationFormal" Tag="15">Formal (15 s)</ComboBoxItem>
                                         </ComboBox>
+                                        <!-- Inline spin buttons: Compact's floating popup could get stuck.
+                                             Warm-up keeps one decimal — the formal contract is 15.0 s + 0.2 s. -->
                                         <NumberBox x:Name="CpuTimeBox" Grid.Column="2" Header="Seconds per test"
-                                                   Value="1" Minimum="0.1" Maximum="3600" SmallChange="0.5"
-                                                   SpinButtonPlacementMode="Compact"
+                                                   Value="1" Minimum="1" Maximum="3600" SmallChange="1"
+                                                   SpinButtonPlacementMode="Inline"
                                                    ValueChanged="OnCpuTimeChanged"/>
                                         <NumberBox x:Name="CpuWarmupBox" Grid.Column="3" Header="Warm-up seconds"
                                                    Value="0.2" Minimum="0" Maximum="60" SmallChange="0.1"
-                                                   SpinButtonPlacementMode="Compact"
+                                                   SpinButtonPlacementMode="Inline"
                                                    ValueChanged="OnCpuTimeChanged"/>
                                     </Grid>
                                     <TextBlock x:Name="CpuDurationHint" Opacity="0.72" TextWrapping="Wrap"
