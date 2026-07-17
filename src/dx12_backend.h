@@ -45,6 +45,9 @@ private:
     void CreateFence();
     void WaitForGpu();
     void CollectTimestampResults();
+    void CreateFluidResources();
+    void CleanupFluidResources();
+    void RecordFluidFrame(float deltaTime);
 
     std::string deviceName_;
     std::string driverVersion_;
@@ -93,6 +96,36 @@ private:
     UINT                            frameIndex_ = 0;
     bool                            tearingSupported_ = false;
     float                           fractalElapsed_ = 0.0f;   // StressFractal palette time
+
+    // Legacy 2D Fluid (Stam): isolated multi-pass compute + fullscreen dye render.
+    struct FluidResources {
+        ComPtr<ID3D12Resource> stateA;
+        ComPtr<ID3D12Resource> stateB;
+        ComPtr<ID3D12Resource> pressA;
+        ComPtr<ID3D12Resource> pressB;
+        ComPtr<ID3D12Resource> divBuf;
+        ComPtr<ID3D12Resource> zeroPressUpload; // cleared pressA each frame
+
+        ComPtr<ID3D12RootSignature> computeRootSig;
+        ComPtr<ID3D12RootSignature> graphicsRootSig;
+        ComPtr<ID3D12PipelineState> advectPSO;
+        ComPtr<ID3D12PipelineState> divPSO;
+        ComPtr<ID3D12PipelineState> jacobiPSO;
+        ComPtr<ID3D12PipelineState> subtractPSO;
+        ComPtr<ID3D12PipelineState> renderPSO;
+
+        ComPtr<ID3D12DescriptorHeap> heap; // 5 tables × 5 UAVs + 1 SRV
+        D3D12_GPU_DESCRIPTOR_HANDLE tableAdvect{};
+        D3D12_GPU_DESCRIPTOR_HANDLE tableDiv{};
+        D3D12_GPU_DESCRIPTOR_HANDLE tableJacA{};
+        D3D12_GPU_DESCRIPTOR_HANDLE tableJacB{};
+        D3D12_GPU_DESCRIPTOR_HANDLE tableSub{};
+        D3D12_GPU_DESCRIPTOR_HANDLE tableRender{};
+
+        std::uint32_t gridSize = 0;
+        float         simTime  = 0.0f;
+        bool          active   = false;
+    } fluid_;
 };
 
 }  // namespace gpu_bench

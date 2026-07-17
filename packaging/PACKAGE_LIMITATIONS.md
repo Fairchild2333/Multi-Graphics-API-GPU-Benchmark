@@ -22,13 +22,14 @@ fully self-contained public installer.
 - CMake attempts to bundle the release MSVC runtime DLLs. Redistribution is
   subject to the Visual Studio license, and the package verifier must confirm
   the required DLLs are present.
-- The stage includes a complete `files.sha256` inventory; the ZIP and Setup get
+- The stage includes a complete `files.sha256` inventory; the ZIP and MSI get
   separate SHA-256 release-asset hashes. These detect accidental corruption but
   do not replace Authenticode signing.
-- The engineering package includes notices for GLAD, GLFW, RenderDoc (when
-  bundled), and the Microsoft redistributable caveat. The repository still has
-  no approved root project distribution license. Public redistribution, MSI
-  publication, and signing therefore remain release blockers.
+- The project is distributed under the MIT license (`LICENSE` at the repository
+  root, also staged under `licenses/`). Third-party notices cover GLAD, GLFW,
+  RenderDoc (when bundled), and the Microsoft redistributable caveat. Unsigned
+  public builds and clean-machine install/capture validation remain release
+  gates.
 
 The ZIP deliberately contains no user results, captures, reports, logs,
 developer SDKs, vcpkg tree, shader compiler, Python installation, PDB files, or

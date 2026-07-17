@@ -100,7 +100,7 @@ function Invoke-CMakeConfigure([string]$GuiDirectory) {
         "-DVCPKG_TARGET_TRIPLET=$triplet",
         '-DGPU_BENCH_ENABLE_PACKAGING=ON',
         '-DGPU_BENCH_STRICT_RELEASE_ASSETS=ON',
-        '-DGPU_BENCH_CPACK_GENERATORS=ZIP'
+        '-DGPU_BENCH_CPACK_GENERATORS=ZIP;WIX'
     )
     if ($Arch -eq 'ARM64') {
         $genScript = Join-Path $PSScriptRoot 'gen-vulkan-arm64-lib.ps1'
@@ -113,8 +113,13 @@ function Invoke-CMakeConfigure([string]$GuiDirectory) {
     else { $configureArgs += '-DGPU_BENCH_RENDERDOC_DIR=' }
     if ($ReportWorkerDir) { $configureArgs += "-DGPU_BENCH_REPORT_WORKER_DIR=$([IO.Path]::GetFullPath($ReportWorkerDir))" }
     else { $configureArgs += '-DGPU_BENCH_REPORT_WORKER_DIR=' }
-    if ($ProjectLicenseFile) { $configureArgs += "-DGPU_BENCH_PACKAGE_LICENSE_FILE=$([IO.Path]::GetFullPath($ProjectLicenseFile))" }
-    else { $configureArgs += '-DGPU_BENCH_PACKAGE_LICENSE_FILE=' }
+    if (-not $ProjectLicenseFile) {
+        $ProjectLicenseFile = Join-Path $projectRoot 'LICENSE'
+    }
+    if (-not (Test-Path -LiteralPath $ProjectLicenseFile -PathType Leaf)) {
+        throw "Project license file was not found: $ProjectLicenseFile"
+    }
+    $configureArgs += "-DGPU_BENCH_PACKAGE_LICENSE_FILE=$([IO.Path]::GetFullPath($ProjectLicenseFile))"
     Invoke-Checked cmake @configureArgs
 }
 

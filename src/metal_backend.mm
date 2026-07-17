@@ -95,9 +95,9 @@ void MetalBackend::InitBackend() {
         throw std::runtime_error(
             "GPU Stress v1 is not supported on Metal; use Vulkan, DX12, DX11, or OpenGL");
     }
-    if (config_.workload == Workload::GpuBurnV1) {
+    if (isGpuBurnWorkload(config_.workload)) {
         throw std::runtime_error(
-            "GPU Burn v1 is not supported on Metal; use Vulkan, DX12, DX11, or OpenGL");
+            "GPU Burn is not supported on Metal; use Vulkan, DX12, DX11, or OpenGL");
     }
     @autoreleasepool {
         // --- Device selection ---------------------------------------------------

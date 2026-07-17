@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <atomic>
 #include <cctype>
+#include <cstring>
 #include <chrono>
 #include <cwctype>
 #include <cmath>
@@ -30,12 +31,16 @@
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
+#include <functional>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <set>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <vector>
 
@@ -120,6 +125,36 @@ namespace
     hstring locText(const char* en, const char* zh) { return winrt::to_hstring(i18n::tr(en, zh)); }
     IInspectable locContent(const char* en, const char* zh) { return winrt::box_value(locText(en, zh)); }
 
+    // ComboBox disabled visuals barely dim selected text; force the theme
+    // disabled brush onto the control and summary item while Detecting.
+    Brush disabledTextBrush()
+    {
+        if (auto res = Application::Current().Resources().TryLookup(
+                box_value(L"TextFillColorDisabledBrush")))
+            if (auto brush = res.try_as<Brush>())
+                return brush;
+        return SolidColorBrush(Windows::UI::Color{ 255, 160, 160, 160 });
+    }
+
+    void applyComboEnabledLook(ComboBox const& box, bool enabled)
+    {
+        box.IsEnabled(enabled);
+        box.Opacity(enabled ? 1.0 : 0.55);
+        if (enabled)
+        {
+            box.ClearValue(Control::ForegroundProperty());
+            if (auto item = box.SelectedItem().try_as<ComboBoxItem>())
+                item.ClearValue(Control::ForegroundProperty());
+        }
+        else
+        {
+            auto brush = disabledTextBrush();
+            box.Foreground(brush);
+            if (auto item = box.SelectedItem().try_as<ComboBoxItem>())
+                item.Foreground(brush);
+        }
+    }
+
     hstring u8(std::string const& s)
     {
         if (s.empty()) return {};
@@ -127,6 +162,51 @@ namespace
         std::wstring w(n, L'\0');
         ::MultiByteToWideChar(CP_UTF8, 0, s.data(), (int)s.size(), w.data(), n);
         return hstring(w);
+    }
+
+    void appendGuiCrashLog(char const* where, char const* detail)
+    {
+        try
+        {
+            wchar_t dir[MAX_PATH]{};
+            DWORD n = ::GetEnvironmentVariableW(L"LOCALAPPDATA", dir, MAX_PATH);
+            if (n == 0 || n >= MAX_PATH) return;
+            std::filesystem::path path =
+                std::filesystem::path(dir) / L"GpuComputeBenchmark" / L"gui-crash.log";
+            std::error_code ec;
+            std::filesystem::create_directories(path.parent_path(), ec);
+            std::ofstream out(path, std::ios::app);
+            if (!out) return;
+            SYSTEMTIME st{};
+            ::GetLocalTime(&st);
+            out << st.wYear << '-' << st.wMonth << '-' << st.wDay << ' '
+                << st.wHour << ':' << st.wMinute << ':' << st.wSecond
+                << " [" << (where ? where : "?") << "] "
+                << (detail ? detail : "") << '\n';
+        }
+        catch (...) {}
+    }
+
+    // Keep WinUI TextBox updates bounded; multi-job CLI dumps can otherwise spike memory.
+    std::string clipForUi(std::string s, std::size_t maxBytes = 256u * 1024u)
+    {
+        if (s.size() <= maxBytes) return s;
+        return std::string("…[truncated]\n") + s.substr(s.size() - maxBytes);
+    }
+
+    std::string resultDatePrefix(std::string const& timestamp)
+    {
+        return timestamp.size() >= 10 ? timestamp.substr(0, 10) : timestamp;
+    }
+
+    std::shared_ptr<void> makeManualResetEvent()
+    {
+        HANDLE raw = ::CreateEventW(nullptr, TRUE, FALSE, nullptr);
+        if (!raw) return {};
+        return std::shared_ptr<void>(raw, [](void* p)
+        {
+            if (p) ::CloseHandle(static_cast<HANDLE>(p));
+        });
     }
 
     std::filesystem::path pathFromUtf8(std::string const& value)
@@ -487,6 +567,8 @@ namespace
 
         std::thread reader([&]()
         {
+          try
+          {
             constexpr std::size_t kMaxOutputBytes = 4u * 1024u * 1024u;
             constexpr ULONGLONG kStopDrainMs = 1000;
             std::array<char, 8192> buffer{};
@@ -597,6 +679,11 @@ namespace
                     break;
                 }
             }
+          }
+          catch (...)
+          {
+              readError = ERROR_OUTOFMEMORY;
+          }
         });
 
         DWORD waitResult = WAIT_FAILED;
@@ -692,6 +779,10 @@ namespace
     // full GPU matrix forever without penalising intentionally long timed runs.
     DWORD gpuWorkerTimeoutMs(std::vector<std::string> const& args)
     {
+        for (auto const& a : args)
+            if (a == "--no-time-limit")
+                return INFINITE;
+
         constexpr std::uint64_t kMinuteMs = 60u * 1000u;
         constexpr std::uint64_t kDefaultMs = 60u * kMinuteMs;
         constexpr std::uint64_t kGraceMs = 5u * kMinuteMs;
@@ -722,24 +813,123 @@ namespace
         return static_cast<DWORD>(timeout);
     }
 
+    // ProductVersion from this GUI's VERSIONINFO (app.rc), e.g. "0.1.3".
+    std::wstring readGuiProductVersion()
+    {
+        wchar_t path[MAX_PATH]{};
+        if (!GetModuleFileNameW(nullptr, path, MAX_PATH))
+            return L"";
+
+        DWORD handle = 0;
+        const DWORD size = GetFileVersionInfoSizeW(path, &handle);
+        if (!size) return L"";
+
+        std::vector<char> block(size);
+        if (!GetFileVersionInfoW(path, 0, size, block.data()))
+            return L"";
+
+        struct LANGANDCODEPAGE { WORD language; WORD codePage; };
+        LANGANDCODEPAGE* translate = nullptr;
+        UINT translateBytes = 0;
+        if (!VerQueryValueW(block.data(), L"\\VarFileInfo\\Translation",
+                            reinterpret_cast<void**>(&translate), &translateBytes) ||
+            !translate || translateBytes < sizeof(LANGANDCODEPAGE))
+            return L"";
+
+        wchar_t subBlock[64]{};
+        swprintf_s(subBlock, L"\\StringFileInfo\\%04x%04x\\ProductVersion",
+                   translate[0].language, translate[0].codePage);
+        wchar_t* value = nullptr;
+        UINT valueChars = 0;
+        if (!VerQueryValueW(block.data(), subBlock,
+                            reinterpret_cast<void**>(&value), &valueChars) ||
+            !value || valueChars == 0)
+            return L"";
+        return value;
+    }
+
+    std::string trimScoreLine(std::string line)
+    {
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+        size_t b = line.find_first_not_of(" \t");
+        return b == std::string::npos ? std::string{} : line.substr(b);
+    }
+
+    std::string localizeScoreLine(std::string line)
+    {
+        // CLI says "Memory rate:"; UI shows "显存速率:" (Zh) or "VRAM rate:" (En).
+        {
+            auto pos = line.find("Memory rate:");
+            if (pos != std::string::npos)
+                line.replace(pos, std::strlen("Memory rate:"),
+                             i18n::currentLang() == i18n::Lang::Zh
+                                 ? "显存速率:" : "VRAM rate:");
+        }
+        if (i18n::currentLang() != i18n::Lang::Zh) return line;
+        struct Pair { char const* en; char const* zh; };
+        constexpr Pair pairs[] = {
+            { "Avg FPS:", "平均帧率:" },
+            { "Compute rate:", "计算速率:" },
+            { "Burn rate:", "Burn 速率:" },
+            { "Stress rate:", "压力速率:" },
+            { "Fill rate:", "填充速率:" },
+            { "Render rate:", "渲染速率:" },
+            { "Vol rate:", "体积速率:" },
+            { "Fluid rate:", "流体速率:" },
+            { "Liquid rate:", "液体速率:" },
+            { "Peak FP", "峰值 FP" },
+            { "Peak INT", "峰值 INT" },
+        };
+        for (auto const& p : pairs)
+        {
+            auto pos = line.find(p.en);
+            if (pos != std::string::npos)
+                line.replace(pos, std::strlen(p.en), p.zh);
+        }
+        return line;
+    }
+
+    // Returns an English score line (CLI wording). Call localizeScoreLine() for UI.
     std::string extractScore(std::string const& out)
     {
         const char* keys[] = { "Memory rate:", "Compute rate:", "Burn rate:", "Stress rate:", "Fill rate:", "Render rate:", "Vol rate:", "Fluid rate:", "Liquid rate:", "Peak FP", "Peak INT" };
         std::istringstream ss(out);
-        std::string line, fps;
+        std::string line, rate, fps;
         while (std::getline(ss, line))
         {
-            if (!line.empty() && line.back() == '\r') line.pop_back();
-            for (auto k : keys)
-                if (line.find(k) != std::string::npos)
-                {
-                    size_t b = line.find_first_not_of(" \t");
-                    return b == std::string::npos ? line : line.substr(b);
-                }
-            if (line.find("Avg FPS:") != std::string::npos && fps.empty()) fps = line;
+            auto trimmed = trimScoreLine(line);
+            if (trimmed.empty()) continue;
+            if (fps.empty() && trimmed.find("Avg FPS:") != std::string::npos)
+                fps = trimmed;
+            if (rate.empty())
+            {
+                for (auto k : keys)
+                    if (trimmed.find(k) != std::string::npos)
+                    {
+                        rate = trimmed;
+                        break;
+                    }
+            }
         }
-        size_t b = fps.find_first_not_of(" \t");
-        return (b == std::string::npos) ? fps : fps.substr(b);
+
+        std::string combined;
+        if (!rate.empty()) combined = rate;
+        if (!fps.empty())
+        {
+            // Collapse "Avg FPS:      123" → "Avg FPS: 123".
+            auto fpsLabel = fps;
+            auto colon = fpsLabel.find(':');
+            if (colon != std::string::npos)
+            {
+                auto value = fpsLabel.substr(colon + 1);
+                auto first = value.find_first_not_of(" \t");
+                value = first == std::string::npos ? std::string{} : value.substr(first);
+                fpsLabel = fpsLabel.substr(0, colon + 1) + " " + value;
+            }
+            if (!combined.empty()) combined += "  ·  ";
+            combined += fpsLabel;
+        }
+        return combined;
     }
 
     std::string padCol(std::string s, size_t w)
@@ -1221,6 +1411,75 @@ namespace
         return groupedNumber(n);
     }
 
+    // Consolas treats most CJK as double-width. History columns used byte length
+    // for padding, so Chinese workload labels shifted Particles/Score/FPS.
+    size_t utf8DisplayWidth(std::string_view s)
+    {
+        size_t width = 0;
+        for (size_t i = 0; i < s.size();)
+        {
+            auto c = static_cast<unsigned char>(s[i]);
+            if (c < 0x80)
+            {
+                ++width;
+                ++i;
+                continue;
+            }
+
+            std::uint32_t cp = 0;
+            size_t len = 1;
+            if ((c & 0xE0) == 0xC0 && i + 1 < s.size())
+            {
+                cp = (std::uint32_t(c & 0x1F) << 6) |
+                     (std::uint32_t(static_cast<unsigned char>(s[i + 1]) & 0x3F));
+                len = 2;
+            }
+            else if ((c & 0xF0) == 0xE0 && i + 2 < s.size())
+            {
+                cp = (std::uint32_t(c & 0x0F) << 12) |
+                     (std::uint32_t(static_cast<unsigned char>(s[i + 1]) & 0x3F) << 6) |
+                     (std::uint32_t(static_cast<unsigned char>(s[i + 2]) & 0x3F));
+                len = 3;
+            }
+            else if ((c & 0xF8) == 0xF0 && i + 3 < s.size())
+            {
+                cp = (std::uint32_t(c & 0x07) << 18) |
+                     (std::uint32_t(static_cast<unsigned char>(s[i + 1]) & 0x3F) << 12) |
+                     (std::uint32_t(static_cast<unsigned char>(s[i + 2]) & 0x3F) << 6) |
+                     (std::uint32_t(static_cast<unsigned char>(s[i + 3]) & 0x3F));
+                len = 4;
+            }
+            else
+            {
+                ++width;
+                ++i;
+                continue;
+            }
+
+            const bool wide =
+                (cp >= 0x1100 && cp <= 0x115F) ||
+                cp == 0x2329 || cp == 0x232A ||
+                (cp >= 0x2E80 && cp <= 0xA4CF) ||
+                (cp >= 0xAC00 && cp <= 0xD7A3) ||
+                (cp >= 0xF900 && cp <= 0xFAFF) ||
+                (cp >= 0xFE10 && cp <= 0xFE19) ||
+                (cp >= 0xFE30 && cp <= 0xFE6F) ||
+                (cp >= 0xFF00 && cp <= 0xFF60) ||
+                (cp >= 0xFFE0 && cp <= 0xFFE6) ||
+                (cp >= 0x20000 && cp <= 0x3FFFD);
+            width += wide ? 2 : 1;
+            i += len;
+        }
+        return width;
+    }
+
+    std::string padDisplay(std::string s, size_t width)
+    {
+        const size_t dw = utf8DisplayWidth(s);
+        if (dw < width) s.append(width - dw, ' ');
+        return s;
+    }
+
     // Convert stored ISO timestamp "YYYY-MM-DD HH:MM:SS" to locale-appropriate
     // display format. English uses Australian DD/MM/YYYY 12-hour; Chinese keeps
     // YYYY-MM-DD 24-hour.
@@ -1280,7 +1539,9 @@ namespace
     std::string workloadLabel(std::string const& id)
     {
         if (id == "stream")     return i18n::tr("Particle — Memory Throughput", "粒子 —— 内存吞吐");
-        if (id == "gpu_burn")   return i18n::tr("Plasma Bloom — GPU Burn", "等离子晶核 —— GPU Burn");
+        if (id == "headless_compute")
+            return i18n::tr("Headless Compute — Particle", "Headless 计算 —— 粒子");
+        if (id == "gpu_burn")   return i18n::tr("Plasma x Kaleidoscope — GPU Burn", "等离子晶核 × 万花镜 —— GPU Burn");
         if (id == "gpu_stress") return i18n::tr("GraphicsBurn v1 / Component (Advanced)", "GraphicsBurn v1 / 分项（高级）");
         if (id == "nbody")      return i18n::tr("N-Body — Advanced Compute", "N-Body —— 高级计算");
         if (id == "synthpeak")  return i18n::tr("SynthPeak — Advanced Synthetic", "SynthPeak —— 高级合成测试");
@@ -1289,7 +1550,7 @@ namespace
         if (id == "volumetric") return i18n::tr("Volumetric — Experimental Raymarch", "体积渲染 —— 实验性 Raymarch");
         if (id == "cinematic_liquid") return i18n::tr("Fluid — Interactive Pool", "流体 —— 互动水池");
         if (id == "cinematic_liquid_v1") return i18n::tr("Legacy Cinematic Liquid v1 — Dam Break", "旧版电影化液体 v1 —— 溃坝");
-        if (id == "fluid")      return i18n::tr("Other / Legacy 2D Fluid — Vulkan-only", "其他 / 旧版 2D 流体 —— 仅 Vulkan");
+        if (id == "fluid")      return i18n::tr("Other / Legacy 2D Fluid", "其他 / 旧版 2D 流体");
         if (id == "cpu_single_core") return i18n::tr("CPU — Per-core", "CPU —— 逐核");
         if (id == "cpu_multi_core")  return i18n::tr("CPU — All-core", "CPU —— 多核");
         return id;
@@ -1326,7 +1587,7 @@ namespace
         return normalizeCpuName(r.cpuName.empty() ? r.deviceName : r.cpuName);
     }
 
-    // Parse "steps=N" from Plasma Bloom / GPU Burn workloadConfig.
+    // Parse "steps=N" from GPU Burn workloadConfig.
     std::string burnStepsKey(gpu_bench::BenchmarkResult const& r)
     {
         if (r.workload != "gpu_burn") return {};
@@ -1347,6 +1608,48 @@ namespace
     {
         if (steps.empty()) return i18n::tr("(unknown)", "（未知）");
         return steps + i18n::tr(" steps", " 步");
+    }
+
+    // Older stream rows often stored vramMB=0; reuse a known value for the same GPU.
+    std::uint32_t resolvedVramMB(gpu_bench::BenchmarkResult const& r,
+                                 std::vector<gpu_bench::BenchmarkResult> const& all)
+    {
+        if (r.vramMB > 0) return r.vramMB;
+        if (r.deviceName.empty()) return 0;
+        const auto want = normalizeGpuName(r.deviceName);
+        std::uint32_t best = 0;
+        for (auto const& o : all)
+        {
+            if (o.vramMB == 0) continue;
+            if (o.deviceName == r.deviceName || normalizeGpuName(o.deviceName) == want)
+                best = (std::max)(best, o.vramMB);
+        }
+        return best;
+    }
+
+    std::string formatVramMB(std::uint32_t mb)
+    {
+        if (mb == 0) return "-";
+        if (mb < 1024) return std::to_string(mb) + "MB";
+
+        // DXGI DedicatedVideoMemory is often a few hundred MB below the
+        // marketed size (e.g. 32187 MiB for a 32 GB RTX 5090). Snap to a
+        // common advertised GiB label when we are within 5% below it.
+        static constexpr std::uint32_t kCommonGiB[] = {
+            4, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96, 128
+        };
+        for (std::uint32_t gib : kCommonGiB)
+        {
+            const std::uint32_t marketedMiB = gib * 1024u;
+            if (mb > marketedMiB) continue;
+            const std::uint32_t slack = marketedMiB - mb;
+            if (slack <= marketedMiB / 20u)  // ≤ 5%
+                return std::to_string(gib) + "GB";
+        }
+
+        const auto gibRounded = static_cast<std::uint32_t>(
+            (mb + 512u) / 1024u);  // nearest GiB
+        return std::to_string(gibRounded > 0 ? gibRounded : 1) + "GB";
     }
 
     // True if any checked workload checkbox matches predicate; if none checked,
@@ -1371,12 +1674,16 @@ namespace
 
     std::string workloadRunLabel(gpu_bench::BenchmarkResult const& result)
     {
+        if (result.headless && result.workload == "stream")
+            return workloadLabel("headless_compute");
         auto label = workloadLabel(result.workload);
         if (result.workload == "cinematic_liquid" &&
             result.workloadVersion == "cinematic_liquid_v1")
             return workloadLabel("cinematic_liquid_v1");
         if (result.workload == "fluid")
             return i18n::tr("Legacy 2D Fluid — unverified", "旧版 2D 流体 —— 未验证");
+        if (result.headless)
+            label += " [headless]";
         if (result.workload != "gpu_burn") return label;
         constexpr char key[] = "steps=";
         auto pos = result.workloadConfig.find(key);
@@ -1391,6 +1698,8 @@ namespace
 
     std::string historyWorkloadKey(gpu_bench::BenchmarkResult const& result)
     {
+        // Headless Particle stays under stream for the workload filter; the
+        // separate "Show headless" toggle controls visibility.
         // Persisted liquid v1/v2 rows share the historical public workload id
         // and are separated by workloadVersion. Give v1 its own UI filter
         // without rewriting old result files.
@@ -1514,15 +1823,14 @@ MainWindow::MainWindow()
         updateResizeBackdropColor();
         updateCaptionButtonColors();
     });
-    m_gpuCancelEvent = ::CreateEventW(nullptr, TRUE, FALSE, nullptr);
+    m_gpuCancelEvent = makeManualResetEvent();
     Closed([this](auto&&, auto&&) {
+        m_closing.store(true);
         cancelGpuBenchmark();
         cancelCpuBenchmark();
-        if (m_gpuCancelEvent)
-        {
-            ::CloseHandle(m_gpuCancelEvent);
-            m_gpuCancelEvent = nullptr;
-        }
+        // Drop our ref only; in-flight workers keep their shared_ptr copy alive
+        // until WaitForMultipleObjects returns (avoids cancel-handle UAF).
+        m_gpuCancelEvent.reset();
     });
     updateCaptionButtonColors();
 
@@ -1574,16 +1882,53 @@ MainWindow::MainWindow()
         }
     if (auto bmp = loadAppIconBitmap(40))  TitleBarIcon().Source(bmp);
     if (auto bmp = loadAppIconBitmap(128)) AboutIcon().Source(bmp);
+    refreshAboutVersion();
 
     m_uiReady = true;
     applyWorkloadVisibility();
-    populateGpus();
-    refreshHistory();
+    syncCaptureControls();
+    // App activates the window after this constructor returns. Touching ComboBox /
+    // ListView before a live XamlRoot exists surfaces as UnhandledException
+    // "xamlRoot" (seen in gui-crash.log during Detecting). Retry until rooted.
+    auto strong = get_strong();
+    auto tryStartup = std::make_shared<std::function<void()>>();
+    *tryStartup = [this, strong, tryStartup]()
+    {
+        if (!uiAlive()) return;
+        try
+        {
+            auto root = Content();
+            if (!root || !root.XamlRoot())
+            {
+                m_dispatcher.TryEnqueue(
+                    Microsoft::UI::Dispatching::DispatcherQueuePriority::Low,
+                    [tryStartup]() { (*tryStartup)(); });
+                return;
+            }
+            populateGpus();
+            refreshHistory();
+        }
+        catch (winrt::hresult_error const& e)
+        {
+            appendGuiCrashLog("DeferredInit", winrt::to_string(e.message()).c_str());
+            m_gpuEnumerationComplete = true;
+            syncActionButtonsEnabled();
+        }
+        catch (...)
+        {
+            appendGuiCrashLog("DeferredInit", "unknown");
+            m_gpuEnumerationComplete = true;
+            syncActionButtonsEnabled();
+        }
+    };
+    m_dispatcher.TryEnqueue(
+        Microsoft::UI::Dispatching::DispatcherQueuePriority::Low,
+        [tryStartup]() { (*tryStartup)(); });
 }
 
 // Only the three primary tests are listed by default; everything else stays
 // hidden behind the explicit legacy/advanced toggle so the daily dropdown is
-// Particle / Plasma Bloom / Fluid.
+// Particle / Plasma x Kaleidoscope / Fluid.
 void MainWindow::applyWorkloadVisibility()
 {
     const bool showLegacy = ShowLegacyBox().IsChecked().Value();
@@ -1608,8 +1953,65 @@ void MainWindow::OnShowLegacyChecked(IInspectable const&, RoutedEventArgs const&
     if (m_uiReady) applyWorkloadVisibility();
 }
 
+void MainWindow::OnRenderDocChecked(IInspectable const&, RoutedEventArgs const&)
+{
+    if (!m_uiReady || m_suppressRenderDocUi) return;
+    const bool on = RenderDocBox().IsChecked() && RenderDocBox().IsChecked().Value();
+    if (!on)
+    {
+        m_suppressRenderDocUi = true;
+        CaptureBox().IsChecked(false);
+        m_suppressRenderDocUi = false;
+    }
+    syncCaptureControls();
+}
+
+void MainWindow::OnCaptureChecked(IInspectable const&, RoutedEventArgs const&)
+{
+    if (!m_uiReady || m_suppressRenderDocUi) return;
+    const bool on = CaptureBox().IsChecked() && CaptureBox().IsChecked().Value();
+    if (on && !(RenderDocBox().IsChecked() && RenderDocBox().IsChecked().Value()))
+    {
+        m_suppressRenderDocUi = true;
+        RenderDocBox().IsChecked(true);
+        m_suppressRenderDocUi = false;
+    }
+    syncCaptureControls();
+}
+
+void MainWindow::OnCaptureValueChanged(NumberBox const&, NumberBoxValueChangedEventArgs const&)
+{
+    if (!m_uiReady || m_suppressRenderDocUi) return;
+    const double minVal = CaptureValueBox().Minimum();
+    const double maxVal = CaptureValueBox().Maximum();
+    double cur = CaptureValueBox().Value();
+    if (std::isnan(cur)) return;
+    double clamped = (std::min)(maxVal, (std::max)(minVal, cur));
+    if (durationUnitTag() == "frames")
+        clamped = std::floor(clamped + 1e-9);
+    if (clamped == cur) return;
+    m_suppressRenderDocUi = true;
+    CaptureValueBox().Value(clamped);
+    m_suppressRenderDocUi = false;
+}
+
+void MainWindow::OnDurationValueChanged(IInspectable const&, TextChangedEventArgs const&)
+{
+    if (!m_uiReady || m_suppressCombo) return;
+    syncCaptureControls();
+}
+
 void MainWindow::OnApiPickerDropDownOpened(IInspectable const&, IInspectable const&)
 {
+    // MaxDropDownHeight=0 already suppresses the list; keep it closed so a
+    // zero-height popup cannot linger as a "All APIs (4)" ghost.
+    ApiPickerBox().IsDropDownOpen(false);
+}
+
+void MainWindow::OnApiPickerTapped(IInspectable const&,
+                                   Microsoft::UI::Xaml::Input::TappedRoutedEventArgs const&)
+{
+    if (!uiAlive() || !ApiPickerBox().IsEnabled()) return;
     ApiPickerBox().IsDropDownOpen(false);
     Microsoft::UI::Xaml::Controls::Primitives::FlyoutBase::ShowAttachedFlyout(ApiPickerBox());
 }
@@ -1788,9 +2190,9 @@ void MainWindow::applyLanguage()
     PresetParticles().Content(locContent("Particle test — one GPU (selected APIs, custom particles)",
                                          "粒子测试 —— 单 GPU（所选 API，自定义粒子数）"));
     PresetHeadless().Content(locContent("Headless compute — one GPU (selected APIs, pure compute)",
-                                        "无头计算 —— 单 GPU（所选 API，纯计算）"));
-    GpuBox().Header(locContent("GPU / Renderer", "GPU / 渲染器"));
-    ApiPickerBox().Header(locContent("Graphics API", "图形 API"));
+                                        "Headless 计算 —— 单 GPU（所选 API，纯计算）"));
+    GpuHeader().Text(locText("GPU / Renderer", "GPU / 渲染器"));
+    ApiPickerHeader().Text(locText("Graphics API", "图形 API"));
     Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
         ApiPickerBox(), locText("Graphics API", "图形 API"));
     SelectAllRunApis().Content(locContent("Select all", "全选"));
@@ -1804,11 +2206,11 @@ void MainWindow::applyLanguage()
     UnsupportedApisHint().Text(locText(
         "Unsupported selections remain available and will be reported by the CLI.",
         "不支持的 API 仍可勾选；运行后由 CLI 返回明确错误。"));
-    WorkloadBox().Header(locContent("Workload", "测试项目"));
+    WorkloadHeader().Text(locText("Workload", "测试项目"));
     WorkloadStream().Content(locContent("Particle — Memory Throughput",
                                         "粒子 —— 内存吞吐"));
-    WorkloadGpuBurn().Content(locContent("Plasma Bloom — GPU Burn",
-                                          "等离子晶核 —— GPU Burn"));
+    WorkloadGpuBurn().Content(locContent("Plasma x Kaleidoscope — GPU Burn",
+                                          "等离子晶核 × 万花镜 —— GPU Burn"));
     WorkloadCinematicLiquid().Content(locContent("Fluid — Interactive Pool",
                                                   "流体 —— 互动水池"));
     WorkloadCinematicLiquidV1().Content(locContent("Other / Legacy Cinematic Liquid v1 — Dam Break",
@@ -1825,18 +2227,21 @@ void MainWindow::applyLanguage()
                                           "旧版 3D 原型 —— Billboard"));
     WorkloadVolumetric().Content(locContent("Volumetric — Experimental Raymarch",
                                              "体积渲染 —— 实验性 Raymarch"));
-    WorkloadFluid().Content(locContent("Other / Legacy 2D Fluid — Vulkan-only",
-                                        "其他 / 旧版 2D 流体 —— 仅 Vulkan"));
+    WorkloadFluid().Content(locContent("Other / Legacy 2D Fluid",
+                                        "其他 / 旧版 2D 流体"));
     ShowLegacyBox().Content(locContent("Show legacy & advanced tests",
                                        "显示旧版 / 高级测试"));
-    PrecisionBox().Header(locContent("Precision", "精度"));
+    PrecisionHeader().Text(locText("Precision", "精度"));
     PrecisionFp32().Content(locContent("fp32 — standard float", "fp32 —— 标准浮点"));
     PrecisionFp16().Content(locContent("fp16 — half precision", "fp16 —— 半精度"));
     PrecisionFp64().Content(locContent("fp64 — double precision", "fp64 —— 双精度"));
     PrecisionInt32().Content(locContent("int32 — integer ops", "int32 —— 整数运算"));
     DurationUnitBox().Header(locContent("Duration", "运行时长"));
     DurationSeconds().Content(locContent("Seconds", "秒"));
+    DurationMinutes().Content(locContent("Minutes", "分钟"));
+    DurationHours().Content(locContent("Hours", "小时"));
     DurationFrames().Content(locContent("Frames", "帧数"));
+    DurationUnlimited().Content(locContent("Until Cancel", "直到取消"));
     DurationValueBox().Header(locContent("Value", "数值"));
     ParticlePresetBox().Header(locContent("Particles", "粒子数"));
     ParticlesLight().Content(locContent("Light — 65K", "轻量 —— 65K"));
@@ -1847,7 +2252,7 @@ void MainWindow::applyLanguage()
     CustomParticleBox().Header(locContent("Custom particles", "自定义粒子数"));
     CustomParticleBox().PlaceholderText(locText("multiple of 256", "256 的倍数"));
     AdvancedLabel().Text(locText("Advanced", "高级选项"));
-    HeadlessBox().Content(locContent("Headless", "无头"));
+    HeadlessBox().Content(box_value(hstring(L"Headless")));
     auto headlessTip = locContent(
         "Pure compute mode: no swapchain, no rendering, no present. "
         "Useful for measuring raw compute throughput.",
@@ -1863,6 +2268,21 @@ void MainWindow::applyLanguage()
         "用于测试非显存 / UMA 访问。");
     ToolTipService::SetToolTip(HostMemBox(), hostMemTip);
     ToolTipService::SetToolTip(HostMemInfo(), hostMemTip);
+    RenderDocBox().Content(locContent("RenderDoc", "RenderDoc"));
+    CaptureBox().Content(locContent("Capture at", "捕获于"));
+    auto renderDocTip = locContent(
+        "RenderDoc is a free graphics debugger for inspecting GPU frames "
+        "(draw calls, pipelines, resources, and shaders) from Vulkan, D3D, and OpenGL.",
+        "RenderDoc 是免费的图形调试器，用于抓取并检查 GPU 帧内容"
+        "（绘制调用、管线、资源与着色器等），支持 Vulkan / D3D / OpenGL。");
+    ToolTipService::SetToolTip(RenderDocInfo(), renderDocTip);
+    ToolTipService::SetToolTip(RenderDocBox(), renderDocTip);
+    auto captureTip = locContent(
+        "RenderDoc capture may reduce scores and add overhead.",
+        "启用 RenderDoc 捕获可能会影响成绩并增加开销。");
+    ToolTipService::SetToolTip(CaptureInfo(), captureTip);
+    ToolTipService::SetToolTip(CaptureBox(), captureTip);
+    syncCaptureControls();
     RunButton().Content(locContent("Run GPU Benchmark", "开始 GPU 测试"));
     GpuCancelButton().Content(locContent("Cancel", "取消"));
     if (m_activeTask.load() != ActiveTask::GpuBenchmark)
@@ -1907,9 +2327,10 @@ void MainWindow::applyLanguage()
         : locText("GPUs", "显卡"));
     SelectAllGpus().Content(locContent("All", "全选"));
     ClearAllGpus().Content(locContent("None", "清空"));
-    HistoryGpuTab().Header(locContent("GPU", "GPU"));
-    HistoryCpuTab().Header(locContent("CPU", "CPU"));
+    HistoryGpuTab().Text(locText("GPU", "GPU"));
+    HistoryCpuTab().Text(locText("CPU", "CPU"));
     HistoryLegacyBox().Content(locContent("Show legacy tests", "显示旧版测试"));
+    HistoryHeadlessBox().Content(locContent("Show headless", "显示 headless"));
     ChartsTitle().Text(locText("Charts", "图表"));
     GenChartsButton().Content(locContent("Generate Charts", "生成图表"));
 
@@ -1922,6 +2343,7 @@ void MainWindow::applyLanguage()
     AboutTitle().Text(locText("About", "关于"));
     AboutDesc().Text(locText("Cross-API CPU & GPU Benchmark Suite — native C++/WinRT frontend.",
                              "跨 API CPU 与 GPU 测试套件 —— 原生 C++/WinRT 前端。"));
+    refreshAboutVersion();
 
     {
         const wchar_t* sys = (i18n::detectOsLang() == i18n::Lang::Zh) ? L"中文" : L"English";
@@ -1944,11 +2366,39 @@ void MainWindow::applyLanguage()
     refreshCombo(ParticlePresetBox());
     refreshCombo(CpuModeBox());
     refreshCombo(CpuDurationPresetBox());
+    if (GpuBox().Items().Size() > 0)
+    {
+        if (auto autoItem = GpuBox().Items().GetAt(0).try_as<ComboBoxItem>())
+            autoItem.Content(locContent("(auto)", "（自动）"));
+        // Force closed caption refresh after Content change (same ComboBox cache).
+        const int gpuSel = GpuBox().SelectedIndex();
+        GpuBox().SelectedIndex(-1);
+        GpuBox().SelectedIndex(gpuSel >= 0 ? gpuSel : 0);
+    }
     m_suppressCombo = false;
 
     rebuildHistoryFilters();
     if (m_gpuEnumerationComplete) rebuildApiPicker(true);
     updateExtraLabel();
+    updateDurationValueEnabled();
+    if (!m_lastScoreEn.empty())
+        ResultText().Text(u8(localizeScoreLine(m_lastScoreEn)));
+    // updateExtraLabel → updateApiPickerSummary already localises Detecting/All APIs;
+    // re-apply disabled greying after the SelectedItem dance.
+    {
+        const int preset = PresetBox().SelectedIndex();
+        applyComboEnabledLook(GpuBox(),
+            m_gpuEnumerationComplete && preset != 0 && preset != 3);
+        applyComboEnabledLook(ApiPickerBox(),
+            m_gpuEnumerationComplete && preset != 0);
+        if (m_gpuEnumerationComplete && preset != 0)
+            ApiPickerHeader().ClearValue(TextBlock::ForegroundProperty());
+        else
+        {
+            ApiPickerHeader().Opacity(0.55);
+            ApiPickerHeader().Foreground(disabledTextBrush());
+        }
+    }
 }
 
 void MainWindow::configureCpuNumberBoxes()
@@ -2012,14 +2462,32 @@ void MainWindow::setCpuStatus(StatusLight kind, hstring const& text)
     CpuStatusText().Text(text);
 }
 
+bool MainWindow::uiAlive() const
+{
+    return m_uiReady && !m_closing.load();
+}
+
+void MainWindow::syncActionButtonsEnabled()
+{
+    if (m_closing.load()) return;
+    try
+    {
+        const bool busy = m_activeTask.load() != ActiveTask::None;
+        // Block GPU Run while adapters/APIs are still being probed — concurrent
+        // ProbeGpus + benchmark has crashed hosts via driver resets before.
+        RunButton().IsEnabled(!busy && m_gpuEnumerationComplete);
+        CpuRunButton().IsEnabled(!busy && !m_enginePath.empty());
+        GenChartsButton().IsEnabled(!busy && !m_enginePath.empty());
+    }
+    catch (...) {}
+}
+
 // ---- CPU benchmark page ----------------------------------------------------
 bool MainWindow::tryBeginTask(ActiveTask task)
 {
     auto expected = ActiveTask::None;
     if (!m_activeTask.compare_exchange_strong(expected, task)) return false;
-    RunButton().IsEnabled(false);
-    CpuRunButton().IsEnabled(false);
-    GenChartsButton().IsEnabled(false);
+    syncActionButtonsEnabled();
     return true;
 }
 
@@ -2027,9 +2495,7 @@ void MainWindow::endTask(ActiveTask task)
 {
     auto expected = task;
     if (!m_activeTask.compare_exchange_strong(expected, ActiveTask::None)) return;
-    RunButton().IsEnabled(true);
-    CpuRunButton().IsEnabled(true);
-    GenChartsButton().IsEnabled(true);
+    syncActionButtonsEnabled();
 }
 
 void MainWindow::OnCpuDurationPresetChanged(IInspectable const&,
@@ -2118,9 +2584,14 @@ void MainWindow::cancelGpuBenchmark()
 {
     if (m_activeTask.load() != ActiveTask::GpuBenchmark) return;
     m_gpuCancelRequested.store(true);
-    if (m_gpuCancelEvent) ::SetEvent(m_gpuCancelEvent);
-    GpuCancelButton().IsEnabled(false);
-    setGpuStatus(StatusLight::Running, locText("Cancelling...", "正在取消…"));
+    if (m_gpuCancelEvent)
+        ::SetEvent(static_cast<HANDLE>(m_gpuCancelEvent.get()));
+    try
+    {
+        GpuCancelButton().IsEnabled(false);
+        setGpuStatus(StatusLight::Running, locText("Cancelling...", "正在取消…"));
+    }
+    catch (...) {}
 }
 
 void MainWindow::OnGpuCliHostSizeChanged(IInspectable const&, SizeChangedEventArgs const& args)
@@ -2219,6 +2690,8 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
     std::thread([this, strong, dispatcher, engine, workingDirectory,
                  mode = std::move(mode), seconds, warmupSeconds]()
     {
+      try
+      {
         CpuProtocolAudit protocolAudit;
         auto finish = [this, strong, dispatcher](DWORD exitCode,
                                                  std::string errorMessage)
@@ -2567,6 +3040,24 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
         if (exitCode == 0 && pipeError.empty())
             pipeError = protocolAudit.validate(mode);
         finish(exitCode, std::move(pipeError));
+      }
+      catch (...)
+      {
+          dispatcher.TryEnqueue([this, strong]()
+          {
+              m_cpuRunning.store(false);
+              endTask(ActiveTask::CpuBenchmark);
+              CpuCancelButton().IsEnabled(false);
+              CpuModeBox().IsEnabled(true);
+              CpuDurationPresetBox().IsEnabled(true);
+              CpuTimeBox().IsEnabled(true);
+              CpuWarmupBox().IsEnabled(true);
+              setCpuStatus(StatusLight::Error, locText("Failed", "运行失败"));
+              CpuCurrentCoreText().Text(locText(
+                  "CPU worker failed with an unexpected exception.",
+                  "CPU 工作线程发生意外异常。"));
+          });
+      }
     }).detach();
 }
 
@@ -2580,6 +3071,7 @@ void MainWindow::updateExtraLabel()
     bool particleTest = preset == 5;
     bool flightsTest = preset == 4;
     bool particleWorkload = wl == "stream" || wl == "render3d";
+    bool gpuBurnWorkload = wl == "gpu_burn";
     bool showParticles = particleTest || (workloadSelectable && particleWorkload);
     bool fixedQualityLiquid = wl == "cinematic_liquid" || wl == "cinematic_liquid_v1";
     bool showExtra = flightsTest ||
@@ -2592,11 +3084,20 @@ void MainWindow::updateExtraLabel()
     WorkloadBox().IsEnabled(workloadSelectable);
     // Quick chooses automatically; Full-All schedules every enumerated GPU.
     // Disable a selector that those presets intentionally do not consume.
-    GpuBox().IsEnabled(m_gpuEnumerationComplete && preset != 0 && preset != 3);
-    ApiPickerBox().IsEnabled(m_gpuEnumerationComplete && preset != 0);
+    const bool gpuPickerOn = m_gpuEnumerationComplete && preset != 0 && preset != 3;
+    const bool apiPickerOn = m_gpuEnumerationComplete && preset != 0;
     updateApiPickerSummary();
-    PrecisionBox().IsEnabled(workloadSelectable && wl == "synthpeak");
-    bool headlessSupported = customRun && !(wl == "gpu_burn" || wl == "gpu_stress" || wl == "stress"
+    applyComboEnabledLook(GpuBox(), gpuPickerOn);
+    applyComboEnabledLook(ApiPickerBox(), apiPickerOn);
+    ApiPickerHeader().Opacity(apiPickerOn ? 1.0 : 0.55);
+    if (apiPickerOn)
+        ApiPickerHeader().ClearValue(TextBlock::ForegroundProperty());
+    else
+        ApiPickerHeader().Foreground(disabledTextBrush());
+    const bool showPrecision = workloadSelectable && wl == "synthpeak";
+    PrecisionColumn().Visibility(showPrecision ? Visibility::Visible : Visibility::Collapsed);
+    PrecisionBox().IsEnabled(showPrecision);
+    bool headlessSupported = customRun && !(gpuBurnWorkload || wl == "gpu_stress" || wl == "stress"
         || wl == "render3d" || wl == "volumetric" || wl == "fluid"
         || wl == "cinematic_liquid" || wl == "cinematic_liquid_v1");
     if (!headlessSupported) HeadlessBox().IsChecked(false);
@@ -2613,7 +3114,7 @@ void MainWindow::updateExtraLabel()
 
     if (flightsTest)             ExtraBox().Header(locContent("Flights (--flights)", "Flights (--flights)"));
     else if (wl == "nbody")      ExtraBox().Header(locContent("Bodies (--bodies)", "天体数 (--bodies)"));
-    else if (wl == "gpu_burn")   ExtraBox().Header(locContent("Fixed steps (--iter)", "固定步数 (--iter)"));
+    else if (gpuBurnWorkload)     ExtraBox().Header(locContent("Fixed steps (--iter)", "固定步数 (--iter)"));
     else if (wl == "gpu_stress") ExtraBox().Header(locContent("Iterations (--iter)", "迭代次数 (--iter)"));
     else if (wl == "stress")     ExtraBox().Header(locContent("Iterations (--iter)", "迭代次数 (--iter)"));
     else if (wl == "synthpeak")  ExtraBox().Header(locContent("Iterations (--iter)", "迭代次数 (--iter)"));
@@ -2621,7 +3122,7 @@ void MainWindow::updateExtraLabel()
     else if (wl == "fluid")      ExtraBox().Header(locContent("Grid size (--grid)", "网格尺寸 (--grid)"));
     else                          ExtraBox().Header(locContent("Extra", "额外参数"));
 
-    ExtraBox().PlaceholderText(wl == "gpu_burn"
+    ExtraBox().PlaceholderText(gpuBurnWorkload
         ? locText("leave empty: safe auto-tune; fixed 16-32", "留空：安全自动标定；固定值 16-32")
         : wl == "nbody"
         ? locText("default 65536; DX11 FL10/SM4: max 4096", "默认 65536；DX11 FL10/SM4：最多 4096")
@@ -2632,6 +3133,8 @@ void MainWindow::updateExtraLabel()
         : locText("optional", "可选"));
     FluidJacobiBox().Header(locContent("Jacobi iterations (--jacobi)", "Jacobi 迭代次数 (--jacobi)"));
     FluidJacobiBox().PlaceholderText(locText("optional; default 30", "可选；默认 30"));
+
+    updateDurationValueEnabled();
 
     WorkloadInfo().IsOpen(true);
     WorkloadInfo().Severity(InfoBarSeverity::Informational);
@@ -2644,17 +3147,17 @@ void MainWindow::updateExtraLabel()
     }
     else if (infoWl == "gpu_burn")
     {
-        WorkloadInfo().Title(locText("Plasma Bloom", "等离子晶核"));
+        WorkloadInfo().Title(locText("Plasma x Kaleidoscope", "等离子晶核 × 万花镜"));
         WorkloadInfo().Message(locText(
-            "Renders a heavy 3D scene for about 15 seconds to measure short-burst graphics throughput (FPS).",
-            "渲染较重的 3D 场景约 15 秒，衡量短时图形吞吐（FPS）。"));
+            "Combines a solid raymarched Plasma Bloom foreground with the woven v2 Mangekyo kaleidoscope background for a short graphics burst (or Until Cancel for open-ended stress).",
+            "将实心光线步进等离子晶核作为前景，与 v2 织纹万花镜背景合成；默认可限时跑分，也可选「直到取消」持续压测。"));
     }
     else if (infoWl == "cinematic_liquid")
     {
         WorkloadInfo().Title(locText("Fluid", "流体"));
         WorkloadInfo().Message(locText(
-            "Simulates and renders a 3D liquid scene with solid objects, to stress GPU compute and graphics together.",
-            "模拟并渲染带固体的 3D 液体场景，同时压测 GPU 计算与图形能力。"));
+            "Simulates and renders a 3D liquid scene with solid objects (Vulkan only).",
+            "模拟并渲染带固体的 3D 液体场景（目前仅支持 Vulkan）。"));
     }
     else if (infoWl == "cinematic_liquid_v1")
     {
@@ -2710,8 +3213,8 @@ void MainWindow::updateExtraLabel()
         WorkloadInfo().Severity(InfoBarSeverity::Warning);
         WorkloadInfo().Title(locText("Legacy 2D Fluid", "旧版 2D 流体"));
         WorkloadInfo().Message(locText(
-            "Old 2D fluid simulation (Vulkan only); mainly for reference, not a primary score.",
-            "旧版 2D 流体模拟（仅 Vulkan），主要作参考，不是主成绩项。"));
+            "Old 2D fluid simulation (Vulkan / DX12 / DX11 / OpenGL); mainly for reference, not a primary score.",
+            "旧版 2D 流体模拟（Vulkan / DX12 / DX11 / OpenGL），主要作参考，不是主成绩项。"));
     }
 }
 
@@ -2765,6 +3268,9 @@ void MainWindow::updateApiPickerSummary()
     }
 
     ApiPickerSummaryItem().Content(box_value(summary));
+    // ComboBox caches the closed-state caption; re-select so language switches
+    // (e.g. Detecting… → 检测中…) actually repaint.
+    ApiPickerBox().SelectedItem(nullptr);
     ApiPickerBox().SelectedItem(ApiPickerSummaryItem());
     std::wstring accessible = locText("Graphics API", "图形 API").c_str();
     accessible += L": ";
@@ -2804,8 +3310,14 @@ void MainWindow::rebuildApiPicker(bool preserveSelection)
     SupportedApisPanel().Children().Clear();
     UnsupportedApisPanel().Children().Clear();
     const int gpuRow = allGpusPreset ? 0 : GpuBox().SelectedIndex();
+    const auto workload = selected(WorkloadBox());
+    const bool vulkanOnlyWorkload =
+        workload == "cinematic_liquid" || workload == "cinematic_liquid_v1";
     for (auto const& api : kRunApis)
     {
+        if (vulkanOnlyWorkload && api.token != "vulkan")
+            continue; // Interactive pool / legacy liquid: Vulkan is the only API.
+
         bool supported = false;
         std::size_t supportCount = 0;
         for (auto const& capabilities : m_gpuApiSupport)
@@ -2827,9 +3339,13 @@ void MainWindow::rebuildApiPicker(bool preserveSelection)
                 supported = supported || capabilities[api.supportIndex];
         }
 
-        const bool checked = m_apiSelectionInitialized
-            ? previous.find(api.token) != previous.end()
-            : supported;
+        bool checked = false;
+        if (vulkanOnlyWorkload)
+            checked = (api.token == "vulkan" && supported);
+        else if (m_apiSelectionInitialized)
+            checked = previous.find(api.token) != previous.end();
+        else
+            checked = supported;
         std::string label = api.label;
         if (allGpusPreset && supportCount > 0 && supportCount < m_gpuApiSupport.size())
             label += " (" + std::to_string(supportCount) + "/" +
@@ -2848,6 +3364,18 @@ void MainWindow::rebuildApiPicker(bool preserveSelection)
             ? Visibility::Visible : Visibility::Collapsed);
     m_apiSelectionInitialized = true;
     updateApiPickerSummary();
+    if (vulkanOnlyWorkload)
+    {
+        UnsupportedApisHint().Text(locText(
+            "This fluid workload currently supports Vulkan only.",
+            "该流体测试目前仅支持 Vulkan。"));
+    }
+    else
+    {
+        UnsupportedApisHint().Text(locText(
+            "Unsupported selections remain available and will be reported by the CLI.",
+            "不支持的 API 仍可勾选；运行后由 CLI 返回明确错误。"));
+    }
 }
 
 void MainWindow::OnGpuSelectionChanged(IInspectable const&, SelectionChangedEventArgs const&)
@@ -2861,20 +3389,28 @@ void MainWindow::populateGpus()
 {
     m_gpuEnumerationComplete = false;
     m_apiSelectionInitialized = false;
+    syncActionButtonsEnabled();
     GpuBox().Items().Clear();
     m_gpuIndices.clear();
     m_gpuApiSupport.clear();
     SupportedApisPanel().Children().Clear();
     UnsupportedApisPanel().Children().Clear();
-    ApiPickerBox().IsEnabled(false);
-    GpuBox().IsEnabled(false);
-    ApiPickerSummaryItem().Content(locContent("Detecting…", "检测中…"));
-    auto autoItem = ComboBoxItem(); autoItem.Content(locContent("(auto)", "（自动）"));
+    updateApiPickerSummary();
+    applyComboEnabledLook(ApiPickerBox(), false);
+    applyComboEnabledLook(GpuBox(), false);
+    ApiPickerHeader().Opacity(0.55);
+    ApiPickerHeader().Foreground(disabledTextBrush());
+    auto autoItem = ComboBoxItem();
+    autoItem.Content(locContent("(auto)", "（自动）"));
     GpuBox().Items().Append(autoItem);
     GpuBox().SelectedIndex(0);
+    applyComboEnabledLook(GpuBox(), false);
     if (m_enginePath.empty())
     {
         ApiPickerSummaryItem().Content(locContent("Engine not found", "未找到引擎"));
+        ApiPickerBox().SelectedItem(ApiPickerSummaryItem());
+        m_gpuEnumerationComplete = true;
+        syncActionButtonsEnabled();
         return;
     }
 
@@ -2888,7 +3424,11 @@ void MainWindow::populateGpus()
     std::string engine = m_enginePath;
     std::thread([this, strong, disp, engine]()
     {
-        auto detection = captureCliProcess({ engine, "--list-gpus" }, 60u * 1000u);
+      try
+      {
+        // --gui-worker: same crash-handler hygiene as benchmark workers while probing.
+        auto detection = captureCliProcess(
+            { engine, "--gui-worker", "--list-gpus" }, 60u * 1000u);
         std::string const& out = detection.output;
         std::vector<GpuRow> gpus;
         std::istringstream ss(out); std::string line;
@@ -2908,32 +3448,80 @@ void MainWindow::populateGpus()
             r.api[4] = f.size() > 8 ? (f[8] == "1") : r.api[2];
             gpus.push_back(std::move(r));
         }
-        disp.TryEnqueue([this, strong, gpus, detection = std::move(detection)]()
+        if (!disp || !disp.TryEnqueue([this, strong, gpus, detection = std::move(detection)]()
         {
-            for (auto& g : gpus)
+            if (!uiAlive()) return;
+            try
             {
-                m_gpuIndices.push_back(g.idx);
-                m_gpuApiSupport.push_back(g.api);
-                std::string label = isSoftwareGpu(g.name)
-                    ? std::to_string(g.idx) + ": " + (m_cpuName.empty() ? "CPU" : m_cpuName) + "  (CPU / WARP)"
-                    : std::to_string(g.idx) + ": " + g.name;
+                for (auto& g : gpus)
+                {
+                    m_gpuIndices.push_back(g.idx);
+                    m_gpuApiSupport.push_back(g.api);
+                    std::string label = isSoftwareGpu(g.name)
+                        ? std::to_string(g.idx) + ": " + (m_cpuName.empty() ? "CPU" : m_cpuName) + "  (CPU / WARP)"
+                        : std::to_string(g.idx) + ": " + g.name;
                 auto it = ComboBoxItem();
                 it.Content(box_value(u8(label)));
                 GpuBox().Items().Append(it);
+                }
+                m_gpuEnumerationComplete = true;
+                rebuildApiPicker(false);
+                updateExtraLabel();
+                syncActionButtonsEnabled();
+                if (detection.exitCode != 0)
+                {
+                    OutputBox().Text(u8(clipForUi(detection.output)));
+                    setGpuStatus(StatusLight::Error, detection.exitCode == -2
+                        ? locText("GPU detection timed out; APIs remain manually selectable.",
+                                  "GPU 检测超时；仍可手动勾选 API。")
+                        : locText("GPU detection failed; APIs remain manually selectable.",
+                                  "GPU 检测失败；仍可手动勾选 API。"));
+                }
             }
-            m_gpuEnumerationComplete = true;
-            rebuildApiPicker(false);
-            updateExtraLabel();
-            if (detection.exitCode != 0)
+            catch (winrt::hresult_error const& e)
             {
-                OutputBox().Text(u8(detection.output));
-                setGpuStatus(StatusLight::Error, detection.exitCode == -2
-                    ? locText("GPU detection timed out; APIs remain manually selectable.",
-                              "GPU 检测超时；仍可手动勾选 API。")
-                    : locText("GPU detection failed; APIs remain manually selectable.",
-                              "GPU 检测失败；仍可手动勾选 API。"));
+                appendGuiCrashLog("populateGpus.ui", winrt::to_string(e.message()).c_str());
+                m_gpuEnumerationComplete = true;
+                syncActionButtonsEnabled();
             }
-        });
+            catch (...)
+            {
+                appendGuiCrashLog("populateGpus.ui", "unknown");
+                m_gpuEnumerationComplete = true;
+                syncActionButtonsEnabled();
+            }
+        }))
+        {
+            appendGuiCrashLog("populateGpus", "TryEnqueue failed");
+        }
+      }
+      catch (...)
+      {
+          appendGuiCrashLog("populateGpus.worker", "exception");
+          if (!disp || !disp.TryEnqueue([this, strong]()
+          {
+              if (!uiAlive()) return;
+              try
+              {
+                  m_gpuEnumerationComplete = true;
+                  rebuildApiPicker(false);
+                  updateExtraLabel();
+                  syncActionButtonsEnabled();
+                  setGpuStatus(StatusLight::Error, locText(
+                      "GPU detection failed; APIs remain manually selectable.",
+                      "GPU 检测失败；仍可手动勾选 API。"));
+              }
+              catch (...)
+              {
+                  m_gpuEnumerationComplete = true;
+                  syncActionButtonsEnabled();
+              }
+          }))
+          {
+              // Last resort: mark complete so a later language refresh can recover.
+              m_gpuEnumerationComplete = true;
+          }
+      }
     }).detach();
 }
 
@@ -2947,9 +3535,8 @@ void MainWindow::OnWorkloadChanged(IInspectable const&, SelectionChangedEventArg
         ExtraBox().Text(L"");
         FluidJacobiBox().Text(L"");
     }
-    // PrecisionBox enable state is handled inside updateExtraLabel() which
-    // correctly checks customRun; doing it here would bypass that guard.
     updateExtraLabel();
+    if (m_gpuEnumerationComplete) rebuildApiPicker(true);
 }
 
 void MainWindow::OnParticlePresetChanged(IInspectable const&, SelectionChangedEventArgs const&)
@@ -2961,12 +3548,161 @@ void MainWindow::OnParticlePresetChanged(IInspectable const&, SelectionChangedEv
 void MainWindow::OnDurationUnitChanged(IInspectable const&, SelectionChangedEventArgs const&)
 {
     if (!m_uiReady || m_suppressCombo) return;
-    // Index 0 = Seconds (default), 1 = Frames. Swap to the unit's canonical
-    // default value unless the user typed a custom one.
-    bool seconds = DurationUnitBox().SelectedIndex() <= 0;
+
+    const auto unit = durationUnitTag();
     auto cur = to_string(DurationValueBox().Text());
-    if (seconds && (cur.empty() || cur == "600"))      DurationValueBox().Text(L"15");
-    else if (!seconds && (cur.empty() || cur == "15")) DurationValueBox().Text(L"600");
+    const bool looksDefault =
+        cur.empty() || cur == "15" || cur == "5" || cur == "1" || cur == "60" || cur == "600";
+
+    if (unit == "seconds" && looksDefault)       DurationValueBox().Text(L"15");
+    else if (unit == "minutes" && looksDefault)  DurationValueBox().Text(L"5");
+    else if (unit == "hours" && looksDefault)    DurationValueBox().Text(L"1");
+    else if (unit == "frames" && looksDefault)   DurationValueBox().Text(L"600");
+
+    updateDurationValueEnabled();
+    syncCaptureControls();
+}
+
+std::string MainWindow::durationUnitTag()
+{
+    return selected(DurationUnitBox());
+}
+
+bool MainWindow::isUnlimitedDuration()
+{
+    return durationUnitTag() == "unlimited";
+}
+
+void MainWindow::updateDurationValueEnabled()
+{
+    DurationValueBox().IsEnabled(!isUnlimitedDuration());
+}
+
+double MainWindow::durationAmountValue()
+{
+    const auto unit = durationUnitTag();
+    auto val = to_string(DurationValueBox().Text());
+    double amount = 15.0;
+    if (unit == "frames") amount = 600.0;
+    else if (unit == "minutes") amount = 5.0;
+    else if (unit == "hours") amount = 1.0;
+
+    if (!val.empty())
+    {
+        try {
+            size_t used = 0;
+            const double parsed = std::stod(val, &used);
+            if (used == val.size() && std::isfinite(parsed) && parsed > 0.0)
+                amount = parsed;
+        } catch (...) {}
+    }
+    return amount;
+}
+
+void MainWindow::syncCaptureControls()
+{
+    if (!m_uiReady) return;
+
+    const bool unlimited = isUnlimitedDuration();
+    const auto unit = durationUnitTag();
+    const bool frames = (unit == "frames");
+    const bool renderDocOn = RenderDocBox().IsChecked() &&
+                             RenderDocBox().IsChecked().Value();
+    const bool captureOn = CaptureBox().IsChecked() &&
+                           CaptureBox().IsChecked().Value();
+
+    if (unit == "frames")
+        CaptureUnitLabel().Text(locText("frames", "帧"));
+    else if (unit == "minutes")
+        CaptureUnitLabel().Text(locText("min", "分钟"));
+    else if (unit == "hours")
+        CaptureUnitLabel().Text(locText("h", "小时"));
+    else
+        CaptureUnitLabel().Text(locText("s", "秒"));
+
+    const double minVal = frames ? 1.0 : 0.1;
+    double maxVal = unlimited ? minVal : durationAmountValue();
+    if (!(maxVal >= minVal)) maxVal = minVal;
+
+    using Windows::Globalization::NumberFormatting::DecimalFormatter;
+    using Windows::Globalization::NumberFormatting::IncrementNumberRounder;
+    using Windows::Globalization::NumberFormatting::RoundingAlgorithm;
+    IncrementNumberRounder rounder;
+    rounder.Increment(frames ? 1.0 : 0.1);
+    rounder.RoundingAlgorithm(RoundingAlgorithm::RoundHalfUp);
+    DecimalFormatter formatter;
+    formatter.IntegerDigits(1);
+    formatter.FractionDigits(frames ? 0 : 1);
+    formatter.IsGrouped(false);
+    formatter.NumberRounder(rounder);
+
+    double cur = CaptureValueBox().Value();
+    if (std::isnan(cur) || cur < minVal)
+        cur = (std::min)(5.0, maxVal);
+    if (cur > maxVal) cur = maxVal;
+    if (frames) cur = std::floor(cur + 1e-9);
+
+    m_suppressRenderDocUi = true;
+    CaptureValueBox().NumberFormatter(formatter);
+    CaptureValueBox().Minimum(minVal);
+    CaptureValueBox().Maximum(maxVal);
+    CaptureValueBox().SmallChange(frames ? 1.0 : 0.1);
+    CaptureValueBox().LargeChange(frames ? 10.0 : 1.0);
+    CaptureValueBox().Value(cur);
+
+    const bool canCapture = renderDocOn && !unlimited;
+    CaptureBox().IsEnabled(canCapture);
+    CaptureValueBox().IsEnabled(canCapture && captureOn);
+    m_suppressRenderDocUi = false;
+}
+
+void MainWindow::appendCaptureArgs(std::vector<std::string>& dest)
+{
+    if (isUnlimitedDuration()) return;
+    if (!(RenderDocBox().IsChecked() && RenderDocBox().IsChecked().Value())) return;
+    if (!(CaptureBox().IsChecked() && CaptureBox().IsChecked().Value())) return;
+
+    const auto unit = durationUnitTag();
+    double amount = CaptureValueBox().Value();
+    if (std::isnan(amount) || amount <= 0.0) return;
+
+    const double maxAmount = durationAmountValue();
+    if (amount > maxAmount) amount = maxAmount;
+
+    if (unit == "frames")
+    {
+        const auto frame = static_cast<long long>((std::max)(1.0, std::floor(amount + 1e-9)));
+        dest.push_back("--capture-frame");
+        dest.push_back(std::to_string(frame));
+        return;
+    }
+
+    double seconds = amount;
+    if (unit == "minutes") seconds = amount * 60.0;
+    else if (unit == "hours") seconds = amount * 3600.0;
+
+    std::string secText;
+    if (std::floor(seconds) == seconds)
+        secText = std::to_string(static_cast<long long>(seconds));
+    else
+    {
+        std::ostringstream oss;
+        oss << std::setprecision(6) << std::defaultfloat << seconds;
+        secText = oss.str();
+    }
+    dest.push_back("--capture");
+    dest.push_back(secText);
+}
+
+void MainWindow::refreshAboutVersion()
+{
+    const auto ver = readGuiProductVersion();
+    if (ver.empty())
+    {
+        AboutVersion().Text(locText("Version unknown", "版本未知"));
+        return;
+    }
+    AboutVersion().Text(locText("Version ", "版本 ") + hstring(ver));
 }
 
 // ---- run -------------------------------------------------------------------
@@ -2977,16 +3713,52 @@ std::string MainWindow::particleValue()
     return p;                            // preset particle count
 }
 
-// Duration as engine args. Default is time-based (--time <seconds>, default 15)
-// to stay comparable with the existing results database; switch the unit to
-// Frames for a fixed frame-count run (--benchmark <frames>).
+// Duration as engine args. Time units convert to --time <seconds>; Frames uses
+// --benchmark; Until Cancel uses --no-time-limit (stop via Cancel).
 std::vector<std::string> MainWindow::durationArgs()
 {
-    bool seconds = DurationUnitBox().SelectedIndex() <= 0;   // 0 = Seconds (default)
+    const auto unit = durationUnitTag();
+    if (unit == "unlimited")
+        return { "--no-time-limit" };
+
     auto val = to_string(DurationValueBox().Text());
-    if (val.empty()) val = seconds ? "15" : "600";
-    return seconds ? std::vector<std::string>{ "--time", val }
-                   : std::vector<std::string>{ "--benchmark", val };
+    if (unit == "frames")
+    {
+        if (val.empty()) val = "600";
+        return { "--benchmark", val };
+    }
+
+    double amount = 15.0;
+    if (!val.empty())
+    {
+        try {
+            size_t used = 0;
+            amount = std::stod(val, &used);
+            if (used != val.size() || !std::isfinite(amount) || amount < 0.0)
+                amount = 15.0;
+        } catch (...) {
+            amount = 15.0;
+        }
+    }
+    else if (unit == "minutes") amount = 5.0;
+    else if (unit == "hours") amount = 1.0;
+    else amount = 15.0;
+
+    double seconds = amount;
+    if (unit == "minutes") seconds = amount * 60.0;
+    else if (unit == "hours") seconds = amount * 3600.0;
+
+    // Keep CLI arg tidy: whole seconds when possible.
+    std::string secText;
+    if (std::floor(seconds) == seconds)
+        secText = std::to_string(static_cast<long long>(seconds));
+    else
+    {
+        std::ostringstream oss;
+        oss << std::setprecision(6) << std::defaultfloat << seconds;
+        secText = oss.str();
+    }
+    return { "--time", secText };
 }
 
 // Build child-process CLI invocation(s) for the selected preset.
@@ -3063,13 +3835,18 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needChar
         return jobs;
     };
 
+    auto appendCapture = [this](std::vector<std::string>& dest)
+    {
+        appendCaptureArgs(dest);
+    };
+
     switch (p)
     {
         case 0:  // [0] Quick run — best API / GPU, Medium, stream
         {
             std::vector<std::string> a = { m_enginePath, "--gui-worker" };
             for (auto& d : dur) a.push_back(d);
-            a.push_back("--capture"); a.push_back("5");
+            appendCapture(a);
             return { a };
         }
 
@@ -3081,10 +3858,7 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needChar
             if (headless)
                 ex.push_back("--headless");
             else
-            {
-                ex.push_back("--capture");
-                ex.push_back("5");
-            }
+                appendCapture(ex);
             return makeJobs(std::move(ex), false);
         }
 
@@ -3092,7 +3866,7 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needChar
         {
             needCharts = true;
             auto ex = selectedWorkloadArgs();
-            ex.push_back("--capture"); ex.push_back("5");
+            appendCapture(ex);
             return makeJobs(std::move(ex), false);
         }
 
@@ -3100,21 +3874,21 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needChar
         {
             needCharts = true;
             auto ex = selectedWorkloadArgs();
-            ex.push_back("--capture"); ex.push_back("5");
+            appendCapture(ex);
             return makeJobs(std::move(ex), true);
         }
         case 4:  // [7] Flights test, one GPU × selected APIs
         {
             std::vector<std::string> ex;
             if (!extra.empty()) { ex.push_back("--flights"); ex.push_back(extra); }
-            ex.push_back("--capture"); ex.push_back("5");
+            appendCapture(ex);
             return makeJobs(std::move(ex), false);
         }
         case 5:  // [8] Particle test, one GPU × selected APIs
         {
             std::vector<std::string> ex;
             if (!particles.empty()) { ex.push_back("--particles"); ex.push_back(particles); }
-            ex.push_back("--capture"); ex.push_back("5");
+            appendCapture(ex);
             return makeJobs(std::move(ex), false);
         }
         case 6:  // [9] Headless compute, one GPU × selected APIs
@@ -3133,24 +3907,29 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
         return;
     }
     m_gpuCancelRequested.store(false);
-    if (m_gpuCancelEvent) ::ResetEvent(m_gpuCancelEvent);
+    auto cancelEvent = m_gpuCancelEvent; // keep alive for the worker lifetime
+    if (cancelEvent) ::ResetEvent(static_cast<HANDLE>(cancelEvent.get()));
     Busy().IsActive(true);
     GpuCancelButton().IsEnabled(true);
     setGpuStatus(StatusLight::Running, jobs.size() > 1
-        ? locText("Running… (multiple passes; render windows may appear)", "运行中…（多趟；可能弹出渲染窗口）")
+        ? locText("Running… (multiple passes; render windows may appear)", "运行中…（多次；可能弹出渲染窗口）")
         : locText("Running… (a separate render window may appear)", "运行中…（可能弹出独立渲染窗口）"));
+    m_lastScoreEn.clear();
     ResultText().Text(L"—");
     OutputBox().Text({});
 
     std::string repo = m_enginePath.empty() ? std::string{}
         : pathToUtf8(pathFromUtf8(m_enginePath)
             .parent_path().parent_path().parent_path());
-    HANDLE cancelEvent = m_gpuCancelEvent;
+    HANDLE cancelHandle = cancelEvent
+        ? static_cast<HANDLE>(cancelEvent.get()) : nullptr;
 
     auto strong = get_strong();
     auto disp = m_dispatcher;
-    std::thread([this, strong, disp, jobs, needCharts, repo, cancelEvent]()
+    std::thread([this, strong, disp, jobs, needCharts, repo, cancelEvent, cancelHandle]()
     {
+      try
+      {
         std::string all, lastScore;
         size_t failedJobs = 0;
         size_t succeededJobs = 0;
@@ -3171,8 +3950,10 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
             for (size_t i = 1; i < job.size(); ++i) all += " " + job[i];
             all += "\n";
 
-            auto res = captureCliProcess(job, gpuWorkerTimeoutMs(job), cancelEvent);
+            auto res = captureCliProcess(job, gpuWorkerTimeoutMs(job), cancelHandle);
             all += res.output; all += "\n";
+            if (all.size() > 4u * 1024u * 1024u)
+                all = clipForUi(std::move(all), 3u * 1024u * 1024u);
             if (res.exitCode == static_cast<int>(ERROR_CANCELLED) ||
                 m_gpuCancelRequested.load())
             {
@@ -3266,7 +4047,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                             L"\"" + rdccmd.wstring() + L"\" convert -f \""
                             + rdcP.wstring() + L"\" -c chrome.json -o \""
                             + tempJson.wstring() + L"\"", repoW,
-                            5u * 60u * 1000u, cancelEvent);
+                            5u * 60u * 1000u, cancelHandle);
                         if (converted.exitCode == static_cast<int>(ERROR_CANCELLED) ||
                             m_gpuCancelRequested.load())
                         {
@@ -3385,7 +4166,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                                 return false;
                             }
                             auto report = runProcess(command, repoW,
-                                                     10u * 60u * 1000u, cancelEvent);
+                                                     10u * 60u * 1000u, cancelHandle);
                             if (!report.output.empty())
                             {
                                 all += std::string("[") + label + "]\n" + report.output;
@@ -3446,57 +4227,151 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
         if (cancelled)
             all += "\n[GUI] Cancelled by user.\n";
 
-        disp.TryEnqueue([this, strong, all, lastScore, needCharts, failedJobs,
+        all = clipForUi(std::move(all));
+        if (!disp || !disp.TryEnqueue([this, strong, all, lastScore, needCharts, failedJobs,
                          succeededJobs, postProcessFailed, postProcessStatus,
                          cancelled]()
         {
-            OutputBox().Text(u8(all));
-            GpuCancelButton().IsEnabled(false);
-            if (cancelled)
+            if (!uiAlive())
             {
-                ResultText().Text(lastScore.empty()
-                    ? locText("Cancelled.", "已取消。")
-                    : u8(lastScore));
-                setGpuStatus(StatusLight::Ready, locText("Cancelled", "已取消"));
+                endTask(ActiveTask::GpuBenchmark);
+                return;
             }
-            else if (failedJobs > 0 && succeededJobs == 0)
+            try
             {
-                ResultText().Text(locText("Error — see output.", "出错 —— 见输出。"));
-                setGpuStatus(StatusLight::Error, locText("Failed.", "运行失败。"));
-            }
-            else if (failedJobs > 0)
-            {
-                ResultText().Text(lastScore.empty()
-                    ? locText("Completed with errors — see output.",
-                              "部分完成 —— 请查看错误输出。")
-                    : u8(lastScore));
-                const auto ok = std::to_string(succeededJobs);
-                const auto failed = std::to_string(failedJobs);
-                setGpuStatus(StatusLight::Error, i18n::currentLang() == i18n::Lang::Zh
-                    ? u8("完成 " + ok + " 项，失败 " + failed + " 项。")
-                    : u8(ok + " completed; " + failed + " failed."));
-            }
-            else
-            {
-                ResultText().Text(lastScore.empty()
-                    ? locText("Done — see output / History.", "完成 —— 见输出/历史。")
-                    : u8(lastScore));
-                if (postProcessFailed)
-                    setGpuStatus(StatusLight::Error, u8("Benchmark done; " + postProcessStatus));
+                OutputBox().Text(u8(all));
+                GpuCancelButton().IsEnabled(false);
+                auto showScoreOr = [&](hstring const& fallback)
+                {
+                    if (lastScore.empty())
+                    {
+                        m_lastScoreEn.clear();
+                        ResultText().Text(fallback);
+                    }
+                    else
+                    {
+                        m_lastScoreEn = lastScore;
+                        ResultText().Text(u8(localizeScoreLine(lastScore)));
+                    }
+                };
+                if (cancelled)
+                {
+                    showScoreOr(locText("Cancelled", "已取消"));
+                    setGpuStatus(StatusLight::Ready, locText("Cancelled", "已取消"));
+                }
+                else if (failedJobs > 0 && succeededJobs == 0)
+                {
+                    m_lastScoreEn.clear();
+                    ResultText().Text(locText("Error — see output", "出错 —— 见输出"));
+                    setGpuStatus(StatusLight::Error, locText("Failed", "运行失败"));
+                }
+                else if (failedJobs > 0)
+                {
+                    showScoreOr(locText("Completed with errors — see output",
+                                        "部分完成 —— 请查看错误输出"));
+                    const auto ok = std::to_string(succeededJobs);
+                    const auto failed = std::to_string(failedJobs);
+                    setGpuStatus(StatusLight::Error, i18n::currentLang() == i18n::Lang::Zh
+                        ? u8("完成 " + ok + " 项，失败 " + failed + " 项")
+                        : u8(ok + " completed; " + failed + " failed"));
+                }
                 else
-                    setGpuStatus(StatusLight::Ready, needCharts
-                        ? locText("Done (charts & report regenerated).", "完成（已重新生成图表与报告）。")
-                        : locText("Done.", "完成。"));
+                {
+                    showScoreOr(locText("Done — see output / History", "完成 —— 见输出/历史"));
+                    if (postProcessFailed)
+                        setGpuStatus(StatusLight::Error, u8("Benchmark done; " + postProcessStatus));
+                    else
+                        setGpuStatus(StatusLight::Ready, needCharts
+                            ? locText("Done (charts & report regenerated)", "完成（已重新生成图表与报告）")
+                            : locText("Done", "完成"));
+                }
+                endTask(ActiveTask::GpuBenchmark);
+                Busy().IsActive(false);
+                try { refreshHistory(); }
+                catch (winrt::hresult_error const& e)
+                {
+                    appendGuiCrashLog("refreshHistory", winrt::to_string(e.message()).c_str());
+                }
+                catch (...)
+                {
+                    appendGuiCrashLog("refreshHistory", "unknown");
+                }
             }
-            endTask(ActiveTask::GpuBenchmark);
-            Busy().IsActive(false);
-            refreshHistory();
-        });
+            catch (winrt::hresult_error const& e)
+            {
+                appendGuiCrashLog("launchJobs.ui", winrt::to_string(e.message()).c_str());
+                endTask(ActiveTask::GpuBenchmark);
+                try { Busy().IsActive(false); GpuCancelButton().IsEnabled(false); } catch (...) {}
+            }
+            catch (...)
+            {
+                appendGuiCrashLog("launchJobs.ui", "unknown");
+                endTask(ActiveTask::GpuBenchmark);
+                try { Busy().IsActive(false); GpuCancelButton().IsEnabled(false); } catch (...) {}
+            }
+        }))
+        {
+            appendGuiCrashLog("launchJobs", "TryEnqueue failed");
+            // Best-effort unlock if the UI queue is already gone.
+            m_activeTask.store(ActiveTask::None);
+        }
+      }
+      catch (std::exception const& ex)
+      {
+          std::string msg = ex.what();
+          appendGuiCrashLog("launchJobs.worker", msg.c_str());
+          if (!disp || !disp.TryEnqueue([this, strong, msg]()
+          {
+              if (!uiAlive()) { endTask(ActiveTask::GpuBenchmark); return; }
+              try
+              {
+                  OutputBox().Text(u8(std::string("[GUI] Worker exception: ") + msg));
+                  ResultText().Text(locText("Error — see output", "出错 —— 见输出"));
+                  setGpuStatus(StatusLight::Error, locText("Failed", "运行失败"));
+                  endTask(ActiveTask::GpuBenchmark);
+                  Busy().IsActive(false);
+                  GpuCancelButton().IsEnabled(false);
+              }
+              catch (...) { endTask(ActiveTask::GpuBenchmark); }
+          }))
+          {
+              m_activeTask.store(ActiveTask::None);
+          }
+      }
+      catch (...)
+      {
+          appendGuiCrashLog("launchJobs.worker", "unknown");
+          if (!disp || !disp.TryEnqueue([this, strong]()
+          {
+              if (!uiAlive()) { endTask(ActiveTask::GpuBenchmark); return; }
+              try
+              {
+                  OutputBox().Text(locText("[GUI] Worker failed with an unknown exception.",
+                                           "[GUI] 工作线程发生未知异常。"));
+                  ResultText().Text(locText("Error — see output", "出错 —— 见输出"));
+                  setGpuStatus(StatusLight::Error, locText("Failed", "运行失败"));
+                  endTask(ActiveTask::GpuBenchmark);
+                  Busy().IsActive(false);
+                  GpuCancelButton().IsEnabled(false);
+              }
+              catch (...) { endTask(ActiveTask::GpuBenchmark); }
+          }))
+          {
+              m_activeTask.store(ActiveTask::None);
+          }
+      }
     }).detach();
 }
 
 void MainWindow::OnRun(IInspectable const&, RoutedEventArgs const&)
 {
+    if (!m_gpuEnumerationComplete)
+    {
+        setGpuStatus(StatusLight::Running, locText(
+            "Still detecting GPUs / APIs…",
+            "仍在检测 GPU / API…"));
+        return;
+    }
     if (m_enginePath.empty())
     {
         setGpuStatus(StatusLight::Error, locText(
@@ -3515,8 +4390,9 @@ void MainWindow::OnRun(IInspectable const&, RoutedEventArgs const&)
     }
     const bool workloadSelectable = preset == 1 || preset == 2 || preset == 3;
     const auto workload = selected(WorkloadBox());
+    const bool gpuBurnWorkload = workload == "gpu_burn";
     const auto burnIterText = to_string(ExtraBox().Text());
-    if (workloadSelectable && workload == "gpu_burn" && !burnIterText.empty())
+    if (workloadSelectable && gpuBurnWorkload && !burnIterText.empty())
     {
         bool valid = false;
         try {
@@ -3534,13 +4410,14 @@ void MainWindow::OnRun(IInspectable const&, RoutedEventArgs const&)
             return;
         }
     }
-    if (workloadSelectable && workload == "gpu_burn" &&
-        DurationUnitBox().SelectedIndex() > 0 &&
+    if (workloadSelectable && gpuBurnWorkload &&
+        !isUnlimitedDuration() &&
+        durationUnitTag() == "frames" &&
         burnIterText.empty())
     {
         ResultText().Text(locText(
-            "Auto-tuned GPU Burn requires a timed run. Select Seconds, or enter a fixed step count for Frames.",
-            "自动标定的 GPU Burn 需要按时间运行。请选择“秒”，或为按帧运行填写固定步数。"));
+            "Auto-tuned GPU Burn requires a timed run. Select Seconds/Minutes/Hours, or enter a fixed step count for Frames.",
+            "自动标定的 GPU Burn 需要按时间运行。请选择秒/分钟/小时，或为按帧运行填写固定步数。"));
         setGpuStatus(StatusLight::Error, locText("GPU Burn settings need attention.",
                                                  "请检查 GPU Burn 设置。"));
         return;
@@ -3565,9 +4442,11 @@ void MainWindow::OnPresetChanged(IInspectable const&, SelectionChangedEventArgs 
 // ---- history (via gpu_bench::LoadResults, in-process) ----------------------
 void MainWindow::syncHistoryCategoryFromUi()
 {
-    m_historyCategory = HistoryCategoryTabs().SelectedIndex() == 1
+    auto selected = HistoryCategoryTabs().SelectedItem();
+    m_historyCategory = (selected && selected == HistoryCpuTab())
         ? HistoryCategory::Cpu : HistoryCategory::Gpu;
     m_showLegacyHistory = HistoryLegacyBox().IsChecked().Value();
+    m_showHeadlessHistory = HistoryHeadlessBox().IsChecked().Value();
 }
 
 void MainWindow::updateHistoryFilterVisibility()
@@ -3575,6 +4454,7 @@ void MainWindow::updateHistoryFilterVisibility()
     const bool cpu = m_historyCategory == HistoryCategory::Cpu;
     ApiFilterColumn().Visibility(cpu ? Visibility::Collapsed : Visibility::Visible);
     HistoryLegacyBox().Visibility(cpu ? Visibility::Collapsed : Visibility::Visible);
+    HistoryHeadlessBox().Visibility(cpu ? Visibility::Collapsed : Visibility::Visible);
 
     bool showParticles = false;
     bool showSteps = false;
@@ -3616,7 +4496,9 @@ void MainWindow::updateHistoryFilterVisibility()
         GpuFilterLabel().Text(locText("GPUs", "显卡"));
 }
 
-void MainWindow::OnHistoryCategoryChanged(IInspectable const&, SelectionChangedEventArgs const&)
+void MainWindow::OnHistoryCategoryChanged(
+    SelectorBar const&,
+    SelectorBarSelectionChangedEventArgs const&)
 {
     if (!m_uiReady) return;
     const auto previous = m_historyCategory;
@@ -3640,6 +4522,7 @@ void MainWindow::OnHistoryLegacyChecked(IInspectable const&, RoutedEventArgs con
 
 void MainWindow::refreshHistory()
 {
+    if (!uiAlive()) return;
     m_results = gpu_bench::LoadResults();
     syncHistoryCategoryFromUi();
     rebuildGpuFilter(true);
@@ -3696,6 +4579,7 @@ void MainWindow::rebuildHistoryFilters(bool preserveSelection)
         {
             if (historyKey.rfind("cpu_", 0) == 0) continue;
             if (!m_showLegacyHistory && isLegacyGpuWorkload(historyKey)) continue;
+            if (!m_showHeadlessHistory && r.headless) continue;
             ++workloadCounts[historyKey];
             if (r.particleCount > 0 && workloadUsesParticles(historyKey))
                 ++particleCounts[r.particleCount];
@@ -3917,6 +4801,7 @@ void MainWindow::applyHistoryView()
             const auto wlKey = historyWorkloadKey(r);
             if (!cpuCat && !m_showLegacyHistory &&
                 isLegacyGpuWorkload(wlKey)) continue;
+            if (!cpuCat && !m_showHeadlessHistory && r.headless) continue;
             if (hasApiFilter && allowedApis.find(r.graphicsApi) == allowedApis.end()) continue;
             if (hasWorkloadFilter && allowedWorkloads.find(wlKey) == allowedWorkloads.end()) continue;
             // Param filters only apply to workloads that use that dimension.
@@ -3931,7 +4816,7 @@ void MainWindow::applyHistoryView()
                 const auto deviceKey = cpuCat ? cpuFilterKey(r) : filterKey(leafOf(r));
                 if (allowedDevices.find(deviceKey) == allowedDevices.end()) continue;
             }
-            std::string date = r.timestamp.substr(0, 10);
+            std::string date = resultDatePrefix(r.timestamp);
             if (!lo.empty() && date < lo) continue;
             if (!hi.empty() && date > hi) continue;
             view.push_back(&r);
@@ -3965,59 +4850,21 @@ void MainWindow::applyHistoryView()
         HistoryHeaderPanel().Children().Clear();
         m_displayedIds.clear();
 
-        struct Row { std::string time, api, dev, cpu, mem, wl, particles, score, fps; };
-        std::vector<Row> rows; rows.reserve(view.size());
-        for (auto* r : view)
-        {
-            Row x;
-            x.time = localizeTimestamp(r->timestamp);
-            x.api  = r->graphicsApi;
-            x.dev  = normalizeGpuName(r->deviceName);
-            x.cpu  = normalizeCpuName(r->cpuName);
-            x.mem  = r->vramMB >= 1024 ? std::to_string(r->vramMB / 1024) + "GB"
-                   : r->vramMB > 0     ? std::to_string(r->vramMB) + "MB" : "-";
-            x.wl   = workloadRunLabel(*r);
-            x.particles = particleLabel(r->particleCount);
-            x.score = r->workload == "fluid"
-                ? i18n::tr("Unverified legacy", "未验证旧版")
-                : r->score > 0.0
-                ? [&] { std::ostringstream o; o.setf(std::ios::fixed); o.precision(1);
-                        o << r->score << ' ' << r->scoreUnit;
-                        if (!r->precision.empty()) o << " (" << r->precision << ')';
-                        return o.str(); }()
-                : "-";
-            x.fps  = std::to_string((int)r->avgFps);
-            rows.push_back(std::move(x));
-        }
-
-        size_t wTime = 4, wApi = 3, wDev = 6, wCpu = 3, wMem = 3, wWl = 8, wParticles = 9, wScore = 5;
-        for (auto& x : rows)
-        {
-            wTime  = (std::max)(wTime,  x.time.size());
-            wApi   = (std::max)(wApi,   x.api.size());
-            wDev   = (std::max)(wDev,   x.dev.size());
-            wCpu   = (std::max)(wCpu,   x.cpu.size());
-            wMem   = (std::max)(wMem,   x.mem.size());
-            wWl    = (std::max)(wWl,    x.wl.size());
-            wParticles = (std::max)(wParticles, x.particles.size());
-            wScore = (std::max)(wScore, x.score.size());
-        }
-        auto pad = [](std::string s, size_t w) { if (s.size() < w) s.append(w - s.size(), ' '); return s; };
         const std::string gp = "  ";
-
-        // U+200C (zero-width non-joiner) sentinel prevents WinUI TextBlock
-        // from trimming the trailing spaces that align columns.
         const std::string sentinel = "\xE2\x80\x8C";  // UTF-8 for U+200C
+
         auto addHeader = [&](std::string label, size_t width, char const* column)
         {
             if (m_historySortColumn == column)
                 label += m_historySortAscending ? " ^" : " v";
-            width = (std::max)(width, label.size());
+            width = (std::max)(width, utf8DisplayWidth(label));
             TextBlock tb;
-            tb.Text(u8(pad(label, width) + gp + sentinel));
+            tb.Text(u8(padDisplay(label, width) + gp + sentinel));
             tb.Tag(box_value(u8(column)));
             tb.FontFamily(Media::FontFamily(L"Consolas"));
             tb.Opacity(0.78);
+            tb.VerticalAlignment(VerticalAlignment::Center);
+            tb.Margin(Thickness{ 0, 0, 0, 2 });
             tb.Tapped([this](IInspectable const& sender, auto const&)
             {
                 auto fe = sender.as<FrameworkElement>();
@@ -4035,23 +4882,108 @@ void MainWindow::applyHistoryView()
             });
             HistoryHeaderPanel().Children().Append(tb);
         };
-        addHeader("Time", wTime, "time");
-        addHeader("API", wApi, "api");
-        addHeader("GPU/Render", wDev, "device");
-        addHeader("CPU", wCpu, "cpu");
-        addHeader("Mem", wMem, "mem");
-        addHeader("Workload", wWl, "workload");
-        addHeader("Particles", wParticles, "particles");
-        addHeader("Score", wScore, "score");
-        addHeader("FPS", 3, "fps");
+
+        // CPU history: no GPU/API/VRAM/Particles/FPS columns.
+        if (cpuCat)
+        {
+            struct CpuRow { std::string time, cpu, wl, score; };
+            std::vector<CpuRow> rows; rows.reserve(view.size());
+            for (auto* r : view)
+            {
+                CpuRow x;
+                x.time = localizeTimestamp(r->timestamp);
+                x.cpu  = normalizeCpuName(r->cpuName.empty() ? r->deviceName : r->cpuName);
+                x.wl   = workloadRunLabel(*r);
+                x.score = r->score > 0.0
+                    ? [&] { std::ostringstream o; o.setf(std::ios::fixed); o.precision(1);
+                            o << r->score << ' ' << r->scoreUnit;
+                            return o.str(); }()
+                    : "-";
+                rows.push_back(std::move(x));
+            }
+
+            size_t wTime = 4, wCpu = 3, wWl = 8, wScore = 5;
+            for (auto& x : rows)
+            {
+                wTime  = (std::max)(wTime,  utf8DisplayWidth(x.time));
+                wCpu   = (std::max)(wCpu,   utf8DisplayWidth(x.cpu));
+                wWl    = (std::max)(wWl,    utf8DisplayWidth(x.wl));
+                wScore = (std::max)(wScore, utf8DisplayWidth(x.score));
+            }
+
+            addHeader(to_string(locText("Time", "时间")), wTime, "time");
+            addHeader(to_string(locText("CPU", "CPU")), wCpu, "cpu");
+            addHeader(to_string(locText("Workload", "测试项目")), wWl, "workload");
+            addHeader(to_string(locText("Score", "分数")), wScore, "score");
+
+            for (size_t i = 0; i < rows.size(); ++i)
+            {
+                auto& x = rows[i];
+                std::string line = padDisplay(x.time, wTime) + gp + padDisplay(x.cpu, wCpu)
+                                 + gp + padDisplay(x.wl, wWl) + gp + padDisplay(x.score, wScore)
+                                 + sentinel;
+                TextBlock tb; tb.Text(u8(line));
+                tb.FontFamily(Media::FontFamily(L"Consolas"));
+                HistoryList().Items().Append(tb);
+                m_displayedIds.push_back(view[i]->id);
+            }
+            return;
+        }
+
+        struct Row { std::string time, api, dev, cpu, mem, wl, particles, score, fps; };
+        std::vector<Row> rows; rows.reserve(view.size());
+        for (auto* r : view)
+        {
+            Row x;
+            x.time = localizeTimestamp(r->timestamp);
+            x.api  = r->graphicsApi;
+            x.dev  = normalizeGpuName(r->deviceName);
+            x.cpu  = normalizeCpuName(r->cpuName);
+            x.mem  = formatVramMB(resolvedVramMB(*r, m_results));
+            x.wl   = workloadRunLabel(*r);
+            x.particles = particleLabel(r->particleCount);
+            x.score = r->workload == "fluid"
+                ? i18n::tr("Unverified legacy", "未验证旧版")
+                : r->score > 0.0
+                ? [&] { std::ostringstream o; o.setf(std::ios::fixed); o.precision(1);
+                        o << r->score << ' ' << r->scoreUnit;
+                        if (!r->precision.empty()) o << " (" << r->precision << ')';
+                        return o.str(); }()
+                : "-";
+            x.fps  = std::to_string((int)r->avgFps);
+            rows.push_back(std::move(x));
+        }
+
+        size_t wTime = 4, wApi = 3, wDev = 6, wCpu = 3, wMem = 4, wWl = 8, wParticles = 9, wScore = 5;
+        for (auto& x : rows)
+        {
+            wTime  = (std::max)(wTime,  utf8DisplayWidth(x.time));
+            wApi   = (std::max)(wApi,   utf8DisplayWidth(x.api));
+            wDev   = (std::max)(wDev,   utf8DisplayWidth(x.dev));
+            wCpu   = (std::max)(wCpu,   utf8DisplayWidth(x.cpu));
+            wMem   = (std::max)(wMem,   utf8DisplayWidth(x.mem));
+            wWl    = (std::max)(wWl,    utf8DisplayWidth(x.wl));
+            wParticles = (std::max)(wParticles, utf8DisplayWidth(x.particles));
+            wScore = (std::max)(wScore, utf8DisplayWidth(x.score));
+        }
+
+        addHeader(to_string(locText("Time", "时间")), wTime, "time");
+        addHeader(to_string(locText("API", "API")), wApi, "api");
+        addHeader(to_string(locText("GPU/Render", "GPU/渲染")), wDev, "device");
+        addHeader(to_string(locText("CPU", "CPU")), wCpu, "cpu");
+        addHeader(to_string(locText("VRAM", "显存")), wMem, "mem");
+        addHeader(to_string(locText("Workload", "测试项目")), wWl, "workload");
+        addHeader(to_string(locText("Particles", "粒子")), wParticles, "particles");
+        addHeader(to_string(locText("Score", "分数")), wScore, "score");
+        addHeader(to_string(locText("FPS", "FPS")), 3, "fps");
 
         for (size_t i = 0; i < rows.size(); ++i)
         {
             auto& x = rows[i];
-            std::string line = pad(x.time, wTime) + gp + pad(x.api, wApi) + gp + pad(x.dev, wDev)
-                             + gp + pad(x.cpu, wCpu) + gp + pad(x.mem, wMem) + gp + pad(x.wl, wWl)
-                             + gp + pad(x.particles, wParticles)
-                             + gp + pad(x.score, wScore) + gp + x.fps;
+            std::string line = padDisplay(x.time, wTime) + gp + padDisplay(x.api, wApi) + gp + padDisplay(x.dev, wDev)
+                             + gp + padDisplay(x.cpu, wCpu) + gp + padDisplay(x.mem, wMem) + gp + padDisplay(x.wl, wWl)
+                             + gp + padDisplay(x.particles, wParticles)
+                             + gp + padDisplay(x.score, wScore) + gp + x.fps + sentinel;
             TextBlock tb; tb.Text(u8(line));
             tb.FontFamily(Media::FontFamily(L"Consolas"));
             HistoryList().Items().Append(tb);
@@ -4094,7 +5026,7 @@ void MainWindow::applyHistoryView()
         if (anyBox && allowed.find(filterKey(leafOf(r))) == allowed.end()) continue;
         if (workloadFilter != "*" && historyWorkloadKey(r) != workloadFilter) continue;
         if (particleFilter != 0 && r.particleCount != particleFilter) continue;
-        std::string date = r.timestamp.substr(0, 10);
+        std::string date = resultDatePrefix(r.timestamp);
         if (!lo.empty() && date < lo) continue;
         if (!hi.empty() && date > hi) continue;
         view.push_back(&r);
@@ -4128,8 +5060,7 @@ void MainWindow::applyHistoryView()
         x.api  = r->graphicsApi;
         x.dev  = r->deviceName;
         x.cpu  = r->cpuName;
-        x.mem  = r->vramMB >= 1024 ? std::to_string(r->vramMB / 1024) + "GB"
-               : r->vramMB > 0     ? std::to_string(r->vramMB) + "MB" : "-";
+        x.mem  = formatVramMB(r->vramMB);
         x.wl   = workloadRunLabel(*r);
         x.particles = particleLabel(r->particleCount);
         x.score = r->workload == "fluid"
@@ -4144,32 +5075,32 @@ void MainWindow::applyHistoryView()
         rows.push_back(std::move(x));
     }
 
-    size_t wTime = 4, wApi = 3, wDev = 6, wCpu = 3, wMem = 3, wWl = 8, wParticles = 9, wScore = 5;
+    size_t wTime = 4, wApi = 3, wDev = 6, wCpu = 3, wMem = 4, wWl = 8, wParticles = 9, wScore = 5;
     for (auto& x : rows)
     {
-        wTime  = (std::max)(wTime,  x.time.size());
-        wApi   = (std::max)(wApi,   x.api.size());
-        wDev   = (std::max)(wDev,   x.dev.size());
-        wCpu   = (std::max)(wCpu,   x.cpu.size());
-        wMem   = (std::max)(wMem,   x.mem.size());
-        wWl    = (std::max)(wWl,    x.wl.size());
-        wParticles = (std::max)(wParticles, x.particles.size());
-        wScore = (std::max)(wScore, x.score.size());
+        wTime  = (std::max)(wTime,  utf8DisplayWidth(x.time));
+        wApi   = (std::max)(wApi,   utf8DisplayWidth(x.api));
+        wDev   = (std::max)(wDev,   utf8DisplayWidth(x.dev));
+        wCpu   = (std::max)(wCpu,   utf8DisplayWidth(x.cpu));
+        wMem   = (std::max)(wMem,   utf8DisplayWidth(x.mem));
+        wWl    = (std::max)(wWl,    utf8DisplayWidth(x.wl));
+        wParticles = (std::max)(wParticles, utf8DisplayWidth(x.particles));
+        wScore = (std::max)(wScore, utf8DisplayWidth(x.score));
     }
-    auto pad = [](std::string s, size_t w) { if (s.size() < w) s.append(w - s.size(), ' '); return s; };
     const std::string gp = "  ";
+    const std::string sentinel = "\xE2\x80\x8C";
 
-    HistoryHeader().Text(u8(pad("Time", wTime) + gp + pad("API", wApi) + gp + pad("Device", wDev)
-                            + gp + pad("CPU", wCpu) + gp + pad("Mem", wMem) + gp + pad("Workload", wWl)
-                            + gp + pad("Particles", wParticles)
-                            + gp + pad("Score", wScore) + gp + "FPS"));
+    HistoryHeader().Text(u8(padDisplay("Time", wTime) + gp + padDisplay("API", wApi) + gp + padDisplay("Device", wDev)
+                            + gp + padDisplay("CPU", wCpu) + gp + padDisplay("VRAM", wMem) + gp + padDisplay("Workload", wWl)
+                            + gp + padDisplay("Particles", wParticles)
+                            + gp + padDisplay("Score", wScore) + gp + "FPS" + sentinel));
     for (size_t i = 0; i < rows.size(); ++i)
     {
         auto& x = rows[i];
-        std::string line = pad(x.time, wTime) + gp + pad(x.api, wApi) + gp + pad(x.dev, wDev)
-                         + gp + pad(x.cpu, wCpu) + gp + pad(x.mem, wMem) + gp + pad(x.wl, wWl)
-                         + gp + pad(x.particles, wParticles)
-                         + gp + pad(x.score, wScore) + gp + x.fps;
+        std::string line = padDisplay(x.time, wTime) + gp + padDisplay(x.api, wApi) + gp + padDisplay(x.dev, wDev)
+                         + gp + padDisplay(x.cpu, wCpu) + gp + padDisplay(x.mem, wMem) + gp + padDisplay(x.wl, wWl)
+                         + gp + padDisplay(x.particles, wParticles)
+                         + gp + padDisplay(x.score, wScore) + gp + x.fps + sentinel;
         TextBlock tb; tb.Text(u8(line));
         tb.FontFamily(Media::FontFamily(L"Consolas"));
         HistoryList().Items().Append(tb);
@@ -4278,6 +5209,8 @@ void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
     const auto imageDirW = imageDir.wstring();
     std::thread([this, strong, disp, repoW, pythonW, resultsW, imageDirW]()
     {
+      try
+      {
         auto result = runProcess(
             L"\"" + pythonW + L"\" \"scripts\\plot_workloads.py\" --input \""
             + resultsW + L"\" --out \"" + imageDirW + L"\"", repoW);
@@ -4302,11 +5235,26 @@ void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
                 ChartsPanel().Children().Append(img);
                 ++shown;
             }
+            const auto count = std::to_string(shown);
             ChartsStatus().Text(result.exitCode == 0
-                ? u8("Done — " + std::to_string(shown) + " chart(s).")
-                : u8("python exited with " + std::to_string(result.exitCode) + "."));
+                ? (i18n::currentLang() == i18n::Lang::Zh
+                    ? u8("完成 —— " + count + " 张图表")
+                    : u8("Done — " + count + " chart(s)"))
+                : (i18n::currentLang() == i18n::Lang::Zh
+                    ? u8("python 退出码 " + std::to_string(result.exitCode))
+                    : u8("python exited with " + std::to_string(result.exitCode))));
             endTask(ActiveTask::Charts); ChartsBusy().IsActive(false);
         });
+      }
+      catch (...)
+      {
+          disp.TryEnqueue([this, strong]()
+          {
+              ChartsStatus().Text(locText("Chart generation failed.", "图表生成失败"));
+              endTask(ActiveTask::Charts);
+              ChartsBusy().IsActive(false);
+          });
+      }
     }).detach();
 }
 

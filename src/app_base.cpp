@@ -297,6 +297,8 @@ void AppBase::UpdateRenderDocCapturePath() {
     else if (config_.workload == Workload::CinematicLiquid)
         pathTemplate += "_v2_shader" +
                         std::to_string(kCinematicLiquidV2ShaderVersion);
+    else if (config_.workload == Workload::GpuBurnV1)
+        pathTemplate += "_v1_shader" + std::to_string(kGpuBurnV1ShaderVersion);
 
     // Append flights/particles info when overridden
     if (config_.framesInFlight != kMaxFramesInFlight)
@@ -311,7 +313,7 @@ void AppBase::UpdateRenderDocCapturePath() {
 
 void AppBase::Run() {
     if ((config_.workload == Workload::GpuStressV1 ||
-         config_.workload == Workload::GpuBurnV1) && config_.headless) {
+         isGpuBurnWorkload(config_.workload)) && config_.headless) {
         throw std::runtime_error("GPU Stress/Burn is a graphics workload and does not support headless mode");
     }
     if (!config_.headless)
@@ -402,6 +404,27 @@ void AppBase::MainLoop() {
     lastFrameTime_ = glfwGetTime();
     runStartTime_  = lastFrameTime_;
 
+    // Runtime safety net for the fixed-load GPU Burn contract: --run-all and
+    // GUI matrix runs reuse one config across devices, and only here is the
+    // actual device known.  A software rasterizer at the hardware-fixed 256
+    // steps would take multi-second draws (WARP: ~209 ms/frame at 16 steps),
+    // so clamp it to the conservative software cap.
+    if (isGpuBurnWorkload(config_.workload)) {
+        const std::string devName = GetDeviceName();
+        const bool softwareDevice =
+            devName.find("Basic Render") != std::string::npos ||
+            devName.find("WARP") != std::string::npos ||
+            devName.find("Software") != std::string::npos ||
+            devName.find("llvmpipe") != std::string::npos;
+        const auto softwareCap = gpuBurnMaxFixedIter(config_.workload);
+        if (softwareDevice && config_.gpuBurnIter > softwareCap) {
+            std::cout << "[GPU Burn] Software device detected ('" << devName
+                      << "'); clamping fixed steps " << config_.gpuBurnIter
+                      << " -> " << softwareCap << " to stay watchdog-safe.\n";
+            config_.gpuBurnIter = softwareCap;
+        }
+    }
+
     const std::uint32_t totalBenchFrames =
         config_.benchFrames + config_.warmupFrames;
 
@@ -429,6 +452,13 @@ void AppBase::MainLoop() {
             const double elapsed = glfwGetTime() - runStartTime_;
             if (config_.captureAtSec > 0.0 && !timeCaptureTriggered &&
                 elapsed >= config_.captureAtSec) {
+                rdocCaptureRequested_ = true;
+                timeCaptureTriggered = true;
+            }
+            // Capture the Nth drawn frame (totalFrameCount_ is post-increment).
+            if (config_.captureAtFrame > 0 && !timeCaptureTriggered &&
+                static_cast<std::int64_t>(totalFrameCount_) + 1 >=
+                    config_.captureAtFrame) {
                 rdocCaptureRequested_ = true;
                 timeCaptureTriggered = true;
             }
@@ -496,6 +526,14 @@ void AppBase::MainLoop() {
         }
 
         const double elapsed = currentTime - runStartTime_;
+
+        // Smooth GPU Burn's post-probe ramp: double toward the calibrated
+        // step target each frame so the workload rises over a handful of
+        // frames instead of one sudden FPS cliff.  Only ever set for GPU
+        // Burn auto-tune; the formal window runs at the final count.
+        if (gpuBurnRampTarget_ > config_.gpuBurnIter)
+            config_.gpuBurnIter = std::min(gpuBurnRampTarget_,
+                                           config_.gpuBurnIter * 2u);
 
         if (config_.benchmarkMode) {
             if (totalFrameCount_ == config_.warmupFrames) {
@@ -567,7 +605,11 @@ void AppBase::ReportTimingIfDue(double deltaTime) {
     timingReportTimer_ += deltaTime;
     ++frameCount_;
 
-    if (timingReportTimer_ < kTimingReportIntervalSec)
+    // Short warmup windows give the auto-tune several closed-loop rounds
+    // inside the fixed 2 s warmup; the reporting cadence after warmup (and
+    // therefore every measured statistic) is unchanged.
+    const double reportInterval = warmupDone_ ? kTimingReportIntervalSec : 0.30;
+    if (timingReportTimer_ < reportInterval)
         return;
 
     const double fps = static_cast<double>(frameCount_) / timingReportTimer_;
@@ -617,33 +659,60 @@ void AppBase::ReportTimingIfDue(double deltaTime) {
                       << kGpuStressV1TargetFrameMs << " ms)\n";
         }
 
-        // GPU Burn v1 has its own score contract and calibration bounds. Its
-        // maxIter controls exact Plasma Bloom field samples rather than the register
-        // recurrence used by GraphicsBurn v1.
-        if (config_.workload == Workload::GpuBurnV1 &&
-            config_.gpuBurnAutoTune && !gpuBurnCalibrationDone_ &&
-            !warmupDone_ && avgRender > 0.001) {
+        // Each GPU Burn version has its own result contract while sharing the
+        // safe calibration envelope. maxIter always means exact visible samples.
+        //
+        // Closed-loop calibration: a single probe-based projection badly
+        // undershoots on APIs whose 16-step frame is dominated by fixed
+        // per-frame overhead (DX11 probed 0.546 ms where Vulkan probed
+        // 0.206 ms for identical work, landing at ~4.8 ms instead of 14 ms).
+        // Re-projecting from each successive warmup window converges on the
+        // target regardless of the overhead split; rounds only run while the
+        // previous ramp has settled, and the measured window still executes
+        // entirely at the final count.
+        if (isGpuBurnWorkload(config_.workload) &&
+            config_.gpuBurnAutoTune && !warmupDone_ && avgRender > 0.001 &&
+            gpuBurnCalibrationRounds_ < 4u &&
+            (gpuBurnRampTarget_ == 0u ||
+             config_.gpuBurnIter == gpuBurnRampTarget_)) {
             const auto previous = config_.gpuBurnIter;
-            // Besides maxIter scored samples, v1 evaluates the field roughly
-            // seven more times for its surface material/normal. Include that
-            // fixed shader cost in the one-shot estimate; otherwise the low
-            // 16-step probe systematically under-tunes fast GPUs. Never tune
-            // below 16: that is the minimum which preserves the visible core.
-            constexpr double kFixedSampleEquivalent = 7.0;
-            const double scaled =
-                (static_cast<double>(previous) + kFixedSampleEquivalent) *
-                kGpuBurnV1TargetFrameMs / avgRender - kFixedSampleEquivalent;
-            auto tuned = static_cast<std::uint32_t>(std::max(
-                static_cast<double>(kGpuBurnV1DefaultIter), std::round(scaled)));
-            tuned = std::min(tuned, kGpuBurnV1MaxIter);
-            if (tuned >= 4u)
-                tuned = std::min(kGpuBurnV1MaxIter, ((tuned + 3u) / 4u) * 4u);
-            config_.gpuBurnIter = tuned;
-            gpuBurnCalibrationDone_ = true;
-            std::cout << "[GPU Burn auto-tune] " << previous << " -> " << tuned
-                      << " steps/draw (observed " << std::fixed
-                      << std::setprecision(3) << avgRender << " ms, target "
-                      << kGpuBurnV1TargetFrameMs << " ms)\n";
+            const double target = gpuBurnTargetFrameMs(config_.workload);
+            const double errorRatio = avgRender / target;
+            if (gpuBurnRampTarget_ != 0u &&
+                errorRatio > 0.92 && errorRatio < 1.08) {
+                gpuBurnCalibrationRounds_ = 4u;  // converged; freeze
+                gpuBurnCalibrationDone_ = true;
+            } else {
+                // Account for version-specific work outside the fixed loop
+                // when projecting the current observation onto the target.
+                const double fixedSampleEquivalent = 7.0;
+                const double scaled =
+                    (static_cast<double>(previous) + fixedSampleEquivalent) *
+                    target / avgRender - fixedSampleEquivalent;
+                auto tuned = static_cast<std::uint32_t>(std::max(
+                    static_cast<double>(gpuBurnDefaultIter(config_.workload)),
+                    std::round(scaled)));
+                tuned = std::min(tuned, gpuBurnMaxIter(config_.workload));
+                if (tuned >= 4u)
+                    tuned = std::min(gpuBurnMaxIter(config_.workload),
+                                     ((tuned + 3u) / 4u) * 4u);
+                if (tuned >= previous) {
+                    // Upward: per-frame doubling ramp (no FPS cliff).
+                    gpuBurnRampTarget_ = tuned;
+                } else {
+                    // Downward correction after an overshoot: apply directly.
+                    config_.gpuBurnIter = tuned;
+                    gpuBurnRampTarget_ = tuned;
+                }
+                ++gpuBurnCalibrationRounds_;
+                gpuBurnCalibrationDone_ = true;
+                std::cout << "[GPU Burn v1 r2 auto-tune round "
+                          << gpuBurnCalibrationRounds_ << "] "
+                          << previous << " -> " << tuned
+                          << " steps/draw, ramped (observed " << std::fixed
+                          << std::setprecision(3) << avgRender
+                          << " ms, target " << target << " ms)\n";
+            }
         }
 
         // Thermal-stability tracking: push a window sample once warmup is done.
@@ -664,7 +733,7 @@ void AppBase::ReportTimingIfDue(double deltaTime) {
             case gpu_bench::Workload::NBody:         oss << " | N-Body";    break;
             case gpu_bench::Workload::StressFractal: oss << " | Stress";    break;
             case gpu_bench::Workload::GpuStressV1:   oss << " | GPU Stress v1"; break;
-            case gpu_bench::Workload::GpuBurnV1:     oss << " | GPU Burn v1"; break;
+            case gpu_bench::Workload::GpuBurnV1:     oss << " | Plasma x Kaleidoscope GPU Burn"; break;
             case gpu_bench::Workload::SynthPeak:     oss << " | SynthPeak"; break;
             case gpu_bench::Workload::Render3D:      oss << " | Render3D";  break;
             case gpu_bench::Workload::Volumetric:    oss << " | Volumetric"; break;
@@ -739,8 +808,9 @@ void AppBase::PrintSummary() const {
         << std::setw(14) << "Memory:"     << (config_.hostMemory ? "Host-visible (System RAM)" : "Device-local") << "\n"
         << std::setw(14) << "Mode:"       << (config_.headless ? "Headless (compute only)" : "Windowed") << "\n"
         << std::setw(14) << "Resolution:" << kWindowWidth << "x" << kWindowHeight << "\n";
-    if (config_.workload == Workload::GpuBurnV1)
-        std::cout << std::setw(14) << "Workload:" << "GPU Burn v1 (no particle data)\n";
+    if (isGpuBurnWorkload(config_.workload))
+        std::cout << std::setw(14) << "Workload:"
+                  << "GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)\n";
     else
         std::cout << std::setw(14) << "Particles:" << config_.particleCount
                   << " (" << config_.difficultyLabel << ")\n";
@@ -864,15 +934,18 @@ void AppBase::PrintSummary() const {
                 << std::setprecision(3) << avgRender << " ms render)\n";
         }
 
-        if (config_.workload == Workload::GpuBurnV1 && avgRender > 0.0) {
+        if (isGpuBurnWorkload(config_.workload) && avgRender > 0.0) {
             const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
             const double renderSec = avgRender / 1000.0;
             const double gsteps = pixels * config_.gpuBurnIter
-                                * kGpuBurnV1DrawsPerFrame / renderSec / 1e9;
-            std::cout << "GPU Burn:     v1 Plasma Bloom, " << kGpuBurnV1DrawsPerFrame
+                                * gpuBurnDrawsPerFrame(config_.workload) / renderSec / 1e9;
+            std::cout << "GPU Burn:     v1 r2 Plasma x Kaleidoscope, "
+                << gpuBurnDrawsPerFrame(config_.workload)
                 << " draws x " << config_.gpuBurnIter << " fixed steps/pixel  ("
                 << kWindowWidth << "x" << kWindowHeight << " px)\n"
-                << "Visual:       rotating plasma core + crystalline spikes/electric corona\n"
+                << "Visual:       "
+                << "solid Plasma Bloom foreground + woven Mangekyo background"
+                << '\n'
                 << std::setprecision(2)
                 << "Burn rate:    " << gsteps << " Gpix-step/s  ("
                 << std::setprecision(3) << avgRender << " ms render)\n";
@@ -1044,12 +1117,16 @@ BenchmarkResult AppBase::CollectResult() const {
                            << ";autoTune=" << (config_.gpuStressAutoTune ? "true" : "false");
             break;
         case Workload::GpuBurnV1:
-            r.workloadVersion = "gpu_burn_v1";
+            // v2 fixed-load contract: identical 256-step frames on every
+            // hardware GPU, no frame-time target, FPS as the visible signal.
+            // Calibrated r2 results stay in their own retired group.
+            r.workloadVersion = "gpu_burn_v2_fixed256_kaleidoscope";
             workloadConfig << "steps=" << config_.gpuBurnIter
                            << ";draws=" << kGpuBurnV1DrawsPerFrame
                            << ";shaderVersion=" << kGpuBurnV1ShaderVersion
-                           << ";autoTune=" << (config_.gpuBurnAutoTune ? "true" : "false")
-                           << ";visual=plasma_bloom_core";
+                           << ";loadModel=fixed_per_frame"
+                           << ";autoTune=false"
+                           << ";visual=plasma_bloom_concentric_kaleidoscope";
             break;
         case Workload::StressFractal:
             r.workloadVersion = "stress_legacy_v1";
@@ -1075,7 +1152,7 @@ BenchmarkResult AppBase::CollectResult() const {
                            << ";solver=stable_fluids_2d"
                            << ";renderer=projected_dye"
                            << ";status=legacy"
-                           << ";apiScope=vulkan_only";
+                           << ";apiScope=vulkan_dx12_dx11_opengl";
             break;
         case Workload::CinematicLiquidV1:
             r.workloadVersion = "cinematic_liquid_v1";
@@ -1197,9 +1274,12 @@ BenchmarkResult AppBase::CollectResult() const {
                            << ";apiScope=vulkan_only";
             break;
     }
-    if (config_.captureAtSec > 0.0) {
-        workloadConfig << ";captureAtSec=" << config_.captureAtSec
-                       << ";captureAttempts=" << rdocCaptureAttemptCount_
+    if (config_.captureAtSec > 0.0 || config_.captureAtFrame > 0) {
+        if (config_.captureAtSec > 0.0)
+            workloadConfig << ";captureAtSec=" << config_.captureAtSec;
+        if (config_.captureAtFrame > 0)
+            workloadConfig << ";captureAtFrame=" << config_.captureAtFrame;
+        workloadConfig << ";captureAttempts=" << rdocCaptureAttemptCount_
                        << ";captureExcluded="
                        << (rdocCaptureAttemptExcluded_ ? "true" : "false")
                        << ";captureCount=" << rdocCaptureCount_;
@@ -1217,7 +1297,7 @@ BenchmarkResult AppBase::CollectResult() const {
     // GPU Burn allocates a tiny internal compatibility buffer but does not
     // process particles. Persist zero so History/capture metadata cannot imply
     // that the visual burn score came from a 256-particle workload.
-    r.particleCount = config_.workload == Workload::GpuBurnV1
+    r.particleCount = isGpuBurnWorkload(config_.workload)
         ? 0u : config_.particleCount;
     r.difficulty  = config_.difficultyLabel;
     r.vsync       = config_.vsync;
@@ -1284,9 +1364,9 @@ BenchmarkResult AppBase::CollectResult() const {
         r.score = pixels * config_.gpuStressIter * kGpuStressV1DrawsPerFrame
                 / renderSec / 1e9;
         r.scoreUnit = "Gpix-iter/s";
-    } else if (config_.workload == Workload::GpuBurnV1 && renderSec > 0.0) {
+    } else if (isGpuBurnWorkload(config_.workload) && renderSec > 0.0) {
         const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
-        r.score = pixels * config_.gpuBurnIter * kGpuBurnV1DrawsPerFrame
+        r.score = pixels * config_.gpuBurnIter * gpuBurnDrawsPerFrame(config_.workload)
                 / renderSec / 1e9;
         r.scoreUnit = "Gpix-step/s";
     } else if (config_.workload == Workload::Volumetric && renderSec > 0.0) {
@@ -1350,9 +1430,9 @@ double AppBase::computeAxisScore(double computeMs, double renderMs) const {
         const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
         return pixels * config_.gpuStressIter * kGpuStressV1DrawsPerFrame
              / renderSec / 1e9;
-    } else if (config_.workload == Workload::GpuBurnV1 && renderSec > 0.0) {
+    } else if (isGpuBurnWorkload(config_.workload) && renderSec > 0.0) {
         const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
-        return pixels * config_.gpuBurnIter * kGpuBurnV1DrawsPerFrame
+        return pixels * config_.gpuBurnIter * gpuBurnDrawsPerFrame(config_.workload)
              / renderSec / 1e9;
     } else if (config_.workload == Workload::Volumetric && renderSec > 0.0) {
         const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;

@@ -5,7 +5,7 @@ Reads the benchmark results JSON and produces one bar chart per workload:
 
   * stream    -> memory bandwidth   (GB/s)      by API
   * nbody     -> achievable compute (GFLOP/s)   by API
-  * gpu_burn  -> Plasma Bloom burn rate         by device and API
+  * gpu_burn  -> versioned visual burn rate     by device and API
   * cinematic_liquid -> future 3D liquid score  by device and API
 
 The historical ``fluid`` workload is a legacy 2D projected-dye prototype and
@@ -40,7 +40,7 @@ API_COLORS = {
 WORKLOAD_TITLES = {
     "stream":    "Memory Bandwidth (Stream)",
     "nbody":     "Achievable Compute (N-body)",
-    "gpu_burn":  "GPU Burn (Plasma Bloom)",
+    "gpu_burn":  "GPU Burn (Mangekyo / Plasma Bloom)",
     "gpu_stress": "GraphicsBurn v1 / Component (Advanced)",
     "stress":    "Fill Rate (Fractal Stress)",
     "render3d":  "3D Render Throughput (Billboards)",

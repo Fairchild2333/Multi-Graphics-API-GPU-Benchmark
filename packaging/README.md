@@ -42,16 +42,17 @@ portable-ZIP URL and its expected SHA-256; there is no mutable "latest" download
 powershell -NoProfile -ExecutionPolicy Bypass `
   -File scripts\build-windows-github-release.ps1 `
   -RenderDocDownloadUrl https://renderdoc.org/<pinned-path>/RenderDoc_<version>_64.zip `
-  -RenderDocSha256 <sha256> `
-  -ProjectLicenseFile C:\release-inputs\LICENSE.txt
+  -RenderDocSha256 <sha256>
 ```
 
 The default flow rebuilds both CMake and WinUI outputs instead of harvesting a
-developer output directory. It produces the portable ZIP, the Inno Setup EXE,
-`SHA256SUMS.txt`, and `release-assets.json` under
-`out/release/windows-x64`. The target computer does not need Visual Studio,
-vcpkg, Python, a shader compiler, the Vulkan SDK, or a separate Windows App SDK
-installation. A compatible graphics driver is still required.
+developer output directory. It produces the portable ZIP, the WiX MSI
+(`Mangekyo-<ver>-windows-<arch>.msi`), `SHA256SUMS.txt`, and
+`release-assets.json` under `out/release/windows-x64` (or `windows-arm64`).
+The repo root `LICENSE` (MIT) is staged automatically. The target computer does
+not need Visual Studio, vcpkg, Python, a shader compiler, the Vulkan SDK, or a
+separate Windows App SDK installation. A compatible graphics driver is still
+required.
 Before release assets are emitted, every file streamed back from the portable
 ZIP is checked against the verified stage inventory; a missing, extra or changed
 entry fails the build.
@@ -60,11 +61,11 @@ The GitHub Release wrapper refuses a dirty Git worktree so the recorded commit
 actually identifies its binaries. `-AllowDirtySource` exists only for local
 engineering candidates and is recorded as `sourceTreeDirty: true`.
 
-Use `-SignToolCommand '<Inno sign command containing $f>' -RequireSigned` for a
+Use `-SignToolCommand '<signtool command containing $f>' -RequireSigned` for a
 public signed build. Without it the artifacts are intentionally reported as
-unsigned and remain susceptible to SmartScreen warnings. The repository still
-needs a project distribution license, legal review, and clean-machine
-install/capture validation before a public GitHub Release is qualified.
+unsigned and remain susceptible to SmartScreen warnings. Clean-machine
+install/capture validation is still required before a public GitHub Release is
+qualified.
 
 ## Staging and portable ZIP only
 
@@ -102,47 +103,29 @@ RenderDoc directory is accepted only when it contains `renderdoccmd.exe`,
 `renderdoc.dll`, and a license file. A report-worker directory must contain
 `report_worker.exe`.
 
-## MSI / WiX alternative
+## MSI / WiX installer (primary)
 
-The same install rules can feed CPack's `WIX` generator, but MSI generation is
-intentionally blocked until `GPU_BENCH_PACKAGE_LICENSE_FILE` points to an
-approved project distribution license. A public installer also needs audited
-`THIRD_PARTY_NOTICES`, signing, upgrade/uninstall tests, and a VC Redist
-redistribution review. ZIP remains the honest engineering artifact until those
-release gates are satisfied.
-
-To request WIX after those gates are met:
+Release packaging uses CPack `ZIP;WIX` by default. The MSI uses WiXUI InstallDir
+so the user can choose the install path. Build it from a verified stage:
 
 ```powershell
-cmake -S . -B out/build/windows-x64-release `
-  -DGPU_BENCH_CPACK_GENERATORS='ZIP;WIX' `
-  -DGPU_BENCH_PACKAGE_LICENSE_FILE=C:\approved\LICENSE.txt
-cpack --config out/build/windows-x64-release/CPackConfig.cmake -C Release -G WIX
+powershell -NoProfile -ExecutionPolicy Bypass `
+  -File scripts/build-wix-installer.ps1 `
+  -StageDir out/stage/windows-x64 `
+  -BuildDir out/build/windows-x64-release `
+  -Arch x64
 ```
+
+Requires WiX on the build machine (`dotnet tool install --global wix --version 5.0.2`,
+or WiX Toolset v3.14 `candle`/`light`). Both x64 and ARM64 produce native-arch
+MSIs (`CPACK_WIX_ARCHITECTURE`).
 
 Always run `scripts/verify-windows-stage.ps1`. Its normal mode validates the
 core artifact and reports unresolved portability gates. `-RequirePortable`
 turns those gates into failures for a future release CI job.
 
-## Inno Setup installer
+## Inno Setup (legacy)
 
-The same verified stage can be wrapped in a maintainable per-user x64 Setup:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass `
-  -File scripts/build-inno-installer.ps1 `
-  -StageDir out/stage/windows-x64 `
-  -Version 0.1.0
-```
-
-The source is `installer/GpuComputeBenchmark.iss` (the legacy source filename
-is internal and does not affect the Mangekyo Setup name). It uses a stable AppId,
-provides Start Menu and optional desktop shortcuts, and supports normal Inno
-upgrade/uninstall behavior. A complete staged `tools/RenderDoc` payload becomes
-an optional installer component; the script never copies from a developer's
-installed RenderDoc directory. Use `-StaticOnly` when ISCC is unavailable to
-check the stage and installer invariants without producing a Setup executable.
-
-The installer includes the verified stage inventory and keeps RenderDoc as a
-default-selected full-install component. Detailed input, signing and release
-requirements are in `installer/README.md`.
+`scripts/build-inno-installer.ps1` and `installer/GpuComputeBenchmark.iss` remain
+for engineering smoke only. They are not the GitHub Release path. See
+`installer/README.md`.

@@ -9,7 +9,7 @@ command remains `gpu_benchmark`. Source: [`src/main.cpp`](../src/main.cpp), defa
 
 | Field | Default | Notes |
 |---|---|---|
-| `workload` | `Stream` (bandwidth) | one of the 11 public selections listed under `--workload` below |
+| `workload` | `Stream` (bandwidth) | one of the 12 public selections listed under `--workload` below |
 | `particleCount` | `1048576` (= Medium) | 1M particles |
 | `maxRunTimeSec` | `15.0` | time-mode duration |
 | `warmupTimeSec` | `2.0` | time-mode warmup |
@@ -93,7 +93,7 @@ runs append summary rows unless `--cpu-no-save` is supplied.
 | `--flights <N>` | frames-in-flight (1–16) |
 | `--headless` | pure compute, no window |
 | `--particles <count>` | particle count (rounded to 256, skips difficulty menu) |
-| `--workload <id>` | select one of 11 public ids: `stream`, `nbody`, `gpu_burn`, `gpu_stress`, `stress`, `synthpeak`, `render3d`, `volumetric`, `cinematic_liquid`, `cinematic_liquid_v1`, `fluid` |
+| `--workload <id>` | select one of 12 public ids: `stream`, `nbody`, `gpu_burn`, `gpu_burn_v1`, `gpu_stress`, `stress`, `synthpeak`, `render3d`, `volumetric`, `cinematic_liquid`, `cinematic_liquid_v1`, `fluid`; `gpu_burn` is Mangekyo Kaleidoscope v2 and `gpu_burn_v1` preserves Plasma Bloom v1 |
 | `--bodies <count>` | n-body bodies (implies nbody, default 65536) |
 | `--iter <count>` | fixed iteration/step request shared by `stress`, `gpu_stress`, `gpu_burn` and `synthpeak` (burn/stress values are safety-clamped and disable auto-tune) |
 | `--precision <fp32\|fp16\|fp64\|int32>` | synthpeak data type |
@@ -126,6 +126,11 @@ runs append summary rows unless `--cpu-no-save` is supplied.
 `cinematic_liquid_v1` is a public selector for the preserved original liquid
 implementation even though persisted rows retain the historical workload id
 `cinematic_liquid` and are separated by `workloadVersion=cinematic_liquid_v1`.
+Likewise, `gpu_burn` selects the perspective 3D Mangekyo faceted-glass v2 scene
+(cut gems, layered diamond shards, Fresnel reflection and RGB dispersion), while
+`gpu_burn_v1` selects the preserved Plasma Bloom implementation. Both persist
+under the `gpu_burn` family id and are separated by their versioned result
+contract; the current v2 identity is `gpu_burn_v2_mangekyo_faceted_glass_v1`.
 For `--liquid-solver sph`, every duration—including 15 seconds—is currently
 saved as `cinematic_liquid_sph_slice_v1_preview`; changing only the duration
 does not make the four open correctness contracts formal.
@@ -179,8 +184,8 @@ authoritative P/E/Mid/LPE microarchitecture identification.
 
 The WinUI 3 GUI presets mirror these CLI flows (`gui/MainWindow.xaml.cpp`):
 
-The Workload dropdown exposes the same **11 selections**: `stream`, `gpu_burn`,
-`cinematic_liquid`, `gpu_stress`, `nbody`, `synthpeak`, `stress`, `render3d`,
+The Workload dropdown exposes the same **12 selections**: `stream`, `gpu_burn`,
+`gpu_burn_v1`, `cinematic_liquid`, `gpu_stress`, `nbody`, `synthpeak`, `stress`, `render3d`,
 `volumetric`, `fluid`, and `cinematic_liquid_v1` (display order differs from the
 CLI list but the ids are identical).
 

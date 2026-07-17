@@ -1,9 +1,11 @@
-# Inno Setup installer
+# Inno Setup installer (legacy)
 
-`GpuComputeBenchmark.iss` (retained as an internal legacy source filename)
-turns an existing verified Mangekyo Windows x64 stage into a per-user Setup
-executable. It does not build C++, compile shaders, inspect
-`C:\Program Files\RenderDoc`, or copy anything from vcpkg/Visual Studio.
+`GpuComputeBenchmark.iss` is a **legacy** engineering path. The primary Windows
+installer is WiX MSI via `scripts/build-wix-installer.ps1` (see
+`packaging/README.md`). This Inno script turns an existing verified Mangekyo
+Windows stage into a per-user Setup executable. It does not build C++, compile
+shaders, inspect `C:\Program Files\RenderDoc`, or copy anything from
+vcpkg/Visual Studio.
 
 ## Input contract
 
@@ -59,6 +61,15 @@ is intentionally retained, so an in-place upgrade from an older branded build
 can keep its existing program directory instead of breaking the uninstall
 record.
 
+## Languages
+
+The Setup wizard ships English and Simplified Chinese
+(`installer/languages/ChineseSimplified.isl`). `ShowLanguageDialog=auto` picks
+Chinese on Chinese Windows locales and still offers a language choice when the
+system language is not matched. `UsePreviousLanguage=yes` keeps the choice on
+upgrade. The installed GUI has its own in-app language switch and is independent
+of the Setup wizard language.
+
 For a signed public artifact, pass an Inno sign-tool command containing its
 `$f` filename placeholder and make a valid signature mandatory:
 
@@ -83,10 +94,9 @@ add those directories to `[UninstallDelete]`.
 
 ## Release gates
 
-This remains an engineering installer until the root project distribution
-license is approved, third-party notices receive final review, binaries and
-Setup are signed, and clean-machine install/upgrade/uninstall plus GPU/capture
-tests pass. See `packaging/PACKAGE_LIMITATIONS.md`.
+This legacy path still needs Authenticode signing and clean-machine
+install/upgrade/uninstall plus GPU/capture tests before public use. Prefer the
+WiX MSI for new releases. See `packaging/PACKAGE_LIMITATIONS.md`.
 
 Inno references: [architecture checks](https://jrsoftware.org/ishelp/topic_setup_architecturesallowed.htm),
 [stable AppId/upgrades](https://jrsoftware.org/ishelp/topic_setup_appid.htm), and

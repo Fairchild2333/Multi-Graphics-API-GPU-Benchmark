@@ -951,6 +951,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                                      benchCfg.workload = gpu_bench::Workload::GpuStressV1;
             else if (w == "gpu_burn" || w == "gpu-burn" || w == "burn")
                                      benchCfg.workload = gpu_bench::Workload::GpuBurnV1;
+            else if (w == "gpu_burn_v1" || w == "gpu-burn-v1" || w == "plasma_bloom")
+                                     benchCfg.workload = gpu_bench::Workload::GpuBurnV1;
             else if (w == "stress" || w == "fractal")
                                      benchCfg.workload = gpu_bench::Workload::StressFractal;
             else if (w == "synthpeak" || w == "peak")
@@ -981,6 +983,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             benchCfg.gpuStressAutoTune = false;
             benchCfg.gpuBurnIter = (std::min)(n, gpu_bench::kGpuBurnV1MaxIter);
             benchCfg.gpuBurnAutoTune = false;
+            benchCfg.gpuBurnIterOverridden = true;
             benchCfg.peakIters   = n;   // synthpeak loop passes (same flag)
         } else if (std::strcmp(argv[i], "--steps") == 0 && i + 1 < argc) {
             auto n = static_cast<std::uint32_t>(std::stoi(argv[++i]));
@@ -1063,6 +1066,12 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             } else {
                 benchCfg.captureAtSec = 5.0;
             }
+        } else if (std::strcmp(argv[i], "--capture-frame") == 0) {
+            if (i + 1 < argc && argv[i + 1][0] != '-') {
+                benchCfg.captureAtFrame = std::stoll(argv[++i]);
+            } else {
+                benchCfg.captureAtFrame = 5;
+            }
         } else if (std::strcmp(argv[i], "--list-gpus") == 0) {
             listGpus = true;
         } else if (std::strcmp(argv[i], "--run-all") == 0) {
@@ -1086,7 +1095,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --cpu-no-save                        Do not append successful CPU summaries to results.json\n"
                       << "  --particles <count>                 Particle count (skips difficulty menu, rounded to 256)\n"
                       << "  --workload <stream|nbody|gpu_burn|gpu_stress|stress|synthpeak|render3d|volumetric|cinematic_liquid|cinematic_liquid_v1|fluid>\n"
-                      << "                                      particle / N-body / visual GPU Burn / GraphicsBurn component / legacy fractal / peak / 3D / volume / 3D liquid / legacy 2D fluid\n"
+                      << "                                      particle / N-body / Plasma x Kaleidoscope GPU Burn / GraphicsBurn component / legacy fractal / peak / 3D / volume / 3D liquid / legacy 2D fluid\n"
                       << "  --bodies <count>                    N-body body count (implies --workload nbody; default 65536)\n"
                       << "  --iter <count>                      GPU Burn fixed steps (16-32; auto may tune higher) / GraphicsBurn / legacy fractal / SynthPeak\n"
                       << "  --steps <count>                     Volumetric per-pixel ray samples (default 96)\n"
@@ -1103,6 +1112,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --results-export <file.csv>         Export results to CSV file\n"
                       << "  --run-all                            Benchmark every GPU x API combination, then exit\n"
                       << "  --capture [seconds]                 Auto-capture via RenderDoc at T seconds (default: 5)\n"
+                      << "  --capture-frame [N]                 Auto-capture via RenderDoc at frame N (default: 5)\n"
                       << "  --full-analysis                     Run all APIs + RenderDoc capture + Python charts (interactive)\n"
                       << "  --compare                           Compare saved results by workload/version score groups\n"
                       << "  --compare <id1> <id2>               Detailed side-by-side comparison of two results\n"
@@ -1229,33 +1239,36 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         benchCfg.difficultyLabel = "GPU Stress v1";
     }
 
-    // ---- GPU Burn v1 visual workload normalisation ----
-    // The procedural Plasma Bloom is a fragment-only fixed-step raymarch. It never
-    // consumes the particle buffer; gpu_stress_v1 remains a separate component
-    // score and historical result contract.
-    if (benchCfg.workload == gpu_bench::Workload::GpuBurnV1) {
+    // ---- GPU Burn visual workload normalisation ----
+    // The in-place GPU Burn v1 revision combines a solid Plasma Bloom subject
+    // with the woven Mangekyo background. It consumes no particle data.
+    if (gpu_bench::isGpuBurnWorkload(benchCfg.workload)) {
+        const auto minIter = gpu_bench::gpuBurnDefaultIter(benchCfg.workload);
+        const auto maxFixedIter = gpu_bench::gpuBurnMaxFixedIter(benchCfg.workload);
         if (benchCfg.headless) {
-            std::cerr << "[warn] GPU Burn v1 requires rendering; ignoring --headless.\n";
+            std::cerr << "[warn] GPU Burn requires rendering; ignoring --headless.\n";
             benchCfg.headless = false;
         }
-        if (!benchCfg.gpuBurnAutoTune &&
-            benchCfg.gpuBurnIter > gpu_bench::kGpuBurnV1MaxFixedIter) {
-            std::cerr << "[warn] GPU Burn fixed --iter is capped at "
-                      << gpu_bench::kGpuBurnV1MaxFixedIter
-                      << " because an unprobed high value can create multi-second "
-                         "draws on slow GPUs/WARP. Leave --iter unset to auto-tune "
-                         "safely from a 16-step probe.\n";
-            benchCfg.gpuBurnIter = gpu_bench::kGpuBurnV1MaxFixedIter;
+        // v2 fixed-load contract: every hardware GPU runs the identical
+        // 256-step frame and FPS is the comparative signal.  Software
+        // devices keep the conservative cap here (and again at runtime for
+        // --run-all, where the device is only known per matrix entry): WARP
+        // already needs ~209 ms/frame at 16 steps.
+        if (useWarp && benchCfg.gpuBurnIter > maxFixedIter) {
+            std::cerr << "[warn] GPU Burn on a software device is capped at "
+                      << maxFixedIter
+                      << " steps to avoid multi-second draws.\n";
+            benchCfg.gpuBurnIter = maxFixedIter;
         }
-        if (benchCfg.gpuBurnIter < gpu_bench::kGpuBurnV1DefaultIter) {
+        if (benchCfg.gpuBurnIter < minIter) {
             std::cerr << "[warn] GPU Burn requires at least "
-                      << gpu_bench::kGpuBurnV1DefaultIter
+                      << minIter
                       << " fixed steps to preserve the visual workload; clamping --iter.\n";
-            benchCfg.gpuBurnIter = gpu_bench::kGpuBurnV1DefaultIter;
+            benchCfg.gpuBurnIter = minIter;
         }
         benchCfg.particleCount = gpu_bench::kComputeWorkGroupSize;
         benchCfg.particlesOverridden = true;
-        benchCfg.difficultyLabel = "GPU Burn v1";
+        benchCfg.difficultyLabel = "GPU Burn v2 / Fixed 256";
         // A fast GPU can finish the frame-count warmup before the first
         // one-second timing window, leaving auto-tune at its deliberately low
         // probe value. Use the product's timed 15 s flow whenever auto-tune is
@@ -1284,24 +1297,24 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     }
 
     // ---- Cinematic Liquid normalisation ----
-    // Both score contracts use an isolated Vulkan MLS-MPM + density-raymarch
-    // path. V1 is the preserved dam break; the primary id selects the larger
-    // v2 pool with two-way GPU rigid-body coupling.
+    // Interactive pool / dam-break score contracts are Vulkan-only for now.
     if (gpu_bench::isCinematicLiquidWorkload(benchCfg.workload)) {
         const bool liquidV2 = benchCfg.workload == gpu_bench::Workload::CinematicLiquid;
         const char* liquidName = liquidV2 ? "Cinematic Liquid v2" : "Cinematic Liquid v1";
         if (backend == "auto") {
             backend = "vulkan";
         } else if (backend != "vulkan") {
-            std::cerr << liquidName << " is currently Vulkan-only; select --backend vulkan.\n";
+            std::cerr << liquidName
+                      << " is currently Vulkan-only; select --backend vulkan.\n";
             return 2;
         }
         if (runAll || fullAnalysis) {
-            std::cerr << liquidName << " cannot run in a cross-API suite yet; use a Vulkan custom run.\n";
+            std::cerr << liquidName
+                      << " cannot run in a cross-API suite yet; use a custom run.\n";
             return 2;
         }
         if (useWarp) {
-            std::cerr << liquidName << " does not support DXGI WARP; select a Vulkan GPU.\n";
+            std::cerr << liquidName << " does not support DXGI WARP; select a real GPU.\n";
             return 2;
         }
         if (benchCfg.headless) {
@@ -1371,7 +1384,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
 
 #ifdef _WIN32
     const auto bundledRenderDocDll = ConfigureBundledRenderDocLayer(
-        shaderDir, benchCfg.captureAtSec > 0.0);
+        shaderDir, benchCfg.captureAtSec > 0.0 || benchCfg.captureAtFrame > 0);
     const auto guiWorkerRenderDocDll = benchCfg.guiWorker
         ? bundledRenderDocDll : std::filesystem::path{};
 #else
@@ -1568,6 +1581,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         allCfg.framesInFlight = benchCfg.framesInFlight;
         allCfg.hostMemory    = benchCfg.hostMemory;
         allCfg.captureAtSec  = benchCfg.captureAtSec;
+        allCfg.captureAtFrame = benchCfg.captureAtFrame;
         allCfg.guiWorker     = benchCfg.guiWorker;
         if (benchCfg.maxRunTimeSec != 15.0)
             allCfg.maxRunTimeSec = benchCfg.maxRunTimeSec;
@@ -2718,8 +2732,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             std::cout << "Backend: " << app->GetBackendName()
                       << "  |  V-Sync: " << (benchCfg.vsync ? "ON" : "OFF")
                       << "  |  Memory: " << (benchCfg.hostMemory ? "Host-visible" : "Device-local");
-            if (benchCfg.workload == gpu_bench::Workload::GpuBurnV1)
-                std::cout << "  |  Workload: GPU Burn v1";
+            if (gpu_bench::isGpuBurnWorkload(benchCfg.workload))
+                std::cout << "  |  Workload: GPU Burn v1 r2 / Plasma x Kaleidoscope";
             else if (benchCfg.workload == gpu_bench::Workload::CinematicLiquid)
                 std::cout << "  |  Workload: Cinematic Liquid v2 (fixed pool quality)";
             else if (benchCfg.workload == gpu_bench::Workload::CinematicLiquidV1)

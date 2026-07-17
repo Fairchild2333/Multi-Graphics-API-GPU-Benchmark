@@ -1,4 +1,4 @@
-// GPU Burn v1 - DX11/DX12 Plasma Bloom procedural energy crystal.
+// GPU Burn v1 revision 2 - DX11/DX12 Plasma x Kaleidoscope.
 // Every pixel executes exactly maxIter raymarch samples. There are no textures,
 // early loop exits, or pre-loop clips; the final pass-1 clip only composes the
 // crystal/halo over the pass-0 background after all scored work has completed.
@@ -24,6 +24,7 @@ VSOut VSMain(uint vid : SV_VertexID) {
 }
 
 static const float kPi     = 3.141592653589793;
+static const float kTau    = 6.283185307179586;
 static const float kFar    = 6.0;
 static const float kHitEps = 0.006;
 
@@ -31,6 +32,51 @@ float2 rotate2(float2 p, float angle) {
     float c = cos(angle);
     float s = sin(angle);
     return float2(c * p.x - s * p.y, s * p.x + c * p.y);
+}
+
+float3 kaleidoscopeBackground(float2 uv, float phase, float energySignal) {
+    float2 p = uv * 0.86;
+    float radius = length(p);
+    float angle = atan2(p.y, p.x);
+    float weaveA = 0.5 + 0.5 * sin(radius * 8.2
+                 + sin(angle * 12.0 - phase * 0.055) * 1.35);
+    float weaveB = 0.5 + 0.5 * sin(radius * 13.4
+                 - sin(angle * 8.0 + phase * 0.043) * 1.15);
+    float smoke = 0.5 + 0.5 * sin(radius * 4.6
+                + sin(angle * 6.0 - radius * 2.2 - phase * 0.031));
+    float spiral = pow(1.0 - abs(sin(angle * 20.0 + radius * 12.5
+                           - phase * 0.23)), 8.0) * exp(-radius * 1.28);
+    float spiralSoft = pow(1.0 - abs(sin(angle * 10.0 - radius * 7.2
+                               + phase * 0.12)), 3.0) * exp(-radius * 0.90);
+
+    float cyanField = sin(angle * 6.0 - radius * 3.05
+                    + sin(radius * 4.1 - phase * 0.032) * 0.72
+                    + phase * 0.070);
+    float cyanCable = 1.0 - smoothstep(0.055, 0.155, abs(cyanField));
+    float magentaField = sin(angle * 5.0 + radius * 2.45
+                       + sin(radius * 3.25 + phase * 0.025) * 0.88
+                       - phase * 0.058 + 0.65);
+    float magentaCable = 1.0 - smoothstep(0.060, 0.175, abs(magentaField));
+    // Concentric ring families; pure radial phase keeps circles round and
+    // the higher frequencies fit several rings in view (see gpu_burn.frag).
+    float goldField = sin(radius * 7.6 - phase * 0.033);
+    float goldCable = 1.0 - smoothstep(0.035, 0.115, abs(goldField));
+    float fineRing = 1.0 - smoothstep(0.020, 0.070,
+        abs(sin(radius * 15.4 - phase * 0.041)));
+    float vignette = saturate(1.0 - dot(uv * 0.29, uv * 0.29));
+    float3 background = float3(0.003, 0.0015, 0.012)
+                      + float3(0.095, 0.020, 0.145) * weaveA * 0.52
+                      + float3(0.030, 0.020, 0.120) * weaveB * 0.44
+                      + float3(0.090, 0.014, 0.110) * smoke * 0.36;
+    background += float3(0.055, 0.44, 0.88) * cyanCable * 0.28;
+    background += float3(0.72, 0.045, 0.50) * magentaCable * 0.20;
+    background += float3(0.78, 0.30, 0.060) * goldCable * 0.13;
+    background += float3(0.15, 0.28, 0.72) * fineRing * 0.14;
+    background += float3(0.08, 0.52, 1.05) * spiral * 0.38;
+    background += float3(0.86, 0.06, 0.56) * spiralSoft * 0.24;
+    background *= 0.46 + vignette * 0.54;
+    background *= 0.92 + energySignal * 0.06;
+    return background;
 }
 
 float plasmaField(float3 p, float phase, out float structureOut) {
@@ -139,7 +185,7 @@ float4 PSMain(VSOut input) : SV_TARGET {
                       + core.yzwx * 0.719
                       + float4(ad, structure, jitter, t * 0.071)
                       + float4(0.103, 0.217, 0.331, 0.449)));
-        core.xy = sin((core.xy + core.zw) * (2.0 * kPi)) * 0.5 + 0.5;
+        core.xy = sin((core.xy + core.zw) * kTau) * 0.5 + 0.5;
         float coreStep = dot(core, float4(0.17, 0.23, 0.29, 0.31));
         coreEnergy += dot(core, core.wzyx);
 
@@ -181,30 +227,32 @@ float4 PSMain(VSOut input) : SV_TARGET {
                                  float((checksum >> 16u) & 255u)) * (1.0 / 255.0);
     float hotVeins = pow(surfaceStructure, 2.4);
     float3 surface = plasmaBase * (0.22 + diffuse * 1.38)
-                   + float3(0.18, 2.6, 8.4) * rim
+                   + float3(1.2, 1.1, 8.2) * rim
                    + float3(8.5, 9.2, 11.0) * specular
                    + float3(5.8, 7.4, 10.0) * hotVeins
                      * (0.25 + diffuse * 0.75);
     surface *= 0.91 + coreSignal * 0.18;
     surface += checksumTint * 0.018 + surfaceDistance * 0.0;
+    surface *= float3(0.58, 0.52, 1.00) * 0.42;
+    surface += float3(0.30, 0.018, 0.58) * hotVeins
+             * (0.16 + rim * 0.24);
 
     float invSteps = 1.0 / float(max(maxIter, 1u));
     float glow = glowAccum * invSteps;
-    float haloMask = max(hit, 1.0 - smoothstep(0.025, 0.45, nearestSurface));
+    float haloMask = max(hit, 1.0 - smoothstep(0.05, 1.05, nearestSurface));
 
-    float vignette = saturate(1.0 - dot(uv * 0.38, uv * 0.38));
-    float3 background = float3(0.0004, 0.0008, 0.006)
-                      + float3(0.004, 0.002, 0.032) * vignette * vignette;
-    background *= 0.96 + coreSignal * 0.08;
-    float3 bloom = float3(0.035, 0.75, 5.8) * glow * 5.8
-                 + float3(1.7, 0.08, 3.6) * glow * glow * 3.2
-                 + float3(0.025, 0.16, 1.1) * haloMask * haloMask;
+    float3 background = kaleidoscopeBackground(uv, time, coreSignal);
+    float3 bloom = float3(0.85, 0.45, 5.4) * glow * 1.85
+                 + float3(1.7, 0.08, 3.6) * glow * glow * 0.72
+                 + float3(0.30, 0.14, 1.05) * haloMask * haloMask * 0.34;
 
-    float3 baseLayer = background + bloom;
-    float3 crystalLayer = lerp(baseLayer, surface + bloom, hit);
+    float3 baseLayer = background + bloom * 0.50;
+    float3 crystalLayer = lerp(baseLayer, surface + bloom * 0.88
+                             + background * 0.08, hit);
     float overlayPass = step(0.5, passIndex);
     float3 hdr = lerp(baseLayer, crystalLayer, overlayPass);
-    float3 mapped = 1.0 - exp(-max(hdr, 0.0) * 1.18);
+    hdr = max(hdr, 0.0);
+    float3 mapped = 1.0 - exp(-max(hdr, 0.0) * 1.25);  // v1 exposure curve: see gpu_burn.frag
     mapped = pow(mapped, 1.0 / 2.2);
 
     // Post-loop composition only. Pass 1 discards obvious scene exterior so

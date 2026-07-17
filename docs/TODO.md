@@ -6,7 +6,7 @@
 
 > **当前执行边界**：先完善现有 Stream/Particle、GPU Burn、Cinematic Liquid v2、GUI 同步、固定 `15s + 第 5 秒抓帧` 与结果合同。本轮新增的 RT、路径追踪、DLSS/FSR/XeSS/MetalFX 仅记录可行性；在现有测试完成验收且用户再次明确提优先级前，不开始实现。
 
-- [x] 新主测试 `gpu_burn_v1`：原创 Plasma Bloom（实心、无甜甜圈孔洞、非粒子），Vulkan/DX12/DX11/OpenGL + WARP、WinUI、结果/图表与发布资产已接入。
+- [x] 主测试 `gpu_burn` 已升级为 `gpu_burn_v2_mangekyo_faceted_glass_v1`：透视 3D 切割玻璃晶冠、多层碎钻、平面 SDF 法线、Fresnel 反射、折射色散与相机视差已接入 Vulkan/DX12/DX11/OpenGL、WinUI、自动标定和版本化结果；原创 Plasma Bloom 以公开 `gpu_burn_v1` legacy 选择完整保留。
 - [x] RTX 5090 自动标定实测稳定段 NVML 99%，约 599–600W；默认仍是 15 秒 Burst + 第 5 秒 RenderDoc，不宣称长时热稳定或错误检测。
 - [x] 低强度 9 项设备/API 矩阵、包内 RenderDoc 抓帧和 staged WinUI 启动通过；固定未探测步数限制为 16–32，推荐留空自动标定。
 - [x] `cinematic_liquid_v1`：独立于旧 2D `fluid`，已完成 181,216 粒子 3D MLS-MPM、96x56x64 密度体积、160-step 折射自由表面 raymarch、球体碰撞、WinUI/结果接入；RTX 5090 正式 15 秒 + 第 5.1 秒 `.rdc` 通过，成绩 `288.74 MParticle-step/s`。
@@ -28,7 +28,7 @@
 - [x] **GT 120 / DX10 时代代码路径**：不新增 DX9 后端；现有 DX11 后端实际探测 FL10_0/10_1 与可选 DirectCompute 4.x，按设备切换 `cs/vs/ps_4_0`，fragment-only 测试不再创建 compute/UAV，Vulkan loader 改为 delay-load。16/16 个生产 HLSL SM4 entry 已通过 FXC，DX11 Extreme 越界会拒绝，SM4 N-body 安全上限为 4,096。
 - [ ] **GT 120 实卡验收**：在 Windows 10 1809+ / NVIDIA 342.01 环境先跑 Stream/Particle Light/Medium、GPU Burn 安全自动标定、Legacy Fractal/Volumetric 与 4,096-body N-body；确认 DirectCompute feature bit、GPU timestamp、15 秒生命周期、第 5 秒 RenderDoc、TDR 余量和结果 metadata。未完成前只能称“SM4 编译/代码路径通过”，不能称 GT 120 已验证。若目标机是 Windows 7，另建 legacy CLI/OS 包；当前 WinUI 安装器不支持 Win7。
 - [ ] **紧接 v2 — Liquid Lab / Explore**：复用 v2 场景提供无限时间、自由 orbit/WASD 视角、暂停/单步/重置、物体/流体/螺旋桨参数调整，以及充气池/玻璃水缸环境预设；明确标为不可计分，默认不自动 RenderDoc，不得写入正式 benchmark history。正式 Benchmark 与 Explore 切换时必须重建固定资源、恢复 seed 并校验 scene hash。
-- [ ] **紧接 v2 — GPU Burn Unlimited Soak**：使用当前主 `gpu_burn_v1` Plasma Bloom 管线持续运行直到用户停止，而不是复用 Other/Legacy 的旧 `gpu_stress_v1`；GUI 必须在满载时仍能 Stop，持续显示运行时长、滚动 GPU time/FPS、利用率、温度/功耗（可得时）和降频趋势。固定 `15s + 第 5 秒 RenderDoc` 继续只负责可比较跑分；Soak 默认不抓帧、不写正式 score。
+- [ ] **紧接 v2 — GPU Burn Unlimited Soak**：使用当前主 `gpu_burn` Mangekyo Kaleidoscope v2 管线持续运行直到用户停止，而不是复用 legacy `gpu_burn_v1` 或 Other/Legacy 的旧 `gpu_stress_v1`；GUI 必须在满载时仍能 Stop，持续显示运行时长、滚动 GPU time/FPS、利用率、温度/功耗（可得时）和降频趋势。固定 `15s + 第 5 秒 RenderDoc` 继续只负责可比较跑分；Soak 默认不抓帧、不写正式 score。
 - [ ] **紧接 v2 — VRAM Integrity Soak**：新增独立 `vram_memtest`，按显存 budget 的安全比例分块写入 address/random/walking-bit 等 pattern、设备端读回校验并累计错误，持续到用户停止；区分独显 VRAM 与 UMA，共享内存不能误标为显存，OOM/device-lost 必须可恢复。原始 `stream` 继续是 15 秒带宽成绩，不能冒充显存正确性测试。
 - [x] **换机发布构建链**：Windows Vulkan loader 已 delay-load+双重 guard；官方 RenderDoc 1.45、self-contained WinUI/CLI、MSVC runtime、511-file stage、逐文件 SHA、ZIP 解包复核、Inno Setup 6.7.3、最终 ZIP/Setup/SHA256SUMS/release-assets 均已实际生成。候选位于 `out/release/windows-x64`；Setup SHA-256 `f301426776b8ad2bd816a3f6de55463fd4b2f6be0ca3c7f691bfd8108aca0436`。
 - [ ] **公开发布 gate**：用户确认根项目 LICENSE；配置 Authenticode signing；冻结并接入 `report_worker.exe`；在无 VS/Python/Vulkan SDK/RenderDoc/VC Redist 的干净 Windows 10/11 上验证安装/升级/卸载、无 `vulkan-1.dll` 的 DX11/WARP 启动、GUI orchestration、四 API 第 5 秒 bundled RenderDoc 抓帧；再用 clean commit/tag 重建，移除 `sourceTreeDirty=true` 后上传 GitHub Release。

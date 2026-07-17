@@ -6,6 +6,8 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
+#include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 #include <iostream>
@@ -65,10 +67,6 @@ std::uint32_t OpenGLBackend::LinkProgramGL(std::uint32_t s1, std::uint32_t s2) {
 // -----------------------------------------------------------------------
 
 void OpenGLBackend::InitBackend() {
-    if (config_.workload == Workload::Fluid) {
-        throw std::runtime_error(
-            "Fluid is an unverified Vulkan-only Developer Preview; OpenGL fallback is disabled");
-    }
     std::cout << "[OpenGL Init] Loading GL functions..." << std::endl;
     glfwMakeContextCurrent(window_);
     int gladVer = gladLoadGL(glfwGetProcAddress);
@@ -92,6 +90,18 @@ void OpenGLBackend::InitBackend() {
         glfwSwapInterval(1);
     else
         glfwSwapInterval(0);
+
+    if (config_.workload == Workload::Fluid) {
+        std::cout << "[OpenGL Init] Creating fluid resources..." << std::endl;
+        CreateFluidResources();
+        std::cout << "[OpenGL Init] Creating timestamp queries..." << std::endl;
+        CreateTimestampQueries();
+        glDisable(GL_BLEND);
+        glViewport(0, 0, static_cast<GLsizei>(kWindowWidth),
+                   static_cast<GLsizei>(kWindowHeight));
+        std::cout << "[OpenGL Init] Initialisation complete (fluid)." << std::endl;
+        return;
+    }
 
     std::cout << "[OpenGL Init] Compiling shaders..." << std::endl;
     CreateShaders();
@@ -140,10 +150,10 @@ void OpenGLBackend::CreateShaders() {
         const char* fsf = "particle_gl.frag";
         if (config_.workload == Workload::StressFractal
             || config_.workload == Workload::GpuStressV1
-            || config_.workload == Workload::GpuBurnV1) {
+            || isGpuBurnWorkload(config_.workload)) {
             vsf = "fractal_gl.vert";
             fsf = (config_.workload == Workload::GpuBurnV1)
-                ? "gpu_burn_gl.frag"
+                    ? "gpu_burn_gl.frag"
                 : (config_.workload == Workload::GpuStressV1)
                     ? "gpu_stress_gl.frag" : "fractal_gl.frag";
         }
@@ -258,6 +268,11 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
     if (timestampsSupported_)
         glQueryCounter(timestampQueries_[slot][0], GL_TIMESTAMP);
 
+    if (fluid_.active) {
+        RecordFluidFrame(deltaTime);
+        return;
+    }
+
     // -- Fragment-only fullscreen pass (fractal / volumetric): no compute --
     if (isFragmentOnlyWorkload(config_.workload)) {
         if (timestampsSupported_)
@@ -281,11 +296,11 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
                 glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(sp), &sp);
                 glDrawArrays(GL_TRIANGLES, 0, 3);
             }
-        } else if (config_.workload == Workload::GpuBurnV1) {
+        } else if (isGpuBurnWorkload(config_.workload)) {
             fractalElapsed_ += deltaTime;
-            for (std::uint32_t pass = 0; pass < kGpuBurnV1DrawsPerFrame; ++pass) {
-                const GpuBurnV1Params bp{ fractalElapsed_, static_cast<float>(pass),
-                                          config_.gpuBurnIter, kGpuBurnV1ShaderVersion };
+            for (std::uint32_t pass = 0; pass < gpuBurnDrawsPerFrame(config_.workload); ++pass) {
+                const GpuBurnParams bp{ fractalElapsed_, static_cast<float>(pass),
+                                        config_.gpuBurnIter, gpuBurnShaderVersion(config_.workload) };
                 glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(bp), &bp);
                 glDrawArrays(GL_TRIANGLES, 0, 3);
             }
@@ -469,6 +484,7 @@ void OpenGLBackend::CollectTimestampResults() {
 // -----------------------------------------------------------------------
 
 void OpenGLBackend::CleanupBackend() {
+    CleanupFluidResources();
     for (int s = 0; s < kTimestampSlotCount; ++s) {
         if (frameFences_[s]) {
             glDeleteSync(static_cast<GLsync>(frameFences_[s]));
@@ -485,6 +501,164 @@ void OpenGLBackend::CleanupBackend() {
     if (ssbo_)           { glDeleteBuffers(1, &ssbo_);           ssbo_ = 0; }
     if (computeProgram_) { glDeleteProgram(computeProgram_);     computeProgram_ = 0; }
     if (renderProgram_)  { glDeleteProgram(renderProgram_);      renderProgram_ = 0; }
+}
+
+void OpenGLBackend::CreateFluidResources() {
+    fluid_.gridSize = config_.fluidGridSize;
+    const std::uint32_t N = fluid_.gridSize;
+    if (N < 64 || N > 512)
+        throw std::invalid_argument("Fluid --grid must be between 64 and 512");
+    if (config_.fluidJacobiIters < 1 || config_.fluidJacobiIters > 64)
+        throw std::invalid_argument("Fluid --jacobi must be between 1 and 64");
+
+    auto linkCs = [&](const char* file) {
+        auto cs = CompileShaderGL(shaderDir_ + file, GL_COMPUTE_SHADER);
+        return LinkProgramGL(cs, 0);
+    };
+    fluid_.advectProg = linkCs("fluid_advect_gl.comp");
+    fluid_.divProg = linkCs("fluid_divergence_gl.comp");
+    fluid_.jacobiProg = linkCs("fluid_jacobi_gl.comp");
+    fluid_.subtractProg = linkCs("fluid_subtract_gl.comp");
+    {
+        auto vs = CompileShaderGL(shaderDir_ + "fluid_render_gl.vert", GL_VERTEX_SHADER);
+        auto fs = CompileShaderGL(shaderDir_ + "fluid_render_gl.frag", GL_FRAGMENT_SHADER);
+        fluid_.renderProg = LinkProgramGL(vs, fs);
+    }
+
+    const GLsizeiptr stateSize = static_cast<GLsizeiptr>(sizeof(float) * 4 * N * N);
+    const GLsizeiptr pressSize = static_cast<GLsizeiptr>(sizeof(float) * N * N);
+
+    std::vector<float> init(static_cast<size_t>(stateSize / sizeof(float)));
+    for (std::uint32_t y = 0; y < N; ++y) {
+        for (std::uint32_t x = 0; x < N; ++x) {
+            const size_t i = (size_t(y) * N + x) * 4;
+            const float fx = (float(x) + 0.5f) / float(N) - 0.5f;
+            const float fy = (float(y) + 0.5f) / float(N) - 0.5f;
+            const float envelope = std::exp(-(fx * fx + fy * fy) * 7.0f);
+            init[i + 0] = -fy * 0.32f * envelope;
+            init[i + 1] =  fx * 0.32f * envelope;
+            const float ax = fx + 0.25f, ay = fy - 0.04f;
+            const float bx = fx - 0.25f, by = fy + 0.04f;
+            init[i + 2] = std::exp(-(ax * ax + ay * ay) * 120.0f);
+            init[i + 3] = std::exp(-(bx * bx + by * by) * 120.0f);
+        }
+    }
+
+    auto makeSsbo = [&](GLuint& buf, GLsizeiptr size, const void* data) {
+        glGenBuffers(1, &buf);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, buf);
+        glBufferStorage(GL_SHADER_STORAGE_BUFFER, size, data, 0);
+    };
+    makeSsbo(fluid_.stateA, stateSize, init.data());
+    makeSsbo(fluid_.stateB, stateSize, nullptr);
+    makeSsbo(fluid_.pressA, pressSize, nullptr);
+    makeSsbo(fluid_.pressB, pressSize, nullptr);
+    makeSsbo(fluid_.divBuf, pressSize, nullptr);
+
+    glGenBuffers(1, &fluid_.paramsUbo);
+    glBindBuffer(GL_UNIFORM_BUFFER, fluid_.paramsUbo);
+    glBufferData(GL_UNIFORM_BUFFER, 16, nullptr, GL_DYNAMIC_DRAW);
+
+    glGenBuffers(1, &fluid_.renderUbo);
+    glBindBuffer(GL_UNIFORM_BUFFER, fluid_.renderUbo);
+    glBufferData(GL_UNIFORM_BUFFER, 16, nullptr, GL_DYNAMIC_DRAW);
+
+    glGenVertexArrays(1, &fluid_.emptyVao);
+    fluid_.simTime = 0.0f;
+    fluid_.active = true;
+}
+
+void OpenGLBackend::CleanupFluidResources() {
+    if (!fluid_.active) return;
+    auto delProg = [](GLuint& p) { if (p) { glDeleteProgram(p); p = 0; } };
+    auto delBuf = [](GLuint& b) { if (b) { glDeleteBuffers(1, &b); b = 0; } };
+    delProg(fluid_.advectProg); delProg(fluid_.divProg);
+    delProg(fluid_.jacobiProg); delProg(fluid_.subtractProg);
+    delProg(fluid_.renderProg);
+    delBuf(fluid_.stateA); delBuf(fluid_.stateB);
+    delBuf(fluid_.pressA); delBuf(fluid_.pressB); delBuf(fluid_.divBuf);
+    delBuf(fluid_.paramsUbo); delBuf(fluid_.renderUbo);
+    if (fluid_.emptyVao) { glDeleteVertexArrays(1, &fluid_.emptyVao); fluid_.emptyVao = 0; }
+    fluid_.active = false;
+}
+
+void OpenGLBackend::RecordFluidFrame(float deltaTime) {
+    const int slot = currentFrame_ % kTimestampSlotCount;
+    const std::uint32_t N = fluid_.gridSize;
+    const float stepDt = (std::min)((std::max)(deltaTime, 0.0f), 1.0f / 30.0f);
+    fluid_.simTime += (std::min)((std::max)(deltaTime, 0.0f), 0.1f);
+    const FluidParams fp{ stepDt, 1.0f / float(N), N, fluid_.simTime };
+    const GLuint groups = (N + 15u) / 16u;
+
+    glBindBuffer(GL_UNIFORM_BUFFER, fluid_.paramsUbo);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(fp), &fp);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 5, fluid_.paramsUbo);
+
+    // Clear pressA
+    {
+        const std::uint32_t zero = 0;
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, fluid_.pressA);
+        glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER,
+                          GL_UNSIGNED_INT, &zero);
+    }
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+    glUseProgram(fluid_.advectProg);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, fluid_.stateA);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, fluid_.stateB);
+    glDispatchCompute(groups, groups, 1);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+    glUseProgram(fluid_.divProg);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, fluid_.stateB);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, fluid_.divBuf);
+    glDispatchCompute(groups, groups, 1);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+    glUseProgram(fluid_.jacobiProg);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, fluid_.divBuf);
+    for (std::uint32_t i = 0; i < config_.fluidJacobiIters; ++i) {
+        const bool aToB = (i & 1u) == 0u;
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, aToB ? fluid_.pressA : fluid_.pressB);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, aToB ? fluid_.pressB : fluid_.pressA);
+        glDispatchCompute(groups, groups, 1);
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+    }
+
+    const GLuint finalPress = (config_.fluidJacobiIters & 1u) ? fluid_.pressB : fluid_.pressA;
+    glUseProgram(fluid_.subtractProg);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, fluid_.stateB);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, fluid_.stateA);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, finalPress);
+    glDispatchCompute(groups, groups, 1);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+    if (timestampsSupported_)
+        glQueryCounter(timestampQueries_[slot][1], GL_TIMESTAMP);
+
+    glClearColor(0.04f, 0.08f, 0.14f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    if (timestampsSupported_)
+        glQueryCounter(timestampQueries_[slot][2], GL_TIMESTAMP);
+
+    FluidRenderParams rp{ N, fluid_.simTime, 0.88f, 1u };
+    glBindBuffer(GL_UNIFORM_BUFFER, fluid_.renderUbo);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(rp), &rp);
+
+    glUseProgram(fluid_.renderProg);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, fluid_.stateA);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, fluid_.renderUbo);
+    glBindVertexArray(fluid_.emptyVao);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    if (timestampsSupported_)
+        glQueryCounter(timestampQueries_[slot][3], GL_TIMESTAMP);
+
+    glfwSwapBuffers(window_);
+    ++currentFrame_;
+    if (timestampsSupported_ && timestampFrameCount_ < kTimestampSlotCount)
+        ++timestampFrameCount_;
 }
 
 void OpenGLBackend::WaitIdle() {

@@ -17,7 +17,7 @@
 #endif
 
 #ifndef MyAppVersion
-  #define MyAppVersion "0.1.1"
+  #define MyAppVersion "0.1.3"
 #endif
 #ifndef StageDir
   #define StageDir AddBackslash(SourcePath) + "..\out\stage\windows-" + MyAppArch
@@ -96,6 +96,7 @@ OutputBaseFilename=Mangekyo-{#MyAppVersion}-windows-{#MyAppArch}-setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
+ShowLanguageDialog=auto
 SetupLogging=yes
 SetupIconFile={#SourcePath}\..\gui\app.ico
 Uninstallable=yes
@@ -107,6 +108,7 @@ UninstallDisplayIcon={app}\app\bin\gpu_benchmark.exe
 #endif
 UsePreviousAppDir=yes
 UsePreviousGroup=no
+UsePreviousLanguage=yes
 UsePreviousTasks=yes
 CloseApplications=yes
 RestartApplications=no
@@ -118,23 +120,48 @@ SignTool=release
 SignedUninstaller=yes
 #endif
 
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+; Vendored so builds do not depend on the optional Inno language pack install.
+Name: "chinesesimplified"; MessagesFile: "languages\ChineseSimplified.isl"
+
+[CustomMessages]
+english.TypeFull=Full installation
+english.TypeCompact=Core benchmark only
+english.TypeCustom=Custom installation
+english.CompCore=Mangekyo
+english.CompRenderDoc=RenderDoc capture tools
+english.CompReports=Report worker payload (not yet GUI-integrated)
+english.TaskDesktopIcon=Create a desktop shortcut
+english.TaskDesktopIconGroup=Additional shortcuts:
+english.LaunchApp=Launch {#MyAppName}
+chinesesimplified.TypeFull=完整安装
+chinesesimplified.TypeCompact=仅核心基准测试
+chinesesimplified.TypeCustom=自定义安装
+chinesesimplified.CompCore=Mangekyo
+chinesesimplified.CompRenderDoc=RenderDoc 捕获工具
+chinesesimplified.CompReports=报告工具负载（尚未接入 GUI）
+chinesesimplified.TaskDesktopIcon=创建桌面快捷方式
+chinesesimplified.TaskDesktopIconGroup=其他快捷方式：
+chinesesimplified.LaunchApp=启动 {#MyAppName}
+
 [Types]
-Name: "full"; Description: "Full installation"
-Name: "compact"; Description: "Core benchmark only"
-Name: "custom"; Description: "Custom installation"; Flags: iscustom
+Name: "full"; Description: "{cm:TypeFull}"
+Name: "compact"; Description: "{cm:TypeCompact}"
+Name: "custom"; Description: "{cm:TypeCustom}"; Flags: iscustom
 
 [Components]
-Name: "core"; Description: "Mangekyo"; Types: full compact custom; Flags: fixed
+Name: "core"; Description: "{cm:CompCore}"; Types: full compact custom; Flags: fixed
 #if HasRenderDoc
-Name: "renderdoc"; Description: "RenderDoc capture tools"; Types: full custom
+Name: "renderdoc"; Description: "{cm:CompRenderDoc}"; Types: full custom
 #endif
 #if HasReportWorker
-Name: "reports"; Description: "Report worker payload (not yet GUI-integrated)"; Types: full custom
+Name: "reports"; Description: "{cm:CompReports}"; Types: full custom
 #endif
 
 [Tasks]
 #if HasGui
-Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"; Flags: unchecked
+Name: "desktopicon"; Description: "{cm:TaskDesktopIcon}"; GroupDescription: "{cm:TaskDesktopIconGroup}"; Flags: unchecked
 #endif
 
 [Files]
@@ -175,7 +202,7 @@ Name: "{autoprograms}\{#MyAppName}\RenderDoc"; Filename: "{app}\tools\RenderDoc\
 
 [Run]
 #if HasGui
-Filename: "{app}\app\bin\{#MyAppExeName}"; Description: "Launch {#MyAppName}"; WorkingDir: "{app}\app\bin"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\app\bin\{#MyAppExeName}"; Description: "{cm:LaunchApp}"; WorkingDir: "{app}\app\bin"; Flags: nowait postinstall skipifsilent
 #endif
 
 ; No [UninstallDelete] entry is intentional. Results, captures, reports and

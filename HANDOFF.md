@@ -1,7 +1,7 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
-> 最后更新：2026-07-16（Australia/Sydney）
-> 分支 / 提交：`main` / `b5d5b0e`（本轮实现尚未提交，工作树为 dirty）
+> 最后更新：2026-07-17（Australia/Sydney）
+> 分支 / 提交：`main` / `2947589`（**本轮大量改动尚未提交**，工作树 dirty；勿把 `out/` 构建产物当仓库事实）
 > 本文件是项目的**首要进度与交接入口**。后续 AI 或开发者开始工作前先完整阅读，结束工作前优先更新本文件，再更新专题 TODO、roadmap 和 README。
 
 ## 1. 交接规则
@@ -46,14 +46,14 @@
 除仓库已有的隔离 HarmonyOS Vulkan 粒子原型外，均未开始完整产品移植；该原型不等于主 workload suite 已移植。Windows 7 GUI 是共享现有引擎与 worker 协议的兼容前端，不得为了支持旧系统复制出另一套含义不同的成绩合同。
 
 通用规则：
-- 逐平台落地时沿用现有合同规则：能力不齐明确 unsupported、不静默 fallback；**计时/抓帧模型不同的实现必须使用新 `workloadVersion` 独立成组**，现有 Windows 成绩组（`stream`、`gpu_burn_v1`、cinematic liquid 各版本）的 A/B 对比不受任何影响。
+- 逐平台落地时沿用现有合同规则：能力不齐明确 unsupported、不静默 fallback；**计时/抓帧模型不同的实现必须使用新 `workloadVersion` 独立成组**，现有 Windows 成绩组（`stream`、`gpu_burn_v2_mangekyo_faceted_glass_v1`、`gpu_burn_v1`、cinematic liquid 各版本）的 A/B 对比不受任何影响。
 - 每个发布包必须记录主程序、GUI、安装器 bootstrap 与所有原生 DLL/EXE 的真实 PE 架构。ARM64 包优先使用原生 ARM64 依赖；任何 x64/ARM64EC/仿真组件必须显式列入 manifest/SBOM 和 UI 能力说明，不能静默混入并宣称“全原生 ARM64”。
 - 本节顺序与第 9 节保持一致；后续 AI 不得再按旧的液体优先级自行调回顺序，除非用户再次明确调整。
 
 逐平台要点：
-1. **Windows ARM64（已于 2026-07-16 完工）**：已实现本体、GUI、依赖与打包闭环。新增了 VS/CMake ARM64 配置，原生编译 `gpu_engine`、CLI 和 WinUI，使用 vcpkg `arm64-windows` 在 manifest 模式下引入原生 GLFW。完成了动态 ARM64 Vulkan 导入库自动生成，解决了 x64 SDK 链接冲突；豁免了 VC 运行时中特有的 x64 `vcruntime140_1.dll` 架构审计；CPack 与 Inno Setup 完美支持 ARM64 并输出 `-windows-arm64` 包名。发布与验证脚本一键输出 ZIP、Installer、release-assets.json 和 SHA256 校验和。
-   - **依赖规则**：GLFW、WinAppSDK、VC runtime 等均使用原生 ARM64；豁免了特殊的 x64 `vcruntime140_1.dll`（Redist 目录自带）。RenderDoc、Python 报告链暂标为不支持并显示 N/A，不影响全原生主程序包发布。
-   - **完成门槛**：ARM64 本体、GUI、安装器和依赖全部通过 0-error 本地 staging 校验与 PE 架构审计。
+1. **Windows ARM64（已于 2026-07-16 完工；2026-07-17 安装器主路径改 WiX）**：已实现本体、GUI、依赖与打包闭环。新增了 VS/CMake ARM64 配置，原生编译 `gpu_engine`、CLI 和 WinUI，使用 vcpkg `arm64-windows` 在 manifest 模式下引入原生 GLFW。完成了动态 ARM64 Vulkan 导入库自动生成，解决了 x64 SDK 链接冲突；豁免了 VC 运行时中特有的 x64 `vcruntime140_1.dll` 架构审计。**CPU 与 GPU 测项本体也是按架构分别原生编译**（x64 包 = AMD64 PE，ARM64 包 = ARM64 PE；同一套源码、两套二进制），不是 x64 测项装到 ARM 上。2026-07-17 起发布安装器主路径为 **CPack WiX MSI**（x64 / ARM64 各自原生 `Template`），Inno Setup 降为 legacy。
+   - **依赖规则**：GLFW、WinAppSDK、VC runtime 等均使用原生 ARM64；豁免了特殊的 x64 `vcruntime140_1.dll`（Redist 目录自带）。RenderDoc 在 ARM64 发布语义上可为 Skip/N/A；Python 报告链仍未冻结。
+   - **完成门槛**：ARM64 本体、GUI、ZIP/MSI 与依赖本地 staging 校验与 PE 架构审计已通过；clean-machine 与签名仍开放。
 2. **Windows 7 专用 GUI（ARM64 后紧接的下一步）**：当前 WinUI 3 / Windows App SDK 与现有安装器最低版本是 Windows 10 1809，不能通过改 manifest 假装支持 Windows 7。另建共享 `gpu_engine`/CLI worker/结果 schema 的原生 Win32 兼容前端与独立安装包；优先使用 DWM/Aero 能力（例如玻璃区域、非客户区整合、主题化控件、Direct2D/DirectWrite），但必须运行时探测 DWM composition，并在 Aero Basic、经典主题、远程桌面或 DWM 关闭时正常回退，不能把透明/模糊当硬依赖。
    - Windows 7 包不得携带 WinUI/WinAppSDK payload；需要单独审计 toolset、Windows SDK、VC runtime、GLFW、DX11 FL10/SM4 与抓帧工具的 Win7 兼容版本。若没有可安全再分发且实测可用的 RenderDoc 组合，第 5 秒抓帧必须明确显示 unavailable，而不是降级到含义不同的捕获或伪造成功。GUI 外观不同不应改变 GPU/CPU 计时与成绩组；任何实际 worker、timer 或 capture 合同差异才触发新 `workloadVersion`。
 3. **macOS**：Metal 后端目前只覆盖粒子 workload（GPU Burn 明确 unsupported、液体无 Metal 实现）；需要主 workload 的 Metal 移植、SwiftUI GUI 与统一 registry 对齐、`MTLCaptureManager`(.gputrace) 替代 RenderDoc；PathService 路径已就绪。
@@ -74,7 +74,7 @@
 | 主测试 | 定位 | 当前状态 |
 |---|---|---|
 | **Particle (Original / Baseline)** | 原始粒子计算+绘制；历史基线，实际偏显存/内存带宽 | 已保留稳定 id `stream`；GUI 明确标为 Memory Throughput |
-| **GPU Burn (15s Burst)** | 原创实心 Plasma Bloom 图形压力场景；后续扩展 CoreBurn + MixedBurn 与错误校验 | **`gpu_burn_v1` 已实现**：Vulkan/DX12/DX11/OpenGL + WARP；RTX 5090 自动标定实测连续 8 次 NVML=99%、约 600W；Metal 明确 unsupported |
+| **GPU Burn (15s Burst)** | 主项为透视 3D 切割玻璃 Mangekyo Kaleidoscope v2；Plasma Bloom v1 作为公开 legacy 保留；后续扩展 CoreBurn + MixedBurn 与错误校验 | **`gpu_burn_v2_mangekyo_faceted_glass_v1` 已实现**：Vulkan/DX12/DX11/OpenGL；RTX 5090 Vulkan 自动标定 16→2048 后 13.199 ms render / 286.00 Gpix-step/s / 90.4% timestamp utilisation；Metal 明确 unsupported；v1 回归通过 |
 | **Cinematic Liquid** | 固定镜头的真实 3D 粒子液体 + 粒子重建密度体积自由表面；后续叠加完整综合场景 | **v1 正式合同与历史 v2 optics_v4 正式成绩已验证并保留**；当前 MLS-MPM 为 `cinematic_liquid_v2_physical_scene_v8` / `sceneVersion=5`，SPH 为强制 `_preview`。SPH 15 秒视觉已获用户接受并正常结束，但四项正确性 blocker、正式第 5 秒抓帧/成绩、WinUI 交互/history 与跨后端仍开放 |
 
 `15s` 应对外称为 **Burst / 短时峰值压力**，不能宣称完成热稳定认证。真正的热饱和、显存错误或超频稳定性通常需要可选的数分钟模式；这不改变用户要求的默认 15 秒流程。
@@ -130,20 +130,21 @@ CLI 与 WinUI 当前暴露 11 个 workload 选择（`cinematic_liquid_v1` 是独
 | Workload id | 真实负载 | 后端代码状态 | 建议归类 |
 |---|---|---|---|
 | `stream` | 原始粒子 Euler 更新 + 点绘制；低算术强度，偏带宽 | Vulkan/DX12/DX11/OpenGL/Metal | **主界面：Particle (Original)** |
-| `gpu_burn` | 原创 Plasma Bloom 实心七瓣晶核；2 次全屏 opaque draw、固定 step raymarch + 晶面/裂纹/纤维/电弧计算；自动标定到约 14 ms render | Vulkan/DX12/DX11/OpenGL；DX11/DX12 WARP；Metal 明确拒绝 | **主界面：GPU Burn v1 (15s Burst)** |
+| `gpu_burn` | Mangekyo faceted glass v2：透视相机、截顶宝石/拉伸八面体碎钻、前后深度层、SDF 平面法线、Fresnel 反射、RGB 折射色散与吸收；2 次全屏 opaque draw、固定 step FP32/SFU/INT 循环；自动标定目标约 14 ms render | Vulkan/DX12/DX11/OpenGL；DX11/DX12 WARP；Metal 明确拒绝 | **主界面：Mangekyo Kaleidoscope — GPU Burn**；`gpu_burn_v1` 为 Plasma Bloom legacy |
 | `gpu_stress` | 独立 shader 的 4 次全屏 opaque overdraw；FP32/SFU/INT 循环，warmup 首秒自动标定到约 8 ms/draw-group | Vulkan/DX12/DX11/OpenGL；DX11/DX12 WARP；Metal 明确拒绝 | Other / Advanced：GraphicsBurn component |
 | `nbody` | tiled all-pairs 粒子计算 | 五后端 | Other / Advanced Compute |
 | `stress` | 全屏固定次数 fractal + `sin()`，fragment ALU/SFU | 五后端 | **Legacy Stress v1** |
 | `synthpeak` | 寄存器内合成峰值循环 | 五后端，精度能力不同 | Other / Advanced Synthetic |
 | `render3d` | 6 顶点实例化 billboard + 深度 | 五后端 | **Legacy 3D Prototype** |
 | `volumetric` | 程序化 FBM 体积 raymarch | 五后端代码已接入，但仓库结果无验证记录 | Other / Experimental；未来综合场景 pass |
-| `cinematic_liquid` | 3D MLS-MPM 或 `--liquid-solver sph` + 独立粒子 splat/binomial R32F 密度体积 + 最多 4 界面自由表面 ray path | Vulkan-only；当前 MPM 是 physical-scene v8，SPH 视觉已验收但始终 preview；DX12/DX11/OpenGL/Metal 尚未实现 | **主界面：Cinematic Liquid**；所有历史版本、当前 v8 与 SPH preview 必须按 `workloadVersion` 分组 |
+| `cinematic_liquid` | 3D MLS-MPM 或 `--liquid-solver sph` + 独立粒子 splat/binomial R32F 密度体积 + 最多 4 界面自由表面 ray path；GUI 文案为「流体 —— 互动水池」 | **仍为 Vulkan-only**（CLI `--backend dx12` 拒绝；GUI InfoBar + API picker 只露 Vulkan）。曾短暂尝试 DX12 HLSL 移植并做过 smoke，用户要求后已撤回 DX12 宿主路径；仓库里可能仍有未提交的 `shaders/cinematic_liquid_v2_*.hlsl` / `cinematic_liquid_v2_common.*` 草稿，**不等于** DX12 已支持。DX11/OpenGL/Metal 尚未实现 | **主界面：Cinematic Liquid / 互动水池**；所有历史版本、当前 v8 与 SPH preview 必须按 `workloadVersion` 分组 |
+
 | `cinematic_liquid_v1` | 原始 181,216 粒子/96x56x64 MLS-MPM 溃坝 | Vulkan 正式 15 秒 + 5.1 秒 capture 已通过 | **Legacy Cinematic Liquid v1**；结果使用历史 `workload=cinematic_liquid` + `workloadVersion=cinematic_liquid_v1` |
 | `fluid` | 旧 2D Stable Fluids 多 pass | **只有 Vulkan 原型，且当前不正确** | Other / Legacy；不得产生正式成绩 |
 
 仓库内历史 `results/results.json` 仍为 232 条：`stream=224`、`nbody=5`、`stress=1`、`synthpeak=1`、`render3d=1`、`volumetric=0`、`fluid=0`。本轮 smoke 数据刻意写到 `out/*/results`，没有污染历史库。新结果 schema 为 v2，记录 workloadVersion、最终标定参数与 capture 状态；旧结果读取时仍按 schema v1 兼容。
 
-`gpu_burn_v1` 是当前正式图形 Burst：画面没有环形孔洞，也不是粒子测试；score 为版本化的 `Gpix-step/s`。它在 RTX 5090 上达到真实 99% NVML 利用率，但 15 秒默认流程仍不是热稳定/硬件错误认证。`gpu_stress_v1` 保留为 Advanced **GraphicsBurn component**；两者都没有 GPU readback/CPU 对照，shader recurrence/checksum 目前只用于防止 dead-code elimination。`cinematic_liquid_v1` 的已验证成绩合同继续保留，不复用旧 `fluid` 的 2D dye score 或错误状态。v2 的正式历史成绩属于 `cinematic_liquid_v2_surface_splat_optics_v4`；当前 MPM 代码身份是 `cinematic_liquid_v2_physical_scene_v8`，没有正式成绩，SPH 只有强制 preview，均不能沿用 v4 的正式成绩或 v6/v7 的值。GUI 交互、跨 GPU 轨迹可比性和异常路径资源清理仍开放。
+`gpu_burn` 当前选择 `gpu_burn_v2_mangekyo_faceted_glass_v1` 正式图形 Burst，score 仍为版本化的 `Gpix-step/s`；公开 `gpu_burn_v1` 选择保留原 Plasma Bloom shader 与历史成绩身份。被用户否定的二维 plasma chamber 原型没有沿用成绩身份；当前 shaderVersion=3 使用真实 3D SDF 晶体表面、透视/视差、Fresnel 和 RGB 色散。RTX 5090 / Vulkan 自动标定到 2048 steps/draw 后 render 13.199 ms、286.00 Gpix-step/s、90.4% timestamp utilisation，5 个 1 秒窗口 stableScore 288.21 / CV 1.50%。这次短测没有重新声明 v1 的 600W/NVML 热稳定证据，15 秒默认流程也仍不是热稳定/硬件错误认证。`gpu_stress_v1` 保留为 Advanced **GraphicsBurn component**；三者都没有 GPU readback/CPU 对照，shader recurrence/checksum 目前只用于防止 dead-code elimination。`cinematic_liquid_v1` 的已验证成绩合同继续保留，不复用旧 `fluid` 的 2D dye score 或错误状态。v2 的正式历史成绩属于 `cinematic_liquid_v2_surface_splat_optics_v4`；当前 MPM 代码身份是 `cinematic_liquid_v2_physical_scene_v8`，没有正式成绩，SPH 只有强制 preview，均不能沿用 v4 的正式成绩或 v6/v7 的值。GUI 交互、跨 GPU 轨迹可比性和异常路径资源清理仍开放。
 
 ### 3.3 为什么现有新测试“效果不好”的判断成立
 
@@ -200,9 +201,9 @@ RenderDoc。当前已同时提供原生 C++ CLI 与独立 WinUI CPU 页面：
 
 **仍开放的发布/跨平台边界：**
 
-- 当前已有本机 CLI 与 WinUI build/smoke，不等于新的 ZIP/Inno Setup 已重建；
-  公开安装包前须重新 stage，并在干净 Windows 机器验证安装后 GUI 能找到
+- 当前已有本机 CLI 与 WinUI build/smoke，不等于干净机安装验收已完成；公开安装包前须在干净 Windows 机器验证 MSI 安装后 GUI 能找到
   相邻 `gpu_benchmark.exe`、Run/Cancel、结果写入与卸载保留用户数据。
+- 2026-07-17 起主发布产物是 **ZIP + WiX MSI**（不是 Inno `*-setup.exe`）；x64/ARM64 测项本体均为对应原生 ISA。
 - Windows 的 `EfficiencyClass`、Linux/Android 的 `cpu_capacity`/最大频率只
   用来生成 `InferredPerformance/Efficiency/Middle/LPE` 排名标签，**不是**
   CPUID/SoC 官方核心身份，不能宣称已精确识别所有 P/E/Mid/LPE 变体。
@@ -218,7 +219,7 @@ RenderDoc。当前已同时提供原生 C++ CLI 与独立 WinUI CPU 页面：
 ## 4. P0 正确性阻塞项
 
 仍开放的问题修复前，不应把旧 `fluid` 计入正式排行榜。GPU Burn
-`gpu_burn_v1` 已作为带版本的新主项接入，不与 `gpu_stress_v1` 或旧 `stress` 混分。
+`gpu_burn_v2_mangekyo_faceted_glass_v1` 已作为带版本的新主项接入；`gpu_burn_v1` 只作为公开 legacy 保留，两者均不与 `gpu_stress_v1` 或旧 `stress` 混分。
 
 ### 4.1 Fluid 会产生未定义或伪造结果
 
@@ -281,8 +282,8 @@ probe 前把随包 `tools/RenderDoc` 设为进程级 `VK_IMPLICIT_LAYER_PATH` �
 
 ### Windows WinUI 3
 
-- 下拉框当前实际暴露 11 个 workload 选择，参数映射、score parser 与 History label/filter 覆盖对应公开 id；`cinematic_liquid_v1` 作为独立 legacy 选择展示。
-- 主项为 `Particle — Memory Throughput` 和 `GPU Burn — Plasma Bloom (15s Burst)`；`gpu_stress` 归入 Advanced，旧 `stress`、`render3d` 明确标 Legacy，volumetric 标 Experimental，fluid 标 Vulkan-only Developer Preview 并阻止非法后端。
+- 下拉框当前实际暴露 12 个 workload 选择，参数映射、score parser 与 History label/filter 覆盖对应公开 id；`gpu_burn_v1` 与 `cinematic_liquid_v1` 作为独立 legacy 选择展示。
+- GPU Burn 主项为 `Mangekyo Kaleidoscope — GPU Burn`，Plasma Bloom v1 收入 legacy；`gpu_stress` 归入 Advanced，旧 `stress`、`render3d` 明确标 Legacy，volumetric 标 Experimental，fluid 标 Vulkan-only Developer Preview 并阻止非法后端。
 - Custom 与 Quick 的非 headless 运行现在默认追加 `--capture 5`；默认 duration 仍为 15 秒。Full analysis / Flights / Particle 预设也继续抓帧。
 - installed/staged 布局优先使用同目录 CLI/资产；若不存在外部 CLI，静态 engine 以 GUI module 目录运行，不再强制切到 repo CWD。
 - Full Analysis 优先调用随包 `tools/RenderDoc/renderdoccmd.exe`；报告输出改到用户数据目录。若缺 Python/冻结 report worker 或任一后处理命令失败，GUI 现在显示“benchmark 已完成、报告不可用/失败”，不再误报图表与报告已成功生成。
@@ -299,8 +300,8 @@ probe 前把随包 `tools/RenderDoc` 设为进程级 `VK_IMPLICIT_LAYER_PATH` �
 
 | 文件 | 主要漂移 |
 |---|---|
-| `README.md` | 本轮已同步 9 workload、Particle 带宽定位、GPU Burn Plasma Bloom 与 staging 入口 |
-| `docs/cli-reference.md` | workload/GUI 表仍停在 5 项；未记录 full-all capture 丢失 |
+| `README.md` | 已同步 12 个公开选择、Mangekyo GPU Burn v2 与 Plasma Bloom v1 legacy 边界 |
+| `docs/cli-reference.md` | 已同步 12 个 CLI/GUI 选择及两代 GPU Burn selector/结果分组 |
 | `docs/roadmap.md` | 历史内容仍有漂移；结果真实默认路径现已改为平台用户数据目录 |
 | `docs/benchmark-workload-suite.md` | “canonical enum” 仍只有最初 4 项 |
 | `docs/TODO.md` | 多项报告/RenderDoc 数据任务与仓库现有大报告、抓帧 JSON 状态不一致 |
@@ -327,7 +328,7 @@ probe 前把随包 `tools/RenderDoc` 设为进程级 `VK_IMPLICIT_LAYER_PATH` �
 ### A2 — GPU Burn (15s Burst)
 
 - [ ] `CoreBurn`：寄存器/共享内存驻留的 FP32 FMA 热循环，少量全局访存，checksum 防止优化并做确定性错误检测。
-- [x] `VisualBurn v1 / Plasma Bloom`：独立跨 API fragment shader、2 次 opaque draw、固定 step raymarch、无孔实心晶核、warmup 自动标定、版本化 `Gpix-step/s`；RTX 5090 稳态 NVML 99%。
+- [x] `VisualBurn v2 / Mangekyo faceted glass`：独立跨 API fragment shader、透视 3D 截顶宝石/八面体碎钻、前后层视差、SDF 平面法线、Fresnel 反射、RGB 折射色散、2 次 opaque draw、固定 step FP32/SFU/INT、warmup 自动标定、版本化 `Gpix-step/s`；Plasma Bloom v1 以公开 legacy selector 与独立结果身份保留。
 - [x] `GraphicsBurn v1`：原 `gpu_stress_v1` 保留为 Advanced component；4 次 opaque overdraw、FP32/SFU/INT、版本化 `Gpix-iter/s`。
 - [ ] `MixedBurn`：同帧 compute + graphics，覆盖 core、SFU、texture/fill/ROP；按设备自动校准到短而可取消的 dispatch/draw，单块工作不要逼近 Windows TDR。
 - [ ] 三个分项分别报告，不宣传某一个 shader 对所有 GPU 都是“绝对最热”。
@@ -343,26 +344,27 @@ probe 前把随包 `tools/RenderDoc` 设为进程级 `VK_IMPLICIT_LAYER_PATH` �
 
 ### 7.1 已完成的第一阶段与剩余阻塞
 
-本轮已建立并实际执行 Windows x64 GitHub Release 候选链：CMake
+本轮已建立并实际执行 Windows x64/ARM64 GitHub Release 候选链：CMake
 `install()`/CPack、固定 `vcpkg.json` baseline、CMakePresets、staging verifier、
 WinUI self-contained payload、MSVC runtime、GLFW、全部预编译 shader、GLAD
-2.0.8 in-tree、完整官方 RenderDoc 1.45 portable、Inno Setup 6.7.3、逐文件
-SHA-256 与 ZIP 解包复核。目标机运行核心 benchmark/GUI/抓帧不需要 VS、vcpkg、
-Vulkan SDK、shader compiler、单独的 Windows App SDK 或预装 RenderDoc。
-**上述构建、依赖和 RenderDoc 结论只对当前 Windows x64 产物成立，不能外推到 ARM64 或 Windows 7。**
+2.0.8 in-tree、完整官方 RenderDoc 1.45 portable（x64 常规捆绑）、**WiX MSI**、
+逐文件 SHA-256 与 ZIP 解包复核。目标机运行核心 benchmark/GUI/抓帧不需要 VS、
+vcpkg、Vulkan SDK、shader compiler、单独的 Windows App SDK 或预装 RenderDoc。
+Inno Setup 仍保留为 legacy 工程路径，**不再是** `build-windows-github-release.ps1`
+的默认安装器。
 
 PathService 已把 results/captures/reports/logs 改到
 `%LOCALAPPDATA%/GpuComputeBenchmark`（可用 `GPU_BENCH_DATA_DIR` 覆盖），并一次性
 迁移旧相对 `results/results.json`。GUI/CLI 与 RenderDoc 能从 staged 布局运行。
 
-已生成可供换机验收的 ZIP 与 Setup，但仍不能宣称“已经公开发布/完全验收”，原因是：
+已生成可供换机验收的 ZIP 与 MSI，但仍不能宣称“已经公开发布/完全验收”，原因是：
 
 - CLI/GUI 已把 `vulkan-1.dll` 改为 delay-import，probe 与显式 Vulkan backend 创建前都有 loader guard；本机构建和 PE 审计通过。仍须在真正没有 `vulkan-1.dll` 的干净机确认 DX11/DX12/WARP 启动。
 - 报告链仍只有 `.py` 源码，没有冻结的 `report_worker.exe`；核心 benchmark/GUI 不需要 Python，但自动报告仍需要开发环境。打包规则虽预留 `tools/report_worker`，GUI 尚未实现调用该 worker 的 argv 协议。
-- 仓库没有经用户确认的根项目分发 LICENSE；已有 `THIRD_PARTY_NOTICES.md` 与 GLAD/GLFW/RenderDoc 许可证不能替代项目自身许可证，因此 public MSI/WiX、签名与发布被刻意阻止。
-- 当前 Setup、GUI 与 CLI 均未做 Authenticode 签名；Release asset manifest 明确记录 `NotSigned`，公开下载会有 SmartScreen 风险。
+- **项目分发 LICENSE 已订为 MIT**（仓库根 `LICENSE`，staged `licenses/LICENSE`，`projectDistributionLicense=true`）。CPack WiX 需要 `.txt`/`.rtf`，构建时会复制为 `cpack-LICENSE.txt`。
+- 当前 MSI、GUI 与 CLI 均未做 Authenticode 签名；Release asset manifest 会记录 `NotSigned`，公开下载有 SmartScreen 风险。
 - 尚未在真正干净 Windows VM 上验证 GUI 启动、无 RenderDoc/VC Redist/SDK 环境下的运行与升级/卸载。
-- GUI 当前只有 x64；ARM64 不能据此宣称可发布。
+- GUI 与 CLI 均已有 **x64 与 ARM64 原生**产物；勿再写成“GUI 只有 x64”。
 
 ### 7.2 推荐发布架构（当前 Windows x64 基线）
 
@@ -371,7 +373,7 @@ PathService 已把 results/captures/reports/logs 改到
 3. **锁定构建（部分已做）**：已有 `vcpkg.json` baseline、CMakePresets、strict shader asset gate 与 in-tree GLAD；NuGet lock、完整 shader manifest/CI 仍待补。
 4. **预编译资产（已做）**：发布 SPIR-V、HLSL/GLSL 与 DX12 FP16 DXIL；用户机器不装 SDK/compiler。
 5. **报告 worker**：把 Python 报告链冻结为随包的 `report_worker`（嵌入 Python或独立 onedir），主程序只用绝对路径/argv 调用，不查 PATH、不拼 shell。
-6. **安装器（已实际生成）**：`installer/GpuComputeBenchmark.iss` 使用 stable AppId、x64/按用户安装、升级/卸载和可选完整 RenderDoc；`scripts/build-windows-github-release.ps1` 一次产出 ZIP、Setup、`SHA256SUMS.txt` 与 `release-assets.json`。当前 v0.1.0 Setup 为 91,887,918 bytes、SHA-256 `f301426776b8ad2bd816a3f6de55463fd4b2f6be0ca3c7f691bfd8108aca0436`，尚未签名。
+6. **安装器（2026-07-17 起主路径为 WiX MSI）**：`scripts/build-wix-installer.ps1` + CPack `ZIP;WIX`，`WixUI_InstallDir` 可选安装目录；产物名 `Mangekyo-<ver>-windows-{x64,arm64}.msi`。`build-windows-github-release.ps1` 已切到该脚本。Inno（`installer/GpuComputeBenchmark.iss`）保留作 legacy。本机已冒烟：`Mangekyo-0.1.3-windows-x64.msi`（Template `x64;1033`，SHA-256 `db82358f2dfd93542bac2659638d3fa91b45ec4c0d465ef978678c819dd5154e`）与 `Mangekyo-0.1.3-windows-arm64.msi`（Template `Arm64;1033`），均 NotSigned。
 7. **RenderDoc 可选组件（构建机 staged 已验证）**：随包放完整官方 1.45 bundle 到 `{app}/tools/RenderDoc`，archive SHA-256 `bd665c348a8245d10a1f513e35b83603edc1a78006277583d09ec0769286eea4`；in-app API 在第 5 秒包住一帧，Vulkan 使用进程级 implicit-layer path。仍需 clean-machine 抓帧与 credits/签名审计。
 8. **Vulkan loader（代码与 PE 已收口）**：SDK 只用于构建；Windows 运行时 delay-load 并探测 loader/ICD。缺 Vulkan 时隐藏该能力；若显式请求 Vulkan则返回可读错误，DX11/DX12/WARP 仍可启动。不随软件安装 GPU 驱动或复制系统 loader。
 
@@ -412,6 +414,7 @@ PathService 已把 results/captures/reports/logs 改到
 
 ### 当前正在进行
 
+- [x] 2026-07-16/17：用户否定首个二维 plasma chamber 原型后，将公开 `gpu_burn` 重做为 **Mangekyo faceted glass v2**：Vulkan/HLSL/OpenGL 三份一致 shader 现使用透视 3D SDF 截顶宝石/八面体碎钻、前后深度层、平面法线、Fresnel、RGB 色散和吸收；两次全屏固定循环使用独立 `gpu_burn_v2_mangekyo_faceted_glass_v1` / shaderVersion=3 身份，被否定原型不混分。Plasma Bloom 通过 `gpu_burn_v1` selector、原 shader 与历史合同完整保留。Release core 编译通过；RTX 5090 Vulkan 自动标定 16→2048 后 render 13.199 ms / 286.00 Gpix-step/s / 90.4% timestamp utilisation，stableScore 288.21 / CV 1.50%；DX12/DX11/OpenGL v2 低步数 runtime smoke 均通过。视觉核验图为 `out/kaleidoscope-prototype/mangekyo_faceted_final.png`。
 - [x] 2026-07-15：完成独立 `gpu_burn_v1` vertical slice。用户否定甜甜圈后改为原创 **Plasma Bloom / 等离子晶核**：实心七瓣晶体、无环形孔洞、非粒子；保留 `gpu_stress_v1` 成绩契约，默认 15 秒 / 第 5 秒抓帧，并同步 Vulkan/DX12/DX11/OpenGL、WARP、GUI、结果/图表与打包资产。
 - [x] 2026-07-15：RTX 5090 Vulkan 自动标定 16 → 1604 steps/draw；正式 render 14.899 ms、`198.44 Gpix-step/s`，稳定段连续 8 次 NVML utilization 均为 99%，功耗约 599–600W（600W limit）。应用内 93% 是 GPU timestamp / 总帧墙钟比，包含 CPU/present 间隙，不等同于 NVML busy。
 - [x] 2026-07-15：完成 README/TODO/roadmap/真实源码/结果文件/GUI/构建链审计。
@@ -436,20 +439,23 @@ PathService 已把 results/captures/reports/logs 改到
 - [x] 2026-07-15：v7 shader 编译、最终 6 个 SPIR-V、CLI Release、WinUI Release x64 build 通过（0 error，仅有既有 warning；最新增量构建 2 个，源文件重编时曾为 4 个）；仅做 6/8 秒自动停止 smoke，无正式 15 秒、无可靠保存的新 RenderDoc、无完整视觉验收。`241.13` transient console 值不得记录为结果；`--time 8` 窗口自动关闭不是已确认的崩溃。
 - [x] 2026-07-16：当前 scene 合同升为 `cinematic_liquid_v2_physical_scene_v8` / `sceneVersion=5`（inset 0.45、wall-top fraction 0.42、extinction 12/3.6/2.5）；SPH 318,464 粒子完整运行 15 秒并获用户视觉验收。SPH 仍无正式 score，所有时长强制 `_preview`。
 - [x] 2026-07-16：完成 Windows ARM64 原生本体、WinUI GUI、ZIP、Inno Setup 安装包、依赖与全链路构建审计。通过自动构建 ARM64 `vulkan-1.lib` 并处理 `vcruntime140_1.dll`，全量测试及 CPack 打包全部通过，产物生成于 `out/release/windows-arm64/`。
-- [ ] **当前下一步（用户 2026-07-16 最新指定）**：完成独立 Windows 7 GUI 与安装包，复用现有引擎/worker/成绩 schema，并在能力存在时尽可能使用 Aero/DWM；Aero 不可用时必须可用且可读地降级。
+- [x] 2026-07-17：用户订 **MIT** 根 `LICENSE`；CMake/CPack 默认 `ZIP;WIX`；发布主路径改为 WiX MSI（x64+ARM64 原生 Template）；Inno 降为 legacy。本机已产出 `Mangekyo-0.1.3-windows-{x64,arm64}.msi`（stage `projectDistributionLicense=true`）。
+- [x] 2026-07-17：互动水池（`cinematic_liquid`）跨 API 需求曾短暂接 DX12，后按用户要求 **撤回**，恢复 Vulkan-only；勿把未接线的 HLSL 草稿写成已支持。
+- [ ] **当前下一步（用户 2026-07-16 指定，仍有效）**：完成独立 Windows 7 GUI 与安装包，复用现有引擎/worker/成绩 schema，并在能力存在时尽可能使用 Aero/DWM；Aero 不可用时必须可用且可读地降级。
 - [ ] 旧 `fluid` Vulkan 正确性与统一跨后端 workload registry 仍开放，但不再阻塞独立 Cinematic Liquid v1。
-- [x] 实际 Setup 与动态 Vulkan loader 已完成构建/静态审计；显式 Vulkan 缺 loader 的异常路径也已加 guard。
-- [ ] 冻结 report worker、项目 LICENSE、Authenticode signing、GT120 实卡与 clean-machine 安装/升级/卸载/抓帧验收仍开放。
+- [x] 实际 MSI/ZIP 与动态 Vulkan loader 已完成构建/静态审计；显式 Vulkan 缺 loader 的异常路径也已加 guard。
+- [ ] 冻结 report worker、Authenticode signing、GT120 实卡与 clean-machine 安装/升级/卸载/抓帧验收仍开放（**项目 LICENSE 阻塞已解除**）。
+- [ ] **日语本地化（用户待办）**：WinUI 目前只有 Auto / English / 简体中文（`gui/i18n.h` 的 `tr(en, zh)` + `LangBox`）；需扩展 **日本語**（至少 GUI 全表文案、语言下拉、OS UI 自动探测 `LANG_JAPANESE`/`ja`）。安装器侧：WiX MSI 向导目前默认英文；若产品要日语安装体验，需另加 WiX 日语 UI/本地化字符串（Inno legacy 目前也只有 EN + 简体中文 `.isl`）。不改变成绩合同或内部 id，只做显示语言。
 
 ### 推荐下一个实现切片
 
-用户在 2026-07-16 最新调整了近期顺序：**先 Windows ARM64 完整发布闭环，再 Windows 7 Aero GUI**。这覆盖 2026-07-15 的“先关闭液体 v2 正式计分，再立即做三个自由/无限模式”旧顺序。下一刀严格按以下顺序执行：
+用户在 2026-07-16 最新调整了近期顺序：**先 Windows ARM64 完整发布闭环，再 Windows 7 Aero GUI**。ARM64 + WiX 主路径已落地。下一刀严格按以下顺序执行：
 
-1. **Windows ARM64 vertical slice（已完成）**：完成了 CMake、VS、vcpkg ARM64、WinUI GUI 原生构建；在 vcpkg 清单模式与 Windows App SDK/MSVC redist 自动集成下实现了完整的打包校验流程。
+1. **Windows ARM64 vertical slice（已完成）**：含原生测项、GUI、ZIP/MSI。
 2. **Windows 7 GUI vertical slice（当前下一步）**：保留 `gpu_engine` 与 CLI worker 为唯一跑分实现，另建不依赖 WinUI/WinAppSDK 的 Win32/DWM 前端；实现 Aero glass/主题化非客户区/Direct2D/DirectWrite 等能力检测 and 无 Aero fallback。建立 Win7 专用 toolchain/runtime/dependency/installer gate，并优先用 GT 120 验证 DX11 FL10/SM4、窗口响应、15 秒流程、timestamp/TDR 与可用的抓帧路径。
 3. **回到未关闭的正确性与自由模式**：依次关闭 Cinematic Liquid SPH 的 frame-driven timestep、per-substep impulse clear、viscosity race、atomic scatter ordering；之后再做 Liquid Lab / Explore、GPU Burn Unlimited Soak 和 VRAM Integrity Soak。四项关闭前 SPH 始终 `_preview`，旧结果合同不变。
-4. **Windows x64 完整公开发布收口**仍开放：冻结 `report_worker`，在干净 Windows 10/11 VM 验收 bundled RenderDoc 和完整 GUI-first 安装/升级/卸载；项目 LICENSE 与签名证书由用户决定后再创建公开 Release。
-5. 之后按第 2 节新顺序做 macOS、Android、iOS、Debian、WebGPU、HarmonyOS、PS3（探索）与 Dual-GPU Aggregate；后期 RT/路径追踪/厂商超分不得抢占当前 ARM64 与 Windows 7 两刀。
+4. **Windows 完整公开发布收口**仍开放：冻结 `report_worker`，签名证书，在干净 Windows 10/11 VM 验收 bundled RenderDoc 和完整 GUI-first MSI 安装/升级/卸载。
+5. 之后按第 2 节新顺序做 macOS、Android、iOS、Debian、WebGPU、HarmonyOS、PS3（探索）与 Dual-GPU Aggregate；后期 RT/路径追踪/厂商超分不得抢占当前 Windows 7 刀。
 
 ## 10. 验证记录
 
@@ -518,6 +524,44 @@ PathService 已把 results/captures/reports/logs 改到
 - 船的螺旋桨尾流不作用于 SPH 水体（v7 尾流实现在 grid_update，SPH 不跑该 pass）。
 - 当前外观已获用户接受，不再优先调水色；secondary spray/foam 与螺旋桨尾流是未来增强，不阻塞本轮视觉收口。
 - 正式 15 秒 + 第 5 秒 RenderDoc 成绩、timestamp 边界、确定性/轨迹合同与跨后端一律未完成。
+
+### 2026-07-17 光效可见性根因修复 + 0.1.3 双架构（午间轮）
+
+- **"调了亮度却看不出变化"的根因是 Reinhard 饱和**：`mapped = hdr/(1+hdr)` 在晶核的 HDR 5-10 区间输出被压死在 0.85-0.90，上游增益再乘系数视觉不可辨。修复：色调映射膝点 1.0 → **0.62**（全场提亮，晶核逼近白热，肉眼差异显著），并把光晕衰减带从 smoothstep(0.025,0.45) 加宽到 (0.05,1.05)（光雾半径约翻倍，"光"可见地向背景扩散）。三份 shader 同步；固定循环工作量不变（discard 在计分循环之后）。教训：调亮度先看色调映射曲线所在段。
+- History 的 GPU/CPU 浏览器式标签页（TabView）已由并行会话实现在源码中，用户所装旧包未包含——随本轮包发布，无需另改。
+- **0.1.3 双架构**：CMake 0.1.2→0.1.3；x64（含 RenderDoc）与 ARM64（-SkipRenderDoc，N/A 语义不变）先后重打，ARM64 首次带上 SPH/池子/GUI 改版/固定负载 GPU Burn/光效全部内容。
+
+### 2026-07-17 晚间：MIT LICENSE + WiX 主路径（本轮交接）
+
+- **License**：用户确认订根目录 `LICENSE` 为 **MIT**（Copyright 2026 Mangekyo contributors）。`GPU_BENCH_PACKAGE_LICENSE_FILE` 默认指向该文件；stage 写入 `licenses/LICENSE`，manifest `projectDistributionLicense=true`。`THIRD_PARTY_NOTICES.md` / `PACKAGE_LIMITATIONS.md` / packaging 文档已改为“项目 MIT + 第三方 notices”，不再写“无项目许可证阻塞 MSI”。
+- **WiX 替代 Inno 为主路径**：
+  - `cmake/Packaging.cmake`：默认 `GPU_BENCH_CPACK_GENERATORS=ZIP;WIX`；`CPACK_WIX_UI_REF=WixUI_InstallDir`；`CPACK_WIX_ARCHITECTURE` x64/arm64；无扩展名 `LICENSE` 自动 `COPYONLY` 为 `cpack-LICENSE.txt`（否则 CPack 报 `unsupported WiX License file extension ''`）。
+  - 新脚本 `scripts/build-wix-installer.ps1`；`stage-windows-release.ps1` 强制带 LICENSE；`build-windows-github-release.ps1` 调用 WiX 并收集 `*.msi`（不再要求 `*-setup.exe`）。
+  - Inno（`installer/GpuComputeBenchmark.iss` + 简体中文 `.isl`）保留为 **legacy**。
+- **本机冒烟产物**（`out/installer/`，NotSigned）：
+  - `Mangekyo-0.1.3-windows-x64.msi` ~103.9 MiB，SHA-256 `db82358f2dfd93542bac2659638d3fa91b45ec4c0d465ef978678c819dd5154e`，Summary Template=`x64;1033`
+  - `Mangekyo-0.1.3-windows-arm64.msi` ~102.5 MiB，Template=`Arm64;1033`
+  - 对应 stage 的 `gpu_benchmark.exe` / `gpu_bench_gui.exe` PE 分别为 AMD64 / ARM64；`compiledBackends` 两边均为 vulkan/dx12/dx11/opengl=true。
+- **测项架构事实**：CPU 与 GPU 测试本体都是按包架构原生编译的两套二进制，不是同一套 x64 测项 + 两个安装壳。
+- **互动水池**：仍 Vulkan-only；曾试 DX12 后撤回。未接线 HLSL 草稿若提交须标明为移植草稿，不可宣称 DX12 liquid 可用。
+- **仍开放**：Authenticode、frozen report worker、干净机 MSI 安装/升级/卸载/抓帧、Windows 7 GUI 下一刀、**日语（日本語）GUI/安装器本地化**。
+
+### 2026-07-17 GPU Burn v2 固定负载合同（用户拍板）+ 0.1.2
+
+- **用户决策：废弃"目标帧时/自动标定"哲学**（"我不需要目标步数，我就要显卡尽可能生成高帧数"）。GPU Burn 改为 **FurMark 式固定负载**：所有硬件 GPU 每帧执行完全相同的 256 步 x 2 draw（`kGpuBurnV2FixedIter=256`），无标定、无渐升，FPS 本身成为直观对比信号。实测 RTX 5090 Vulkan 恒定 ~345 FPS（2.34 ms/帧），全程无帧数跳变——之前"开头帧数高后面骤降"的现象连根消除（那是标定探针→目标的设计残留）。
+- **新成绩身份**：`workloadVersion=gpu_burn_v2_fixed256_kaleidoscope`、`shaderVersion=3`、metadata `loadModel=fixed_per_frame;autoTune=false`。此前标定制的 `gpu_burn_v1_plasma_kaleidoscope_r2` 及更早 `gpu_burn_v1` 成绩组全部独立保留退役。闭环标定代码保留休眠（`gpuBurnAutoTune` 默认 false，无 CLI 开关）。
+- **安全边界保留**：软件设备（WARP/Basic Render/llvmpipe）双层钳制到 32 步——CLI 归一化按 `--warp` 钳一次，`AppBase::MainLoop` 起始按真实设备名再兜底一次（覆盖 `--run-all`/GUI 矩阵在逐设备处才知道 WARP 的情形；WARP 16 步已需 ~209 ms/帧，256 步会触发 watchdog）。显式 `--iter` 上限仍 2048。
+- **晶核光效**（用户两轮加亮要求）：主增益 0.20→0.26→0.34→**0.42**，光晕合成权重 crystal 0.62→0.88 / base 0.36→0.50，配色紫罗兰系契合背景；三份 shader（frag/hlsl/gl）同步。
+- **版本 0.1.2**：CMake project VERSION 0.1.1→0.1.2，x64 包重打（含固定负载合同、光效、此前全部 GUI/安装器/RenderDoc 改动）。
+- 待办：15 秒正式流程在新 fixed256 合同下建立基线（每 API 的 FPS/Gpix-step/s 将天然不同——固定负载下这是真实差异而非标定伪差）；README/cli-reference 的 auto-tune 文案清理；GUI 中 gpu_burn 的 `--iter` 传参路径核对。
+
+### 2026-07-17 GUI 改版 / GPU Burn v2 同心圆 / x64 重打（凌晨轮）
+
+- **VM 反馈修复（VMware Win11 全 GPU 完整分析后 RenderDoc 弹错）**：崩溃本体是 RenderDoc 在虚拟 GPU（SVGA3D/WARP）上的上游限制，物理机验收为准；其 Bug Reporter 二次报错根因是官方包 OpenSSL 命名 `libcrypto/libssl-1_1-x64.dll` 与报告器探测的 `-1_1-64.dll` 不匹配——`prepare-renderdoc-portable.ps1` 现自动生成字节级同文件别名（记入 BUNDLE_SOURCE.json 的 localModifications），现有 dependencies/staged 目录已补。
+- **GUI 改版（用户逐项要求）**：测试下拉默认只显示 粒子/等离子晶核（词序对调为"等离子晶核 —— GPU Burn"）/流体（去掉"电影化"与 v2 后缀，"流体 —— 互动水池"），其余 8 项藏于新增"显示旧版 / 高级测试"复选框（`ShowLegacyBox` + `applyWorkloadVisibility()`，隐藏时选中项自动回退到粒子）；全部"跑分"文案改"测试"（11 处）；GPU 导航图标由三角形改为自绘显卡 PathIcon；高级选项复选框间距收紧（VsyncBox MinWidth=0、Spacing 20→14）。History 分组标签同步改名（仅显示文案，id/版本不动）。
+- **安装目录**：与并行会话的 `{pf}\Mangekyo + PrivilegesRequired=admin` 方案会合（本会话曾先改为 {autopf}+dialog，后被并行会话覆盖并升级为 {pf}+admin+SignedUninstaller，遵其现状；build-inno-installer 静态 invariant 已由并行会话同步）。第一次重打失败即因 invariant 与 .iss 撞改动窗口，重跑通过。
+- **GPU Burn v2 背景不是同心圆（用户实图指出）**：`kaleidoscopeBackground` 金环 `sin(radius*3.85)` 的环距 ~1.6 大于可见半径 → 全屏只显一圈；细环权重 0.055 不可见；两者还叠加角向扰动使圆波浪化。修复：环族改纯径向相位、金环频率 3.85→7.6、细环 10.8→15.4/权重 0.14，三份 shader（frag/hlsl/gl.frag）同步。实抓帧验证 5-6 圈完美同心圆 + 中央晶核 + 保留的品红/青波浪臂。**注意：GPU Burn v2 视觉迭代（含本次）未重新标定成绩基线，定稿时须升 shaderVersion 并重跑正式 15 秒。**
+- **x64 包**：`Mangekyo-0.1.1-windows-x64` setup（87.7 MiB，SHA256 94a3bbf8…60791874）与 zip（120.0 MiB）已重打，含以上全部 + SPH/池子几何 + Program Files 安装；staged gpu_burn.frag.spv (01:41:55) 晚于同心圆修复 (01:39:27) 已核对。一次编码事故已完整恢复：PowerShell 批量替换曾损坏 MainWindow.xaml.cpp 中文编码，经与 HEAD 零结构差异验证后 git 恢复并用 Python UTF-8 重做；后续中文文本处理一律禁用 PowerShell 管道。
 
 ### 2026-07-16 GUI History 打开目录按钮
 
@@ -612,7 +656,7 @@ PathService 已把 results/captures/reports/logs 改到
 
 - [ ] 先建立通用 `SessionMode { Benchmark, Explore, Soak }` 和 GUI/CLI 生命周期：Benchmark 固定 15 秒、固定参数并可计分；Explore/Soak 无限运行直到用户停止，默认不自动抓帧，结果只进入独立 diagnostic session，不得污染正式 history。从 Explore/Soak 返回 Benchmark 必须重建资源、恢复固定 seed 并校验 scene/config hash。
 - [ ] **Liquid Lab / Explore**：自由 orbit/WASD 相机、暂停/单步/重置；重力、黏度、刚度、物体密度/阻尼与螺旋桨速度可实时调整，网格/粒子/水位/substeps 必须 Apply & Reset；提供 Inflatable Pool / Glass Tank 环境预设，并永久标注“自由实验模式，不可与跑分比较”。
-- [ ] **GPU Burn — Unlimited Soak**：最终持续烤机应使用当前主 `gpu_burn_v1` Plasma Bloom，而不是 Other/Legacy 中的旧 `gpu_stress_v1`；默认持续到 Stop/Esc/Ctrl+C，GUI 满载时仍须可响应，显示已运行时间、滚动 GPU time/FPS、利用率、功耗/温度（可得时）和降频趋势。固定 `15s + 第 5 秒 RenderDoc` 仍只用于 Burst score，Soak 不生成正式成绩或硬件错误认证。
+- [ ] **GPU Burn — Unlimited Soak**：最终持续烤机应使用当前主 `gpu_burn` Mangekyo Kaleidoscope v2，而不是 legacy `gpu_burn_v1` 或 Other/Legacy 中的旧 `gpu_stress_v1`；默认持续到 Stop/Esc/Ctrl+C，GUI 满载时仍须可响应，显示已运行时间、滚动 GPU time/FPS、利用率、功耗/温度（可得时）和降频趋势。固定 `15s + 第 5 秒 RenderDoc` 仍只用于 Burst score，Soak 不生成正式成绩或硬件错误认证。
 - [ ] **VRAM Integrity Soak**：新增独立 `vram_memtest`，优先读取 memory budget，保留桌面/系统安全余量并区分独显和 UMA；分块写入 address/random/walking-bit 等 pattern、设备端校验并累计错误，报告已验证字节、循环数、带宽和错误块。OOM、device lost 与用户停止必须干净退出；`stream` 永远只表示带宽，不表示显存无错误。
 - [ ] 开发验收：Liquid Lab 退出后正式 v2 的 scene hash/初始画面恢复；GPU Burn 连续 30 分钟无资源增长且 Stop 可用（发布前建议 2 小时）；VRAM Integrity 连续 30 分钟基线零误报并可从 OOM/device-lost 报告原因。
 

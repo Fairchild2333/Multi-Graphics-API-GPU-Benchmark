@@ -21,10 +21,10 @@ set(GPU_BENCH_RENDERDOC_DIR "" CACHE PATH
     "Optional complete RenderDoc portable directory (not a lone DLL)")
 set(GPU_BENCH_REPORT_WORKER_DIR "" CACHE PATH
     "Optional frozen report-worker directory containing report_worker.exe")
-set(GPU_BENCH_PACKAGE_LICENSE_FILE "" CACHE FILEPATH
+set(GPU_BENCH_PACKAGE_LICENSE_FILE "${CMAKE_SOURCE_DIR}/LICENSE" CACHE FILEPATH
     "Project distribution license; required before generating a public MSI")
-set(GPU_BENCH_CPACK_GENERATORS "ZIP" CACHE STRING
-    "Semicolon-separated CPack generators; ZIP is the supported fallback")
+set(GPU_BENCH_CPACK_GENERATORS "ZIP;WIX" CACHE STRING
+    "Semicolon-separated CPack generators; ZIP+WIX is the Windows release pair")
 
 option(GPU_BENCH_BUNDLE_MSVC_RUNTIME
        "Install redistributable MSVC runtime DLLs found by CMake" ON)
@@ -315,7 +315,8 @@ install(FILES
 )
 
 # Keep the engineering payload redistributable for the dependencies that are
-# actually copied.  This still does not supply the project's own license.
+# actually copied. The project MIT license is installed separately above when
+# GPU_BENCH_PACKAGE_LICENSE_FILE is set (default: repo LICENSE).
 install(FILES "${CMAKE_SOURCE_DIR}/THIRD_PARTY_NOTICES.md"
     DESTINATION licenses
     COMPONENT Runtime
@@ -338,18 +339,53 @@ else()
 endif()
 
 set(_gpu_bench_cpack_generators ${GPU_BENCH_CPACK_GENERATORS})
+if(NOT GPU_BENCH_PACKAGE_LICENSE_FILE AND EXISTS "${CMAKE_SOURCE_DIR}/LICENSE")
+    set(GPU_BENCH_PACKAGE_LICENSE_FILE "${CMAKE_SOURCE_DIR}/LICENSE")
+endif()
 if("WIX" IN_LIST _gpu_bench_cpack_generators)
     if(NOT WIN32)
         message(FATAL_ERROR "The CPack WIX generator is only available on Windows")
     endif()
-    if(NOT GPU_BENCH_PACKAGE_LICENSE_FILE)
+    if(NOT GPU_BENCH_PACKAGE_LICENSE_FILE OR NOT EXISTS "${GPU_BENCH_PACKAGE_LICENSE_FILE}")
         message(FATAL_ERROR
-            "Public MSI generation is blocked until GPU_BENCH_PACKAGE_LICENSE_FILE "
-            "points to the approved project distribution license.")
+            "Public MSI generation requires GPU_BENCH_PACKAGE_LICENSE_FILE to point "
+            "at an existing project distribution license (expected repo LICENSE).")
     endif()
-    set(CPACK_RESOURCE_FILE_LICENSE "${GPU_BENCH_PACKAGE_LICENSE_FILE}")
+    # CPack WIX only accepts .txt/.rtf license resources; the repo uses bare LICENSE.
+    get_filename_component(_gpu_bench_license_ext
+        "${GPU_BENCH_PACKAGE_LICENSE_FILE}" EXT)
+    if(_gpu_bench_license_ext STREQUAL ".txt" OR _gpu_bench_license_ext STREQUAL ".rtf")
+        set(CPACK_RESOURCE_FILE_LICENSE "${GPU_BENCH_PACKAGE_LICENSE_FILE}")
+    else()
+        set(_gpu_bench_wix_license "${CMAKE_BINARY_DIR}/cpack-LICENSE.txt")
+        configure_file(
+            "${GPU_BENCH_PACKAGE_LICENSE_FILE}"
+            "${_gpu_bench_wix_license}"
+            COPYONLY)
+        set(CPACK_RESOURCE_FILE_LICENSE "${_gpu_bench_wix_license}")
+    endif()
     set(CPACK_WIX_UPGRADE_GUID "B8D17851-59E5-4FBA-ABF7-6A06B2CBB3DC")
     set(CPACK_WIX_PROGRAM_MENU_FOLDER "Mangekyo")
+    # Prefer WiX CLI (v4+ / v5) when available; otherwise classic candle/light (v3).
+    find_program(_gpu_bench_wix_cli NAMES wix)
+    find_program(_gpu_bench_wix_candle NAMES candle)
+    if(_gpu_bench_wix_cli)
+        set(CPACK_WIX_VERSION "4")
+    else()
+        set(CPACK_WIX_VERSION "3")
+        if(NOT _gpu_bench_wix_candle)
+            message(WARNING
+                "WiX tools were not found on PATH (wix.exe or candle.exe). "
+                "cpack -G WIX will fail until WiX Toolset is installed.")
+        endif()
+    endif()
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(ARM64|arm64)$" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+        set(CPACK_WIX_ARCHITECTURE "arm64")
+    else()
+        set(CPACK_WIX_ARCHITECTURE "x64")
+    endif()
+    # Allow choosing the install directory (Program Files\\Mangekyo by default).
+    set(CPACK_WIX_UI_REF "WixUI_InstallDir")
 endif()
 
 set(CPACK_GENERATOR "${GPU_BENCH_CPACK_GENERATORS}")

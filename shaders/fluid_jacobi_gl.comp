@@ -1,0 +1,44 @@
+#version 430
+
+// Fluid: one Jacobi pressure iteration (OpenGL 4.3). See shaders/fluid_jacobi.comp.
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(std430, binding = 2) buffer InPressure {
+    float inP[];
+};
+
+layout(std430, binding = 3) buffer OutPressure {
+    float outP[];
+};
+
+layout(std430, binding = 4) buffer DivField {
+    float div[];
+};
+
+layout(binding = 5, std140) uniform FluidParams {
+    float dt;
+    float dx;
+    uint  gridSize;
+    float time;
+} p;
+
+uint cellIdx(uvec2 c) { return c.y * p.gridSize + c.x; }
+
+void main() {
+    uvec2 c = gl_GlobalInvocationID.xy;
+    if (c.x >= p.gridSize || c.y >= p.gridSize) return;
+
+    if (c.x == 0u || c.y == 0u || c.x == p.gridSize - 1u || c.y == p.gridSize - 1u) {
+        outP[cellIdx(c)] = 0.0;
+        return;
+    }
+
+    float pL = inP[cellIdx(c - uvec2(1u, 0u))];
+    float pR = inP[cellIdx(c + uvec2(1u, 0u))];
+    float pD = inP[cellIdx(c - uvec2(0u, 1u))];
+    float pU = inP[cellIdx(c + uvec2(0u, 1u))];
+    float d  = div[cellIdx(c)];
+
+    outP[cellIdx(c)] = (pL + pR + pD + pU - d * p.dx * p.dx) * 0.25;
+}

@@ -1,6 +1,7 @@
 #ifdef HAVE_VULKAN
 
 #include "vulkan_backend.h"
+#include "cinematic_liquid_v2_common.h"
 #include "mini_mat.h"
 
 #include <algorithm>
@@ -1383,13 +1384,13 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
                                sizeof(GpuStressV1Params), &sp);
             vkCmdDraw(cmd, 3, 1, 0, 0);  // bounded overdraw; deterministic pass salt
         }
-    } else if (config_.workload == Workload::GpuBurnV1) {
+    } else if (isGpuBurnWorkload(config_.workload)) {
         fractalElapsed_ += deltaTime;
-        for (std::uint32_t pass = 0; pass < kGpuBurnV1DrawsPerFrame; ++pass) {
-            GpuBurnV1Params bp{ fractalElapsed_, static_cast<float>(pass),
-                                config_.gpuBurnIter, kGpuBurnV1ShaderVersion };
+        for (std::uint32_t pass = 0; pass < gpuBurnDrawsPerFrame(config_.workload); ++pass) {
+            GpuBurnParams bp{ fractalElapsed_, static_cast<float>(pass),
+                              config_.gpuBurnIter, gpuBurnShaderVersion(config_.workload) };
             vkCmdPushConstants(cmd, graphicsPipelineLayout_, VK_SHADER_STAGE_FRAGMENT_BIT, 0,
-                               sizeof(GpuBurnV1Params), &bp);
+                               sizeof(GpuBurnParams), &bp);
             vkCmdDraw(cmd, 3, 1, 0, 0);
         }
     } else if (config_.workload == Workload::Volumetric) {
@@ -2105,16 +2106,6 @@ void VulkanBackend::RecordFluidFrame(VkCommandBuffer cmd, float deltaTime,
 
 namespace {
 
-struct alignas(16) MlsMpmParticleGpu {
-    float position[4];
-    float velocity[4];
-    float c0[4];
-    float c1[4];
-    float c2[4];
-};
-static_assert(sizeof(MlsMpmParticleGpu) == 80,
-              "MLS-MPM particle layout must match the GLSL std430 ABI");
-
 struct alignas(16) MlsMpmPushConstants {
     std::uint32_t gridSizeAndCount[4];
     float simulation[4];
@@ -2136,63 +2127,6 @@ struct alignas(16) CinematicLiquidRenderPushConstants {
 };
 static_assert(sizeof(CinematicLiquidRenderPushConstants) == 96,
               "Cinematic Liquid render push constants must match GLSL");
-
-// V2 deliberately uses an independent ABI.  Every field is a full vec4 so
-// std430 and C++ agree without compiler-specific packing rules.
-struct alignas(16) CinematicLiquidBodyStateGpu {
-    float positionType[4];
-    float orientation[4];
-    float linearVelocityInvMass[4];
-    float angularVelocityInvInertia[4];
-    float shape0[4];
-    float shape1[4];
-    float material[4];
-    float color[4];
-};
-static_assert(sizeof(CinematicLiquidBodyStateGpu) == 128,
-              "Cinematic Liquid v2 body state must match GLSL std430");
-
-struct alignas(16) CinematicLiquidBodyImpulseGpu {
-    std::int32_t linear[4];
-    std::int32_t angular[4];
-};
-static_assert(sizeof(CinematicLiquidBodyImpulseGpu) == 32,
-              "Cinematic Liquid v2 body impulse must match GLSL std430");
-
-struct alignas(16) CinematicLiquidV2PushConstants {
-    std::uint32_t gridSizeAndCount[4];
-    float simulation[4];
-    float material[4];
-    float gridOriginDx[4];
-    float collision[4];
-    float coupling[4];
-    std::uint32_t scene[4];
-    float pool[4];
-};
-static_assert(sizeof(CinematicLiquidV2PushConstants) == 128,
-              "Cinematic Liquid v2 compute push constants must match GLSL");
-
-struct alignas(16) CinematicLiquidV2RenderPushConstants {
-    float cameraTime[4];
-    float targetAspect[4];
-    float volumeMinIso[4];
-    float volumeMaxStep[4];
-    float pool[4];
-    float lighting[4];
-    std::uint32_t render[4];
-    std::uint32_t scene[4];
-};
-static_assert(sizeof(CinematicLiquidV2RenderPushConstants) == 128,
-              "Cinematic Liquid v2 render push constants must match GLSL");
-
-struct alignas(16) CinematicLiquidV2SurfacePushConstants {
-    std::uint32_t volumeSizeAndCount[4];
-    float volumeMinVoxel[4];
-    float kernel[4];
-    std::uint32_t contract[4];
-};
-static_assert(sizeof(CinematicLiquidV2SurfacePushConstants) == 64,
-              "Cinematic Liquid v2 surface push constants must match GLSL");
 
 // Shared 128-byte ABI for every cinematic_liquid_sph_* pass.
 struct alignas(16) CinematicLiquidSphPushConstants {
@@ -2217,25 +2151,6 @@ constexpr float kLiquidSphereX = 0.0f;
 constexpr float kLiquidSphereY = 0.62f;
 constexpr float kLiquidSphereZ = 0.0f;
 constexpr float kLiquidSphereRadius = 0.34f;
-
-constexpr float kLiquidV2OriginX = -2.56f;
-constexpr float kLiquidV2OriginY = -0.12f;
-constexpr float kLiquidV2OriginZ = -1.92f;
-constexpr float kLiquidV2RestDensity = 1000.0f;
-constexpr float kLiquidV2FixedPointScale = 65'536.0f;
-constexpr float kLiquidV2BodyImpulseScale = 8'192.0f;
-
-std::uint32_t liquidHash(std::uint32_t x) {
-    x ^= x >> 16;
-    x *= 0x7feb352du;
-    x ^= x >> 15;
-    x *= 0x846ca68bu;
-    return x ^ (x >> 16);
-}
-
-float liquidJitter(std::uint32_t seed) {
-    return (float(liquidHash(seed) & 0xffffu) / 65535.0f - 0.5f);
-}
 
 void appendLiquidBlock(std::vector<MlsMpmParticleGpu>& particles,
                        V3 lo, V3 hi, float spacing, V3 initialVelocity,
@@ -2769,125 +2684,14 @@ void VulkanBackend::CreateCinematicLiquidV2Resources() {
         r.particleCount = static_cast<std::uint32_t>(initial.size());
         config_.particleCount = r.particleCount;
     } else {
-    constexpr std::uint32_t baseX = 142, baseY = 14, baseZ = 98;
-    constexpr std::uint32_t damX = 48, damY = 37, damZ = 71;
-    constexpr std::size_t expectedParticles =
-        std::size_t(baseX) * baseY * baseZ +
-        std::size_t(damX) * damY * damZ;
-    initial.reserve(expectedParticles);
-    std::uint32_t serial = 0;
-    auto appendLattice = [&](std::uint32_t countX, std::uint32_t countY,
-                             std::uint32_t countZ, float centreX,
-                             float startY, float centreZ) {
-        for (std::uint32_t iz = 0; iz < countZ; ++iz) {
-            for (std::uint32_t iy = 0; iy < countY; ++iy) {
-                for (std::uint32_t ix = 0; ix < countX; ++ix, ++serial) {
-                    const float x = centreX +
-                        (float(ix) - 0.5f * float(countX - 1u)) * r.particleSpacing;
-                    const float y = startY + float(iy) * r.particleSpacing;
-                    const float z = centreZ +
-                        (float(iz) - 0.5f * float(countZ - 1u)) * r.particleSpacing;
-                    const float jitterScale = r.particleSpacing * 0.035f;
-                    MlsMpmParticleGpu particle{};
-                    particle.position[0] = x + liquidJitter(0x51a7c0deu + serial * 3u) * jitterScale;
-                    particle.position[1] = y + liquidJitter(0x51a7c0dfu + serial * 3u) * jitterScale;
-                    particle.position[2] = z + liquidJitter(0x51a7c0e0u + serial * 3u) * jitterScale;
-                    particle.position[3] = 1.0f;
-                    initial.push_back(particle);
-                }
-            }
-        }
-    };
-    appendLattice(baseX, baseY, baseZ, 0.0f, 0.10f, 0.0f);
-    appendLattice(damX, damY, damZ, -1.63f, 0.46f, 0.0f);
-    if (initial.size() != expectedParticles)
-        throw std::runtime_error("Cinematic Liquid v2 deterministic dam-break seed drifted");
-    r.particleCount = static_cast<std::uint32_t>(initial.size());
-    if (r.particleCount < 310'000u || r.particleCount > 330'000u)
-        throw std::runtime_error("Cinematic Liquid v2 particle contract drifted outside 310k-330k");
-    config_.particleCount = r.particleCount;
+        BuildCinematicLiquidV2ParticleSeed(initial, r.dx, r.particleSpacing,
+                                           r.particleMass);
+        r.particleCount = static_cast<std::uint32_t>(initial.size());
+        config_.particleCount = r.particleCount;
     }
 
-    auto set4 = [](float (&dst)[4], float x, float y, float z, float w) {
-        dst[0] = x; dst[1] = y; dst[2] = z; dst[3] = w;
-    };
-    std::vector<CinematicLiquidBodyStateGpu> bodies(r.bodyCount);
-    // 0: mother rubber duck.  shape0.xyz is the plump belly envelope and
-    // shape0.w the upright-righting strength; shape1 packs (head radius,
-    // head forward, head height, beak length).  The SDF/render shaders blend
-    // belly, upswept tail, head and flat beak with smooth-min so the toy
-    // reads as one continuous classic bath duck rather than ellipsoid lobes.
-    set4(bodies[0].positionType, 0.05f, 0.56f, 0.30f, 0.0f);
-    set4(bodies[0].orientation, 0.0f, -0.30071f, 0.0f, 0.95372f);
-    set4(bodies[0].linearVelocityInvMass, 0.0f, 0.0f, 0.0f, 1.0f / 20.0f);
-    set4(bodies[0].angularVelocityInvInertia, 0.0f, 0.0f, 0.0f, 1.2f);
-    set4(bodies[0].shape0, 0.30f, 0.21f, 0.26f, 18.0f);
-    set4(bodies[0].shape1, 0.15f, 0.12f, 0.26f, 0.12f);
-    set4(bodies[0].material, 0.08f, 0.28f, 1.35f, 2.60f);
-    set4(bodies[0].color, 1.00f, 0.66f, 0.035f, 0.30f);
-
-    // 1: hollow play ball (about 12% of displaced-water density).
-    set4(bodies[1].positionType, 0.78f, 0.55f, -0.32f, 1.0f);
-    set4(bodies[1].orientation, 0.0f, 0.0f, 0.0f, 1.0f);
-    set4(bodies[1].linearVelocityInvMass, 0.0f, 0.0f, 0.0f, 1.0f / 5.4f);
-    set4(bodies[1].angularVelocityInvInertia, 0.0f, 0.0f, 0.0f, 4.0f);
-    set4(bodies[1].shape0, 0.22f, 0.0f, 0.0f, 0.0f);
-    set4(bodies[1].shape1, 0.0f, 0.0f, 0.0f, 0.0f);
-    set4(bodies[1].material, 0.34f, 0.20f, 0.85f, 1.10f);
-    set4(bodies[1].color, 0.96f, 0.10f, 0.18f, 0.24f);
-
-    // 2: motorized toy boat on a compliant mooring. Local -X is aft; the
-    // raised centre leaves a readable painted hull above the shallow base while
-    // the lower shaft and propeller remain submerged. Finite mass/inertia let
-    // the actuator disk's equal-and-opposite impulse drive, bob and yaw the
-    // boat; the shader-side soft tether keeps it in the fixed hero scene.
-    set4(bodies[2].positionType, 1.25f, 0.47f, 0.50f, 2.0f);
-    set4(bodies[2].orientation, 0.0f, -0.08716f, 0.0f, 0.99619f);
-    set4(bodies[2].linearVelocityInvMass, 0.0f, 0.0f, 0.0f, 1.0f / 34.0f);
-    set4(bodies[2].angularVelocityInvInertia, 0.0f, 0.0f, 0.0f, 0.62f);
-    set4(bodies[2].shape0, 0.52f, 0.16f, 0.24f, 0.10f);
-    set4(bodies[2].shape1, 0.14f, 0.62f, 3.2f, 12.0f);
-    set4(bodies[2].material, 0.04f, 0.34f, 0.90f, 1.70f);
-    set4(bodies[2].color, 0.045f, 0.22f, 0.82f, 0.30f);
-
-    // 3: 1.06x-water-density solid sphere. It is held above open water until
-    // 4.28s, then released to gravity so the formal 5s capture records a real
-    // fluid-coupled impact rather than a zero-velocity crane placement.
-    // Keep the formal entry clear of the duck in the 5s hero camera while
-    // retaining enough open water around the sphere for a readable splash.
-    set4(bodies[3].positionType, 0.38f, 1.65f, -1.25f, 3.0f);
-    set4(bodies[3].orientation, 0.0f, 0.0f, 0.0f, 1.0f);
-    set4(bodies[3].linearVelocityInvMass, 0.0f, 0.0f, 0.0f, 1.0f / 35.52f);
-    set4(bodies[3].angularVelocityInvInertia, 0.0f, 0.0f, 0.0f, 1.76f);
-    set4(bodies[3].shape0, 0.20f, 0.0f, 0.0f, 0.0f);
-    set4(bodies[3].shape1, 0.0f, 0.0f, 0.0f, 0.0f);
-    set4(bodies[3].material, 0.0f, 0.42f, 4.00f, 1.40f);
-    set4(bodies[3].color, 0.12f, 0.15f, 0.19f, 0.20f);
-
-    // 4-6: duckling trio (the reference "子母鸭" family) at ~0.45 mother
-    // scale, staggered between the mother and the 5 s hero camera with varied
-    // headings.  Appended after index 3 because the sink sphere's release is
-    // keyed to lane 3 in the rigid integrate shader.  Spawn spacing exceeds
-    // every pairwise bounding-radius sum, so the pair solver applies no
-    // start-up pop.  Lighter bodies right faster (stronger shape0.w) and get
-    // extra linear/angular drag so the dam wave rocks them without spinning
-    // them like tops.
-    constexpr struct { float x, z, qy, qw; } kDucklings[3] = {
-        {-0.62f, 0.78f,  0.21644f, 0.97630f},
-        { 0.42f, 1.10f, -0.46175f, 0.88701f},
-        {-0.20f, 1.15f, -0.60876f, 0.79335f},
-    };
-    for (std::size_t i = 0; i < 3; ++i) {
-        auto& duckling = bodies[4 + i];
-        set4(duckling.positionType, kDucklings[i].x, 0.52f, kDucklings[i].z, 0.0f);
-        set4(duckling.orientation, 0.0f, kDucklings[i].qy, 0.0f, kDucklings[i].qw);
-        set4(duckling.linearVelocityInvMass, 0.0f, 0.0f, 0.0f, 1.0f / 1.82f);
-        set4(duckling.angularVelocityInvInertia, 0.0f, 0.0f, 0.0f, 9.0f);
-        set4(duckling.shape0, 0.14f, 0.095f, 0.12f, 26.0f);
-        set4(duckling.shape1, 0.068f, 0.054f, 0.118f, 0.055f);
-        set4(duckling.material, 0.10f, 0.30f, 1.60f, 3.20f);
-        set4(duckling.color, 1.00f, 0.66f, 0.035f, 0.30f);
-    }
+    std::vector<CinematicLiquidBodyStateGpu> bodies;
+    BuildCinematicLiquidV2BodySeed(bodies);
 
     const std::uint64_t gridCellCount64 = std::uint64_t(r.gridX) * r.gridY * r.gridZ;
     const std::uint64_t surfaceCellCount64 =
@@ -3612,43 +3416,10 @@ void VulkanBackend::RecordCinematicLiquidV2Frame(VkCommandBuffer cmd, float delt
     r.simTime += frameDt;
 
     CinematicLiquidV2PushConstants pc{};
-    pc.gridSizeAndCount[0] = r.gridX;
-    pc.gridSizeAndCount[1] = r.gridY;
-    pc.gridSizeAndCount[2] = r.gridZ;
-    pc.gridSizeAndCount[3] = r.particleCount;
-    pc.simulation[0] = substepDt;
-    pc.simulation[1] = -9.81f;
-    pc.simulation[2] = kLiquidV2RestDensity;
-    pc.simulation[3] = 45'000.0f;
-    pc.material[0] = 0.035f;
-    pc.material[1] = r.particleMass;
-    pc.material[2] = kLiquidV2FixedPointScale;
-    pc.material[3] = 2.5f;
-    pc.gridOriginDx[0] = kLiquidV2OriginX;
-    pc.gridOriginDx[1] = kLiquidV2OriginY;
-    pc.gridOriginDx[2] = kLiquidV2OriginZ;
-    pc.gridOriginDx[3] = r.dx;
-    pc.collision[0] = 0.45f;
-    pc.collision[1] = 0.035f;
-    pc.collision[2] = 0.035f;
-    pc.collision[3] = 8.0f;
-    pc.coupling[0] = kLiquidV2BodyImpulseScale;
-    pc.coupling[1] = 1.0f;
-    pc.coupling[2] = 1.0f;
-    pc.coupling[3] = 1.0f;
-    pc.scene[0] = r.bodyCount;
-    pc.scene[1] = 2u;
-    pc.scene[2] = 1u;  // two-way coupling + deterministic choreography
-    pc.scene[3] = r.shaderVersion;
-    pc.pool[0] = 0.30f;
-    // Inset of the finite-height physical pool wall from the outer simulation
-    // domain. The remaining catch band lets real spray cross the rim and land
-    // on the ground instead of hitting an invisible infinite wall.  0.45
-    // (user-widened from 0.22) must stay in sync with the render frag's
-    // poolInset and the SPH wall constants.
-    pc.pool[1] = 0.45f;
-    pc.pool[2] = 0.00f;
-    pc.pool[3] = r.presentationTime;
+    FillCinematicLiquidV2ComputePush(pc, r.gridX, r.gridY, r.gridZ,
+                                     r.particleCount, substepDt, r.particleMass,
+                                     r.dx, r.bodyCount, r.shaderVersion,
+                                     r.presentationTime);
 
     BeginDebugLabel(cmd, "Cinematic Liquid v2: Coupled MLS-MPM", 0.02f, 0.62f, 0.82f);
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, r.computeLayout,
@@ -3797,20 +3568,10 @@ void VulkanBackend::RecordCinematicLiquidV2Frame(VkCommandBuffer cmd, float delt
     const float surfaceVoxelSize =
         (float(r.gridX) * r.dx) / float(r.surfaceX);
     CinematicLiquidV2SurfacePushConstants surfacePc{};
-    surfacePc.volumeSizeAndCount[0] = r.surfaceX;
-    surfacePc.volumeSizeAndCount[1] = r.surfaceY;
-    surfacePc.volumeSizeAndCount[2] = r.surfaceZ;
-    surfacePc.volumeSizeAndCount[3] = r.particleCount;
-    surfacePc.volumeMinVoxel[0] = kLiquidV2OriginX;
-    surfacePc.volumeMinVoxel[1] = kLiquidV2OriginY;
-    surfacePc.volumeMinVoxel[2] = kLiquidV2OriginZ;
-    surfacePc.volumeMinVoxel[3] = surfaceVoxelSize;
-    surfacePc.kernel[0] = 1.70f * r.particleSpacing;
-    surfacePc.kernel[1] = r.particleMass / kLiquidV2RestDensity;
-    surfacePc.kernel[2] = kLiquidV2FixedPointScale;
-    surfacePc.kernel[3] = 4.0f;
-    surfacePc.contract[0] = r.shaderVersion;
-    surfacePc.contract[1] = 1u;  // normalized Spiky^2 particle reconstruction
+    FillCinematicLiquidV2SurfacePush(surfacePc, r.surfaceX, r.surfaceY,
+                                     r.surfaceZ, r.particleCount,
+                                     surfaceVoxelSize, r.particleSpacing,
+                                     r.particleMass, r.shaderVersion);
 
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
                             r.surfaceLayout, 0, 1, &r.surfaceSet, 0, nullptr);
@@ -3868,39 +3629,6 @@ void VulkanBackend::RecordCinematicLiquidV2Frame(VkCommandBuffer cmd, float delt
                             timestampQueryPool_, timestampBase + 2);
     }
 
-    // Piecewise smoothstep path: overview -> low side-on 5 s hero hold ->
-    // propeller side -> high rear.  The side view exposes the height and curl
-    // of the released water wall; the old high three-quarter view flattened it
-    // into what looked like a calm blue sheet. Segment derivatives reach zero
-    // at joins, so the camera is C1.
-    struct CameraKey { float t, degrees, radius, height; };
-    constexpr CameraKey keys[] = {
-        {0.0f,  -35.0f, 5.35f, 2.05f},
-        {3.0f,   34.0f, 5.00f, 1.78f},
-        {4.6f,   72.0f, 4.25f, 1.76f},
-        {5.5f,   84.0f, 4.30f, 1.82f},
-        {10.0f, 105.0f, 4.85f, 2.30f},
-        {15.0f, 165.0f, 5.35f, 2.65f}
-    };
-    constexpr std::size_t keyCount = sizeof(keys) / sizeof(keys[0]);
-    const float cameraT = std::clamp(r.presentationTime, 0.0f, 15.0f);
-    CameraKey camera = keys[keyCount - 1u];
-    for (std::size_t i = 0; i + 1u < keyCount; ++i) {
-        if (cameraT <= keys[i + 1u].t) {
-            float u = (cameraT - keys[i].t) / (keys[i + 1u].t - keys[i].t);
-            u = std::clamp(u, 0.0f, 1.0f);
-            u = u * u * (3.0f - 2.0f * u);
-            camera.t = cameraT;
-            camera.degrees = keys[i].degrees + (keys[i + 1u].degrees - keys[i].degrees) * u;
-            camera.radius = keys[i].radius + (keys[i + 1u].radius - keys[i].radius) * u;
-            camera.height = keys[i].height + (keys[i + 1u].height - keys[i].height) * u;
-            break;
-        }
-    }
-    const float angle = camera.degrees * 3.14159265359f / 180.0f;
-    const float cameraX = std::cos(angle) * camera.radius;
-    const float cameraZ = std::sin(angle) * camera.radius;
-
     BeginDebugLabel(cmd, "Cinematic Liquid v2: Pool Raymarch", 0.03f, 0.36f, 0.94f);
     VkClearValue clear{};
     clear.color = {{0.045f, 0.16f, 0.36f, 1.0f}};
@@ -3916,46 +3644,18 @@ void VulkanBackend::RecordCinematicLiquidV2Frame(VkCommandBuffer cmd, float delt
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, r.renderLayout,
                             0, 1, &r.renderSet, 0, nullptr);
 
-    CinematicLiquidV2RenderPushConstants renderPc{};
-    renderPc.cameraTime[0] = cameraX;
-    renderPc.cameraTime[1] = camera.height;
-    renderPc.cameraTime[2] = cameraZ;
-    renderPc.cameraTime[3] = r.presentationTime;
-    renderPc.targetAspect[0] = 0.0f;
-    renderPc.targetAspect[1] = 0.82f;
-    renderPc.targetAspect[2] = 0.0f;
-    renderPc.targetAspect[3] = float(swapChainExtent_.width) /
-                               float(std::max(swapChainExtent_.height, 1u));
-    renderPc.volumeMinIso[0] = kLiquidV2OriginX;
-    renderPc.volumeMinIso[1] = kLiquidV2OriginY;
-    renderPc.volumeMinIso[2] = kLiquidV2OriginZ;
-    // jeantimex/fluid uses densityOffset/targetDensity ~= 200/630.
-    // Preserve that dimensionless threshold for the Spiky^2 particle splat.
-    renderPc.volumeMinIso[3] = 0.32f;
-    renderPc.volumeMaxStep[0] = kLiquidV2OriginX + float(r.gridX) * r.dx;
-    renderPc.volumeMaxStep[1] = kLiquidV2OriginY + float(r.gridY) * r.dx;
-    renderPc.volumeMaxStep[2] = kLiquidV2OriginZ + float(r.gridZ) * r.dx;
-    renderPc.volumeMaxStep[3] = 1.0f;
-    renderPc.pool[0] = 0.30f;
-    renderPc.pool[1] = 0.085f;
-    renderPc.pool[2] = 0.00f;  // physical pool/grass ground height
-    renderPc.pool[3] = 0.025f;
-    renderPc.lighting[0] = -0.42f;
-    renderPc.lighting[1] = 0.78f;
-    renderPc.lighting[2] = 0.46f;
-    renderPc.lighting[3] = 1.08f;
-    renderPc.render[0] = r.raySteps;
-    renderPc.render[1] = r.shaderVersion;
-    renderPc.render[2] = swapChainExtent_.width;
-    renderPc.render[3] = swapChainExtent_.height;
-    renderPc.scene[0] = r.bodyCount;
-    renderPc.scene[1] = 2u;
     const bool swapchainIsSrgb =
         swapChainImageFormat_ == VK_FORMAT_B8G8R8A8_SRGB ||
         swapChainImageFormat_ == VK_FORMAT_R8G8B8A8_SRGB ||
         swapChainImageFormat_ == VK_FORMAT_A8B8G8R8_SRGB_PACK32;
-    renderPc.scene[2] = swapchainIsSrgb ? 1u : 0u;
-    renderPc.scene[3] = r.shaderVersion;
+    CinematicLiquidV2RenderPushConstants renderPc{};
+    FillCinematicLiquidV2RenderPush(
+        renderPc, r.presentationTime,
+        float(swapChainExtent_.width) /
+            float(std::max(swapChainExtent_.height, 1u)),
+        r.gridX, r.gridY, r.gridZ, r.dx, r.raySteps, r.shaderVersion,
+        swapChainExtent_.width, swapChainExtent_.height, r.bodyCount,
+        swapchainIsSrgb);
     vkCmdPushConstants(cmd, r.renderLayout, VK_SHADER_STAGE_FRAGMENT_BIT,
                        0, sizeof(renderPc), &renderPc);
     vkCmdDraw(cmd, 3, 1, 0, 0);
@@ -4207,38 +3907,10 @@ void VulkanBackend::RecordCinematicLiquidSphFrame(VkCommandBuffer cmd,
     // Reused fixed-point/rigid ABI for the shared rigid-integrate, grid-clear
     // and whitewater-resolve passes (grid stays zeroed: SPH has no P2G).
     CinematicLiquidV2PushConstants pc{};
-    pc.gridSizeAndCount[0] = r.gridX;
-    pc.gridSizeAndCount[1] = r.gridY;
-    pc.gridSizeAndCount[2] = r.gridZ;
-    pc.gridSizeAndCount[3] = r.particleCount;
-    pc.simulation[0] = dtWorld;
-    pc.simulation[1] = -9.81f;
-    pc.simulation[2] = kLiquidV2RestDensity;
-    pc.simulation[3] = 45'000.0f;
-    pc.material[0] = 0.035f;
-    pc.material[1] = r.particleMass;
-    pc.material[2] = kLiquidV2FixedPointScale;
-    pc.material[3] = 2.5f;
-    pc.gridOriginDx[0] = kLiquidV2OriginX;
-    pc.gridOriginDx[1] = kLiquidV2OriginY;
-    pc.gridOriginDx[2] = kLiquidV2OriginZ;
-    pc.gridOriginDx[3] = r.dx;
-    pc.collision[0] = 0.45f;
-    pc.collision[1] = 0.035f;
-    pc.collision[2] = 0.035f;
-    pc.collision[3] = 8.0f;
-    pc.coupling[0] = kLiquidV2BodyImpulseScale;
-    pc.coupling[1] = 1.0f;
-    pc.coupling[2] = 1.0f;
-    pc.coupling[3] = 1.0f;
-    pc.scene[0] = r.bodyCount;
-    pc.scene[1] = 2u;
-    pc.scene[2] = 1u;
-    pc.scene[3] = r.shaderVersion;
-    pc.pool[0] = 0.30f;
-    pc.pool[1] = 0.45f;  // wall inset; must match the SPH wall constants
-    pc.pool[2] = 0.00f;
-    pc.pool[3] = r.presentationTime;
+    FillCinematicLiquidV2ComputePush(pc, r.gridX, r.gridY, r.gridZ,
+                                     r.particleCount, dtWorld, r.particleMass,
+                                     r.dx, r.bodyCount, r.shaderVersion,
+                                     r.presentationTime);
 
     const float h = kCinematicLiquidSphSmoothingRadius;
     const float pi = 3.14159265358979323846f;
@@ -4536,20 +4208,10 @@ void VulkanBackend::RecordCinematicLiquidSphFrame(VkCommandBuffer cmd,
     const float surfaceVoxelSize =
         (float(r.gridX) * r.dx) / float(r.surfaceX);
     CinematicLiquidV2SurfacePushConstants surfacePc{};
-    surfacePc.volumeSizeAndCount[0] = r.surfaceX;
-    surfacePc.volumeSizeAndCount[1] = r.surfaceY;
-    surfacePc.volumeSizeAndCount[2] = r.surfaceZ;
-    surfacePc.volumeSizeAndCount[3] = r.particleCount;
-    surfacePc.volumeMinVoxel[0] = kLiquidV2OriginX;
-    surfacePc.volumeMinVoxel[1] = kLiquidV2OriginY;
-    surfacePc.volumeMinVoxel[2] = kLiquidV2OriginZ;
-    surfacePc.volumeMinVoxel[3] = surfaceVoxelSize;
-    surfacePc.kernel[0] = 1.70f * r.particleSpacing;
-    surfacePc.kernel[1] = r.particleMass / kLiquidV2RestDensity;
-    surfacePc.kernel[2] = kLiquidV2FixedPointScale;
-    surfacePc.kernel[3] = 4.0f;
-    surfacePc.contract[0] = r.shaderVersion;
-    surfacePc.contract[1] = 1u;
+    FillCinematicLiquidV2SurfacePush(surfacePc, r.surfaceX, r.surfaceY,
+                                     r.surfaceZ, r.particleCount,
+                                     surfaceVoxelSize, r.particleSpacing,
+                                     r.particleMass, r.shaderVersion);
 
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
                             r.surfaceLayout, 0, 1, &r.surfaceSet, 0, nullptr);
@@ -4609,34 +4271,6 @@ void VulkanBackend::RecordCinematicLiquidSphFrame(VkCommandBuffer cmd,
 
     // Camera path and raymarch identical to v2 so the SPH slice can be
     // compared frame-for-frame against the MLS-MPM captures.
-    struct CameraKey { float t, degrees, radius, height; };
-    constexpr CameraKey keys[] = {
-        {0.0f,  -35.0f, 5.35f, 2.05f},
-        {3.0f,   34.0f, 5.00f, 1.78f},
-        {4.6f,   72.0f, 4.25f, 1.76f},
-        {5.5f,   84.0f, 4.30f, 1.82f},
-        {10.0f, 105.0f, 4.85f, 2.30f},
-        {15.0f, 165.0f, 5.35f, 2.65f}
-    };
-    constexpr std::size_t keyCount = sizeof(keys) / sizeof(keys[0]);
-    const float cameraT = std::clamp(r.presentationTime, 0.0f, 15.0f);
-    CameraKey camera = keys[keyCount - 1u];
-    for (std::size_t i = 0; i + 1u < keyCount; ++i) {
-        if (cameraT <= keys[i + 1u].t) {
-            float u = (cameraT - keys[i].t) / (keys[i + 1u].t - keys[i].t);
-            u = std::clamp(u, 0.0f, 1.0f);
-            u = u * u * (3.0f - 2.0f * u);
-            camera.t = cameraT;
-            camera.degrees = keys[i].degrees + (keys[i + 1u].degrees - keys[i].degrees) * u;
-            camera.radius = keys[i].radius + (keys[i + 1u].radius - keys[i].radius) * u;
-            camera.height = keys[i].height + (keys[i + 1u].height - keys[i].height) * u;
-            break;
-        }
-    }
-    const float angle = camera.degrees * 3.14159265359f / 180.0f;
-    const float cameraX = std::cos(angle) * camera.radius;
-    const float cameraZ = std::sin(angle) * camera.radius;
-
     BeginDebugLabel(cmd, "Cinematic Liquid SPH: Pool Raymarch", 0.03f, 0.36f, 0.94f);
     VkClearValue clear{};
     clear.color = {{0.045f, 0.16f, 0.36f, 1.0f}};
@@ -4652,44 +4286,18 @@ void VulkanBackend::RecordCinematicLiquidSphFrame(VkCommandBuffer cmd,
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, r.renderLayout,
                             0, 1, &r.renderSet, 0, nullptr);
 
-    CinematicLiquidV2RenderPushConstants renderPc{};
-    renderPc.cameraTime[0] = cameraX;
-    renderPc.cameraTime[1] = camera.height;
-    renderPc.cameraTime[2] = cameraZ;
-    renderPc.cameraTime[3] = r.presentationTime;
-    renderPc.targetAspect[0] = 0.0f;
-    renderPc.targetAspect[1] = 0.82f;
-    renderPc.targetAspect[2] = 0.0f;
-    renderPc.targetAspect[3] = float(swapChainExtent_.width) /
-                               float(std::max(swapChainExtent_.height, 1u));
-    renderPc.volumeMinIso[0] = kLiquidV2OriginX;
-    renderPc.volumeMinIso[1] = kLiquidV2OriginY;
-    renderPc.volumeMinIso[2] = kLiquidV2OriginZ;
-    renderPc.volumeMinIso[3] = 0.32f;
-    renderPc.volumeMaxStep[0] = kLiquidV2OriginX + float(r.gridX) * r.dx;
-    renderPc.volumeMaxStep[1] = kLiquidV2OriginY + float(r.gridY) * r.dx;
-    renderPc.volumeMaxStep[2] = kLiquidV2OriginZ + float(r.gridZ) * r.dx;
-    renderPc.volumeMaxStep[3] = 1.0f;
-    renderPc.pool[0] = 0.30f;
-    renderPc.pool[1] = 0.085f;
-    renderPc.pool[2] = 0.00f;
-    renderPc.pool[3] = 0.025f;
-    renderPc.lighting[0] = -0.42f;
-    renderPc.lighting[1] = 0.78f;
-    renderPc.lighting[2] = 0.46f;
-    renderPc.lighting[3] = 1.08f;
-    renderPc.render[0] = r.raySteps;
-    renderPc.render[1] = r.shaderVersion;
-    renderPc.render[2] = swapChainExtent_.width;
-    renderPc.render[3] = swapChainExtent_.height;
-    renderPc.scene[0] = r.bodyCount;
-    renderPc.scene[1] = 2u;
     const bool swapchainIsSrgb =
         swapChainImageFormat_ == VK_FORMAT_B8G8R8A8_SRGB ||
         swapChainImageFormat_ == VK_FORMAT_R8G8B8A8_SRGB ||
         swapChainImageFormat_ == VK_FORMAT_A8B8G8R8_SRGB_PACK32;
-    renderPc.scene[2] = swapchainIsSrgb ? 1u : 0u;
-    renderPc.scene[3] = r.shaderVersion;
+    CinematicLiquidV2RenderPushConstants renderPc{};
+    FillCinematicLiquidV2RenderPush(
+        renderPc, r.presentationTime,
+        float(swapChainExtent_.width) /
+            float(std::max(swapChainExtent_.height, 1u)),
+        r.gridX, r.gridY, r.gridZ, r.dx, r.raySteps, r.shaderVersion,
+        swapChainExtent_.width, swapChainExtent_.height, r.bodyCount,
+        swapchainIsSrgb);
     vkCmdPushConstants(cmd, r.renderLayout, VK_SHADER_STAGE_FRAGMENT_BIT,
                        0, sizeof(renderPc), &renderPc);
     vkCmdDraw(cmd, 3, 1, 0, 0);

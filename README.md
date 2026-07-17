@@ -98,8 +98,9 @@ suite.
 
 ## Benchmark Workloads
 
-The engine currently exposes **eleven public workload selections**. `gpu_burn` is the
-new primary visual graphics-burn path; `gpu_stress` remains an advanced
+The engine currently exposes **twelve public workload selections**. `gpu_burn` is the
+Mangekyo Kaleidoscope primary visual graphics-burn path; the original Plasma Bloom
+contract remains available as `gpu_burn_v1`, and `gpu_stress` remains an advanced
 GraphicsBurn component score, and the original `stress` path is retained as
 `Legacy Stress v1`. `cinematic_liquid` is the real 3D Vulkan liquid test. Its
 validated v1 score contract is preserved, while the current working tree adds
@@ -112,7 +113,8 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
 |------|--------------|----------|--------|-------|
 | **Bandwidth** | `stream` (default) | Particle working-set memory traffic | GB/s | `--particles` |
 | **Compute (achievable)** | `nbody` | FP32 ALU + SFU + shared memory | GFLOP/s | `--bodies` |
-| **Primary visual GPU burn** | `gpu_burn` | Original Plasma Bloom core; fixed-step fragment FP32/SFU/INT + overdraw | Gpix-step/s | safe auto-tune (recommended), or fixed `--iter 16..32` |
+| **Primary visual GPU burn** | `gpu_burn` | Perspective 3D cut-glass crown and layered diamond shards; fixed-step SDF/FP32/SFU/INT + overdraw | Gpix-step/s | safe auto-tune (recommended), or fixed `--iter 16..32` |
+| **Legacy visual GPU burn** | `gpu_burn_v1` | Preserved Plasma Bloom v1 contract and shader | Gpix-step/s | safe auto-tune (recommended), or fixed `--iter 16..32` |
 | **Advanced GraphicsBurn component** | `gpu_stress` | Fragment FP32/SFU/INT ALU + four-pass overdraw | Gpix-iter/s | auto-tuned, or `--iter` |
 | **Legacy fill test** | `stress` | Fractal fragment ALU + fill | G-iter/s | `--iter` |
 | **Compute (peak)** | `synthpeak` | Raw ALU throughput per precision | GFLOPS / GIOPS | `--precision`, `--iter` |
@@ -125,7 +127,8 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
 ```bash
 ./build/gpu_benchmark --benchmark --headless                          # Stream — bandwidth (GB/s)
 ./build/gpu_benchmark --benchmark --workload nbody --bodies 65536      # N-body — achievable GFLOP/s
-./build/gpu_benchmark --time 15 --workload gpu_burn --capture 5        # Primary 15 s Plasma Bloom visual burn
+./build/gpu_benchmark --time 15 --workload gpu_burn --capture 5        # Primary 15 s Mangekyo Kaleidoscope visual burn
+./build/gpu_benchmark --time 15 --workload gpu_burn_v1 --capture 5     # Preserved Plasma Bloom v1 visual burn
 ./build/gpu_benchmark --time 15 --workload gpu_stress --capture 5      # Advanced GraphicsBurn component
 ./build/gpu_benchmark --benchmark --workload stress --iter 8000        # Legacy fractal fill test
 ./build/gpu_benchmark --benchmark --workload synthpeak --precision fp32  # Peak FLOPS (fp32|fp16|fp64|int32)
@@ -140,11 +143,14 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
   a working-set memory-throughput result rather than a complete GPU-performance
   score. `nbody` is a shared-memory-tiled all-pairs simulation that is genuinely
   ALU/SFU-bound. `gpu_burn` is a versioned, auto-tuned visual GraphicsBurn: two
-  fixed-step fullscreen passes render an original rotating Plasma Bloom: an
-  irregular energy core with crystalline spikes and electric HDR corona, while
-  consuming FP32/SFU/INT work. It is
+  fixed-step fullscreen passes raymarch a perspective 3D Mangekyo crown built
+  from truncated cut gems and layered diamond shards. Planar SDF normals,
+  Fresnel reflection, chromatic refraction, absorption and camera parallax make
+  the geometry visibly faceted while consuming FP32/SFU/INT work.
+  `gpu_burn_v1` preserves the original rotating Plasma Bloom shader and
+  result identity for historical comparison. Both are
   implemented on Vulkan, DX12, DX11 and OpenGL (including DX WARP), with Metal
-  explicitly unsupported for v1. `gpu_stress` retains the earlier four-pass
+  explicitly unsupported on Metal. `gpu_stress` retains the earlier four-pass
   GraphicsBurn component score under its original result contract. Neither is
   currently a hardware-error detector. `stress` is the unchanged legacy fractal test;
   `synthpeak` is a vkpeak-style
@@ -338,11 +344,12 @@ platform-specific setup (Windows/Linux/macOS).
 For a Windows GUI-first GitHub Release candidate, use
 [`scripts/build-windows-github-release.ps1`](scripts/build-windows-github-release.ps1).
 It rebuilds CLI/WinUI, verifies a pinned RenderDoc portable input, audits PE
-imports, inventories and rechecks the ZIP, then emits the portable ZIP, Inno
-Setup EXE, `SHA256SUMS.txt` and `release-assets.json` under
-`out/release/windows-x64`. The current repository still needs a root project
-license, signing, frozen report worker and clean-machine acceptance before a
-public release; see [`packaging/PACKAGE_LIMITATIONS.md`](packaging/PACKAGE_LIMITATIONS.md).
+imports, inventories and rechecks the ZIP, then emits the portable ZIP, WiX MSI,
+`SHA256SUMS.txt` and `release-assets.json` under
+`out/release/windows-x64` (or `windows-arm64`). The project is MIT-licensed
+(`LICENSE`); public release still needs Authenticode signing, frozen report
+worker and clean-machine acceptance — see
+[`packaging/PACKAGE_LIMITATIONS.md`](packaging/PACKAGE_LIMITATIONS.md).
 
 **Linux (Debian/Ubuntu):**
 ```bash

@@ -1,0 +1,93 @@
+#version 430
+
+// Fluid: semi-Lagrangian advection of velocity + dye (OpenGL 4.3).
+// See shaders/fluid_advect.comp for the full algorithm description.
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(std430, binding = 0) buffer InBuf {
+    vec4 inCells[];
+};
+
+layout(std430, binding = 1) buffer OutBuf {
+    vec4 outCells[];
+};
+
+// Bindings 0-4 mirror the Vulkan SSBO table; params live at binding 5.
+layout(binding = 5, std140) uniform FluidParams {
+    float dt;
+    float dx;
+    uint  gridSize;
+    float time;
+} p;
+
+uint cellIdx(uvec2 c) { return c.y * p.gridSize + c.x; }
+
+uvec2 clampCoord(uvec2 c) {
+    return clamp(c, uvec2(0u), uvec2(p.gridSize - 1u));
+}
+
+void main() {
+    uvec2 c = gl_GlobalInvocationID.xy;
+    if (c.x >= p.gridSize || c.y >= p.gridSize) return;
+
+    vec2 vel = inCells[cellIdx(c)].xy;
+    vec2 pos = vec2(c) - vel * p.dt / p.dx;
+    pos = clamp(pos, vec2(0.0), vec2(p.gridSize - 1u));
+
+    uvec2 i0 = uvec2(floor(pos));
+    vec2 f = pos - vec2(i0);
+    uvec2 i1 = i0 + uvec2(1u);
+    i0 = clampCoord(i0);
+    i1 = clampCoord(i1);
+
+    vec4 v00 = inCells[cellIdx(i0)];
+    vec4 v10 = inCells[cellIdx(uvec2(i1.x, i0.y))];
+    vec4 v01 = inCells[cellIdx(uvec2(i0.x, i1.y))];
+    vec4 v11 = inCells[cellIdx(i1)];
+
+    vec4 a = mix(v00, v10, f.x);
+    vec4 b = mix(v01, v11, f.x);
+    vec4 fluid = mix(a, b, f.y);
+
+    fluid.xy *= exp(-0.22 * p.dt);
+    fluid.zw *= exp(-0.72 * p.dt);
+
+    vec2 q = (vec2(c) + 0.5) / float(p.gridSize) - 0.5;
+    float phase = p.time * 0.72;
+    vec2 emitterA = vec2(-0.40, -0.025 + 0.018 * sin(phase));
+    vec2 emitterB = vec2( 0.40,  0.025 - 0.018 * sin(phase * 0.91 + 1.2));
+    vec2 impact = vec2(0.025 * sin(phase * 0.43),
+                       0.018 * cos(phase * 0.37));
+    vec2 da = q - emitterA;
+    vec2 db = q - emitterB;
+    float jetA = exp(-dot(da, da) * 720.0);
+    float jetB = exp(-dot(db, db) * 720.0);
+
+    vec2 forceA = normalize(impact - emitterA) * 0.88;
+    vec2 forceB = normalize(impact - emitterB) * 0.88;
+
+    float r2 = dot(q, q);
+    float vortexWeight = exp(-r2 * 65.0);
+    vec2 vortex = vec2(-q.y, q.x) *
+                  (0.26 + 0.05 * sin(phase * 0.63)) * vortexWeight;
+    vec2 breathing = (impact - q) * (0.11 + 0.03 * sin(phase * 0.47)) *
+                     exp(-r2 * 12.0);
+    vec2 eddyA = vec2(cos(q.y * 43.0 - phase * 1.37),
+                      sin(q.x * 39.0 + phase * 1.11)) * 0.035;
+    vec2 eddyB = vec2(sin(q.y * 67.0 + phase * 0.83),
+                     -sin(q.x * 55.0 - phase * 0.96)) * 0.045;
+    vec2 eddies = (eddyA + eddyB) * exp(-r2 * 13.0);
+
+    fluid.xy += (jetA * forceA + jetB * forceB + vortex + breathing + eddies) * p.dt;
+    float speed = length(fluid.xy);
+    if (speed > 1.0)
+        fluid.xy *= 1.0 / speed;
+    fluid.z = min(fluid.z + jetA * (3.8 * p.dt), 1.8);
+    fluid.w = min(fluid.w + jetB * (3.8 * p.dt), 1.8);
+
+    if (c.x == 0u || c.y == 0u || c.x == p.gridSize - 1u || c.y == p.gridSize - 1u)
+        fluid.xy = vec2(0.0);
+
+    outCells[cellIdx(c)] = fluid;
+}

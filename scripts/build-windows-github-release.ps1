@@ -15,6 +15,7 @@ param(
     [string]$RenderDocSha256,
     [string]$ReportWorkerDir,
     [string]$ProjectLicenseFile,
+    [string]$WixBinDir,
     [string]$IsccPath,
     [string]$SignToolCommand,
     [string]$Version,
@@ -144,9 +145,14 @@ if ($Version -and $Version -ne $manifestVersion) {
 $Version = $manifestVersion
 
 if (-not $SkipInstaller) {
-    $installerScript = Join-Path $PSScriptRoot 'build-inno-installer.ps1'
-    $installerArgs = @('-StageDir', $StageDir, '-OutputDir', $InstallerDir, '-Version', $Version, '-Arch', $Arch)
-    if ($IsccPath) { $installerArgs += @('-IsccPath', $IsccPath) }
+    $installerScript = Join-Path $PSScriptRoot 'build-wix-installer.ps1'
+    $installerArgs = @(
+        '-StageDir', $StageDir,
+        '-BuildDir', $BuildDir,
+        '-OutputDir', $InstallerDir,
+        '-Version', $Version,
+        '-Arch', $Arch)
+    if ($WixBinDir) { $installerArgs += @('-WixBinDir', $WixBinDir) }
     if ($SignToolCommand) { $installerArgs += @('-SignToolCommand', $SignToolCommand) }
     if ($RequireSigned) { $installerArgs += '-RequireSigned' }
     Invoke-CheckedScript $installerScript $installerArgs
@@ -227,14 +233,16 @@ try {
     }
 } finally { $zipAudit.Dispose() }
 if (-not $SkipInstaller) {
-    $setupName = "Mangekyo-$Version-windows-$archLower-setup.exe"
-    $setup = Get-Item -LiteralPath (Join-Path $InstallerDir $setupName) -ErrorAction Stop
-    Copy-Item -LiteralPath $setup.FullName -Destination (Join-Path $ReleaseDir $setup.Name) -Force
-    $assets.Add((Get-Item -LiteralPath (Join-Path $ReleaseDir $setup.Name)))
+    $msiName = "Mangekyo-$Version-windows-$archLower.msi"
+    $msi = Get-Item -LiteralPath (Join-Path $InstallerDir $msiName) -ErrorAction Stop
+    Copy-Item -LiteralPath $msi.FullName -Destination (Join-Path $ReleaseDir $msi.Name) -Force
+    $assets.Add((Get-Item -LiteralPath (Join-Path $ReleaseDir $msi.Name)))
 }
 
 $assetRows = @($assets | Sort-Object Name | ForEach-Object {
-    $signature = if ($_.Extension -eq '.exe') { (Get-AuthenticodeSignature -LiteralPath $_.FullName).Status.ToString() } else { 'NotApplicable' }
+    $signature = if ($_.Extension -in '.exe', '.msi') {
+        (Get-AuthenticodeSignature -LiteralPath $_.FullName).Status.ToString()
+    } else { 'NotApplicable' }
     [ordered]@{
         name = $_.Name
         sizeBytes = $_.Length

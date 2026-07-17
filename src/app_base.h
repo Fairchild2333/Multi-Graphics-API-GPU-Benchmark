@@ -123,6 +123,11 @@ private:
     double throttlePct_        = 0.0;   // (earlyMean - lateMean) / earlyMean
     bool   gpuStressCalibrationDone_ = false;
     bool   gpuBurnCalibrationDone_   = false;
+    // Calibrated GPU Burn step target, approached by per-frame doubling
+    // instead of one probe-to-target jump (which read as a sudden FPS cliff).
+    std::uint32_t gpuBurnRampTarget_ = 0;
+    // Closed-loop warmup calibration rounds already consumed (max 4).
+    std::uint32_t gpuBurnCalibrationRounds_ = 0;
 };
 
 }  // namespace gpu_bench

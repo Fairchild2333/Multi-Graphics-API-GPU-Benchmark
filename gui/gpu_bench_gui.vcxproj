@@ -127,7 +127,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(GpuBuildDir)\$(Configuration);$(GpuBuildDir);$(VULKAN_SDK)\Lib;$(VcpkgLib);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>gpu_engine.lib;glad_gl43.lib;glfw3dll.lib;vulkan-1.lib;delayimp.lib;d3d12.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>gpu_engine.lib;glad_gl43.lib;glfw3dll.lib;vulkan-1.lib;delayimp.lib;d3d12.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;opengl32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <DelayLoadDLLs>vulkan-1.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>

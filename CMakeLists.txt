@@ -6,7 +6,7 @@ if(APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum macOS version")
 endif()
 
-project(Mangekyo VERSION 0.1.1 LANGUAGES C CXX)
+project(Mangekyo VERSION 0.1.3 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -38,6 +38,7 @@ set(COMMON_SOURCES
     src/benchmark_results.cpp
     src/cpu_benchmark.cpp
     src/path_service.cpp
+    src/cinematic_liquid_v2_common.cpp
 )
 
 set(BACKEND_SOURCES "")
@@ -257,6 +258,7 @@ if((ENABLE_DX12 AND WIN32) OR (ENABLE_DX11 AND WIN32))
         ${CMAKE_SOURCE_DIR}/shaders/gpu_stress.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/gpu_burn.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/volumetric.hlsl
+        ${CMAKE_SOURCE_DIR}/shaders/fluid.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp32.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp64.hlsl
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_int32.hlsl
@@ -315,6 +317,12 @@ if(ENABLE_OPENGL AND OpenGL_FOUND)
         ${CMAKE_SOURCE_DIR}/shaders/gpu_burn_gl.frag
         ${CMAKE_SOURCE_DIR}/shaders/volumetric_gl.vert
         ${CMAKE_SOURCE_DIR}/shaders/volumetric_gl.frag
+        ${CMAKE_SOURCE_DIR}/shaders/fluid_advect_gl.comp
+        ${CMAKE_SOURCE_DIR}/shaders/fluid_divergence_gl.comp
+        ${CMAKE_SOURCE_DIR}/shaders/fluid_jacobi_gl.comp
+        ${CMAKE_SOURCE_DIR}/shaders/fluid_subtract_gl.comp
+        ${CMAKE_SOURCE_DIR}/shaders/fluid_render_gl.vert
+        ${CMAKE_SOURCE_DIR}/shaders/fluid_render_gl.frag
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp32_gl.comp
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp64_gl.comp
         ${CMAKE_SOURCE_DIR}/shaders/synthpeak_int32_gl.comp

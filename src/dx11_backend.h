@@ -38,6 +38,9 @@ private:
     void CreateParticleBuffers();
     void CreateComputeParamsCB();
     void CreateTimestampQueries();
+    void CreateFluidResources();
+    void CleanupFluidResources();
+    void RecordFluidFrame(float deltaTime);
 
     void CollectTimestampResults();
 
@@ -89,6 +92,20 @@ private:
     UINT64 lastGoodFrequency_    = 0;
     std::uint32_t currentFrame_  = 0;
     float fractalElapsed_        = 0.0f;   // StressFractal palette time
+
+    struct FluidResources {
+        ComPtr<ID3D11Buffer> stateA, stateB, pressA, pressB, divBuf;
+        ComPtr<ID3D11UnorderedAccessView> uavStateA, uavStateB, uavPressA, uavPressB, uavDiv;
+        ComPtr<ID3D11ShaderResourceView> srvStateA;
+        ComPtr<ID3D11ComputeShader> csAdvect, csDiv, csJacobi, csSubtract;
+        ComPtr<ID3D11VertexShader> vs;
+        ComPtr<ID3D11PixelShader> ps;
+        ComPtr<ID3D11Buffer> paramsCB, renderCB;
+        ComPtr<ID3D11RasterizerState> rast;
+        std::uint32_t gridSize = 0;
+        float simTime = 0.0f;
+        bool active = false;
+    } fluid_;
 };
 
 }  // namespace gpu_bench

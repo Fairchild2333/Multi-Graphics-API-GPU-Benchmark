@@ -1,0 +1,40 @@
+#version 430
+
+// Fluid: divergence pass (OpenGL 4.3). See shaders/fluid_divergence.comp.
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(std430, binding = 0) buffer InBuf {
+    vec4 inCells[];
+};
+
+layout(std430, binding = 4) buffer DivergenceField {
+    float outP[];
+};
+
+layout(binding = 5, std140) uniform FluidParams {
+    float dt;
+    float dx;
+    uint  gridSize;
+    float time;
+} p;
+
+uint cellIdx(uvec2 c) { return c.y * p.gridSize + c.x; }
+
+void main() {
+    uvec2 c = gl_GlobalInvocationID.xy;
+    if (c.x >= p.gridSize || c.y >= p.gridSize) return;
+
+    if (c.x == 0u || c.y == 0u || c.x == p.gridSize - 1u || c.y == p.gridSize - 1u) {
+        outP[cellIdx(c)] = 0.0;
+        return;
+    }
+
+    vec4 L = inCells[cellIdx(c - uvec2(1u, 0u))];
+    vec4 R = inCells[cellIdx(c + uvec2(1u, 0u))];
+    vec4 D = inCells[cellIdx(c - uvec2(0u, 1u))];
+    vec4 U = inCells[cellIdx(c + uvec2(0u, 1u))];
+
+    float div = 0.5 * ((R.x - L.x) + (U.y - D.y)) / p.dx;
+    outP[cellIdx(c)] = div;
+}

@@ -6,6 +6,7 @@
 #include <atomic>
 #include <array>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -44,12 +45,27 @@ namespace winrt::gpu_bench_gui::implementation
         void OnShowLegacyChecked(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void OnRenderDocChecked(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void OnCaptureChecked(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void OnCaptureValueChanged(
+            winrt::Microsoft::UI::Xaml::Controls::NumberBox const& sender,
+            winrt::Microsoft::UI::Xaml::Controls::NumberBoxValueChangedEventArgs const& args);
         void OnApiPickerDropDownOpened(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Windows::Foundation::IInspectable const& args);
+        void OnApiPickerTapped(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::Input::TappedRoutedEventArgs const& args);
         void OnDurationUnitChanged(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
+        void OnDurationValueChanged(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::Controls::TextChangedEventArgs const& args);
         void OnParticlePresetChanged(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
@@ -96,8 +112,8 @@ namespace winrt::gpu_bench_gui::implementation
         void OnOpenCapturesFolder(winrt::Windows::Foundation::IInspectable const& sender,
                                   winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void OnHistoryCategoryChanged(
-            winrt::Windows::Foundation::IInspectable const& sender,
-            winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
+            winrt::Microsoft::UI::Xaml::Controls::SelectorBar const& sender,
+            winrt::Microsoft::UI::Xaml::Controls::SelectorBarSelectionChangedEventArgs const& args);
         void OnHistoryLegacyChecked(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
@@ -141,6 +157,13 @@ namespace winrt::gpu_bench_gui::implementation
         void rebuildApiPicker(bool preserveSelection);
         void updateApiPickerSummary();
         void updateExtraLabel();
+        void updateDurationValueEnabled();
+        bool isUnlimitedDuration();
+        std::string durationUnitTag();
+        double durationAmountValue();
+        void syncCaptureControls();
+        void appendCaptureArgs(std::vector<std::string>& dest);
+        void refreshAboutVersion();
         void refreshHistory();         // (re)load from disk + rebuild filters + render
         void applyHistoryView();       // filter + sort + render m_results
         void rebuildGpuFilter(bool preserveSelection = true);       // GPU tree or CPU list
@@ -150,7 +173,8 @@ namespace winrt::gpu_bench_gui::implementation
         std::string selected(winrt::Microsoft::UI::Xaml::Controls::ComboBox const& box);
         std::vector<std::string> selectedApis();
         std::string particleValue();   // "" means use engine default
-        // Duration as engine args: {"--time","<s>"} (default) or {"--benchmark","<frames>"}.
+        // Duration as engine args: {"--time","<s>"}, {"--benchmark","<frames>"},
+        // or {"--no-time-limit"} when Duration is "Until Cancel".
         std::vector<std::string> durationArgs();
         // Build child-process CLI invocation(s) for the selected preset (sets needCharts).
         std::vector<std::vector<std::string>> buildPresetJobs(bool& needCharts);
@@ -160,6 +184,8 @@ namespace winrt::gpu_bench_gui::implementation
         void cancelGpuBenchmark();
         bool tryBeginTask(ActiveTask task);
         void endTask(ActiveTask task);
+        void syncActionButtonsEnabled();
+        bool uiAlive() const;
 
         Microsoft::UI::Dispatching::DispatcherQueue m_dispatcher{ nullptr };
         HWND  m_hwnd{ nullptr };
@@ -177,9 +203,11 @@ namespace winrt::gpu_bench_gui::implementation
         std::atomic_bool m_cpuRunning{ false };
         std::atomic_bool m_cpuCancelRequested{ false };
         std::atomic_bool m_gpuCancelRequested{ false };
+        std::atomic_bool m_closing{ false };
         std::mutex m_cpuProcessMutex;
         HANDLE m_cpuProcess{ nullptr };    // owned and closed by the CPU worker thread
-        HANDLE m_gpuCancelEvent{ nullptr }; // manual-reset; signals captureProcess to stop
+        // Shared so workers can Wait on the handle after Closed drops the window's ref.
+        std::shared_ptr<void> m_gpuCancelEvent;
         std::map<int, std::string> m_cpuCoreLabels; // populated from CPU_TOPOLOGY on the UI thread
         bool m_cpuHadProtocolError{ false }; // UI-thread only
 
@@ -188,8 +216,11 @@ namespace winrt::gpu_bench_gui::implementation
         bool m_historyFiltersInitialized{ false };
         HistoryCategory m_historyCategory{ HistoryCategory::Gpu };
         bool m_showLegacyHistory{ false };
+        bool m_showHeadlessHistory{ false };
         std::string m_historySortColumn{ "time" };
         bool m_historySortAscending{ false };
+        std::string m_lastScoreEn; // English score line; re-localised on language change
+        bool m_suppressRenderDocUi{ false };
     };
 }
 

@@ -55,10 +55,9 @@ constexpr double kTimingReportIntervalSec = 1.0;
 //                and the float recurrence also contributes to every pixel, so
 //                neither path is dead-code removable. Stable result id:
 //                "gpu_stress"; changing the algorithm requires a new workload.
-// GpuBurnV1    : Original visual GraphicsBurn. A rotating Plasma Bloom core
-//                with dense crystalline spikes is evaluated with a fixed-count
-//                fullscreen raymarch. This is deliberately a separate score
-//                contract from gpu_stress_v1 and does not use particle data.
+// GpuBurnV1    : Plasma Bloom x Mangekyo Kaleidoscope visual burn. The solid
+//                plasma crystal remains the foreground subject while the v2
+//                woven kaleidoscope field is used as its animated background.
 enum class Workload {
     Stream,
     NBody,
@@ -188,8 +187,43 @@ constexpr std::uint32_t kGpuBurnV1DefaultIter   = 16;
 constexpr std::uint32_t kGpuBurnV1MaxIter       = 2048;
 constexpr std::uint32_t kGpuBurnV1MaxFixedIter  = 32;
 constexpr std::uint32_t kGpuBurnV1DrawsPerFrame = 2;
-constexpr std::uint32_t kGpuBurnV1ShaderVersion = 1;
+constexpr std::uint32_t kGpuBurnV1ShaderVersion = 3;
 constexpr double        kGpuBurnV1TargetFrameMs = 14.0;
+// v2 fixed-load contract (user decision 2026-07-17): no frame-time target and
+// no auto-calibration.  Every hardware GPU runs the identical 256-step frame,
+// so FPS itself is the comparative signal (FurMark-style fixed complexity).
+// Software devices (WARP/Basic Render) still clamp to kGpuBurnV1MaxFixedIter:
+// 16 steps already measured ~209 ms/frame on WARP, so 256 would mean
+// multi-second draws and watchdog resets.
+constexpr std::uint32_t kGpuBurnV2FixedIter     = 256;
+
+inline constexpr bool isGpuBurnWorkload(Workload workload) {
+    return workload == Workload::GpuBurnV1;
+}
+
+inline constexpr std::uint32_t gpuBurnDefaultIter(Workload /*workload*/) {
+    return kGpuBurnV1DefaultIter;
+}
+
+inline constexpr std::uint32_t gpuBurnMaxIter(Workload /*workload*/) {
+    return kGpuBurnV1MaxIter;
+}
+
+inline constexpr std::uint32_t gpuBurnMaxFixedIter(Workload /*workload*/) {
+    return kGpuBurnV1MaxFixedIter;
+}
+
+inline constexpr std::uint32_t gpuBurnDrawsPerFrame(Workload /*workload*/) {
+    return kGpuBurnV1DrawsPerFrame;
+}
+
+inline constexpr std::uint32_t gpuBurnShaderVersion(Workload /*workload*/) {
+    return kGpuBurnV1ShaderVersion;
+}
+
+inline constexpr double gpuBurnTargetFrameMs(Workload /*workload*/) {
+    return kGpuBurnV1TargetFrameMs;
+}
 
 // Volumetric raymarch default per-pixel step count. Each pixel walks a 3D ray
 // with exactly this many samples (no early-out) so the work scales linearly
@@ -309,17 +343,16 @@ struct GpuStressV1Params {
 static_assert(sizeof(GpuStressV1Params) == 16,
               "GPU Stress v1 constants must match GLSL std140/HLSL layout");
 
-// Dedicated GPU Burn v1 constants. The 16-byte ABI matches push constants,
-// HLSL cbuffer packing and the OpenGL std140 UBO, but its semantics and score
-// contract remain independent from GpuStressV1Params.
-struct GpuBurnV1Params {
-    float         time;       // deterministic animation clock for the Plasma Bloom
+// Shared GPU Burn ABI for the upgraded Plasma x Kaleidoscope shader.
+struct GpuBurnParams {
+    float         time;       // deterministic animation clock
     float         passIndex;  // overdraw salt within the current frame
     std::uint32_t maxIter;    // exact raymarch/fur samples per pixel/draw
     std::uint32_t version = kGpuBurnV1ShaderVersion;
 };
-static_assert(sizeof(GpuBurnV1Params) == 16,
-              "GPU Burn v1 constants must match GLSL std140/HLSL layout");
+using GpuBurnV1Params = GpuBurnParams;
+static_assert(sizeof(GpuBurnParams) == 16,
+              "GPU Burn constants must match GLSL std140/HLSL layout");
 
 // Push constants for the Volumetric raymarch fragment shader. `steps` is the
 // fixed per-pixel sample count (constant work, drives the score formula).
@@ -383,8 +416,11 @@ struct BenchmarkConfig {
     std::uint32_t fractalIter        = kFractalDefaultIter;  // StressFractal per-pixel iterations
     std::uint32_t gpuStressIter      = kGpuStressV1DefaultIter; // GPU Stress v1 iterations per pixel/draw
     bool          gpuStressAutoTune  = true;  // disabled by an explicit --iter
-    std::uint32_t gpuBurnIter        = kGpuBurnV1DefaultIter; // GPU Burn v1 samples per pixel/draw
-    bool          gpuBurnAutoTune    = true;  // disabled by an explicit --iter
+    std::uint32_t gpuBurnIter        = kGpuBurnV2FixedIter; // fixed GPU Burn samples per pixel/draw
+    // v2 fixed-load contract: auto-calibration retired (code kept dormant);
+    // identical per-frame work on every hardware GPU, FPS is the signal.
+    bool          gpuBurnAutoTune    = false;
+    bool          gpuBurnIterOverridden = false;  // explicit --iter given
     std::uint32_t volumetricSteps    = kVolumetricDefaultSteps; // Volumetric per-pixel ray samples
     std::uint32_t fluidGridSize      = kFluidDefaultGridSize;   // Fluid: 2D grid side length
     std::uint32_t fluidJacobiIters   = kFluidDefaultJacobiIters;// Fluid: pressure projection iterations
@@ -402,6 +438,7 @@ struct BenchmarkConfig {
     std::uint32_t framesInFlight     = kMaxFramesInFlight;  // runtime override
     const char*   difficultyLabel    = "Medium";
     double        captureAtSec       = -1.0;
+    std::int64_t  captureAtFrame     = -1;   // RenderDoc capture at absolute frame N (1-based)
     std::string   gpuDisplayName;           // if set, overrides deviceName_ for results/RenderDoc
     std::uint32_t vramMB             = 0;   // selected GPU's dedicated VRAM (MB, for results)
     // DXGI adapter LUID for precise GPU selection across factory instances.

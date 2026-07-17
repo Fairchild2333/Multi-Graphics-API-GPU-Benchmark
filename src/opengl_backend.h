@@ -28,6 +28,9 @@ private:
     void CreateParticleBuffers();
     void CreateTimestampQueries();
     void CollectTimestampResults();
+    void CreateFluidResources();
+    void CleanupFluidResources();
+    void RecordFluidFrame(float deltaTime);
 
     std::uint32_t CompileShaderGL(const std::string& path, std::uint32_t type);
     std::uint32_t LinkProgramGL(std::uint32_t s1, std::uint32_t s2);
@@ -41,6 +44,15 @@ private:
     std::uint32_t ssbo_ = 0;
     std::uint32_t vao_  = 0;
     std::uint32_t ubo_  = 0;
+
+    struct FluidResources {
+        std::uint32_t advectProg = 0, divProg = 0, jacobiProg = 0, subtractProg = 0, renderProg = 0;
+        std::uint32_t stateA = 0, stateB = 0, pressA = 0, pressB = 0, divBuf = 0;
+        std::uint32_t paramsUbo = 0, renderUbo = 0, emptyVao = 0;
+        std::uint32_t gridSize = 0;
+        float simTime = 0.0f;
+        bool active = false;
+    } fluid_;
 
     // Render3D resources (instanced billboards, default-FBO depth)
     std::uint32_t quadVbo_     = 0;

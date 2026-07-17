@@ -418,24 +418,23 @@ vcpkg, Python, and shader compilers are not copied.
 
 For a complete GitHub Release candidate, use the umbrella command. It rebuilds
 the CMake CLI/engine and self-contained WinUI GUI, validates and bundles the
-official RenderDoc portable x64 tree, creates the ZIP and Inno Setup installer,
-then writes a unified asset manifest and `SHA256SUMS.txt`:
+official RenderDoc portable tree, creates the ZIP and WiX MSI installer, then
+writes a unified asset manifest and `SHA256SUMS.txt`:
 
 ```powershell
 $env:VCPKG_ROOT = 'C:\vcpkg'
 powershell -NoProfile -ExecutionPolicy Bypass `
   -File scripts\build-windows-github-release.ps1 `
   -RenderDocArchive C:\release-inputs\RenderDoc_<version>_64.zip `
-  -RenderDocSha256 <sha256> `
-  -ProjectLicenseFile C:\release-inputs\LICENSE.txt
+  -RenderDocSha256 <sha256>
 ```
 
 Use `-RenderDocDownloadUrl <pinned-https-zip> -RenderDocSha256 <sha256>`
 instead for an online build. A mutable unverified "latest" download is never
-accepted. Add `-SignToolCommand '<Inno command containing $f>' -RequireSigned`
-in signed release CI. Final assets are placed in `out/release/windows-x64`.
-The wrapper requires a clean Git worktree; use `-AllowDirtySource` only for a
-non-publishable local engineering candidate.
+accepted. Add `-SignToolCommand '<signtool command containing $f>' -RequireSigned`
+in signed release CI. Final assets are placed in `out/release/windows-x64`
+(or `windows-arm64`). The wrapper requires a clean Git worktree; use
+`-AllowDirtySource` only for a non-publishable local engineering candidate.
 
 `-BuildGui` creates a fresh self-contained WinUI payload and then reconfigures
 the install rules around it. `-GuiPayloadDir` selects an externally prepared
@@ -505,8 +504,8 @@ following are true:
 - a frozen report worker is present and integrated into the GUI, and a complete
   portable RenderDoc bundle is present;
 - the staged GUI and fifth-second capture flow pass a clean-machine test;
-- an approved project distribution license exists (dependency notices are now
-  staged under `licenses/`);
+- the project MIT license is staged (`licenses/LICENSE`; dependency notices are
+  also under `licenses/`);
 - VC runtime redistribution and installer signing have been reviewed.
 
 The target computer does not need Visual Studio, vcpkg, Python, a Vulkan SDK,
@@ -515,14 +514,12 @@ absence is designed to disable Vulkan while leaving DirectX/WARP available;
 that exact no-loader path remains a clean-machine release test.
 
 The CPU engine adds no new redistributable, so the normal install rules include
-it automatically through `gpu_benchmark.exe`. However, any ZIP/Inno Setup built
+it automatically through `gpu_benchmark.exe`. However, any ZIP/MSI built
 before the CPU page/engine changes predates this feature. Rebuild the CLI and
 self-contained GUI, regenerate the stage and installer, then add an installed-
 location CPU smoke to release acceptance: the GUI must find
 `app/bin/gpu_benchmark.exe`, complete Quick, cancel a longer run cleanly, and
 append its isolated preview/formal summary under the user-data results path.
 
-CPack ZIP is the supported fallback. The same install rules can feed CPack WIX,
-but MSI generation is blocked unless `GPU_BENCH_PACKAGE_LICENSE_FILE` points to
-the approved license. See `packaging/README.md` and the generated
+CPack defaults to `ZIP;WIX`. See `packaging/README.md` and the generated
 `PACKAGE_LIMITATIONS.md` for the complete gates.

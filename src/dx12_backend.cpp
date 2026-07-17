@@ -7,6 +7,8 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
+#include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 #include <iomanip>
@@ -44,7 +46,8 @@ Microsoft::WRL::ComPtr<ID3DBlob> DX12Backend::CompileShader(const std::string& p
     auto src = ReadFileBytes(path);
     ComPtr<ID3DBlob> shader, errors;
     HRESULT hr = D3DCompile(src.data(), src.size(), path.c_str(),
-                            nullptr, nullptr, entry, target, 0, 0,
+                            nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+                            entry, target, 0, 0,
                             &shader, &errors);
     if (FAILED(hr)) {
         std::string msg = "Shader compilation failed: " + path;
@@ -61,11 +64,11 @@ Microsoft::WRL::ComPtr<ID3DBlob> DX12Backend::CompileShader(const std::string& p
 // -----------------------------------------------------------------------
 
 void DX12Backend::InitBackend() {
-    if (config_.workload == Workload::Fluid) {
-        throw std::runtime_error(
-            "Fluid is an unverified Vulkan-only Developer Preview; DX12 fallback is disabled");
-    }
     frameCount_ = config_.framesInFlight;
+    // FLIP swap chains require at least 2 buffers. Fluid forces framesInFlight=1
+    // for the Vulkan submission model; bump the DX12 ring so CreateSwapChain works.
+    if (config_.workload == Workload::Fluid && frameCount_ < 2)
+        frameCount_ = 2;
     frameFenceValues_.resize(frameCount_, 0);
     renderTargets_.resize(frameCount_);
     commandAllocators_.resize(frameCount_);
@@ -88,6 +91,16 @@ void DX12Backend::InitBackend() {
     CreateCommandAllocatorsAndList();
     std::cout << "[DX12 Init] Creating fence..." << std::endl;
     CreateFence();
+
+    if (config_.workload == Workload::Fluid) {
+        std::cout << "[DX12 Init] Creating fluid resources..." << std::endl;
+        CreateFluidResources();
+        std::cout << "[DX12 Init] Creating timestamp resources..." << std::endl;
+        CreateTimestampResources();
+        std::cout << "[DX12 Init] Initialisation complete (fluid)." << std::endl;
+        return;
+    }
+
     std::cout << "[DX12 Init] Creating root signatures..." << std::endl;
     CreateRootSignatures();
     std::cout << "[DX12 Init] Creating pipeline states (compiling shaders)..." << std::endl;
@@ -437,7 +450,7 @@ void DX12Backend::CreateRootSignatures() {
         // GPU Stress v1 has a dedicated 16-byte parameter block. Legacy
         // Fractal/Volumetric retain their original 3-constant signatures.
         if (config_.workload == Workload::GpuStressV1 ||
-            config_.workload == Workload::GpuBurnV1) {
+            isGpuBurnWorkload(config_.workload)) {
             fparam.ParameterType            = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
             fparam.Constants.ShaderRegister = 0;
             fparam.Constants.Num32BitValues = 4;
@@ -519,16 +532,17 @@ void DX12Backend::CreatePipelineStates() {
 
     const bool fractal   = (config_.workload == Workload::StressFractal);
     const bool gpuStress = (config_.workload == Workload::GpuStressV1);
-    const bool gpuBurn   = (config_.workload == Workload::GpuBurnV1);
+    const bool gpuBurn   = isGpuBurnWorkload(config_.workload);
     const bool volumetric= (config_.workload == Workload::Volumetric);
     const bool render3d  = (config_.workload == Workload::Render3D);
     // Fractal and Volumetric both use a single HLSL file with VSMain + PSMain
     // and rely on SV_VertexID (no vertex buffer / input layout).
-    const char* gvs = gpuBurn ? "gpu_burn.hlsl"
+    const char* burnFile = "gpu_burn.hlsl";
+    const char* gvs = gpuBurn ? burnFile
                     : gpuStress ? "gpu_stress.hlsl"
                     : (fractal || volumetric) ? (fractal ? "fractal.hlsl" : "volumetric.hlsl")
                     : render3d ? "render3d.hlsl" : "particle_vs.hlsl";
-    const char* gps = gpuBurn ? "gpu_burn.hlsl"
+    const char* gps = gpuBurn ? burnFile
                     : gpuStress ? "gpu_stress.hlsl"
                     : (fractal || volumetric) ? (fractal ? "fractal.hlsl" : "volumetric.hlsl")
                     : render3d ? "render3d.hlsl" : "particle_ps.hlsl";
@@ -792,6 +806,11 @@ void DX12Backend::DrawFrame(float deltaTime) {
 
     const UINT tsBase = frameIndex_ * kTimestampsPerFrame;
 
+    if (fluid_.active) {
+        RecordFluidFrame(deltaTime);
+        return;
+    }
+
     if (config_.headless) {
         // --- Headless: compute-only path ---
         // Transition VBV -> UAV
@@ -962,12 +981,12 @@ void DX12Backend::DrawFrame(float deltaTime) {
             commandList_->SetGraphicsRoot32BitConstants(0, 4, &sp, 0);
             commandList_->DrawInstanced(3, 1, 0, 0);
         }
-    } else if (config_.workload == Workload::GpuBurnV1) {
+    } else if (isGpuBurnWorkload(config_.workload)) {
         fractalElapsed_ += deltaTime;
         commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        for (std::uint32_t pass = 0; pass < kGpuBurnV1DrawsPerFrame; ++pass) {
-            GpuBurnV1Params bp{ fractalElapsed_, static_cast<float>(pass),
-                                config_.gpuBurnIter, kGpuBurnV1ShaderVersion };
+        for (std::uint32_t pass = 0; pass < gpuBurnDrawsPerFrame(config_.workload); ++pass) {
+            GpuBurnParams bp{ fractalElapsed_, static_cast<float>(pass),
+                              config_.gpuBurnIter, gpuBurnShaderVersion(config_.workload) };
             commandList_->SetGraphicsRoot32BitConstants(0, 4, &bp, 0);
             commandList_->DrawInstanced(3, 1, 0, 0);
         }
@@ -1035,11 +1054,457 @@ void DX12Backend::DrawFrame(float deltaTime) {
 
 void DX12Backend::CleanupBackend() {
     WaitForGpu();
+    CleanupFluidResources();
 
     if (fenceEvent_) {
         CloseHandle(fenceEvent_);
         fenceEvent_ = nullptr;
     }
+}
+
+// -----------------------------------------------------------------------
+// Legacy 2D Fluid (Stam) — multi-pass compute + fullscreen dye render
+// -----------------------------------------------------------------------
+
+void DX12Backend::CreateFluidResources() {
+    fluid_.gridSize = config_.fluidGridSize;
+    const std::uint32_t N = fluid_.gridSize;
+    if (N < 64 || N > 512)
+        throw std::invalid_argument("Fluid --grid must be between 64 and 512");
+    if (config_.fluidJacobiIters < 1 || config_.fluidJacobiIters > 64)
+        throw std::invalid_argument("Fluid --jacobi must be between 1 and 64");
+
+    const UINT64 stateSize = sizeof(float) * 4 * N * N;
+    const UINT64 pressSize = sizeof(float) * N * N;
+
+    auto createDefaultBuffer = [&](UINT64 size, ComPtr<ID3D12Resource>& out) {
+        D3D12_HEAP_PROPERTIES hp{}; hp.Type = D3D12_HEAP_TYPE_DEFAULT;
+        D3D12_RESOURCE_DESC rd{};
+        rd.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        rd.Width = size;
+        rd.Height = 1;
+        rd.DepthOrArraySize = 1;
+        rd.MipLevels = 1;
+        rd.SampleDesc.Count = 1;
+        rd.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        rd.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+        ThrowIfFailed(device_->CreateCommittedResource(
+            &hp, D3D12_HEAP_FLAG_NONE, &rd, D3D12_RESOURCE_STATE_COMMON,
+            nullptr, IID_PPV_ARGS(&out)), "CreateCommittedResource (fluid) failed");
+    };
+
+    createDefaultBuffer(stateSize, fluid_.stateA);
+    createDefaultBuffer(stateSize, fluid_.stateB);
+    createDefaultBuffer(pressSize, fluid_.pressA);
+    createDefaultBuffer(pressSize, fluid_.pressB);
+    createDefaultBuffer(pressSize, fluid_.divBuf);
+
+    // Seed stateA (same dual-emitter field as Vulkan).
+    std::vector<float> init(static_cast<size_t>(stateSize / sizeof(float)));
+    for (std::uint32_t y = 0; y < N; ++y) {
+        for (std::uint32_t x = 0; x < N; ++x) {
+            const size_t i = (size_t(y) * N + x) * 4;
+            const float fx = (float(x) + 0.5f) / float(N) - 0.5f;
+            const float fy = (float(y) + 0.5f) / float(N) - 0.5f;
+            const float envelope = std::exp(-(fx * fx + fy * fy) * 7.0f);
+            init[i + 0] = -fy * 0.32f * envelope;
+            init[i + 1] =  fx * 0.32f * envelope;
+            const float ax = fx + 0.25f, ay = fy - 0.04f;
+            const float bx = fx - 0.25f, by = fy + 0.04f;
+            init[i + 2] = std::exp(-(ax * ax + ay * ay) * 120.0f);
+            init[i + 3] = std::exp(-(bx * bx + by * by) * 120.0f);
+        }
+    }
+
+    auto createUpload = [&](UINT64 size, const void* data, ComPtr<ID3D12Resource>& out) {
+        D3D12_HEAP_PROPERTIES hp{}; hp.Type = D3D12_HEAP_TYPE_UPLOAD;
+        D3D12_RESOURCE_DESC rd{};
+        rd.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        rd.Width = size;
+        rd.Height = 1;
+        rd.DepthOrArraySize = 1;
+        rd.MipLevels = 1;
+        rd.SampleDesc.Count = 1;
+        rd.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        ThrowIfFailed(device_->CreateCommittedResource(
+            &hp, D3D12_HEAP_FLAG_NONE, &rd, D3D12_RESOURCE_STATE_GENERIC_READ,
+            nullptr, IID_PPV_ARGS(&out)), "CreateCommittedResource (fluid upload) failed");
+        void* mapped = nullptr;
+        ThrowIfFailed(out->Map(0, nullptr, &mapped), "Map fluid upload failed");
+        if (data) std::memcpy(mapped, data, static_cast<size_t>(size));
+        else std::memset(mapped, 0, static_cast<size_t>(size));
+        out->Unmap(0, nullptr);
+    };
+
+    ComPtr<ID3D12Resource> stateUpload, zeroUpload;
+    createUpload(stateSize, init.data(), stateUpload);
+    createUpload(pressSize, nullptr, zeroUpload);
+    fluid_.zeroPressUpload = zeroUpload;
+
+    // One-shot upload: stateA seeded, pressure/div cleared.
+    commandAllocators_[0]->Reset();
+    commandList_->Reset(commandAllocators_[0].Get(), nullptr);
+    commandList_->CopyBufferRegion(fluid_.stateA.Get(), 0, stateUpload.Get(), 0, stateSize);
+    commandList_->CopyBufferRegion(fluid_.pressA.Get(), 0, zeroUpload.Get(), 0, pressSize);
+    commandList_->CopyBufferRegion(fluid_.pressB.Get(), 0, zeroUpload.Get(), 0, pressSize);
+    commandList_->CopyBufferRegion(fluid_.divBuf.Get(), 0, zeroUpload.Get(), 0, pressSize);
+    {
+        D3D12_RESOURCE_BARRIER barriers[5]{};
+        ID3D12Resource* bufs[] = {
+            fluid_.stateA.Get(), fluid_.stateB.Get(), fluid_.pressA.Get(),
+            fluid_.pressB.Get(), fluid_.divBuf.Get()
+        };
+        for (int i = 0; i < 5; ++i) {
+            barriers[i].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+            barriers[i].Transition.pResource = bufs[i];
+            barriers[i].Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+            barriers[i].Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+            barriers[i].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        }
+        // stateB never received a copy; it starts in COMMON. Transition COMMON->UAV.
+        barriers[1].Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+        commandList_->ResourceBarrier(5, barriers);
+    }
+    ThrowIfFailed(commandList_->Close(), "Fluid upload Close failed");
+    ID3D12CommandList* lists[] = { commandList_.Get() };
+    commandQueue_->ExecuteCommandLists(1, lists);
+    WaitForGpu();
+
+    // Root signatures
+    {
+        D3D12_DESCRIPTOR_RANGE uavRange{};
+        uavRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+        uavRange.NumDescriptors = 5;
+        uavRange.BaseShaderRegister = 0;
+
+        D3D12_ROOT_PARAMETER params[2]{};
+        params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+        params[0].DescriptorTable.NumDescriptorRanges = 1;
+        params[0].DescriptorTable.pDescriptorRanges = &uavRange;
+        params[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        params[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+        params[1].Constants.ShaderRegister = 0;
+        params[1].Constants.Num32BitValues = 4;
+        params[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+        D3D12_ROOT_SIGNATURE_DESC desc{};
+        desc.NumParameters = 2;
+        desc.pParameters = params;
+        ComPtr<ID3DBlob> sig, err;
+        ThrowIfFailed(D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1, &sig, &err),
+                      "Serialize fluid compute root signature failed");
+        ThrowIfFailed(device_->CreateRootSignature(0, sig->GetBufferPointer(), sig->GetBufferSize(),
+                                                   IID_PPV_ARGS(&fluid_.computeRootSig)),
+                      "CreateRootSignature (fluid compute) failed");
+    }
+    {
+        D3D12_DESCRIPTOR_RANGE srvRange{};
+        srvRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+        srvRange.NumDescriptors = 1;
+        srvRange.BaseShaderRegister = 0;
+
+        D3D12_ROOT_PARAMETER params[2]{};
+        params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+        params[0].DescriptorTable.NumDescriptorRanges = 1;
+        params[0].DescriptorTable.pDescriptorRanges = &srvRange;
+        params[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+        params[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+        params[1].Constants.ShaderRegister = 0;
+        params[1].Constants.Num32BitValues = 4;
+        params[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+        D3D12_ROOT_SIGNATURE_DESC desc{};
+        desc.NumParameters = 2;
+        desc.pParameters = params;
+        ComPtr<ID3DBlob> sig, err;
+        ThrowIfFailed(D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1, &sig, &err),
+                      "Serialize fluid graphics root signature failed");
+        ThrowIfFailed(device_->CreateRootSignature(0, sig->GetBufferPointer(), sig->GetBufferSize(),
+                                                   IID_PPV_ARGS(&fluid_.graphicsRootSig)),
+                      "CreateRootSignature (fluid graphics) failed");
+    }
+
+    const std::string hlsl = shaderDir_ + "fluid.hlsl";
+    auto makeCs = [&](const char* entry, ComPtr<ID3D12PipelineState>& pso) {
+        auto blob = CompileShader(hlsl, entry, "cs_5_1");
+        D3D12_COMPUTE_PIPELINE_STATE_DESC d{};
+        d.pRootSignature = fluid_.computeRootSig.Get();
+        d.CS = { blob->GetBufferPointer(), blob->GetBufferSize() };
+        ThrowIfFailed(device_->CreateComputePipelineState(&d, IID_PPV_ARGS(&pso)),
+                      (std::string("CreateComputePipelineState (") + entry + ") failed").c_str());
+    };
+    makeCs("CSAdvect", fluid_.advectPSO);
+    makeCs("CSDivergence", fluid_.divPSO);
+    makeCs("CSJacobi", fluid_.jacobiPSO);
+    makeCs("CSSubtract", fluid_.subtractPSO);
+
+    {
+        auto vs = CompileShader(hlsl, "VSMain", "vs_5_1");
+        auto ps = CompileShader(hlsl, "PSMain", "ps_5_1");
+        D3D12_GRAPHICS_PIPELINE_STATE_DESC d{};
+        d.pRootSignature = fluid_.graphicsRootSig.Get();
+        d.VS = { vs->GetBufferPointer(), vs->GetBufferSize() };
+        d.PS = { ps->GetBufferPointer(), ps->GetBufferSize() };
+        d.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+        d.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+        d.RasterizerState.DepthClipEnable = TRUE;
+        d.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+        d.SampleMask = UINT_MAX;
+        d.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        d.NumRenderTargets = 1;
+        d.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+        d.SampleDesc.Count = 1;
+        ThrowIfFailed(device_->CreateGraphicsPipelineState(&d, IID_PPV_ARGS(&fluid_.renderPSO)),
+                      "CreateGraphicsPipelineState (fluid) failed");
+    }
+
+    // Descriptor heap: 5 UAV tables × 5 + 1 SRV = 26
+    {
+        D3D12_DESCRIPTOR_HEAP_DESC hd{};
+        hd.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+        hd.NumDescriptors = 26;
+        hd.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+        ThrowIfFailed(device_->CreateDescriptorHeap(&hd, IID_PPV_ARGS(&fluid_.heap)),
+                      "CreateDescriptorHeap (fluid) failed");
+    }
+
+    const UINT stride = device_->GetDescriptorHandleIncrementSize(
+        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    auto cpuAt = [&](UINT index) {
+        D3D12_CPU_DESCRIPTOR_HANDLE h = fluid_.heap->GetCPUDescriptorHandleForHeapStart();
+        h.ptr += static_cast<SIZE_T>(index) * stride;
+        return h;
+    };
+    auto gpuAt = [&](UINT index) {
+        D3D12_GPU_DESCRIPTOR_HANDLE h = fluid_.heap->GetGPUDescriptorHandleForHeapStart();
+        h.ptr += static_cast<SIZE_T>(index) * stride;
+        return h;
+    };
+
+    auto writeUav = [&](UINT index, ID3D12Resource* res, UINT elementStride, UINT numElements) {
+        D3D12_UNORDERED_ACCESS_VIEW_DESC u{};
+        u.Format = DXGI_FORMAT_UNKNOWN;
+        u.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+        u.Buffer.FirstElement = 0;
+        u.Buffer.NumElements = numElements;
+        u.Buffer.StructureByteStride = elementStride;
+        device_->CreateUnorderedAccessView(res, nullptr, &u, cpuAt(index));
+    };
+    auto writeSrv = [&](UINT index, ID3D12Resource* res, UINT elementStride, UINT numElements) {
+        D3D12_SHADER_RESOURCE_VIEW_DESC s{};
+        s.Format = DXGI_FORMAT_UNKNOWN;
+        s.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+        s.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        s.Buffer.FirstElement = 0;
+        s.Buffer.NumElements = numElements;
+        s.Buffer.StructureByteStride = elementStride;
+        device_->CreateShaderResourceView(res, &s, cpuAt(index));
+    };
+
+    const UINT cellCount = N * N;
+    // Table layout (5 UAVs each): [0]advect [5]div [10]jacA [15]jacB [20]sub; [25]=SRV
+    // Advect: u0=A u1=B u2=pressA u3=pressB u4=div
+    writeUav(0, fluid_.stateA.Get(), 16, cellCount);
+    writeUav(1, fluid_.stateB.Get(), 16, cellCount);
+    writeUav(2, fluid_.pressA.Get(), 4, cellCount);
+    writeUav(3, fluid_.pressB.Get(), 4, cellCount);
+    writeUav(4, fluid_.divBuf.Get(), 4, cellCount);
+    fluid_.tableAdvect = gpuAt(0);
+
+    // Div: u0=B u1=B u2=pressA u3=pressB u4=div
+    writeUav(5, fluid_.stateB.Get(), 16, cellCount);
+    writeUav(6, fluid_.stateB.Get(), 16, cellCount);
+    writeUav(7, fluid_.pressA.Get(), 4, cellCount);
+    writeUav(8, fluid_.pressB.Get(), 4, cellCount);
+    writeUav(9, fluid_.divBuf.Get(), 4, cellCount);
+    fluid_.tableDiv = gpuAt(5);
+
+    // Jacobi A: in=pressA out=pressB
+    writeUav(10, fluid_.stateA.Get(), 16, cellCount);
+    writeUav(11, fluid_.stateB.Get(), 16, cellCount);
+    writeUav(12, fluid_.pressA.Get(), 4, cellCount);
+    writeUav(13, fluid_.pressB.Get(), 4, cellCount);
+    writeUav(14, fluid_.divBuf.Get(), 4, cellCount);
+    fluid_.tableJacA = gpuAt(10);
+
+    // Jacobi B: in=pressB out=pressA
+    writeUav(15, fluid_.stateA.Get(), 16, cellCount);
+    writeUav(16, fluid_.stateB.Get(), 16, cellCount);
+    writeUav(17, fluid_.pressB.Get(), 4, cellCount);
+    writeUav(18, fluid_.pressA.Get(), 4, cellCount);
+    writeUav(19, fluid_.divBuf.Get(), 4, cellCount);
+    fluid_.tableJacB = gpuAt(15);
+
+    // Subtract: in=B out=A inP=final pressure
+    ID3D12Resource* finalPress = (config_.fluidJacobiIters & 1u)
+        ? fluid_.pressB.Get() : fluid_.pressA.Get();
+    writeUav(20, fluid_.stateB.Get(), 16, cellCount);
+    writeUav(21, fluid_.stateA.Get(), 16, cellCount);
+    writeUav(22, finalPress, 4, cellCount);
+    writeUav(23, fluid_.pressB.Get(), 4, cellCount);
+    writeUav(24, fluid_.divBuf.Get(), 4, cellCount);
+    fluid_.tableSub = gpuAt(20);
+
+    writeSrv(25, fluid_.stateA.Get(), 16, cellCount);
+    fluid_.tableRender = gpuAt(25);
+
+    fluid_.simTime = 0.0f;
+    fluid_.active = true;
+}
+
+void DX12Backend::CleanupFluidResources() {
+    if (!fluid_.active) return;
+    WaitForGpu();
+    fluid_ = FluidResources{};
+}
+
+void DX12Backend::RecordFluidFrame(float deltaTime) {
+    const UINT tsBase = frameIndex_ * kTimestampsPerFrame;
+    const std::uint32_t N = fluid_.gridSize;
+    const float stepDt = (std::min)((std::max)(deltaTime, 0.0f), 1.0f / 30.0f);
+    fluid_.simTime += (std::min)((std::max)(deltaTime, 0.0f), 0.1f);
+    const FluidParams fp{ stepDt, 1.0f / float(N), N, fluid_.simTime };
+    const UINT groups = (N + 15u) / 16u;
+    const UINT64 pressSize = sizeof(float) * N * N;
+
+    auto uavBarrier = [&](ID3D12Resource* res) {
+        D3D12_RESOURCE_BARRIER b{};
+        b.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+        b.UAV.pResource = res;
+        commandList_->ResourceBarrier(1, &b);
+    };
+
+    if (timestampsSupported_)
+        commandList_->EndQuery(timestampHeap_.Get(), D3D12_QUERY_TYPE_TIMESTAMP, tsBase + 0);
+
+    ID3D12DescriptorHeap* heaps[] = { fluid_.heap.Get() };
+    commandList_->SetDescriptorHeaps(1, heaps);
+    commandList_->SetComputeRootSignature(fluid_.computeRootSig.Get());
+    commandList_->SetComputeRoot32BitConstants(1, 4, &fp, 0);
+
+    // Clear pressA each frame (Jacobi warm start).
+    {
+        D3D12_RESOURCE_BARRIER toCopy{};
+        toCopy.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        toCopy.Transition.pResource = fluid_.pressA.Get();
+        toCopy.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+        toCopy.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
+        toCopy.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        commandList_->ResourceBarrier(1, &toCopy);
+        commandList_->CopyBufferRegion(fluid_.pressA.Get(), 0,
+                                       fluid_.zeroPressUpload.Get(), 0, pressSize);
+        toCopy.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+        toCopy.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+        commandList_->ResourceBarrier(1, &toCopy);
+    }
+
+    commandList_->SetPipelineState(fluid_.advectPSO.Get());
+    commandList_->SetComputeRootDescriptorTable(0, fluid_.tableAdvect);
+    commandList_->Dispatch(groups, groups, 1);
+    uavBarrier(fluid_.stateB.Get());
+
+    commandList_->SetPipelineState(fluid_.divPSO.Get());
+    commandList_->SetComputeRootDescriptorTable(0, fluid_.tableDiv);
+    commandList_->Dispatch(groups, groups, 1);
+    uavBarrier(fluid_.divBuf.Get());
+
+    commandList_->SetPipelineState(fluid_.jacobiPSO.Get());
+    D3D12_GPU_DESCRIPTOR_HANDLE jacTables[2] = { fluid_.tableJacA, fluid_.tableJacB };
+    for (std::uint32_t i = 0; i < config_.fluidJacobiIters; ++i) {
+        commandList_->SetComputeRootDescriptorTable(0, jacTables[i & 1u]);
+        commandList_->Dispatch(groups, groups, 1);
+        uavBarrier((i & 1u) ? fluid_.pressA.Get() : fluid_.pressB.Get());
+    }
+
+    commandList_->SetPipelineState(fluid_.subtractPSO.Get());
+    commandList_->SetComputeRootDescriptorTable(0, fluid_.tableSub);
+    commandList_->Dispatch(groups, groups, 1);
+    uavBarrier(fluid_.stateA.Get());
+
+    // stateA: UAV -> NON_PIXEL_SHADER | PIXEL_SHADER for SRV sample in PS
+    {
+        D3D12_RESOURCE_BARRIER b{};
+        b.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        b.Transition.pResource = fluid_.stateA.Get();
+        b.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+        b.Transition.StateAfter = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE |
+                                  D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        b.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        commandList_->ResourceBarrier(1, &b);
+    }
+
+    if (timestampsSupported_) {
+        commandList_->EndQuery(timestampHeap_.Get(), D3D12_QUERY_TYPE_TIMESTAMP, tsBase + 1);
+        commandList_->EndQuery(timestampHeap_.Get(), D3D12_QUERY_TYPE_TIMESTAMP, tsBase + 2);
+    }
+
+    D3D12_RESOURCE_BARRIER rtBarrier{};
+    rtBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    rtBarrier.Transition.pResource = renderTargets_[frameIndex_].Get();
+    rtBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+    rtBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    rtBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    commandList_->ResourceBarrier(1, &rtBarrier);
+
+    D3D12_CPU_DESCRIPTOR_HANDLE rtv = rtvHeap_->GetCPUDescriptorHandleForHeapStart();
+    rtv.ptr += static_cast<SIZE_T>(frameIndex_) * rtvDescriptorSize_;
+    const float clearColor[] = { 0.04f, 0.08f, 0.14f, 1.0f };
+    commandList_->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+    commandList_->OMSetRenderTargets(1, &rtv, FALSE, nullptr);
+
+    D3D12_VIEWPORT vp{ 0, 0, static_cast<float>(kWindowWidth),
+                       static_cast<float>(kWindowHeight), 0.0f, 1.0f };
+    D3D12_RECT sc{ 0, 0, static_cast<LONG>(kWindowWidth),
+                   static_cast<LONG>(kWindowHeight) };
+    commandList_->RSSetViewports(1, &vp);
+    commandList_->RSSetScissorRects(1, &sc);
+
+    commandList_->SetGraphicsRootSignature(fluid_.graphicsRootSig.Get());
+    commandList_->SetPipelineState(fluid_.renderPSO.Get());
+    commandList_->SetGraphicsRootDescriptorTable(0, fluid_.tableRender);
+    FluidRenderParams rp{ N, fluid_.simTime, 0.88f, 1u };
+    commandList_->SetGraphicsRoot32BitConstants(1, 4, &rp, 0);
+    commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    commandList_->DrawInstanced(3, 1, 0, 0);
+
+    if (timestampsSupported_)
+        commandList_->EndQuery(timestampHeap_.Get(), D3D12_QUERY_TYPE_TIMESTAMP, tsBase + 3);
+
+    // stateA back to UAV for next frame
+    {
+        D3D12_RESOURCE_BARRIER b{};
+        b.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        b.Transition.pResource = fluid_.stateA.Get();
+        b.Transition.StateBefore = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE |
+                                   D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        b.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+        b.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        commandList_->ResourceBarrier(1, &b);
+    }
+
+    rtBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    rtBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+    commandList_->ResourceBarrier(1, &rtBarrier);
+
+    if (timestampsSupported_)
+        commandList_->ResolveQueryData(timestampHeap_.Get(), D3D12_QUERY_TYPE_TIMESTAMP,
+                                       tsBase, kTimestampsPerFrame,
+                                       timestampReadback_.Get(),
+                                       tsBase * sizeof(UINT64));
+
+    ThrowIfFailed(commandList_->Close(), "Fluid CommandList Close failed");
+    ID3D12CommandList* cmdLists[] = { commandList_.Get() };
+    commandQueue_->ExecuteCommandLists(1, cmdLists);
+
+    UINT presentFlags = 0;
+    if (!config_.vsync && tearingSupported_)
+        presentFlags = DXGI_PRESENT_ALLOW_TEARING;
+    swapChain_->Present(config_.vsync ? 1 : 0, presentFlags);
+
+    commandQueue_->Signal(fence_.Get(), nextFenceValue_);
+    frameFenceValues_[frameIndex_] = nextFenceValue_;
+    ++nextFenceValue_;
+    frameIndex_ = swapChain_->GetCurrentBackBufferIndex();
 }
 
 }  // namespace gpu_bench

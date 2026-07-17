@@ -8,6 +8,12 @@
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
+            <!-- Keep Fluent defaults for ComboBoxItem / dropdown chrome. Only nudge
+                 closed-box content centering; do not restyle list items. -->
+            <Style TargetType="ComboBox" BasedOn="{StaticResource DefaultComboBoxStyle}">
+                <Setter Property="MinHeight" Value="32"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

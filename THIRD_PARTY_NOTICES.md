@@ -1,8 +1,8 @@
 # Third-party notices
 
-This file covers third-party components copied into the current engineering
-release payload. It does not replace the project's own distribution license,
-which is still required before public release.
+This file covers third-party components copied into the release payload. The
+project itself is licensed under MIT; see the repository root `LICENSE` (also
+staged as `licenses/LICENSE`).
 
 ## GLAD
 

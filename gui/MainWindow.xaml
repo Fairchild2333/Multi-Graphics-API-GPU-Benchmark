@@ -31,10 +31,9 @@
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Name="NavRun" Content="GPU" Tag="0" IsSelected="True">
                     <NavigationViewItem.Icon>
-                        <!-- Fluent TV/graphics display glyph.  Keeping this in the
-                             system icon font matches every other navigation icon. -->
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}"
-                                  Glyph="&#xE7F4;" FontSize="20"/>
+                        <!-- SpeedHigh: Fluent performance gauge — closer to GPU/benchmark
+                             than the old TV/monitor glyph, and distinct from CPU's chip. -->
+                        <FontIcon Glyph="&#xEC4A;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem x:Name="NavCpu" Content="CPU" Tag="5">
@@ -88,23 +87,41 @@
                                         <ComboBoxItem x:Name="PresetParticles">Particle test — one GPU (selected APIs, custom particles)</ComboBoxItem>
                                         <ComboBoxItem x:Name="PresetHeadless">Headless compute — one GPU (selected APIs, pure compute)</ComboBoxItem>
                                     </ComboBox>
-                                    <!-- Responsive: star columns shrink to fit so nothing clips at min width. -->
+                                    <!-- Same ComboBox chrome for GPU / API / Workload. API uses MaxDropDownHeight=0
+                                         + Tapped flyout so the native list never paints (avoids stuck popup). -->
                                     <Grid ColumnSpacing="16">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="32"/>
+                                        </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="1.8*"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <ComboBox x:Name="GpuBox" Grid.Column="0" Header="GPU" MinWidth="160"
+
+                                        <TextBlock x:Name="GpuHeader" Grid.Row="0" Grid.Column="0"
+                                                   Text="GPU" Margin="0,0,0,4"/>
+                                        <ComboBox x:Name="GpuBox" Grid.Row="1" Grid.Column="0"
+                                                  MinWidth="160" Height="32"
                                                   HorizontalAlignment="Stretch"
                                                   SelectionChanged="OnGpuSelectionChanged"/>
-                                        <!-- ComboBox shell shows the summary; DropDownOpened opens the multi-select flyout. -->
-                                        <ComboBox x:Name="ApiPickerBox" Grid.Column="1" Header="Graphics API" MinWidth="130"
+
+                                        <TextBlock x:Name="ApiPickerHeader" Grid.Row="0" Grid.Column="1"
+                                                   Text="Graphics API" Margin="0,0,0,4" Opacity="0.55"
+                                                   Foreground="{ThemeResource TextFillColorDisabledBrush}"/>
+                                        <ComboBox x:Name="ApiPickerBox" Grid.Row="1" Grid.Column="1"
+                                                  Height="32"
+                                                  IsEnabled="False" Opacity="0.55"
+                                                  Foreground="{ThemeResource TextFillColorDisabledBrush}"
+                                                  MaxDropDownHeight="0"
                                                   HorizontalAlignment="Stretch"
                                                   DropDownOpened="OnApiPickerDropDownOpened"
+                                                  Tapped="OnApiPickerTapped"
                                                   AutomationProperties.Name="Graphics API">
-                                            <ComboBoxItem x:Name="ApiPickerSummaryItem" Content="Detecting…"/>
+                                            <ComboBoxItem x:Name="ApiPickerSummaryItem" Content="Detecting…"
+                                                          Foreground="{ThemeResource TextFillColorDisabledBrush}"/>
                                             <FlyoutBase.AttachedFlyout>
                                                 <Flyout x:Name="ApiPickerFlyout" Placement="Bottom">
                                                     <StackPanel Width="300" Spacing="10">
@@ -138,11 +155,15 @@
                                                 </Flyout>
                                             </FlyoutBase.AttachedFlyout>
                                         </ComboBox>
-                                        <ComboBox x:Name="WorkloadBox" Grid.Column="2" Header="Workload" MinWidth="120"
-                                                  HorizontalAlignment="Stretch" SelectedIndex="0"
+
+                                        <TextBlock x:Name="WorkloadHeader" Grid.Row="0" Grid.Column="2"
+                                                   Text="Workload" Margin="0,0,0,4"/>
+                                        <ComboBox x:Name="WorkloadBox" Grid.Row="1" Grid.Column="2"
+                                                  MinWidth="120" Height="32" SelectedIndex="0"
+                                                  HorizontalAlignment="Stretch"
                                                   SelectionChanged="OnWorkloadChanged">
                                             <ComboBoxItem x:Name="WorkloadStream" Tag="stream">Particle — Memory Throughput</ComboBoxItem>
-                                            <ComboBoxItem x:Name="WorkloadGpuBurn" Tag="gpu_burn">Plasma Bloom — GPU Burn</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadGpuBurn" Tag="gpu_burn">Mangekyo Kaleidoscope — GPU Burn</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadCinematicLiquid" Tag="cinematic_liquid">Fluid — Interactive Pool</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadGpuStress" Tag="gpu_stress">GraphicsBurn v1 / Component (Advanced)</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadNBody" Tag="nbody">N-Body — Advanced Compute</ComboBoxItem>
@@ -150,16 +171,23 @@
                                             <ComboBoxItem x:Name="WorkloadStress" Tag="stress">Legacy Stress v1 — Fragment ALU/SFU</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadRender3D" Tag="render3d">Legacy 3D Prototype — Billboards</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadVolumetric" Tag="volumetric">Volumetric — Experimental Raymarch</ComboBoxItem>
-                                            <ComboBoxItem x:Name="WorkloadFluid" Tag="fluid">Other / Legacy 2D Fluid — Vulkan-only</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadFluid" Tag="fluid">Other / Legacy 2D Fluid</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadCinematicLiquidV1" Tag="cinematic_liquid_v1">Other / Legacy Cinematic Liquid v1 — Dam Break</ComboBoxItem>
                                         </ComboBox>
-                                        <ComboBox x:Name="PrecisionBox" Grid.Column="3" MinWidth="100"
-                                                  HorizontalAlignment="Stretch" SelectedIndex="0" IsEnabled="False">
-                                            <ComboBoxItem x:Name="PrecisionFp32" Tag="fp32">fp32 — standard float</ComboBoxItem>
-                                            <ComboBoxItem x:Name="PrecisionFp16" Tag="fp16">fp16 — half precision</ComboBoxItem>
-                                            <ComboBoxItem x:Name="PrecisionFp64" Tag="fp64">fp64 — double precision</ComboBoxItem>
-                                            <ComboBoxItem x:Name="PrecisionInt32" Tag="int32">int32 — integer ops</ComboBoxItem>
-                                        </ComboBox>
+
+                                        <!-- Precision is SynthPeak-only; hide the whole column by default. -->
+                                        <StackPanel x:Name="PrecisionColumn" Grid.Row="0" Grid.Column="3"
+                                                    Grid.RowSpan="2" Spacing="0" Visibility="Collapsed">
+                                            <TextBlock x:Name="PrecisionHeader" Text="Precision" Margin="0,0,0,4"/>
+                                            <ComboBox x:Name="PrecisionBox" MinWidth="100" Height="32"
+                                                      SelectedIndex="0" IsEnabled="False"
+                                                      HorizontalAlignment="Stretch">
+                                                <ComboBoxItem x:Name="PrecisionFp32" Tag="fp32">fp32 — standard float</ComboBoxItem>
+                                                <ComboBoxItem x:Name="PrecisionFp16" Tag="fp16">fp16 — half precision</ComboBoxItem>
+                                                <ComboBoxItem x:Name="PrecisionFp64" Tag="fp64">fp64 — double precision</ComboBoxItem>
+                                                <ComboBoxItem x:Name="PrecisionInt32" Tag="int32">int32 — integer ops</ComboBoxItem>
+                                            </ComboBox>
+                                        </StackPanel>
                                     </Grid>
                                     <InfoBar x:Name="WorkloadInfo" IsOpen="True" IsClosable="False"
                                              Severity="Informational"/>
@@ -171,12 +199,16 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <ComboBox x:Name="DurationUnitBox" Grid.Column="0" Header="Duration" MinWidth="120"
+                                        <ComboBox x:Name="DurationUnitBox" Grid.Column="0" Header="Duration" MinWidth="140"
                                                   SelectedIndex="0" SelectionChanged="OnDurationUnitChanged">
-                                            <ComboBoxItem x:Name="DurationSeconds">Seconds</ComboBoxItem>
-                                            <ComboBoxItem x:Name="DurationFrames">Frames</ComboBoxItem>
+                                            <ComboBoxItem x:Name="DurationSeconds" Tag="seconds">Seconds</ComboBoxItem>
+                                            <ComboBoxItem x:Name="DurationMinutes" Tag="minutes">Minutes</ComboBoxItem>
+                                            <ComboBoxItem x:Name="DurationHours" Tag="hours">Hours</ComboBoxItem>
+                                            <ComboBoxItem x:Name="DurationFrames" Tag="frames">Frames</ComboBoxItem>
+                                            <ComboBoxItem x:Name="DurationUnlimited" Tag="unlimited">Until Cancel</ComboBoxItem>
                                         </ComboBox>
-                                        <TextBox x:Name="DurationValueBox" Grid.Column="1" Header="Value" Text="15" Width="110"/>
+                                        <TextBox x:Name="DurationValueBox" Grid.Column="1" Header="Value" Text="15" Width="110"
+                                                 TextChanged="OnDurationValueChanged"/>
                                         <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
                                             <ComboBox x:Name="ParticlePresetBox" Header="Particles" Width="220"
                                                       SelectedIndex="1" SelectionChanged="OnParticlePresetChanged">
@@ -225,15 +257,41 @@
                                         <CheckBox x:Name="ShowLegacyBox" Content="Show legacy &amp; advanced tests"
                                                   MinWidth="0" Checked="OnShowLegacyChecked" Unchecked="OnShowLegacyChecked"/>
                                     </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="14">
+                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <CheckBox x:Name="RenderDocBox" Content="RenderDoc" MinWidth="0"
+                                                      IsChecked="True"
+                                                      Checked="OnRenderDocChecked" Unchecked="OnRenderDocChecked"/>
+                                            <FontIcon x:Name="RenderDocInfo" Glyph="&#xE946;" FontSize="14"
+                                                      VerticalAlignment="Center"
+                                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <CheckBox x:Name="CaptureBox" Content="Capture at" MinWidth="0"
+                                                      IsChecked="True"
+                                                      Checked="OnCaptureChecked" Unchecked="OnCaptureChecked"/>
+                                            <NumberBox x:Name="CaptureValueBox" Width="96" Minimum="0.1"
+                                                       Maximum="15" Value="5"
+                                                       SpinButtonPlacementMode="Compact"
+                                                       ValueChanged="OnCaptureValueChanged"/>
+                                            <TextBlock x:Name="CaptureUnitLabel" Text="s"
+                                                       VerticalAlignment="Center"/>
+                                            <FontIcon x:Name="CaptureInfo" Glyph="&#xE946;" FontSize="14"
+                                                      VerticalAlignment="Center"
+                                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        </StackPanel>
+                                    </StackPanel>
                                 </StackPanel>
                             </Border>
 
                             <!-- Result score -->
-                            <Border Padding="16"
+                            <Border Padding="16,12,16,14"
                                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                     BorderThickness="1" CornerRadius="8">
-                                <TextBlock x:Name="ResultText" FontSize="18" FontWeight="SemiBold" Text="—" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="ResultText" FontSize="18" FontWeight="SemiBold" Text="—"
+                                           TextWrapping="Wrap" VerticalAlignment="Center"
+                                           OpticalMarginAlignment="TrimSideBearings"/>
                             </Border>
 
                             <!-- CLI follows page content (not pinned above the action bar). -->
@@ -264,7 +322,8 @@
                         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <Ellipse x:Name="GpuStatusLight" Width="10" Height="10"
                                      Fill="#6CCB5F" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="Status" Text="Ready" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="Status" Text="Ready" VerticalAlignment="Center"
+                                       Margin="0,-1,0,1"/>
                         </StackPanel>
                         <!-- Kept for code that toggles IsActive; traffic light is the visible status. -->
                         <ProgressRing x:Name="Busy" IsActive="False" Width="22" Height="22"
@@ -429,7 +488,8 @@
                         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <Ellipse x:Name="CpuStatusLight" Width="10" Height="10"
                                      Fill="#6CCB5F" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="CpuStatusText" Text="Ready" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="CpuStatusText" Text="Ready" VerticalAlignment="Center"
+                                       Margin="0,-1,0,1"/>
                         </StackPanel>
                         <Button x:Name="CpuCancelButton" Content="Cancel" Click="OnCpuCancel" IsEnabled="False"/>
                         <Button x:Name="CpuRunButton" Content="Run CPU Benchmark" Click="OnCpuRun"
@@ -458,43 +518,39 @@
                                 Click="OnOpenCapturesFolder" VerticalAlignment="Bottom"/>
                     </StackPanel>
 
-                    <!-- Compact browser-style category tabs + one-line legacy filter. -->
-                    <Grid Grid.Row="1" ColumnSpacing="16" Margin="0,0,0,10"
-                          Height="40" VerticalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="180"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TabView x:Name="HistoryCategoryTabs" Grid.Column="0"
-                                 Height="40" SelectedIndex="0"
-                                 IsAddTabButtonVisible="False" TabWidthMode="Equal"
-                                 CanDragTabs="False" CanReorderTabs="False"
-                                 SelectionChanged="OnHistoryCategoryChanged">
-                            <TabViewItem x:Name="HistoryGpuTab" Header="GPU" IsClosable="False"/>
-                            <TabViewItem x:Name="HistoryCpuTab" Header="CPU" IsClosable="False"/>
-                        </TabView>
-                        <CheckBox x:Name="HistoryLegacyBox" Grid.Column="1"
-                                  Content="Show legacy tests" VerticalAlignment="Center"
-                                  Checked="OnHistoryLegacyChecked"
-                                  Unchecked="OnHistoryLegacyChecked"/>
-                    </Grid>
+                    <!-- GPU/CPU tabs + optional GPU-only toggles, vertically centered together. -->
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="16"
+                                Margin="0,0,0,10" VerticalAlignment="Center">
+                        <SelectorBar x:Name="HistoryCategoryTabs"
+                                     VerticalAlignment="Center"
+                                     SelectionChanged="OnHistoryCategoryChanged">
+                            <SelectorBarItem x:Name="HistoryGpuTab" Text="GPU" IsSelected="True"/>
+                            <SelectorBarItem x:Name="HistoryCpuTab" Text="CPU"/>
+                        </SelectorBar>
+                        <StackPanel Orientation="Horizontal" Spacing="16"
+                                    VerticalAlignment="Center">
+                            <CheckBox x:Name="HistoryLegacyBox"
+                                      Content="Show legacy tests"
+                                      VerticalAlignment="Center"
+                                      Checked="OnHistoryLegacyChecked"
+                                      Unchecked="OnHistoryLegacyChecked"/>
+                            <CheckBox x:Name="HistoryHeadlessBox"
+                                      Content="Show headless"
+                                      VerticalAlignment="Center"
+                                      Checked="OnHistoryLegacyChecked"
+                                      Unchecked="OnHistoryLegacyChecked"/>
+                        </StackPanel>
+                    </StackPanel>
 
-                    <!-- Sort + workload/particle/GPU filters + time range -->
-                    <Grid Grid.Row="2" ColumnSpacing="16" Margin="0,0,0,8"
-                          VerticalAlignment="Bottom">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="1.2*"/>
-                            <ColumnDefinition Width="0.9*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel x:Name="ApiFilterColumn" Grid.Column="0" Spacing="4" VerticalAlignment="Bottom">
+                    <!-- Horizontal StackPanel: collapsed filters leave no ColumnSpacing gap. -->
+                    <StackPanel x:Name="HistoryFilterRow" Grid.Row="2" Orientation="Horizontal"
+                                Spacing="12" Margin="0,0,0,8" VerticalAlignment="Bottom">
+                        <StackPanel x:Name="ApiFilterColumn" Spacing="4" VerticalAlignment="Bottom"
+                                    MinWidth="140">
                             <TextBlock x:Name="ApiFilterLabel" Text="Graphics API" Margin="1,0,0,0"/>
-                            <DropDownButton x:Name="ApiFilterButton" Content="Graphics API" MinWidth="160" Height="32"
-                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                            <DropDownButton x:Name="ApiFilterButton" Content="Graphics API" Height="32"
+                                            MinWidth="140"
+                                            HorizontalContentAlignment="Left"
                                             VerticalContentAlignment="Center">
                                 <DropDownButton.Flyout>
                                     <Flyout x:Name="ApiFilterFlyout" Placement="Bottom">
@@ -512,10 +568,12 @@
                             </DropDownButton>
                         </StackPanel>
 
-                        <StackPanel x:Name="WorkloadFilterColumn" Grid.Column="1" Spacing="4" VerticalAlignment="Bottom">
+                        <StackPanel x:Name="WorkloadFilterColumn" Spacing="4" VerticalAlignment="Bottom"
+                                    MinWidth="180">
                             <TextBlock x:Name="WorkloadFilterLabel" Text="Workload" Margin="1,0,0,0"/>
-                            <DropDownButton x:Name="WorkloadFilterButton" Content="All workloads" MinWidth="160" Height="32"
-                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                            <DropDownButton x:Name="WorkloadFilterButton" Content="All workloads" Height="32"
+                                            MinWidth="180"
+                                            HorizontalContentAlignment="Left"
                                             VerticalContentAlignment="Center">
                                 <DropDownButton.Flyout>
                                     <Flyout x:Name="WorkloadFilterFlyout" Placement="Bottom">
@@ -533,10 +591,12 @@
                             </DropDownButton>
                         </StackPanel>
 
-                        <StackPanel x:Name="ParticleFilterColumn" Grid.Column="2" Spacing="4" VerticalAlignment="Bottom">
+                        <StackPanel x:Name="ParticleFilterColumn" Spacing="4" VerticalAlignment="Bottom"
+                                    MinWidth="150">
                             <TextBlock x:Name="ParticleFilterLabel" Text="Particles" Margin="1,0,0,0"/>
-                            <DropDownButton x:Name="ParticleFilterButton" Content="All particle counts" MinWidth="170" Height="32"
-                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                            <DropDownButton x:Name="ParticleFilterButton" Content="All particle counts" Height="32"
+                                            MinWidth="150"
+                                            HorizontalContentAlignment="Left"
                                             VerticalContentAlignment="Center">
                                 <DropDownButton.Flyout>
                                     <Flyout x:Name="ParticleFilterFlyout" Placement="Bottom">
@@ -553,12 +613,13 @@
                                 </DropDownButton.Flyout>
                             </DropDownButton>
                         </StackPanel>
-                        <!-- Plasma Bloom / GPU Burn step counts (from workloadConfig steps=). -->
-                        <StackPanel x:Name="StepsFilterColumn" Grid.Column="3" Spacing="4" VerticalAlignment="Bottom"
-                                    Visibility="Collapsed">
+
+                        <StackPanel x:Name="StepsFilterColumn" Spacing="4" VerticalAlignment="Bottom"
+                                    MinWidth="120" Visibility="Collapsed">
                             <TextBlock x:Name="StepsFilterLabel" Text="Steps" Margin="1,0,0,0"/>
-                            <DropDownButton x:Name="StepsFilterButton" Content="All step counts" MinWidth="140" Height="32"
-                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                            <DropDownButton x:Name="StepsFilterButton" Content="All step counts" Height="32"
+                                            MinWidth="120"
+                                            HorizontalContentAlignment="Left"
                                             VerticalContentAlignment="Center">
                                 <DropDownButton.Flyout>
                                     <Flyout x:Name="StepsFilterFlyout" Placement="Bottom">
@@ -575,6 +636,7 @@
                                 </DropDownButton.Flyout>
                             </DropDownButton>
                         </StackPanel>
+
                         <ComboBox x:Name="SortBox" Header="Sort by" Width="180" SelectedIndex="0" Visibility="Collapsed"
                                   VerticalAlignment="Bottom" SelectionChanged="OnHistoryViewChanged">
                             <ComboBoxItem x:Name="SortTime">Time (newest)</ComboBoxItem>
@@ -591,10 +653,13 @@
                                   VerticalAlignment="Bottom" SelectionChanged="OnHistoryViewChanged">
                             <ComboBoxItem x:Name="ParticleFilterAll" Tag="0">All particle counts</ComboBoxItem>
                         </ComboBox>
-                        <StackPanel x:Name="DeviceFilterColumn" Grid.Column="4" Spacing="4" VerticalAlignment="Bottom">
+
+                        <StackPanel x:Name="DeviceFilterColumn" Spacing="4" VerticalAlignment="Bottom"
+                                    MinWidth="200">
                             <TextBlock x:Name="GpuFilterLabel" Text="GPUs" Margin="1,0,0,0"/>
-                            <DropDownButton x:Name="GpuFilterButton" Content="All GPUs" MinWidth="220" Height="32"
-                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                            <DropDownButton x:Name="GpuFilterButton" Content="All GPUs" Height="32"
+                                            MinWidth="200"
+                                            HorizontalContentAlignment="Left"
                                             VerticalContentAlignment="Center">
                                 <DropDownButton.Flyout>
                                     <Flyout x:Name="GpuFilterFlyout" Placement="Bottom">
@@ -611,8 +676,9 @@
                                 </DropDownButton.Flyout>
                             </DropDownButton>
                         </StackPanel>
-                        <ComboBox x:Name="TimeRangeBox" Grid.Column="5" Header="Time range" MinWidth="150" SelectedIndex="0"
-                                  HorizontalAlignment="Stretch"
+
+                        <ComboBox x:Name="TimeRangeBox" Header="Time range" Width="150"
+                                  SelectedIndex="0"
                                   VerticalAlignment="Bottom" SelectionChanged="OnHistoryViewChanged">
                             <ComboBoxItem x:Name="RangeAll">All</ComboBoxItem>
                             <ComboBoxItem x:Name="RangeToday">Today</ComboBoxItem>
@@ -620,7 +686,7 @@
                             <ComboBoxItem x:Name="Range30">Last 30 days</ComboBoxItem>
                             <ComboBoxItem x:Name="RangeCustom">Custom range…</ComboBoxItem>
                         </ComboBox>
-                    </Grid>
+                    </StackPanel>
 
                     <!-- Custom date range (only shown for "Custom range…") -->
                     <StackPanel x:Name="DateRangeRow" Grid.Row="3" Orientation="Horizontal" Spacing="16"
@@ -646,7 +712,7 @@
                                 </Grid.RowDefinitions>
                                 <TextBlock x:Name="HistoryHeader" Grid.Row="0" Visibility="Collapsed"/>
                                 <StackPanel x:Name="HistoryHeaderPanel" Grid.Row="0" Orientation="Horizontal"
-                                            Margin="60,10,16,6" Spacing="0"/>
+                                            Margin="60,6,16,2" Spacing="0" VerticalAlignment="Center"/>
                                 <ListView x:Name="HistoryList" Grid.Row="1" SelectionMode="Multiple"
                                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                                           ScrollViewer.HorizontalScrollMode="Disabled"/>
@@ -709,8 +775,12 @@
                             <StackPanel Spacing="10">
                                 <StackPanel Orientation="Horizontal" Spacing="14">
                                     <Image x:Name="AboutIcon" Width="56" Height="56" VerticalAlignment="Top"/>
-                                    <TextBlock Text="Mangekyo" FontSize="20"
-                                               FontWeight="Bold" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                    <StackPanel Spacing="2" VerticalAlignment="Center">
+                                        <TextBlock Text="Mangekyo" FontSize="20"
+                                                   FontWeight="Bold" TextWrapping="Wrap"/>
+                                        <TextBlock x:Name="AboutVersion" Opacity="0.72"
+                                                   Text="Version —" TextWrapping="Wrap"/>
+                                    </StackPanel>
                                 </StackPanel>
                                 <TextBlock x:Name="AboutDesc" Opacity="0.85" TextWrapping="Wrap"
                                            Text="Cross-API CPU &amp; GPU Benchmark Suite — native C++/WinRT frontend."/>
