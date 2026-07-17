@@ -56,9 +56,11 @@
             <Grid x:Name="RootGrid" Padding="0,4,0,0">
 
                 <!-- ===================== Run page ===================== -->
+                <!-- Transparent background: empty page areas must hit-test so
+                     clicks there can dismiss focus-driven popups. PointerPressed
+                     is wired in code with handledEventsToo (controls swallow it). -->
                 <Grid x:Name="RunPage" Visibility="Visible" Margin="28,12,28,0"
-                      IsTabStop="True"
-                      PointerPressed="OnGpuPagePointerPressed">
+                      IsTabStop="True" Background="Transparent">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
@@ -209,7 +211,8 @@
                                         </ComboBox>
                                         <NumberBox x:Name="DurationValueBox" Grid.Column="1" Header="Value" Value="15" Width="150"
                                                    Minimum="1" Maximum="360000" SmallChange="1"
-                                                   SpinButtonPlacementMode="Inline"
+                                                   SpinButtonPlacementMode="Compact"
+                                                   ValidationMode="InvalidInputOverwritten"
                                                    ValueChanged="OnDurationValueChanged"/>
                                         <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
                                             <ComboBox x:Name="ParticlePresetBox" Header="Particles" Width="220"
@@ -272,11 +275,12 @@
                                             <CheckBox x:Name="CaptureBox" Content="Capture at" MinWidth="0"
                                                       IsChecked="True"
                                                       Checked="OnCaptureChecked" Unchecked="OnCaptureChecked"/>
-                                            <!-- Inline spin buttons (the Compact popup could get stuck on
-                                                 screen); wide enough that the input stays usable. -->
+                                            <!-- Compact spin buttons expand into a vertical flyout while
+                                                 the number field is focused. -->
                                             <NumberBox x:Name="CaptureValueBox" Width="160" Minimum="1"
                                                        Maximum="15" Value="5" SmallChange="1"
-                                                       SpinButtonPlacementMode="Inline"
+                                                       SpinButtonPlacementMode="Compact"
+                                                       ValidationMode="InvalidInputOverwritten"
                                                        ValueChanged="OnCaptureValueChanged"/>
                                             <TextBlock x:Name="CaptureUnitLabel" Text="s"
                                                        VerticalAlignment="Center"/>
@@ -374,8 +378,7 @@
                 <!-- ===================== CPU page ===================== -->
                 <!-- Same shell as GPU: scrollable body (incl. CLI) + pinned action bar. -->
                 <Grid x:Name="CpuPage" Visibility="Collapsed" Margin="28,12,28,0"
-                      IsTabStop="True"
-                      PointerPressed="OnCpuPagePointerPressed">
+                      IsTabStop="True" Background="Transparent">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
@@ -420,15 +423,17 @@
                                             <ComboBoxItem x:Name="CpuDurationQuick" Tag="1">Quick (1 s)</ComboBoxItem>
                                             <ComboBoxItem x:Name="CpuDurationFormal" Tag="15">Formal (15 s)</ComboBoxItem>
                                         </ComboBox>
-                                        <!-- Inline spin buttons: Compact's floating popup could get stuck.
+                                        <!-- Compact spin buttons match the GPU duration controls.
                                              Warm-up keeps one decimal — the formal contract is 15.0 s + 0.2 s. -->
                                         <NumberBox x:Name="CpuTimeBox" Grid.Column="2" Header="Seconds per test"
                                                    Value="1" Minimum="1" Maximum="3600" SmallChange="1"
-                                                   SpinButtonPlacementMode="Inline"
+                                                   SpinButtonPlacementMode="Compact"
+                                                   ValidationMode="InvalidInputOverwritten"
                                                    ValueChanged="OnCpuTimeChanged"/>
                                         <NumberBox x:Name="CpuWarmupBox" Grid.Column="3" Header="Warm-up seconds"
                                                    Value="0.2" Minimum="0" Maximum="60" SmallChange="0.1"
-                                                   SpinButtonPlacementMode="Inline"
+                                                   SpinButtonPlacementMode="Compact"
+                                                   ValidationMode="InvalidInputOverwritten"
                                                    ValueChanged="OnCpuTimeChanged"/>
                                     </Grid>
                                     <TextBlock x:Name="CpuDurationHint" Opacity="0.72" TextWrapping="Wrap"

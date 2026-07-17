@@ -17,6 +17,7 @@
 #include <winrt/Microsoft.UI.Xaml.Media.Animation.h>
 #include <winrt/Windows.UI.h>
 #include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.System.h>
 
 #include <winrt/Windows.UI.Text.h>
 
@@ -1832,6 +1833,80 @@ namespace
         { "dx11",   "DirectX 11", 2 },
         { "opengl", "OpenGL",     3 },
     };
+
+    // Compact NumberBox template part: the popup holding the spin buttons.
+    Microsoft::UI::Xaml::Controls::Primitives::Popup findSpinPopup(
+        DependencyObject const& root)
+    {
+        if (!root) return nullptr;
+        if (auto popup = root.try_as<Microsoft::UI::Xaml::Controls::Primitives::Popup>();
+            popup && popup.Name() == L"UpDownPopup")
+            return popup;
+        const int count = VisualTreeHelper::GetChildrenCount(root);
+        for (int i = 0; i < count; ++i)
+            if (auto p = findSpinPopup(VisualTreeHelper::GetChild(root, i)))
+                return p;
+        return nullptr;
+    }
+
+    void attachSpinPopupTransition(NumberBox const& box)
+    {
+        try
+        {
+            if (auto popup = findSpinPopup(box);
+                popup && (!popup.ChildTransitions() ||
+                          popup.ChildTransitions().Size() == 0))
+            {
+                TransitionCollection transitions;
+                transitions.Append(PopupThemeTransition{});
+                popup.ChildTransitions(transitions);
+            }
+        }
+        catch (...) {}
+    }
+
+    // Compact NumberBox template part: the editable text field.
+    TextBox findNumberBoxInput(DependencyObject const& root)
+    {
+        if (!root) return nullptr;
+        if (auto tb = root.try_as<TextBox>(); tb && tb.Name() == L"InputBox")
+            return tb;
+        const int count = VisualTreeHelper::GetChildrenCount(root);
+        for (int i = 0; i < count; ++i)
+            if (auto tb = findNumberBoxInput(VisualTreeHelper::GetChild(root, i)))
+                return tb;
+        return nullptr;
+    }
+
+    // Stepping select-alls the text (native NumberBox behaviour) — from the
+    // popup arrows that reads as an accidental selection. Collapse it.
+    void clearSpinSelection(NumberBox const& box)
+    {
+        try
+        {
+            if (auto input = findNumberBoxInput(box))
+                input.Select(static_cast<int32_t>(input.Text().size()), 0);
+        }
+        catch (...) {}
+    }
+
+    // Typing the field empty produces NaN; snap back to the previous value so
+    // the box never sits blank.
+    bool restoreEmptyNumberBox(NumberBox const& box,
+                               NumberBoxValueChangedEventArgs const& args)
+    {
+        if (!std::isnan(args.NewValue())) return false;
+
+        double fallback = args.OldValue();
+        if (!std::isfinite(fallback))
+            fallback = std::isfinite(box.Minimum()) ? box.Minimum() : 0.0;
+        if (std::isfinite(box.Minimum()))
+            fallback = (std::max)(box.Minimum(), fallback);
+        if (std::isfinite(box.Maximum()))
+            fallback = (std::min)(box.Maximum(), fallback);
+        box.Value(fallback);
+        return true;
+    }
 }
 
 MainWindow::MainWindow()
@@ -1914,6 +1989,64 @@ MainWindow::MainWindow()
     auto syncOnHeadlessToggle = [this](auto&&, auto&&) { syncCaptureControls(); };
     HeadlessBox().Checked(syncOnHeadlessToggle);
     HeadlessBox().Unchecked(syncOnHeadlessToggle);
+
+    // Compact NumberBox popups follow focus, so Enter/Escape confirm by
+    // handing focus back to the page (which closes the popup natively).
+    // AddHandler with handledEventsToo: the inner TextBox marks Enter handled.
+    auto numberBoxKeyDismiss = [this](IInspectable const& sender,
+                                      Input::KeyRoutedEventArgs const& e)
+    {
+        if (e.Key() != Windows::System::VirtualKey::Enter &&
+            e.Key() != Windows::System::VirtualKey::Escape)
+            return;
+        auto box = sender.try_as<NumberBox>();
+        if (!box) return;
+        DependencyObject runPage = RunPage();
+        bool onRunPage = false;
+        for (DependencyObject walk = box; walk; walk = VisualTreeHelper::GetParent(walk))
+            if (walk == runPage) { onRunPage = true; break; }
+        (onRunPage ? RunPage() : CpuPage()).Focus(FocusState::Programmatic);
+    };
+    for (auto const& numberBox :
+         { DurationValueBox(), CaptureValueBox(), CpuTimeBox(), CpuWarmupBox() })
+    {
+        numberBox.AddHandler(UIElement::KeyDownEvent(),
+                             winrt::box_value(Input::KeyEventHandler(numberBoxKeyDismiss)),
+                             true /*handledEventsToo*/);
+        // The template's UpDownPopup ships without transitions — attach the
+        // standard popup animation. The popup may not be realised yet when
+        // Loaded fires, so retry one dispatcher pass later.
+        numberBox.Loaded([this](IInspectable const& sender, RoutedEventArgs const&)
+        {
+            auto box = sender.try_as<NumberBox>();
+            if (!box) return;
+            attachSpinPopupTransition(box);
+            if (m_dispatcher)
+                m_dispatcher.TryEnqueue(
+                    Microsoft::UI::Dispatching::DispatcherQueuePriority::Low,
+                    [box]() { attachSpinPopupTransition(box); });
+        });
+    }
+
+    // Page-level pointer handlers via AddHandler: many controls mark
+    // PointerPressed handled, which silently ate the XAML-wired version and
+    // made outside-click dismissal intermittent.
+    RunPage().AddHandler(UIElement::PointerPressedEvent(),
+        winrt::box_value(Input::PointerEventHandler{ this, &MainWindow::OnGpuPagePointerPressed }),
+        true /*handledEventsToo*/);
+    CpuPage().AddHandler(UIElement::PointerPressedEvent(),
+        winrt::box_value(Input::PointerEventHandler{ this, &MainWindow::OnCpuPagePointerPressed }),
+        true /*handledEventsToo*/);
+    // Whole-window listener so Compact spin popups dismiss no matter where
+    // the click lands (page margins, nav pane, title bar, other cards).
+    RootShell().AddHandler(UIElement::PointerPressedEvent(),
+        winrt::box_value(Input::PointerEventHandler(
+            [this](IInspectable const&, Input::PointerRoutedEventArgs const& e)
+            {
+                if (auto src = e.OriginalSource().try_as<DependencyObject>())
+                    dismissNumberBoxPopupsOnOutsideClick(src);
+            })),
+        true /*handledEventsToo*/);
     SelectAllRunApis().Click([this](auto&&, auto&&) {
         setPanelChecks(SupportedApisPanel(), true);
         setPanelChecks(UnsupportedApisPanel(), true);
@@ -2044,13 +2177,26 @@ void MainWindow::OnCaptureChecked(IInspectable const&, RoutedEventArgs const&)
     syncCaptureControls();
 }
 
-void MainWindow::OnCaptureValueChanged(NumberBox const&, NumberBoxValueChangedEventArgs const&)
+// The select-all NumberBox performs after stepping may land before or after
+// this handler runs; collapse now and once more on the next dispatcher pass.
+void MainWindow::collapseSpinSelectionSoon(NumberBox const& box)
 {
+    clearSpinSelection(box);
+    if (m_dispatcher)
+        m_dispatcher.TryEnqueue(
+            Microsoft::UI::Dispatching::DispatcherQueuePriority::Low,
+            [box]() { clearSpinSelection(box); });
+}
+
+void MainWindow::OnCaptureValueChanged(NumberBox const& sender,
+                                       NumberBoxValueChangedEventArgs const& args)
+{
+    if (restoreEmptyNumberBox(sender, args)) return;
+    collapseSpinSelectionSoon(sender);
     if (!m_uiReady || m_suppressRenderDocUi) return;
+    const double cur = sender.Value();
     const double minVal = CaptureValueBox().Minimum();
     const double maxVal = CaptureValueBox().Maximum();
-    double cur = CaptureValueBox().Value();
-    if (std::isnan(cur)) return;
     double clamped = (std::min)(maxVal, (std::max)(minVal, cur));
     clamped = std::floor(clamped + 1e-9); // integer steps for every unit
     if (clamped == cur) return;
@@ -2059,9 +2205,11 @@ void MainWindow::OnCaptureValueChanged(NumberBox const&, NumberBoxValueChangedEv
     m_suppressRenderDocUi = false;
 }
 
-void MainWindow::OnDurationValueChanged(NumberBox const&,
-                                        NumberBoxValueChangedEventArgs const&)
+void MainWindow::OnDurationValueChanged(NumberBox const& sender,
+                                        NumberBoxValueChangedEventArgs const& args)
 {
+    if (restoreEmptyNumberBox(sender, args)) return;
+    collapseSpinSelectionSoon(sender);
     if (!m_uiReady || m_suppressCombo) return;
     syncCaptureControls();
 }
@@ -2823,9 +2971,11 @@ void MainWindow::OnCpuDurationPresetChanged(IInspectable const&,
     catch (...) {}
 }
 
-void MainWindow::OnCpuTimeChanged(NumberBox const&,
-                                  NumberBoxValueChangedEventArgs const&)
+void MainWindow::OnCpuTimeChanged(NumberBox const& sender,
+                                  NumberBoxValueChangedEventArgs const& args)
 {
+    if (restoreEmptyNumberBox(sender, args)) return;
+    collapseSpinSelectionSoon(sender);
     if (!m_uiReady || m_suppressCombo || m_cpuRunning.load()) return;
     const double value = CpuTimeBox().Value();
     const double warmup = CpuWarmupBox().Value();
@@ -2928,20 +3078,70 @@ namespace
         if (focused && focused == box)
             fallback.Focus(FocusState::Programmatic);
     }
+
 }
 
 void MainWindow::OnGpuPagePointerPressed(IInspectable const&, PointerRoutedEventArgs const& args)
 {
     auto src = args.OriginalSource().try_as<DependencyObject>();
-    if (!src || isUnder(src, GpuOutputExpander())) return;
-    clearReadOnlyTextBoxFocus(OutputBox(), RunPage());
+    if (!src) return;
+    if (!isUnder(src, GpuOutputExpander()))
+        clearReadOnlyTextBoxFocus(OutputBox(), RunPage());
 }
 
 void MainWindow::OnCpuPagePointerPressed(IInspectable const&, PointerRoutedEventArgs const& args)
 {
     auto src = args.OriginalSource().try_as<DependencyObject>();
-    if (!src || isUnder(src, CpuOutputExpander())) return;
-    clearReadOnlyTextBoxFocus(CpuOutputBox(), CpuPage());
+    if (!src) return;
+    if (!isUnder(src, CpuOutputExpander()))
+        clearReadOnlyTextBoxFocus(CpuOutputBox(), CpuPage());
+}
+
+// The Compact spin popup follows focus: WinUI closes it when its NumberBox
+// loses focus and reopens it while focus stays, so force-closing the popup
+// never sticks. This runs on every window click (root handler,
+// handledEventsToo) and defers the check one dispatcher pass — by then a
+// focusable click target owns focus (nothing to do), while clicks on blank
+// or non-focusable space leave focus in the box / popup, so we take it back.
+void MainWindow::dismissNumberBoxPopupsOnOutsideClick(DependencyObject const& src)
+{
+    const std::array<NumberBox, 4> boxes{
+        DurationValueBox(), CaptureValueBox(), CpuTimeBox(), CpuWarmupBox() };
+    for (auto const& box : boxes)
+        if (isUnder(src, box)) return; // the box's own business
+
+    if (!m_dispatcher) return;
+    m_dispatcher.TryEnqueue(
+        Microsoft::UI::Dispatching::DispatcherQueuePriority::Low,
+        [this, strong = get_strong()]()
+    {
+        if (!uiAlive()) return;
+        auto focused = FocusManager::GetFocusedElement(RootShell().XamlRoot())
+                           .try_as<DependencyObject>();
+        if (!focused) return;
+
+        bool dismiss = false;
+        const std::array<NumberBox, 4> boxes{
+            DurationValueBox(), CaptureValueBox(), CpuTimeBox(), CpuWarmupBox() };
+        for (auto const& box : boxes)
+            if (isUnder(focused, box)) { dismiss = true; break; }
+        if (!dismiss)
+        {
+            // After spinning, focus sits on the popup's own repeat buttons,
+            // which live in a separate popup tree (WinUI template names).
+            if (auto fe = focused.try_as<FrameworkElement>())
+            {
+                const auto name = fe.Name();
+                dismiss = name == L"PopupUpSpinButton" ||
+                          name == L"PopupDownSpinButton";
+            }
+        }
+        if (!dismiss) return;
+
+        auto page = CpuPage().Visibility() == Visibility::Visible
+            ? CpuPage() : RunPage();
+        page.Focus(FocusState::Programmatic);
+    });
 }
 
 void MainWindow::cancelCpuBenchmark()

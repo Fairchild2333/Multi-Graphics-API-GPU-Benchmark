@@ -163,6 +163,10 @@ namespace winrt::gpu_bench_gui::implementation
         void renderResultScore();
         void setTaskbarProgress(bool active, double fraction,
                                 bool indeterminate = false);
+        void dismissNumberBoxPopupsOnOutsideClick(
+            winrt::Microsoft::UI::Xaml::DependencyObject const& src);
+        void collapseSpinSelectionSoon(
+            winrt::Microsoft::UI::Xaml::Controls::NumberBox const& box);
         void updateGpuProgressTick();
         void stopGpuProgress(winrt::hstring const& stage, bool complete);
         void updateExtraLabel();

@@ -216,6 +216,12 @@ RenderDoc。当前已同时提供原生 C++ CLI 与独立 WinUI CPU 页面：
   logical concurrency，不能选择、硬绑定或可靠分类宿主核心；移动端还需独立
   热状态/前后台合同，禁止把当前源代码存在写成已完成端口。
 
+### 3.5 WinUI 秒数输入样式（2026-07-17）
+
+- 用户要求把当前横向内联上下箭头改成参考图中的竖向浮层效果。`DurationValueBox`、`CaptureValueBox`、`CpuTimeBox` 与 `CpuWarmupBox` 现统一使用 WinUI `NumberBox` 的 `SpinButtonPlacementMode="Compact"`；默认值、范围、步长与成绩合同未改变。
+- Compact 交互补层现包括：Enter 提交后把焦点移到当前 GPU/CPU 导航项；GPU/CPU 滚动内容的外部点击会移走 NumberBox 焦点；× 或编辑产生 `NaN` 时立即恢复 `OldValue`（无合法旧值才取 Minimum），避免原生上下按钮进入全灰状态；`UpDownPopup` 追加轻微水平 `PopupThemeTransition`，不复制整份 WinUI 控件模板。
+- 源码、独立输出目录以及正式 `gui/x64/Release` 目录的 Release x64 构建均已通过。按用户明确要求，本轮最终版本只改代码和重新编译，没有启动 GUI；逐控件视觉与手动交互仍由用户侧验收。
+
 ## 4. P0 正确性阻塞项
 
 仍开放的问题修复前，不应把旧 `fluid` 计入正式排行榜。GPU Burn
@@ -414,6 +420,7 @@ PathService 已把 results/captures/reports/logs 改到
 
 ### 当前正在进行
 
+- [x] 2026-07-17：WinUI 四个秒数/时长 `NumberBox`（GPU duration、RenderDoc capture、CPU per-test、CPU warm-up）由 `Inline` 统一改为参考图对应的 `Compact` 竖向浮层按钮；补齐 Enter/页面外点击失焦、空值恢复与 `PopupThemeTransition`，避免 × 清空后 `NaN` 导致按钮全灰。数值合同未变，Release engine 与 WinUI x64 build 通过；按用户要求未启动最终 GUI，视觉手测仍待用户侧验收。
 - [x] 2026-07-16/17：用户否定首个二维 plasma chamber 原型后，将公开 `gpu_burn` 重做为 **Mangekyo faceted glass v2**：Vulkan/HLSL/OpenGL 三份一致 shader 现使用透视 3D SDF 截顶宝石/八面体碎钻、前后深度层、平面法线、Fresnel、RGB 色散和吸收；两次全屏固定循环使用独立 `gpu_burn_v2_mangekyo_faceted_glass_v1` / shaderVersion=3 身份，被否定原型不混分。Plasma Bloom 通过 `gpu_burn_v1` selector、原 shader 与历史合同完整保留。Release core 编译通过；RTX 5090 Vulkan 自动标定 16→2048 后 render 13.199 ms / 286.00 Gpix-step/s / 90.4% timestamp utilisation，stableScore 288.21 / CV 1.50%；DX12/DX11/OpenGL v2 低步数 runtime smoke 均通过。视觉核验图为 `out/kaleidoscope-prototype/mangekyo_faceted_final.png`。
 - [x] 2026-07-15：完成独立 `gpu_burn_v1` vertical slice。用户否定甜甜圈后改为原创 **Plasma Bloom / 等离子晶核**：实心七瓣晶体、无环形孔洞、非粒子；保留 `gpu_stress_v1` 成绩契约，默认 15 秒 / 第 5 秒抓帧，并同步 Vulkan/DX12/DX11/OpenGL、WARP、GUI、结果/图表与打包资产。
 - [x] 2026-07-15：RTX 5090 Vulkan 自动标定 16 → 1604 steps/draw；正式 render 14.899 ms、`198.44 Gpix-step/s`，稳定段连续 8 次 NVML utilization 均为 99%，功耗约 599–600W（600W limit）。应用内 93% 是 GPU timestamp / 总帧墙钟比，包含 CPU/present 间隙，不等同于 NVML busy。
@@ -451,6 +458,8 @@ PathService 已把 results/captures/reports/logs 改到
 
 用户在 2026-07-16 最新调整了近期顺序：**先 Windows ARM64 完整发布闭环，再 Windows 7 Aero GUI**。ARM64 + WiX 主路径已落地。下一刀严格按以下顺序执行：
 
+本次秒数控件没有剩余代码修改；下次启动 WinUI 做 GUI 实机验收时，补验四个 Compact 浮层的聚焦、上下调节、失焦、切页和窗口停用关闭行为。项目主线下一步仍是下列 Windows 7 GUI vertical slice，不因该显示样式调整改变优先级。
+
 1. **Windows ARM64 vertical slice（已完成）**：含原生测项、GUI、ZIP/MSI。
 2. **Windows 7 GUI vertical slice（当前下一步）**：保留 `gpu_engine` 与 CLI worker 为唯一跑分实现，另建不依赖 WinUI/WinAppSDK 的 Win32/DWM 前端；实现 Aero glass/主题化非客户区/Direct2D/DirectWrite 等能力检测 and 无 Aero fallback。建立 Win7 专用 toolchain/runtime/dependency/installer gate，并优先用 GT 120 验证 DX11 FL10/SM4、窗口响应、15 秒流程、timestamp/TDR 与可用的抓帧路径。
 3. **回到未关闭的正确性与自由模式**：依次关闭 Cinematic Liquid SPH 的 frame-driven timestep、per-substep impulse clear、viscosity race、atomic scatter ordering；之后再做 Liquid Lab / Explore、GPU Burn Unlimited Soak 和 VRAM Integrity Soak。四项关闭前 SPH 始终 `_preview`，旧结果合同不变。
@@ -458,6 +467,15 @@ PathService 已把 results/captures/reports/logs 改到
 5. 之后按第 2 节新顺序做 macOS、Android、iOS、Debian、WebGPU、HarmonyOS、PS3（探索）与 Dual-GPU Aggregate；后期 RT/路径追踪/厂商超分不得抢占当前 Windows 7 刀。
 
 ## 10. 验证记录
+
+### 2026-07-17 WinUI 秒数输入 Compact 样式
+
+- `gui/MainWindow.xaml` 中四个相关 `NumberBox` 的 `SpinButtonPlacementMode` 均从 `Inline` 改为 `Compact`，并更新旧的 Inline/浮层规避注释；`git diff --check` 通过。
+- 四控件统一使用 `InvalidInputOverwritten`、Loaded/GotFocus 动画配置与 Enter 处理；GPU/CPU 滚动内容接入外部点击失焦。空值由 `NumberBoxValueChangedEventArgs::OldValue` 同步恢复，无合法旧值时才回退 Minimum；不再保留关闭 XamlRoot 全部 Popup 的实验逻辑。
+- `cmake --build build --config Release`：成功，`gpu_engine.lib` 与 `gpu_benchmark.exe` 均生成。
+- VS 18/v145 WinUI Release x64 独立输出构建成功：`out/numberbox-ui-verify/gpu_bench_gui.exe` 与新 `MainWindow.xbf` 生成，0 error、7 个 MSB8004/MSB3774/MSB8027/C4996/LNK4042 warning（均为现有工具链/工程 warning）。
+- 按用户要求确认目标 EXE 无占用后，以工程默认 `OutDir` 重建成功：`gui/x64/Release/gpu_bench_gui.exe` 与 `MainWindow.xbf` 已更新，0 error、4 个 MSB3774/MSB8027/LNK4042 warning；构建后未启动 GUI。
+- 用户明确要求最终版本只改代码并重新编译，因此未启动 GUI、未做自动点击，也未重新 stage/打包；结论仅为代码与构建通过，交互视觉和发布包仍未验收。
 
 ### 2026-07-15 审计
 
