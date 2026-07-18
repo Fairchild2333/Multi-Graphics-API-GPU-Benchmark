@@ -189,9 +189,12 @@ constexpr std::uint32_t kGpuBurnV1MaxFixedIter  = 32;
 constexpr std::uint32_t kGpuBurnV1DrawsPerFrame = 2;
 constexpr std::uint32_t kGpuBurnV1ShaderVersion = 3;
 constexpr double        kGpuBurnV1TargetFrameMs = 14.0;
-// v2 fixed-load contract (user decision 2026-07-17): no frame-time target and
-// no auto-calibration.  Every hardware GPU runs the identical 256-step frame,
-// so FPS itself is the comparative signal (FurMark-style fixed complexity).
+// v2 was the historical fixed-256 contract. v3 keeps fixed per-frame work but
+// exposes three user-selected tiers plus a custom value; it never auto-tunes.
+constexpr std::uint32_t kGpuBurnV3LightIter     = 16;
+constexpr std::uint32_t kGpuBurnV3MediumIter    = 64;
+constexpr std::uint32_t kGpuBurnV3HeavyIter     = 256;
+constexpr std::uint32_t kGpuBurnV3MaxCustomIter = 2048;
 // Software devices (WARP/Basic Render) still clamp to kGpuBurnV1MaxFixedIter:
 // 16 steps already measured ~209 ms/frame on WARP, so 256 would mean
 // multi-second draws and watchdog resets.
@@ -416,9 +419,8 @@ struct BenchmarkConfig {
     std::uint32_t fractalIter        = kFractalDefaultIter;  // StressFractal per-pixel iterations
     std::uint32_t gpuStressIter      = kGpuStressV1DefaultIter; // GPU Stress v1 iterations per pixel/draw
     bool          gpuStressAutoTune  = true;  // disabled by an explicit --iter
-    std::uint32_t gpuBurnIter        = kGpuBurnV2FixedIter; // fixed GPU Burn samples per pixel/draw
-    // v2 fixed-load contract: auto-calibration retired (code kept dormant);
-    // identical per-frame work on every hardware GPU, FPS is the signal.
+    std::uint32_t gpuBurnIter        = kGpuBurnV3LightIter; // selected fixed samples per pixel/draw
+    // v3 selectable fixed-load contract: auto-calibration remains retired.
     bool          gpuBurnAutoTune    = false;
     bool          gpuBurnIterOverridden = false;  // explicit --iter given
     std::uint32_t volumetricSteps    = kVolumetricDefaultSteps; // Volumetric per-pixel ray samples
@@ -439,6 +441,7 @@ struct BenchmarkConfig {
     const char*   difficultyLabel    = "Medium";
     double        captureAtSec       = -1.0;
     std::int64_t  captureAtFrame     = -1;   // RenderDoc capture at absolute frame N (1-based)
+    bool          renderDocEnabled   = true; // master switch; false skips DLL/API initialisation and F12
     std::string   gpuDisplayName;           // if set, overrides deviceName_ for results/RenderDoc
     std::uint32_t vramMB             = 0;   // selected GPU's dedicated VRAM (MB, for results)
     // DXGI adapter LUID for precise GPU selection across factory instances.

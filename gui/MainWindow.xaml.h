@@ -69,6 +69,9 @@ namespace winrt::gpu_bench_gui::implementation
         void OnParticlePresetChanged(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
+        void OnBurnStepPresetChanged(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
 
         // CPU page
         void OnCpuRun(winrt::Windows::Foundation::IInspectable const& sender,
@@ -141,6 +144,29 @@ namespace winrt::gpu_bench_gui::implementation
             Cpu,
         };
 
+        enum class GpuRunIssueKind : int
+        {
+            UnsupportedGpuApi = 0,
+            OpenGlRouting,
+            ApiUnavailable,
+            VulkanRuntimeMissing,
+            OpenGlVersion,
+            WorkloadUnsupported,
+            WorkerTimeout,
+            DeviceLost,
+            ShaderPipeline,
+            SwapchainOutOfDate,
+            ResourceAllocation,
+            BurnStepsClamped, // informational: run succeeded with reduced steps
+            Unknown,
+        };
+
+        struct GpuRunIssue
+        {
+            GpuRunIssueKind kind{ GpuRunIssueKind::Unknown };
+            std::string target; // display-only "GPU — API" label
+        };
+
         void applyLanguage();
         void configureCpuNumberBoxes();
         void setStatusLight(winrt::Microsoft::UI::Xaml::Shapes::Ellipse const& light,
@@ -186,12 +212,15 @@ namespace winrt::gpu_bench_gui::implementation
         std::string selected(winrt::Microsoft::UI::Xaml::Controls::ComboBox const& box);
         std::vector<std::string> selectedApis();
         std::string particleValue();   // "" means use engine default
+        std::string burnStepValue();   // selected fixed GPU Burn steps
         // Duration as engine args: {"--time","<s>"}, {"--benchmark","<frames>"},
         // or {"--no-time-limit"} when Duration is "Until Cancel".
         std::vector<std::string> durationArgs();
         // Build child-process CLI invocation(s) for the selected preset (sets needCharts).
-        std::vector<std::vector<std::string>> buildPresetJobs(bool& needCharts);
-        void launchJobs(std::vector<std::vector<std::string>> jobs, bool needCharts);
+        std::vector<std::vector<std::string>> buildPresetJobs(
+            bool& needCharts, std::vector<std::string>& skippedJobs);
+        void launchJobs(std::vector<std::vector<std::string>> jobs, bool needCharts,
+                        std::vector<std::string> skippedJobs);
         void launchCpuBenchmark(std::string mode, double seconds, double warmupSeconds);
         void cancelCpuBenchmark();
         void cancelGpuBenchmark();
@@ -219,6 +248,7 @@ namespace winrt::gpu_bench_gui::implementation
         bool  m_suppressCombo{ false };
         std::string m_enginePath;          // UTF-8 path to isolated gpu_benchmark.exe worker
         std::vector<int> m_gpuIndices;     // engine GPU index per GpuBox row after "(auto)"
+        std::vector<std::string> m_gpuNames; // probe name aligned with m_gpuIndices
         std::vector<std::array<bool, 5>> m_gpuApiSupport;  // {vulkan,dx12,dx11,opengl,dx11Compute}
         bool m_gpuEnumerationComplete{ false };
         bool m_apiSelectionInitialized{ false };
@@ -246,7 +276,13 @@ namespace winrt::gpu_bench_gui::implementation
         bool m_historySortAscending{ false };
         std::string m_lastScoreEn; // English score line; re-localised on language change
         bool m_lastScoreCacheHint{ false }; // VRAM run with a working set small enough for L2
+        std::vector<std::string> m_lastSkippedJobs; // known-unsupported GPU/API combinations
+        std::vector<GpuRunIssue> m_lastGpuRunIssues; // exact/common worker failure classes
+        bool m_lastPostProcessFailed{ false };
         bool m_suppressRenderDocUi{ false };
+        bool m_headlessRenderDocOverrideActive{ false };
+        bool m_renderDocBeforeHeadless{ true };
+        bool m_captureBeforeHeadless{ true };
     };
 }
 

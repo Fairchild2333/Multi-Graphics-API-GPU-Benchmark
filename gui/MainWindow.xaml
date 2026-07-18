@@ -81,13 +81,15 @@
                                 <StackPanel Spacing="16">
                                     <ComboBox x:Name="PresetBox" Header="Preset" HorizontalAlignment="Stretch"
                                               SelectedIndex="1" SelectionChanged="OnPresetChanged">
-                                        <ComboBoxItem x:Name="PresetQuick">Quick run (best API / GPU, Medium)</ComboBoxItem>
+                                        <!-- Quick / Flights / Particles / Headless shortcuts hidden:
+                                             same flows are covered by Custom + Advanced options. -->
+                                        <ComboBoxItem x:Name="PresetQuick" Visibility="Collapsed">Quick run (best API / GPU, Medium)</ComboBoxItem>
                                         <ComboBoxItem x:Name="PresetCustom">Custom run (choose API / GPU / workload)</ComboBoxItem>
                                         <ComboBoxItem x:Name="PresetFullOne">Full analysis — selected workload / one GPU (selected APIs + RenderDoc + charts)</ComboBoxItem>
                                         <ComboBoxItem x:Name="PresetFullAll">Full analysis — selected workload / all GPUs × selected APIs (+ RenderDoc + charts)</ComboBoxItem>
-                                        <ComboBoxItem x:Name="PresetFlights">Flights test — one GPU (selected APIs, custom flights)</ComboBoxItem>
-                                        <ComboBoxItem x:Name="PresetParticles">Particle test — one GPU (selected APIs, custom particles)</ComboBoxItem>
-                                        <ComboBoxItem x:Name="PresetHeadless">Headless compute — one GPU (selected APIs, pure compute)</ComboBoxItem>
+                                        <ComboBoxItem x:Name="PresetFlights" Visibility="Collapsed">Flights test — one GPU (selected APIs, custom flights)</ComboBoxItem>
+                                        <ComboBoxItem x:Name="PresetParticles" Visibility="Collapsed">Particle test — one GPU (selected APIs, custom particles)</ComboBoxItem>
+                                        <ComboBoxItem x:Name="PresetHeadless" Visibility="Collapsed">Headless compute — one GPU (selected APIs, pure compute)</ComboBoxItem>
                                     </ComboBox>
                                     <!-- Same ComboBox chrome for GPU / API / Workload. API uses MaxDropDownHeight=0
                                          + Tapped flyout so the native list never paints (avoids stuck popup). -->
@@ -225,6 +227,18 @@
                                             </ComboBox>
                                             <TextBox x:Name="CustomParticleBox" Header="Custom particles" Width="220"
                                                      PlaceholderText="multiple of 256" Visibility="Collapsed"/>
+                                        </StackPanel>
+                                        <StackPanel x:Name="BurnStepPanel" Grid.Column="2" Grid.ColumnSpan="2"
+                                                    Orientation="Horizontal" Spacing="12" Visibility="Collapsed">
+                                            <ComboBox x:Name="BurnStepPresetBox" Header="GPU Burn steps" Width="220"
+                                                      SelectedIndex="0" SelectionChanged="OnBurnStepPresetChanged">
+                                                <ComboBoxItem x:Name="BurnStepsLight" Tag="16">Light — 16</ComboBoxItem>
+                                                <ComboBoxItem x:Name="BurnStepsMedium" Tag="64">Medium — 64</ComboBoxItem>
+                                                <ComboBoxItem x:Name="BurnStepsHeavy" Tag="256">Heavy — 256</ComboBoxItem>
+                                                <ComboBoxItem x:Name="BurnStepsCustom" Tag="custom">Custom…</ComboBoxItem>
+                                            </ComboBox>
+                                            <TextBox x:Name="BurnCustomStepBox" Header="Custom steps" Width="220"
+                                                     PlaceholderText="16–2048" Visibility="Collapsed"/>
                                         </StackPanel>
                                         <!-- Fixed width: only a short optional number; do not span the row. -->
                                         <TextBox x:Name="ExtraBox" Grid.Column="2" Header="Extra" PlaceholderText="optional"

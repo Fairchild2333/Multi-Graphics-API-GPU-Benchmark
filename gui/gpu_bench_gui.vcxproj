@@ -210,5 +210,18 @@
 
   <Target Name="GpuBenchPrepareXaml"
           DependsOnTargets="MarkupCompilePass1;_Midl;CppWinRTMergeProjectWinMDInputs;CppWinRTCopyWinMDToOutputDirectory;CppWinRTAddXamlMetaDataProviderCpp;CppWinRTMakeProjections;MarkupCompilePass2" />
+  <!-- The GUI always launches an adjacent worker in developer builds. Keep it
+       synchronized with the engine library used for this GUI link; otherwise
+       an old gpu_benchmark.exe silently wins over build/Release. -->
+  <Target Name="CopyGpuBenchmarkWorker" AfterTargets="Build">
+    <PropertyGroup>
+      <GpuBenchmarkWorker>$(GpuBuildDir)\$(Configuration)\gpu_benchmark.exe</GpuBenchmarkWorker>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(GpuBenchmarkWorker)')"
+           Text="GPU worker not found at $(GpuBenchmarkWorker). Build the engine first." />
+    <Copy SourceFiles="$(GpuBenchmarkWorker)"
+          DestinationFolder="$(OutDir)"
+          SkipUnchangedFiles="true" />
+  </Target>
   <Target Name="AddProcessedXamlFilesToCopyLocal" />
 </Project>

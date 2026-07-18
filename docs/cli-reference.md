@@ -12,7 +12,7 @@ command remains `gpu_benchmark`. Source: [`src/main.cpp`](../src/main.cpp), defa
 | `workload` | `Stream` (bandwidth) | one of the 12 public selections listed under `--workload` below |
 | `particleCount` | `1048576` (= Medium) | 1M particles |
 | `maxRunTimeSec` | `15.0` | time-mode duration |
-| `warmupTimeSec` | `2.0` | time-mode warmup |
+| `warmupTimeSec` | `2.0` | time-mode warmup; runs shorter than 8s reduce this to at most 25% of total duration |
 | `benchFrames` | `2000` | frame-mode count (only with `--benchmark`) |
 | `warmupFrames` | `100` | frame-mode warmup |
 | `framesInFlight` | `2` (max 16) | flights |
@@ -20,13 +20,17 @@ command remains `gpu_benchmark`. Source: [`src/main.cpp`](../src/main.cpp), defa
 | `headless` | `false` | |
 | `hostMemory` | `false` | |
 | `captureAtSec` | `-1.0` | <0 = no RenderDoc capture |
+| `renderDocEnabled` | `true` | master switch; `--no-renderdoc` skips DLL/API initialization and manual F12 |
 | `fractalIter` / `peakIters` | `2000` / `16384` | stress / synthpeak |
 | n-body bodies | `65536` | `kNBodyDefaultBodies` |
 
 ### Two run modes (app_base.cpp:391-421)
 
 - **Time mode** (default, `benchmarkMode=false`): runs `maxRunTimeSec` seconds
-  (default 15s), 2s warmup. **All interactive-menu runs use this.**
+  (default 15s), including a 2s warmup. Runs shorter than 8s cap warmup at 25%
+  of total duration so even a 1s preview has measured frames and GPU timestamp
+  samples. The formal 15s contract remains unchanged. **All interactive-menu
+  runs use this.**
 - **Frame mode** (`benchmarkMode=true`, only via `--benchmark [frames]`): runs
   `benchFrames` (default 2000) frames, ignores the time limit.
 
@@ -95,7 +99,7 @@ runs append summary rows unless `--cpu-no-save` is supplied.
 | `--particles <count>` | particle count (rounded to 256, skips difficulty menu) |
 | `--workload <id>` | select one of 12 public ids: `stream`, `nbody`, `gpu_burn`, `gpu_burn_v1`, `gpu_stress`, `stress`, `synthpeak`, `render3d`, `volumetric`, `cinematic_liquid`, `cinematic_liquid_v1`, `fluid`; `gpu_burn` is Mangekyo Kaleidoscope v2 and `gpu_burn_v1` preserves Plasma Bloom v1 |
 | `--bodies <count>` | n-body bodies (implies nbody, default 65536) |
-| `--iter <count>` | fixed iteration/step request shared by `stress`, `gpu_stress`, `gpu_burn` and `synthpeak` (burn/stress values are safety-clamped and disable auto-tune) |
+| `--iter <count>` | fixed iteration/step request shared by `stress`, `gpu_stress`, `gpu_burn` and `synthpeak`; GPU Burn accepts 16–2048 with no auto-tuning (software renderers retain a safety cap) |
 | `--precision <fp32\|fp16\|fp64\|int32>` | synthpeak data type |
 | `--steps <count>` | `volumetric` per-pixel ray samples (default 96; minimum 1) |
 | `--grid <count>` | legacy `fluid` square-grid side; rounded up to a multiple of 16 (minimum 16) |
@@ -130,7 +134,9 @@ Likewise, `gpu_burn` selects the perspective 3D Mangekyo faceted-glass v2 scene
 (cut gems, layered diamond shards, Fresnel reflection and RGB dispersion), while
 `gpu_burn_v1` selects the preserved Plasma Bloom implementation. Both persist
 under the `gpu_burn` family id and are separated by their versioned result
-contract; the current v2 identity is `gpu_burn_v2_mangekyo_faceted_glass_v1`.
+contract. Current runs use `gpu_burn_v3_fixed_steps_<N>_kaleidoscope`:
+the GUI offers Light (16), Medium (64), Heavy (256), and Custom (16–2048),
+and always sends a fixed `--iter` value without per-device auto-tuning.
 For `--liquid-solver sph`, every duration—including 15 seconds—is currently
 saved as `cinematic_liquid_sph_slice_v1_preview`; changing only the duration
 does not make the four open correctness contracts formal.
@@ -174,11 +180,15 @@ authoritative P/E/Mid/LPE microarchitecture identification.
 
 | Tool | When | What |
 |---|---|---|
-| RenderDoc In-App API | during a run when `captureAtSec ≥ 0` (menu 5/6/7/8) | captures `.rdc` via `renderdoc_app.h` |
+| RenderDoc In-App API | during a run when `captureAtSec > 0` (menu 5/6/7/8) | captures `.rdc` via `renderdoc_app.h`; timed capture is clamped to `duration - 1s`, and disabled when duration is at most 1s |
 | `renderdoccmd.exe convert` | after 5/6/7/8 if captures exist | `.rdc` → chrome JSON |
 | `python scripts/rdoc_analyse.py` | 5/6 only | `docs/rdoc_comparison.md` |
 | `python scripts/plot_results.py` | 5/6 only | `docs/images/*.png` |
 | `python scripts/export_report.py` | 5/6 only | `docs/results-table.md` + `docs/report.html` |
+
+`--renderdoc` enables RenderDoc injection and manual F12 capture independently
+of the automatic timer. `--no-renderdoc` is a true master-off switch: the worker
+does not initialize the RenderDoc DLL/API and ignores automatic/manual capture.
 
 ## 5. GUI parity
 
@@ -192,17 +202,20 @@ CLI list but the ids are identical).
 | GUI preset | CLI equivalent | Notes |
 |---|---|---|
 | Quick run | [0] | auto API/GPU, Stream, Medium |
-| Custom run | [1] | honours every control (the only preset that uses the Workload/Precision/Advanced inputs) |
-| Full analysis — one GPU | [5] | per-API for the selected GPU, `--capture 5`, then full toolchain |
-| Full analysis — all GPUs | [6] | `--run-all --capture 5`, then full toolchain |
+| Custom run | [1] | honours every visible control, including optional Headless |
+| Full analysis — one GPU | [5] | selected workload/APIs for one GPU; optional Headless, RenderDoc, and full toolchain |
+| Full analysis — all GPUs | [6] | selected workload/APIs for all GPUs; optional Headless, RenderDoc, and full toolchain |
 | Flights test | [7] | `--flights N --capture 5`, RenderDoc convert |
 | Particle test | [8] | `--particles N --capture 5`, RenderDoc convert |
 | Headless compute | [9] | `--headless`, no capture |
 
 Parity details:
-- Full-analysis/Flights/Particle/Headless presets always run the **Stream**
-  workload (the Workload dropdown is ignored for them, matching the CLI; only
-  Custom run honours it).
+- Custom and Full Analysis honour the selected workload. The specialised
+  Flights, Particle, and Headless Compute presets retain their Stream-only
+  behaviour.
+- Headless is available in Custom and Full Analysis when the selected workload
+  supports compute-only execution. Enabling it turns off RenderDoc/Capture;
+  Full Analysis still runs its selected GPU/API matrix and report/chart steps.
 - APIs are filtered to those the selected GPU supports (from `--list-gpus`);
   OpenGL only runs on the first GPU on Windows.
 - After a full-analysis run the GUI runs the same toolchain as the CLI

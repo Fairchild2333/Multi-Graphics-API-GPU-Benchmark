@@ -228,8 +228,8 @@ static std::string ExeDirectory(const char* argv0) {
 }
 
 #ifdef _WIN32
-// A copied RenderDoc DLL can hook DirectX directly, but Vulkan discovers its
-// capture layer through a manifest. Point the loader at the bundled manifest
+// A RenderDoc DLL can hook DirectX directly, but Vulkan discovers its capture
+// layer through a manifest. Point the loader at an available matching manifest
 // before the early GPU probe creates a Vulkan instance. This is process-local:
 // no SDK, installer, administrator rights, or registry mutation is required.
 static std::filesystem::path ConfigureBundledRenderDocLayer(
@@ -245,6 +245,7 @@ static std::filesystem::path ConfigureBundledRenderDocLayer(
         exeDir / "tools" / "RenderDoc",
         exeDir / ".." / "tools" / "RenderDoc",
         exeDir / ".." / ".." / "tools" / "RenderDoc",
+        std::filesystem::path(L"C:\\Program Files\\RenderDoc"),
     };
     for (const auto& candidate : candidates) {
         const auto dir = candidate.lexically_normal();
@@ -261,7 +262,7 @@ static std::filesystem::path ConfigureBundledRenderDocLayer(
         // the manifest and DLL always come from the same packaged version.
         SetEnvironmentVariableW(L"VK_IMPLICIT_LAYER_PATH", dir.wstring().c_str());
         SetEnvironmentVariableW(L"ENABLE_VULKAN_RENDERDOC_CAPTURE", L"1");
-        std::cout << "[RenderDoc] Configured bundled Vulkan layer: "
+        std::cout << "[RenderDoc] Configured Vulkan layer: "
                   << dir.u8string() << "\n";
         return dir / "renderdoc.dll";
     }
@@ -857,6 +858,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     bool listGpus = false;
     bool timeArgGiven = false;   // explicit --time => run directly (no menu)
     bool benchmarkArgGiven = false; // remains true if an auto-tuned workload switches to timed mode
+    bool renderDocLayerRequested = false;
     bool cpuBenchmarkRequested = false;
     bool saveCpuResults = true;
     gpu_bench::CpuBenchmarkConfig cpuCfg;
@@ -928,6 +930,14 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             benchCfg.framesInFlight = static_cast<std::uint32_t>(n);
         } else if (std::strcmp(argv[i], "--headless") == 0) {
             benchCfg.headless = true;
+        } else if (std::strcmp(argv[i], "--renderdoc") == 0) {
+            benchCfg.renderDocEnabled = true;
+            renderDocLayerRequested = true;
+        } else if (std::strcmp(argv[i], "--no-renderdoc") == 0) {
+            benchCfg.renderDocEnabled = false;
+            renderDocLayerRequested = false;
+            benchCfg.captureAtSec = -1.0;
+            benchCfg.captureAtFrame = -1;
         } else if (std::strcmp(argv[i], "--gui-worker") == 0) {
             // Internal WinUI orchestration marker. GPU work is isolated in a
             // child process, so RenderDoc must not replace the worker's own
@@ -1061,12 +1071,16 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             }
             return 0;
         } else if (std::strcmp(argv[i], "--capture") == 0) {
+            benchCfg.renderDocEnabled = true;
+            renderDocLayerRequested = true;
             if (i + 1 < argc && argv[i + 1][0] != '-') {
                 benchCfg.captureAtSec = std::stod(argv[++i]);
             } else {
                 benchCfg.captureAtSec = 5.0;
             }
         } else if (std::strcmp(argv[i], "--capture-frame") == 0) {
+            benchCfg.renderDocEnabled = true;
+            renderDocLayerRequested = true;
             if (i + 1 < argc && argv[i + 1][0] != '-') {
                 benchCfg.captureAtFrame = std::stoll(argv[++i]);
             } else {
@@ -1090,6 +1104,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --headless                           Pure compute mode (no window/rendering/present)\n"
                       << "  --cpu-benchmark [per-core|multi|all] Run native CPU-only benchmark (default: all)\n"
                       << "  --cpu-mode <per-core|multi|all>      CPU mode alias used by the GUI\n"
+                      << "  --renderdoc                         Enable RenderDoc injection/manual F12 capture\n"
+                      << "  --no-renderdoc                      Disable RenderDoc DLL/API initialization\n"
                       << "  --cpu-time <seconds>                 Total measurement time per CPU test (default: 1)\n"
                       << "  --cpu-warmup <seconds>               CPU warm-up time per test (default: 0.15)\n"
                       << "  --cpu-no-save                        Do not append successful CPU summaries to results.json\n"
@@ -1097,7 +1113,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --workload <stream|nbody|gpu_burn|gpu_stress|stress|synthpeak|render3d|volumetric|cinematic_liquid|cinematic_liquid_v1|fluid>\n"
                       << "                                      particle / N-body / Plasma x Kaleidoscope GPU Burn / GraphicsBurn component / legacy fractal / peak / 3D / volume / 3D liquid / legacy 2D fluid\n"
                       << "  --bodies <count>                    N-body body count (implies --workload nbody; default 65536)\n"
-                      << "  --iter <count>                      GPU Burn fixed steps (16-32; auto may tune higher) / GraphicsBurn / legacy fractal / SynthPeak\n"
+                      << "  --iter <count>                      GPU Burn fixed steps (16-2048) / GraphicsBurn / legacy fractal / SynthPeak\n"
                       << "  --steps <count>                     Volumetric per-pixel ray samples (default 96)\n"
                       << "  --grid <count>                      Legacy 2D fluid grid side length (default 256, rounded to 16)\n"
                       << "  --jacobi <count>                    Legacy 2D fluid pressure iterations (default 30)\n"
@@ -1249,11 +1265,10 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             std::cerr << "[warn] GPU Burn requires rendering; ignoring --headless.\n";
             benchCfg.headless = false;
         }
-        // v2 fixed-load contract: every hardware GPU runs the identical
-        // 256-step frame and FPS is the comparative signal.  Software
-        // devices keep the conservative cap here (and again at runtime for
-        // --run-all, where the device is only known per matrix entry): WARP
-        // already needs ~209 ms/frame at 16 steps.
+        // v3 selectable fixed-load contract. Hardware GPUs run the user's
+        // chosen 16..2048 steps without auto-tuning. Software devices keep a
+        // conservative cap here (and again at runtime for --run-all, where
+        // the device is only known per matrix entry).
         if (useWarp && benchCfg.gpuBurnIter > maxFixedIter) {
             std::cerr << "[warn] GPU Burn on a software device is capped at "
                       << maxFixedIter
@@ -1268,18 +1283,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         }
         benchCfg.particleCount = gpu_bench::kComputeWorkGroupSize;
         benchCfg.particlesOverridden = true;
-        benchCfg.difficultyLabel = "GPU Burn v2 / Fixed 256";
-        // A fast GPU can finish the frame-count warmup before the first
-        // one-second timing window, leaving auto-tune at its deliberately low
-        // probe value. Use the product's timed 15 s flow whenever auto-tune is
-        // requested; an explicit --iter remains available for deterministic
-        // frame-count benchmarking.
-        if (benchCfg.benchmarkMode && benchCfg.gpuBurnAutoTune) {
-            std::cerr << "[warn] Auto-tuned GPU Burn uses timed mode so calibration "
-                         "completes before scoring; use --iter with --benchmark for "
-                         "a fixed frame-count run.\n";
-            benchCfg.benchmarkMode = false;
-        }
+        benchCfg.difficultyLabel = "GPU Burn v3 / Selectable fixed steps";
     }
 
     // ---- Volumetric workload normalisation ----
@@ -1384,7 +1388,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
 
 #ifdef _WIN32
     const auto bundledRenderDocDll = ConfigureBundledRenderDocLayer(
-        shaderDir, benchCfg.captureAtSec > 0.0 || benchCfg.captureAtFrame > 0);
+        shaderDir, benchCfg.renderDocEnabled && renderDocLayerRequested);
     const auto guiWorkerRenderDocDll = benchCfg.guiWorker
         ? bundledRenderDocDll : std::filesystem::path{};
 #else
@@ -1582,6 +1586,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         allCfg.hostMemory    = benchCfg.hostMemory;
         allCfg.captureAtSec  = benchCfg.captureAtSec;
         allCfg.captureAtFrame = benchCfg.captureAtFrame;
+        allCfg.renderDocEnabled = benchCfg.renderDocEnabled;
         allCfg.guiWorker     = benchCfg.guiWorker;
         if (benchCfg.maxRunTimeSec != 15.0)
             allCfg.maxRunTimeSec = benchCfg.maxRunTimeSec;

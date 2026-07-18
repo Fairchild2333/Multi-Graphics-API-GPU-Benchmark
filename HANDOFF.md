@@ -1,6 +1,6 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
-> 最后更新：2026-07-17（Australia/Sydney）
+> 最后更新：2026-07-18（Australia/Sydney）
 > 分支 / 提交：`main` / `2947589`（**本轮大量改动尚未提交**，工作树 dirty；勿把 `out/` 构建产物当仓库事实）
 > 本文件是项目的**首要进度与交接入口**。后续 AI 或开发者开始工作前先完整阅读，结束工作前优先更新本文件，再更新专题 TODO、roadmap 和 README。
 
@@ -420,6 +420,7 @@ PathService 已把 results/captures/reports/logs 改到
 
 ### 当前正在进行
 
+- [x] 2026-07-18：按用户对 Full Analysis / All GPUs 实图反馈修正 WinUI 结果编排与软件设备显示。WARP/Basic Render 在 GPU 下拉框和本次 Summary 中保留真实软件渲染器名称，并追加当前 CPU 型号（例如 `Microsoft WARP (AMD Ryzen …)`），不再退化显示为 `GPU 2`。Full Analysis 会在启动前跳过 probe 已知不支持的 GPU×API（含非 fragment workload 的 DX11 compute 不可用）并在 Summary hint/raw output 列表说明；这些组合计为 unsupported/skipped、使用绿色完成状态，只有实际启动后非零退出才计为 failed/红色。另为“所选核显但 Windows/WGL 实际分配到另一 GL_RENDERER”增加专用 Summary 说明和状态文案；分类严格要求 OpenGL worker + CLI 精确 `cannot select GPU index`/`active GL_RENDERER` 标记，shader/context/driver/timeout 等其他 OpenGL 错误不会套用此说明。Release WinUI x64 已编译通过；尚未运行新的 Full Analysis/核显 OpenGL 矩阵或做 GUI 视觉点击验收。
 - [x] 2026-07-17：WinUI 四个秒数/时长 `NumberBox`（GPU duration、RenderDoc capture、CPU per-test、CPU warm-up）由 `Inline` 统一改为参考图对应的 `Compact` 竖向浮层按钮；补齐 Enter/页面外点击失焦、空值恢复与 `PopupThemeTransition`，避免 × 清空后 `NaN` 导致按钮全灰。数值合同未变，Release engine 与 WinUI x64 build 通过；按用户要求未启动最终 GUI，视觉手测仍待用户侧验收。
 - [x] 2026-07-16/17：用户否定首个二维 plasma chamber 原型后，将公开 `gpu_burn` 重做为 **Mangekyo faceted glass v2**：Vulkan/HLSL/OpenGL 三份一致 shader 现使用透视 3D SDF 截顶宝石/八面体碎钻、前后深度层、平面法线、Fresnel、RGB 色散和吸收；两次全屏固定循环使用独立 `gpu_burn_v2_mangekyo_faceted_glass_v1` / shaderVersion=3 身份，被否定原型不混分。Plasma Bloom 通过 `gpu_burn_v1` selector、原 shader 与历史合同完整保留。Release core 编译通过；RTX 5090 Vulkan 自动标定 16→2048 后 render 13.199 ms / 286.00 Gpix-step/s / 90.4% timestamp utilisation，stableScore 288.21 / CV 1.50%；DX12/DX11/OpenGL v2 低步数 runtime smoke 均通过。视觉核验图为 `out/kaleidoscope-prototype/mangekyo_faceted_final.png`。
 - [x] 2026-07-15：完成独立 `gpu_burn_v1` vertical slice。用户否定甜甜圈后改为原创 **Plasma Bloom / 等离子晶核**：实心七瓣晶体、无环形孔洞、非粒子；保留 `gpu_stress_v1` 成绩契约，默认 15 秒 / 第 5 秒抓帧，并同步 Vulkan/DX12/DX11/OpenGL、WARP、GUI、结果/图表与打包资产。
@@ -467,6 +468,25 @@ PathService 已把 results/captures/reports/logs 改到
 5. 之后按第 2 节新顺序做 macOS、Android、iOS、Debian、WebGPU、HarmonyOS、PS3（探索）与 Dual-GPU Aggregate；后期 RT/路径追踪/厂商超分不得抢占当前 Windows 7 刀。
 
 ## 10. 验证记录
+
+### 2026-07-18 WinUI WARP 命名与 Full Analysis 跳过状态
+
+- `gui/MainWindow.xaml.cpp/.h`：probe 设备名新增与 GPU index 对齐的快照；软件设备显示统一为真实 probe 名称 + 当前 CPU 型号，worker 回传 `Microsoft Basic Render Driver`/`Microsoft WARP (CPU Software Renderer)` 时不会再在 Summary fallback 为 `GPU <index>`。
+- Full Analysis one/all GPU 的任务计划会过滤 probe 明确不支持的 API；非 fragment workload 的 DX11 还检查 `dx11Compute`。跳过明细进入 Summary hint 与 Raw CLI output；最终状态分别报告 completed / failed / unsupported skipped。Custom、Flights、Particle 等路径仍保留显式启动并由 CLI 返回真实能力错误的既有诊断语义。
+- `git diff --check`：通过。
+- VS 18/v145 `MSBuild gui\gpu_bench_gui.vcxproj /p:Configuration=Release /p:Platform=x64 /p:GpuBuildDir=... /m:1`：成功，生成 `gui/x64/Release/gpu_bench_gui.exe`；仅有既有 MSB3774/MSB8027/C4996/LNK4042 warning。首次短超时留下的 MSBuild 占用同一 PDB，结束该遗留进程后在沙箱外单线程重跑成功；这不是源码编译失败。
+- 本轮没有启动 GUI、Full Analysis、GPU workload 或 RenderDoc；WARP 文案视觉和实际 `9 completed; 3 unsupported combinations skipped` 矩阵仍待交互验收。
+
+### 2026-07-18 Windows OpenGL 指定 GPU 错误说明
+
+- `gui/MainWindow.xaml.cpp/.h`：worker 失败后在 backend 为 `opengl` 时识别两条 CLI 精确路径：(a) `OpenGL on Windows cannot select GPU index` + `active GL_RENDERER`；(b) 更早的 capability gate `does not report support for backend 'opengl'`。路径 (b) 还必须从 probe 快照确认**另一张** GPU 的 OpenGL capability 为 true，才记录“所选 GPU -> 当前 OpenGL renderer”；若没有这项交叉证据，generic unsupported 仍不会被误写成 Windows 设备路由限制。Summary hint 解释 WGL 没有标准的按 DXGI/Vulkan index 切换设备能力，并明确该说明不适用于其他 OpenGL 错误。
+- 若本次所有真实失败均为上述 renderer mismatch，进度卡/底部状态直接写 `OpenGL could not use the selected GPU`；若还有其他失败则继续使用普通 failed/error 统计，同时仅为已识别 mismatch 附加说明。失败计数本身不改成 skipped，因为用户明确请求了该 GPU/API pass 而它没有运行成功。
+- `git diff --check`：通过。
+- VS 18/v145 Release x64 WinUI 单线程构建成功，更新 `gui/x64/Release/gpu_bench_gui.exe`；仅有既有 MSB3774/MSB8027/C4996/LNK4042 warning。
+- 本轮未再次运行 15 秒核显 All APIs；实际中英文提示、所选/实际 renderer 名称和不会误分类其他 OpenGL 错误仍待 GUI 交互验收。
+- 用户随后提供的 Raw CLI 实图确认实际失败发生在较早的路径 (b)：`GPU index 1 (AMD Radeon(TM) Graphics) does not report support for backend 'opengl'.`，因此首版只识别路径 (a) 时 Summary 没显示说明。补齐路径 (b) 后再次完成 VS 18/v145 Release x64 WinUI 构建，`gui/x64/Release/gpu_bench_gui.exe` 已更新；仍未代替用户重跑完整 15 秒矩阵。
+- 用户实图验收路径 (b) 的说明已能显示，但指出它与 L2 small-working-set 提示贴得太近，且 WARP All APIs 的另一个 Vulkan 失败仍只有计数。随后把 ResultHint 改为段落式渲染（各问题/性能提示之间使用空行），并新增严格的常见 worker 错误分类：unsupported GPU/API、API/adapter 初始化失败、缺 Vulkan Runtime、OpenGL 4.3 不足、workload/feature 不支持、安全超时、device lost/driver reset、shader/link/pipeline 失败、swapchain out-of-date、GPU 资源分配失败；未知错误只提示展开 Raw CLI，不猜测原因。OpenGL routing mismatch 仍使用专门说明且不重复生成 generic unsupported。
+- 后处理失败也会在 Summary 独立说明“成绩可能有效，但 RenderDoc 转换/图表/报告失败”。分类只基于 exit code 与明确的 CLI/backend 错误标记；不会把所有 OpenGL 或所有 non-zero exit 归成同一原因。VS 18/v145 Release x64 WinUI 再次构建成功，`git diff --check` 通过；仍未运行新的 15 秒矩阵做视觉验收。
 
 ### 2026-07-17 WinUI 秒数输入 Compact 样式
 
@@ -677,6 +697,42 @@ PathService 已把 results/captures/reports/logs 改到
 - [ ] **GPU Burn — Unlimited Soak**：最终持续烤机应使用当前主 `gpu_burn` Mangekyo Kaleidoscope v2，而不是 legacy `gpu_burn_v1` 或 Other/Legacy 中的旧 `gpu_stress_v1`；默认持续到 Stop/Esc/Ctrl+C，GUI 满载时仍须可响应，显示已运行时间、滚动 GPU time/FPS、利用率、功耗/温度（可得时）和降频趋势。固定 `15s + 第 5 秒 RenderDoc` 仍只用于 Burst score，Soak 不生成正式成绩或硬件错误认证。
 - [ ] **VRAM Integrity Soak**：新增独立 `vram_memtest`，优先读取 memory budget，保留桌面/系统安全余量并区分独显和 UMA；分块写入 address/random/walking-bit 等 pattern、设备端校验并累计错误，报告已验证字节、循环数、带宽和错误块。OOM、device lost 与用户停止必须干净退出；`stream` 永远只表示带宽，不表示显存无错误。
 - [ ] 开发验收：Liquid Lab 退出后正式 v2 的 scene hash/初始画面恢复；GPU Burn 连续 30 分钟无资源增长且 Stop 可用（发布前建议 2 小时）；VRAM Integrity 连续 30 分钟基线零误报并可从 OOM/device-lost 报告原因。
+
+### 2026-07-18：软件渲染器序号与 OpenGL Run issues 归类
+
+- GPU 下拉框重新保留所有设备的探测序号；软件渲染器现在显示为 `2: Microsoft Basic Render Driver (当前 CPU 型号)`。本次运行的 Summary 仍使用真实渲染器名与 CPU 型号，不恢复含义不清的 `GPU 2` 标题。
+- Windows OpenGL 选卡失败不再作为 Summary 中独立的说明段落；经 CLI 精确标记确认的 WGL renderer mismatch 现在进入统一 `Run issues:` 列表，类别为 `GpuRunIssueKind::OpenGlRouting`，detail 显示 `所选设备 -> 实际 GL_RENDERER`。其他 OpenGL 初始化、shader、timeout、device-lost 等错误继续使用各自类别，不会误套选卡提示。
+- 默认 Release 输出最初在链接阶段因用户正在运行 `gui/x64/Release/gpu_bench_gui.exe`（PID 12320）而无法覆盖；用户随后明确要求用 `taskkill` 强制关闭该窗口。进程结束后已按 `.agents/AGENTS.md` 指定的 VS 18/v145 MSBuild 命令成功重新生成默认 `gui/x64/Release/gpu_bench_gui.exe`。相同源码也曾使用独立 `OutDir` 成功完成 Release x64 编译与链接，验证产物为 `out/gui-run-issues-verify/gpu_bench_gui.exe`；尚需用户侧做一次下拉框与 Run issues 的视觉验收。
+
+### 2026-07-18：1–3 秒短测统计与 RenderDoc 结束边界
+
+- 根因确认：`BenchmarkConfig::warmupTimeSec=2.0` 包含在 `maxRunTimeSec` 总墙钟内，导致 1 秒运行没有 measured frame，2 秒只有极短 CPU FPS 窗口且异步 GPU timestamp 尚未回收，3 秒才出现显存速率。`AppBase` 现在对短于 8 秒的 time-mode 运行把有效 warmup 限制为总时长的 25%；默认/正式 15 秒运行仍保持原 2 秒 warmup，frame-mode 不变。
+- Windows AMD Radeon(TM) Graphics / Vulkan / Stream 1M 的隔离数据目录实测：1 秒窗口化运行 warmup 0.25 秒，116 measured frames，Avg FPS 152，VRAM rate 27.97 GB/s（1.499 ms compute）；2 秒窗口化运行 warmup 0.5 秒，241 measured frames，Avg FPS 159，VRAM rate 29.44 GB/s（1.425 ms compute）。两种短时运行均同时产生 FPS 与 GPU timing/显存速率。
+- 自动 RenderDoc 定时抓帧现在由 GUI 与引擎双重限制为不晚于 `duration - 1s`；1 秒或更短的 timed run 没有合法自动抓帧点，GUI 禁用 Capture 控件且引擎将其关闭，手动 F12 不受影响。2 秒 `--capture 5` 无窗口边界 smoke 明确调整为 1 秒；1 秒同参数明确禁用；两次仍有非零 FPS 与显存速率。
+- Release engine、独立 OutDir GUI 和默认 `gui/x64/Release/gpu_bench_gui.exe` 均构建通过，仅有既有 WinAppSDK/VCLibs/重复 initializer 警告。用户最新明确要求：以后 GUI 占用默认 Release 输出时直接结束 `gpu_bench_gui.exe`，无需保留旧窗口或先改用独立 OutDir；本轮按该偏好结束 PID 38480 后刷新了默认 Release。
+- 第一次交付后的用户截图证明 GUI 仍为 1 秒/0 FPS 且 Capture 保持启用。复盘确认有两个遗漏：(1) `findEngineExe()` 优先启动 GUI 同目录 worker，而 `gui/x64/Release/gpu_benchmark.exe` 仍为 2026-07-17 的旧文件（803328 bytes / SHA-256 `D78A...754F2`），不是刚验证的 `build/Release` 新引擎；(2) `ValueChanged` 内通过 `DurationValueBox().Text()` 读值时，WinUI NumberBox 尚未提交模板文本，所以仍读到旧的 15。
+- 已把 Duration 相关逻辑改为以 `NumberBox.Value()` 为权威值；当时长为 1 秒时，GUI 会同时取消 Capture 勾选并禁用复选框/数值框。`gpu_bench_gui.vcxproj` 新增 `CopyGpuBenchmarkWorker` AfterTargets=Build，GUI 每次构建都从对应 `$(GpuBuildDir)/$(Configuration)` 同步 worker，缺失时直接构建失败，不再静默运行旧 EXE。修复后两个 worker 的 SHA-256 均为 `5B0D9E3E7B904748B4AEABB35F7724965C583714CC0412A369B2D8E0902ED4E9`（805376 bytes）。
+- 最终不是仅编译验证：启动默认 GUI 后用 Windows UI Automation 把 Duration 设为 1，实读 `CaptureEnabled=False`、`CaptureToggle=Off`、CaptureValue disabled/max=1；再从该 GUI 点击 Run 完成 1 秒 Custom/Auto/Particle 矩阵，Summary 为 Vulkan 1736.19 GB/s / 2453 FPS、DX12 2643.67 GB/s / 2793 FPS、DX11 2161.67 GB/s / 3746 FPS、OpenGL 2088.87 GB/s / 1512 FPS。验证窗口 PID 58264 已按用户偏好关闭。
+
+### 2026-07-18：RenderDoc 主开关改为真实引擎开关
+
+- 用户确认旧 RenderDoc 开关实际为假：GUI 只用它决定是否追加自动 `--capture` 参数，而 `AppBase::Run()` 对所有有窗口运行仍无条件初始化 RenderDoc。现在 `BenchmarkConfig::renderDocEnabled` 是引擎级主开关；GUI 每个非 headless worker 都显式传 `--renderdoc` 或 `--no-renderdoc`。`--no-renderdoc` 会同时清空自动抓帧请求，跳过 Vulkan layer 配置、DLL/API 初始化与手动 F12；RenderDoc 主开关关闭时 GUI 也取消并禁用 Capture。Capture 仍只是主开关之下的自动定时抓帧子选项。
+- Windows Vulkan 的可用 layer 搜索除安装包内 `tools/RenderDoc` 外，开发机还会识别 `C:\Program Files\RenderDoc` 中相互匹配的 `renderdoc.json`/`renderdoc.dll`。开启但找不到 DLL/API、以及配置明确关闭时，Raw CLI output 现在都会输出可核对状态，不再静默。
+- Release engine 与 VS 18/v145 GUI 均重新构建通过；第一次 GUI post-build 因残留 worker PID 30940 占用 `glfw3.dll` 失败，按用户“以后直接关闭”的偏好强制结束后重跑成功，并由 `CopyGpuBenchmarkWorker` 同步 GUI worker。两个 worker 的 SHA-256 均为 `240A7C9ED4EB83469DAFFE682078CA01F367B4DECE6D13050001E212B36E101D`。仅保留既有 MSB3774/MSB8027/LNK4042 与 C4996 警告。
+- 实机进程级验证：同一 Vulkan worker 的 `--no-renderdoc` 运行在检查时存活且 `renderdoc.dll=False`；`--renderdoc` 运行为 `renderdoc.dll=True`。GUI UI Automation 进一步把 RenderDoc 切到 Off 后确认 `CaptureEnabled=False`，点击 Run 后实际子进程命令行为 `... --backend vulkan --particles 1048576 --no-renderdoc`（PID 41072）。全部验证 GUI/worker 已强制关闭，无本项目残留进程。
+
+### 2026-07-18：Full Analysis 开放 Headless
+
+- 用户要求 Full Analysis 单 GPU/全部 GPU 也能运行 Headless。GUI 的 `headlessSupported` 现对 Custom 与两种 Full Analysis 开放，同时继续拒绝 GPU Burn、graphics stress、Render3D、Volumetric、Fluid 与 Cinematic Liquid 等必须渲染的 workload。
+- 勾选 Headless 会明确取消 RenderDoc 与 Capture；Custom、Full-One、Full-All 三条 job 生成路径统一追加 `--headless`，不追加 RenderDoc/capture 参数。Full Analysis 仍保留所选 GPU/API 矩阵、报告和图表流程；只有本次命令行实际请求了 `--capture`/`--capture-frame` 且没有生成 `.rdc` 时，才报告缺失抓帧，Headless 或手动关闭 Capture 不再产生假错误。
+- Release engine 与 VS 18/v145 GUI 均构建成功，GUI post-build 同步 worker，两个 worker SHA-256 一致。用户随后明确要求：此类修改写完后直接编译即可，不再自动启动 GUI、操作控件或运行 benchmark；因此本切片的运行时 GUI 点击验证未执行，不能写成已实机运行验证。
+- 用户截图随后确认首次实现会永久清掉进入 Headless 前的 RenderDoc/Capture 勾选状态。现已增加临时覆盖记忆：第一次进入 Headless 时保存两项原状态并临时关闭；退出 Headless（包括切换到不支持 Headless 的 workload/preset）时原样恢复。恢复后仍会经过现有 capture 安全边界校验，例如时长已改为 1 秒时不会错误恢复自动 Capture。Release engine 与 VS 18/v145 GUI 再次构建成功；按用户要求未启动 GUI 或运行 benchmark，构建前直接关闭了旧 GUI PID 52940。
+
+### 2026-07-18：GPU Burn 固定步数三档 + 自定义
+
+- 按用户最终决定，GPU Burn 不做设备自适应或目标帧时标定。WinUI 现与 Particle 相同采用显式档位：Light 16（默认）、Medium 64、Heavy 256、Custom 16–2048；选择 Custom 时显示独立输入框，每次任务都明确传入 `--iter`。
+- 引擎默认从旧 fixed-256 改为固定 16 步，`gpuBurnAutoTune` 继续保持 false；软件渲染器仍保留 32 步安全钳制。新结果使用 `gpu_burn_v3_fixed_steps_<实际步数>_kaleidoscope` 与 `loadModel=fixed_selectable_per_frame`，因此不同固定负载互不混分；旧 `gpu_burn_v2_fixed256_kaleidoscope` 成绩也保持原组。
+- `cmake --build build --config Release` 成功。首次 WinUI 链接因正在运行的 `gui/x64/Release/gpu_bench_gui.exe`（PID 50784）锁定输出而报 LNK1104，按用户长期偏好直接强制关闭后，VS 18/v145 Release x64 重编译成功，0 error；仅保留既有 VCLibs/重复 WinAppSDK initializer 警告。按用户要求未启动 GUI、未运行 benchmark。
 
 ## 13. 后期水体 RT、路径追踪与超分可行性（2026-07-15，仅规划）
 

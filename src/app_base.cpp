@@ -33,6 +33,8 @@ namespace {
 // the largest backend ring (plus margin) so the captured query never reaches
 // the formal benchmark accumulator.
 constexpr std::uint32_t kCaptureTimingDrainSamples = 16;
+constexpr double kShortRunWarmupFraction = 0.25;
+constexpr double kCaptureEndMarginSec = 1.0;
 
 }  // namespace
 
@@ -148,7 +150,41 @@ AppBase::AppBase(std::int32_t gpuIndex, std::string shaderDir,
                  BenchmarkConfig config)
     : requestedGpuIndex_(gpuIndex),
       shaderDir_(std::move(shaderDir)),
-      config_(config) {}
+      config_(config) {
+    if (!config_.benchmarkMode && config_.maxRunTimeSec > 0.0) {
+        // The duration is the complete wall-clock run, including warmup. A
+        // fixed two-second warmup consumed all of a 1-2 second preview and
+        // left no measured frames/timestamp samples. Preserve the published
+        // 15 s + 2 s warmup contract, but reserve 75% of short previews for
+        // real measurement.
+        const double maxWarmup =
+            config_.maxRunTimeSec * kShortRunWarmupFraction;
+        if (config_.warmupTimeSec > maxWarmup) {
+            std::cerr << "[warn] Short timed run: reducing warmup from "
+                      << config_.warmupTimeSec << "s to " << maxWarmup
+                      << "s so measured frames and GPU timestamps are available.\n";
+            config_.warmupTimeSec = maxWarmup;
+        }
+
+        // A capture started at the duration boundary races process teardown.
+        // Keep a full second after automatic capture; a one-second run has no
+        // legal automatic capture point (manual F12 remains available).
+        if (config_.captureAtSec > 0.0) {
+            const double latestCapture =
+                config_.maxRunTimeSec - kCaptureEndMarginSec;
+            if (latestCapture <= 0.0) {
+                std::cerr << "[warn] Automatic RenderDoc capture disabled: "
+                             "the timed run must be longer than 1 second.\n";
+                config_.captureAtSec = -1.0;
+            } else if (config_.captureAtSec > latestCapture) {
+                std::cerr << "[warn] Automatic RenderDoc capture moved from "
+                          << config_.captureAtSec << "s to " << latestCapture
+                          << "s to keep the final second capture-free.\n";
+                config_.captureAtSec = latestCapture;
+            }
+        }
+    }
+}
 
 AppBase::~AppBase() {
     CleanupWindow();
@@ -176,7 +212,10 @@ void AppBase::InitRenderDoc() {
             if (mod) break;
         }
     }
-    if (!mod) return;
+    if (!mod) {
+        std::cout << "[RenderDoc] Enabled, but renderdoc.dll was not found.\n";
+        return;
+    }
     wchar_t modulePath[32768]{};
     const DWORD modulePathLength = GetModuleFileNameW(
         mod, modulePath, static_cast<DWORD>(std::size(modulePath)));
@@ -190,7 +229,10 @@ void AppBase::InitRenderDoc() {
     void* mod = dlopen("librenderdoc.so", RTLD_NOW | RTLD_NOLOAD);
     if (!mod)
         mod = dlopen("librenderdoc.so", RTLD_NOW);
-    if (!mod) return;
+    if (!mod) {
+        std::cout << "[RenderDoc] Enabled, but librenderdoc.so was not found.\n";
+        return;
+    }
     auto RENDERDOC_GetAPI =
         reinterpret_cast<pRENDERDOC_GetAPI>(dlsym(mod, "RENDERDOC_GetAPI"));
 #else
@@ -198,10 +240,16 @@ void AppBase::InitRenderDoc() {
 #endif
 
 #if defined(_WIN32) || defined(__linux__)
-    if (!RENDERDOC_GetAPI) return;
+    if (!RENDERDOC_GetAPI) {
+        std::cout << "[RenderDoc] Enabled, but the in-application API is unavailable.\n";
+        return;
+    }
     RENDERDOC_API_1_6_0* api = nullptr;
     int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_6_0, reinterpret_cast<void**>(&api));
-    if (ret != 1 || !api) return;
+    if (ret != 1 || !api) {
+        std::cout << "[RenderDoc] Enabled, but API 1.6.0 could not be initialised.\n";
+        return;
+    }
     rdocApi_ = api;
 
     // The CLI installs its own unhandled-exception filter. For an isolated GUI
@@ -316,8 +364,13 @@ void AppBase::Run() {
          isGpuBurnWorkload(config_.workload)) && config_.headless) {
         throw std::runtime_error("GPU Stress/Burn is a graphics workload and does not support headless mode");
     }
-    if (!config_.headless)
-        InitRenderDoc();
+    if (!config_.headless) {
+        if (config_.renderDocEnabled) {
+            InitRenderDoc();
+        } else {
+            std::cout << "[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.\n";
+        }
+    }
 
     // OpenGL always needs a window for its GL context, even in headless mode.
     // Other backends skip window creation entirely in headless mode.
@@ -1118,14 +1171,15 @@ BenchmarkResult AppBase::CollectResult() const {
                            << ";autoTune=" << (config_.gpuStressAutoTune ? "true" : "false");
             break;
         case Workload::GpuBurnV1:
-            // v2 fixed-load contract: identical 256-step frames on every
-            // hardware GPU, no frame-time target, FPS as the visible signal.
-            // Calibrated r2 results stay in their own retired group.
-            r.workloadVersion = "gpu_burn_v2_fixed256_kaleidoscope";
+            // v3 records the selected fixed step count. Keep v2 fixed-256 and
+            // calibrated r2 results in their historical groups.
+            r.workloadVersion = "gpu_burn_v3_fixed_steps_"
+                              + std::to_string(config_.gpuBurnIter)
+                              + "_kaleidoscope";
             workloadConfig << "steps=" << config_.gpuBurnIter
                            << ";draws=" << kGpuBurnV1DrawsPerFrame
                            << ";shaderVersion=" << kGpuBurnV1ShaderVersion
-                           << ";loadModel=fixed_per_frame"
+                           << ";loadModel=fixed_selectable_per_frame"
                            << ";autoTune=false"
                            << ";visual=plasma_bloom_concentric_kaleidoscope";
             break;
@@ -1275,6 +1329,8 @@ BenchmarkResult AppBase::CollectResult() const {
                            << ";apiScope=vulkan_only";
             break;
     }
+    workloadConfig << ";renderDoc="
+                   << (config_.renderDocEnabled ? "enabled" : "disabled");
     if (config_.captureAtSec > 0.0 || config_.captureAtFrame > 0) {
         if (config_.captureAtSec > 0.0)
             workloadConfig << ";captureAtSec=" << config_.captureAtSec;

@@ -1335,6 +1335,20 @@ namespace
             || name.find("Software") != std::string::npos;
     }
 
+    std::string softwareGpuDisplayName(std::string deviceName,
+                                       std::string const& cpuName)
+    {
+        if (deviceName.empty()) deviceName = "Microsoft WARP";
+        // The engine's synthetic name already carries a generic CPU suffix;
+        // replace it with the actual processor model used by WARP.
+        constexpr std::string_view genericSuffix = " (CPU Software Renderer)";
+        if (deviceName.size() >= genericSuffix.size() &&
+            deviceName.compare(deviceName.size() - genericSuffix.size(),
+                               genericSuffix.size(), genericSuffix) == 0)
+            deviceName.erase(deviceName.size() - genericSuffix.size());
+        return deviceName + " (" + (cpuName.empty() ? "CPU" : cpuName) + ')';
+    }
+
     // "" = All; otherwise a YYYY-MM-DD cutoff (keep timestamps >= cutoff).
     std::string cutoffFor(int rangeIdx)
     {
@@ -1907,6 +1921,24 @@ namespace
         box.Value(fallback);
         return true;
     }
+
+    // CaptureValueBox uses the selected duration unit. Return the latest
+    // integer value that still leaves one full second before timed teardown.
+    // Frame-count mode has no wall-clock contract, so only exclude its final
+    // frame. A return value below 1 means automatic capture is unavailable.
+    double safeCaptureMaximumAmount(std::string const& unit,
+                                    double durationAmount)
+    {
+        if (unit == "unlimited") return 0.0;
+        if (unit == "frames")
+            return std::floor(durationAmount + 1e-9) - 1.0;
+
+        double unitSeconds = 1.0;
+        if (unit == "minutes") unitSeconds = 60.0;
+        else if (unit == "hours") unitSeconds = 3600.0;
+        const double safeSeconds = durationAmount * unitSeconds - 1.0;
+        return std::floor(safeSeconds / unitSeconds + 1e-9);
+    }
 }
 
 MainWindow::MainWindow()
@@ -1984,9 +2016,37 @@ MainWindow::MainWindow()
     ApiPickerFlyout().Closed([this](auto&&, auto&&) {
         if (m_uiReady) updateApiPickerSummary();
     });
-    // Headless disables RenderDoc capture (the engine never triggers captures
-    // without a window); grey the controls to match.
-    auto syncOnHeadlessToggle = [this](auto&&, auto&&) { syncCaptureControls(); };
+    // Headless is a true compute-only mode. Temporarily turn RenderDoc off,
+    // then restore the exact prior choices when returning to windowed mode.
+    auto syncOnHeadlessToggle = [this](auto&&, auto&&)
+    {
+        const bool headless = HeadlessBox().IsChecked() &&
+                              HeadlessBox().IsChecked().Value();
+        if (headless)
+        {
+            if (!m_headlessRenderDocOverrideActive)
+            {
+                m_renderDocBeforeHeadless = RenderDocBox().IsChecked() &&
+                                            RenderDocBox().IsChecked().Value();
+                m_captureBeforeHeadless = CaptureBox().IsChecked() &&
+                                          CaptureBox().IsChecked().Value();
+                m_headlessRenderDocOverrideActive = true;
+            }
+            m_suppressRenderDocUi = true;
+            CaptureBox().IsChecked(false);
+            RenderDocBox().IsChecked(false);
+            m_suppressRenderDocUi = false;
+        }
+        else if (m_headlessRenderDocOverrideActive)
+        {
+            m_suppressRenderDocUi = true;
+            RenderDocBox().IsChecked(m_renderDocBeforeHeadless);
+            CaptureBox().IsChecked(m_captureBeforeHeadless);
+            m_suppressRenderDocUi = false;
+            m_headlessRenderDocOverrideActive = false;
+        }
+        syncCaptureControls();
+    };
     HeadlessBox().Checked(syncOnHeadlessToggle);
     HeadlessBox().Unchecked(syncOnHeadlessToggle);
 
@@ -2144,6 +2204,16 @@ void MainWindow::applyWorkloadVisibility()
         if (current && current.Visibility() == Visibility::Collapsed)
             WorkloadBox().SelectedIndex(0);
     }
+
+    // Preset shortcuts retired from the dropdown (Custom + Advanced cover them).
+    // Keep items in the list so SelectedIndex mapping in buildPresetJobs stays stable.
+    ComboBoxItem hiddenPresets[] = {
+        PresetQuick(), PresetFlights(), PresetParticles(), PresetHeadless()};
+    for (auto const& item : hiddenPresets)
+        item.Visibility(Visibility::Collapsed);
+    if (auto current = PresetBox().SelectedItem().try_as<ComboBoxItem>();
+        current && current.Visibility() == Visibility::Collapsed)
+        PresetBox().SelectedIndex(1);  // Custom run
 }
 
 void MainWindow::OnShowLegacyChecked(IInspectable const&, RoutedEventArgs const&)
@@ -2375,8 +2445,112 @@ void MainWindow::updateResultHint()
     const bool cacheHint = !m_lastScoreEn.empty() && m_lastScoreCacheHint;
 
     hstring text;
+    auto appendSection = [&](hstring const& section)
+    {
+        if (section.empty()) return;
+        text = text.empty() ? section : text + L"\n\n" + section;
+    };
+    if (!m_lastSkippedJobs.empty())
+    {
+        const auto count = std::to_string(m_lastSkippedJobs.size());
+        hstring section = i18n::currentLang() == i18n::Lang::Zh
+            ? u8("有 " + count + " 个组合因设备未报告支持而未运行（这不是测试失败）：")
+            : u8(count + " unsupported combinations were not run (these are not test failures):");
+        for (auto const& job : m_lastSkippedJobs)
+            section = section + L"\n\u2022 " + u8(job);
+        appendSection(section);
+    }
+    if (!m_lastGpuRunIssues.empty())
+    {
+        hstring section = locText("Run issues:", "运行问题：");
+        for (auto const& issue : m_lastGpuRunIssues)
+        {
+            hstring message;
+            switch (issue.kind)
+            {
+            case GpuRunIssueKind::UnsupportedGpuApi:
+                message = locText(
+                    "The selected GPU/API combination was not reported as supported by the driver.",
+                    "驱动未报告支持所选的 GPU/API 组合。");
+                break;
+            case GpuRunIssueKind::OpenGlRouting:
+                message = locText(
+                    "Windows OpenGL cannot directly switch the WGL renderer to the selected GPU; Windows/the display driver assigned a different renderer. This applies only to this renderer mismatch.",
+                    "Windows OpenGL 无法直接把 WGL renderer 切换到所选 GPU；Windows/显示驱动分配了另一渲染器。此说明只适用于本次 renderer 不匹配。");
+                break;
+            case GpuRunIssueKind::ApiUnavailable:
+                message = locText(
+                    "The graphics API or requested adapter could not be initialised.",
+                    "图形 API 或所请求的设备无法初始化。");
+                break;
+            case GpuRunIssueKind::VulkanRuntimeMissing:
+                message = locText(
+                    "The Vulkan runtime is missing; install/update the display driver or select DirectX.",
+                    "缺少 Vulkan Runtime；请安装/更新显示驱动，或改用 DirectX。");
+                break;
+            case GpuRunIssueKind::OpenGlVersion:
+                message = locText(
+                    "The active OpenGL renderer does not provide the required OpenGL 4.3 features.",
+                    "当前 OpenGL renderer 不提供测试所需的 OpenGL 4.3 功能。");
+                break;
+            case GpuRunIssueKind::WorkloadUnsupported:
+                message = locText(
+                    "This workload or requested feature is not supported by the selected API/device.",
+                    "所选 API/设备不支持该测试项目或请求的功能。");
+                break;
+            case GpuRunIssueKind::WorkerTimeout:
+                message = locText(
+                    "The benchmark exceeded its safety timeout and the worker was stopped.",
+                    "测试超过安全超时时间，worker 已停止。");
+                break;
+            case GpuRunIssueKind::DeviceLost:
+                message = locText(
+                    "The GPU device/driver was lost or reset during the run; restart the app and check driver or stability issues.",
+                    "运行期间 GPU 设备丢失或驱动重置；请重启程序，并检查驱动或稳定性问题。");
+                break;
+            case GpuRunIssueKind::ShaderPipeline:
+                message = locText(
+                    "Shader compilation, program linking, or graphics/compute pipeline creation failed.",
+                    "Shader 编译、程序链接或图形/计算管线创建失败。");
+                break;
+            case GpuRunIssueKind::SwapchainOutOfDate:
+                message = locText(
+                    "The render surface became out of date, usually after a resize or display change; run the fixed-size test again.",
+                    "渲染表面已失效，通常由调整窗口或显示配置变化引起；请重新运行固定尺寸测试。");
+                break;
+            case GpuRunIssueKind::ResourceAllocation:
+                message = locText(
+                    "GPU memory/resource allocation failed; reduce the workload or close other GPU-heavy applications.",
+                    "GPU 内存或资源分配失败；请降低负载或关闭其他占用 GPU 的程序。");
+                break;
+            case GpuRunIssueKind::BurnStepsClamped:
+                message = locText(
+                    "GPU Burn steps were clamped to the software-device safety cap (32) "
+                    "to avoid watchdog resets; the score uses the clamped step count.",
+                    "GPU Burn 步数已被钳制到软件设备的安全上限（32 步），以避免触发"
+                    "系统看门狗；成绩按钳制后的步数计算。");
+                break;
+            case GpuRunIssueKind::Unknown:
+            default:
+                message = locText(
+                    "The worker exited unexpectedly; expand Raw CLI output for the original error.",
+                    "Worker 意外退出；请展开 Raw CLI output 查看原始错误。");
+                break;
+            }
+            section = section + L"\n\u2022 " + message;
+            if (!issue.target.empty()) section = section + L" (" + u8(issue.target) + L")";
+        }
+        appendSection(section);
+    }
+    if (m_lastPostProcessFailed)
+    {
+        appendSection(locText(
+            "Post-processing did not finish: benchmark scores may still be valid, but RenderDoc conversion, charts, or report generation failed. See Raw CLI output.",
+            "后处理未完成：测试成绩可能仍然有效，但 RenderDoc 转换、图表或报告生成失败；请查看 Raw CLI output。"));
+    }
     if (hostMem)
-        text = locText(
+    {
+        auto hostText = locText(
             "System memory mode: the GPU reads and writes system RAM directly over PCIe "
             "in small per-particle transactions. Each one pays the full PCIe round-trip "
             "latency and bypasses the GPU caches, so the rate is latency-bound — typically "
@@ -2386,6 +2560,8 @@ void MainWindow::updateResultHint()
             "每次访问都要承担完整的 PCIe 往返延迟，且无法被 GPU 缓存，"
             "因此速率受延迟而非带宽限制——通常只有 PCIe 链路带宽的百分之几，"
             "远低于 PCIe 和内存的带宽上限；成绩比显存模式低很多属正常现象。");
+        appendSection(hostText);
+    }
     if (cacheHint)
     {
         auto cacheText = locText(
@@ -2398,7 +2574,7 @@ void MainWindow::updateResultHint()
             "此时速率是缓存带宽与每次调度开销的混合值——可能超过显存理论带宽、"
             "又远低于真实 L2 带宽，两者都不代表。"
             "要测真实显存带宽，请选择重载（4M）及以上的粒子档。");
-        text = text.empty() ? cacheText : text + L"\n" + cacheText;
+        appendSection(cacheText);
     }
     if (!text.empty()) ResultHint().Text(text);
     ResultHint().Visibility(text.empty() ? Visibility::Collapsed : Visibility::Visible);
@@ -2578,10 +2754,10 @@ void MainWindow::applyLanguage()
                                      "快速运行（最佳 API / GPU，中等）"));
     PresetCustom().Content(locContent("Custom run (choose API / GPU / workload)",
                                       "自定义运行（选择 API / GPU / 测试项目）"));
-    PresetFullOne().Content(locContent("Full analysis — selected workload / one GPU (selected APIs + RenderDoc + charts)",
-                                       "完整分析 —— 所选测试 / 单 GPU（所选 API + RenderDoc + 图表）"));
-    PresetFullAll().Content(locContent("Full analysis — selected workload / all GPUs × selected APIs (+ RenderDoc + charts)",
-                                       "完整分析 —— 所选测试 / 全部 GPU × 所选 API（+ RenderDoc + 图表）"));
+    PresetFullOne().Content(locContent("Full analysis — selected workload / one GPU (selected APIs + optional RenderDoc + charts)",
+                                       "完整分析 —— 所选测试 / 单 GPU（所选 API + 可选 RenderDoc + 图表）"));
+    PresetFullAll().Content(locContent("Full analysis — selected workload / all GPUs × selected APIs (optional RenderDoc + charts)",
+                                       "完整分析 —— 所选测试 / 全部 GPU × 所选 API（可选 RenderDoc + 图表）"));
     PresetFlights().Content(locContent("Flights test — one GPU (selected APIs, custom flights)",
                                        "Flights 测试 —— 单 GPU（所选 API，自定义 flights）"));
     PresetParticles().Content(locContent("Particle test — one GPU (selected APIs, custom particles)",
@@ -2663,8 +2839,10 @@ void MainWindow::applyLanguage()
     HeadlessBox().Content(box_value(hstring(L"Headless")));
     auto headlessTip = locContent(
         "Pure compute mode: no swapchain, no rendering, no present. "
-        "Useful for measuring raw compute throughput.",
-        "纯计算模式：无交换链、无渲染、无 present。用于测量原始计算吞吐。");
+        "Useful for measuring raw compute throughput. Available in Custom and "
+        "Full Analysis for compute-capable workloads; enabling it turns off RenderDoc capture.",
+        "纯计算模式：无交换链、无渲染、无 present。用于测量原始计算吞吐。"
+        "支持纯计算的测试可在自定义和完整分析中启用；启用后会关闭 RenderDoc 抓帧。");
     ToolTipService::SetToolTip(HeadlessBox(), headlessTip);
     ToolTipService::SetToolTip(HeadlessInfo(), headlessTip);
     VsyncBox().Content(locContent("V-Sync", "垂直同步"));
@@ -2687,14 +2865,19 @@ void MainWindow::applyLanguage()
     CaptureBox().Content(locContent("Capture at", "捕获于"));
     auto renderDocTip = locContent(
         "RenderDoc is a free graphics debugger for inspecting GPU frames "
-        "(draw calls, pipelines, resources, and shaders) from Vulkan, D3D, and OpenGL.",
+        "(draw calls, pipelines, resources, and shaders) from Vulkan, D3D, and OpenGL. "
+        "Turn this off to prevent the worker from loading RenderDoc and to disable manual F12 capture.",
         "RenderDoc 是免费的图形调试器，用于抓取并检查 GPU 帧内容"
-        "（绘制调用、管线、资源与着色器等），支持 Vulkan / D3D / OpenGL。");
+        "（绘制调用、管线、资源与着色器等），支持 Vulkan / D3D / OpenGL。"
+        "关闭此主开关后，worker 不会加载 RenderDoc，手动 F12 抓帧也会停用。");
     ToolTipService::SetToolTip(RenderDocInfo(), renderDocTip);
     ToolTipService::SetToolTip(RenderDocBox(), renderDocTip);
     auto captureTip = locContent(
-        "RenderDoc capture may reduce scores and add overhead.",
-        "启用 RenderDoc 捕获可能会影响成绩并增加开销。");
+        "RenderDoc capture may reduce scores and add overhead. Automatic capture "
+        "runs no later than one second before the test ends and is unavailable "
+        "for runs of one second or less.",
+        "启用 RenderDoc 捕获可能会影响成绩并增加开销。自动抓帧最晚发生在测试"
+        "结束前 1 秒；测试时长不超过 1 秒时不可用。");
     ToolTipService::SetToolTip(CaptureInfo(), captureTip);
     ToolTipService::SetToolTip(CaptureBox(), captureTip);
     syncCaptureControls();
@@ -2770,6 +2953,14 @@ void MainWindow::applyLanguage()
 
     m_suppressCombo = true;
     auto refreshCombo = [](ComboBox const& cb) { int s = cb.SelectedIndex(); cb.SelectedIndex(-1); cb.SelectedIndex(s); };
+    BurnStepPresetBox().Header(locContent("GPU Burn steps", "GPU Burn 步数"));
+    BurnStepsLight().Content(locContent("Light — 16", "轻量 — 16"));
+    BurnStepsMedium().Content(locContent("Medium — 64", "中等 — 64"));
+    BurnStepsHeavy().Content(locContent("Heavy — 256", "重载 — 256"));
+    BurnStepsCustom().Content(locContent("Custom…", "自定义…"));
+    BurnCustomStepBox().Header(locContent("Custom steps", "自定义步数"));
+    BurnCustomStepBox().PlaceholderText(locText("16–2048", "16–2048"));
+
     refreshCombo(ThemeBox());
     refreshCombo(LangBox());
     refreshCombo(SortBox());
@@ -2781,6 +2972,7 @@ void MainWindow::applyLanguage()
     refreshCombo(WorkloadBox());
     refreshCombo(PrecisionBox());
     refreshCombo(ParticlePresetBox());
+    refreshCombo(BurnStepPresetBox());
     refreshCombo(CpuModeBox());
     refreshCombo(CpuDurationPresetBox());
     if (GpuBox().Items().Size() > 0)
@@ -3579,9 +3771,10 @@ void MainWindow::updateExtraLabel()
     bool particleWorkload = wl == "stream" || wl == "render3d";
     bool gpuBurnWorkload = wl == "gpu_burn";
     bool showParticles = particleTest || (workloadSelectable && particleWorkload);
+    bool showBurnSteps = workloadSelectable && gpuBurnWorkload;
     bool fixedQualityLiquid = wl == "cinematic_liquid" || wl == "cinematic_liquid_v1";
     bool showExtra = flightsTest ||
-        (workloadSelectable && !particleWorkload && !fixedQualityLiquid);
+        (workloadSelectable && !particleWorkload && !gpuBurnWorkload && !fixedQualityLiquid);
     bool fluidWorkload = workloadSelectable && wl == "fluid";
     std::string infoWl = workloadSelectable ? wl : "stream";
 
@@ -3603,7 +3796,8 @@ void MainWindow::updateExtraLabel()
     const bool showPrecision = workloadSelectable && wl == "synthpeak";
     PrecisionColumn().Visibility(showPrecision ? Visibility::Visible : Visibility::Collapsed);
     PrecisionBox().IsEnabled(showPrecision);
-    bool headlessSupported = customRun && !(gpuBurnWorkload || wl == "gpu_stress" || wl == "stress"
+    bool headlessSupported = (customRun || fullAnalysis) &&
+        !(gpuBurnWorkload || wl == "gpu_stress" || wl == "stress"
         || wl == "render3d" || wl == "volumetric" || wl == "fluid"
         || wl == "cinematic_liquid" || wl == "cinematic_liquid_v1");
     if (!headlessSupported) HeadlessBox().IsChecked(false);
@@ -3615,12 +3809,14 @@ void MainWindow::updateExtraLabel()
     ParticlePresetBox().Visibility(showParticles ? Visibility::Visible : Visibility::Collapsed);
     CustomParticleBox().Visibility(showParticles && selected(ParticlePresetBox()) == "custom"
         ? Visibility::Visible : Visibility::Collapsed);
+    BurnStepPanel().Visibility(showBurnSteps ? Visibility::Visible : Visibility::Collapsed);
+    BurnCustomStepBox().Visibility(showBurnSteps && selected(BurnStepPresetBox()) == "custom"
+        ? Visibility::Visible : Visibility::Collapsed);
     ExtraBox().Visibility(showExtra ? Visibility::Visible : Visibility::Collapsed);
     FluidJacobiBox().Visibility(fluidWorkload ? Visibility::Visible : Visibility::Collapsed);
 
     if (flightsTest)             ExtraBox().Header(locContent("Flights (--flights)", "Flights (--flights)"));
     else if (wl == "nbody")      ExtraBox().Header(locContent("Bodies (--bodies)", "天体数 (--bodies)"));
-    else if (gpuBurnWorkload)     ExtraBox().Header(locContent("Fixed steps (--iter)", "固定步数 (--iter)"));
     else if (wl == "gpu_stress") ExtraBox().Header(locContent("Iterations (--iter)", "迭代次数 (--iter)"));
     else if (wl == "stress")     ExtraBox().Header(locContent("Iterations (--iter)", "迭代次数 (--iter)"));
     else if (wl == "synthpeak")  ExtraBox().Header(locContent("Iterations (--iter)", "迭代次数 (--iter)"));
@@ -3628,9 +3824,7 @@ void MainWindow::updateExtraLabel()
     else if (wl == "fluid")      ExtraBox().Header(locContent("Grid size (--grid)", "网格尺寸 (--grid)"));
     else                          ExtraBox().Header(locContent("Extra", "额外参数"));
 
-    ExtraBox().PlaceholderText(gpuBurnWorkload
-        ? locText("leave empty: safe auto-tune; fixed 16-32", "留空：安全自动标定；固定值 16-32")
-        : wl == "nbody"
+    ExtraBox().PlaceholderText(wl == "nbody"
         ? locText("default 65536; DX11 FL10/SM4: max 4096", "默认 65536；DX11 FL10/SM4：最多 4096")
         : wl == "volumetric"
         ? locText("optional; default 96", "可选；默认 96")
@@ -3655,8 +3849,8 @@ void MainWindow::updateExtraLabel()
     {
         WorkloadInfo().Title(locText("Plasma x Kaleidoscope", "等离子晶核 × 万花镜"));
         WorkloadInfo().Message(locText(
-            "Combines a solid raymarched Plasma Bloom foreground with the woven v2 Mangekyo kaleidoscope background for a short graphics burst (or Until Cancel for open-ended stress).",
-            "将实心光线步进等离子晶核作为前景，与 v2 织纹万花镜背景合成；默认可限时跑分，也可选「直到取消」持续压测。"));
+            "Choose a fixed per-frame load: Light 16, Medium 64, Heavy 256, or Custom 16–2048. No automatic tuning is used.",
+            "请选择固定的每帧负载：轻量 16、中等 64、重载 256，或自定义 16–2048；不会自动调节。"));
     }
     else if (infoWl == "cinematic_liquid")
     {
@@ -3837,8 +4031,15 @@ void MainWindow::rebuildApiPicker(bool preserveSelection)
 
         if (allGpusPreset)
         {
-            supported = !m_gpuApiSupport.empty() &&
-                        supportCount == m_gpuApiSupport.size();
+            // Vulkan-only workloads: one capable GPU is enough — the launch
+            // matrix already skips GPU x API combos a device does not report
+            // (listed under "unsupported combinations" in the summary).
+            // Other workloads keep the stricter all-GPUs rule for the
+            // "supported" grouping; partially supported APIs stay selectable.
+            supported = vulkanOnlyWorkload
+                ? supportCount > 0
+                : !m_gpuApiSupport.empty() &&
+                      supportCount == m_gpuApiSupport.size();
         }
         else if (gpuRow > 0 && static_cast<size_t>(gpuRow - 1) < m_gpuApiSupport.size())
         {
@@ -3898,9 +4099,16 @@ void MainWindow::rebuildApiPicker(bool preserveSelection)
     }
     else
     {
-        UnsupportedApisHint().Text(locText(
-            "Unsupported selections remain available and will be reported by the CLI.",
-            "不支持的 API 仍可勾选；运行后由 CLI 返回明确错误。"));
+        const bool fullAnalysis = PresetBox().SelectedIndex() == 2 ||
+                                  PresetBox().SelectedIndex() == 3;
+        UnsupportedApisHint().Text(fullAnalysis
+            ? locText(
+                "Unavailable combinations may stay selected; Full Analysis skips them "
+                "before launch and lists them in Summary.",
+                "不支持的组合仍可保持勾选；完整分析会在启动前跳过，并在汇总中列出。")
+            : locText(
+                "Unsupported selections remain available and will be reported by the CLI.",
+                "不支持的 API 仍可勾选；运行后由 CLI 返回明确错误。"));
     }
 }
 
@@ -3918,6 +4126,7 @@ void MainWindow::populateGpus()
     syncActionButtonsEnabled();
     GpuBox().Items().Clear();
     m_gpuIndices.clear();
+    m_gpuNames.clear();
     m_gpuApiSupport.clear();
     SupportedApisPanel().Children().Clear();
     UnsupportedApisPanel().Children().Clear();
@@ -3982,9 +4191,11 @@ void MainWindow::populateGpus()
                 for (auto& g : gpus)
                 {
                     m_gpuIndices.push_back(g.idx);
+                    m_gpuNames.push_back(g.name);
                     m_gpuApiSupport.push_back(g.api);
                     std::string label = isSoftwareGpu(g.name)
-                        ? std::to_string(g.idx) + ": " + (m_cpuName.empty() ? "CPU" : m_cpuName) + "  (CPU / WARP)"
+                        ? std::to_string(g.idx) + ": " +
+                          softwareGpuDisplayName(g.name, m_cpuName)
                         : std::to_string(g.idx) + ": " + g.name;
                 auto it = ComboBoxItem();
                 it.Content(box_value(u8(label)));
@@ -4071,6 +4282,12 @@ void MainWindow::OnParticlePresetChanged(IInspectable const&, SelectionChangedEv
     updateExtraLabel();
 }
 
+void MainWindow::OnBurnStepPresetChanged(IInspectable const&, SelectionChangedEventArgs const&)
+{
+    if (!m_uiReady || m_suppressCombo) return;
+    updateExtraLabel();
+}
+
 void MainWindow::OnDurationUnitChanged(IInspectable const&, SelectionChangedEventArgs const&)
 {
     if (!m_uiReady || m_suppressCombo) return;
@@ -4080,10 +4297,10 @@ void MainWindow::OnDurationUnitChanged(IInspectable const&, SelectionChangedEven
     const bool looksDefault =
         cur.empty() || cur == "15" || cur == "5" || cur == "1" || cur == "60" || cur == "600";
 
-    if (unit == "seconds" && looksDefault)       DurationValueBox().Text(L"15");
-    else if (unit == "minutes" && looksDefault)  DurationValueBox().Text(L"5");
-    else if (unit == "hours" && looksDefault)    DurationValueBox().Text(L"1");
-    else if (unit == "frames" && looksDefault)   DurationValueBox().Text(L"600");
+    if (unit == "seconds" && looksDefault)       DurationValueBox().Value(15.0);
+    else if (unit == "minutes" && looksDefault)  DurationValueBox().Value(5.0);
+    else if (unit == "hours" && looksDefault)    DurationValueBox().Value(1.0);
+    else if (unit == "frames" && looksDefault)   DurationValueBox().Value(600.0);
 
     updateDurationValueEnabled();
     syncCaptureControls();
@@ -4107,21 +4324,18 @@ void MainWindow::updateDurationValueEnabled()
 double MainWindow::durationAmountValue()
 {
     const auto unit = durationUnitTag();
-    auto val = to_string(DurationValueBox().Text());
     double amount = 15.0;
     if (unit == "frames") amount = 600.0;
     else if (unit == "minutes") amount = 5.0;
     else if (unit == "hours") amount = 1.0;
 
-    if (!val.empty())
-    {
-        try {
-            size_t used = 0;
-            const double parsed = std::stod(val, &used);
-            if (used == val.size() && std::isfinite(parsed) && parsed > 0.0)
-                amount = parsed;
-        } catch (...) {}
-    }
+    // ValueChanged fires before the NumberBox template commits Text. Reading
+    // Text here kept the previous value (usually 15), so the 1-second capture
+    // guard never activated. Value is the authoritative, already-updated
+    // NumberBox value.
+    const double value = DurationValueBox().Value();
+    if (std::isfinite(value) && value > 0.0)
+        amount = value;
     return amount;
 }
 
@@ -4134,8 +4348,8 @@ void MainWindow::syncCaptureControls()
     const bool frames = (unit == "frames");
     const bool renderDocOn = RenderDocBox().IsChecked() &&
                              RenderDocBox().IsChecked().Value();
-    const bool captureOn = CaptureBox().IsChecked() &&
-                           CaptureBox().IsChecked().Value();
+    bool captureOn = CaptureBox().IsChecked() &&
+                     CaptureBox().IsChecked().Value();
 
     if (unit == "frames")
         CaptureUnitLabel().Text(locText("frames", "帧"));
@@ -4149,8 +4363,9 @@ void MainWindow::syncCaptureControls()
     // Integer capture points for every unit — fractional seconds added noise
     // and the decimal formatter confused more than it helped.
     const double minVal = 1.0;
-    double maxVal = unlimited ? minVal : std::floor(durationAmountValue() + 1e-9);
-    if (!(maxVal >= minVal)) maxVal = minVal;
+    const double safeMax = safeCaptureMaximumAmount(unit, durationAmountValue());
+    const bool hasSafeCapturePoint = !unlimited && safeMax >= minVal;
+    const double maxVal = hasSafeCapturePoint ? safeMax : minVal;
 
     using Windows::Globalization::NumberFormatting::DecimalFormatter;
     using Windows::Globalization::NumberFormatting::IncrementNumberRounder;
@@ -4171,6 +4386,11 @@ void MainWindow::syncCaptureControls()
     cur = std::floor(cur + 1e-9);
 
     m_suppressRenderDocUi = true;
+    if (!hasSafeCapturePoint && captureOn)
+    {
+        CaptureBox().IsChecked(false);
+        captureOn = false;
+    }
     CaptureValueBox().NumberFormatter(formatter);
     CaptureValueBox().Minimum(minVal);
     CaptureValueBox().Maximum(maxVal);
@@ -4181,7 +4401,7 @@ void MainWindow::syncCaptureControls()
     const bool headlessOn = HeadlessBox().IsChecked() &&
                             HeadlessBox().IsChecked().Value();
     RenderDocBox().IsEnabled(!headlessOn);
-    const bool canCapture = renderDocOn && !unlimited && !headlessOn;
+    const bool canCapture = renderDocOn && !headlessOn && hasSafeCapturePoint;
     CaptureBox().IsEnabled(canCapture);
     CaptureValueBox().IsEnabled(canCapture && captureOn);
     m_suppressRenderDocUi = false;
@@ -4189,17 +4409,20 @@ void MainWindow::syncCaptureControls()
 
 void MainWindow::appendCaptureArgs(std::vector<std::string>& dest)
 {
-    if (isUnlimitedDuration()) return;
     // Headless runs never trigger captures in the engine — don't pass the args.
     if (HeadlessBox().IsChecked() && HeadlessBox().IsChecked().Value()) return;
-    if (!(RenderDocBox().IsChecked() && RenderDocBox().IsChecked().Value())) return;
+    const bool renderDocOn = RenderDocBox().IsChecked() &&
+                             RenderDocBox().IsChecked().Value();
+    dest.push_back(renderDocOn ? "--renderdoc" : "--no-renderdoc");
+    if (!renderDocOn || isUnlimitedDuration()) return;
     if (!(CaptureBox().IsChecked() && CaptureBox().IsChecked().Value())) return;
 
     const auto unit = durationUnitTag();
     double amount = CaptureValueBox().Value();
     if (std::isnan(amount) || amount <= 0.0) return;
 
-    const double maxAmount = durationAmountValue();
+    const double maxAmount = safeCaptureMaximumAmount(unit, durationAmountValue());
+    if (maxAmount < 1.0) return;
     if (amount > maxAmount) amount = maxAmount;
 
     if (unit == "frames")
@@ -4246,6 +4469,13 @@ std::string MainWindow::particleValue()
     return p;                            // preset particle count
 }
 
+std::string MainWindow::burnStepValue()
+{
+    auto steps = selected(BurnStepPresetBox());
+    if (steps == "custom") return to_string(BurnCustomStepBox().Text());
+    return steps;
+}
+
 // Duration as engine args. Time units convert to --time <seconds>; Frames uses
 // --benchmark; Until Cancel uses --no-time-limit (stop via Cancel).
 std::vector<std::string> MainWindow::durationArgs()
@@ -4254,28 +4484,12 @@ std::vector<std::string> MainWindow::durationArgs()
     if (unit == "unlimited")
         return { "--no-time-limit" };
 
-    auto val = to_string(DurationValueBox().Text());
+    const double amount = durationAmountValue();
     if (unit == "frames")
     {
-        if (val.empty()) val = "600";
-        return { "--benchmark", val };
+        return { "--benchmark",
+                 std::to_string(static_cast<long long>(std::floor(amount + 1e-9))) };
     }
-
-    double amount = 15.0;
-    if (!val.empty())
-    {
-        try {
-            size_t used = 0;
-            amount = std::stod(val, &used);
-            if (used != val.size() || !std::isfinite(amount) || amount < 0.0)
-                amount = 15.0;
-        } catch (...) {
-            amount = 15.0;
-        }
-    }
-    else if (unit == "minutes") amount = 5.0;
-    else if (unit == "hours") amount = 1.0;
-    else amount = 15.0;
 
     double seconds = amount;
     if (unit == "minutes") seconds = amount * 60.0;
@@ -4295,9 +4509,11 @@ std::vector<std::string> MainWindow::durationArgs()
 }
 
 // Build child-process CLI invocation(s) for the selected preset.
-std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needCharts)
+std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(
+    bool& needCharts, std::vector<std::string>& skippedJobs)
 {
     needCharts = false;
+    skippedJobs.clear();
     int p = PresetBox().SelectedIndex();
 
     std::vector<std::string> dur = durationArgs();   // --time <s> or --benchmark <frames>
@@ -4316,9 +4532,11 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needChar
         }
         if ((wl == "stream" || wl == "render3d") && !particles.empty()) {
             ex.push_back("--particles"); ex.push_back(particles);
+        } else if (wl == "gpu_burn") {
+            ex.push_back("--iter"); ex.push_back(burnStepValue());
         } else if (!extra.empty()) {
             std::string flag = (wl == "nbody") ? "--bodies"
-                             : (wl == "gpu_burn" || wl == "gpu_stress" || wl == "stress" || wl == "synthpeak") ? "--iter"
+                             : (wl == "gpu_stress" || wl == "stress" || wl == "synthpeak") ? "--iter"
                              : (wl == "volumetric") ? "--steps"
                              : (wl == "fluid") ? "--grid" : "--particles";
             ex.push_back(flag); ex.push_back(extra);
@@ -4339,10 +4557,11 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needChar
     if (gpuRow > 0 && static_cast<size_t>(gpuRow - 1) < m_gpuIndices.size())
         selectedGpu = m_gpuIndices[gpuRow - 1];
 
-    // Each API×GPU combination gets a fresh process. Unsupported choices are
-    // deliberately retained: the CLI reports a precise capability error and
-    // the remaining jobs continue.
-    auto makeJobs = [&](std::vector<std::string> extraArgs, bool everyGpu) {
+    // Each API×GPU combination gets a fresh process. Full Analysis plans omit
+    // combinations that the probe already identified as unsupported. A worker
+    // that is actually launched and exits non-zero remains a real failure.
+    auto makeJobs = [&](std::vector<std::string> extraArgs, bool everyGpu,
+                        bool skipKnownUnsupported = false) {
         std::vector<std::vector<std::string>> jobs;
         std::vector<int> targets;
         if (everyGpu)
@@ -4355,9 +4574,42 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needChar
             targets.push_back(selectedGpu);
         }
 
+        const auto workload = selected(WorkloadBox());
+        const bool fragmentOnly =
+            workload == "gpu_burn" || workload == "gpu_burn_v1" ||
+            workload == "gpu_stress" || workload == "stress" ||
+            workload == "volumetric";
         for (int gpu : targets)
             for (auto const& api : selectedApis())
             {
+            auto gpuIt = std::find(m_gpuIndices.begin(), m_gpuIndices.end(), gpu);
+            const size_t gpuPos = gpuIt == m_gpuIndices.end()
+                ? m_gpuIndices.size()
+                : static_cast<size_t>(std::distance(m_gpuIndices.begin(), gpuIt));
+            auto apiIt = std::find_if(std::begin(kRunApis), std::end(kRunApis),
+                [&](RunApiDefinition const& candidate) { return api == candidate.token; });
+            bool supported = true;
+            if (skipKnownUnsupported && gpuPos < m_gpuApiSupport.size() &&
+                apiIt != std::end(kRunApis))
+            {
+                supported = m_gpuApiSupport[gpuPos][apiIt->supportIndex];
+                if (supported && api == "dx11" && !fragmentOnly)
+                    supported = m_gpuApiSupport[gpuPos][4];
+            }
+            if (!supported)
+            {
+                std::string gpuLabel;
+                if (gpuPos < m_gpuNames.size() && isSoftwareGpu(m_gpuNames[gpuPos]))
+                    gpuLabel = softwareGpuDisplayName(m_gpuNames[gpuPos], m_cpuName);
+                else if (gpuPos < m_gpuNames.size())
+                    gpuLabel = m_gpuNames[gpuPos];
+                else
+                    gpuLabel = gpu >= 0 ? "GPU " + std::to_string(gpu) : "GPU";
+                const char* apiLabel = api.c_str();
+                if (apiIt != std::end(kRunApis)) apiLabel = apiIt->label;
+                skippedJobs.push_back(gpuLabel + " — " + apiLabel);
+                continue;
+            }
             std::vector<std::string> a = { m_enginePath, "--gui-worker" };
             for (auto& d : dur) a.push_back(d);
             a.push_back("--backend"); a.push_back(api);
@@ -4371,6 +4623,15 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needChar
     auto appendCapture = [this](std::vector<std::string>& dest)
     {
         appendCaptureArgs(dest);
+    };
+    const bool headless = HeadlessBox().IsChecked() &&
+                          HeadlessBox().IsChecked().Value();
+    auto appendRunMode = [&](std::vector<std::string>& dest)
+    {
+        if (headless)
+            dest.push_back("--headless");
+        else
+            appendCapture(dest);
     };
 
     switch (p)
@@ -4386,12 +4647,7 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needChar
         case 1:  // [1] Custom run — honour every visible control
         {
             auto ex = selectedWorkloadArgs();
-            const bool headless = HeadlessBox().IsChecked() &&
-                                  HeadlessBox().IsChecked().Value();
-            if (headless)
-                ex.push_back("--headless");
-            else
-                appendCapture(ex);
+            appendRunMode(ex);
             return makeJobs(std::move(ex), false);
         }
 
@@ -4399,16 +4655,16 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needChar
         {
             needCharts = true;
             auto ex = selectedWorkloadArgs();
-            appendCapture(ex);
-            return makeJobs(std::move(ex), false);
+            appendRunMode(ex);
+            return makeJobs(std::move(ex), false, true);
         }
 
         case 3:  // [6] Selected workload, all GPUs × selected APIs
         {
             needCharts = true;
             auto ex = selectedWorkloadArgs();
-            appendCapture(ex);
-            return makeJobs(std::move(ex), true);
+            appendRunMode(ex);
+            return makeJobs(std::move(ex), true, true);
         }
         case 4:  // [7] Flights test, one GPU × selected APIs
         {
@@ -4430,7 +4686,8 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(bool& needChar
     return {};
 }
 
-void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool needCharts)
+void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool needCharts,
+                            std::vector<std::string> skippedJobs)
 {
     if (!tryBeginTask(ActiveTask::GpuBenchmark))
     {
@@ -4449,6 +4706,9 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
         : locText("Running… (a separate render window may appear)", "运行中…（可能弹出独立渲染窗口）"));
     m_lastScoreEn.clear();
     m_lastScoreCacheHint = false;
+    m_lastSkippedJobs.clear();
+    m_lastGpuRunIssues.clear();
+    m_lastPostProcessFailed = false;
     ResultText().Text(L"—");
     updateResultHint();
     OutputBox().Text({});
@@ -4493,13 +4753,26 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
 
     auto strong = get_strong();
     auto disp = m_dispatcher;
-    std::thread([this, strong, disp, jobs, needCharts, repo, cancelEvent, cancelHandle]()
+    const auto gpuIndices = m_gpuIndices;
+    const auto gpuNames = m_gpuNames;
+    const auto gpuApiSupport = m_gpuApiSupport;
+    const auto cpuName = m_cpuName;
+    std::thread([this, strong, disp, jobs, needCharts, repo, cancelEvent, cancelHandle,
+                 skippedJobs, gpuIndices, gpuNames, gpuApiSupport, cpuName]()
     {
       try
       {
         std::string all, lastScore;
+        if (!skippedJobs.empty())
+        {
+            all += "[GUI] Known-unsupported combinations skipped before launch:\n";
+            for (auto const& skipped : skippedJobs)
+                all += "  - " + skipped + "\n";
+        }
         size_t failedJobs = 0;
         size_t succeededJobs = 0;
+        std::vector<std::string> openGlRoutingMismatches;
+        std::vector<GpuRunIssue> gpuRunIssues;
         bool cancelled = false;
         std::vector<std::string> caps;
         // Scores accumulate grouped by adapter: a "# <GPU name>" header line
@@ -4511,6 +4784,24 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
             for (size_t i = 1; i + 1 < job.size(); ++i)
                 if (job[i] == key) return job[i + 1];
             return {};
+        };
+        auto jobTargetLabel = [&](std::vector<std::string> const& job)
+        {
+            const auto gpuArg = jobArgValue(job, "--gpu");
+            int gpuIndex = -1;
+            try { if (!gpuArg.empty()) gpuIndex = std::stoi(gpuArg); }
+            catch (...) { gpuIndex = -1; }
+            auto gpuIt = std::find(gpuIndices.begin(), gpuIndices.end(), gpuIndex);
+            const size_t gpuPos = gpuIt == gpuIndices.end()
+                ? gpuIndices.size()
+                : static_cast<size_t>(std::distance(gpuIndices.begin(), gpuIt));
+            std::string gpu = gpuPos < gpuNames.size()
+                ? gpuNames[gpuPos]
+                : (gpuArg.empty() ? "Automatic GPU" : "GPU " + gpuArg);
+            std::string api = jobArgValue(job, "--backend");
+            for (auto const& definition : kRunApis)
+                if (api == definition.token) { api = definition.label; break; }
+            return gpu + " — " + (api.empty() ? "API" : api);
         };
         std::string currentGpuGroup;
         bool cacheResident = false;
@@ -4562,6 +4853,138 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
             if (res.exitCode != 0)
             {
                 ++failedJobs;
+                const size_t routingCountBefore = openGlRoutingMismatches.size();
+                // Classify only the CLI's exact Windows/WGL adapter mismatch.
+                // Shader, context, driver, timeout, and all other OpenGL errors
+                // deliberately remain ordinary failures with no routing hint.
+                constexpr std::string_view routingMarker =
+                    "OpenGL on Windows cannot select GPU index ";
+                constexpr std::string_view activeMarker =
+                    "; the active GL_RENDERER is ";
+                constexpr std::string_view unsupportedMarker =
+                    "does not report support for backend 'opengl'.";
+                const auto routingPos = res.output.find(routingMarker);
+                const auto activePos = routingPos == std::string::npos
+                    ? std::string::npos
+                    : res.output.find(activeMarker, routingPos + routingMarker.size());
+                const auto unsupportedPos = res.output.find(unsupportedMarker);
+                if (jobArgValue(job, "--backend") == "opengl")
+                {
+                    const auto gpuArg = jobArgValue(job, "--gpu");
+                    int gpuIndex = -1;
+                    try { if (!gpuArg.empty()) gpuIndex = std::stoi(gpuArg); }
+                    catch (...) { gpuIndex = -1; }
+                    auto gpuIt = std::find(gpuIndices.begin(), gpuIndices.end(), gpuIndex);
+                    const size_t gpuPos = gpuIt == gpuIndices.end()
+                        ? gpuIndices.size()
+                        : static_cast<size_t>(std::distance(gpuIndices.begin(), gpuIt));
+                    const std::string requested = gpuPos < gpuNames.size()
+                        ? gpuNames[gpuPos]
+                        : (gpuArg.empty() ? "Selected GPU" : "GPU " + gpuArg);
+                    std::string active;
+                    if (routingPos != std::string::npos && activePos != std::string::npos)
+                    {
+                        const size_t activeBegin = activePos + activeMarker.size();
+                        size_t activeEnd = res.output.find(" (GPU index ", activeBegin);
+                        if (activeEnd == std::string::npos)
+                            activeEnd = res.output.find('\n', activeBegin);
+                        active = res.output.substr(
+                            activeBegin, activeEnd == std::string::npos
+                                ? std::string::npos : activeEnd - activeBegin);
+                        while (!active.empty() &&
+                               (active.back() == '\r' || active.back() == '\n' ||
+                                active.back() == '.'))
+                            active.pop_back();
+                    }
+                    else if (unsupportedPos != std::string::npos)
+                    {
+                        // The early capability gate runs before the more
+                        // descriptive GL_RENDERER mismatch check. On Windows,
+                        // a different probed adapter with OpenGL support is the
+                        // renderer WGL currently exposes. Require that evidence
+                        // so a generic "unsupported" OpenGL failure is not
+                        // mislabeled as a device-routing limitation.
+                        for (size_t i = 0; i < gpuApiSupport.size() && i < gpuNames.size(); ++i)
+                            if (i != gpuPos && gpuApiSupport[i][3])
+                            {
+                                active = gpuNames[i];
+                                break;
+                            }
+                    }
+                    if (!active.empty())
+                    {
+                        openGlRoutingMismatches.push_back(requested + " -> " + active);
+                        gpuRunIssues.push_back(GpuRunIssue{
+                            GpuRunIssueKind::OpenGlRouting,
+                            requested + " -> " + active });
+                    }
+                }
+                const bool classifiedAsOpenGlRouting =
+                    openGlRoutingMismatches.size() != routingCountBefore;
+                if (!classifiedAsOpenGlRouting)
+                {
+                    auto has = [&](std::string_view marker)
+                    {
+                        return res.output.find(marker) != std::string::npos;
+                    };
+                    GpuRunIssueKind kind = GpuRunIssueKind::Unknown;
+                    if (res.exitCode == -2)
+                        kind = GpuRunIssueKind::WorkerTimeout;
+                    else if (has("Vulkan was selected, but vulkan-1.dll is not installed"))
+                        kind = GpuRunIssueKind::VulkanRuntimeMissing;
+                    else if (has("GPU device lost") || has("VK_ERROR_DEVICE_LOST") ||
+                             has("DXGI_ERROR_DEVICE_REMOVED") || has("DXGI_ERROR_DEVICE_HUNG") ||
+                             has("DXGI_ERROR_DEVICE_RESET") || has("0x887a0005") ||
+                             has("0x887a0006") || has("0x887a0007"))
+                        kind = GpuRunIssueKind::DeviceLost;
+                    else if (has("OpenGL 4.3+ required") ||
+                             has("does not provide OpenGL 4.3"))
+                        kind = GpuRunIssueKind::OpenGlVersion;
+                    else if (has("does not report support for backend") ||
+                             has("has no usable backend device index") ||
+                             has("does not support D3D12") ||
+                             has("Requested GPU (LUID) not found") ||
+                             has("Requested GPU index unsuitable") ||
+                             has("GPU index unsuitable"))
+                        kind = GpuRunIssueKind::UnsupportedGpuApi;
+                    else if (has("is currently Vulkan-only") ||
+                             has("cannot run in a cross-API suite") ||
+                             has("does not support DXGI WARP") ||
+                             has("does not support headless mode") ||
+                             has("requires sampled+storage R32_SFLOAT") ||
+                             has("needs Shader Model") || has("requires GL_NV_gpu_shader5"))
+                        kind = GpuRunIssueKind::WorkloadUnsupported;
+                    else if (has("Shader compilation failed") || has("Program link failed") ||
+                             has("vkCreateShaderModule failed") ||
+                             has("CreateGraphicsPipeline") || has("CreateComputePipeline") ||
+                             has("CreatePipelineState") || has("pipeline failed"))
+                        kind = GpuRunIssueKind::ShaderPipeline;
+                    else if (has("swapchain became out of date") ||
+                             has("VK_ERROR_OUT_OF_DATE_KHR"))
+                        kind = GpuRunIssueKind::SwapchainOutOfDate;
+                    else if (has("out of memory") || has("E_OUTOFMEMORY") ||
+                             has("vkAllocateMemory failed") || has("allocation failed") ||
+                             has("Failed to find suitable memory type") ||
+                             has("No suitable memory type"))
+                        kind = GpuRunIssueKind::ResourceAllocation;
+                    else if (has("not compiled in or failed to initialise") ||
+                             has("Failed to initialise GLAD") ||
+                             has("No Vulkan physical device found") ||
+                             has("No suitable Vulkan device") ||
+                             has("no probed adapter matches GL_RENDERER") ||
+                             has("D3D12CreateDevice failed"))
+                        kind = GpuRunIssueKind::ApiUnavailable;
+
+                    GpuRunIssue issue{ kind, jobTargetLabel(job) };
+                    const bool duplicate = std::any_of(
+                        gpuRunIssues.begin(), gpuRunIssues.end(),
+                        [&](GpuRunIssue const& existing)
+                        {
+                            return existing.kind == issue.kind &&
+                                   existing.target == issue.target;
+                        });
+                    if (!duplicate) gpuRunIssues.push_back(std::move(issue));
+                }
                 std::ostringstream code;
                 code << "[GUI worker] Exited with code 0x" << std::hex
                      << static_cast<std::uint32_t>(res.exitCode) << std::dec << ".\n";
@@ -4570,6 +4993,24 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
             else
             {
                 ++succeededJobs;
+                // Informational: GPU Burn ran, but a software device clamped
+                // the fixed step count (app_base prints "clamping fixed
+                // steps N -> cap"). Surface it as a run issue in Summary.
+                if (res.output.find("clamping fixed steps") != std::string::npos ||
+                    res.output.find("GPU Burn on a software device is capped at")
+                        != std::string::npos)
+                {
+                    GpuRunIssue issue{ GpuRunIssueKind::BurnStepsClamped,
+                                       jobTargetLabel(job) };
+                    const bool duplicate = std::any_of(
+                        gpuRunIssues.begin(), gpuRunIssues.end(),
+                        [&](GpuRunIssue const& existing)
+                        {
+                            return existing.kind == issue.kind &&
+                                   existing.target == issue.target;
+                        });
+                    if (!duplicate) gpuRunIssues.push_back(std::move(issue));
+                }
                 auto workerCaps = parseCapturePaths(res.output);
                 caps.insert(caps.end(), workerCaps.begin(), workerCaps.end());
                 std::string sc = extractScore(res.output);
@@ -4589,11 +5030,26 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                             if (label == api.token) { label = api.label; break; }
                         sc = label + " — " + sc;
                     }
-                    std::string gpuName = normalizeGpuName(extractGpuName(res.output));
+                    const auto gpuArg = jobArgValue(job, "--gpu");
+                    int gpuIndex = -1;
+                    try { if (!gpuArg.empty()) gpuIndex = std::stoi(gpuArg); }
+                    catch (...) { gpuIndex = -1; }
+                    auto gpuIt = std::find(gpuIndices.begin(), gpuIndices.end(), gpuIndex);
+                    const size_t gpuPos = gpuIt == gpuIndices.end()
+                        ? gpuIndices.size()
+                        : static_cast<size_t>(std::distance(gpuIndices.begin(), gpuIt));
+                    const std::string reportedGpu = extractGpuName(res.output);
+                    const bool software =
+                        (gpuPos < gpuNames.size() && isSoftwareGpu(gpuNames[gpuPos])) ||
+                        isSoftwareGpu(reportedGpu);
+                    std::string gpuName = software
+                        ? softwareGpuDisplayName(
+                            gpuPos < gpuNames.size() ? gpuNames[gpuPos] : reportedGpu,
+                            cpuName)
+                        : normalizeGpuName(reportedGpu);
                     if (gpuName.empty() || gpuName == "(unknown)")
                     {
-                        const auto g = jobArgValue(job, "--gpu");
-                        gpuName = g.empty() ? "GPU" : "GPU " + g;
+                        gpuName = gpuArg.empty() ? "GPU" : "GPU " + gpuArg;
                     }
                     if (gpuName != currentGpuGroup)
                     {
@@ -4607,6 +5063,12 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
             }
         }
 
+        const bool renderDocCaptureRequested = std::any_of(
+            jobs.begin(), jobs.end(), [](auto const& job)
+            {
+                return std::find(job.begin(), job.end(), "--capture") != job.end() ||
+                       std::find(job.begin(), job.end(), "--capture-frame") != job.end();
+            });
         bool postProcessFailed = false;
         bool renderDocConversionFailed = false;
         std::string postProcessStatus;
@@ -4736,7 +5198,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                     }
                 }
             }
-            else if (needCharts)
+            else if (needCharts && renderDocCaptureRequested)
             {
                 recordPostProcessFailure(
                     "No RenderDoc capture was produced for Full Analysis.");
@@ -4859,7 +5321,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
         if (!disp || !disp.TryEnqueue([this, strong, all, lastScore, cacheResident,
                          needCharts, failedJobs,
                          succeededJobs, postProcessFailed, postProcessStatus,
-                         cancelled]()
+                         skippedJobs, openGlRoutingMismatches, gpuRunIssues, cancelled]()
         {
             if (!uiAlive())
             {
@@ -4871,12 +5333,26 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                 OutputBox().Text(u8(all));
                 GpuCancelButton().IsEnabled(false);
                 m_lastScoreCacheHint = cacheResident;
+                m_lastSkippedJobs = skippedJobs;
+                m_lastGpuRunIssues = gpuRunIssues;
+                m_lastPostProcessFailed = postProcessFailed;
+                const bool onlyOpenGlRoutingFailures = failedJobs > 0 &&
+                    openGlRoutingMismatches.size() == failedJobs;
                 if (cancelled)
                     stopGpuProgress(locText("Cancelled", "已取消"), false);
+                else if (onlyOpenGlRoutingFailures && succeededJobs == 0)
+                    stopGpuProgress(locText("OpenGL could not use the selected GPU",
+                                            "OpenGL 无法使用所选 GPU"), false);
                 else if (failedJobs > 0 && succeededJobs == 0)
                     stopGpuProgress(locText("Failed", "运行失败"), false);
+                else if (onlyOpenGlRoutingFailures)
+                    stopGpuProgress(locText("Completed — OpenGL could not use the selected GPU",
+                                            "已完成——OpenGL 无法使用所选 GPU"), true);
                 else if (failedJobs > 0)
                     stopGpuProgress(locText("Completed with errors", "部分完成"), true);
+                else if (!skippedJobs.empty())
+                    stopGpuProgress(locText("Completed — unsupported combinations skipped",
+                                            "完成——已跳过不支持的组合"), true);
                 else
                     stopGpuProgress(locText("Done", "完成"), true);
                 auto showScoreOr = [&](hstring const& fallback)
@@ -4903,7 +5379,10 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                     m_lastScoreEn.clear();
                     ResultText().Text(locText("Error — see output", "出错 —— 见输出"));
                     updateResultHint();
-                    setGpuStatus(StatusLight::Error, locText("Failed", "运行失败"));
+                    setGpuStatus(StatusLight::Error, onlyOpenGlRoutingFailures
+                        ? locText("OpenGL could not use the selected GPU on Windows.",
+                                  "Windows 上 OpenGL 无法使用所选 GPU。")
+                        : locText("Failed", "运行失败"));
                 }
                 else if (failedJobs > 0)
                 {
@@ -4911,15 +5390,32 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                                         "部分完成 —— 请查看错误输出"));
                     const auto ok = std::to_string(succeededJobs);
                     const auto failed = std::to_string(failedJobs);
-                    setGpuStatus(StatusLight::Error, i18n::currentLang() == i18n::Lang::Zh
-                        ? u8("完成 " + ok + " 项，失败 " + failed + " 项")
-                        : u8(ok + " completed; " + failed + " failed"));
+                    const auto skipped = std::to_string(skippedJobs.size());
+                    if (onlyOpenGlRoutingFailures)
+                        setGpuStatus(StatusLight::Error, i18n::currentLang() == i18n::Lang::Zh
+                            ? u8("完成 " + ok + " 项；OpenGL 无法使用所选 GPU")
+                            : u8(ok + " completed; OpenGL could not use the selected GPU"));
+                    else
+                        setGpuStatus(StatusLight::Error, i18n::currentLang() == i18n::Lang::Zh
+                            ? u8("完成 " + ok + " 项，失败 " + failed + " 项" +
+                                 (skippedJobs.empty() ? "" : "，跳过 " + skipped + " 项"))
+                            : u8(ok + " completed; " + failed + " failed" +
+                                 (skippedJobs.empty() ? "" : "; " + skipped + " skipped")));
                 }
                 else
                 {
                     showScoreOr(locText("Done — see output / History", "完成 —— 见输出/历史"));
                     if (postProcessFailed)
                         setGpuStatus(StatusLight::Error, u8("Benchmark done; " + postProcessStatus));
+                    else if (!skippedJobs.empty())
+                    {
+                        const auto ok = std::to_string(succeededJobs);
+                        const auto skipped = std::to_string(skippedJobs.size());
+                        setGpuStatus(StatusLight::Ready, i18n::currentLang() == i18n::Lang::Zh
+                            ? u8("完成 " + ok + " 项；" + skipped + " 个不支持的组合已跳过")
+                            : u8(ok + " completed; " + skipped +
+                                 " unsupported combinations skipped"));
+                    }
                     else
                         setGpuStatus(StatusLight::Ready, needCharts
                             ? locText("Done (charts & report regenerated)", "完成（已重新生成图表与报告）")
@@ -5067,45 +5563,50 @@ void MainWindow::OnRun(IInspectable const&, RoutedEventArgs const&)
     const bool workloadSelectable = preset == 1 || preset == 2 || preset == 3;
     const auto workload = selected(WorkloadBox());
     const bool gpuBurnWorkload = workload == "gpu_burn";
-    const auto burnIterText = to_string(ExtraBox().Text());
-    if (workloadSelectable && gpuBurnWorkload && !burnIterText.empty())
+    const auto burnIterText = burnStepValue();
+    if (workloadSelectable && gpuBurnWorkload)
     {
         bool valid = false;
         try {
             size_t used = 0;
             const int value = std::stoi(burnIterText, &used);
-            valid = used == burnIterText.size() && value >= 16 && value <= 32;
+            valid = used == burnIterText.size() && value >= 16 && value <= 2048;
         } catch (...) {}
         if (!valid)
         {
             ResultText().Text(locText(
-                "GPU Burn fixed steps must be an integer from 16 to 32. Leave it empty for safe per-device auto-tuning.",
-                "GPU Burn 固定步数必须是 16 到 32 的整数；留空会按设备安全自动标定。"));
+                "GPU Burn steps must be an integer from 16 to 2048.",
+                "GPU Burn 步数必须是 16 到 2048 的整数。"));
             setGpuStatus(StatusLight::Error, locText("GPU Burn settings need attention.",
                                                      "请检查 GPU Burn 设置。"));
             return;
         }
     }
-    if (workloadSelectable && gpuBurnWorkload &&
-        !isUnlimitedDuration() &&
-        durationUnitTag() == "frames" &&
-        burnIterText.empty())
-    {
-        ResultText().Text(locText(
-            "Auto-tuned GPU Burn requires a timed run. Select Seconds/Minutes/Hours, or enter a fixed step count for Frames.",
-            "自动标定的 GPU Burn 需要按时间运行。请选择秒/分钟/小时，或为按帧运行填写固定步数。"));
-        setGpuStatus(StatusLight::Error, locText("GPU Burn settings need attention.",
-                                                 "请检查 GPU Burn 设置。"));
-        return;
-    }
     bool needCharts = false;
-    auto jobs = buildPresetJobs(needCharts);
+    std::vector<std::string> skippedJobs;
+    auto jobs = buildPresetJobs(needCharts, skippedJobs);
     if (jobs.empty())
     {
-        setGpuStatus(StatusLight::Error, locText("No benchmark jobs were generated.", "没有生成任何测试任务。"));
+        m_lastScoreEn.clear();
+        m_lastScoreCacheHint = false;
+        m_lastSkippedJobs = skippedJobs;
+        m_lastGpuRunIssues.clear();
+        m_lastPostProcessFailed = false;
+        if (!skippedJobs.empty())
+        {
+            ResultText().Text(locText(
+                "No supported GPU / API combinations are available for this Full Analysis.",
+                "此完整分析没有可运行的 GPU / API 组合。"));
+            setGpuStatus(StatusLight::Error, locText(
+                "Nothing to run — all selected combinations are unsupported.",
+                "没有可运行项目——所选组合均不受支持。"));
+        }
+        else
+            setGpuStatus(StatusLight::Error, locText("No benchmark jobs were generated.", "没有生成任何测试任务。"));
+        updateResultHint();
         return;
     }
-    launchJobs(std::move(jobs), needCharts);
+    launchJobs(std::move(jobs), needCharts, std::move(skippedJobs));
 }
 
 void MainWindow::OnPresetChanged(IInspectable const&, SelectionChangedEventArgs const&)

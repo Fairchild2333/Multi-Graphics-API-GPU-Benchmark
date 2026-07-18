@@ -441,8 +441,8 @@ void PrintComparisonTable(const std::vector<BenchmarkResult>& results) {
         "==========================================================\n\n";
 
     // Scores from different workloads, algorithm versions, units or
-    // precisions are not comparable.  In particular, GPU Burn deliberately
-    // auto-tunes frame time, so an all-workload FPS ranking is misleading.
+    // precisions are not comparable. GPU Burn tiers use different fixed step
+    // counts, so an all-workload FPS ranking is misleading.
     std::map<std::string, std::vector<BenchmarkResult>> groups;
     for (const auto& r : results) {
         const std::string workload = r.workload.empty() ? "stream" : r.workload;
