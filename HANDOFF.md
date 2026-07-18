@@ -453,7 +453,7 @@ PathService 已把 results/captures/reports/logs 改到
 - [ ] 旧 `fluid` Vulkan 正确性与统一跨后端 workload registry 仍开放，但不再阻塞独立 Cinematic Liquid v1。
 - [x] 实际 MSI/ZIP 与动态 Vulkan loader 已完成构建/静态审计；显式 Vulkan 缺 loader 的异常路径也已加 guard。
 - [ ] 冻结 report worker、Authenticode signing、GT120 实卡与 clean-machine 安装/升级/卸载/抓帧验收仍开放（**项目 LICENSE 阻塞已解除**）。
-- [ ] **日语本地化（用户待办）**：WinUI 目前只有 Auto / English / 简体中文（`gui/i18n.h` 的 `tr(en, zh)` + `LangBox`）；需扩展 **日本語**（至少 GUI 全表文案、语言下拉、OS UI 自动探测 `LANG_JAPANESE`/`ja`）。安装器侧：WiX MSI 向导目前默认英文；若产品要日语安装体验，需另加 WiX 日语 UI/本地化字符串（Inno legacy 目前也只有 EN + 简体中文 `.isl`）。不改变成绩合同或内部 id，只做显示语言。
+- [x] **日语 GUI 本地化（2026-07-18 / 0.2.0）**：`gui/i18n.h` 扩展 `Lang::Ja`、`tr(en,zh,ja)`、`trDyn`、`usesYmdDate`、`detectOsLangLabel`；OS 自动探测 `LANG_JAPANESE`；设置页语言下拉增加「日本語」；`MainWindow.xaml.cpp` 全表 UI 文案含第三参日语。安装器 WiX 向导仍为英文（可选后续加日语 MSI UI）；Inno legacy 仍为 EN + 简体中文 `.isl`。成绩合同与内部 id 不变。
 
 ### 推荐下一个实现切片
 
@@ -582,7 +582,7 @@ PathService 已把 results/captures/reports/logs 改到
   - 对应 stage 的 `gpu_benchmark.exe` / `gpu_bench_gui.exe` PE 分别为 AMD64 / ARM64；`compiledBackends` 两边均为 vulkan/dx12/dx11/opengl=true。
 - **测项架构事实**：CPU 与 GPU 测试本体都是按包架构原生编译的两套二进制，不是同一套 x64 测项 + 两个安装壳。
 - **互动水池**：仍 Vulkan-only；曾试 DX12 后撤回。未接线 HLSL 草稿若提交须标明为移植草稿，不可宣称 DX12 liquid 可用。
-- **仍开放**：Authenticode、frozen report worker、干净机 MSI 安装/升级/卸载/抓帧、Windows 7 GUI 下一刀、**日语（日本語）GUI/安装器本地化**。
+- **仍开放**：Authenticode、frozen report worker、干净机 MSI 安装/升级/卸载/抓帧、Windows 7 GUI 下一刀；**日语 GUI 已在 0.2.0 完成**，WiX 安装向导日语 UI 仍可选。
 
 ### 2026-07-17 GPU Burn v2 固定负载合同（用户拍板）+ 0.1.2
 

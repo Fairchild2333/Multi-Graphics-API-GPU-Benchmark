@@ -123,8 +123,14 @@ namespace
         return wb;
     }
 
-    hstring locText(const char* en, const char* zh) { return winrt::to_hstring(i18n::tr(en, zh)); }
-    IInspectable locContent(const char* en, const char* zh) { return winrt::box_value(locText(en, zh)); }
+    hstring locText(const char* en, const char* zh, const char* ja = nullptr)
+    {
+        return winrt::to_hstring(i18n::tr(en, zh, ja));
+    }
+    IInspectable locContent(const char* en, const char* zh, const char* ja = nullptr)
+    {
+        return winrt::box_value(locText(en, zh, ja));
+    }
 
     // ComboBox disabled visuals barely dim selected text; force the theme
     // disabled brush onto the control and summary item while Detecting.
@@ -860,37 +866,37 @@ namespace
     {
         // CLI prints "VRAM rate:" (device-local) or "RAM rate:" (system memory).
         // Older builds used "Memory rate:" — treat those as VRAM for display.
-        auto replaceRate = [&](char const* from, char const* en, char const* zh) {
+        auto replaceRate = [&](char const* from, char const* en,
+                               char const* zh, char const* ja) {
             auto pos = line.find(from);
             if (pos != std::string::npos)
-                line.replace(pos, std::strlen(from),
-                             i18n::currentLang() == i18n::Lang::Zh ? zh : en);
+                line.replace(pos, std::strlen(from), i18n::tr(en, zh, ja));
         };
         // VRAM must be handled before RAM: "VRAM rate:" contains "RAM rate:"
         // as a substring, so the reverse order produced "V内存速率:".
-        replaceRate("VRAM rate:", "VRAM rate:", "显存速率:");
-        replaceRate("RAM rate:", "RAM rate:", "内存速率:");
-        replaceRate("Memory rate:", "VRAM rate:", "显存速率:");
-        if (i18n::currentLang() != i18n::Lang::Zh) return line;
-        struct Pair { char const* en; char const* zh; };
+        replaceRate("VRAM rate:", "VRAM rate:", "显存速率:", "VRAM レート:");
+        replaceRate("RAM rate:", "RAM rate:", "内存速率:", "RAM レート:");
+        replaceRate("Memory rate:", "VRAM rate:", "显存速率:", "VRAM レート:");
+        if (i18n::currentLang() == i18n::Lang::En) return line;
+        struct Pair { char const* en; char const* zh; char const* ja; };
         constexpr Pair pairs[] = {
-            { "Avg FPS:", "平均帧率:" },
-            { "Compute rate:", "计算速率:" },
-            { "Burn rate:", "Burn 速率:" },
-            { "Stress rate:", "压力速率:" },
-            { "Fill rate:", "填充速率:" },
-            { "Render rate:", "渲染速率:" },
-            { "Vol rate:", "体积速率:" },
-            { "Fluid rate:", "流体速率:" },
-            { "Liquid rate:", "液体速率:" },
-            { "Peak FP", "峰值 FP" },
-            { "Peak INT", "峰值 INT" },
+            { "Avg FPS:", "平均帧率:", "平均 FPS:" },
+            { "Compute rate:", "计算速率:", "コンピュートレート:" },
+            { "Burn rate:", "Burn 速率:", "Burn レート:" },
+            { "Stress rate:", "压力速率:", "ストレステート:" },
+            { "Fill rate:", "填充速率:", "フィルレート:" },
+            { "Render rate:", "渲染速率:", "レンダーレート:" },
+            { "Vol rate:", "体积速率:", "ボリュームレート:" },
+            { "Fluid rate:", "流体速率:", "流体レート:" },
+            { "Liquid rate:", "液体速率:", "液体レート:" },
+            { "Peak FP", "峰值 FP", "ピーク FP" },
+            { "Peak INT", "峰值 INT", "ピーク INT" },
         };
         for (auto const& p : pairs)
         {
             auto pos = line.find(p.en);
             if (pos != std::string::npos)
-                line.replace(pos, std::strlen(p.en), p.zh);
+                line.replace(pos, std::strlen(p.en), i18n::tr(p.en, p.zh, p.ja));
         }
         return line;
     }
@@ -1561,7 +1567,7 @@ namespace
     std::string localizeTimestamp(std::string const& ts)
     {
         if (ts.size() < 19) return ts;  // malformed, return as-is
-        if (i18n::currentLang() == i18n::Lang::Zh) return ts;  // 中文: 年-月-日 24h
+        if (i18n::usesYmdDate()) return ts;  // zh/ja: 年-月-日 24h
 
         // Parse "YYYY-MM-DD HH:MM:SS"
         int Y = 0, M = 0, D = 0, h = 0, m = 0, s = 0;
@@ -1613,21 +1619,21 @@ namespace
 
     std::string workloadLabel(std::string const& id)
     {
-        if (id == "stream")     return i18n::tr("Particle — Memory Throughput", "粒子 —— 内存吞吐");
+        if (id == "stream")     return i18n::tr("Particle — Memory Throughput", "粒子 —— 内存吞吐", "パーティクル — メモリスループット");
         if (id == "headless_compute")
-            return i18n::tr("Headless Compute — Particle", "Headless 计算 —— 粒子");
-        if (id == "gpu_burn")   return i18n::tr("Plasma x Kaleidoscope — GPU Burn", "等离子晶核 × 万花镜 —— GPU Burn");
-        if (id == "gpu_stress") return i18n::tr("GraphicsBurn v1 / Component (Advanced)", "GraphicsBurn v1 / 分项（高级）");
-        if (id == "nbody")      return i18n::tr("N-Body — Advanced Compute", "N-Body —— 高级计算");
-        if (id == "synthpeak")  return i18n::tr("SynthPeak — Advanced Synthetic", "SynthPeak —— 高级合成测试");
-        if (id == "stress")     return i18n::tr("Legacy Stress v1 — Fragment ALU/SFU", "旧版压力测试 v1 —— 片元 ALU/SFU");
-        if (id == "render3d")   return i18n::tr("Legacy 3D Prototype — Billboards", "旧版 3D 原型 —— Billboard");
-        if (id == "volumetric") return i18n::tr("Volumetric — Experimental Raymarch", "体积渲染 —— 实验性 Raymarch");
-        if (id == "cinematic_liquid") return i18n::tr("Fluid — Interactive Pool", "流体 —— 互动水池");
-        if (id == "cinematic_liquid_v1") return i18n::tr("Legacy Cinematic Liquid v1 — Dam Break", "旧版电影化液体 v1 —— 溃坝");
-        if (id == "fluid")      return i18n::tr("Other / Legacy 2D Fluid", "其他 / 旧版 2D 流体");
-        if (id == "cpu_single_core") return i18n::tr("CPU — Per-core", "CPU —— 逐核");
-        if (id == "cpu_multi_core")  return i18n::tr("CPU — All-core", "CPU —— 多核");
+            return i18n::tr("Headless Compute — Particle", "Headless 计算 —— 粒子", "Headless コンピュート — パーティクル");
+        if (id == "gpu_burn")   return i18n::tr("Plasma x Kaleidoscope — GPU Burn", "等离子晶核 × 万花镜 —— GPU Burn", "プラズマ核 × カレイドスコープ — GPU Burn");
+        if (id == "gpu_stress") return i18n::tr("GraphicsBurn v1 / Component (Advanced)", "GraphicsBurn v1 / 分项（高级）", "GraphicsBurn v1 / 分項（上級）");
+        if (id == "nbody")      return i18n::tr("N-Body — Advanced Compute", "N-Body —— 高级计算", "N-Body — 上級コンピュート");
+        if (id == "synthpeak")  return i18n::tr("SynthPeak — Advanced Synthetic", "SynthPeak —— 高级合成测试", "SynthPeak — 上級合成テスト");
+        if (id == "stress")     return i18n::tr("Legacy Stress v1 — Fragment ALU/SFU", "旧版压力测试 v1 —— 片元 ALU/SFU", "旧版ストレステスト v1 — フラグメント ALU/SFU");
+        if (id == "render3d")   return i18n::tr("Legacy 3D Prototype — Billboards", "旧版 3D 原型 —— Billboard", "旧版 3D プロトタイプ — Billboard");
+        if (id == "volumetric") return i18n::tr("Volumetric — Experimental Raymarch", "体积渲染 —— 实验性 Raymarch", "ボリューム — 実験的レイマーチ");
+        if (id == "cinematic_liquid") return i18n::tr("Fluid — Interactive Pool", "流体 —— 互动水池", "流体 — インタラクティブプール");
+        if (id == "cinematic_liquid_v1") return i18n::tr("Legacy Cinematic Liquid v1 — Dam Break", "旧版电影化液体 v1 —— 溃坝", "旧版シネマティック液体 v1 — ダムブレイク");
+        if (id == "fluid")      return i18n::tr("Other / Legacy 2D Fluid", "其他 / 旧版 2D 流体", "その他 / 旧版 2D 流体");
+        if (id == "cpu_single_core") return i18n::tr("CPU — Per-core", "CPU —— 逐核", "CPU — コア別");
+        if (id == "cpu_multi_core")  return i18n::tr("CPU — All-core", "CPU —— 多核", "CPU — 全コア");
         return id;
     }
 
@@ -1681,8 +1687,8 @@ namespace
 
     std::string burnStepsLabel(std::string const& steps)
     {
-        if (steps.empty()) return i18n::tr("(unknown)", "（未知）");
-        return steps + i18n::tr(" steps", " 步");
+        if (steps.empty()) return i18n::tr("(unknown)", "（未知）", "（不明）");
+        return steps + i18n::tr(" steps", " 步", " ステップ");
     }
 
     // Older stream rows often stored vramMB=0; reuse a known value for the same GPU.
@@ -1756,7 +1762,7 @@ namespace
             result.workloadVersion == "cinematic_liquid_v1")
             return workloadLabel("cinematic_liquid_v1");
         if (result.workload == "fluid")
-            return i18n::tr("Legacy 2D Fluid — unverified", "旧版 2D 流体 —— 未验证");
+            return i18n::tr("Legacy 2D Fluid — unverified", "旧版 2D 流体 —— 未验证", "旧版 2D 流体 — 未検証");
         if (result.headless)
             label += " [headless]";
         if (result.workload != "gpu_burn") return label;
@@ -1767,7 +1773,7 @@ namespace
         auto end = result.workloadConfig.find(';', pos);
         auto steps = result.workloadConfig.substr(pos, end - pos);
         if (!steps.empty())
-            label += " [" + steps + i18n::tr(" steps]", " 步]");
+            label += " [" + steps + i18n::tr(" steps]", " 步]", " ステップ]");
         return label;
     }
 
@@ -2453,16 +2459,17 @@ void MainWindow::updateResultHint()
     if (!m_lastSkippedJobs.empty())
     {
         const auto count = std::to_string(m_lastSkippedJobs.size());
-        hstring section = i18n::currentLang() == i18n::Lang::Zh
-            ? u8("有 " + count + " 个组合因设备未报告支持而未运行（这不是测试失败）：")
-            : u8(count + " unsupported combinations were not run (these are not test failures):");
+        hstring section = u8(i18n::trDyn(
+            count + " unsupported combinations were not run (these are not test failures):",
+            "有 " + count + " 个组合因设备未报告支持而未运行（这不是测试失败）：",
+            count + " 件の未サポート組み合わせは実行されませんでした（テスト失敗ではありません）："));
         for (auto const& job : m_lastSkippedJobs)
             section = section + L"\n\u2022 " + u8(job);
         appendSection(section);
     }
     if (!m_lastGpuRunIssues.empty())
     {
-        hstring section = locText("Run issues:", "运行问题：");
+        hstring section = locText("Run issues:", "运行问题：", "実行時の問題：");
         for (auto const& issue : m_lastGpuRunIssues)
         {
             hstring message;
@@ -2471,70 +2478,70 @@ void MainWindow::updateResultHint()
             case GpuRunIssueKind::UnsupportedGpuApi:
                 message = locText(
                     "The selected GPU/API combination was not reported as supported by the driver.",
-                    "驱动未报告支持所选的 GPU/API 组合。");
+                    "驱动未报告支持所选的 GPU/API 组合。", "ドライバーが選択した GPU/API の組み合わせをサポート対象として報告していません。");
                 break;
             case GpuRunIssueKind::OpenGlRouting:
                 message = locText(
                     "Windows OpenGL cannot directly switch the WGL renderer to the selected GPU; Windows/the display driver assigned a different renderer. This applies only to this renderer mismatch.",
-                    "Windows OpenGL 无法直接把 WGL renderer 切换到所选 GPU；Windows/显示驱动分配了另一渲染器。此说明只适用于本次 renderer 不匹配。");
+                    "Windows OpenGL 无法直接把 WGL renderer 切换到所选 GPU；Windows/显示驱动分配了另一渲染器。此说明只适用于本次 renderer 不匹配。", "Windows OpenGL は WGL レンダラーを選択 GPU に直接切り替えられません。Windows / ディスプレイドライバーが別のレンダラーを割り当てました。この説明は今回のレンダラー不一致にのみ当てはまります。");
                 break;
             case GpuRunIssueKind::ApiUnavailable:
                 message = locText(
                     "The graphics API or requested adapter could not be initialised.",
-                    "图形 API 或所请求的设备无法初始化。");
+                    "图形 API 或所请求的设备无法初始化。", "グラフィックス API または要求されたアダプターを初期化できませんでした。");
                 break;
             case GpuRunIssueKind::VulkanRuntimeMissing:
                 message = locText(
                     "The Vulkan runtime is missing; install/update the display driver or select DirectX.",
-                    "缺少 Vulkan Runtime；请安装/更新显示驱动，或改用 DirectX。");
+                    "缺少 Vulkan Runtime；请安装/更新显示驱动，或改用 DirectX。", "Vulkan Runtime がありません。ディスプレイドライバーをインストール/更新するか、DirectX を選択してください。");
                 break;
             case GpuRunIssueKind::OpenGlVersion:
                 message = locText(
                     "The active OpenGL renderer does not provide the required OpenGL 4.3 features.",
-                    "当前 OpenGL renderer 不提供测试所需的 OpenGL 4.3 功能。");
+                    "当前 OpenGL renderer 不提供测试所需的 OpenGL 4.3 功能。", "現在の OpenGL レンダラーはテストに必要な OpenGL 4.3 機能を提供しません。");
                 break;
             case GpuRunIssueKind::WorkloadUnsupported:
                 message = locText(
                     "This workload or requested feature is not supported by the selected API/device.",
-                    "所选 API/设备不支持该测试项目或请求的功能。");
+                    "所选 API/设备不支持该测试项目或请求的功能。", "選択した API/デバイスはこのワークロードまたは要求機能をサポートしていません。");
                 break;
             case GpuRunIssueKind::WorkerTimeout:
                 message = locText(
                     "The benchmark exceeded its safety timeout and the worker was stopped.",
-                    "测试超过安全超时时间，worker 已停止。");
+                    "测试超过安全超时时间，worker 已停止。", "ベンチマークが安全タイムアウトを超え、ワーカーを停止しました。");
                 break;
             case GpuRunIssueKind::DeviceLost:
                 message = locText(
                     "The GPU device/driver was lost or reset during the run; restart the app and check driver or stability issues.",
-                    "运行期间 GPU 设备丢失或驱动重置；请重启程序，并检查驱动或稳定性问题。");
+                    "运行期间 GPU 设备丢失或驱动重置；请重启程序，并检查驱动或稳定性问题。", "実行中に GPU デバイス/ドライバーが消失またはリセットされました。アプリを再起動し、ドライバーや安定性を確認してください。");
                 break;
             case GpuRunIssueKind::ShaderPipeline:
                 message = locText(
                     "Shader compilation, program linking, or graphics/compute pipeline creation failed.",
-                    "Shader 编译、程序链接或图形/计算管线创建失败。");
+                    "Shader 编译、程序链接或图形/计算管线创建失败。", "シェーダーコンパイル、プログラムリンク、またはグラフィックス/コンピュートパイプラインの作成に失敗しました。");
                 break;
             case GpuRunIssueKind::SwapchainOutOfDate:
                 message = locText(
                     "The render surface became out of date, usually after a resize or display change; run the fixed-size test again.",
-                    "渲染表面已失效，通常由调整窗口或显示配置变化引起；请重新运行固定尺寸测试。");
+                    "渲染表面已失效，通常由调整窗口或显示配置变化引起；请重新运行固定尺寸测试。", "レンダーサーフェスが無効になりました（ウィンドウサイズや表示設定の変更が原因のことが多いです）。固定サイズで再実行してください。");
                 break;
             case GpuRunIssueKind::ResourceAllocation:
                 message = locText(
                     "GPU memory/resource allocation failed; reduce the workload or close other GPU-heavy applications.",
-                    "GPU 内存或资源分配失败；请降低负载或关闭其他占用 GPU 的程序。");
+                    "GPU 内存或资源分配失败；请降低负载或关闭其他占用 GPU 的程序。", "GPU メモリ/リソースの割り当てに失敗しました。負荷を下げるか、他の GPU 利用アプリを閉じてください。");
                 break;
             case GpuRunIssueKind::BurnStepsClamped:
                 message = locText(
                     "GPU Burn steps were clamped to the software-device safety cap (32) "
                     "to avoid watchdog resets; the score uses the clamped step count.",
                     "GPU Burn 步数已被钳制到软件设备的安全上限（32 步），以避免触发"
-                    "系统看门狗；成绩按钳制后的步数计算。");
+                    "系统看门狗；成绩按钳制后的步数计算。", "ウォッチドッグ再起動を避けるため、GPU Burn のステップ数はソフトウェアデバイスの安全上限（32）に制限されました。スコアは制限後のステップ数で計算されます。");
                 break;
             case GpuRunIssueKind::Unknown:
             default:
                 message = locText(
                     "The worker exited unexpectedly; expand Raw CLI output for the original error.",
-                    "Worker 意外退出；请展开 Raw CLI output 查看原始错误。");
+                    "Worker 意外退出；请展开 Raw CLI output 查看原始错误。", "ワーカーが予期せず終了しました。元のエラーは Raw CLI 出力を展開して確認してください。");
                 break;
             }
             section = section + L"\n\u2022 " + message;
@@ -2546,7 +2553,7 @@ void MainWindow::updateResultHint()
     {
         appendSection(locText(
             "Post-processing did not finish: benchmark scores may still be valid, but RenderDoc conversion, charts, or report generation failed. See Raw CLI output.",
-            "后处理未完成：测试成绩可能仍然有效，但 RenderDoc 转换、图表或报告生成失败；请查看 Raw CLI output。"));
+            "后处理未完成：测试成绩可能仍然有效，但 RenderDoc 转换、图表或报告生成失败；请查看 Raw CLI output。", "後処理が完了しませんでした。ベンチマークスコアは有効な場合がありますが、RenderDoc 変換、チャート、またはレポート生成に失敗しました。Raw CLI 出力を確認してください。"));
     }
     if (hostMem)
     {
@@ -2559,7 +2566,7 @@ void MainWindow::updateResultHint()
             "系统内存模式：GPU 经 PCIe 以逐粒子的小块读写直接访问系统内存，"
             "每次访问都要承担完整的 PCIe 往返延迟，且无法被 GPU 缓存，"
             "因此速率受延迟而非带宽限制——通常只有 PCIe 链路带宽的百分之几，"
-            "远低于 PCIe 和内存的带宽上限；成绩比显存模式低很多属正常现象。");
+            "远低于 PCIe 和内存的带宽上限；成绩比显存模式低很多属正常现象。", "システムメモリモード：GPU は PCIe 経由でパーティクルごとの小さなトランザクションとしてシステム RAM を直接読み書きします。各アクセスは PCIe 往復レイテンシを払い、GPU キャッシュを迂回するため、速度はレイテンシ律速です——通常は PCIe リンク帯域の数パーセントに過ぎず、PCIe や RAM の上限を大きく下回ります。VRAM モードより大幅に低いスコアは想定どおりです。");
         appendSection(hostText);
     }
     if (cacheHint)
@@ -2573,7 +2580,7 @@ void MainWindow::updateResultHint()
             "工作集较小（不足 128 MB）：可能整个驻留在 GPU 的 L2 缓存中，"
             "此时速率是缓存带宽与每次调度开销的混合值——可能超过显存理论带宽、"
             "又远低于真实 L2 带宽，两者都不代表。"
-            "要测真实显存带宽，请选择重载（4M）及以上的粒子档。");
+            "要测真实显存带宽，请选择重载（4M）及以上的粒子档。", "作業セットが小さい（128 MB 未満）：GPU の L2 キャッシュに全体が収まることがあり、この速度はキャッシュ帯域とディスパッチごとのオーバーヘッドの混成です——理論 VRAM 帯域を超えても実際の L2 帯域には遠く及ばず、どちらも代表しません。実 VRAM 測定には Heavy（4M）以上のパーティクルを選んでください。");
         appendSection(cacheText);
     }
     if (!text.empty()) ResultHint().Text(text);
@@ -2704,91 +2711,92 @@ void MainWindow::OnLangChanged(IInspectable const&, SelectionChangedEventArgs co
     int idx = LangBox().SelectedIndex();
     if (idx == 1)      i18n::initLang("en");
     else if (idx == 2) i18n::initLang("zh");
-    else               i18n::initLang(nullptr);
+    else if (idx == 3) i18n::initLang("ja");
+    else               i18n::initLang(nullptr);  // Auto
     applyLanguage();
 }
 
 // ---- localization ----------------------------------------------------------
 void MainWindow::applyLanguage()
 {
-    NavCpu().Content(locContent("CPU", "CPU"));
-    CpuTitle().Text(locText("CPU Benchmark", "CPU 测试"));
+    NavCpu().Content(locContent("CPU", "CPU", "CPU"));
+    CpuTitle().Text(locText("CPU Benchmark", "CPU 测试", "CPU ベンチマーク"));
     CpuNameText().Text(u8(m_cpuName));
     CpuInfo().Message(locText(
         "Measures CPU compute throughput with dense math loops on logical processors (single-core and multi-core).",
-        "测 CPU 算力：用密集运算循环压测逻辑核心，对比单核与多核吞吐。"));
-    CpuModeBox().Header(locContent("Test mode", "测试模式"));
-    CpuModePerCore().Content(locContent("Each logical processor", "逐个逻辑处理器"));
-    CpuModeMulti().Content(locContent("All cores together", "全部核心并行"));
-    CpuModeAll().Content(locContent("Per-core + all-core", "逐核 + 多核"));
-    CpuDurationPresetBox().Header(locContent("Duration preset", "时长预设"));
-    CpuDurationQuick().Content(locContent("Quick (1 s)", "快速（1 秒）"));
-    CpuDurationFormal().Content(locContent("Formal (15 s)", "正式（15 秒）"));
-    CpuTimeBox().Header(locContent("Seconds per test", "每项测试秒数"));
-    CpuWarmupBox().Header(locContent("Warm-up seconds", "预热秒数"));
+        "测 CPU 算力：用密集运算循环压测逻辑核心，对比单核与多核吞吐。", "論理プロセッサ上の高密度演算ループで CPU 計算スループットを測定します（シングルコアとマルチコア）。"));
+    CpuModeBox().Header(locContent("Test mode", "测试模式", "テストモード"));
+    CpuModePerCore().Content(locContent("Each logical processor", "逐个逻辑处理器", "各論理プロセッサ"));
+    CpuModeMulti().Content(locContent("All cores together", "全部核心并行", "全コア同時"));
+    CpuModeAll().Content(locContent("Per-core + all-core", "逐核 + 多核", "コア別 + 全コア"));
+    CpuDurationPresetBox().Header(locContent("Duration preset", "时长预设", "時間プリセット"));
+    CpuDurationQuick().Content(locContent("Quick (1 s)", "快速（1 秒）", "クイック（1 秒）"));
+    CpuDurationFormal().Content(locContent("Formal (15 s)", "正式（15 秒）", "正式（15 秒）"));
+    CpuTimeBox().Header(locContent("Seconds per test", "每项测试秒数", "テストごとの秒数"));
+    CpuWarmupBox().Header(locContent("Warm-up seconds", "预热秒数", "ウォームアップ秒数"));
     CpuDurationHint().Text(locText(
         "Per-core duration is applied separately to every logical processor; the formal preset can take a long time.",
-        "该时长会分别应用到每个逻辑处理器；正式逐核测试可能需要较长时间。"));
-    CpuPerCoreTitle().Text(locText("Per-logical-processor results", "逐逻辑处理器成绩"));
-    CpuSummaryTitle().Text(locText("Summary", "汇总"));
-    GpuSummaryTitle().Text(locText("Summary", "汇总"));
-    CpuAverageLabel().Text(locText("Per-core average", "逐核平均"));
-    CpuMultiLabel().Text(locText("All-core result", "多核成绩"));
-    CpuOutputExpander().Header(locContent("Raw CLI output (live tail)", "原始 CLI 输出（实时尾部）"));
-    CpuCancelButton().Content(locContent("Cancel", "取消"));
-    CpuRunButton().Content(locContent("Run CPU Benchmark", "开始 CPU 测试"));
+        "该时长会分别应用到每个逻辑处理器；正式逐核测试可能需要较长时间。", "コア別時間は各論理プロセッサに個別適用されます。正式プリセットは長時間かかることがあります。"));
+    CpuPerCoreTitle().Text(locText("Per-logical-processor results", "逐逻辑处理器成绩", "論理プロセッサ別の結果"));
+    CpuSummaryTitle().Text(locText("Summary", "汇总", "サマリー"));
+    GpuSummaryTitle().Text(locText("Summary", "汇总", "サマリー"));
+    CpuAverageLabel().Text(locText("Per-core average", "逐核平均", "コア別平均"));
+    CpuMultiLabel().Text(locText("All-core result", "多核成绩", "全コア結果"));
+    CpuOutputExpander().Header(locContent("Raw CLI output (live tail)", "原始 CLI 输出（实时尾部）", "生 CLI 出力（ライブ末尾）"));
+    CpuCancelButton().Content(locContent("Cancel", "取消", "キャンセル"));
+    CpuRunButton().Content(locContent("Run CPU Benchmark", "开始 CPU 测试", "CPU ベンチマークを実行"));
     if (!m_cpuRunning.load())
-        setCpuStatus(StatusLight::Ready, locText("Ready", "就绪"));
+        setCpuStatus(StatusLight::Ready, locText("Ready", "就绪", "準備完了"));
 
-    GpuOutputExpander().Header(locContent("Raw CLI output", "原始 CLI 输出"));
+    GpuOutputExpander().Header(locContent("Raw CLI output", "原始 CLI 输出", "生 CLI 出力"));
 
-    NavRun().Content(locContent("GPU", "GPU"));
-    NavHistory().Content(locContent("History", "历史"));
-    NavCharts().Content(locContent("Charts", "图表"));
-    NavSettings().Content(locContent("Settings", "设置"));
-    NavAbout().Content(locContent("About", "关于"));
+    NavRun().Content(locContent("GPU", "GPU", "GPU"));
+    NavHistory().Content(locContent("History", "历史", "履歴"));
+    NavCharts().Content(locContent("Charts", "图表", "チャート"));
+    NavSettings().Content(locContent("Settings", "设置", "設定"));
+    NavAbout().Content(locContent("About", "关于", "バージョン情報"));
 
-    RunTitle().Text(locText("GPU Benchmark", "GPU 测试"));
-    PresetBox().Header(locContent("Preset", "预设"));
+    RunTitle().Text(locText("GPU Benchmark", "GPU 测试", "GPU ベンチマーク"));
+    PresetBox().Header(locContent("Preset", "预设", "プリセット"));
     PresetQuick().Content(locContent("Quick run (best API / GPU, Medium)",
-                                     "快速运行（最佳 API / GPU，中等）"));
+                                     "快速运行（最佳 API / GPU，中等）", "クイック実行（最適 API / GPU、Medium）"));
     PresetCustom().Content(locContent("Custom run (choose API / GPU / workload)",
-                                      "自定义运行（选择 API / GPU / 测试项目）"));
+                                      "自定义运行（选择 API / GPU / 测试项目）", "カスタム実行（API / GPU / ワークロードを選択）"));
     PresetFullOne().Content(locContent("Full analysis — selected workload / one GPU (selected APIs + optional RenderDoc + charts)",
-                                       "完整分析 —— 所选测试 / 单 GPU（所选 API + 可选 RenderDoc + 图表）"));
+                                       "完整分析 —— 所选测试 / 单 GPU（所选 API + 可选 RenderDoc + 图表）", "完全分析 — 選択ワークロード / 単一 GPU（選択 API + 任意で RenderDoc + チャート）"));
     PresetFullAll().Content(locContent("Full analysis — selected workload / all GPUs × selected APIs (optional RenderDoc + charts)",
-                                       "完整分析 —— 所选测试 / 全部 GPU × 所选 API（可选 RenderDoc + 图表）"));
+                                       "完整分析 —— 所选测试 / 全部 GPU × 所选 API（可选 RenderDoc + 图表）", "完全分析 — 選択ワークロード / 全 GPU × 選択 API（任意で RenderDoc + チャート）"));
     PresetFlights().Content(locContent("Flights test — one GPU (selected APIs, custom flights)",
-                                       "Flights 测试 —— 单 GPU（所选 API，自定义 flights）"));
+                                       "Flights 测试 —— 单 GPU（所选 API，自定义 flights）", "Flights テスト — 単一 GPU（選択 API、カスタム flights）"));
     PresetParticles().Content(locContent("Particle test — one GPU (selected APIs, custom particles)",
-                                         "粒子测试 —— 单 GPU（所选 API，自定义粒子数）"));
+                                         "粒子测试 —— 单 GPU（所选 API，自定义粒子数）", "パーティクルテスト — 単一 GPU（選択 API、カスタム粒子数）"));
     PresetHeadless().Content(locContent("Headless compute — one GPU (selected APIs, pure compute)",
-                                        "Headless 计算 —— 单 GPU（所选 API，纯计算）"));
-    GpuHeader().Text(locText("GPU / Renderer", "GPU / 渲染器"));
-    ApiPickerHeader().Text(locText("Graphics API", "图形 API"));
+                                        "Headless 计算 —— 单 GPU（所选 API，纯计算）", "Headless コンピュート — 単一 GPU（選択 API、純計算）"));
+    GpuHeader().Text(locText("GPU / Renderer", "GPU / 渲染器", "GPU / レンダラー"));
+    ApiPickerHeader().Text(locText("Graphics API", "图形 API", "グラフィックス API"));
     Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
-        ApiPickerBox(), locText("Graphics API", "图形 API"));
-    SelectAllRunApis().Content(locContent("Select all", "全选"));
-    ClearAllRunApis().Content(locContent("Select none", "全不选"));
-    SupportedApisLabel().Text(locText("Supported", "支持"));
-    UnsupportedApisLabel().Text(locText("Not reported as supported", "未报告支持"));
+        ApiPickerBox(), locText("Graphics API", "图形 API", "グラフィックス API"));
+    SelectAllRunApis().Content(locContent("Select all", "全选", "すべて選択"));
+    ClearAllRunApis().Content(locContent("Select none", "全不选", "すべて解除"));
+    SupportedApisLabel().Text(locText("Supported", "支持", "サポート"));
+    UnsupportedApisLabel().Text(locText("Not reported as supported", "未报告支持", "サポート未報告"));
     Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
-        SupportedApisGroup(), locText("Supported APIs", "支持的 API"));
+        SupportedApisGroup(), locText("Supported APIs", "支持的 API", "サポートされる API"));
     Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
-        UnsupportedApisGroup(), locText("Unsupported APIs", "不支持的 API"));
+        UnsupportedApisGroup(), locText("Unsupported APIs", "不支持的 API", "サポートされない API"));
     UnsupportedApisHint().Text(locText(
         "Unsupported selections remain available and will be reported by the CLI.",
-        "不支持的 API 仍可勾选；运行后由 CLI 返回明确错误。"));
-    WorkloadHeader().Text(locText("Workload", "测试项目"));
+        "不支持的 API 仍可勾选；运行后由 CLI 返回明确错误。", "未サポートの API も選択できます。実行後に CLI が明確なエラーを返します。"));
+    WorkloadHeader().Text(locText("Workload", "测试项目", "ワークロード"));
     WorkloadStream().Content(locContent("Particle — Memory Throughput",
-                                        "粒子 —— 内存吞吐"));
+                                        "粒子 —— 内存吞吐", "パーティクル — メモリスループット"));
     WorkloadGpuBurn().Content(locContent("Plasma x Kaleidoscope — GPU Burn",
-                                          "等离子晶核 × 万花镜 —— GPU Burn"));
+                                          "等离子晶核 × 万花镜 —— GPU Burn", "プラズマ核 × カレイドスコープ — GPU Burn"));
     WorkloadCinematicLiquid().Content(locContent("Fluid — Interactive Pool",
-                                                  "流体 —— 互动水池"));
+                                                  "流体 —— 互动水池", "流体 — インタラクティブプール"));
     WorkloadCinematicLiquid().Tag(box_value(hstring(L"cinematic_liquid")));
     WorkloadCinematicLiquidV1().Content(locContent("Other / Legacy Cinematic Liquid v1 — Dam Break",
-                                                    "其他 / 旧版电影化液体 v1 —— 溃坝"));
+                                                    "其他 / 旧版电影化液体 v1 —— 溃坝", "その他 / 旧版シネマティック液体 v1 — ダムブレイク"));
     WorkloadCinematicLiquidV1().Tag(box_value(hstring(L"cinematic_liquid_v1")));
     WorkloadStream().Tag(box_value(hstring(L"stream")));
     WorkloadGpuBurn().Tag(box_value(hstring(L"gpu_burn")));
@@ -2800,53 +2808,53 @@ void MainWindow::applyLanguage()
     WorkloadVolumetric().Tag(box_value(hstring(L"volumetric")));
     WorkloadFluid().Tag(box_value(hstring(L"fluid")));
     WorkloadGpuStress().Content(locContent("GraphicsBurn v1 / Component (Advanced)",
-                                           "GraphicsBurn v1 / 分项（高级）"));
+                                           "GraphicsBurn v1 / 分项（高级）", "GraphicsBurn v1 / 分項（上級）"));
     WorkloadNBody().Content(locContent("N-Body — Advanced Compute",
-                                       "N-Body —— 高级计算"));
+                                       "N-Body —— 高级计算", "N-Body — 上級コンピュート"));
     WorkloadSynthPeak().Content(locContent("SynthPeak — Advanced Synthetic",
-                                           "SynthPeak —— 高级合成测试"));
+                                           "SynthPeak —— 高级合成测试", "SynthPeak — 上級合成テスト"));
     WorkloadStress().Content(locContent("Legacy Stress v1 — Fragment ALU/SFU",
-                                        "旧版压力测试 v1 —— 片元 ALU/SFU"));
+                                        "旧版压力测试 v1 —— 片元 ALU/SFU", "旧版ストレステスト v1 — フラグメント ALU/SFU"));
     WorkloadRender3D().Content(locContent("Legacy 3D Prototype — Billboards",
-                                          "旧版 3D 原型 —— Billboard"));
+                                          "旧版 3D 原型 —— Billboard", "旧版 3D プロトタイプ — Billboard"));
     WorkloadVolumetric().Content(locContent("Volumetric — Experimental Raymarch",
-                                             "体积渲染 —— 实验性 Raymarch"));
+                                             "体积渲染 —— 实验性 Raymarch", "ボリューム — 実験的レイマーチ"));
     WorkloadFluid().Content(locContent("Other / Legacy 2D Fluid",
-                                        "其他 / 旧版 2D 流体"));
+                                        "其他 / 旧版 2D 流体", "その他 / 旧版 2D 流体"));
     ShowLegacyBox().Content(locContent("Show legacy & advanced tests",
-                                       "显示旧版 / 高级测试"));
-    PrecisionHeader().Text(locText("Precision", "精度"));
-    PrecisionFp32().Content(locContent("fp32 — standard float", "fp32 —— 标准浮点"));
-    PrecisionFp16().Content(locContent("fp16 — half precision", "fp16 —— 半精度"));
-    PrecisionFp64().Content(locContent("fp64 — double precision", "fp64 —— 双精度"));
-    PrecisionInt32().Content(locContent("int32 — integer ops", "int32 —— 整数运算"));
-    DurationUnitBox().Header(locContent("Duration", "运行时长"));
-    DurationSeconds().Content(locContent("Seconds", "秒"));
-    DurationMinutes().Content(locContent("Minutes", "分钟"));
-    DurationHours().Content(locContent("Hours", "小时"));
-    DurationFrames().Content(locContent("Frames", "帧数"));
-    DurationUnlimited().Content(locContent("Until Cancel", "直到取消"));
-    DurationValueBox().Header(locContent("Value", "数值"));
-    ParticlePresetBox().Header(locContent("Particles", "粒子数"));
-    ParticlesLight().Content(locContent("Light — 65K", "轻量 —— 65K"));
-    ParticlesMedium().Content(locContent("Medium — 1M", "中等 —— 1M"));
-    ParticlesHeavy().Content(locContent("Heavy — 4M", "重载 —— 4M"));
-    ParticlesExtreme().Content(locContent("Extreme — 16M", "极限 —— 16M"));
-    ParticlesCustom().Content(locContent("Custom…", "自定义…"));
-    CustomParticleBox().Header(locContent("Custom particles", "自定义粒子数"));
-    CustomParticleBox().PlaceholderText(locText("multiple of 256", "256 的倍数"));
-    AdvancedLabel().Text(locText("Advanced", "高级选项"));
+                                       "显示旧版 / 高级测试", "旧版 / 上級テストを表示"));
+    PrecisionHeader().Text(locText("Precision", "精度", "精度"));
+    PrecisionFp32().Content(locContent("fp32 — standard float", "fp32 —— 标准浮点", "fp32 — 標準浮動小数点"));
+    PrecisionFp16().Content(locContent("fp16 — half precision", "fp16 —— 半精度", "fp16 — 半精度"));
+    PrecisionFp64().Content(locContent("fp64 — double precision", "fp64 —— 双精度", "fp64 — 倍精度"));
+    PrecisionInt32().Content(locContent("int32 — integer ops", "int32 —— 整数运算", "int32 — 整数演算"));
+    DurationUnitBox().Header(locContent("Duration", "运行时长", "実行時間"));
+    DurationSeconds().Content(locContent("Seconds", "秒", "秒"));
+    DurationMinutes().Content(locContent("Minutes", "分钟", "分"));
+    DurationHours().Content(locContent("Hours", "小时", "時間"));
+    DurationFrames().Content(locContent("Frames", "帧数", "フレーム"));
+    DurationUnlimited().Content(locContent("Until Cancel", "直到取消", "キャンセルまで"));
+    DurationValueBox().Header(locContent("Value", "数值", "値"));
+    ParticlePresetBox().Header(locContent("Particles", "粒子数", "パーティクル数"));
+    ParticlesLight().Content(locContent("Light — 65K", "轻量 —— 65K", "Light — 65K"));
+    ParticlesMedium().Content(locContent("Medium — 1M", "中等 —— 1M", "Medium — 1M"));
+    ParticlesHeavy().Content(locContent("Heavy — 4M", "重载 —— 4M", "Heavy — 4M"));
+    ParticlesExtreme().Content(locContent("Extreme — 16M", "极限 —— 16M", "Extreme — 16M"));
+    ParticlesCustom().Content(locContent("Custom…", "自定义…", "カスタム…"));
+    CustomParticleBox().Header(locContent("Custom particles", "自定义粒子数", "カスタムパーティクル数"));
+    CustomParticleBox().PlaceholderText(locText("multiple of 256", "256 的倍数", "256 の倍数"));
+    AdvancedLabel().Text(locText("Advanced", "高级选项", "詳細オプション"));
     HeadlessBox().Content(box_value(hstring(L"Headless")));
     auto headlessTip = locContent(
         "Pure compute mode: no swapchain, no rendering, no present. "
         "Useful for measuring raw compute throughput. Available in Custom and "
         "Full Analysis for compute-capable workloads; enabling it turns off RenderDoc capture.",
         "纯计算模式：无交换链、无渲染、无 present。用于测量原始计算吞吐。"
-        "支持纯计算的测试可在自定义和完整分析中启用；启用后会关闭 RenderDoc 抓帧。");
+        "支持纯计算的测试可在自定义和完整分析中启用；启用后会关闭 RenderDoc 抓帧。", "純計算モード：スワップチェーン・描画・present なし。生のコンピュートスループット測定向け。コンピュート可能なワークロードではカスタム/完全分析で利用でき、有効化すると RenderDoc キャプチャはオフになります。");
     ToolTipService::SetToolTip(HeadlessBox(), headlessTip);
     ToolTipService::SetToolTip(HeadlessInfo(), headlessTip);
-    VsyncBox().Content(locContent("V-Sync", "垂直同步"));
-    HostMemBox().Content(locContent("System memory", "系统内存"));
+    VsyncBox().Content(locContent("V-Sync", "垂直同步", "垂直同期"));
+    HostMemBox().Content(locContent("System memory", "系统内存", "システムメモリ"));
     auto hostMemTip = locContent(
         "Keep the particle buffer in system RAM instead of VRAM. This reproduces the "
         "access path a real game hits when VRAM overflows and resources are demoted "
@@ -2858,18 +2866,18 @@ void MainWindow::applyLanguage()
         "把粒子缓冲放在系统内存而非显存。这复现了真实游戏爆显存、资源被降级到系统内存后的"
         "访问路径——能反映这种故障形态，但不完全等同于游戏管线（游戏还会用 DMA 大块流送、"
         "并优先把热点资源留在显存）。速率受 PCIe 延迟限制，并非内存 / PCIe 带宽测试。"
-        "仅 Vulkan 和 OpenGL 支持 —— DirectX 会回退到显存并输出警告。");
+        "仅 Vulkan 和 OpenGL 支持 —— DirectX 会回退到显存并输出警告。", "パーティクルバッファを VRAM ではなくシステム RAM に置きます。VRAM 溢れでリソースがシステムメモリへ退避したときにゲームが辿るアクセス経路を再現します——その障害形態を代表しますが、完全なゲームパイプラインとは同一ではありません（ゲームは大きな DMA でストリーミングし、ホットなリソースを常駐させます）。速度は PCIe レイテンシ律速であり、RAM/PCIe 帯域の測定ではありません。Vulkan と OpenGL のみ——DirectX は警告付きで VRAM にフォールバックします。");
     ToolTipService::SetToolTip(HostMemBox(), hostMemTip);
     ToolTipService::SetToolTip(HostMemInfo(), hostMemTip);
-    RenderDocBox().Content(locContent("RenderDoc", "RenderDoc"));
-    CaptureBox().Content(locContent("Capture at", "捕获于"));
+    RenderDocBox().Content(locContent("RenderDoc", "RenderDoc", "RenderDoc"));
+    CaptureBox().Content(locContent("Capture at", "捕获于", "キャプチャ位置"));
     auto renderDocTip = locContent(
         "RenderDoc is a free graphics debugger for inspecting GPU frames "
         "(draw calls, pipelines, resources, and shaders) from Vulkan, D3D, and OpenGL. "
         "Turn this off to prevent the worker from loading RenderDoc and to disable manual F12 capture.",
         "RenderDoc 是免费的图形调试器，用于抓取并检查 GPU 帧内容"
         "（绘制调用、管线、资源与着色器等），支持 Vulkan / D3D / OpenGL。"
-        "关闭此主开关后，worker 不会加载 RenderDoc，手动 F12 抓帧也会停用。");
+        "关闭此主开关后，worker 不会加载 RenderDoc，手动 F12 抓帧也会停用。", "RenderDoc は Vulkan / D3D / OpenGL の GPU フレーム（ドローコール、パイプライン、リソース、シェーダーなど）を検査する無料のグラフィックスデバッガーです。オフにするとワーカーは RenderDoc を読み込まず、手動 F12 キャプチャも無効になります。");
     ToolTipService::SetToolTip(RenderDocInfo(), renderDocTip);
     ToolTipService::SetToolTip(RenderDocBox(), renderDocTip);
     auto captureTip = locContent(
@@ -2877,89 +2885,89 @@ void MainWindow::applyLanguage()
         "runs no later than one second before the test ends and is unavailable "
         "for runs of one second or less.",
         "启用 RenderDoc 捕获可能会影响成绩并增加开销。自动抓帧最晚发生在测试"
-        "结束前 1 秒；测试时长不超过 1 秒时不可用。");
+        "结束前 1 秒；测试时长不超过 1 秒时不可用。", "RenderDoc キャプチャはスコア低下やオーバーヘッドの原因になります。自動キャプチャは終了の 1 秒前までに行われ、1 秒以下の実行では利用できません。");
     ToolTipService::SetToolTip(CaptureInfo(), captureTip);
     ToolTipService::SetToolTip(CaptureBox(), captureTip);
     syncCaptureControls();
-    RunButton().Content(locContent("Run GPU Benchmark", "开始 GPU 测试"));
-    GpuCancelButton().Content(locContent("Cancel", "取消"));
+    RunButton().Content(locContent("Run GPU Benchmark", "开始 GPU 测试", "GPU ベンチマークを実行"));
+    GpuCancelButton().Content(locContent("Cancel", "取消", "キャンセル"));
     if (m_activeTask.load() != ActiveTask::GpuBenchmark)
-        setGpuStatus(StatusLight::Ready, locText("Ready", "就绪"));
+        setGpuStatus(StatusLight::Ready, locText("Ready", "就绪", "準備完了"));
 
-    HistoryTitle().Text(locText("History", "历史"));
-    RefreshButton().Content(locContent("Refresh", "刷新"));
-    DeleteButton().Content(locContent("Delete selected", "删除所选"));
-    OpenResultsFolderButton().Content(locContent("Open results folder", "打开成绩目录"));
-    OpenCapturesFolderButton().Content(locContent("Open captures folder", "打开抓帧目录"));
-    GpuOpenResultsButton().Content(locContent("Open results folder", "打开成绩目录"));
-    GpuOpenCapturesButton().Content(locContent("Open RenderDoc captures", "打开 RenderDoc 抓帧目录"));
-    SortBox().Header(locContent("Sort by", "排序"));
-    SortTime().Content(locContent("Time (newest)", "时间（最新）"));
-    SortScore().Content(locContent("Score (high→low)", "分数（高→低）"));
-    SortApi().Content(locContent("Graphics API", "图形 API"));
-    SortDevice().Content(locContent("GPU / Renderer", "GPU / 渲染器"));
-    SortWorkload().Content(locContent("Workload", "测试项目"));
-    WorkloadFilterBox().Header(locContent("Workload", "测试项目"));
-    WorkloadFilterAll().Content(locContent("All workloads", "全部项目"));
-    ParticleFilterBox().Header(locContent("Particles", "粒子数"));
-    ParticleFilterAll().Content(locContent("All particle counts", "全部粒子数"));
-    StepsFilterLabel().Text(locText("Steps", "步数"));
-    SelectAllSteps().Content(locContent("All", "全选"));
-    ClearAllSteps().Content(locContent("None", "清空"));
-    TimeRangeBox().Header(locContent("Time range", "时间范围"));
-    RangeAll().Content(locContent("All", "全部"));
-    RangeToday().Content(locContent("Today", "今天"));
-    Range7().Content(locContent("Last 7 days", "近 7 天"));
-    Range30().Content(locContent("Last 30 days", "近 30 天"));
-    RangeCustom().Content(locContent("Custom range…", "自定义范围…"));
-    FromDate().Header(locContent("From", "起始"));
-    ToDate().Header(locContent("To", "结束"));
-    FromDate().PlaceholderText(locText("select a date", "选择日期"));
-    ToDate().PlaceholderText(locText("select a date", "选择日期"));
-    FromDate().DateFormat(i18n::currentLang() == i18n::Lang::Zh
+    HistoryTitle().Text(locText("History", "历史", "履歴"));
+    RefreshButton().Content(locContent("Refresh", "刷新", "更新"));
+    DeleteButton().Content(locContent("Delete selected", "删除所选", "選択を削除"));
+    OpenResultsFolderButton().Content(locContent("Open results folder", "打开成绩目录", "結果フォルダーを開く"));
+    OpenCapturesFolderButton().Content(locContent("Open captures folder", "打开抓帧目录", "キャプチャフォルダーを開く"));
+    GpuOpenResultsButton().Content(locContent("Open results folder", "打开成绩目录", "結果フォルダーを開く"));
+    GpuOpenCapturesButton().Content(locContent("Open RenderDoc captures", "打开 RenderDoc 抓帧目录", "RenderDoc キャプチャを開く"));
+    SortBox().Header(locContent("Sort by", "排序", "並び替え"));
+    SortTime().Content(locContent("Time (newest)", "时间（最新）", "時刻（新しい順）"));
+    SortScore().Content(locContent("Score (high→low)", "分数（高→低）", "スコア（高い順）"));
+    SortApi().Content(locContent("Graphics API", "图形 API", "グラフィックス API"));
+    SortDevice().Content(locContent("GPU / Renderer", "GPU / 渲染器", "GPU / レンダラー"));
+    SortWorkload().Content(locContent("Workload", "测试项目", "ワークロード"));
+    WorkloadFilterBox().Header(locContent("Workload", "测试项目", "ワークロード"));
+    WorkloadFilterAll().Content(locContent("All workloads", "全部项目", "すべてのワークロード"));
+    ParticleFilterBox().Header(locContent("Particles", "粒子数", "パーティクル数"));
+    ParticleFilterAll().Content(locContent("All particle counts", "全部粒子数", "すべてのパーティクル数"));
+    StepsFilterLabel().Text(locText("Steps", "步数", "ステップ数"));
+    SelectAllSteps().Content(locContent("All", "全选", "すべて"));
+    ClearAllSteps().Content(locContent("None", "清空", "なし"));
+    TimeRangeBox().Header(locContent("Time range", "时间范围", "期間"));
+    RangeAll().Content(locContent("All", "全部", "すべて"));
+    RangeToday().Content(locContent("Today", "今天", "今日"));
+    Range7().Content(locContent("Last 7 days", "近 7 天", "過去 7 日"));
+    Range30().Content(locContent("Last 30 days", "近 30 天", "過去 30 日"));
+    RangeCustom().Content(locContent("Custom range…", "自定义范围…", "カスタム期間…"));
+    FromDate().Header(locContent("From", "起始", "開始"));
+    ToDate().Header(locContent("To", "结束", "終了"));
+    FromDate().PlaceholderText(locText("select a date", "选择日期", "日付を選択"));
+    ToDate().PlaceholderText(locText("select a date", "选择日期", "日付を選択"));
+    FromDate().DateFormat(i18n::usesYmdDate()
         ? hstring(L"{year.full}-{month.integer(2)}-{day.integer(2)}")
         : hstring(L"{day.integer(2)}/{month.integer(2)}/{year.full}"));
-    ToDate().DateFormat(i18n::currentLang() == i18n::Lang::Zh
+    ToDate().DateFormat(i18n::usesYmdDate()
         ? hstring(L"{year.full}-{month.integer(2)}-{day.integer(2)}")
         : hstring(L"{day.integer(2)}/{month.integer(2)}/{year.full}"));
     GpuFilterLabel().Text(m_historyCategory == HistoryCategory::Cpu
-        ? locText("CPUs", "处理器")
-        : locText("GPUs", "显卡"));
-    SelectAllGpus().Content(locContent("All", "全选"));
-    ClearAllGpus().Content(locContent("None", "清空"));
-    HistoryGpuTab().Text(locText("GPU", "GPU"));
-    HistoryCpuTab().Text(locText("CPU", "CPU"));
-    HistoryLegacyBox().Content(locContent("Show legacy tests", "显示旧版测试"));
-    HistoryHeadlessBox().Content(locContent("Show headless", "显示 headless"));
-    ChartsTitle().Text(locText("Charts", "图表"));
-    GenChartsButton().Content(locContent("Generate Charts", "生成图表"));
+        ? locText("CPUs", "处理器", "プロセッサ")
+        : locText("GPUs", "显卡", "GPU"));
+    SelectAllGpus().Content(locContent("All", "全选", "すべて"));
+    ClearAllGpus().Content(locContent("None", "清空", "なし"));
+    HistoryGpuTab().Text(locText("GPU", "GPU", "GPU"));
+    HistoryCpuTab().Text(locText("CPU", "CPU", "CPU"));
+    HistoryLegacyBox().Content(locContent("Show legacy tests", "显示旧版测试", "旧版テストを表示"));
+    HistoryHeadlessBox().Content(locContent("Show headless", "显示 headless", "Headless を表示"));
+    ChartsTitle().Text(locText("Charts", "图表", "チャート"));
+    GenChartsButton().Content(locContent("Generate Charts", "生成图表", "チャートを生成"));
 
-    SettingsTitle().Text(locText("Settings", "设置"));
-    ThemeBox().Header(locContent("Theme", "主题"));
-    ThemeSystem().Content(locContent("Use system setting", "跟随系统"));
-    ThemeLight().Content(locContent("Light", "浅色"));
-    ThemeDark().Content(locContent("Dark", "深色"));
-    LangBox().Header(locContent("Language", "语言"));
-    AboutTitle().Text(locText("About", "关于"));
+    SettingsTitle().Text(locText("Settings", "设置", "設定"));
+    ThemeBox().Header(locContent("Theme", "主题", "テーマ"));
+    ThemeSystem().Content(locContent("Use system setting", "跟随系统", "システム設定に従う"));
+    ThemeLight().Content(locContent("Light", "浅色", "ライト"));
+    ThemeDark().Content(locContent("Dark", "深色", "ダーク"));
+    LangBox().Header(locContent("Language", "语言", "言語"));
+    AboutTitle().Text(locText("About", "关于", "バージョン情報"));
     AboutDesc().Text(locText("Cross-API CPU & GPU Benchmark Suite — native C++/WinRT frontend.",
-                             "跨 API CPU 与 GPU 测试套件 —— 原生 C++/WinRT 前端。"));
+                             "跨 API CPU 与 GPU 测试套件 —— 原生 C++/WinRT 前端。", "クロス API の CPU / GPU ベンチマークスイート — ネイティブ C++/WinRT フロントエンド。"));
     refreshAboutVersion();
 
     {
-        const wchar_t* sys = (i18n::detectOsLang() == i18n::Lang::Zh) ? L"中文" : L"English";
-        std::wstring label = std::wstring(locText("Auto", "自动").c_str()) + L" (" + sys + L")";
+        const wchar_t* sys = i18n::detectOsLangLabel();
+        std::wstring label = std::wstring(locText("Auto", "自动", "自動").c_str()) + L" (" + sys + L")";
         LangAuto().Content(winrt::box_value(hstring(label)));
     }
 
     m_suppressCombo = true;
     auto refreshCombo = [](ComboBox const& cb) { int s = cb.SelectedIndex(); cb.SelectedIndex(-1); cb.SelectedIndex(s); };
-    BurnStepPresetBox().Header(locContent("GPU Burn steps", "GPU Burn 步数"));
-    BurnStepsLight().Content(locContent("Light — 16", "轻量 — 16"));
-    BurnStepsMedium().Content(locContent("Medium — 64", "中等 — 64"));
-    BurnStepsHeavy().Content(locContent("Heavy — 256", "重载 — 256"));
-    BurnStepsCustom().Content(locContent("Custom…", "自定义…"));
-    BurnCustomStepBox().Header(locContent("Custom steps", "自定义步数"));
-    BurnCustomStepBox().PlaceholderText(locText("16–2048", "16–2048"));
+    BurnStepPresetBox().Header(locContent("GPU Burn steps", "GPU Burn 步数", "GPU Burn ステップ数"));
+    BurnStepsLight().Content(locContent("Light — 16", "轻量 — 16", "Light — 16"));
+    BurnStepsMedium().Content(locContent("Medium — 64", "中等 — 64", "Medium — 64"));
+    BurnStepsHeavy().Content(locContent("Heavy — 256", "重载 — 256", "Heavy — 256"));
+    BurnStepsCustom().Content(locContent("Custom…", "自定义…", "カスタム…"));
+    BurnCustomStepBox().Header(locContent("Custom steps", "自定义步数", "カスタムステップ数"));
+    BurnCustomStepBox().PlaceholderText(locText("16–2048", "16–2048", "16–2048"));
 
     refreshCombo(ThemeBox());
     refreshCombo(LangBox());
@@ -2978,7 +2986,7 @@ void MainWindow::applyLanguage()
     if (GpuBox().Items().Size() > 0)
     {
         if (auto autoItem = GpuBox().Items().GetAt(0).try_as<ComboBoxItem>())
-            autoItem.Content(locContent("(auto)", "（自动）"));
+            autoItem.Content(locContent("(auto)", "（自动）", "（自動）"));
         // Force closed caption refresh after Content change (same ComboBox cache).
         const int gpuSel = GpuBox().SelectedIndex();
         GpuBox().SelectedIndex(-1);
@@ -3081,13 +3089,14 @@ void MainWindow::setCpuStatus(StatusLight kind, hstring const& text)
 
 hstring MainWindow::gpuRunningStatusText() const
 {
-    if (m_gpuProgressJobs == 0) return locText("Running…", "运行中…");
+    if (m_gpuProgressJobs == 0) return locText("Running…", "运行中…", "実行中…");
     const auto progress = std::to_string(m_gpuProgressJobIndex + 1) + "/" +
                           std::to_string(m_gpuProgressJobs);
     const std::string api = m_gpuProgressApiLabel.empty() ? "?" : m_gpuProgressApiLabel;
-    return i18n::currentLang() == i18n::Lang::Zh
-        ? u8("运行中… (" + progress + "：" + api + ")")
-        : u8("Running… (" + progress + ": " + api + ")");
+    return u8(i18n::trDyn(
+        "Running… (" + progress + ": " + api + ")",
+        "运行中… (" + progress + "：" + api + ")",
+        "実行中… (" + progress + "：" + api + ")"));
 }
 
 void MainWindow::refreshActiveGpuStatusLanguage()
@@ -3095,7 +3104,7 @@ void MainWindow::refreshActiveGpuStatusLanguage()
     if (m_activeTask.load() != ActiveTask::GpuBenchmark) return;
     if (m_gpuCancelRequested.load())
     {
-        const auto text = locText("Cancelling...", "正在取消…");
+        const auto text = locText("Cancelling...", "正在取消…", "キャンセル中…");
         setGpuStatus(StatusLight::Running, text);
         GpuStageText().Text(text);
         return;
@@ -3197,7 +3206,7 @@ void MainWindow::OnCpuRun(IInspectable const&, RoutedEventArgs const&)
     {
         setCpuStatus(StatusLight::Error, locText(
             "Enter a valid duration and warm-up time.",
-            "请输入有效的测试时长和预热时间。"));
+            "请输入有效的测试时长和预热时间。", "有効な実行時間とウォームアップ時間を入力してください。"));
         return;
     }
 
@@ -3208,7 +3217,7 @@ void MainWindow::OnCpuRun(IInspectable const&, RoutedEventArgs const&)
     {
         setCpuStatus(StatusLight::Error, locText(
             "gpu_benchmark.exe was not found beside the GUI or in the build directory.",
-            "未在 GUI 同目录或构建目录中找到 gpu_benchmark.exe。"));
+            "未在 GUI 同目录或构建目录中找到 gpu_benchmark.exe。", "GUI と同じ場所またはビルドディレクトリに gpu_benchmark.exe が見つかりません。"));
         return;
     }
 
@@ -3234,7 +3243,7 @@ void MainWindow::cancelGpuBenchmark()
     try
     {
         GpuCancelButton().IsEnabled(false);
-        setGpuStatus(StatusLight::Running, locText("Cancelling...", "正在取消…"));
+        setGpuStatus(StatusLight::Running, locText("Cancelling...", "正在取消…", "キャンセル中…"));
     }
     catch (...) {}
 }
@@ -3341,8 +3350,8 @@ void MainWindow::cancelCpuBenchmark()
     if (!m_cpuRunning.load()) return;
     m_cpuCancelRequested.store(true);
     CpuCancelButton().IsEnabled(false);
-    setCpuStatus(StatusLight::Running, locText("Cancelling...", "正在取消…"));
-    CpuCurrentCoreText().Text(locText("Stopping the CPU worker", "正在停止 CPU 测试进程"));
+    setCpuStatus(StatusLight::Running, locText("Cancelling...", "正在取消…", "キャンセル中…"));
+    CpuCurrentCoreText().Text(locText("Stopping the CPU worker", "正在停止 CPU 测试进程", "CPU ワーカーを停止しています"));
 
     std::lock_guard<std::mutex> lock(m_cpuProcessMutex);
     if (m_cpuProcess) ::TerminateProcess(m_cpuProcess, ERROR_CANCELLED);
@@ -3355,7 +3364,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
     {
         setCpuStatus(StatusLight::Error, locText(
             "Another benchmark or report task is already running.",
-            "另一个测试或报告任务正在运行。"));
+            "另一个测试或报告任务正在运行。", "別のベンチマークまたはレポートタスクが既に実行中です。"));
         return;
     }
     m_cpuRunning.store(true);
@@ -3370,8 +3379,8 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
     CpuProgressBar().Value(0.0);
     CpuProgressText().Text(L"0%");
     setTaskbarProgress(true, 0.0);
-    CpuCurrentCoreText().Text(locText("Starting CPU worker...", "正在启动 CPU 测试进程…"));
-    setCpuStatus(StatusLight::Running, locText("Running", "运行中"));
+    CpuCurrentCoreText().Text(locText("Starting CPU worker...", "正在启动 CPU 测试进程…", "CPU ワーカーを起動しています…"));
+    setCpuStatus(StatusLight::Running, locText("Running", "运行中", "実行中"));
     CpuCancelButton().IsEnabled(true);
     CpuModeBox().IsEnabled(false);
     CpuDurationPresetBox().IsEnabled(false);
@@ -3411,8 +3420,8 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
 
                 if (cancelled)
                 {
-                    setCpuStatus(StatusLight::Ready, locText("Cancelled", "已取消"));
-                    CpuCurrentCoreText().Text(locText("Benchmark cancelled", "CPU 测试已取消"));
+                    setCpuStatus(StatusLight::Ready, locText("Cancelled", "已取消", "キャンセル済み"));
+                    CpuCurrentCoreText().Text(locText("Benchmark cancelled", "CPU 测试已取消", "ベンチマークはキャンセルされました"));
                     return;
                 }
                 if (exitCode != 0 || !errorMessage.empty() || m_cpuHadProtocolError)
@@ -3425,15 +3434,15 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                         output += L"\r\n";
                         CpuOutputBox().Text(output);
                     }
-                    setCpuStatus(StatusLight::Error, locText("Failed; see raw output", "失败；请查看原始输出"));
-                    CpuCurrentCoreText().Text(locText("CPU benchmark failed", "CPU 测试失败"));
+                    setCpuStatus(StatusLight::Error, locText("Failed; see raw output", "失败；请查看原始输出", "失敗；生出力を確認してください"));
+                    CpuCurrentCoreText().Text(locText("CPU benchmark failed", "CPU 测试失败", "CPU ベンチマーク失敗"));
                     return;
                 }
 
                 CpuProgressBar().Value(100.0);
                 CpuProgressText().Text(L"100%");
-                setCpuStatus(StatusLight::Ready, locText("Done", "完成"));
-                CpuCurrentCoreText().Text(locText("CPU benchmark completed", "CPU 测试完成"));
+                setCpuStatus(StatusLight::Ready, locText("Done", "完成", "完了"));
+                CpuCurrentCoreText().Text(locText("CPU benchmark completed", "CPU 测试完成", "CPU ベンチマーク完了"));
             });
         };
 
@@ -3587,13 +3596,13 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                     const auto phase = cpuField(parsed, { "phase" });
                     const int core = cpuInteger(parsed, { "core_index" }).value_or(-1);
                     hstring phaseText = phase == "warmup"
-                        ? locText("warming up", "预热")
+                        ? locText("warming up", "预热", "ウォームアップ")
                         : phase == "measure"
-                            ? locText("measuring", "测量")
-                            : locText("finishing", "收尾");
+                            ? locText("measuring", "测量", "測定中")
+                            : locText("finishing", "收尾", "終了処理");
                     if (modeName == "multi" || core < 0)
                     {
-                        std::wstring status = locText("All-core", "多核").c_str();
+                        std::wstring status = locText("All-core", "多核", "全コア").c_str();
                         status += L" · "; status += phaseText.c_str();
                         CpuCurrentCoreText().Text(status);
                     }
@@ -3615,7 +3624,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                     auto message = cpuField(parsed, { "message", "error" });
                     std::replace(message.begin(), message.end(), '_', ' ');
                     setCpuStatus(StatusLight::Error, message.empty()
-                        ? locText("CPU engine error", "CPU 引擎错误") : u8(message));
+                        ? locText("CPU engine error", "CPU 引擎错误", "CPU エンジンエラー") : u8(message));
                     return;
                 }
 
@@ -3750,10 +3759,10 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
               CpuDurationPresetBox().IsEnabled(true);
               CpuTimeBox().IsEnabled(true);
               CpuWarmupBox().IsEnabled(true);
-              setCpuStatus(StatusLight::Error, locText("Failed", "运行失败"));
+              setCpuStatus(StatusLight::Error, locText("Failed", "运行失败", "失敗"));
               CpuCurrentCoreText().Text(locText(
                   "CPU worker failed with an unexpected exception.",
-                  "CPU 工作线程发生意外异常。"));
+                  "CPU 工作线程发生意外异常。", "CPU ワーカーで予期しない例外が発生しました。"));
           });
       }
     }).detach();
@@ -3815,24 +3824,24 @@ void MainWindow::updateExtraLabel()
     ExtraBox().Visibility(showExtra ? Visibility::Visible : Visibility::Collapsed);
     FluidJacobiBox().Visibility(fluidWorkload ? Visibility::Visible : Visibility::Collapsed);
 
-    if (flightsTest)             ExtraBox().Header(locContent("Flights (--flights)", "Flights (--flights)"));
-    else if (wl == "nbody")      ExtraBox().Header(locContent("Bodies (--bodies)", "天体数 (--bodies)"));
-    else if (wl == "gpu_stress") ExtraBox().Header(locContent("Iterations (--iter)", "迭代次数 (--iter)"));
-    else if (wl == "stress")     ExtraBox().Header(locContent("Iterations (--iter)", "迭代次数 (--iter)"));
-    else if (wl == "synthpeak")  ExtraBox().Header(locContent("Iterations (--iter)", "迭代次数 (--iter)"));
-    else if (wl == "volumetric") ExtraBox().Header(locContent("Ray steps (--steps)", "光线步数 (--steps)"));
-    else if (wl == "fluid")      ExtraBox().Header(locContent("Grid size (--grid)", "网格尺寸 (--grid)"));
-    else                          ExtraBox().Header(locContent("Extra", "额外参数"));
+    if (flightsTest)             ExtraBox().Header(locContent("Flights (--flights)", "Flights (--flights)", "Flights (--flights)"));
+    else if (wl == "nbody")      ExtraBox().Header(locContent("Bodies (--bodies)", "天体数 (--bodies)", "ボディ数 (--bodies)"));
+    else if (wl == "gpu_stress") ExtraBox().Header(locContent("Iterations (--iter)", "迭代次数 (--iter)", "反復回数 (--iter)"));
+    else if (wl == "stress")     ExtraBox().Header(locContent("Iterations (--iter)", "迭代次数 (--iter)", "反復回数 (--iter)"));
+    else if (wl == "synthpeak")  ExtraBox().Header(locContent("Iterations (--iter)", "迭代次数 (--iter)", "反復回数 (--iter)"));
+    else if (wl == "volumetric") ExtraBox().Header(locContent("Ray steps (--steps)", "光线步数 (--steps)", "レイステップ (--steps)"));
+    else if (wl == "fluid")      ExtraBox().Header(locContent("Grid size (--grid)", "网格尺寸 (--grid)", "グリッドサイズ (--grid)"));
+    else                          ExtraBox().Header(locContent("Extra", "额外参数", "追加パラメータ"));
 
     ExtraBox().PlaceholderText(wl == "nbody"
-        ? locText("default 65536; DX11 FL10/SM4: max 4096", "默认 65536；DX11 FL10/SM4：最多 4096")
+        ? locText("default 65536; DX11 FL10/SM4: max 4096", "默认 65536；DX11 FL10/SM4：最多 4096", "既定 65536；DX11 FL10/SM4：最大 4096")
         : wl == "volumetric"
-        ? locText("optional; default 96", "可选；默认 96")
+        ? locText("optional; default 96", "可选；默认 96", "任意；既定 96")
         : wl == "fluid"
-        ? locText("optional; default 256", "可选；默认 256")
-        : locText("optional", "可选"));
-    FluidJacobiBox().Header(locContent("Jacobi iterations (--jacobi)", "Jacobi 迭代次数 (--jacobi)"));
-    FluidJacobiBox().PlaceholderText(locText("optional; default 30", "可选；默认 30"));
+        ? locText("optional; default 256", "可选；默认 256", "任意；既定 256")
+        : locText("optional", "可选", "任意"));
+    FluidJacobiBox().Header(locContent("Jacobi iterations (--jacobi)", "Jacobi 迭代次数 (--jacobi)", "Jacobi 反復 (--jacobi)"));
+    FluidJacobiBox().PlaceholderText(locText("optional; default 30", "可选；默认 30", "任意；既定 30"));
 
     updateDurationValueEnabled();
 
@@ -3840,81 +3849,81 @@ void MainWindow::updateExtraLabel()
     WorkloadInfo().Severity(InfoBarSeverity::Informational);
     if (infoWl == "stream")
     {
-        WorkloadInfo().Title(locText("Particle", "粒子"));
+        WorkloadInfo().Title(locText("Particle", "粒子", "パーティクル"));
         WorkloadInfo().Message(locText(
             "Moves many particles each frame to measure GPU memory / bandwidth throughput.",
-            "每帧移动大量粒子，主要衡量 GPU 显存带宽与内存吞吐。"));
+            "每帧移动大量粒子，主要衡量 GPU 显存带宽与内存吞吐。", "毎フレーム大量のパーティクルを動かし、GPU メモリ / 帯域スループットを測ります。"));
     }
     else if (infoWl == "gpu_burn")
     {
-        WorkloadInfo().Title(locText("Plasma x Kaleidoscope", "等离子晶核 × 万花镜"));
+        WorkloadInfo().Title(locText("Plasma x Kaleidoscope", "等离子晶核 × 万花镜", "プラズマ核 × カレイドスコープ"));
         WorkloadInfo().Message(locText(
             "Choose a fixed per-frame load: Light 16, Medium 64, Heavy 256, or Custom 16–2048. No automatic tuning is used.",
-            "请选择固定的每帧负载：轻量 16、中等 64、重载 256，或自定义 16–2048；不会自动调节。"));
+            "请选择固定的每帧负载：轻量 16、中等 64、重载 256，或自定义 16–2048；不会自动调节。", "フレームごとの固定負荷を選択：Light 16、Medium 64、Heavy 256、またはカスタム 16–2048。自動調整は行いません。"));
     }
     else if (infoWl == "cinematic_liquid")
     {
-        WorkloadInfo().Title(locText("Fluid", "流体"));
+        WorkloadInfo().Title(locText("Fluid", "流体", "流体"));
         WorkloadInfo().Message(locText(
             "Simulates and renders a 3D liquid scene with solid objects (Vulkan only).",
-            "模拟并渲染带固体的 3D 液体场景（目前仅支持 Vulkan）。"));
+            "模拟并渲染带固体的 3D 液体场景（目前仅支持 Vulkan）。", "固体を含む 3D 液体シーンをシミュレートして描画します（Vulkan のみ）。"));
     }
     else if (infoWl == "cinematic_liquid_v1")
     {
-        WorkloadInfo().Title(locText("Legacy Fluid v1", "旧版流体 v1"));
+        WorkloadInfo().Title(locText("Legacy Fluid v1", "旧版流体 v1", "旧版流体 v1"));
         WorkloadInfo().Message(locText(
             "Older dam-break liquid scene, kept for comparison with earlier results.",
-            "旧版溃坝液体场景，用于和历史成绩对比。"));
+            "旧版溃坝液体场景，用于和历史成绩对比。", "旧版ダムブレイク液体シーン。過去の結果との比較用に残しています。"));
     }
     else if (infoWl == "gpu_stress")
     {
-        WorkloadInfo().Title(locText("GraphicsBurn Component", "GraphicsBurn 分项"));
+        WorkloadInfo().Title(locText("GraphicsBurn Component", "GraphicsBurn 分项", "GraphicsBurn 分項"));
         WorkloadInfo().Message(locText(
             "Breaks graphics load into smaller parts for deeper diagnosis.",
-            "把图形负载拆成更小分项，便于深入诊断瓶颈。"));
+            "把图形负载拆成更小分项，便于深入诊断瓶颈。", "グラフィックス負荷を細分化し、ボトルネック診断を容易にします。"));
     }
     else if (infoWl == "nbody")
     {
-        WorkloadInfo().Title(locText("N-Body", "N-Body"));
+        WorkloadInfo().Title(locText("N-Body", "N-Body", "N-Body"));
         WorkloadInfo().Message(locText(
             "Computes gravity between many particles to measure GPU compute throughput.",
-            "计算大量粒子间的引力相互作用，衡量 GPU 计算吞吐。"));
+            "计算大量粒子间的引力相互作用，衡量 GPU 计算吞吐。", "多数の粒子間重力を計算し、GPU コンピュートスループットを測ります。"));
     }
     else if (infoWl == "synthpeak")
     {
-        WorkloadInfo().Title(locText("SynthPeak", "SynthPeak"));
+        WorkloadInfo().Title(locText("SynthPeak", "SynthPeak", "SynthPeak"));
         WorkloadInfo().Message(locText(
             "Runs synthetic math loops to estimate peak ALU throughput.",
-            "跑合成运算循环，估算峰值 ALU 吞吐。"));
+            "跑合成运算循环，估算峰值 ALU 吞吐。", "合成演算ループを実行し、ピーク ALU スループットを推定します。"));
     }
     else if (infoWl == "stress")
     {
-        WorkloadInfo().Title(locText("Legacy Stress", "旧版压力测试"));
+        WorkloadInfo().Title(locText("Legacy Stress", "旧版压力测试", "旧版ストレステスト"));
         WorkloadInfo().Message(locText(
             "Fragment-shader math stress test from an earlier prototype.",
-            "早期片元着色器运算压力测试原型。"));
+            "早期片元着色器运算压力测试原型。", "初期プロトタイプのフラグメントシェーダー演算ストレステスト。"));
     }
     else if (infoWl == "render3d")
     {
-        WorkloadInfo().Title(locText("Legacy 3D", "旧版 3D"));
+        WorkloadInfo().Title(locText("Legacy 3D", "旧版 3D", "旧版 3D"));
         WorkloadInfo().Message(locText(
             "Draws many billboard sprites to measure simple 3D draw throughput.",
-            "绘制大量 Billboard 精灵，衡量简单 3D 绘制吞吐。"));
+            "绘制大量 Billboard 精灵，衡量简单 3D 绘制吞吐。", "多数の Billboard スプライトを描画し、単純な 3D 描画スループットを測ります。"));
     }
     else if (infoWl == "volumetric")
     {
-        WorkloadInfo().Title(locText("Volumetric", "体积渲染"));
+        WorkloadInfo().Title(locText("Volumetric", "体积渲染", "ボリューム"));
         WorkloadInfo().Message(locText(
             "Raymarches a procedural volume field to stress fill-rate and shader cost.",
-            "对程序化体积场做光线步进，压测填充率与着色器开销。"));
+            "对程序化体积场做光线步进，压测填充率与着色器开销。", "手続き的ボリューム場をレイマーチし、フィルレートとシェーダー負荷をかけます。"));
     }
     else if (infoWl == "fluid")
     {
         WorkloadInfo().Severity(InfoBarSeverity::Warning);
-        WorkloadInfo().Title(locText("Legacy 2D Fluid", "旧版 2D 流体"));
+        WorkloadInfo().Title(locText("Legacy 2D Fluid", "旧版 2D 流体", "旧版 2D 流体"));
         WorkloadInfo().Message(locText(
             "Old 2D fluid simulation (Vulkan / DX12 / DX11 / OpenGL); mainly for reference, not a primary score.",
-            "旧版 2D 流体模拟（Vulkan / DX12 / DX11 / OpenGL），主要作参考，不是主成绩项。"));
+            "旧版 2D 流体模拟（Vulkan / DX12 / DX11 / OpenGL），主要作参考，不是主成绩项。", "旧版 2D 流体シミュレーション（Vulkan / DX12 / DX11 / OpenGL）。主に参考用で、主要スコアではありません。"));
     }
 }
 
@@ -3936,19 +3945,19 @@ void MainWindow::updateApiPickerSummary()
     hstring summary;
     if (!m_gpuEnumerationComplete)
     {
-        summary = locText("Detecting…", "检测中…");
+        summary = locText("Detecting…", "检测中…", "検出中…");
     }
     else if (PresetBox().SelectedIndex() == 0)
     {
-        summary = locText("Automatic (quick preset)", "自动（快速预设）");
+        summary = locText("Automatic (quick preset)", "自动（快速预设）", "自動（クイックプリセット）");
     }
     else
     {
         const auto apis = selectedApis();
         if (apis.empty())
-            summary = locText("Select APIs", "选择 API");
+            summary = locText("Select APIs", "选择 API", "API を選択");
         else if (apis.size() == std::size(kRunApis))
-            summary = locText("All APIs (4)", "全部 API（4）");
+            summary = locText("All APIs (4)", "全部 API（4）", "すべての API（4）");
         else if (apis.size() == 1)
         {
             for (auto const& api : kRunApis)
@@ -3961,9 +3970,10 @@ void MainWindow::updateApiPickerSummary()
         else
         {
             const auto count = std::to_string(apis.size());
-            summary = i18n::currentLang() == i18n::Lang::Zh
-                ? u8("已选 " + count + " 个 API")
-                : u8(count + " APIs selected");
+            summary = u8(i18n::trDyn(
+                count + " APIs selected",
+                "已选 " + count + " 个 API",
+                count + " 個の API を選択"));
         }
     }
 
@@ -3972,7 +3982,7 @@ void MainWindow::updateApiPickerSummary()
     // (e.g. Detecting… → 检测中…) actually repaint.
     ApiPickerBox().SelectedItem(nullptr);
     ApiPickerBox().SelectedItem(ApiPickerSummaryItem());
-    std::wstring accessible = locText("Graphics API", "图形 API").c_str();
+    std::wstring accessible = locText("Graphics API", "图形 API", "グラフィックス API").c_str();
     accessible += L": ";
     accessible += summary.c_str();
     Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
@@ -3986,11 +3996,11 @@ void MainWindow::rebuildApiPicker(bool preserveSelection)
     const bool allGpusPreset = PresetBox().SelectedIndex() == 3;
     const bool hasAllGpuTargets = allGpusPreset && !m_gpuApiSupport.empty();
     const auto supportedHeading = hasAllGpuTargets
-        ? locText("Supported by every GPU", "所有 GPU 均支持")
-        : locText("Supported", "支持");
+        ? locText("Supported by every GPU", "所有 GPU 均支持", "すべての GPU でサポート")
+        : locText("Supported", "支持", "サポート");
     const auto unsupportedHeading = hasAllGpuTargets
-        ? locText("Unavailable on one or more GPUs", "至少一个 GPU 不支持")
-        : locText("Not reported as supported", "未报告支持");
+        ? locText("Unavailable on one or more GPUs", "至少一个 GPU 不支持", "一部の GPU で利用不可")
+        : locText("Not reported as supported", "未报告支持", "サポート未報告");
     SupportedApisLabel().Text(supportedHeading);
     UnsupportedApisLabel().Text(unsupportedHeading);
     Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
@@ -4063,7 +4073,7 @@ void MainWindow::rebuildApiPicker(bool preserveSelection)
         if (allGpusPreset && supportCount > 0 && supportCount < m_gpuApiSupport.size())
             label += " (" + std::to_string(supportCount) + "/" +
                      std::to_string(m_gpuApiSupport.size()) +
-                     (i18n::currentLang() == i18n::Lang::Zh ? " 个 GPU)" : " GPUs)");
+                     i18n::tr(" GPUs)", " 个 GPU)", " GPU)");
         // Vulkan-only workloads never list other APIs, even as "unsupported"
         // checkboxes — those entries made it look like DX12/11/GL were still options.
         appendFilterCheckBox(
@@ -4095,7 +4105,7 @@ void MainWindow::rebuildApiPicker(bool preserveSelection)
     {
         UnsupportedApisHint().Text(locText(
             "This fluid workload currently supports Vulkan only.",
-            "该流体测试目前仅支持 Vulkan。"));
+            "该流体测试目前仅支持 Vulkan。", "この流体ワークロードは現在 Vulkan のみ対応です。"));
     }
     else
     {
@@ -4105,10 +4115,10 @@ void MainWindow::rebuildApiPicker(bool preserveSelection)
             ? locText(
                 "Unavailable combinations may stay selected; Full Analysis skips them "
                 "before launch and lists them in Summary.",
-                "不支持的组合仍可保持勾选；完整分析会在启动前跳过，并在汇总中列出。")
+                "不支持的组合仍可保持勾选；完整分析会在启动前跳过，并在汇总中列出。", "利用不可の組み合わせも選択したままにできます。完全分析は起動前にスキップし、サマリーに一覧表示します。")
             : locText(
                 "Unsupported selections remain available and will be reported by the CLI.",
-                "不支持的 API 仍可勾选；运行后由 CLI 返回明确错误。"));
+                "不支持的 API 仍可勾选；运行后由 CLI 返回明确错误。", "未サポートの API も選択できます。実行後に CLI が明確なエラーを返します。"));
     }
 }
 
@@ -4136,13 +4146,13 @@ void MainWindow::populateGpus()
     ApiPickerHeader().Opacity(0.55);
     ApiPickerHeader().Foreground(disabledTextBrush());
     auto autoItem = ComboBoxItem();
-    autoItem.Content(locContent("(auto)", "（自动）"));
+    autoItem.Content(locContent("(auto)", "（自动）", "（自動）"));
     GpuBox().Items().Append(autoItem);
     GpuBox().SelectedIndex(0);
     applyComboEnabledLook(GpuBox(), false);
     if (m_enginePath.empty())
     {
-        ApiPickerSummaryItem().Content(locContent("Engine not found", "未找到引擎"));
+        ApiPickerSummaryItem().Content(locContent("Engine not found", "未找到引擎", "エンジンが見つかりません"));
         ApiPickerBox().SelectedItem(ApiPickerSummaryItem());
         m_gpuEnumerationComplete = true;
         syncActionButtonsEnabled();
@@ -4210,9 +4220,9 @@ void MainWindow::populateGpus()
                     OutputBox().Text(u8(clipForUi(detection.output)));
                     setGpuStatus(StatusLight::Error, detection.exitCode == -2
                         ? locText("GPU detection timed out; APIs remain manually selectable.",
-                                  "GPU 检测超时；仍可手动勾选 API。")
+                                  "GPU 检测超时；仍可手动勾选 API。", "GPU 検出がタイムアウトしました。API は手動で選択できます。")
                         : locText("GPU detection failed; APIs remain manually selectable.",
-                                  "GPU 检测失败；仍可手动勾选 API。"));
+                                  "GPU 检测失败；仍可手动勾选 API。", "GPU 検出に失敗しました。API は手動で選択できます。"));
                 }
             }
             catch (winrt::hresult_error const& e)
@@ -4246,7 +4256,7 @@ void MainWindow::populateGpus()
                   syncActionButtonsEnabled();
                   setGpuStatus(StatusLight::Error, locText(
                       "GPU detection failed; APIs remain manually selectable.",
-                      "GPU 检测失败；仍可手动勾选 API。"));
+                      "GPU 检测失败；仍可手动勾选 API。", "GPU 検出に失敗しました。API は手動で選択できます。"));
               }
               catch (...)
               {
@@ -4352,13 +4362,13 @@ void MainWindow::syncCaptureControls()
                      CaptureBox().IsChecked().Value();
 
     if (unit == "frames")
-        CaptureUnitLabel().Text(locText("frames", "帧"));
+        CaptureUnitLabel().Text(locText("frames", "帧", "フレーム"));
     else if (unit == "minutes")
-        CaptureUnitLabel().Text(locText("min", "分钟"));
+        CaptureUnitLabel().Text(locText("min", "分钟", "分"));
     else if (unit == "hours")
-        CaptureUnitLabel().Text(locText("h", "小时"));
+        CaptureUnitLabel().Text(locText("h", "小时", "時間"));
     else
-        CaptureUnitLabel().Text(locText("s", "秒"));
+        CaptureUnitLabel().Text(locText("s", "秒", "秒"));
 
     // Integer capture points for every unit — fractional seconds added noise
     // and the decimal formatter confused more than it helped.
@@ -4455,10 +4465,10 @@ void MainWindow::refreshAboutVersion()
     const auto ver = readGuiProductVersion();
     if (ver.empty())
     {
-        AboutVersion().Text(locText("Version unknown", "版本未知"));
+        AboutVersion().Text(locText("Version unknown", "版本未知", "バージョン不明"));
         return;
     }
-    AboutVersion().Text(locText("Version ", "版本 ") + hstring(ver));
+    AboutVersion().Text(locText("Version ", "版本 ", "バージョン ") + hstring(ver));
 }
 
 // ---- run -------------------------------------------------------------------
@@ -4693,7 +4703,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
     {
         setGpuStatus(StatusLight::Error, locText(
             "Another benchmark or report task is already running.",
-            "另一个测试或报告任务正在运行。"));
+            "另一个测试或报告任务正在运行。", "別のベンチマークまたはレポートタスクが既に実行中です。"));
         return;
     }
     m_gpuCancelRequested.store(false);
@@ -4702,8 +4712,8 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
     Busy().IsActive(true);
     GpuCancelButton().IsEnabled(true);
     setGpuStatus(StatusLight::Running, jobs.size() > 1
-        ? locText("Running… (multiple passes; render windows may appear)", "运行中…（多次；可能弹出渲染窗口）")
-        : locText("Running… (a separate render window may appear)", "运行中…（可能弹出独立渲染窗口）"));
+        ? locText("Running… (multiple passes; render windows may appear)", "运行中…（多次；可能弹出渲染窗口）", "実行中…（複数パス；描画ウィンドウが表示される場合があります）")
+        : locText("Running… (a separate render window may appear)", "运行中…（可能弹出独立渲染窗口）", "実行中…（別ウィンドウが表示される場合があります）"));
     m_lastScoreEn.clear();
     m_lastScoreCacheHint = false;
     m_lastSkippedJobs.clear();
@@ -4731,7 +4741,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
         GpuProgressBar().IsIndeterminate(m_gpuProgressIndeterminate);
         GpuProgressBar().Value(0.0);
         GpuProgressText().Text(m_gpuProgressIndeterminate ? L"—" : L"0%");
-        GpuStageText().Text(locText("Starting…", "正在启动…"));
+        GpuStageText().Text(locText("Starting…", "正在启动…", "開始中…"));
         if (!m_gpuProgressTimer)
         {
             m_gpuProgressTimer = DispatcherTimer{};
@@ -5339,22 +5349,22 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                 const bool onlyOpenGlRoutingFailures = failedJobs > 0 &&
                     openGlRoutingMismatches.size() == failedJobs;
                 if (cancelled)
-                    stopGpuProgress(locText("Cancelled", "已取消"), false);
+                    stopGpuProgress(locText("Cancelled", "已取消", "キャンセル済み"), false);
                 else if (onlyOpenGlRoutingFailures && succeededJobs == 0)
                     stopGpuProgress(locText("OpenGL could not use the selected GPU",
-                                            "OpenGL 无法使用所选 GPU"), false);
+                                            "OpenGL 无法使用所选 GPU", "OpenGL は選択した GPU を使えませんでした"), false);
                 else if (failedJobs > 0 && succeededJobs == 0)
-                    stopGpuProgress(locText("Failed", "运行失败"), false);
+                    stopGpuProgress(locText("Failed", "运行失败", "失敗"), false);
                 else if (onlyOpenGlRoutingFailures)
                     stopGpuProgress(locText("Completed — OpenGL could not use the selected GPU",
-                                            "已完成——OpenGL 无法使用所选 GPU"), true);
+                                            "已完成——OpenGL 无法使用所选 GPU", "完了 — OpenGL は選択 GPU を使用できませんでした"), true);
                 else if (failedJobs > 0)
-                    stopGpuProgress(locText("Completed with errors", "部分完成"), true);
+                    stopGpuProgress(locText("Completed with errors", "部分完成", "エラーありで完了"), true);
                 else if (!skippedJobs.empty())
                     stopGpuProgress(locText("Completed — unsupported combinations skipped",
-                                            "完成——已跳过不支持的组合"), true);
+                                            "完成——已跳过不支持的组合", "完了 — 未サポートの組み合わせをスキップ"), true);
                 else
-                    stopGpuProgress(locText("Done", "完成"), true);
+                    stopGpuProgress(locText("Done", "完成", "完了"), true);
                 auto showScoreOr = [&](hstring const& fallback)
                 {
                     if (lastScore.empty())
@@ -5371,55 +5381,59 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                 };
                 if (cancelled)
                 {
-                    showScoreOr(locText("Cancelled", "已取消"));
-                    setGpuStatus(StatusLight::Ready, locText("Cancelled", "已取消"));
+                    showScoreOr(locText("Cancelled", "已取消", "キャンセル済み"));
+                    setGpuStatus(StatusLight::Ready, locText("Cancelled", "已取消", "キャンセル済み"));
                 }
                 else if (failedJobs > 0 && succeededJobs == 0)
                 {
                     m_lastScoreEn.clear();
-                    ResultText().Text(locText("Error — see output", "出错 —— 见输出"));
+                    ResultText().Text(locText("Error — see output", "出错 —— 见输出", "エラー — 出力を確認"));
                     updateResultHint();
                     setGpuStatus(StatusLight::Error, onlyOpenGlRoutingFailures
                         ? locText("OpenGL could not use the selected GPU on Windows.",
-                                  "Windows 上 OpenGL 无法使用所选 GPU。")
-                        : locText("Failed", "运行失败"));
+                                  "Windows 上 OpenGL 无法使用所选 GPU。", "Windows では OpenGL が選択した GPU を使用できません。")
+                        : locText("Failed", "运行失败", "失敗"));
                 }
                 else if (failedJobs > 0)
                 {
                     showScoreOr(locText("Completed with errors — see output",
-                                        "部分完成 —— 请查看错误输出"));
+                                        "部分完成 —— 请查看错误输出", "エラーありで完了 — 出力を確認してください"));
                     const auto ok = std::to_string(succeededJobs);
                     const auto failed = std::to_string(failedJobs);
                     const auto skipped = std::to_string(skippedJobs.size());
                     if (onlyOpenGlRoutingFailures)
-                        setGpuStatus(StatusLight::Error, i18n::currentLang() == i18n::Lang::Zh
-                            ? u8("完成 " + ok + " 项；OpenGL 无法使用所选 GPU")
-                            : u8(ok + " completed; OpenGL could not use the selected GPU"));
+                        setGpuStatus(StatusLight::Error, u8(i18n::trDyn(
+                            ok + " completed; OpenGL could not use the selected GPU",
+                            "完成 " + ok + " 项；OpenGL 无法使用所选 GPU",
+                            ok + " 件完了；OpenGL は選択 GPU を使用できませんでした")));
                     else
-                        setGpuStatus(StatusLight::Error, i18n::currentLang() == i18n::Lang::Zh
-                            ? u8("完成 " + ok + " 项，失败 " + failed + " 项" +
-                                 (skippedJobs.empty() ? "" : "，跳过 " + skipped + " 项"))
-                            : u8(ok + " completed; " + failed + " failed" +
-                                 (skippedJobs.empty() ? "" : "; " + skipped + " skipped")));
+                        setGpuStatus(StatusLight::Error, u8(i18n::trDyn(
+                            ok + " completed; " + failed + " failed" +
+                                 (skippedJobs.empty() ? "" : "; " + skipped + " skipped"),
+                            "完成 " + ok + " 项，失败 " + failed + " 项" +
+                                 (skippedJobs.empty() ? "" : "，跳过 " + skipped + " 项"),
+                            ok + " 件完了、" + failed + " 件失敗" +
+                                 (skippedJobs.empty() ? "" : "、" + skipped + " 件スキップ"))));
                 }
                 else
                 {
-                    showScoreOr(locText("Done — see output / History", "完成 —— 见输出/历史"));
+                    showScoreOr(locText("Done — see output / History", "完成 —— 见输出/历史", "完了 — 出力 / 履歴を確認"));
                     if (postProcessFailed)
                         setGpuStatus(StatusLight::Error, u8("Benchmark done; " + postProcessStatus));
                     else if (!skippedJobs.empty())
                     {
                         const auto ok = std::to_string(succeededJobs);
                         const auto skipped = std::to_string(skippedJobs.size());
-                        setGpuStatus(StatusLight::Ready, i18n::currentLang() == i18n::Lang::Zh
-                            ? u8("完成 " + ok + " 项；" + skipped + " 个不支持的组合已跳过")
-                            : u8(ok + " completed; " + skipped +
-                                 " unsupported combinations skipped"));
+                        setGpuStatus(StatusLight::Ready, u8(i18n::trDyn(
+                            ok + " completed; " + skipped +
+                                 " unsupported combinations skipped",
+                            "完成 " + ok + " 项；" + skipped + " 个不支持的组合已跳过",
+                            ok + " 件完了；未サポート " + skipped + " 件をスキップ")));
                     }
                     else
                         setGpuStatus(StatusLight::Ready, needCharts
-                            ? locText("Done (charts & report regenerated)", "完成（已重新生成图表与报告）")
-                            : locText("Done", "完成"));
+                            ? locText("Done (charts & report regenerated)", "完成（已重新生成图表与报告）", "完了（チャートとレポートを再生成）")
+                            : locText("Done", "完成", "完了"));
                 }
                 endTask(ActiveTask::GpuBenchmark);
                 Busy().IsActive(false);
@@ -5462,9 +5476,9 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
               try
               {
                   OutputBox().Text(u8(std::string("[GUI] Worker exception: ") + msg));
-                  ResultText().Text(locText("Error — see output", "出错 —— 见输出"));
-                  setGpuStatus(StatusLight::Error, locText("Failed", "运行失败"));
-                  stopGpuProgress(locText("Failed", "运行失败"), false);
+                  ResultText().Text(locText("Error — see output", "出错 —— 见输出", "エラー — 出力を確認"));
+                  setGpuStatus(StatusLight::Error, locText("Failed", "运行失败", "失敗"));
+                  stopGpuProgress(locText("Failed", "运行失败", "失敗"), false);
                   endTask(ActiveTask::GpuBenchmark);
                   Busy().IsActive(false);
                   GpuCancelButton().IsEnabled(false);
@@ -5484,10 +5498,10 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
               try
               {
                   OutputBox().Text(locText("[GUI] Worker failed with an unknown exception.",
-                                           "[GUI] 工作线程发生未知异常。"));
-                  ResultText().Text(locText("Error — see output", "出错 —— 见输出"));
-                  setGpuStatus(StatusLight::Error, locText("Failed", "运行失败"));
-                  stopGpuProgress(locText("Failed", "运行失败"), false);
+                                           "[GUI] 工作线程发生未知异常。", "[GUI] ワーカーで不明な例外が発生しました。"));
+                  ResultText().Text(locText("Error — see output", "出错 —— 见输出", "エラー — 出力を確認"));
+                  setGpuStatus(StatusLight::Error, locText("Failed", "运行失败", "失敗"));
+                  stopGpuProgress(locText("Failed", "运行失败", "失敗"), false);
                   endTask(ActiveTask::GpuBenchmark);
                   Busy().IsActive(false);
                   GpuCancelButton().IsEnabled(false);
@@ -5507,14 +5521,14 @@ void MainWindow::OnRun(IInspectable const&, RoutedEventArgs const&)
     {
         setGpuStatus(StatusLight::Running, locText(
             "Still detecting GPUs / APIs…",
-            "仍在检测 GPU / API…"));
+            "仍在检测 GPU / API…", "GPU / API を検出中…"));
         return;
     }
     if (m_enginePath.empty())
     {
         setGpuStatus(StatusLight::Error, locText(
             "Engine exe not found (build the CMake project first).",
-            "未找到引擎（请先用 CMake 构建）。"));
+            "未找到引擎（请先用 CMake 构建）。", "エンジン実行ファイルが見つかりません（先に CMake でビルドしてください）。"));
         return;
     }
     const int preset = PresetBox().SelectedIndex();
@@ -5537,26 +5551,26 @@ void MainWindow::OnRun(IInspectable const&, RoutedEventArgs const&)
             ResultText().Text(locText(
                 "This fluid workload requires Vulkan, and no Vulkan support was "
                 "detected on this device.",
-                "该流体测试仅支持 Vulkan，当前设备未检测到 Vulkan 支持。"));
+                "该流体测试仅支持 Vulkan，当前设备未检测到 Vulkan 支持。", "この流体ワークロードは Vulkan が必要ですが、このデバイスで Vulkan サポートが検出されませんでした。"));
             setGpuStatus(StatusLight::Error,
-                         locText("Vulkan not available.", "Vulkan 不可用。"));
+                         locText("Vulkan not available.", "Vulkan 不可用。", "Vulkan を利用できません。"));
         }
         else if (vulkanOnly)
         {
             ResultText().Text(locText(
                 "This fluid workload runs on Vulkan only — select Vulkan in the "
                 "Graphics API list.",
-                "该流体测试仅支持 Vulkan，请在图形 API 中勾选 Vulkan。"));
+                "该流体测试仅支持 Vulkan，请在图形 API 中勾选 Vulkan。", "この流体ワークロードは Vulkan のみです。グラフィックス API で Vulkan を選択してください。"));
             setGpuStatus(StatusLight::Error,
-                         locText("No graphics API selected.", "尚未选择图形 API。"));
+                         locText("No graphics API selected.", "尚未选择图形 API。", "グラフィックス API が選択されていません。"));
         }
         else
         {
             ResultText().Text(locText(
                 "Select at least one graphics API. Unsupported APIs may also be selected.",
-                "请至少选择一个图形 API；未报告支持的 API 也可以勾选。"));
+                "请至少选择一个图形 API；未报告支持的 API 也可以勾选。", "少なくとも 1 つのグラフィックス API を選択してください。未サポートの API も選択できます。"));
             setGpuStatus(StatusLight::Error,
-                         locText("No graphics API selected.", "尚未选择图形 API。"));
+                         locText("No graphics API selected.", "尚未选择图形 API。", "グラフィックス API が選択されていません。"));
         }
         return;
     }
@@ -5576,9 +5590,9 @@ void MainWindow::OnRun(IInspectable const&, RoutedEventArgs const&)
         {
             ResultText().Text(locText(
                 "GPU Burn steps must be an integer from 16 to 2048.",
-                "GPU Burn 步数必须是 16 到 2048 的整数。"));
+                "GPU Burn 步数必须是 16 到 2048 的整数。", "GPU Burn ステップ数は 16〜2048 の整数である必要があります。"));
             setGpuStatus(StatusLight::Error, locText("GPU Burn settings need attention.",
-                                                     "请检查 GPU Burn 设置。"));
+                                                     "请检查 GPU Burn 设置。", "GPU Burn 設定を確認してください。"));
             return;
         }
     }
@@ -5596,13 +5610,13 @@ void MainWindow::OnRun(IInspectable const&, RoutedEventArgs const&)
         {
             ResultText().Text(locText(
                 "No supported GPU / API combinations are available for this Full Analysis.",
-                "此完整分析没有可运行的 GPU / API 组合。"));
+                "此完整分析没有可运行的 GPU / API 组合。", "この完全分析で実行可能な GPU / API の組み合わせがありません。"));
             setGpuStatus(StatusLight::Error, locText(
                 "Nothing to run — all selected combinations are unsupported.",
-                "没有可运行项目——所选组合均不受支持。"));
+                "没有可运行项目——所选组合均不受支持。", "実行対象がありません — 選択した組み合わせはすべて未サポートです。"));
         }
         else
-            setGpuStatus(StatusLight::Error, locText("No benchmark jobs were generated.", "没有生成任何测试任务。"));
+            setGpuStatus(StatusLight::Error, locText("No benchmark jobs were generated.", "没有生成任何测试任务。", "ベンチマークジョブが生成されませんでした。"));
         updateResultHint();
         return;
     }
@@ -5668,9 +5682,9 @@ void MainWindow::updateHistoryFilterVisibility()
     StepsFilterColumn().Visibility(showSteps ? Visibility::Visible : Visibility::Collapsed);
 
     if (cpu)
-        GpuFilterLabel().Text(locText("CPUs", "处理器"));
+        GpuFilterLabel().Text(locText("CPUs", "处理器", "プロセッサ"));
     else
-        GpuFilterLabel().Text(locText("GPUs", "显卡"));
+        GpuFilterLabel().Text(locText("GPUs", "显卡", "GPU"));
 }
 
 void MainWindow::OnHistoryCategoryChanged(
@@ -5711,20 +5725,20 @@ void MainWindow::refreshHistory()
 
 void MainWindow::rebuildHistoryFilters(bool preserveSelection)
 {
-    ApiFilterLabel().Text(locText("Graphics API", "图形 API"));
-    WorkloadFilterLabel().Text(locText("Workload", "测试项目"));
-    ParticleFilterLabel().Text(locText("Particles", "粒子数"));
-    StepsFilterLabel().Text(locText("Steps", "步数"));
-    SelectAllApis().Content(locContent("All", "全选"));
-    ClearAllApis().Content(locContent("None", "清空"));
-    SelectAllWorkloads().Content(locContent("All", "全选"));
-    ClearAllWorkloads().Content(locContent("None", "清空"));
-    SelectAllParticles().Content(locContent("All", "全选"));
-    ClearAllParticles().Content(locContent("None", "清空"));
-    SelectAllSteps().Content(locContent("All", "全选"));
-    ClearAllSteps().Content(locContent("None", "清空"));
-    SelectAllGpus().Content(locContent("All", "全选"));
-    ClearAllGpus().Content(locContent("None", "清空"));
+    ApiFilterLabel().Text(locText("Graphics API", "图形 API", "グラフィックス API"));
+    WorkloadFilterLabel().Text(locText("Workload", "测试项目", "ワークロード"));
+    ParticleFilterLabel().Text(locText("Particles", "粒子数", "パーティクル数"));
+    StepsFilterLabel().Text(locText("Steps", "步数", "ステップ数"));
+    SelectAllApis().Content(locContent("All", "全选", "すべて"));
+    ClearAllApis().Content(locContent("None", "清空", "なし"));
+    SelectAllWorkloads().Content(locContent("All", "全选", "すべて"));
+    ClearAllWorkloads().Content(locContent("None", "清空", "なし"));
+    SelectAllParticles().Content(locContent("All", "全选", "すべて"));
+    ClearAllParticles().Content(locContent("None", "清空", "なし"));
+    SelectAllSteps().Content(locContent("All", "全选", "すべて"));
+    ClearAllSteps().Content(locContent("None", "清空", "なし"));
+    SelectAllGpus().Content(locContent("All", "全选", "すべて"));
+    ClearAllGpus().Content(locContent("None", "清空", "なし"));
 
     auto prevApis = checkedTags(ApiFilterPanel());
     auto prevWorkloads = checkedTags(WorkloadFilterPanel());
@@ -5942,17 +5956,17 @@ void MainWindow::applyHistoryView()
 
         const bool cpuCat = m_historyCategory == HistoryCategory::Cpu;
         auto allowedApis = collect(ApiFilterPanel(), ApiFilterButton(),
-                                   locText("All APIs", "全部 API"), locText("None", "无"));
+                                   locText("All APIs", "全部 API", "すべての API"), locText("None", "无", "なし"));
         auto allowedWorkloads = collect(WorkloadFilterPanel(), WorkloadFilterButton(),
-                                        locText("All workloads", "全部项目"), locText("None", "无"));
+                                        locText("All workloads", "全部项目", "すべてのワークロード"), locText("None", "无", "なし"));
         auto allowedParticles = collect(ParticleFilterPanel(), ParticleFilterButton(),
-                                        locText("All particle counts", "全部粒子数"), locText("None", "无"));
+                                        locText("All particle counts", "全部粒子数", "すべてのパーティクル数"), locText("None", "无", "なし"));
         auto allowedSteps = collect(StepsFilterPanel(), StepsFilterButton(),
-                                    locText("All step counts", "全部步数"), locText("None", "无"));
+                                    locText("All step counts", "全部步数", "すべてのステップ数"), locText("None", "无", "なし"));
         auto allowedDevices = collect(GpuFilterPanel(), GpuFilterButton(),
-                                      cpuCat ? locText("All CPUs", "全部处理器")
-                                             : locText("All GPUs", "全部 GPU"),
-                                      locText("None", "无"));
+                                      cpuCat ? locText("All CPUs", "全部处理器", "すべてのプロセッサ")
+                                             : locText("All GPUs", "全部 GPU", "すべての GPU"),
+                                      locText("None", "无", "なし"));
 
         bool hasApiFilter = !cpuCat && ApiFilterPanel().Children().Size() > 0;
         bool hasWorkloadFilter = WorkloadFilterPanel().Children().Size() > 0;
@@ -6088,10 +6102,10 @@ void MainWindow::applyHistoryView()
                 wScore = (std::max)(wScore, utf8DisplayWidth(x.score));
             }
 
-            addHeader(to_string(locText("Time", "时间")), wTime, "time");
-            addHeader(to_string(locText("CPU", "CPU")), wCpu, "cpu");
-            addHeader(to_string(locText("Workload", "测试项目")), wWl, "workload");
-            addHeader(to_string(locText("Score", "分数")), wScore, "score");
+            addHeader(to_string(locText("Time", "时间", "時刻")), wTime, "time");
+            addHeader(to_string(locText("CPU", "CPU", "CPU")), wCpu, "cpu");
+            addHeader(to_string(locText("Workload", "测试项目", "ワークロード")), wWl, "workload");
+            addHeader(to_string(locText("Score", "分数", "スコア")), wScore, "score");
 
             for (size_t i = 0; i < rows.size(); ++i)
             {
@@ -6120,7 +6134,7 @@ void MainWindow::applyHistoryView()
             x.wl   = workloadRunLabel(*r);
             x.particles = particleLabel(r->particleCount);
             x.score = r->workload == "fluid"
-                ? i18n::tr("Unverified legacy", "未验证旧版")
+                ? i18n::tr("Unverified legacy", "未验证旧版", "未検証の旧版")
                 : r->score > 0.0
                 ? [&] { std::ostringstream o; o.setf(std::ios::fixed); o.precision(1);
                         o << r->score << ' ' << r->scoreUnit;
@@ -6144,15 +6158,15 @@ void MainWindow::applyHistoryView()
             wScore = (std::max)(wScore, utf8DisplayWidth(x.score));
         }
 
-        addHeader(to_string(locText("Time", "时间")), wTime, "time");
-        addHeader(to_string(locText("API", "API")), wApi, "api");
-        addHeader(to_string(locText("GPU/Render", "GPU/渲染")), wDev, "device");
-        addHeader(to_string(locText("CPU", "CPU")), wCpu, "cpu");
-        addHeader(to_string(locText("VRAM", "显存")), wMem, "mem");
-        addHeader(to_string(locText("Workload", "测试项目")), wWl, "workload");
-        addHeader(to_string(locText("Particles", "粒子")), wParticles, "particles");
-        addHeader(to_string(locText("Score", "分数")), wScore, "score");
-        addHeader(to_string(locText("FPS", "FPS")), 3, "fps");
+        addHeader(to_string(locText("Time", "时间", "時刻")), wTime, "time");
+        addHeader(to_string(locText("API", "API", "API")), wApi, "api");
+        addHeader(to_string(locText("GPU/Render", "GPU/渲染", "GPU/描画")), wDev, "device");
+        addHeader(to_string(locText("CPU", "CPU", "CPU")), wCpu, "cpu");
+        addHeader(to_string(locText("VRAM", "显存", "VRAM")), wMem, "mem");
+        addHeader(to_string(locText("Workload", "测试项目", "ワークロード")), wWl, "workload");
+        addHeader(to_string(locText("Particles", "粒子", "パーティクル数")), wParticles, "particles");
+        addHeader(to_string(locText("Score", "分数", "スコア")), wScore, "score");
+        addHeader(to_string(locText("FPS", "FPS", "FPS")), 3, "fps");
 
         for (size_t i = 0; i < rows.size(); ++i)
         {
@@ -6181,8 +6195,8 @@ void MainWindow::applyHistoryView()
         }
     bool anyBox = total > 0;
     GpuFilterButton().Content(box_value(
-        (!anyBox || checked == total) ? locText("All GPUs", "全部 GPU")
-        : (checked == 0)              ? locText("None", "无")
+        (!anyBox || checked == total) ? locText("All GPUs", "全部 GPU", "すべての GPU")
+        : (checked == 0)              ? locText("None", "无", "なし")
                                       : u8(std::to_string(checked) + " / " + std::to_string(total))));
 
     // Time range (index 4 = custom date pickers).
@@ -6241,7 +6255,7 @@ void MainWindow::applyHistoryView()
         x.wl   = workloadRunLabel(*r);
         x.particles = particleLabel(r->particleCount);
         x.score = r->workload == "fluid"
-            ? i18n::tr("Unverified legacy", "未验证旧版")
+            ? i18n::tr("Unverified legacy", "未验证旧版", "未検証の旧版")
             : r->score > 0.0
             ? [&] { std::ostringstream o; o.setf(std::ios::fixed); o.precision(1);
                     o << r->score << ' ' << r->scoreUnit;
@@ -6344,16 +6358,16 @@ void MainWindow::OnOpenCapturesFolder(IInspectable const&, RoutedEventArgs const
 // ---- charts (run plot_workloads.py, then show the PNGs) --------------------
 void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
 {
-    if (m_enginePath.empty()) { ChartsStatus().Text(locText("Engine/repo not found.", "未找到引擎/仓库。")); return; }
+    if (m_enginePath.empty()) { ChartsStatus().Text(locText("Engine/repo not found.", "未找到引擎/仓库。", "エンジン/リポジトリが見つかりません。")); return; }
     auto repo = pathFromUtf8(m_enginePath).parent_path().parent_path().parent_path();
     if (!std::filesystem::exists(repo / "scripts" / "plot_workloads.py"))
-    { ChartsStatus().Text(locText("scripts/plot_workloads.py not found.", "未找到 scripts/plot_workloads.py。")); return; }
+    { ChartsStatus().Text(locText("scripts/plot_workloads.py not found.", "未找到 scripts/plot_workloads.py。", "scripts/plot_workloads.py が見つかりません。")); return; }
     const auto python = findPythonExecutable();
     if (python.empty())
     {
         ChartsStatus().Text(locText(
             "Charts unavailable: this package does not yet include the frozen report worker.",
-            "图表不可用：当前安装包尚未包含冻结的报告工具。"));
+            "图表不可用：当前安装包尚未包含冻结的报告工具。", "チャートは利用できません：このパッケージには凍結済みレポートワーカーがまだ含まれていません。"));
         return;
     }
 
@@ -6364,7 +6378,7 @@ void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
     if (ec)
     {
         ChartsStatus().Text(locText("Could not create the reports directory.",
-                                    "无法创建报告目录。"));
+                                    "无法创建报告目录。", "レポートディレクトリを作成できませんでした。"));
         return;
     }
 
@@ -6372,11 +6386,11 @@ void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
     {
         ChartsStatus().Text(locText(
             "Another benchmark or report task is already running.",
-            "另一个测试或报告任务正在运行。"));
+            "另一个测试或报告任务正在运行。", "別のベンチマークまたはレポートタスクが既に実行中です。"));
         return;
     }
     ChartsBusy().IsActive(true);
-    ChartsStatus().Text(locText("Running plot_workloads.py…", "正在运行 plot_workloads.py…"));
+    ChartsStatus().Text(locText("Running plot_workloads.py…", "正在运行 plot_workloads.py…", "plot_workloads.py を実行中…"));
 
     auto strong = get_strong();
     auto disp = m_dispatcher;
@@ -6414,12 +6428,14 @@ void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
             }
             const auto count = std::to_string(shown);
             ChartsStatus().Text(result.exitCode == 0
-                ? (i18n::currentLang() == i18n::Lang::Zh
-                    ? u8("完成 —— " + count + " 张图表")
-                    : u8("Done — " + count + " chart(s)"))
-                : (i18n::currentLang() == i18n::Lang::Zh
-                    ? u8("python 退出码 " + std::to_string(result.exitCode))
-                    : u8("python exited with " + std::to_string(result.exitCode))));
+                ? u8(i18n::trDyn(
+                    "Done — " + count + " chart(s)",
+                    "完成 —— " + count + " 张图表",
+                    "完了 — チャート " + count + " 枚"))
+                : u8(i18n::trDyn(
+                    "python exited with " + std::to_string(result.exitCode),
+                    "python 退出码 " + std::to_string(result.exitCode),
+                    "python 終了コード " + std::to_string(result.exitCode))));
             endTask(ActiveTask::Charts); ChartsBusy().IsActive(false);
         });
       }
@@ -6427,7 +6443,7 @@ void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
       {
           disp.TryEnqueue([this, strong]()
           {
-              ChartsStatus().Text(locText("Chart generation failed.", "图表生成失败"));
+              ChartsStatus().Text(locText("Chart generation failed.", "图表生成失败", "チャート生成に失敗しました。"));
               endTask(ActiveTask::Charts);
               ChartsBusy().IsActive(false);
           });

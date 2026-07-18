@@ -815,6 +815,7 @@
                                     <ComboBoxItem x:Name="LangAuto" Content="Auto"/>
                                     <ComboBoxItem>English</ComboBoxItem>
                                     <ComboBoxItem>简体中文</ComboBoxItem>
+                                    <ComboBoxItem>日本語</ComboBoxItem>
                                 </ComboBox>
                             </StackPanel>
                         </Border>

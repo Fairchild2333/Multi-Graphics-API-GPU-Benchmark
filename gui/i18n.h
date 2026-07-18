@@ -1,20 +1,18 @@
 // -----------------------------------------------------------------------------
-// Tiny i18n layer for sdr2hdr.
+// Tiny i18n layer for the WinUI frontend (and any shared call sites).
 //
 // Design:
-//   - Single global `g_lang` picked once at startup (auto-detect + --lang override).
-//   - `tr(en, zh)` picks the right literal at call site; both languages live
+//   - Single global `g_lang` picked once at startup (auto-detect + override).
+//   - `tr(en, zh, ja)` picks the right literal at the call site; languages live
 //     next to each other in source so diff-reviewing translations is trivial.
-//   - Scope is limited to user-facing prose: the interactive wizard and
-//     `--help` text. Runtime status / error logs stay English because they
-//     need to round-trip with external tooling (logs, grep, bug reports).
+//   - If `ja` is null/empty and the active language is Japanese, English is used
+//     as a safe fallback so partial migrations still compile and run.
 //
-// Auto-detection:
-//   - Windows: GetUserDefaultUILanguage(); anything under LANG_CHINESE -> zh.
-//   - Otherwise (incl. non-Windows): English.
-//   - Environment override SDR2HDR_LANG = "en" | "zh" | "auto" beats auto.
-//   - Command-line override `--lang en|zh|auto` beats the env var; parsed
-//     EARLY in main() so even --help / unknown-arg errors localise correctly.
+// Auto-detection (Windows):
+//   - LANG_JAPANESE -> ja
+//   - LANG_CHINESE  -> zh
+//   - otherwise     -> en
+//   - Env SDR2HDR_LANG / MANGEKYO_LANG = "en"|"zh"|"ja"|"auto"
 // -----------------------------------------------------------------------------
 #pragma once
 
@@ -31,34 +29,69 @@
 
 namespace i18n {
 
-enum class Lang { En, Zh };
+enum class Lang { En, Zh, Ja };
 
 inline Lang& langRef()
 {
-    // Default: English. initLang() overrides based on env / OS / CLI.
     static Lang g = Lang::En;
     return g;
 }
 
 inline Lang currentLang() { return langRef(); }
 
-inline const char* tr(const char* en, const char* zh)
+inline const char* tr(const char* en, const char* zh, const char* ja = nullptr)
 {
-    return langRef() == Lang::Zh ? zh : en;
+    switch (langRef())
+    {
+    case Lang::Zh: return zh ? zh : en;
+    case Lang::Ja: return (ja && *ja) ? ja : en;
+    default:       return en;
+    }
 }
 
-// Returns a newly-constructed std::string for dynamic tr() call sites.
-inline std::string trs(const char* en, const char* zh)
+inline std::string trs(const char* en, const char* zh, const char* ja = nullptr)
 {
-    return tr(en, zh);
+    return tr(en, zh, ja);
+}
+
+// Prefer for dynamic (assembled) strings.
+inline std::string trDyn(std::string const& en,
+                         std::string const& zh,
+                         std::string const& ja)
+{
+    switch (langRef())
+    {
+    case Lang::Zh: return zh;
+    case Lang::Ja: return ja;
+    default:       return en;
+    }
+}
+
+inline bool usesYmdDate()
+{
+    return langRef() == Lang::Zh || langRef() == Lang::Ja;
 }
 
 inline bool parseLangTag(const char* s, Lang& out)
 {
     if (!s || !*s) return false;
-    if (!::strcmp(s, "en") || !::strcmp(s, "EN") || !::strcmp(s, "english")) { out = Lang::En; return true; }
-    if (!::strcmp(s, "zh") || !::strcmp(s, "ZH") || !::strcmp(s, "chinese")) { out = Lang::Zh; return true; }
-    // "auto" is handled by caller (leaves Lang untouched so auto-detect runs).
+    if (!::strcmp(s, "en") || !::strcmp(s, "EN") || !::strcmp(s, "english"))
+    {
+        out = Lang::En;
+        return true;
+    }
+    if (!::strcmp(s, "zh") || !::strcmp(s, "ZH") || !::strcmp(s, "chinese") ||
+        !::strcmp(s, "zh-CN") || !::strcmp(s, "zh_CN"))
+    {
+        out = Lang::Zh;
+        return true;
+    }
+    if (!::strcmp(s, "ja") || !::strcmp(s, "JA") || !::strcmp(s, "jp") ||
+        !::strcmp(s, "japanese") || !::strcmp(s, "ja-JP") || !::strcmp(s, "ja_JP"))
+    {
+        out = Lang::Ja;
+        return true;
+    }
     return false;
 }
 
@@ -66,25 +99,42 @@ inline Lang detectOsLang()
 {
 #ifdef _WIN32
     LANGID id = GetUserDefaultUILanguage();
-    if (PRIMARYLANGID(id) == LANG_CHINESE) return Lang::Zh;
+    const auto primary = PRIMARYLANGID(id);
+    if (primary == LANG_JAPANESE) return Lang::Ja;
+    if (primary == LANG_CHINESE) return Lang::Zh;
 #endif
     return Lang::En;
 }
 
-// cliOverride is whatever the user passed to `--lang` (empty / "auto" -> ignore).
-// Honoured precedence: explicit CLI > env var > OS UI language > English default.
+inline const wchar_t* detectOsLangLabel()
+{
+    switch (detectOsLang())
+    {
+    case Lang::Zh: return L"中文";
+    case Lang::Ja: return L"日本語";
+    default:       return L"English";
+    }
+}
+
+// cliOverride: explicit tag, or nullptr/"auto" to use env then OS.
 inline void initLang(const char* cliOverride = nullptr)
 {
     Lang chosen = detectOsLang();
 
-    if (const char* env = std::getenv("SDR2HDR_LANG"))
+    if (const char* env = std::getenv("MANGEKYO_LANG"))
+    {
+        Lang fromEnv;
+        if (parseLangTag(env, fromEnv))
+            chosen = fromEnv;
+    }
+    else if (const char* env = std::getenv("SDR2HDR_LANG"))
     {
         Lang fromEnv;
         if (parseLangTag(env, fromEnv))
             chosen = fromEnv;
     }
 
-    if (cliOverride && *cliOverride)
+    if (cliOverride && *cliOverride && ::strcmp(cliOverride, "auto") != 0)
     {
         Lang fromCli;
         if (parseLangTag(cliOverride, fromCli))
