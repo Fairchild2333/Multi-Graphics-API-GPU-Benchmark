@@ -14,12 +14,12 @@ struct ChartsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
-                Text(Localization.tr("Charts", "图表"))
+                Text(Localization.tr("Charts", "图表", "チャート"))
                     .font(.largeTitle)
                     .fontWeight(.bold)
 
                 Button(action: generateCharts) {
-                    Label(Localization.tr("Generate Charts", "生成图表"),
+                    Label(Localization.tr("Generate Charts", "生成图表", "チャート生成"),
                           systemImage: "chart.bar.xaxis")
                 }
                 .disabled(isGenerating || engine.workingDirectory.isEmpty)
@@ -36,6 +36,13 @@ struct ChartsView: View {
                 }
 
                 Spacer()
+
+                Button(Localization.tr("Open charts folder", "打开图表文件夹", "チャートフォルダを開く")) {
+                    let dir = URL(fileURLWithPath: engine.workingDirectory)
+                        .appendingPathComponent("docs/images").path
+                    engine.openFolder(dir)
+                }
+                .disabled(engine.workingDirectory.isEmpty)
             }
 
             if chartImages.isEmpty && !isGenerating {
@@ -46,7 +53,8 @@ struct ChartsView: View {
                             .foregroundStyle(.secondary)
                         Text(Localization.tr(
                             "Click \"Generate Charts\" to create workload comparison plots.\nRequires Python 3 + matplotlib.",
-                            "点击「生成图表」创建负载对比图。\n需要 Python 3 + matplotlib。"))
+                            "点击「生成图表」创建负载对比图。\n需要 Python 3 + matplotlib。",
+                            "「チャート生成」で負荷比較図を作成。\nPython 3 + matplotlib が必要です。"))
                             .multilineTextAlignment(.center)
                             .foregroundStyle(.secondary)
                     }
@@ -83,7 +91,7 @@ struct ChartsView: View {
 
     private func generateCharts() {
         isGenerating = true
-        statusText = Localization.tr("Generating…", "生成中…")
+        statusText = Localization.tr("Generating…", "生成中…", "生成中…")
 
         let cwd = engine.workingDirectory
         Task.detached {
@@ -104,11 +112,12 @@ struct ChartsView: View {
 
                 await MainActor.run {
                     if process.terminationStatus == 0 {
-                        statusText = Localization.tr("Done.", "完成。")
+                        statusText = Localization.tr("Done.", "完成。", "完了。")
                         loadExistingCharts()
                     } else {
                         statusText = Localization.tr("Error — check Python/matplotlib.",
-                                                    "出错 — 请检查 Python/matplotlib。")
+                                                    "出错 — 请检查 Python/matplotlib。",
+                                                    "エラー — Python/matplotlib を確認。")
                         if !output.isEmpty { print("[Charts] \(output)") }
                     }
                     isGenerating = false

@@ -7,6 +7,8 @@ struct BenchResult: Codable, Identifiable, Hashable {
     var timestamp: String
 
     var workload: String
+    var workloadVersion: String?
+    var workloadConfig: String?
     var graphicsApi: String
     var deviceName: String
     var driverVersion: String

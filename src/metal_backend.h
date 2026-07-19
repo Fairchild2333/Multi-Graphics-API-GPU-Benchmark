@@ -27,6 +27,10 @@ protected:
     void CleanupBackend()           override;
     void WaitIdle()                 override;
 
+    bool SupportsNativeGpuCapture() const override;
+    bool BeginNativeGpuCapture(const std::string& outputPath) override;
+    bool EndNativeGpuCapture(std::string& outPath) override;
+
 private:
     struct Impl;
     std::unique_ptr<Impl> impl_;

@@ -5,6 +5,7 @@
 
 #include "gpu_engine.h"
 #include "benchmark_results.h"
+#include "path_service.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -57,6 +58,8 @@ static std::string resultToJson(const gpu_bench::BenchmarkResult& r) {
     o << "\"id\":\""          << jsonEscape(r.id) << "\",";
     o << "\"timestamp\":\""   << jsonEscape(r.timestamp) << "\",";
     o << "\"workload\":\""    << jsonEscape(r.workload) << "\",";
+    o << "\"workloadVersion\":\"" << jsonEscape(r.workloadVersion) << "\",";
+    o << "\"workloadConfig\":\"" << jsonEscape(r.workloadConfig) << "\",";
     o << "\"graphicsApi\":\"" << jsonEscape(r.graphicsApi) << "\",";
     o << "\"deviceName\":\""  << jsonEscape(r.deviceName) << "\",";
     o << "\"driverVersion\":\"" << jsonEscape(r.driverVersion) << "\",";
@@ -251,6 +254,14 @@ bool gpb_clear_results(void) {
 
 void gpb_free(char* ptr) {
     free(ptr);
+}
+
+char* gpb_results_dir(void) {
+    return strdup_alloc(gpu_bench::paths::ResultsDirectory().string());
+}
+
+char* gpb_captures_dir(void) {
+    return strdup_alloc(gpu_bench::paths::CapturesDirectory().string());
 }
 
 } // extern "C"

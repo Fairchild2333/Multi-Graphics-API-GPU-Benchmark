@@ -1,18 +1,24 @@
 # Mangekyo for macOS (SwiftUI + Liquid Glass)
 
 Native macOS SwiftUI front-end for Mangekyo — the Cross-API CPU & GPU Benchmark Suite.
-Uses **Liquid Glass** on macOS 26 (Tahoe) with graceful fallback to Material
-on macOS 14–15.
+**Minimum OS: macOS 12 Monterey.** Uses **Liquid Glass** on macOS 26 (Tahoe)
+with Material fallback on 12–15. Build with a current Xcode (26 recommended);
+run on Monterey+.
+
+**iOS (future, not in this target):** floor **iOS 16**; **iOS 26/27 = Liquid
+Glass**, 16–25 Material. `#available(iOS 26.0, *)` already on `GlassCard`.
+Full build/surface/acceptance spec: root `HANDOFF.md` §3.0.3. No iOS target yet.
 
 ## Architecture
 
-Same as the Windows WinUI 3 GUI: the C++ `gpu_engine` static library runs
-**in-process** on a worker thread. No subprocess or shell invocation.
+Aligned with the Windows WinUI 3 GUI. Prefers launching the built
+`gpu_benchmark` CLI as a subprocess (Cancel = terminate). Falls back to the
+in-process `gpu_engine` bridge when the binary is missing.
 
 ```
 SwiftUI App
-  ↕ (ObjC++ bridge: GpuBenchBridge.mm)
-libgpu_engine.a  →  Metal / Vulkan / OpenGL backends
+  ↕ Process (preferred) or ObjC++ bridge
+gpu_benchmark / libgpu_engine.a  →  Metal / Vulkan / OpenGL backends
 ```
 
 ## Prerequisites
@@ -61,19 +67,23 @@ chart scripts.
 
 | Page | Features |
 |------|----------|
-| **Run** | 7 presets, GPU/API/workload/precision pickers, advanced toggles (headless/VSync/host-memory), real-time log output, score display |
-| **History** | Multi-column table with sorting, GPU filter, time range filter, multi-select deletion |
-| **Charts** | Generate workload comparison charts via `scripts/plot_workloads.py`, display PNGs |
-| **Settings** | Theme (system/light/dark), language (Auto/English/简体中文), working directory |
-| **About** | Version, description, GitHub link, system info (CPU/memory/architecture) |
+| **GPU / Run** | Custom + Full Analysis; multi-select API (supported / unsupported); Duration seconds/minutes/hours/frames/Until Cancel; particle & Burn presets; capture-at-N; legacy toggle; progress; Cancel; open results/captures |
+| **CPU** | per-core / multi / all; Quick 1s & Formal 15s; warm-up; summary + log |
+| **History** | Table + sort; GPU/API/workload/time filters; `workloadVersion` column; clear all; open folders |
+| **Charts** | `scripts/plot_workloads.py` PNGs; open charts folder |
+| **Settings** | Theme; language Auto/EN/简体中文/日本語; working directory |
+| **About** | Version, description, GitHub link, system info |
 
 ## Compatibility
 
-| macOS Version | Liquid Glass | Functional |
-|---------------|:------------:|:----------:|
-| macOS 26+     | ✅ Full      | ✅         |
-| macOS 14–15   | ❌ Material fallback | ✅ |
-| < macOS 14    | ❌           | ❌ (deployment target 14.0) |
+| macOS Version | Liquid Glass | Shell | Functional |
+|---------------|:------------:|:-----:|:----------:|
+| macOS 26+     | ✅ Full      | NavigationSplitView | ✅ |
+| macOS 13–15   | ❌ Material  | NavigationSplitView | ✅ |
+| macOS 12      | ❌ Material  | NavigationView columns | ✅ |
+| < macOS 12    | —            | — | ❌ (deployment target 12.0) |
+
+CLI/`gpu_engine` CMake deployment target is also **12.0**.
 
 ## File Structure
 

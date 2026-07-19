@@ -1301,15 +1301,28 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     }
 
     // ---- Cinematic Liquid normalisation ----
-    // Interactive pool / dam-break score contracts are Vulkan-only for now.
+    // Formal scores remain Vulkan; Metal hosts an MLS-MPM v2 preview path only.
     if (gpu_bench::isCinematicLiquidWorkload(benchCfg.workload)) {
         const bool liquidV2 = benchCfg.workload == gpu_bench::Workload::CinematicLiquid;
         const char* liquidName = liquidV2 ? "Cinematic Liquid v2" : "Cinematic Liquid v1";
         if (backend == "auto") {
+#if defined(__APPLE__)
+            backend = liquidV2 ? "metal" : "vulkan";
+#else
             backend = "vulkan";
+#endif
+        } else if (backend == "metal") {
+            if (!liquidV2) {
+                std::cerr << "Cinematic Liquid v1 is Vulkan-only; Metal hosts v2 only.\n";
+                return 2;
+            }
         } else if (backend != "vulkan") {
             std::cerr << liquidName
-                      << " is currently Vulkan-only; select --backend vulkan.\n";
+                      << " supports Vulkan"
+                      << (liquidV2 ? " and Metal (preview)" : "")
+                      << "; select --backend vulkan"
+                      << (liquidV2 ? " or metal" : "")
+                      << ".\n";
             return 2;
         }
         if (runAll || fullAnalysis) {
@@ -2706,13 +2719,17 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         try {
             std::unique_ptr<gpu_bench::AppBase> app;
 
-            // Only the Vulkan and OpenGL backends place the particle buffer in
-            // system memory; DX11/DX12/Metal would silently run device-local
-            // and report a misleading "RAM rate". Fall back honestly.
+            // Only Vulkan/OpenGL implement an explicit host-memory demotion path.
+            // Metal particle buffers are already Shared/UMA — --host-memory is a
+            // no-op there (results use memory=Unified-memory). DX11/DX12 would
+            // silently stay device-local, so refuse the flag honestly.
             gpu_bench::BenchmarkConfig runCfg = benchCfg;
-            const bool hostMemorySupported =
-                selectedBackend == "vulkan" || selectedBackend == "opengl";
-            if (runCfg.hostMemory && !hostMemorySupported) {
+            if (runCfg.hostMemory && selectedBackend == "metal") {
+                std::cerr << "[info] --host-memory is a no-op on Metal: particle "
+                             "buffers already use Shared / Unified-memory.\n";
+            } else if (runCfg.hostMemory &&
+                       selectedBackend != "vulkan" &&
+                       selectedBackend != "opengl") {
                 std::cerr << "[warn] --host-memory (system memory) is not implemented for "
                           << selectedBackend
                           << "; this pass runs device-local (VRAM) instead.\n";

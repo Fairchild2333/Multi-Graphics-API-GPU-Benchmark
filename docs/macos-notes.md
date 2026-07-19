@@ -1,5 +1,17 @@
 # Mangekyo macOS Platform Notes
 
+## OS 版本底线
+
+| 组件 | 最低系统 | 说明 |
+|------|----------|------|
+| **CLI / `gpu_engine`（CMake）** | **macOS 12.0** | `CMAKE_OSX_DEPLOYMENT_TARGET=12.0` |
+| **SwiftUI GUI** | **macOS 12.0** | `MACOSX_DEPLOYMENT_TARGET` / `LSMinimumSystemVersion=12.0` |
+| **UI 外壳** | 12：`NavigationView`；13+：`NavigationSplitView` | 功能对齐，布局略有差异 |
+| **Liquid Glass** | 仅 26+ | 12–15 使用 Material 回退 |
+| **构建机** | 建议 Xcode 26 / 较新 SDK | 在新系统上编译、部署到 Monterey 运行 |
+
+macOS 11 及更旧系统不在支持范围。
+
 ## Graphics API Availability
 
 | Backend | macOS Support | Details |
@@ -87,7 +99,27 @@ macOS ProMotion 显示器（120Hz）会在运行几秒后将帧率锁定在 120 
 
 ### 解决方案
 
-Metal 后端默认创建离屏纹理（`MTLTexture`）作为渲染目标，大部分帧渲染到离屏纹理，每 60 帧才通过 `nextDrawable` 获取一次 drawable present 到屏幕。这样 GPU 不被显示器刷新率锁定，窗口仍有视觉反馈。
+当 **未开 VSync**（含正式 15 秒 time-mode 与 `--benchmark`）时，Metal 后端创建离屏纹理（`MTLTexture`）作为渲染目标，大部分帧渲染到离屏纹理，每 60 帧才通过 `nextDrawable` 获取一次 drawable present 到屏幕。这样 GPU 不被显示器刷新率锁定，窗口仍有视觉反馈。开 VSync 时仍每帧 present（按刷新率测）。
+
+粒子缓冲使用 `MTLResourceStorageModeShared`，成绩 JSON 的 `memory` 记为 `Unified-memory`（不是离散 VRAM）。`--capture` / F12 / `--capture-frame` 走 `MTLCaptureManager` 写出 `.gputrace`；失败时必须写明 `captureUnavailable`，不得假装 RenderDoc 成功。
+
+## 三主项 + Metal 状态（2026-07-19）
+
+| 主项 | Windows | Metal / macOS | 还差 |
+|------|---------|---------------|------|
+| **Particle (`stream`)** | 正式可用 | 代码已对齐合同 + MTLCapture | 真 Mac 15s 验收；验证 `.gputrace` |
+| **GPU Burn (`gpu_burn`)** | 正式可用（Vulkan/DX*/GL） | `gpu_burn.metal` 已接线（**不再 unsupported**） | 真 Mac 15s/`--iter 16` 验收 |
+| **Cinematic Liquid** | Vulkan v8 场景在、**无 v8 正式成绩**；SPH=`_preview` | MLS-MPM + **raymarch present**；成绩强制 `…_metal_preview` | 真 Mac 编译/冒烟；正式合同；SPH/v1 未移植 |
+
+验收命令（真 Mac）：
+
+```bash
+gpu_benchmark --backend metal --workload stream --particles 1048576 --time 15
+gpu_benchmark --backend metal --workload gpu_burn --time 15 --iter 16
+gpu_benchmark --backend metal --workload cinematic_liquid --time 6   # preview only
+```
+
+SwiftUI（`macos-gui/`）已与 WinUI 真对齐（Run/CPU/History/Duration/Capture/API 多选/日语）。液体 Metal 可跑但必须标 preview，不得混入 Vulkan v8 榜。
 
 ### 优化措施
 

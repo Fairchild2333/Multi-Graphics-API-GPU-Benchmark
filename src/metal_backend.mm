@@ -1,6 +1,7 @@
 #ifdef HAVE_METAL
 
 #include "metal_backend.h"
+#include "metal_cinematic_liquid.h"
 #include "mini_mat.h"
 
 #define GLFW_EXPOSE_NATIVE_COCOA
@@ -14,6 +15,7 @@
 #include <cstring>
 #include <iostream>
 #include <mutex>
+#include <string>
 
 namespace gpu_bench {
 
@@ -57,6 +59,13 @@ struct MetalBackend::Impl {
         double totalMs;
     };
     std::vector<PendingTiming> pendingTimings;
+
+    // Cinematic Liquid v2 (MLS-MPM) Metal preview host; null when unused.
+    std::unique_ptr<MetalLiquidV2Host> liquid;
+
+    // MTLCaptureManager session (one capture at a time).
+    bool capturing = false;
+    std::string captureOutputPath;
 };
 
 // -----------------------------------------------------------------------
@@ -82,6 +91,67 @@ std::string MetalBackend::GetDriverVersion() const {
          + std::to_string(v.patchVersion);
 }
 
+bool MetalBackend::SupportsNativeGpuCapture() const {
+    if (!impl_ || !impl_->commandQueue)
+        return false;
+    @autoreleasepool {
+        MTLCaptureManager* mgr = [MTLCaptureManager sharedCaptureManager];
+        return mgr != nil &&
+               [mgr supportsDestination:MTLCaptureDestinationGPUTraceDocument];
+    }
+}
+
+bool MetalBackend::BeginNativeGpuCapture(const std::string& outputPath) {
+    if (!impl_ || !impl_->commandQueue || impl_->capturing)
+        return false;
+    @autoreleasepool {
+        MTLCaptureManager* mgr = [MTLCaptureManager sharedCaptureManager];
+        if (!mgr ||
+            ![mgr supportsDestination:MTLCaptureDestinationGPUTraceDocument])
+            return false;
+
+        std::string path = outputPath;
+        if (path.size() < 10 ||
+            path.substr(path.size() - 10) != ".gputrace")
+            path += ".gputrace";
+
+        NSURL* url = [NSURL fileURLWithPath:
+            [NSString stringWithUTF8String:path.c_str()]];
+        MTLCaptureDescriptor* desc = [[MTLCaptureDescriptor alloc] init];
+        desc.captureObject = impl_->commandQueue;
+        desc.destination = MTLCaptureDestinationGPUTraceDocument;
+        desc.outputURL = url;
+
+        NSError* error = nil;
+        if (![mgr startCaptureWithDescriptor:desc error:&error]) {
+            std::string msg = error
+                ? [[error localizedDescription] UTF8String]
+                : "unknown";
+            std::cout << "[Capture] MTLCaptureManager start failed: " << msg
+                      << "\n";
+            return false;
+        }
+        impl_->capturing = true;
+        impl_->captureOutputPath = path;
+        return true;
+    }
+}
+
+bool MetalBackend::EndNativeGpuCapture(std::string& outPath) {
+    outPath.clear();
+    if (!impl_ || !impl_->capturing)
+        return false;
+    @autoreleasepool {
+        MTLCaptureManager* mgr = [MTLCaptureManager sharedCaptureManager];
+        if (mgr && mgr.isCapturing)
+            [mgr stopCapture];
+        outPath = impl_->captureOutputPath;
+        impl_->capturing = false;
+        impl_->captureOutputPath.clear();
+        return !outPath.empty();
+    }
+}
+
 // -----------------------------------------------------------------------
 // Initialisation
 // -----------------------------------------------------------------------
@@ -91,13 +161,13 @@ void MetalBackend::InitBackend() {
         throw std::runtime_error(
             "Fluid is an unverified Vulkan-only Developer Preview; Metal fallback is disabled");
     }
+    if (config_.workload == Workload::CinematicLiquidV1) {
+        throw std::runtime_error(
+            "Cinematic Liquid v1 is Vulkan-only; Metal hosts v2 MLS-MPM preview only");
+    }
     if (config_.workload == Workload::GpuStressV1) {
         throw std::runtime_error(
             "GPU Stress v1 is not supported on Metal; use Vulkan, DX12, DX11, or OpenGL");
-    }
-    if (isGpuBurnWorkload(config_.workload)) {
-        throw std::runtime_error(
-            "GPU Burn is not supported on Metal; use Vulkan, DX12, DX11, or OpenGL");
     }
     @autoreleasepool {
         // --- Device selection ---------------------------------------------------
@@ -167,8 +237,42 @@ void MetalBackend::InitBackend() {
         // --- Command queue ------------------------------------------------------
         impl_->commandQueue = [impl_->device newCommandQueue];
 
+        auto enableOffscreenIfNeeded = [&]() {
+            if (!config_.headless && !config_.vsync) {
+                MTLTextureDescriptor* texDesc =
+                    [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
+                                                                       width:kWindowWidth
+                                                                      height:kWindowHeight
+                                                                   mipmapped:NO];
+                texDesc.usage = MTLTextureUsageRenderTarget;
+                texDesc.storageMode = MTLStorageModePrivate;
+                impl_->offscreenTex = [impl_->device newTextureWithDescriptor:texDesc];
+                if (!impl_->offscreenTex)
+                    throw std::runtime_error("Failed to create offscreen texture");
+                std::cout << "[Metal] Offscreen render target enabled to bypass ProMotion "
+                             "drawable locking (vsync off)\n";
+            }
+        };
+
+        // --- Cinematic Liquid v2 (separate library / host) -----------------------
+        if (config_.workload == Workload::CinematicLiquid) {
+            if (config_.liquidSolverSph) {
+                throw std::runtime_error(
+                    "Cinematic Liquid SPH is not implemented on Metal; use --liquid-solver mpm "
+                    "or Vulkan");
+            }
+            impl_->liquid = std::make_unique<MetalLiquidV2Host>();
+            impl_->liquid->init((__bridge void*)impl_->device,
+                                shaderDir_ + "cinematic_liquid_v2.metal");
+            config_.memoryLabelOverride = "Unified-memory";
+            enableOffscreenIfNeeded();
+            std::cout << "[Profiling] GPU command-buffer timestamps enabled\n";
+            return;
+        }
+
         // --- Compile Metal shader library from source ---------------------------
-        std::string shaderPath = shaderDir_ + "particle.metal";
+        const bool gpuBurn = isGpuBurnWorkload(config_.workload);
+        std::string shaderPath = shaderDir_ + (gpuBurn ? "gpu_burn.metal" : "particle.metal");
         auto shaderSource = ReadFileBytes(shaderPath);
         NSString* source =
             [[NSString alloc] initWithBytes:shaderSource.data()
@@ -186,35 +290,38 @@ void MetalBackend::InitBackend() {
             std::string msg = error
                 ? [[error localizedDescription] UTF8String]
                 : "unknown error";
-            throw std::runtime_error("Metal shader compilation failed: " + msg);
+            throw std::runtime_error("Metal shader compilation failed (" +
+                                     shaderPath + "): " + msg);
         }
 
-        // --- Compute pipeline ---------------------------------------------------
-        NSString* kernelName = @"computeMain";
-        if (config_.workload == Workload::NBody) {
-            kernelName = @"nbodyMain";
-        } else if (config_.workload == Workload::SynthPeak) {
-            switch (config_.peakPrecision) {
-                case Precision::FP16:  kernelName = @"synthFp16";  break;
-                case Precision::INT32: kernelName = @"synthInt32"; break;
-                case Precision::FP64:
-                    throw std::runtime_error("SynthPeak FP64 is not supported on Apple GPUs (no double); use Vulkan");
-                default:               kernelName = @"synthFp32";  break;
+        if (!gpuBurn) {
+            // --- Compute pipeline (particle / nbody / synthpeak) ----------------
+            NSString* kernelName = @"computeMain";
+            if (config_.workload == Workload::NBody) {
+                kernelName = @"nbodyMain";
+            } else if (config_.workload == Workload::SynthPeak) {
+                switch (config_.peakPrecision) {
+                    case Precision::FP16:  kernelName = @"synthFp16";  break;
+                    case Precision::INT32: kernelName = @"synthInt32"; break;
+                    case Precision::FP64:
+                        throw std::runtime_error("SynthPeak FP64 is not supported on Apple GPUs (no double); use Vulkan");
+                    default:               kernelName = @"synthFp32";  break;
+                }
             }
-        }
-        id<MTLFunction> computeFunc =
-            [impl_->library newFunctionWithName:kernelName];
-        if (!computeFunc)
-            throw std::runtime_error("compute kernel function not found in shader");
+            id<MTLFunction> computeFunc =
+                [impl_->library newFunctionWithName:kernelName];
+            if (!computeFunc)
+                throw std::runtime_error("compute kernel function not found in shader");
 
-        impl_->computePSO =
-            [impl_->device newComputePipelineStateWithFunction:computeFunc
-                                                         error:&error];
-        if (!impl_->computePSO) {
-            std::string msg = error
-                ? [[error localizedDescription] UTF8String]
-                : "unknown error";
-            throw std::runtime_error("Compute pipeline creation failed: " + msg);
+            impl_->computePSO =
+                [impl_->device newComputePipelineStateWithFunction:computeFunc
+                                                             error:&error];
+            if (!impl_->computePSO) {
+                std::string msg = error
+                    ? [[error localizedDescription] UTF8String]
+                    : "unknown error";
+                throw std::runtime_error("Compute pipeline creation failed: " + msg);
+            }
         }
 
         // --- Render pipeline (skipped in headless mode) -------------------------
@@ -222,10 +329,12 @@ void MetalBackend::InitBackend() {
             const bool fractal   = (config_.workload == Workload::StressFractal);
             const bool volumetric= (config_.workload == Workload::Volumetric);
             const bool render3d  = (config_.workload == Workload::Render3D);
-            NSString* vfn = fractal ? @"fractalVertex"
+            NSString* vfn = gpuBurn ? @"gpuBurnVertex"
+                         : fractal ? @"fractalVertex"
                          : volumetric ? @"volumetricVertex"
                          : render3d ? @"render3dVertex" : @"vertexMain";
-            NSString* ffn = fractal ? @"fractalFragment"
+            NSString* ffn = gpuBurn ? @"gpuBurnFragment"
+                         : fractal ? @"fractalFragment"
                          : volumetric ? @"volumetricFragment"
                          : render3d ? @"render3dFragment" : @"fragmentMain";
             id<MTLFunction> vertFunc = [impl_->library newFunctionWithName:vfn];
@@ -242,14 +351,19 @@ void MetalBackend::InitBackend() {
 
             MTLRenderPipelineColorAttachmentDescriptor* ca =
                 rpDesc.colorAttachments[0];
-            ca.pixelFormat                 = MTLPixelFormatBGRA8Unorm;
-            ca.blendingEnabled             = YES;
-            ca.sourceRGBBlendFactor        = MTLBlendFactorSourceAlpha;
-            ca.destinationRGBBlendFactor   = MTLBlendFactorOneMinusSourceAlpha;
-            ca.rgbBlendOperation           = MTLBlendOperationAdd;
-            ca.sourceAlphaBlendFactor      = MTLBlendFactorOne;
-            ca.destinationAlphaBlendFactor = MTLBlendFactorZero;
-            ca.alphaBlendOperation         = MTLBlendOperationAdd;
+            ca.pixelFormat = MTLPixelFormatBGRA8Unorm;
+            if (gpuBurn) {
+                // Opaque two-pass burn (pass1 uses discard); no alpha blend.
+                ca.blendingEnabled = NO;
+            } else {
+                ca.blendingEnabled             = YES;
+                ca.sourceRGBBlendFactor        = MTLBlendFactorSourceAlpha;
+                ca.destinationRGBBlendFactor   = MTLBlendFactorOneMinusSourceAlpha;
+                ca.rgbBlendOperation           = MTLBlendOperationAdd;
+                ca.sourceAlphaBlendFactor      = MTLBlendFactorOne;
+                ca.destinationAlphaBlendFactor = MTLBlendFactorZero;
+                ca.alphaBlendOperation         = MTLBlendOperationAdd;
+            }
 
             impl_->renderPSO =
                 [impl_->device newRenderPipelineStateWithDescriptor:rpDesc
@@ -279,37 +393,34 @@ void MetalBackend::InitBackend() {
             }
         }
 
-        // --- Particle buffer (shared memory — ideal for Apple Silicon) ----------
-        const NSUInteger bufSize = sizeof(Particle) * config_.particleCount;
-        impl_->particleBuf =
-            [impl_->device newBufferWithBytes:initialParticles_.data()
-                                       length:bufSize
-                                      options:MTLResourceStorageModeShared];
-        if (!impl_->particleBuf)
-            throw std::runtime_error("Failed to create particle buffer");
+        if (!gpuBurn) {
+            // --- Particle buffer (Shared / UMA — Apple Silicon default path) ----
+            const NSUInteger bufSize = sizeof(Particle) * config_.particleCount;
+            impl_->particleBuf =
+                [impl_->device newBufferWithBytes:initialParticles_.data()
+                                           length:bufSize
+                                          options:MTLResourceStorageModeShared];
+            if (!impl_->particleBuf)
+                throw std::runtime_error("Failed to create particle buffer");
 
-        std::cout << "Created particle buffer: " << config_.particleCount
-                  << " particles\n";
+            // Honest score metadata: Shared buffers are not discrete VRAM.
+            config_.memoryLabelOverride = "Unified-memory";
+
+            std::cout << "Created particle buffer: " << config_.particleCount
+                      << " particles (MTLResourceStorageModeShared / Unified-memory)\n";
+        } else {
+            std::cout << "[Metal] GPU Burn: fullscreen raymarch ("
+                      << gpuBurnDrawsPerFrame(config_.workload)
+                      << " draws/frame, steps=" << config_.gpuBurnIter << ")\n";
+        }
         std::cout << "[Profiling] GPU command-buffer timestamps enabled\n";
 
-        // --- Offscreen render target (benchmark mode only) ----------------------
-        // On macOS, ProMotion displays lock nextDrawable to refresh rate even with
-        // displaySyncEnabled=NO. In benchmark mode, use offscreen texture and
-        // present periodically to avoid VSync throttling.
-        // In interactive (non-benchmark) mode, present every frame normally.
-        if (!config_.headless && config_.benchmarkMode && !config_.vsync) {
-            MTLTextureDescriptor* texDesc =
-                [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
-                                                                  width:kWindowWidth
-                                                                 height:kWindowHeight
-                                                              mipmapped:NO];
-            texDesc.usage = MTLTextureUsageRenderTarget;
-            texDesc.storageMode = MTLStorageModePrivate;
-            impl_->offscreenTex = [impl_->device newTextureWithDescriptor:texDesc];
-            if (!impl_->offscreenTex)
-                throw std::runtime_error("Failed to create offscreen texture");
-            std::cout << "[Metal] Benchmark mode: using offscreen render target to bypass ProMotion VSync\n";
-        }
+        // --- Offscreen render target (timed / frame bench, VSync off) -----------
+        // ProMotion can lock nextDrawable to refresh even with
+        // displaySyncEnabled=NO. Formal 15s time-mode (not only --benchmark)
+        // must use an offscreen target and present periodically so throughput
+        // stays comparable to Windows vsync-off runs.
+        enableOffscreenIfNeeded();
 
         if (config_.headless)
             std::cout << "[Metal] Headless mode: pure compute, no rendering\n";
@@ -390,7 +501,7 @@ void MetalBackend::DrawFrame(float deltaTime) {
             return;
         }
 
-        // === WINDOWED PATH: compute + render ====================================
+        // === WINDOWED PATH ======================================================
 
         // --- Determine render target --------------------------------------------
         const bool useOffscreen = impl_->offscreenTex != nil;
@@ -412,38 +523,93 @@ void MetalBackend::DrawFrame(float deltaTime) {
             return;
         }
 
-        // --- Compute command buffer ---------------------------------------------
-        id<MTLCommandBuffer> computeCB = [impl_->commandQueue commandBuffer];
+        // --- Cinematic Liquid v2 preview ----------------------------------------
+        if (impl_->liquid && impl_->liquid->active()) {
+            void* computeCBPtr = nullptr;
+            void* renderCBPtr = nullptr;
+            impl_->liquid->encodeFrame(
+                (__bridge void*)impl_->commandQueue,
+                deltaTime,
+                (__bridge void*)renderTarget,
+                drawable ? (__bridge void*)drawable : nullptr,
+                &computeCBPtr,
+                &renderCBPtr);
 
-        id<MTLComputeCommandEncoder> computeEnc =
-            [computeCB computeCommandEncoder];
+            __block auto* implPtr = impl_.get();
+            __block id<MTLCommandBuffer> capturedComputeCB =
+                (__bridge id<MTLCommandBuffer>)computeCBPtr;
+            id<MTLCommandBuffer> renderCB =
+                (__bridge id<MTLCommandBuffer>)renderCBPtr;
+            dispatch_semaphore_t sem = impl_->frameSemaphore;
 
-        [computeEnc setComputePipelineState:impl_->computePSO];
-        [computeEnc setBuffer:impl_->particleBuf offset:0 atIndex:0];
+            id<MTLCommandBuffer> timingCB = renderCB ? renderCB : capturedComputeCB;
+            [timingCB addCompletedHandler:^(id<MTLCommandBuffer> cb) {
+                dispatch_semaphore_signal(sem);
+                const double rs = cb.GPUStartTime;
+                const double re = cb.GPUEndTime;
+                if (!(re > rs))
+                    return;
+                double computeMs = 0.0;
+                double renderMs = (re - rs) * 1000.0;
+                double totalMs = renderMs;
+                if (capturedComputeCB && renderCB) {
+                    const double cs = capturedComputeCB.GPUStartTime;
+                    const double ce = capturedComputeCB.GPUEndTime;
+                    if (ce > cs) {
+                        computeMs = (ce - cs) * 1000.0;
+                        totalMs = (re - cs) * 1000.0;
+                        renderMs = (re - rs) * 1000.0;
+                    }
+                } else if (capturedComputeCB && !renderCB) {
+                    computeMs = (re - rs) * 1000.0;
+                    renderMs = 0.0;
+                    totalMs = computeMs;
+                }
+                std::lock_guard<std::mutex> lock(implPtr->timingMutex);
+                implPtr->pendingTimings.push_back({computeMs, renderMs, totalMs});
+            }];
 
-        if (config_.workload == Workload::SynthPeak) {
-            PeakParams params{ config_.peakIters, 0.9999f, 0.0001f, 0 };
-            [computeEnc setBytes:&params length:sizeof(PeakParams) atIndex:1];
-        } else if (config_.workload == Workload::NBody) {
-            NBodyParams params{ deltaTime, config_.softening, config_.particleCount, 0 };
-            [computeEnc setBytes:&params length:sizeof(NBodyParams) atIndex:1];
-        } else {
-            ComputeParams params{ deltaTime, 0.9f };
-            [computeEnc setBytes:&params length:sizeof(ComputeParams) atIndex:1];
+            ++impl_->totalFrames;
+            impl_->currentFrame = (frameSlot + 1) % impl_->framesInFlight;
+            return;
         }
 
-        const MTLSize tgSize  = MTLSizeMake(kComputeWorkGroupSize, 1, 1);
-        const MTLSize tgCount = MTLSizeMake(
-            config_.particleCount / kComputeWorkGroupSize, 1, 1);
-        [computeEnc dispatchThreadgroups:tgCount
-                   threadsPerThreadgroup:tgSize];
-        [computeEnc endEncoding];
-        [computeCB commit];
-
-        // --- Render command buffer (queued after compute — GPU executes in order)
+        const bool gpuBurn  = isGpuBurnWorkload(config_.workload);
         const bool render3d = (config_.workload == Workload::Render3D);
+
+        // --- Optional compute (particle / nbody / synthpeak); GPU Burn skips ---
+        id<MTLCommandBuffer> computeCB = nil;
+        if (!gpuBurn) {
+            computeCB = [impl_->commandQueue commandBuffer];
+            id<MTLComputeCommandEncoder> computeEnc =
+                [computeCB computeCommandEncoder];
+
+            [computeEnc setComputePipelineState:impl_->computePSO];
+            [computeEnc setBuffer:impl_->particleBuf offset:0 atIndex:0];
+
+            if (config_.workload == Workload::SynthPeak) {
+                PeakParams params{ config_.peakIters, 0.9999f, 0.0001f, 0 };
+                [computeEnc setBytes:&params length:sizeof(PeakParams) atIndex:1];
+            } else if (config_.workload == Workload::NBody) {
+                NBodyParams params{ deltaTime, config_.softening, config_.particleCount, 0 };
+                [computeEnc setBytes:&params length:sizeof(NBodyParams) atIndex:1];
+            } else {
+                ComputeParams params{ deltaTime, 0.9f };
+                [computeEnc setBytes:&params length:sizeof(ComputeParams) atIndex:1];
+            }
+
+            const MTLSize tgSize  = MTLSizeMake(kComputeWorkGroupSize, 1, 1);
+            const MTLSize tgCount = MTLSizeMake(
+                config_.particleCount / kComputeWorkGroupSize, 1, 1);
+            [computeEnc dispatchThreadgroups:tgCount
+                       threadsPerThreadgroup:tgSize];
+            [computeEnc endEncoding];
+            [computeCB commit];
+        }
+
+        // --- Render command buffer ----------------------------------------------
         MTLRenderPassDescriptor* rpDesc = [MTLRenderPassDescriptor new];
-        rpDesc.colorAttachments[0].texture    = renderTarget;
+        rpDesc.colorAttachments[0].texture     = renderTarget;
         rpDesc.colorAttachments[0].loadAction  = MTLLoadActionClear;
         rpDesc.colorAttachments[0].storeAction = MTLStoreActionStore;
         rpDesc.colorAttachments[0].clearColor  =
@@ -460,20 +626,30 @@ void MetalBackend::DrawFrame(float deltaTime) {
             [renderCB renderCommandEncoderWithDescriptor:rpDesc];
 
         [renderEnc setRenderPipelineState:impl_->renderPSO];
-        if (config_.workload == Workload::StressFractal) {
+        if (gpuBurn) {
+            fractalElapsed_ += deltaTime;
+            for (std::uint32_t pass = 0; pass < gpuBurnDrawsPerFrame(config_.workload); ++pass) {
+                GpuBurnParams bp{ fractalElapsed_, static_cast<float>(pass),
+                                  config_.gpuBurnIter, gpuBurnShaderVersion(config_.workload) };
+                [renderEnc setFragmentBytes:&bp length:sizeof(GpuBurnParams) atIndex:0];
+                [renderEnc drawPrimitives:MTLPrimitiveTypeTriangle
+                              vertexStart:0
+                              vertexCount:3];
+            }
+        } else if (config_.workload == Workload::StressFractal) {
             fractalElapsed_ += deltaTime;
             FractalParams fp{ fractalElapsed_, 1.0f, config_.fractalIter, 0 };
             [renderEnc setFragmentBytes:&fp length:sizeof(FractalParams) atIndex:0];
             [renderEnc drawPrimitives:MTLPrimitiveTypeTriangle
                           vertexStart:0
-                          vertexCount:3];   // fullscreen triangle, no vertex buffer
+                          vertexCount:3];
         } else if (config_.workload == Workload::Volumetric) {
-            fractalElapsed_ += deltaTime;   // reused as noise-field animation time
+            fractalElapsed_ += deltaTime;
             VolumetricParams vp{ fractalElapsed_, 0.05f, config_.volumetricSteps, 0 };
             [renderEnc setFragmentBytes:&vp length:sizeof(VolumetricParams) atIndex:0];
             [renderEnc drawPrimitives:MTLPrimitiveTypeTriangle
                           vertexStart:0
-                          vertexCount:3];   // fullscreen triangle, no vertex buffer
+                          vertexCount:3];
         } else if (render3d) {
             [renderEnc setDepthStencilState:impl_->depthState];
             fractalElapsed_ += deltaTime;
@@ -502,24 +678,31 @@ void MetalBackend::DrawFrame(float deltaTime) {
         // --- Async timing + semaphore signal ------------------------------------
         __block auto* implPtr = impl_.get();
         __block id<MTLCommandBuffer> capturedComputeCB = computeCB;
+        __block BOOL burnOnly = gpuBurn ? YES : NO;
         dispatch_semaphore_t sem = impl_->frameSemaphore;
 
         [renderCB addCompletedHandler:^(id<MTLCommandBuffer> cb) {
             dispatch_semaphore_signal(sem);
 
-            const double cs = capturedComputeCB.GPUStartTime;
-            const double ce = capturedComputeCB.GPUEndTime;
             const double rs = cb.GPUStartTime;
             const double re = cb.GPUEndTime;
+            if (!(re > rs))
+                return;
 
-            if (ce > cs && re > rs) {
-                const double computeMs = (ce - cs) * 1000.0;
-                const double renderMs  = (re - rs) * 1000.0;
-                const double totalMs   = (re - cs) * 1000.0;
-
-                std::lock_guard<std::mutex> lock(implPtr->timingMutex);
-                implPtr->pendingTimings.push_back({computeMs, renderMs, totalMs});
+            const double renderMs = (re - rs) * 1000.0;
+            double computeMs = 0.0;
+            double totalMs   = renderMs;
+            if (!burnOnly && capturedComputeCB) {
+                const double cs = capturedComputeCB.GPUStartTime;
+                const double ce = capturedComputeCB.GPUEndTime;
+                if (ce > cs) {
+                    computeMs = (ce - cs) * 1000.0;
+                    totalMs   = (re - cs) * 1000.0;
+                }
             }
+
+            std::lock_guard<std::mutex> lock(implPtr->timingMutex);
+            implPtr->pendingTimings.push_back({computeMs, renderMs, totalMs});
         }];
 
         [renderCB commit];
@@ -556,9 +739,26 @@ void MetalBackend::CleanupBackend() {
     WaitIdle();
     if (!impl_) return;
 
+    if (impl_->capturing) {
+        @autoreleasepool {
+            MTLCaptureManager* mgr = [MTLCaptureManager sharedCaptureManager];
+            if (mgr && mgr.isCapturing)
+                [mgr stopCapture];
+        }
+        impl_->capturing = false;
+        impl_->captureOutputPath.clear();
+    }
+
+    if (impl_->liquid) {
+        impl_->liquid->cleanup();
+        impl_->liquid.reset();
+    }
     impl_->computePSO   = nil;
     impl_->renderPSO    = nil;
     impl_->particleBuf  = nil;
+    impl_->offscreenTex = nil;
+    impl_->depthTex     = nil;
+    impl_->depthState   = nil;
     impl_->library       = nil;
     impl_->commandQueue  = nil;
     impl_->metalLayer    = nil;

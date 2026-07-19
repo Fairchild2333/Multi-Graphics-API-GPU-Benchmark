@@ -19,6 +19,7 @@
 		847779A7AEAAB3BC594F07D5 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5931797D1CD1890548F2D50F /* Localization.swift */; };
 		CF3EB0E6C6CCE4AB52BC4B17 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 292D8F0C76E8C53D937E8BC9 /* AboutView.swift */; };
 		DD389C242471EE7C4D674617 /* RunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65BBAE1016DDE442843EDFC /* RunView.swift */; };
+		E1CPUVIEW01BUILDFILE00001 /* CpuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1CPUVIEW01FILEREF00002 /* CpuView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,7 @@
 		6F65AC0E25F3B972B1C7E067 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B45FBBD285712A4940F91A64 /* ChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
 		B65BBAE1016DDE442843EDFC /* RunView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunView.swift; sourceTree = "<group>"; };
+		E1CPUVIEW01FILEREF00002 /* CpuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CpuView.swift; sourceTree = "<group>"; };
 		DB1E17A053B2F4CB03F9F87E /* GPUBenchmark-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GPUBenchmark-Bridging-Header.h"; sourceTree = "<group>"; };
 		DCA604AC7291DFD52E3ED90A /* GPUBenchmark.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GPUBenchmark.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -61,6 +63,7 @@
 			children = (
 				292D8F0C76E8C53D937E8BC9 /* AboutView.swift */,
 				B45FBBD285712A4940F91A64 /* ChartsView.swift */,
+				E1CPUVIEW01FILEREF00002 /* CpuView.swift */,
 				5A5D4F75593984C34C3D979F /* HistoryView.swift */,
 				B65BBAE1016DDE442843EDFC /* RunView.swift */,
 				6F65AC0E25F3B972B1C7E067 /* SettingsView.swift */,
@@ -169,6 +172,7 @@
 				822737CDCEBC289F34EF2AD7 /* BenchResult.swift in Sources */,
 				551CC5E27733CBD92696B6C7 /* ChartsView.swift in Sources */,
 				66F3FDA2D6171DDE8BBF9FA5 /* ContentView.swift in Sources */,
+				E1CPUVIEW01BUILDFILE00001 /* CpuView.swift in Sources */,
 				3003398856F31FFD7517AF0F /* GPUBenchmarkApp.swift in Sources */,
 				324CE56B3629BD508C55A17F /* GlassCard.swift in Sources */,
 				72B4A9CEC591F2CCE9E0ADFE /* GpuBenchBridge.mm in Sources */,
@@ -209,7 +213,7 @@
 					"$(PROJECT_DIR)/../build",
 					/usr/local/lib,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				OTHER_LDFLAGS = (
 					"-lgpu_engine",
 					"-lglad_gl43",
@@ -276,7 +280,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -314,7 +318,7 @@
 					"$(PROJECT_DIR)/../build",
 					/usr/local/lib,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				OTHER_LDFLAGS = (
 					"-lgpu_engine",
 					"-lglad_gl43",
@@ -387,7 +391,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

@@ -36,6 +36,13 @@ protected:
     virtual void CleanupBackend()         = 0;
     virtual void WaitIdle()               = 0;
 
+    // Native GPU capture (Metal .gputrace). RenderDoc path uses rdocApi_.
+    virtual bool SupportsNativeGpuCapture() const { return false; }
+    virtual bool BeginNativeGpuCapture(const std::string& /*outputPath*/) {
+        return false;
+    }
+    virtual bool EndNativeGpuCapture(std::string& /*outPath*/) { return false; }
+
     void AccumulateTiming(double computeMs, double renderMs, double totalGpuMs);
 
     static std::vector<char> ReadFileBytes(const std::string& filename);
@@ -78,6 +85,8 @@ private:
     uint32_t rdocCaptureCount_     = 0;
     uint32_t rdocCaptureAttemptCount_ = 0;
     bool     rdocCaptureAttemptExcluded_ = false;
+    bool     captureUnavailable_   = false;  // requested but neither RenderDoc nor native capture available
+    bool     nativeCaptureRequested_ = false;
     std::string lastCapturePath_;
 
     double        lastFrameTime_      = 0.0;

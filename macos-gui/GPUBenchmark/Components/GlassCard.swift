@@ -1,5 +1,6 @@
-// GlassCard.swift — Reusable Liquid Glass card component.
-// Uses .glassEffect() on macOS 26+, falls back to .ultraThinMaterial on older versions.
+// GlassCard.swift — Reusable Liquid Glass card (shared Apple UI contract).
+// Liquid Glass on macOS 26+ / iOS 26+ / iOS 27+; older OS uses Material fallback.
+// iOS app target does not exist yet; keep #available ready for the shared port.
 
 import SwiftUI
 
@@ -12,7 +13,7 @@ struct GlassCard<Content: View>: View {
         content()
             .padding(padding)
             .background {
-                if #available(macOS 26.0, *) {
+                if #available(macOS 26.0, iOS 26.0, *) {
                     RoundedRectangle(cornerRadius: cornerRadius)
                         .fill(.clear)
                         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
@@ -37,7 +38,7 @@ struct AccentGlassCard<Content: View>: View {
         content()
             .padding(16)
             .background {
-                if #available(macOS 26.0, *) {
+                if #available(macOS 26.0, iOS 26.0, *) {
                     RoundedRectangle(cornerRadius: cornerRadius)
                         .fill(Color.accentColor.opacity(0.15))
                         .glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))

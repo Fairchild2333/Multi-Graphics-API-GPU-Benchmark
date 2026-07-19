@@ -42,7 +42,9 @@ set(_gpu_bench_runtime_shaders
 )
 if(ENABLE_METAL AND APPLE AND METAL_FRAMEWORK)
     list(APPEND _gpu_bench_runtime_shaders
-        "${CMAKE_SOURCE_DIR}/shaders/particle.metal")
+        "${CMAKE_SOURCE_DIR}/shaders/particle.metal"
+        "${CMAKE_SOURCE_DIR}/shaders/gpu_burn.metal"
+        "${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_v2.metal")
 endif()
 list(REMOVE_DUPLICATES _gpu_bench_runtime_shaders)
 

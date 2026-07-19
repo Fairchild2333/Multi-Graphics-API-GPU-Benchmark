@@ -33,8 +33,13 @@ bool gpb_delete_result(const char* resultId);
 /// Delete all results. Returns true on success.
 bool gpb_clear_results(void);
 
-/// Free a string returned by gpb_list_gpus / gpb_load_results.
+/// Free a string returned by gpb_list_gpus / gpb_load_results / path helpers.
 void gpb_free(char* ptr);
+
+/// Platform data-root subfolders (caller must free with gpb_free).
+/// macOS default: ~/Library/Application Support/GpuComputeBenchmark/{results,captures}
+char* gpb_results_dir(void);
+char* gpb_captures_dir(void);
 
 #ifdef __cplusplus
 }

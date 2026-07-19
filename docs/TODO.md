@@ -22,7 +22,7 @@
 - [ ] **P0 — v8 正式流程与 GUI/场景最终验收**：在 fixed timestep 合同冻结后运行 v8 正式 15 秒 + 第 5 秒 RenderDoc；WinUI 仍需实机检查 workload 选择、Vulkan-only 限制、完整运行与 History 分组；读取并记录沉球、船、越沿粒子的精确 GPU 轨迹。不得把历史 v7 构建、短 smoke 或 transient console 值写成 v8 视觉验收/正式成绩。
 - [ ] **P0 — v2 可比性与可靠性收口**：解决固定 dt/每渲染帧推进造成的跨 GPU 帧率反馈，冻结第 5 秒轨迹合同；审计 Vulkan timestamp 是否完整且只覆盖约定的 compute/surface/render 边界；补齐初始化失败、swapchain/设备异常与提前退出路径的 surface buffer/image/descriptor/pipeline 资源清理。
 - [x] **v2 下一重大画质路线 — SPH vertical slice 与视觉收口（2026-07-16）**：`--liquid-solver sph` → 始终为 `cinematic_liquid_sph_slice_v1_preview`。当前深池版本为 **318,464 粒子**、计数排序邻域、per-particle SDF/浮力刚体耦合，复用当前 inset 0.45、wall-top fraction 0.42、`extinction=(12,3.6,2.5)` 的池体/场景和用户鸭子家族；草地吸收倒计时为 0.50–1.80 sim 秒。RTX 5090/Vulkan 已实际完整运行 15 秒，水池/水面/鸭子/球/船/草地稳定显示并正常自动结束，用户接受当前视觉并停止外观迭代。**这只完成视觉验收，不是正式成绩完成**；在 render-frame 驱动的 2×1/120 timestep、每 substep `bodyImpulses` 清零、viscosity 原位 SSBO race、atomic scatter cell-order 非确定性四项全部关闭前，任何时长（包括 15 秒）都必须强制 `_preview`。之后才能做正式 15 秒 + 第 5 秒 RenderDoc、timestamp/确定性合同。secondary spray/foam、SPH 螺旋桨尾流与跨 API 是后续增强；细节见 HANDOFF 的 SPH vertical slice。
-- [ ] **P0 后的 v2 原生后端移植**：DX12、DX11、OpenGL 与 Metal 尚未实现；必须在 Vulkan scene/pass/quality contract 冻结并通过正式验收后逐后端实现和验证，不能把通用 workload fallback 当作 liquid 支持。
+- [ ] **P0 后的 v2 原生后端移植**：DX12、DX11、OpenGL 液体尚未实现；Metal 已有 MLS-MPM + raymarch present（`…_metal_preview`），正式合同与真机验收未完成。必须在 Vulkan scene/pass/quality contract 冻结并通过正式验收后逐后端实现和验证，不能把 preview 当作正式 liquid 支持。
 - [x] **CPU 补充测试 Windows vertical slice（2026-07-16）**：原生 `cpu_mixed_v1`、CLI `per-core|multi|all`、三轮中位数、独立 WinUI CPU 页、实时逐核/总进度、Run/Cancel、stdout 协议与 `results.json` summary 持久化已实现；不创建 3D 窗口、不调用 RenderDoc。正式计分热路径已改为所有 per-core 同 seed、被测线程零 stdout、multi 测量窗口零 stdout、线程局部/128-byte 隔离计数；Windows/Linux/Android affinity 均要求 set 后回读验证。GUI 已加 CPU/GPU/Charts 全局互斥、完整 15.0/0.2 Formal 预设、输出节流和协议完整性审计。9800X3D Release smoke 正确枚举 16 logical/8 physical/SMT2，逐核与 multi 全部 strict affinity、exit 0；隔离数据目录的 0.1 秒 GUI E2E 显示 16 条逐核、平均、多核、100%/Done。两者均是 preview，不是正式成绩。正式合同为 15.0 秒总测量 + 0.2 秒预热 + r3；版本隔离 affinity/time/warmup/sequence，JSON 只保存逐核平均与 multi summary。
 - [ ] **CPU 发布与平台合同收口**：重建新的 stage/ZIP/Inno Setup，并在干净 Windows 安装后验收 GUI 相邻 CLI 查找、Run/Cancel、History 写入；补一次不受当前开发负载影响的正式 15.0/0.2/r3 成绩、>64 logical/processor-group 与真实混合核实机。Linux/Android 代码合同为回读验证的 `strict_sched_affinity`（失败 `valid=0`/exit 3），但原生 Linux、容器/cpuset 和 Android 设备尚未构建；macOS 为 `scheduler_managed`/估计拓扑，iOS/Web/WASM 未构建。P/E/Mid/LPE 只允许写 `Inferred*` 排名标签，不得宣称真实微架构识别，各 affinity capability 必须独立分组。
 - [x] **GT 120 / DX10 时代代码路径**：不新增 DX9 后端；现有 DX11 后端实际探测 FL10_0/10_1 与可选 DirectCompute 4.x，按设备切换 `cs/vs/ps_4_0`，fragment-only 测试不再创建 compute/UAV，Vulkan loader 改为 delay-load。16/16 个生产 HLSL SM4 entry 已通过 FXC，DX11 Extreme 越界会拒绝，SM4 N-body 安全上限为 4,096。
@@ -36,19 +36,26 @@
 - [ ] 第二阶段建立 `/web` 浏览器前端，共享 WGSL/workload manifest；浏览器结果单独分组，不承诺“全部 GPU 精确选择”或第 5 秒 RenderDoc。
 - [ ] TriangleBin WebGPU：建议另建正式 fork/独立 `TriangleBin-WebGPU` 仓库，保留上游 MIT 与历史，只移植 atomic-counter shade-order 核心并以 HTML/WGSL 重写 UI；当前项目仅在 Architecture Tools 中链接或导入结果，不直接合并源码。
 
-## 平台移植优先级（用户锁定 2026-07-16）
+## 平台移植优先级（用户锁定；2026-07-19 将 Win7 GUI 挪到 PS3 前）
 
-顺序：**Win ARM64 → macOS → Android → iOS → Debian Linux → WebGPU → HarmonyOS PC / 鸿蒙 → PS3（探索性）→ Dual-GPU Aggregate（双卡合力，功能项）**（2026-07-16 用户把 WebGPU 排入、把 HarmonyOS 排在 WebGPU 后与 PS3 前；同日把 Dual-GPU Aggregate 排在 PS3 之后）。除现有隔离的 HarmonyOS Vulkan 粒子 demo 外，完整产品移植均未开始；该 demo 不等于 workload suite 已移植。不改变上方产品主线的切片顺序，平台移植在其后展开。逐平台落地时：能力不齐明确 unsupported、不静默 fallback；计时/抓帧模型不同的实现必须使用新 `workloadVersion` 独立成组，现有 Windows 成绩组的 A/B 对比不受影响。详细逐平台要点见 `HANDOFF.md` 目标 C。
+顺序：**Win ARM64 → macOS → Android → iOS → Debian Linux → WebGPU → HarmonyOS PC / 鸿蒙 → Windows 7 专用 GUI（Aero）→ PS3（探索性）→ Dual-GPU Aggregate（双卡合力，功能项）**。除现有隔离的 HarmonyOS Vulkan 粒子 demo 外，完整产品移植均未开始；该 demo 不等于 workload suite 已移植。不改变上方产品主线的切片顺序，平台移植在其后展开。逐平台落地时：能力不齐明确 unsupported、不静默 fallback；计时/抓帧模型不同的实现必须使用新 `workloadVersion` 独立成组，现有 Windows 成绩组的 A/B 对比不受影响。详细逐平台要点见 `HANDOFF.md` 目标 C。
 
-- [ ] **1. Win ARM64**：CLI/WinUI ARM64 目标 + vcpkg `arm64-windows` + WinAppSDK ARM64 payload；实机验证 Vulkan(Adreno)/DX12/DX11/WARP/OpenGL 兼容层。预计不动核心代码与成绩合同。
-- [ ] **2. macOS**：主 workload 的 Metal 移植（现仅粒子）、SwiftUI GUI 对齐统一 registry、`MTLCaptureManager`(.gputrace) 替代 RenderDoc。
+- [x] **1. Win ARM64**：原生 CLI/WinUI + WiX MSI 闭环已落地（见 HANDOFF）；clean-machine/签名仍开放。
+- [ ] **2. macOS（下一平台刀）**：
+  - [x] Metal Particle 合同代码（离屏 / Unified-memory / capture 诚实）— **待真 Mac 15s 验收**
+  - [x] Metal GPU Burn（`gpu_burn.metal` + 双 pass）— **待真 Mac 验收**
+  - [x] SwiftUI ↔ WinUI 真对齐（Run/CPU/History/Duration/Capture/API 多选）— **待 Mac 编译验收**
+  - [x] Metal 液体：raymarch present（`liquidFragment` / `_metal_preview`）— **待真 Mac 编译与冒烟**
+  - [ ] 真 Mac 三主项冒烟 + 15s 正式流程
+  - [x] `MTLCaptureManager`(.gputrace) 接线（F12/`--capture`/`--capture-frame`）— **待真 Mac 验证**
 - [ ] **3. Android**：NativeActivity/ANativeWindow 表面层替代 GLFW + 新前端；RenderDoc Android 远程抓帧；评估温控对 15 秒 Burst 语义的影响。
-- [ ] **4. iOS**：仅 Metal/MoltenVK；抓帧走 `MTLCaptureManager`；与 macOS 共享 SwiftUI 前端；App Store 分发约束。
+- [ ] **4. iOS**（未开工；排在 Android 后）：**最低 iOS 16**；仅 Metal；`MTLCaptureManager`；共享 SwiftUI；App Store。**iOS 26/27 = Liquid Glass**，16–25 Material。开工规格见 `HANDOFF.md` §3.0.3。
 - [ ] **5. Debian Linux**：构建修正、`.deb` 打包、CI 与实机验证（后端/GLFW/RenderDoc/XDG 路径均已有，摩擦最低）。
 - [ ] **6. WebGPU**：按既定路线——capability registry P0 → 固定 Dawn 版本原生后端（Stream → GPU Burn → Cinematic Liquid）→ `/web` 浏览器前端；独立版本 id（`stream_webgpu_v1` 等），无可靠 timestamp 不产生正式 score（对应上方“原生 WebGPU 后端”与 `/web` 两条任务）。
 - [ ] **7. HarmonyOS PC / 鸿蒙**：把现有 `ohos/` 独立 Vulkan 粒子 demo 升级为正式产品端口；补统一 workload registry、主 CLI/GUI、GPU Burn/Cinematic Liquid、结果合同与适合该平台的抓帧编排。现有 demo 不能标为已完成移植。
-- [ ] **8. PS3（探索性，永不进成绩体系）**：仅 homebrew（PSL1GHT/RSXGL）；RSX 无 compute/原子/GPU timestamp，PSGL≈GL ES 1.0+Cg，三主测试不可直移；至多独立仓库的固定管线情怀 demo。
-- [ ] **9. Dual-GPU Aggregate（双卡合力模式，功能项；首个验证目标 Boot Camp 下 Mac Pro 2013 双 D700）**：引擎级显式多 GPU，不依赖驱动 CrossFire/LDA/device-group。切片：(a) `stream` headless 双设备聚合（新组 `stream_dualgpu_v1`，记录双 adapter 元数据）→ (b) N-body 双卡位置交换 → (c) GPU Burn 分屏 SFR/AFR（DX12 unlinked 跨适配器堆）。不做液体域分解。双 D700 满载注意散热，禁止双卡长时烤机。
+- [ ] **8. Windows 7 专用 GUI（PS3 之前）**：独立 Win32/DWM 前端与安装包，共享 `gpu_engine`/CLI/成绩 schema；Aero 能力探测与无 Aero 回退；不得携带 WinUI/WinAppSDK。
+- [ ] **9. PS3（探索性，永不进成绩体系）**：仅 homebrew（PSL1GHT/RSXGL）；RSX 无 compute/原子/GPU timestamp，PSGL≈GL ES 1.0+Cg，三主测试不可直移；至多独立仓库的固定管线情怀 demo。
+- [ ] **10. Dual-GPU Aggregate（双卡合力模式，功能项；首个验证目标 Boot Camp 下 Mac Pro 2013 双 D700）**：引擎级显式多 GPU，不依赖驱动 CrossFire/LDA/device-group。切片：(a) `stream` headless 双设备聚合（新组 `stream_dualgpu_v1`，记录双 adapter 元数据）→ (b) N-body 双卡位置交换 → (c) GPU Burn 分屏 SFR/AFR（DX12 unlinked 跨适配器堆）。不做液体域分解。双 D700 满载注意散热，禁止双卡长时烤机。
 
 > 状态提示：请先阅读根目录 [`HANDOFF.md`](../HANDOFF.md)。当前事实、两条产品主线、P0 阻塞和下一实现切片以 HANDOFF 为准；本文件保留专题任务与历史上下文。每次工作应先更新 HANDOFF，再同步这里。
 
@@ -61,10 +68,10 @@
 ### 实现步骤
 
 #### 1. MTLCaptureManager 集成（C++ / ObjC）
-- [ ] 在 `metal_backend.mm` 中添加 `MTLCaptureManager` 支持
-- [ ] 复用现有 `--capture <seconds>` 参数，Metal 后端自动走 MTLCaptureManager
-- [ ] 自动导出 `.gputrace` 到 `metal_captures/` 目录
-- [ ] 捕获文件命名格式：`Metal_<GPU名>.gputrace`
+- [x] 在 `metal_backend.mm` 中添加 `MTLCaptureManager` 支持
+- [x] 复用现有 `--capture` / F12 / `--capture-frame`，Metal 走 MTLCaptureManager
+- [x] 导出 `.gputrace` 到 PathService captures 目录（`Metal_<GPU>_<ms>.gputrace`）
+- [ ] 真 Mac 验证抓帧文件可被 Xcode 打开
 
 #### 2. Timing JSON 导出（C++ / ObjC）
 - [ ] 捕获帧时通过 `GPUStartTime` / `GPUEndTime` 采集 per-event timing

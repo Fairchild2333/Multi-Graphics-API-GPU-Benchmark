@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 
-# macOS: support 10.15+ (Catalina) — minimum for Metal GPUStartTime/GPUEndTime
-# and MTLMathModeFast. Covers all Intel + Apple Silicon Macs from 2019 onward.
+# macOS product floor: 12.0 (Monterey). Metal CLI also works from 10.15 APIs, but
+# SwiftUI GUI and packaging target Monterey+ so scores/docs stay one floor.
 if(APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum macOS version")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS version")
 endif()
 
 project(Mangekyo VERSION 0.2.0 LANGUAGES C CXX)
@@ -95,12 +95,18 @@ if(ENABLE_METAL AND APPLE)
     find_library(COCOA_FRAMEWORK Cocoa)
 
     if(METAL_FRAMEWORK)
-        list(APPEND BACKEND_SOURCES src/metal_backend.mm src/metal_probe.mm)
+        list(APPEND BACKEND_SOURCES
+            src/metal_backend.mm
+            src/metal_probe.mm
+            src/metal_cinematic_liquid.mm)
         list(APPEND BACKEND_LIBS
             ${METAL_FRAMEWORK} ${QUARTZCORE_FRAMEWORK} ${COCOA_FRAMEWORK})
         list(APPEND BACKEND_DEFS HAVE_METAL)
 
-        set_source_files_properties(src/metal_backend.mm src/metal_probe.mm
+        set_source_files_properties(
+            src/metal_backend.mm
+            src/metal_probe.mm
+            src/metal_cinematic_liquid.mm
             PROPERTIES COMPILE_FLAGS "-fobjc-arc"
         )
 
@@ -294,13 +300,15 @@ if(ENABLE_DX12 AND WIN32)
     endif()
 endif()
 
-# ---- Copy Metal shader source file next to executable (macOS) ----
+# ---- Copy Metal shader source files next to executable (macOS) ----
 if(ENABLE_METAL AND APPLE AND METAL_FRAMEWORK)
     add_custom_command(TARGET gpu_benchmark POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${CMAKE_SOURCE_DIR}/shaders/particle.metal
+            ${CMAKE_SOURCE_DIR}/shaders/gpu_burn.metal
+            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_v2.metal
             $<TARGET_FILE_DIR:gpu_benchmark>
-        COMMENT "Copying Metal shader file next to executable"
+        COMMENT "Copying Metal shader files next to executable"
     )
 endif()
 

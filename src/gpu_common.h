@@ -411,6 +411,9 @@ struct BenchmarkConfig {
     bool          vsync              = false;
     bool          benchmarkMode      = false;
     bool          hostMemory         = false;
+    // If non-empty, persisted as results.json "memory" instead of the default
+    // System-RAM / Device-local labels (e.g. Metal Shared → "Unified-memory").
+    std::string   memoryLabelOverride;
     bool          particlesOverridden = false;
     bool          headless           = false;    // pure compute, no window/swapchain/present
     bool          guiWorker          = false;    // internal: isolated WinUI child process

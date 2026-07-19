@@ -1,5 +1,4 @@
-// HistoryView.swift — Saved benchmark results with sorting, filtering, deletion.
-// Uses SwiftUI Table for native multi-column display with sorting support.
+// HistoryView.swift — Saved benchmark results (WinUI-aligned filters + folders).
 
 import SwiftUI
 
@@ -8,73 +7,99 @@ struct HistoryView: View {
 
     @State private var selection = Set<String>()
     @State private var sortOrder = [KeyPathComparator(\BenchResult.id, order: .reverse)]
-
-    // Filters
     @State private var selectedSort: SortOption = .timeNewest
     @State private var gpuFilter: String = "All"
+    @State private var apiFilter: String = "All"
+    @State private var workloadFilter: String = "All"
     @State private var timeRange: TimeRange = .all
+    @State private var confirmClear = false
 
     enum SortOption: String, CaseIterable {
-        case timeNewest  = "Time (newest)"
-        case scoreHigh   = "Score (high→low)"
-        case api         = "Graphics API"
-        case device      = "GPU / Renderer"
-        case workload    = "Workload"
+        case timeNewest, scoreHigh, api, device, workload
+        var label: String {
+            switch self {
+            case .timeNewest: return Localization.tr("Time (newest)", "时间（最新）", "時間（新しい順）")
+            case .scoreHigh:  return Localization.tr("Score (high→low)", "分数（高→低）", "スコア（高→低）")
+            case .api:        return Localization.tr("Graphics API", "图形 API", "グラフィックス API")
+            case .device:     return Localization.tr("GPU / Renderer", "GPU / 渲染器", "GPU / レンダラ")
+            case .workload:   return Localization.tr("Workload", "负载", "ワークロード")
+            }
+        }
     }
 
     enum TimeRange: String, CaseIterable {
-        case all     = "All"
-        case today   = "Today"
-        case week    = "Last 7 days"
-        case month   = "Last 30 days"
+        case all, today, week, month
+        var label: String {
+            switch self {
+            case .all:   return Localization.tr("All", "全部", "すべて")
+            case .today: return Localization.tr("Today", "今天", "今日")
+            case .week:  return Localization.tr("Last 7 days", "近 7 天", "過去 7 日")
+            case .month: return Localization.tr("Last 30 days", "近 30 天", "過去 30 日")
+            }
+        }
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Header
             HStack(spacing: 12) {
-                Text(Localization.tr("History", "历史"))
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+                Text(Localization.tr("History", "历史", "履歴"))
+                    .font(.largeTitle).fontWeight(.bold)
 
                 Button(action: refresh) {
-                    Label(Localization.tr("Refresh", "刷新"), systemImage: "arrow.clockwise")
+                    Label(Localization.tr("Refresh", "刷新", "更新"), systemImage: "arrow.clockwise")
                 }
-
                 Button(role: .destructive, action: deleteSelected) {
-                    Label(Localization.tr("Delete selected", "删除选中"), systemImage: "trash")
+                    Label(Localization.tr("Delete selected", "删除选中", "選択を削除"), systemImage: "trash")
                 }
                 .disabled(selection.isEmpty)
 
+                Button(role: .destructive) { confirmClear = true } label: {
+                    Label(Localization.tr("Clear all", "清空全部", "すべて消去"), systemImage: "trash.fill")
+                }
+                .disabled(engine.results.isEmpty)
+
                 Spacer()
+
+                Button(Localization.tr("Open results folder", "打开结果文件夹", "結果フォルダを開く")) {
+                    engine.openResultsFolder()
+                }
+                Button(Localization.tr("Open captures folder", "打开抓帧文件夹", "キャプチャフォルダを開く")) {
+                    engine.openCapturesFolder()
+                }
             }
 
-            // Filter bar
-            HStack(spacing: 16) {
-                Picker(Localization.tr("Sort by", "排序"), selection: $selectedSort) {
+            HStack(spacing: 12) {
+                Picker(Localization.tr("Sort by", "排序", "並べ替え"), selection: $selectedSort) {
                     ForEach(SortOption.allCases, id: \.self) { opt in
-                        Text(opt.rawValue).tag(opt)
+                        Text(opt.label).tag(opt)
                     }
                 }
-                .frame(width: 200)
+                .frame(width: 180)
 
-                Picker(Localization.tr("GPU", "GPU"), selection: $gpuFilter) {
-                    Text(Localization.tr("All GPUs", "所有 GPU")).tag("All")
-                    ForEach(uniqueDevices, id: \.self) { dev in
-                        Text(dev).tag(dev)
-                    }
+                Picker("GPU", selection: $gpuFilter) {
+                    Text(Localization.tr("All GPUs", "所有 GPU", "すべての GPU")).tag("All")
+                    ForEach(uniqueDevices, id: \.self) { Text($0).tag($0) }
                 }
-                .frame(width: 250)
+                .frame(width: 220)
 
-                Picker(Localization.tr("Time range", "时间范围"), selection: $timeRange) {
-                    ForEach(TimeRange.allCases, id: \.self) { r in
-                        Text(r.rawValue).tag(r)
-                    }
+                Picker("API", selection: $apiFilter) {
+                    Text(Localization.tr("All APIs", "所有 API", "すべての API")).tag("All")
+                    ForEach(uniqueApis, id: \.self) { Text($0).tag($0) }
                 }
-                .frame(width: 160)
+                .frame(width: 140)
+
+                Picker(Localization.tr("Workload", "负载", "ワークロード"), selection: $workloadFilter) {
+                    Text(Localization.tr("All workloads", "所有负载", "すべてのワークロード")).tag("All")
+                    ForEach(uniqueWorkloads, id: \.self) { Text($0).tag($0) }
+                }
+                .frame(width: 180)
+
+                Picker(Localization.tr("Time range", "时间范围", "期間"), selection: $timeRange) {
+                    ForEach(TimeRange.allCases, id: \.self) { Text($0.label).tag($0) }
+                }
+                .frame(width: 150)
             }
 
-            // Results table
             GlassCard(padding: 0) {
                 Table(filteredResults, selection: $selection, sortOrder: $sortOrder) {
                     TableColumn("#", value: \.id) { r in
@@ -83,43 +108,46 @@ struct HistoryView: View {
                     }
                     .width(min: 30, ideal: 40, max: 50)
 
-                    TableColumn(Localization.tr("API", "API"), value: \.graphicsApi)
+                    TableColumn(Localization.tr("API", "API", "API"), value: \.graphicsApi)
                         .width(min: 50, ideal: 65, max: 80)
 
-                    TableColumn(Localization.tr("Device", "设备"), value: \.deviceName)
-                        .width(min: 120, ideal: 200)
+                    TableColumn(Localization.tr("Device", "设备", "デバイス"), value: \.deviceName)
+                        .width(min: 120, ideal: 180)
 
-                    TableColumn(Localization.tr("Workload", "负载"), value: \.workload)
-                        .width(min: 60, ideal: 80, max: 100)
+                    TableColumn(Localization.tr("Workload", "负载", "ワークロード"), value: \.workload)
+                        .width(min: 70, ideal: 90, max: 110)
 
-                    TableColumn(Localization.tr("Difficulty", "难度"), value: \.difficulty)
+                    TableColumn(Localization.tr("Version", "版本", "バージョン")) { r in
+                        Text(r.workloadVersion ?? "—")
+                            .font(.caption2)
+                            .lineLimit(1)
+                    }
+                    .width(min: 100, ideal: 160)
+
+                    TableColumn(Localization.tr("Difficulty", "难度", "難易度"), value: \.difficulty)
                         .width(min: 60, ideal: 80, max: 100)
 
                     TableColumn("FPS") { r in
-                        Text(String(format: "%.0f", r.avgFps))
-                            .monospacedDigit()
+                        Text(String(format: "%.0f", r.avgFps)).monospacedDigit()
                     }
                     .width(min: 50, ideal: 70, max: 90)
 
                     TableColumn("GPU ms") { r in
                         Text(r.avgTotalGpuMs > 0
-                             ? String(format: "%.3f", r.avgTotalGpuMs)
-                             : "N/A")
+                             ? String(format: "%.3f", r.avgTotalGpuMs) : "N/A")
                             .monospacedDigit()
                     }
                     .width(min: 60, ideal: 80, max: 100)
 
-                    TableColumn(Localization.tr("Score", "分数")) { r in
+                    TableColumn(Localization.tr("Score", "分数", "スコア")) { r in
                         Text(r.score > 0
-                             ? String(format: "%.1f %@", r.score, r.scoreUnit)
-                             : "—")
+                             ? String(format: "%.1f %@", r.score, r.scoreUnit) : "—")
                             .monospacedDigit()
                     }
                     .width(min: 80, ideal: 120)
 
-                    TableColumn(Localization.tr("Time", "时间"), value: \.timestamp) { r in
-                        Text(formatTimestamp(r.id))
-                            .font(.caption)
+                    TableColumn(Localization.tr("Time", "时间", "時間"), value: \.timestamp) { r in
+                        Text(formatTimestamp(r.id)).font(.caption)
                     }
                     .width(min: 100, ideal: 140)
                 }
@@ -128,23 +156,33 @@ struct HistoryView: View {
         }
         .padding(28)
         .onAppear { refresh() }
+        .confirmationDialog(
+            Localization.tr("Clear all results?", "清空全部结果？", "すべての結果を消去しますか？"),
+            isPresented: $confirmClear
+        ) {
+            Button(Localization.tr("Clear all", "清空全部", "すべて消去"), role: .destructive) {
+                _ = engine.clearAllResults()
+            }
+            Button(Localization.tr("Cancel", "取消", "キャンセル"), role: .cancel) {}
+        }
     }
-
-    // MARK: - Helpers
 
     private var uniqueDevices: [String] {
         Array(Set(engine.results.map(\.deviceName))).sorted()
     }
+    private var uniqueApis: [String] {
+        Array(Set(engine.results.map(\.graphicsApi))).sorted()
+    }
+    private var uniqueWorkloads: [String] {
+        Array(Set(engine.results.map(\.workload))).sorted()
+    }
 
     private var filteredResults: [BenchResult] {
         var r = engine.results
+        if gpuFilter != "All" { r = r.filter { $0.deviceName == gpuFilter } }
+        if apiFilter != "All" { r = r.filter { $0.graphicsApi == apiFilter } }
+        if workloadFilter != "All" { r = r.filter { $0.workload == workloadFilter } }
 
-        // GPU filter
-        if gpuFilter != "All" {
-            r = r.filter { $0.deviceName == gpuFilter }
-        }
-
-        // Time range filter
         let now = Date()
         switch timeRange {
         case .today:
@@ -153,19 +191,16 @@ struct HistoryView: View {
             r = r.filter { $0.date.map { now.timeIntervalSince($0) < 7 * 86400 } ?? false }
         case .month:
             r = r.filter { $0.date.map { now.timeIntervalSince($0) < 30 * 86400 } ?? false }
-        case .all:
-            break
+        case .all: break
         }
 
-        // Sort
         switch selectedSort {
         case .timeNewest: r.sort { $0.id > $1.id }
-        case .scoreHigh:  r.sort { $0.avgFps > $1.avgFps }
+        case .scoreHigh:  r.sort { $0.score > $1.score }
         case .api:        r.sort { $0.graphicsApi < $1.graphicsApi }
         case .device:     r.sort { $0.deviceName < $1.deviceName }
         case .workload:   r.sort { $0.workload < $1.workload }
         }
-
         return r
     }
 
@@ -175,9 +210,7 @@ struct HistoryView: View {
     }
 
     private func deleteSelected() {
-        for id in selection {
-            _ = engine.deleteResult(id: id)
-        }
+        for id in selection { _ = engine.deleteResult(id: id) }
         selection.removeAll()
     }
 
@@ -185,7 +218,6 @@ struct HistoryView: View {
         guard id.count >= 15 else { return id }
         let idx = id.index(id.startIndex, offsetBy: 15)
         let s = String(id[..<idx])
-        // "20260627-101245" → "2026-06-27 10:12:45"
         guard s.count == 15 else { return id }
         let y = s.prefix(4), m = s.dropFirst(4).prefix(2),
             d = s.dropFirst(6).prefix(2), H = s.dropFirst(9).prefix(2),

@@ -39,30 +39,29 @@ still needs physical-card acceptance; its safe N-body profile is limited to
 4,096 bodies. Vulkan is delay-loaded, so a DirectX-only machine can start even
 when no `vulkan-1.dll` is installed.
 
-## Platform Porting Priority (user-locked 2026-07-16)
+## Platform Porting Priority (user-locked; Win7 GUI moved before PS3 on 2026-07-19)
 
 Planned porting order after the current Windows x64 work settles. Ports land
 as their own result groups (new `workloadVersion` whenever the timing or
 capture model differs), so existing Windows score comparisons are never
-affected. None of these full product ports has started; HarmonyOS already has
-an isolated Vulkan particle prototype, but it is not the current benchmark
-suite.
+affected. HarmonyOS already has an isolated Vulkan particle prototype, but it
+is not the current benchmark suite. Windows ARM64 packaging has landed; the
+next platform slice is macOS.
 
-1. **Windows on ARM (ARM64)** — expected to be a build/packaging port only:
-   ARM64 CLI/WinUI targets (currently x64-only), vcpkg `arm64-windows`
-   triplet, WinAppSDK ARM64 payload, on-device validation of Vulkan
-   (Adreno), DX12/DX11, WARP and the OpenGL compatibility layer.
-2. **macOS** — Metal backend currently covers only the particle workload;
-   needs Metal ports of the main workloads, SwiftUI GUI alignment with the
-   shared workload registry, and `MTLCaptureManager` (.gputrace) replacing
-   RenderDoc capture.
+1. **Windows on ARM (ARM64)** — native CLI/WinUI + WiX MSI packaging landed;
+   clean-machine / signing still open.
+2. **macOS** — Product floor **macOS 12 Monterey** (CLI + SwiftUI). Metal code
+   for the three primary workloads has landed: Particle + GPU Burn + Cinematic
+   Liquid MLS-MPM/raymarch (`…_metal_preview`) + `MTLCaptureManager` (.gputrace).
+   SwiftUI is aligned with WinUI (Liquid Glass on 26, Material on 12–15). Still
+   open: real-Mac compile/smoke and formal acceptance.
 3. **Android** — reuses the Vulkan backend; GLFW does not support Android, so
    a NativeActivity/ANativeWindow surface layer and a new frontend are
    required. RenderDoc supports Android remote capture. Thermal throttling
    may require a separate mobile duration contract.
-4. **iOS** — Metal (or MoltenVK) only; no RenderDoc, capture via
-   `MTLCaptureManager`; shares the SwiftUI frontend with macOS; App Store
-   distribution constraints apply.
+4. **iOS** — Not started (after Android). Floor **iOS 16**. Metal only; no
+   RenderDoc; `MTLCaptureManager`; shared SwiftUI with macOS. **iOS 26 / 27
+   must use Liquid Glass** (Material on 16–25). See `HANDOFF.md` §3.0.3.
 5. **Debian Linux** — technically the lowest-friction port: Vulkan/OpenGL
    backends, GLFW, RenderDoc and the XDG data path already exist; mostly
    build fixes, `.deb` packaging, CI and real-machine validation.
@@ -77,13 +76,16 @@ suite.
    result contracts and platform-appropriate capture path with the main suite.
    The current prototype has none of that full-suite integration, so this item
    remains unstarted.
-8. **PS3 (exploratory, out of the score system)** — homebrew only
+8. **Windows 7 dedicated GUI (before PS3)** — separate Win32/DWM frontend and
+   installer sharing `gpu_engine` / CLI / result schema; Aero capability probe
+   with non-Aero fallback; must not ship WinUI / Windows App SDK.
+9. **PS3 (exploratory, out of the score system)** — homebrew only
    (PSL1GHT/RSXGL); the RSX GPU has no compute/SSBO/atomics/GPU timestamps
    and PSGL is OpenGL ES 1.0 + Cg, not desktop GL 4.3, so none of the main
    workloads can be ported directly. At most a fixed-function novelty demo in
    a separate repository; it must never enter the formal score contracts or
    the GUI main page.
-9. **Dual-GPU Aggregate (feature, not an OS port; first validation target:
+10. **Dual-GPU Aggregate (feature, not an OS port; first validation target:
    dual FirePro D700 in a Mac Pro 2013 under Boot Camp Windows)** — explicit
    engine-level multi-GPU; driver CrossFire never accelerates a custom
    engine and is not relied upon. Slices: (a) `stream` headless dual-device
@@ -120,7 +122,7 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
 | **Compute (peak)** | `synthpeak` | Raw ALU throughput per precision | GFLOPS / GIOPS | `--precision`, `--iter` |
 | **3D render** | `render3d` | Vertex transform + raster + fill + depth | MQuad/s | `--particles` |
 | **Volume raymarch** | `volumetric` | Fragment ALU/SFU + register pressure | GSample/s | `--steps` |
-| **3D cinematic liquid** | `cinematic_liquid` | 320,920-particle MLS-MPM + particle-splatted 3D density volume + iterative free-surface optics; optional SPH preview | MParticle-step/s | current physical-scene v8 is Vulkan-only and unscored; `--liquid-solver mpm\|sph` |
+| **3D cinematic liquid** | `cinematic_liquid` | 320,920-particle MLS-MPM + particle-splatted 3D density volume + iterative free-surface optics; optional SPH preview | MParticle-step/s | Vulkan v8 formal score still open; Metal = compute + raymarch present (`…_metal_preview`); `--liquid-solver mpm\|sph` |
 | **Legacy cinematic liquid v1** | `cinematic_liquid_v1` | Original 181,216-particle MLS-MPM dam-break contract | MParticle-step/s | fixed v1 Vulkan-only contract |
 | **Legacy 2D fluid** | `fluid` | Multi-pass compute + fullscreen dye render | unverified legacy | `--grid`, `--jacobi` |
 
@@ -147,12 +149,11 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
   from truncated cut gems and layered diamond shards. Planar SDF normals,
   Fresnel reflection, chromatic refraction, absorption and camera parallax make
   the geometry visibly faceted while consuming FP32/SFU/INT work.
-  `gpu_burn_v1` preserves the original rotating Plasma Bloom shader and
-  result identity for historical comparison. Both are
-  implemented on Vulkan, DX12, DX11 and OpenGL (including DX WARP), with Metal
-  explicitly unsupported on Metal. `gpu_stress` retains the earlier four-pass
-  GraphicsBurn component score under its original result contract. Neither is
-  currently a hardware-error detector. `stress` is the unchanged legacy fractal test;
+  `gpu_burn_v1` preserves a historical Plasma Bloom selector/result identity.
+  Public `gpu_burn` runs on Vulkan, DX12, DX11, OpenGL (including DX WARP), and
+  **Metal** (`gpu_burn.metal`, pending real-Mac verification). `gpu_stress`
+  remains Metal-unsupported. Neither burn path is currently a hardware-error
+  detector. `stress` is the unchanged legacy fractal test;
   `synthpeak` is a vkpeak-style
   register-resident FMA loop measuring near-theoretical peak per data type;
   `render3d` is a real 3D pipeline — perspective + orbiting camera + depth test,
@@ -218,8 +219,10 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
   The transient console value `241.13` is neither formal nor persisted. A smoke
   window closing after a few seconds is the test script's `--time 8` lifecycle,
   not evidence of a crash. Interactive WinUI run/history acceptance,
-  fixed-timestep cross-GPU trajectory and DX12/DX11/OpenGL/Metal v2 ports remain
-  open. V8 remains MLS-MPM; use `--liquid-solver sph` for the experimental SPH
+  fixed-timestep cross-GPU trajectory and DX12/DX11/OpenGL liquid ports remain
+  open. Metal has an MLS-MPM + raymarch preview host
+  (`cinematic_liquid_v2_physical_scene_v8_metal_preview`); real-Mac verification
+  is still open. V8 remains MLS-MPM; use `--liquid-solver sph` for the experimental SPH
   slice inspired by [jeantimex/fluid](https://github.com/jeantimex/fluid).
   Every SPH duration, including 15 seconds, is forcibly recorded as
   `cinematic_liquid_sph_slice_v1_preview`. Before it can produce a formal score,
@@ -332,7 +335,9 @@ strict-affinity scores.
 │   ├── compute_gl.comp       # OpenGL 4.3 compute shader
 │   ├── particle_gl.vert      # OpenGL 4.3 vertex shader
 │   ├── particle_gl.frag      # OpenGL 4.3 fragment shader
-│   └── particle.metal        # Metal compute + vertex + fragment
+│   ├── particle.metal        # Metal stream / nbody / synth / fractal / volumetric
+│   ├── gpu_burn.metal        # Metal GPU Burn (Plasma×Kaleidoscope)
+│   └── cinematic_liquid_v2.metal  # Metal liquid MLS-MPM + raymarch present
 └── build/
 ```
 

@@ -236,6 +236,12 @@ void AppBase::InitRenderDoc() {
     auto RENDERDOC_GetAPI =
         reinterpret_cast<pRENDERDOC_GetAPI>(dlsym(mod, "RENDERDOC_GetAPI"));
 #else
+    // macOS / other: RenderDoc is unavailable. Metal backends may still provide
+    // MTLCaptureManager .gputrace after InitBackend — defer unavailable until then.
+    if (config_.captureAtSec > 0.0 || config_.captureAtFrame > 0) {
+        std::cout << "[Capture] RenderDoc unavailable on this platform; will try "
+                     "native GPU capture (MTLCaptureManager) after backend init.\n";
+    }
     return;
 #endif
 
@@ -388,6 +394,18 @@ void AppBase::Run() {
 
     if (!config_.headless) {
         UpdateRenderDocCapturePath();
+        // Capture was requested but neither RenderDoc nor a native Metal path
+        // is available — mark honest captureUnavailable (do not fake success).
+        if ((config_.captureAtSec > 0.0 || config_.captureAtFrame > 0) &&
+            !rdocApi_ && !SupportsNativeGpuCapture()) {
+            std::cout << "[Capture] Automatic capture was requested, but no "
+                         "capture backend is available. Continuing without "
+                         "capture (captureUnavailable).\n";
+            captureUnavailable_ = true;
+        } else if ((config_.captureAtSec > 0.0 || config_.captureAtFrame > 0) &&
+                   !rdocApi_ && SupportsNativeGpuCapture()) {
+            std::cout << "[Capture] Using native Metal GPU capture (.gputrace).\n";
+        }
         glfwShowWindow(window_);
     }
 
@@ -496,34 +514,70 @@ void AppBase::MainLoop() {
             glfwPollEvents();
 
         auto* rdoc = static_cast<RENDERDOC_API_1_6_0*>(rdocApi_);
-        if (rdoc && !config_.headless) {
+        const bool nativeCap = !rdoc && SupportsNativeGpuCapture();
+        if ((rdoc || nativeCap) && !config_.headless) {
             bool f12Down = glfwGetKey(window_, GLFW_KEY_F12) == GLFW_PRESS;
-            if (f12Down && !f12WasPressed)
-                rdocCaptureRequested_ = true;
+            if (f12Down && !f12WasPressed) {
+                if (rdoc)
+                    rdocCaptureRequested_ = true;
+                else
+                    nativeCaptureRequested_ = true;
+            }
             f12WasPressed = f12Down;
 
             const double elapsed = glfwGetTime() - runStartTime_;
             if (config_.captureAtSec > 0.0 && !timeCaptureTriggered &&
                 elapsed >= config_.captureAtSec) {
-                rdocCaptureRequested_ = true;
+                if (rdoc)
+                    rdocCaptureRequested_ = true;
+                else
+                    nativeCaptureRequested_ = true;
                 timeCaptureTriggered = true;
             }
             // Capture the Nth drawn frame (totalFrameCount_ is post-increment).
             if (config_.captureAtFrame > 0 && !timeCaptureTriggered &&
                 static_cast<std::int64_t>(totalFrameCount_) + 1 >=
                     config_.captureAtFrame) {
-                rdocCaptureRequested_ = true;
+                if (rdoc)
+                    rdocCaptureRequested_ = true;
+                else
+                    nativeCaptureRequested_ = true;
                 timeCaptureTriggered = true;
             }
         }
 
         bool capturing = false;
+        bool capturingNative = false;
         if (rdoc && rdocCaptureRequested_) {
             captureWallStart = glfwGetTime();
             captureDuringMeasurement = warmupDone_;
             rdoc->StartFrameCapture(nullptr, nullptr);
             capturing = true;
             rdocCaptureRequested_ = false;
+        } else if (nativeCap && nativeCaptureRequested_) {
+            captureWallStart = glfwGetTime();
+            captureDuringMeasurement = warmupDone_;
+            // Unique path under the platform captures directory.
+            const auto capDir = paths::CapturesDirectory();
+            std::string safeName = GetDeviceName();
+            for (char& c : safeName) {
+                if (c == ' ' || c == '/' || c == '\\' || c == ':' || c == '|')
+                    c = '_';
+            }
+            if (safeName.empty())
+                safeName = "GPU";
+            const std::string hint =
+                (capDir / ("Metal_" + safeName + "_" +
+                           std::to_string(static_cast<long long>(
+                               glfwGetTime() * 1000.0)))).string();
+            if (BeginNativeGpuCapture(hint)) {
+                capturingNative = true;
+            } else {
+                std::cout << "[Capture] Native Metal capture failed to start "
+                             "(captureUnavailable for this attempt).\n";
+                captureUnavailable_ = true;
+            }
+            nativeCaptureRequested_ = false;
         }
 
         const double currentTime = glfwGetTime();
@@ -533,7 +587,35 @@ void AppBase::MainLoop() {
         DrawFrame(deltaTime);
         ++totalFrameCount_;
 
-        if (capturing && rdoc) {
+        if (capturingNative) {
+            std::string outPath;
+            const bool ok = EndNativeGpuCapture(outPath);
+            const double captureWallEnd = glfwGetTime();
+            ++rdocCaptureAttemptCount_;
+            if (captureDuringMeasurement) {
+                excludedCaptureSec_ += captureWallEnd - captureWallStart;
+                rdocCaptureAttemptExcluded_ = true;
+            }
+            timingSamplesToSkip_ = (std::max)(
+                timingSamplesToSkip_,
+                (std::max)(kCaptureTimingDrainSamples,
+                           config_.framesInFlight + 1u));
+            double capTime = glfwGetTime() - runStartTime_;
+            if (ok) {
+                ++rdocCaptureCount_;
+                lastCapturePath_ = outPath;
+                std::cout << "[Capture] Metal .gputrace at " << std::fixed
+                          << std::setprecision(1) << capTime << "s (frame "
+                          << totalFrameCount_ << ")\n";
+                if (!lastCapturePath_.empty())
+                    std::cout << "  -> " << lastCapturePath_ << "\n";
+            } else {
+                std::cout << "[Capture] Metal capture end failed at "
+                          << std::fixed << std::setprecision(1) << capTime
+                          << "s\n";
+                captureUnavailable_ = true;
+            }
+        } else if (capturing && rdoc) {
             const std::uint32_t captureResult =
                 rdoc->EndFrameCapture(nullptr, nullptr);
             const double captureWallEnd = glfwGetTime();
@@ -1280,10 +1362,17 @@ BenchmarkResult AppBase::CollectResult() const {
             // wall.  The later 0.45 inset, 0.42 wall-top fraction and lighter
             // extinction changed the shared scene again, so the current MPM
             // contract is V8 and must not rank with any V7 smoke result.
-            r.workloadVersion =
-                std::abs(config_.maxRunTimeSec - 15.0) < 0.001
-                    ? "cinematic_liquid_v2_physical_scene_v8"
-                    : "cinematic_liquid_v2_physical_scene_v8_preview";
+            // Metal raymarch present is wired, but timing/capture contracts are
+            // still independent — never share the Vulkan v8 formal score group.
+            if (GetBackendName() == "Metal") {
+                r.workloadVersion =
+                    "cinematic_liquid_v2_physical_scene_v8_metal_preview";
+            } else {
+                r.workloadVersion =
+                    std::abs(config_.maxRunTimeSec - 15.0) < 0.001
+                        ? "cinematic_liquid_v2_physical_scene_v8"
+                        : "cinematic_liquid_v2_physical_scene_v8_preview";
+            }
             workloadConfig << "solver=mls_mpm_3d_rigid_coupled"
                            << ";particles=" << config_.particleCount
                            << ";particleLayoutBytes=80"
@@ -1340,6 +1429,8 @@ BenchmarkResult AppBase::CollectResult() const {
                        << ";captureExcluded="
                        << (rdocCaptureAttemptExcluded_ ? "true" : "false")
                        << ";captureCount=" << rdocCaptureCount_;
+        if (captureUnavailable_)
+            workloadConfig << ";captureUnavailable=true";
     }
     r.workloadConfig = workloadConfig.str();
     r.graphicsApi    = GetBackendName();
@@ -1347,7 +1438,10 @@ BenchmarkResult AppBase::CollectResult() const {
     r.driverVersion  = GetDriverVersion();
     r.cpuName        = GetCpuName();
     r.osVersion      = GetOsVersion();
-    r.memory      = config_.hostMemory ? "System-RAM" : "Device-local";
+    if (!config_.memoryLabelOverride.empty())
+        r.memory = config_.memoryLabelOverride;
+    else
+        r.memory = config_.hostMemory ? "System-RAM" : "Device-local";
     r.vramMB      = config_.vramMB;
     r.resWidth    = kWindowWidth;
     r.resHeight   = kWindowHeight;
