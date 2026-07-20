@@ -12,6 +12,8 @@ namespace gpu_bench {
 int cliMain(int argc, char* argv[]);
 
 // Legacy embedding hook: when true, cliMain() skips glfwTerminate() on exit.
+#if !defined(GPU_BENCH_NO_GLFW)
 inline bool skipGlfwTerminate = false;
+#endif
 
 }  // namespace gpu_bench

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 仅作 Compose 启动前的窗口底色；真正主题在 ui/theme/Theme.kt。 -->
+    <style name="Theme.Mangekyo" parent="android:Theme.Material.NoActionBar" />
+</resources>

@@ -38,7 +38,9 @@
 #include <string>
 #include <vector>
 
+#if !defined(GPU_BENCH_NO_GLFW)
 #include <GLFW/glfw3.h>
+#endif
 
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -1682,8 +1684,10 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         if (!allResults.empty())
             gpu_bench::PrintComparisonTable(allResults);
 
+#if !defined(GPU_BENCH_NO_GLFW)
         if (!gpu_bench::skipGlfwTerminate)
             glfwTerminate();
+#endif
         // GUI Full Analysis treats the worker exit code as its success signal.
         // A partial matrix is not a successful full analysis: preserve the
         // per-entry diagnostics above, but return non-zero if any run failed or
@@ -2815,7 +2819,9 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         }
     }
 
+#if !defined(GPU_BENCH_NO_GLFW)
     if (!gpu_bench::skipGlfwTerminate)
         glfwTerminate();
+#endif
     return 0;
 }

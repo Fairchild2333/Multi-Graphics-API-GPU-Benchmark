@@ -4,9 +4,11 @@
 #include "metal_cinematic_liquid.h"
 #include "mini_mat.h"
 
+#if !defined(GPU_BENCH_NO_GLFW)
 #define GLFW_EXPOSE_NATIVE_COCOA
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
+#endif
 
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>
@@ -86,7 +88,12 @@ std::string MetalBackend::GetDeviceName() const {
 std::string MetalBackend::GetDriverVersion() const {
     NSProcessInfo* pi = [NSProcessInfo processInfo];
     NSOperatingSystemVersion v = [pi operatingSystemVersion];
-    return "macOS " + std::to_string(v.majorVersion) + "."
+#if TARGET_OS_IOS
+    std::string prefix = "iOS ";
+#else
+    std::string prefix = "macOS ";
+#endif
+    return prefix + std::to_string(v.majorVersion) + "."
          + std::to_string(v.minorVersion) + "."
          + std::to_string(v.patchVersion);
 }
@@ -216,7 +223,7 @@ void MetalBackend::InitBackend() {
         impl_->framesInFlight = config_.framesInFlight;
         impl_->frames.resize(impl_->framesInFlight);
 
-        // --- CAMetalLayer (skipped in headless mode) ----------------------------
+#if !defined(GPU_BENCH_NO_GLFW)
         if (!config_.headless) {
             NSWindow* nsWindow = glfwGetCocoaWindow(window_);
             impl_->metalLayer  = [CAMetalLayer layer];
@@ -230,6 +237,16 @@ void MetalBackend::InitBackend() {
             nsWindow.contentView.layer     = impl_->metalLayer;
             nsWindow.contentView.wantsLayer = YES;
         }
+#else
+        if (!config_.headless && window_ != nullptr) {
+            impl_->metalLayer = (__bridge CAMetalLayer*)window_;
+            impl_->metalLayer.device       = impl_->device;
+            impl_->metalLayer.pixelFormat  = MTLPixelFormatBGRA8Unorm;
+            impl_->metalLayer.drawableSize = CGSizeMake(kWindowWidth, kWindowHeight);
+            impl_->metalLayer.framebufferOnly = YES;
+            impl_->metalLayer.maximumDrawableCount = 3;
+        }
+#endif
 
         // --- Frame semaphore ----------------------------------------------------
         impl_->frameSemaphore = dispatch_semaphore_create(impl_->framesInFlight);

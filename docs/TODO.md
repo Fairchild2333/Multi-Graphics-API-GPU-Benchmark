@@ -41,7 +41,7 @@
 
 ## 平台移植优先级（用户锁定；2026-07-19 将 Win7 GUI 挪到 PS3 前）
 
-顺序：**Win ARM64 → macOS → Android → iOS → Debian Linux → WebGPU → HarmonyOS PC / 鸿蒙 → Windows 7 专用 GUI（Aero）→ PS3（探索性）→ Dual-GPU Aggregate（双卡合力，功能项）**。除现有隔离的 HarmonyOS Vulkan 粒子 demo 外，完整产品移植均未开始；该 demo 不等于 workload suite 已移植。不改变上方产品主线的切片顺序，平台移植在其后展开。逐平台落地时：能力不齐明确 unsupported、不静默 fallback；计时/抓帧模型不同的实现必须使用新 `workloadVersion` 独立成组，现有 Windows 成绩组的 A/B 对比不受影响。详细逐平台要点见 `HANDOFF.md` 目标 C。
+顺序：**Win ARM64 → macOS → Android → iOS → Debian Linux → WebGPU → HarmonyOS PC / 鸿蒙 → Windows 7 专用 GUI（Aero）→ PS3（探索性）→ Lumia 1520 legacy WP（探索性）→ iPhone 4 legacy iOS（探索性）→ Dual-GPU Aggregate（双卡合力，功能项）**。除现有隔离的 HarmonyOS Vulkan 粒子 demo 外，完整产品移植均未开始；该 demo 不等于 workload suite 已移植。不改变上方产品主线的切片顺序，平台移植在其后展开。逐平台落地时：能力不齐明确 unsupported、不静默 fallback；计时/抓帧模型不同的实现必须使用新 `workloadVersion` 独立成组，现有 Windows 成绩组的 A/B 对比不受影响。详细逐平台要点见 `HANDOFF.md` 目标 C。
 
 - [x] **1. Win ARM64**：原生 CLI/WinUI + WiX MSI 闭环已落地（见 HANDOFF）；clean-machine/签名仍开放。
 - [ ] **2. macOS（下一平台刀）**：
@@ -52,13 +52,20 @@
   - [ ] 真 Mac 三主项冒烟 + 15s 正式流程
   - [x] `MTLCaptureManager`(.gputrace) 接线（F12/`--capture`/`--capture-frame`）— **待真 Mac 验证**
 - [ ] **3. Android**：NativeActivity/ANativeWindow 表面层替代 GLFW + 新前端；RenderDoc Android 远程抓帧；评估温控对 15 秒 Burst 语义的影响。
+  - [ ] 主路径：Vulkan 1.0+（覆盖 Tegra K1 只有 Vulkan 1.0 驱动的情况）+ GL ES 3.1/3.2 后端（GLSL ES 重写、EGL、`EXT_disjoint_timer_query` 探测）；设备分界线为 **K1 及以后 = 主路径，Tegra 3/4 = legacy tier**。
+  - [ ] **SDK/ABI 合同（2026-07-20 锁定）**：主包 minSdk 21 / targetSdk 最新；NDK r27+ 开 16 KB 页对齐；结果写应用专属目录；Vulkan 运行时门控（API ≥24 + dlopen 成功，否则 ES 3.1）；四 ABI 全原生编译 **armeabi-v7a / arm64-v8a / x86 / x86_64**，结果 metadata 记录真实 ABI；legacy APK 仅 armeabi-v7a、targetSdk 可较低。详见 HANDOFF 目标 C 第 3 条。
+  - [ ] **UI 基调（2026-07-20 锁定）**：主包单套 Compose + Material 3 能力递减（动态取色 12+ 回退品牌静态配色）；四页信息架构对齐 WinUI/SwiftUI；若最新 Compose 要求 minSdk 23 则主包提 23（K1=API 24 零损失）；legacy APK 极简原生 View 不用 Compose；满载可 Stop。
+  - [x] **前端脚手架已建（2026-07-20，代码已写、未编译）**：`android/` Gradle + Compose 骨架、JNI/CMake stub、registry/results 占位；交接见 `android/README.md`，接手 AI 先更新占位版本号并完成首次构建。
+  - [ ] **ES 2.0 legacy tier（用户 2026-07-20 锁定底线：Tegra 3/4 必须支持）**：简化 fragment-only GPU Burn（避开 highp，Tegra 3 仅 FP20）新组 `gpu_burn_es2_legacy_v1`；粒子改 CPU(NEON) 物理 + GPU 渲染或纯 fragment 填充率测试（新 workloadVersion，不与 `stream` 混排）；液体 unsupported；墙钟计时、无 RenderDoc（用户已确认不要求）；独立 legacy APK（设备停在 Android 4.1–5.1，minSdk 约束），主包不背包袱。详见 HANDOFF 目标 C 第 3 条。
 - [ ] **4. iOS**（未开工；排在 Android 后）：**最低 iOS 16**；仅 Metal；`MTLCaptureManager`；共享 SwiftUI；App Store。**iOS 26/27 = Liquid Glass**，16–25 Material。开工规格见 `HANDOFF.md` §3.0.3。
 - [ ] **5. Debian Linux**：构建修正、`.deb` 打包、CI 与实机验证（后端/GLFW/RenderDoc/XDG 路径均已有，摩擦最低）。
 - [ ] **6. WebGPU**：按既定路线——capability registry P0 → 固定 Dawn 版本原生后端（Stream → GPU Burn → Cinematic Liquid）→ `/web` 浏览器前端；独立版本 id（`stream_webgpu_v1` 等），无可靠 timestamp 不产生正式 score（对应上方“原生 WebGPU 后端”与 `/web` 两条任务）。
 - [ ] **7. HarmonyOS PC / 鸿蒙**：把现有 `ohos/` 独立 Vulkan 粒子 demo 升级为正式产品端口；补统一 workload registry、主 CLI/GUI、GPU Burn/Cinematic Liquid、结果合同与适合该平台的抓帧编排。现有 demo 不能标为已完成移植。
 - [ ] **8. Windows 7 专用 GUI（PS3 之前）**：独立 Win32/DWM 前端与安装包，共享 `gpu_engine`/CLI/成绩 schema；Aero 能力探测与无 Aero 回退；不得携带 WinUI/WinAppSDK。
 - [ ] **9. PS3（探索性，永不进成绩体系）**：仅 homebrew（PSL1GHT/RSXGL）；RSX 无 compute/原子/GPU timestamp，PSGL≈GL ES 1.0+Cg，三主测试不可直移；至多独立仓库的固定管线情怀 demo。
-- [ ] **10. Dual-GPU Aggregate（双卡合力模式，功能项；首个验证目标 Boot Camp 下 Mac Pro 2013 双 D700）**：引擎级显式多 GPU，不依赖驱动 CrossFire/LDA/device-group。切片：(a) `stream` headless 双设备聚合（新组 `stream_dualgpu_v1`，记录双 adapter 元数据）→ (b) N-body 双卡位置交换 → (c) GPU Burn 分屏 SFR/AFR（DX12 unlinked 跨适配器堆）。不做液体域分解。双 D700 满载注意散热，禁止双卡长时烤机。
+- [ ] **10. Lumia 1520 legacy Windows Phone（探索性，永不进成绩体系；2026-07-20 排入）**：骁龙 800 / Adreno 330,但 WP8.1/W10M 驱动仅暴露 D3D11 **FL 9_3**(无 compute/UAV)→ 形态同 ES 2.0 legacy tier:简化 fragment Burn、粒子 CPU(NEON) 物理、液体 unsupported;WinRT/UWP + CoreWindow 前端,VS2015/VS2013 工具链,开发者模式侧载(商店已死);墙钟计时,成绩自成体系;shader 优先经 archived ANGLE 复用 Tegra 3/4 的 GLSL ES legacy shader,备选 HLSL 9_3 重写;独立小工程。详见 HANDOFF 目标 C 第 10 条。
+- [ ] **11. iPhone 4 legacy iOS（探索性，永不进成绩体系；2026-07-20 排入）**：OS X 10.11 + Xcode 7.3.1（free provisioning、armv7、deployment iOS 7.x，需老 Intel Mac/虚拟机）；不精简主工程，独立仓库或 `legacy-ios/` 小工程，仅复用 Android ES 2.0 legacy tier 的 GLSL ES shader/workload 定义；EAGL + UIKit + ObjC 宿主，粒子 CPU 物理，SGX535 单独更低预设；墙钟计时、无抓帧、成绩不进主 History；仅自签侧载（7 天过期），无 App Store。主 iOS 计划（iOS 16 + Metal）不受影响。详见 HANDOFF 目标 C 第 11 条。
+- [ ] **12. Dual-GPU Aggregate（双卡合力模式，功能项；首个验证目标 Boot Camp 下 Mac Pro 2013 双 D700）**：引擎级显式多 GPU，不依赖驱动 CrossFire/LDA/device-group。切片：(a) `stream` headless 双设备聚合（新组 `stream_dualgpu_v1`，记录双 adapter 元数据）→ (b) N-body 双卡位置交换 → (c) GPU Burn 分屏 SFR/AFR（DX12 unlinked 跨适配器堆）。不做液体域分解。双 D700 满载注意散热，禁止双卡长时烤机。
 
 > 状态提示：请先阅读根目录 [`HANDOFF.md`](../HANDOFF.md)。当前事实、两条产品主线、P0 阻塞和下一实现切片以 HANDOFF 为准；本文件保留专题任务与历史上下文。每次工作应先更新 HANDOFF，再同步这里。
 

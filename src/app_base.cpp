@@ -2,7 +2,11 @@
 #include "path_service.h"
 #include "renderdoc_app.h"
 
+#if !defined(GPU_BENCH_NO_GLFW)
 #include <GLFW/glfw3.h>
+#else
+#include <mach/mach_time.h>
+#endif
 
 #include <cmath>
 #include <iomanip>
@@ -22,6 +26,18 @@
 #elif defined(__APPLE__)
 #include <sys/sysctl.h>
 #endif
+
+namespace {
+static double gpuBenchGetTime() {
+#if !defined(GPU_BENCH_NO_GLFW)
+    return glfwGetTime();
+#else
+    static mach_timebase_info_data_t tb = {};
+    if (tb.denom == 0) mach_timebase_info(&tb);
+    return static_cast<double>(mach_absolute_time()) * tb.numer / tb.denom / 1e9;
+#endif
+}
+}  // namespace
 
 namespace gpu_bench {
 
@@ -378,9 +394,10 @@ void AppBase::Run() {
         }
     }
 
+#if !defined(GPU_BENCH_NO_GLFW)
     // OpenGL always needs a window for its GL context, even in headless mode.
     // Other backends skip window creation entirely in headless mode.
-    // glfwInit() is always needed for glfwGetTime() used in MainLoop.
+    // glfwInit() is always needed for gpuBenchGetTime() used in MainLoop.
     if (!config_.headless || NeedsOpenGLContext()) {
         InitWindow();
     } else {
@@ -388,6 +405,7 @@ void AppBase::Run() {
         if (glfwInit() != GLFW_TRUE)
             throw std::runtime_error("glfwInit failed");
     }
+#endif
 
     GenerateInitialParticles();
     InitBackend();
@@ -406,7 +424,9 @@ void AppBase::Run() {
                    !rdocApi_ && SupportsNativeGpuCapture()) {
             std::cout << "[Capture] Using native Metal GPU capture (.gputrace).\n";
         }
+#if !defined(GPU_BENCH_NO_GLFW)
         glfwShowWindow(window_);
+#endif
     }
 
     MainLoop();
@@ -424,6 +444,7 @@ void AppBase::Run() {
     }
 }
 
+#if !defined(GPU_BENCH_NO_GLFW)
 void AppBase::InitWindow() {
     if (glfwInit() != GLFW_TRUE) {
         throw std::runtime_error("glfwInit failed");
@@ -452,6 +473,7 @@ void AppBase::InitWindow() {
         throw std::runtime_error("glfwCreateWindow failed");
     }
 }
+#endif
 
 void AppBase::GenerateInitialParticles() {
     initialParticles_.resize(config_.particleCount);
@@ -472,7 +494,7 @@ void AppBase::GenerateInitialParticles() {
 }
 
 void AppBase::MainLoop() {
-    lastFrameTime_ = glfwGetTime();
+    lastFrameTime_ = gpuBenchGetTime();
     runStartTime_  = lastFrameTime_;
 
     // Runtime safety net for the fixed-load GPU Burn contract: --run-all and
@@ -506,16 +528,23 @@ void AppBase::MainLoop() {
 
     auto shouldContinue = [&]() -> bool {
         if (config_.headless) return true;  // headless: exit via time/frame limit only
+#if !defined(GPU_BENCH_NO_GLFW)
         return glfwWindowShouldClose(window_) == GLFW_FALSE;
+#else
+        return true;
+#endif
     };
 
     while (shouldContinue()) {
+#if !defined(GPU_BENCH_NO_GLFW)
         if (!config_.headless)
             glfwPollEvents();
+#endif
 
         auto* rdoc = static_cast<RENDERDOC_API_1_6_0*>(rdocApi_);
         const bool nativeCap = !rdoc && SupportsNativeGpuCapture();
         if ((rdoc || nativeCap) && !config_.headless) {
+#if !defined(GPU_BENCH_NO_GLFW)
             bool f12Down = glfwGetKey(window_, GLFW_KEY_F12) == GLFW_PRESS;
             if (f12Down && !f12WasPressed) {
                 if (rdoc)
@@ -524,8 +553,9 @@ void AppBase::MainLoop() {
                     nativeCaptureRequested_ = true;
             }
             f12WasPressed = f12Down;
+#endif
 
-            const double elapsed = glfwGetTime() - runStartTime_;
+            const double elapsed = gpuBenchGetTime() - runStartTime_;
             if (config_.captureAtSec > 0.0 && !timeCaptureTriggered &&
                 elapsed >= config_.captureAtSec) {
                 if (rdoc)
@@ -549,13 +579,13 @@ void AppBase::MainLoop() {
         bool capturing = false;
         bool capturingNative = false;
         if (rdoc && rdocCaptureRequested_) {
-            captureWallStart = glfwGetTime();
+            captureWallStart = gpuBenchGetTime();
             captureDuringMeasurement = warmupDone_;
             rdoc->StartFrameCapture(nullptr, nullptr);
             capturing = true;
             rdocCaptureRequested_ = false;
         } else if (nativeCap && nativeCaptureRequested_) {
-            captureWallStart = glfwGetTime();
+            captureWallStart = gpuBenchGetTime();
             captureDuringMeasurement = warmupDone_;
             // Unique path under the platform captures directory.
             const auto capDir = paths::CapturesDirectory();
@@ -569,7 +599,7 @@ void AppBase::MainLoop() {
             const std::string hint =
                 (capDir / ("Metal_" + safeName + "_" +
                            std::to_string(static_cast<long long>(
-                               glfwGetTime() * 1000.0)))).string();
+                               gpuBenchGetTime() * 1000.0)))).string();
             if (BeginNativeGpuCapture(hint)) {
                 capturingNative = true;
             } else {
@@ -580,7 +610,7 @@ void AppBase::MainLoop() {
             nativeCaptureRequested_ = false;
         }
 
-        const double currentTime = glfwGetTime();
+        const double currentTime = gpuBenchGetTime();
         const auto   deltaTime   = static_cast<float>(currentTime - lastFrameTime_);
         lastFrameTime_ = currentTime;
 
@@ -590,7 +620,7 @@ void AppBase::MainLoop() {
         if (capturingNative) {
             std::string outPath;
             const bool ok = EndNativeGpuCapture(outPath);
-            const double captureWallEnd = glfwGetTime();
+            const double captureWallEnd = gpuBenchGetTime();
             ++rdocCaptureAttemptCount_;
             if (captureDuringMeasurement) {
                 excludedCaptureSec_ += captureWallEnd - captureWallStart;
@@ -600,7 +630,7 @@ void AppBase::MainLoop() {
                 timingSamplesToSkip_,
                 (std::max)(kCaptureTimingDrainSamples,
                            config_.framesInFlight + 1u));
-            double capTime = glfwGetTime() - runStartTime_;
+            double capTime = gpuBenchGetTime() - runStartTime_;
             if (ok) {
                 ++rdocCaptureCount_;
                 lastCapturePath_ = outPath;
@@ -618,7 +648,7 @@ void AppBase::MainLoop() {
         } else if (capturing && rdoc) {
             const std::uint32_t captureResult =
                 rdoc->EndFrameCapture(nullptr, nullptr);
-            const double captureWallEnd = glfwGetTime();
+            const double captureWallEnd = gpuBenchGetTime();
             ++rdocCaptureAttemptCount_;
             if (captureDuringMeasurement) {
                 excludedCaptureSec_ += captureWallEnd - captureWallStart;
@@ -632,7 +662,7 @@ void AppBase::MainLoop() {
                 timingSamplesToSkip_,
                 (std::max)(kCaptureTimingDrainSamples,
                            config_.framesInFlight + 1u));
-            double capTime = glfwGetTime() - runStartTime_;
+            double capTime = gpuBenchGetTime() - runStartTime_;
             if (captureResult == 1u) {
                 ++rdocCaptureCount_;
 
@@ -672,7 +702,7 @@ void AppBase::MainLoop() {
 
         if (config_.benchmarkMode) {
             if (totalFrameCount_ == config_.warmupFrames) {
-                benchStartTime_ = glfwGetTime();
+                benchStartTime_ = gpuBenchGetTime();
                 warmupDone_ = true;
             }
             if (totalFrameCount_ > config_.warmupFrames && !capturing) {
@@ -682,7 +712,7 @@ void AppBase::MainLoop() {
                              static_cast<double>(deltaTime));
             }
             if (totalFrameCount_ >= totalBenchFrames) {
-                benchEndTime_ = glfwGetTime();
+                benchEndTime_ = gpuBenchGetTime();
                 break;
             }
         } else {
@@ -697,7 +727,7 @@ void AppBase::MainLoop() {
                              static_cast<double>(deltaTime));
             }
             if (config_.maxRunTimeSec > 0.0 && elapsed >= config_.maxRunTimeSec) {
-                benchEndTime_ = glfwGetTime();
+                benchEndTime_ = gpuBenchGetTime();
                 break;
             }
         }
@@ -706,7 +736,7 @@ void AppBase::MainLoop() {
     }
 
     if (benchEndTime_ == 0.0)
-        benchEndTime_ = glfwGetTime();
+        benchEndTime_ = gpuBenchGetTime();
 
     WaitIdle();
 }
@@ -858,7 +888,7 @@ void AppBase::ReportTimingIfDue(double deltaTime) {
     }
 
     if (!config_.headless && window_) {
-        const double elapsed = glfwGetTime() - runStartTime_;
+        const double elapsed = gpuBenchGetTime() - runStartTime_;
         std::ostringstream oss;
         oss << GetBackendName();
 
@@ -899,7 +929,9 @@ void AppBase::ReportTimingIfDue(double deltaTime) {
                 << (config_.benchFrames + config_.warmupFrames);
         }
 
+#if !defined(GPU_BENCH_NO_GLFW)
         glfwSetWindowTitle(window_, oss.str().c_str());
+#endif
     }
 
     accumComputeMs_    = 0.0;
@@ -1669,11 +1701,13 @@ std::vector<char> AppBase::ReadFileBytes(const std::string& filename) {
     return buffer;
 }
 
+#if !defined(GPU_BENCH_NO_GLFW)
 void AppBase::CleanupWindow() {
     if (window_ != nullptr) {
         glfwDestroyWindow(window_);
         window_ = nullptr;
     }
 }
+#endif
 
 }  // namespace gpu_bench

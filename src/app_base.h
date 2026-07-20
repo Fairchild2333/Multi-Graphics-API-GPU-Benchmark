@@ -9,7 +9,9 @@
 #include <string>
 #include <vector>
 
+#if !defined(GPU_BENCH_NO_GLFW)
 struct GLFWwindow;
+#endif
 
 namespace gpu_bench {
 
@@ -52,7 +54,11 @@ protected:
     std::int32_t    requestedGpuIndex_;
     std::string     shaderDir_;
     BenchmarkConfig config_;
+#if !defined(GPU_BENCH_NO_GLFW)
     GLFWwindow*     window_ = nullptr;
+#else
+    void*           window_ = nullptr;  // iOS: no GLFW, use void* placeholder
+#endif
     std::vector<Particle> initialParticles_;
 
     bool IsRenderDocAttached() const { return rdocApi_ != nullptr; }
@@ -62,13 +68,17 @@ protected:
 private:
     void InitRenderDoc();
     void UpdateRenderDocCapturePath();
+#if !defined(GPU_BENCH_NO_GLFW)
     void InitWindow();
+#endif
     void GenerateInitialParticles();
     void MainLoop();
     void ReportTimingIfDue(double deltaTime);
     void PrintSummary() const;
     BenchmarkResult CollectResult() const;
+#if !defined(GPU_BENCH_NO_GLFW)
     void CleanupWindow();
+#endif
 
     // Thermal-stability analysis helpers.
     // computeAxisScore: same formula as CollectResult's derived score, but

@@ -1,0 +1,42 @@
+name: Mangekyo
+options:
+  bundleIdPrefix: com.fairchild
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "26.0"
+  createIntermediateGroups: true
+  defaultConfig: Debug
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+    CLANG_CXX_LANGUAGE_STANDARD: "c++17"
+
+targets:
+  Mangekyo:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: Mangekyo
+        excludes:
+          - "**/*.xcassets"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fairchild.Mangekyo
+        INFOPLIST_GENERATION_CLASS: MangekyoApp
+        SWIFT_OBJC_BRIDGING_HEADER: Mangekyo/Engine/GPUBenchmark-Bridging-Header.h
+        HEADER_SEARCH_PATHS:
+          - "$(PROJECT_DIR)/../src"
+        LIBRARY_SEARCH_PATHS:
+          - "$(PROJECT_DIR)/../build"
+        OTHER_LDFLAGS:
+          - "-lgpu_engine"
+          - "-framework Metal"
+          - "-framework MetalKit"
+          - "-framework QuartzCore"
+          - "-framework UIKit"
+          - "-framework CoreFoundation"
+          - "-framework Foundation"
+        CLANG_CXX_LANGUAGE_STANDARD: "c++17"

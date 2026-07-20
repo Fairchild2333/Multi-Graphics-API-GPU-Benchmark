@@ -12,6 +12,17 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# ---- iOS platform setup ----
+if(IOS OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    set(ENABLE_VULKAN OFF CACHE BOOL "Vulkan backend" FORCE)
+    set(ENABLE_DX12 OFF CACHE BOOL "DX12 backend" FORCE)
+    set(ENABLE_DX11 OFF CACHE BOOL "DX11 backend" FORCE)
+    set(ENABLE_OPENGL OFF CACHE BOOL "OpenGL backend" FORCE)
+    set(ENABLE_METAL ON CACHE BOOL "Metal backend" FORCE)
+    add_compile_definitions(GPU_BENCH_NO_GLFW)
+    set(GPU_BENCH_IOS ON)
+endif()
+
 # ---- Options ----
 option(ENABLE_VULKAN "Build with Vulkan backend" ON)
 if(WIN32)
@@ -22,14 +33,16 @@ else()
     option(ENABLE_DX11  "Build with DirectX 11 backend (Windows only)" OFF)
 endif()
 if(APPLE)
-    option(ENABLE_METAL "Build with Metal backend (macOS only)" ON)
+    option(ENABLE_METAL "Build with Metal backend" ON)
 else()
-    option(ENABLE_METAL "Build with Metal backend (macOS only)" OFF)
+    option(ENABLE_METAL "Build with Metal backend" OFF)
 endif()
 option(ENABLE_OPENGL "Build with OpenGL 4.3 backend" ON)
 
-# ---- GLFW (required by all backends for windowing) ----
-find_package(glfw3 REQUIRED)
+# ---- GLFW (required by all backends for windowing, skipped on iOS) ----
+if(NOT GPU_BENCH_IOS)
+    find_package(glfw3 REQUIRED)
+endif()
 
 # ---- Common source files ----
 set(COMMON_SOURCES
@@ -92,15 +105,20 @@ if(ENABLE_METAL AND APPLE)
 
     find_library(METAL_FRAMEWORK Metal)
     find_library(QUARTZCORE_FRAMEWORK QuartzCore)
-    find_library(COCOA_FRAMEWORK Cocoa)
+    if(GPU_BENCH_IOS)
+        find_library(UIKIT_FRAMEWORK UIKit)
+        set(APPLE_LIBS ${METAL_FRAMEWORK} ${QUARTZCORE_FRAMEWORK} ${UIKIT_FRAMEWORK})
+    else()
+        find_library(COCOA_FRAMEWORK Cocoa)
+        set(APPLE_LIBS ${METAL_FRAMEWORK} ${QUARTZCORE_FRAMEWORK} ${COCOA_FRAMEWORK})
+    endif()
 
     if(METAL_FRAMEWORK)
         list(APPEND BACKEND_SOURCES
             src/metal_backend.mm
             src/metal_probe.mm
             src/metal_cinematic_liquid.mm)
-        list(APPEND BACKEND_LIBS
-            ${METAL_FRAMEWORK} ${QUARTZCORE_FRAMEWORK} ${COCOA_FRAMEWORK})
+        list(APPEND BACKEND_LIBS ${APPLE_LIBS})
         list(APPEND BACKEND_DEFS HAVE_METAL)
 
         set_source_files_properties(
@@ -144,10 +162,12 @@ else()
 endif()
 
 # ---- Engine library (shared by the CLI and the WinUI3 C++/WinRT GUI) ----
-# COMMON_SOURCES includes main.cpp, which now defines gpu_bench::cliMain (not
-# main); the GUI links gpu_engine and calls cliMain in-process on a worker thread.
 add_library(gpu_engine STATIC ${COMMON_SOURCES} ${BACKEND_SOURCES})
-target_link_libraries(gpu_engine PUBLIC glfw ${BACKEND_LIBS})
+if(GPU_BENCH_IOS)
+    target_link_libraries(gpu_engine PUBLIC ${BACKEND_LIBS})
+else()
+    target_link_libraries(gpu_engine PUBLIC glfw ${BACKEND_LIBS})
+endif()
 target_compile_definitions(gpu_engine PUBLIC ${BACKEND_DEFS})
 target_include_directories(gpu_engine PUBLIC ${CMAKE_SOURCE_DIR}/src)
 
@@ -161,8 +181,10 @@ if(MSVC AND ENABLE_VULKAN AND Vulkan_FOUND)
 endif()
 
 # ---- CLI executable (thin entry point -> gpu_bench::cliMain) ----
-add_executable(gpu_benchmark src/cli_main.cpp)
-target_link_libraries(gpu_benchmark PRIVATE gpu_engine)
+if(NOT GPU_BENCH_IOS)
+    add_executable(gpu_benchmark src/cli_main.cpp)
+    target_link_libraries(gpu_benchmark PRIVATE gpu_engine)
+endif()
 
 if(MSVC)
     target_compile_options(gpu_engine PRIVATE /W4 /permissive- /utf-8)

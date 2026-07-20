@@ -41,7 +41,7 @@
 
 ### 目标 C — 平台与兼容前端优先级（2026-07-16 用户最新锁定）
 
-用户最新锁定的顺序（**2026-07-19 调整**：Windows 7 GUI 挪到 PS3 之前）：**1. Windows on ARM (ARM64) → 2. macOS → 3. Android → 4. iOS → 5. Debian Linux → 6. WebGPU → 7. HarmonyOS PC / 鸿蒙 → 8. Windows 7 专用 GUI（尽量使用 Aero）→ 9. PS3（探索性）→ 10. Dual-GPU Aggregate（双卡合力模式，功能项）**。ARM64 已完工；平台移植下一刀为 macOS。液体正确性、自由模式和 soak 任务仍然开放，但不阻塞上述平台顺序，除非用户再次改序。
+用户最新锁定的顺序（**2026-07-19 调整**：Windows 7 GUI 挪到 PS3 之前）：**1. Windows on ARM (ARM64) → 2. macOS → 3. Android → 4. iOS → 5. Debian Linux → 6. WebGPU → 7. HarmonyOS PC / 鸿蒙 → 8. Windows 7 专用 GUI（尽量使用 Aero）→ 9. PS3（探索性）→ 10. Lumia 1520 legacy Windows Phone（探索性）→ 11. iPhone 4 legacy iOS（探索性）→ 12. Dual-GPU Aggregate（双卡合力模式，功能项）**。ARM64 已完工；平台移植下一刀为 macOS。液体正确性、自由模式和 soak 任务仍然开放，但不阻塞上述平台顺序，除非用户再次改序。
 
 除仓库已有的隔离 HarmonyOS Vulkan 粒子原型外，均未开始完整产品移植；该原型不等于主 workload suite 已移植。Windows 7 GUI 是共享现有引擎与 worker 协议的兼容前端，不得为了支持旧系统复制出另一套含义不同的成绩合同。
 
@@ -63,6 +63,18 @@
    4. **液体 Metal**（代码已落 / 未正式）：`scripts/port_liquid_v2_metal.py` + `port_liquid_render_v2_metal.py` → `shaders/cinematic_liquid_v2.metal`（10 compute + `liquidFragment` raymarch）；宿主 `src/metal_cinematic_liquid.mm`（含 4s restage）；成绩强制 `cinematic_liquid_v2_physical_scene_v8_metal_preview`。**真 Mac 编译/冒烟与正式合同仍开放**；不得混入 Vulkan v8 榜。
 
 3. **Android**：复用 Vulkan 后端；GLFW 不支持 Android，需 NativeActivity/ANativeWindow 表面层与新前端；RenderDoc 支持 Android 远程抓帧；须评估温控降频对 15 秒 Burst 语义的影响（可能需要独立移动端 duration 合同）。
+   - **主路径基线**：Vulkan **1.0+**（主力，后端理论可复用；基线放宽到 1.0 以覆盖 Tegra K1 这类只有 Vulkan 1.0 驱动的设备）+ GL ES 3.1/3.2（由现有 GL 4.3 后端降级适配：GLSL ES 方言重写、EGL 上下文、`EXT_disjoint_timer_query` 能力探测，无可靠 GPU timestamp 不出正式 score）。计时/抓帧模型不同的实现独立 `workloadVersion` 成组。
+   - **设备分界线**：**Tegra K1 (2014, Kepler, ES 3.1 + Vulkan 1.0, 系统停在 Android 7.0) 及以后 = 主路径**；X1 (Maxwell, ES 3.2 + Vulkan 1.1) 完全无障碍。**Tegra 3/4 = 下方 ES 2.0 legacy tier**。K1 跑液体是性能问题而非能力问题。
+   - **SDK 版本合同（用户 2026-07-20 锁定）**：主包 **minSdk 21 (Android 5.0) / targetSdk 最新**。要点：NDK r27+ 编译并开启 **16 KB 页对齐**（target Android 15+ 对原生 `.so` 强制）；结果/历史写应用专属目录（`getExternalFilesDir`/内部存储，对应 Windows 侧 `%LOCALAPPDATA%` 语义），不碰共享存储；新 API 一律 `Build.VERSION.SDK_INT` 守卫；Vulkan 运行时门控（API ≥24 且 `dlopen` 成功才启用，否则 ES 3.1，同 Windows delay-load 思路）。legacy APK 单独 `minSdk 21 / targetSdk 可较低`（仅侧载，不为老壳子适配新行为）。targetSdk 不影响 15 秒 Burst 语义；温控评估照旧。
+   - **ABI 合同（用户 2026-07-20 锁定）**：主包计划编译 **armeabi-v7a、arm64-v8a、x86、x86_64 四个 ABI**，全部按架构原生编译（同 Windows x64/ARM64 两套原生二进制的规则，不做仿真混入）；x86/x86_64 主要覆盖模拟器、老 Atom 设备与 Chromebook。结果 metadata 必须记录真实 ABI，不同 ABI 不混排宣称。legacy APK 只需 **armeabi-v7a**（Tegra 3/4 均为 32-bit ARM）。
+   - **UI 基调（用户 2026-07-20 锁定）**：主包**单套 Jetpack Compose + Material 3**，能力递减而非双套 UI——动态取色 (Material You) 仅 Android 12+，以下回退 Mangekyo 品牌静态 Material 3 配色；预测式返回 (13/14+)、单色图标 (13+)、SplashScreen compat 均自动降级。3D 场景走原生 SurfaceView/ANativeWindow，Material 3 只管壳层；信息架构对齐 WinUI/SwiftUI（GPU/CPU/History/Charts 四页，同一份 workload registry/metadata，遵守交接规则 6）。**androidx 下限抬升注意**：若开工时最新 Compose 已要求 minSdk 23，主包直接提到 23（主包最老目标设备 K1 = API 24，零损失）；否则锁 21 兼容版本。**legacy APK 不用 Compose/Material 3**：2012 年 1GB RAM 设备用极简原生 View（列表 + Run + 结果文本）。满载时 UI 必须保持可 Stop，跑分工作不占 UI 线程（对齐 GPU Burn Soak 的 GUI 规则）。
+   - **前端脚手架（2026-07-20；状态=代码已写，未编译、未真机验证）**：`android/` 已建 Gradle + Compose 脚手架：`MainActivity` + 4 页底部导航、动态取色/静态回退主题、`BenchmarkSurface` (SurfaceView) 占位、`NativeBridge` JNI stub + `app/src/main/cpp` CMake stub（含 16 KB `max-page-size` 链接参数与四 ABI filter）、`WorkloadRegistry`/`ResultsStore`/`CapabilityGate` 占位。交接与待办见 `android/README.md`。版本号为占位，接手 AI 须按当时最新稳定版更新并首次实际构建。
+   - **用户锁定底线（2026-07-20）：Tegra 3/4（GL ES 2.0）必须支持**，形态为独立 **ES 2.0 legacy tier**，不允许用 unsupported 打发：
+     - **GPU Burn**：简化 legacy 变体（纯 fragment 全屏重载，避开 highp 依赖——Tegra 3 fragment 仅 FP20；降低 SDF/raymarch 复杂度），新组如 `gpu_burn_es2_legacy_v1`。三主项中最先做。
+     - **Stream/Particle**：ES 2.0 无 transform feedback、Tegra VTF 不可靠，粒子物理无法留在 GPU。改为 CPU(NEON) 物理 + GPU 渲染，或纯 fragment 填充率/带宽测试；含义已变，必须新 workloadVersion，绝不与现有 `stream` 组混排。
+     - **Cinematic Liquid**：无原子/SSBO/3D 纹理/精度，无降级空间，明确 **unsupported**。
+     - **计时**：Tegra 3/4 无可靠 GPU timer query，legacy tier 只用墙钟 FPS，成绩自成体系；**用户已确认不要求 RenderDoc/抓帧**，抓帧标注 unavailable 即可。
+     - **打包**：这些设备停在 Android 4.1–5.1，现代 NDK 最低 minSdk 21；Tegra 4 的 4.4 设备可能需旧 NDK。做**独立 legacy APK**，主 Android 包（Vulkan/ES 3.1+）不背此包袱。
 4. **iOS**（**尚未开工**——仓库无 `ios/` / 无 iOS target；排在 Android 之后）。用户锁定细节见 **§3.0.3**（最低 **iOS 16**；**iOS 26/27 = Liquid Glass**）。摘要：Metal-only + 共享 SwiftUI；无 RenderDoc；`MTLCaptureManager`；App Store/沙盒；温控则独立 `workloadVersion`。
 5. **Debian Linux**：技术摩擦最低——Vulkan/OpenGL 后端、GLFW、RenderDoc、XDG 数据路径全部已有；主要是构建修正、`.deb` 打包、CI 与实机验证。
 6. **WebGPU**：按第 11 节既定路线执行——先统一 capability registry（P0），再固定 Dawn 版本的原生后端，依次移植 Stream、GPU Burn、Cinematic Liquid，最后 `/web` 浏览器前端。结果使用独立临时版本 id（如 `stream_webgpu_v1`），记录 `apiImplementation/underlyingBackend/timingMode`；timestamp-query 是可选能力，没有可靠 GPU timestamp 不产生正式 score；浏览器无 RenderDoc，抓帧标注不可用。
@@ -70,7 +82,9 @@
 8. **Windows 7 专用 GUI（排在 HarmonyOS 之后、PS3 之前）**：当前 WinUI 3 / Windows App SDK 与现有安装器最低版本是 Windows 10 1809，不能通过改 manifest 假装支持 Windows 7。另建共享 `gpu_engine`/CLI worker/结果 schema 的原生 Win32 兼容前端与独立安装包；优先使用 DWM/Aero 能力（例如玻璃区域、非客户区整合、主题化控件、Direct2D/DirectWrite），但必须运行时探测 DWM composition，并在 Aero Basic、经典主题、远程桌面或 DWM 关闭时正常回退，不能把透明/模糊当硬依赖。
    - Windows 7 包不得携带 WinUI/WinAppSDK payload；需要单独审计 toolset、Windows SDK、VC runtime、GLFW、DX11 FL10/SM4 与抓帧工具的 Win7 兼容版本。若没有可安全再分发且实测可用的 RenderDoc 组合，第 5 秒抓帧必须明确显示 unavailable，而不是降级到含义不同的捕获或伪造成功。GUI 外观不同不应改变 GPU/CPU 计时与成绩组；任何实际 worker、timer 或 capture 合同差异才触发新 `workloadVersion`。
 9. **PS3（探索性，永不进成绩体系）**：官方开发授权已停止，只能 homebrew（PSL1GHT/RSXGL）；RSX 无 compute/SSBO/原子/GPU timestamp，PSGL≈OpenGL ES 1.0+Cg 而非桌面 GL 4.3，三个主测试均不可直移。至多做隔离的固定管线情怀 demo，建议独立仓库，不进入正式成绩合同与 GUI 主界面。
-10. **Dual-GPU Aggregate（双卡合力模式，功能项而非 OS 移植；首个验证目标：Boot Camp Windows 下的 Mac Pro 2013 双 FirePro D700）**：显式引擎级多 GPU 协作——驱动层 CrossFire 对自研引擎无效，不作依赖。切片顺序：(a) `stream` headless 双独立设备聚合：一进程两个 device 各算一半粒子、帧边界 CPU 同步、吞吐相加，新成绩组 `stream_dualgpu_v1`，结果必须记录两张 adapter 的完整元数据；(b) N-body 双卡（每步交换位置，~1MB/步）；(c) GPU Burn 分屏 SFR 或 AFR（DX12 unlinked 显式多适配器 + 跨适配器堆）。**不做** DX12 LDA / Vulkan device-group 依赖（D700 22.6.1 老驱动是否暴露不确定），**不做** Cinematic Liquid 域分解（每 substep 跨 PCIe 网格同步属科研级，不值）。单卡成绩组不受影响；混插不同型号也应能跑（聚合分数需标注非对称配置）。安全注意：双 D700 同时满载是 Mac Pro 2013 已知散热死穴，15 秒 Burst 可以，禁止双卡长时烤机。
+10. **Lumia 1520 legacy Windows Phone（探索性，用户 2026-07-20 排入 PS3 之后、iPhone 4 之前；永不进成绩体系）**：骁龙 800 / Adreno 330——硬件本是 ES 3.0 级，但 WP8.1 / Windows 10 Mobile 驱动仅暴露 **D3D11 FL 9_3**（无 compute/UAV，shader 仅 `*_4_0_level_9_3` 档），所以形态同 ES 2.0 legacy tier：简化 fragment Burn、粒子 CPU(NEON) 物理、液体 unsupported。前端必须 WinRT/UWP + CoreWindow（无 Win32/GLFW/GL/Vulkan）；工具链 VS2015（W10M）/ VS2013（WP8.1），可在现代 Windows 上运行；部署靠设备开发者模式侧载（免费），商店已死、无分发渠道。FL 9_3 GPU timestamp 不保证可用 → 墙钟计时，成绩自成体系。shader 复用优先走微软 archived **ANGLE**（GL ES 2.0 → D3D11 9_3），直接复用 Tegra 3/4 的 GLSL ES 2.0 legacy shader；备选原生 HLSL 9_3 重写（多一份维护）。主引擎/结果合同不带过去，独立小工程。
+11. **iPhone 4 legacy iOS（探索性，用户 2026-07-20 排入 Lumia 1520 之后；永不进成绩体系）**：iPhone 4 = A4 + PowerVR SGX535，仅 GL ES 2.0，无 Metal，系统止于 iOS 7.1；32-bit 应用无法上 App Store，只能免费账号自签侧载（7 天过期）。工具链：**OS X 10.11 + Xcode 7.3.1**（首个支持 free provisioning 且仍可构建 armv7 / 部署 iOS 7 设备的版本；只能跑在老 Intel Mac 或 10.11 虚拟机）。**不精简主工程**：主 C++ 引擎（现代 C++ 标准）、Metal/Vulkan、结果合同均不带过去；独立仓库或 `legacy-ios/` 小工程，仅复用 Android ES 2.0 legacy tier 的 GLSL ES shader 与 workload 定义，宿主为 EAGL + 极简 UIKit + ObjC，粒子走 CPU 物理；SGX535 比 Tegra 3 更弱，需单独更低预设。墙钟计时、无任何抓帧、成绩不进主 History。主 iOS 计划（最低 iOS 16 + Metal + SwiftUI，§3.0.3）完全不受影响。
+12. **Dual-GPU Aggregate（双卡合力模式，功能项而非 OS 移植；首个验证目标：Boot Camp Windows 下的 Mac Pro 2013 双 FirePro D700）**：显式引擎级多 GPU 协作——驱动层 CrossFire 对自研引擎无效，不作依赖。切片顺序：(a) `stream` headless 双独立设备聚合：一进程两个 device 各算一半粒子、帧边界 CPU 同步、吞吐相加，新成绩组 `stream_dualgpu_v1`，结果必须记录两张 adapter 的完整元数据；(b) N-body 双卡（每步交换位置，~1MB/步）；(c) GPU Burn 分屏 SFR 或 AFR（DX12 unlinked 显式多适配器 + 跨适配器堆）。**不做** DX12 LDA / Vulkan device-group 依赖（D700 22.6.1 老驱动是否暴露不确定），**不做** Cinematic Liquid 域分解（每 substep 跨 PCIe 网格同步属科研级，不值）。单卡成绩组不受影响；混插不同型号也应能跑（聚合分数需标注非对称配置）。安全注意：双 D700 同时满载是 Mac Pro 2013 已知散热死穴，15 秒 Burst 可以，禁止双卡长时烤机。
 
 ## 3. 当前结论（先读这一节）
 
@@ -572,7 +586,7 @@ PathService 已把 results/captures/reports/logs 改到
 2. **macOS vertical slice（平台下一刀）**：Particle + GPU Burn + 液体 raymarch + MTLCapture + **deployment macOS 12** **代码已落 → 真机验收（优先含 Monterey 冒烟）**；SwiftUI 已对齐 → Mac 编译验收。
 3. **回到未关闭的正确性与自由模式**（可与平台刀并行由用户指定）：依次关闭 Cinematic Liquid SPH 的 frame-driven timestep、per-substep impulse clear、viscosity race、atomic scatter ordering；之后再做 Liquid Lab / Explore、GPU Burn Unlimited Soak 和 VRAM Integrity Soak。四项关闭前 SPH 始终 `_preview`，旧结果合同不变。
 4. **Windows 完整公开发布收口**仍开放：冻结 `report_worker`，签名证书，在干净 Windows 10/11 VM 验收 bundled RenderDoc 和完整 GUI-first MSI 安装/升级/卸载。
-5. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Dual-GPU Aggregate；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
+5. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Aggregate；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
 
 ## 10. 验证记录
 
@@ -873,3 +887,19 @@ PathService 已把 results/captures/reports/logs 改到
 - **公平比较**分三组：`Native Baseline` 固定输入=输出；`Fixed-Scale Upscaler` 对所有插件使用相同输入/输出分辨率、相同水面回放与时序输入；`Vendor Recommended` 使用厂商推荐 Quality/Balanced，只作体验展示。分别报告 base render/upscale/total GPU time、VRAM 与 PSNR/SSIM/FLIP，不把画质和 FPS 合成单一总分。
 - Frame Generation 与 Super Resolution、Ray Reconstruction/denoising 分开。FG 只报告真实渲染 FPS、显示 FPS、生成耗时与延迟，生成帧不得计入完成的模拟/渲染工作量。
 - **安装包**：厂商库均做可选、运行时能力检测与动态加载。Streamline/DLSS 只分发 NVIDIA 签名 production DLL 并遵守 RTX SDK 通知/发布条款；当前 AMD SDK binary 按其许可证原样分发并保留 notices，不能笼统声称整个 SDK 都是 MIT；XeSS 允许未修改 binary 再分发但必须附 Intel 许可与第三方通知；MetalFX 是系统 framework，无需捆绑第三方 DLL。所有结果记录 provider、SDK version、API、driver、input/output resolution 与 capability path。
+
+### 2026-07-19: iOS (iOS 16+) Porting Phase 1 Completed
+
+- **Engine removal of GLFW**: In `CMakeLists.txt`, added iOS system check to force ENABLE_METAL and disable other backends. Defined `GPU_BENCH_NO_GLFW`. Removed GLFW link dependency and `gpu_benchmark` CLI target.
+- **Native Apple timing**: Replaced all `glfwGetTime` calls in `src/app_base.cpp` with `gpuBenchGetTime` using high-resolution `mach_absolute_time`.
+- **iOS CAMetalLayer compatibility**: Conditionalized `CAMetalLayer` window binding in `src/metal_backend.mm` for iOS to directly bind to a passed `void*` cast of `CAMetalLayer` instead of relying on GLFW and `NSWindow`.
+- **SwiftUI iOS App XcodeGen Setup**: Created `ios-gui/project.yml` targeting iOS 16.0+, linking only Metal, UIKit, and other system framework dependencies.
+- **iOS UI Adaptation**:
+  - `MangekyoApp.swift` implements `scenePhase` lifecycle listener to cancel running benchmarks on background transitions.
+  - `ContentView.swift` uses a `TabView` for iPhone (compact) and `NavigationSplitView` for iPad (regular).
+  - `RunView.swift` locks backend selection to Metal, replaces checkbox styles with switches, and enforces number pads for value inputs.
+  - `HistoryView.swift` replaces macOS `Table` with an iOS swipable `List` and custom rows.
+  - `SettingsView.swift` hides working directory selector and displays read-only sandboxed path.
+  - `AboutView.swift` queries model details using `utsname` to avoid macOS sysctl calls.
+  - `ChartsView.swift` rebuilds chart graphics natively in SwiftUI using the `Charts` framework, removing python3/matplotlib dependencies.
+
