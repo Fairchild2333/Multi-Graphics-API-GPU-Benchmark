@@ -338,7 +338,10 @@ strict-affinity scores.
 │   ├── particle.metal        # Metal stream / nbody / synth / fractal / volumetric
 │   ├── gpu_burn.metal        # Metal GPU Burn (Plasma×Kaleidoscope)
 │   └── cinematic_liquid_v2.metal  # Metal liquid MLS-MPM + raymarch present
-└── build/
+├── scripts/
+│   └── build-windows.ps1       # Windows default: CLI + WinUI + adjacent shaders
+├── gui/x64/Release/            # Developer WinUI output (after build-windows.ps1)
+└── out/build/windows-*-release/  # CMake preset CLI/engine output
 ```
 
 ## Quick Start
@@ -363,7 +366,17 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build
 ./build/gpu_benchmark
 ```
 
-**Windows:**
+**Windows (default: CLI + WinUI GUI):**
+```powershell
+$env:VCPKG_ROOT = 'C:\vcpkg'
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-windows.ps1
+.\gui\x64\Release\gpu_bench_gui.exe
+# CLI worker also at:
+#   out\build\windows-x64-release\Release\gpu_benchmark.exe
+#   gui\x64\Release\gpu_benchmark.exe  (copied beside the GUI with shaders)
+```
+
+CLI-only: `scripts\build-windows.ps1 -SkipGui`. Or the lower-level CMake path:
 ```powershell
 cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
 cmake --build build --config Release

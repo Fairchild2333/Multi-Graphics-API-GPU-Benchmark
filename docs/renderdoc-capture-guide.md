@@ -15,15 +15,22 @@
 ## Prerequisites
 
 1. Install [RenderDoc](https://renderdoc.org/) (v1.35+).
-2. Build the project:
+2. Build the project (Windows default = CLI + WinUI GUI):
    ```powershell
-   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-   cmake --build build --config Release
+   $env:VCPKG_ROOT = 'C:\vcpkg'
+   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-windows.ps1
    ```
+   CLI-only: `scripts\build-windows.ps1 -SkipGui`. Outputs:
+   - CLI: `out\build\windows-x64-release\Release\gpu_benchmark.exe`
+   - GUI: `gui\x64\Release\gpu_bench_gui.exe` (adjacent worker + shaders staged)
 3. Verify the executable runs:
    ```powershell
-   .\build\Release\gpu_benchmark.exe --backend vulkan --benchmark 10
+   .\out\build\windows-x64-release\Release\gpu_benchmark.exe --backend vulkan --benchmark 10
    ```
+
+> Older docs used `build\Release\gpu_benchmark.exe`. That layout still works if
+> you configure CMake with `-B build` yourself; the preset/default developer
+> path above is preferred.
 
 ---
 
@@ -33,13 +40,13 @@ Before capturing, record clean performance numbers without RenderDoc overhead.
 
 ```powershell
 # RX 6900 XT — 16M particles, Vulkan
-.\build\Release\gpu_benchmark.exe --backend vulkan --gpu 0 --benchmark 500 --particles 16777216
+.\out\build\windows-x64-release\Release\gpu_benchmark.exe --backend vulkan --gpu 0 --benchmark 500 --particles 16777216
 
 # RX 6900 XT — 16M particles, DX11 (for cross-API comparison)
-.\build\Release\gpu_benchmark.exe --backend dx11 --gpu 0 --benchmark 500 --particles 16777216
+.\out\build\windows-x64-release\Release\gpu_benchmark.exe --backend dx11 --gpu 0 --benchmark 500 --particles 16777216
 
 # AMD iGPU — 1M particles, Vulkan (lower count to keep it runnable)
-.\build\Release\gpu_benchmark.exe --backend vulkan --gpu 1 --benchmark 500 --particles 1048576
+.\out\build\windows-x64-release\Release\gpu_benchmark.exe --backend vulkan --gpu 1 --benchmark 500 --particles 1048576
 ```
 
 **Record from the terminal Summary output:**
@@ -65,11 +72,11 @@ Before capturing, record clean performance numbers without RenderDoc overhead.
 ```powershell
 # RX 6900 XT — auto-capture frame 50
 & "C:\Program Files\RenderDoc\renderdoccmd.exe" capture -w `
-    .\build\Release\gpu_benchmark.exe --backend vulkan --gpu 0 --benchmark 200 --particles 16777216 --capture 50
+    .\out\build\windows-x64-release\Release\gpu_benchmark.exe --backend vulkan --gpu 0 --benchmark 200 --particles 16777216 --capture 50
 
 # AMD iGPU — auto-capture frame 50
 & "C:\Program Files\RenderDoc\renderdoccmd.exe" capture -w `
-    .\build\Release\gpu_benchmark.exe --backend vulkan --gpu 1 --benchmark 200 --particles 1048576 --capture 50
+    .\out\build\windows-x64-release\Release\gpu_benchmark.exe --backend vulkan --gpu 1 --benchmark 200 --particles 1048576 --capture 50
 ```
 
 The console will print:
@@ -87,8 +94,9 @@ The console will print:
 ### Option B: RenderDoc GUI
 
 1. Open RenderDoc → **Launch Application**.
-2. Executable Path: `build\Release\gpu_benchmark.exe`
-3. Working Directory: project root
+2. Executable Path: `out\build\windows-x64-release\Release\gpu_benchmark.exe`
+   (or `gui\x64\Release\gpu_benchmark.exe` after `scripts\build-windows.ps1`)
+3. Working Directory: same folder as the chosen `gpu_benchmark.exe` (shaders live next to the exe)
 4. Command-line Arguments: `--backend vulkan --gpu 0 --benchmark 200 --particles 16777216`
 5. Click **Launch**, then press **F12** when particles are visible.
 

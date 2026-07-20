@@ -3,6 +3,11 @@
 This package is a staged Windows x64 engineering release. It is not yet a
 fully self-contained public installer.
 
+This document describes **staged/release** trees under `out/stage` and
+`out/release`. A local developer build from `scripts/build-windows.ps1`
+(`gui/x64/Release` + `out/build/windows-*-release`) is not a portable package
+and is outside this contract.
+
 - Windows binaries delay-load `vulkan-1.dll` and probe it before any Vulkan API
   call, so a machine without a Vulkan loader can fall back to DirectX/WARP. The
   Vulkan SDK and system/driver loader are not bundled. Binary import auditing is

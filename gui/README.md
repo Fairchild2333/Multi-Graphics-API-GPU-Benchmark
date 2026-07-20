@@ -40,22 +40,35 @@ location, where History and the chart scripts read them.
 
 ## Build
 
-1. Build the engine first with CMake (produces `build/Release/gpu_engine.lib`
-   and `gpu_benchmark.exe` + shaders) — see the repo root README.
-2. Build the GUI (requires Visual Studio / VS Build Tools with the **Windows App
-   SDK / C++/WinRT** components — the bare .NET SDK lacks the XAML/MSIX tasks):
+**Preferred (CLI + GUI together):** from the repo root:
+
+```powershell
+$env:VCPKG_ROOT = 'C:\vcpkg'
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-windows.ps1
+```
+
+This configures/builds the CMake CLI, then MSBuilds the WinUI GUI. The GUI
+post-build step copies `gpu_benchmark.exe` **and** its HLSL / SPIR-V / OpenGL
+shader assets beside `gpu_bench_gui.exe`, so the adjacent worker can resolve
+shaders from its exe directory.
+
+Manual two-step flow (requires Visual Studio / VS Build Tools with the
+**Windows App SDK / C++/WinRT** components — the bare .NET SDK lacks the
+XAML/MSIX tasks):
+
+1. Build the engine with CMake (produces `gpu_engine.lib`, `gpu_benchmark.exe`,
+   and shaders next to the CLI).
+2. Build the GUI:
 
 ```bat
-nuget restore gui\gpu_bench_gui.vcxproj -ConfigFile gui\nuget.config
-"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\MSBuild\Current\Bin\MSBuild.exe" ^
-    gui\gpu_bench_gui.vcxproj /p:Configuration=Release /p:Platform=x64 ^
-    /p:GpuBuildDir=<repo>\build /m
+"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe" ^
+    gui\gpu_bench_gui.vcxproj /restore /p:Configuration=Release /p:Platform=x64 ^
+    /p:GpuBuildDir=<repo>\out\build\windows-x64-release /m
 ```
 
 Output: `gui\x64\Release\gpu_bench_gui.exe` (self-contained Windows App Runtime;
-`glfw3.dll` is copied next to it). The GUI locates the CMake-built
-`gpu_benchmark.exe` and starts it with that directory as the worker's current
-directory, keeping the engine's shader lookup intact.
+`glfw3.dll`, `gpu_benchmark.exe`, and shader assets are copied next to it).
+The GUI prefers the adjacent worker so driver faults stay process-isolated.
 
 ## Notes
 

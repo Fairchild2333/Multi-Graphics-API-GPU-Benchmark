@@ -1368,15 +1368,15 @@ namespace
     }
 
     // Different APIs report the same physical GPU under decorated names
-    // ("…RTX 5090", "…RTX 5090 (FL 12_1)", "…RTX 5090/PCIe/SSE2") — collapse to
-    // a common base so they merge in the filter.
+    // ("…RTX 5090", "…RTX 5090 (FL 12_1)", "…RTX 5090/PCIe/SSE2") — collapse
+    // feature-level / GL suffix noise. Keep " #1"/" #2" so dual identical
+    // cards (e.g. Mac Pro 2013 dual FirePro D700) stay distinct in Summary,
+    // History and Charts.
     std::string normalizeGpuName(std::string n)
     {
         auto p = n.find(" (");
         if (p != std::string::npos) n = n.substr(0, p);
         p = n.find('/');
-        if (p != std::string::npos) n = n.substr(0, p);
-        p = n.find(" #");                       // "…RTX 5090 #1" -> base
         if (p != std::string::npos) n = n.substr(0, p);
         // OEM-branded Adreno: "Mi Pad 5 Adreno 640 GPU" -> "Qualcomm Adreno 640"
         p = n.find("Adreno");
@@ -5052,11 +5052,24 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                     const bool software =
                         (gpuPos < gpuNames.size() && isSoftwareGpu(gpuNames[gpuPos])) ||
                         isSoftwareGpu(reportedGpu);
-                    std::string gpuName = software
-                        ? softwareGpuDisplayName(
+                    // Prefer the probe label (keeps "#1"/"#2" for dual identical
+                    // cards). normalizeGpuName() strips that suffix and wrongly
+                    // merges two FirePro D700s into one summary group.
+                    std::string gpuName;
+                    if (software)
+                    {
+                        gpuName = softwareGpuDisplayName(
                             gpuPos < gpuNames.size() ? gpuNames[gpuPos] : reportedGpu,
-                            cpuName)
-                        : normalizeGpuName(reportedGpu);
+                            cpuName);
+                    }
+                    else if (gpuPos < gpuNames.size() && !gpuNames[gpuPos].empty())
+                    {
+                        gpuName = gpuNames[gpuPos];
+                    }
+                    else
+                    {
+                        gpuName = reportedGpu;
+                    }
                     if (gpuName.empty() || gpuName == "(unknown)")
                     {
                         gpuName = gpuArg.empty() ? "GPU" : "GPU " + gpuArg;

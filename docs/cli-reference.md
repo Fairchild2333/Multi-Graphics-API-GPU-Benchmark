@@ -5,6 +5,9 @@ external tools it invokes. The product name changed, but the compatible internal
 command remains `gpu_benchmark`. Source: [`src/main.cpp`](../src/main.cpp), defaults in
 [`src/gpu_common.h`](../src/gpu_common.h).
 
+Windows build: prefer [`scripts/build-windows.ps1`](../scripts/build-windows.ps1)
+(CLI + WinUI). Details: [`docs/building.md`](building.md).
+
 ## 1. Default config (`BenchmarkConfig`, gpu_common.h:103-120)
 
 | Field | Default | Notes |

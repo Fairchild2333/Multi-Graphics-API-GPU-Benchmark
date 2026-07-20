@@ -4,8 +4,11 @@
 
 > 当前事实、验证记录与交接顺序以根目录 [`HANDOFF.md`](../HANDOFF.md) 为准；下面旧专题内容只保留历史上下文。
 
+> **Windows 本地编译（2026-07-21）**：默认用 [`scripts/build-windows.ps1`](../scripts/build-windows.ps1) 编 CLI+WinUI，并同步同目录 shader；详见 [`docs/building.md`](building.md)。发布 ZIP/MSI 仍走 github-release/stage，勿把开发树当成安装包。
+
 > **当前执行边界**：先完善现有 Stream/Particle、GPU Burn、Cinematic Liquid v2、GUI 同步、固定 `15s + 第 5 秒抓帧` 与结果合同。本轮新增的 RT、路径追踪、DLSS/FSR/XeSS/MetalFX 仅记录可行性；在现有测试完成验收且用户再次明确提优先级前，不开始实现。
 
+- [x] **2026-07-21 开发默认 CLI+GUI**：`scripts/build-windows.ps1`；`CopyGpuBenchmarkWorker` 同步 worker 与 HLSL/SPIR-V/OpenGL 资产（修复 GUI 同目录缺 `compute.hlsl` 导致 DX/OpenGL 失败）。
 - [x] 主测试 `gpu_burn` 已升级为 `gpu_burn_v2_mangekyo_faceted_glass_v1`：透视 3D 切割玻璃晶冠、多层碎钻、平面 SDF 法线、Fresnel 反射、折射色散与相机视差已接入 Vulkan/DX12/DX11/OpenGL、WinUI、自动标定和版本化结果；原创 Plasma Bloom 以公开 `gpu_burn_v1` legacy 选择完整保留。
 - [x] RTX 5090 自动标定实测稳定段 NVML 99%，约 599–600W；默认仍是 15 秒 Burst + 第 5 秒 RenderDoc，不宣称长时热稳定或错误检测。
 - [x] 低强度 9 项设备/API 矩阵、包内 RenderDoc 抓帧和 staged WinUI 启动通过；固定未探测步数限制为 16–32，推荐留空自动标定。

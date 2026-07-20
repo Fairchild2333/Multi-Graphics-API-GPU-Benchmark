@@ -13,7 +13,9 @@ Full build/surface/acceptance spec: root `HANDOFF.md` §3.0.3. No iOS target yet
 
 Aligned with the Windows WinUI 3 GUI. Prefers launching the built
 `gpu_benchmark` CLI as a subprocess (Cancel = terminate). Falls back to the
-in-process `gpu_engine` bridge when the binary is missing.
+in-process `gpu_engine` bridge when the binary is missing. On Windows the
+matching developer flow is `scripts/build-windows.ps1` (CLI + WinUI + adjacent
+worker/shaders); see `docs/building.md`.
 
 ```
 SwiftUI App

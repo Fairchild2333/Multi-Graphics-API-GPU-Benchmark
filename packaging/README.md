@@ -21,6 +21,23 @@ Writable results, captures, reports, and logs are deliberately excluded. The
 application stores them below the platform user-data directory through
 `PathService`.
 
+## Local developer build (not a release)
+
+For day-to-day Windows development, use the repo-root helper. It builds the
+CMake CLI/engine **and** the WinUI GUI, and stages `gpu_benchmark.exe` plus
+HLSL/SPIR-V/OpenGL shader assets beside `gpu_bench_gui.exe`:
+
+```powershell
+$env:VCPKG_ROOT = 'C:\vcpkg'
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-windows.ps1
+# GUI: gui\x64\Release\gpu_bench_gui.exe
+# CLI: out\build\windows-x64-release\Release\gpu_benchmark.exe
+```
+
+Pass `-SkipGui` for a CLI-only tree. This is **not** a portable GitHub Release
+candidate — no RenderDoc bundle, no stage inventory, no MSI. Use the sections
+below for release packaging. See also `docs/building.md`.
+
 ## One-command GitHub Release build
 
 Download the official RenderDoc **64-bit portable ZIP** on a connected machine.

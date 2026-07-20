@@ -28,6 +28,17 @@ Set-StrictMode -Version 3.0
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $outRoot = [IO.Path]::GetFullPath((Join-Path $projectRoot 'out'))
 
+$renderDocPinPath = Join-Path $projectRoot 'packaging/renderdoc-version.json'
+if (-not (Test-Path -LiteralPath $renderDocPinPath -PathType Leaf)) {
+    throw "Pinned RenderDoc manifest was not found: $renderDocPinPath"
+}
+$renderDocPin = Get-Content -LiteralPath $renderDocPinPath -Raw -Encoding utf8 | ConvertFrom-Json
+if ([int]$renderDocPin.schemaVersion -ne 1 -or
+    [string]::IsNullOrWhiteSpace([string]$renderDocPin.version)) {
+    throw "Pinned RenderDoc manifest is invalid: $renderDocPinPath"
+}
+$pinnedRenderDocVersion = [string]$renderDocPin.version
+
 $archLower = $Arch.ToLowerInvariant()
 if (-not $BuildDir) { $BuildDir = Join-Path $outRoot "build/windows-$archLower-release" }
 if (-not $StageDir) { $StageDir = Join-Path $outRoot "stage/windows-$archLower" }
@@ -164,6 +175,18 @@ if (-not $SkipGui -and -not $BuildGui -and -not $GuiPayloadDir) {
     }
 }
 if ($GuiPayloadDir) { $GuiPayloadDir = [IO.Path]::GetFullPath($GuiPayloadDir) }
+if ($RenderDocDir) {
+    $RenderDocDir = [IO.Path]::GetFullPath($RenderDocDir)
+    $renderDocDll = Join-Path $RenderDocDir 'renderdoc.dll'
+    if (-not (Test-Path -LiteralPath $renderDocDll -PathType Leaf)) {
+        throw "RenderDoc payload is missing renderdoc.dll: $RenderDocDir"
+    }
+    $actualRenderDocVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo(
+        $renderDocDll).ProductVersion.TrimStart('v')
+    if ($actualRenderDocVersion -ne $pinnedRenderDocVersion) {
+        throw "Release staging requires pinned RenderDoc $pinnedRenderDocVersion, but '$renderDocDll' is $actualRenderDocVersion."
+    }
+}
 if ($SkipGui) {
     $GuiPayloadDir = ''
     Write-Warning 'Creating a CLI-only smoke package. This is not the intended GUI-first release.'

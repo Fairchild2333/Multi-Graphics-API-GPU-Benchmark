@@ -7,6 +7,9 @@ Windows stage into a per-user Setup executable. It does not build C++, compile
 shaders, inspect `C:\Program Files\RenderDoc`, or copy anything from
 vcpkg/Visual Studio.
 
+For a local **developer** CLI+GUI tree (not an installer), use
+`scripts/build-windows.ps1` instead — see `docs/building.md`.
+
 ## Input contract
 
 First create and verify the stage:

@@ -1,7 +1,7 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
-> 最后更新：2026-07-19（Australia/Sydney）
-> 分支 / 提交：`main`（**本轮 macOS / Metal / GUI 改动尚未提交**，工作树 dirty；勿把 `out/` 构建产物当仓库事实）
+> 最后更新：2026-07-21（Australia/Sydney）
+> 分支 / 提交：`main`（本地可能含未提交的开发构建文档/`build-windows.ps1` 改动；勿把 `out/` 构建产物当仓库事实）
 > 本文件是项目的**首要进度与交接入口**。后续 AI 或开发者开始工作前先完整阅读，结束工作前优先更新本文件，再更新专题 TODO、roadmap 和 README。
 
 ## 1. 交接规则
@@ -391,10 +391,11 @@ probe 前把随包 `tools/RenderDoc` 设为进程级 `VK_IMPLICIT_LAYER_PATH` �
 
 ### Windows WinUI 3
 
+- **本地开发默认构建（2026-07-21）**：`scripts/build-windows.ps1` 一次编齐 CMake CLI + WinUI GUI（`-SkipGui` 才只要 CLI）。GUI 的 `CopyGpuBenchmarkWorker` 会把 `gpu_benchmark.exe` **以及** HLSL / SPIR-V / OpenGL 着色器资产拷到 `gui/<Arch>/<Config>/`，避免同目录 worker 因缺 `compute.hlsl` 等文件在 DX/OpenGL 初始化失败。正式发布仍走 `build-windows-github-release.ps1` / `stage-windows-release.ps1`，与开发树分离。
 - 下拉框当前实际暴露 12 个 workload 选择，参数映射、score parser 与 History label/filter 覆盖对应公开 id；`gpu_burn_v1` 与 `cinematic_liquid_v1` 作为独立 legacy 选择展示。
 - GPU Burn 主项为 `Mangekyo Kaleidoscope — GPU Burn`，Plasma Bloom v1 收入 legacy；`gpu_stress` 归入 Advanced，旧 `stress`、`render3d` 明确标 Legacy，volumetric 标 Experimental，fluid 标 Vulkan-only Developer Preview 并阻止非法后端。
 - Custom 与 Quick 的非 headless 运行现在默认追加 `--capture 5`；默认 duration 仍为 15 秒。Full analysis / Flights / Particle 预设也继续抓帧。
-- installed/staged 布局优先使用同目录 CLI/资产；若不存在外部 CLI，静态 engine 以 GUI module 目录运行，不再强制切到 repo CWD。
+- installed/staged 布局优先使用同目录 CLI/资产；开发树 GUI 同样优先同目录 `gpu_benchmark.exe`（现须连同 shader 一起由构建同步）。若不存在外部 CLI，静态 engine 以 GUI module 目录运行，不再强制切到 repo CWD。
 - Full Analysis 优先调用随包 `tools/RenderDoc/renderdoccmd.exe`；报告输出改到用户数据目录。若缺 Python/冻结 report worker 或任一后处理命令失败，GUI 现在显示“benchmark 已完成、报告不可用/失败”，不再误报图表与报告已成功生成。
 - Charts 页从真实用户结果路径读取并写入 `%LOCALAPPDATA%/GpuComputeBenchmark/reports/images`；图表脚本与 GUI 现已包含 `gpu_burn`/`gpu_stress`，只比较同 workloadVersion，并按设备×API 诚实分组。
 - Release x64 已用最终 v2 `gpu_engine.lib` 重编并成功（0 error，2 个既有 duplicate WinAppSDK warning）。
@@ -411,7 +412,7 @@ probe 前把随包 `tools/RenderDoc` 设为进程级 `VK_IMPLICIT_LAYER_PATH` �
 
 | 文件 | 主要漂移 |
 |---|---|
-| `README.md` | 已同步 12 个公开选择、Mangekyo GPU Burn v2 与 Plasma Bloom v1 legacy 边界 |
+| `README.md` / `docs/building.md` / `docs/cli-reference.md` / `gui/README.md` / `packaging/README.md` / `packaging/PACKAGE_LIMITATIONS.md` / `installer/README.md` / `docs/renderdoc-capture-guide.md` / `docs/report.md` / `docs/TODO.md` / `macos-gui/README.md` | **2026-07-21 已同步**：Windows 开发默认 `scripts/build-windows.ps1`（CLI+GUI+同目录 shader）；发布链仍为 github-release/stage |
 | `docs/cli-reference.md` | 已同步 12 个 CLI/GUI 选择及两代 GPU Burn selector/结果分组 |
 | `docs/roadmap.md` | 历史内容仍有漂移；结果真实默认路径现已改为平台用户数据目录 |
 | `docs/benchmark-workload-suite.md` | “canonical enum” 仍只有最初 4 项 |
@@ -525,6 +526,7 @@ PathService 已把 results/captures/reports/logs 改到
 
 ### 当前正在进行
 
+- [x] 2026-07-21：用户要求开发默认编完整 GUI+CLI。新增 `scripts/build-windows.ps1`；`CopyGpuBenchmarkWorker` 扩展为同步 worker **与** HLSL/SPIR-V/OpenGL 资产。本机已用 preset 编过 CLI、MSBuild 编过 WinUI，并在 `gui/x64/Release` 验证 `compute.hlsl` 等可由该 target 自动补齐。双 FirePro D700 上仍见独立问题：Vulkan `vkCreateDevice failed`（与缺 shader 无关）；DX/OpenGL 缺文件问题在拷贝后应消失。正式发布脚本未改。
 - [x] 2026-07-18：按用户对 Full Analysis / All GPUs 实图反馈修正 WinUI 结果编排与软件设备显示。WARP/Basic Render 在 GPU 下拉框和本次 Summary 中保留真实软件渲染器名称，并追加当前 CPU 型号（例如 `Microsoft WARP (AMD Ryzen …)`），不再退化显示为 `GPU 2`。Full Analysis 会在启动前跳过 probe 已知不支持的 GPU×API（含非 fragment workload 的 DX11 compute 不可用）并在 Summary hint/raw output 列表说明；这些组合计为 unsupported/skipped、使用绿色完成状态，只有实际启动后非零退出才计为 failed/红色。另为“所选核显但 Windows/WGL 实际分配到另一 GL_RENDERER”增加专用 Summary 说明和状态文案；分类严格要求 OpenGL worker + CLI 精确 `cannot select GPU index`/`active GL_RENDERER` 标记，shader/context/driver/timeout 等其他 OpenGL 错误不会套用此说明。Release WinUI x64 已编译通过；尚未运行新的 Full Analysis/核显 OpenGL 矩阵或做 GUI 视觉点击验收。
 - [x] 2026-07-17：WinUI 四个秒数/时长 `NumberBox`（GPU duration、RenderDoc capture、CPU per-test、CPU warm-up）由 `Inline` 统一改为参考图对应的 `Compact` 竖向浮层按钮；补齐 Enter/页面外点击失焦、空值恢复与 `PopupThemeTransition`，避免 × 清空后 `NaN` 导致按钮全灰。数值合同未变，Release engine 与 WinUI x64 build 通过；按用户要求未启动最终 GUI，视觉手测仍待用户侧验收。
 - [x] 2026-07-16/17：用户否定首个二维 plasma chamber 原型后，将公开 `gpu_burn` 重做为 **Mangekyo faceted glass v2**：Vulkan/HLSL/OpenGL 三份一致 shader 现使用透视 3D SDF 截顶宝石/八面体碎钻、前后深度层、平面法线、Fresnel、RGB 色散和吸收；两次全屏固定循环使用独立 `gpu_burn_v2_mangekyo_faceted_glass_v1` / shaderVersion=3 身份，被否定原型不混分。Plasma Bloom 通过 `gpu_burn_v1` selector、原 shader 与历史合同完整保留。Release core 编译通过；RTX 5090 Vulkan 自动标定 16→2048 后 render 13.199 ms / 286.00 Gpix-step/s / 90.4% timestamp utilisation，stableScore 288.21 / CV 1.50%；DX12/DX11/OpenGL v2 低步数 runtime smoke 均通过。视觉核验图为 `out/kaleidoscope-prototype/mangekyo_faceted_final.png`。
@@ -573,6 +575,13 @@ PathService 已把 results/captures/reports/logs 改到
 5. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Dual-GPU Aggregate；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
 
 ## 10. 验证记录
+
+### 2026-07-21 Windows 开发默认 CLI+GUI 构建与同目录 shader
+
+- 根因：开发树 GUI 的 `findEngineExe()` 优先启动 `gui/x64/Release/gpu_benchmark.exe`，但旧 `CopyGpuBenchmarkWorker` 只拷 EXE、不拷着色器；worker 按 exe 目录解析 `compute.hlsl` / `*.spv` / `*_gl.*`，DX11/DX12/OpenGL 报 `Failed to open file: ...\gui\x64\Release\compute.hlsl`。
+- 修复：`gui/gpu_bench_gui.vcxproj` 的 `CopyGpuBenchmarkWorker` 现拷贝 worker + `*.hlsl` / `*.spv` / `*.cso` / `*_gl.*`；新增 `scripts/build-windows.ps1` 默认 `cmake --preset windows-*-release` 再 MSBuild GUI。
+- 验证：对本机已有 `out/build/windows-x64-release/Release`，单独跑 `/t:CopyGpuBenchmarkWorker` 后删除的 `compute.hlsl` 被恢复；`compute.comp.spv` / `compute_gl.comp` 存在。文档已更新：`README.md`、`docs/building.md`、`gui/README.md`、`packaging/README.md`、`packaging/PACKAGE_LIMITATIONS.md`、`installer/README.md`、`docs/renderdoc-capture-guide.md`、`docs/report.md`、`docs/TODO.md`、`macos-gui/README.md`、本文件。
+- 未宣称：双 D700 Vulkan `vkCreateDevice failed`、干净机发布包、或正式 github-release 重跑。
 
 ### 2026-07-19 macOS 最低系统 12 Monterey（代码侧，无真机）
 

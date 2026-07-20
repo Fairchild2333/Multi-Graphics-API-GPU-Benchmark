@@ -146,8 +146,9 @@
     </Link>
   </ItemDefinitionGroup>
 
-  <!-- Copy glfw3.dll (vcpkg, dynamic) next to the exe. The engine finds its
-       shaders via argv[0] -> the CMake build's gpu_benchmark.exe directory. -->
+  <!-- Copy glfw3.dll (vcpkg, dynamic) next to the GUI. CopyGpuBenchmarkWorker
+       also stages the CLI worker + shader assets beside the GUI so adjacent
+       gpu_benchmark.exe can resolve HLSL/SPIR-V/OpenGL sources from its exe dir. -->
   <ItemDefinitionGroup>
     <PostBuildEvent>
       <Command>copy /Y "$(VcpkgBin)\glfw3.dll" "$(OutDir)" &gt;nul</Command>
@@ -210,16 +211,25 @@
 
   <Target Name="GpuBenchPrepareXaml"
           DependsOnTargets="MarkupCompilePass1;_Midl;CppWinRTMergeProjectWinMDInputs;CppWinRTCopyWinMDToOutputDirectory;CppWinRTAddXamlMetaDataProviderCpp;CppWinRTMakeProjections;MarkupCompilePass2" />
-  <!-- The GUI always launches an adjacent worker in developer builds. Keep it
-       synchronized with the engine library used for this GUI link; otherwise
-       an old gpu_benchmark.exe silently wins over build/Release. -->
+  <!-- The GUI always launches an adjacent worker in developer builds. Keep the
+       worker and its runtime shader assets synchronized with the engine used
+       for this GUI link; otherwise an old gpu_benchmark.exe (or a worker
+       without HLSL/SPIR-V/OpenGL sources) silently wins over the CMake output. -->
   <Target Name="CopyGpuBenchmarkWorker" AfterTargets="Build">
     <PropertyGroup>
-      <GpuBenchmarkWorker>$(GpuBuildDir)\$(Configuration)\gpu_benchmark.exe</GpuBenchmarkWorker>
+      <GpuWorkerDir>$(GpuBuildDir)\$(Configuration)</GpuWorkerDir>
+      <GpuBenchmarkWorker>$(GpuWorkerDir)\gpu_benchmark.exe</GpuBenchmarkWorker>
     </PropertyGroup>
     <Error Condition="!Exists('$(GpuBenchmarkWorker)')"
            Text="GPU worker not found at $(GpuBenchmarkWorker). Build the engine first." />
-    <Copy SourceFiles="$(GpuBenchmarkWorker)"
+    <ItemGroup>
+      <_GpuWorkerPayload Include="$(GpuBenchmarkWorker)" />
+      <_GpuWorkerPayload Include="$(GpuWorkerDir)\*.hlsl" />
+      <_GpuWorkerPayload Include="$(GpuWorkerDir)\*.spv" />
+      <_GpuWorkerPayload Include="$(GpuWorkerDir)\*.cso" />
+      <_GpuWorkerPayload Include="$(GpuWorkerDir)\*_gl.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_GpuWorkerPayload)"
           DestinationFolder="$(OutDir)"
           SkipUnchangedFiles="true" />
   </Target>

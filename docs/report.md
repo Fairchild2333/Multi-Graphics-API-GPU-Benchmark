@@ -495,15 +495,21 @@ single-frame vs multi-frame averaging.
 
 ### How to Capture
 
+Build first with `scripts\build-windows.ps1` (or CMake). Prefer the preset CLI
+path below; `build\Release\...` remains valid only if you configured `-B build`.
+
 ```powershell
 # Option A — GUI: launch from RenderDoc, press F12 during rendering
+#   Executable: out\build\windows-x64-release\Release\gpu_benchmark.exe
+#   (or gui\x64\Release\gpu_benchmark.exe after build-windows.ps1)
+#   Working dir: same folder as the exe (shaders are adjacent)
 
 # Option B — CLI (Windows)
 & "C:\Program Files\RenderDoc\renderdoccmd.exe" capture `
-    .\build\Release\gpu_benchmark.exe --backend vulkan --benchmark 200
+    .\out\build\windows-x64-release\Release\gpu_benchmark.exe --backend vulkan --benchmark 200
 
 # Option C — Auto-capture frame 50 (must be launched via RenderDoc)
-.\build\Release\gpu_benchmark.exe --backend vulkan --benchmark 200 --capture 50
+.\out\build\windows-x64-release\Release\gpu_benchmark.exe --backend vulkan --benchmark 200 --capture 50
 ```
 
 ```bash

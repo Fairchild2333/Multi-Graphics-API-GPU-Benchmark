@@ -3,6 +3,11 @@
 Mangekyo's internal CMake target and command remain `gpu_benchmark`; the display
 brand does not require downstream build scripts to rename the executable.
 
+**Windows day-to-day default:** `scripts/build-windows.ps1` builds the CLI and
+WinUI GUI together and stages shaders beside the GUI worker. Release ZIP/MSI
+packaging remains a separate flow (`scripts/build-windows-github-release.ps1` /
+`packaging/README.md`).
+
 ## Prerequisites
 
 | Dependency | Install |
@@ -311,6 +316,22 @@ CMake will print which backends are enabled during configuration:
 
 ### Windows
 
+**Default developer build (CLI + WinUI GUI):**
+
+```powershell
+$env:VCPKG_ROOT = 'C:\vcpkg'
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-windows.ps1
+# GUI: gui\x64\Release\gpu_bench_gui.exe
+# CLI: out\build\windows-x64-release\Release\gpu_benchmark.exe
+```
+
+The script builds the CMake CLI/engine, then MSBuilds the WinUI GUI and stages
+`gpu_benchmark.exe` plus HLSL/SPIR-V/OpenGL shader assets beside the GUI so the
+adjacent worker can find them. Pass `-SkipGui` for a CLI-only tree, or
+`-Arch ARM64` for a native ARM64 developer build.
+
+**CLI-only CMake path** (same as before; does not build the GUI):
+
 ```powershell
 # Configure (vcpkg toolchain, all backends auto-detected)
 # By default, CMake targets the host architecture (x64 on x64 machines, ARM64 on ARM64 machines).
@@ -375,10 +396,11 @@ target; it has no additional runtime dependency, graphics window, shader or
 RenderDoc requirement. On Windows the WinUI project also contains the dedicated
 CPU page and starts the adjacent CLI as a no-window child process.
 
-After a Release build, run a non-persistent smoke first:
+After a Release build (`scripts\build-windows.ps1` or CMake), run a
+non-persistent smoke first:
 
 ```powershell
-.\build\Release\gpu_benchmark.exe `
+.\out\build\windows-x64-release\Release\gpu_benchmark.exe `
   --cpu-benchmark all `
   --cpu-time 0.09 `
   --cpu-warmup 0 `
@@ -396,7 +418,7 @@ systems: 15 seconds is applied separately to every logical processor and then to
 the multi-core stage, with a 0.2-second warm-up per test and three median rounds.
 
 ```powershell
-.\build\Release\gpu_benchmark.exe `
+.\out\build\windows-x64-release\Release\gpu_benchmark.exe `
   --cpu-benchmark all `
   --cpu-time 15 `
   --cpu-warmup 0.2

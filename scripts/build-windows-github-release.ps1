@@ -36,6 +36,21 @@ Set-StrictMode -Version 3.0
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $outRoot = [IO.Path]::GetFullPath((Join-Path $projectRoot 'out'))
 
+$renderDocPinPath = Join-Path $projectRoot 'packaging/renderdoc-version.json'
+if (-not (Test-Path -LiteralPath $renderDocPinPath -PathType Leaf)) {
+    throw "Pinned RenderDoc manifest was not found: $renderDocPinPath"
+}
+$renderDocPin = Get-Content -LiteralPath $renderDocPinPath -Raw -Encoding utf8 | ConvertFrom-Json
+if ([int]$renderDocPin.schemaVersion -ne 1 -or
+    [string]::IsNullOrWhiteSpace([string]$renderDocPin.version) -or
+    [string]::IsNullOrWhiteSpace([string]$renderDocPin.downloadUrl) -or
+    ([string]$renderDocPin.archiveSha256) -notmatch '^[0-9a-fA-F]{64}$') {
+    throw "Pinned RenderDoc manifest is invalid: $renderDocPinPath"
+}
+$pinnedRenderDocVersion = [string]$renderDocPin.version
+$pinnedRenderDocUrl = [string]$renderDocPin.downloadUrl
+$pinnedRenderDocSha256 = ([string]$renderDocPin.archiveSha256).ToLowerInvariant()
+
 $archLower = $Arch.ToLowerInvariant()
 if (-not $BuildDir) { $BuildDir = Join-Path $outRoot "build/windows-$archLower-release" }
 if (-not $StageDir) { $StageDir = Join-Path $outRoot "stage/windows-$archLower" }
@@ -77,6 +92,15 @@ function Reset-SafeReleaseDirectory([string]$Path) {
     New-Item -ItemType Directory -Force -Path $Path | Out-Null
 }
 
+if (-not $SkipRenderDoc -and
+    -not $RenderDocDir -and -not $RenderDocArchive -and -not $RenderDocDownloadUrl) {
+    $RenderDocDownloadUrl = $pinnedRenderDocUrl
+    $RenderDocSha256 = $pinnedRenderDocSha256
+    Write-Host "Using pinned RenderDoc $pinnedRenderDocVersion portable archive." -ForegroundColor Cyan
+}
+if (-not $SkipRenderDoc -and $RenderDocArchive -and -not $RenderDocSha256) {
+    $RenderDocSha256 = $pinnedRenderDocSha256
+}
 if ($SkipRenderDoc -and ($RenderDocDir -or $RenderDocArchive -or $RenderDocDownloadUrl)) {
     throw '-SkipRenderDoc cannot be combined with a RenderDoc input.'
 }
@@ -100,14 +124,18 @@ if (-not $SkipRenderDoc -and -not $RenderDocDir) {
             '-Sha256', $RenderDocSha256,
             '-OutputDir', $preparedRenderDoc)
         $RenderDocDir = $preparedRenderDoc
-    } else {
-        throw @'
-A full GitHub release requires RenderDoc. Supply one reproducible input:
-  -RenderDocArchive <official RenderDoc_*_64.zip> [-RenderDocSha256 <hash>]
-or:
-  -RenderDocDownloadUrl <pinned HTTPS portable ZIP> -RenderDocSha256 <hash>
-Use -SkipRenderDoc only for an explicitly incomplete engineering artifact.
-'@
+    }
+}
+
+if (-not $SkipRenderDoc) {
+    $renderDocDll = Join-Path $RenderDocDir 'renderdoc.dll'
+    if (-not (Test-Path -LiteralPath $renderDocDll -PathType Leaf)) {
+        throw "RenderDoc payload is missing renderdoc.dll: $RenderDocDir"
+    }
+    $actualRenderDocVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo(
+        $renderDocDll).ProductVersion.TrimStart('v')
+    if ($actualRenderDocVersion -ne $pinnedRenderDocVersion) {
+        throw "Release requires pinned RenderDoc $pinnedRenderDocVersion, but '$renderDocDll' is $actualRenderDocVersion."
     }
 }
 
