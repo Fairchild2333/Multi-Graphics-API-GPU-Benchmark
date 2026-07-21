@@ -6,19 +6,18 @@
 
 > **Windows 本地编译（2026-07-21）**：默认用 [`scripts/build-windows.ps1`](../scripts/build-windows.ps1) 编 CLI+WinUI，并同步同目录 shader；详见 [`docs/building.md`](building.md)。发布 ZIP/MSI 仍走 github-release/stage，勿把开发树当成安装包。
 
-> **当前执行边界**：先完善现有 Stream/Particle、GPU Burn、Cinematic Liquid v2、GUI 同步、固定 `15s + 第 5 秒抓帧` 与结果合同。本轮新增的 RT、路径追踪、DLSS/FSR/XeSS/MetalFX 仅记录可行性；在现有测试完成验收且用户再次明确提优先级前，不开始实现。
+> **当前执行边界**：先完善 Original Particle、Plasma/GPU Burn、当前 Cinematic Liquid `physical_scene_v8`、GUI 同步、固定 `15s + 第 5 秒抓帧` 与结果合同。N-body 不进入双卡路线。本轮新增的 RT、路径追踪、DLSS/FSR/XeSS/MetalFX 仅记录可行性；在现有测试完成验收且用户再次明确提优先级前，不开始实现。
 
 - [x] **2026-07-21 开发默认 CLI+GUI**：`scripts/build-windows.ps1`；`CopyGpuBenchmarkWorker` 同步 worker 与 HLSL/SPIR-V/OpenGL 资产（修复 GUI 同目录缺 `compute.hlsl` 导致 DX/OpenGL 失败）。
 - [x] 主测试 `gpu_burn` 已升级为 `gpu_burn_v2_mangekyo_faceted_glass_v1`：透视 3D 切割玻璃晶冠、多层碎钻、平面 SDF 法线、Fresnel 反射、折射色散与相机视差已接入 Vulkan/DX12/DX11/OpenGL、WinUI、自动标定和版本化结果；原创 Plasma Bloom 以公开 `gpu_burn_v1` legacy 选择完整保留。
 - [x] RTX 5090 自动标定实测稳定段 NVML 99%，约 599–600W；默认仍是 15 秒 Burst + 第 5 秒 RenderDoc，不宣称长时热稳定或错误检测。
 - [x] 低强度 9 项设备/API 矩阵、包内 RenderDoc 抓帧和 staged WinUI 启动通过；固定未探测步数限制为 16–32，推荐留空自动标定。
-- [x] `cinematic_liquid_v1`：独立于旧 2D `fluid`，已完成 181,216 粒子 3D MLS-MPM、96x56x64 密度体积、160-step 折射自由表面 raymarch、球体碰撞、WinUI/结果接入；RTX 5090 正式 15 秒 + 第 5.1 秒 `.rdc` 通过，成绩 `288.74 MParticle-step/s`。
 - [x] **历史 P0 — Cinematic Liquid v2 physical-scene v7 Vulkan 切片**：固定 128x64x96 MLS-MPM 网格、10 substeps 与 **320,920 粒子**（142x14x98 浅水底 + 48x37x71 溃坝体）；固定参数为 stiffness 45,000、viscosity 0.035、maxSpeed 8。历史身份为 `workloadVersion=cinematic_liquid_v2_physical_scene_v7`、`shaderVersion=9`、`sceneVersion=4`。用户调整后的母鸭、3 只小鸭以及 7 刚体 index ABI 均保留：船仍为 index 2、沉球仍为 index 3、小鸭仍追加在 4-6。
 - [x] **当前合同隔离 — physical-scene v8**：共享池体/光学参数后来改为 `poolWallInset=0.45`、`poolWallTopFraction=0.42`、`extinction=(12,3.6,2.5)`，已将当前 MLS-MPM 结果身份升为 `cinematic_liquid_v2_physical_scene_v8`、`sceneVersion=5`，不得与 v7 smoke 或任何更早版本混排；v8 尚无正式成绩。
 - [x] **P0 — 船与沉球物理修正**：船由硬锚定改为 34 kg 有限质量刚体、软系泊，并允许推进器反冲驱动/摇摆；目前只确认实现，**尚未视觉验收其运动轨迹**。index 3 水密实心球保持 1.06 水密度比，4.28 秒释放，重力 -9.81、空气阻尼 0.015；材料水阻按 displaced mass 与浸没率门控，不再把空气阶段错误地当成水下运动。
 - [x] **P0 — 越沿流体与自适应表面**：当前池壁是有限高度的内嵌碰撞壁（inset 0.45、wall-top fraction 0.42），外层 simulation catch band 允许粒子真实越沿后落到地面；catch band 带宽有限，**不是无限流体域**。5x5x5 binomial 重建改为自适应保留低支持喷滴。沉球入水 crown/whitewater 由真实 GPU 刚体状态与局部流体产生，不是 fragment 假水花；尚无独立 secondary-spray 粒子系统。
 - [x] **P0 — 场景材质与环境**：前景侧壁新增独立透明软 PVC 薄膜，使用 IOR 1.50、Fresnel、弱吸收与 wrinkle；这只是专用薄膜近似，**不是完整 PVC 多介质 ray path**。render `pool.z`、PVC bottom、liner、草地与物理粒子底面已统一到 `y=0`，ring separation 由 `2*tube` 推导。场景加入无限程序化草地及大气天空/云，没有 cubemap 资产。当前 v8 保留 4 界面 Fresnel/Snell、分段 Beer–Lambert、opaque depth sorting、linear exposure 与 density 边界归零，并使用 `extinction=(12,3.6,2.5)`；历史 v6 的 `(30,10,8)` 合同不回写。未 vendor MIT [jeantimex/fluid](https://github.com/jeantimex/fluid) 的代码或资产。
-- [x] **历史合同隔离**：`cinematic_liquid_v1`、正式 `cinematic_liquid_v2_surface_splat_optics_v4` / `shaderVersion=6`、`cinematic_liquid_v2_duck_family_v5` / `shaderVersion=7` 预览、`cinematic_liquid_v2_iterative_optics_v6` / `shaderVersion=8` 预览、physical-scene v7 与当前 v8 必须各自分组，绝不混分。
+- [x] **合同隔离**：当前 `physical_scene_v8` 与任何后继实现必须按 `workloadVersion` / shaderVersion / sceneVersion 独立分组；历史结果只读保留，绝不混分。
 - [x] **历史 optics_v4 正式 CLI/抓帧验收**：RTX 5090 Vulkan 正式 15 秒 + 5.1 秒 RenderDoc 已通过，结果 `20260715-170629-492`：Compute 10.572 ms、Render 1.553 ms、Total 12.125 ms、`263.98 MParticle-step/s`、966 个计分帧；0.103 秒抓帧开销已排除，1 次尝试/1 个文件成功。正式图为 `rdoc_captures/cinematic-liquid-v2-5s-formal-optics-v4.png`。该成绩只能归属 optics_v4。
 - [x] **历史 v6 短预览**：RTX 5090 / Vulkan / 6 秒预览结果 `20260715-221447-024`：Compute 9.450 ms、Render 3.003 ms、Total 12.454 ms、`257.01 MParticle-step/s`、284 个计分帧；图为 `rdoc_captures/cinematic-liquid-v2-5s-iterative-optics-v6-final-preview.png`。它只属于 v6 `_preview`，v6 没有正式 15 秒成绩，也不能归到 v7。
 - [x] **历史 v7 构建/自动 smoke 边界**：shader 编译、最终 6 个 SPIR-V 校验、CLI Release 与 WinUI Release x64 构建通过；WinUI 为 0 error，仅有既有 MSB8027/C4996/LNK4042 类 warning（最新增量构建显示 2 个重复 WinAppSDK warning，源文件重编时曾显示 4 个）。只做过若干 `--time 6` / `--time 8` 自动停止 smoke；没有正式 15 秒、没有可靠保存的新 RenderDoc，也没有完整视觉验收。控制台瞬时 `241.13` 不是正式或持久成绩。窗口约 2-3 秒后关闭来自测试脚本的 `--time 8` 自动生命周期，不是已确认的崩溃。
@@ -41,7 +40,7 @@
 
 ## 平台移植优先级（用户锁定；2026-07-19 将 Win7 GUI 挪到 PS3 前）
 
-顺序：**Win ARM64 → macOS → Android → iOS → Debian Linux → WebGPU → HarmonyOS PC / 鸿蒙 → Windows 7 专用 GUI（Aero）→ PS3（探索性）→ Lumia 1520 legacy WP（探索性）→ iPhone 4 legacy iOS（探索性）→ Dual-GPU Aggregate（双卡合力，功能项）**。除现有隔离的 HarmonyOS Vulkan 粒子 demo 外，完整产品移植均未开始；该 demo 不等于 workload suite 已移植。不改变上方产品主线的切片顺序，平台移植在其后展开。逐平台落地时：能力不齐明确 unsupported、不静默 fallback；计时/抓帧模型不同的实现必须使用新 `workloadVersion` 独立成组，现有 Windows 成绩组的 A/B 对比不受影响。详细逐平台要点见 `HANDOFF.md` 目标 C。
+顺序：**Win ARM64 → macOS → Android → iOS → Debian Linux → WebGPU → HarmonyOS PC / 鸿蒙 → Windows 7 专用 GUI（Aero）→ PS3（探索性）→ Lumia 1520 legacy WP（探索性）→ iPhone 4 legacy iOS（探索性）→ Dual-GPU Collaboration（双卡协作，功能项）**。除现有隔离的 HarmonyOS Vulkan 粒子 demo 外，完整产品移植均未开始；该 demo 不等于 workload suite 已移植。不改变上方产品主线的切片顺序，平台移植在其后展开。逐平台落地时：能力不齐明确 unsupported、不静默 fallback；计时/抓帧模型不同的实现必须使用新 `workloadVersion` 独立成组，现有 Windows 成绩组的 A/B 对比不受影响。详细逐平台要点见 `HANDOFF.md` 目标 C。
 
 - [x] **1. Win ARM64**：原生 CLI/WinUI + WiX MSI 闭环已落地（见 HANDOFF）；clean-machine/签名仍开放。
 - [ ] **2. macOS（下一平台刀）**：
@@ -65,7 +64,7 @@
 - [ ] **9. PS3（探索性，永不进成绩体系）**：仅 homebrew（PSL1GHT/RSXGL）；RSX 无 compute/原子/GPU timestamp，PSGL≈GL ES 1.0+Cg，三主测试不可直移；至多独立仓库的固定管线情怀 demo。
 - [ ] **10. Lumia 1520 legacy Windows Phone（探索性，永不进成绩体系；2026-07-20 排入）**：骁龙 800 / Adreno 330,但 WP8.1/W10M 驱动仅暴露 D3D11 **FL 9_3**(无 compute/UAV)→ 形态同 ES 2.0 legacy tier:简化 fragment Burn、粒子 CPU(NEON) 物理、液体 unsupported;WinRT/UWP + CoreWindow 前端,VS2015/VS2013 工具链,开发者模式侧载(商店已死);墙钟计时,成绩自成体系;shader 优先经 archived ANGLE 复用 Tegra 3/4 的 GLSL ES legacy shader,备选 HLSL 9_3 重写;独立小工程。详见 HANDOFF 目标 C 第 10 条。
 - [ ] **11. iPhone 4 legacy iOS（探索性，永不进成绩体系；2026-07-20 排入）**：OS X 10.11 + Xcode 7.3.1（free provisioning、armv7、deployment iOS 7.x，需老 Intel Mac/虚拟机）；不精简主工程，独立仓库或 `legacy-ios/` 小工程，仅复用 Android ES 2.0 legacy tier 的 GLSL ES shader/workload 定义；EAGL + UIKit + ObjC 宿主，粒子 CPU 物理，SGX535 单独更低预设；墙钟计时、无抓帧、成绩不进主 History；仅自签侧载（7 天过期），无 App Store。主 iOS 计划（iOS 16 + Metal）不受影响。详见 HANDOFF 目标 C 第 11 条。
-- [ ] **12. Dual-GPU Aggregate（双卡合力模式，功能项；首个验证目标 Boot Camp 下 Mac Pro 2013 双 D700）**：引擎级显式多 GPU，不依赖驱动 CrossFire/LDA/device-group。切片：(a) `stream` headless 双设备聚合（新组 `stream_dualgpu_v1`，记录双 adapter 元数据）→ (b) N-body 双卡位置交换 → (c) GPU Burn 分屏 SFR/AFR（DX12 unlinked 跨适配器堆）。不做液体域分解。双 D700 满载注意散热，禁止双卡长时烤机。
+- [ ] **12. Dual-GPU Collaboration（双卡协作模式，功能项；首个验证目标 Boot Camp 下 Mac Pro 2013 双 D700）**：Plasma/GPU Burn 的 DX12 AFR 已在强制 4 flights、禁用 RenderDoc 后实测约 2×；DX12 SFR 也已完成 50/50 半屏 + Tier-1 cross-node buffer 合成，16 steps 为 0.62× 负优化、128 steps 为 1.47×（仍低于 AFR），隔离为 `..._sfr2`。Vulkan 因 AMD 20.45.40.15 只暴露一个 graphics queue 而串行。DX11 窗口隐式 AFR 无提升；最终 AMD AGS 6.3.1 探针虽枚举到两张 D700，但显式/驱动 AFR 都返回 `crossfireAPI=0`、`crossfireGPUCount=1`，本机 FireGL 栈已判定不可用。OpenGL 虽由 `WGL_AMD_gpu_association` 枚举到两个 ID，但驱动拒绝为 GPU 2 创建 associated context，显式 SFR 已判定不可用并撤回原型。后续仅覆盖：(a) Original Particle 固定总粒子数分片并合成同一帧；(b) 当前 Cinematic Liquid 只验证模拟/渲染跨帧流水线，必须证明同一固定 workload 加速。传统 CrossFire/隐式 AFR 不可由应用强制；N-body、重复液体模拟、液体域分解和长时双卡烤机均不做。
 
 > 状态提示：请先阅读根目录 [`HANDOFF.md`](../HANDOFF.md)。当前事实、两条产品主线、P0 阻塞和下一实现切片以 HANDOFF 为准；本文件保留专题任务与历史上下文。每次工作应先更新 HANDOFF，再同步这里。
 

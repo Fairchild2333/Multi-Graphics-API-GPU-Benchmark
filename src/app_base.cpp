@@ -983,6 +983,11 @@ void AppBase::PrintSummary() const {
                   << " (" << config_.difficultyLabel << ")\n";
     std::cout
         << std::setw(14) << "Flights:"    << config_.framesInFlight << "\n"
+        << std::setw(14) << "Multi-GPU:"
+        << (config_.multiGpuMode == MultiGpuMode::Afr
+                ? "AFR (2 nodes/devices)"
+                : config_.multiGpuMode == MultiGpuMode::Sfr
+                    ? "SFR (2 linked nodes, one frame)" : "Off") << "\n"
         << std::setw(14) << "V-Sync:"     << (config_.vsync ? "ON" : "OFF") << "\n"
         << std::setw(14) << "Duration:"
             << std::setprecision(1) << duration << " s"
@@ -1184,23 +1189,57 @@ void AppBase::PrintSummary() const {
 
         const double avgFrameMs = (avgFps > 0.0) ? 1000.0 / avgFps : 0.0;
         const double devUtil = (avgFrameMs > 0.0) ? avgTotal / avgFrameMs : 0.0;
+        const bool afr = config_.multiGpuMode == MultiGpuMode::Afr;
+        const bool sfr = config_.multiGpuMode == MultiGpuMode::Sfr;
+        const bool implicitAfr = afr && GetBackendName() == "DX11";
+        // SFR timestamps cover the one-frame critical path on the presenting
+        // node, including its wait for the secondary half.  They are not the
+        // sum of two independent GPU timelines, so do not divide them by two.
+        const double perDeviceUtil = afr ? devUtil / 2.0 : devUtil;
 
         std::cout << "\n--- Analysis ---\n"
             << "Avg frame time:  " << std::setprecision(3) << avgFrameMs << " ms\n"
             << "Avg " << (isSoftware ? "device" : "GPU") << " time: "
             << std::string(isSoftware ? 1 : 3, ' ')
             << avgTotal << " ms\n"
-            << (isSoftware ? "Device" : "GPU") << " utilisation: "
-            << std::setprecision(1) << (devUtil * 100.0) << "%\n";
+            << (isSoftware ? "Device" : (afr ? "GPU-equivalent" : "GPU"))
+            << " utilisation: "
+            << std::setprecision(1) << (devUtil * 100.0) << "%";
+        if (implicitAfr) {
+            std::cout << " (DX11 physical split unverified)";
+        } else if (afr) {
+            std::cout << " (" << (perDeviceUtil * 100.0)
+                      << "% average per GPU)";
+        } else if (sfr) {
+            std::cout << " (SFR critical path, not summed GPU time)";
+        }
+        std::cout << "\n";
 
         if (isSoftware) {
             std::cout << ">> Software renderer -- all work runs on CPU.\n";
-        } else if (devUtil < 0.5) {
+        } else if (implicitAfr) {
+            std::cout << ">> Driver-managed AFR did not improve throughput; "
+                         "physical GPU participation is unverified.\n";
+        } else if (afr && devUtil > 1.6) {
+            std::cout << ">> GPU-bound: both AFR devices overlap and are saturated.\n";
+        } else if (afr && devUtil > 0.8) {
+            std::cout << ">> AFR overlap absent: throughput is limited to about one "
+                         "GPU-equivalent despite alternating device assignments.\n";
+        } else if (afr) {
+            std::cout << ">> AFR is under-filled: neither device receives enough "
+                         "overlapping work.\n";
+        } else if (sfr && perDeviceUtil > 0.8) {
+            std::cout << ">> SFR critical path is GPU-bound; compare FPS against single GPU "
+                         "to determine whether half-frame shading repays composition cost.\n";
+        } else if (sfr) {
+            std::cout << ">> SFR is not saturating the presentation critical path; compare "
+                         "against AFR and single-GPU throughput before keeping it.\n";
+        } else if (perDeviceUtil < 0.5) {
             std::cout << ">> CPU-bound: GPU is idle "
-                      << static_cast<int>((1.0 - devUtil) * 100.0)
+                      << static_cast<int>((1.0 - perDeviceUtil) * 100.0)
                       << "% of the time.\n"
                       << "   -> Try a higher difficulty for more accurate GPU benchmarking.\n";
-        } else if (devUtil > 0.8) {
+        } else if (perDeviceUtil > 0.8) {
             std::cout << ">> GPU-bound: GPU is the bottleneck.\n";
         } else {
             std::cout << ">> Balanced: CPU and GPU workloads are roughly matched.\n";
@@ -1452,6 +1491,35 @@ BenchmarkResult AppBase::CollectResult() const {
     }
     workloadConfig << ";renderDoc="
                    << (config_.renderDocEnabled ? "enabled" : "disabled");
+    workloadConfig << ";multiGpu=" << multiGpuModeId(config_.multiGpuMode);
+    if (GetBackendName() == "DX12" &&
+        config_.multiGpuMode == MultiGpuMode::Off &&
+        config_.adapterNodeCount > 1) {
+        const std::uint32_t nodeMask = 1u << config_.adapterNodeIndex;
+        workloadConfig << ";dx12Node=" << config_.adapterNodeIndex
+                       << ";dx12NodeMask=0x" << std::hex << nodeMask << std::dec
+                       << ";dx12LinkedNodes=" << config_.adapterNodeCount;
+    }
+    if (config_.multiGpuMode == MultiGpuMode::Afr) {
+        // Keep AFR scores in a separate comparison group.  A two-node frame
+        // stream has a different scheduling contract from the single-GPU run.
+        r.workloadVersion += "_afr2";
+        workloadConfig << ";afrNodes=2";
+        if (GetBackendName() == "DX12")
+            workloadConfig << ";afrControl=explicit_dx12_linked_nodes";
+        else if (GetBackendName() == "Vulkan")
+            workloadConfig << ";afrControl=explicit_vulkan_device_group";
+        else if (GetBackendName() == "DX11")
+            workloadConfig << ";afrControl=implicit_driver_unverified";
+    } else if (config_.multiGpuMode == MultiGpuMode::Sfr) {
+        // SFR is a distinct score contract: both nodes cooperate on one frame,
+        // followed by exactly one composition and one presentation.
+        r.workloadVersion += "_sfr2";
+        workloadConfig << ";sfrNodes=2"
+                       << ";sfrControl=explicit_dx12_linked_nodes"
+                       << ";sfrSplit=vertical_50_50"
+                       << ";sfrComposition=node1_local_to_node0_cross_adapter_copy";
+    }
     if (config_.captureAtSec > 0.0 || config_.captureAtFrame > 0) {
         if (config_.captureAtSec > 0.0)
             workloadConfig << ";captureAtSec=" << config_.captureAtSec;

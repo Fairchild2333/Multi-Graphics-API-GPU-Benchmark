@@ -34,8 +34,7 @@ void VulkanBackend::InitBackend() {
     if (!config_.headless) {
         CreateSwapChain();
         CreateImageViews();
-        if (config_.workload == Workload::Render3D)
-            CreateDepthResources();
+        if (config_.workload == Workload::Render3D) CreateDepthResources();
         CreateRenderPass();
         if (config_.workload == Workload::StressFractal)
             CreateFullscreenPipeline("fractal.vert.spv", "fractal.frag.spv");
@@ -45,11 +44,9 @@ void VulkanBackend::InitBackend() {
             CreateFullscreenPipeline("fractal.vert.spv", "gpu_burn.frag.spv");
         else if (config_.workload == Workload::Volumetric)
             CreateFullscreenPipeline("volumetric.vert.spv", "volumetric.frag.spv");
-        else if (config_.workload == Workload::Render3D)
-            CreateRender3DPipeline();
+        else if (config_.workload == Workload::Render3D) CreateRender3DPipeline();
         else if (config_.workload != Workload::Fluid &&
-                 !isCinematicLiquidWorkload(config_.workload))
-            CreateGraphicsPipeline();   // Stateful fluid workloads build isolated render pipelines.
+                 !isCinematicLiquidWorkload(config_.workload)) CreateGraphicsPipeline();
     }
     CreateComputeDescriptorSetLayout();
     CreateCommandPool();
@@ -65,8 +62,7 @@ void VulkanBackend::InitBackend() {
     CreateComputeDescriptorResources();
     CreateComputePipeline();
     if (!config_.headless) {
-        CreateFramebuffers();
-        CreateCommandBuffers();
+        CreateFramebuffers(); CreateCommandBuffers();
     }
     CreateSyncObjects();
     CreateTimestampQueryPool();
@@ -216,6 +212,29 @@ QueueFamilyIndices VulkanBackend::FindQueueFamilies(VkPhysicalDevice device) con
         // the same combined family.
         indices.presentFamily = combinedFamily;
     } else {
+        // On the D700 device group the only graphics-capable family exposes
+        // one VkQueue, while the compute/transfer-only families can also
+        // present.  Keeping vkQueuePresentKHR on the graphics queue places a
+        // present operation between alternating device-mask submissions and
+        // prevents the driver from overlapping them.  For AFR, prefer any
+        // separate present-capable family (search backwards so the lightest
+        // transfer-only family wins on this driver).
+        if (deviceGroupAfr_) {
+            for (std::uint32_t i = count; i-- > 0;) {
+                if (i == *combinedFamily)
+                    continue;
+                VkBool32 present = VK_FALSE;
+                vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface_, &present);
+                if (present) {
+                    indices.presentFamily = i;
+                    break;
+                }
+            }
+        }
+
+        if (indices.presentFamily)
+            return indices;
+
         VkBool32 combinedCanPresent = VK_FALSE;
         vkGetPhysicalDeviceSurfaceSupportKHR(device, *combinedFamily, surface_,
                                              &combinedCanPresent);
@@ -324,6 +343,50 @@ void VulkanBackend::PickPhysicalDevice() {
     }
 
     physicalDevice_ = devices[chosen];
+
+    if (config_.multiGpuMode == MultiGpuMode::Afr) {
+        std::uint32_t groupCount = 0;
+        VkResult groupResult = vkEnumeratePhysicalDeviceGroups(instance_, &groupCount, nullptr);
+        if (groupResult != VK_SUCCESS || groupCount == 0)
+            throw std::runtime_error(
+                "Vulkan AFR requested, but the driver exposes no physical-device group");
+
+        std::vector<VkPhysicalDeviceGroupProperties> groups(groupCount);
+        for (auto& group : groups)
+            group.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GROUP_PROPERTIES;
+        groupResult = vkEnumeratePhysicalDeviceGroups(instance_, &groupCount, groups.data());
+        if (groupResult != VK_SUCCESS)
+            throw std::runtime_error("vkEnumeratePhysicalDeviceGroups failed");
+
+        VkPhysicalDeviceProperties selectedProps{};
+        vkGetPhysicalDeviceProperties(physicalDevice_, &selectedProps);
+        for (const auto& group : groups) {
+            bool containsSelected = false;
+            for (std::uint32_t i = 0; i < group.physicalDeviceCount; ++i)
+                containsSelected |= group.physicalDevices[i] == physicalDevice_;
+            if (!containsSelected || group.physicalDeviceCount < 2)
+                continue;
+
+            physicalDeviceGroup_.clear();
+            for (std::uint32_t i = 0; i < group.physicalDeviceCount &&
+                                      physicalDeviceGroup_.size() < 2; ++i) {
+                VkPhysicalDeviceProperties candidate{};
+                vkGetPhysicalDeviceProperties(group.physicalDevices[i], &candidate);
+                if (candidate.vendorID == selectedProps.vendorID &&
+                    candidate.deviceID == selectedProps.deviceID &&
+                    IsDeviceSuitable(group.physicalDevices[i])) {
+                    physicalDeviceGroup_.push_back(group.physicalDevices[i]);
+                }
+            }
+            if (physicalDeviceGroup_.size() == 2)
+                break;
+        }
+        if (physicalDeviceGroup_.size() != 2)
+            throw std::runtime_error(
+                "Vulkan AFR requires a driver device group containing two compatible GPUs");
+        deviceGroupAfr_ = true;
+        afrDeviceCount_ = 2;
+    }
     VkPhysicalDeviceProperties props{};
     vkGetPhysicalDeviceProperties(physicalDevice_, &props);
     deviceName_ = props.deviceName;
@@ -363,10 +426,29 @@ void VulkanBackend::PickPhysicalDevice() {
 
     std::cout << "Selected GPU [" << chosen << "]: " << deviceName_
               << "  |  Driver: " << driverVersion_ << std::endl;
+    if (deviceGroupAfr_) {
+        // AMD's 20.45.40.15 Windows ICD completes device-group rendering and
+        // resource teardown, then faults inside vkDestroyDevice after a LOCAL
+        // device-group swapchain was used.  This exact compatibility path is
+        // intentionally narrow; newer drivers retain normal Vulkan teardown.
+        deferAfrDeviceDestroyToProcessExit_ =
+            props.vendorID == 0x1002 &&
+            driverVersion_.find("20.45.40.15") != std::string::npos;
+        std::cout << "[Vulkan AFR] Device group accepted: 2 physical GPUs, "
+                     "alternate-frame device masks 0x1/0x2\n";
+    }
 }
 
 void VulkanBackend::CreateLogicalDevice() {
     const auto indices = FindQueueFamilies(physicalDevice_);
+    std::uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(
+        physicalDevice_, &queueFamilyCount, nullptr);
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(
+        physicalDevice_, &queueFamilyCount, queueFamilies.data());
+    const std::uint32_t graphicsQueueCount =
+        queueFamilies[indices.graphicsFamily.value()].queueCount;
     std::set<std::uint32_t> unique = {
         indices.graphicsFamily.value(),
         indices.computeFamily.value()
@@ -380,7 +462,7 @@ void VulkanBackend::CreateLogicalDevice() {
         VkDeviceQueueCreateInfo qi{};
         qi.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         qi.queueFamilyIndex = fam;
-        qi.queueCount       = 1;
+        qi.queueCount       = 1u;
         qi.pQueuePriorities = &prio;
         queueCIs.push_back(qi);
     }
@@ -418,8 +500,17 @@ void VulkanBackend::CreateLogicalDevice() {
     ci.pEnabledFeatures        = &features;
     ci.enabledExtensionCount   = static_cast<std::uint32_t>(deviceExts.size());
     ci.ppEnabledExtensionNames = deviceExts.empty() ? nullptr : deviceExts.data();
-    if (fp16Supported)
+    VkDeviceGroupDeviceCreateInfo groupCI{};
+    if (deviceGroupAfr_) {
+        groupCI.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_DEVICE_CREATE_INFO;
+        groupCI.physicalDeviceCount = afrDeviceCount_;
+        groupCI.pPhysicalDevices = physicalDeviceGroup_.data();
+        if (fp16Supported)
+            groupCI.pNext = &f16enable;
+        ci.pNext = &groupCI;
+    } else if (fp16Supported) {
         ci.pNext = &f16enable;
+    }
 
     if (vkCreateDevice(physicalDevice_, &ci, nullptr, &device_) != VK_SUCCESS)
         throw std::runtime_error("vkCreateDevice failed");
@@ -428,6 +519,56 @@ void VulkanBackend::CreateLogicalDevice() {
     if (!config_.headless)
         vkGetDeviceQueue(device_, indices.presentFamily.value(),  0, &presentQueue_);
     vkGetDeviceQueue(device_, indices.computeFamily.value(),  0, &computeQueue_);
+
+    if (deviceGroupAfr_) {
+        std::cout << "[Vulkan AFR] Graphics queue family exposes "
+                  << graphicsQueueCount << " queue(s).\n";
+        std::cout << "[Vulkan AFR] Queue families: graphics="
+                  << indices.graphicsFamily.value() << ", present="
+                  << indices.presentFamily.value()
+                  << (indices.presentFamily != indices.graphicsFamily
+                          ? " (dedicated present queue)\n"
+                          : " (shared graphics/present queue)\n");
+        if (graphicsQueueCount < afrDeviceCount_) {
+            std::cout << "[Vulkan AFR] Warning: fewer graphics queues than devices; "
+                         "device-mask submissions share one VkQueue and this driver "
+                         "may serialize them.\n";
+        }
+        VkDeviceGroupPresentCapabilitiesKHR caps{};
+        caps.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_PRESENT_CAPABILITIES_KHR;
+        const VkResult capsResult = vkGetDeviceGroupPresentCapabilitiesKHR(device_, &caps);
+        if (capsResult != VK_SUCCESS ||
+            (caps.modes & VK_DEVICE_GROUP_PRESENT_MODE_LOCAL_BIT_KHR) == 0) {
+            throw std::runtime_error(
+                "Vulkan device group cannot present local AFR frames on this surface");
+        }
+
+        auto peerFlagsText = [](VkPeerMemoryFeatureFlags flags) {
+            std::string text;
+            if (flags & VK_PEER_MEMORY_FEATURE_COPY_SRC_BIT) text += "copy-src|";
+            if (flags & VK_PEER_MEMORY_FEATURE_COPY_DST_BIT) text += "copy-dst|";
+            if (flags & VK_PEER_MEMORY_FEATURE_GENERIC_SRC_BIT) text += "generic-src|";
+            if (flags & VK_PEER_MEMORY_FEATURE_GENERIC_DST_BIT) text += "generic-dst|";
+            if (text.empty()) return std::string("none");
+            text.pop_back();
+            return text;
+        };
+        VkPhysicalDeviceMemoryProperties memoryProperties{};
+        vkGetPhysicalDeviceMemoryProperties(physicalDevice_, &memoryProperties);
+        for (std::uint32_t heap = 0; heap < memoryProperties.memoryHeapCount; ++heap) {
+            const VkMemoryHeapFlags flags = memoryProperties.memoryHeaps[heap].flags;
+            if ((flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) == 0 ||
+                (flags & VK_MEMORY_HEAP_MULTI_INSTANCE_BIT) == 0)
+                continue;
+            VkPeerMemoryFeatureFlags peer01 = 0;
+            VkPeerMemoryFeatureFlags peer10 = 0;
+            vkGetDeviceGroupPeerMemoryFeatures(device_, heap, 0, 1, &peer01);
+            vkGetDeviceGroupPeerMemoryFeatures(device_, heap, 1, 0, &peer10);
+            std::cout << "[Vulkan AFR] Peer heap " << heap
+                      << ": GPU0 reads GPU1=" << peerFlagsText(peer01)
+                      << ", GPU1 reads GPU0=" << peerFlagsText(peer10) << "\n";
+        }
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -622,6 +763,14 @@ void VulkanBackend::CreateSwapChain() {
     ci.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     ci.presentMode    = pm;
     ci.clipped        = VK_TRUE;
+
+    VkDeviceGroupSwapchainCreateInfoKHR groupSwapchainCI{};
+    if (deviceGroupAfr_) {
+        groupSwapchainCI.sType =
+            VK_STRUCTURE_TYPE_DEVICE_GROUP_SWAPCHAIN_CREATE_INFO_KHR;
+        groupSwapchainCI.modes = VK_DEVICE_GROUP_PRESENT_MODE_LOCAL_BIT_KHR;
+        ci.pNext = &groupSwapchainCI;
+    }
 
     if (vkCreateSwapchainKHR(device_, &ci, nullptr, &swapChain_) != VK_SUCCESS)
         throw std::runtime_error("vkCreateSwapchainKHR failed");
@@ -1190,8 +1339,13 @@ void VulkanBackend::CreateCommandBuffers() {
 void VulkanBackend::CreateSyncObjects() {
     const auto flights = config_.framesInFlight;
     imageAvailableSemaphores_.resize(flights, VK_NULL_HANDLE);
-    renderFinishedSemaphores_.resize(flights, VK_NULL_HANDLE);
+    // A present wait is not covered by the frame submit fence.  Index the
+    // render-finished semaphores by swapchain image so a semaphore is reused
+    // only after that image has been acquired again (presentation completed).
+    renderFinishedSemaphores_.resize(
+        config_.headless ? 0u : swapChainImages_.size(), VK_NULL_HANDLE);
     inFlightFences_.resize(flights, VK_NULL_HANDLE);
+    timestampSlotReady_.resize(flights, false);
 
     VkSemaphoreCreateInfo si{}; si.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     VkFenceCreateInfo fi{};
@@ -1205,10 +1359,13 @@ void VulkanBackend::CreateSyncObjects() {
                 throw std::runtime_error("Failed to create fence");
         } else {
             if (vkCreateSemaphore(device_, &si, nullptr, &imageAvailableSemaphores_[i]) != VK_SUCCESS ||
-                vkCreateSemaphore(device_, &si, nullptr, &renderFinishedSemaphores_[i]) != VK_SUCCESS ||
                 vkCreateFence(device_, &fi, nullptr, &inFlightFences_[i]) != VK_SUCCESS)
                 throw std::runtime_error("Failed to create sync objects");
         }
+    }
+    for (auto& semaphore : renderFinishedSemaphores_) {
+        if (vkCreateSemaphore(device_, &si, nullptr, &semaphore) != VK_SUCCESS)
+            throw std::runtime_error("Failed to create present semaphore");
     }
     if (!config_.headless)
         imagesInFlight_.resize(swapChainImages_.size(), VK_NULL_HANDLE);
@@ -1245,7 +1402,8 @@ void VulkanBackend::CreateTimestampQueryPool() {
 }
 
 void VulkanBackend::CollectTimestampResults(std::uint32_t slot) {
-    if (!timestampsSupported_) return;
+    if (!timestampsSupported_ || slot >= timestampSlotReady_.size() ||
+        !timestampSlotReady_[slot]) return;
 
     std::uint32_t first = slot * kTimestampsPerFrame;
     std::uint64_t ts[kTimestampsPerFrame]{};
@@ -1253,6 +1411,8 @@ void VulkanBackend::CollectTimestampResults(std::uint32_t slot) {
             sizeof(ts), ts, sizeof(std::uint64_t),
             VK_QUERY_RESULT_64_BIT) != VK_SUCCESS)
         return;
+
+    timestampSlotReady_[slot] = false;
 
     const double toMs = static_cast<double>(timestampPeriodNs_) / 1'000'000.0;
     AccumulateTiming(
@@ -1265,13 +1425,20 @@ void VulkanBackend::CollectTimestampResults(std::uint32_t slot) {
 // Per-frame recording
 // -----------------------------------------------------------------------
 
-void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTime) {
+void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTime,
+                                        std::uint32_t deviceMask) {
     VkCommandBuffer cmd = commandBuffers_[imageIndex];
     vkResetCommandBuffer(cmd, 0);
 
     VkCommandBufferBeginInfo bi{};
     bi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    VkDeviceGroupCommandBufferBeginInfo groupBegin{};
+    if (deviceGroupAfr_) {
+        groupBegin.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_COMMAND_BUFFER_BEGIN_INFO;
+        groupBegin.deviceMask = deviceMask;
+        bi.pNext = &groupBegin;
+    }
     if (vkBeginCommandBuffer(cmd, &bi) != VK_SUCCESS)
         throw std::runtime_error("vkBeginCommandBuffer failed");
 
@@ -1504,15 +1671,31 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         if (res != VK_SUCCESS)
             throw std::runtime_error("vkQueueSubmit (headless) failed");
 
+        timestampSlotReady_[currentFrame_] = timestampsSupported_;
+
         currentFrame_ = (currentFrame_ + 1) % config_.framesInFlight;
         return;
     }
 
     // --- Normal (windowed) path ---
     std::uint32_t imageIndex = 0;
-    VkResult res = vkAcquireNextImageKHR(device_, swapChain_, UINT64_MAX,
-                                         imageAvailableSemaphores_[currentFrame_],
-                                         VK_NULL_HANDLE, &imageIndex);
+    const std::uint32_t afrDeviceIndex = deviceGroupAfr_
+        ? (currentFrame_ % afrDeviceCount_) : 0u;
+    const std::uint32_t afrDeviceMask = 1u << afrDeviceIndex;
+    VkResult res = VK_SUCCESS;
+    if (deviceGroupAfr_) {
+        VkAcquireNextImageInfoKHR acquire{};
+        acquire.sType = VK_STRUCTURE_TYPE_ACQUIRE_NEXT_IMAGE_INFO_KHR;
+        acquire.swapchain = swapChain_;
+        acquire.timeout = UINT64_MAX;
+        acquire.semaphore = imageAvailableSemaphores_[currentFrame_];
+        acquire.deviceMask = afrDeviceMask;
+        res = vkAcquireNextImage2KHR(device_, &acquire, &imageIndex);
+    } else {
+        res = vkAcquireNextImageKHR(device_, swapChain_, UINT64_MAX,
+                                    imageAvailableSemaphores_[currentFrame_],
+                                    VK_NULL_HANDLE, &imageIndex);
+    }
     if (res == VK_ERROR_OUT_OF_DATE_KHR)
         throw std::runtime_error("Vulkan swapchain became out of date; restart the fixed-resolution benchmark after resizing");
     if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR)
@@ -1523,11 +1706,11 @@ void VulkanBackend::DrawFrame(float deltaTime) {
     imagesInFlight_[imageIndex] = inFlightFences_[currentFrame_];
 
     vkResetFences(device_, 1, &inFlightFences_[currentFrame_]);
-    RecordCommandBuffer(imageIndex, deltaTime);
+    RecordCommandBuffer(imageIndex, deltaTime, afrDeviceMask);
 
     VkSemaphore          waitSem[]   = { imageAvailableSemaphores_[currentFrame_] };
     VkPipelineStageFlags waitStage[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-    VkSemaphore          sigSem[]    = { renderFinishedSemaphores_[currentFrame_] };
+    VkSemaphore          sigSem[]    = { renderFinishedSemaphores_[imageIndex] };
 
     VkSubmitInfo si{};
     si.sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1536,6 +1719,18 @@ void VulkanBackend::DrawFrame(float deltaTime) {
     si.commandBufferCount   = 1; si.pCommandBuffers   = &commandBuffers_[imageIndex];
     si.signalSemaphoreCount = 1; si.pSignalSemaphores = sigSem;
 
+    VkDeviceGroupSubmitInfo groupSubmit{};
+    if (deviceGroupAfr_) {
+        groupSubmit.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_SUBMIT_INFO;
+        groupSubmit.waitSemaphoreCount = 1;
+        groupSubmit.pWaitSemaphoreDeviceIndices = &afrDeviceIndex;
+        groupSubmit.commandBufferCount = 1;
+        groupSubmit.pCommandBufferDeviceMasks = &afrDeviceMask;
+        groupSubmit.signalSemaphoreCount = 1;
+        groupSubmit.pSignalSemaphoreDeviceIndices = &afrDeviceIndex;
+        si.pNext = &groupSubmit;
+    }
+
     res = vkQueueSubmit(graphicsQueue_, 1, &si, inFlightFences_[currentFrame_]);
     if (res != VK_SUCCESS) {
         std::string msg = "vkQueueSubmit failed (VkResult " + std::to_string(static_cast<int>(res)) + ")";
@@ -1543,6 +1738,7 @@ void VulkanBackend::DrawFrame(float deltaTime) {
             msg += " -- GPU device lost; try restarting the application or rebooting";
         throw std::runtime_error(msg);
     }
+    timestampSlotReady_[currentFrame_] = timestampsSupported_;
 
     VkSwapchainKHR chains[] = { swapChain_ };
     VkPresentInfoKHR pi{};
@@ -1550,6 +1746,14 @@ void VulkanBackend::DrawFrame(float deltaTime) {
     pi.waitSemaphoreCount = 1; pi.pWaitSemaphores = sigSem;
     pi.swapchainCount     = 1; pi.pSwapchains     = chains;
     pi.pImageIndices      = &imageIndex;
+    VkDeviceGroupPresentInfoKHR groupPresent{};
+    if (deviceGroupAfr_) {
+        groupPresent.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_PRESENT_INFO_KHR;
+        groupPresent.swapchainCount = 1;
+        groupPresent.pDeviceMasks = &afrDeviceMask;
+        groupPresent.mode = VK_DEVICE_GROUP_PRESENT_MODE_LOCAL_BIT_KHR;
+        pi.pNext = &groupPresent;
+    }
     const VkResult presentResult = vkQueuePresentKHR(presentQueue_, &pi);
     if (presentResult == VK_ERROR_OUT_OF_DATE_KHR)
         throw std::runtime_error("Vulkan swapchain became out of date; restart the fixed-resolution benchmark after resizing");
@@ -1578,6 +1782,7 @@ void VulkanBackend::CleanupSwapChain() {
 }
 
 void VulkanBackend::CleanupBackend() {
+    if (deviceGroupAfr_) std::cout << "[Vulkan AFR] Cleanup: sync/profiling\n";
     for (auto sem : imageAvailableSemaphores_)
         if (sem) vkDestroySemaphore(device_, sem, nullptr);
     for (auto sem : renderFinishedSemaphores_)
@@ -1589,6 +1794,7 @@ void VulkanBackend::CleanupBackend() {
     // because their render pipelines are aliased into the generic slots.
     CleanupCinematicLiquidResources();
     CleanupFluidResources();
+    if (deviceGroupAfr_) std::cout << "[Vulkan AFR] Cleanup: commands/resources\n";
     if (commandPool_)               { vkDestroyCommandPool(device_, commandPool_, nullptr); commandPool_ = VK_NULL_HANDLE; }
     if (particleBuffer_)            { vkDestroyBuffer(device_, particleBuffer_, nullptr); }
     if (particleBufferMemory_)      { vkFreeMemory(device_, particleBufferMemory_, nullptr); }
@@ -1600,8 +1806,20 @@ void VulkanBackend::CleanupBackend() {
     if (computeDescriptorSetLayout_){ vkDestroyDescriptorSetLayout(device_, computeDescriptorSetLayout_, nullptr); }
     if (graphicsPipeline_)          { vkDestroyPipeline(device_, graphicsPipeline_, nullptr); }
     if (graphicsPipelineLayout_)    { vkDestroyPipelineLayout(device_, graphicsPipelineLayout_, nullptr); }
+    if (deviceGroupAfr_) std::cout << "[Vulkan AFR] Cleanup: swapchain\n";
     CleanupSwapChain();
+    if (deviceGroupAfr_) std::cout << "[Vulkan AFR] Cleanup: logical device\n";
+    if (deferAfrDeviceDestroyToProcessExit_) {
+        std::cout
+            << "[Vulkan AFR] AMD 20.45.40.15 teardown workaround: all child "
+               "resources destroyed; deferring device/instance release to process exit.\n";
+        device_ = VK_NULL_HANDLE;
+        surface_ = VK_NULL_HANDLE;
+        instance_ = VK_NULL_HANDLE;
+        return;
+    }
     if (device_)   vkDestroyDevice(device_, nullptr);
+    if (deviceGroupAfr_) std::cout << "[Vulkan AFR] Cleanup: instance\n";
     if (surface_)  vkDestroySurfaceKHR(instance_, surface_, nullptr);
     if (instance_) vkDestroyInstance(instance_, nullptr);
 }

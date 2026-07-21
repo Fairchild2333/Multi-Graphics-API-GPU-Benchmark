@@ -14,6 +14,10 @@ public:
 constexpr std::uint32_t kWindowWidth  = 1280;
 constexpr std::uint32_t kWindowHeight = 720;
 constexpr std::uint32_t kMaxFramesInFlight    = 2;
+// AFR needs two reusable frame slots per device.  With only one slot per device,
+// linked DXGI presentation serialises alternating frames on older AMD drivers
+// (confirmed on dual FirePro D700).
+constexpr std::uint32_t kAfrMinFramesInFlight = 4;
 constexpr std::uint32_t kParticleCount        = 1048576;
 constexpr std::uint32_t kComputeWorkGroupSize = 256;
 constexpr double kTimingReportIntervalSec = 1.0;
@@ -71,6 +75,23 @@ enum class Workload {
     CinematicLiquidV1,
     CinematicLiquid,
 };
+
+// Multi-GPU execution is deliberately opt-in.  AFR means one logical frame
+// stream whose consecutive frames are assigned to different physical nodes;
+// it is not the same as launching independent benchmark instances.
+enum class MultiGpuMode {
+    Off,
+    Afr,
+    Sfr,
+};
+
+inline const char* multiGpuModeId(MultiGpuMode mode) {
+    switch (mode) {
+        case MultiGpuMode::Afr: return "afr";
+        case MultiGpuMode::Sfr: return "sfr";
+        default:                return "off";
+    }
+}
 
 inline const char* workloadId(Workload workload) {
     switch (workload) {
@@ -441,6 +462,7 @@ struct BenchmarkConfig {
     std::uint32_t warmupFrames       = 100;
     std::uint32_t particleCount      = kParticleCount;
     std::uint32_t framesInFlight     = kMaxFramesInFlight;  // runtime override
+    MultiGpuMode  multiGpuMode       = MultiGpuMode::Off;
     const char*   difficultyLabel    = "Medium";
     double        captureAtSec       = -1.0;
     std::int64_t  captureAtFrame     = -1;   // RenderDoc capture at absolute frame N (1-based)
@@ -451,6 +473,11 @@ struct BenchmarkConfig {
     // When both are 0, backends fall back to index-based selection.
     std::int64_t  adapterLuidHigh   = 0;
     std::int64_t  adapterLuidLow    = 0;
+    // A linked D3D12 adapter is one DXGI adapter with multiple physical
+    // nodes.  Ordinary adapter selection chooses the LUID; this index chooses
+    // the physical node within that device (0 -> mask 0x1, 1 -> mask 0x2).
+    std::uint32_t adapterNodeIndex  = 0;
+    std::uint32_t adapterNodeCount  = 1;
 };
 
 }  // namespace gpu_bench

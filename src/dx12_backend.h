@@ -41,6 +41,7 @@ private:
     void CreateRootSignatures();
     void CreatePipelineStates();
     void CreateParticleBuffer();
+    void CreateSfrResources();
     void CreateTimestampResources();
     void CreateFence();
     void WaitForGpu();
@@ -48,6 +49,16 @@ private:
     void CreateFluidResources();
     void CleanupFluidResources();
     void RecordFluidFrame(float deltaTime);
+    void DrawSfrFrame(float deltaTime);
+
+    UINT SingleNodeMask() const { return linkedAfr_ ? 0u : singleNodeMask_; }
+    void ApplySingleNodeHeapMasks(D3D12_HEAP_PROPERTIES& heap) const {
+        const UINT mask = SingleNodeMask();
+        if (mask != 0) {
+            heap.CreationNodeMask = mask;
+            heap.VisibleNodeMask = mask;
+        }
+    }
 
     std::string deviceName_;
     std::string driverVersion_;
@@ -58,9 +69,20 @@ private:
     ComPtr<IDXGIFactory4>           factory_;
     ComPtr<ID3D12Device>            device_;
     ComPtr<ID3D12CommandQueue>      commandQueue_;
+    std::vector<ComPtr<ID3D12CommandQueue>> afrCommandQueues_;
     ComPtr<IDXGISwapChain3>         swapChain_;
+    bool                            linkedAfr_ = false;
+    bool                            linkedSfr_ = false;
+    UINT                            deviceNodeCount_ = 1;
+    UINT                            singleNodeIndex_ = 0;
+    UINT                            singleNodeMask_ = 0;
+    UINT                            afrNodeCount_ = 1;
+    D3D12_CROSS_NODE_SHARING_TIER  crossNodeSharingTier_ =
+        D3D12_CROSS_NODE_SHARING_TIER_NOT_SUPPORTED;
+    std::vector<UINT>               frameNodeMasks_;
 
     ComPtr<ID3D12DescriptorHeap>    rtvHeap_;
+    std::vector<ComPtr<ID3D12DescriptorHeap>> afrRtvHeaps_;
     UINT                            rtvDescriptorSize_ = 0;
     std::vector<ComPtr<ID3D12Resource>> renderTargets_;
 
@@ -68,15 +90,31 @@ private:
 
     std::vector<ComPtr<ID3D12CommandAllocator>> commandAllocators_;
     ComPtr<ID3D12GraphicsCommandList> commandList_;
+    std::vector<ComPtr<ID3D12GraphicsCommandList>> frameCommandLists_;
+    std::vector<ComPtr<ID3D12CommandAllocator>> sfrSecondaryAllocators_;
+    std::vector<ComPtr<ID3D12GraphicsCommandList>> sfrSecondaryCommandLists_;
+    std::vector<ComPtr<ID3D12CommandAllocator>> sfrComposeAllocators_;
+    std::vector<ComPtr<ID3D12GraphicsCommandList>> sfrComposeCommandLists_;
 
     ComPtr<ID3D12RootSignature>     computeRootSig_;
     ComPtr<ID3D12PipelineState>     computePSO_;
     ComPtr<ID3D12RootSignature>     graphicsRootSig_;
     ComPtr<ID3D12PipelineState>     graphicsPSO_;
+    std::vector<ComPtr<ID3D12RootSignature>> afrGraphicsRootSigs_;
+    std::vector<ComPtr<ID3D12PipelineState>> afrGraphicsPSOs_;
 
     ComPtr<ID3D12Resource>          particleBuffer_;
     ComPtr<ID3D12Resource>          particleUpload_;
     D3D12_VERTEX_BUFFER_VIEW        vbView_{};
+
+    // DX12 linked-node split-frame rendering.  Node 1 shades the right half
+    // into a node-local full-size target (preserving the shader's screen-space
+    // coordinates), then copies that half into a node-0-owned cross-adapter
+    // buffer.  Node 0 consumes the buffer after a GPU-side fence wait.
+    std::vector<ComPtr<ID3D12Resource>> sfrSecondaryTargets_;
+    std::vector<ComPtr<ID3D12Heap>> sfrCrossAdapterHeaps_;
+    std::vector<ComPtr<ID3D12Resource>> sfrCrossAdapterBuffers_;
+    std::vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> sfrCrossFootprints_;
 
     // Render3D resources (instanced billboards with depth)
     ComPtr<ID3D12Resource>          quadBuffer_;
@@ -87,11 +125,16 @@ private:
     ComPtr<ID3D12QueryHeap>         timestampHeap_;
     ComPtr<ID3D12Resource>          timestampReadback_;
     UINT64                          gpuFrequency_ = 0;
+    std::vector<ComPtr<ID3D12QueryHeap>> afrTimestampHeaps_;
+    std::vector<ComPtr<ID3D12Resource>> afrTimestampReadbacks_;
+    std::vector<UINT64>             afrGpuFrequencies_;
     bool                            timestampsSupported_ = false;
 
     ComPtr<ID3D12Fence>             fence_;
     HANDLE                          fenceEvent_ = nullptr;
-    UINT64                          nextFenceValue_ = 1;
+    std::vector<ComPtr<ID3D12Fence>> afrFences_;
+    std::vector<HANDLE>             afrFenceEvents_;
+    std::vector<UINT64>             afrNextFenceValues_;
     std::vector<UINT64>             frameFenceValues_;
     UINT                            frameIndex_ = 0;
     bool                            tearingSupported_ = false;

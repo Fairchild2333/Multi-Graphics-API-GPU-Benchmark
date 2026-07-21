@@ -278,6 +278,20 @@
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Spacing="14">
                                         <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <TextBlock x:Name="MultiGpuLabel" Text="Multi-GPU"
+                                                       VerticalAlignment="Center"/>
+                                            <ComboBox x:Name="MultiGpuBox" Width="112" Height="32"
+                                                      SelectedIndex="0"
+                                                      SelectionChanged="OnMultiGpuChanged">
+                                                <ComboBoxItem x:Name="MultiGpuOff" Tag="off">Off</ComboBoxItem>
+                                                <ComboBoxItem x:Name="MultiGpuAfr" Tag="afr">AFR</ComboBoxItem>
+                                                <ComboBoxItem x:Name="MultiGpuSfr" Tag="sfr">SFR</ComboBoxItem>
+                                            </ComboBox>
+                                            <FontIcon x:Name="MultiGpuInfo" Glyph="&#xE946;" FontSize="14"
+                                                      VerticalAlignment="Center"
+                                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                             <CheckBox x:Name="RenderDocBox" Content="RenderDoc" MinWidth="0"
                                                       IsChecked="True"
                                                       Checked="OnRenderDocChecked" Unchecked="OnRenderDocChecked"/>

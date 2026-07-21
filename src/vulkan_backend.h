@@ -51,7 +51,11 @@ private:
     VkInstance       instance_       = VK_NULL_HANDLE;
     VkSurfaceKHR    surface_        = VK_NULL_HANDLE;
     VkPhysicalDevice physicalDevice_ = VK_NULL_HANDLE;
+    std::vector<VkPhysicalDevice> physicalDeviceGroup_;
     VkDevice         device_        = VK_NULL_HANDLE;
+    bool             deviceGroupAfr_ = false;
+    std::uint32_t    afrDeviceCount_ = 1;
+    bool             deferAfrDeviceDestroyToProcessExit_ = false;
 
     VkQueue graphicsQueue_ = VK_NULL_HANDLE;
     VkQueue presentQueue_  = VK_NULL_HANDLE;
@@ -251,6 +255,7 @@ private:
     std::vector<VkSemaphore> renderFinishedSemaphores_;
     std::vector<VkFence>     inFlightFences_;
     std::vector<VkFence>                        imagesInFlight_;
+    std::vector<bool>        timestampSlotReady_;
     std::uint32_t currentFrame_ = 0;
     float         fractalElapsed_ = 0.0f;   // StressFractal palette animation time
 
@@ -322,7 +327,8 @@ private:
     void CreateFramebuffers();
     void CreateCommandPool();
     void CreateCommandBuffers();
-    void RecordCommandBuffer(std::uint32_t imageIndex, float deltaTime);
+    void RecordCommandBuffer(std::uint32_t imageIndex, float deltaTime,
+                             std::uint32_t deviceMask);
     void CreateSyncObjects();
     void CreateTimestampQueryPool();
     void CollectTimestampResults(std::uint32_t frameSlot);

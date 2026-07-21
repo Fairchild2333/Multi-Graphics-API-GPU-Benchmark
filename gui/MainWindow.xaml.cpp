@@ -1685,6 +1685,44 @@ namespace
         return steps;
     }
 
+    std::string workloadConfigValue(gpu_bench::BenchmarkResult const& result,
+                                    std::string const& key)
+    {
+        const std::string needle = key + "=";
+        auto pos = result.workloadConfig.find(needle);
+        if (pos == std::string::npos) return {};
+        pos += needle.size();
+        auto end = result.workloadConfig.find(';', pos);
+        return result.workloadConfig.substr(pos, end - pos);
+    }
+
+    std::string historyExecutionMode(gpu_bench::BenchmarkResult const& result)
+    {
+        auto mode = workloadConfigValue(result, "multiGpu");
+        if (mode.empty())
+        {
+            if (result.workloadVersion.find("_afr2") != std::string::npos) mode = "afr";
+            else if (result.workloadVersion.find("_sfr2") != std::string::npos) mode = "sfr";
+        }
+
+        if (mode == "afr")
+        {
+            const auto control = workloadConfigValue(result, "afrControl");
+            if (control == "implicit_driver_unverified")
+                return i18n::tr("AFR (unverified)", "AFR（未验证）", "AFR（未検証）");
+            if (control == "explicit_vulkan_device_group")
+                return i18n::tr("AFR (experimental)", "AFR（实验）", "AFR（実験）");
+            if (control.empty())
+                return i18n::tr("AFR (legacy)", "AFR（旧记录）", "AFR（旧記録）");
+            return "AFR ×2";
+        }
+        if (mode == "sfr")
+            return "SFR ×2";
+        if (result.headless)
+            return "Headless";
+        return i18n::tr("Single", "单卡", "単一 GPU");
+    }
+
     std::string burnStepsLabel(std::string const& steps)
     {
         if (steps.empty()) return i18n::tr("(unknown)", "（未知）", "（不明）");
@@ -2537,6 +2575,19 @@ void MainWindow::updateResultHint()
                     "GPU Burn 步数已被钳制到软件设备的安全上限（32 步），以避免触发"
                     "系统看门狗；成绩按钳制后的步数计算。", "ウォッチドッグ再起動を避けるため、GPU Burn のステップ数はソフトウェアデバイスの安全上限（32）に制限されました。スコアは制限後のステップ数で計算されます。");
                 break;
+            case GpuRunIssueKind::Dx12SecondaryNodeRenderDoc:
+                message = locText(
+                    "DX12 RenderDoc capture was automatically disabled on a secondary "
+                    "linked-adapter node: the capture layer crashes CreateCommandQueue on "
+                    "this AMD FireGL/UMD stack. The score is still valid; capture remains "
+                    "available on the primary DX12 node (#1 / node 0).",
+                    "DX12 在 linked-adapter 次节点上已自动关闭 RenderDoc：抓帧层会在本机 "
+                    "AMD FireGL/UMD 栈的 CreateCommandQueue 崩溃。成绩仍然有效；主节点"
+                    "（#1 / node 0）仍可抓帧。",
+                    "DX12 の linked-adapter 副ノードでは RenderDoc キャプチャを自動無効化しました。"
+                    "この AMD FireGL/UMD ではキャプチャ層が CreateCommandQueue でクラッシュするためです。"
+                    "スコアは有効です。主ノード（#1 / node 0）では引き続きキャプチャできます。");
+                break;
             case GpuRunIssueKind::Unknown:
             default:
                 message = locText(
@@ -2869,15 +2920,43 @@ void MainWindow::applyLanguage()
         "仅 Vulkan 和 OpenGL 支持 —— DirectX 会回退到显存并输出警告。", "パーティクルバッファを VRAM ではなくシステム RAM に置きます。VRAM 溢れでリソースがシステムメモリへ退避したときにゲームが辿るアクセス経路を再現します——その障害形態を代表しますが、完全なゲームパイプラインとは同一ではありません（ゲームは大きな DMA でストリーミングし、ホットなリソースを常駐させます）。速度は PCIe レイテンシ律速であり、RAM/PCIe 帯域の測定ではありません。Vulkan と OpenGL のみ——DirectX は警告付きで VRAM にフォールバックします。");
     ToolTipService::SetToolTip(HostMemBox(), hostMemTip);
     ToolTipService::SetToolTip(HostMemInfo(), hostMemTip);
+    MultiGpuLabel().Text(locText("Multi-GPU", "双 GPU", "マルチ GPU"));
+    MultiGpuOff().Content(locContent("Off", "关闭", "オフ"));
+    MultiGpuAfr().Content(box_value(hstring(L"AFR")));
+    MultiGpuSfr().Content(box_value(hstring(L"SFR")));
+    auto multiGpuTip = locContent(
+        "Experimental two-GPU cooperation. Available only for a Custom run with exactly "
+        "DX12 + Plasma selected. AFR alternates complete frames across two linked-adapter "
+        "nodes; SFR renders half a frame on each node and composes once. RenderDoc is "
+        "disabled automatically. This requires a DX12 linked-adapter device and is tested "
+        "on dual AMD FirePro D700s; it is not legacy CrossFire/SLI and NVIDIA SLI is unverified.",
+        "实验性双 GPU 协作。仅在“自定义运行”且只选择 DX12 + Plasma 时可用。AFR 让两个"
+        "链接适配器节点交替渲染完整帧；SFR 让两节点各渲染半帧，再合成并只呈现一次。"
+        "启用后会自动关闭 RenderDoc。它要求驱动暴露 DX12 linked-adapter，当前仅在双 AMD "
+        "FirePro D700 上验证；这不是传统 CrossFire / SLI，NVIDIA SLI 尚未验证。",
+        "実験的な 2 GPU 協調です。カスタム実行で DX12 + Plasma のみを選択した場合に利用できます。"
+        "AFR は linked-adapter の 2 ノードでフレームを交互に描画し、SFR は各ノードで半分ずつ描画して 1 回合成します。"
+        "RenderDoc は自動的に無効になります。DX12 linked-adapter が必要で、現在はデュアル AMD FirePro D700 のみ検証済みです。"
+        "従来の CrossFire / SLI ではなく、NVIDIA SLI は未検証です。");
+    ToolTipService::SetToolTip(MultiGpuBox(), multiGpuTip);
+    ToolTipService::SetToolTip(MultiGpuInfo(), multiGpuTip);
     RenderDocBox().Content(locContent("RenderDoc", "RenderDoc", "RenderDoc"));
     CaptureBox().Content(locContent("Capture at", "捕获于", "キャプチャ位置"));
     auto renderDocTip = locContent(
         "RenderDoc is a free graphics debugger for inspecting GPU frames "
         "(draw calls, pipelines, resources, and shaders) from Vulkan, D3D, and OpenGL. "
-        "Turn this off to prevent the worker from loading RenderDoc and to disable manual F12 capture.",
+        "Turn this off to prevent the worker from loading RenderDoc and to disable manual F12 capture. "
+        "On DX12 linked adapters, capture is automatically disabled for secondary nodes "
+        "(e.g. D700 #2): the capture layer crashes CreateCommandQueue there; node 0 remains capturable.",
         "RenderDoc 是免费的图形调试器，用于抓取并检查 GPU 帧内容"
         "（绘制调用、管线、资源与着色器等），支持 Vulkan / D3D / OpenGL。"
-        "关闭此主开关后，worker 不会加载 RenderDoc，手动 F12 抓帧也会停用。", "RenderDoc は Vulkan / D3D / OpenGL の GPU フレーム（ドローコール、パイプライン、リソース、シェーダーなど）を検査する無料のグラフィックスデバッガーです。オフにするとワーカーは RenderDoc を読み込まず、手動 F12 キャプチャも無効になります。");
+        "关闭此主开关后，worker 不会加载 RenderDoc，手动 F12 抓帧也会停用。"
+        "在 DX12 linked-adapter 上，次节点（例如 D700 #2）会自动关闭抓帧："
+        "抓帧层会在 CreateCommandQueue 崩溃；主节点（node 0）仍可抓帧。",
+        "RenderDoc は Vulkan / D3D / OpenGL の GPU フレーム（ドローコール、パイプライン、リソース、シェーダーなど）を検査する無料のグラフィックスデバッガーです。"
+        "オフにするとワーカーは RenderDoc を読み込まず、手動 F12 キャプチャも無効になります。"
+        "DX12 linked-adapter の副ノード（例: D700 #2）ではキャプチャが自動無効になります——"
+        "キャプチャ層が CreateCommandQueue でクラッシュするためです。node 0 では引き続きキャプチャできます。");
     ToolTipService::SetToolTip(RenderDocInfo(), renderDocTip);
     ToolTipService::SetToolTip(RenderDocBox(), renderDocTip);
     auto captureTip = locContent(
@@ -3814,6 +3893,7 @@ void MainWindow::updateExtraLabel()
     bool hostMemorySupported = !(workloadSelectable && fixedQualityLiquid);
     if (!hostMemorySupported) HostMemBox().IsChecked(false);
     HostMemBox().IsEnabled(hostMemorySupported);
+    syncMultiGpuControls();
 
     ParticlePresetBox().Visibility(showParticles ? Visibility::Visible : Visibility::Collapsed);
     CustomParticleBox().Visibility(showParticles && selected(ParticlePresetBox()) == "custom"
@@ -3987,6 +4067,7 @@ void MainWindow::updateApiPickerSummary()
     accessible += summary.c_str();
     Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
         ApiPickerBox(), hstring(accessible));
+    if (m_uiReady) syncMultiGpuControls();
 }
 
 void MainWindow::rebuildApiPicker(bool preserveSelection)
@@ -4286,6 +4367,61 @@ void MainWindow::OnWorkloadChanged(IInspectable const&, SelectionChangedEventArg
     if (m_gpuEnumerationComplete) rebuildApiPicker(true);
 }
 
+void MainWindow::applyMultiGpuRenderDocOverride(bool active)
+{
+    if (active)
+    {
+        if (!m_multiGpuRenderDocOverrideActive)
+        {
+            m_renderDocBeforeMultiGpu = RenderDocBox().IsChecked() &&
+                                        RenderDocBox().IsChecked().Value();
+            m_captureBeforeMultiGpu = CaptureBox().IsChecked() &&
+                                      CaptureBox().IsChecked().Value();
+            m_multiGpuRenderDocOverrideActive = true;
+        }
+        m_suppressRenderDocUi = true;
+        CaptureBox().IsChecked(false);
+        RenderDocBox().IsChecked(false);
+        m_suppressRenderDocUi = false;
+    }
+    else if (m_multiGpuRenderDocOverrideActive)
+    {
+        m_suppressRenderDocUi = true;
+        RenderDocBox().IsChecked(m_renderDocBeforeMultiGpu);
+        CaptureBox().IsChecked(m_captureBeforeMultiGpu);
+        m_suppressRenderDocUi = false;
+        m_multiGpuRenderDocOverrideActive = false;
+    }
+    syncCaptureControls();
+}
+
+void MainWindow::syncMultiGpuControls()
+{
+    if (!m_uiReady) return;
+    const auto apis = selectedApis();
+    const bool eligible = PresetBox().SelectedIndex() == 1 &&
+                          selected(WorkloadBox()) == "gpu_burn" &&
+                          apis.size() == 1 && apis.front() == "dx12" &&
+                          m_gpuEnumerationComplete;
+    MultiGpuBox().IsEnabled(eligible);
+    MultiGpuLabel().Opacity(eligible ? 1.0 : 0.55);
+    MultiGpuInfo().Opacity(eligible ? 1.0 : 0.55);
+    if (!eligible && MultiGpuBox().SelectedIndex() != 0)
+    {
+        m_suppressCombo = true;
+        MultiGpuBox().SelectedIndex(0);
+        m_suppressCombo = false;
+        applyMultiGpuRenderDocOverride(false);
+    }
+}
+
+void MainWindow::OnMultiGpuChanged(IInspectable const&, SelectionChangedEventArgs const&)
+{
+    if (!m_uiReady || m_suppressCombo) return;
+    const auto mode = selected(MultiGpuBox());
+    applyMultiGpuRenderDocOverride(mode == "afr" || mode == "sfr");
+}
+
 void MainWindow::OnParticlePresetChanged(IInspectable const&, SelectionChangedEventArgs const&)
 {
     if (!m_uiReady || m_suppressCombo) return;
@@ -4410,7 +4546,9 @@ void MainWindow::syncCaptureControls()
 
     const bool headlessOn = HeadlessBox().IsChecked() &&
                             HeadlessBox().IsChecked().Value();
-    RenderDocBox().IsEnabled(!headlessOn);
+    const auto multiGpuMode = selected(MultiGpuBox());
+    const bool multiGpuOn = multiGpuMode == "afr" || multiGpuMode == "sfr";
+    RenderDocBox().IsEnabled(!headlessOn && !multiGpuOn);
     const bool canCapture = renderDocOn && !headlessOn && hasSafeCapturePoint;
     CaptureBox().IsEnabled(canCapture);
     CaptureValueBox().IsEnabled(canCapture && captureOn);
@@ -4559,6 +4697,11 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(
             ex.push_back("--vsync");
         if (HostMemBox().IsChecked() && HostMemBox().IsChecked().Value())
             ex.push_back("--host-memory");
+        const auto multiGpu = selected(MultiGpuBox());
+        if (multiGpu == "afr" || multiGpu == "sfr") {
+            ex.push_back("--multi-gpu");
+            ex.push_back(multiGpu);
+        }
         return ex;
     };
 
@@ -5011,6 +5154,24 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                         != std::string::npos)
                 {
                     GpuRunIssue issue{ GpuRunIssueKind::BurnStepsClamped,
+                                       jobTargetLabel(job) };
+                    const bool duplicate = std::any_of(
+                        gpuRunIssues.begin(), gpuRunIssues.end(),
+                        [&](GpuRunIssue const& existing)
+                        {
+                            return existing.kind == issue.kind &&
+                                   existing.target == issue.target;
+                        });
+                    if (!duplicate) gpuRunIssues.push_back(std::move(issue));
+                }
+                // Informational: DX12 on a secondary linked-adapter node cannot
+                // load RenderDoc (CreateCommandQueue AV). Worker auto-disables
+                // capture; surface that in Summary so a missing .rdc is expected.
+                if (res.output.find(
+                        "RenderDoc capture/injection disabled for linked-adapter node")
+                        != std::string::npos)
+                {
+                    GpuRunIssue issue{ GpuRunIssueKind::Dx12SecondaryNodeRenderDoc,
                                        jobTargetLabel(job) };
                     const bool duplicate = std::any_of(
                         gpuRunIssues.begin(), gpuRunIssues.end(),
@@ -6042,6 +6203,7 @@ void MainWindow::applyHistoryView()
                 else if (col == "cpu")       c = cmpString(a->cpuName, b->cpuName);
                 else if (col == "mem")       c = (a->vramMB < b->vramMB) ? -1 : (a->vramMB > b->vramMB) ? 1 : 0;
                 else if (col == "workload")  c = cmpString(a->workload, b->workload);
+                else if (col == "mode")      c = cmpString(historyExecutionMode(*a), historyExecutionMode(*b));
                 else if (col == "particles") c = (a->particleCount < b->particleCount) ? -1 : (a->particleCount > b->particleCount) ? 1 : 0;
                 else if (col == "score")     c = (a->score < b->score) ? -1 : (a->score > b->score) ? 1 : 0;
                 else if (col == "fps")       c = (a->avgFps < b->avgFps) ? -1 : (a->avgFps > b->avgFps) ? 1 : 0;
@@ -6134,7 +6296,7 @@ void MainWindow::applyHistoryView()
             return;
         }
 
-        struct Row { std::string time, api, dev, cpu, mem, wl, particles, score, fps; };
+        struct Row { std::string time, api, dev, cpu, mem, wl, mode, particles, score, fps; };
         std::vector<Row> rows; rows.reserve(view.size());
         for (auto* r : view)
         {
@@ -6145,6 +6307,7 @@ void MainWindow::applyHistoryView()
             x.cpu  = normalizeCpuName(r->cpuName);
             x.mem  = formatVramMB(resolvedVramMB(*r, m_results));
             x.wl   = workloadRunLabel(*r);
+            x.mode = historyExecutionMode(*r);
             x.particles = particleLabel(r->particleCount);
             x.score = r->workload == "fluid"
                 ? i18n::tr("Unverified legacy", "未验证旧版", "未検証の旧版")
@@ -6158,7 +6321,7 @@ void MainWindow::applyHistoryView()
             rows.push_back(std::move(x));
         }
 
-        size_t wTime = 4, wApi = 3, wDev = 6, wCpu = 3, wMem = 4, wWl = 8, wParticles = 9, wScore = 5;
+        size_t wTime = 4, wApi = 3, wDev = 6, wCpu = 3, wMem = 4, wWl = 8, wMode = 4, wParticles = 9, wScore = 5;
         for (auto& x : rows)
         {
             wTime  = (std::max)(wTime,  utf8DisplayWidth(x.time));
@@ -6167,6 +6330,7 @@ void MainWindow::applyHistoryView()
             wCpu   = (std::max)(wCpu,   utf8DisplayWidth(x.cpu));
             wMem   = (std::max)(wMem,   utf8DisplayWidth(x.mem));
             wWl    = (std::max)(wWl,    utf8DisplayWidth(x.wl));
+            wMode  = (std::max)(wMode,  utf8DisplayWidth(x.mode));
             wParticles = (std::max)(wParticles, utf8DisplayWidth(x.particles));
             wScore = (std::max)(wScore, utf8DisplayWidth(x.score));
         }
@@ -6177,6 +6341,7 @@ void MainWindow::applyHistoryView()
         addHeader(to_string(locText("CPU", "CPU", "CPU")), wCpu, "cpu");
         addHeader(to_string(locText("VRAM", "显存", "VRAM")), wMem, "mem");
         addHeader(to_string(locText("Workload", "测试项目", "ワークロード")), wWl, "workload");
+        addHeader(to_string(locText("Mode", "模式", "モード")), wMode, "mode");
         addHeader(to_string(locText("Particles", "粒子", "パーティクル数")), wParticles, "particles");
         addHeader(to_string(locText("Score", "分数", "スコア")), wScore, "score");
         addHeader(to_string(locText("FPS", "FPS", "FPS")), 3, "fps");
@@ -6186,6 +6351,7 @@ void MainWindow::applyHistoryView()
             auto& x = rows[i];
             std::string line = padDisplay(x.time, wTime) + gp + padDisplay(x.api, wApi) + gp + padDisplay(x.dev, wDev)
                              + gp + padDisplay(x.cpu, wCpu) + gp + padDisplay(x.mem, wMem) + gp + padDisplay(x.wl, wWl)
+                             + gp + padDisplay(x.mode, wMode)
                              + gp + padDisplay(x.particles, wParticles)
                              + gp + padDisplay(x.score, wScore) + gp + x.fps + sentinel;
             TextBlock tb; tb.Text(u8(line));

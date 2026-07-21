@@ -449,7 +449,9 @@ void PrintComparisonTable(const std::vector<BenchmarkResult>& results) {
         const std::string version = r.workloadVersion.empty() ? "legacy" : r.workloadVersion;
         const std::string unit = r.scoreUnit.empty() ? "Avg FPS" : r.scoreUnit;
         const std::string precision = r.precision.empty() ? "default" : r.precision;
-        groups[workload + "\x1f" + version + "\x1f" + unit + "\x1f" + precision]
+        const std::string execution = r.headless ? "headless" : "windowed";
+        groups[workload + "\x1f" + version + "\x1f" + unit + "\x1f" + precision +
+               "\x1f" + execution]
             .push_back(r);
     }
 
@@ -482,6 +484,7 @@ void PrintComparisonTable(const std::vector<BenchmarkResult>& results) {
 
         std::cout << "Workload: " << workload
                   << "  |  Version: " << version
+                  << "  |  Mode: " << (first.headless ? "Headless" : "Windowed")
                   << "  |  Metric: " << metricLabel << " (" << metricUnit << ")";
         if (!first.precision.empty()) std::cout << "  |  Precision: " << first.precision;
         std::cout << "\n";
@@ -616,19 +619,22 @@ void PrintDetailedComparison(const BenchmarkResult& a, const BenchmarkResult& b)
     rowStr("Particles:",    partA, partB);
 
     rowStr("V-Sync:",       a.vsync ? "ON" : "OFF", b.vsync ? "ON" : "OFF");
+    rowStr("Execution:",    a.headless ? "Headless" : "Windowed",
+                             b.headless ? "Headless" : "Windowed");
     std::cout << "\n";
 
     const bool comparableScore = a.score > 0.0 && b.score > 0.0 &&
         a.workload == b.workload &&
         a.workloadVersion == b.workloadVersion &&
         a.scoreUnit == b.scoreUnit &&
-        a.precision == b.precision;
+        a.precision == b.precision &&
+        a.headless == b.headless;
     if (comparableScore) {
         rowMetric("Score:", a.score, b.score, a.scoreUnit);
         if (a.stableScore > 0.0 && b.stableScore > 0.0)
             rowMetric("Stable score:", a.stableScore, b.stableScore, a.scoreUnit);
     } else {
-        std::cout << "Score delta omitted: workload/version/unit/precision differ "
+        std::cout << "Score delta omitted: workload/version/unit/precision/execution mode differ "
                      "or a result has no axis score.\n";
     }
 

@@ -95,18 +95,17 @@ runs append summary rows unless `--cpu-no-save` is supplied.
 | Flag | Effect |
 |---|---|
 | `--backend <vulkan\|dx12\|dx11\|metal\|opengl>` | select backend (default auto) |
-| `--gpu <index>` / `--warp` | select GPU / WARP software renderer (DX only) |
+| `--gpu <index>` / `--warp` | select GPU / WARP software renderer (DX only); a DX12 linked adapter is listed once per physical node, so selecting its `#2` row binds an ordinary DX12 run to node 1 rather than repeating node 0 |
 | `--vsync` / `--host-memory` | enable vsync / keep particle buffer in host RAM |
 | `--flights <N>` | frames-in-flight (1–16) |
+| `--multi-gpu <off\|afr\|sfr>` / `--afr` / `--sfr` | experimental two-GPU Plasma modes; AFR requires at least 4 flights and supports DX12/Vulkan/DX11 with the documented backend limits; SFR is DX12-only and splits one frame 50/50 before a Tier-1 cross-node copy/composition; both disable RenderDoc and use separate score contracts |
 | `--headless` | pure compute, no window |
 | `--particles <count>` | particle count (rounded to 256, skips difficulty menu) |
-| `--workload <id>` | select one of 12 public ids: `stream`, `nbody`, `gpu_burn`, `gpu_burn_v1`, `gpu_stress`, `stress`, `synthpeak`, `render3d`, `volumetric`, `cinematic_liquid`, `cinematic_liquid_v1`, `fluid`; `gpu_burn` is Mangekyo Kaleidoscope v2 and `gpu_burn_v1` preserves Plasma Bloom v1 |
+| `--workload <id>` | recommended product ids: `stream`, `gpu_burn`, `cinematic_liquid`; maintained advanced/compatibility ids: `nbody`, `gpu_burn_v1`, `gpu_stress`, `stress`, `synthpeak`, `render3d`, `volumetric`; `gpu_burn` is Plasma×Kaleidoscope and `gpu_burn_v1` preserves Plasma Bloom v1 |
 | `--bodies <count>` | n-body bodies (implies nbody, default 65536) |
 | `--iter <count>` | fixed iteration/step request shared by `stress`, `gpu_stress`, `gpu_burn` and `synthpeak`; GPU Burn accepts 16–2048 with no auto-tuning (software renderers retain a safety cap) |
 | `--precision <fp32\|fp16\|fp64\|int32>` | synthpeak data type |
 | `--steps <count>` | `volumetric` per-pixel ray samples (default 96; minimum 1) |
-| `--grid <count>` | legacy `fluid` square-grid side; rounded up to a multiple of 16 (minimum 16) |
-| `--jacobi <count>` | legacy `fluid` pressure iterations (default 30) |
 | `--liquid-solver <mpm\|sph>` | solver for `cinematic_liquid`; default `mpm`; `sph` is the independent preview-only slice |
 | `--time <sec>` | time-mode auto-stop (default 15) |
 | `--no-time-limit` | run until window closed |
@@ -115,7 +114,7 @@ runs append summary rows unless `--cpu-no-save` is supplied.
 | `--capture [sec]` | RenderDoc capture at T seconds (default 5) |
 | `--full-analysis` | same as menu [5] |
 | `--results` / `--results-delete <id>` / `--results-clear` / `--results-export <csv>` | result management |
-| `--compare [id1 id2]` / `--list-gpus` / `--help` | compare / list GPUs / help |
+| `--compare [id1 id2]` / `--list-gpus` / `--help` | compare / list GPUs / help; comparison groups keep windowed and headless execution separate |
 | `--cpu-benchmark [per-core\|multi\|all]` | run the native CPU-only path and exit before GLFW/GPU probing; default mode is `all` |
 | `--cpu-mode <per-core\|multi\|all>` | compatibility alias for the preferred compact `--cpu-benchmark <mode>` form; it also selects the CPU-only path |
 | `--cpu-time <seconds>` | total measurement budget per CPU test, split across three rounds; default `1`, range `0.03..3600` |
@@ -130,10 +129,7 @@ runs append summary rows unless `--cpu-no-save` is supplied.
 > Explicit `--time` also counts as a "direct run" (no menu) — this is what lets
 > the GUI's isolated benchmark workers use time-mode presets (main.cpp:788).
 
-`cinematic_liquid_v1` is a public selector for the preserved original liquid
-implementation even though persisted rows retain the historical workload id
-`cinematic_liquid` and are separated by `workloadVersion=cinematic_liquid_v1`.
-Likewise, `gpu_burn` selects the perspective 3D Mangekyo faceted-glass v2 scene
+`gpu_burn` selects the current Plasma×Kaleidoscope scene
 (cut gems, layered diamond shards, Fresnel reflection and RGB dispersion), while
 `gpu_burn_v1` selects the preserved Plasma Bloom implementation. Both persist
 under the `gpu_burn` family id and are separated by their versioned result
@@ -197,10 +193,9 @@ does not initialize the RenderDoc DLL/API and ignores automatic/manual capture.
 
 The WinUI 3 GUI presets mirror these CLI flows (`gui/MainWindow.xaml.cpp`):
 
-The Workload dropdown exposes the same **12 selections**: `stream`, `gpu_burn`,
-`gpu_burn_v1`, `cinematic_liquid`, `gpu_stress`, `nbody`, `synthpeak`, `stress`, `render3d`,
-`volumetric`, `fluid`, and `cinematic_liquid_v1` (display order differs from the
-CLI list but the ids are identical).
+The product-facing GUI flows are centred on `stream`, `gpu_burn` and
+`cinematic_liquid`. Advanced and compatibility selectors remain isolated from
+the three primary workload contracts.
 
 | GUI preset | CLI equivalent | Notes |
 |---|---|---|

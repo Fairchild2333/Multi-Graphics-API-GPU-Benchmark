@@ -2,14 +2,13 @@
 
 > Status note: read [`HANDOFF.md`](../HANDOFF.md) first. It is the authoritative source for current findings, the two active product goals, P0 blockers, and the next implementation slice. This roadmap retains historical context and must be updated only after the handoff.
 
+> Current workload focus: Original Particle (`stream`), Plasma/GPU Burn
+> (`gpu_burn`) and the current Cinematic Liquid
+> (`cinematic_liquid_v2_physical_scene_v8` or its successor). N-body is not a
+> dual-GPU target.
+
 ## Completed
 
-- [x] `cinematic_liquid_v1`: a true 3D Vulkan liquid workload separate from
-      the legacy 2D dye prototype. It uses 181,216 MLS-MPM particles, a
-      96x56x64 fixed-point grid, ten substeps, R32F density-volume resolve and
-      160-step refractive free-surface raymarch. WinUI/results integration and
-      the formal 15 s + RenderDoc-at-5 s flow passed on RTX 5090 at
-      `288.74 MParticle-step/s`.
 - [x] `gpu_burn_v1` original Plasma Bloom visual burn: solid no-hole crystal
       scene (not particles and not a FurMark donut), safe 16-step probe with
       per-device auto-tuning, Vulkan/DX12/DX11/OpenGL + WARP, versioned
@@ -394,15 +393,13 @@ range of AMD and NVIDIA hardware spanning 16 years (2009–2025):
 >
 > **FirePro D700 note:** The Mac Pro (Late 2013) has two identical D700
 > GPUs (GCN 1.0, Tahiti XT). macOS does **not** support CrossFire; each GPU
-> is an independent `MTLDevice`. One GPU handles display output while the
-> other is dedicated to compute. Both cards will be benchmarked individually
-> via Metal, and optionally via MoltenVK (Vulkan→Metal) or Boot Camp DX11.
-> This provides the only GCN 1.0 data point in the comparison.
-> Although the D700 can create a DX12 device (Feature Level 11_0), its
-> compute shader performance under DX12 is identical to WARP software
-> rendering (~29 FPS vs ~28 FPS), indicating the driver does not
-> accelerate DX12 compute on GCN 1.0. Vulkan 1.1 and DX11 run on the GPU
-> normally (~570–600 FPS).
+> is an independent `MTLDevice`. Both cards are benchmarked individually first.
+> Dual-GPU collaboration is attempted only after a capability probe proves
+> concurrent execution; it is never inferred from two adapter entries or from
+> summed independent scores. Metal is the most direct path. On the current Boot
+> Camp machine Vulkan enumerates both D700s but fails logical-device creation,
+> while DX adapter routing still needs a physical-engine probe, so both Windows
+> routes remain blocked rather than assumed working.
 >
 > **WARP note:** The Windows Advanced Rasterization Platform (WARP) is a
 > high-performance software renderer included in DirectX. Running the DX11 /
@@ -506,30 +503,48 @@ Equivalent headless compute benchmark targeting NVIDIA GPUs natively:
 - Compare CUDA kernel throughput against Vulkan compute and the HIP path on
   NVIDIA hardware.
 
-### Explicit Multi-GPU — Split Compute Across Dual GPUs
+### Explicit Multi-GPU — One Workload Across Dual GPUs
 
-Implement explicit multi-GPU support, splitting the particle compute workload
-across two physical GPUs and merging results for rendering. Target hardware:
-**Mac Pro 2013 dual FirePro D700** (GCN 1.0, 6 GB each).
+Implement explicit multi-GPU collaboration for one fixed workload, never two
+independent benchmark runs whose scores are added together. Target hardware is
+the **Mac Pro 2013 dual FirePro D700** (GCN 1.0, 6 GB each). The first gate is a
+diagnostic proving that both physical adapters execute concurrently; if the
+Boot Camp driver routes both logical selections to one GPU, stop the Windows
+implementation and report it as unsupported.
 
 | API | Mechanism | Status |
 |-----|-----------|--------|
-| **Metal** (primary) | `MTLCopyAllDevices()` → two `MTLDevice` / `MTLCommandQueue`, split particle buffer, `MTLSharedEvent` cross-GPU sync | Planned — most feasible path; macOS natively exposes both D700s |
-| **DX12** | `IDXGIFactory6::EnumAdapters` → Linked or Unlinked Explicit Multi-Adapter, `ID3D12Fence` cross-GPU sync | Long-term — requires Boot Camp + working DX12 driver for D700 |
-| **Vulkan** | `VK_KHR_device_group` / `VK_KHR_device_group_creation`, sub-allocate per-device memory, semaphore sync | Long-term — needs dual Vulkan ICDs on the same machine |
+| **Metal** (primary) | `MTLCopyAllDevices()` → two `MTLDevice` / `MTLCommandQueue`, per-device resources and explicit copy/sync | Planned — macOS natively exposes both D700s |
+| **DX12** | linked-adapter nodes, node-local queues/backbuffers/PSOs/fences, `ResizeBuffers1` present queues | Measured ~1.96–2.05× on dual D700 when using 4 flights with RenderDoc disabled |
+| **Vulkan** | physical-device group, command/acquire/submit/present device masks | Functional but serial on AMD 20.45.40.15: graphics family exposes one `VkQueue`; no measured gain |
+| **DX11** | implicit driver AFR or AMD AGS explicit AFR | Final AGS 6.3.1 probe sees both D700s, but explicit and driver modes both return `crossfireAPI=0`, `crossfireGPUCount=1`; unavailable on this FireGL stack |
+| **OpenGL** | `WGL_AMD_gpu_association` contexts plus cross-context framebuffer blit | Driver enumerates two IDs but returns `NULL` when creating GPU-2 associated context; explicit SFR unavailable |
 
 Tasks:
 
-- [ ] Metal: enumerate both D700s, create per-device command queues and
-      particle buffers (each device owns half the particles).
-- [ ] Metal: dispatch compute on both devices in parallel, synchronise with
-      `MTLSharedEvent`, blit results to the display-GPU buffer.
-- [ ] Metal: render merged particle buffer on the display GPU.
-- [ ] Benchmark single-GPU vs dual-GPU throughput (ideal ≈ 2× compute, less
-      for render due to data transfer overhead).
-- [ ] Write analysis document: scaling efficiency, PCIe transfer cost,
-      synchronisation overhead, comparison with implicit CrossFire AFR.
-- [ ] (Optional) DX12 Explicit Multi-Adapter implementation on Boot Camp
-      Windows, if D700 drivers support DX12.
-- [ ] (Optional) Vulkan `VK_KHR_device_group` implementation on a system with
-      two discrete Vulkan-capable GPUs.
+- [x] Capability probe: enumerate both D700s, submit uniquely marked work to
+      both at the same time, verify completion and physical-engine utilisation.
+- [ ] Original Particle: keep the total particle count fixed, let each device
+      own/update/render half, then composite one frame on the display adapter.
+      Score total particles divided by the slower device's completion time.
+- [x] Plasma/GPU Burn: implement the first **explicit AFR** vertical slice. Device A renders even
+      frame ids and device B odd frame ids into one ordered presentation stream.
+      Corrected D700 acceptance proved DX12 scaling with four flights and no
+      RenderDoc injection; Vulkan device-group submissions remain serial on the
+      single graphics queue. The final dual-compute-queue/storage-swapchain AFR
+      experiment also ran and exited correctly, but measured only ~98% aggregate
+      GPU-equivalent utilisation (no cross-frame overlap), so it was fully
+      reverted. No further single-`VkDevice` Vulkan AFR/SFR work remains; a
+      two-`VkDevice` external-memory design would require a separate future
+      project and score contract.
+- [x] Plasma/GPU Burn DX12 **SFR** vertical slice: split one logical frame 50/50,
+      shade on both linked nodes, copy the secondary half through a Tier-1
+      cross-node buffer, then compose and present once. D700 short-run acceptance:
+      16 steps 112 -> 69 FPS (copy-bound regression), 128 steps 19 -> 28 FPS
+      (1.47x speed-up, but below AFR's ~39 FPS). Keep `..._sfr2` experimental.
+- [ ] Current Cinematic Liquid: do not alternate independent simulations.
+      Measure a simulation-GPU/render-GPU pipeline and the required state copy;
+      keep it only if the same fixed scene becomes faster. No duplicate full
+      simulation and no domain decomposition.
+- [ ] Report single-vs-dual strong scaling, PCIe/copy cost, synchronisation,
+      frame pacing and both adapter identities in a separate result contract.

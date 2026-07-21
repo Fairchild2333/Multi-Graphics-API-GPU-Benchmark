@@ -27,7 +27,8 @@
 ### 目标 A — 测试产品线
 
 - 保留原始粒子测试，继续支持当前电脑的全部可用 GPU、软件设备/WARP 和图形 API。
-- 固定流程维持 **15 秒运行 + 第 5 秒 RenderDoc 抓取完整一帧**。
+- **2026-07-21 用户锁定当前关注范围**：Original Particle（`stream`）、Plasma/GPU Burn（`gpu_burn`）和当前 Cinematic Liquid（`cinematic_liquid_v2_physical_scene_v8` 或其后继版本）。本文后续的“液体”默认只指当前版本；N-body 不进入双卡路线，也不是当前需要深究的产品项。
+- 固定流程维持 **15 秒运行 + 第 5 秒 RenderDoc 抓取完整一帧**；多 GPU AFR/SFR 是例外：RenderDoc 注入会破坏 linked-adapter/device-group 的排队与计时，因此自动禁用抓帧并明确记录 unavailable/disabled，不能伪造第 5 秒捕获。
 - 新增能达到 FurMark 类负载水平、但不照搬甜甜圈造型的短时极限压力测试。
 - 新增真正的 3DMark 类综合图形测试；流体可以成为综合场景的重要 pass，而不是单独替代核心压力测试。
 - 当前效果不够好的新原型保留到 `Other / Advanced / Legacy`，不能删除，也不能冒充正式主分数。
@@ -41,7 +42,7 @@
 
 ### 目标 C — 平台与兼容前端优先级（2026-07-16 用户最新锁定）
 
-用户最新锁定的顺序（**2026-07-19 调整**：Windows 7 GUI 挪到 PS3 之前）：**1. Windows on ARM (ARM64) → 2. macOS → 3. Android → 4. iOS → 5. Debian Linux → 6. WebGPU → 7. HarmonyOS PC / 鸿蒙 → 8. Windows 7 专用 GUI（尽量使用 Aero）→ 9. PS3（探索性）→ 10. Lumia 1520 legacy Windows Phone（探索性）→ 11. iPhone 4 legacy iOS（探索性）→ 12. Dual-GPU Aggregate（双卡合力模式，功能项）**。ARM64 已完工；平台移植下一刀为 macOS。液体正确性、自由模式和 soak 任务仍然开放，但不阻塞上述平台顺序，除非用户再次改序。
+用户最新锁定的顺序（**2026-07-19 调整**：Windows 7 GUI 挪到 PS3 之前）：**1. Windows on ARM (ARM64) → 2. macOS → 3. Android → 4. iOS → 5. Debian Linux → 6. WebGPU → 7. HarmonyOS PC / 鸿蒙 → 8. Windows 7 专用 GUI（尽量使用 Aero）→ 9. PS3（探索性）→ 10. Lumia 1520 legacy Windows Phone（探索性）→ 11. iPhone 4 legacy iOS（探索性）→ 12. Dual-GPU Collaboration（双卡协作模式，功能项）**。ARM64 已完工；平台移植下一刀为 macOS。液体正确性、自由模式和 soak 任务仍然开放，但不阻塞上述平台顺序，除非用户再次改序。
 
 除仓库已有的隔离 HarmonyOS Vulkan 粒子原型外，均未开始完整产品移植；该原型不等于主 workload suite 已移植。Windows 7 GUI 是共享现有引擎与 worker 协议的兼容前端，不得为了支持旧系统复制出另一套含义不同的成绩合同。
 
@@ -84,7 +85,21 @@
 9. **PS3（探索性，永不进成绩体系）**：官方开发授权已停止，只能 homebrew（PSL1GHT/RSXGL）；RSX 无 compute/SSBO/原子/GPU timestamp，PSGL≈OpenGL ES 1.0+Cg 而非桌面 GL 4.3，三个主测试均不可直移。至多做隔离的固定管线情怀 demo，建议独立仓库，不进入正式成绩合同与 GUI 主界面。
 10. **Lumia 1520 legacy Windows Phone（探索性，用户 2026-07-20 排入 PS3 之后、iPhone 4 之前；永不进成绩体系）**：骁龙 800 / Adreno 330——硬件本是 ES 3.0 级，但 WP8.1 / Windows 10 Mobile 驱动仅暴露 **D3D11 FL 9_3**（无 compute/UAV，shader 仅 `*_4_0_level_9_3` 档），所以形态同 ES 2.0 legacy tier：简化 fragment Burn、粒子 CPU(NEON) 物理、液体 unsupported。前端必须 WinRT/UWP + CoreWindow（无 Win32/GLFW/GL/Vulkan）；工具链 VS2015（W10M）/ VS2013（WP8.1），可在现代 Windows 上运行；部署靠设备开发者模式侧载（免费），商店已死、无分发渠道。FL 9_3 GPU timestamp 不保证可用 → 墙钟计时，成绩自成体系。shader 复用优先走微软 archived **ANGLE**（GL ES 2.0 → D3D11 9_3），直接复用 Tegra 3/4 的 GLSL ES 2.0 legacy shader；备选原生 HLSL 9_3 重写（多一份维护）。主引擎/结果合同不带过去，独立小工程。
 11. **iPhone 4 legacy iOS（探索性，用户 2026-07-20 排入 Lumia 1520 之后；永不进成绩体系）**：iPhone 4 = A4 + PowerVR SGX535，仅 GL ES 2.0，无 Metal，系统止于 iOS 7.1；32-bit 应用无法上 App Store，只能免费账号自签侧载（7 天过期）。工具链：**OS X 10.11 + Xcode 7.3.1**（首个支持 free provisioning 且仍可构建 armv7 / 部署 iOS 7 设备的版本；只能跑在老 Intel Mac 或 10.11 虚拟机）。**不精简主工程**：主 C++ 引擎（现代 C++ 标准）、Metal/Vulkan、结果合同均不带过去；独立仓库或 `legacy-ios/` 小工程，仅复用 Android ES 2.0 legacy tier 的 GLSL ES shader 与 workload 定义，宿主为 EAGL + 极简 UIKit + ObjC，粒子走 CPU 物理；SGX535 比 Tegra 3 更弱，需单独更低预设。墙钟计时、无任何抓帧、成绩不进主 History。主 iOS 计划（最低 iOS 16 + Metal + SwiftUI，§3.0.3）完全不受影响。
-12. **Dual-GPU Aggregate（双卡合力模式，功能项而非 OS 移植；首个验证目标：Boot Camp Windows 下的 Mac Pro 2013 双 FirePro D700）**：显式引擎级多 GPU 协作——驱动层 CrossFire 对自研引擎无效，不作依赖。切片顺序：(a) `stream` headless 双独立设备聚合：一进程两个 device 各算一半粒子、帧边界 CPU 同步、吞吐相加，新成绩组 `stream_dualgpu_v1`，结果必须记录两张 adapter 的完整元数据；(b) N-body 双卡（每步交换位置，~1MB/步）；(c) GPU Burn 分屏 SFR 或 AFR（DX12 unlinked 显式多适配器 + 跨适配器堆）。**不做** DX12 LDA / Vulkan device-group 依赖（D700 22.6.1 老驱动是否暴露不确定），**不做** Cinematic Liquid 域分解（每 substep 跨 PCIe 网格同步属科研级，不值）。单卡成绩组不受影响；混插不同型号也应能跑（聚合分数需标注非对称配置）。安全注意：双 D700 同时满载是 Mac Pro 2013 已知散热死穴，15 秒 Burst 可以，禁止双卡长时烤机。
+12. **Dual-GPU Collaboration（实验性功能；首个目标为 Boot Camp Windows 双 D700）**：2026-07-21 已完成 Plasma/GPU Burn 的第一条 AFR vertical slice，CLI 为 `--multi-gpu afr` / `--afr`，仅允许窗口化 `gpu_burn`。DX12 已确认同一 LDA 暴露 2 nodes，并使用交替 NodeMask、node-local queue/backbuffer/command list/root signature/PSO/RTV/timestamp/fence；Vulkan 已确认两张 D700 属于同一 physical-device group，并把 device mask 贯穿 acquire、command buffer、submit 与 LOCAL present；DX11 只能提交普通单逻辑设备帧流，让 UMD 决定是否启用隐式 CrossFire，程序明确记录 `implicit_driver_unverified`。**纠正后的 D700 验收结论**：AFR 至少需要 4 frames-in-flight（每卡两个可复用 slot），并必须完全关闭 RenderDoc 注入；RenderDoc 加载时会出现约 2000 FPS、无 timestamp、退出阶段长时间 drain 的假结果。自动强制上述条件后，DX12 在 1280×720、2 draws 下由单卡约 113 FPS 提升到 222–230 FPS（16 steps），由 19 提升到 39 FPS（128 steps），约 1.96–2.05×，双节点平均占用约 91–99%。Vulkan `20.45.40.15` 的 graphics queue family 只有 1 个 queue，device-mask AFR 仍串行：约 102 vs 104 FPS（16 steps）、17 vs 17 FPS（128 steps）。DX11 窗口模式约 120 vs 120、20 vs 20 FPS；最终又用 AMD 官方 AGS 6.3.1 探针分别请求 `AGS_CROSSFIRE_MODE_EXPLICIT_AFR` 与 `AGS_CROSSFIRE_MODE_DRIVER_AFR`，两次都能枚举 2 张 D700、成功创建设备，却都返回 `crossfireAPI=0`、`crossfireGPUCount=1`，确认 FireGL 驱动未向该应用开放 CrossFire，隐式或显式 AFR 均未激活。AFR 结果隔离到 `..._afr2` 合同，禁止与单卡混榜；目前只有 DX12 可以描述为实测双 D700 加速。AMD Vulkan `20.45.40.15` 在 device-group LOCAL swapchain 的所有子资源销毁后仍会于 `vkDestroyDevice` 内部崩溃，代码只对该精确版本延迟最后 device/instance 释放到 worker 进程退出；其他驱动正常销毁。下一步若继续双卡，只做 Original Particle 固定总量分片，以及当前 Cinematic Liquid 的模拟卡→渲染卡流水线实测；不做两份完整 workload、成绩相加、N-body 深挖或长时双卡烤机。
+
+   **AFR / SFR 边界（0.2.2）**：Original Particle 虽可在 DX12 API 层交替节点，但其 `N+1` 帧依赖 `N` 帧粒子状态；每帧跨节点复制会抵消收益，两份独立状态又改变测试语义，因此不实现粒子 AFR。DX11 只有不可控、不可验证的驱动隐式 AFR，本机实测也无提升。粒子双卡只接受固定总粒子数的 SFR/data-parallel：两卡各模拟并绘制同一帧的一半，最终只合成/呈现一次，不是同时跑两个测试。**DX12 Plasma SFR 已实现**，CLI 为 `--multi-gpu sfr` / `--sfr`：node 0 直接画左半屏，node 1 在本地全尺寸 target 上只画右半屏，再把 640×720 区域复制到 node-0-owned 的 1,843,200-byte cross-adapter buffer；跨节点 fence 后 node 0 复制进 backbuffer 并唯一 Present。D700 返回 `D3D12_CROSS_NODE_SHARING_TIER_1`；旧驱动拒绝 cross-adapter committed resource（`E_INVALIDARG`），改用微软示例的 explicit shared heap + placed resource 后稳定运行并正常退出。独立短跑对照：16 steps 单卡 112 FPS / 8.17 ms，SFR 69 FPS / 14.33 ms（0.62×，固定复制成本主导）；128 steps 单卡 19 FPS / 49.75 ms，SFR 28 FPS / 35.11 ms（1.47×，但仍低于 AFR 约 39 FPS）。2/4 flights 结果相同，排除帧环过浅。SFR 结果隔离为 `..._sfr2`，不能写成普遍提速。Vulkan 因只有一个 graphics `VkQueue` 且 group present 仅 LOCAL，SFR 暂不进入实现。
+
+   **GUI 双卡入口（0.2.2）**：Windows Advanced 卡片现有 `Multi-GPU: Off / AFR / SFR`，选择框后带 `i` 提示。仅当 Preset=Custom、Workload=Plasma、且 API 只勾选 DX12 时启用；其他组合自动退回 Off。AFR/SFR 会向 worker 传 `--multi-gpu afr|sfr`，自动关闭并锁定 RenderDoc，切回 Off 时恢复用户原先的抓帧选择。该控件只暴露当前已验证的 DX12 linked-adapter 路径，不展示 Vulkan/DX11 的无加速实验。代码使用标准 DX12 NodeMask/GetNodeCount，并无 AMD 专用调用；理论上可覆盖驱动暴露为单个 ≥2-node linked adapter 的 NVIDIA SLI，但尚未在 NVIDIA 双卡上验证，绝不能标成已支持传统 SLI。
+
+   **History 运行模式（0.2.2）**：`results.json` 原本已保存 `headless`，并在 `workloadConfig` / `workloadVersion` 中保存 `multiGpu=afr|sfr`、`_afr2|_sfr2` 与控制方式，但旧 History 表只显示 workload + steps。现新增独立 `Mode` 列：`Single`、`Headless`、`AFR ×2`、`SFR ×2`；旧 DX11 隐式记录显示 `AFR（未验证）`，Vulkan device-group 记录显示 `AFR（实验）`，无 control 元数据的早期记录显示 `AFR（旧记录）`。CLI 通用排行榜分组键也新增 headless/windowed 维度，两项比较只有 execution mode 相同才输出 score delta，防止 `stream_v1` 的无窗口和窗口成绩混排。
+
+   **抓帧边界（0.2.2）**：RenderDoc 并非全局关闭。单 GPU 仍执行 15 秒 + 第 5 秒抓帧；AFR 与当前 SFR 都自动禁用注入和抓帧，因为 D700 多节点运行加载 RenderDoc 后会产生约 2000 FPS、timestamp 缺失和退出长时间 drain 的假数据。SFR 尚未单独证明 capture-safe。多 GPU 调度用原生 timestamp + GPUView/PIX 诊断；需要检查 shader 时可退回单节点复现并抓帧。
+
+   **0.2.2 Windows 构建记录**：2026-07-21 用恢复后的 VS 18 / MSVC 14.50.35717 完成 x64 Release CLI + WinUI 构建，0 error；SFR 收口后又通过 `scripts/build-windows.ps1` 完整重建，GUI 邻接 worker 与 CMake Release worker 的 SHA-256 均为 `8AA80CBF799092A374394DFE37436278A63631E8B9F34F5255E9C2677E1E41AF`。GUI 保留既有 4 个 VCLibs/重复 WinAppSDK initializer warning。此前 CMake 消失、MSVC props 指向新 toolset 但文件未齐，与 Visual Studio 自动更新过程中的组件中间态吻合，不是本次双卡代码导致；更新完成后 CMake 4.2.3-msvc3 与完整编译均恢复。所有 SFR/AFR 短探针都使用独立 `GPU_BENCH_DATA_DIR`，未写入正式 History。
+
+   **Vulkan AFR 深挖（2026-07-21）**：D700 的 queue family 0 是唯一 graphics+compute family（`queueCount=1`），但 family 1（2× compute queue）和 family 2（2× transfer queue）也都支持 Win32 present。0.2.2 现于 AFR 优先把 present 移到 family 2，实测正常运行但性能仍不变：16 steps 约 103 FPS、128 steps 单卡/AFR 均为 17 FPS，聚合 GPU-equivalent 约 98–100%，排除了 present 占用 graphics queue 和轻负载掩盖。尝试在同一 LOCAL swapchain 上先 acquire GPU0 图、再挂起 acquire GPU1 图，以便两次 submit 都排在 present 前；AMD `20.45.40.15` 会在第二 acquire 内无限等待，该实验已完全撤回，不得恢复。device-group peer-memory 探针显示两个 multi-instance device-local heap 的 0→1 / 1→0 都只有 `VK_PEER_MEMORY_FEATURE_COPY_DST_BIT`，没有 copy-src/generic 访问：副卡可以主动写主卡目标，但主卡不能直接读取副卡本地输出。最后又完整实作并实测了 Vulkan 专用 compute-to-swapchain Plasma AFR：surface/format 的 storage 能力通过，family 1 的 queue 0/1 按 device mask 0x1/0x2 直接写各 GPU 的 LOCAL swapchain image，禁用 RenderDoc 的 3 秒探针正常初始化、运行和退出；但 16 steps 只有约 119 FPS / 8.18 ms，GPU-equivalent 约 98%（平均每卡约 49%），仍没有跨帧重叠，只是 compute shader 与原 fragment 合同的微小管线差异，不能算双卡加速。该实验代码、shader 变体和独立成绩合同已完整撤回，不发布。至此单 `VkDevice` 下的低复杂度 Vulkan AFR 绕行已穷尽；若未来再开，只能单独立项评估两套独立 `VkDevice` + external memory/semaphore，不能继续在 0.2.2 上试探。
+
+   **OpenGL SFR 探针（2026-07-21）**：FireGL 20.45.40.15 暴露 `WGL_AMD_gpu_association`，`wglGetGPUIDsAMD` 返回两个 GPU ID，当前可见 context 对应 id 1；但 id 2 的 renderer 查询为空，而且 `wglCreateAssociatedContextAttribsAMD`（OpenGL 4.3 core）与旧式 `wglCreateAssociatedContextAMD` 都返回 `NULL`。先解绑可见 context 后重试仍失败，`GetLastError` 也保持 0。也就是说 ICD 能枚举副卡，却不能为它创建可提交 GL 命令的 associated context；没有第二 context 就无法执行“左右半屏分别渲染 + `wglBlitContextFramebufferAMD` 合成”的显式 SFR。原型及 CLI 放行已完整撤回，0.2.2 继续只允许 DX12 SFR。
 
 ## 3. 当前结论（先读这一节）
 
@@ -242,7 +257,7 @@ API 选择器：iOS 只列 **Metal**；其余 API 标 unsupported。
 
 ### 3.2 源码真实状态
 
-CLI 与 WinUI 当前暴露 11 个 workload 选择（`cinematic_liquid_v1` 是独立公开选择，持久化时沿用历史 `workload=cinematic_liquid` 并靠 `workloadVersion` 隔离）：
+下表记录当前产品与仍需维护的高级 workload；兼容性选择不再属于产品重点或未来双卡计划：
 
 | Workload id | 真实负载 | 后端代码状态 | 建议归类 |
 |---|---|---|---|
@@ -254,21 +269,17 @@ CLI 与 WinUI 当前暴露 11 个 workload 选择（`cinematic_liquid_v1` 是独
 | `synthpeak` | 寄存器内合成峰值循环 | 五后端，精度能力不同 | Other / Advanced Synthetic |
 | `render3d` | 6 顶点实例化 billboard + 深度 | 五后端 | **Legacy 3D Prototype** |
 | `volumetric` | 程序化 FBM 体积 raymarch | 五后端代码已接入，但仓库结果无验证记录 | Other / Experimental；未来综合场景 pass |
-| `cinematic_liquid` | 3D MLS-MPM 或 `--liquid-solver sph` + 独立粒子 splat/binomial R32F 密度体积 + 最多 4 界面自由表面 ray path；GUI 文案为「流体 —— 互动水池」 | **正式合同仍以 Vulkan 为准**。Metal：MLS-MPM compute + raymarch present 已接线，成绩强制 `…_metal_preview`；真机验收 / SPH / v1 未完成。DX12 曾接线后撤回；DX11/OpenGL 未实现 | **主界面：Cinematic Liquid / 互动水池**；所有历史版本、当前 v8、Metal preview 与 SPH preview 必须按 `workloadVersion` 分组 |
+| `cinematic_liquid` | 3D MLS-MPM 或 `--liquid-solver sph` + 独立粒子 splat/binomial R32F 密度体积 + 最多 4 界面自由表面 ray path；GUI 文案为「流体 —— 互动水池」 | **正式合同仍以 Vulkan 为准**。Metal：MLS-MPM compute + raymarch present 已接线，成绩强制 `…_metal_preview`；真机验收与 SPH 正式合同未完成。DX12 曾接线后撤回；DX11/OpenGL 未实现 | **主界面：Cinematic Liquid / 互动水池**；当前 v8、Metal preview 与 SPH preview 必须按 `workloadVersion` 分组 |
 
-| `cinematic_liquid_v1` | 原始 181,216 粒子/96x56x64 MLS-MPM 溃坝 | Vulkan 正式 15 秒 + 5.1 秒 capture 已通过 | **Legacy Cinematic Liquid v1**；结果使用历史 `workload=cinematic_liquid` + `workloadVersion=cinematic_liquid_v1` |
-| `fluid` | 旧 2D Stable Fluids 多 pass | **只有 Vulkan 原型，且当前不正确** | Other / Legacy；不得产生正式成绩 |
+仓库内历史 `results/results.json` 仍为 232 条：`stream=224`、`nbody=5`、`stress=1`、`synthpeak=1`、`render3d=1`、`volumetric=0`。本轮 smoke 数据刻意写到 `out/*/results`，没有污染历史库。新结果 schema 为 v2，记录 workloadVersion、最终标定参数与 capture 状态；旧结果读取时仍按 schema v1 兼容。
 
-仓库内历史 `results/results.json` 仍为 232 条：`stream=224`、`nbody=5`、`stress=1`、`synthpeak=1`、`render3d=1`、`volumetric=0`、`fluid=0`。本轮 smoke 数据刻意写到 `out/*/results`，没有污染历史库。新结果 schema 为 v2，记录 workloadVersion、最终标定参数与 capture 状态；旧结果读取时仍按 schema v1 兼容。
-
-公开 `gpu_burn` 当前成绩身份为可选手动步数的 `gpu_burn_v3_fixed_steps_<N>_kaleidoscope`（shaderVersion=3，Plasma×Kaleidoscope 视觉）；历史 faceted-glass / 自动标定结果按各自 `workloadVersion` 永久隔离。`gpu_burn_v1` selector 保留更早 Plasma Bloom 合同。Windows 上 Vulkan/DX12/DX11/OpenGL（含 WARP）可跑；**Metal 已接线、待真 Mac 验收**。RTX 5090 / Vulkan 历史标定数据（如 2048 steps → 13.199 ms render / 286 Gpix-step/s）仍有效，但不得改写身份。`gpu_stress_v1` 仍为 Advanced GraphicsBurn，**Metal unsupported**。液体：`cinematic_liquid_v1` 与 optics_v4 正式成绩保留；当前 MPM `physical_scene_v8` 尚无正式成绩；SPH 强制 `_preview`；Metal 仅为 `…_metal_preview`（raymarch 已接、待 Mac 验收）。跨后端液体与 GUI 细项仍开放。
+公开 `gpu_burn` 当前成绩身份为可选手动步数的 `gpu_burn_v3_fixed_steps_<N>_kaleidoscope`（shaderVersion=3，Plasma×Kaleidoscope 视觉）；历史 faceted-glass / 自动标定结果按各自 `workloadVersion` 永久隔离。`gpu_burn_v1` selector 保留更早 Plasma Bloom 合同。Windows 上 Vulkan/DX12/DX11/OpenGL（含 WARP）可跑；**Metal 已接线、待真 Mac 验收**。RTX 5090 / Vulkan 历史标定数据（如 2048 steps → 13.199 ms render / 286 Gpix-step/s）仍有效，但不得改写身份。`gpu_stress_v1` 仍为 Advanced GraphicsBurn，**Metal unsupported**。液体：当前 MPM `physical_scene_v8` 尚无正式成绩；SPH 强制 `_preview`；Metal 仅为 `…_metal_preview`（raymarch 已接、待 Mac 验收）。跨后端液体与 GUI 细项仍开放。
 
 ### 3.3 为什么现有新测试“效果不好”的判断成立
 
 - 旧 `stress` 的固定循环适合可重复的 fragment ALU/SFU 微测试，但没有 compute+graphics 混合与错误校验，所以继续作为 Legacy Stress v1；新的 `gpu_stress` 没有复用或修改旧 fractal shader。
 - `render3d` 只有相机朝向 billboard，没有 mesh、材质、纹理、灯光、阴影、环境光照或后处理，不能称为 3DMark 类场景（`shaders/render3d.vert:23-32`、`shaders/render3d.frag:8-12`）。
 - `volumetric` 是可用的独立 raymarch 技术积木，但文档记录 RTX 5090 默认仅约 68% 利用率（`docs/TODO-volumetric-fluid.md:20`），不足以承担“绝对压力”主项。
-- `fluid` 的 fragment shader 自己注明“这是 benchmark，不是漂亮 renderer”，只做最近邻 dye/speed 色带（`shaders/fluid_render.frag:18-32`）；当前也没有持续 force/dye injection。
 
 ### 3.4 CPU 补充测试（2026-07-16，Windows vertical slice 已跑通）
 
@@ -341,24 +352,15 @@ RenderDoc。当前已同时提供原生 C++ CLI 与独立 WinUI CPU 页面：
 
 ## 4. P0 正确性阻塞项
 
-仍开放的问题修复前，不应把旧 `fluid` 计入正式排行榜。GPU Burn
-`gpu_burn_v2_mangekyo_faceted_glass_v1` 已作为带版本的新主项接入；`gpu_burn_v1` 只作为公开 legacy 保留，两者均不与 `gpu_stress_v1` 或旧 `stress` 混分。
+GPU Burn `gpu_burn_v2_mangekyo_faceted_glass_v1` 已作为带版本的新主项接入；`gpu_burn_v1` 只作为公开 legacy 保留，两者均不与 `gpu_stress_v1` 或旧 `stress` 混分。当前液体 P0 只以 `physical_scene_v8` / SPH preview 的正确性清单为准。
 
-### 4.1 Fluid 会产生未定义或伪造结果
-
-1. divergence shader 把输出声明为 binding 2（`shaders/fluid_divergence.comp:8-13`），C++ 却把 `divBuf` 写到 binding 3（`src/vulkan_backend.cpp:1698-1703`）。
-2. advect descriptor 永久绑定 A→B（`src/vulkan_backend.cpp:1698-1700`、`1899-1904`），后续却用 `uint(simTime * 60)` 的奇偶假定每帧已经 A/B 交换（`1923-1931`）。这不是实际 ping-pong，并且结果依赖帧率取整。
-3. 最终 buffer 的 barrier 目标 stage 仍只有 compute（`1886-1896`），随后 fragment shader 直接读取（`1978-1999`）；缺少 compute-write → fragment-read 同步。
-4. 每帧更新仍可能被在途帧使用的共用 descriptor set；应按 frames-in-flight 预建 descriptor 组合或隔离每帧 set。
-5. ~~DX12/DX11/OpenGL/Metal 会静默 fallback。~~ **已修复**：这些后端现在明确抛出 unsupported，不再伪造 `GCell/s`；Vulkan fluid 的前四项正确性问题仍开放。
-
-### 4.2 “全部 GPU × API + 第 5 秒抓帧”目前不成立
+### 4.1 “全部 GPU × API + 第 5 秒抓帧”目前不成立
 
 - ~~`--run-all --capture 5` 丢失 `captureAtSec`。~~ **已修复**：run-all 复制 capture、GPU Burn/GraphicsBurn 参数与 autotune 配置；任一矩阵项失败时现在返回非零，GUI 不再把部分成功冒充 Full Analysis 完成。
 - ~~Windows OpenGL 会给每张硬件 GPU 建重复/错标项。~~ **已修复**：probe 只把 OpenGL 能力赋给 renderer 名称匹配的 adapter；2026-07-15 `gpu_burn --run-all` 实测只产生一条 RTX 5090 OpenGL 记录。
 - 软件设备自动 backend 与显式 DX11/DX12 现在都正确进入 WARP，并清空硬件 LUID/VRAM 元数据；统一 capability registry 仍待实现。
 
-### 4.3 15 秒的当前语义
+### 4.2 15 秒的当前语义
 
 - 默认是墙钟 15 秒，前 2 秒 warmup（`src/gpu_common.h:215-216`）。
 - 第 5 秒从整个 run 开始计时（`src/app_base.cpp:318-349`）。
@@ -374,7 +376,7 @@ probe 前把随包 `tools/RenderDoc` 设为进程级 `VK_IMPLICIT_LAYER_PATH` �
 
 为了保留旧粒子成绩语义，`stream` 暂时保持“总墙钟 15 秒 / 第 5 秒抓帧 / 2 秒后开始统计”。若将来改成“2 秒预热 + 15 秒正式窗口”，必须增加 suite/result schema version，不能与旧分数混排。
 
-### 4.4 Cinematic Liquid v2：历史 optics_v4 正式通过；当前 v8/SPH 尚未正式计分
+### 4.3 Cinematic Liquid：当前 v8/SPH 尚未正式计分
 
 已完成并验证的 Vulkan 切片：
 
@@ -406,8 +408,8 @@ probe 前把随包 `tools/RenderDoc` 设为进程级 `VK_IMPLICIT_LAYER_PATH` �
 ### Windows WinUI 3
 
 - **本地开发默认构建（2026-07-21）**：`scripts/build-windows.ps1` 一次编齐 CMake CLI + WinUI GUI（`-SkipGui` 才只要 CLI）。GUI 的 `CopyGpuBenchmarkWorker` 会把 `gpu_benchmark.exe` **以及** HLSL / SPIR-V / OpenGL 着色器资产拷到 `gui/<Arch>/<Config>/`，避免同目录 worker 因缺 `compute.hlsl` 等文件在 DX/OpenGL 初始化失败。正式发布仍走 `build-windows-github-release.ps1` / `stage-windows-release.ps1`，与开发树分离。
-- 下拉框当前实际暴露 12 个 workload 选择，参数映射、score parser 与 History label/filter 覆盖对应公开 id；`gpu_burn_v1` 与 `cinematic_liquid_v1` 作为独立 legacy 选择展示。
-- GPU Burn 主项为 `Mangekyo Kaleidoscope — GPU Burn`，Plasma Bloom v1 收入 legacy；`gpu_stress` 归入 Advanced，旧 `stress`、`render3d` 明确标 Legacy，volumetric 标 Experimental，fluid 标 Vulkan-only Developer Preview 并阻止非法后端。
+- 下拉框当前仍包含兼容性 workload；参数映射、score parser 与 History label/filter 覆盖对应 id。当前产品验收与后续双卡工作只围绕 Original Particle、Plasma/GPU Burn、当前 Cinematic Liquid。
+- GPU Burn 主项为 `Mangekyo Kaleidoscope — GPU Burn`，Plasma Bloom v1 收入 legacy；`gpu_stress` 归入 Advanced，旧 `stress`、`render3d` 明确标 Legacy，volumetric 标 Experimental。
 - Custom 与 Quick 的非 headless 运行现在默认追加 `--capture 5`；默认 duration 仍为 15 秒。Full analysis / Flights / Particle 预设也继续抓帧。
 - installed/staged 布局优先使用同目录 CLI/资产；开发树 GUI 同样优先同目录 `gpu_benchmark.exe`（现须连同 shader 一起由构建同步）。若不存在外部 CLI，静态 engine 以 GUI module 目录运行，不再强制切到 repo CWD。
 - Full Analysis 优先调用随包 `tools/RenderDoc/renderdoccmd.exe`；报告输出改到用户数据目录。若缺 Python/冻结 report worker 或任一后处理命令失败，GUI 现在显示“benchmark 已完成、报告不可用/失败”，不再误报图表与报告已成功生成。
@@ -461,10 +463,10 @@ probe 前把随包 `tools/RenderDoc` 设为进程级 `VK_IMPLICIT_LAYER_PATH` �
 
 ### A3 — Cinematic Liquid
 
-- [x] v1 不再修补旧 2D dye：建立独立 3D MLS-MPM 路径，固定 seed/质量、粒子/网格 P2G-G2P、球体碰撞、密度体积重建与自由表面 raymarch。
-- [x] v1 固定 181,216 粒子、96x56x64 网格、10 substeps、160 ray steps；score 为 `MParticle-step/s`，RenderDoc 抓帧开销排除计分；GUI/历史/图表识别独立 id。
-- [ ] v2 综合场景：PBR mesh、阴影、环境光、后处理和可重复镜头；保持 v1 workloadVersion/score contract 不变，另开版本。
-- [ ] 建立跨后端 scene/pass registry；当前 v1 明确 Vulkan-only，不能静默 fallback 或跨 API 混分。
+- [x] 当前 `physical_scene_v8` 使用固定 128x64x96 MLS-MPM 网格、320,920 粒子、10 substeps、密度体积重建、迭代自由表面光学与版本化结果合同。
+- [ ] 关闭当前 v8 正式 15 秒/抓帧验收、SPH 正确性、刚体轨迹和资源清理 blocker。
+- [ ] 建立跨后端 scene/pass registry；能力不足必须明确 unsupported，不能静默 fallback 或跨 API 混分。
+- [ ] 双卡只评估同一固定液体 workload 的模拟/渲染流水线；不做重复模拟、简单 AFR 或域分解。
 
 ## 7. 目标 B 的当前阻塞与发布路线
 
@@ -518,6 +520,7 @@ PathService 已把 results/captures/reports/logs 改到
 
 - **决定：不实现 DX9 后端。** GT 120 已能由 D3D11 runtime 创建 FL10_0 设备；DX9 没有 compute/UAV，无法忠实承载 Stream/N-body/SynthPeak，且 RenderDoc 不支持 D3D9。正确路线是 DX11 downlevel，而不是把同一个测试改成含义不同的 pixel-shader 仿真。
 - `ProbeGpus()` 现在实际创建探测设备，记录 DX11 Feature Level 与 DirectCompute；不再把每个 DXGI adapter 硬编码为 DX11 supported。WinUI 也读取 `dx11Compute`，Full Analysis 会跳过不支持计算的 DX11 组合，Custom Run 会给出明确错误。
+- **双 D700 能力合并与 DX12 单节点选择纠正（2026-07-21）**：必须按驱动区分拓扑。归档的 2026-03 D700 运行使用 `25.20.14020.10001`，当时 DXGI 探针确实得到 2 个不同 LUID，DX11/DX12 都能通过两个 handle 创建设备；但同期 Task Manager 已确认两条 D3D 路径的物理负载都被驱动路由到主卡，所以旧 #2 是有效 API 运行、却不是副卡独立成绩。重装后的 `27.20.14540.15002` 下，Vulkan 枚举 2 个 `VkPhysicalDevice`，DXGI 当前只枚举 1 个 D700 LUID，其 D3D12 device 内部有 2 nodes。最初为第二个 Vulkan 设备补行时复制了第一行的 DXGI index/LUID 和 D3D flags，导致 Full-All 的 DX12 默认 `NodeMask=0` 两次都落在 node 0；82.610/82.723 GB/s 即属于该问题。现探针按 `ID3D12Device::GetNodeCount()` 把 linked adapter 展开成两个可选行，普通 DX12 运行把 command queue、swap-chain buffers、command lists、root signatures/PSOs、descriptor/query heaps、粒子/流体资源全部绑定到所选 node。当前 `--list-gpus` 为 D700 #1=`Vulkan/DX12/DX11/OpenGL`、#2=`Vulkan/DX12`；DX11 仍只能使用逻辑主行。隔离目录下 4M Particle 短跑已验证 node 0 使用 mask `0x1`（122.8 FPS / 78.66 GB/s），node 1 使用 mask `0x2`（120.1 FPS / 80.14 GB/s），且 `workloadConfig` 写入 `dx12Node`、`dx12NodeMask`、`dx12LinkedNodes`，History/JSON 不再把两次运行当成无法区分的同一设备。AFR/SFR 双节点路径保持不变；若旧驱动再次真实暴露两个 DXGI LUID，探针仍会分别保留它们。另：本机 FireGL/UMD + RenderDoc 在 **linked-adapter 次节点（node≥1）** 上会在 `CreateCommandQueue` 触发 AV。先前仅关 `renderDocEnabled` 不够：GUI Full Analysis 对 DX12 worker 仍会在 probe 前设置 `VK_IMPLICIT_LAYER_PATH`，Vulkan 探测会把 RenderDoc 注入进程并挂钩 D3D12。现对显式 DX12/DX11/OpenGL worker **不再配置/预加载** Vulkan RenderDoc 层；次节点仍自动关闭抓帧（与 AFR/SFR 同类例外），node 0 仍可经 `InitRenderDoc` 抓帧。
 - DX11 backend 在 FL10 使用 `cs_4_0/vs_4_0/ps_4_0`，FL11 使用 SM5；对 FL10 查询 `D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS::ComputeShaders_Plus_RawAndStructuredBuffers_Via_Shader_4_x`。fragment-only workload 完全跳过 compute shader、UAV 与粒子 buffer。
 - 生产 shader 的 16 个 SM4 entry/profile 已由 Windows SDK FXC 全部编译通过；N-body `SV_GroupIndex` 已修正，FP64 在 SM4 明确拒绝，DX11 超过 65,535 dispatch groups 会拒绝，SM4 N-body 安全上限暂定 4,096 以避免 TDR。
 - **尚未在 GT 120 实卡运行。** 正式支持结论必须在目标驱动/系统上完成 Stream Light/Medium、fragment workload、4,096-body N-body、15 秒、可用时的第 5 秒抓帧、timestamp 与 TDR 验收。当前 WinUI/安装器不支持 Windows 7；用户已把独立 Windows 7 GUI + 安装包排在 **PS3 之前**（HarmonyOS 之后），计划共享现有 DX11 FL10/SM4 worker，并以 Aero/DWM 原生前端取代此前仅做 legacy CLI package 的设想。Windows 10 与 Windows 7 的驱动、抓帧工具和 TDR 结论必须分别记录，不得由一端外推另一端。
@@ -528,8 +531,7 @@ PathService 已把 results/captures/reports/logs 改到
 - [memtest_vulkan](https://github.com/GpuZelenograd/memtest_vulkan)（zlib）：Vulkan 显存带宽/错误检测；数分钟才适合稳定性判断。
 - [vkmark](https://github.com/vkmark/vkmark)（LGPL-2.1）：scene registry、可配置 option、有序 suite 与逐场景 duration；优先独立实现结构，避免无意引入 LGPL 代码义务。
 - [Sascha Willems Vulkan](https://github.com/SaschaWillems/Vulkan)（MIT）与 [Khronos Vulkan Samples](https://github.com/KhronosGroup/Vulkan-Samples)（Apache-2.0）：PBR、shadow、deferred、N-body、timestamp 等技术积木；素材许可证需另审。
-- [GPU Gems 2D Fluid](https://developer.nvidia.com/gpugems/gpugems/part-vi-beyond-triangles/chapter-38-fast-fluid-dynamics-simulation-gpu) / [3D Fluid](https://developer.nvidia.com/gpugems/gpugems3/part-v-physics-simulation/chapter-30-real-time-simulation-and-rendering-3d-fluids)：算法参考，不在许可不清时复制示例代码。
-- [jeantimex/fluid](https://github.com/jeantimex/fluid)（MIT）：用户截图对应项目；其路线是 3D SPH/PIC-FLIP、粒子空间网格、独立密度体积 splat 与 free-surface raymarch，而不是 2D dye。Cinematic Liquid v2 只参考该架构和参数比例，shader 与宿主实现均为本项目独立代码，未 vendor 上游代码/资产。
+- [jeantimex/fluid](https://github.com/jeantimex/fluid)（MIT）：用户截图对应项目；其路线是 3D SPH/PIC-FLIP、粒子空间网格、独立密度体积 splat 与 free-surface raymarch。当前 Cinematic Liquid 只参考该架构和参数比例，shader 与宿主实现均为本项目独立代码，未 vendor 上游代码/资产。
 - [matsuoka-601/Splash](https://github.com/matsuoka-601/Splash)（MIT）：WebGPU MLS-MPM + screen-space fluid；参考其粒子/网格管线和密度体积阴影思路。
 - [luihabl/VkFluidSim](https://github.com/luihabl/VkFluidSim)（CC0）与 [Wumpf/blub](https://github.com/Wumpf/blub)（MIT）：原生 Vulkan SPH 与 APIC/MLS-MPM 结构参考。核心算法依据 [MLS-MPM/APIC paper](https://yuanming.taichi.graphics/publication/2018-mlsmpm/) 独立实现。
 - [LegitEngine](https://github.com/Raikiri/LegitEngine)（代码 MIT）：Vulkan rendergraph、3D FFT/流体与 point-sprite 可视化参考；仓库素材另有权利人。
@@ -554,7 +556,6 @@ PathService 已把 results/captures/reports/logs 改到
 - [x] 2026-07-15：生成并验证 Windows x64 GUI-first engineering ZIP；本机 staged 四 API 均实际产生 `.rdc`。
 - [x] 2026-07-15：最终可靠性收口：抓帧后固定排空 16 个 query samples；GUI 后处理改为随包 RenderDoc 优先、缺报告运行时时诚实降级；Charts 接入 GPU Burn/GraphicsBurn。
 - [x] 2026-07-15：GPU Burn 未探测的固定步数收紧为 16–32；默认自动标定仍可在 16-step 安全探针后升至 2048。Windows 直接/GUI Custom OpenGL 若请求的 GPU 与真实 GL_RENDERER 不符会明确失败，不能错标成绩。
-- [x] 2026-07-15：完成独立 `cinematic_liquid_v1` vertical slice：181,216 粒子 3D MLS-MPM、96x56x64 定点网格、10 substeps、R32F 密度体积与 160-step 折射自由表面 raymarch；旧 `fluid` 明确留在 Other / Legacy，未删除。
 - [x] 2026-07-15：Cinematic Liquid 已同步 CLI、WinUI、历史/图表和结果 schema；固定 15 秒、第 5.1 秒 RenderDoc 抓帧，首个 3.55 秒演示循环使抓帧落在明显撞击/飞溅阶段。
 - [x] 2026-07-15：完成 `cinematic_liquid_v2_surface_splat_optics_v4` Vulkan 切片：320,068 粒子、128x64x96、10 substeps、四刚体/双向耦合、Spiky² surface + 3x3x3 Gaussian（mix 0.75）、352-step 两界面折射；`shaderVersion=6`。
 - [x] 2026-07-15：最终低侧第 5 秒镜头和开放侧单层细池沿已进入固定场景；正式图 `rdoc_captures/cinematic-liquid-v2-5s-formal-optics-v4.png` 显示真实宏观溃坝，画面/光学显著改善，但仍未达到 jeantimex SPH 参考的自然微观细节。
@@ -573,7 +574,6 @@ PathService 已把 results/captures/reports/logs 改到
 - [x] 2026-07-17：用户订 **MIT** 根 `LICENSE`；CMake/CPack 默认 `ZIP;WIX`；发布主路径改为 WiX MSI（x64+ARM64 原生 Template）；Inno 降为 legacy。本机已产出 `Mangekyo-0.1.3-windows-{x64,arm64}.msi`（stage `projectDistributionLicense=true`）。
 - [x] 2026-07-17：互动水池（`cinematic_liquid`）跨 API 需求曾短暂接 DX12，后按用户要求 **撤回**，恢复 Vulkan-only；勿把未接线的 HLSL 草稿写成已支持。
 - [ ] **平台下一刀（用户 2026-07-19 改序）**：macOS — 代码侧 Particle/Burn/SwiftUI/液体 raymarch/MTLCapture + **OS 底线 12** 已落，**真 Mac（含 Monterey）编译与三主项验收仍开放**。**Windows 7 GUI** 已后移至 HarmonyOS 之后、PS3 之前。
-- [ ] 旧 `fluid` Vulkan 正确性与统一跨后端 workload registry 仍开放，但不再阻塞独立 Cinematic Liquid v1。
 - [x] 实际 MSI/ZIP 与动态 Vulkan loader 已完成构建/静态审计；显式 Vulkan 缺 loader 的异常路径也已加 guard。
 - [ ] 冻结 report worker、Authenticode signing、GT120 实卡与 clean-machine 安装/升级/卸载/抓帧验收仍开放（**项目 LICENSE 阻塞已解除**）。
 - [x] **日语 GUI 本地化（2026-07-18 / 0.2.0）**：`gui/i18n.h` 扩展 `Lang::Ja`、`tr(en,zh,ja)`、`trDyn`、`usesYmdDate`、`detectOsLangLabel`；OS 自动探测 `LANG_JAPANESE`；设置页语言下拉增加「日本語」；`MainWindow.xaml.cpp` 全表 UI 文案含第三参日语。安装器 WiX 向导仍为英文（可选后续加日语 MSI UI）；Inno legacy 仍为 EN + 简体中文 `.isl`。成绩合同与内部 id 不变。
@@ -586,7 +586,7 @@ PathService 已把 results/captures/reports/logs 改到
 2. **macOS vertical slice（平台下一刀）**：Particle + GPU Burn + 液体 raymarch + MTLCapture + **deployment macOS 12** **代码已落 → 真机验收（优先含 Monterey 冒烟）**；SwiftUI 已对齐 → Mac 编译验收。
 3. **回到未关闭的正确性与自由模式**（可与平台刀并行由用户指定）：依次关闭 Cinematic Liquid SPH 的 frame-driven timestep、per-substep impulse clear、viscosity race、atomic scatter ordering；之后再做 Liquid Lab / Explore、GPU Burn Unlimited Soak 和 VRAM Integrity Soak。四项关闭前 SPH 始终 `_preview`，旧结果合同不变。
 4. **Windows 完整公开发布收口**仍开放：冻结 `report_worker`，签名证书，在干净 Windows 10/11 VM 验收 bundled RenderDoc 和完整 GUI-first MSI 安装/升级/卸载。
-5. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Aggregate；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
+5. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Collaboration；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
 
 ## 10. 验证记录
 
@@ -759,7 +759,6 @@ PathService 已把 results/captures/reports/logs 改到
 - RTX 5090 Vulkan 10 秒自动标定 smoke（`out/gpu-burn-plasma-smoke`）：16 → 1604 steps/draw，Render 14.899 ms、internal utilisation 93.0%、`198.44 Gpix-step/s`、stableScore 197.79/CV 0.97%；外部 NVML 稳定段 8/8 次 99%，约 599–600W。画面核验图为 `out/gpu-burn-plasma-smoke/plasma_bloom_vulkan_verified.png`。
 - `--run-all --workload gpu_burn --iter 16 --time 3` 隔离矩阵通过 9/9：RTX 5090 四 API、AMD iGPU 三 API、WARP DX12/DX11；OpenGL 只出现一次，所有 burn 记录 `particleCount=0`。CLI comparison 现按 `gpu_burn_v1 + Gpix-step/s` 分组/score 排名。
 - 安全回归：WARP 输入 `--iter 2048` 被限制为 32，正式 render 228.375 ms，未产生数十秒 draw；Windows OpenGL 指定 AMD index 时以 exit 1 拒绝并报告真实 RTX GL_RENDERER，不生成错标结果。
-- Cinematic Liquid 正式流程通过：RTX 5090 / Vulkan / 1280x720 / 181,216 粒子 / 96x56x64 网格 / 10 substeps，墙钟 15 秒；第 5.1 秒生成 19,474,099-byte `.rdc`，抓帧 0.080 秒和异步样本已排除计分。正式 Compute 6.117 ms、Render 0.159 ms、`288.74 MParticle-step/s`、GPU timestamp utilisation 90.5%；结果 id `20260715-042720-440`，`workloadVersion=cinematic_liquid_v1`，配置记录 `captureAttempts=1;captureExcluded=true;captureCount=1`。抓帧缩略图为 `out/cinematic-liquid-v1/capture-5s.png`。
 - Cinematic Liquid 新增的 8 份 SPIR-V 均从最新 staged 目录通过 Vulkan 1.1 `spirv-val`；静态复核确认 80B particle、16B grid cell、96B compute/render push constant ABI、P2G/G2P barriers 和 density compute→fragment barrier 一致。CLI 强制 v1 使用真实 device-local storage，GUI 会禁用不适用的 Host memory，避免结果误标。
 - v2 早期 RenderDoc 缩略图已检查：`rdoc_captures/cinematic-liquid-v2-5s-particle-splat-128.png` 与 `rdoc_captures/cinematic-liquid-v2-10s-particle-splat.png` 只属于 surface-splat 视觉 smoke，不再代表最终 optics v4 合同。
 - 最终 `cinematic_liquid_v2_surface_splat_optics_v4`（`shaderVersion=6`）正式流程通过：RTX 5090 / Vulkan / 1280x720 / 320,068 粒子 / 128x64x96 / 墙钟 15 秒；5.1 秒 RenderDoc 抓帧 0.103 秒已排除计分，1 次尝试保存 1 个 capture。正式 Compute 10.572 ms、Render 1.553 ms、Total 12.125 ms、`263.98 MParticle-step/s`、966 measured frames，结果 id `20260715-170629-492`。最终图为 `rdoc_captures/cinematic-liquid-v2-5s-formal-optics-v4.png`。
@@ -902,4 +901,3 @@ PathService 已把 results/captures/reports/logs 改到
   - `SettingsView.swift` hides working directory selector and displays read-only sandboxed path.
   - `AboutView.swift` queries model details using `utsname` to avoid macOS sysctl calls.
   - `ChartsView.swift` rebuilds chart graphics natively in SwiftUI using the `Charts` framework, removing python3/matplotlib dependencies.
-

@@ -85,30 +85,67 @@ next platform slice is macOS.
    workloads can be ported directly. At most a fixed-function novelty demo in
    a separate repository; it must never enter the formal score contracts or
    the GUI main page.
-10. **Dual-GPU Aggregate (feature, not an OS port; first validation target:
-   dual FirePro D700 in a Mac Pro 2013 under Boot Camp Windows)** — explicit
-   engine-level multi-GPU; driver CrossFire never accelerates a custom
-   engine and is not relied upon. Slices: (a) `stream` headless dual-device
-   aggregate (each device simulates half the particles, CPU frame-boundary
-   sync, summed throughput as new group `stream_dualgpu_v1` recording both
-   adapters), (b) dual-GPU N-body with per-step position exchange,
-   (c) split-frame or AFR GPU Burn via DX12 unlinked multi-adapter with a
-   cross-adapter heap. No DX12 LDA / Vulkan device-group dependency (unclear
-   on the final GCN 1.0 drivers) and no liquid domain decomposition.
-   Thermal caution: sustained dual-GPU load is the Mac Pro 2013's known
-   weakness — 15-second bursts only, no dual-GPU long soak.
+10. **Dual-GPU collaboration (experimental feature; first target: dual FirePro
+   D700 under Boot Camp Windows).** The first Plasma/GPU Burn AFR slice is now
+   implemented behind `--multi-gpu afr` (or `--afr`). DX12 uses the two nodes of
+   the linked adapter, with node-local queues/backbuffers/PSOs/timestamps;
+   Vulkan uses a two-device group and explicit acquire/submit/present masks.
+   DX11 can request only driver-managed implicit CrossFire and reports that the
+   physical participation is unverified. A final AMD AGS 6.3.1 probe enumerated
+   both D700s, but both explicit and driver-managed AFR device creation reported
+   `crossfireAPI=0` and only one active GPU, confirming that this FireGL driver
+   does not expose DX11 CrossFire to the application. The corrected July 21 D700 acceptance
+   run found that AFR requires **at least four frames in flight** (two reusable
+   slots per GPU) and must run without RenderDoc injection. With those conditions,
+   DX12 scales from about 113 to 222–230 FPS at 16 steps and from 19 to 39 FPS at
+   128 steps. Vulkan remains serial on AMD `20.45.40.15` because its graphics
+   queue family exposes only one `VkQueue` (about 102 vs 104 FPS at 16 steps and
+   17 vs 17 FPS at 128); DX11 remains unchanged at about 120/120 and 20/20 FPS.
+   DX12 SFR is also available through `--multi-gpu sfr` / `--sfr`: node 0 shades
+   the left half, node 1 shades the right half into a local target, and a Tier-1
+   cross-node buffer carries that half back for one composition and one present.
+   On the D700 it is workload-dependent: at 16 steps the fixed copy cost reduces
+   performance from about 112 to 69 FPS, while at 128 steps SFR improves 19 to
+   28 FPS (about 1.47x), still behind AFR's 39 FPS. SFR scores use a separate
+   `..._sfr2` contract and automatically disable RenderDoc. AFR likewise remains
+   experimental and uses `..._afr2`; only DX12 currently has measured dual-D700
+   speed-ups. The Windows GUI exposes **Multi-GPU: Off / AFR / SFR** only for a
+   Custom run with exactly DX12 + Plasma selected; its adjacent info icon explains
+   the linked-adapter requirement and RenderDoc shutdown. The implementation uses
+   standard DX12 node masks rather than AMD-specific calls, so an NVIDIA SLI pair
+   could work only if its driver exposes one linked adapter with at least two nodes;
+   that path is not yet validated. An explicit OpenGL SFR probe found that FireGL exposes
+   `WGL_AMD_gpu_association` and two GPU IDs, but refuses to create an associated
+   context for GPU 2; the prototype was therefore reverted without a fallback.
+   Original Particle
+   fixed-total-work splitting and the current Cinematic Liquid simulation/render
+   pipeline remain future measured work. Independent benchmark scores are never
+   added together. They are also never synthesized from DX12/DX11 adapter aliases:
+   on the current `27.20.14540.15002` driver DXGI exposes one D700 linked-adapter
+   LUID while Vulkan exposes two physical devices. The GPU probe expands the
+   linked adapter's two D3D12 nodes into D700 #1/#2 rows, and an ordinary DX12
+   run binds its queue, swap-chain buffers, pipelines, descriptors, timestamps,
+   and resources to the selected node. DX11 remains available only on the
+   logical/primary row because D3D11 has no equivalent node selector. AFR/SFR
+   continue to use both DX12 nodes cooperatively. The archived `25.20.14020.10001` driver exposed
+   two DXGI LUIDs, but Task Manager showed both D3D handles executing on the
+   primary physical GPU. Use short bursts on the Mac Pro 2013, not a
+   dual-GPU long soak.
+
+   History has a separate **Mode** column: `Single`, `Headless`, `AFR ×2`, or
+   `SFR ×2`. Historical DX11/Vulkan AFR probes are labelled unverified or
+   experimental rather than presented as measured scaling. Headless and windowed
+   scores are also separate comparison contracts even when their workload version
+   strings are otherwise identical.
 
 ## Benchmark Workloads
 
-The engine currently exposes **twelve public workload selections**. `gpu_burn` is the
-Mangekyo Kaleidoscope primary visual graphics-burn path; the original Plasma Bloom
-contract remains available as `gpu_burn_v1`, and `gpu_stress` remains an advanced
-GraphicsBurn component score, and the original `stress` path is retained as
-`Legacy Stress v1`. `cinematic_liquid` is the real 3D Vulkan liquid test. Its
-validated v1 score contract is preserved, while the current working tree adds
-the separately versioned v2 surface-splat implementation described below. The
-unrelated old `fluid` dye prototype is retained under Legacy/Other and must not
-be used for cross-API comparison.
+The product-facing workload set is centred on Original Particle (`stream`),
+Plasma/GPU Burn (`gpu_burn`) and the current Cinematic Liquid
+(`cinematic_liquid`). `gpu_stress` remains an advanced GraphicsBurn component
+score, and the original `stress` path is retained as `Legacy Stress v1`.
+Compatibility-only selectors are not part of the current product or multi-GPU
+roadmap.
 See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated support.
 
 | Axis | `--workload` | Stresses | Metric | Knobs |
@@ -123,8 +160,6 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
 | **3D render** | `render3d` | Vertex transform + raster + fill + depth | MQuad/s | `--particles` |
 | **Volume raymarch** | `volumetric` | Fragment ALU/SFU + register pressure | GSample/s | `--steps` |
 | **3D cinematic liquid** | `cinematic_liquid` | 320,920-particle MLS-MPM + particle-splatted 3D density volume + iterative free-surface optics; optional SPH preview | MParticle-step/s | Vulkan v8 formal score still open; Metal = compute + raymarch present (`…_metal_preview`); `--liquid-solver mpm\|sph` |
-| **Legacy cinematic liquid v1** | `cinematic_liquid_v1` | Original 181,216-particle MLS-MPM dam-break contract | MParticle-step/s | fixed v1 Vulkan-only contract |
-| **Legacy 2D fluid** | `fluid` | Multi-pass compute + fullscreen dye render | unverified legacy | `--grid`, `--jacobi` |
 
 ```bash
 ./build/gpu_benchmark --benchmark --headless                          # Stream — bandwidth (GB/s)
@@ -138,7 +173,6 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
 ./build/gpu_benchmark --time 15 --workload volumetric --steps 96      # Experimental raymarch
 ./build/gpu_benchmark --backend vulkan --time 15 --workload cinematic_liquid --capture 5
 ./build/gpu_benchmark --backend vulkan --time 15 --workload cinematic_liquid --liquid-solver sph
-# `cinematic_liquid_v1` and `fluid` remain public legacy selections.
 ```
 
 - `stream` is bandwidth-dominated (~0.15 FLOP/byte), so its GB/s score is mainly
@@ -159,13 +193,6 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
   `render3d` is a real 3D pipeline — perspective + orbiting camera + depth test,
   particles drawn as instanced camera-facing billboard quads (vertex transform +
   rasterisation + fill + ROP).
-- `cinematic_liquid_v1` is separate from the old 2D dye solver. It runs a true
-  3D MLS-MPM particle/grid simulation, resolves grid mass to an R32F 3D density
-  volume, and raymarches a refractive free surface with Fresnel reflection,
-  Beer-Lambert absorption, a collision sphere, floor and sky. Its fixed
-  96x56x64 grid, 181,216 particles, 10 substeps and 160 ray steps make results
-  comparable within v1. It is currently Vulkan-only and therefore is not yet a
-  cross-API 3DMark replacement.
 - The current Vulkan v2 MPM implementation uses a fixed 128x64x96 grid,
   320,920 particles (142x14x98 base plus a 48x37x71 dam), ten substeps,
   stiffness 45,000, viscosity 0.035 and an 8-unit/s speed cap. The current

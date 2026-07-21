@@ -353,6 +353,8 @@ struct GpuInfo {
     std::int32_t vkPhysDevIndex = -1; // Vulkan vkEnumeratePhysicalDevices index
     std::int64_t luidHigh = 0;  // DXGI adapter LUID for cross-factory matching
     std::int64_t luidLow  = 0;
+    std::uint32_t dx12NodeIndex = 0; // physical node inside a linked DX12 adapter
+    std::uint32_t dx12NodeCount = 1;
 };
 
 static bool NameLooksIntegrated(const std::string& name) {
@@ -423,8 +425,9 @@ static std::vector<GpuInfo> ProbeGpus(
 
 #ifdef HAVE_DX12
             {
-                extern bool ProbeDX12Support(IDXGIAdapter1*);
-                info.supportsDX12 = ProbeDX12Support(adapter.Get());
+                extern std::uint32_t ProbeDX12NodeCount(IDXGIAdapter1*);
+                info.dx12NodeCount = ProbeDX12NodeCount(adapter.Get());
+                info.supportsDX12 = info.dx12NodeCount > 0;
             }
 #endif
 #ifdef HAVE_DX11
@@ -474,6 +477,30 @@ static std::vector<GpuInfo> ProbeGpus(
             adapter.Reset();
         }
 
+        // DXGI exposes a linked-adapter set as one adapter.  D3D12 exposes
+        // its physical GPUs as nodes of that one device, so expand those
+        // nodes into selectable benchmark rows while retaining the same LUID.
+        // DX11 has no equivalent node selector and therefore remains on the
+        // first/logical row only.
+        std::vector<GpuInfo> nodeExpanded;
+        for (const auto& gpu : gpus) {
+            nodeExpanded.push_back(gpu);
+            if (!gpu.isSoftware && gpu.supportsDX12 && gpu.dx12NodeCount > 1) {
+                for (std::uint32_t node = 1; node < gpu.dx12NodeCount; ++node) {
+                    GpuInfo nodeGpu = gpu;
+                    nodeGpu.dx12NodeIndex = node;
+                    nodeGpu.supportsDX11 = false;
+                    nodeGpu.supportsDX11Compute = false;
+                    nodeGpu.dx11FeatureLevel = 0;
+                    nodeGpu.supportsOpenGL = false;
+                    nodeGpu.supportsVulkan = false;
+                    nodeGpu.vkPhysDevIndex = -1;
+                    nodeExpanded.push_back(std::move(nodeGpu));
+                }
+            }
+        }
+        gpus = std::move(nodeExpanded);
+
         // --- DXGI 1.6: classify discrete vs integrated ---
         // EnumAdapterByGpuPreference(HIGH_PERFORMANCE) returns the adapter
         // Windows considers "high performance" first — typically the discrete GPU.
@@ -503,7 +530,10 @@ static std::vector<GpuInfo> ProbeGpus(
                     size_t hpConverted = 0;
                     wcstombs_s(&hpConverted, hpName, sizeof(hpName), hpDesc.Description, _TRUNCATE);
                     for (auto& g : gpus) {
-                        if (g.name == hpName) { g.isDiscrete = true; break; }
+                        // A DX12 linked adapter is expanded into one selectable
+                        // row per physical node.  Mark every row that belongs to
+                        // the high-performance adapter, not only node 0.
+                        if (g.name == hpName) g.isDiscrete = true;
                     }
                     hpAdapter.Reset();
                     break;  // only the first non-software high-perf adapter is discrete
@@ -609,12 +639,16 @@ static std::vector<GpuInfo> ProbeGpus(
                             info.isSoftware = vkIsSoftware;
                             info.isDiscrete = vkIsDiscrete;
                             info.vramMB = gpus[gi].vramMB;
-                            info.supportsDX12 = gpus[gi].supportsDX12;
-                            info.supportsDX11 = gpus[gi].supportsDX11;
-                            info.supportsOpenGL = gpus[gi].supportsOpenGL;
-                            info.dxgiRawIndex = gpus[gi].dxgiRawIndex;
-                            info.luidHigh = gpus[gi].luidHigh;
-                            info.luidLow  = gpus[gi].luidLow;
+                            // This is an extra Vulkan physical device, not an
+                            // extra DXGI adapter.  A linked-adapter driver can
+                            // expose one DXGI adapter with multiple D3D12 nodes
+                            // while Vulkan exposes each physical GPU separately.
+                            // Copying the first match's DXGI index/LUID and D3D
+                            // capabilities makes run-all execute the same D3D
+                            // adapter twice and merely label the second result
+                            // as another GPU.  Leave this entry Vulkan-only;
+                            // DX12 reaches its other node through explicit
+                            // linked-adapter AFR/SFR instead.
                             info.vkPhysDevIndex = static_cast<std::int32_t>(di);
                             gpus.insert(gpus.begin() + static_cast<std::ptrdiff_t>(gi) + 1, info);
                             matched = true;
@@ -766,7 +800,9 @@ static std::vector<GpuInfo> ProbeGpus(
                 break;
             }
         }
-        if (hasVulkanSibling && !gpus[i].supportsVulkan) {
+        const bool linkedDx12Node = gpus[i].supportsDX12 &&
+                                    gpus[i].dx12NodeCount > 1;
+        if (hasVulkanSibling && !gpus[i].supportsVulkan && !linkedDx12Node) {
             gpus.erase(gpus.begin() + static_cast<std::ptrdiff_t>(i));
         } else {
             ++i;
@@ -794,11 +830,40 @@ static std::vector<GpuInfo> ProbeGpus(
 
 #ifdef HAVE_DX12
 #include <d3d12.h>
-bool ProbeDX12Support(IDXGIAdapter1* adapter) {
-    return SUCCEEDED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0,
-                                       __uuidof(ID3D12Device), nullptr));
+std::uint32_t ProbeDX12NodeCount(IDXGIAdapter1* adapter) {
+    Microsoft::WRL::ComPtr<ID3D12Device> device;
+    if (FAILED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0,
+                                 IID_PPV_ARGS(&device))))
+        return 0;
+    return device->GetNodeCount();
 }
 #endif
+
+// RenderDoc's D3D12 interpose crashes CreateCommandQueue when NodeMask selects
+// a secondary linked-adapter node on the Mac Pro dual-D700 FireGL stack.
+// Keep capture on node 0 / single adapters; force it off for node >= 1.
+static void DisableRenderDocForSecondaryDx12Node(
+    gpu_bench::BenchmarkConfig& cfg,
+    const std::string& backendId,
+    bool* renderDocLayerRequestedFlag = nullptr) {
+    if (backendId != "dx12")
+        return;
+    if (!(cfg.adapterNodeCount > 1 && cfg.adapterNodeIndex > 0))
+        return;
+    if (!(cfg.renderDocEnabled || cfg.captureAtSec > 0.0 ||
+          cfg.captureAtFrame > 0))
+        return;
+    std::cerr << "[DX12] RenderDoc capture/injection disabled for linked-adapter "
+                 "node " << cfg.adapterNodeIndex
+              << ": the capture layer crashes CreateCommandQueue on secondary "
+                 "nodes of this AMD FireGL/UMD stack. Benchmark scores remain "
+                 "valid; node 0 / the primary DX12 row remains capturable.\n";
+    cfg.renderDocEnabled = false;
+    cfg.captureAtSec = -1.0;
+    cfg.captureAtFrame = -1;
+    if (renderDocLayerRequestedFlag)
+        *renderDocLayerRequestedFlag = false;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -860,6 +925,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     bool listGpus = false;
     bool timeArgGiven = false;   // explicit --time => run directly (no menu)
     bool benchmarkArgGiven = false; // remains true if an auto-tuned workload switches to timed mode
+    bool headlessArgGiven = false;
     bool renderDocLayerRequested = false;
     bool cpuBenchmarkRequested = false;
     bool saveCpuResults = true;
@@ -930,8 +996,26 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             if (n < 1) n = 1;
             if (n > 16) n = 16;
             benchCfg.framesInFlight = static_cast<std::uint32_t>(n);
+        } else if (std::strcmp(argv[i], "--multi-gpu") == 0 && i + 1 < argc) {
+            const std::string mode = argv[++i];
+            if (mode == "afr")
+                benchCfg.multiGpuMode = gpu_bench::MultiGpuMode::Afr;
+            else if (mode == "sfr")
+                benchCfg.multiGpuMode = gpu_bench::MultiGpuMode::Sfr;
+            else if (mode == "off" || mode == "none")
+                benchCfg.multiGpuMode = gpu_bench::MultiGpuMode::Off;
+            else {
+                std::cerr << "Unknown --multi-gpu mode '" << mode
+                          << "' (expected off, afr, or sfr)\n";
+                return 2;
+            }
+        } else if (std::strcmp(argv[i], "--afr") == 0) {
+            benchCfg.multiGpuMode = gpu_bench::MultiGpuMode::Afr;
+        } else if (std::strcmp(argv[i], "--sfr") == 0) {
+            benchCfg.multiGpuMode = gpu_bench::MultiGpuMode::Sfr;
         } else if (std::strcmp(argv[i], "--headless") == 0) {
             benchCfg.headless = true;
+            headlessArgGiven = true;
         } else if (std::strcmp(argv[i], "--renderdoc") == 0) {
             benchCfg.renderDocEnabled = true;
             renderDocLayerRequested = true;
@@ -1103,6 +1187,9 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --vsync                              Enable vertical sync (default: off)\n"
                       << "  --host-memory                        Keep particle buffer in system RAM (slower on dGPU)\n"
                       << "  --flights <N>                       Set frames-in-flight count (default: 2, max: 16)\n"
+                      << "  --multi-gpu <off|afr|sfr>           Split Plasma across two DX12 nodes or alternate frames\n"
+                      << "  --afr                               Shorthand for --multi-gpu afr\n"
+                      << "  --sfr                               Shorthand for --multi-gpu sfr\n"
                       << "  --headless                           Pure compute mode (no window/rendering/present)\n"
                       << "  --cpu-benchmark [per-core|multi|all] Run native CPU-only benchmark (default: all)\n"
                       << "  --cpu-mode <per-core|multi|all>      CPU mode alias used by the GUI\n"
@@ -1399,12 +1486,122 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         benchCfg.difficultyLabel = "3D";
     }
 
+    // AFR is currently a deliberately narrow, stateless vertical slice.  The
+    // Plasma/GPU Burn pass has no cross-frame simulation data, which lets two
+    // devices render alternate frames without duplicating mutable state.
+    if (benchCfg.multiGpuMode == gpu_bench::MultiGpuMode::Afr) {
+        if (!gpu_bench::isGpuBurnWorkload(benchCfg.workload)) {
+            std::cerr << "--multi-gpu afr currently supports only --workload gpu_burn "
+                         "(Plasma). Particle and liquid workloads have cross-frame state "
+                         "and are intentionally not run as two independent tests.\n";
+            return 2;
+        }
+        if (headlessArgGiven) {
+            std::cerr << "--multi-gpu afr requires a windowed present path.\n";
+            return 2;
+        }
+        if (useWarp) {
+            std::cerr << "--multi-gpu afr requires hardware GPUs; WARP is unsupported.\n";
+            return 2;
+        }
+        if (backend != "auto" && backend != "vulkan" &&
+            backend != "dx12" && backend != "dx11") {
+            std::cerr << "--multi-gpu afr supports Vulkan, DX12, or DX11 only.\n";
+            return 2;
+        }
+        if (runAll || fullAnalysis) {
+            std::cerr << "--multi-gpu afr is a custom-run mode and cannot be combined "
+                         "with --run-all or --full-analysis.\n";
+            return 2;
+        }
+        if (benchCfg.framesInFlight < gpu_bench::kAfrMinFramesInFlight) {
+            std::cerr << "[AFR] Raising frames-in-flight from "
+                      << benchCfg.framesInFlight << " to "
+                      << gpu_bench::kAfrMinFramesInFlight
+                      << ": two reusable frame slots per GPU are required for "
+                         "linked-adapter overlap.\n";
+            benchCfg.framesInFlight = gpu_bench::kAfrMinFramesInFlight;
+        }
+
+        // RenderDoc interposes queue submission/presentation.  On linked D3D12
+        // adapters this can let the CPU run far ahead while GPU work drains only
+        // during teardown, producing impossible FPS and no timestamp samples.
+        // Vulkan device-group capture has the same multi-device ambiguity.  AFR
+        // benchmarking must therefore run without the capture layer/API.
+        if (benchCfg.renderDocEnabled || benchCfg.captureAtSec > 0.0 ||
+            benchCfg.captureAtFrame > 0) {
+            std::cerr << "[AFR] RenderDoc capture/injection is disabled for multi-GPU "
+                         "runs because it invalidates AFR timing and queue overlap.\n";
+            benchCfg.renderDocEnabled = false;
+            renderDocLayerRequested = false;
+            benchCfg.captureAtSec = -1.0;
+            benchCfg.captureAtFrame = -1;
+        }
+    }
+
+    // DX12 SFR renders one logical Plasma frame on both linked nodes: node 0
+    // shades the left half, node 1 shades the right half, then node 0 performs
+    // the single composition/present.  Keep the first implementation narrow so
+    // it cannot silently turn stateful workloads into two independent tests.
+    if (benchCfg.multiGpuMode == gpu_bench::MultiGpuMode::Sfr) {
+        if (!gpu_bench::isGpuBurnWorkload(benchCfg.workload)) {
+            std::cerr << "--multi-gpu sfr currently supports only --workload gpu_burn "
+                         "(Plasma).\n";
+            return 2;
+        }
+        if (headlessArgGiven) {
+            std::cerr << "--multi-gpu sfr requires a windowed composition path.\n";
+            return 2;
+        }
+        if (useWarp) {
+            std::cerr << "--multi-gpu sfr requires hardware GPUs; WARP is unsupported.\n";
+            return 2;
+        }
+        if (backend != "auto" && backend != "dx12") {
+            std::cerr << "--multi-gpu sfr currently supports DX12 only.\n";
+            return 2;
+        }
+        if (backend == "auto")
+            backend = "dx12";
+        if (runAll || fullAnalysis) {
+            std::cerr << "--multi-gpu sfr is a custom-run mode and cannot be combined "
+                         "with --run-all or --full-analysis.\n";
+            return 2;
+        }
+        if (benchCfg.renderDocEnabled || benchCfg.captureAtSec > 0.0 ||
+            benchCfg.captureAtFrame > 0) {
+            std::cerr << "[SFR] RenderDoc capture/injection is disabled until linked-node "
+                         "composition has independent capture validation.\n";
+            benchCfg.renderDocEnabled = false;
+            renderDocLayerRequested = false;
+            benchCfg.captureAtSec = -1.0;
+            benchCfg.captureAtFrame = -1;
+        }
+    }
+
     const std::string shaderDir = ExeDirectory(argv[0]);
 
 #ifdef _WIN32
+    // Vulkan capture needs the RenderDoc implicit layer before vkCreateInstance.
+    // DX12/DX11 capture uses AppBase::InitRenderDoc (LoadLibrary) instead.
+    // Enabling the Vulkan layer for a DX12 GUI/CLI worker makes ProbeGpus'
+    // Vulkan instance load renderdoc.dll, which also hooks D3D12 and then
+    // access-violates CreateCommandQueue on linked-adapter node >= 1.
+    const bool configureVulkanRenderDocLayer =
+        benchCfg.renderDocEnabled && renderDocLayerRequested &&
+        (backend == "vulkan" ||
+         (benchCfg.guiWorker && backend == "auto"));
     const auto bundledRenderDocDll = ConfigureBundledRenderDocLayer(
-        shaderDir, benchCfg.renderDocEnabled && renderDocLayerRequested);
-    const auto guiWorkerRenderDocDll = benchCfg.guiWorker
+        shaderDir, configureVulkanRenderDocLayer);
+    // GUI workers preload RenderDoc before the Vulkan probe so its crash
+    // handler can be disabled.  Skip that preload for explicit DX12/DX11/
+    // OpenGL workers: the D3D hooks would already be installed before we
+    // know whether --gpu selected a secondary linked-adapter node, and on
+    // FirePro D700 node 1 CreateCommandQueue then access-violates.
+    const bool preloadRenderDocForVulkanProbe =
+        benchCfg.guiWorker &&
+        (backend == "auto" || backend == "vulkan");
+    const auto guiWorkerRenderDocDll = preloadRenderDocForVulkanProbe
         ? bundledRenderDocDll : std::filesystem::path{};
 #else
     const std::filesystem::path guiWorkerRenderDocDll;
@@ -1530,6 +1727,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             std::int64_t luidHigh = 0;
             std::int64_t luidLow  = 0;
             std::uint32_t vramMB  = 0;
+            std::uint32_t nodeIndex = 0;
+            std::uint32_t nodeCount = 1;
         };
         // Map gpus-array index + backend to the raw index each backend expects.
         auto rawIdx = [&](std::uint32_t gi, const std::string& bid) -> std::int32_t {
@@ -1544,23 +1743,23 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             const auto& g = gpus[gi];
 #ifdef HAVE_VULKAN
             if (g.supportsVulkan)
-                entries.push_back({rawIdx(gi, "vulkan"), "vulkan", g.name, "Vulkan", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                entries.push_back({rawIdx(gi, "vulkan"), "vulkan", g.name, "Vulkan", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
 #ifdef HAVE_DX12
             if (g.supportsDX12)
-                entries.push_back({rawIdx(gi, "dx12"), "dx12", g.name, "DirectX 12", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                entries.push_back({rawIdx(gi, "dx12"), "dx12", g.name, "DirectX 12", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
 #ifdef HAVE_DX11
             if (g.supportsDX11)
-                entries.push_back({rawIdx(gi, "dx11"), "dx11", g.name, "DirectX 11", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                entries.push_back({rawIdx(gi, "dx11"), "dx11", g.name, "DirectX 11", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
 #ifdef HAVE_METAL
             if (g.supportsMetal)
-                entries.push_back({rawIdx(gi, "metal"), "metal", g.name, "Metal", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                entries.push_back({rawIdx(gi, "metal"), "metal", g.name, "Metal", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
 #ifdef HAVE_OPENGL
             if (g.supportsOpenGL)
-                entries.push_back({rawIdx(gi, "opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                entries.push_back({rawIdx(gi, "opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
         }
 
@@ -1619,6 +1818,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             allCfg.adapterLuidHigh = runtimeNamedDevice ? 0 : e.luidHigh;
             allCfg.adapterLuidLow  = runtimeNamedDevice ? 0 : e.luidLow;
             allCfg.vramMB          = e.gpuIdx == -2 ? 0 : e.vramMB;
+            allCfg.adapterNodeIndex = e.nodeIndex;
+            allCfg.adapterNodeCount = e.nodeCount;
             std::cout << "\n>>> [" << (i + 1) << "/" << entries.size()
                       << "] " << e.apiLabel << " / " << e.gpuName << " <<<\n";
             try {
@@ -1626,6 +1827,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                 // Same host-memory fallback as the single-run path: only
                 // Vulkan/OpenGL implement it; report other passes honestly.
                 gpu_bench::BenchmarkConfig entryCfg = allCfg;
+                DisableRenderDocForSecondaryDx12Node(entryCfg, e.backendId);
                 if (entryCfg.hostMemory &&
                     e.backendId != "vulkan" && e.backendId != "opengl") {
                     std::cerr << "[warn] --host-memory (system memory) is not implemented for "
@@ -1872,6 +2074,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                     std::int64_t luidHigh = 0;
                     std::int64_t luidLow  = 0;
                     std::uint32_t vramMB  = 0;
+                    std::uint32_t nodeIndex = 0;
+                    std::uint32_t nodeCount = 1;
                 };
 
                 std::int32_t selectedGpuForAll = -1;
@@ -1907,27 +2111,27 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                     };
 #ifdef HAVE_METAL
                     if (g.supportsMetal)
-                        entries.push_back({faRawIdx("metal"), "metal", g.name, "Metal", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                        entries.push_back({faRawIdx("metal"), "metal", g.name, "Metal", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
 #ifdef HAVE_VULKAN
                     if (g.supportsVulkan)
-                        entries.push_back({faRawIdx("vulkan"), "vulkan", g.name, "Vulkan", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                        entries.push_back({faRawIdx("vulkan"), "vulkan", g.name, "Vulkan", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
 #ifdef HAVE_DX12
                     if (g.supportsDX12)
-                        entries.push_back({faRawIdx("dx12"), "dx12", g.name, "DirectX 12", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                        entries.push_back({faRawIdx("dx12"), "dx12", g.name, "DirectX 12", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
 #ifdef HAVE_DX11
                     if (g.supportsDX11)
-                        entries.push_back({faRawIdx("dx11"), "dx11", g.name, "DirectX 11", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                        entries.push_back({faRawIdx("dx11"), "dx11", g.name, "DirectX 11", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
 #ifdef HAVE_OPENGL
                     if (g.supportsOpenGL) {
 #ifdef _WIN32
                         if (gi == 0)
-                            entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                            entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #else
-                        entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                        entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
                     }
 #endif
@@ -1975,30 +2179,34 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                     faCfg.adapterLuidHigh = e.luidHigh;
                     faCfg.adapterLuidLow  = e.luidLow;
                     faCfg.vramMB          = e.vramMB;
+                    faCfg.adapterNodeIndex = e.nodeIndex;
+                    faCfg.adapterNodeCount = e.nodeCount;
                     std::cout << "\n>>> [" << (i + 1) << "/" << entries.size()
                               << "] " << e.apiLabel << " / " << e.gpuName
                               << " (15s + RenderDoc @ 5s) <<<\n";
                     try {
                         std::unique_ptr<gpu_bench::AppBase> app;
+                        gpu_bench::BenchmarkConfig entryCfg = faCfg;
+                        DisableRenderDocForSecondaryDx12Node(entryCfg, e.backendId);
 #ifdef HAVE_VULKAN
                         if (e.backendId == "vulkan")
                             app = std::make_unique<gpu_bench::VulkanBackend>(
-                                e.gpuIdx, shaderDir, faCfg);
+                                e.gpuIdx, shaderDir, entryCfg);
 #endif
 #ifdef HAVE_DX12
                         if (e.backendId == "dx12")
                             app = std::make_unique<gpu_bench::DX12Backend>(
-                                e.gpuIdx, shaderDir, faCfg);
+                                e.gpuIdx, shaderDir, entryCfg);
 #endif
 #ifdef HAVE_DX11
                         if (e.backendId == "dx11")
                             app = std::make_unique<gpu_bench::DX11Backend>(
-                                e.gpuIdx, shaderDir, faCfg);
+                                e.gpuIdx, shaderDir, entryCfg);
 #endif
 #ifdef HAVE_METAL
                         if (e.backendId == "metal")
                             app = std::make_unique<gpu_bench::MetalBackend>(
-                                e.gpuIdx, shaderDir, faCfg);
+                                e.gpuIdx, shaderDir, entryCfg);
 #endif
 #ifdef HAVE_OPENGL
                         if (e.backendId == "opengl") {
@@ -2007,7 +2215,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                                          "- using system default.\n";
 #endif
                             app = std::make_unique<gpu_bench::OpenGLBackend>(
-                                e.gpuIdx, shaderDir, faCfg);
+                                e.gpuIdx, shaderDir, entryCfg);
                         }
 #endif
                         if (!app) {
@@ -2170,6 +2378,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                     std::int64_t luidHigh = 0;
                     std::int64_t luidLow  = 0;
                     std::uint32_t vramMB  = 0;
+                    std::uint32_t nodeIndex = 0;
+                    std::uint32_t nodeCount = 1;
                 };
 
                 PrintGpuTable(gpus);
@@ -2261,27 +2471,27 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                     };
 #ifdef HAVE_METAL
                     if (g.supportsMetal)
-                        entries.push_back({faRawIdx("metal"), "metal", g.name, "Metal", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                        entries.push_back({faRawIdx("metal"), "metal", g.name, "Metal", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
 #ifdef HAVE_VULKAN
                     if (g.supportsVulkan)
-                        entries.push_back({faRawIdx("vulkan"), "vulkan", g.name, "Vulkan", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                        entries.push_back({faRawIdx("vulkan"), "vulkan", g.name, "Vulkan", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
 #ifdef HAVE_DX12
                     if (g.supportsDX12)
-                        entries.push_back({faRawIdx("dx12"), "dx12", g.name, "DirectX 12", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                        entries.push_back({faRawIdx("dx12"), "dx12", g.name, "DirectX 12", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
 #ifdef HAVE_DX11
                     if (g.supportsDX11)
-                        entries.push_back({faRawIdx("dx11"), "dx11", g.name, "DirectX 11", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                        entries.push_back({faRawIdx("dx11"), "dx11", g.name, "DirectX 11", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
 #ifdef HAVE_OPENGL
                     if (g.supportsOpenGL) {
 #ifdef _WIN32
                         if (gchoice == 0)
-                            entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                            entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #else
-                        entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB)});
+                        entries.push_back({faRawIdx("opengl"), "opengl", g.name, "OpenGL 4.3", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
                     }
 #endif
@@ -2318,6 +2528,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                     testCfg.adapterLuidHigh = e.luidHigh;
                     testCfg.adapterLuidLow  = e.luidLow;
                     testCfg.vramMB          = e.vramMB;
+                    testCfg.adapterNodeIndex = e.nodeIndex;
+                    testCfg.adapterNodeCount = e.nodeCount;
                     std::cout << "\n>>> [" << (i + 1) << "/" << entries.size()
                               << "] " << e.apiLabel << " / " << e.gpuName
                               << " (" << testLabel << ", 15s";
@@ -2326,25 +2538,27 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                     std::cout << ") <<<\n";
                     try {
                         std::unique_ptr<gpu_bench::AppBase> app;
+                        gpu_bench::BenchmarkConfig entryCfg = testCfg;
+                        DisableRenderDocForSecondaryDx12Node(entryCfg, e.backendId);
 #ifdef HAVE_VULKAN
                         if (e.backendId == "vulkan")
                             app = std::make_unique<gpu_bench::VulkanBackend>(
-                                e.gpuIdx, shaderDir, testCfg);
+                                e.gpuIdx, shaderDir, entryCfg);
 #endif
 #ifdef HAVE_DX12
                         if (e.backendId == "dx12")
                             app = std::make_unique<gpu_bench::DX12Backend>(
-                                e.gpuIdx, shaderDir, testCfg);
+                                e.gpuIdx, shaderDir, entryCfg);
 #endif
 #ifdef HAVE_DX11
                         if (e.backendId == "dx11")
                             app = std::make_unique<gpu_bench::DX11Backend>(
-                                e.gpuIdx, shaderDir, testCfg);
+                                e.gpuIdx, shaderDir, entryCfg);
 #endif
 #ifdef HAVE_METAL
                         if (e.backendId == "metal")
                             app = std::make_unique<gpu_bench::MetalBackend>(
-                                e.gpuIdx, shaderDir, testCfg);
+                                e.gpuIdx, shaderDir, entryCfg);
 #endif
 #ifdef HAVE_OPENGL
                         if (e.backendId == "opengl") {
@@ -2353,7 +2567,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                                          "- using system default.\n";
 #endif
                             app = std::make_unique<gpu_bench::OpenGLBackend>(
-                                e.gpuIdx, shaderDir, testCfg);
+                                e.gpuIdx, shaderDir, entryCfg);
                         }
 #endif
                         if (!app) {
@@ -2707,6 +2921,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             benchCfg.adapterLuidHigh = 0;
             benchCfg.adapterLuidLow = 0;
             benchCfg.vramMB = 0;
+            benchCfg.adapterNodeIndex = 0;
+            benchCfg.adapterNodeCount = 1;
         } else {
             std::int32_t resolvedIdx = gpuIndex;
             if (resolvedIdx < 0 && !gpus.empty())
@@ -2716,8 +2932,13 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                 benchCfg.adapterLuidHigh = gpus[resolvedIdx].luidHigh;
                 benchCfg.adapterLuidLow  = gpus[resolvedIdx].luidLow;
                 benchCfg.vramMB          = static_cast<std::uint32_t>(gpus[resolvedIdx].vramMB);
+                benchCfg.adapterNodeIndex = gpus[resolvedIdx].dx12NodeIndex;
+                benchCfg.adapterNodeCount = gpus[resolvedIdx].dx12NodeCount;
             }
         }
+
+        DisableRenderDocForSecondaryDx12Node(
+            benchCfg, selectedBackend, &renderDocLayerRequested);
 
         // -- Create and run the backend --
         try {

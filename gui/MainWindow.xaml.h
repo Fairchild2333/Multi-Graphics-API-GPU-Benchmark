@@ -42,6 +42,9 @@ namespace winrt::gpu_bench_gui::implementation
         void OnWorkloadChanged(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
+        void OnMultiGpuChanged(
+            winrt::Windows::Foundation::IInspectable const& sender,
+            winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
         void OnShowLegacyChecked(
             winrt::Windows::Foundation::IInspectable const& sender,
             winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
@@ -158,6 +161,7 @@ namespace winrt::gpu_bench_gui::implementation
             SwapchainOutOfDate,
             ResourceAllocation,
             BurnStepsClamped, // informational: run succeeded with reduced steps
+            Dx12SecondaryNodeRenderDoc, // informational: capture auto-disabled on linked node >= 1
             Unknown,
         };
 
@@ -201,6 +205,8 @@ namespace winrt::gpu_bench_gui::implementation
         std::string durationUnitTag();
         double durationAmountValue();
         void syncCaptureControls();
+        void syncMultiGpuControls();
+        void applyMultiGpuRenderDocOverride(bool active);
         void appendCaptureArgs(std::vector<std::string>& dest);
         void refreshAboutVersion();
         void refreshHistory();         // (re)load from disk + rebuild filters + render
@@ -283,6 +289,9 @@ namespace winrt::gpu_bench_gui::implementation
         bool m_headlessRenderDocOverrideActive{ false };
         bool m_renderDocBeforeHeadless{ true };
         bool m_captureBeforeHeadless{ true };
+        bool m_multiGpuRenderDocOverrideActive{ false };
+        bool m_renderDocBeforeMultiGpu{ true };
+        bool m_captureBeforeMultiGpu{ true };
     };
 }
 

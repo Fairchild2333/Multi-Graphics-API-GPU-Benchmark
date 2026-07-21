@@ -60,6 +60,20 @@ void DX11Backend::InitBackend() {
     }
     std::cout << "[DX11 Init] Creating device" << (config_.headless ? " (headless)..." : " and swap chain...") << std::endl;
     CreateDeviceAndSwapChain();
+    if (config_.multiGpuMode == MultiGpuMode::Afr) {
+        // D3D11 has no public node-mask/device-group submission API.  On a
+        // CrossFire driver this presents the normal single-device frame stream
+        // and leaves AFR ownership to the UMD.  Keep enough queued frames for
+        // the driver to pipeline alternate physical GPUs.
+        ComPtr<IDXGIDevice1> dxgiDevice;
+        if (SUCCEEDED(device_.As(&dxgiDevice)))
+            dxgiDevice->SetMaximumFrameLatency(
+                (std::max)(2u, config_.framesInFlight));
+        std::cout
+            << "[DX11 AFR] Driver-managed implicit CrossFire requested. "
+               "D3D11 cannot select or verify the physical GPU for each frame; "
+               "confirm both GPUs with driver telemetry.\n";
+    }
     if (featureLevel_ < D3D_FEATURE_LEVEL_11_0 &&
         config_.workload == Workload::NBody &&
         config_.particleCount > 4096u) {

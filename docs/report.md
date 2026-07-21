@@ -35,6 +35,7 @@
 15. [DX11 Timestamp Query Failures](#15-dx11-timestamp-query-failures--three-distinct-causes)
 16. [OpenGL Compute Shader Performance on AMD GPUs](#16-opengl-compute-shader-performance-on-amd-gpus)
 17. [Dual Identical GPU Behaviour (Mac Pro 2013)](#17-dual-identical-gpu-behaviour-mac-pro-2013--2-firepro-d700)
+    - [AFR, SFR, CrossFire and SLI](#afr-sfr-crossfire-and-sli--brief-definitions)
 
 ### Part 6 — Conclusion
 
@@ -2119,35 +2120,91 @@ Additionally, API performance rankings are architecture-dependent: DX11 leads on
 
 ## 17. Dual Identical GPU Behaviour (Mac Pro 2013 — 2× FirePro D700)
 
-The Mac Pro (Late 2013) contains two identical AMD FirePro D700 GPUs (GCN 1.0, Tahiti XT). Testing under Windows 11 via Boot Camp revealed notable differences in how each graphics API handles multi-GPU selection for identical cards:
+The Mac Pro (Late 2013) contains two identical AMD FirePro D700 GPUs (GCN 1.0, Tahiti XT). Two concepts must be kept separate on this machine: selecting one adapter independently, and making both adapters collaborate on one benchmark. Earlier report revisions conflated them.
 
-### Per-API GPU Addressability
+### AFR, SFR, CrossFire and SLI — brief definitions
 
-| API | Sees both GPUs? | Can run on GPU #2 independently? |
-|-----|----------------|----------------------------------|
-| Vulkan | Yes (2 `VkPhysicalDevice`) | **Yes** — Task Manager confirms GPU #2 load |
-| DirectX 12 | Yes (2 DXGI adapters, distinct LUIDs) | **No** — driver routes work to GPU #1 |
-| DirectX 11 | Yes (2 DXGI adapters, distinct LUIDs) | **No** — driver routes work to GPU #1 |
-| OpenGL | No (single context, OS-assigned GPU) | No |
+Before the D700 measurements, four terms are easy to mix up. **AFR** and **SFR** are *how* two GPUs share work inside one application. **CrossFire** (AMD) and **SLI** (NVIDIA) are *vendor multi-GPU brands / driver frameworks* that historically packaged those modes for games—usually as an opaque driver profile rather than an app-controlled API contract.
 
-### Key Findings
+| Term | What it means | How work is split | Typical cost / risk |
+|------|---------------|-------------------|---------------------|
+| **AFR** (Alternate Frame Rendering) | GPUs take turns rendering **whole frames** (GPU0 → frame *N*, GPU1 → frame *N+1*, …) | Frame-level parallelism; both GPUs can overlap if the queue is deep enough | Extra frames-in-flight; higher input latency; bad for strongly stateful frame-to-frame dependencies unless state is copied |
+| **SFR** (Split Frame Rendering) | Both GPUs render **parts of the same frame** (commonly left/right halves, or other screen partitions), then one present path composites | Intra-frame data parallelism; one logical image | Cross-GPU copy/composite every frame; can lose to AFR when the transfer cost dominates light shaders |
+| **CrossFire** | AMD’s multi-GPU product/driver branding (later “mGPU” naming varied by generation) | Historically often AFR via driver profiles; some eras also SFR / hybrid modes | App may get no control and no honest utilization signal; profile-dependent and largely retired for modern DX12/Vulkan games |
+| **SLI** | NVIDIA’s multi-GPU product/driver branding | Same idea family as CrossFire—mostly driver-managed AFR for DX11-era titles | Same opacity problem; modern NVIDIA dual-GPU gaming support is effectively discontinued |
 
-- **DXGI enumerates both D700s with different LUIDs**, and both report DX12 Feature Level 11_1 support. Creating a D3D12/D3D11 device on either adapter succeeds. However, **the AMD driver routes all DX11/DX12 compute and rendering work to GPU #1** regardless of which adapter was selected. Windows Task Manager shows zero utilisation on GPU #2 during DX11/DX12 benchmarks targeting the second adapter.
+Key distinctions for this benchmark:
 
-- **Only Vulkan can genuinely dispatch work to GPU #2.** When the benchmark selects `VkPhysicalDevice[1]`, Task Manager confirms GPU #2 shows compute and 3D load while GPU #1 remains idle (aside from display output).
+1. **Mode vs brand.** AFR/SFR describe the scheduling. CrossFire/SLI name the *vendor stack* that might implement a mode for you. Saying “CrossFire is on” does not prove the app is doing explicit AFR or SFR—only that the driver claims multi-GPU participation.
+2. **Explicit engine path vs implicit driver path.** Mangekyo’s validated collaboration is **application-controlled DX12 linked-adapter** work (`NodeMask`, per-node queues/resources, `--multi-gpu afr|sfr`). That is *not* the same as hoping DX11 CrossFire/SLI profiles accelerate a custom engine. On this D700 FireGL stack, AMD AGS still saw two physical cards but returned `crossfireAPI=0` / one active GPU for both explicit and driver AFR requests—so classic CrossFire was unavailable even when two adapters existed.
+3. **Why Plasma can use AFR, while Particle prefers SFR.** Plasma/GPU Burn has no persistent simulation state between frames, so alternating whole frames is meaningful and measured ~2× on DX12 AFR (with ≥4 frames in flight, RenderDoc off). Original Particle’s frame *N+1* depends on frame *N* particle state; AFR would require a full cross-node state copy every frame or would change the test semantics. The product direction for Particle is therefore fixed-total-count SFR/data-parallel split of one frame, not AFR.
+4. **SLI is not “validated” here.** The DX12 linked-node code is vendor-neutral in the sense Microsoft’s linked-GPU samples describe homogeneous CrossFire/SLI topologies, but this report only accepts measured D700 DX12 AFR/SFR results. No NVIDIA SLI system has been validated; the GUI must not claim SLI support.
 
-- **This is an AMD driver limitation, not a DX11/DX12 API limitation.** The DX11/DX12 APIs fully support multi-GPU independent addressing — DXGI enumerates both adapters with distinct LUIDs, and `D3D12CreateDevice` / `D3D11CreateDevice` succeed on both. The API layer does its job correctly. However, the AMD Windows driver internally routes all DX11/DX12 work to the primary GPU regardless of which adapter was selected. AMD's own Vulkan driver on the same hardware correctly dispatches to GPU #2, proving the hardware is capable. The FirePro D700's Windows driver has been EOL since March 2019, so this behaviour is unlikely to ever be fixed. This is also consistent with 3DMark behaviour: 3DMark Time Spy cannot select between identical GPUs on this system either.
+In short: **AFR = alternate whole frames; SFR = split one frame; CrossFire/SLI = vendor multi-GPU brands that may hide either mode behind the driver.** This project only scores modes it controls and measures.
 
-- **Performance is near-identical between the two cards** when properly addressed via Vulkan: GPU #1 averages ~554 FPS while GPU #2 averages ~448 FPS. The ~20% gap is likely due to GPU #1 handling display output overhead being offset by its position as the "primary" adapter, or minor thermal/power delivery asymmetry in the Mac Pro chassis.
+### Addressability and collaboration
 
-### Technical Details
+| API | Independent adapter selection | Explicit two-GPU collaboration | D700 result |
+|-----|-------------------------------|--------------------------------|-------------|
+| Vulkan | Two `VkPhysicalDevice` objects; GPU #2 can be selected directly | Physical-device-group masks | Functional, but the only graphics-capable family exposes one `VkQueue`, so tested AFR submissions serialize and do not scale |
+| DirectX 12 | Driver-dependent: `25.20.14020.10001` exposed two distinct DXGI LUIDs but routed both to the primary GPU; `27.20.14540.15002` exposes one linked adapter | **Linked-adapter device with two explicit nodes and `NodeMask` control** | **Working AFR (~2×) and workload-dependent SFR (1.47× at 128 steps)** |
+| DirectX 11 | The old driver accepted two DXGI LUIDs but routed both to the primary GPU; the current topology exposes one logical adapter and AGS still sees both physical D700s | Standard D3D11 has no node control; AGS can request explicit or driver-managed CrossFire when the driver exposes it | Windowed implicit AFR did not scale; AGS returned `crossfireAPI=0` and one active GPU for both AFR modes |
+| OpenGL | The AMD WGL extension enumerates both D700 GPU IDs | `WGL_AMD_gpu_association` would permit per-GPU off-screen contexts and cross-context framebuffer blit | Driver exposes the interface but refuses to create an associated context for GPU #2; explicit SFR is unavailable |
 
-The benchmark uses **DXGI adapter LUID** (Locally Unique Identifier) to match GPUs across different DXGI factory instances. This was necessary because:
-1. DXGI `EnumAdapters1` may return different adapter counts or ordering across factory instances (e.g., the DX12 backend's factory only sees one D700 adapter while the detection-phase factory sees both).
-2. The previous approach of deduplicating by `VendorId + DeviceId + SubSysId` incorrectly merged both D700s into a single entry.
-3. Passing a gpus-array index to backends failed because the array could be reordered by Vulkan device insertion, causing index mismatches (e.g., index 1 pointing to Basic Render Driver instead of GPU #2).
+DXGI LUID matching remains necessary because factory instances can reorder adapters, and `VendorId + DeviceId + SubSysId` is not a unique identity. The archived March run on `25.20.14020.10001` recorded two distinct D700 LUIDs and successfully created DX11/DX12 devices through both handles. Task Manager nevertheless showed both D3D runs executing on the primary physical GPU, so those are valid API runs but not independent second-card measurements. After reinstalling `27.20.14540.15002`, the current probe sees one D700 DXGI LUID; `ID3D12Device::GetNodeCount()` exposes its two physical nodes. D3D11 cannot address those nodes independently, but D3D12 can: the benchmark now expands a linked adapter into selectable node rows and binds all ordinary single-GPU objects and resources to the selected node mask.
 
-The LUID-based selection resolves all three issues — the benchmark now correctly creates a device on the intended DXGI adapter, even though the driver ultimately routes DX11/DX12 work to the primary GPU.
+A July 21 run-all check on the **current** driver exposed a probe-merging and routing bug: Vulkan correctly returned two `VkPhysicalDevice` objects, but the synthetic second row copied the first row's DXGI identity while the ordinary DX12 backend left `NodeMask=0`. Consequently both labelled DX12 runs executed on linked-adapter node 0; the two 65K Particle results (82.610 and 82.723 GB/s) were not independent card measurements. The corrected probe derives two rows from `GetNodeCount()` and correlates the two Vulkan devices with those rows. The verified capability table is now D700 #1 = Vulkan/DX12/DX11/OpenGL and D700 #2 = Vulkan/DX12. For ordinary DX12, the command queue, `ResizeBuffers1` placement, command lists, root signatures, PSOs, descriptor/query heaps, timestamps, and particle/fluid resources all use the row's explicit mask (`0x1` or `0x2`). A temporary 4M Particle validation produced 122.8 FPS / 78.66 GB/s on node 0 and 120.1 FPS / 80.14 GB/s on node 1. Each result persists `dx12Node`, `dx12NodeMask`, and `dx12LinkedNodes` in `workloadConfig`. This correction does not retroactively assert that the old driver's two LUIDs were fabricated; it records that the old physical routing and the new linked-node topology are different cases.
+
+The Windows GUI now exposes `Multi-GPU: Off / AFR / SFR` with an adjacent information icon. It is enabled only for a Custom run whose sole API is DX12 and whose workload is Plasma; selecting AFR or SFR forwards the matching `--multi-gpu` argument and disables RenderDoc, while changing to an unsupported combination resets the mode to Off. The code is not AMD-specific: a NVIDIA SLI configuration could use the same path only when its driver presents the pair as one DX12 linked adapter with `GetNodeCount() >= 2` and the required cross-node sharing support. Microsoft's official [D3D12 linked-GPU sample](https://learn.microsoft.com/en-us/samples/microsoft/directx-graphics-samples/d3d12-linked-gpu-sample-win32/) explicitly describes the linked homogeneous case as CrossFire/SLI, but this benchmark has not yet validated an NVIDIA system and therefore does not claim SLI support.
+
+History now renders the saved execution contract explicitly in a `Mode` column: `Single`, `Headless`, `AFR ×2`, or `SFR ×2`. Legacy DX11/Vulkan AFR experiments are labelled unverified/experimental from their persisted control tags. The `headless` boolean was already serialized, but the generic comparison grouping previously omitted it and could place windowed and headless `stream_v1` rows together. Comparison groups now include execution mode, and pairwise score deltas require matching headless state.
+
+The final DX11 probe used the official AMD AGS 6.3.1 library rather than inferring CrossFire activity from Task Manager. `agsInitialize` enumerated both FirePro D700s. `agsDriverExtensionsDX11_CreateDevice` also succeeded in both `AGS_CROSSFIRE_MODE_EXPLICIT_AFR` and `AGS_CROSSFIRE_MODE_DRIVER_AFR`, but both returned `extensionsSupported.crossfireAPI=0` and `crossfireGPUCount=1`. Thus this FireGL driver exposes two physical adapters but does not activate or expose DX11 CrossFire for the application; there is no useful AGS integration to retain in the benchmark. AMD defines explicit AFR as the no-profile path and `crossfireGPUCount` as the number of GPUs active for the app in the [official AGS DX11 API](https://gpuopen-librariesandsdks.github.io/ags/group__dx11.html).
+
+The OpenGL SFR probe used the only relevant explicit Windows mechanism, `WGL_AMD_gpu_association`. FireGL 20.45.40.15 reports two IDs and maps the visible context to ID 1, but ID 2 returns no renderer string. Both `wglCreateAssociatedContextAttribsAMD` for a 4.3 core context and legacy `wglCreateAssociatedContextAMD` return `NULL`, including a retry with the visible context unbound; the ICD also leaves `GetLastError` at zero. Consequently the second D700 cannot receive OpenGL commands. The planned left/right rendering plus `wglBlitContextFramebufferAMD` composition cannot begin, so the prototype and CLI enablement were reverted rather than falling back to single-GPU rendering. The intended mechanism and its requirement for a valid GPU-associated context are defined by the [Khronos WGL_AMD_gpu_association specification](https://registry.khronos.org/OpenGL/extensions/AMD/WGL_AMD_gpu_association.txt).
+
+### Plasma AFR acceptance results (2026-07-21)
+
+The first correct AFR vertical slice is limited to the windowed Plasma/GPU Burn workload (`--multi-gpu afr`). It alternates complete frames between DX12 node masks `0x1` and `0x2` and uses a separate queue and frame resources for each node.
+
+| Backend / configuration | 16 shader steps | 128 shader steps | Interpretation |
+|-------------------------|----------------:|-----------------:|----------------|
+| DX12 single GPU | ~113 FPS | ~19 FPS | Baseline |
+| DX12 AFR, 2 frames in flight | ~109 FPS | — | Too little queue depth; each node has only one reusable slot |
+| DX12 AFR, 4 frames in flight | **222–230 FPS** | **39–40 FPS** | **1.96–2.05×; both nodes overlap** |
+| Vulkan single / device-group AFR | ~102 / ~104 FPS | ~17 / ~17 FPS | No material gain; shared graphics `VkQueue` serializes work |
+| DX11 single / implicit-driver AFR request | ~120 / ~120 FPS | ~20 / ~20 FPS | No gain; driver-managed physical split unverified |
+
+The program therefore forces at least four frames in flight for AFR. Utilisation analysis is reported as GPU-equivalent work across the two devices: the validated DX12 run reached approximately 200% aggregate (about 100% per GPU), whereas Vulkan and DX11 remained near 100% aggregate.
+
+Additional Vulkan isolation tests moved `vkQueuePresentKHR` from queue family 0 to the independently present-capable transfer family 2. This removed presentation operations from the sole graphics queue without changing the result: 16-step AFR remained about 103 FPS, while the 128-step single/AFR pair remained 17/17 FPS with approximately 100% aggregate GPU-equivalent utilisation. A paired-acquire experiment intended to enqueue both device-mask submissions before either present instead blocked indefinitely in AMD 20.45.40.15's second `vkAcquireNextImage2KHR` call on the LOCAL-only swapchain and was reverted.
+
+Both D700 multi-instance device-local heaps expose peer access as `VK_PEER_MEMORY_FEATURE_COPY_DST_BIT` only in either direction—no peer copy-source or generic reads. A secondary GPU can therefore write a destination allocated for the primary GPU, but the primary cannot directly pull from secondary-local output. The remaining single-`VkDevice` experiment used the compute-only family's two queues and an `R8G8B8A8_UNORM` storage-capable swapchain: alternate device masks dispatched both Plasma layers directly into each GPU's LOCAL swapchain image. Runtime capability checks, compilation and a RenderDoc-disabled three-second run all succeeded, including clean workload completion. The result was nevertheless only about 119 FPS / 8.18 ms at 16 steps and approximately 98% aggregate GPU-equivalent utilisation (49% average per GPU), proving that the driver still did not overlap alternate frames. Because the compute shader also changes the pipeline contract relative to fragment Plasma, this small throughput difference is not evidence of AFR scaling. The implementation, shader variant and separate score identity were reverted in full. Only a future, separately scoped two-`VkDevice` external-memory/external-semaphore design remains unexplored. The peer-memory flag meanings are defined by [Khronos](https://registry.khronos.org/VulkanSC/specs/1.0-extensions/man/html/VkPeerMemoryFeatureFlagBits.html).
+
+### RenderDoc constraint
+
+RenderDoc is **not disabled globally**. Single-GPU runs still use the normal 15-second run and fifth-second capture. It is automatically disabled for multi-GPU AFR and SFR because merely injecting RenderDoc on this old D700 stack produced false ~2000 FPS output, missing GPU timestamps and a long queue drain at process exit. SFR has not independently proved capture-safe. Multi-GPU scoring must use native timing plus GPUView/PIX-style diagnostics; a one-node reproduction may still be captured separately for shader debugging.
+
+### Particle AFR and SFR direction
+
+DX12 can alternate particle frames at the API level, but Original Particle is stateful: frame *N+1* consumes the positions and velocities produced by frame *N*. Copying that full state across nodes every frame would add synchronization and transfer cost, while keeping one independent state per node changes the simulation and is not a valid acceleration. DX11 offers only implicit driver AFR and cannot solve this dependency explicitly. Consequently, particle AFR is not a product path.
+
+The meaningful two-GPU particle design is SFR/data parallelism: keep one fixed total particle count, split the particle range between both GPUs, simulate and draw both partitions for the **same** frame, then composite once. That measures one accelerated test rather than two tests run side by side. Plasma is the lower-risk SFR prototype because it has no persistent simulation state: render the left and right halves into node-local targets, copy one half to the presenting node, then compose and present. Complexity is moderate rather than trivial—cross-node resource visibility, two fences, copy/composition and failure fallback must all be handled.
+
+The version 0.2.2 runtime probe reports **`D3D12_CROSS_NODE_SHARING_TIER_1`** on the D700 linked adapter. This is sufficient for explicit cross-node `CopyBufferRegion`, `CopyTextureRegion` and `CopyResource` operations when the shared resource is the copy destination, so a Plasma half-frame copy/composite prototype is technically viable. It does not promise free peer bandwidth or cross-node render-target use; the copy cost must be measured before SFR is accepted. See Microsoft's [`D3D12_CROSS_NODE_SHARING_TIER` contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_cross_node_sharing_tier).
+
+### DX12 SFR implementation and D700 result
+
+The prototype is now implemented as `--multi-gpu sfr` / `--sfr`. Both nodes use the same frame time and shader contract. Node 0 shades the left half directly into the swap-chain buffer; node 1 shades the right half into a node-local full-size render target so `SV_Position` and UV values remain identical to the single-GPU image. Node 1 then copies only the 640x720 right region into a 1,843,200-byte node-0-owned shared buffer. A cross-node fence lets node 0 consume that buffer, copy it into the right side of the back buffer, and perform the only `Present`. This is one cooperative frame, not two benchmark instances.
+
+The old D700 driver rejects a cross-adapter committed resource with `E_INVALIDARG`; using the explicit shared-heap plus placed-resource pattern from Microsoft's heterogeneous multi-adapter sample succeeds. Two and four frames in flight produce the same result, ruling out a shallow frame ring. Short isolated comparisons on driver `27.20.14540.15002` were:
+
+| Plasma fixed steps | Single DX12 | DX12 SFR | Scaling | Interpretation |
+|---:|---:|---:|---:|---|
+| 16 | 112 FPS / 8.17 ms | 69 FPS / 14.33 ms | 0.62x | Tier-1 transfer/composition dominates |
+| 128 | 19 FPS / 49.75 ms | 28 FPS / 35.11 ms | 1.47x | half-frame shading repays the fixed copy cost |
+
+SFR therefore works and accelerates sufficiently heavy Plasma frames, but it is not a universal optimisation and remains slower than the measured 128-step AFR result of about 39 FPS. Results are isolated under `..._sfr2`; RenderDoc remains disabled for SFR until linked-node capture is independently trustworthy. Microsoft's Tier-1 contract permits only cross-node copies with the shared resource as destination, which is why the secondary GPU cannot render directly into the presenting resource. See the official [cross-node sharing tiers](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_cross_node_sharing_tier) and [multi-adapter copy example](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-copyresource).
 
 ---
 
