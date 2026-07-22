@@ -855,6 +855,29 @@ namespace
         return value;
     }
 
+    // Compile-time package architecture label for About (separate ARM64 / x64 binaries).
+    wchar_t const* guiPackageArchLabel()
+    {
+#if defined(_M_ARM64) || defined(_M_ARM64EC)
+        return L"arm64";
+#elif defined(_M_X64) || defined(_M_AMD64)
+        return L"x64";
+#elif defined(_M_IX86)
+        return L"x86";
+#else
+        return L"unknown";
+#endif
+    }
+
+    bool guiPackageIsArm64()
+    {
+#if defined(_M_ARM64) || defined(_M_ARM64EC)
+        return true;
+#else
+        return false;
+#endif
+    }
+
     std::string trimScoreLine(std::string line)
     {
         if (!line.empty() && line.back() == '\r') line.pop_back();
@@ -2187,6 +2210,9 @@ MainWindow::MainWindow()
     refreshAboutVersion();
 
     m_uiReady = true;
+    applyPlatformFeatureVisibility();
+    syncCaptureControls();
+    syncMultiGpuControls();
     applyWorkloadVisibility();
     syncCaptureControls();
     // App activates the window after this constructor returns. Touching ComboBox /
@@ -2924,22 +2950,9 @@ void MainWindow::applyLanguage()
     MultiGpuOff().Content(locContent("Off", "关闭", "オフ"));
     MultiGpuAfr().Content(box_value(hstring(L"AFR")));
     MultiGpuSfr().Content(box_value(hstring(L"SFR")));
-    auto multiGpuTip = locContent(
-        "Experimental two-GPU cooperation. Available only for a Custom run with exactly "
-        "DX12 + Plasma selected. AFR alternates complete frames across two linked-adapter "
-        "nodes; SFR renders half a frame on each node and composes once. RenderDoc is "
-        "disabled automatically. This requires a DX12 linked-adapter device and is tested "
-        "on dual AMD FirePro D700s; it is not legacy CrossFire/SLI and NVIDIA SLI is unverified.",
-        "实验性双 GPU 协作。仅在“自定义运行”且只选择 DX12 + Plasma 时可用。AFR 让两个"
-        "链接适配器节点交替渲染完整帧；SFR 让两节点各渲染半帧，再合成并只呈现一次。"
-        "启用后会自动关闭 RenderDoc。它要求驱动暴露 DX12 linked-adapter，当前仅在双 AMD "
-        "FirePro D700 上验证；这不是传统 CrossFire / SLI，NVIDIA SLI 尚未验证。",
-        "実験的な 2 GPU 協調です。カスタム実行で DX12 + Plasma のみを選択した場合に利用できます。"
-        "AFR は linked-adapter の 2 ノードでフレームを交互に描画し、SFR は各ノードで半分ずつ描画して 1 回合成します。"
-        "RenderDoc は自動的に無効になります。DX12 linked-adapter が必要で、現在はデュアル AMD FirePro D700 のみ検証済みです。"
-        "従来の CrossFire / SLI ではなく、NVIDIA SLI は未検証です。");
-    ToolTipService::SetToolTip(MultiGpuBox(), multiGpuTip);
-    ToolTipService::SetToolTip(MultiGpuInfo(), multiGpuTip);
+    // Tooltip text is refreshed by syncMultiGpuControls() so a disabled control
+    // can explain "dual GPU not detected" instead of only the DX12/Plasma rules.
+    if (m_uiReady) syncMultiGpuControls();
     RenderDocBox().Content(locContent("RenderDoc", "RenderDoc", "RenderDoc"));
     CaptureBox().Content(locContent("Capture at", "捕获于", "キャプチャ位置"));
     auto renderDocTip = locContent(
@@ -4219,6 +4232,8 @@ void MainWindow::populateGpus()
     m_gpuIndices.clear();
     m_gpuNames.clear();
     m_gpuApiSupport.clear();
+    m_gpuDx12NodeCounts.clear();
+    m_gpuSoftware.clear();
     SupportedApisPanel().Children().Clear();
     UnsupportedApisPanel().Children().Clear();
     updateApiPickerSummary();
@@ -4241,9 +4256,15 @@ void MainWindow::populateGpus()
     }
 
     // One row of `--list-gpus`: GPU \t idx \t name \t vk \t dx12 \t dx11
-    // \t opengl \t dx11FeatureLevel \t dx11Compute. The last two fields are
-    // optional so a newer GUI can still drive an older engine build.
-    struct GpuRow { int idx; std::string name; std::array<bool, 5> api; };
+    // \t opengl \t dx11FeatureLevel \t dx11Compute [\t dx12NodeCount \t isSoftware].
+    // Trailing fields are optional so a newer GUI can still drive an older engine.
+    struct GpuRow {
+        int idx = 0;
+        std::string name;
+        std::array<bool, 5> api{};
+        std::uint32_t dx12NodeCount = 1;
+        bool software = false;
+    };
 
     auto strong = get_strong();
     auto disp = m_dispatcher;
@@ -4272,6 +4293,13 @@ void MainWindow::populateGpus()
             for (int k = 0; k < 4; ++k)
                 r.api[k] = (f.size() > (size_t)(3 + k)) ? (f[3 + k] == "1") : true;
             r.api[4] = f.size() > 8 ? (f[8] == "1") : r.api[2];
+            if (f.size() > 9)
+            {
+                try { r.dx12NodeCount = static_cast<std::uint32_t>(std::stoul(f[9])); }
+                catch (...) { r.dx12NodeCount = 1; }
+                if (r.dx12NodeCount == 0) r.dx12NodeCount = 1;
+            }
+            r.software = f.size() > 10 ? (f[10] == "1") : isSoftwareGpu(r.name);
             gpus.push_back(std::move(r));
         }
         if (!disp || !disp.TryEnqueue([this, strong, gpus, detection = std::move(detection)]()
@@ -4284,7 +4312,9 @@ void MainWindow::populateGpus()
                     m_gpuIndices.push_back(g.idx);
                     m_gpuNames.push_back(g.name);
                     m_gpuApiSupport.push_back(g.api);
-                    std::string label = isSoftwareGpu(g.name)
+                    m_gpuDx12NodeCounts.push_back(g.dx12NodeCount);
+                    m_gpuSoftware.push_back(g.software);
+                    std::string label = g.software || isSoftwareGpu(g.name)
                         ? std::to_string(g.idx) + ": " +
                           softwareGpuDisplayName(g.name, m_cpuName)
                         : std::to_string(g.idx) + ": " + g.name;
@@ -4295,6 +4325,7 @@ void MainWindow::populateGpus()
                 m_gpuEnumerationComplete = true;
                 rebuildApiPicker(false);
                 updateExtraLabel();
+                syncMultiGpuControls();
                 syncActionButtonsEnabled();
                 if (detection.exitCode != 0)
                 {
@@ -4334,6 +4365,7 @@ void MainWindow::populateGpus()
                   m_gpuEnumerationComplete = true;
                   rebuildApiPicker(false);
                   updateExtraLabel();
+                  syncMultiGpuControls();
                   syncActionButtonsEnabled();
                   setGpuStatus(StatusLight::Error, locText(
                       "GPU detection failed; APIs remain manually selectable.",
@@ -4398,14 +4430,85 @@ void MainWindow::applyMultiGpuRenderDocOverride(bool active)
 void MainWindow::syncMultiGpuControls()
 {
     if (!m_uiReady) return;
+
+    auto setTip = [this](auto tip)
+    {
+        ToolTipService::SetToolTip(MultiGpuBox(), tip);
+        ToolTipService::SetToolTip(MultiGpuInfo(), tip);
+    };
+
+    if (guiPackageIsArm64())
+    {
+        MultiGpuBox().IsEnabled(false);
+        MultiGpuLabel().Opacity(0.55);
+        MultiGpuInfo().Opacity(0.55);
+        setTip(locContent(
+            "Multi-GPU is not available on Windows on ARM packages.",
+            "Windows on ARM 包不提供双 GPU。",
+            "Windows on ARM パッケージではマルチ GPU を利用できません。"));
+        if (MultiGpuBox().SelectedIndex() != 0)
+        {
+            m_suppressCombo = true;
+            MultiGpuBox().SelectedIndex(0);
+            m_suppressCombo = false;
+            applyMultiGpuRenderDocOverride(false);
+        }
+        return;
+    }
+
     const auto apis = selectedApis();
-    const bool eligible = PresetBox().SelectedIndex() == 1 &&
-                          selected(WorkloadBox()) == "gpu_burn" &&
-                          apis.size() == 1 && apis.front() == "dx12" &&
-                          m_gpuEnumerationComplete;
+    const bool customPlasmaDx12 =
+        PresetBox().SelectedIndex() == 1 &&
+        selected(WorkloadBox()) == "gpu_burn" &&
+        apis.size() == 1 && apis.front() == "dx12";
+    const bool dualGpu = m_gpuEnumerationComplete && hasLinkedIdenticalDualGpu();
+    const bool eligible = customPlasmaDx12 && dualGpu;
+
     MultiGpuBox().IsEnabled(eligible);
     MultiGpuLabel().Opacity(eligible ? 1.0 : 0.55);
     MultiGpuInfo().Opacity(eligible ? 1.0 : 0.55);
+
+    if (!m_gpuEnumerationComplete)
+    {
+        setTip(locContent(
+            "Detecting GPUs… Multi-GPU stays unavailable until enumeration finishes.",
+            "正在检测 GPU… 枚举完成前双 GPU 不可用。",
+            "GPU を検出中… 列挙が終わるまでマルチ GPU は利用できません。"));
+    }
+    else if (!dualGpu)
+    {
+        setTip(locContent(
+            "No dual identical GPUs detected. Multi-GPU needs two identical GPUs exposed "
+            "as one DX12 linked-adapter (≥2 nodes). Selecting DX12 alone does not enable it.",
+            "未检测到双 GPU。双 GPU 需要两块相同 GPU，且驱动把它们暴露为同一个 DX12 "
+            "linked-adapter（≥2 个 node）。仅仅切到 DX12 并不会启用。",
+            "デュアル GPU が検出されませんでした。同一の 2 枚 GPU が DX12 linked-adapter"
+            "（ノード ≥2）として見える必要があります。DX12 を選んだだけでは有効になりません。"));
+    }
+    else if (!customPlasmaDx12)
+    {
+        setTip(locContent(
+            "Dual GPUs were detected, but Multi-GPU is only enabled for a Custom run with "
+            "exactly DX12 + Plasma selected.",
+            "已检测到双 GPU，但仍需在“自定义运行”中只选择 DX12 + Plasma 才会启用。",
+            "デュアル GPU は検出済みですが、カスタム実行で DX12 + Plasma のみを選択したときだけ有効です。"));
+    }
+    else
+    {
+        setTip(locContent(
+            "Experimental two-GPU cooperation. AFR alternates complete frames across two "
+            "linked-adapter nodes; SFR renders half a frame on each node and composes once. "
+            "RenderDoc is disabled automatically. Validated on dual AMD FirePro D700s; not "
+            "legacy CrossFire/SLI and NVIDIA SLI is unverified.",
+            "实验性双 GPU 协作。AFR 让两个 linked-adapter 节点交替渲染完整帧；SFR 让两节点各"
+            "渲染半帧，再合成并只呈现一次。启用后会自动关闭 RenderDoc。当前仅在双 AMD FirePro "
+            "D700 上验证；这不是传统 CrossFire / SLI，NVIDIA SLI 尚未验证。",
+            "実験的な 2 GPU 協調です。AFR は linked-adapter の 2 ノードでフレームを交互描画し、"
+            "SFR は各ノードで半分ずつ描画して 1 回合成します。RenderDoc は自動無効化されます。"
+            "現在はデュアル AMD FirePro D700 のみ検証済みで、従来の CrossFire / SLI ではなく、"
+            "NVIDIA SLI は未検証です。"));
+    }
+
     if (!eligible && MultiGpuBox().SelectedIndex() != 0)
     {
         m_suppressCombo = true;
@@ -4601,12 +4704,66 @@ void MainWindow::appendCaptureArgs(std::vector<std::string>& dest)
 void MainWindow::refreshAboutVersion()
 {
     const auto ver = readGuiProductVersion();
+    const auto arch = guiPackageArchLabel();
     if (ver.empty())
     {
-        AboutVersion().Text(locText("Version unknown", "版本未知", "バージョン不明"));
+        AboutVersion().Text(
+            locText("Version unknown", "版本未知", "バージョン不明") +
+            hstring(L" · ") + hstring(arch));
         return;
     }
-    AboutVersion().Text(locText("Version ", "版本 ", "バージョン ") + hstring(ver));
+    AboutVersion().Text(
+        locText("Version ", "版本 ", "バージョン ") + hstring(ver) +
+        hstring(L" · ") + hstring(arch));
+}
+
+void MainWindow::applyPlatformFeatureVisibility()
+{
+    const bool arm64 = guiPackageIsArm64();
+    const auto vis = arm64 ? Visibility::Collapsed : Visibility::Visible;
+    MultiGpuPanel().Visibility(vis);
+    RenderDocPanel().Visibility(vis);
+    CapturePanel().Visibility(vis);
+    GpuOpenCapturesButton().Visibility(vis);
+
+    if (arm64)
+    {
+        m_suppressCombo = true;
+        MultiGpuBox().SelectedIndex(0);
+        m_suppressCombo = false;
+        m_suppressRenderDocUi = true;
+        RenderDocBox().IsChecked(false);
+        CaptureBox().IsChecked(false);
+        m_suppressRenderDocUi = false;
+        m_multiGpuRenderDocOverrideActive = false;
+        m_headlessRenderDocOverrideActive = false;
+    }
+}
+
+bool MainWindow::hasLinkedIdenticalDualGpu() const
+{
+    for (size_t i = 0; i < m_gpuDx12NodeCounts.size(); ++i)
+    {
+        const bool software = i < m_gpuSoftware.size() && m_gpuSoftware[i];
+        const bool dx12 = i < m_gpuApiSupport.size() && m_gpuApiSupport[i][1];
+        if (!software && dx12 && m_gpuDx12NodeCounts[i] >= 2)
+            return true;
+    }
+
+    // Fallback for older workers without dx12NodeCount: two hardware rows that
+    // share a name and both report DX12 (linked-adapter node expansion).
+    std::map<std::string, int> identicalDx12Hardware;
+    for (size_t i = 0; i < m_gpuNames.size(); ++i)
+    {
+        const bool software = i < m_gpuSoftware.size()
+            ? m_gpuSoftware[i]
+            : isSoftwareGpu(m_gpuNames[i]);
+        const bool dx12 = i < m_gpuApiSupport.size() && m_gpuApiSupport[i][1];
+        if (software || !dx12) continue;
+        if (++identicalDx12Hardware[m_gpuNames[i]] >= 2)
+            return true;
+    }
+    return false;
 }
 
 // ---- run -------------------------------------------------------------------

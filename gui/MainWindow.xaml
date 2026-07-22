@@ -277,7 +277,8 @@
                                                   MinWidth="0" Checked="OnShowLegacyChecked" Unchecked="OnShowLegacyChecked"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Spacing="14">
-                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <StackPanel x:Name="MultiGpuPanel" Orientation="Horizontal" Spacing="6"
+                                                    VerticalAlignment="Center">
                                             <TextBlock x:Name="MultiGpuLabel" Text="Multi-GPU"
                                                        VerticalAlignment="Center"/>
                                             <ComboBox x:Name="MultiGpuBox" Width="112" Height="32"
@@ -291,7 +292,8 @@
                                                       VerticalAlignment="Center"
                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                         </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <StackPanel x:Name="RenderDocPanel" Orientation="Horizontal" Spacing="6"
+                                                    VerticalAlignment="Center">
                                             <CheckBox x:Name="RenderDocBox" Content="RenderDoc" MinWidth="0"
                                                       IsChecked="True"
                                                       Checked="OnRenderDocChecked" Unchecked="OnRenderDocChecked"/>
@@ -299,7 +301,8 @@
                                                       VerticalAlignment="Center"
                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                         </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <StackPanel x:Name="CapturePanel" Orientation="Horizontal" Spacing="6"
+                                                    VerticalAlignment="Center">
                                             <CheckBox x:Name="CaptureBox" Content="Capture at" MinWidth="0"
                                                       IsChecked="True"
                                                       Checked="OnCaptureChecked" Unchecked="OnCaptureChecked"/>

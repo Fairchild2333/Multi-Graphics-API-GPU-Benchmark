@@ -5,6 +5,7 @@
 #include <winrt/Microsoft.UI.Dispatching.h>
 #include <atomic>
 #include <array>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -207,6 +208,8 @@ namespace winrt::gpu_bench_gui::implementation
         void syncCaptureControls();
         void syncMultiGpuControls();
         void applyMultiGpuRenderDocOverride(bool active);
+        void applyPlatformFeatureVisibility();
+        bool hasLinkedIdenticalDualGpu() const;
         void appendCaptureArgs(std::vector<std::string>& dest);
         void refreshAboutVersion();
         void refreshHistory();         // (re)load from disk + rebuild filters + render
@@ -256,6 +259,8 @@ namespace winrt::gpu_bench_gui::implementation
         std::vector<int> m_gpuIndices;     // engine GPU index per GpuBox row after "(auto)"
         std::vector<std::string> m_gpuNames; // probe name aligned with m_gpuIndices
         std::vector<std::array<bool, 5>> m_gpuApiSupport;  // {vulkan,dx12,dx11,opengl,dx11Compute}
+        std::vector<std::uint32_t> m_gpuDx12NodeCounts; // linked-adapter node count per GPU row
+        std::vector<bool> m_gpuSoftware;   // software/WARP row aligned with m_gpuIndices
         bool m_gpuEnumerationComplete{ false };
         bool m_apiSelectionInitialized{ false };
         std::string m_cpuName;             // for relabelling the software (WARP) renderer

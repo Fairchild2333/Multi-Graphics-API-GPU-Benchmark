@@ -1612,8 +1612,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
 
     // Machine-readable GPU list for external front-ends (WinUI launcher).
     // One line per GPU: GPU<TAB>index<TAB>name<TAB>vk<TAB>dx12<TAB>dx11<TAB>ogl
-    // followed by optional downlevel DX11 metadata. Older GUI builds safely
-    // ignore the appended fields.
+    // followed by optional downlevel DX11 metadata, then optional
+    // dx12NodeCount / isSoftware. Older GUI builds safely ignore appended fields.
     if (listGpus) {
         for (std::size_t i = 0; i < gpus.size(); ++i) {
             const auto& g = gpus[i];
@@ -1623,7 +1623,9 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << (g.supportsDX11   ? 1 : 0) << '\t'
                       << (g.supportsOpenGL ? 1 : 0) << '\t'
                       << g.dx11FeatureLevel << '\t'
-                      << (g.supportsDX11Compute ? 1 : 0) << '\n';
+                      << (g.supportsDX11Compute ? 1 : 0) << '\t'
+                      << g.dx12NodeCount << '\t'
+                      << (g.isSoftware ? 1 : 0) << '\n';
         }
         return 0;
     }
