@@ -30,7 +30,8 @@ private:
 
     static void ThrowIfFailed(HRESULT hr, const char* msg);
     ComPtr<ID3DBlob> CompileShader(const std::string& path,
-                                   const char* entry, const char* target);
+                                   const char* entry, const char* target,
+                                   const D3D_SHADER_MACRO* defines = nullptr);
 
     void CreateDeviceAndSwapChain();
     void CreateRenderTarget();

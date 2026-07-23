@@ -10,6 +10,14 @@
 /Makefile
 /CMakeUserPresets.json
 
+# ---- Android / Gradle generated state ----
+/android/.gradle/
+/android/.kotlin/
+/android/build/
+/android/**/build/
+/android/**/.cxx/
+/android/local.properties
+
 # ---- WinUI / MSBuild GUI outputs (any arch + intermediates) ----
 /gui/x64/
 /gui/x86/

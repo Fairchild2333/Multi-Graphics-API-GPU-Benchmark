@@ -30,11 +30,12 @@ void DX11Backend::ThrowIfFailed(HRESULT hr, const char* msg) {
 
 Microsoft::WRL::ComPtr<ID3DBlob> DX11Backend::CompileShader(const std::string& path,
                                                              const char* entry,
-                                                             const char* target) {
+                                                             const char* target,
+                                                             const D3D_SHADER_MACRO* defines) {
     auto src = ReadFileBytes(path);
     ComPtr<ID3DBlob> shader, errors;
     HRESULT hr = D3DCompile(src.data(), src.size(), path.c_str(),
-                            nullptr, nullptr, entry, target, 0, 0,
+                            defines, nullptr, entry, target, 0, 0,
                             &shader, &errors);
     if (FAILED(hr)) {
         std::string msg = "Shader compilation failed: " + path;
@@ -89,7 +90,11 @@ void DX11Backend::InitBackend() {
     }
     const std::uint64_t dispatchGroups =
         std::uint64_t(config_.particleCount) / kComputeWorkGroupSize;
+    const bool chunkableParticleUpdate =
+        config_.workload == Workload::Stream ||
+        config_.workload == Workload::Render3D;
     if (!fluid && !isFragmentOnlyWorkload(config_.workload) &&
+        !chunkableParticleUpdate &&
         dispatchGroups > D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION) {
         throw std::runtime_error(
             "DX11 workload exceeds the 65,535 thread-group Dispatch limit; "
@@ -434,8 +439,13 @@ void DX11Backend::CreateShaders() {
         } else {
             csFile = (config_.workload == Workload::NBody) ? "nbody.hlsl" : "compute.hlsl";
         }
-        auto csBlob = CompileShader(shaderDir_ + csFile, "CSMain",
-                                    downlevel ? "cs_4_0" : "cs_5_0");
+        const D3D_SHADER_MACRO chunkedDispatchDefines[] = {
+            { "DX11_CHUNKED_DISPATCH", "1" },
+            { nullptr, nullptr }
+        };
+        auto csBlob = CompileShader(
+            shaderDir_ + csFile, "CSMain", downlevel ? "cs_4_0" : "cs_5_0",
+            csFile == "compute.hlsl" ? chunkedDispatchDefines : nullptr);
         ThrowIfFailed(device_->CreateComputeShader(
             csBlob->GetBufferPointer(), csBlob->GetBufferSize(), nullptr, &computeShader_),
             "CreateComputeShader failed");
@@ -713,27 +723,55 @@ void DX11Backend::DrawFrame(float deltaTime) {
 
     // Compute pass — skipped entirely for the fragment-only workloads.
     if (!isFragmentOnlyWorkload(config_.workload)) {
-        // Update compute params
-        D3D11_MAPPED_SUBRESOURCE mapped{};
-        context_->Map(computeParamsCB_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-        if (config_.workload == Workload::SynthPeak) {
-            PeakParams params{ config_.peakIters, 0.9999f, 0.0001f, 0 };
-            std::memcpy(mapped.pData, &params, sizeof(params));
-        } else if (config_.workload == Workload::NBody) {
-            NBodyParams params{ deltaTime, config_.softening, config_.particleCount, 0 };
-            std::memcpy(mapped.pData, &params, sizeof(params));
-        } else {
-            ComputeParams params{ deltaTime, 0.9f };
-            std::memcpy(mapped.pData, &params, sizeof(params));
-        }
-        context_->Unmap(computeParamsCB_.Get(), 0);
-
         context_->CSSetShader(computeShader_.Get(), nullptr, 0);
         ID3D11UnorderedAccessView* uavs[] = { computeUAV_.Get() };
         context_->CSSetUnorderedAccessViews(0, 1, uavs, nullptr);
         ID3D11Buffer* cbs[] = { computeParamsCB_.Get() };
-        context_->CSSetConstantBuffers(0, 1, cbs);
-        context_->Dispatch(config_.particleCount / kComputeWorkGroupSize, 1, 1);
+
+        auto uploadParams = [&](const void* params, std::size_t bytes) {
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            ThrowIfFailed(context_->Map(computeParamsCB_.Get(), 0,
+                                        D3D11_MAP_WRITE_DISCARD, 0, &mapped),
+                          "Map compute params constant buffer failed");
+            std::memcpy(mapped.pData, params, bytes);
+            context_->Unmap(computeParamsCB_.Get(), 0);
+            context_->CSSetConstantBuffers(0, 1, cbs);
+        };
+
+        const UINT totalGroups = config_.particleCount / kComputeWorkGroupSize;
+        if (config_.workload == Workload::SynthPeak) {
+            PeakParams params{ config_.peakIters, 0.9999f, 0.0001f, 0 };
+            uploadParams(&params, sizeof(params));
+            context_->Dispatch(totalGroups, 1, 1);
+        } else if (config_.workload == Workload::NBody) {
+            NBodyParams params{ deltaTime, config_.softening, config_.particleCount, 0 };
+            uploadParams(&params, sizeof(params));
+            context_->Dispatch(totalGroups, 1, 1);
+        } else {
+            struct DX11ChunkedComputeParams {
+                float deltaTime;
+                float bounds;
+                std::uint32_t particleOffset;
+                std::uint32_t particleCount;
+            };
+            static_assert(sizeof(DX11ChunkedComputeParams) == 16);
+
+            UINT groupOffset = 0;
+            while (groupOffset < totalGroups) {
+                const UINT chunkGroups = (std::min)(
+                    totalGroups - groupOffset,
+                    UINT(D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION));
+                const DX11ChunkedComputeParams params{
+                    deltaTime,
+                    0.9f,
+                    groupOffset * kComputeWorkGroupSize,
+                    config_.particleCount
+                };
+                uploadParams(&params, sizeof(params));
+                context_->Dispatch(chunkGroups, 1, 1);
+                groupOffset += chunkGroups;
+            }
+        }
 
         // Unbind UAV
         ID3D11UnorderedAccessView* nullUav[] = { nullptr };

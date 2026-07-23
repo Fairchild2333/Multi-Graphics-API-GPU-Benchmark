@@ -7,8 +7,8 @@
 IDI_APPICON ICON "app.ico"
 
 1 VERSIONINFO
- FILEVERSION 0,2,3,0
- PRODUCTVERSION 0,2,3,0
+ FILEVERSION 0,2,4,0
+ PRODUCTVERSION 0,2,4,0
  FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -26,12 +26,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Fairchild\0"
             VALUE "FileDescription", "Mangekyo - Cross-API CPU & GPU Benchmark Suite\0"
-            VALUE "FileVersion", "0.2.3\0"
+            VALUE "FileVersion", "0.2.4\0"
             VALUE "InternalName", "Mangekyo\0"
             VALUE "LegalCopyright", "Copyright (c) 2026 Fairchild\0"
             VALUE "OriginalFilename", "gpu_bench_gui.exe\0"
             VALUE "ProductName", "Mangekyo\0"
-            VALUE "ProductVersion", "0.2.3\0"
+            VALUE "ProductVersion", "0.2.4\0"
         END
     END
     BLOCK "VarFileInfo"
