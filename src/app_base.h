@@ -26,6 +26,12 @@ public:
 
     void Run();
 
+#if defined(GPU_BENCH_NO_GLFW)
+    // Embedded hosts (Android ANativeWindow / iOS CAMetalLayer) inject the
+    // platform surface before Run(). Desktop GLFW path uses InitWindow().
+    void SetEmbeddedWindow(void* window) { window_ = window; }
+#endif
+
     virtual std::string GetBackendName() const = 0;
     virtual std::string GetDeviceName() const  = 0;
     virtual std::string GetDriverVersion() const { return ""; }

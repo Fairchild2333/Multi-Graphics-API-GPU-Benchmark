@@ -4,10 +4,13 @@
 
 #if !defined(GPU_BENCH_NO_GLFW)
 #include <GLFW/glfw3.h>
-#else
+#elif defined(__APPLE__)
 #include <mach/mach_time.h>
+#elif defined(__ANDROID__) || defined(__linux__)
+#include <time.h>
 #endif
 
+#include <atomic>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
@@ -28,18 +31,36 @@
 #endif
 
 namespace {
+std::atomic<bool> g_stopRequested{false};
+
 static double gpuBenchGetTime() {
 #if !defined(GPU_BENCH_NO_GLFW)
     return glfwGetTime();
-#else
+#elif defined(__APPLE__)
     static mach_timebase_info_data_t tb = {};
     if (tb.denom == 0) mach_timebase_info(&tb);
     return static_cast<double>(mach_absolute_time()) * tb.numer / tb.denom / 1e9;
+#else
+    timespec ts{};
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1e-9;
 #endif
 }
 }  // namespace
 
 namespace gpu_bench {
+
+void RequestStop() {
+    g_stopRequested.store(true, std::memory_order_release);
+}
+
+void ClearStopRequest() {
+    g_stopRequested.store(false, std::memory_order_release);
+}
+
+bool StopRequested() {
+    return g_stopRequested.load(std::memory_order_acquire);
+}
 
 namespace {
 
@@ -203,7 +224,9 @@ AppBase::AppBase(std::int32_t gpuIndex, std::string shaderDir,
 }
 
 AppBase::~AppBase() {
+#if !defined(GPU_BENCH_NO_GLFW)
     CleanupWindow();
+#endif
 }
 
 // -----------------------------------------------------------------------
@@ -499,9 +522,9 @@ void AppBase::MainLoop() {
 
     // Runtime safety net for the fixed-load GPU Burn contract: --run-all and
     // GUI matrix runs reuse one config across devices, and only here is the
-    // actual device known.  A software rasterizer at the hardware-fixed 256
-    // steps would take multi-second draws (WARP: ~209 ms/frame at 16 steps),
-    // so clamp it to the conservative software cap.
+    // actual device known.  Keep software rasterizers at the shared 64-step
+    // Medium tier so their score is comparable without exposing watchdog-scale
+    // 256/2048-step frames.
     if (isGpuBurnWorkload(config_.workload)) {
         const std::string devName = GetDeviceName();
         const bool softwareDevice =
@@ -527,6 +550,7 @@ void AppBase::MainLoop() {
     bool captureDuringMeasurement = false;
 
     auto shouldContinue = [&]() -> bool {
+        if (StopRequested()) return false;
         if (config_.headless) return true;  // headless: exit via time/frame limit only
 #if !defined(GPU_BENCH_NO_GLFW)
         return glfwWindowShouldClose(window_) == GLFW_FALSE;
@@ -972,6 +996,16 @@ void AppBase::PrintSummary() const {
     std::cout
         << std::setw(14) << "CPU:"        << GetCpuName() << "\n"
         << std::setw(14) << "OS:"         << GetOsVersion() << "\n"
+        << std::setw(14) << "System:"     << CurrentPlatform() << ' '
+        << CurrentOsArchitecture()
+        << (CurrentProcessArchitecture() != CurrentOsArchitecture()
+            ? " (" + CurrentProcessArchitecture() + " process)" : std::string{})
+        << "\n"
+        << std::setw(14) << "System:"     << CurrentPlatform() << ' '
+        << CurrentOsArchitecture()
+        << (CurrentProcessArchitecture() != CurrentOsArchitecture()
+            ? " (" + CurrentProcessArchitecture() + " process)" : std::string{})
+        << "\n"
         << std::setw(14) << "Memory:"     << (config_.hostMemory ? "System RAM (host-visible)" : "Device-local VRAM") << "\n"
         << std::setw(14) << "Mode:"       << (config_.headless ? "Headless (compute only)" : "Windowed") << "\n"
         << std::setw(14) << "Resolution:" << kWindowWidth << "x" << kWindowHeight << "\n";
@@ -1303,7 +1337,7 @@ BenchmarkResult AppBase::CollectResult() const {
     r.id          = GenerateResultId();
     r.timestamp   = GenerateTimestamp();
     r.workload    = workloadId(config_.workload);
-    r.resultSchemaVersion = 2;
+    r.resultSchemaVersion = 3;
     std::ostringstream workloadConfig;
     switch (config_.workload) {
         case Workload::Stream:
@@ -1538,6 +1572,9 @@ BenchmarkResult AppBase::CollectResult() const {
     r.driverVersion  = GetDriverVersion();
     r.cpuName        = GetCpuName();
     r.osVersion      = GetOsVersion();
+    r.platform       = CurrentPlatform();
+    r.osArchitecture = CurrentOsArchitecture();
+    r.processArchitecture = CurrentProcessArchitecture();
     if (!config_.memoryLabelOverride.empty())
         r.memory = config_.memoryLabelOverride;
     else

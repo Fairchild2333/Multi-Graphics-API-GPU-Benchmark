@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.25)
+# 3.22: Android SDK CMake floor. Desktop/iOS builders typically have newer.
+cmake_minimum_required(VERSION 3.22)
 
 # macOS product floor: 12.0 (Monterey). Metal CLI also works from 10.15 APIs, but
 # SwiftUI GUI and packaging target Monterey+ so scores/docs stay one floor.
@@ -6,7 +7,7 @@ if(APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS version")
 endif()
 
-project(Mangekyo VERSION 0.2.4 LANGUAGES C CXX)
+project(Mangekyo VERSION 0.2.5 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -21,6 +22,18 @@ if(IOS OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
     set(ENABLE_METAL ON CACHE BOOL "Metal backend" FORCE)
     add_compile_definitions(GPU_BENCH_NO_GLFW)
     set(GPU_BENCH_IOS ON)
+endif()
+
+# ---- Android platform setup (ANativeWindow Vulkan; no GLFW / DX / Metal / GL) ----
+if(ANDROID)
+    set(ENABLE_VULKAN ON CACHE BOOL "Vulkan backend" FORCE)
+    set(ENABLE_DX12 OFF CACHE BOOL "DX12 backend" FORCE)
+    set(ENABLE_DX11 OFF CACHE BOOL "DX11 backend" FORCE)
+    set(ENABLE_OPENGL OFF CACHE BOOL "OpenGL backend" FORCE)
+    set(ENABLE_METAL OFF CACHE BOOL "Metal backend" FORCE)
+    add_compile_definitions(GPU_BENCH_NO_GLFW GPU_BENCH_ANDROID)
+    set(GPU_BENCH_ANDROID ON)
+    set(GPU_BENCH_IOS OFF)
 endif()
 
 # ---- Options ----
@@ -39,8 +52,8 @@ else()
 endif()
 option(ENABLE_OPENGL "Build with OpenGL 4.3 backend" ON)
 
-# ---- GLFW (required by all backends for windowing, skipped on iOS) ----
-if(NOT GPU_BENCH_IOS)
+# ---- GLFW (required by desktop backends; skipped on iOS / Android) ----
+if(NOT GPU_BENCH_IOS AND NOT GPU_BENCH_ANDROID)
     find_package(glfw3 REQUIRED)
 endif()
 
@@ -60,14 +73,25 @@ set(BACKEND_DEFS "")
 
 # ---- Vulkan backend (optional) ----
 if(ENABLE_VULKAN)
-    find_package(Vulkan QUIET)
-    if(Vulkan_FOUND)
-        list(APPEND BACKEND_SOURCES src/vulkan_backend.cpp)
-        list(APPEND BACKEND_LIBS    Vulkan::Vulkan)
-        list(APPEND BACKEND_DEFS    HAVE_VULKAN GLFW_INCLUDE_VULKAN)
-        message(STATUS "Vulkan backend: ENABLED")
+    if(ANDROID)
+        # NDK ships vulkan headers; link the system stub only into the Android
+        # JNI shared library (see android/.../CMakeLists.txt). CapabilityGate
+        # still dlopen-probes before Run so API 23 devices without Vulkan never
+        # enter the workload path.
+        list(APPEND BACKEND_SOURCES src/vulkan_backend.cpp
+                                    src/android_engine_host.cpp)
+        list(APPEND BACKEND_DEFS    HAVE_VULKAN)
+        message(STATUS "Vulkan backend: ENABLED (Android NDK / ANativeWindow)")
     else()
-        message(STATUS "Vulkan backend: DISABLED (Vulkan SDK not found)")
+        find_package(Vulkan QUIET)
+        if(Vulkan_FOUND)
+            list(APPEND BACKEND_SOURCES src/vulkan_backend.cpp)
+            list(APPEND BACKEND_LIBS    Vulkan::Vulkan)
+            list(APPEND BACKEND_DEFS    HAVE_VULKAN GLFW_INCLUDE_VULKAN)
+            message(STATUS "Vulkan backend: ENABLED")
+        else()
+            message(STATUS "Vulkan backend: DISABLED (Vulkan SDK not found)")
+        endif()
     endif()
 else()
     message(STATUS "Vulkan backend: DISABLED (by option)")
@@ -148,7 +172,7 @@ if(ENABLE_OPENGL)
         # access and the implicit Python/Jinja2 build dependency.
         add_library(glad_gl43 STATIC third_party/glad/src/gl.c)
         target_include_directories(glad_gl43 PUBLIC
-            ${CMAKE_SOURCE_DIR}/third_party/glad/include)
+            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad/include)
 
         list(APPEND BACKEND_SOURCES src/opengl_backend.cpp)
         list(APPEND BACKEND_LIBS    OpenGL::GL glad_gl43)
@@ -163,13 +187,20 @@ endif()
 
 # ---- Engine library (shared by the CLI and the WinUI3 C++/WinRT GUI) ----
 add_library(gpu_engine STATIC ${COMMON_SOURCES} ${BACKEND_SOURCES})
-if(GPU_BENCH_IOS)
+if(GPU_BENCH_IOS OR GPU_BENCH_ANDROID)
     target_link_libraries(gpu_engine PUBLIC ${BACKEND_LIBS})
 else()
     target_link_libraries(gpu_engine PUBLIC glfw ${BACKEND_LIBS})
 endif()
 target_compile_definitions(gpu_engine PUBLIC ${BACKEND_DEFS})
-target_include_directories(gpu_engine PUBLIC ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(gpu_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+if(ANDROID)
+    # Headers only here; the consuming shared lib links libvulkan.
+    find_library(ANDROID_VULKAN_LIB vulkan)
+    if(ANDROID_VULKAN_LIB)
+        target_include_directories(gpu_engine PUBLIC ${CMAKE_SYSROOT}/usr/include)
+    endif()
+endif()
 
 # A Vulkan-capable build must still start on Windows machines whose driver did
 # not install vulkan-1.dll.  main.cpp probes the loader before issuing any
@@ -181,7 +212,7 @@ if(MSVC AND ENABLE_VULKAN AND Vulkan_FOUND)
 endif()
 
 # ---- CLI executable (thin entry point -> gpu_bench::cliMain) ----
-if(NOT GPU_BENCH_IOS)
+if(NOT GPU_BENCH_IOS AND NOT GPU_BENCH_ANDROID)
     add_executable(gpu_benchmark src/cli_main.cpp)
     target_link_libraries(gpu_benchmark PRIVATE gpu_engine)
 endif()
@@ -200,57 +231,57 @@ if(ENABLE_VULKAN AND Vulkan_FOUND)
     find_program(GLSLC_EXECUTABLE glslc)
     if(GLSLC_EXECUTABLE)
         set(GLSL_SOURCES
-            ${CMAKE_SOURCE_DIR}/shaders/particle.vert
-            ${CMAKE_SOURCE_DIR}/shaders/particle.frag
-            ${CMAKE_SOURCE_DIR}/shaders/compute.comp
-            ${CMAKE_SOURCE_DIR}/shaders/nbody.comp
-            ${CMAKE_SOURCE_DIR}/shaders/fractal.vert
-            ${CMAKE_SOURCE_DIR}/shaders/fractal.frag
-            ${CMAKE_SOURCE_DIR}/shaders/gpu_stress.frag
-            ${CMAKE_SOURCE_DIR}/shaders/gpu_burn.frag
-            ${CMAKE_SOURCE_DIR}/shaders/volumetric.vert
-            ${CMAKE_SOURCE_DIR}/shaders/volumetric.frag
-            ${CMAKE_SOURCE_DIR}/shaders/fluid_advect.comp
-            ${CMAKE_SOURCE_DIR}/shaders/fluid_divergence.comp
-            ${CMAKE_SOURCE_DIR}/shaders/fluid_jacobi.comp
-            ${CMAKE_SOURCE_DIR}/shaders/fluid_subtract.comp
-            ${CMAKE_SOURCE_DIR}/shaders/fluid_render.vert
-            ${CMAKE_SOURCE_DIR}/shaders/fluid_render.frag
-            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_clear_grid.comp
-            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_p2g_mass_momentum.comp
-            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_p2g_density_stress.comp
-            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_grid_update.comp
-            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_g2p.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_resolve.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_render.vert
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_render.frag
-            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_clear_grid_v2.comp
-            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_p2g_mass_momentum_v2.comp
-            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_p2g_density_stress_v2.comp
-            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_grid_update_v2.comp
-            ${CMAKE_SOURCE_DIR}/shaders/mls_mpm_g2p_v2.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_rigid_integrate_v2.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_resolve_v2.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_surface_clear_v2.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_surface_splat_v2.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_surface_resolve_v2.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_render_v2.vert
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_render_v2.frag
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_external.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_hash_count.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_scan_block.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_scan_add.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_scatter.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_density.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_pressure.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_viscosity.comp
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_sph_integrate.comp
-            ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp32.comp
-            ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp64.comp
-            ${CMAKE_SOURCE_DIR}/shaders/synthpeak_int32.comp
-            ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp16.comp
-            ${CMAKE_SOURCE_DIR}/shaders/render3d.vert
-            ${CMAKE_SOURCE_DIR}/shaders/render3d.frag
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/particle.vert
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/particle.frag
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/compute.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/nbody.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fractal.vert
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fractal.frag
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gpu_stress.frag
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gpu_burn.frag
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/volumetric.vert
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/volumetric.frag
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluid_advect.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluid_divergence.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluid_jacobi.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluid_subtract.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluid_render.vert
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluid_render.frag
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/mls_mpm_clear_grid.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/mls_mpm_p2g_mass_momentum.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/mls_mpm_p2g_density_stress.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/mls_mpm_grid_update.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/mls_mpm_g2p.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_resolve.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_render.vert
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_render.frag
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/mls_mpm_clear_grid_v2.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/mls_mpm_p2g_mass_momentum_v2.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/mls_mpm_p2g_density_stress_v2.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/mls_mpm_grid_update_v2.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/mls_mpm_g2p_v2.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_rigid_integrate_v2.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_resolve_v2.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_surface_clear_v2.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_surface_splat_v2.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_surface_resolve_v2.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_render_v2.vert
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_render_v2.frag
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_sph_external.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_sph_hash_count.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_sph_scan_block.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_sph_scan_add.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_sph_scatter.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_sph_density.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_sph_pressure.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_sph_viscosity.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_sph_integrate.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_fp32.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_fp64.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_int32.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_fp16.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/render3d.vert
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/render3d.frag
         )
         set(SPV_OUTPUTS "")
         foreach(SHADER ${GLSL_SOURCES})
@@ -280,19 +311,19 @@ endif()
 # ---- Copy HLSL shader source files next to executable (DX12/DX11) ----
 if((ENABLE_DX12 AND WIN32) OR (ENABLE_DX11 AND WIN32))
     set(HLSL_SOURCES
-        ${CMAKE_SOURCE_DIR}/shaders/compute.hlsl
-        ${CMAKE_SOURCE_DIR}/shaders/nbody.hlsl
-        ${CMAKE_SOURCE_DIR}/shaders/fractal.hlsl
-        ${CMAKE_SOURCE_DIR}/shaders/gpu_stress.hlsl
-        ${CMAKE_SOURCE_DIR}/shaders/gpu_burn.hlsl
-        ${CMAKE_SOURCE_DIR}/shaders/volumetric.hlsl
-        ${CMAKE_SOURCE_DIR}/shaders/fluid.hlsl
-        ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp32.hlsl
-        ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp64.hlsl
-        ${CMAKE_SOURCE_DIR}/shaders/synthpeak_int32.hlsl
-        ${CMAKE_SOURCE_DIR}/shaders/render3d.hlsl
-        ${CMAKE_SOURCE_DIR}/shaders/particle_vs.hlsl
-        ${CMAKE_SOURCE_DIR}/shaders/particle_ps.hlsl
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/compute.hlsl
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/nbody.hlsl
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fractal.hlsl
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gpu_stress.hlsl
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gpu_burn.hlsl
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/volumetric.hlsl
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluid.hlsl
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_fp32.hlsl
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_fp64.hlsl
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_int32.hlsl
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/render3d.hlsl
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/particle_vs.hlsl
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/particle_ps.hlsl
     )
     add_custom_command(TARGET gpu_benchmark POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HLSL_SOURCES} $<TARGET_FILE_DIR:gpu_benchmark>
@@ -314,7 +345,7 @@ if(ENABLE_DX12 AND WIN32)
         add_custom_command(TARGET gpu_benchmark POST_BUILD
             COMMAND "${SDK_DXC}" -T cs_6_2 -E CSMain -enable-16bit-types
                     -Fo $<TARGET_FILE_DIR:gpu_benchmark>/synthpeak_fp16.cso
-                    ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp16.hlsl
+                    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_fp16.hlsl
             COMMENT "Compiling synthpeak_fp16.hlsl -> signed DXIL (.cso) for DX12 FP16"
         )
     else()
@@ -326,9 +357,9 @@ endif()
 if(ENABLE_METAL AND APPLE AND METAL_FRAMEWORK)
     add_custom_command(TARGET gpu_benchmark POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_SOURCE_DIR}/shaders/particle.metal
-            ${CMAKE_SOURCE_DIR}/shaders/gpu_burn.metal
-            ${CMAKE_SOURCE_DIR}/shaders/cinematic_liquid_v2.metal
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/particle.metal
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gpu_burn.metal
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cinematic_liquid_v2.metal
             $<TARGET_FILE_DIR:gpu_benchmark>
         COMMENT "Copying Metal shader files next to executable"
     )
@@ -337,28 +368,28 @@ endif()
 # ---- Copy OpenGL GLSL shader files next to executable ----
 if(ENABLE_OPENGL AND OpenGL_FOUND)
     set(GL_SHADERS
-        ${CMAKE_SOURCE_DIR}/shaders/compute_gl.comp
-        ${CMAKE_SOURCE_DIR}/shaders/nbody_gl.comp
-        ${CMAKE_SOURCE_DIR}/shaders/particle_gl.vert
-        ${CMAKE_SOURCE_DIR}/shaders/particle_gl.frag
-        ${CMAKE_SOURCE_DIR}/shaders/fractal_gl.vert
-        ${CMAKE_SOURCE_DIR}/shaders/fractal_gl.frag
-        ${CMAKE_SOURCE_DIR}/shaders/gpu_stress_gl.frag
-        ${CMAKE_SOURCE_DIR}/shaders/gpu_burn_gl.frag
-        ${CMAKE_SOURCE_DIR}/shaders/volumetric_gl.vert
-        ${CMAKE_SOURCE_DIR}/shaders/volumetric_gl.frag
-        ${CMAKE_SOURCE_DIR}/shaders/fluid_advect_gl.comp
-        ${CMAKE_SOURCE_DIR}/shaders/fluid_divergence_gl.comp
-        ${CMAKE_SOURCE_DIR}/shaders/fluid_jacobi_gl.comp
-        ${CMAKE_SOURCE_DIR}/shaders/fluid_subtract_gl.comp
-        ${CMAKE_SOURCE_DIR}/shaders/fluid_render_gl.vert
-        ${CMAKE_SOURCE_DIR}/shaders/fluid_render_gl.frag
-        ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp32_gl.comp
-        ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp64_gl.comp
-        ${CMAKE_SOURCE_DIR}/shaders/synthpeak_int32_gl.comp
-        ${CMAKE_SOURCE_DIR}/shaders/synthpeak_fp16_gl.comp
-        ${CMAKE_SOURCE_DIR}/shaders/render3d_gl.vert
-        ${CMAKE_SOURCE_DIR}/shaders/render3d_gl.frag
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/compute_gl.comp
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/nbody_gl.comp
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/particle_gl.vert
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/particle_gl.frag
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fractal_gl.vert
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fractal_gl.frag
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gpu_stress_gl.frag
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gpu_burn_gl.frag
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/volumetric_gl.vert
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/volumetric_gl.frag
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluid_advect_gl.comp
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluid_divergence_gl.comp
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluid_jacobi_gl.comp
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluid_subtract_gl.comp
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluid_render_gl.vert
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluid_render_gl.frag
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_fp32_gl.comp
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_fp64_gl.comp
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_int32_gl.comp
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_fp16_gl.comp
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/render3d_gl.vert
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/render3d_gl.frag
     )
     add_custom_command(TARGET gpu_benchmark POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GL_SHADERS} $<TARGET_FILE_DIR:gpu_benchmark>
@@ -371,7 +402,11 @@ endif()
 # release payload use the same target and shader lists. The first deliverable
 # is the Windows x64 CLI core; GUI, RenderDoc and the frozen report worker are
 # optional payloads until their remaining path/runtime blockers are removed.
+# Android embeds gpu_engine only — no CLI / CPack.
 option(GPU_BENCH_ENABLE_PACKAGING "Generate install and CPack release rules" ON)
+if(ANDROID OR GPU_BENCH_ANDROID)
+    set(GPU_BENCH_ENABLE_PACKAGING OFF CACHE BOOL "Generate install and CPack release rules" FORCE)
+endif()
 if(GPU_BENCH_ENABLE_PACKAGING)
     include(cmake/Packaging.cmake)
 endif()

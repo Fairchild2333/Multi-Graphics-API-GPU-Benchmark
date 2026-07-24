@@ -4,10 +4,17 @@
 
 #include "app_base.h"
 
+#if defined(GPU_BENCH_NO_GLFW)
+#if defined(__ANDROID__)
+#define VK_USE_PLATFORM_ANDROID_KHR
+#endif
+#include <vulkan/vulkan.h>
+#else
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
 #endif
 #include <GLFW/glfw3.h>
+#endif
 
 #include <optional>
 

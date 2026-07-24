@@ -12,6 +12,15 @@
 #include <set>
 #include <stdexcept>
 
+#if defined(__ANDROID__)
+#include <android/native_window.h>
+#endif
+
+
+#if defined(__ANDROID__)
+// NDK libvulkan is a Vulkan 1.0 stub: 1.1 device-group entry points are absent.
+// Multi-GPU AFR is desktop-only; keep single-GPU Android paths compiling.
+#endif
 namespace gpu_bench {
 
 void VulkanBackend::InitBackend() {
@@ -91,13 +100,23 @@ void VulkanBackend::CreateInstance() {
     appInfo.applicationVersion = VK_MAKE_VERSION(0, 2, 4);
     appInfo.pEngineName        = "Mangekyo";
     appInfo.engineVersion      = VK_MAKE_VERSION(0, 1, 0);
+    // Android primary floor is Vulkan 1.0 (Tegra K1). Desktop keeps 1.1.
+#if defined(__ANDROID__)
+    appInfo.apiVersion         = VK_API_VERSION_1_0;
+#else
     appInfo.apiVersion         = VK_API_VERSION_1_1;
+#endif
 
     std::vector<const char*> extensions;
     if (!config_.headless) {
+#if defined(__ANDROID__)
+        extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+        extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
+#else
         std::uint32_t glfwExtCount = 0;
         const char** glfwExts = glfwGetRequiredInstanceExtensions(&glfwExtCount);
         extensions.assign(glfwExts, glfwExts + glfwExtCount);
+#endif
     }
     std::uint32_t availableExtensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, nullptr);
@@ -167,8 +186,19 @@ void VulkanBackend::EndDebugLabel(VkCommandBuffer cmd) const {
 // -----------------------------------------------------------------------
 
 void VulkanBackend::CreateSurface() {
+#if defined(__ANDROID__)
+    auto* nativeWindow = static_cast<ANativeWindow*>(window_);
+    if (!nativeWindow)
+        throw std::runtime_error("Android Vulkan surface requires ANativeWindow");
+    VkAndroidSurfaceCreateInfoKHR ci{};
+    ci.sType  = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
+    ci.window = nativeWindow;
+    if (vkCreateAndroidSurfaceKHR(instance_, &ci, nullptr, &surface_) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateAndroidSurfaceKHR failed");
+#else
     if (glfwCreateWindowSurface(instance_, window_, nullptr, &surface_) != VK_SUCCESS)
         throw std::runtime_error("glfwCreateWindowSurface failed");
+#endif
 }
 
 // -----------------------------------------------------------------------
@@ -345,6 +375,9 @@ void VulkanBackend::PickPhysicalDevice() {
     physicalDevice_ = devices[chosen];
 
     if (config_.multiGpuMode == MultiGpuMode::Afr) {
+#if defined(__ANDROID__)
+        throw std::runtime_error("Vulkan AFR is not supported on Android");
+#else
         std::uint32_t groupCount = 0;
         VkResult groupResult = vkEnumeratePhysicalDeviceGroups(instance_, &groupCount, nullptr);
         if (groupResult != VK_SUCCESS || groupCount == 0)
@@ -386,6 +419,7 @@ void VulkanBackend::PickPhysicalDevice() {
                 "Vulkan AFR requires a driver device group containing two compatible GPUs");
         deviceGroupAfr_ = true;
         afrDeviceCount_ = 2;
+#endif
     }
     VkPhysicalDeviceProperties props{};
     vkGetPhysicalDeviceProperties(physicalDevice_, &props);
@@ -475,6 +509,10 @@ void VulkanBackend::CreateLogicalDevice() {
     if (supported.shaderFloat64) features.shaderFloat64 = VK_TRUE;
 
     // Query FP16 (shaderFloat16) support for the SynthPeak FP16 variant.
+#if defined(__ANDROID__)
+    // Android NDK libvulkan stubs are 1.0; skip Features2 / FP16 for now.
+    const bool fp16Supported = false;
+#else
     VkPhysicalDeviceShaderFloat16Int8FeaturesKHR f16query{};
     f16query.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR;
     VkPhysicalDeviceFeatures2 feats2{};
@@ -482,6 +520,7 @@ void VulkanBackend::CreateLogicalDevice() {
     feats2.pNext = &f16query;
     vkGetPhysicalDeviceFeatures2(physicalDevice_, &feats2);
     const bool fp16Supported = (f16query.shaderFloat16 == VK_TRUE);
+#endif
 
     std::vector<const char*> deviceExts;
     if (!config_.headless)
@@ -534,6 +573,7 @@ void VulkanBackend::CreateLogicalDevice() {
                          "device-mask submissions share one VkQueue and this driver "
                          "may serialize them.\n";
         }
+#if !defined(__ANDROID__)
         VkDeviceGroupPresentCapabilitiesKHR caps{};
         caps.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_PRESENT_CAPABILITIES_KHR;
         const VkResult capsResult = vkGetDeviceGroupPresentCapabilitiesKHR(device_, &caps);
@@ -568,6 +608,7 @@ void VulkanBackend::CreateLogicalDevice() {
                       << ": GPU0 reads GPU1=" << peerFlagsText(peer01)
                       << ", GPU1 reads GPU0=" << peerFlagsText(peer10) << "\n";
         }
+#endif
     }
 }
 
@@ -719,7 +760,17 @@ VkExtent2D VulkanBackend::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& caps)
     if (caps.currentExtent.width != std::numeric_limits<std::uint32_t>::max())
         return caps.currentExtent;
     int w = 0, h = 0;
+#if defined(__ANDROID__)
+    if (auto* nativeWindow = static_cast<ANativeWindow*>(window_)) {
+        w = ANativeWindow_getWidth(nativeWindow);
+        h = ANativeWindow_getHeight(nativeWindow);
+    } else {
+        w = static_cast<int>(kWindowWidth);
+        h = static_cast<int>(kWindowHeight);
+    }
+#else
     glfwGetFramebufferSize(window_, &w, &h);
+#endif
     return {
         std::clamp(static_cast<std::uint32_t>(w), caps.minImageExtent.width,  caps.maxImageExtent.width),
         std::clamp(static_cast<std::uint32_t>(h), caps.minImageExtent.height, caps.maxImageExtent.height)
@@ -1683,6 +1734,11 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         ? (currentFrame_ % afrDeviceCount_) : 0u;
     const std::uint32_t afrDeviceMask = 1u << afrDeviceIndex;
     VkResult res = VK_SUCCESS;
+#if defined(__ANDROID__)
+    res = vkAcquireNextImageKHR(device_, swapChain_, UINT64_MAX,
+                                imageAvailableSemaphores_[currentFrame_],
+                                VK_NULL_HANDLE, &imageIndex);
+#else
     if (deviceGroupAfr_) {
         VkAcquireNextImageInfoKHR acquire{};
         acquire.sType = VK_STRUCTURE_TYPE_ACQUIRE_NEXT_IMAGE_INFO_KHR;
@@ -1696,6 +1752,7 @@ void VulkanBackend::DrawFrame(float deltaTime) {
                                     imageAvailableSemaphores_[currentFrame_],
                                     VK_NULL_HANDLE, &imageIndex);
     }
+#endif
     if (res == VK_ERROR_OUT_OF_DATE_KHR)
         throw std::runtime_error("Vulkan swapchain became out of date; restart the fixed-resolution benchmark after resizing");
     if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR)

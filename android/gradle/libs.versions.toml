@@ -1,23 +1,22 @@
-# ============================================================
-# 版本占位（2026-07-20 脚手架）。接手 AI 第一件事：
-# 1. 全部更新为当时最新稳定版；
-# 2. 检查该版 Compose 的 minSdk 要求——若已要求 23，
-#    按 HANDOFF 基调把 app/build.gradle.kts 的 minSdk 提到 23（K1 = API 24，零损失）。
-# ============================================================
+# Mangekyo Android version catalog — keep on latest stable BOM / AGP.
+# Dynamic color (Material You) is API 31+; Material 3 components come from the Compose BOM.
 [versions]
-agp = "8.13.0"
-kotlin = "2.2.0"
-composeBom = "2026.06.00"
-activityCompose = "1.11.0"
-navigationCompose = "2.9.0"
-lifecycle = "2.9.1"
-coreKtx = "1.16.0"
+agp = "9.3.1"
+kotlin = "2.3.21"
+composeBom = "2026.06.01"
+activityCompose = "1.13.0"
+navigationCompose = "2.9.8"
+lifecycle = "2.9.4"
+coreKtx = "1.17.0"
+splashscreen = "1.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -27,5 +26,4 @@ compose-material-icons = { group = "androidx.compose.material", name = "material
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

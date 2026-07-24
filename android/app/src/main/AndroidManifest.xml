@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- 跑分应用不需要危险权限；results.json 写应用专属目录（ResultsStore），不申请存储权限。 -->
+    <!-- Vulkan / GLES 均 optional：CapabilityGate 运行时选择；无 Vulkan 时走 ES 3.1。 -->
+    <uses-feature android:name="android.hardware.vulkan.level" android:required="false" />
+    <uses-feature android:glEsVersion="0x00030001" android:required="false" />
     <application
         android:label="@string/app_name"
         android:theme="@style/Theme.Mangekyo"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:extractNativeLibs="false">
         <activity
             android:name=".MainActivity"
             android:exported="true"

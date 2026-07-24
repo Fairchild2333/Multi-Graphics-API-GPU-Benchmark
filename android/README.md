@@ -1,47 +1,45 @@
-# Mangekyo Android（主包脚手架）
+# Mangekyo Android（主包）
 
-> 状态（2026-07-20）：**代码已写、未编译、未真机验证**。这是给后续 AI 的前端骨架，
-> 合同与基调以根目录 `HANDOFF.md` 目标 C 第 3 条为准，先读它再动手。
+> 状态（2026-07-24）：**gpu_engine 已接入（Vulkan 垂直切片）** —
+> `:app:assembleDebug` 通过；SurfaceView → ANativeWindow → `VulkanBackend::Run`；
+> FAB Run/Stop（3s preview：`stream` / `gpu_burn`）。
+> minSdk **23**（Compose）；原生链接 API **24** stub（`libvulkan`）。
+> **正式成绩合同未齐**（`*_android_preview`）；GLES 3.1 未接；液体未开。
+> 合同见 `HANDOFF.md` 目标 C 第 3 条。真机验收仍待做。
 
-## 接手第一步（按顺序）
+## 已完成
 
-1. 更新 `gradle/libs.versions.toml` 全部占位版本为当时最新稳定版。
-2. 检查该版 Compose 的 minSdk 要求：若要求 23，把 `app/build.gradle.kts` 的 `minSdk` 提到 23
-   （主包最老目标设备 Tegra K1 = API 24，零损失）；否则保持 21。
-3. 生成 Gradle wrapper（本脚手架未含 wrapper 二进制）：`gradle wrapper`。
-4. 首次构建 + 模拟器跑通四页导航，这时才允许把 TODO/HANDOFF 里的"未编译"改状态。
-5. 补应用图标（当前 Manifest 未设 icon，使用系统默认）。
+- Compose BOM `2026.06.01` / Material3；AGP **9.3.1** + Kotlin **2.3.21**；minSdk **23**
+- Material You：API 31+ 动态取色，以下品牌静态色
+- 四页 Material 3 壳 + SplashScreen
+- `CapabilityGate`：Vulkan dlopen 探针 + HW feature + GL ES 版本
+- `ResultsStore`：应用专属目录；引擎经 `GPU_BENCH_DATA_DIR` 写同一根
+- **gpu_engine**：根 CMake `ANDROID` 分支（无 GLFW / 无 CLI）；`libmangekyo_jni` 链引擎 + NDK `vulkan`
+- JNI：Surface 生命周期、后台线程 Run、`RequestStop` 协作取消
+- SPIR-V：构建时 `glslc` → `assets/shaders/`（particle + compute + gpu_burn）
 
-## 已锁定合同（勿改，改前问用户）
+## 构建
 
-- minSdk 21（或按上述规则 23）/ targetSdk 最新；NDK r27+，`.so` 16 KB 页对齐（CMake 已加 max-page-size）。
-- ABI：armeabi-v7a / arm64-v8a / x86 / x86_64 全原生编译；结果 metadata 记录真实 ABI，不混排。
-- UI：单套 Compose + Material 3 能力递减；动态取色仅 12+，以下回退 `ui/theme/Color.kt` 品牌静态色；
-  信息架构 GPU/CPU/History/Charts 对齐 WinUI/SwiftUI。
-- Vulkan 运行时门控（API≥24 + dlopen），失败走 GL ES 3.1；能力不齐显式 unsupported，不静默 fallback。
-- Android 计时/抓帧模型不同 → 新 workloadVersion 独立成组，绝不与 Windows 成绩混排。
-- 满载时 Stop 必须可用；跑分不占 UI 线程。
-- 结果写应用专属目录，schema 与 Windows results.json 同源。
-- Tegra 3/4（ES 2.0）不在本工程：独立 legacy APK（armeabi-v7a only），见 HANDOFF。
-
-## 目录
-
-```
-app/src/main/java/com/mangekyo/benchmark/
-  MainActivity.kt            入口，edge-to-edge + 主题
-  ui/AppRoot.kt              底部导航 + NavHost（四页）
-  ui/theme/                  Material 3 主题：动态取色/静态回退
-  ui/screens/                GpuScreen / CpuScreen / HistoryScreen / ChartsScreen（均含 TODO 注释）
-  ui/components/BenchmarkSurface.kt  SurfaceView 占位 → NativeBridge
-  core/NativeBridge.kt       JNI 桥（stub）
-  core/CapabilityGate.kt     Vulkan/ES 能力门控（stub）
-  core/WorkloadRegistry.kt   registry 占位——最终必须与 C++ registry 同源，删除硬编码
-  core/ResultsStore.kt       results.json 占位
-app/src/main/cpp/            JNI stub + CMake（含 16 KB 对齐；引擎接入 TODO）
+```bash
+cd android
+# 需要 PATH 上有 glslc（Vulkan SDK），用于打包 SPIR-V
+./gradlew :app:assembleDebug
 ```
 
-## 主要待实现（详细 TODO 在各文件头部注释）
+产物：`app/build/outputs/apk/debug/app-debug.apk`。
 
-引擎接入（gpu_engine 进 CMake、Surface→ANativeWindow、EGL/VkAndroidSurfaceKHR）、
-workload 启停与进度回调、ES 3.1 后端与 timer query 探测、结果读写与 History/Charts、
-CPU strict affinity（回读验证）、温控评估与 15s Burst 语义记录。
+## 运行说明
+
+1. API 24+ 且 Vulkan loader 可用时，GPU 页可选 Stream / GPU Burn，点 Run（默认 3s）。
+2. 跑分线程不占 UI；Stop 调用 `RequestStop()`。
+3. 结果若写出，版本带 android preview 后缀，**不得与 Windows 榜混排**。
+
+## Windows 开发注意
+
+- 勿写 `import androidx.compose.ui.Modifier`（类/包大小写冲突）；用 `import androidx.compose.ui.*`
+- 命名参数必须小写 `modifier =`
+
+## 主要待实现
+
+GLES 3.1 / EGL 降级、完整 `workloadVersion` 合同、温控 15s Burst、液体、
+独立 ES 2.0 legacy APK、真机冒烟与抓帧。

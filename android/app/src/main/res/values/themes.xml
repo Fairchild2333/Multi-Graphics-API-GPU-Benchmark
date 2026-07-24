@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 仅作 Compose 启动前的窗口底色；真正主题在 ui/theme/Theme.kt。 -->
-    <style name="Theme.Mangekyo" parent="android:Theme.Material.NoActionBar" />
+    <!-- Window theme before Compose; SplashScreen compat uses this on API 21–30. -->
+    <style name="Theme.Mangekyo" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FF3558C7</item>
+        <item name="postSplashScreenTheme">@style/Theme.Mangekyo.PostSplash</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.Mangekyo.PostSplash" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">#FFF8F9FF</item>
+    </style>
 </resources>

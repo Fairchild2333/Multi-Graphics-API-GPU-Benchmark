@@ -11,6 +11,12 @@ namespace gpu_bench {
 // argv/argc follow the usual C convention. Returns a process-style exit code.
 int cliMain(int argc, char* argv[]);
 
+// Cooperative cancel for embedded hosts (Android JNI thread, future iOS).
+// MainLoop polls StopRequested() each frame; ClearStopRequest() before Run().
+void RequestStop();
+void ClearStopRequest();
+bool StopRequested();
+
 // Legacy embedding hook: when true, cliMain() skips glfwTerminate() on exit.
 #if !defined(GPU_BENCH_NO_GLFW)
 inline bool skipGlfwTerminate = false;

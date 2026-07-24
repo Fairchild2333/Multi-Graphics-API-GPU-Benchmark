@@ -436,7 +436,27 @@ public:
                            actual.Group == requested.Group && actual.Mask == requested.Mask;
             }
         }
-#elif defined(__linux__) || defined(__ANDROID__)
+#elif defined(__ANDROID__)
+        // Bionic: sched_*affinity. glibc pthread_*affinity_np is unavailable.
+        CPU_ZERO(&previous_);
+        havePrevious_ = sched_getaffinity(0, sizeof(previous_), &previous_) == 0;
+        cpu_set_t requested;
+        CPU_ZERO(&requested);
+        if (cpu.logicalIndex < CPU_SETSIZE) {
+            CPU_SET(cpu.logicalIndex, &requested);
+            changed_ = sched_setaffinity(0, sizeof(requested), &requested) == 0;
+            if (changed_) {
+                cpu_set_t actual;
+                CPU_ZERO(&actual);
+                if (sched_getaffinity(0, sizeof(actual), &actual) == 0) {
+                    int selected = 0;
+                    for (int i = 0; i < CPU_SETSIZE; ++i)
+                        selected += CPU_ISSET(i, &actual) ? 1 : 0;
+                    applied_ = selected == 1 && CPU_ISSET(cpu.logicalIndex, &actual);
+                }
+            }
+        }
+#elif defined(__linux__)
         CPU_ZERO(&previous_);
         havePrevious_ = pthread_getaffinity_np(pthread_self(), sizeof(previous_), &previous_) == 0;
         cpu_set_t requested;
@@ -464,7 +484,10 @@ public:
     ~ThreadAffinityScope() {
 #ifdef _WIN32
         if (changed_) SetThreadGroupAffinity(GetCurrentThread(), &previous_, nullptr);
-#elif defined(__linux__) || defined(__ANDROID__)
+#elif defined(__ANDROID__)
+        if (changed_ && havePrevious_)
+            sched_setaffinity(0, sizeof(previous_), &previous_);
+#elif defined(__linux__)
         if (changed_ && havePrevious_)
             pthread_setaffinity_np(pthread_self(), sizeof(previous_), &previous_);
 #endif
@@ -988,6 +1011,48 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
         << "Each score is million mixed integer/branch/FP32/FP64 work units per second.\n"
         << "The checksum is a dead-code-elimination sink, not a correctness oracle.\n";
 
+    auto runMultiStage = [&]() {
+        out << "\n--- CPU all-logical-processor test ---\n" << std::flush;
+        report.multiCore = RunMultiTimed(report.processors, config, stage, totalStages, out);
+        out << std::fixed << std::setprecision(2)
+            << "All-core score (" << report.multiCore.threadCount << " threads): "
+            << report.multiCore.scoreMWorkPerSec << " MWork/s"
+            << (report.multiCore.valid ? "" : " [INVALID: affinity contract not met]")
+            << "\n";
+        out << std::fixed << std::setprecision(6)
+            << "CPU_RESULT\tkind=multi\tmode=multi\tcore_index=-1"
+            << "\tworkload_version=" << report.workloadVersion
+            << "\tscore_contract=" << scoreContract
+            << "\taggregation=median"
+            << "\tcore_count=" << report.processors.size()
+            << "\tthread_count=" << report.multiCore.threadCount
+            << "\tpinned_threads=" << report.multiCore.pinnedThreadCount
+            << "\taffinity=" << report.multiCore.affinityMode
+            << "\tvalid=" << (report.multiCore.valid ? 1 : 0)
+            << "\tscore=" << report.multiCore.scoreMWorkPerSec
+            << "\tunit=MWork/s"
+            << "\tseconds=" << report.multiCore.measuredSeconds
+            << "\trequested_seconds=" << config.measureSeconds
+            << "\tround_count=" << report.multiCore.roundCount
+            << "\tmedian_round=" << report.multiCore.medianRound
+            << "\tchecksum=" << Hex64(report.multiCore.checksum)
+            << "\tchecksum_role=dce_sink" << '\n' << std::flush;
+#if defined(_WIN32) || defined(__linux__) || defined(__ANDROID__)
+        if (!report.multiCore.valid) {
+            out << "CPU_ERROR\tmessage=required_multicore_affinity_failed"
+                << "\tpinned_threads=" << report.multiCore.pinnedThreadCount
+                << "\tthread_count=" << report.multiCore.threadCount << '\n' << std::flush;
+        }
+#endif
+        ++stage;
+    };
+
+    // In All mode, measure the all-core score before the long per-core sweep.
+    // This gives it the same cold-start ordering as a standalone all-core run
+    // instead of measuring after minutes of accumulated heat and package power.
+    if (runMulti && config.mode == CpuBenchmarkMode::All)
+        runMultiStage();
+
     if (runPerCore) {
         report.perCore.reserve(report.processors.size());
         for (const auto& cpu : report.processors) {
@@ -1094,40 +1159,8 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
 #endif
     }
 
-    if (runMulti) {
-        out << "\n--- CPU all-logical-processor test ---\n" << std::flush;
-        report.multiCore = RunMultiTimed(report.processors, config, stage, totalStages, out);
-        out << std::fixed << std::setprecision(2)
-            << "All-core score (" << report.multiCore.threadCount << " threads): "
-            << report.multiCore.scoreMWorkPerSec << " MWork/s"
-            << (report.multiCore.valid ? "" : " [INVALID: affinity contract not met]")
-            << "\n";
-        out << std::fixed << std::setprecision(6)
-            << "CPU_RESULT\tkind=multi\tmode=multi\tcore_index=-1"
-            << "\tworkload_version=" << report.workloadVersion
-            << "\tscore_contract=" << scoreContract
-            << "\taggregation=median"
-            << "\tcore_count=" << report.processors.size()
-            << "\tthread_count=" << report.multiCore.threadCount
-            << "\tpinned_threads=" << report.multiCore.pinnedThreadCount
-            << "\taffinity=" << report.multiCore.affinityMode
-            << "\tvalid=" << (report.multiCore.valid ? 1 : 0)
-            << "\tscore=" << report.multiCore.scoreMWorkPerSec
-            << "\tunit=MWork/s"
-            << "\tseconds=" << report.multiCore.measuredSeconds
-            << "\trequested_seconds=" << config.measureSeconds
-            << "\tround_count=" << report.multiCore.roundCount
-            << "\tmedian_round=" << report.multiCore.medianRound
-            << "\tchecksum=" << Hex64(report.multiCore.checksum)
-            << "\tchecksum_role=dce_sink" << '\n' << std::flush;
-#if defined(_WIN32) || defined(__linux__) || defined(__ANDROID__)
-        if (!report.multiCore.valid) {
-            out << "CPU_ERROR\tmessage=required_multicore_affinity_failed"
-                << "\tpinned_threads=" << report.multiCore.pinnedThreadCount
-                << "\tthread_count=" << report.multiCore.threadCount << '\n' << std::flush;
-        }
-#endif
-    }
+    if (runMulti && config.mode != CpuBenchmarkMode::All)
+        runMultiStage();
 
     return report;
 }
