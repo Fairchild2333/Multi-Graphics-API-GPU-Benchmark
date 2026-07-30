@@ -38,7 +38,11 @@ Windows build: prefer [`scripts/build-windows.ps1`](../scripts/build-windows.ps1
   `benchFrames` (default 2000) frames, ignores the time limit.
 
 Every successful GPU run appends its result to `results.json`. Successful CPU
-runs append summary rows unless `--cpu-no-save` is supplied.
+runs append summary rows unless `--cpu-no-save` is supplied. New records also
+store the operating-system family, native OS architecture, and process
+architecture. This distinguishes, for example, an x64 process running through
+Windows-on-Arm emulation from a native ARM64 process. Older records remain
+loadable and are marked as legacy/unknown where those fields did not exist.
 
 ## 2. Interactive menu [0]–[10] (main.cpp:1026-1041)
 
@@ -111,6 +115,9 @@ runs append summary rows unless `--cpu-no-save` is supplied.
 | `--no-time-limit` | run until window closed |
 | `--benchmark [frames]` | **frame mode** (default 2000), then exit |
 | `--run-all` | iterate every GPU×API, then exit |
+| `--complete-suite` | run the formal 15-second matrix on every GPU and compiled API: Particle 65K/1M/4M/16M both windowed and headless, GPU Burn 64 steps, and Cinematic Liquid; windowed jobs request a 5-second capture and unsupported combinations are attempted and recorded |
+| `--fill-missing` | inspect both `results.json` and the real capture directory, then offer to run only missing scores/captures; known unsupported and previously failed combinations are reported but not retried |
+| `--yes` | confirm `--fill-missing` non-interactively (used by the GUI after its confirmation dialog) |
 | `--capture [sec]` | RenderDoc capture at T seconds (default 5) |
 | `--full-analysis` | same as menu [5] |
 | `--results` / `--results-delete <id>` / `--results-clear` / `--results-export <csv>` | result management |
@@ -135,7 +142,9 @@ runs append summary rows unless `--cpu-no-save` is supplied.
 under the `gpu_burn` family id and are separated by their versioned result
 contract. Current runs use `gpu_burn_v3_fixed_steps_<N>_kaleidoscope`:
 the GUI offers Light (16), Medium (64), Heavy (256), and Custom (16–2048),
-and always sends a fixed `--iter` value without per-device auto-tuning.
+and always sends a fixed `--iter` value without per-device auto-tuning. Software
+renderers clamp this workload to 64 steps, so the formal 64-step score remains
+directly comparable instead of silently dropping to 32.
 For `--liquid-solver sph`, every duration—including 15 seconds—is currently
 saved as `cinematic_liquid_sph_slice_v1_preview`; changing only the duration
 does not make the four open correctness contracts formal.
@@ -155,7 +164,9 @@ gpu_benchmark.exe --cpu-benchmark per-core --cpu-time 0.09 --cpu-warmup 0 --cpu-
 
 `per-core` means a sequential test of every available **logical processor**, not
 one representative thread per physical core. `multi` starts one worker for every
-available logical processor; `all` runs per-core first and multi second. Each
+available logical processor; `all` runs all-core first and the long single-core
+sweep second, preventing the all-core score from being depressed by heat and
+power state left by the sweep. Each
 test splits its measurement budget into three rounds and selects the median.
 The per-core summary is the arithmetic mean of those logical-processor medians.
 
@@ -206,6 +217,8 @@ the three primary workload contracts.
 | Flights test | [7] | `--flights N --capture 5`, RenderDoc convert |
 | Particle test | [8] | `--particles N --capture 5`, RenderDoc convert |
 | Headless compute | [9] | `--headless`, no capture |
+| Complete test | `--complete-suite` | one-click formal matrix across all GPUs/APIs, including headless Particle tests and windowed captures |
+| Fill missing | `--fill-missing --yes` | GUI confirms first; the worker rechecks legacy/current results and the capture directory before launching only genuinely missing work |
 
 Parity details:
 - Custom and Full Analysis honour the selected workload. The specialised
@@ -227,3 +240,9 @@ Parity details:
   Light/Medium/Heavy/Extreme presets).
 - Duration defaults to **15 seconds** (time mode); switch the unit to Frames for
   a fixed frame-count run.
+- Fill-missing uses `complete-suite-status.tsv` beside the result database to
+  remember unsupported and failed combinations. A score in `results.json` does
+  not satisfy a required capture by itself: the matching `.rdc`/`.gputrace`
+  must still exist in the capture directory. Successful retries append through
+  the normal result writer, which rewrites a valid current `results.json` while
+  preserving compatible legacy records.

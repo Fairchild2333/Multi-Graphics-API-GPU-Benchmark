@@ -152,8 +152,8 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
 |------|--------------|----------|--------|-------|
 | **Bandwidth** | `stream` (default) | Particle working-set memory traffic | GB/s | `--particles` |
 | **Compute (achievable)** | `nbody` | FP32 ALU + SFU + shared memory | GFLOP/s | `--bodies` |
-| **Primary visual GPU burn** | `gpu_burn` | Perspective 3D cut-glass crown and layered diamond shards; fixed-step SDF/FP32/SFU/INT + overdraw | Gpix-step/s | safe auto-tune (recommended), or fixed `--iter 16..32` |
-| **Legacy visual GPU burn** | `gpu_burn_v1` | Preserved Plasma Bloom v1 contract and shader | Gpix-step/s | safe auto-tune (recommended), or fixed `--iter 16..32` |
+| **Primary visual GPU burn** | `gpu_burn` | Perspective 3D cut-glass crown and layered diamond shards; fixed-step SDF/FP32/SFU/INT + overdraw | Gpix-step/s | fixed `--iter 16..2048`; software renderers cap at 64 |
+| **Legacy visual GPU burn** | `gpu_burn_v1` | Preserved Plasma Bloom v1 contract and shader | Gpix-step/s | fixed `--iter 16..2048`; software renderers cap at 64 |
 | **Advanced GraphicsBurn component** | `gpu_stress` | Fragment FP32/SFU/INT ALU + four-pass overdraw | Gpix-iter/s | auto-tuned, or `--iter` |
 | **Legacy fill test** | `stress` | Fractal fragment ALU + fill | G-iter/s | `--iter` |
 | **Compute (peak)** | `synthpeak` | Raw ALU throughput per precision | GFLOPS / GIOPS | `--precision`, `--iter` |

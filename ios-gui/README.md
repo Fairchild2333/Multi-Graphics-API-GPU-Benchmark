@@ -1,49 +1,70 @@
 # Mangekyo iOS GUI (SwiftUI)
 
-This directory contains the native iOS front-end for **Mangekyo** (Cross-API CPU & GPU Benchmark Suite), targeting **iOS 16.0+**. 
-It runs the C++ GPU engine (`gpu_engine`) in-process via a lightweight Objective-C++ bridge.
+Native iOS front-end for **Mangekyo**, targeting **iOS 16.0+** (Liquid Glass on 26/27).
+Intended path: in-process `gpu_engine` via Objective-C++ bridge + embedded Metal host
+(`CAMetalLayer` → `MetalBackend::Run`).
+
+> Status (2026-07-24, fact layers):
+> - **Code written**: `ios-gui/` + `src/ios_engine_host.*` + bridge (`gpb_*`) + Metal NO_GLFW iPhone path.
+> - **Not compiled here**: this Windows workstation cannot build iOS; no Xcode/`cmake` iOS artifact on this machine.
+> - **Not device/simulator verified**: no smoke run logged.
+> - **Score identity (engine, when built for iPhone)**: `CollectResult` appends `_ios_preview`
+>   (e.g. `stream_v1_ios_preview`,
+>   `gpu_burn_v3_fixed_steps_16_kaleidoscope_ios_preview`).
+>   Default host duration is 3s preview — **not** desktop 15s; do not mix with desktop groups.
+> - **Not done**: formal mobile duration/thermal contract, liquid via embedded host,
+>   App Store packaging, Mac CI.
 
 ## Prerequisite
 
-1. A Mac running macOS 14+ with **Xcode 16+** installed (required for iOS 26+ Liquid Glass APIs).
-2. [XcodeGen](https://github.com/yonaskolb/XcodeGen) installed on your Mac:
+1. macOS 14+ with **Xcode 16+** (Xcode 26+ for Liquid Glass APIs).
+2. [XcodeGen](https://github.com/yonaskolb/XcodeGen):
    ```bash
    brew install xcodegen
    ```
 
 ## How to Build
 
-Follow these steps on your Mac:
-
-### 1. Compile the C++ Engine for iOS
-
-Run CMake using the iOS Toolchain:
+### 1. Compile `gpu_engine` for iOS
 
 ```bash
-# In the repository root:
+# Repository root:
 cmake -S . -B build-ios -GXcode \
   -DCMAKE_SYSTEM_NAME=iOS \
   -DCMAKE_OSX_ARCHITECTURES=arm64 \
   -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0
 
-cmake --build build-ios --config Release -- -sdk iphoneos
+cmake --build build-ios --config Release --target gpu_engine -- -sdk iphoneos
 ```
 
-This compiles `libgpu_engine.a` for physical iOS devices (ARM64). If you want to compile for the simulator, compile using `-sdk iphonesimulator`.
-
-### 2. Generate the Xcode Project
-
-Generate `Mangekyo.xcodeproj` using XcodeGen:
+Simulator:
 
 ```bash
-# Inside the ios-gui directory:
-codegen
+cmake --build build-ios --config Release --target gpu_engine -- -sdk iphonesimulator
 ```
 
-This will automatically create `Mangekyo.xcodeproj` according to `project.yml`.
+### 2. Generate the Xcode project
 
-### 3. Build & Run in Xcode
+```bash
+cd ios-gui
+xcodegen
+```
 
-1. Open `Mangekyo.xcodeproj` in Xcode.
-2. Select your physical iOS device or Simulator.
-3. Click the **Run** button (or press `Cmd + R`).
+### 3. Run
+
+Open `Mangekyo.xcodeproj`, pick a device/simulator, Run.
+
+On the GPU tab: wait for the Metal preview surface, choose **stream** or **gpu_burn**,
+set duration (default 3s), tap Run. Stop remains available under load.
+
+## Architecture
+
+| Piece | Role |
+|---|---|
+| `MetalBenchView` | `UIView` + `CAMetalLayer` |
+| `gpb_set_metal_layer` / `gpb_start_workload` | Bridge → `ios_engine_host` |
+| `MetalBackend` + `SetEmbeddedWindow` | NO_GLFW iOS path |
+| `RequestStop` | Cooperative cancel from Swift / scenePhase |
+
+Bundled resources: `shaders/particle.metal`, `shaders/gpu_burn.metal` (copied into Documents at launch).
+Data root: app Documents via `GPU_BENCH_DATA_DIR`.

@@ -50,13 +50,13 @@
   - [x] Metal 液体：raymarch present（`liquidFragment` / `_metal_preview`）— **待真 Mac 编译与冒烟**
   - [ ] 真 Mac 三主项冒烟 + 15s 正式流程
   - [x] `MTLCaptureManager`(.gputrace) 接线（F12/`--capture`/`--capture-frame`）— **待真 Mac 验证**
-- [ ] **3. Android**：NativeActivity/ANativeWindow 表面层替代 GLFW + 新前端；RenderDoc Android 远程抓帧；评估温控对 15 秒 Burst 语义的影响。
-  - [ ] 主路径：Vulkan 1.0+（覆盖 Tegra K1 只有 Vulkan 1.0 驱动的情况）+ GL ES 3.1/3.2 后端（GLSL ES 重写、EGL、`EXT_disjoint_timer_query` 探测）；设备分界线为 **K1 及以后 = 主路径，Tegra 3/4 = legacy tier**。
-  - [ ] **SDK/ABI 合同（2026-07-20 锁定）**：主包 minSdk 21 / targetSdk 最新；NDK r27+ 开 16 KB 页对齐；结果写应用专属目录；Vulkan 运行时门控（API ≥24 + dlopen 成功，否则 ES 3.1）；四 ABI 全原生编译 **armeabi-v7a / arm64-v8a / x86 / x86_64**，结果 metadata 记录真实 ABI；legacy APK 仅 armeabi-v7a、targetSdk 可较低。详见 HANDOFF 目标 C 第 3 条。
-  - [ ] **UI 基调（2026-07-20 锁定）**：主包单套 Compose + Material 3 能力递减（动态取色 12+ 回退品牌静态配色）；四页信息架构对齐 WinUI/SwiftUI；若最新 Compose 要求 minSdk 23 则主包提 23（K1=API 24 零损失）；legacy APK 极简原生 View 不用 Compose；满载可 Stop。
-  - [x] **前端脚手架已建（2026-07-20，代码已写、未编译）**：`android/` Gradle + Compose 骨架、JNI/CMake stub、registry/results 占位；交接见 `android/README.md`，接手 AI 先更新占位版本号并完成首次构建。
+- [ ] **3. Android**：RenderDoc Android 远程抓帧；评估温控对 15 秒 Burst 语义的影响；GLES 降级 / 液体 / 正式移动 duration。
+  - [x] **Vulkan 垂直切片（2026-07-24）**：ANativeWindow + `gpu_engine` + Compose GPU 页 Run/Stop（stream / gpu_burn light=16，默认 3s）。**Windows 本机 `assembleDebug` 通过；未真机。** 引擎真实写出 `*_android_preview`。
+  - [ ] 主路径补齐：GL ES 3.1/3.2 后端（GLSL ES 重写、EGL、`EXT_disjoint_timer_query` 探测）；设备分界线为 **K1 及以后 = 主路径，Tegra 3/4 = legacy tier**。
+  - [ ] **SDK/ABI 合同（2026-07-20 锁定）**：主包 minSdk 21 / targetSdk 最新（脚手架已抬到 minSdk 23）；NDK r27+ 开 16 KB 页对齐；结果写应用专属目录；Vulkan 运行时门控（API ≥24 + dlopen 成功，否则 ES 3.1）；四 ABI 全原生编译 **armeabi-v7a / arm64-v8a / x86 / x86_64**，结果 metadata 记录真实 ABI；legacy APK 仅 armeabi-v7a、targetSdk 可较低。详见 HANDOFF 目标 C 第 3 条。
+  - [x] **UI 壳（2026-07-20/24）**：Compose + Material 3 四页；动态取色 12+；满载可 Stop。registry 仅展示已接线 GPU 项及真实 `*_android_preview` 字符串。
   - [ ] **ES 2.0 legacy tier（用户 2026-07-20 锁定底线：Tegra 3/4 必须支持）**：简化 fragment-only GPU Burn（避开 highp，Tegra 3 仅 FP20）新组 `gpu_burn_es2_legacy_v1`；粒子改 CPU(NEON) 物理 + GPU 渲染或纯 fragment 填充率测试（新 workloadVersion，不与 `stream` 混排）；液体 unsupported；墙钟计时、无 RenderDoc（用户已确认不要求）；独立 legacy APK（设备停在 Android 4.1–5.1，minSdk 约束），主包不背包袱。详见 HANDOFF 目标 C 第 3 条。
-- [ ] **4. iOS**（未开工；排在 Android 后）：**最低 iOS 16**；仅 Metal；`MTLCaptureManager`；共享 SwiftUI；App Store。**iOS 26/27 = Liquid Glass**，16–25 Material。开工规格见 `HANDOFF.md` §3.0.3。
+- [ ] **4. iOS**（**源码垂直切片已写；本机未编译、未设备验收**；排在 Android 后）：**最低 iOS 16**；仅 Metal；`MTLCaptureManager`；SwiftUI；App Store。**iOS 26/27 = Liquid Glass**，16–25 Material。引擎写出 `*_ios_preview`。规格见 `HANDOFF.md` §3.0.3；状态见 `ios-gui/README.md`。
 - [ ] **5. Debian Linux**：构建修正、`.deb` 打包、CI 与实机验证（后端/GLFW/RenderDoc/XDG 路径均已有，摩擦最低）。
 - [ ] **6. WebGPU**：按既定路线——capability registry P0 → 固定 Dawn 版本原生后端（Stream → GPU Burn → Cinematic Liquid）→ `/web` 浏览器前端；独立版本 id（`stream_webgpu_v1` 等），无可靠 timestamp 不产生正式 score（对应上方“原生 WebGPU 后端”与 `/web` 两条任务）。
 - [ ] **7. HarmonyOS PC / 鸿蒙**：把现有 `ohos/` 独立 Vulkan 粒子 demo 升级为正式产品端口；补统一 workload registry、主 CLI/GUI、GPU Burn/Cinematic Liquid、结果合同与适合该平台的抓帧编排。现有 demo 不能标为已完成移植。

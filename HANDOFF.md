@@ -69,14 +69,14 @@
    - **SDK 版本合同（用户 2026-07-20 锁定）**：主包 **minSdk 21 (Android 5.0) / targetSdk 最新**。要点：NDK r27+ 编译并开启 **16 KB 页对齐**（target Android 15+ 对原生 `.so` 强制）；结果/历史写应用专属目录（`getExternalFilesDir`/内部存储，对应 Windows 侧 `%LOCALAPPDATA%` 语义），不碰共享存储；新 API 一律 `Build.VERSION.SDK_INT` 守卫；Vulkan 运行时门控（API ≥24 且 `dlopen` 成功才启用，否则 ES 3.1，同 Windows delay-load 思路）。legacy APK 单独 `minSdk 21 / targetSdk 可较低`（仅侧载，不为老壳子适配新行为）。targetSdk 不影响 15 秒 Burst 语义；温控评估照旧。
    - **ABI 合同（用户 2026-07-20 锁定）**：主包计划编译 **armeabi-v7a、arm64-v8a、x86、x86_64 四个 ABI**，全部按架构原生编译（同 Windows x64/ARM64 两套原生二进制的规则，不做仿真混入）；x86/x86_64 主要覆盖模拟器、老 Atom 设备与 Chromebook。结果 metadata 必须记录真实 ABI，不同 ABI 不混排宣称。legacy APK 只需 **armeabi-v7a**（Tegra 3/4 均为 32-bit ARM）。
    - **UI 基调（用户 2026-07-20 锁定）**：主包**单套 Jetpack Compose + Material 3**，能力递减而非双套 UI——动态取色 (Material You) 仅 Android 12+，以下回退 Mangekyo 品牌静态 Material 3 配色；预测式返回 (13/14+)、单色图标 (13+)、SplashScreen compat 均自动降级。3D 场景走原生 SurfaceView/ANativeWindow，Material 3 只管壳层；信息架构对齐 WinUI/SwiftUI（GPU/CPU/History/Charts 四页，同一份 workload registry/metadata，遵守交接规则 6）。**androidx 下限抬升注意**：若开工时最新 Compose 已要求 minSdk 23，主包直接提到 23（主包最老目标设备 K1 = API 24，零损失）；否则锁 21 兼容版本。**legacy APK 不用 Compose/Material 3**：2012 年 1GB RAM 设备用极简原生 View（列表 + Run + 结果文本）。满载时 UI 必须保持可 Stop，跑分工作不占 UI 线程（对齐 GPU Burn Soak 的 GUI 规则）。
-   - **前端脚手架（2026-07-20；2026-07-24 更新：gpu_engine Vulkan 垂直切片已接入，assembleDebug 通过，未真机验证）**：`android/` Compose Material 3 壳 + `libmangekyo_jni` 链入根 `gpu_engine`（`GPU_BENCH_NO_GLFW` / ANativeWindow `vkCreateAndroidSurfaceKHR`）。GPU 页可对 `stream` / `gpu_burn` 做 3s preview Run/Stop；SPIR-V 经 glslc 进 assets。正式 `workloadVersion` / GLES 降级 / 液体仍 TODO。详见 `android/README.md`。
+   - **前端 + 引擎垂直切片（2026-07-24 事实）**：`android/` Compose Material 3 壳 + `libmangekyo_jni` 链入根 `gpu_engine`（`GPU_BENCH_NO_GLFW` / ANativeWindow `vkCreateAndroidSurfaceKHR`）。GPU 页可对 `stream` / `gpu_burn`（light steps=16）做默认 3s preview Run/Stop；SPIR-V 经 glslc 进 assets。**本机 Windows：`assembleDebug` 已通过；未真机运行。** `CollectResult` 在 `__ANDROID__` 下真实追加 `_android_preview`（例：`stream_v1_android_preview`、`gpu_burn_v3_fixed_steps_16_kaleidoscope_android_preview`）——不是桌面 15s 合同，禁止混排。GLES 降级 / 液体 / CPU 宿主 / 温控 15s 仍 TODO。详见 `android/README.md`。
    - **用户锁定底线（2026-07-20）：Tegra 3/4（GL ES 2.0）必须支持**，形态为独立 **ES 2.0 legacy tier**，不允许用 unsupported 打发：
      - **GPU Burn**：简化 legacy 变体（纯 fragment 全屏重载，避开 highp 依赖——Tegra 3 fragment 仅 FP20；降低 SDF/raymarch 复杂度），新组如 `gpu_burn_es2_legacy_v1`。三主项中最先做。
      - **Stream/Particle**：ES 2.0 无 transform feedback、Tegra VTF 不可靠，粒子物理无法留在 GPU。改为 CPU(NEON) 物理 + GPU 渲染，或纯 fragment 填充率/带宽测试；含义已变，必须新 workloadVersion，绝不与现有 `stream` 组混排。
      - **Cinematic Liquid**：无原子/SSBO/3D 纹理/精度，无降级空间，明确 **unsupported**。
      - **计时**：Tegra 3/4 无可靠 GPU timer query，legacy tier 只用墙钟 FPS，成绩自成体系；**用户已确认不要求 RenderDoc/抓帧**，抓帧标注 unavailable 即可。
      - **打包**：这些设备停在 Android 4.1–5.1，现代 NDK 最低 minSdk 21；Tegra 4 的 4.4 设备可能需旧 NDK。做**独立 legacy APK**，主 Android 包（Vulkan/ES 3.1+）不背此包袱。
-4. **iOS**（**尚未开工**——仓库无 `ios/` / 无 iOS target；排在 Android 之后）。用户锁定细节见 **§3.0.3**（最低 **iOS 16**；**iOS 26/27 = Liquid Glass**）。摘要：Metal-only + 共享 SwiftUI；无 RenderDoc；`MTLCaptureManager`；App Store/沙盒；温控则独立 `workloadVersion`。
+4. **iOS**（**2026-07-24 事实：代码已写，本机未编译、未模拟器/真机验收**——`ios-gui/` + `ios_engine_host` + `gpb_*` 桥；`CollectResult` 在 iPhone 目标下追加 `_ios_preview`）。用户锁定细节见 **§3.0.3**（最低 **iOS 16**；**iOS 26/27 = Liquid Glass**）。摘要：Metal-only + SwiftUI；无 RenderDoc；`MTLCaptureManager`；App Store/沙盒；温控/正式 duration 合同仍开放。
 5. **Debian Linux**：技术摩擦最低——Vulkan/OpenGL 后端、GLFW、RenderDoc、XDG 数据路径全部已有；主要是构建修正、`.deb` 打包、CI 与实机验证。
 6. **WebGPU**：按第 11 节既定路线执行——先统一 capability registry（P0），再固定 Dawn 版本的原生后端，依次移植 Stream、GPU Burn、Cinematic Liquid，最后 `/web` 浏览器前端。结果使用独立临时版本 id（如 `stream_webgpu_v1`），记录 `apiImplementation/underlyingBackend/timingMode`；timestamp-query 是可选能力，没有可靠 GPU timestamp 不产生正式 score；浏览器无 RenderDoc，抓帧标注不可用。
 7. **HarmonyOS PC / 鸿蒙**：仓库已有 `ohos/` 的独立 Vulkan 粒子 demo，但没有统一 workload registry、GPU Burn/Cinematic Liquid、主 CLI/GUI、15 秒结果合同或抓帧编排。该移植项是把它升级为与主产品边界一致的正式端口；在能力与捕获模型明确前必须使用独立结果组，不能把现有 demo 写成已完成移植。
@@ -135,7 +135,7 @@
 
 ### 3.0.3 iOS 实现规格（2026-07-19 用户锁定 — 给后续 AI 开工用）
 
-> **状态：未开工。** 无 `ios/`、无 iOS Xcode target、无真机/模拟器验收。平台顺序仍为 macOS → **Android → iOS**；除非用户改序，不要抢 Android 之前开工。macOS GUI「代码已落」≠ iOS 可用。
+> **状态（2026-07-24 事实）**：**代码已写**（`ios-gui/` SwiftUI + `CAMetalLayer` → `ios_engine_host` → `MetalBackend::Run`；stream/gpu_burn 默认 3s + `RequestStop`）。**本 Windows 工作站未做 Xcode/iOS 编译；无模拟器/真机冒烟记录。** 引擎在 `TARGET_OS_IPHONE` 下真实追加 `_ios_preview`（例：`stream_v1_ios_preview`）；这仍是 preview 合同，不是桌面 15s。平台顺序：macOS → Android → **iOS**。
 
 #### A. 用户锁定
 
@@ -148,19 +148,19 @@
 | **抓帧** | **无 RenderDoc**；`MTLCaptureManager` → `.gputrace`；失败 JSON/UI 诚实 `captureUnavailable` |
 | **成绩** | 与桌面共用 schema；若 duration/温控/后台模型不同 → **新 `workloadVersion`**，不得混入 Windows/macOS 桌面 15s 正式榜 |
 
-#### B. 建议仓库布局（开工时创建，现不存在）
+#### B. 仓库布局（代码已存在；Mac 构建/设备验收未做）
 
 ```
-ios-gui/                          # 或把 macos-gui 升为 Apple multiplatform
-  project.yml / *.xcodeproj
+ios-gui/                          # 已存在：XcodeGen project.yml + SwiftUI
+  project.yml
   Mangekyo/                       # iOS app target, deployment 16.0
-AppleShared/                      # 从 macos-gui 抽出的共享 SwiftUI（推荐）
-  GlassCard.swift                 # 已有 iOS 26 availability 预留
-  Views/  Engine/  Models/        # Run/CPU/History/… 条件编译 #if os(iOS)
-src/                              # 既有 metal_backend.mm / gpu_engine — 需 iOS 表面层
+    Views/ Engine/ Models/ …      # Run/CPU/History/…；嵌入 Metal 预览面
+src/ios_engine_host.h/.cpp        # CAMetalLayer → MetalBackend::Run
+src/metal_backend.mm              # TARGET_OS_IPHONE 嵌入路径
+# AppleShared/ 仍未抽离；部分 UI 从 macos-gui 复制/改写，非独立共享 target
 ```
 
-参考现有 macOS 前端：`macos-gui/GPUBenchmark/`（`ContentView`、`RunView`、`CpuView`、`HistoryView`、`ChartsView`、`SettingsView`、`AboutView`、`BenchEngine`、`GpuBenchBridge.*`、`GlassCard`）。
+参考 macOS 前端：`macos-gui/GPUBenchmark/`。
 
 #### C. 引擎与表面层（相对 macOS 的必改点）
 
@@ -421,7 +421,7 @@ probe 前把随包 `tools/RenderDoc` 设为进程级 `VK_IMPLICIT_LAYER_PATH` �
 
 - **OS 底线 macOS 12 Monterey**（见 §3.0.2）：CMake + SwiftUI deployment 12.0；壳层/玻璃按系统版本回退；功能与成绩合同不按 OS 拆分。
 - macOS SwiftUI 已与 WinUI 真对齐（Run/CPU/History/Duration/Capture/API 多选等）；仍待 **Mac 编译 + Monterey 冒烟**。细节见 `macos-gui/README.md`、`docs/macos-notes.md`。
-- **iOS：未开工**（见 §3.0.3）。用户已锁定 **最低 iOS 16** + **iOS 26/27 = Liquid Glass**（16–25 Material）。共享 `GlassCard` 已预留 `iOS 26.0`。排在 Android 之后；详细开工规格在 §3.0.3 供其他 AI 直接实现。
+- **iOS：代码已写 / 本机未编译 / 未设备验收**（见 §3.0.3）。`ios-gui/` + `ios_engine_host` 存在；`CollectResult` 追加 `_ios_preview`。用户已锁定 **最低 iOS 16** + **iOS 26/27 = Liquid Glass**（16–25 Material）。共享 `GlassCard` 已预留 `iOS 26.0`。
 - HarmonyOS 仍是原始 Vulkan 粒子 demo，没有 workload suite、15 秒结果模型或抓帧编排。
 
 ### 已知文档漂移
@@ -563,7 +563,7 @@ PathService 已把 results/captures/reports/logs 改到
 - [x] 2026-07-15：stage verifier 已覆盖 3 个 surface SPIR-V；v1/v2 capture 命名已隔离；非 15 秒预览结果进入独立 `_preview` 组。
 - [ ] `cinematic_liquid_v2` 的 WinUI 交互/run/history、船/沉球/越沿粒子精确数值与视觉轨迹、跨 GPU 时间推进合同、Vulkan timestamp 边界和异常路径资源清理仍待验收；DX12/DX11/OpenGL 液体仍未实现（**Metal 已有 MLS-MPM + raymarch preview，见目标 C / §3.0.1**）。
 - [x] **2026-07-19：macOS 最低系统锁定为 12 Monterey（代码侧已改）**：CMake/`macos-gui` deployment 12.0；`NavigationView`/`defaultSize` 可用性回退；文档 `HANDOFF` / `macos-notes` / `macos-gui/README` / 根 `README` 已同步。**真机 Monterey 编译产物运行验收仍开放**。
-- [x] **2026-07-19：iOS 规格写入（未开工）**：最低 **iOS 16**；**iOS 26/27 = Liquid Glass**；§3.0.3 含布局/引擎/导航/验收/给其他 AI 的硬约束。`GlassCard` 预留 `iOS 26.0`。**无 iOS 工程/无设备验收**。
+- [x] **2026-07-19：iOS 规格写入**；**2026-07-24：源码垂直切片已写入仓库**（`ios-gui/` + embed host）。最低 **iOS 16**；**iOS 26/27 = Liquid Glass**。`GlassCard` 预留 `iOS 26.0`。**本机无 iOS 编译产物；无模拟器/真机验收。**
 - [x] 2026-07-15：安装/Release 链完成并实跑：安装 Inno Setup 6.7.3，以官方 RenderDoc 1.45 固定 archive+SHA 为输入，从头构建 CLI/WinUI、511-file stage、PE delay-import 审计、CPack ZIP、ZIP 内容复核与 Inno Setup；最终 v0.1.0 ZIP/Setup、`SHA256SUMS.txt`、`release-assets.json` 已生成。
 - [x] 2026-07-15：应用户要求完成 duck family v5 场景改造（经典造型大黄鸭 + 3 只小鸭、7 刚体、SDF/渲染/碰撞三处一致、bounding 剔除；`cinematic_liquid_v2_duck_family_v5`、`shaderVersion=7`、`sceneVersion=3`）。CLI Release 重建通过；验证细节见第 10 节。15 秒正式成绩尚未在新版本下重跑。
 - [x] 2026-07-15：用户恢复流体工作后完成 iterative optics v6：保留用户的 duck family，surface 改为 5x5x5 binomial（mix 0.90），最多 4 界面 Fresnel/Snell + 分段 Beer–Lambert/opaque depth sorting，`extinction=(30,10,8)`、linear exposure、density 边界归零；`cinematic_liquid_v2_iterative_optics_v6`、`shaderVersion=8`、`sceneVersion=3`。CLI/WinUI Release 构建通过，只有 6 秒短预览，尚无正式 15 秒成绩。
@@ -602,11 +602,12 @@ PathService 已把 results/captures/reports/logs 改到
 - 用户要求产品至少能在 **macOS 12** 运行；已将 CMake + SwiftUI deployment 从 14.0 降至 **12.0**，并补 `NavigationView` / `defaultSize` 回退（详见 §3.0.2）。
 - 本机为 Windows，**未**在 Mac/Monterey 上编译或运行；验收仍开放。同步文件：`HANDOFF.md`、`docs/macos-notes.md`、`macos-gui/README.md`、根 `README.md`。
 
-### 2026-07-19 iOS：未开工 + iOS 16 底线 + Liquid Glass 合同
+### 2026-07-19 iOS：iOS 16 底线 + Liquid Glass 合同（规格）；2026-07-24 源码切片
 
 - 用户锁定：**最低 iOS 16**；**iOS 26/27 必须新版 Liquid Glass**（16–25 Material 回退）。
-- **事实**：仓库无 iOS 工程；顺序仍 Android → iOS；不得宣称可跑。
-- 完整开工规格见 **§3.0.3**（布局、表面层、导航表、功能对齐、验收、其他 AI 硬约束）；`GlassCard` 已预留 `iOS 26.0`。
+- **2026-07-19 当时事实**：规格写入、无工程。
+- **2026-07-24 事实**：`ios-gui/` + `ios_engine_host` + `_ios_preview` 后缀代码已在仓库；**Windows 本机不能也不曾完成 iOS 编译/运行**；不得写成「可安装发布」或「已实机跑通」。
+- 完整规格见 **§3.0.3**；`GlassCard` 已预留 `iOS 26.0`。
 
 ### 2026-07-18 WinUI WARP 命名与 Full Analysis 跳过状态
 
@@ -872,6 +873,14 @@ PathService 已把 results/captures/reports/logs 改到
 - 引擎默认从旧 fixed-256 改为固定 16 步，`gpuBurnAutoTune` 继续保持 false；软件渲染器仍保留 32 步安全钳制。新结果使用 `gpu_burn_v3_fixed_steps_<实际步数>_kaleidoscope` 与 `loadModel=fixed_selectable_per_frame`，因此不同固定负载互不混分；旧 `gpu_burn_v2_fixed256_kaleidoscope` 成绩也保持原组。
 - `cmake --build build --config Release` 成功。首次 WinUI 链接因正在运行的 `gui/x64/Release/gpu_bench_gui.exe`（PID 50784）锁定输出而报 LNK1104，按用户长期偏好直接强制关闭后，VS 18/v145 Release x64 重编译成功，0 error；仅保留既有 VCLibs/重复 WinAppSDK initializer 警告。按用户要求未启动 GUI、未运行 benchmark。
 
+### 2026-07-24: Android/iOS 成绩后缀与文档去假
+
+- `AppBase::CollectResult()`：`__ANDROID__` → 追加 `_android_preview` + `embedHost=android_anativewindow`；`TARGET_OS_IPHONE` → `_ios_preview` + `embedHost=ios_cametallayer`。与桌面 15s 正式组隔离。
+- `CurrentPlatform()`：Apple 路径用 `TARGET_OS_IPHONE` 区分 iOS/macOS。
+- Android `WorkloadRegistry`：去掉假 placeholder；仅列出已接线项，字符串与引擎一致（`stream_v1_android_preview`、`gpu_burn_v3_fixed_steps_16_kaleidoscope_android_preview`）。
+- `HANDOFF.md` / `android/README.md` / `ios-gui/README.md` / `docs/TODO.md`：按交接规则分层写清「代码已写 / assembleDebug 通过 / 未真机 / iOS 本机未编译」。
+- 本条未声称 Android 真机或 iOS 编译通过。
+
 ### 2026-07-24: DX11 16M particle dispatch chunking
 
 - Root cause confirmed from the user-provided RTX 4070/5090 logs: 16,777,216 particles at 256 threads per group require 65,536 groups, while one DX11 `Dispatch` dimension is limited to 65,535. This was an engine dispatch-shaping limit, not a GPU performance or driver limit.
@@ -884,6 +893,23 @@ PathService 已把 results/captures/reports/logs 改到
 - 0.2.4 validation/build artifacts: the normal Release engine and VS 18/v145 GUI builds succeeded; both the default and staged GUI report file/product version 0.2.4. A fresh x64 stage with the pinned portable RenderDoc payload passed verification with 0 errors and 4 existing clean-machine/report-worker warnings. `out/packages/Mangekyo-0.2.4-windows-x64.zip` was generated (SHA-256 `1f050431e4d7a4c22d0db9173bc38f6b0f52e3264a5ac727e093f2fd0b17d7a0`). The primary WiX artifact `out/installer/Mangekyo-0.2.4-windows-x64.msi` was generated (SHA-256 `d7c311bafe18456f78993a7e1461d0ec77718f8abebf33741ec1ef8404049778`, Authenticode `NotSigned`). No GUI or benchmark workload was launched; RTX 4070/5090 DX11 16M runtime validation remains user-side.
 - `.gitignore` now excludes Android/Gradle generated state (`android/.gradle`, `.kotlin`, root/module `build`, native `.cxx`, and `local.properties`) so a repository-root `git add .` does not stage local Android build caches or outputs.
 - Windows ARM64 release artifacts were subsequently built after the x64 release: the engine and self-contained WinUI GUI compiled successfully, and `dumpbin /headers` reports `AA64 machine (ARM64)` for both staged executables. The ARM64 stage verifier completed with 0 errors and 5 warnings (clean-machine/runtime validation, missing frozen report worker, portable RenderDoc not bundled, and host/target architecture mismatch). The manifest reports version `0.2.4`, architecture `arm64`, and `bundled.renderDocPortable=false`. Generated artifacts are `out/packages/Mangekyo-0.2.4-windows-arm64.zip` (SHA-256 `9b4c0fa81b02662670ebdfe7009c35f81e89fbdc81f85a85671287cd4f1493a9`) and unsigned `out/installer/Mangekyo-0.2.4-windows-arm64.msi` (SHA-256 `25d693e092f7cd1fc04771286980f6eaa3e7b395339f55c7494c6f55c250abbf`). The AMD64 build host cannot execute these ARM64 binaries, so no ARM64 GUI or benchmark runtime test was performed.
+
+### 2026-07-30: Legacy Intel DX12/RenderDoc fallback and OpenGL timing repair
+
+- Compared the two user archives for the same Intel HD Graphics 6000. `D:\学习\score\1\imac 2014` contains successful DX12 RenderDoc captures with driver `20.19.15.4531` (particle 64K/1M/16M and GPU Burn), while the failing archive uses driver `10.18.15.4279` and crashes at DX12 `CreateCommandQueue` under RenderDoc. This is a driver/RenderDoc compatibility regression rather than a lack of DX12 support on the GPU.
+- Both direct GUI jobs and complete/fill suites now retry a failed DX12+RenderDoc job once without RenderDoc. A successful retry preserves the benchmark score, records a capture-incompatible status, and shows a clear missing-capture issue. The Intel HD 6000/`10.18.15.4279` case additionally recommends the previously proven `20.19.15.4531` or a compatible newer Intel driver. ARM behavior is unchanged because RenderDoc is unavailable there.
+- Legacy Intel OpenGL `10.18.15.x` now uses synchronized wall-clock timing instead of unreliable timestamp queries. Generic timestamp validation also rejects non-monotonic, zero-duration, and implausibly high-throughput samples, then switches to the synchronized fallback.
+- GUI issue reporting includes both DX12 capture fallback and OpenGL synchronized timing. The unsupported-combination heading no longer says that the condition is "not a test failure". The software-renderer GPU Burn ceiling text is synchronized at 64 steps.
+- Restored the missing `endif()` around the concurrent iOS CMake source-list block so project generation remains valid; no unrelated iOS implementation was changed.
+- Validation: Windows x64 Release CLI+GUI and Windows ARM64 Release CLI+GUI both compile successfully with 0 errors. Per the user's standing instruction, no GUI or benchmark runtime was launched. Actual DX12 capture restoration on the iMac still requires installing a working Intel display driver and user-side validation; the fallback cannot create an `.rdc` through the crashing driver.
+
+### 2026-07-30: 0.2.6 legacy timing, result provenance, and History GPU naming
+
+- Reviewed the archived machines under `D:\学习\score\2\bug报告`. Their zero-FPS and impossible-throughput rows are consistent with unreliable legacy GPU timestamp queries: Glenfly Arise2030, Radeon HD 5700, GeForce 9500 GT, and GeForce GTX 570 now use a synchronized wall-clock fallback on the affected OpenGL/DX11 driver paths. Generic validation also switches away from GPU timestamps when queries fail, never resolve, go backwards, return zero, or imply an impossible Stream rate. Synchronized measurements receive a distinct timing marker in `workloadConfig` and `_sync_timing` workload-version suffix so they cannot silently mix with timestamp-query scores. Existing bogus JSON rows are preserved; rerunning creates valid, separately identified results.
+- GPU display normalization now strips OpenGL decorations such as `/PCIe/SSE2`, matches those aliases back to the DXGI/Vulkan adapter, and automatically supplies an omitted vendor prefix without rewriting the detailed model: RX/Radeon/Vega/HD families become AMD Radeon, GeForce/RTX/GTX/GT become NVIDIA GeForce, Fantasy/Fenghua becomes Innosilicon, and Arise becomes Glenfly. History vendor headings are localized in Chinese, including `英伟达`, `英特尔`, `摩尔线程`, `芯动科技`, and `格兰菲`; historical rows are normalized at display time, so old result files benefit without a migration. FantasyII remains the detailed model string while its vendor is shown as 芯动科技 (the product is 风华2号), per the rule not to translate model names.
+- Result schema is now v4 and records `appVersion` in JSON/CSV. GPU results already carried `workloadVersion`, `driverVersion`, `osVersion`, `platform`, `osArchitecture`, and `processArchitecture`; CPU results now receive application/OS provenance as well. Old rows remain readable and show `Unknown (legacy)` when no application version was stored.
+- Windows product version is `0.2.6` in CMake, WinUI resources, the Inno definition, and engine metadata. The WinUI project now links vcpkg libraries from each CMake build tree rather than a machine-global `C:\vcpkg` path, fixing the ARM64 GUI link on a clean/self-contained build.
+- Validation: x64 Release engine/CLI and WinUI GUI compile successfully; ARM64 Release engine/CLI and WinUI GUI also compile successfully. `git diff --check` reports no whitespace errors (only existing line-ending conversion warnings). Per the user's standing instruction, no GUI or benchmark runtime was launched.
 
 ## 13. 后期水体 RT、路径追踪与超分可行性（2026-07-15，仅规划）
 
