@@ -1390,6 +1390,40 @@ namespace
         return buf;
     }
 
+    // Add an omitted vendor without rewriting the model reported by the
+    // driver. This is also used for legacy results, whose OpenGL renderer
+    // often contains only "GTX 570", "RX 580", "Fantasy II", etc.
+    std::string gpuDisplayName(std::string n)
+    {
+        auto starts = [&](std::string_view prefix) {
+            return n.size() >= prefix.size() &&
+                   n.compare(0, prefix.size(), prefix) == 0;
+        };
+        if (starts("NVIDIA ") || starts("AMD ") || starts("Intel ") ||
+            starts("Apple ") || starts("Qualcomm ") || starts("ARM ") ||
+            starts("Moore Threads ") || starts("Innosilicon ") ||
+            starts("Glenfly ") || starts("Microsoft "))
+            return n;
+
+        if (starts("GeForce ") || starts("Quadro ") || starts("Tesla "))
+            return "NVIDIA " + n;
+        if (starts("RTX") || starts("GTX") || starts("GT "))
+            return "NVIDIA GeForce " + n;
+
+        if (starts("Radeon ") || starts("FirePro "))
+            return "AMD " + n;
+        if (starts("RX") || starts("R9 ") || starts("R7 ") ||
+            starts("R5 ") || starts("Vega ") || starts("HD "))
+            return "AMD Radeon " + n;
+
+        if (starts("FantasyII") || starts("Fantasy II") ||
+            starts("Fantasy 2") || starts("Fenghua II"))
+            return "Innosilicon " + n;
+        if (starts("Arise"))
+            return "Glenfly " + n;
+        return n;
+    }
+
     // Different APIs report the same physical GPU under decorated names
     // ("…RTX 5090", "…RTX 5090 (FL 12_1)", "…RTX 5090/PCIe/SSE2") — collapse
     // feature-level / GL suffix noise. Keep " #1"/" #2" so dual identical
@@ -1401,6 +1435,7 @@ namespace
         if (p != std::string::npos) n = n.substr(0, p);
         p = n.find('/');
         if (p != std::string::npos) n = n.substr(0, p);
+        n = gpuDisplayName(std::move(n));
         // OEM-branded Adreno: "Mi Pad 5 Adreno 640 GPU" -> "Qualcomm Adreno 640"
         p = n.find("Adreno");
         if (p != std::string::npos)
@@ -1428,6 +1463,9 @@ namespace
         if (has("Adreno") || has("Qualcomm") || has("Snapdragon"))            return "Qualcomm";
         if (has("Mali") || has("ARM"))                                        return "ARM";
         if (has("Moore Threads") || has("MTT"))                               return "Moore Threads";
+        if (has("Innosilicon") || has("FantasyII") || has("Fantasy II") ||
+            has("Fenghua"))                                                    return "Innosilicon";
+        if (has("Glenfly") || has("Arise"))                                  return "Glenfly";
         return "Other";
     }
 
@@ -1462,6 +1500,8 @@ namespace
         if (brand == "ARM")            return "Mali";
         if (brand == "Apple")          return "Apple Silicon";
         if (brand == "Moore Threads")  return "MTT";
+        if (brand == "Innosilicon")    return has("Fantasy") ? "Fantasy II" : "Other";
+        if (brand == "Glenfly")        return has("Arise") ? "Arise" : "Other";
         return brand;
     }
 
@@ -1655,8 +1695,8 @@ namespace
         if (id == "cinematic_liquid") return i18n::tr("Fluid — Interactive Pool", "流体 —— 互动水池", "流体 — インタラクティブプール");
         if (id == "cinematic_liquid_v1") return i18n::tr("Legacy Cinematic Liquid v1 — Dam Break", "旧版电影化液体 v1 —— 溃坝", "旧版シネマティック液体 v1 — ダムブレイク");
         if (id == "fluid")      return i18n::tr("Other / Legacy 2D Fluid", "其他 / 旧版 2D 流体", "その他 / 旧版 2D 流体");
-        if (id == "cpu_single_core") return i18n::tr("CPU — Per-core", "CPU —— 逐核", "CPU — コア別");
-        if (id == "cpu_multi_core")  return i18n::tr("CPU — All-core", "CPU —— 多核", "CPU — 全コア");
+        if (id == "cpu_single_core") return i18n::tr("CPU — Single-core", "CPU —— 单核", "CPU — コア別");
+        if (id == "cpu_multi_core")  return i18n::tr("CPU — All-core", "CPU —— 全核", "CPU — 全コア");
         return id;
     }
 
@@ -2524,9 +2564,9 @@ void MainWindow::updateResultHint()
     {
         const auto count = std::to_string(m_lastSkippedJobs.size());
         hstring section = u8(i18n::trDyn(
-            count + " unsupported combinations were not run (these are not test failures):",
-            "有 " + count + " 个组合因设备未报告支持而未运行（这不是测试失败）：",
-            count + " 件の未サポート組み合わせは実行されませんでした（テスト失敗ではありません）："));
+            count + " unsupported combinations were not run:",
+            "有 " + count + " 个组合因设备未报告支持而未运行：",
+            count + " 件の未サポート組み合わせは実行されませんでした："));
         for (auto const& job : m_lastSkippedJobs)
             section = section + L"\n\u2022 " + u8(job);
         appendSection(section);
@@ -2596,10 +2636,10 @@ void MainWindow::updateResultHint()
                 break;
             case GpuRunIssueKind::BurnStepsClamped:
                 message = locText(
-                    "GPU Burn steps were clamped to the software-device safety cap (32) "
+                    "GPU Burn steps were clamped to the software-device safety cap (64) "
                     "to avoid watchdog resets; the score uses the clamped step count.",
-                    "GPU Burn 步数已被钳制到软件设备的安全上限（32 步），以避免触发"
-                    "系统看门狗；成绩按钳制后的步数计算。", "ウォッチドッグ再起動を避けるため、GPU Burn のステップ数はソフトウェアデバイスの安全上限（32）に制限されました。スコアは制限後のステップ数で計算されます。");
+                    "GPU Burn 步数已被钳制到软件设备的安全上限（64 步），以避免触发"
+                    "系统看门狗；成绩按钳制后的步数计算。", "ウォッチドッグ再起動を避けるため、GPU Burn のステップ数はソフトウェアデバイスの安全上限（64）に制限されました。スコアは制限後のステップ数で計算されます。");
                 break;
             case GpuRunIssueKind::Dx12SecondaryNodeRenderDoc:
                 message = locText(
@@ -2613,6 +2653,30 @@ void MainWindow::updateResultHint()
                     "DX12 の linked-adapter 副ノードでは RenderDoc キャプチャを自動無効化しました。"
                     "この AMD FireGL/UMD ではキャプチャ層が CreateCommandQueue でクラッシュするためです。"
                     "スコアは有効です。主ノード（#1 / node 0）では引き続きキャプチャできます。");
+                break;
+            case GpuRunIssueKind::Dx12RenderDocFallback:
+                message = locText(
+                    "DX12 crashed while RenderDoc was creating the command queue, so the app automatically retried without capture. The benchmark score is valid, but this driver cannot provide the requested DX12 capture.",
+                    "DX12 在 RenderDoc 创建命令队列时崩溃，应用已自动关闭抓帧并重试。测试成绩有效，但此驱动无法生成所请求的 DX12 抓帧。",
+                    "RenderDoc がコマンドキューを作成中に DX12 がクラッシュしたため、キャプチャなしで自動再試行しました。スコアは有効ですが、このドライバーでは要求された DX12 キャプチャを作成できません。");
+                break;
+            case GpuRunIssueKind::Dx12LegacyIntelRenderDoc:
+                message = locText(
+                    "Intel HD Graphics 6000 driver 10.18.15.4279 crashes the RenderDoc DX12 layer at CreateCommandQueue. The score was recovered without capture. Driver 20.19.15.4531 has previously completed DX12 captures on this same GPU; install that version or a compatible newer Intel driver to restore capture support.",
+                    "Intel HD Graphics 6000 驱动 10.18.15.4279 会让 RenderDoc 的 DX12 层在 CreateCommandQueue 处崩溃。应用已用无抓帧重试恢复成绩。同一块 GPU 使用 20.19.15.4531 时曾成功完成 DX12 抓帧；请安装该版本或兼容的较新 Intel 驱动以恢复抓帧。",
+                    "Intel HD Graphics 6000 ドライバー 10.18.15.4279 では RenderDoc の DX12 レイヤーが CreateCommandQueue でクラッシュします。スコアはキャプチャなしの再試行で取得しました。同じ GPU では 20.19.15.4531 で DX12 キャプチャに成功しているため、そのバージョンまたは互換性のある新しい Intel ドライバーを使用してください。");
+                break;
+            case GpuRunIssueKind::OpenGlSynchronizedTiming:
+                message = locText(
+                    "The OpenGL driver returned invalid GPU timestamps. Synchronized timing was used instead, so the displayed score is slower to collect but remains meaningful.",
+                    "OpenGL 驱动返回了无效的 GPU 时间戳，已改用同步计时。测试采集会更慢，但显示的成绩仍有意义。",
+                    "OpenGL ドライバーが無効な GPU タイムスタンプを返したため、同期計測に切り替えました。計測は遅くなりますが、表示スコアは有効です。");
+                break;
+            case GpuRunIssueKind::Dx11SynchronizedTiming:
+                message = locText(
+                    "The DirectX 11 driver returned invalid GPU timestamps. Synchronized timing was used instead; this result is stored in a separate timing group so it is not mixed with timestamp-query scores.",
+                    "DirectX 11 驱动返回了无效的 GPU 时间戳，已改用同步计时；该成绩会保存到独立计时分组，不会与时间戳查询成绩混合比较。",
+                    "DirectX 11 ドライバーが無効な GPU タイムスタンプを返したため、同期計測に切り替えました。この結果は別の計測グループに保存され、タイムスタンプクエリのスコアとは混在しません。");
                 break;
             case GpuRunIssueKind::Unknown:
             default:
@@ -2803,22 +2867,22 @@ void MainWindow::applyLanguage()
         "Measures CPU compute throughput with dense math loops on logical processors (single-core and multi-core).",
         "测 CPU 算力：用密集运算循环压测逻辑核心，对比单核与多核吞吐。", "論理プロセッサ上の高密度演算ループで CPU 計算スループットを測定します（シングルコアとマルチコア）。"));
     CpuModeBox().Header(locContent("Test mode", "测试模式", "テストモード"));
-    CpuModePerCore().Content(locContent("Each logical processor", "逐个逻辑处理器", "各論理プロセッサ"));
-    CpuModeMulti().Content(locContent("All cores together", "全部核心并行", "全コア同時"));
-    CpuModeAll().Content(locContent("Per-core + all-core", "逐核 + 多核", "コア別 + 全コア"));
+    CpuModePerCore().Content(locContent("Single-core", "单核", "コア別"));
+    CpuModeMulti().Content(locContent("All-core", "全核", "全コア"));
+    CpuModeAll().Content(locContent("Single-core + All-core", "单核 + 全核", "コア別 + 全コア"));
     CpuDurationPresetBox().Header(locContent("Duration preset", "时长预设", "時間プリセット"));
     CpuDurationQuick().Content(locContent("Quick (1 s)", "快速（1 秒）", "クイック（1 秒）"));
     CpuDurationFormal().Content(locContent("Formal (15 s)", "正式（15 秒）", "正式（15 秒）"));
     CpuTimeBox().Header(locContent("Seconds per test", "每项测试秒数", "テストごとの秒数"));
     CpuWarmupBox().Header(locContent("Warm-up seconds", "预热秒数", "ウォームアップ秒数"));
     CpuDurationHint().Text(locText(
-        "Per-core duration is applied separately to every logical processor; the formal preset can take a long time.",
-        "该时长会分别应用到每个逻辑处理器；正式逐核测试可能需要较长时间。", "コア別時間は各論理プロセッサに個別適用されます。正式プリセットは長時間かかることがあります。"));
-    CpuPerCoreTitle().Text(locText("Per-logical-processor results", "逐逻辑处理器成绩", "論理プロセッサ別の結果"));
+        "Single-core duration is applied once to each logical processor; the formal preset can take a long time.",
+        "单核测试会依次测试每个逻辑处理器；正式测试可能需要较长时间。", "コア別時間は各論理プロセッサに個別適用されます。正式プリセットは長時間かかることがあります。"));
+    CpuPerCoreTitle().Text(locText("Single-core results", "单核成绩", "論理プロセッサ別の結果"));
     CpuSummaryTitle().Text(locText("Summary", "汇总", "サマリー"));
     GpuSummaryTitle().Text(locText("Summary", "汇总", "サマリー"));
-    CpuAverageLabel().Text(locText("Per-core average", "逐核平均", "コア別平均"));
-    CpuMultiLabel().Text(locText("All-core result", "多核成绩", "全コア結果"));
+    CpuAverageLabel().Text(locText("Single-core result", "单核成绩", "コア別平均"));
+    CpuMultiLabel().Text(locText("All-core result", "全核成绩", "全コア結果"));
     CpuOutputExpander().Header(locContent("Raw CLI output (live tail)", "原始 CLI 输出（实时尾部）", "生 CLI 出力（ライブ末尾）"));
     CpuCancelButton().Content(locContent("Cancel", "取消", "キャンセル"));
     CpuRunButton().Content(locContent("Run CPU Benchmark", "开始 CPU 测试", "CPU ベンチマークを実行"));
@@ -2849,6 +2913,14 @@ void MainWindow::applyLanguage()
                                          "粒子测试 —— 单 GPU（所选 API，自定义粒子数）", "パーティクルテスト — 単一 GPU（選択 API、カスタム粒子数）"));
     PresetHeadless().Content(locContent("Headless compute — one GPU (selected APIs, pure compute)",
                                         "Headless 计算 —— 单 GPU（所选 API，纯计算）", "Headless コンピュート — 単一 GPU（選択 API、純計算）"));
+    PresetCompleteSuite().Content(locContent(
+        "Complete test — all formal scores, headless and captures",
+        "完整测试 —— 全部正式成绩、Headless 与抓帧",
+        "完全テスト — 全正式スコア、Headless、キャプチャ"));
+    PresetFillMissing().Content(locContent(
+        "Fill missing — incomplete scores and captures",
+        "查漏补缺 —— 缺少的成绩与抓帧",
+        "不足分を補完 — 未完了スコアとキャプチャ"));
     GpuHeader().Text(locText("GPU / Renderer", "GPU / 渲染器", "GPU / レンダラー"));
     ApiPickerHeader().Text(locText("Graphics API", "图形 API", "グラフィックス API"));
     Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
@@ -3694,7 +3766,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                             : locText("finishing", "收尾", "終了処理");
                     if (modeName == "multi" || core < 0)
                     {
-                        std::wstring status = locText("All-core", "多核", "全コア").c_str();
+                        std::wstring status = locText("All-core", "全核", "全コア").c_str();
                         status += L" · "; status += phaseText.c_str();
                         CpuCurrentCoreText().Text(status);
                     }
@@ -3864,6 +3936,7 @@ void MainWindow::updateExtraLabel()
 {
     auto wl = selected(WorkloadBox());
     int preset = PresetBox().SelectedIndex();
+    const bool suitePreset = preset == 7 || preset == 8;
     bool customRun = preset == 1;
     bool fullAnalysis = preset == 2 || preset == 3;
     bool workloadSelectable = customRun || fullAnalysis;
@@ -3884,8 +3957,9 @@ void MainWindow::updateExtraLabel()
     WorkloadBox().IsEnabled(workloadSelectable);
     // Quick chooses automatically; Full-All schedules every enumerated GPU.
     // Disable a selector that those presets intentionally do not consume.
-    const bool gpuPickerOn = m_gpuEnumerationComplete && preset != 0 && preset != 3;
-    const bool apiPickerOn = m_gpuEnumerationComplete && preset != 0;
+    const bool gpuPickerOn = m_gpuEnumerationComplete && preset != 0 && preset != 3 &&
+                             !suitePreset;
+    const bool apiPickerOn = m_gpuEnumerationComplete && preset != 0 && !suitePreset;
     updateApiPickerSummary();
     applyComboEnabledLook(GpuBox(), gpuPickerOn);
     applyComboEnabledLook(ApiPickerBox(), apiPickerOn);
@@ -3902,10 +3976,12 @@ void MainWindow::updateExtraLabel()
         || wl == "render3d" || wl == "volumetric" || wl == "fluid"
         || wl == "cinematic_liquid" || wl == "cinematic_liquid_v1");
     if (!headlessSupported) HeadlessBox().IsChecked(false);
-    HeadlessBox().IsEnabled(headlessSupported);
-    bool hostMemorySupported = !(workloadSelectable && fixedQualityLiquid);
+    HeadlessBox().IsEnabled(headlessSupported && !suitePreset);
+    bool hostMemorySupported = !(workloadSelectable && fixedQualityLiquid) && !suitePreset;
     if (!hostMemorySupported) HostMemBox().IsChecked(false);
     HostMemBox().IsEnabled(hostMemorySupported);
+    VsyncBox().IsEnabled(!suitePreset);
+    ShowLegacyBox().IsEnabled(!suitePreset);
     syncMultiGpuControls();
 
     ParticlePresetBox().Visibility(showParticles ? Visibility::Visible : Visibility::Collapsed);
@@ -4317,7 +4393,7 @@ void MainWindow::populateGpus()
                     std::string label = g.software || isSoftwareGpu(g.name)
                         ? std::to_string(g.idx) + ": " +
                           softwareGpuDisplayName(g.name, m_cpuName)
-                        : std::to_string(g.idx) + ": " + g.name;
+                        : std::to_string(g.idx) + ": " + gpuDisplayName(g.name);
                 auto it = ComboBoxItem();
                 it.Content(box_value(u8(label)));
                 GpuBox().Items().Append(it);
@@ -4567,7 +4643,10 @@ bool MainWindow::isUnlimitedDuration()
 
 void MainWindow::updateDurationValueEnabled()
 {
-    DurationValueBox().IsEnabled(!isUnlimitedDuration());
+    const int preset = PresetBox().SelectedIndex();
+    const bool suitePreset = preset == 7 || preset == 8;
+    DurationUnitBox().IsEnabled(!suitePreset);
+    DurationValueBox().IsEnabled(!suitePreset && !isUnlimitedDuration());
 }
 
 double MainWindow::durationAmountValue()
@@ -4651,8 +4730,10 @@ void MainWindow::syncCaptureControls()
                             HeadlessBox().IsChecked().Value();
     const auto multiGpuMode = selected(MultiGpuBox());
     const bool multiGpuOn = multiGpuMode == "afr" || multiGpuMode == "sfr";
-    RenderDocBox().IsEnabled(!headlessOn && !multiGpuOn);
-    const bool canCapture = renderDocOn && !headlessOn && hasSafeCapturePoint;
+    const int preset = PresetBox().SelectedIndex();
+    const bool suitePreset = preset == 7 || preset == 8;
+    RenderDocBox().IsEnabled(!suitePreset && !headlessOn && !multiGpuOn);
+    const bool canCapture = !suitePreset && renderDocOn && !headlessOn && hasSafeCapturePoint;
     CaptureBox().IsEnabled(canCapture);
     CaptureValueBox().IsEnabled(canCapture && captureOn);
     m_suppressRenderDocUi = false;
@@ -4992,6 +5073,12 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(
         }
         case 6:  // [9] Headless compute, one GPU × selected APIs
             return makeJobs({ "--headless" }, false);
+        case 7:  // Complete formal score/capture matrix (CLI owns the contract).
+            needCharts = true;
+            return {{m_enginePath, "--gui-worker", "--complete-suite"}};
+        case 8:  // Fill only absent results/captures; CLI owns compatibility/state.
+            needCharts = true;
+            return {{m_enginePath, "--gui-worker", "--fill-missing"}};
     }
     return {};
 }
@@ -5083,6 +5170,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
         size_t succeededJobs = 0;
         std::vector<std::string> openGlRoutingMismatches;
         std::vector<GpuRunIssue> gpuRunIssues;
+        std::vector<std::string> reportedSkippedJobs = skippedJobs;
         bool cancelled = false;
         std::vector<std::string> caps;
         // Scores accumulate grouped by adapter: a "# <GPU name>" header line
@@ -5094,6 +5182,24 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
             for (size_t i = 1; i + 1 < job.size(); ++i)
                 if (job[i] == key) return job[i + 1];
             return {};
+        };
+        auto withoutRenderDocArgs = [](std::vector<std::string> const& job)
+        {
+            std::vector<std::string> retry;
+            retry.reserve(job.size());
+            for (size_t i = 0; i < job.size(); ++i)
+            {
+                if (job[i] == "--renderdoc") continue;
+                if (job[i] == "--capture" || job[i] == "--capture-frame")
+                {
+                    if (i + 1 < job.size()) ++i;
+                    continue;
+                }
+                if (job[i] == "--no-renderdoc") continue;
+                retry.push_back(job[i]);
+            }
+            retry.push_back("--no-renderdoc");
+            return retry;
         };
         auto jobTargetLabel = [&](std::vector<std::string> const& job)
         {
@@ -5150,7 +5256,103 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
             }
 
             auto res = captureCliProcess(job, gpuWorkerTimeoutMs(job), cancelHandle);
+            bool dx12RenderDocFallback = false;
+            const bool requestedRenderDoc =
+                std::find(job.begin(), job.end(), "--renderdoc") != job.end() ||
+                std::find(job.begin(), job.end(), "--capture") != job.end() ||
+                std::find(job.begin(), job.end(), "--capture-frame") != job.end();
+            const bool commandQueueAccessViolation =
+                res.output.find("[DX12 Init] Creating command queue") != std::string::npos &&
+                (res.output.find("[CRASH] Unhandled exception: 0xc0000005") != std::string::npos ||
+                 static_cast<std::uint32_t>(res.exitCode) == 0xc0000005u);
+            if (res.exitCode != 0 && requestedRenderDoc &&
+                jobArgValue(job, "--backend") == "dx12" &&
+                commandQueueAccessViolation && !m_gpuCancelRequested.load())
+            {
+                const std::string failedCaptureOutput = std::move(res.output);
+                auto retryJob = withoutRenderDocArgs(job);
+                res = captureCliProcess(
+                    retryJob, gpuWorkerTimeoutMs(retryJob), cancelHandle);
+                res.output = failedCaptureOutput +
+                    "\n[GUI] DX12 RenderDoc injection crashed during command-queue "
+                    "initialization; retrying without capture.\n"
+                    "[GUI] Automatic DX12 no-RenderDoc retry:\n" + res.output;
+                dx12RenderDocFallback = res.exitCode == 0;
+                if (dx12RenderDocFallback)
+                {
+                    const bool legacyIntelHd6000 =
+                        failedCaptureOutput.find("Intel(R) HD Graphics 6000") !=
+                            std::string::npos &&
+                        failedCaptureOutput.find("10.18.15.4279") !=
+                            std::string::npos;
+                    GpuRunIssue issue{
+                        legacyIntelHd6000
+                            ? GpuRunIssueKind::Dx12LegacyIntelRenderDoc
+                            : GpuRunIssueKind::Dx12RenderDocFallback,
+                                       jobTargetLabel(job) };
+                    const bool duplicate = std::any_of(
+                        gpuRunIssues.begin(), gpuRunIssues.end(),
+                        [&](GpuRunIssue const& existing)
+                        {
+                            return existing.kind == issue.kind &&
+                                   existing.target == issue.target;
+                        });
+                    if (!duplicate) gpuRunIssues.push_back(std::move(issue));
+                }
+            }
             all += res.output; all += "\n";
+            // The complete/fill CLI owns a nested matrix. Promote its explicit
+            // unsupported reasons into the normal GUI Summary instead of
+            // leaving them visible only in Raw CLI output.
+            std::istringstream suiteLines(res.output);
+            std::string suiteLine;
+            while (std::getline(suiteLines, suiteLine))
+            {
+                const bool captureUnsupportedLine =
+                    suiteLine.rfind("SUITE_RESULT\tstatus=capture_unsupported", 0) == 0 ||
+                    suiteLine.rfind("SUITE_SKIP\tstatus=capture_unsupported", 0) == 0;
+                if (captureUnsupportedLine)
+                {
+                    const auto keyPos = suiteLine.find("\tkey=");
+                    const auto reasonPos = suiteLine.find("\treason=");
+                    std::string target = "DX12 suite pass";
+                    if (keyPos != std::string::npos)
+                    {
+                        const size_t begin = keyPos + 5;
+                        target = suiteLine.substr(
+                            begin, reasonPos == std::string::npos
+                                ? std::string::npos : reasonPos - begin);
+                    }
+                    const bool legacyIntelHd6000 =
+                        res.output.find("Intel(R) HD Graphics 6000") !=
+                            std::string::npos &&
+                        res.output.find("10.18.15.4279") != std::string::npos;
+                    GpuRunIssue issue{
+                        legacyIntelHd6000
+                            ? GpuRunIssueKind::Dx12LegacyIntelRenderDoc
+                            : GpuRunIssueKind::Dx12RenderDocFallback,
+                        std::move(target) };
+                    const bool duplicate = std::any_of(
+                        gpuRunIssues.begin(), gpuRunIssues.end(),
+                        [&](GpuRunIssue const& existing)
+                        {
+                            return existing.kind == issue.kind &&
+                                   existing.target == issue.target;
+                        });
+                    if (!duplicate) gpuRunIssues.push_back(std::move(issue));
+                    continue;
+                }
+                const bool unsupportedLine =
+                    (suiteLine.rfind("SUITE_RESULT\tstatus=unsupported", 0) == 0) ||
+                    (suiteLine.rfind("SUITE_SKIP\tstatus=unsupported", 0) == 0);
+                if (!unsupportedLine) continue;
+                const auto reasonPos = suiteLine.find("\treason=");
+                const std::string reason = reasonPos == std::string::npos
+                    ? suiteLine : suiteLine.substr(reasonPos + 8);
+                if (std::find(reportedSkippedJobs.begin(), reportedSkippedJobs.end(), reason) ==
+                    reportedSkippedJobs.end())
+                    reportedSkippedJobs.push_back(reason);
+            }
             if (all.size() > 4u * 1024u * 1024u)
                 all = clipForUi(std::move(all), 3u * 1024u * 1024u);
             if (res.exitCode == static_cast<int>(ERROR_CANCELLED) ||
@@ -5339,6 +5541,36 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                         });
                     if (!duplicate) gpuRunIssues.push_back(std::move(issue));
                 }
+                if (res.output.find(
+                        "OpenGL timestamp queries are unreliable") !=
+                    std::string::npos)
+                {
+                    GpuRunIssue issue{ GpuRunIssueKind::OpenGlSynchronizedTiming,
+                                       jobTargetLabel(job) };
+                    const bool duplicate = std::any_of(
+                        gpuRunIssues.begin(), gpuRunIssues.end(),
+                        [&](GpuRunIssue const& existing)
+                        {
+                            return existing.kind == issue.kind &&
+                                   existing.target == issue.target;
+                        });
+                    if (!duplicate) gpuRunIssues.push_back(std::move(issue));
+                }
+                if (res.output.find(
+                        "DX11 timestamp queries are unreliable") !=
+                    std::string::npos)
+                {
+                    GpuRunIssue issue{ GpuRunIssueKind::Dx11SynchronizedTiming,
+                                       jobTargetLabel(job) };
+                    const bool duplicate = std::any_of(
+                        gpuRunIssues.begin(), gpuRunIssues.end(),
+                        [&](GpuRunIssue const& existing)
+                        {
+                            return existing.kind == issue.kind &&
+                                   existing.target == issue.target;
+                        });
+                    if (!duplicate) gpuRunIssues.push_back(std::move(issue));
+                }
                 auto workerCaps = parseCapturePaths(res.output);
                 caps.insert(caps.end(), workerCaps.begin(), workerCaps.end());
                 std::string sc = extractScore(res.output);
@@ -5382,11 +5614,11 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                     }
                     else if (gpuPos < gpuNames.size() && !gpuNames[gpuPos].empty())
                     {
-                        gpuName = gpuNames[gpuPos];
+                        gpuName = gpuDisplayName(gpuNames[gpuPos]);
                     }
                     else
                     {
-                        gpuName = reportedGpu;
+                        gpuName = gpuDisplayName(reportedGpu);
                     }
                     if (gpuName.empty() || gpuName == "(unknown)")
                     {
@@ -5662,7 +5894,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
         if (!disp || !disp.TryEnqueue([this, strong, all, lastScore, cacheResident,
                          needCharts, failedJobs,
                          succeededJobs, postProcessFailed, postProcessStatus,
-                         skippedJobs, openGlRoutingMismatches, gpuRunIssues, cancelled]()
+                         reportedSkippedJobs, openGlRoutingMismatches, gpuRunIssues, cancelled]()
         {
             if (!uiAlive())
             {
@@ -5674,7 +5906,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                 OutputBox().Text(u8(all));
                 GpuCancelButton().IsEnabled(false);
                 m_lastScoreCacheHint = cacheResident;
-                m_lastSkippedJobs = skippedJobs;
+                m_lastSkippedJobs = reportedSkippedJobs;
                 m_lastGpuRunIssues = gpuRunIssues;
                 m_lastPostProcessFailed = postProcessFailed;
                 const bool onlyOpenGlRoutingFailures = failedJobs > 0 &&
@@ -5691,7 +5923,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                                             "已完成——OpenGL 无法使用所选 GPU", "完了 — OpenGL は選択 GPU を使用できませんでした"), true);
                 else if (failedJobs > 0)
                     stopGpuProgress(locText("Completed with errors", "部分完成", "エラーありで完了"), true);
-                else if (!skippedJobs.empty())
+                else if (!reportedSkippedJobs.empty())
                     stopGpuProgress(locText("Completed — unsupported combinations skipped",
                                             "完成——已跳过不支持的组合", "完了 — 未サポートの組み合わせをスキップ"), true);
                 else
@@ -5731,7 +5963,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                                         "部分完成 —— 请查看错误输出", "エラーありで完了 — 出力を確認してください"));
                     const auto ok = std::to_string(succeededJobs);
                     const auto failed = std::to_string(failedJobs);
-                    const auto skipped = std::to_string(skippedJobs.size());
+                    const auto skipped = std::to_string(reportedSkippedJobs.size());
                     if (onlyOpenGlRoutingFailures)
                         setGpuStatus(StatusLight::Error, u8(i18n::trDyn(
                             ok + " completed; OpenGL could not use the selected GPU",
@@ -5740,21 +5972,21 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                     else
                         setGpuStatus(StatusLight::Error, u8(i18n::trDyn(
                             ok + " completed; " + failed + " failed" +
-                                 (skippedJobs.empty() ? "" : "; " + skipped + " skipped"),
+                                  (reportedSkippedJobs.empty() ? "" : "; " + skipped + " skipped"),
                             "完成 " + ok + " 项，失败 " + failed + " 项" +
-                                 (skippedJobs.empty() ? "" : "，跳过 " + skipped + " 项"),
+                                  (reportedSkippedJobs.empty() ? "" : "，跳过 " + skipped + " 项"),
                             ok + " 件完了、" + failed + " 件失敗" +
-                                 (skippedJobs.empty() ? "" : "、" + skipped + " 件スキップ"))));
+                                  (reportedSkippedJobs.empty() ? "" : "、" + skipped + " 件スキップ"))));
                 }
                 else
                 {
                     showScoreOr(locText("Done — see output / History", "完成 —— 见输出/历史", "完了 — 出力 / 履歴を確認"));
                     if (postProcessFailed)
                         setGpuStatus(StatusLight::Error, u8("Benchmark done; " + postProcessStatus));
-                    else if (!skippedJobs.empty())
+                    else if (!reportedSkippedJobs.empty())
                     {
                         const auto ok = std::to_string(succeededJobs);
-                        const auto skipped = std::to_string(skippedJobs.size());
+                        const auto skipped = std::to_string(reportedSkippedJobs.size());
                         setGpuStatus(StatusLight::Ready, u8(i18n::trDyn(
                             ok + " completed; " + skipped +
                                  " unsupported combinations skipped",
@@ -5863,7 +6095,7 @@ void MainWindow::OnRun(IInspectable const&, RoutedEventArgs const&)
         return;
     }
     const int preset = PresetBox().SelectedIndex();
-    if (preset != 0 && selectedApis().empty())
+    if (preset != 0 && preset != 7 && preset != 8 && selectedApis().empty())
     {
         // Mirror rebuildApiPicker's Vulkan-only test: for the fluid workloads the
         // API panel lists Vulkan or nothing, so the generic "unsupported APIs may
@@ -5949,6 +6181,45 @@ void MainWindow::OnRun(IInspectable const&, RoutedEventArgs const&)
         else
             setGpuStatus(StatusLight::Error, locText("No benchmark jobs were generated.", "没有生成任何测试任务。", "ベンチマークジョブが生成されませんでした。"));
         updateResultHint();
+        return;
+    }
+    if (preset == 8)
+    {
+        // Fill-missing is intentionally confirm-first: the CLI will rescan
+        // results.json and the real capture directory after confirmation, so
+        // a deleted .rdc is not mistaken for a completed pass.
+        ContentDialog dialog;
+        dialog.XamlRoot(Content().as<FrameworkElement>().XamlRoot());
+        dialog.Title(box_value(locText("Run missing tests?", "运行缺少的测试？", "不足テストを実行しますか？")));
+        dialog.Content(box_value(locText(
+            "Results and the capture directory will be checked again. Only missing scores or captures will run; known unsupported and previously failed tests will be listed but not repeated.",
+            "将重新检查成绩文件和抓帧目录。只补跑缺少的成绩或抓帧；已知不支持和以前失败的项目只会列出，不会重跑。",
+            "結果とキャプチャフォルダーを再確認し、不足分のみ実行します。既知の未対応・失敗済み項目は再実行しません。")));
+        dialog.PrimaryButtonText(locText("Check and run", "检查并运行", "確認して実行"));
+        dialog.CloseButtonText(locText("Cancel", "取消", "キャンセル"));
+        dialog.DefaultButton(ContentDialogButton::Primary);
+
+        auto strong = get_strong();
+        auto dispatcher = m_dispatcher;
+        auto operation = dialog.ShowAsync();
+        operation.Completed(
+            [this, strong, dispatcher, dialog, jobs = std::move(jobs),
+             needCharts, skippedJobs = std::move(skippedJobs)]
+            (IAsyncOperation<ContentDialogResult> const& completed,
+             AsyncStatus status) mutable
+            {
+                if (status != AsyncStatus::Completed ||
+                    completed.GetResults() != ContentDialogResult::Primary)
+                    return;
+                dispatcher.TryEnqueue(
+                    [this, strong, jobs = std::move(jobs), needCharts,
+                     skippedJobs = std::move(skippedJobs)]() mutable
+                    {
+                        if (!jobs.empty()) jobs.front().push_back("--yes");
+                        launchJobs(std::move(jobs), needCharts,
+                                   std::move(skippedJobs));
+                    });
+            });
         return;
     }
     launchJobs(std::move(jobs), needCharts, std::move(skippedJobs));
@@ -6229,14 +6500,30 @@ void MainWindow::rebuildGpuFilter(bool preserveSelection)
 
     for (auto const& [brand, seriesMap] : groups)
     {
-        TextBlock bt; bt.Text(u8(brand));
+        std::string brandLabel = brand;
+        if (brand == "NVIDIA")            brandLabel = to_string(locText("NVIDIA", "英伟达", "NVIDIA"));
+        else if (brand == "AMD")          brandLabel = to_string(locText("AMD", "AMD", "AMD"));
+        else if (brand == "Intel")        brandLabel = to_string(locText("Intel", "英特尔", "Intel"));
+        else if (brand == "Apple")        brandLabel = to_string(locText("Apple", "苹果", "Apple"));
+        else if (brand == "Qualcomm")     brandLabel = to_string(locText("Qualcomm", "高通", "Qualcomm"));
+        else if (brand == "ARM")          brandLabel = to_string(locText("Arm", "安谋", "Arm"));
+        else if (brand == "Moore Threads") brandLabel = to_string(locText("Moore Threads", "摩尔线程", "Moore Threads"));
+        else if (brand == "Innosilicon")  brandLabel = to_string(locText("Innosilicon", "芯动科技", "Innosilicon"));
+        else if (brand == "Glenfly")      brandLabel = to_string(locText("Glenfly", "格兰菲", "Glenfly"));
+        else if (brand == "CPU / Software") brandLabel = to_string(locText("CPU / Software", "CPU / 软件", "CPU / Software"));
+
+        TextBlock bt; bt.Text(u8(brandLabel));
         bt.FontWeight(FontWeights::SemiBold());
         bt.Margin(Thickness{ 0, 8, 0, 2 });
         GpuFilterPanel().Children().Append(bt);
 
         for (auto const& [series, devs] : seriesMap)
         {
-            TextBlock st; st.Text(u8(series));
+            std::string seriesLabel = series;
+            if (brand == "Innosilicon" && series == "Fantasy II")
+                seriesLabel = to_string(locText("Fantasy II", "风华2号", "Fantasy II"));
+
+            TextBlock st; st.Text(u8(seriesLabel));
             st.Opacity(0.7); st.FontSize(12);
             st.Margin(Thickness{ 12, 2, 0, 0 });
             GpuFilterPanel().Children().Append(st);
@@ -6578,7 +6865,7 @@ void MainWindow::applyHistoryView()
 
     // Flatten to strings first so columns can size to the widest value (no
     // truncation); the list scrolls horizontally if the total is wide.
-    struct Row { std::string time, api, dev, cpu, mem, wl, particles, score, fps; };
+    struct Row { std::string time, api, dev, cpu, system, mem, wl, particles, score, fps; };
     std::vector<Row> rows; rows.reserve(view.size());
     for (auto* r : view)
     {
@@ -6587,6 +6874,10 @@ void MainWindow::applyHistoryView()
         x.api  = r->graphicsApi;
         x.dev  = r->deviceName;
         x.cpu  = r->cpuName;
+        x.system = r->platform + " " + r->osArchitecture;
+        if (!r->processArchitecture.empty() && r->processArchitecture != "Unknown" &&
+            r->processArchitecture != r->osArchitecture)
+            x.system += " (" + r->processArchitecture + " process)";
         x.mem  = formatVramMB(r->vramMB);
         x.wl   = workloadRunLabel(*r);
         x.particles = particleLabel(r->particleCount);
@@ -6602,13 +6893,15 @@ void MainWindow::applyHistoryView()
         rows.push_back(std::move(x));
     }
 
-    size_t wTime = 4, wApi = 3, wDev = 6, wCpu = 3, wMem = 4, wWl = 8, wParticles = 9, wScore = 5;
+    size_t wTime = 4, wApi = 3, wDev = 6, wCpu = 3, wSystem = 6,
+           wMem = 4, wWl = 8, wParticles = 9, wScore = 5;
     for (auto& x : rows)
     {
         wTime  = (std::max)(wTime,  utf8DisplayWidth(x.time));
         wApi   = (std::max)(wApi,   utf8DisplayWidth(x.api));
         wDev   = (std::max)(wDev,   utf8DisplayWidth(x.dev));
         wCpu   = (std::max)(wCpu,   utf8DisplayWidth(x.cpu));
+        wSystem = (std::max)(wSystem, utf8DisplayWidth(x.system));
         wMem   = (std::max)(wMem,   utf8DisplayWidth(x.mem));
         wWl    = (std::max)(wWl,    utf8DisplayWidth(x.wl));
         wParticles = (std::max)(wParticles, utf8DisplayWidth(x.particles));
@@ -6618,14 +6911,16 @@ void MainWindow::applyHistoryView()
     const std::string sentinel = "\xE2\x80\x8C";
 
     HistoryHeader().Text(u8(padDisplay("Time", wTime) + gp + padDisplay("API", wApi) + gp + padDisplay("Device", wDev)
-                            + gp + padDisplay("CPU", wCpu) + gp + padDisplay("VRAM", wMem) + gp + padDisplay("Workload", wWl)
+                            + gp + padDisplay("CPU", wCpu) + gp + padDisplay("System", wSystem)
+                            + gp + padDisplay("VRAM", wMem) + gp + padDisplay("Workload", wWl)
                             + gp + padDisplay("Particles", wParticles)
                             + gp + padDisplay("Score", wScore) + gp + "FPS" + sentinel));
     for (size_t i = 0; i < rows.size(); ++i)
     {
         auto& x = rows[i];
         std::string line = padDisplay(x.time, wTime) + gp + padDisplay(x.api, wApi) + gp + padDisplay(x.dev, wDev)
-                         + gp + padDisplay(x.cpu, wCpu) + gp + padDisplay(x.mem, wMem) + gp + padDisplay(x.wl, wWl)
+                         + gp + padDisplay(x.cpu, wCpu) + gp + padDisplay(x.system, wSystem)
+                         + gp + padDisplay(x.mem, wMem) + gp + padDisplay(x.wl, wWl)
                          + gp + padDisplay(x.particles, wParticles)
                          + gp + padDisplay(x.score, wScore) + gp + x.fps + sentinel;
         TextBlock tb; tb.Text(u8(line));

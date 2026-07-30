@@ -90,10 +90,10 @@
   <PropertyGroup Label="UserMacros">
     <GpuBuildDir Condition="'$(GpuBuildDir)'==''">$(ProjectDir)..\build</GpuBuildDir>
     <GpuSourceDir Condition="'$(GpuSourceDir)'==''">$(ProjectDir)..</GpuSourceDir>
-    <VcpkgLib Condition="'$(VcpkgLib)'=='' And '$(Platform)'=='ARM64'">C:\vcpkg\installed\arm64-windows\lib</VcpkgLib>
-    <VcpkgBin Condition="'$(VcpkgBin)'=='' And '$(Platform)'=='ARM64'">C:\vcpkg\installed\arm64-windows\bin</VcpkgBin>
-    <VcpkgLib Condition="'$(VcpkgLib)'==''">C:\vcpkg\installed\x64-windows\lib</VcpkgLib>
-    <VcpkgBin Condition="'$(VcpkgBin)'==''">C:\vcpkg\installed\x64-windows\bin</VcpkgBin>
+    <VcpkgLib Condition="'$(VcpkgLib)'=='' And '$(Platform)'=='ARM64'">$(GpuBuildDir)\vcpkg_installed\arm64-windows\lib</VcpkgLib>
+    <VcpkgBin Condition="'$(VcpkgBin)'=='' And '$(Platform)'=='ARM64'">$(GpuBuildDir)\vcpkg_installed\arm64-windows\bin</VcpkgBin>
+    <VcpkgLib Condition="'$(VcpkgLib)'==''">$(GpuBuildDir)\vcpkg_installed\x64-windows\lib</VcpkgLib>
+    <VcpkgBin Condition="'$(VcpkgBin)'==''">$(GpuBuildDir)\vcpkg_installed\x64-windows\bin</VcpkgBin>
   </PropertyGroup>
 
   <!-- Native WinUI 3: wire the XAML compiler into the MSVC build. -->

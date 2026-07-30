@@ -90,6 +90,8 @@
                                         <ComboBoxItem x:Name="PresetFlights" Visibility="Collapsed">Flights test — one GPU (selected APIs, custom flights)</ComboBoxItem>
                                         <ComboBoxItem x:Name="PresetParticles" Visibility="Collapsed">Particle test — one GPU (selected APIs, custom particles)</ComboBoxItem>
                                         <ComboBoxItem x:Name="PresetHeadless" Visibility="Collapsed">Headless compute — one GPU (selected APIs, pure compute)</ComboBoxItem>
+                                        <ComboBoxItem x:Name="PresetCompleteSuite">Complete test — all formal scores, headless and captures</ComboBoxItem>
+                                        <ComboBoxItem x:Name="PresetFillMissing">Fill missing — incomplete scores and captures</ComboBoxItem>
                                     </ComboBox>
                                     <!-- Same ComboBox chrome for GPU / API / Workload. API uses MaxDropDownHeight=0
                                          + Tapped flyout so the native list never paints (avoids stuck popup). -->
@@ -444,9 +446,9 @@
                                         </Grid.ColumnDefinitions>
                                         <ComboBox x:Name="CpuModeBox" Grid.Column="0" Header="Test mode"
                                                   SelectedIndex="2" HorizontalAlignment="Stretch">
-                                            <ComboBoxItem x:Name="CpuModePerCore" Tag="per-core">Each logical processor</ComboBoxItem>
-                                            <ComboBoxItem x:Name="CpuModeMulti" Tag="multi">All cores together</ComboBoxItem>
-                                            <ComboBoxItem x:Name="CpuModeAll" Tag="all">Per-core + all-core</ComboBoxItem>
+                                            <ComboBoxItem x:Name="CpuModePerCore" Tag="per-core">Single-core</ComboBoxItem>
+                                            <ComboBoxItem x:Name="CpuModeMulti" Tag="multi">All-core</ComboBoxItem>
+                                            <ComboBoxItem x:Name="CpuModeAll" Tag="all">Single-core + All-core</ComboBoxItem>
                                         </ComboBox>
                                         <ComboBox x:Name="CpuDurationPresetBox" Grid.Column="1" Header="Duration preset"
                                                   SelectedIndex="0" HorizontalAlignment="Stretch"
@@ -468,7 +470,7 @@
                                                    ValueChanged="OnCpuTimeChanged"/>
                                     </Grid>
                                     <TextBlock x:Name="CpuDurationHint" Opacity="0.72" TextWrapping="Wrap"
-                                               Text="Per-core duration is applied separately to every logical processor; the formal preset can take a long time."/>
+                                               Text="Single-core duration is applied once to each logical processor; the formal preset can take a long time."/>
                                 </StackPanel>
                             </Border>
 
@@ -522,7 +524,7 @@
                                     <StackPanel Spacing="14" MinWidth="0">
                                         <TextBlock x:Name="CpuSummaryTitle" Text="Summary" FontWeight="SemiBold"/>
                                         <StackPanel Spacing="4">
-                                            <TextBlock x:Name="CpuAverageLabel" Text="Per-core average" Opacity="0.72"/>
+                                            <TextBlock x:Name="CpuAverageLabel" Text="Single-core result" Opacity="0.72"/>
                                             <TextBlock x:Name="CpuAverageResult" Text="&#x2014;" FontSize="20" FontWeight="SemiBold"
                                                        TextWrapping="Wrap"/>
                                         </StackPanel>
