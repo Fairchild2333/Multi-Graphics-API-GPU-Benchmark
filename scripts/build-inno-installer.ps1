@@ -85,11 +85,12 @@ if (Test-Path -LiteralPath $renderDocDir -PathType Container) {
 $iss = Get-Content -LiteralPath $issPath -Raw -Encoding utf8
 $requiredInstallerTokens = @(
     '{{9DBD8675-1CE2-45DF-83BB-2E62EB71796B}',
+    '{{4B7DF8D6-8FE7-4A29-A04B-19B21957B58D}',
     'AppId={#MyAppId}',
     '#define MyAppName "Mangekyo"',
     'ArchitecturesAllowed={#MyAppArchAllowed}',
     'ArchitecturesInstallIn64BitMode={#MyAppArchAllowed}',
-    'DefaultDirName={pf}\Mangekyo',
+    'DefaultDirName={pf}\{#MyInstallDir}',
     'OutputBaseFilename=Mangekyo-{#MyAppVersion}-windows-{#MyAppArch}-setup',
     'PrivilegesRequired=admin',
     'SetupIconFile=',

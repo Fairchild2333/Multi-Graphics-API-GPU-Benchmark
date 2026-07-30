@@ -54,9 +54,12 @@ artifacts; the normal installer fails if the GUI is missing. If `-Version` is
 omitted, the build script uses `release-manifest.json`; an explicit mismatched
 version is rejected so the Setup filename cannot mislabel its staged payload.
 
-The stable AppId is `{9DBD8675-1CE2-45DF-83BB-2E62EB71796B}`. Never change it
-for normal upgrades: Inno uses AppId to associate subsequent versions with the
-same uninstall record. The installer accepts only x64-compatible Windows and
+The x64 AppId remains `{9DBD8675-1CE2-45DF-83BB-2E62EB71796B}` so normal x64
+upgrades keep the existing uninstall record. ARM64 uses the separate AppId
+`{4B7DF8D6-8FE7-4A29-A04B-19B21957B58D}` and installs to `Mangekyo ARM64`;
+therefore Windows on Arm can keep the native ARM64 and emulated x64 editions
+installed side by side. Do not change either architecture identity for normal
+upgrades. The x64 installer accepts x64-compatible Windows and
 uses 64-bit install mode. A fresh install uses
 `%LOCALAPPDATA%\Programs\Mangekyo`, creates Mangekyo Start Menu and optional
 desktop shortcuts, and supplies automatic uninstall support. `UsePreviousAppDir`

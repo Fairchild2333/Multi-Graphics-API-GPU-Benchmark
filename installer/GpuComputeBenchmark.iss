@@ -4,7 +4,6 @@
 
 #define MyAppName "Mangekyo"
 #define MyAppExeName "gpu_bench_gui.exe"
-#define MyAppId "{{9DBD8675-1CE2-45DF-83BB-2E62EB71796B}"
 
 #ifndef MyAppArch
   #define MyAppArch "x64"
@@ -12,12 +11,19 @@
 
 #if MyAppArch == "arm64"
   #define MyAppArchAllowed "arm64"
+  #define MyAppId "{{4B7DF8D6-8FE7-4A29-A04B-19B21957B58D}"
+  #define MyAppDisplayName "Mangekyo (ARM64)"
+  #define MyInstallDir "Mangekyo ARM64"
 #else
   #define MyAppArchAllowed "x64compatible"
+  ; Preserve the historical x64 identity so existing installs upgrade in place.
+  #define MyAppId "{{9DBD8675-1CE2-45DF-83BB-2E62EB71796B}"
+  #define MyAppDisplayName "Mangekyo (x64)"
+  #define MyInstallDir "Mangekyo"
 #endif
 
 #ifndef MyAppVersion
-  #define MyAppVersion "0.2.4"
+  #define MyAppVersion "0.2.6"
 #endif
 #ifndef StageDir
   #define StageDir AddBackslash(SourcePath) + "..\out\stage\windows-" + MyAppArch
@@ -71,9 +77,9 @@
 
 [Setup]
 AppId={#MyAppId}
-AppName={#MyAppName}
+AppName={#MyAppDisplayName}
 AppVersion={#MyAppVersion}
-AppVerName={#MyAppName} {#MyAppVersion}
+AppVerName={#MyAppDisplayName} {#MyAppVersion}
 AppPublisher=Mangekyo contributors
 VersionInfoVersion={#MyAppVersion}
 VersionInfoDescription={#MyAppName} Setup
@@ -84,8 +90,8 @@ VersionInfoProductName={#MyAppName}
 ; per-user %LOCALAPPDATA%\Programs path, which is not what we want.  A hard
 ; admin install keeps {app} in Program Files; app data still lives in
 ; %LOCALAPPDATA%, so the install directory stays read-only at run time.
-DefaultDirName={pf}\Mangekyo
-DefaultGroupName={#MyAppName}
+DefaultDirName={pf}\{#MyInstallDir}
+DefaultGroupName={#MyAppDisplayName}
 DisableProgramGroupPage=yes
 PrivilegesRequired=admin
 ArchitecturesAllowed={#MyAppArchAllowed}
@@ -100,7 +106,7 @@ ShowLanguageDialog=auto
 SetupLogging=yes
 SetupIconFile={#SourcePath}\..\gui\app.ico
 Uninstallable=yes
-UninstallDisplayName={#MyAppName}
+UninstallDisplayName={#MyAppDisplayName}
 #if HasGui
 UninstallDisplayIcon={app}\app\bin\{#MyAppExeName}
 #else
@@ -134,7 +140,7 @@ english.CompRenderDoc=RenderDoc capture tools
 english.CompReports=Report worker payload (not yet GUI-integrated)
 english.TaskDesktopIcon=Create a desktop shortcut
 english.TaskDesktopIconGroup=Additional shortcuts:
-english.LaunchApp=Launch {#MyAppName}
+english.LaunchApp=Launch {#MyAppDisplayName}
 chinesesimplified.TypeFull=完整安装
 chinesesimplified.TypeCompact=仅核心基准测试
 chinesesimplified.TypeCustom=自定义安装
@@ -143,7 +149,7 @@ chinesesimplified.CompRenderDoc=RenderDoc 捕获工具
 chinesesimplified.CompReports=报告工具负载（尚未接入 GUI）
 chinesesimplified.TaskDesktopIcon=创建桌面快捷方式
 chinesesimplified.TaskDesktopIconGroup=其他快捷方式：
-chinesesimplified.LaunchApp=启动 {#MyAppName}
+chinesesimplified.LaunchApp=启动 {#MyAppDisplayName}
 
 [Types]
 Name: "full"; Description: "{cm:TypeFull}"
@@ -181,6 +187,7 @@ Source: "{#StageDir}\tools\report_worker\*"; DestDir: "{app}\tools\report_worker
 #endif
 
 [InstallDelete]
+#if MyAppArch != "arm64"
 ; The stable AppId upgrades legacy installations in place. Remove only the old
 ; product shortcuts; the historical application-data directory is preserved.
 Type: files; Name: "{autoprograms}\GPU Compute Benchmark.lnk"
@@ -188,16 +195,17 @@ Type: files; Name: "{autoprograms}\GPU Compute Benchmark CLI.lnk"
 Type: files; Name: "{autoprograms}\GPU Compute Benchmark\RenderDoc.lnk"
 Type: dirifempty; Name: "{autoprograms}\GPU Compute Benchmark"
 Type: files; Name: "{autodesktop}\GPU Compute Benchmark.lnk"
+#endif
 
 [Icons]
 #if HasGui
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\app\bin\{#MyAppExeName}"; WorkingDir: "{app}\app\bin"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\app\bin\{#MyAppExeName}"; WorkingDir: "{app}\app\bin"; Tasks: desktopicon
+Name: "{autoprograms}\{#MyAppDisplayName}"; Filename: "{app}\app\bin\{#MyAppExeName}"; WorkingDir: "{app}\app\bin"
+Name: "{autodesktop}\{#MyAppDisplayName}"; Filename: "{app}\app\bin\{#MyAppExeName}"; WorkingDir: "{app}\app\bin"; Tasks: desktopicon
 #else
-Name: "{autoprograms}\{#MyAppName} CLI"; Filename: "{app}\app\bin\gpu_benchmark.exe"; Parameters: "--help"; WorkingDir: "{app}\app\bin"
+Name: "{autoprograms}\{#MyAppDisplayName} CLI"; Filename: "{app}\app\bin\gpu_benchmark.exe"; Parameters: "--help"; WorkingDir: "{app}\app\bin"
 #endif
 #if HasRenderDoc
-Name: "{autoprograms}\{#MyAppName}\RenderDoc"; Filename: "{app}\tools\RenderDoc\qrenderdoc.exe"; WorkingDir: "{app}\tools\RenderDoc"; Components: renderdoc
+Name: "{autoprograms}\{#MyAppDisplayName}\RenderDoc"; Filename: "{app}\tools\RenderDoc\qrenderdoc.exe"; WorkingDir: "{app}\tools\RenderDoc"; Components: renderdoc
 #endif
 
 [Run]
