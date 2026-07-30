@@ -1,11 +1,33 @@
-# Inno Setup installer (legacy)
+# Windows installers
 
-`GpuComputeBenchmark.iss` is a **legacy** engineering path. The primary Windows
-installer is WiX MSI via `scripts/build-wix-installer.ps1` (see
-`packaging/README.md`). This Inno script turns an existing verified Mangekyo
-Windows stage into a per-user Setup executable. It does not build C++, compile
-shaders, inspect `C:\Program Files\RenderDoc`, or copy anything from
-vcpkg/Visual Studio.
+See [`../docs/windows-installer-packaging.md`](../docs/windows-installer-packaging.md)
+for the complete day-to-day build, dual-architecture release, signing and
+clean-machine acceptance procedure.
+
+The release installer is a native, dependency-free Win32 bootstrapper backed by
+a WiX MSI. Two files are published: one native x64 EXE and one native ARM64 EXE.
+Each is a single-file installer with an explicit English/Simplified Chinese
+selector; there are no separate language downloads.
+
+The native Setup draws its own theme-aware rounded progress indicator and keeps
+the completion state visible instead of closing immediately. Before elevation,
+users can choose a desktop shortcut (off by default) and a Start menu shortcut
+(on by default). These choices are passed to conditional WiX MSI components so
+repair and uninstall retain normal Windows Installer ownership and cleanup.
+The same controls are enabled again on the completion page. Changed choices
+switch the primary action to Apply and run MSI maintenance against transitive
+shortcut components, so repeated application updates the same component and
+never creates a second shortcut.
+
+`scripts/build-native-bootstrapper.ps1` compiles the same source for both
+architectures and embeds the matching MSI as an executable overlay. The Setup
+extracts that MSI to a unique temporary path, invokes Windows Installer with
+elevation, waits for completion, and removes the temporary file. MSI product and
+upgrade identities remain architecture-specific, so x64 and ARM64 installations
+can coexist on Windows on Arm.
+
+`GpuComputeBenchmark.iss` and `scripts/build-inno-installer.ps1` remain a
+**legacy** engineering path only.
 
 For a local **developer** CLI+GUI tree (not an installer), use
 `scripts/build-windows.ps1` instead — see `docs/building.md`.
@@ -37,7 +59,29 @@ tree must contain `renderdoccmd.exe`, `qrenderdoc.exe`, `renderdoc.dll`,
 component only when that portable payload is present. The installer never
 harvests an arbitrary installed copy.
 
-## Build
+## Build the release installers
+
+Build the two WiX MSI intermediates first, then package them:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-wix-installer.ps1 -Arch x64
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-wix-installer.ps1 -Arch ARM64
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-native-bootstrapper.ps1 -Arch Both
+```
+
+The resulting release files are:
+
+```text
+out/installer/Mangekyo-<version>-windows-x64-setup.exe
+out/installer/Mangekyo-<version>-windows-arm64-setup.exe
+```
+
+Both installers support interactive language switching. For managed deployment,
+use `--quiet` and optionally `--lang en` or `--lang zh-CN`. Public files should
+be Authenticode-signed by passing a sign command containing `$f`; the build
+script can enforce this with `-RequireSigned`.
+
+## Build the legacy Inno installer
 
 Install Inno Setup 6.3 or later on the build machine, then run:
 
@@ -67,14 +111,15 @@ is intentionally retained, so an in-place upgrade from an older branded build
 can keep its existing program directory instead of breaking the uninstall
 record.
 
-## Languages
+## Legacy Inno languages
 
 The Setup wizard ships English and Simplified Chinese
-(`installer/languages/ChineseSimplified.isl`). `ShowLanguageDialog=auto` picks
-Chinese on Chinese Windows locales and still offers a language choice when the
-system language is not matched. `UsePreviousLanguage=yes` keeps the choice on
-upgrade. The installed GUI has its own in-app language switch and is independent
-of the Setup wizard language.
+(`installer/languages/ChineseSimplified.isl`). It always shows the language
+choice before installation, so Simplified Chinese remains discoverable even
+when Windows or a previous installation selected English.
+`UsePreviousLanguage=yes` preselects the previous choice on upgrade. The
+installed GUI has its own in-app language switch and is independent of the
+Setup wizard language.
 
 For a signed public artifact, pass an Inno sign-tool command containing its
 `$f` filename placeholder and make a valid signature mandatory:
@@ -100,9 +145,9 @@ add those directories to `[UninstallDelete]`.
 
 ## Release gates
 
-This legacy path still needs Authenticode signing and clean-machine
-install/upgrade/uninstall plus GPU/capture tests before public use. Prefer the
-WiX MSI for new releases. See `packaging/PACKAGE_LIMITATIONS.md`.
+The native release path still needs Authenticode signing and clean-machine
+install/upgrade/uninstall validation before public use. The legacy Inno path is
+not a release substitute. See `packaging/PACKAGE_LIMITATIONS.md`.
 
 Inno references: [architecture checks](https://jrsoftware.org/ishelp/topic_setup_architecturesallowed.htm),
 [stable AppId/upgrades](https://jrsoftware.org/ishelp/topic_setup_appid.htm), and

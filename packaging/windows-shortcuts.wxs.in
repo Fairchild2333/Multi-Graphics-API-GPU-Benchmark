@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Fragment>
+    <Property Id="CREATE_DESKTOP_SHORTCUT" Value="0" Secure="yes" />
+    <Property Id="CREATE_START_MENU_SHORTCUT" Value="1" Secure="yes" />
+
+    <StandardDirectory Id="DesktopFolder">
+      <Component Id="MangekyoDesktopShortcutComponent" Guid="*" Transitive="yes"
+                 Condition="CREATE_DESKTOP_SHORTCUT = 1">
+        <Shortcut Id="MangekyoDesktopShortcut"
+                  Name="Mangekyo"
+                  Description="Mangekyo cross-API GPU and CPU benchmark"
+                  Target="[INSTALL_ROOT]@CPACK_PACKAGE_FILE_NAME@\app\bin\gpu_bench_gui.exe"
+                  WorkingDirectory="INSTALL_ROOT" />
+        <RegistryValue Root="HKLM"
+                       Key="Software\Mangekyo\Installer"
+                       Name="DesktopShortcut@GPU_BENCH_WIX_SHORTCUT_SUFFIX@"
+                       Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="MangekyoStartMenuDirectory@GPU_BENCH_WIX_SHORTCUT_SUFFIX@"
+                 Name="@GPU_BENCH_WIX_START_MENU_FOLDER@">
+        <Component Id="MangekyoStartMenuShortcutComponent" Guid="*" Transitive="yes"
+                   Condition="CREATE_START_MENU_SHORTCUT = 1">
+          <Shortcut Id="MangekyoStartMenuShortcut"
+                    Name="Mangekyo"
+                    Description="Mangekyo cross-API GPU and CPU benchmark"
+                    Target="[INSTALL_ROOT]@CPACK_PACKAGE_FILE_NAME@\app\bin\gpu_bench_gui.exe"
+                    WorkingDirectory="INSTALL_ROOT" />
+          <RemoveFolder Id="RemoveMangekyoStartMenuDirectory"
+                        Directory="MangekyoStartMenuDirectory@GPU_BENCH_WIX_SHORTCUT_SUFFIX@"
+                        On="uninstall" />
+          <RegistryValue Root="HKLM"
+                         Key="Software\Mangekyo\Installer"
+                         Name="StartMenuShortcut@GPU_BENCH_WIX_SHORTCUT_SUFFIX@"
+                         Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+  </Fragment>
+</Wix>

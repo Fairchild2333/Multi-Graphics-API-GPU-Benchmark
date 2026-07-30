@@ -1,5 +1,19 @@
 # Windows x64 release staging
 
+> The current installer contract is documented in
+> [`../docs/windows-installer-packaging.md`](../docs/windows-installer-packaging.md).
+> x64 and ARM64 each publish one native, single-file, English/Chinese Setup EXE;
+> WiX MSI is an embedded intermediate and Inno Setup is legacy only.
+
+The WiX intermediate owns the optional desktop and Start menu shortcuts. The
+native Setup passes `CREATE_DESKTOP_SHORTCUT` and
+`CREATE_START_MENU_SHORTCUT`; defaults are desktop off and Start menu on. Keep
+the shortcut definitions in `windows-shortcuts.wxs.in` and their root-feature
+references in `windows-shortcuts-patch.xml.in` so uninstall removes them. The
+components are transitive because the native Setup can reapply both choices
+from its completion page; MSI maintenance re-evaluates the conditions instead
+of copying extra `.lnk` files.
+
 This directory defines the Windows x64 release contract. The release script
 builds the CLI and self-contained WinUI GUI, installs the app-local runtime and
 all shaders, adds a pinned RenderDoc portable tree, verifies PE architecture and
@@ -63,8 +77,8 @@ powershell -NoProfile -ExecutionPolicy Bypass `
 ```
 
 The default flow rebuilds both CMake and WinUI outputs instead of harvesting a
-developer output directory. It produces the portable ZIP, the WiX MSI
-(`Mangekyo-<ver>-windows-<arch>.msi`), `SHA256SUMS.txt`, and
+developer output directory. It produces the portable ZIP, a native multilingual
+Setup executable (`Mangekyo-<ver>-windows-<arch>-setup.exe`), `SHA256SUMS.txt`, and
 `release-assets.json` under `out/release/windows-x64` (or `windows-arm64`).
 The repo root `LICENSE` (MIT) is staged automatically. The target computer does
 not need Visual Studio, vcpkg, Python, a shader compiler, the Vulkan SDK, or a
@@ -120,10 +134,15 @@ RenderDoc directory is accepted only when it contains `renderdoccmd.exe`,
 `renderdoc.dll`, and a license file. A report-worker directory must contain
 `report_worker.exe`.
 
-## MSI / WiX installer (primary)
+## Native multilingual Windows installer (primary)
 
-Release packaging uses CPack `ZIP;WIX` by default. The MSI uses WiXUI InstallDir
-so the user can choose the install path. Build it from a verified stage:
+Release packaging first creates a native-architecture WiX MSI, then embeds it in
+a dependency-free Win32 bootstrapper of the same architecture. The published
+Setup EXE offers an explicit English/Simplified Chinese selector and silently
+delegates the transactional install, upgrade, repair and uninstall registration
+to Windows Installer. The MSI is an intermediate rather than a release asset.
+
+Build the MSI from a verified stage, then build both native Setup executables:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass `
@@ -131,11 +150,18 @@ powershell -NoProfile -ExecutionPolicy Bypass `
   -StageDir out/stage/windows-x64 `
   -BuildDir out/build/windows-x64-release `
   -Arch x64
+
+powershell -NoProfile -ExecutionPolicy Bypass `
+  -File scripts/build-native-bootstrapper.ps1 `
+  -Arch Both
 ```
 
 Requires WiX on the build machine (`dotnet tool install --global wix --version 5.0.2`,
 or WiX Toolset v3.14 `candle`/`light`). Both x64 and ARM64 produce native-arch
-MSIs (`CPACK_WIX_ARCHITECTURE`).
+MSIs (`CPACK_WIX_ARCHITECTURE`) and Setup shells. The final release has exactly
+one Setup file per architecture; each file contains both installer languages.
+The native bootstrapper also supports unattended deployment with `--quiet` and
+accepts `--lang en` or `--lang zh-CN`.
 
 Always run `scripts/verify-windows-stage.ps1`. Its normal mode validates the
 core artifact and reports unresolved portability gates. `-RequirePortable`

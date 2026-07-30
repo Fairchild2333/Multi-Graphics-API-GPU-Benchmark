@@ -4,8 +4,8 @@ Mangekyo's internal CMake target and command remain `gpu_benchmark`; the display
 brand does not require downstream build scripts to rename the executable.
 
 **Windows day-to-day default:** `scripts/build-windows.ps1` builds the CLI and
-WinUI GUI together and stages shaders beside the GUI worker. Release ZIP/MSI
-packaging remains a separate flow (`scripts/build-windows-github-release.ps1` /
+WinUI GUI together and stages shaders beside the GUI worker. Release ZIP/native
+multilingual Setup packaging remains a separate flow (`scripts/build-windows-github-release.ps1` /
 `packaging/README.md`).
 
 ## Prerequisites
@@ -440,7 +440,8 @@ vcpkg, Python, and shader compilers are not copied.
 
 For a complete GitHub Release candidate, use the umbrella command. It rebuilds
 the CMake CLI/engine and self-contained WinUI GUI, validates and bundles the
-official RenderDoc portable tree, creates the ZIP and WiX MSI installer, then
+official RenderDoc portable tree, creates the ZIP and native multilingual Setup
+installer (using an embedded WiX MSI as its transaction layer), then
 writes a unified asset manifest and `SHA256SUMS.txt`:
 
 ```powershell
@@ -536,7 +537,7 @@ absence is designed to disable Vulkan while leaving DirectX/WARP available;
 that exact no-loader path remains a clean-machine release test.
 
 The CPU engine adds no new redistributable, so the normal install rules include
-it automatically through `gpu_benchmark.exe`. However, any ZIP/MSI built
+it automatically through `gpu_benchmark.exe`. However, any ZIP/Setup built
 before the CPU page/engine changes predates this feature. Rebuild the CLI and
 self-contained GUI, regenerate the stage and installer, then add an installed-
 location CPU smoke to release acceptance: the GUI must find
@@ -545,3 +546,10 @@ append its isolated preview/formal summary under the user-data results path.
 
 CPack defaults to `ZIP;WIX`. See `packaging/README.md` and the generated
 `PACKAGE_LIMITATIONS.md` for the complete gates.
+
+For the exact two-architecture installer workflow, including rebuilding from an
+existing stage, installation-directory selection, bilingual command-line
+switches, Authenticode signing and the clean-machine checklist, follow
+[`windows-installer-packaging.md`](windows-installer-packaging.md). Raw MSI files
+are intermediate inputs; public Windows installer assets are the native x64 and
+ARM64 `*-setup.exe` files.

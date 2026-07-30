@@ -1152,7 +1152,7 @@ void AppBase::PrintSummary() const {
             }
             std::cout
                 << std::setprecision(2)
-                << "Liquid rate:  " << rate << " MParticle-step/s  ("
+                << "Fluid rate:   " << rate << " MParticle-step/s  ("
                 << std::setprecision(3) << avgCompute << " ms compute + "
                 << avgRender << " ms render)\n";
         }

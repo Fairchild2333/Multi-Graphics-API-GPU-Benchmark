@@ -48,7 +48,8 @@ affected. HarmonyOS already has an isolated Vulkan particle prototype, but it
 is not the current benchmark suite. Windows ARM64 packaging has landed; the
 next platform slice is macOS.
 
-1. **Windows on ARM (ARM64)** — native CLI/WinUI + WiX MSI packaging landed;
+1. **Windows on ARM (ARM64)** — native CLI/WinUI plus a native bilingual
+   ARM64 Setup executable landed; x64 uses the same installer implementation;
    clean-machine / signing still open.
 2. **macOS** — Product floor **macOS 12 Monterey** (CLI + SwiftUI). Metal code
    for the three primary workloads has landed: Particle + GPU Burn + Cinematic
@@ -379,12 +380,15 @@ platform-specific setup (Windows/Linux/macOS).
 For a Windows GUI-first GitHub Release candidate, use
 [`scripts/build-windows-github-release.ps1`](scripts/build-windows-github-release.ps1).
 It rebuilds CLI/WinUI, verifies a pinned RenderDoc portable input, audits PE
-imports, inventories and rechecks the ZIP, then emits the portable ZIP, WiX MSI,
+imports, inventories and rechecks the ZIP, then emits the portable ZIP and a
+native bilingual Setup EXE,
 `SHA256SUMS.txt` and `release-assets.json` under
 `out/release/windows-x64` (or `windows-arm64`). The project is MIT-licensed
 (`LICENSE`); public release still needs Authenticode signing, frozen report
 worker and clean-machine acceptance — see
 [`packaging/PACKAGE_LIMITATIONS.md`](packaging/PACKAGE_LIMITATIONS.md).
+See [`docs/windows-installer-packaging.md`](docs/windows-installer-packaging.md)
+for the authoritative x64/ARM64 installer build, signing and validation commands.
 
 **Linux (Debian/Ubuntu):**
 ```bash

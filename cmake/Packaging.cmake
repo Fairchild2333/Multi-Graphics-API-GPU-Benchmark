@@ -423,4 +423,26 @@ set(CPACK_MONOLITHIC_INSTALL ON)
 set(CPACK_PACKAGE_CHECKSUM SHA256)
 set(CPACK_PACKAGE_DIRECTORY "${CMAKE_BINARY_DIR}/packages")
 
+if("WIX" IN_LIST _gpu_bench_cpack_generators)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(ARM64|arm64)$" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+        set(GPU_BENCH_WIX_SHORTCUT_SUFFIX "ARM64")
+        set(GPU_BENCH_WIX_START_MENU_FOLDER "Mangekyo ARM64")
+    else()
+        set(GPU_BENCH_WIX_SHORTCUT_SUFFIX "X64")
+        set(GPU_BENCH_WIX_START_MENU_FOLDER "Mangekyo")
+    endif()
+    set(_gpu_bench_wix_shortcuts "${CMAKE_BINARY_DIR}/windows-shortcuts.wxs")
+    set(_gpu_bench_wix_shortcuts_patch "${CMAKE_BINARY_DIR}/windows-shortcuts-patch.xml")
+    configure_file(
+        "${CMAKE_SOURCE_DIR}/packaging/windows-shortcuts.wxs.in"
+        "${_gpu_bench_wix_shortcuts}"
+        @ONLY)
+    configure_file(
+        "${CMAKE_SOURCE_DIR}/packaging/windows-shortcuts-patch.xml.in"
+        "${_gpu_bench_wix_shortcuts_patch}"
+        @ONLY)
+    set(CPACK_WIX_EXTRA_SOURCES "${_gpu_bench_wix_shortcuts}")
+    set(CPACK_WIX_PATCH_FILE "${_gpu_bench_wix_shortcuts_patch}")
+endif()
+
 include(CPack)

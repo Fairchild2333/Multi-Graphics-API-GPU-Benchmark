@@ -27,8 +27,8 @@ and is outside this contract.
 - CMake attempts to bundle the release MSVC runtime DLLs. Redistribution is
   subject to the Visual Studio license, and the package verifier must confirm
   the required DLLs are present.
-- The stage includes a complete `files.sha256` inventory; the ZIP and MSI get
-  separate SHA-256 release-asset hashes. These detect accidental corruption but
+- The stage includes a complete `files.sha256` inventory; the ZIP and final
+  native Setup EXE get separate SHA-256 release-asset hashes. These detect accidental corruption but
   do not replace Authenticode signing.
 - The project is distributed under the MIT license (`LICENSE` at the repository
   root, also staged under `licenses/`). Third-party notices cover GLAD, GLFW,

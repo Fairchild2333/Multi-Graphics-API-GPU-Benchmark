@@ -102,7 +102,10 @@ OutputBaseFilename=Mangekyo-{#MyAppVersion}-windows-{#MyAppArch}-setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
-ShowLanguageDialog=auto
+; Always expose the English / Simplified Chinese choice. Automatic language
+; selection made the bundled Chinese translation effectively invisible on
+; systems whose locale had previously selected English.
+ShowLanguageDialog=yes
 SetupLogging=yes
 SetupIconFile={#SourcePath}\..\gui\app.ico
 Uninstallable=yes
@@ -142,11 +145,11 @@ english.TaskDesktopIcon=Create a desktop shortcut
 english.TaskDesktopIconGroup=Additional shortcuts:
 english.LaunchApp=Launch {#MyAppDisplayName}
 chinesesimplified.TypeFull=完整安装
-chinesesimplified.TypeCompact=仅核心基准测试
+chinesesimplified.TypeCompact=仅安装核心测试
 chinesesimplified.TypeCustom=自定义安装
 chinesesimplified.CompCore=Mangekyo
-chinesesimplified.CompRenderDoc=RenderDoc 捕获工具
-chinesesimplified.CompReports=报告工具负载（尚未接入 GUI）
+chinesesimplified.CompRenderDoc=RenderDoc 抓帧工具
+chinesesimplified.CompReports=报告工具组件（尚未接入 GUI）
 chinesesimplified.TaskDesktopIcon=创建桌面快捷方式
 chinesesimplified.TaskDesktopIconGroup=其他快捷方式：
 chinesesimplified.LaunchApp=启动 {#MyAppDisplayName}

@@ -167,6 +167,7 @@ namespace winrt::gpu_bench_gui::implementation
             Dx12LegacyIntelRenderDoc, // HD 6000 legacy driver; newer driver captured successfully
             Dx11SynchronizedTiming, // informational: invalid D3D11 timestamps replaced by sync timing
             OpenGlSynchronizedTiming, // informational: invalid GL timestamps replaced by sync timing
+            SuspectResult, // informational: retained score appears physically implausible
             Unknown,
         };
 

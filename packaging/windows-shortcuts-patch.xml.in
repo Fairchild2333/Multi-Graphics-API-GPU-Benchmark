@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CPackWiXPatch>
+  <CPackWiXFragment Id="#PRODUCTFEATURE">
+    <ComponentRef Id="MangekyoDesktopShortcutComponent" />
+    <ComponentRef Id="MangekyoStartMenuShortcutComponent" />
+  </CPackWiXFragment>
+</CPackWiXPatch>

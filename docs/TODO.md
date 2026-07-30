@@ -4,7 +4,7 @@
 
 > 当前事实、验证记录与交接顺序以根目录 [`HANDOFF.md`](../HANDOFF.md) 为准；下面旧专题内容只保留历史上下文。
 
-> **Windows 本地编译（2026-07-21）**：默认用 [`scripts/build-windows.ps1`](../scripts/build-windows.ps1) 编 CLI+WinUI，并同步同目录 shader；详见 [`docs/building.md`](building.md)。发布 ZIP/MSI 仍走 github-release/stage，勿把开发树当成安装包。
+> **Windows 本地编译**：默认用 [`scripts/build-windows.ps1`](../scripts/build-windows.ps1) 编 CLI+WinUI，并同步同目录 shader；详见 [`docs/building.md`](building.md)。正式发布生成 ZIP，以及 x64/ARM64 各一个原生中英双语 Setup EXE；完整步骤见 [`windows-installer-packaging.md`](windows-installer-packaging.md)，勿把开发树、raw MSI 或 legacy Inno 产物当成正式安装包。
 
 > **当前执行边界**：先完善 Original Particle、Plasma/GPU Burn、当前 Cinematic Liquid `physical_scene_v8`、GUI 同步、固定 `15s + 第 5 秒抓帧` 与结果合同。N-body 不进入双卡路线。本轮新增的 RT、路径追踪、DLSS/FSR/XeSS/MetalFX 仅记录可行性；在现有测试完成验收且用户再次明确提优先级前，不开始实现。
 
@@ -26,7 +26,7 @@
 - [x] **v2 下一重大画质路线 — SPH vertical slice 与视觉收口（2026-07-16）**：`--liquid-solver sph` → 始终为 `cinematic_liquid_sph_slice_v1_preview`。当前深池版本为 **318,464 粒子**、计数排序邻域、per-particle SDF/浮力刚体耦合，复用当前 inset 0.45、wall-top fraction 0.42、`extinction=(12,3.6,2.5)` 的池体/场景和用户鸭子家族；草地吸收倒计时为 0.50–1.80 sim 秒。RTX 5090/Vulkan 已实际完整运行 15 秒，水池/水面/鸭子/球/船/草地稳定显示并正常自动结束，用户接受当前视觉并停止外观迭代。**这只完成视觉验收，不是正式成绩完成**；在 render-frame 驱动的 2×1/120 timestep、每 substep `bodyImpulses` 清零、viscosity 原位 SSBO race、atomic scatter cell-order 非确定性四项全部关闭前，任何时长（包括 15 秒）都必须强制 `_preview`。之后才能做正式 15 秒 + 第 5 秒 RenderDoc、timestamp/确定性合同。secondary spray/foam、SPH 螺旋桨尾流与跨 API 是后续增强；细节见 HANDOFF 的 SPH vertical slice。
 - [ ] **P0 后的 v2 原生后端移植**：DX12、DX11、OpenGL 液体尚未实现；Metal 已有 MLS-MPM + raymarch present（`…_metal_preview`），正式合同与真机验收未完成。必须在 Vulkan scene/pass/quality contract 冻结并通过正式验收后逐后端实现和验证，不能把 preview 当作正式 liquid 支持。
 - [x] **CPU 补充测试 Windows vertical slice（2026-07-16）**：原生 `cpu_mixed_v1`、CLI `per-core|multi|all`、三轮中位数、独立 WinUI CPU 页、实时逐核/总进度、Run/Cancel、stdout 协议与 `results.json` summary 持久化已实现；不创建 3D 窗口、不调用 RenderDoc。正式计分热路径已改为所有 per-core 同 seed、被测线程零 stdout、multi 测量窗口零 stdout、线程局部/128-byte 隔离计数；Windows/Linux/Android affinity 均要求 set 后回读验证。GUI 已加 CPU/GPU/Charts 全局互斥、完整 15.0/0.2 Formal 预设、输出节流和协议完整性审计。9800X3D Release smoke 正确枚举 16 logical/8 physical/SMT2，逐核与 multi 全部 strict affinity、exit 0；隔离数据目录的 0.1 秒 GUI E2E 显示 16 条逐核、平均、多核、100%/Done。两者均是 preview，不是正式成绩。正式合同为 15.0 秒总测量 + 0.2 秒预热 + r3；版本隔离 affinity/time/warmup/sequence，JSON 只保存逐核平均与 multi summary。
-- [ ] **CPU 发布与平台合同收口**：重建新的 stage/ZIP/Inno Setup，并在干净 Windows 安装后验收 GUI 相邻 CLI 查找、Run/Cancel、History 写入；补一次不受当前开发负载影响的正式 15.0/0.2/r3 成绩、>64 logical/processor-group 与真实混合核实机。Linux/Android 代码合同为回读验证的 `strict_sched_affinity`（失败 `valid=0`/exit 3），但原生 Linux、容器/cpuset 和 Android 设备尚未构建；macOS 为 `scheduler_managed`/估计拓扑，iOS/Web/WASM 未构建。P/E/Mid/LPE 只允许写 `Inferred*` 排名标签，不得宣称真实微架构识别，各 affinity capability 必须独立分组。
+- [ ] **CPU 发布与平台合同收口**：重建新的 stage/ZIP/原生双语 Setup，并在干净 Windows 安装后验收 GUI 相邻 CLI 查找、Run/Cancel、History 写入；补一次不受当前开发负载影响的正式 15.0/0.2/r3 成绩、>64 logical/processor-group 与真实混合核实机。Linux/Android 代码合同为回读验证的 `strict_sched_affinity`（失败 `valid=0`/exit 3），但原生 Linux、容器/cpuset 和 Android 设备尚未构建；macOS 为 `scheduler_managed`/估计拓扑，iOS/Web/WASM 未构建。P/E/Mid/LPE 只允许写 `Inferred*` 排名标签，不得宣称真实微架构识别，各 affinity capability 必须独立分组。
 - [x] **GT 120 / DX10 时代代码路径**：不新增 DX9 后端；现有 DX11 后端实际探测 FL10_0/10_1 与可选 DirectCompute 4.x，按设备切换 `cs/vs/ps_4_0`，fragment-only 测试不再创建 compute/UAV，Vulkan loader 改为 delay-load。16/16 个生产 HLSL SM4 entry 已通过 FXC，DX11 Extreme 越界会拒绝，SM4 N-body 安全上限为 4,096。
 - [ ] **GT 120 实卡验收**：在 Windows 10 1809+ / NVIDIA 342.01 环境先跑 Stream/Particle Light/Medium、GPU Burn 安全自动标定、Legacy Fractal/Volumetric 与 4,096-body N-body；确认 DirectCompute feature bit、GPU timestamp、15 秒生命周期、第 5 秒 RenderDoc、TDR 余量和结果 metadata。未完成前只能称“SM4 编译/代码路径通过”，不能称 GT 120 已验证。若目标机是 Windows 7，另建 legacy CLI/OS 包；当前 WinUI 安装器不支持 Win7。
 - [ ] **紧接 v2 — Liquid Lab / Explore**：复用 v2 场景提供无限时间、自由 orbit/WASD 视角、暂停/单步/重置、物体/流体/螺旋桨参数调整，以及充气池/玻璃水缸环境预设；明确标为不可计分，默认不自动 RenderDoc，不得写入正式 benchmark history。正式 Benchmark 与 Explore 切换时必须重建固定资源、恢复 seed 并校验 scene hash。
@@ -42,7 +42,7 @@
 
 顺序：**Win ARM64 → macOS → Android → iOS → Debian Linux → WebGPU → HarmonyOS PC / 鸿蒙 → Windows 7 专用 GUI（Aero）→ PS3（探索性）→ Lumia 1520 legacy WP（探索性）→ iPhone 4 legacy iOS（探索性）→ Dual-GPU Collaboration（双卡协作，功能项）**。除现有隔离的 HarmonyOS Vulkan 粒子 demo 外，完整产品移植均未开始；该 demo 不等于 workload suite 已移植。不改变上方产品主线的切片顺序，平台移植在其后展开。逐平台落地时：能力不齐明确 unsupported、不静默 fallback；计时/抓帧模型不同的实现必须使用新 `workloadVersion` 独立成组，现有 Windows 成绩组的 A/B 对比不受影响。详细逐平台要点见 `HANDOFF.md` 目标 C。
 
-- [x] **1. Win ARM64**：原生 CLI/WinUI + WiX MSI 闭环已落地（见 HANDOFF）；clean-machine/签名仍开放。
+- [x] **1. Win ARM64**：原生 CLI/WinUI + 原生 ARM64 中英双语 Setup 闭环已落地；x64 使用同一安装器实现，WiX MSI 仅为内嵌中间层；clean-machine/签名仍开放。
 - [ ] **2. macOS（下一平台刀）**：
   - [x] Metal Particle 合同代码（离屏 / Unified-memory / capture 诚实）— **待真 Mac 15s 验收**
   - [x] Metal GPU Burn（`gpu_burn.metal` + 双 pass）— **待真 Mac 验收**

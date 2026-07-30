@@ -184,6 +184,20 @@ if (-not $SkipInstaller) {
     if ($SignToolCommand) { $installerArgs += @('-SignToolCommand', $SignToolCommand) }
     if ($RequireSigned) { $installerArgs += '-RequireSigned' }
     Invoke-CheckedScript $installerScript $installerArgs
+
+    $bootstrapperScript = Join-Path $PSScriptRoot 'build-native-bootstrapper.ps1'
+    $bootstrapperArgs = @(
+        '-Arch', $Arch,
+        '-Version', $Version,
+        '-OutputDir', $InstallerDir)
+    if ($Arch -eq 'x64') {
+        $bootstrapperArgs += @('-X64Msi', (Join-Path $InstallerDir "Mangekyo-$Version-windows-x64.msi"))
+    } else {
+        $bootstrapperArgs += @('-Arm64Msi', (Join-Path $InstallerDir "Mangekyo-$Version-windows-arm64.msi"))
+    }
+    if ($SignToolCommand) { $bootstrapperArgs += @('-SignToolCommand', $SignToolCommand) }
+    if ($RequireSigned) { $bootstrapperArgs += '-RequireSigned' }
+    Invoke-CheckedScript $bootstrapperScript $bootstrapperArgs
 }
 
 if (-not $NoClean) { Reset-SafeReleaseDirectory $ReleaseDir }
@@ -261,10 +275,10 @@ try {
     }
 } finally { $zipAudit.Dispose() }
 if (-not $SkipInstaller) {
-    $msiName = "Mangekyo-$Version-windows-$archLower.msi"
-    $msi = Get-Item -LiteralPath (Join-Path $InstallerDir $msiName) -ErrorAction Stop
-    Copy-Item -LiteralPath $msi.FullName -Destination (Join-Path $ReleaseDir $msi.Name) -Force
-    $assets.Add((Get-Item -LiteralPath (Join-Path $ReleaseDir $msi.Name)))
+    $setupName = "Mangekyo-$Version-windows-$archLower-setup.exe"
+    $setup = Get-Item -LiteralPath (Join-Path $InstallerDir $setupName) -ErrorAction Stop
+    Copy-Item -LiteralPath $setup.FullName -Destination (Join-Path $ReleaseDir $setup.Name) -Force
+    $assets.Add((Get-Item -LiteralPath (Join-Path $ReleaseDir $setup.Name)))
 }
 
 $assetRows = @($assets | Sort-Object Name | ForEach-Object {

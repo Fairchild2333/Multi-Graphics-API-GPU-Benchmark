@@ -900,6 +900,8 @@ namespace
         replaceRate("VRAM rate:", "VRAM rate:", "显存速率:", "VRAM レート:");
         replaceRate("RAM rate:", "RAM rate:", "内存速率:", "RAM レート:");
         replaceRate("Memory rate:", "VRAM rate:", "显存速率:", "VRAM レート:");
+        // Normalise legacy worker wording before the English early return too.
+        replaceRate("Liquid rate:", "Fluid rate:", "流体速率:", "流体レート:");
         if (i18n::currentLang() == i18n::Lang::En) return line;
         struct Pair { char const* en; char const* zh; char const* ja; };
         constexpr Pair pairs[] = {
@@ -911,7 +913,7 @@ namespace
             { "Render rate:", "渲染速率:", "レンダーレート:" },
             { "Vol rate:", "体积速率:", "ボリュームレート:" },
             { "Fluid rate:", "流体速率:", "流体レート:" },
-            { "Liquid rate:", "液体速率:", "液体レート:" },
+            { "Liquid rate:", "流体速率:", "流体レート:" },
             { "Peak FP", "峰值 FP", "ピーク FP" },
             { "Peak INT", "峰值 INT", "ピーク INT" },
         };
@@ -982,6 +984,54 @@ namespace
             combined += fpsLabel;
         }
         return combined;
+    }
+
+    bool scoreTextLooksImplausible(std::string const& scoreText)
+    {
+        const char* rateLabels[] = { "VRAM rate:", "RAM rate:", "Memory rate:" };
+        size_t valuePos = std::string::npos;
+        for (auto const* label : rateLabels)
+        {
+            const auto labelPos = scoreText.find(label);
+            if (labelPos != std::string::npos)
+            {
+                valuePos = labelPos + std::strlen(label);
+                break;
+            }
+        }
+        if (valuePos == std::string::npos) return false;
+
+        try
+        {
+            const double rate = std::stod(scoreText.substr(valuePos));
+            if (!std::isfinite(rate) || rate > 10000.0) return true;
+
+            const auto fpsLabel = scoreText.find("Avg FPS:");
+            if (rate > 0.0 && fpsLabel != std::string::npos)
+            {
+                const double fps = std::stod(scoreText.substr(
+                    fpsLabel + std::strlen("Avg FPS:")));
+                if (!std::isfinite(fps) || fps <= 0.0) return true;
+            }
+        }
+        catch (...) {}
+        return false;
+    }
+
+    bool hideImplausibleLegacyHistoryScore(
+        gpu_bench::BenchmarkResult const& result)
+    {
+        const bool legacy = result.resultSchemaVersion < 4 ||
+            result.appVersion.empty() || result.appVersion == "Unknown (legacy)";
+        const bool bandwidthScore = result.scoreUnit.find("GB/s") !=
+            std::string::npos;
+        if (!legacy || !bandwidthScore) return false;
+
+        return !std::isfinite(result.score) ||
+            !std::isfinite(result.avgFps) ||
+            !std::isfinite(result.avgComputeMs) ||
+            result.score > 10000.0 ||
+            (result.score > 0.0 && result.avgFps <= 0.0);
     }
 
     // Stream summary's "Working set:  512.00 MiB"; 0 when absent.
@@ -2677,6 +2727,12 @@ void MainWindow::updateResultHint()
                     "The DirectX 11 driver returned invalid GPU timestamps. Synchronized timing was used instead; this result is stored in a separate timing group so it is not mixed with timestamp-query scores.",
                     "DirectX 11 驱动返回了无效的 GPU 时间戳，已改用同步计时；该成绩会保存到独立计时分组，不会与时间戳查询成绩混合比较。",
                     "DirectX 11 ドライバーが無効な GPU タイムスタンプを返したため、同期計測に切り替えました。この結果は別の計測グループに保存され、タイムスタンプクエリのスコアとは混在しません。");
+                break;
+            case GpuRunIssueKind::SuspectResult:
+                message = locText(
+                    "This score may be abnormal: the reported bandwidth/timing is not consistent with a plausible result. The original value has been saved for diagnosis.",
+                    "该成绩可能异常：驱动报告的带宽或计时不符合合理范围。原始数值已保留，便于排查。",
+                    "このスコアは異常な可能性があります。報告された帯域幅または計測値が妥当な範囲と一致しません。診断用に元の値は保存されています。");
                 break;
             case GpuRunIssueKind::Unknown:
             default:
@@ -5576,6 +5632,19 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                 std::string sc = extractScore(res.output);
                 if (!sc.empty())
                 {
+                    if (scoreTextLooksImplausible(sc))
+                    {
+                        GpuRunIssue issue{ GpuRunIssueKind::SuspectResult,
+                                           jobTargetLabel(job) };
+                        const bool duplicate = std::any_of(
+                            gpuRunIssues.begin(), gpuRunIssues.end(),
+                            [&](GpuRunIssue const& existing)
+                            {
+                                return existing.kind == issue.kind &&
+                                       existing.target == issue.target;
+                            });
+                        if (!duplicate) gpuRunIssues.push_back(std::move(issue));
+                    }
                     // Small VRAM working sets can sit entirely in a big GPU L2
                     // (e.g. 96 MB on GB202), inflating the apparent bandwidth.
                     if (res.output.find("VRAM rate:") != std::string::npos)
@@ -6637,6 +6706,10 @@ void MainWindow::applyHistoryView()
             if (a > b) return 1;
             return 0;
         };
+        auto historySortableScore = [](gpu_bench::BenchmarkResult const& result)
+        {
+            return hideImplausibleLegacyHistoryScore(result) ? 0.0 : result.score;
+        };
         std::sort(view.begin(), view.end(),
             [&](const gpu_bench::BenchmarkResult* a, const gpu_bench::BenchmarkResult* b)
             {
@@ -6649,7 +6722,12 @@ void MainWindow::applyHistoryView()
                 else if (col == "workload")  c = cmpString(a->workload, b->workload);
                 else if (col == "mode")      c = cmpString(historyExecutionMode(*a), historyExecutionMode(*b));
                 else if (col == "particles") c = (a->particleCount < b->particleCount) ? -1 : (a->particleCount > b->particleCount) ? 1 : 0;
-                else if (col == "score")     c = (a->score < b->score) ? -1 : (a->score > b->score) ? 1 : 0;
+                else if (col == "score")
+                {
+                    const double as = historySortableScore(*a);
+                    const double bs = historySortableScore(*b);
+                    c = (as < bs) ? -1 : (as > bs) ? 1 : 0;
+                }
                 else if (col == "fps")       c = (a->avgFps < b->avgFps) ? -1 : (a->avgFps > b->avgFps) ? 1 : 0;
                 else                          c = cmpString(a->timestamp, b->timestamp);
                 if (c == 0) c = cmpString(a->timestamp, b->timestamp);
@@ -6755,6 +6833,8 @@ void MainWindow::applyHistoryView()
             x.particles = particleLabel(r->particleCount);
             x.score = r->workload == "fluid"
                 ? i18n::tr("Unverified legacy", "未验证旧版", "未検証の旧版")
+                : hideImplausibleLegacyHistoryScore(*r)
+                ? "-"
                 : r->score > 0.0
                 ? [&] { std::ostringstream o; o.setf(std::ios::fixed); o.precision(1);
                         o << r->score << ' ' << r->scoreUnit;
@@ -6852,7 +6932,12 @@ void MainWindow::applyHistoryView()
         {
             switch (s)
             {
-                case 1:  return a->score > b->score;
+                case 1:
+                {
+                    const double as = hideImplausibleLegacyHistoryScore(*a) ? 0.0 : a->score;
+                    const double bs = hideImplausibleLegacyHistoryScore(*b) ? 0.0 : b->score;
+                    return as > bs;
+                }
                 case 2:  return a->graphicsApi < b->graphicsApi;
                 case 3:  return a->deviceName  < b->deviceName;
                 case 4:  return a->workload    < b->workload;
@@ -6883,6 +6968,8 @@ void MainWindow::applyHistoryView()
         x.particles = particleLabel(r->particleCount);
         x.score = r->workload == "fluid"
             ? i18n::tr("Unverified legacy", "未验证旧版", "未検証の旧版")
+            : hideImplausibleLegacyHistoryScore(*r)
+            ? "-"
             : r->score > 0.0
             ? [&] { std::ostringstream o; o.setf(std::ios::fixed); o.precision(1);
                     o << r->score << ' ' << r->scoreUnit;

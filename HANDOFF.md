@@ -52,9 +52,9 @@
 - 本节顺序与第 9 节保持一致；后续 AI 不得再按旧的液体优先级自行调回顺序，除非用户再次明确调整。
 
 逐平台要点：
-1. **Windows ARM64（已于 2026-07-16 完工；2026-07-17 安装器主路径改 WiX）**：已实现本体、GUI、依赖与打包闭环。新增了 VS/CMake ARM64 配置，原生编译 `gpu_engine`、CLI 和 WinUI，使用 vcpkg `arm64-windows` 在 manifest 模式下引入原生 GLFW。完成了动态 ARM64 Vulkan 导入库自动生成，解决了 x64 SDK 链接冲突；豁免了 VC 运行时中特有的 x64 `vcruntime140_1.dll` 架构审计。**CPU 与 GPU 测项本体也是按架构分别原生编译**（x64 包 = AMD64 PE，ARM64 包 = ARM64 PE；同一套源码、两套二进制），不是 x64 测项装到 ARM 上。2026-07-17 起发布安装器主路径为 **CPack WiX MSI**（x64 / ARM64 各自原生 `Template`），Inno Setup 降为 legacy。
+1. **Windows ARM64（已于 2026-07-16 完工；2026-07-31 与 x64 统一原生双语安装器）**：已实现本体、GUI、依赖与打包闭环。新增了 VS/CMake ARM64 配置，原生编译 `gpu_engine`、CLI 和 WinUI，使用 vcpkg `arm64-windows` 在 manifest 模式下引入原生 GLFW。完成了动态 ARM64 Vulkan 导入库自动生成，解决了 x64 SDK 链接冲突；豁免了 VC 运行时中特有的 x64 `vcruntime140_1.dll` 架构审计。**CPU 与 GPU 测项本体也是按架构分别原生编译**（x64 包 = AMD64 PE，ARM64 包 = ARM64 PE；同一套源码、两套二进制），不是 x64 测项装到 ARM 上。正式安装器为 x64/ARM64 各一个对应原生 PE 的单文件中英双语 Setup EXE；WiX MSI 是内嵌事务层，Inno Setup 降为 legacy。
    - **依赖规则**：GLFW、WinAppSDK、VC runtime 等均使用原生 ARM64；豁免了特殊的 x64 `vcruntime140_1.dll`（Redist 目录自带）。RenderDoc 在 ARM64 发布语义上可为 Skip/N/A；Python 报告链仍未冻结。
-   - **完成门槛**：ARM64 本体、GUI、ZIP/MSI 与依赖本地 staging 校验与 PE 架构审计已通过；clean-machine 与签名仍开放。
+   - **完成门槛**：ARM64 本体、GUI、ZIP/原生双语 Setup 与依赖本地 staging 校验及 PE 架构审计已通过；clean-machine 与签名仍开放。
 2. **macOS（ARM64 后的下一平台刀；用户 2026-07-19 指定四步）**：
    - **产品 OS 底线（用户 2026-07-19 锁定）：macOS 12 Monterey**。CLI/`gpu_engine` 与 SwiftUI GUI 均 `deploymentTarget=12.0`（`CMakeLists.txt` `CMAKE_OSX_DEPLOYMENT_TARGET`、`macos-gui/project.yml` / `Info.plist` `LSMinimumSystemVersion`）。macOS 11 及更旧不支持。
    - **版本差异（功能合同相同，UI/壳层不同）**：12 = `NavigationView` + Material；13–15 = `NavigationSplitView` + Material；26+ = Liquid Glass（`.glassEffect`）。建议在较新 Xcode（26）上编译、部署到 Monterey+ 运行。
@@ -329,9 +329,9 @@ RenderDoc。当前已同时提供原生 C++ CLI 与独立 WinUI CPU 页面：
 
 **仍开放的发布/跨平台边界：**
 
-- 当前已有本机 CLI 与 WinUI build/smoke，不等于干净机安装验收已完成；公开安装包前须在干净 Windows 机器验证 MSI 安装后 GUI 能找到
+- 当前已有本机 CLI 与 WinUI build/smoke，不等于干净机安装验收已完成；公开安装包前须在干净 Windows 机器验证 Setup 安装后 GUI 能找到
   相邻 `gpu_benchmark.exe`、Run/Cancel、结果写入与卸载保留用户数据。
-- 2026-07-17 起主发布产物是 **ZIP + WiX MSI**（不是 Inno `*-setup.exe`）；x64/ARM64 测项本体均为对应原生 ISA。
+- 当前主发布产物是 **ZIP + 原生中英双语 Setup EXE**；x64/ARM64 各一个安装包且测项本体均为对应原生 ISA。WiX MSI 只作内嵌中间文件，Inno 仅保留为 legacy。
 - Windows 的 `EfficiencyClass`、Linux/Android 的 `cpu_capacity`/最大频率只
   用来生成 `InferredPerformance/Efficiency/Middle/LPE` 排名标签，**不是**
   CPUID/SoC 官方核心身份，不能宣称已精确识别所有 P/E/Mid/LPE 变体。
@@ -475,7 +475,7 @@ probe 前把随包 `tools/RenderDoc` 设为进程级 `VK_IMPLICIT_LAYER_PATH` �
 本轮已建立并实际执行 Windows x64/ARM64 GitHub Release 候选链：CMake
 `install()`/CPack、固定 `vcpkg.json` baseline、CMakePresets、staging verifier、
 WinUI self-contained payload、MSVC runtime、GLFW、全部预编译 shader、GLAD
-2.0.8 in-tree、完整官方 RenderDoc 1.45 portable（x64 常规捆绑）、**WiX MSI**、
+2.0.8 in-tree、完整官方 RenderDoc 1.45 portable（x64 常规捆绑）、**x64/ARM64 原生双语 Setup**、
 逐文件 SHA-256 与 ZIP 解包复核。目标机运行核心 benchmark/GUI/抓帧不需要 VS、
 vcpkg、Vulkan SDK、shader compiler、单独的 Windows App SDK 或预装 RenderDoc。
 Inno Setup 仍保留为 legacy 工程路径，**不再是** `build-windows-github-release.ps1`
@@ -485,12 +485,12 @@ PathService 已把 results/captures/reports/logs 改到
 `%LOCALAPPDATA%/GpuComputeBenchmark`（可用 `GPU_BENCH_DATA_DIR` 覆盖），并一次性
 迁移旧相对 `results/results.json`。GUI/CLI 与 RenderDoc 能从 staged 布局运行。
 
-已生成可供换机验收的 ZIP 与 MSI，但仍不能宣称“已经公开发布/完全验收”，原因是：
+已生成可供换机验收的 ZIP 与原生 Setup EXE，但仍不能宣称“已经公开发布/完全验收”，原因是：
 
 - CLI/GUI 已把 `vulkan-1.dll` 改为 delay-import，probe 与显式 Vulkan backend 创建前都有 loader guard；本机构建和 PE 审计通过。仍须在真正没有 `vulkan-1.dll` 的干净机确认 DX11/DX12/WARP 启动。
 - 报告链仍只有 `.py` 源码，没有冻结的 `report_worker.exe`；核心 benchmark/GUI 不需要 Python，但自动报告仍需要开发环境。打包规则虽预留 `tools/report_worker`，GUI 尚未实现调用该 worker 的 argv 协议。
 - **项目分发 LICENSE 已订为 MIT**（仓库根 `LICENSE`，staged `licenses/LICENSE`，`projectDistributionLicense=true`）。CPack WiX 需要 `.txt`/`.rtf`，构建时会复制为 `cpack-LICENSE.txt`。
-- 当前 MSI、GUI 与 CLI 均未做 Authenticode 签名；Release asset manifest 会记录 `NotSigned`，公开下载有 SmartScreen 风险。
+- 当前 Setup EXE、内嵌 MSI、GUI 与 CLI 均未做 Authenticode 签名；Release asset manifest 会记录 `NotSigned`，公开下载有 SmartScreen 风险。
 - 尚未在真正干净 Windows VM 上验证 GUI 启动、无 RenderDoc/VC Redist/SDK 环境下的运行与升级/卸载。
 - GUI 与 CLI 均已有 **x64 与 ARM64 原生**产物；勿再写成“GUI 只有 x64”。
 
@@ -501,7 +501,7 @@ PathService 已把 results/captures/reports/logs 改到
 3. **锁定构建（部分已做）**：已有 `vcpkg.json` baseline、CMakePresets、strict shader asset gate 与 in-tree GLAD；NuGet lock、完整 shader manifest/CI 仍待补。
 4. **预编译资产（已做）**：发布 SPIR-V、HLSL/GLSL 与 DX12 FP16 DXIL；用户机器不装 SDK/compiler。
 5. **报告 worker**：把 Python 报告链冻结为随包的 `report_worker`（嵌入 Python或独立 onedir），主程序只用绝对路径/argv 调用，不查 PATH、不拼 shell。
-6. **安装器（2026-07-17 起主路径为 WiX MSI）**：`scripts/build-wix-installer.ps1` + CPack `ZIP;WIX`，`WixUI_InstallDir` 可选安装目录；产物名 `Mangekyo-<ver>-windows-{x64,arm64}.msi`。`build-windows-github-release.ps1` 已切到该脚本。Inno（`installer/GpuComputeBenchmark.iss`）保留作 legacy。本机已冒烟：`Mangekyo-0.1.3-windows-x64.msi`（Template `x64;1033`，SHA-256 `db82358f2dfd93542bac2659638d3fa91b45ec4c0d465ef978678c819dd5154e`）与 `Mangekyo-0.1.3-windows-arm64.msi`（Template `Arm64;1033`），均 NotSigned。
+6. **安装器（当前主路径）**：`scripts/build-wix-installer.ps1` 先生成原生架构 MSI 中间文件，`scripts/build-native-bootstrapper.ps1` 再生成对应架构的单文件中英双语 Setup EXE，并把界面选择的路径传给 MSI `INSTALL_ROOT`。正式产物名为 `Mangekyo-<ver>-windows-{x64,arm64}-setup.exe`；`build-windows-github-release.ps1` 已串联整套流程且不再发布 raw MSI。Inno（`installer/GpuComputeBenchmark.iss`）保留作 legacy。完整操作见 `docs/windows-installer-packaging.md`。
 7. **RenderDoc 可选组件（构建机 staged 已验证）**：随包放完整官方 1.45 bundle 到 `{app}/tools/RenderDoc`，archive SHA-256 `bd665c348a8245d10a1f513e35b83603edc1a78006277583d09ec0769286eea4`；in-app API 在第 5 秒包住一帧，Vulkan 使用进程级 implicit-layer path。仍需 clean-machine 抓帧与 credits/签名审计。
 8. **Vulkan loader（代码与 PE 已收口）**：SDK 只用于构建；Windows 运行时 delay-load 并探测 loader/ICD。缺 Vulkan 时隐藏该能力；若显式请求 Vulkan则返回可读错误，DX11/DX12/WARP 仍可启动。不随软件安装 GPU 驱动或复制系统 loader。
 
@@ -580,12 +580,12 @@ PathService 已把 results/captures/reports/logs 改到
 
 ### 推荐下一个实现切片
 
-用户在 **2026-07-19** 将 **Windows 7 GUI** 从 ARM64 之后挪到 **PS3 之前**（HarmonyOS 之后）。ARM64 + WiX 主路径已落地。平台/产品切片按以下理解执行：
+用户在 **2026-07-19** 将 **Windows 7 GUI** 从 ARM64 之后挪到 **PS3 之前**（HarmonyOS 之后）。ARM64 原生本体与双语 Setup 主路径已落地。平台/产品切片按以下理解执行：
 
-1. **Windows ARM64 vertical slice（已完成）**：含原生测项、GUI、ZIP/MSI。
+1. **Windows ARM64 vertical slice（已完成）**：含原生测项、GUI、ZIP 与原生 ARM64 中英双语 Setup。
 2. **macOS vertical slice（平台下一刀）**：Particle + GPU Burn + 液体 raymarch + MTLCapture + **deployment macOS 12** **代码已落 → 真机验收（优先含 Monterey 冒烟）**；SwiftUI 已对齐 → Mac 编译验收。
 3. **回到未关闭的正确性与自由模式**（可与平台刀并行由用户指定）：依次关闭 Cinematic Liquid SPH 的 frame-driven timestep、per-substep impulse clear、viscosity race、atomic scatter ordering；之后再做 Liquid Lab / Explore、GPU Burn Unlimited Soak 和 VRAM Integrity Soak。四项关闭前 SPH 始终 `_preview`，旧结果合同不变。
-4. **Windows 完整公开发布收口**仍开放：冻结 `report_worker`，签名证书，在干净 Windows 10/11 VM 验收 bundled RenderDoc 和完整 GUI-first MSI 安装/升级/卸载。
+4. **Windows 完整公开发布收口**仍开放：冻结 `report_worker`，签名证书，在干净 Windows 10/11 VM 验收 bundled RenderDoc 和完整 GUI-first Setup 安装/自定义路径/升级/卸载。
 5. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Collaboration；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
 
 ## 10. 验证记录
@@ -925,6 +925,38 @@ PathService 已把 results/captures/reports/logs 改到
 - **公平比较**分三组：`Native Baseline` 固定输入=输出；`Fixed-Scale Upscaler` 对所有插件使用相同输入/输出分辨率、相同水面回放与时序输入；`Vendor Recommended` 使用厂商推荐 Quality/Balanced，只作体验展示。分别报告 base render/upscale/total GPU time、VRAM 与 PSNR/SSIM/FLIP，不把画质和 FPS 合成单一总分。
 - Frame Generation 与 Super Resolution、Ray Reconstruction/denoising 分开。FG 只报告真实渲染 FPS、显示 FPS、生成耗时与延迟，生成帧不得计入完成的模拟/渲染工作量。
 - **安装包**：厂商库均做可选、运行时能力检测与动态加载。Streamline/DLSS 只分发 NVIDIA 签名 production DLL 并遵守 RTX SDK 通知/发布条款；当前 AMD SDK binary 按其许可证原样分发并保留 notices，不能笼统声称整个 SDK 都是 MIT；XeSS 允许未修改 binary 再分发但必须附 Intel 许可与第三方通知；MetalFX 是系统 framework，无需捆绑第三方 DLL。所有结果记录 provider、SDK version、API、driver、input/output resolution 与 capability path。
+
+### 2026-07-30: Legacy anomalous-score display and Fluid wording
+
+- Old result files remain byte-for-byte compatible and their raw measurements are not rewritten. In WinUI History only, schema-v1/v2/v3 (or otherwise legacy-labelled) bandwidth scores are hidden when the stored value is non-finite, exceeds 10,000 GB/s, or reports a positive bandwidth with zero FPS; the FPS column remains visible and score sorting treats the hidden value as zero.
+- A newly completed run retains and displays its raw score, but the Summary adds a localised `Run issues` warning when the same implausible bandwidth pattern is detected. This preserves evidence without presenting an obviously invalid legacy rate as a normal History score.
+- Cinematic fluid throughput wording is now `Fluid rate` / `流体速率`; legacy `Liquid rate` worker text is normalised at display time for compatibility.
+- Validation: Windows x64 Release engine/CLI + WinUI GUI and Windows ARM64 Release engine/CLI + WinUI GUI all compiled successfully. No GUI or benchmark workload was launched.
+
+### 2026-07-31: 0.2.6 Windows installers
+
+> Historical intermediate state, superseded later the same day by the native
+> bilingual x64/ARM64 Setup section below. The Inno files and raw MSI described
+> here are not current release assets.
+
+- Rebuilt the 0.2.6 x64 and native ARM64 release stages. Both stage verifiers completed with 0 errors; the AMD64 host did not execute the ARM64 binaries, and no GUI or benchmark workload was launched.
+- WiX MSI remains the native deployment format and keeps its default English UI because an MSI has one compiled UI culture rather than an Inno-style language chooser. `Mangekyo-0.2.6-windows-arm64.msi` was inspected through Windows Installer/WiX metadata: summary template `Arm64;1033`, product language 1033 (English), and payload components are 64-bit.
+- The optional Inno Setup packages now always show an English/Simplified Chinese language chooser. Both the x64 and ARM64 variants were generated; the ARM64 Setup installs the same native ARM64 application payload, although it is not a native ARM64 MSI.
+- Generated unsigned artifacts: `out/installer/Mangekyo-0.2.6-windows-arm64.msi` (SHA-256 `06cc54374d7716b2cb2d4707c30c8470a67bb255c5ae215583498c1163dbc10c`), `Mangekyo-0.2.6-windows-arm64-setup.exe` (`fa433941781432cf420e381d41d6be7b2a8c7eb587a9dac12ad8e15358628412`), `Mangekyo-0.2.6-windows-x64.msi` (`8658db756fc3a2e14074a142452d0ccf76d59dce4bb7e7059546ffc3ac79ff62`), and `Mangekyo-0.2.6-windows-x64-setup.exe` (`e9ae878cd4881010820564e9bc67e3fd6b8cdaa3eed69b64746c314493afaff2`).
+
+## 2026-07-31: native bilingual x64/ARM64 Setup
+
+- Replaced the mixed Inno/MSI user-facing installer scheme with one implementation in `installer/native-bootstrapper/main.cpp`. It is compiled as native x64 and native ARM64, offers an explicit English/简体中文 selector, accepts the MIT licence, elevates only `msiexec`, and uses the matching WiX MSI for install/upgrade/repair registration.
+- `scripts/build-native-bootstrapper.ps1` appends the corresponding MSI to each native Setup EXE, validates the PE machine and embedded OLE/MSI header, adds 0.2.6 version resources, writes SHA-256 sidecars, and supports signing. Authenticode-aware payload lookup permits signing the completed EXE without losing access to the embedded MSI.
+- `scripts/build-windows-github-release.ps1` now builds the WiX MSI as an intermediate, builds the native multilingual bootstrapper, and publishes the Setup EXE rather than the raw MSI. Formal artifacts are exactly one x64 Setup and one ARM64 Setup; each contains both languages.
+- The bootstrapper UI was upgraded from the initial functional prototype to a Mangekyo-styled card layout with custom rounded language/checkbox/button controls, a theme-drawn language popup, a borderless path edit inside a rounded input surface plus a modern folder picker, and the repository's `gui/app.ico` embedded as the window/Setup icon. It follows the Windows app light/dark setting across the title bar, surfaces, text, input and progress colours. Window sizing now targets a compact 720 x 531 client area so the bottom actions are not clipped by the non-client frame and idle progress space does not leave a large blank band. The selected path is passed to the MSI's real `INSTALL_ROOT` property; defaults are `%ProgramFiles%\\Mangekyo` (x64) and `%ProgramFiles%\\Mangekyo ARM64` (ARM64).
+- The MIT licence now opens in a custom light/dark adaptive window rather than a legacy system MessageBox. It uses an installer-drawn Fluent-style information symbol and the same rounded primary action as the Setup. Installation exposes a custom theme-aware rounded progress track with a moving accent segment plus status text and mirrors the indeterminate state to the Windows taskbar; successful completion remains visible with a full accent bar, 100% taskbar progress, a localised completion heading and a Close action instead of immediately closing after a system dialog.
+- Setup now offers MSI-owned desktop and Start menu shortcut choices before installation (desktop off, Start menu on by default). The bootstrapper passes `CREATE_DESKTOP_SHORTCUT` and `CREATE_START_MENU_SHORTCUT`; WiX conditional components create and uninstall the selected shortcuts, with architecture-specific Start menu directories for x64/ARM64 coexistence. Both generated MSIs were inspected through the Windows Installer `Property`, `Shortcut`, `Component`, and `FeatureComponents` tables to confirm the properties, conditions, targets, and root-feature references.
+- The shortcut controls are enabled again after installation. Changing either selection switches Close to Apply and runs MSI maintenance with `REINSTALL=ALL`; both shortcut components are transitive, so their conditions are re-evaluated to create or remove the MSI-owned component in place. Reapplying the same state cannot create a duplicate `.lnk`. MSI table inspection confirms component attributes `324` (64-bit + registry key path + transitive) for both architectures.
+- Diagnosed the Setup disappearing immediately after Install from Windows Error Reporting: the x64 process failed with `0xc00000fd` before UAC. `ExtractPayload` placed a 1 MiB byte array on a `CreateThread` worker whose default stack is also approximately 1 MiB. The embedded MSI extraction buffer now uses heap-backed storage, allowing execution to reach `ShellExecuteEx(..., "runas")`, UAC and the progress/completion path.
+- The bootstrapper build now embeds an explicit `asInvoker`, Common Controls 6 and Per-Monitor V2 DPI manifest. This prevents Windows setup-name heuristics from deciding elevation at process launch, keeps the bootstrapper at normal privilege, requests UAC only for the `msiexec` `runas` step, and opts remaining system controls into modern Windows styling.
+- Added `docs/windows-installer-packaging.md` as the authoritative future packaging guide and linked/synchronised README, building, installer, packaging, limitations and TODO documentation.
+- Rebuilt without launching the app or benchmark: `Mangekyo-0.2.6-windows-x64-setup.exe` SHA-256 `3af0217751f68c33c3bc333fbd463cca85f184877614081db2e80a10f189419b`; `Mangekyo-0.2.6-windows-arm64-setup.exe` SHA-256 `74f7c80f5a30bb1cffdc2025cc72b17fa037fd2ca4c829b292d46cfaae58f054`. Both are currently unsigned and still require clean-machine install/custom-path/post-install shortcut/upgrade/uninstall validation before publication.
 
 ### 2026-07-19: iOS (iOS 16+) Porting Phase 1 Completed
 
