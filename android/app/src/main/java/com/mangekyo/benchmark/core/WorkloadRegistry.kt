@@ -1,14 +1,14 @@
 package com.mangekyo.benchmark.core
 
 /**
- * Workload registry 占位。
+ * Android UI 展示的 workload 身份。
  *
- * 合同（HANDOFF 交接规则 6）：CLI、WinUI、macOS GUI、Android 必须从**同一份**
- * 测试 metadata/registry 获取能力。此处硬编码仅为脚手架展示；
- * TODO(next-ai)：改为由 C++ registry（经 NativeBridge）或共享 manifest 生成，删除硬编码。
+ * 引擎侧 `AppBase::CollectResult()` 在 `__ANDROID__` 下会给桌面基线版本追加
+ * `_android_preview`（并写入 `scoreContract=preview_not_desktop_15s`）。
+ * 此处字符串必须与引擎写出一致，禁止再写假的 placeholder 名。
  *
- * Android 计时/抓帧模型与 Windows 不同 → 必须使用新的 android 后缀 workloadVersion
- * 独立成组，绝不与现有 Windows 成绩组混排。版本名以实际实现时的合同为准，下面是占位。
+ * 仅列出当前 JNI 宿主真正可启动的项（stream / gpu_burn light=16）。
+ * 液体 / CPU mixed 未接线，不出现在可跑列表。
  */
 data class WorkloadInfo(
     val id: String,
@@ -19,15 +19,27 @@ data class WorkloadInfo(
 
 object WorkloadRegistry {
     val gpuWorkloads: List<WorkloadInfo> = listOf(
-        WorkloadInfo("stream", "Stream / Particle", "stream_android_v1 (placeholder)", isPreview = true),
-        WorkloadInfo("gpu_burn", "GPU Burn", "gpu_burn_android_v1 (placeholder)", isPreview = true),
         WorkloadInfo(
-            "cinematic_liquid_v2", "Cinematic Liquid v2",
-            "cinematic_liquid_v2_android_preview (placeholder)", isPreview = true,
+            "stream",
+            "Stream / Particle",
+            "stream_v1_android_preview",
+            isPreview = true,
+        ),
+        WorkloadInfo(
+            "gpu_burn",
+            "GPU Burn (light 16)",
+            "gpu_burn_v3_fixed_steps_16_kaleidoscope_android_preview",
+            isPreview = true,
         ),
     )
 
+    /** CPU 页仍可展示合同名；宿主尚未接线，不可当作已实现。 */
     val cpuWorkloads: List<WorkloadInfo> = listOf(
-        WorkloadInfo("cpu_mixed", "CPU Mixed", "cpu_mixed_v1_android (placeholder)", isPreview = true),
+        WorkloadInfo(
+            "cpu_mixed",
+            "CPU Mixed (not wired)",
+            "cpu_mixed — Android host not wired",
+            isPreview = true,
+        ),
     )
 }

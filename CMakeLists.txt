@@ -7,7 +7,7 @@ if(APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS version")
 endif()
 
-project(Mangekyo VERSION 0.2.5 LANGUAGES C CXX)
+project(Mangekyo VERSION 0.2.6 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -142,6 +142,9 @@ if(ENABLE_METAL AND APPLE)
             src/metal_backend.mm
             src/metal_probe.mm
             src/metal_cinematic_liquid.mm)
+        if(GPU_BENCH_IOS)
+            list(APPEND BACKEND_SOURCES src/ios_engine_host.cpp)
+        endif()
         list(APPEND BACKEND_LIBS ${APPLE_LIBS})
         list(APPEND BACKEND_DEFS HAVE_METAL)
 
@@ -153,6 +156,9 @@ if(ENABLE_METAL AND APPLE)
         )
 
         message(STATUS "Metal backend:  ENABLED")
+        if(GPU_BENCH_IOS)
+            message(STATUS "iOS engine host: ENABLED (CAMetalLayer embed)")
+        endif()
     else()
         message(STATUS "Metal backend:  DISABLED (Metal framework not found)")
     endif()
@@ -192,7 +198,12 @@ if(GPU_BENCH_IOS OR GPU_BENCH_ANDROID)
 else()
     target_link_libraries(gpu_engine PUBLIC glfw ${BACKEND_LIBS})
 endif()
-target_compile_definitions(gpu_engine PUBLIC ${BACKEND_DEFS})
+target_compile_definitions(gpu_engine PUBLIC
+    ${BACKEND_DEFS}
+    GPU_BENCH_APP_VERSION="${PROJECT_VERSION}"
+    GPU_BENCH_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+    GPU_BENCH_VERSION_MINOR=${PROJECT_VERSION_MINOR}
+    GPU_BENCH_VERSION_PATCH=${PROJECT_VERSION_PATCH})
 target_include_directories(gpu_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 if(ANDROID)
     # Headers only here; the consuming shared lib links libvulkan.
@@ -402,9 +413,9 @@ endif()
 # release payload use the same target and shader lists. The first deliverable
 # is the Windows x64 CLI core; GUI, RenderDoc and the frozen report worker are
 # optional payloads until their remaining path/runtime blockers are removed.
-# Android embeds gpu_engine only — no CLI / CPack.
+# Android / iOS embed gpu_engine only — no CLI / CPack.
 option(GPU_BENCH_ENABLE_PACKAGING "Generate install and CPack release rules" ON)
-if(ANDROID OR GPU_BENCH_ANDROID)
+if(ANDROID OR GPU_BENCH_ANDROID OR GPU_BENCH_IOS)
     set(GPU_BENCH_ENABLE_PACKAGING OFF CACHE BOOL "Generate install and CPack release rules" FORCE)
 endif()
 if(GPU_BENCH_ENABLE_PACKAGING)

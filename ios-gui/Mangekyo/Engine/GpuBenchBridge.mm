@@ -5,8 +5,10 @@
 
 #include "gpu_engine.h"
 #include "benchmark_results.h"
+#include "ios_engine_host.h"
 #include "path_service.h"
 
+#include <atomic>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -57,6 +59,7 @@ static std::string resultToJson(const gpu_bench::BenchmarkResult& r) {
     o << "{";
     o << "\"id\":\""          << jsonEscape(r.id) << "\",";
     o << "\"timestamp\":\""   << jsonEscape(r.timestamp) << "\",";
+    o << "\"appVersion\":\""  << jsonEscape(r.appVersion) << "\",";
     o << "\"workload\":\""    << jsonEscape(r.workload) << "\",";
     o << "\"workloadVersion\":\"" << jsonEscape(r.workloadVersion) << "\",";
     o << "\"workloadConfig\":\"" << jsonEscape(r.workloadConfig) << "\",";
@@ -102,6 +105,21 @@ static std::string resultToJson(const gpu_bench::BenchmarkResult& r) {
 // Serialise is NOT reentrant — cliMain can't run concurrently anyway.
 static std::mutex g_runMutex;
 
+static std::string g_shaderDir;
+static std::string g_dataDir;
+static void* g_metalLayer = nullptr;
+static std::mutex g_embedMutex;
+static std::atomic<bool> g_workerAlive{false};
+static std::mutex g_workerMutex;
+static std::thread g_worker;
+static std::string g_lastError;
+
+static void JoinWorkerUnlocked() {
+    if (g_worker.joinable())
+        g_worker.join();
+    g_workerAlive.store(false, std::memory_order_release);
+}
+
 // ---------------------------------------------------------------------------
 // Public C API
 // ---------------------------------------------------------------------------
@@ -110,6 +128,90 @@ extern "C" {
 
 void gpb_set_working_dir(const char* path) {
     if (path && *path) chdir(path);
+}
+
+void gpb_init_paths(const char* shader_dir, const char* data_dir) {
+    std::lock_guard<std::mutex> lock(g_embedMutex);
+    g_shaderDir = shader_dir ? shader_dir : "";
+    g_dataDir = data_dir ? data_dir : "";
+    if (!g_dataDir.empty())
+        setenv("GPU_BENCH_DATA_DIR", g_dataDir.c_str(), 1);
+}
+
+void gpb_set_metal_layer(void* ca_metal_layer) {
+    std::lock_guard<std::mutex> lock(g_embedMutex);
+    if (gpu_bench::ios_host::IsRunning() || g_workerAlive.load())
+        return;  // keep stable surface while running
+    g_metalLayer = ca_metal_layer;
+}
+
+bool gpb_start_workload(const char* workload_id, double seconds) {
+    std::string workload = workload_id ? workload_id : "stream";
+    void* layer = nullptr;
+    std::string shaderDir;
+    std::string dataDir;
+    {
+        std::lock_guard<std::mutex> lock(g_embedMutex);
+        layer = g_metalLayer;
+        shaderDir = g_shaderDir;
+        dataDir = g_dataDir;
+    }
+    if (!layer) {
+        std::lock_guard<std::mutex> lock(g_workerMutex);
+        g_lastError = "CAMetalLayer not set";
+        return false;
+    }
+    if (shaderDir.empty()) {
+        std::lock_guard<std::mutex> lock(g_workerMutex);
+        g_lastError = "gpb_init_paths not called";
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lock(g_workerMutex);
+    if (g_workerAlive.load() || gpu_bench::ios_host::IsRunning()) {
+        g_lastError = "already running";
+        return false;
+    }
+    JoinWorkerUnlocked();
+    g_lastError.clear();
+    g_workerAlive.store(true, std::memory_order_release);
+    g_worker = std::thread([layer, shaderDir, dataDir, workload, seconds]() {
+        gpu_bench::ios_host::RunRequest req;
+        req.metalLayer = layer;
+        req.shaderDir = shaderDir;
+        req.dataDir = dataDir;
+        req.workloadId = workload;
+        req.maxRunTimeSec = seconds > 0.0 ? seconds : 3.0;
+        std::string err;
+        const int rc = gpu_bench::ios_host::RunWorkload(req, err);
+        {
+            std::lock_guard<std::mutex> lock(g_workerMutex);
+            if (rc != 0)
+                g_lastError = err.empty() ? ("run failed rc=" + std::to_string(rc)) : err;
+            else
+                g_lastError.clear();
+        }
+        g_workerAlive.store(false, std::memory_order_release);
+    });
+    return true;
+}
+
+void gpb_stop_workload(void) {
+    gpu_bench::RequestStop();
+}
+
+bool gpb_is_running(void) {
+    return g_workerAlive.load(std::memory_order_acquire) ||
+           gpu_bench::ios_host::IsRunning();
+}
+
+char* gpb_last_error(void) {
+    std::lock_guard<std::mutex> lock(g_workerMutex);
+    return strdup_alloc(g_lastError);
+}
+
+char* gpb_engine_version(void) {
+    return strdup_alloc("mangekyo-ios-0.2.0-gpu_engine");
 }
 
 char* gpb_list_gpus(void) {

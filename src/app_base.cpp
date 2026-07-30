@@ -27,6 +27,7 @@
 #include <fstream>
 #include <sys/utsname.h>
 #elif defined(__APPLE__)
+#include <TargetConditionals.h>
 #include <sys/sysctl.h>
 #endif
 
@@ -115,72 +116,7 @@ std::string AppBase::GetCpuName() {
 }
 
 std::string AppBase::GetOsVersion() {
-#ifdef _WIN32
-    // RtlGetVersion gives the real version even on Windows 10+
-    // where GetVersionExW may be shimmed.
-    using RtlGetVersionFn = LONG(WINAPI*)(PRTL_OSVERSIONINFOW);
-    auto ntdll = GetModuleHandleW(L"ntdll.dll");
-    if (ntdll) {
-        auto fn = reinterpret_cast<RtlGetVersionFn>(
-            GetProcAddress(ntdll, "RtlGetVersion"));
-        if (fn) {
-            RTL_OSVERSIONINFOW vi{};
-            vi.dwOSVersionInfoSize = sizeof(vi);
-            if (fn(&vi) == 0) {
-                const auto maj = vi.dwMajorVersion;
-                const auto min = vi.dwMinorVersion;
-                const auto bld = vi.dwBuildNumber;
-
-                std::string friendly;
-                if (maj == 10 && bld >= 22000)
-                    friendly = "Windows 11";
-                else if (maj == 10)
-                    friendly = "Windows 10";
-                else if (maj == 6 && min == 3)
-                    friendly = "Windows 8.1";
-                else if (maj == 6 && min == 2)
-                    friendly = "Windows 8";
-                else if (maj == 6 && min == 1)
-                    friendly = "Windows 7";
-                else if (maj == 6 && min == 0)
-                    friendly = "Windows Vista";
-                else
-                    friendly = "Windows";
-
-                return friendly + " (NT "
-                     + std::to_string(maj) + "."
-                     + std::to_string(min) + "."
-                     + std::to_string(bld) + ")";
-            }
-        }
-    }
-#elif defined(__APPLE__)
-    char buf[64]{};
-    size_t len = sizeof(buf);
-    if (sysctlbyname("kern.osproductversion", buf, &len, nullptr, 0) == 0) {
-        return "macOS " + std::string(buf);
-    }
-#elif defined(__linux__)
-    // Try /etc/os-release for a friendly distro name
-    std::ifstream osrel("/etc/os-release");
-    std::string line;
-    while (std::getline(osrel, line)) {
-        if (line.rfind("PRETTY_NAME=", 0) == 0) {
-            std::string val = line.substr(12);
-            if (!val.empty() && val.front() == '"') val.erase(0, 1);
-            if (!val.empty() && val.back()  == '"') val.pop_back();
-            // Append kernel version
-            struct utsname un{};
-            if (uname(&un) == 0) val += " (kernel " + std::string(un.release) + ")";
-            return val;
-        }
-    }
-    // Fallback to kernel version
-    struct utsname un{};
-    if (uname(&un) == 0)
-        return std::string(un.sysname) + " " + un.release;
-#endif
-    return "Unknown";
+    return CurrentOsVersion();
 }
 
 AppBase::AppBase(std::int32_t gpuIndex, std::string shaderDir,
@@ -1337,7 +1273,8 @@ BenchmarkResult AppBase::CollectResult() const {
     r.id          = GenerateResultId();
     r.timestamp   = GenerateTimestamp();
     r.workload    = workloadId(config_.workload);
-    r.resultSchemaVersion = 3;
+    r.resultSchemaVersion = 4;
+    r.appVersion = CurrentAppVersion();
     std::ostringstream workloadConfig;
     switch (config_.workload) {
         case Workload::Stream:
@@ -1554,6 +1491,17 @@ BenchmarkResult AppBase::CollectResult() const {
                        << ";sfrSplit=vertical_50_50"
                        << ";sfrComposition=node1_local_to_node0_cross_adapter_copy";
     }
+#if defined(__ANDROID__)
+    // Embedded Android host (ANativeWindow / thermal / duration) is not the
+    // desktop 15s contract. Force a separate score group even for stream_v1.
+    r.workloadVersion += "_android_preview";
+    workloadConfig << ";embedHost=android_anativewindow"
+                   << ";scoreContract=preview_not_desktop_15s";
+#elif defined(__APPLE__) && TARGET_OS_IPHONE
+    r.workloadVersion += "_ios_preview";
+    workloadConfig << ";embedHost=ios_cametallayer"
+                   << ";scoreContract=preview_not_desktop_15s";
+#endif
     if (config_.captureAtSec > 0.0 || config_.captureAtFrame > 0) {
         if (config_.captureAtSec > 0.0)
             workloadConfig << ";captureAtSec=" << config_.captureAtSec;
@@ -1566,6 +1514,10 @@ BenchmarkResult AppBase::CollectResult() const {
         if (captureUnavailable_)
             workloadConfig << ";captureUnavailable=true";
     }
+    const std::string timingMode = GetTimingMode();
+    workloadConfig << ";timingMode=" << timingMode;
+    if (timingMode == "synchronized_wall_clock")
+        r.workloadVersion += "_sync_timing";
     r.workloadConfig = workloadConfig.str();
     r.graphicsApi    = GetBackendName();
     r.deviceName     = config_.gpuDisplayName.empty() ? GetDeviceName() : config_.gpuDisplayName;

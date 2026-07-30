@@ -11,6 +11,7 @@ struct BenchmarkResult {
     std::string timestamp;
 
     std::uint32_t resultSchemaVersion = 1;
+    std::string appVersion;       // Mangekyo build that produced this result
     std::string workload = "stream";
     std::string workloadVersion;  // stable score contract, e.g. "gpu_stress_v1"
     std::string workloadConfig;   // reproducibility parameters, key=value pairs
@@ -19,6 +20,9 @@ struct BenchmarkResult {
     std::string driverVersion;
     std::string cpuName;
     std::string osVersion;
+    std::string platform;
+    std::string osArchitecture;
+    std::string processArchitecture;
     std::string memory;
     std::uint32_t vramMB = 0;          // dedicated VRAM (0 = unknown / shared)
     std::uint32_t resWidth  = 0;
@@ -62,6 +66,11 @@ std::string ResultsFilePath();
 
 std::string GenerateResultId();
 std::string GenerateTimestamp();
+std::string CurrentAppVersion();
+std::string CurrentOsVersion();
+std::string CurrentPlatform();
+std::string CurrentOsArchitecture();
+std::string CurrentProcessArchitecture();
 
 std::vector<BenchmarkResult> LoadResults();
 bool SaveResults(const std::vector<BenchmarkResult>& results);

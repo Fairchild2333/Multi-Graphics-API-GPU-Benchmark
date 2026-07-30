@@ -15,6 +15,10 @@ public:
     std::string GetBackendName()    const override { return "OpenGL"; }
     std::string GetDeviceName()     const override { return deviceName_; }
     std::string GetDriverVersion()  const override { return driverVersion_; }
+    std::string GetTimingMode()     const override {
+        return synchronizedTimingFallback_
+            ? "synchronized_wall_clock" : "gpu_timestamp_query";
+    }
     bool NeedsOpenGLContext() const override { return true; }
 
 protected:
@@ -28,6 +32,8 @@ private:
     void CreateParticleBuffers();
     void CreateTimestampQueries();
     void CollectTimestampResults();
+    bool UseTimestampQueries() const;
+    void EnableSynchronizedTimingFallback(const char* reason);
     void CreateFluidResources();
     void CleanupFluidResources();
     void RecordFluidFrame(float deltaTime);
@@ -64,6 +70,8 @@ private:
     std::uint32_t timestampQueries_[kTimestampSlotCount][kTimestampsPerFrame]{};
     void*  frameFences_[kTimestampSlotCount]{};  // GLsync per slot
     bool   timestampsSupported_ = false;
+    bool   timestampQueriesAllocated_ = false;
+    bool   synchronizedTimingFallback_ = false;
     int    timestampFrameCount_ = 0;
     int    currentFrame_        = 0;
     float  fractalElapsed_      = 0.0f;   // StressFractal palette time

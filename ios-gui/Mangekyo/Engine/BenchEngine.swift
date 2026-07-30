@@ -1,9 +1,11 @@
-// BenchEngine.swift — Swift wrapper around GpuBenchBridge for iOS (Bridge-only, no sub-processes).
-// Manages benchmark state, stdout capture, cancel, and GPU enumeration.
+// BenchEngine.swift — Swift wrapper around GpuBenchBridge for iOS.
+// Embedded Metal host for stream/gpu_burn preview; cliMain kept for advanced jobs.
 
 import UIKit
 import Foundation
 import SwiftUI
+import QuartzCore
+import Darwin
 
 /// Represents a detected GPU from the engine.
 struct GpuDevice: Identifiable, Hashable {
@@ -28,19 +30,21 @@ final class BenchEngine: ObservableObject {
     @Published var results: [BenchResult] = []
     @Published var progressFraction: Double = 0
     @Published var progressLabel: String = "0%"
+    @Published var engineVersion: String = ""
+    @Published var lastError: String = ""
 
     /// Available graphics APIs on iOS (Metal only).
     static let availableAPIs = ["Metal"]
 
     private var cancelRequested = false
+    private var metalLayer: CAMetalLayer?
+    private var pollTask: Task<Void, Never>?
 
     init() {
-        // On iOS, we use Application Support / Documents directory as the data root.
-        // We can retrieve it through path_service or default directories.
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        if let docsDir = paths.first {
-            workingDirectory = docsDir.path
-            gpb_set_working_dir(workingDirectory)
+        prepareSandboxAndShaders()
+        if let ver = gpb_engine_version() {
+            engineVersion = String(cString: ver)
+            gpb_free(ver)
         }
         if !workingDirectory.isEmpty {
             refreshGpus()
@@ -48,9 +52,39 @@ final class BenchEngine: ObservableObject {
         }
     }
 
+    /// Copy bundled .metal sources into Documents/shaders and point the host at sandbox data.
+    private func prepareSandboxAndShaders() {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        guard let docs else { return }
+        workingDirectory = docs.path
+        gpb_set_working_dir(workingDirectory)
+
+        let shaderDir = docs.appendingPathComponent("shaders", isDirectory: true)
+        try? FileManager.default.createDirectory(at: shaderDir, withIntermediateDirectories: true)
+        for name in ["particle.metal", "gpu_burn.metal"] {
+            let dest = shaderDir.appendingPathComponent(name)
+            if FileManager.default.fileExists(atPath: dest.path) { continue }
+            if let src = Bundle.main.url(forResource: name, withExtension: nil)
+                ?? Bundle.main.url(forResource: (name as NSString).deletingPathExtension,
+                                   withExtension: (name as NSString).pathExtension) {
+                try? FileManager.default.copyItem(at: src, to: dest)
+            } else if let src = Bundle.main.url(forResource: "shaders/\(name)", withExtension: nil) {
+                try? FileManager.default.copyItem(at: src, to: dest)
+            }
+        }
+        gpb_init_paths(shaderDir.path, docs.path)
+        setenv("GPU_BENCH_DATA_DIR", docs.path, 1)
+    }
+
+    func attachMetalLayer(_ layer: CAMetalLayer) {
+        metalLayer = layer
+        gpb_set_metal_layer(Unmanaged.passUnretained(layer).toOpaque())
+    }
+
     func setWorkingDirectory(_ path: String) {
         workingDirectory = path
         gpb_set_working_dir(path)
+        gpb_init_paths((URL(fileURLWithPath: path).appendingPathComponent("shaders")).path, path)
         refreshGpus()
         refreshResults()
     }
@@ -76,7 +110,7 @@ final class BenchEngine: ObservableObject {
                     index: idx,
                     name: name,
                     vramMB: dict["vramMB"] as? Int ?? dict["vram"] as? Int ?? 0,
-                    supportsMetal: dict["metal"] as? Bool ?? false,
+                    supportsMetal: dict["metal"] as? Bool ?? true,
                     supportsVulkan: dict["vulkan"] as? Bool ?? false,
                     supportsOpenGL: dict["opengl"] as? Bool ?? false
                 )
@@ -113,28 +147,108 @@ final class BenchEngine: ObservableObject {
         guard !path.isEmpty else { return }
         let url = URL(fileURLWithPath: path)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-        // iOS: cannot open directory in Files app directly in a standard way,
-        // but we can share or display the path. For sandbox sharing, iOS apps
-        // typically export files using ShareSheet or DocumentPicker.
         print("iOS Data Folder: \(path)")
     }
 
     func cancel() {
         cancelRequested = true
+        gpb_stop_workload()
         statusText = Localization.tr("Cancel requested…", "已请求取消…", "キャンセル要求済み…")
-        // iOS in-process run cannot be cleanly stopped via Process.terminate.
-        // It relies on app_base.cpp checking cancel signals or event loop exits.
     }
 
     func cancelIfRunning() {
-        if isRunning {
+        if isRunning || gpb_is_running() {
             cancel()
         }
     }
 
-    /// Run a sequence of benchmark jobs.
+    /// 3s embedded Metal preview (stream / gpu_burn). Requires CAMetalLayer.
+    @discardableResult
+    func startPreview(workload: String, seconds: Double = 3.0) -> Bool {
+        guard metalLayer != nil else {
+            lastError = "Metal layer not ready"
+            statusText = lastError
+            return false
+        }
+        guard !isRunning else { return false }
+        isRunning = true
+        cancelRequested = false
+        lastError = ""
+        statusText = Localization.tr(
+            "Running \(workload) preview (\(Int(seconds))s)…",
+            "运行 \(workload) 预览（\(Int(seconds)) 秒）…",
+            "\(workload) プレビュー実行中（\(Int(seconds))秒）…")
+        logOutput += "=== Preview \(workload) \(seconds)s ===\n"
+
+        let ok = gpb_start_workload(workload, seconds)
+        if !ok {
+            if let err = gpb_last_error() {
+                lastError = String(cString: err)
+                gpb_free(err)
+            }
+            statusText = lastError.isEmpty ? "Start failed" : lastError
+            isRunning = false
+            return false
+        }
+        startPolling()
+        return true
+    }
+
+    private func startPolling() {
+        pollTask?.cancel()
+        pollTask = Task { [weak self] in
+            while !Task.isCancelled {
+                let running = gpb_is_running()
+                await MainActor.run {
+                    guard let self else { return }
+                    self.isRunning = running
+                    if !running {
+                        if let err = gpb_last_error() {
+                            let s = String(cString: err)
+                            gpb_free(err)
+                            if !s.isEmpty {
+                                self.lastError = s
+                                self.logOutput += "ERROR: \(s)\n"
+                                self.statusText = s
+                            } else if self.cancelRequested {
+                                self.statusText = Localization.tr("Cancelled.", "已取消。", "キャンセルしました。")
+                            } else {
+                                self.statusText = Localization.tr(
+                                    "Preview done (ios_preview — do not mix with desktop scores).",
+                                    "预览完成（ios_preview — 勿与桌面成绩混排）。",
+                                    "プレビュー完了（ios_preview — デスクトップ成績と混在禁止）。")
+                            }
+                        }
+                        self.refreshResults()
+                        self.pollTask = nil
+                    }
+                }
+                if !running { break }
+                try? await Task.sleep(nanoseconds: 250_000_000)
+            }
+        }
+    }
+
+    /// Run a sequence of benchmark jobs (legacy cliMain path).
     func run(jobs: [[String]], needCharts: Bool) {
         guard !isRunning, !jobs.isEmpty else { return }
+
+        // Prefer embedded host for single stream/gpu_burn preview-style jobs.
+        if jobs.count == 1 {
+            let job = jobs[0]
+            let wl = job.first(where: { ["stream", "gpu_burn", "particle"].contains($0) })
+                ?? job.dropFirst().first { ["stream", "gpu_burn"].contains($0) }
+            if let wl, metalLayer != nil {
+                var seconds = 3.0
+                if let i = job.firstIndex(of: "--time"), i + 1 < job.count,
+                   let v = Double(job[i + 1]) {
+                    seconds = min(max(v, 1.0), 15.0)
+                }
+                _ = startPreview(workload: wl == "particle" ? "stream" : wl, seconds: seconds)
+                return
+            }
+        }
+
         isRunning = true
         cancelRequested = false
         logOutput = ""
@@ -165,7 +279,6 @@ final class BenchEngine: ObservableObject {
                     self.logOutput += "=== Job \(index + 1) of \(jobs.count): \(job.joined(separator: " ")) ===\n"
                 }
 
-                // On iOS, we only run via in-process bridge.
                 await self.runViaBridge(job: job)
             }
 

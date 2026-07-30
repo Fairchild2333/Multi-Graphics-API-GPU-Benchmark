@@ -201,12 +201,13 @@ constexpr double        kGpuStressV1TargetFrameMs = 8.0;
 // the final animated core. Auto-tune always starts at the visually valid
 // 16-step floor, so slow GPUs/WARP never see a surprise long first draw. Auto
 // mode may reach the 2048-step ceiling only after measuring that safe probe.
-// Unprobed fixed mode is intentionally capped at 32 steps: the 16-step matrix
-// already measured ~209 ms/frame on WARP, so exposing 2048 as a fixed public
-// knob could create multi-second draws or trip a hardware watchdog.
+// Unprobed software mode is capped at the public Medium tier (64 steps).  This
+// keeps WARP/Basic Render directly comparable with hardware at the same tier,
+// while still preventing the 256/2048-step choices from causing watchdog-scale
+// frames on a CPU rasterizer.
 constexpr std::uint32_t kGpuBurnV1DefaultIter   = 16;
 constexpr std::uint32_t kGpuBurnV1MaxIter       = 2048;
-constexpr std::uint32_t kGpuBurnV1MaxFixedIter  = 32;
+constexpr std::uint32_t kGpuBurnV1MaxFixedIter  = 64;
 constexpr std::uint32_t kGpuBurnV1DrawsPerFrame = 2;
 constexpr std::uint32_t kGpuBurnV1ShaderVersion = 3;
 constexpr double        kGpuBurnV1TargetFrameMs = 14.0;
@@ -216,9 +217,7 @@ constexpr std::uint32_t kGpuBurnV3LightIter     = 16;
 constexpr std::uint32_t kGpuBurnV3MediumIter    = 64;
 constexpr std::uint32_t kGpuBurnV3HeavyIter     = 256;
 constexpr std::uint32_t kGpuBurnV3MaxCustomIter = 2048;
-// Software devices (WARP/Basic Render) still clamp to kGpuBurnV1MaxFixedIter:
-// 16 steps already measured ~209 ms/frame on WARP, so 256 would mean
-// multi-second draws and watchdog resets.
+// Software devices (WARP/Basic Render) still clamp to kGpuBurnV1MaxFixedIter.
 constexpr std::uint32_t kGpuBurnV2FixedIter     = 256;
 
 inline constexpr bool isGpuBurnWorkload(Workload workload) {

@@ -57,6 +57,7 @@ static std::string resultToJson(const gpu_bench::BenchmarkResult& r) {
     o << "{";
     o << "\"id\":\""          << jsonEscape(r.id) << "\",";
     o << "\"timestamp\":\""   << jsonEscape(r.timestamp) << "\",";
+    o << "\"appVersion\":\""  << jsonEscape(r.appVersion) << "\",";
     o << "\"workload\":\""    << jsonEscape(r.workload) << "\",";
     o << "\"workloadVersion\":\"" << jsonEscape(r.workloadVersion) << "\",";
     o << "\"workloadConfig\":\"" << jsonEscape(r.workloadConfig) << "\",";

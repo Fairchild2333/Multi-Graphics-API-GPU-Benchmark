@@ -38,9 +38,9 @@ struct CpuView: View {
                                     Text(Localization.tr("Test mode", "测试模式", "テストモード"))
                                         .font(.subheadline).foregroundStyle(.secondary)
                                     Picker("", selection: $mode) {
-                                        Text(Localization.tr("Each logical processor", "每个逻辑处理器", "各論理プロセッサ")).tag("per-core")
-                                        Text(Localization.tr("All cores together", "全部核心一起", "全コア同時")).tag("multi")
-                                        Text(Localization.tr("Per-core + all-core", "单核 + 全核", "単一+全コア")).tag("all")
+                                        Text(Localization.tr("Single-core", "单核", "コア別")).tag("per-core")
+                                        Text(Localization.tr("All-core", "全核", "全コア")).tag("multi")
+                                        Text(Localization.tr("Single-core + All-core", "单核 + 全核", "コア別 + 全コア")).tag("all")
                                     }
                                     .labelsHidden()
                                 }
@@ -76,8 +76,8 @@ struct CpuView: View {
                             }
 
                             Text(Localization.tr(
-                                "Per-core duration is applied separately to every logical processor; the formal preset can take a long time.",
-                                "单核时长会对每个逻辑处理器分别计时；正式预设可能耗时较长。",
+                                "Single-core duration is applied once to each logical processor; the formal preset can take a long time.",
+                                "单核测试会依次测试每个逻辑处理器；正式测试可能耗时较长。",
                                 "単一コア時間は論理プロセッサごとに適用。正式プリセットは長時間かかる場合があります。"))
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)

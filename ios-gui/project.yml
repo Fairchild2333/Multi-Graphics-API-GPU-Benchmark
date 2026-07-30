@@ -22,6 +22,11 @@ targets:
       - path: Mangekyo
         excludes:
           - "**/*.xcassets"
+    resources:
+      - path: ../shaders/particle.metal
+        buildPhase: resources
+      - path: ../shaders/gpu_burn.metal
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.fairchild.Mangekyo
@@ -30,9 +35,13 @@ targets:
         HEADER_SEARCH_PATHS:
           - "$(PROJECT_DIR)/../src"
         LIBRARY_SEARCH_PATHS:
+          - "$(PROJECT_DIR)/../build-ios/Release-iphoneos"
+          - "$(PROJECT_DIR)/../build-ios/Release-iphonesimulator"
+          - "$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)"
           - "$(PROJECT_DIR)/../build"
         OTHER_LDFLAGS:
           - "-lgpu_engine"
+          - "-lc++"
           - "-framework Metal"
           - "-framework MetalKit"
           - "-framework QuartzCore"
@@ -40,3 +49,4 @@ targets:
           - "-framework CoreFoundation"
           - "-framework Foundation"
         CLANG_CXX_LANGUAGE_STANDARD: "c++17"
+        CLANG_ENABLE_OBJC_ARC: "YES"

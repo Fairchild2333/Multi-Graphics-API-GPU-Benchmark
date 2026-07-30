@@ -50,7 +50,7 @@ struct RunView: View {
     @State private var showLegacy = false
 
     @State private var durationUnit: DurationUnit = .seconds
-    @State private var durationValue: String = "15"
+    @State private var durationValue: String = "3"
 
     @State private var particlePreset: String = "1048576"
     @State private var customParticles: String = ""
@@ -92,19 +92,19 @@ struct RunView: View {
         switch selectedWorkload {
         case "stream":
             return Localization.tr(
-                "Particle baseline: compute update + point sprite draw. Score is memory-throughput oriented.",
-                "粒子基线：计算更新 + 点精灵绘制。分数偏内存吞吐。",
-                "パーティクル基線：計算更新 + 点描画。スコアは帯域寄り。")
+                "Particle baseline. Embedded host writes stream_v1_ios_preview (not desktop 15s).",
+                "粒子基线。嵌入宿主写出 stream_v1_ios_preview（非桌面 15s）。",
+                "パーティクル基線。埋め込みは stream_v1_ios_preview（デスクトップ15sではない）。")
         case "gpu_burn":
             return Localization.tr(
-                "Fullscreen Plasma×Kaleidoscope burn; fixed steps/draw, 2 draws/frame. Metal supported.",
-                "全屏等离子×万花镜 Burn；固定步数/次绘制，每帧 2 次不透明绘制。Metal 已支持。",
-                "全画面 Plasma×カレイド Burn。固定ステップ、2 ドロー/フレーム。Metal 対応。")
+                "Burn light=16. Writes gpu_burn_v3_fixed_steps_16_kaleidoscope_ios_preview.",
+                "Burn light=16。写出 gpu_burn_v3_fixed_steps_16_kaleidoscope_ios_preview。",
+                "Burn light=16。書き出し gpu_burn_v3_fixed_steps_16_kaleidoscope_ios_preview。")
         case "cinematic_liquid":
             return Localization.tr(
-                "Interactive pool. Metal = MLS-MPM + preview render (_metal_preview).",
-                "互动水池。Metal = MLS-MPM + 预览渲染（_metal_preview）。",
-                "インタラクティブプール。Metal=MLS-MPM+プレビュー（_metal_preview）。")
+                "Interactive pool. Not on ios_engine_host yet; desktop Metal uses …_metal_preview.",
+                "互动水池。尚未接 ios_engine_host；桌面 Metal 为 …_metal_preview。",
+                "インタラクティブプール。ios_engine_host 未接続。デスクトップ Metal は …_metal_preview。")
         case "synthpeak":
             return Localization.tr(
                 "Synthetic peak FLOPS/IOPS. FP64 unsupported on Apple GPUs.",
@@ -119,6 +119,7 @@ struct RunView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
+                    previewSurfaceCard
                     optionsCard
                     advancedCard
                     progressCard
@@ -138,6 +139,27 @@ struct RunView: View {
     }
 
     // MARK: - Cards
+
+    private var previewSurfaceCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(Localization.tr("Metal preview surface", "Metal 预览表面", "Metal プレビュー面"))
+                    .font(.headline)
+                MetalBenchView { layer in
+                    engine.attachMetalLayer(layer)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 200)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                Text(Localization.tr(
+                    "Engine: \(engine.engineVersion.isEmpty ? "…" : engine.engineVersion). stream/gpu_burn use embedded gpu_engine (ios_preview).",
+                    "引擎：\(engine.engineVersion.isEmpty ? "…" : engine.engineVersion)。stream/gpu_burn 走嵌入式 gpu_engine（ios_preview）。",
+                    "エンジン：\(engine.engineVersion.isEmpty ? "…" : engine.engineVersion)。stream/gpu_burn は埋め込み gpu_engine（ios_preview）。"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
 
     private var optionsCard: some View {
         GlassCard {

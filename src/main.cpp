@@ -2,6 +2,7 @@
 #include "benchmark_results.h"
 #include "cpu_benchmark.h"
 #include "gpu_engine.h"
+#include "path_service.h"
 
 #if defined(_WIN32) && defined(HAVE_VULKAN)
 #include "renderdoc_app.h"
@@ -26,12 +27,16 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cctype>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
+#include <map>
 #include <iostream>
+#include <iomanip>
 #include <iterator>
 #include <memory>
 #include <sstream>
@@ -120,24 +125,29 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
     stored.id = gpu_bench::GenerateResultId() +
                 (multiCore ? "-cpu-multi" : "-cpu-single");
     stored.timestamp = gpu_bench::GenerateTimestamp();
-    stored.resultSchemaVersion = 2;
+    stored.resultSchemaVersion = 4;
+    stored.appVersion = gpu_bench::CurrentAppVersion();
     stored.workload = multiCore ? "cpu_multi_core" : "cpu_single_core";
     const auto measureMs = static_cast<long long>(std::llround(config.measureSeconds * 1000.0));
     const auto warmupMs = static_cast<long long>(std::llround(config.warmupSeconds * 1000.0));
     const bool formalContract = measureMs == 15000 && warmupMs == 200 &&
                                 config.roundCount == 3;
-    const bool afterPerCore = multiCore && config.mode == gpu_bench::CpuBenchmarkMode::All;
+    const bool beforePerCore = multiCore && config.mode == gpu_bench::CpuBenchmarkMode::All;
     std::ostringstream storedVersion;
     storedVersion << report.workloadVersion
                   << (formalContract ? "_formal" : "_preview")
                   << "_r" << config.roundCount
                   << "_t" << measureMs << "ms"
                   << "_w" << warmupMs << "ms"
-                  << "_sequence_" << (afterPerCore ? "after_percore" : "standalone");
+                  << "_sequence_" << (beforePerCore ? "before_percore" : "standalone");
     stored.workloadVersion = storedVersion.str();
     stored.graphicsApi = "CPU";
     stored.deviceName = report.cpuName;
     stored.cpuName = report.cpuName;
+    stored.osVersion = gpu_bench::CurrentOsVersion();
+    stored.platform = gpu_bench::CurrentPlatform();
+    stored.osArchitecture = gpu_bench::CurrentOsArchitecture();
+    stored.processArchitecture = gpu_bench::CurrentProcessArchitecture();
     stored.difficulty = multiCore ? "Multi-core" : "Per-core";
     stored.headless = true;
     stored.framesInFlight = 0;
@@ -163,7 +173,7 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
              << ";coreClassLabels=inferred_rank_not_architectural_identity"
              << ";checksumRole=dce_sink";
     contract << ";scoreContract=" << (formalContract ? "formal" : "preview")
-             << ";sequence=" << (afterPerCore ? "after_percore" : "standalone");
+             << ";sequence=" << (beforePerCore ? "before_percore" : "standalone");
 
     if (multiCore) {
         stored.score = report.multiCore.scoreMWorkPerSec;
@@ -357,6 +367,189 @@ struct GpuInfo {
     std::uint32_t dx12NodeCount = 1;
 };
 
+struct CompleteSuiteJob {
+    std::int32_t gpuIndex = -1;
+    std::string gpuName;
+    bool software = false;
+    std::string backend;
+    std::string apiName;
+    std::string workload;
+    std::uint32_t particleCount = 0;
+    std::uint32_t burnSteps = 0;
+    bool headless = false;
+    bool captureRequired = false;
+    bool knownSupported = false;
+    std::string unsupportedReason;
+};
+
+struct SuiteAttemptState {
+    std::string status;
+    std::string reason;
+};
+
+static std::string SuiteJobKey(const CompleteSuiteJob& job) {
+    std::ostringstream out;
+    out << "suite_v1|" << job.gpuName << '|' << job.backend << '|'
+        << job.workload << "|particles=" << job.particleCount
+        << "|steps=" << job.burnSteps
+        << "|headless=" << (job.headless ? 1 : 0)
+        << "|capture=" << (job.captureRequired ? 1 : 0);
+    return out.str();
+}
+
+static std::filesystem::path SuiteStatusFilePath() {
+    return std::filesystem::path(gpu_bench::ResultsFilePath()).parent_path() /
+           "complete-suite-status.tsv";
+}
+
+static std::string SuiteTsvField(std::string value) {
+    for (char& c : value)
+        if (c == '\t' || c == '\r' || c == '\n') c = ' ';
+    return value;
+}
+
+static std::map<std::string, SuiteAttemptState> LoadSuiteAttemptStates() {
+    std::map<std::string, SuiteAttemptState> states;
+    std::ifstream input(SuiteStatusFilePath());
+    std::string line;
+    while (std::getline(input, line)) {
+        std::istringstream row(line);
+        std::string timestamp, key, status, reason;
+        if (!std::getline(row, timestamp, '\t') ||
+            !std::getline(row, key, '\t') ||
+            !std::getline(row, status, '\t'))
+            continue;
+        std::getline(row, reason);
+        states[key] = {status, reason};
+    }
+    return states;
+}
+
+static void AppendSuiteAttemptState(const CompleteSuiteJob& job,
+                                    const std::string& status,
+                                    const std::string& reason) {
+    std::ofstream output(SuiteStatusFilePath(), std::ios::app);
+    if (!output) return;
+    output << SuiteTsvField(gpu_bench::GenerateTimestamp()) << '\t'
+           << SuiteTsvField(SuiteJobKey(job)) << '\t'
+           << SuiteTsvField(status) << '\t'
+           << SuiteTsvField(reason) << '\n';
+}
+
+static long long SuiteConfigInteger(const std::string& config,
+                                    const std::string& key,
+                                    long long fallback = 0) {
+    const std::string needle = key + "=";
+    auto pos = config.find(needle);
+    if (pos == std::string::npos) return fallback;
+    pos += needle.size();
+    auto end = config.find(';', pos);
+    try { return std::stoll(config.substr(pos, end - pos)); }
+    catch (...) { return fallback; }
+}
+
+static bool SuiteResultMatches(const gpu_bench::BenchmarkResult& result,
+                               const CompleteSuiteJob& job) {
+    if (result.graphicsApi != job.apiName || result.workload != job.workload ||
+        result.headless != job.headless)
+        return false;
+    if (job.software) {
+        if (!result.isSoftware &&
+            result.deviceName.find("WARP") == std::string::npos &&
+            result.deviceName.find("Basic Render") == std::string::npos)
+            return false;
+    } else if (result.deviceName != job.gpuName) {
+        return false;
+    }
+    if (job.workload == "stream" && result.particleCount != job.particleCount)
+        return false;
+    if (job.workload == "gpu_burn" &&
+        SuiteConfigInteger(result.workloadConfig, "steps", -1) != job.burnSteps)
+        return false;
+    return true;
+}
+
+static bool SuiteResultHasCapture(const gpu_bench::BenchmarkResult& result) {
+    return SuiteConfigInteger(result.workloadConfig, "captureCount", 0) > 0;
+}
+
+static std::string SuiteCaptureTag(std::string value, const char* fallback) {
+    const std::string original = value;
+    for (char& ch : value) {
+        const auto byte = static_cast<unsigned char>(ch);
+        if (byte < 0x20 || ch == ' ' || ch == '.' || ch == '(' || ch == ')' ||
+            std::strchr("<>:\"/\\|?*", ch) != nullptr)
+            ch = '_';
+    }
+    value.erase(std::unique(value.begin(), value.end(),
+        [](char a, char b) { return a == '_' && b == '_'; }), value.end());
+    while (!value.empty() && value.front() == '_') value.erase(value.begin());
+    while (!value.empty() && value.back() == '_') value.pop_back();
+    if (value.empty()) value = fallback;
+    if (value.size() > 80) {
+        std::uint32_t hash = 2166136261u;
+        for (unsigned char byte : original) {
+            hash ^= byte;
+            hash *= 16777619u;
+        }
+        std::size_t cut = 64;
+        while (cut > 0 && cut < value.size() &&
+               (static_cast<unsigned char>(value[cut]) & 0xC0u) == 0x80u)
+            --cut;
+        value.resize(cut);
+        std::ostringstream suffix;
+        suffix << '_' << std::hex << std::setw(8) << std::setfill('0') << hash;
+        value += suffix.str();
+    }
+    return value;
+}
+
+static bool SuiteCaptureExists(const CompleteSuiteJob& job) {
+    if (!job.captureRequired) return true;
+    std::string expected = SuiteCaptureTag(job.apiName, "api") + "_" +
+                           SuiteCaptureTag(job.gpuName, "gpu") + "_" + job.workload;
+    if (job.workload == "stream")
+        expected += "_particles" + std::to_string(job.particleCount);
+    std::transform(expected.begin(), expected.end(), expected.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+
+    std::error_code ec;
+    const auto directory = gpu_bench::paths::CapturesDirectory();
+    for (std::filesystem::directory_iterator it(directory, ec), end;
+         !ec && it != end; it.increment(ec)) {
+        const auto path = it->path();
+        auto name = path.filename().u8string();
+        std::transform(name.begin(), name.end(), name.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        const bool captureObject =
+            (it->is_regular_file(ec) && path.extension() == ".rdc") ||
+            (it->is_directory(ec) && path.extension() == ".gputrace");
+        if (captureObject && name.rfind(expected, 0) == 0)
+            return true;
+    }
+    return false;
+}
+
+static std::string QuoteSuiteProcessArg(const std::string& value) {
+#ifdef _WIN32
+    std::string escaped;
+    escaped.reserve(value.size() + 2);
+    escaped.push_back('"');
+    for (char c : value) {
+        if (c == '"') escaped.push_back('\\');
+        escaped.push_back(c);
+    }
+    escaped.push_back('"');
+    return escaped;
+#else
+    std::string escaped = "'";
+    for (char c : value)
+        escaped += c == '\'' ? "'\\''" : std::string(1, c);
+    escaped.push_back('\'');
+    return escaped;
+#endif
+}
+
 static bool NameLooksIntegrated(const std::string& name) {
     // Intel integrated: HD Graphics, UHD Graphics, Iris
     if (name.find("Intel") != std::string::npos) {
@@ -384,6 +577,34 @@ static bool NameLooksIntegrated(const std::string& name) {
         return true;       // generic "Radeon Graphics" = APU integrated
     }
     return false;  // unknown vendor, assume discrete
+}
+
+static std::string CanonicalGpuMatchName(std::string name) {
+    // OpenGL commonly decorates the renderer ("/PCIe/SSE2") and some NVIDIA
+    // drivers omit the leading vendor name. Compare a lowercase alphanumeric
+    // form so these aliases attach to the existing DXGI/Vulkan adapter rather
+    // than creating a second, GL-only GPU row.
+    const auto slash = name.find('/');
+    if (slash != std::string::npos) name.resize(slash);
+    std::string canonical;
+    canonical.reserve(name.size());
+    for (unsigned char ch : name) {
+        if (std::isalnum(ch))
+            canonical.push_back(static_cast<char>(std::tolower(ch)));
+    }
+    return canonical;
+}
+
+static bool GpuNamesReferToSameAdapter(const std::string& a,
+                                       const std::string& b) {
+    const std::string ca = CanonicalGpuMatchName(a);
+    const std::string cb = CanonicalGpuMatchName(b);
+    if (ca.empty() || cb.empty()) return false;
+    if (ca == cb) return true;
+    const std::size_t shorter = (std::min)(ca.size(), cb.size());
+    return shorter >= 6 &&
+           (ca.find(cb) != std::string::npos ||
+            cb.find(ca) != std::string::npos);
 }
 
 static std::vector<GpuInfo> ProbeGpus(
@@ -613,8 +834,7 @@ static std::vector<GpuInfo> ProbeGpus(
                 // Prefer an unmatched entry first so that duplicate GPUs each get their own match.
                 bool matched = false;
                 auto nameMatches = [&](const GpuInfo& gpu) {
-                    return gpu.name.find(props.deviceName) != std::string::npos ||
-                           std::string(props.deviceName).find(gpu.name) != std::string::npos;
+                    return GpuNamesReferToSameAdapter(gpu.name, props.deviceName);
                 };
                 // First pass: match an entry that hasn't been marked yet.
                 for (auto& gpu : gpus) {
@@ -738,8 +958,7 @@ static std::vector<GpuInfo> ProbeGpus(
             if (!glRenderer.empty()) {
                 for (auto& gpu : gpus) {
                     if (gpu.isSoftware != isSoftwareGL) continue;
-                    if (glRenderer.find(gpu.name) != std::string::npos ||
-                        gpu.name.find(glRenderer) != std::string::npos) {
+                    if (GpuNamesReferToSameAdapter(glRenderer, gpu.name)) {
                         gpu.supportsOpenGL = true;
                         matchedOpenGlGpu = true;
                         break;
@@ -762,8 +981,7 @@ static std::vector<GpuInfo> ProbeGpus(
             if (!glRenderer.empty()) {
                 bool alreadyListed = matchedOpenGlGpu;
                 for (const auto& gpu : gpus) {
-                    if (glRenderer.find(gpu.name) != std::string::npos ||
-                        gpu.name.find(glRenderer) != std::string::npos) {
+                    if (GpuNamesReferToSameAdapter(glRenderer, gpu.name)) {
                         alreadyListed = true;
                         break;
                     }
@@ -922,6 +1140,9 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     bool useWarp = false;
     bool runAll = false;
     bool fullAnalysis = false;
+    bool completeSuite = false;
+    bool fillMissingSuite = false;
+    bool assumeSuiteYes = false;
     bool listGpus = false;
     bool timeArgGiven = false;   // explicit --time => run directly (no menu)
     bool benchmarkArgGiven = false; // remains true if an auto-tuned workload switches to timed mode
@@ -1176,6 +1397,16 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             listGpus = true;
         } else if (std::strcmp(argv[i], "--run-all") == 0) {
             runAll = true;
+        } else if (std::strcmp(argv[i], "--complete-suite") == 0) {
+            completeSuite = true;
+            benchCfg.renderDocEnabled = true;
+            renderDocLayerRequested = true;
+        } else if (std::strcmp(argv[i], "--fill-missing") == 0) {
+            fillMissingSuite = true;
+            benchCfg.renderDocEnabled = true;
+            renderDocLayerRequested = true;
+        } else if (std::strcmp(argv[i], "--yes") == 0) {
+            assumeSuiteYes = true;
         } else if (std::strcmp(argv[i], "--full-analysis") == 0) {
             fullAnalysis = true;
         } else if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
@@ -1216,6 +1447,9 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --results-clear                     Delete all saved results\n"
                       << "  --results-export <file.csv>         Export results to CSV file\n"
                       << "  --run-all                            Benchmark every GPU x API combination, then exit\n"
+                      << "  --complete-suite                     Run the formal v1 score matrix on all GPUs/APIs, including unsupported attempts\n"
+                      << "  --fill-missing                       Run only missing formal-suite scores/captures; keep prior failures unsupported\n"
+                      << "  --yes                                Confirm a non-interactive --fill-missing run\n"
                       << "  --capture [seconds]                 Auto-capture via RenderDoc at T seconds (default: 5)\n"
                       << "  --capture-frame [N]                 Auto-capture via RenderDoc at frame N (default: 5)\n"
                       << "  --full-analysis                     Run all APIs + RenderDoc capture + Python charts (interactive)\n"
@@ -1241,6 +1475,11 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             std::cout << '\n';
             return 0;
         }
+    }
+
+    if (completeSuite && fillMissingSuite) {
+        std::cerr << "--complete-suite and --fill-missing are mutually exclusive.\n";
+        return 2;
     }
 
     // CPU benchmarking is a fully separate path. Return before GLFW, GPU/API
@@ -1590,7 +1829,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     const bool configureVulkanRenderDocLayer =
         benchCfg.renderDocEnabled && renderDocLayerRequested &&
         (backend == "vulkan" ||
-         (benchCfg.guiWorker && backend == "auto"));
+         ((benchCfg.guiWorker || completeSuite || fillMissingSuite) &&
+          backend == "auto"));
     const auto bundledRenderDocDll = ConfigureBundledRenderDocLayer(
         shaderDir, configureVulkanRenderDocLayer);
     // GUI workers preload RenderDoc before the Vulkan probe so its crash
@@ -1632,7 +1872,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
 
     PrintGpuTable(gpus);
 
-    bool directBenchmark = (backend != "auto") || benchmarkArgGiven || runAll || timeArgGiven;
+    bool directBenchmark = (backend != "auto") || benchmarkArgGiven || runAll ||
+                           completeSuite || fillMissingSuite || timeArgGiven;
 
     // ---- Build available backends ----
     struct BackendEntry { std::string id; bool hwOnly; };
@@ -1718,6 +1959,304 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     else if (recommendedApi == "opengl")  recommendedApiLabel = "OpenGL 4.3";
 
     bool hasLastRun = false;
+
+    // ---- Formal complete suite / fill-missing suite -----------------------
+    // Every pass is a fresh child process, so failures remain isolated and the
+    // GUI and CLI use the exact same validation/result/capture implementation.
+    if (completeSuite || fillMissingSuite) {
+        struct SuiteApi { const char* backend; const char* resultName; };
+        const SuiteApi suiteApis[] = {
+#ifdef HAVE_VULKAN
+            {"vulkan", "Vulkan"},
+#endif
+#ifdef HAVE_DX12
+            {"dx12", "DX12"},
+#endif
+#ifdef HAVE_DX11
+            {"dx11", "DX11"},
+#endif
+#ifdef HAVE_METAL
+            {"metal", "Metal"},
+#endif
+#ifdef HAVE_OPENGL
+            {"opengl", "OpenGL"},
+#endif
+        };
+        struct SuiteVariant {
+            const char* workload;
+            std::uint32_t particles;
+            std::uint32_t burnSteps;
+            bool headless;
+        };
+        const SuiteVariant variants[] = {
+            {"stream", 65536u, 0u, false},
+            {"stream", 1048576u, 0u, false},
+            {"stream", 4194304u, 0u, false},
+            {"stream", 16777216u, 0u, false},
+            {"stream", 65536u, 0u, true},
+            {"stream", 1048576u, 0u, true},
+            {"stream", 4194304u, 0u, true},
+            {"stream", 16777216u, 0u, true},
+            {"gpu_burn", 0u, gpu_bench::kGpuBurnV3MediumIter, false},
+            {"cinematic_liquid", 0u, 0u, false},
+        };
+        auto gpuSupportsApi = [](const GpuInfo& gpu, const std::string& api,
+                                 bool needsCompute) {
+            if (api == "vulkan") return gpu.supportsVulkan;
+            if (api == "dx12") return gpu.supportsDX12;
+            if (api == "dx11")
+                return gpu.supportsDX11 && (!needsCompute || gpu.supportsDX11Compute);
+            if (api == "metal") return gpu.supportsMetal;
+            if (api == "opengl") return gpu.supportsOpenGL;
+            return false;
+        };
+
+        std::vector<CompleteSuiteJob> allJobs;
+        for (std::size_t gi = 0; gi < gpus.size(); ++gi) {
+            const auto& gpu = gpus[gi];
+            for (const auto& api : suiteApis) {
+                for (const auto& variant : variants) {
+                    CompleteSuiteJob job;
+                    job.gpuIndex = static_cast<std::int32_t>(gi);
+                    job.gpuName = gpu.name;
+                    job.software = gpu.isSoftware;
+                    job.backend = api.backend;
+                    job.apiName = api.resultName;
+                    job.workload = variant.workload;
+                    job.particleCount = variant.particles;
+                    job.burnSteps = variant.burnSteps;
+                    job.headless = variant.headless;
+                    job.captureRequired = !variant.headless;
+                    const bool liquid = job.workload == "cinematic_liquid";
+                    const bool needsCompute = job.workload == "stream";
+                    const bool apiSupported = gpuSupportsApi(gpu, job.backend, needsCompute);
+                    const bool workloadSupported = !liquid ||
+                        job.backend == "vulkan" || job.backend == "metal";
+                    job.knownSupported = apiSupported && workloadSupported;
+                    if (!apiSupported) {
+                        job.unsupportedReason = gpu.name + " does not report " +
+                            job.backend + (needsCompute && job.backend == "dx11"
+                                ? " compute support" : " support");
+                    } else if (!workloadSupported) {
+                        job.unsupportedReason =
+                            "Cinematic Liquid is available only on Vulkan/Metal";
+                    }
+                    allJobs.push_back(std::move(job));
+                }
+            }
+        }
+
+        const auto savedResults = gpu_bench::LoadResults();
+        auto states = LoadSuiteAttemptStates();
+        std::vector<CompleteSuiteJob> jobs;
+        std::size_t alreadyComplete = 0;
+        std::size_t skippedUnsupported = 0;
+        std::size_t skippedFailed = 0;
+        for (const auto& job : allJobs) {
+            const auto key = SuiteJobKey(job);
+            if (!fillMissingSuite) {
+                jobs.push_back(job);
+                continue;
+            }
+            if (!job.knownSupported) {
+                ++skippedUnsupported;
+                std::cout << "SUITE_SKIP\tstatus=unsupported\tkey=" << key
+                          << "\treason=" << job.unsupportedReason << "\n";
+                continue;
+            }
+            const auto state = states.find(key);
+            if (state != states.end() &&
+                (state->second.status == "failed" ||
+                 state->second.status == "unsupported" ||
+                 state->second.status == "capture_failed" ||
+                 state->second.status == "capture_unsupported")) {
+                ++skippedFailed;
+                std::cout << "SUITE_SKIP\tstatus=" << state->second.status
+                          << "\tkey=" << key << "\treason="
+                          << state->second.reason << "\n";
+                continue;
+            }
+            bool hasResult = false;
+            // Old result schemas did not record captureCount.  The actual
+            // capture directory is authoritative for both old and new scores;
+            // this also detects captures that were deleted after a run.
+            const bool hasCapture = SuiteCaptureExists(job);
+            for (const auto& result : savedResults) {
+                if (!SuiteResultMatches(result, job)) continue;
+                hasResult = true;
+            }
+            if (hasResult && hasCapture) {
+                ++alreadyComplete;
+                continue;
+            }
+            jobs.push_back(job);
+        }
+
+        std::cout << "\n========== "
+                  << (fillMissingSuite ? "Fill Missing" : "Complete Suite")
+                  << " v1 ==========\n"
+                  << "Formal contract: 15 s; RenderDoc at 5 s for windowed passes; "
+                     "headless passes do not inject RenderDoc.\n"
+                  << "Matrix: 65K/1M/4M/16M Particle windowed + headless, "
+                     "GPU Burn 64 steps, Cinematic Liquid.\n"
+                  << "Planned now: " << jobs.size() << " / " << allJobs.size() << "\n";
+        if (fillMissingSuite) {
+            std::cout << "Already complete: " << alreadyComplete
+                      << "; known unsupported: " << skippedUnsupported
+                      << "; prior failed/unsupported: " << skippedFailed << "\n";
+        }
+        std::cout << "Status ledger: " << SuiteStatusFilePath().u8string()
+                  << "\n============================================\n";
+        if (jobs.empty()) {
+            std::cout << "No missing runnable tests or captures were found; nothing was started.\n";
+#if !defined(GPU_BENCH_NO_GLFW)
+            if (!gpu_bench::skipGlfwTerminate) glfwTerminate();
+#endif
+            return 0;
+        }
+        if (fillMissingSuite && !assumeSuiteYes) {
+            if (benchCfg.guiWorker) {
+                std::cout << "SUITE_CONFIRM_REQUIRED\tmissing=" << jobs.size()
+                          << "\tmessage=missing results or capture files were found\n";
+#if !defined(GPU_BENCH_NO_GLFW)
+                if (!gpu_bench::skipGlfwTerminate) glfwTerminate();
+#endif
+                return 4;
+            }
+            std::cout << "Run these " << jobs.size()
+                      << " missing score/capture pass(es)? [y/N]: " << std::flush;
+            std::string answer;
+            std::getline(std::cin, answer);
+            std::transform(answer.begin(), answer.end(), answer.begin(),
+                           [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            if (answer != "y" && answer != "yes") {
+                std::cout << "Fill-missing cancelled; nothing was started.\n";
+#if !defined(GPU_BENCH_NO_GLFW)
+                if (!gpu_bench::skipGlfwTerminate) glfwTerminate();
+#endif
+                return 0;
+            }
+        }
+
+        std::error_code exeError;
+        auto suiteExecutable = std::filesystem::absolute(argv[0], exeError);
+        if (exeError) suiteExecutable = argv[0];
+        std::size_t passed = 0, failed = 0, unsupported = 0, captureMissing = 0;
+        std::size_t captureUnsupported = 0;
+        for (std::size_t index = 0; index < jobs.size(); ++index) {
+            const auto& job = jobs[index];
+            const auto key = SuiteJobKey(job);
+            std::vector<std::string> childArgs = {
+                suiteExecutable.u8string(), "--time", "15",
+                "--backend", job.backend, "--gpu", std::to_string(job.gpuIndex),
+                "--workload", job.workload,
+            };
+            if (benchCfg.guiWorker) childArgs.push_back("--gui-worker");
+            if (job.workload == "stream") {
+                childArgs.push_back("--particles");
+                childArgs.push_back(std::to_string(job.particleCount));
+            } else if (job.workload == "gpu_burn") {
+                childArgs.push_back("--iter");
+                childArgs.push_back(std::to_string(job.burnSteps));
+            }
+            if (job.headless) {
+                childArgs.push_back("--headless");
+                childArgs.push_back("--no-renderdoc");
+            } else {
+                childArgs.push_back("--renderdoc");
+                childArgs.push_back("--capture");
+                childArgs.push_back("5");
+            }
+            auto buildCommand = [](const std::vector<std::string>& args) {
+                std::ostringstream command;
+                for (std::size_t arg = 0; arg < args.size(); ++arg) {
+                    if (arg) command << ' ';
+                    command << QuoteSuiteProcessArg(args[arg]);
+                }
+                return command.str();
+            };
+
+            const auto before = gpu_bench::LoadResults().size();
+            std::cout << "\nSUITE_RUN\tindex=" << (index + 1)
+                      << "\ttotal=" << jobs.size() << "\tkey=" << key << "\n"
+                      << ">>> " << job.apiName << " / " << job.gpuName << " / "
+                      << job.workload;
+            if (job.particleCount) std::cout << " / " << job.particleCount << " particles";
+            if (job.burnSteps) std::cout << " / " << job.burnSteps << " steps";
+            if (job.headless) std::cout << " / headless";
+            std::cout << " <<<\n" << std::flush;
+
+            int childStatus = std::system(buildCommand(childArgs).c_str());
+            bool retriedWithoutCapture = false;
+            if (childStatus != 0 && job.backend == "dx12" &&
+                job.captureRequired) {
+                std::vector<std::string> retryArgs;
+                retryArgs.reserve(childArgs.size());
+                for (std::size_t arg = 0; arg < childArgs.size(); ++arg) {
+                    if (childArgs[arg] == "--renderdoc") continue;
+                    if (childArgs[arg] == "--capture" ||
+                        childArgs[arg] == "--capture-frame") {
+                        if (arg + 1 < childArgs.size()) ++arg;
+                        continue;
+                    }
+                    retryArgs.push_back(childArgs[arg]);
+                }
+                retryArgs.push_back("--no-renderdoc");
+                std::cout
+                    << "[Suite] DX12 worker failed with RenderDoc enabled; "
+                       "retrying the same benchmark without capture.\n"
+                    << std::flush;
+                childStatus = std::system(buildCommand(retryArgs).c_str());
+                retriedWithoutCapture = childStatus == 0;
+            }
+            const auto afterResults = gpu_bench::LoadResults();
+            const gpu_bench::BenchmarkResult* newMatch = nullptr;
+            for (std::size_t resultIndex = before;
+                 resultIndex < afterResults.size(); ++resultIndex)
+                if (SuiteResultMatches(afterResults[resultIndex], job))
+                    newMatch = &afterResults[resultIndex];
+
+            std::string status, reason;
+            if (childStatus != 0 || newMatch == nullptr) {
+                status = job.knownSupported ? "failed" : "unsupported";
+                reason = job.knownSupported
+                    ? (childStatus != 0 ? "worker exited non-zero" : "worker saved no matching result")
+                    : job.unsupportedReason;
+                if (job.knownSupported) ++failed;
+                else ++unsupported;
+            } else if (retriedWithoutCapture) {
+                status = "capture_unsupported";
+                reason = "DX12 score completed after automatic no-RenderDoc retry; "
+                         "capture injection is incompatible with this driver";
+                ++captureUnsupported;
+                ++passed;
+            } else if (job.captureRequired &&
+                       (!SuiteResultHasCapture(*newMatch) || !SuiteCaptureExists(job))) {
+                status = fillMissingSuite ? "capture_failed" : "capture_missing";
+                reason = "benchmark completed but no RenderDoc capture was recorded";
+                ++captureMissing;
+                ++failed;
+            } else {
+                status = "success";
+                reason = "result and required capture are present";
+                ++passed;
+            }
+            AppendSuiteAttemptState(job, status, reason);
+            states[key] = {status, reason};
+            std::cout << "SUITE_RESULT\tstatus=" << status
+                      << "\tkey=" << key << "\treason=" << reason << "\n";
+        }
+        std::cout << "\n========== Suite Complete ==========\n"
+                  << "Passed: " << passed << " / " << jobs.size() << "\n"
+                  << "Failed: " << failed << "; unsupported: " << unsupported << "\n"
+                  << "Missing captures: " << captureMissing
+                  << "; capture-incompatible fallbacks: " << captureUnsupported << "\n"
+                  << "====================================\n";
+#if !defined(GPU_BENCH_NO_GLFW)
+        if (!gpu_bench::skipGlfwTerminate) glfwTerminate();
+#endif
+        return failed ? 1 : 0;
+    }
 
     // ---- --run-all: benchmark every GPU × API combination, then exit ----
     if (runAll) {

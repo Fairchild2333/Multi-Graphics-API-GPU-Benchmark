@@ -35,6 +35,7 @@ public:
     virtual std::string GetBackendName() const = 0;
     virtual std::string GetDeviceName() const  = 0;
     virtual std::string GetDriverVersion() const { return ""; }
+    virtual std::string GetTimingMode() const { return "gpu_timestamp_query"; }
     virtual bool NeedsOpenGLContext() const { return false; }
     const std::string& GetLastCapturePath() const { return lastCapturePath_; }
 

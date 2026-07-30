@@ -8,12 +8,14 @@
 #include <GLFW/glfw3native.h>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <vector>
 
 #pragma comment(lib, "d3d11.lib")
@@ -591,6 +593,23 @@ void DX11Backend::CreateComputeParamsCB() {
 }
 
 void DX11Backend::CreateTimestampQueries() {
+    D3D11_QUERY_DESC completion{};
+    completion.Query = D3D11_QUERY_EVENT;
+    if (FAILED(device_->CreateQuery(&completion, &synchronizedCompletionQuery_))) {
+        std::cout << "[Profiling] DX11 synchronized timing query creation failed.\n";
+    }
+
+    const bool knownLegacyTimestampDriver =
+        deviceName_.find("NVIDIA GeForce 9500 GT") != std::string::npos ||
+        deviceName_.find("NVIDIA GeForce GTX 570") != std::string::npos ||
+        deviceName_.find("AMD Radeon HD 5700") != std::string::npos ||
+        deviceName_.find("Glenfly Arise2030") != std::string::npos;
+    if (knownLegacyTimestampDriver && synchronizedCompletionQuery_) {
+        EnableSynchronizedTimingFallback(
+            "known legacy driver returns invalid D3D11 timestamps");
+        return;
+    }
+
     D3D11_QUERY_DESC dj{};
     dj.Query = D3D11_QUERY_TIMESTAMP_DISJOINT;
 
@@ -599,12 +618,18 @@ void DX11Backend::CreateTimestampQueries() {
 
     for (UINT f = 0; f < kTimestampSlotCount; ++f) {
         if (FAILED(device_->CreateQuery(&dj, &disjointQueries_[f]))) {
-            std::cout << "[Profiling] DX11 timestamp disjoint query creation failed -- disabled.\n";
+            if (synchronizedCompletionQuery_)
+                EnableSynchronizedTimingFallback("timestamp disjoint query creation failed");
+            else
+                std::cout << "[Profiling] DX11 timestamp disjoint query creation failed -- disabled.\n";
             return;
         }
         for (UINT q = 0; q < kTimestampsPerFrame; ++q) {
             if (FAILED(device_->CreateQuery(&ts, &timestampQueries_[f][q]))) {
-                std::cout << "[Profiling] DX11 timestamp query creation failed -- disabled.\n";
+                if (synchronizedCompletionQuery_)
+                    EnableSynchronizedTimingFallback("timestamp query creation failed");
+                else
+                    std::cout << "[Profiling] DX11 timestamp query creation failed -- disabled.\n";
                 return;
             }
         }
@@ -614,8 +639,41 @@ void DX11Backend::CreateTimestampQueries() {
     std::cout << "[Profiling] DX11 timestamp queries enabled.\n";
 }
 
+bool DX11Backend::UseTimestampQueries() const {
+    return timestampsSupported_ && !synchronizedTimingFallback_;
+}
+
+void DX11Backend::EnableSynchronizedTimingFallback(const char* reason) {
+    if (synchronizedTimingFallback_ || !synchronizedCompletionQuery_) return;
+    synchronizedTimingFallback_ = true;
+    for (UINT slot = 0; slot < kTimestampSlotCount; ++slot) {
+        slotPending_[slot] = false;
+        slotAge_[slot] = 0;
+    }
+    std::cout << "[Profiling] DX11 timestamp queries are unreliable ("
+              << reason << "); using synchronized wall-clock timing.\n";
+}
+
+bool DX11Backend::WaitForSynchronizedGpu() {
+    if (!synchronizedCompletionQuery_) return false;
+    context_->End(synchronizedCompletionQuery_.Get());
+    context_->Flush();
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
+    BOOL completed = FALSE;
+    while (std::chrono::steady_clock::now() < deadline) {
+        const HRESULT hr = context_->GetData(
+            synchronizedCompletionQuery_.Get(), &completed, sizeof(completed),
+            D3D11_ASYNC_GETDATA_DONOTFLUSH);
+        if (hr == S_OK) return completed != FALSE;
+        if (FAILED(hr)) return false;
+        std::this_thread::yield();
+    }
+    std::cout << "[Profiling] DX11 synchronized timing wait timed out.\n";
+    return false;
+}
+
 void DX11Backend::CollectTimestampResults() {
-    if (!timestampsSupported_) return;
+    if (!UseTimestampQueries()) return;
 
     // Non-blocking: poll every in-flight slot once per frame and free the
     // ones that resolved. Pending slots stay reserved (DrawFrame does not
@@ -624,9 +682,13 @@ void DX11Backend::CollectTimestampResults() {
     // the frame loop or gave up and reused slots before they resolved,
     // permanently disabling timing at high frame rates.
     const auto declareUnavailable = [this] {
-        timestampsSupported_ = false;
-        std::cout << "[Profiling] DX11 timestamps permanently unavailable "
-                     "(driver never resolves queries).\n";
+        if (synchronizedCompletionQuery_)
+            EnableSynchronizedTimingFallback("driver never resolves queries");
+        else {
+            timestampsSupported_ = false;
+            std::cout << "[Profiling] DX11 timestamps permanently unavailable "
+                         "(driver never resolves queries).\n";
+        }
     };
 
     for (UINT slot = 0; slot < kTimestampSlotCount; ++slot) {
@@ -681,6 +743,11 @@ void DX11Backend::CollectTimestampResults() {
         }
         if (freq == 0) continue;
 
+        if (!(ts[0] <= ts[1] && ts[1] <= ts[2] && ts[2] <= ts[3])) {
+            EnableSynchronizedTimingFallback("non-monotonic query results");
+            return;
+        }
+
         double toMs = 1000.0 / static_cast<double>(freq);
         double computeMs = static_cast<double>(ts[1] - ts[0]) * toMs;
         double renderMs  = static_cast<double>(ts[3] - ts[2]) * toMs;
@@ -693,6 +760,22 @@ void DX11Backend::CollectTimestampResults() {
         if (computeMs < 0.0 || renderMs < 0.0 || totalMs < 0.0)
             continue;
 
+        if (config_.workload == Workload::Stream && computeMs <= 0.0) {
+            EnableSynchronizedTimingFallback("zero-duration stream timestamp result");
+            return;
+        }
+        if (config_.workload == Workload::Stream) {
+            constexpr double kBytesPerParticle = 40.0;
+            const double apparentGbPerSec =
+                (static_cast<double>(config_.particleCount) * kBytesPerParticle) /
+                (computeMs / 1000.0) / 1.0e9;
+            if (apparentGbPerSec > 10000.0) {
+                EnableSynchronizedTimingFallback(
+                    "implausible stream timestamp result");
+                return;
+            }
+        }
+
         AccumulateTiming(computeMs, renderMs, totalMs);
     }
 }
@@ -704,9 +787,18 @@ void DX11Backend::CollectTimestampResults() {
 void DX11Backend::DrawFrame(float deltaTime) {
     CollectTimestampResults();
 
+    using Clock = std::chrono::steady_clock;
+    const bool synchronizedTiming = synchronizedTimingFallback_;
+    const auto frameBegin = Clock::now();
+    auto renderBegin = frameBegin;
+    double synchronizedComputeMs = 0.0;
+    auto elapsedMs = [](Clock::time_point begin, Clock::time_point end) {
+        return std::chrono::duration<double, std::milli>(end - begin).count();
+    };
+
     UINT slot = currentFrame_;
     // Reserve the slot only if its previous queries have been consumed.
-    const bool issueTimestamps = timestampsSupported_ && !slotPending_[slot];
+    const bool issueTimestamps = UseTimestampQueries() && !slotPending_[slot];
 
     // Begin timestamp disjoint
     if (issueTimestamps)
@@ -776,6 +868,11 @@ void DX11Backend::DrawFrame(float deltaTime) {
         // Unbind UAV
         ID3D11UnorderedAccessView* nullUav[] = { nullptr };
         context_->CSSetUnorderedAccessViews(0, 1, nullUav, nullptr);
+
+        if (synchronizedTiming && WaitForSynchronizedGpu()) {
+            synchronizedComputeMs = elapsedMs(frameBegin, Clock::now());
+            renderBegin = Clock::now();
+        }
     }
 
     if (issueTimestamps)
@@ -931,6 +1028,20 @@ void DX11Backend::DrawFrame(float deltaTime) {
     if (issueTimestamps)
         context_->End(disjointQueries_[slot].Get());
 
+    if (synchronizedTiming) {
+        if (config_.headless) {
+            if (synchronizedComputeMs > 0.0)
+                AccumulateTiming(synchronizedComputeMs, 0.0, synchronizedComputeMs);
+        } else if (WaitForSynchronizedGpu()) {
+            const double synchronizedRenderMs = elapsedMs(renderBegin, Clock::now());
+            const double synchronizedTotalMs =
+                synchronizedComputeMs + synchronizedRenderMs;
+            AccumulateTiming(synchronizedComputeMs,
+                             synchronizedRenderMs,
+                             synchronizedTotalMs);
+        }
+    }
+
     if (config_.headless) {
         // Flush replaces Present() — submits queued GPU commands so
         // timestamp queries can resolve without stalling in Sleep() retries.
@@ -1074,9 +1185,18 @@ void DX11Backend::CleanupFluidResources() {
 }
 
 void DX11Backend::RecordFluidFrame(float deltaTime) {
+    using Clock = std::chrono::steady_clock;
+    const bool synchronizedTiming = synchronizedTimingFallback_;
+    const auto frameBegin = Clock::now();
+    auto renderBegin = frameBegin;
+    double synchronizedComputeMs = 0.0;
+    auto elapsedMs = [](Clock::time_point begin, Clock::time_point end) {
+        return std::chrono::duration<double, std::milli>(end - begin).count();
+    };
+
     UINT slot = currentFrame_;
     // Reserve the slot only if its previous queries have been consumed.
-    const bool issueTimestamps = timestampsSupported_ && !slotPending_[slot];
+    const bool issueTimestamps = UseTimestampQueries() && !slotPending_[slot];
     const std::uint32_t N = fluid_.gridSize;
     const float stepDt = (std::min)((std::max)(deltaTime, 0.0f), 1.0f / 30.0f);
     fluid_.simTime += (std::min)((std::max)(deltaTime, 0.0f), 0.1f);
@@ -1136,6 +1256,11 @@ void DX11Backend::RecordFluidFrame(float deltaTime) {
     context_->Dispatch(groups, groups, 1);
     unbindCs();
 
+    if (synchronizedTiming && WaitForSynchronizedGpu()) {
+        synchronizedComputeMs = elapsedMs(frameBegin, Clock::now());
+        renderBegin = Clock::now();
+    }
+
     if (issueTimestamps)
         context_->End(timestampQueries_[slot][1].Get());
 
@@ -1179,6 +1304,13 @@ void DX11Backend::RecordFluidFrame(float deltaTime) {
         context_->End(timestampQueries_[slot][3].Get());
     if (issueTimestamps)
         context_->End(disjointQueries_[slot].Get());
+
+    if (synchronizedTiming && WaitForSynchronizedGpu()) {
+        const double synchronizedRenderMs = elapsedMs(renderBegin, Clock::now());
+        AccumulateTiming(synchronizedComputeMs,
+                         synchronizedRenderMs,
+                         synchronizedComputeMs + synchronizedRenderMs);
+    }
 
     UINT presentFlags = 0;
     if (!config_.vsync && tearingSupported_)

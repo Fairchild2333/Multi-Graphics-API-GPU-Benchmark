@@ -15,6 +15,17 @@ typedef void (*gpb_line_callback)(const char* line, void* context);
 // Platform path setup
 void gpb_set_working_dir(const char* dir);
 
+// Embedded Metal host (mirrors Android NativeBridge).
+// shader_dir / data_dir must be absolute UTF-8 paths; shader_dir should contain
+// particle.metal and gpu_burn.metal (usually copied from the app bundle).
+void gpb_init_paths(const char* shader_dir, const char* data_dir);
+void gpb_set_metal_layer(void* ca_metal_layer);  // CAMetalLayer* as __bridge void*
+bool gpb_start_workload(const char* workload_id, double seconds);  // stream|gpu_burn
+void gpb_stop_workload(void);   // -> gpu_bench::RequestStop()
+bool gpb_is_running(void);
+char* gpb_last_error(void);     // malloc'd; caller gpb_free()
+char* gpb_engine_version(void); // malloc'd; caller gpb_free()
+
 // Probe operations: returns allocated JSON array of GPUs. Must call gpb_free().
 char* gpb_list_gpus(void);
 

@@ -5,6 +5,7 @@ import Foundation
 struct BenchResult: Codable, Identifiable, Hashable {
     var id: String
     var timestamp: String
+    var appVersion: String?
 
     var workload: String
     var workloadVersion: String?

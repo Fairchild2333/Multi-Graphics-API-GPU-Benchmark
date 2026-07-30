@@ -18,6 +18,10 @@ public:
     std::string GetBackendName()    const override { return "DX11"; }
     std::string GetDeviceName()     const override { return deviceName_; }
     std::string GetDriverVersion()  const override { return driverVersion_; }
+    std::string GetTimingMode()     const override {
+        return synchronizedTimingFallback_
+            ? "synchronized_wall_clock" : "gpu_timestamp_query";
+    }
 
 protected:
     void InitBackend()              override;
@@ -44,6 +48,9 @@ private:
     void RecordFluidFrame(float deltaTime);
 
     void CollectTimestampResults();
+    bool UseTimestampQueries() const;
+    void EnableSynchronizedTimingFallback(const char* reason);
+    bool WaitForSynchronizedGpu();
 
     std::string deviceName_;
     std::string driverVersion_;
@@ -85,7 +92,9 @@ private:
     static constexpr UINT kTimestampSlotCount = 8;
     ComPtr<ID3D11Query> disjointQueries_[kTimestampSlotCount];
     ComPtr<ID3D11Query> timestampQueries_[kTimestampSlotCount][kTimestampsPerFrame];
+    ComPtr<ID3D11Query> synchronizedCompletionQuery_;
     bool timestampsSupported_    = false;
+    bool synchronizedTimingFallback_ = false;
     bool tearingSupported_       = false;
     bool timestampDiagPrinted_   = false;
     // A slot stays reserved (not reissued) until its queries resolve; results

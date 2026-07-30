@@ -11,6 +11,7 @@
 #endif
 
 #import <Metal/Metal.h>
+#import <TargetConditionals.h>
 #import <QuartzCore/CAMetalLayer.h>
 
 #include <array>
@@ -178,6 +179,15 @@ void MetalBackend::InitBackend() {
     }
     @autoreleasepool {
         // --- Device selection ---------------------------------------------------
+#if TARGET_OS_IPHONE
+        // iOS has a single system GPU; MTLCopyAllDevices is macOS-only.
+        id<MTLDevice> systemDevice = MTLCreateSystemDefaultDevice();
+        if (!systemDevice)
+            throw std::runtime_error("No Metal device found");
+        impl_->device = systemDevice;
+        impl_->deviceName = [impl_->device.name UTF8String];
+        std::cout << "Selected GPU: " << impl_->deviceName << std::endl;
+#else
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
         NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
@@ -218,6 +228,7 @@ void MetalBackend::InitBackend() {
         impl_->deviceName = [impl_->device.name UTF8String];
         std::cout << "Selected GPU [" << chosen << "]: " << impl_->deviceName
                   << std::endl;
+#endif
 
         // --- Frames-in-flight from config (respects --flights) ------------------
         impl_->framesInFlight = config_.framesInFlight;

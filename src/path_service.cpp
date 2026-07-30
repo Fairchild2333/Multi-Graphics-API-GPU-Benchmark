@@ -51,6 +51,8 @@ std::filesystem::path PlatformDataRoot() {
     if (auto profile = EnvPath("USERPROFILE"); !profile.empty())
         return profile / "AppData" / "Local" / "GpuComputeBenchmark";
 #elif defined(__APPLE__)
+    // iOS sandbox: callers must set GPU_BENCH_DATA_DIR (Documents / App Support).
+    // Falling through to HOME/... is for macOS CLI/GUI only.
     if (auto home = EnvPath("HOME"); !home.empty())
         return home / "Library" / "Application Support" / "GpuComputeBenchmark";
 #else

@@ -97,7 +97,10 @@ void VulkanBackend::CreateInstance() {
     VkApplicationInfo appInfo{};
     appInfo.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName   = "Mangekyo";
-    appInfo.applicationVersion = VK_MAKE_VERSION(0, 2, 4);
+    appInfo.applicationVersion = VK_MAKE_VERSION(
+        GPU_BENCH_VERSION_MAJOR,
+        GPU_BENCH_VERSION_MINOR,
+        GPU_BENCH_VERSION_PATCH);
     appInfo.pEngineName        = "Mangekyo";
     appInfo.engineVersion      = VK_MAKE_VERSION(0, 1, 0);
     // Android primary floor is Vulkan 1.0 (Tegra K1). Desktop keeps 1.1.

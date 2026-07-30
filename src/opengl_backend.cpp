@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
@@ -238,19 +239,69 @@ void OpenGLBackend::CreateParticleBuffers() {
 }
 
 void OpenGLBackend::CreateTimestampQueries() {
+    const char* vendorText = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+    const char* versionText = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+    const char* rendererText = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+    const std::string vendor = vendorText ? vendorText : "";
+    const std::string version = versionText ? versionText : "";
+    const std::string renderer = rendererText ? rendererText : "";
+
+    // Intel's legacy 10.18.15 OpenGL stack advertises GL_TIMESTAMP but can
+    // return essentially constant (for example 0.002 ms) values for large
+    // compute dispatches.  Use a synchronized wall-clock measurement on this
+    // driver so the benchmark remains usable instead of reporting hundreds of
+    // thousands of GB/s.
+    if (vendor.find("Intel") != std::string::npos &&
+        version.find("10.18.15.") != std::string::npos) {
+        EnableSynchronizedTimingFallback(
+            "legacy Intel 10.18.15 driver reports invalid GL timestamps");
+        return;
+    }
+
+    // Archived field reports show these legacy Windows stacks returning
+    // constant, zero, or cross-frame GL timestamps (Glenfly Arise2030,
+    // Radeon HD 5700, and GeForce GTX 570). Their wall-clock synchronized
+    // results are slower to collect but avoid impossible 0.000-0.002 ms
+    // compute times and six-digit GB/s scores.
+    const bool knownLegacyTimestampDriver =
+        (renderer.find("Glenfly Arise2030") != std::string::npos) ||
+        (renderer.find("Radeon HD 5700") != std::string::npos &&
+         version.find("15.201.") != std::string::npos) ||
+        (renderer.find("GeForce GTX 570") != std::string::npos &&
+         version.find("376.54") != std::string::npos);
+    if (knownLegacyTimestampDriver) {
+        EnableSynchronizedTimingFallback(
+            "known legacy driver returns invalid GL timestamps");
+        return;
+    }
+
     GLint bits = 0;
     glGetQueryiv(GL_TIMESTAMP, GL_QUERY_COUNTER_BITS, &bits);
     timestampsSupported_ = (bits > 0);
 
     if (!timestampsSupported_) {
-        std::cout << "[Profiling] OpenGL timestamp queries not supported." << std::endl;
+        EnableSynchronizedTimingFallback("timestamp queries are not supported");
         return;
     }
 
     for (int s = 0; s < kTimestampSlotCount; ++s)
         glGenQueries(kTimestampsPerFrame, timestampQueries_[s]);
+    timestampQueriesAllocated_ = true;
 
     std::cout << "[Profiling] OpenGL timestamp queries enabled." << std::endl;
+}
+
+bool OpenGLBackend::UseTimestampQueries() const {
+    return timestampsSupported_ && !synchronizedTimingFallback_;
+}
+
+void OpenGLBackend::EnableSynchronizedTimingFallback(const char* reason) {
+    if (synchronizedTimingFallback_) return;
+    synchronizedTimingFallback_ = true;
+    timestampFrameCount_ = 0;
+    std::cout << "[Profiling] OpenGL timestamp queries are unreliable ("
+              << reason << "); using synchronized wall-clock timing."
+              << std::endl;
 }
 
 // -----------------------------------------------------------------------
@@ -259,29 +310,42 @@ void OpenGLBackend::CreateTimestampQueries() {
 
 void OpenGLBackend::DrawFrame(float deltaTime) {
     const int slot = currentFrame_ % kTimestampSlotCount;
+    using Clock = std::chrono::steady_clock;
+    const auto elapsedMs = [](Clock::time_point begin, Clock::time_point end) {
+        return std::chrono::duration<double, std::milli>(end - begin).count();
+    };
 
     // Collect results from a previous frame (if ring buffer is full)
-    if (timestampsSupported_ && timestampFrameCount_ >= kTimestampSlotCount)
+    if (UseTimestampQueries() && timestampFrameCount_ >= kTimestampSlotCount)
         CollectTimestampResults();
 
+    const bool useQueries = UseTimestampQueries();
+    const bool synchronizedTiming = synchronizedTimingFallback_;
+    const auto synchronizedFrameBegin = Clock::now();
+
     // -- Timestamp: frame begin --
-    if (timestampsSupported_)
+    if (useQueries)
         glQueryCounter(timestampQueries_[slot][0], GL_TIMESTAMP);
 
     if (fluid_.active) {
         RecordFluidFrame(deltaTime);
+        if (synchronizedTiming) {
+            glFinish();
+            const double totalMs = elapsedMs(synchronizedFrameBegin, Clock::now());
+            AccumulateTiming(totalMs, 0.0, totalMs);
+        }
         return;
     }
 
     // -- Fragment-only fullscreen pass (fractal / volumetric): no compute --
     if (isFragmentOnlyWorkload(config_.workload)) {
-        if (timestampsSupported_)
+        if (useQueries)
             glQueryCounter(timestampQueries_[slot][1], GL_TIMESTAMP);  // compute ~0
 
         glClearColor(0.0f, 0.0f, 0.02f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        if (timestampsSupported_)
+        if (useQueries)
             glQueryCounter(timestampQueries_[slot][2], GL_TIMESTAMP);
 
         glUseProgram(renderProgram_);
@@ -324,12 +388,18 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
             glDrawArrays(GL_TRIANGLES, 0, 3);
         }
 
-        if (timestampsSupported_)
+        if (useQueries)
             glQueryCounter(timestampQueries_[slot][3], GL_TIMESTAMP);
+
+        if (synchronizedTiming) {
+            glFinish();
+            const double renderMs = elapsedMs(synchronizedFrameBegin, Clock::now());
+            AccumulateTiming(0.0, renderMs, renderMs);
+        }
 
         glfwSwapBuffers(window_);
         ++currentFrame_;
-        if (timestampsSupported_ && timestampFrameCount_ < kTimestampSlotCount)
+        if (useQueries && timestampFrameCount_ < kTimestampSlotCount)
             ++timestampFrameCount_;
         return;
     }
@@ -358,25 +428,36 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_);
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_);
 
+    const auto synchronizedComputeBegin = Clock::now();
+
     GLuint groups = (config_.particleCount + kComputeWorkGroupSize - 1)
                     / kComputeWorkGroupSize;
     glDispatchCompute(groups, 1, 1);
 
     // -- Timestamp: compute end --
-    if (timestampsSupported_)
+    if (useQueries)
         glQueryCounter(timestampQueries_[slot][1], GL_TIMESTAMP);
+
+    double synchronizedComputeMs = 0.0;
+    if (synchronizedTiming) {
+        glMemoryBarrier(GL_ALL_BARRIER_BITS);
+        glFinish();
+        synchronizedComputeMs = elapsedMs(synchronizedComputeBegin, Clock::now());
+    }
 
     if (config_.headless) {
         // Headless: barrier for compute coherency, mirror timestamps
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-        if (timestampsSupported_) {
+        if (useQueries) {
             glQueryCounter(timestampQueries_[slot][2], GL_TIMESTAMP);
             glQueryCounter(timestampQueries_[slot][3], GL_TIMESTAMP);
         }
         // Periodic glFinish to force AMD driver to process commands on
         // hidden windows (glFlush alone is insufficient on some drivers).
         // Every 16 frames: full sync; otherwise: fence + flush.
-        if (currentFrame_ % 16 == 0) {
+        if (synchronizedTiming) {
+            AccumulateTiming(synchronizedComputeMs, 0.0, synchronizedComputeMs);
+        } else if (currentFrame_ % 16 == 0) {
             glFinish();
         } else {
             if (frameFences_[slot])
@@ -393,7 +474,7 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
         glClearColor(0.04f, 0.08f, 0.14f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (timestampsSupported_)
+        if (useQueries)
             glQueryCounter(timestampQueries_[slot][2], GL_TIMESTAMP);
 
         fractalElapsed_ += deltaTime;
@@ -410,13 +491,20 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
         glBindVertexArray(render3dVao_);
         glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(config_.particleCount));
 
-        if (timestampsSupported_)
+        if (useQueries)
             glQueryCounter(timestampQueries_[slot][3], GL_TIMESTAMP);
+
+        if (synchronizedTiming) {
+            glFinish();
+            const double totalMs = elapsedMs(synchronizedFrameBegin, Clock::now());
+            const double renderMs = (std::max)(0.0, totalMs - synchronizedComputeMs);
+            AccumulateTiming(synchronizedComputeMs, renderMs, totalMs);
+        }
 
         glDisable(GL_DEPTH_TEST);
         glfwSwapBuffers(window_);
         ++currentFrame_;
-        if (timestampsSupported_ && timestampFrameCount_ < kTimestampSlotCount)
+        if (useQueries && timestampFrameCount_ < kTimestampSlotCount)
             ++timestampFrameCount_;
         return;
     } else {
@@ -428,7 +516,7 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // -- Timestamp: render begin --
-        if (timestampsSupported_)
+        if (useQueries)
             glQueryCounter(timestampQueries_[slot][2], GL_TIMESTAMP);
 
         glUseProgram(renderProgram_);
@@ -436,14 +524,21 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(config_.particleCount));
 
         // -- Timestamp: render end --
-        if (timestampsSupported_)
+        if (useQueries)
             glQueryCounter(timestampQueries_[slot][3], GL_TIMESTAMP);
+
+        if (synchronizedTiming) {
+            glFinish();
+            const double totalMs = elapsedMs(synchronizedFrameBegin, Clock::now());
+            const double renderMs = (std::max)(0.0, totalMs - synchronizedComputeMs);
+            AccumulateTiming(synchronizedComputeMs, renderMs, totalMs);
+        }
 
         glfwSwapBuffers(window_);
     }
 
     currentFrame_++;
-    if (timestampsSupported_ && timestampFrameCount_ < kTimestampSlotCount)
+    if (useQueries && timestampFrameCount_ < kTimestampSlotCount)
         ++timestampFrameCount_;
 }
 
@@ -471,12 +566,35 @@ void OpenGLBackend::CollectTimestampResults() {
         glGetQueryObjectui64v(timestampQueries_[readSlot][i],
                               GL_QUERY_RESULT, &ts[i]);
 
+    if (!(ts[0] <= ts[1] && ts[1] <= ts[2] && ts[2] <= ts[3])) {
+        EnableSynchronizedTimingFallback("non-monotonic query results");
+        return;
+    }
+
     double computeMs = static_cast<double>(ts[1] - ts[0]) / 1e6;
     double renderMs  = static_cast<double>(ts[3] - ts[2]) / 1e6;
     double totalMs   = static_cast<double>(ts[3] - ts[0]) / 1e6;
 
-    if (computeMs >= 0.0 && renderMs >= 0.0 && totalMs >= 0.0)
-        AccumulateTiming(computeMs, renderMs, totalMs);
+    // A stream result above 10 TB/s is outside a deliberately generous
+    // plausibility envelope for this workload and indicates a broken timer,
+    // not an exceptionally fast GPU.  Switch subsequent frames to the slower
+    // but correct synchronized timing path and discard this sample.
+    if (config_.workload == Workload::Stream && computeMs <= 0.0) {
+        EnableSynchronizedTimingFallback("zero-duration stream timestamp result");
+        return;
+    }
+    if (config_.workload == Workload::Stream) {
+        constexpr double kBytesPerParticle = 40.0;
+        const double apparentGbPerSec =
+            (static_cast<double>(config_.particleCount) * kBytesPerParticle) /
+            (computeMs / 1000.0) / 1.0e9;
+        if (apparentGbPerSec > 10000.0) {
+            EnableSynchronizedTimingFallback("implausible stream timestamp result");
+            return;
+        }
+    }
+
+    AccumulateTiming(computeMs, renderMs, totalMs);
 }
 
 // -----------------------------------------------------------------------
@@ -491,7 +609,7 @@ void OpenGLBackend::CleanupBackend() {
             frameFences_[s] = nullptr;
         }
     }
-    if (timestampsSupported_) {
+    if (timestampQueriesAllocated_) {
         for (int s = 0; s < kTimestampSlotCount; ++s)
             glDeleteQueries(kTimestampsPerFrame, timestampQueries_[s]);
     }
@@ -633,13 +751,13 @@ void OpenGLBackend::RecordFluidFrame(float deltaTime) {
     glDispatchCompute(groups, groups, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-    if (timestampsSupported_)
+    if (UseTimestampQueries())
         glQueryCounter(timestampQueries_[slot][1], GL_TIMESTAMP);
 
     glClearColor(0.04f, 0.08f, 0.14f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    if (timestampsSupported_)
+    if (UseTimestampQueries())
         glQueryCounter(timestampQueries_[slot][2], GL_TIMESTAMP);
 
     FluidRenderParams rp{ N, fluid_.simTime, 0.88f, 1u };
@@ -652,12 +770,12 @@ void OpenGLBackend::RecordFluidFrame(float deltaTime) {
     glBindVertexArray(fluid_.emptyVao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    if (timestampsSupported_)
+    if (UseTimestampQueries())
         glQueryCounter(timestampQueries_[slot][3], GL_TIMESTAMP);
 
     glfwSwapBuffers(window_);
     ++currentFrame_;
-    if (timestampsSupported_ && timestampFrameCount_ < kTimestampSlotCount)
+    if (UseTimestampQueries() && timestampFrameCount_ < kTimestampSlotCount)
         ++timestampFrameCount_;
 }
 

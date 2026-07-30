@@ -9,6 +9,20 @@
 #include <map>
 #include <sstream>
 
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
+#if defined(__APPLE__)
+#include <TargetConditionals.h>
+#include <sys/sysctl.h>
+#elif defined(__linux__)
+#include <sys/utsname.h>
+#endif
+
 namespace gpu_bench {
 
 // ---------------------------------------------------------------------------
@@ -120,6 +134,118 @@ std::string GenerateTimestamp() {
     return oss.str();
 }
 
+std::string CurrentAppVersion() {
+#ifdef GPU_BENCH_APP_VERSION
+    return GPU_BENCH_APP_VERSION;
+#else
+    return "Unknown";
+#endif
+}
+
+std::string CurrentOsVersion() {
+#ifdef _WIN32
+    using RtlGetVersionFn = LONG(WINAPI*)(PRTL_OSVERSIONINFOW);
+    auto ntdll = GetModuleHandleW(L"ntdll.dll");
+    if (ntdll) {
+        auto fn = reinterpret_cast<RtlGetVersionFn>(
+            GetProcAddress(ntdll, "RtlGetVersion"));
+        if (fn) {
+            RTL_OSVERSIONINFOW vi{};
+            vi.dwOSVersionInfoSize = sizeof(vi);
+            if (fn(&vi) == 0) {
+                const auto maj = vi.dwMajorVersion;
+                const auto min = vi.dwMinorVersion;
+                const auto bld = vi.dwBuildNumber;
+                std::string friendly;
+                if (maj == 10 && bld >= 22000) friendly = "Windows 11";
+                else if (maj == 10) friendly = "Windows 10";
+                else if (maj == 6 && min == 3) friendly = "Windows 8.1";
+                else if (maj == 6 && min == 2) friendly = "Windows 8";
+                else if (maj == 6 && min == 1) friendly = "Windows 7";
+                else if (maj == 6 && min == 0) friendly = "Windows Vista";
+                else friendly = "Windows";
+                return friendly + " (NT " + std::to_string(maj) + "." +
+                       std::to_string(min) + "." + std::to_string(bld) + ")";
+            }
+        }
+    }
+#elif defined(__APPLE__)
+    char buf[64]{};
+    size_t len = sizeof(buf);
+    if (sysctlbyname("kern.osproductversion", buf, &len, nullptr, 0) == 0) {
+#if TARGET_OS_IPHONE
+        return "iOS " + std::string(buf);
+#else
+        return "macOS " + std::string(buf);
+#endif
+    }
+#elif defined(__linux__)
+    std::ifstream osrel("/etc/os-release");
+    std::string line;
+    while (std::getline(osrel, line)) {
+        if (line.rfind("PRETTY_NAME=", 0) == 0) {
+            std::string val = line.substr(12);
+            if (!val.empty() && val.front() == '"') val.erase(0, 1);
+            if (!val.empty() && val.back() == '"') val.pop_back();
+            struct utsname un{};
+            if (uname(&un) == 0) val += " (kernel " + std::string(un.release) + ")";
+            return val;
+        }
+    }
+    struct utsname un{};
+    if (uname(&un) == 0) return std::string(un.sysname) + " " + un.release;
+#endif
+    return "Unknown";
+}
+
+std::string CurrentPlatform() {
+#if defined(__ANDROID__)
+    return "Android";
+#elif defined(__APPLE__)
+#if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
+    return "iOS";
+#else
+    return "macOS";
+#endif
+#elif defined(_WIN32)
+    return "Windows";
+#elif defined(__linux__)
+    return "Linux";
+#else
+    return "Unknown";
+#endif
+}
+
+std::string CurrentProcessArchitecture() {
+#if defined(_M_ARM64) || defined(__aarch64__) || defined(__arm64__)
+    return "ARM64";
+#elif defined(_M_X64) || defined(__x86_64__)
+    return "x64";
+#elif defined(_M_IX86) || defined(__i386__)
+    return "x86";
+#elif defined(_M_ARM) || defined(__arm__)
+    return "ARM32";
+#else
+    return "Unknown";
+#endif
+}
+
+std::string CurrentOsArchitecture() {
+#ifdef _WIN32
+    SYSTEM_INFO info{};
+    GetNativeSystemInfo(&info);
+    switch (info.wProcessorArchitecture) {
+    case PROCESSOR_ARCHITECTURE_ARM64: return "ARM64";
+    case PROCESSOR_ARCHITECTURE_AMD64: return "x64";
+    case PROCESSOR_ARCHITECTURE_INTEL: return "x86";
+    case PROCESSOR_ARCHITECTURE_ARM: return "ARM32";
+    default: return "Unknown";
+    }
+#else
+    return CurrentProcessArchitecture();
+#endif
+}
+
 // ---------------------------------------------------------------------------
 // Serialize
 // ---------------------------------------------------------------------------
@@ -146,6 +272,7 @@ static std::string ResultToJson(const BenchmarkResult& r, int indent = 4) {
     str("id",          r.id);
     str("timestamp",   r.timestamp);
     u32("resultSchemaVersion", r.resultSchemaVersion);
+    str("appVersion",      r.appVersion);
     str("workload",       r.workload);
     str("workloadVersion", r.workloadVersion);
     str("workloadConfig",  r.workloadConfig);
@@ -154,6 +281,9 @@ static std::string ResultToJson(const BenchmarkResult& r, int indent = 4) {
     str("driverVersion",  r.driverVersion);
     str("cpuName",        r.cpuName);
     str("osVersion",      r.osVersion);
+    str("platform",       r.platform);
+    str("osArchitecture", r.osArchitecture);
+    str("processArchitecture", r.processArchitecture);
     str("memory",         r.memory);
     u32("vramMB",         r.vramMB);
     u32("resWidth",    r.resWidth);
@@ -241,6 +371,8 @@ static BenchmarkResult JsonToResult(const std::string& json) {
     r.timestamp     = findStr("timestamp");
     r.resultSchemaVersion = static_cast<std::uint32_t>(findNum("resultSchemaVersion"));
     if (r.resultSchemaVersion == 0) r.resultSchemaVersion = 1;
+    r.appVersion     = findStr("appVersion");
+    if (r.appVersion.empty()) r.appVersion = "Unknown (legacy)";
     r.workload       = findStr("workload");
     if (r.workload.empty()) r.workload = "stream";   // default for old results
     r.workloadVersion = findStr("workloadVersion");
@@ -251,6 +383,12 @@ static BenchmarkResult JsonToResult(const std::string& json) {
     r.cpuName        = findStr("cpuName");
     r.vramMB         = static_cast<std::uint32_t>(findNum("vramMB"));
     r.osVersion      = findStr("osVersion");
+    r.platform       = findStr("platform");
+    r.osArchitecture = findStr("osArchitecture");
+    r.processArchitecture = findStr("processArchitecture");
+    if (r.platform.empty()) r.platform = "Unknown (legacy)";
+    if (r.osArchitecture.empty()) r.osArchitecture = "Unknown";
+    if (r.processArchitecture.empty()) r.processArchitecture = "Unknown";
     r.memory         = findStr("memory");
     r.resWidth      = static_cast<std::uint32_t>(findNum("resWidth"));
     r.resHeight     = static_cast<std::uint32_t>(findNum("resHeight"));
@@ -377,21 +515,28 @@ void PrintResultsTable(const std::vector<BenchmarkResult>& results) {
               << std::setw(4)  << "#"
               << std::setw(8)  << "API"
               << std::setw(28) << "Device"
+              << std::setw(22) << "System"
               << std::setw(10) << "Difficulty"
               << std::setw(10) << "Avg FPS"
               << std::setw(12) << "GPU Avg(ms)"
               << "\n";
-    std::cout << std::string(72, '-') << "\n";
+    std::cout << std::string(94, '-') << "\n";
 
     for (std::size_t i = 0; i < results.size(); ++i) {
         const auto& r = results[i];
         std::string dev = r.deviceName;
         if (dev.size() > 26) dev = dev.substr(0, 23) + "...";
+        std::string system = r.platform + " " + r.osArchitecture;
+        if (r.processArchitecture != "Unknown" &&
+            r.processArchitecture != r.osArchitecture)
+            system += " (" + r.processArchitecture + ")";
+        if (system.size() > 20) system = system.substr(0, 17) + "...";
 
         std::cout << std::left
                   << std::setw(4)  << (i + 1)
                   << std::setw(8)  << r.graphicsApi
                   << std::setw(28) << dev
+                  << std::setw(22) << system
                   << std::setw(10) << r.difficulty
                   << std::setw(10) << static_cast<int>(r.avgFps);
 
@@ -605,9 +750,13 @@ void PrintDetailedComparison(const BenchmarkResult& a, const BenchmarkResult& b)
     rowStr("Driver:",       a.driverVersion, b.driverVersion);
     rowStr("CPU:",          a.cpuName,     b.cpuName);
     rowStr("OS:",           a.osVersion,   b.osVersion);
+    rowStr("Platform:",     a.platform, b.platform);
+    rowStr("OS architecture:", a.osArchitecture, b.osArchitecture);
+    rowStr("Process architecture:", a.processArchitecture, b.processArchitecture);
     rowStr("Memory:",       a.memory,      b.memory);
     rowStr("Workload:",     a.workload,    b.workload);
     rowStr("Version:",      a.workloadVersion, b.workloadVersion);
+    rowStr("App version:",  a.appVersion, b.appVersion);
     rowStr("Config:",       a.workloadConfig, b.workloadConfig);
 
     std::string resA = std::to_string(a.resWidth) + "x" + std::to_string(a.resHeight);
@@ -664,8 +813,8 @@ bool ExportResultsCsv(const std::string& path,
     std::ofstream out(path);
     if (!out.is_open()) return false;
 
-    out << "id,timestamp,resultSchemaVersion,workload,workloadVersion,workloadConfig,"
-           "graphicsApi,deviceName,driverVersion,cpuName,osVersion,memory,vramMB,"
+    out << "id,timestamp,resultSchemaVersion,appVersion,workload,workloadVersion,workloadConfig,"
+           "graphicsApi,deviceName,driverVersion,cpuName,osVersion,platform,osArchitecture,processArchitecture,memory,vramMB,"
            "resolution,particleCount,difficulty,vsync,isSoftware,headless,framesInFlight,"
            "durationSec,warmupSec,measuredFrames,timingSamples,"
            "avgComputeMs,minComputeMs,maxComputeMs,"
@@ -682,6 +831,7 @@ bool ExportResultsCsv(const std::string& path,
             << q(r.id) << ","
             << q(r.timestamp) << ","
             << r.resultSchemaVersion << ","
+            << q(r.appVersion) << ","
             << q(r.workload) << ","
             << q(r.workloadVersion) << ","
             << q(r.workloadConfig) << ","
@@ -690,6 +840,9 @@ bool ExportResultsCsv(const std::string& path,
             << q(r.driverVersion) << ","
             << q(r.cpuName) << ","
             << q(r.osVersion) << ","
+            << q(r.platform) << ","
+            << q(r.osArchitecture) << ","
+            << q(r.processArchitecture) << ","
             << q(r.memory) << ","
             << r.vramMB << ","
             << r.resWidth << "x" << r.resHeight << ","

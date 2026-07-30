@@ -211,7 +211,7 @@ fun GpuScreen() {
             item {
                 Text("Workloads", style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = "Versions are Android placeholders — must not mix with Windows score groups.",
+                    text = "Engine writes *_android_preview (3s embed, not desktop 15s) — do not mix with Windows groups.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
