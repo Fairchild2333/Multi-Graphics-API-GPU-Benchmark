@@ -1,9 +1,12 @@
 # 3.22: Android SDK CMake floor. Desktop/iOS builders typically have newer.
 cmake_minimum_required(VERSION 3.22)
 
-# macOS product floor: 12.0 (Monterey). Metal CLI also works from 10.15 APIs, but
-# SwiftUI GUI and packaging target Monterey+ so scores/docs stay one floor.
-if(APPLE)
+# Keep the Apple platform floors distinct: the desktop product targets
+# Monterey, while the mobile host uses std::filesystem and SwiftUI APIs that
+# require the project's iOS 16 floor.
+if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "16.0" CACHE STRING "Minimum iOS version")
+elseif(APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS version")
 endif()
 
@@ -37,7 +40,14 @@ if(ANDROID)
 endif()
 
 # ---- Options ----
-option(ENABLE_VULKAN "Build with Vulkan backend" ON)
+# Vulkan on macOS requires a separately distributed loader/ICD (typically
+# MoltenVK). Keep the Monterey-compatible default self-contained and let
+# developers opt in with a loader built for their deployment target.
+if(APPLE)
+    option(ENABLE_VULKAN "Build with Vulkan backend" OFF)
+else()
+    option(ENABLE_VULKAN "Build with Vulkan backend" ON)
+endif()
 if(WIN32)
     option(ENABLE_DX12  "Build with DirectX 12 backend (Windows only)" ON)
     option(ENABLE_DX11  "Build with DirectX 11 backend (Windows only)" ON)
@@ -54,18 +64,57 @@ option(ENABLE_OPENGL "Build with OpenGL 4.3 backend" ON)
 
 # ---- GLFW (required by desktop backends; skipped on iOS / Android) ----
 if(NOT GPU_BENCH_IOS AND NOT GPU_BENCH_ANDROID)
-    find_package(glfw3 REQUIRED)
+    if(APPLE)
+        option(GPU_BENCH_BUILD_GLFW_FROM_SOURCE
+               "Build GLFW with the configured macOS deployment target" ON)
+    else()
+        option(GPU_BENCH_BUILD_GLFW_FROM_SOURCE
+               "Build GLFW from source instead of using a package" OFF)
+    endif()
+
+    if(GPU_BENCH_BUILD_GLFW_FROM_SOURCE)
+        # GLFW's Cocoa implementation contains Objective-C sources. Enable the
+        # Apple languages before adding its target so CMake generates the
+        # correct compile and archive rules.
+        enable_language(OBJC)
+        enable_language(OBJCXX)
+        include(FetchContent)
+        set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+        set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+        set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+        set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+        FetchContent_Declare(
+            glfw
+            URL https://github.com/glfw/glfw/archive/refs/tags/3.4.tar.gz
+            URL_HASH
+                SHA256=c038d34200234d071fae9345bc455e4a8f2f544ab60150765d7704e08f3dac01
+            DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+        )
+        FetchContent_MakeAvailable(glfw)
+        set(GPU_BENCH_GLFW_LICENSE_FILE "${glfw_SOURCE_DIR}/LICENSE.md")
+        message(STATUS
+            "GLFW: source build (inherits deployment target "
+            "${CMAKE_OSX_DEPLOYMENT_TARGET})")
+    else()
+        find_package(glfw3 REQUIRED)
+    endif()
 endif()
 
 # ---- Common source files ----
 set(COMMON_SOURCES
-    src/main.cpp
     src/app_base.cpp
     src/benchmark_results.cpp
     src/cpu_benchmark.cpp
     src/path_service.cpp
     src/cinematic_liquid_v2_common.cpp
 )
+if(NOT GPU_BENCH_IOS)
+    # The iOS app embeds a narrow CAMetalLayer host instead of the desktop CLI.
+    # Keeping main.cpp in the mobile archive pulled in process spawning
+    # (std::system), terminal menus and desktop-only orchestration that are both
+    # unavailable in the iOS SDK and inappropriate inside an app sandbox.
+    list(PREPEND COMMON_SOURCES src/main.cpp)
+endif()
 
 set(BACKEND_SOURCES "")
 set(BACKEND_LIBS "")
@@ -365,7 +414,7 @@ if(ENABLE_DX12 AND WIN32)
 endif()
 
 # ---- Copy Metal shader source files next to executable (macOS) ----
-if(ENABLE_METAL AND APPLE AND METAL_FRAMEWORK)
+if(ENABLE_METAL AND APPLE AND METAL_FRAMEWORK AND TARGET gpu_benchmark)
     add_custom_command(TARGET gpu_benchmark POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/particle.metal

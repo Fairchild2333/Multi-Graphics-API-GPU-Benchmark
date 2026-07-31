@@ -23,7 +23,12 @@ set(GPU_BENCH_REPORT_WORKER_DIR "" CACHE PATH
     "Optional frozen report-worker directory containing report_worker.exe")
 set(GPU_BENCH_PACKAGE_LICENSE_FILE "${CMAKE_SOURCE_DIR}/LICENSE" CACHE FILEPATH
     "Project distribution license; required before generating a public MSI")
-set(GPU_BENCH_CPACK_GENERATORS "ZIP;WIX" CACHE STRING
+if(WIN32)
+    set(_gpu_bench_default_cpack_generators "ZIP;WIX")
+else()
+    set(_gpu_bench_default_cpack_generators "ZIP")
+endif()
+set(GPU_BENCH_CPACK_GENERATORS "${_gpu_bench_default_cpack_generators}" CACHE STRING
     "Semicolon-separated CPack generators; ZIP+WIX is the Windows release pair")
 
 option(GPU_BENCH_BUNDLE_MSVC_RUNTIME
@@ -328,7 +333,13 @@ install(FILES "${CMAKE_SOURCE_DIR}/third_party/glad/LICENSE"
     RENAME GLAD-LICENSE.txt
     COMPONENT Runtime
 )
-if(EXISTS "${glfw3_DIR}/copyright")
+if(GPU_BENCH_GLFW_LICENSE_FILE AND EXISTS "${GPU_BENCH_GLFW_LICENSE_FILE}")
+    install(FILES "${GPU_BENCH_GLFW_LICENSE_FILE}"
+        DESTINATION licenses
+        RENAME GLFW-LICENSE.txt
+        COMPONENT Runtime
+    )
+elseif(EXISTS "${glfw3_DIR}/copyright")
     install(FILES "${glfw3_DIR}/copyright"
         DESTINATION licenses
         RENAME GLFW-LICENSE.txt

@@ -1,0 +1,39 @@
+Mangekyo @VERSION@ for macOS
+================================
+
+Package: @ARCH_LABEL@ (@ARCH@)
+Minimum system: macOS 12 Monterey
+Backend: Metal
+
+Installation
+------------
+
+Drag Mangekyo.app onto the Applications alias in this disk image. Eject the
+disk image, then open Mangekyo from Applications.
+
+This package contains the native SwiftUI app, the matching gpu_benchmark
+worker, and the Metal shaders needed by that worker. Benchmark results,
+captures, reports, and logs are stored under:
+
+  ~/Library/Application Support/GpuComputeBenchmark/
+
+Architecture and validation
+---------------------------
+
+@VALIDATION@
+
+The package is a single-architecture build. Use the Apple Silicon package on
+M-series Macs and the Intel package on Intel Macs.
+
+Release-signing note
+--------------------
+
+The default local build uses an ad-hoc signature and is not notarized. A public
+Internet release should instead set MACOS_SIGN_IDENTITY to a Developer ID
+Application certificate, notarize the result, and staple the ticket.
+
+License
+-------
+
+See LICENSE.txt and THIRD_PARTY_NOTICES.md in this disk image. Additional
+third-party license files are included inside Mangekyo.app.
