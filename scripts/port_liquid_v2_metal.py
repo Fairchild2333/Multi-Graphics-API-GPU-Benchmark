@@ -66,7 +66,7 @@ struct LiquidV2Params {
 struct SurfaceParams {
     uint4 volumeSizeAndCount;
     float4 volumeMinVoxel;
-    float4 kernel;
+    float4 kernelParams;
     uint4 contract;
 };
 
@@ -80,6 +80,19 @@ constant float3x3 kMat3Zero = float3x3(float3(0.0), float3(0.0), float3(0.0));
 
 inline void atomicAddInt(device atomic_int* addr, int delta) {
     atomic_fetch_add_explicit(addr, delta, memory_order_relaxed);
+}
+
+inline void atomicAddBodyImpulse(device BodyImpulse* impulses,
+                                 uint bodyIndex,
+                                 uint component,
+                                 int delta) {
+    device atomic_int* words =
+        (device atomic_int*)(impulses + bodyIndex);
+    atomic_fetch_add_explicit(words + component, delta, memory_order_relaxed);
+}
+
+inline float3x3 OuterProduct(float3 column, float3 row) {
+    return float3x3(column * row.x, column * row.y, column * row.z);
 }
 
 // Shared with Vulkan GLSL contract (2^29 - 1).
@@ -97,6 +110,8 @@ CTX = [
     ("densityAtomic", "device atomic_int* densityAtomic"),
     ("densityVolume", "texture3d<float, access::read_write> densityVolume"),
     ("whitewaterVolume", "texture3d<float, access::read_write> whitewaterVolume"),
+    ("initialStates", "threadgroup BodyState* initialStates"),
+    ("predictedStates", "threadgroup BodyState* predictedStates"),
 ]
 
 
@@ -147,6 +162,8 @@ def convert_body(src: str) -> str:
         (r"\bmat3\b", "float3x3"),
         (r"\binversesqrt\b", "rsqrt"),
         (r"\bgl_GlobalInvocationID\b", "gid"),
+        (r"\bgl_WorkGroupID\b", "tgid"),
+        (r"\bgl_LocalInvocationID\b", "tid"),
         (r"particleBuffer\.particles", "particles"),
         (r"gridBuffer\.cells", "grid"),
         (r"bodyStateBuffer\.bodies", "bodies"),
@@ -164,28 +181,37 @@ def convert_body(src: str) -> str:
 
     src = re.sub(r"\bpc\.", "params.", src)
     src = re.sub(r"\bsp\.", "surface.", src)
+    src = re.sub(r"\bsurface\.kernel\b", "surface.kernelParams", src)
+    src = re.sub(r"\bouterProduct\s*\(", "OuterProduct(", src)
+    src = re.sub(
+        r"\bbarrier\s*\(\s*\)",
+        "threadgroup_barrier(mem_flags::mem_threadgroup)",
+        src,
+    )
 
-    # GLSL inout -> Metal thread reference
-    src = re.sub(r"\binout\s+", "thread ", src)
+    # GLSL inout/out -> Metal thread reference.
+    #
+    # `thread T name` alone is a by-value copy in the thread address space, so
+    # every write inside the callee is silently discarded. The reference needs
+    # the ampersand: `thread T& name`. Without it the MLS-MPM boundary helpers
+    # (domain clamp, pool walls, dam gate, rigid-body pool constraint) became
+    # no-ops and the water fell straight out of the simulation domain.
+    src = re.sub(r"\b(?:inout|out)\s+", "thread ", src)
+    src = re.sub(
+        r"\bthread\s+(BodyState|GridCell|Particle|float[234]?|float[234]x[234]|int[234]?|uint[234]?|bool)\s*&?\s*(\w+)",
+        r"thread \1& \2",
+        src,
+    )
 
+    src = rewrite_atomic_adds(src)
     src = re.sub(
-        r"atomicAdd\(\s*&?grid\[([^\]]+)\]\.(vx|vy|vz|mass)\s*,\s*([^)]+)\)",
-        r"atomicAddInt((device atomic_int*)&grid[\1].\2, \3)",
+        r"densityAtomic\[([^\]]+)\]\s*=\s*0u?\s*;",
+        r"atomic_store_explicit(&densityAtomic[\1], 0, memory_order_relaxed);",
         src,
     )
     src = re.sub(
-        r"atomicAdd\(\s*&?impulses\[([^\]]+)\]\.(linImpulse|angImpulse)\.([xyzw])\s*,\s*([^)]+)\)",
-        r"atomicAddInt((device atomic_int*)&impulses[\1].\2.\3, \4)",
-        src,
-    )
-    src = re.sub(
-        r"atomicAdd\(\s*&?densityAtomic\[([^\]]+)\]\s*,\s*([^)]+)\)",
-        r"atomicAddInt(&densityAtomic[\1], (int)(\2))",
-        src,
-    )
-    src = re.sub(
-        r"atomicAdd\(\s*([^,]+),\s*([^)]+)\)",
-        r"atomicAddInt((device atomic_int*)&(\1), (int)(\2))",
+        r"float\(\s*densityAtomic\[([^\]]+)\]\s*\)",
+        r"float(atomic_load_explicit(&densityAtomic[\1], memory_order_relaxed))",
         src,
     )
 
@@ -223,6 +249,16 @@ def convert_body(src: str) -> str:
         r"all(\1 > \2)",
         src,
     )
+    src = re.sub(
+        r"\bany\(greaterThan\(([^,]+),\s*([^)]+)\)\)",
+        r"any(\1 > \2)",
+        src,
+    )
+    src = re.sub(
+        r"\bany\(equal\(([^,]+),\s*([^)]+)\)\)",
+        r"any(\1 == \2)",
+        src,
+    )
 
     src = re.sub(r"(?m)^const\s+", "constant ", src)
     # Drop per-file duplicate of the shared limit (declared in HEADER).
@@ -244,7 +280,101 @@ def convert_body(src: str) -> str:
     src = re.sub(r"\bfloat3\(\s*0(?:\.0)?\s*\)", "float3(0.0, 0.0, 0.0)", src)
     src = re.sub(r"\bfloat3\(\s*0\.5\s*\)", "float3(0.5, 0.5, 0.5)", src)
     src = re.sub(r"\bfloat3\(\s*1(?:\.0)?\s*\)", "float3(1.0, 1.0, 1.0)", src)
+    src = re.sub(
+        r"const\s+int3\s+directions\[6\]\s*=\s*int3\[6\]\((.*?)\);",
+        r"const int3 directions[6] = {\1};",
+        src,
+        flags=re.S,
+    )
     return src
+
+
+def split_top_level_args(text: str) -> list[str]:
+    args: list[str] = []
+    start = 0
+    paren = bracket = brace = 0
+    for index, char in enumerate(text):
+        if char == "(":
+            paren += 1
+        elif char == ")":
+            paren -= 1
+        elif char == "[":
+            bracket += 1
+        elif char == "]":
+            bracket -= 1
+        elif char == "{":
+            brace += 1
+        elif char == "}":
+            brace -= 1
+        elif char == "," and paren == bracket == brace == 0:
+            args.append(text[start:index].strip())
+            start = index + 1
+    args.append(text[start:].strip())
+    return args
+
+
+def rewrite_atomic_adds(text: str) -> str:
+    token = "atomicAdd("
+    result: list[str] = []
+    cursor = 0
+    while cursor < len(text):
+        start = text.find(token, cursor)
+        if start < 0:
+            result.append(text[cursor:])
+            break
+        result.append(text[cursor:start])
+        args_start = start + len(token)
+        depth = 1
+        end = args_start
+        while end < len(text) and depth:
+            if text[end] == "(":
+                depth += 1
+            elif text[end] == ")":
+                depth -= 1
+            end += 1
+        if depth:
+            result.append(text[start:])
+            break
+        args = split_top_level_args(text[args_start : end - 1])
+        if len(args) != 2:
+            result.append(text[start:end])
+            cursor = end
+            continue
+        target, delta = args
+        target = target.lstrip("&").strip()
+        grid_match = re.fullmatch(
+            r"grid\[(.+)\]\.(vx|vy|vz|mass)", target, flags=re.S
+        )
+        impulse_match = re.fullmatch(
+            r"impulses\[(.+)\]\.(linImpulse|angImpulse)\.([xyzw])",
+            target,
+            flags=re.S,
+        )
+        density_match = re.fullmatch(r"densityAtomic\[(.+)\]", target, flags=re.S)
+        if grid_match:
+            replacement = (
+                f"atomicAddInt((device atomic_int*)&grid[{grid_match.group(1)}]."
+                f"{grid_match.group(2)}, {delta})"
+            )
+        elif impulse_match:
+            vector_offset = 0 if impulse_match.group(2) == "linImpulse" else 4
+            lane = "xyzw".index(impulse_match.group(3))
+            replacement = (
+                f"atomicAddBodyImpulse(impulses, {impulse_match.group(1)}, "
+                f"{vector_offset + lane}u, {delta})"
+            )
+        elif density_match:
+            replacement = (
+                f"atomicAddInt(&densityAtomic[{density_match.group(1)}], "
+                f"int({delta}))"
+            )
+        else:
+            replacement = (
+                f"atomicAddInt((device atomic_int*)&({target}), int({delta}))"
+            )
+        result.append(replacement)
+        cursor = end
+    return "".join(result)
 
 
 FUNC_RE = re.compile(
@@ -283,10 +413,46 @@ def used_ctx(text: str) -> list[str]:
     return used
 
 
+def replace_calls_balanced(text: str, callee: str, make_args) -> str:
+    """Replace calls to callee while preserving nested argument expressions."""
+    token = callee + "("
+    result: list[str] = []
+    cursor = 0
+    while cursor < len(text):
+        start = text.find(token, cursor)
+        if start < 0:
+            result.append(text[cursor:])
+            break
+        if start > 0 and (text[start - 1].isalnum() or text[start - 1] == "_"):
+            result.append(text[cursor : start + 1])
+            cursor = start + 1
+            continue
+        result.append(text[cursor:start])
+        args_start = start + len(token)
+        depth = 1
+        end = args_start
+        while end < len(text) and depth:
+            if text[end] == "(":
+                depth += 1
+            elif text[end] == ")":
+                depth -= 1
+            end += 1
+        if depth:
+            result.append(text[start:])
+            break
+        inner = text[args_start : end - 1]
+        result.append(f"{callee}({make_args(inner)})")
+        cursor = end
+    return "".join(result)
+
+
 def inject_and_prefix(helpers: str, main_body: str, entry: str) -> tuple[str, str]:
     funcs = split_functions(helpers)
     if not funcs:
         return helpers, main_body
+
+    first_fn = FUNC_RE.search(helpers)
+    preamble = helpers[: first_fn.start()].rstrip() if first_fn else ""
 
     names = {name for _r, name, _a, _b in funcs}
     # Map original name -> prefixed
@@ -352,36 +518,34 @@ def inject_and_prefix(helpers: str, main_body: str, entry: str) -> tuple[str, st
             return ", ".join(ctx_vals + [call_args_inner.strip()])
         return ", ".join(ctx_vals)
 
-    # Rewrite each function signature + its internal calls' argument lists
+    signatures: dict[str, str] = {}
+    for _ret, name, _args, _body in funcs:
+        pname = pmap[name]
+        ctx_names = [n for n, _ in CTX if n in needs[pname]]
+        signatures[pname] = add_ctx_args(meta[pname][1], ctx_names)
+
+    # MSL requires declarations before use; GLSL permits later definitions.
+    prototypes = [
+        f"{meta[pname][0]}{pname}{signatures[pname]};"
+        for pname in (pmap[name] for _ret, name, _args, _body in funcs)
+    ]
+
+    # Rewrite each function signature + its internal calls' argument lists.
     new_helpers = []
     for ret, name, args, _body in funcs:
         pname = pmap[name]
         ctx_names = [n for n, _ in CTX if n in needs[pname]]
-        new_args = add_ctx_args(meta[pname][1], ctx_names)
+        new_args = signatures[pname]
         body = bodies[pname]
 
-        # Rewrite calls inside body to inject ctx values
-        def call_fix(m: re.Match[str], _body_ctx=ctx_names) -> str:
-            callee = m.group(1)
-            inner = m.group(2)
-            if callee not in needs:
-                return m.group(0)
-            cctx = [n for n, _ in CTX if n in needs[callee]]
-            return f"{callee}({add_ctx_call(inner, cctx)})"
-
         body_inner = body[1:-1] if body.startswith("{") and body.endswith("}") else body
-        # Replace calls: Name( ... ) with balanced parens — simple non-nested first pass
         for callee in sorted(needs.keys(), key=len, reverse=True):
             cctx = [n for n, _ in CTX if n in needs[callee]]
 
-            def repl(m: re.Match[str], callee=callee, cctx=cctx) -> str:
-                return f"{callee}({add_ctx_call(m.group(1), cctx)})"
+            def make_args(inner: str, cctx=cctx) -> str:
+                return add_ctx_call(inner, cctx)
 
-            body_inner = re.sub(
-                rf"\b{re.escape(callee)}\s*\(([^;()]*?)\)",
-                repl,
-                body_inner,
-            )
+            body_inner = replace_calls_balanced(body_inner, callee, make_args)
 
         new_helpers.append(f"{meta[pname][0]}{pname}{new_args} {{{body_inner}}}\n")
 
@@ -389,16 +553,17 @@ def inject_and_prefix(helpers: str, main_body: str, entry: str) -> tuple[str, st
     for callee in sorted(needs.keys(), key=len, reverse=True):
         cctx = [n for n, _ in CTX if n in needs[callee]]
 
-        def repl(m: re.Match[str], callee=callee, cctx=cctx) -> str:
-            return f"{callee}({add_ctx_call(m.group(1), cctx)})"
+        def make_args(inner: str, cctx=cctx) -> str:
+            return add_ctx_call(inner, cctx)
 
-        main_body = re.sub(
-            rf"\b{re.escape(callee)}\s*\(([^;()]*?)\)",
-            repl,
-            main_body,
-        )
+        main_body = replace_calls_balanced(main_body, callee, make_args)
 
-    return "\n".join(new_helpers), main_body
+    pieces = []
+    if preamble:
+        pieces.append(preamble)
+    pieces.append("\n".join(prototypes))
+    pieces.append("\n".join(new_helpers))
+    return "\n\n".join(piece for piece in pieces if piece), main_body
 
 
 KERNEL_ARGS = """
@@ -411,12 +576,36 @@ KERNEL_ARGS = """
     device atomic_int* densityAtomic [[buffer(5)]],
     texture3d<float, access::read_write> densityVolume [[texture(0)]],
     texture3d<float, access::read_write> whitewaterVolume [[texture(1)]],
-    uint3 gid [[thread_position_in_grid]]
+    uint3 gid [[thread_position_in_grid]],
+    uint3 tgid [[threadgroup_position_in_grid]],
+    uint3 tid [[thread_position_in_threadgroup]]
 """
 
 
 def wrap_entry(src: str, entry: str) -> str:
     src = convert_body(src)
+    if entry.startswith("surface"):
+        src = re.sub(r"\bparams\.", "surface.", src)
+        src = re.sub(r"\bsurface\.kernel\b", "surface.kernelParams", src)
+
+    # Prefix file-scope constants because all generated kernels share one MSL
+    # translation unit.
+    constant_names = re.findall(
+        r"(?m)^constant\s+(?:float|int|uint|float2|float3|float4)\s+(\w+)\s*=",
+        src,
+    )
+    for name in constant_names:
+        if name == "kFixedContributionLimit":
+            continue
+        src = re.sub(rf"\b{re.escape(name)}\b", f"{entry}_{name}", src)
+
+    # GLSL workgroup storage must be declared inside the MSL kernel and passed
+    # explicitly to helpers.
+    src = re.sub(
+        r"(?m)^shared\s+BodyState\s+(?:initialStates|predictedStates)\[32\];\s*",
+        "",
+        src,
+    )
     m = re.search(r"void\s+main\s*\(\s*\)\s*\{", src)
     if not m:
         raise RuntimeError(f"no main() in entry {entry}")
@@ -447,6 +636,11 @@ def wrap_entry(src: str, entry: str) -> str:
     if helpers_out.strip():
         parts.append(helpers_out + "\n")
     parts.append(f"kernel void {entry}({KERNEL_ARGS})\n{{\n")
+    if entry == "rigidIntegrate":
+        parts.append(
+            "    threadgroup BodyState initialStates[32];\n"
+            "    threadgroup BodyState predictedStates[32];\n"
+        )
     parts.append(main_body)
     parts.append("\n}\n")
     return "".join(parts)

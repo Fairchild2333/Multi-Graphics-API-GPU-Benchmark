@@ -1134,6 +1134,23 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
 #ifdef _WIN32
     SetUnhandledExceptionFilter(CrashHandler);
 #endif
+#ifdef __APPLE__
+    // Programmatic Metal capture is opt-in.  macOS 14+ honours this variable;
+    // bundled Monterey/Ventura builds also carry MetalCaptureEnabled in their
+    // Info.plist.  Set it before probing or creating a Metal device, and only
+    // for commands that can actually request a capture.
+    for (int i = 1; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--capture") == 0 ||
+            std::strcmp(argv[i], "--capture-frame") == 0 ||
+            std::strcmp(argv[i], "--renderdoc") == 0 ||
+            std::strcmp(argv[i], "--complete-suite") == 0 ||
+            std::strcmp(argv[i], "--fill-missing") == 0 ||
+            std::strcmp(argv[i], "--full-analysis") == 0) {
+            setenv("MTL_CAPTURE_ENABLED", "1", 0);
+            break;
+        }
+    }
+#endif
 
     std::string backend = "auto";
     std::int32_t gpuIndex = -1;
@@ -1424,7 +1441,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --headless                           Pure compute mode (no window/rendering/present)\n"
                       << "  --cpu-benchmark [per-core|multi|all] Run native CPU-only benchmark (default: all)\n"
                       << "  --cpu-mode <per-core|multi|all>      CPU mode alias used by the GUI\n"
-                      << "  --renderdoc                         Enable RenderDoc injection/manual F12 capture\n"
+                      << "  --renderdoc                         Enable available GPU capture integration / manual F12 capture\n"
                       << "  --no-renderdoc                      Disable RenderDoc DLL/API initialization\n"
                       << "  --cpu-time <seconds>                 Total measurement time per CPU test (default: 1)\n"
                       << "  --cpu-warmup <seconds>               CPU warm-up time per test (default: 0.15)\n"
@@ -1450,8 +1467,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --complete-suite                     Run the formal v1 score matrix on all GPUs/APIs, including unsupported attempts\n"
                       << "  --fill-missing                       Run only missing formal-suite scores/captures; keep prior failures unsupported\n"
                       << "  --yes                                Confirm a non-interactive --fill-missing run\n"
-                      << "  --capture [seconds]                 Auto-capture via RenderDoc at T seconds (default: 5)\n"
-                      << "  --capture-frame [N]                 Auto-capture via RenderDoc at frame N (default: 5)\n"
+                      << "  --capture [seconds]                 Auto-capture via RenderDoc or Metal at T seconds (default: 5)\n"
+                      << "  --capture-frame [N]                 Auto-capture via RenderDoc or Metal at frame N (default: 5)\n"
                       << "  --full-analysis                     Run all APIs + RenderDoc capture + Python charts (interactive)\n"
                       << "  --compare                           Compare saved results by workload/version score groups\n"
                       << "  --compare <id1> <id2>               Detailed side-by-side comparison of two results\n"
@@ -2095,8 +2112,9 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         std::cout << "\n========== "
                   << (fillMissingSuite ? "Fill Missing" : "Complete Suite")
                   << " v1 ==========\n"
-                  << "Formal contract: 15 s; RenderDoc at 5 s for windowed passes; "
-                     "headless passes do not inject RenderDoc.\n"
+                  << "Formal contract: 15 s; GPU capture at 5 s for windowed passes "
+                     "(RenderDoc where available, native .gputrace on Metal); "
+                     "headless passes do not request capture.\n"
                   << "Matrix: 65K/1M/4M/16M Particle windowed + headless, "
                      "GPU Burn 64 steps, Cinematic Liquid.\n"
                   << "Planned now: " << jobs.size() << " / " << allJobs.size() << "\n";

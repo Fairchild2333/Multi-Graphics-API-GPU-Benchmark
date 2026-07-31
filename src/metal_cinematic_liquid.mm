@@ -17,6 +17,17 @@
 namespace gpu_bench {
 namespace {
 
+void ConfigureFastMath(MTLCompileOptions* options) {
+    if (@available(macOS 15.0, iOS 18.0, *)) {
+        options.mathMode = MTLMathModeFast;
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        options.fastMathEnabled = YES;
+#pragma clang diagnostic pop
+    }
+}
+
 std::string readTextFile(const std::string& path) {
     std::ifstream f(path, std::ios::binary);
     if (!f)
@@ -99,6 +110,10 @@ bool MetalLiquidV2Host::active() const {
     return impl_ && impl_->particles != nil;
 }
 
+std::uint32_t MetalLiquidV2Host::particleCount() const {
+    return impl_ ? impl_->particleCount : 0;
+}
+
 void MetalLiquidV2Host::cleanup() {
     if (!impl_) return;
     impl_->clearGrid = nil;
@@ -141,7 +156,7 @@ void MetalLiquidV2Host::init(void* mtlDevice, const std::string& shaderPath) {
                                      length:source.size()
                                    encoding:NSUTF8StringEncoding];
         MTLCompileOptions* opts = [[MTLCompileOptions alloc] init];
-        opts.mathMode = MTLMathModeFast;
+        ConfigureFastMath(opts);
         NSError* error = nil;
         impl_->library = [device newLibraryWithSource:nsSource
                                               options:opts
@@ -253,12 +268,13 @@ void MetalLiquidV2Host::init(void* mtlDevice, const std::string& shaderPath) {
             throw std::runtime_error("Metal liquid buffer allocation failed");
 
         auto makeVolume = [&](NSUInteger w, NSUInteger h, NSUInteger d) {
-            MTLTextureDescriptor* td = [MTLTextureDescriptor
-                texture3DDescriptorWithPixelFormat:MTLPixelFormatR32Float
-                                             width:w
-                                            height:h
-                                             depth:d
-                                          mipmapped:NO];
+            MTLTextureDescriptor* td = [[MTLTextureDescriptor alloc] init];
+            td.textureType = MTLTextureType3D;
+            td.pixelFormat = MTLPixelFormatR32Float;
+            td.width = w;
+            td.height = h;
+            td.depth = d;
+            td.mipmapLevelCount = 1;
             td.usage = MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
             td.storageMode = MTLStorageModePrivate;
             id<MTLTexture> tex = [device newTextureWithDescriptor:td];
@@ -405,9 +421,8 @@ void MetalLiquidV2Host::encodeFrame(void* mtlCommandQueue,
         dispatch1D(r.surfaceSplat, particleGroups);
         dispatch3D(r.surfaceResolve, surfGroupsX, surfGroupsY, surfGroupsZ, 8);
 
-        [computeCB commit];
         if (outComputeCB)
-            *outComputeCB = (__bridge void*)computeCB;
+            *outComputeCB = (__bridge_retained void*)computeCB;
 
         if (!target)
             return;
@@ -450,9 +465,8 @@ void MetalLiquidV2Host::encodeFrame(void* mtlCommandQueue,
 
         if (drawable)
             [renderCB presentDrawable:drawable];
-        [renderCB commit];
         if (outRenderCB)
-            *outRenderCB = (__bridge void*)renderCB;
+            *outRenderCB = (__bridge_retained void*)renderCB;
     }
 }
 

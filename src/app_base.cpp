@@ -386,6 +386,16 @@ void AppBase::Run() {
 #if !defined(GPU_BENCH_NO_GLFW)
         glfwShowWindow(window_);
 #endif
+    } else if (config_.captureAtSec > 0.0 || config_.captureAtFrame > 0) {
+        // Headless has no swapchain and no render pass, so there is nothing a
+        // frame capture could record. Say so instead of silently dropping the
+        // request: the run used to finish with no capture and no explanation.
+        std::cout << "[Capture] Headless mode has no swapchain or render pass "
+                     "to capture; ignoring the capture request "
+                     "(captureUnavailable).\n";
+        captureUnavailable_ = true;
+        config_.captureAtSec = -1.0;
+        config_.captureAtFrame = 0;
     }
 
     MainLoop();
@@ -916,6 +926,9 @@ void AppBase::PrintSummary() const {
     const char* devLabel   = isSoftware ? "CPU Renderer:" : "GPU:";
     const char* timerLabel = isSoftware ? "Device Timing (ms)" : "GPU Timing (ms)";
     const char* totalLabel = isSoftware ? "Total:      " : "Total GPU:  ";
+    const std::string memoryLabel = !config_.memoryLabelOverride.empty()
+        ? config_.memoryLabelOverride
+        : (config_.hostMemory ? "System RAM (host-visible)" : "Device-local VRAM");
 
     std::cout << "\n"
         "==========================================================\n"
@@ -937,12 +950,7 @@ void AppBase::PrintSummary() const {
         << (CurrentProcessArchitecture() != CurrentOsArchitecture()
             ? " (" + CurrentProcessArchitecture() + " process)" : std::string{})
         << "\n"
-        << std::setw(14) << "System:"     << CurrentPlatform() << ' '
-        << CurrentOsArchitecture()
-        << (CurrentProcessArchitecture() != CurrentOsArchitecture()
-            ? " (" + CurrentProcessArchitecture() + " process)" : std::string{})
-        << "\n"
-        << std::setw(14) << "Memory:"     << (config_.hostMemory ? "System RAM (host-visible)" : "Device-local VRAM") << "\n"
+        << std::setw(14) << "Memory:"     << memoryLabel << "\n"
         << std::setw(14) << "Mode:"       << (config_.headless ? "Headless (compute only)" : "Windowed") << "\n"
         << std::setw(14) << "Resolution:" << kWindowWidth << "x" << kWindowHeight << "\n";
     if (isGpuBurnWorkload(config_.workload))
@@ -951,6 +959,24 @@ void AppBase::PrintSummary() const {
     else
         std::cout << std::setw(14) << "Particles:" << config_.particleCount
                   << " (" << config_.difficultyLabel << ")\n";
+
+    // The GB/s figure is derived from an assumed byte count, and small buffers
+    // are cache-resident, so both facts belong next to the run that produced
+    // the number rather than only in the docs.
+    if (config_.workload == Workload::Stream) {
+        // Particle = float4 position + float4 velocity.
+        const double bufferMB =
+            double(config_.particleCount) * 32.0 / (1024.0 * 1024.0);
+        std::cout << std::setw(14) << "Buffer:"
+                  << std::fixed << std::setprecision(1) << bufferMB << " MB"
+                  << (bufferMB < 64.0
+                          ? "  [cache-resident: reads above memory bandwidth]"
+                          : "")
+                  << "\n"
+                  << std::setw(14) << "Bandwidth:"
+                  << "derived, assumes 40 B moved per particle; the kernel "
+                     "moves ~48 B (reads 32, writes back 16)\n";
+    }
     std::cout
         << std::setw(14) << "Flights:"    << config_.framesInFlight << "\n"
         << std::setw(14) << "Multi-GPU:"

@@ -15,12 +15,30 @@
 #import <QuartzCore/CAMetalLayer.h>
 
 #include <array>
+#include <atomic>
+#include <chrono>
 #include <cstring>
 #include <iostream>
 #include <mutex>
 #include <string>
+#include <thread>
+#include <vector>
 
 namespace gpu_bench {
+namespace {
+
+void ConfigureFastMath(MTLCompileOptions* options) {
+    if (@available(macOS 15.0, iOS 18.0, *)) {
+        options.mathMode = MTLMathModeFast;
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        options.fastMathEnabled = YES;
+#pragma clang diagnostic pop
+    }
+}
+
+}  // namespace
 
 // -----------------------------------------------------------------------
 // Pimpl — all Objective-C objects live here so the header stays pure C++
@@ -36,7 +54,6 @@ struct MetalBackend::Impl {
     CAMetalLayer*               metalLayer   = nil;
     id<MTLTexture>              depthTex     = nil;   // Render3D
     id<MTLDepthStencilState>    depthState   = nil;   // Render3D
-    id<MTLTexture>              offscreenTex = nil;
 
     std::string deviceName;
     std::uint32_t framesInFlight = kMaxFramesInFlight;
@@ -69,6 +86,114 @@ struct MetalBackend::Impl {
     // MTLCaptureManager session (one capture at a time).
     bool capturing = false;
     std::string captureOutputPath;
+
+    // --- Decoupled presenter (windowed, VSync off) --------------------------
+    // `nextDrawable` blocks until the display releases a drawable, so any
+    // thread that calls it is pinned to the refresh rate — on a 120 Hz
+    // ProMotion panel that caps the benchmark no matter what
+    // `displaySyncEnabled = NO` says. The benchmark thread therefore never
+    // touches a drawable: it renders every frame into one of these textures,
+    // and a presenter thread blits the newest finished one onto a drawable at
+    // whatever rate the display allows. Render throughput becomes independent
+    // of refresh, and the preview shows the latest completed frame instead of
+    // an arbitrary 1-in-N subset.
+    enum class SlotState { Free, Rendering, Ready, Presenting };
+    std::vector<id<MTLTexture>> presentTextures;
+    std::vector<SlotState>      presentSlotState;
+    id<MTLCommandQueue>         presentQueue = nil;
+    std::thread                 presentThread;
+    std::atomic<bool>           presentRunning{false};
+    std::mutex                  presentMutex;
+
+    bool presenterActive() const { return !presentTextures.empty(); }
+
+    /// Claim a texture the presenter is not using. Never returns -1 while the
+    /// ring is larger than framesInFlight + 2.
+    int acquireRenderSlot() {
+        std::lock_guard<std::mutex> lock(presentMutex);
+        for (std::size_t i = 0; i < presentSlotState.size(); ++i) {
+            if (presentSlotState[i] == SlotState::Free) {
+                presentSlotState[i] = SlotState::Rendering;
+                return static_cast<int>(i);
+            }
+        }
+        return -1;
+    }
+
+    /// Called from the frame's completion handler: the texture now holds a
+    /// finished frame. Only the newest one is kept queued, so a fast benchmark
+    /// never makes the presenter fall behind showing stale frames.
+    void publishRenderSlot(int slot) {
+        if (slot < 0) return;
+        std::lock_guard<std::mutex> lock(presentMutex);
+        if (slot >= static_cast<int>(presentSlotState.size())) return;
+        for (auto& state : presentSlotState)
+            if (state == SlotState::Ready) state = SlotState::Free;
+        presentSlotState[slot] = SlotState::Ready;
+    }
+
+    void startPresenter() {
+        presentRunning.store(true, std::memory_order_relaxed);
+        presentThread = std::thread([this]() { presenterLoop(); });
+    }
+
+    void stopPresenter() {
+        if (!presentThread.joinable()) return;
+        presentRunning.store(false, std::memory_order_relaxed);
+        // The loop may be parked inside nextDrawable; allowsNextDrawableTimeout
+        // guarantees it returns rather than hanging the join.
+        presentThread.join();
+    }
+
+    void presenterLoop() {
+        while (presentRunning.load(std::memory_order_relaxed)) {
+            @autoreleasepool {
+                int slot = -1;
+                {
+                    std::lock_guard<std::mutex> lock(presentMutex);
+                    for (std::size_t i = 0; i < presentSlotState.size(); ++i) {
+                        if (presentSlotState[i] == SlotState::Ready) {
+                            presentSlotState[i] = SlotState::Presenting;
+                            slot = static_cast<int>(i);
+                            break;
+                        }
+                    }
+                }
+                if (slot < 0) {
+                    // Workload slower than the display: nothing new to show, so
+                    // idle briefly instead of spinning on the drawable pool.
+                    std::this_thread::sleep_for(std::chrono::microseconds(300));
+                    continue;
+                }
+
+                // This is the only nextDrawable call in the backend, and it is
+                // deliberately on this thread: blocking here paces the preview
+                // to the refresh rate without touching benchmark throughput.
+                id<CAMetalDrawable> drawable = [metalLayer nextDrawable];
+                if (drawable) {
+                    id<MTLCommandBuffer> blitCB = [presentQueue commandBuffer];
+                    id<MTLBlitCommandEncoder> blit = [blitCB blitCommandEncoder];
+                    [blit copyFromTexture:presentTextures[slot]
+                              sourceSlice:0
+                              sourceLevel:0
+                             sourceOrigin:MTLOriginMake(0, 0, 0)
+                               sourceSize:MTLSizeMake(kWindowWidth, kWindowHeight, 1)
+                                toTexture:drawable.texture
+                         destinationSlice:0
+                         destinationLevel:0
+                        destinationOrigin:MTLOriginMake(0, 0, 0)];
+                    [blit endEncoding];
+                    [blitCB presentDrawable:drawable];
+                    [blitCB commit];
+                    // Hold the slot until the GPU has actually read it.
+                    [blitCB waitUntilCompleted];
+                }
+
+                std::lock_guard<std::mutex> lock(presentMutex);
+                presentSlotState[slot] = SlotState::Free;
+            }
+        }
+    }
 };
 
 // -----------------------------------------------------------------------
@@ -266,7 +391,17 @@ void MetalBackend::InitBackend() {
         impl_->commandQueue = [impl_->device newCommandQueue];
 
         auto enableOffscreenIfNeeded = [&]() {
-            if (!config_.headless && !config_.vsync) {
+            if (config_.headless || config_.vsync || !impl_->metalLayer)
+                return;
+
+            // framebufferOnly must be off so the drawable can be a blit
+            // destination for the presenter.
+            impl_->metalLayer.framebufferOnly = NO;
+            impl_->metalLayer.allowsNextDrawableTimeout = YES;
+
+            const std::size_t slots = impl_->framesInFlight + 3;
+            impl_->presentTextures.reserve(slots);
+            for (std::size_t i = 0; i < slots; ++i) {
                 MTLTextureDescriptor* texDesc =
                     [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
                                                                        width:kWindowWidth
@@ -274,12 +409,20 @@ void MetalBackend::InitBackend() {
                                                                    mipmapped:NO];
                 texDesc.usage = MTLTextureUsageRenderTarget;
                 texDesc.storageMode = MTLStorageModePrivate;
-                impl_->offscreenTex = [impl_->device newTextureWithDescriptor:texDesc];
-                if (!impl_->offscreenTex)
-                    throw std::runtime_error("Failed to create offscreen texture");
-                std::cout << "[Metal] Offscreen render target enabled to bypass ProMotion "
-                             "drawable locking (vsync off)\n";
+                id<MTLTexture> tex = [impl_->device newTextureWithDescriptor:texDesc];
+                if (!tex)
+                    throw std::runtime_error("Failed to create present texture");
+                impl_->presentTextures.push_back(tex);
             }
+            impl_->presentSlotState.assign(slots, Impl::SlotState::Free);
+
+            // A dedicated queue keeps the blit out of the timed queue, so the
+            // preview never serialises behind benchmark work.
+            impl_->presentQueue = [impl_->device newCommandQueue];
+            impl_->startPresenter();
+
+            std::cout << "[Metal] Decoupled presenter: benchmark renders offscreen "
+                         "uncapped, preview presents at display refresh\n";
         };
 
         // --- Cinematic Liquid v2 (separate library / host) -----------------------
@@ -292,6 +435,7 @@ void MetalBackend::InitBackend() {
             impl_->liquid = std::make_unique<MetalLiquidV2Host>();
             impl_->liquid->init((__bridge void*)impl_->device,
                                 shaderDir_ + "cinematic_liquid_v2.metal");
+            config_.particleCount = impl_->liquid->particleCount();
             config_.memoryLabelOverride = "Unified-memory";
             enableOffscreenIfNeeded();
             std::cout << "[Profiling] GPU command-buffer timestamps enabled\n";
@@ -308,7 +452,7 @@ void MetalBackend::InitBackend() {
                                    encoding:NSUTF8StringEncoding];
 
         MTLCompileOptions* opts = [[MTLCompileOptions alloc] init];
-        opts.mathMode = MTLMathModeFast;
+        ConfigureFastMath(opts);
 
         NSError* error = nil;
         impl_->library = [impl_->device newLibraryWithSource:source
@@ -532,20 +676,26 @@ void MetalBackend::DrawFrame(float deltaTime) {
         // === WINDOWED PATH ======================================================
 
         // --- Determine render target --------------------------------------------
-        const bool useOffscreen = impl_->offscreenTex != nil;
-        const bool presentThisFrame = !useOffscreen ||
-                                      (impl_->totalFrames % 60 == 0);
+        const bool usePresenter = impl_->presenterActive();
 
         id<CAMetalDrawable> drawable = nil;
         id<MTLTexture> renderTarget = nil;
+        int presentSlot = -1;
 
-        if (presentThisFrame) {
+        if (usePresenter) {
+            // Never acquire a drawable here — that is what pinned the whole
+            // benchmark to the display refresh. Render into the ring and let
+            // the presenter thread deal with the swapchain.
+            presentSlot = impl_->acquireRenderSlot();
+            if (presentSlot >= 0)
+                renderTarget = impl_->presentTextures[presentSlot];
+        } else {
+            // VSync on: present directly, pacing to the display is the point.
             drawable = [impl_->metalLayer nextDrawable];
             if (drawable)
                 renderTarget = drawable.texture;
         }
-        if (!renderTarget && useOffscreen)
-            renderTarget = impl_->offscreenTex;
+
         if (!renderTarget) {
             dispatch_semaphore_signal(impl_->frameSemaphore);
             return;
@@ -565,14 +715,16 @@ void MetalBackend::DrawFrame(float deltaTime) {
 
             __block auto* implPtr = impl_.get();
             __block id<MTLCommandBuffer> capturedComputeCB =
-                (__bridge id<MTLCommandBuffer>)computeCBPtr;
+                (__bridge_transfer id<MTLCommandBuffer>)computeCBPtr;
             id<MTLCommandBuffer> renderCB =
-                (__bridge id<MTLCommandBuffer>)renderCBPtr;
+                (__bridge_transfer id<MTLCommandBuffer>)renderCBPtr;
             dispatch_semaphore_t sem = impl_->frameSemaphore;
 
+            __block int publishSlot = presentSlot;
             id<MTLCommandBuffer> timingCB = renderCB ? renderCB : capturedComputeCB;
             [timingCB addCompletedHandler:^(id<MTLCommandBuffer> cb) {
                 dispatch_semaphore_signal(sem);
+                implPtr->publishRenderSlot(publishSlot);
                 const double rs = cb.GPUStartTime;
                 const double re = cb.GPUEndTime;
                 if (!(re > rs))
@@ -596,6 +748,10 @@ void MetalBackend::DrawFrame(float deltaTime) {
                 std::lock_guard<std::mutex> lock(implPtr->timingMutex);
                 implPtr->pendingTimings.push_back({computeMs, renderMs, totalMs});
             }];
+
+            [capturedComputeCB commit];
+            if (renderCB)
+                [renderCB commit];
 
             ++impl_->totalFrames;
             impl_->currentFrame = (frameSlot + 1) % impl_->framesInFlight;
@@ -707,10 +863,12 @@ void MetalBackend::DrawFrame(float deltaTime) {
         __block auto* implPtr = impl_.get();
         __block id<MTLCommandBuffer> capturedComputeCB = computeCB;
         __block BOOL burnOnly = gpuBurn ? YES : NO;
+        __block int publishSlot = presentSlot;
         dispatch_semaphore_t sem = impl_->frameSemaphore;
 
         [renderCB addCompletedHandler:^(id<MTLCommandBuffer> cb) {
             dispatch_semaphore_signal(sem);
+            implPtr->publishRenderSlot(publishSlot);
 
             const double rs = cb.GPUStartTime;
             const double re = cb.GPUEndTime;
@@ -777,6 +935,12 @@ void MetalBackend::CleanupBackend() {
         impl_->captureOutputPath.clear();
     }
 
+    // Must stop before any Metal object it touches is released.
+    impl_->stopPresenter();
+    impl_->presentTextures.clear();
+    impl_->presentSlotState.clear();
+    impl_->presentQueue = nil;
+
     if (impl_->liquid) {
         impl_->liquid->cleanup();
         impl_->liquid.reset();
@@ -784,7 +948,6 @@ void MetalBackend::CleanupBackend() {
     impl_->computePSO   = nil;
     impl_->renderPSO    = nil;
     impl_->particleBuf  = nil;
-    impl_->offscreenTex = nil;
     impl_->depthTex     = nil;
     impl_->depthState   = nil;
     impl_->library       = nil;

@@ -77,7 +77,11 @@ vertex LiqVtxOut liquidVertex(uint vid [[vertex_id]]) {
     LiqVtxOut out;
     float2 uv = float2((vid << 1) & 2, vid & 2);
     out.uv = uv;
-    out.position = float4(uv * 2.0 - 1.0, 0.0, 1.0);
+    // Metal NDC Y points up (+1 top, -1 bottom); Vulkan Y points down.
+    // Flip Y so the fragment shader's UV-to-ray mapping matches Vulkan.
+    float2 ndc = uv * 2.0 - 1.0;
+    ndc.y = -ndc.y;
+    out.position = float4(ndc, 0.0, 1.0);
     return out;
 }
 
@@ -90,6 +94,7 @@ CTX = [
     ("whitewaterVolume", "texture3d<float> whitewaterVolume"),
     ("densSampler", "sampler densSampler"),
     ("wwSampler", "sampler wwSampler"),
+    ("fragPosition", "float4 fragPosition"),
 ]
 
 
@@ -229,6 +234,14 @@ def convert_types(src: str) -> str:
 
     # GLSL mod → fmod for floats (Metal mod is integer)
     src = re.sub(r"\bmod\(", "fmod(", src)
+    src = re.sub(r"\batan\(([^,()]+),\s*([^()]+)\)", r"atan2(\1, \2)", src)
+    src = src.replace("gl_FragCoord", "fragPosition")
+    src = re.sub(
+        r"float3\s+palette\[6\]\s*=\s*float3\[6\]\((.*?)\);",
+        r"const float3 palette[6] = {\1};",
+        src,
+        flags=re.S,
+    )
 
     # Body type name in signatures (if any remain)
     src = re.sub(r"\bBodyState\b", "RenderBodyState", src)
@@ -357,11 +370,22 @@ def inject_and_prefix(helpers: str, main_body: str) -> tuple[str, str]:
             return ", ".join(ctx_vals + [call_args_inner.strip()])
         return ", ".join(ctx_vals)
 
+    signatures: dict[str, str] = {}
+    for _ret, name, _args, _body in funcs:
+        pname = pmap[name]
+        ctx_names = [n for n, _ in CTX if n in needs[pname]]
+        signatures[pname] = add_ctx_args(meta[pname][1], ctx_names)
+
+    prototypes = [
+        f"{meta[pname][0]}{pname}{signatures[pname]};"
+        for pname in (pmap[name] for _ret, name, _args, _body in funcs)
+    ]
+
     new_helpers = []
     for ret, name, args, _body in funcs:
         pname = pmap[name]
         ctx_names = [n for n, _ in CTX if n in needs[pname]]
-        new_args = add_ctx_args(meta[pname][1], ctx_names)
+        new_args = signatures[pname]
         body = bodies[pname]
         body_inner = body[1:-1] if body.startswith("{") and body.endswith("}") else body
 
@@ -383,7 +407,7 @@ def inject_and_prefix(helpers: str, main_body: str) -> tuple[str, str]:
 
         main_body = replace_calls_balanced(main_body, callee, make_args)
 
-    body_text = "\n".join(new_helpers)
+    body_text = "\n".join(prototypes) + "\n\n" + "\n".join(new_helpers)
     if preamble:
         return preamble + "\n\n" + body_text, main_body
     return body_text, main_body
@@ -434,6 +458,11 @@ def build_render_section() -> str:
         r"return \1;",
         main_body,
     )
+    main_body = re.sub(
+        r"(return\s+float4\([^;]+;\s*)return\s*;",
+        r"\1",
+        main_body,
+    )
     if "return " not in main_body:
         main_body += "\n    return float4(0.0, 0.0, 0.0, 1.0);\n"
 
@@ -441,6 +470,7 @@ def build_render_section() -> str:
     if helpers_out.strip():
         parts.append(helpers_out + "\n")
     parts.append(f"fragment float4 {ENTRY}({FRAG_ARGS})\n{{\n")
+    parts.append("    float4 fragPosition = in.position;\n")
     parts.append(main_body)
     parts.append("\n}\n")
     return "".join(parts)
@@ -463,10 +493,9 @@ def patch_metal_file(render_section: str) -> None:
     if cut is None:
         # Fallback: find liquidVertex
         idx = text.find("struct LiqVtxOut")
-        if idx < 0:
-            raise RuntimeError("Could not find present section in metal file")
-        cut = idx
+        cut = idx if idx >= 0 else len(text)
     new_text = text[:cut].rstrip() + "\n" + render_section
+    new_text = re.sub(r"[ \t]+(?=\n)", "", new_text)
     METAL.write_text(new_text, encoding="utf-8")
     print(f"Patched {METAL} ({len(new_text)} bytes, render={len(render_section)})")
 

@@ -2,6 +2,7 @@
 
 #ifdef HAVE_METAL
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -19,10 +20,11 @@ public:
 
     void init(void* mtlDevice, const std::string& shaderPath);
     bool active() const;
+    std::uint32_t particleCount() const;
 
-    // Encodes one frame (substeps + surface + raymarch present) and commits.
-    // Timing is filled asynchronously by the caller via command-buffer handlers;
-    // this helper returns the committed compute/render command buffers as void*.
+    // Encodes one frame (substeps + surface + raymarch present). The returned
+    // command buffers are retained and uncommitted so the caller can install
+    // timing handlers before committing them in compute-then-render order.
     void encodeFrame(void* mtlCommandQueue,
                      float deltaTime,
                      void* mtlRenderTargetTexture,
