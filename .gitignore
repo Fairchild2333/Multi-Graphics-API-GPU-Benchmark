@@ -109,3 +109,8 @@ Desktop.ini
 # Accidental console dumps
 stdout.txt
 stderr.txt
+
+results/
+macos-gui/theme_check2
+macos-gui/theme_check2.swift
+scripts/__pycache__/
