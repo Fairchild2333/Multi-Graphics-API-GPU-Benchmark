@@ -1,7 +1,7 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
-> 最后更新：2026-07-21（Australia/Sydney）
-> 分支 / 提交：`main`（本地可能含未提交的开发构建文档/`build-windows.ps1` 改动；勿把 `out/` 构建产物当仓库事实）
+> 最后更新：2026-07-31（Australia/Sydney）
+> 分支 / 提交：`main`（HEAD / `origin/main` 均为 `eb10fd3`；本地含未提交的 macOS 构建/Metal/SwiftUI/DMG 与 iOS 移植改动；用户自己的未跟踪 `results/` 不得删除、移动或纳入提交；勿把 `out/` 构建产物当仓库事实）
 > 本文件是项目的**首要进度与交接入口**。后续 AI 或开发者开始工作前先完整阅读，结束工作前优先更新本文件，再更新专题 TODO、roadmap 和 README。
 
 ## 1. 交接规则
@@ -42,7 +42,7 @@
 
 ### 目标 C — 平台与兼容前端优先级（2026-07-16 用户最新锁定）
 
-用户最新锁定的顺序（**2026-07-19 调整**：Windows 7 GUI 挪到 PS3 之前）：**1. Windows on ARM (ARM64) → 2. macOS → 3. Android → 4. iOS → 5. Debian Linux → 6. WebGPU → 7. HarmonyOS PC / 鸿蒙 → 8. Windows 7 专用 GUI（尽量使用 Aero）→ 9. PS3（探索性）→ 10. Lumia 1520 legacy Windows Phone（探索性）→ 11. iPhone 4 legacy iOS（探索性）→ 12. Dual-GPU Collaboration（双卡协作模式，功能项）**。ARM64 已完工；平台移植下一刀为 macOS。液体正确性、自由模式和 soak 任务仍然开放，但不阻塞上述平台顺序，除非用户再次改序。
+原锁定顺序（**2026-07-19 调整**：Windows 7 GUI 挪到 PS3 之前）是：**1. Windows on ARM (ARM64) → 2. macOS → 3. Android → 4. iOS → 5. Debian Linux → 6. WebGPU → 7. HarmonyOS PC / 鸿蒙 → 8. Windows 7 专用 GUI（尽量使用 Aero）→ 9. PS3（探索性）→ 10. Lumia 1520 legacy Windows Phone（探索性）→ 11. iPhone 4 legacy iOS（探索性）→ 12. Dual-GPU Collaboration（双卡协作模式，功能项）**。ARM64 已完工；macOS vertical slice 已在 M4 Pro / macOS 26 上完成自包含 App、三主项与原生抓帧验收，实际 Monterey 运行与公开签名/notarization 仍开放。**用户 2026-07-31 最新明确指令为：先把 macOS 完善到 0.2.6 并分别产出 Apple Silicon / Intel DMG，然后继续完善 iOS/iPadOS；因此当前执行顺序临时改为 macOS DMG → iOS/iPadOS，Android 排在这次 iOS 收口之后。**
 
 除仓库已有的隔离 HarmonyOS Vulkan 粒子原型外，均未开始完整产品移植；该原型不等于主 workload suite 已移植。Windows 7 GUI 是共享现有引擎与 worker 协议的兼容前端，不得为了支持旧系统复制出另一套含义不同的成绩合同。
 
@@ -55,13 +55,13 @@
 1. **Windows ARM64（已于 2026-07-16 完工；2026-07-31 与 x64 统一原生双语安装器）**：已实现本体、GUI、依赖与打包闭环。新增了 VS/CMake ARM64 配置，原生编译 `gpu_engine`、CLI 和 WinUI，使用 vcpkg `arm64-windows` 在 manifest 模式下引入原生 GLFW。完成了动态 ARM64 Vulkan 导入库自动生成，解决了 x64 SDK 链接冲突；豁免了 VC 运行时中特有的 x64 `vcruntime140_1.dll` 架构审计。**CPU 与 GPU 测项本体也是按架构分别原生编译**（x64 包 = AMD64 PE，ARM64 包 = ARM64 PE；同一套源码、两套二进制），不是 x64 测项装到 ARM 上。正式安装器为 x64/ARM64 各一个对应原生 PE 的单文件中英双语 Setup EXE；WiX MSI 是内嵌事务层，Inno Setup 降为 legacy。
    - **依赖规则**：GLFW、WinAppSDK、VC runtime 等均使用原生 ARM64；豁免了特殊的 x64 `vcruntime140_1.dll`（Redist 目录自带）。RenderDoc 在 ARM64 发布语义上可为 Skip/N/A；Python 报告链仍未冻结。
    - **完成门槛**：ARM64 本体、GUI、ZIP/原生双语 Setup 与依赖本地 staging 校验及 PE 架构审计已通过；clean-machine 与签名仍开放。
-2. **macOS（ARM64 后的下一平台刀；用户 2026-07-19 指定四步）**：
+2. **macOS（2026-07-31 已完成当前 Mac vertical slice；用户 2026-07-19 指定四步）**：
    - **产品 OS 底线（用户 2026-07-19 锁定）：macOS 12 Monterey**。CLI/`gpu_engine` 与 SwiftUI GUI 均 `deploymentTarget=12.0`（`CMakeLists.txt` `CMAKE_OSX_DEPLOYMENT_TARGET`、`macos-gui/project.yml` / `Info.plist` `LSMinimumSystemVersion`）。macOS 11 及更旧不支持。
    - **版本差异（功能合同相同，UI/壳层不同）**：12 = `NavigationView` + Material；13–15 = `NavigationSplitView` + Material；26+ = Liquid Glass（`.glassEffect`）。建议在较新 Xcode（26）上编译、部署到 Monterey+ 运行。
-   1. **CLI Metal Particle 对齐 Windows `stream_v1` 合同**（代码已落，待真 Mac 验收）：正式 time-mode 离屏绕过 ProMotion；`memory=Unified-memory`；`--capture` / F12 / `--capture-frame` 走 `MTLCaptureManager` → `.gputrace`（失败则诚实 `captureUnavailable`）。**须在真 Mac 上跑** `gpu_benchmark --backend metal --workload stream --particles 1048576 --time 15`。
-   2. **Metal GPU Burn**（代码已落，待真 Mac 验收）：`shaders/gpu_burn.metal` + `metal_backend` 双 pass 全屏；成绩组仍走现有 `gpu_burn_v3_fixed_steps_*_kaleidoscope`（与 Windows Plasma×Kaleidoscope 合同一致）。验收：`gpu_benchmark --backend metal --workload gpu_burn --time 15 --iter 16`。
-   3. **SwiftUI ↔ WinUI 真对齐**（代码已落，待 Mac 编译验收；**deployment 12.0**）：CPU 页；Duration 秒/分/时/帧/Until Cancel；Capture 自定义秒；粒子/Burn 预设；API 多选（支持/不支持分组）；Progress + Cancel（优先外置 CLI 进程）；History 过滤/`workloadVersion`/清空/开文件夹；Charts 开文件夹；日语。Monterey 须验证 `NavigationView` 壳层。
-   4. **液体 Metal**（代码已落 / 未正式）：`scripts/port_liquid_v2_metal.py` + `port_liquid_render_v2_metal.py` → `shaders/cinematic_liquid_v2.metal`（10 compute + `liquidFragment` raymarch）；宿主 `src/metal_cinematic_liquid.mm`（含 4s restage）；成绩强制 `cinematic_liquid_v2_physical_scene_v8_metal_preview`。**真 Mac 编译/冒烟与正式合同仍开放**；不得混入 Vulkan v8 榜。
+   1. **CLI Metal Particle 对齐 Windows `stream_v1` 合同（M4 Pro 实机通过）**：正式 time-mode 离屏绕过 ProMotion；结果 `memory=Unified-memory`；`--capture` / F12 / `--capture-frame` 走 `MTLCaptureManager` → `.gputrace`（失败则诚实 `captureUnavailable`）。2026-07-31 包内 helper 已完成 1M 粒子 15 秒 + 第 5 秒真实 `.gputrace`。
+   2. **Metal GPU Burn（M4 Pro 实机通过）**：`shaders/gpu_burn.metal` + `metal_backend` 双 pass 全屏；成绩组仍走现有 `gpu_burn_v3_fixed_steps_*_kaleidoscope`。2026-07-31 包内 helper 15 秒 / 16 steps 通过，stable score 4.16 Gpix-step/s、CV 0.14%。
+   3. **SwiftUI ↔ WinUI 工作流对齐（已编译、链接、独立启动）**：CPU；Duration；Capture；预设；API 能力；Progress/Cancel；Complete Suite / Fill Missing；结构化错误摘要；History mode/旧异常分数处理；原生 Charts（13+ Swift Charts、12 SwiftUI fallback）；英/中/日。最终 App 可脱离仓库运行，Monterey `NavigationView` 壳层仍须在实际 macOS 12 验证。
+   4. **液体 Metal（M4 Pro preview 实机通过）**：`scripts/port_liquid_v2_metal.py` + `port_liquid_render_v2_metal.py` → `shaders/cinematic_liquid_v2.metal`（10 compute + `liquidFragment` raymarch）；宿主 `src/metal_cinematic_liquid.mm`。2026-07-31 包内 helper 6 秒通过，正确报告 320,920 粒子；成绩继续强制 `cinematic_liquid_v2_physical_scene_v8_metal_preview`，不得混入 Vulkan v8 榜，正式跨 API 合同仍开放。
 
 3. **Android**：复用 Vulkan 后端；GLFW 不支持 Android，需 NativeActivity/ANativeWindow 表面层与新前端；RenderDoc 支持 Android 远程抓帧；须评估温控降频对 15 秒 Burst 语义的影响（可能需要独立移动端 duration 合同）。
    - **主路径基线**：Vulkan **1.0+**（主力，后端理论可复用；基线放宽到 1.0 以覆盖 Tegra K1 这类只有 Vulkan 1.0 驱动的设备）+ GL ES 3.1/3.2（由现有 GL 4.3 后端降级适配：GLSL ES 方言重写、EGL 上下文、`EXT_disjoint_timer_query` 能力探测，无可靠 GPU timestamp 不出正式 score）。计时/抓帧模型不同的实现独立 `workloadVersion` 成组。
@@ -109,17 +109,17 @@
 
 | 主测试 | 定位 | 当前状态 |
 |---|---|---|
-| **Particle (Original / Baseline)** | 原始粒子计算+绘制；历史基线，实际偏显存/内存带宽 | 已保留稳定 id `stream`；GUI 明确标为 Memory Throughput。**Windows 全 API 正式可用**。**Metal 代码已对齐合同**（离屏 / `Unified-memory` / `MTLCaptureManager`），**待真 Mac 15s 验收** |
-| **GPU Burn (15s Burst)** | 全屏 Plasma×Kaleidoscope 视觉 Burn（当前公开 `gpu_burn` / `gpu_burn_v3_fixed_steps_*` / shaderVersion=3）；历史 faceted-glass / Plasma Bloom legacy 身份按 `workloadVersion` 隔离 | **Windows：Vulkan/DX12/DX11/OpenGL 正式可用**。**Metal：`gpu_burn.metal` + 双 pass 已接线，不再 unsupported**，待真 Mac 验收。`gpu_stress` 仍 Metal unsupported |
-| **Cinematic Liquid** | 固定镜头的真实 3D 粒子液体 + 粒子重建密度体积自由表面 | **Vulkan**：v1 与历史 optics_v4 正式成绩保留；当前 MPM `physical_scene_v8` **尚无正式 15s+第5秒抓帧成绩**；SPH 强制 `_preview`（四项 blocker）。**Metal**：MLS-MPM compute + raymarch present 已接线，成绩强制 `…_metal_preview`；**真机验收 / 正式合同未完成**。DX12/DX11/GL 液体未实现 |
+| **Particle (Original / Baseline)** | 原始粒子计算+绘制；历史基线，实际偏显存/内存带宽 | 已保留稳定 id `stream`；GUI 明确标为 Memory Throughput。**Windows 全 API 正式可用**。**Metal 已在 M4 Pro 完成 1M / 15 秒与第 5 秒 `.gputrace` 实机验收**（离屏 / `Unified-memory` / `MTLCaptureManager`） |
+| **GPU Burn (15s Burst)** | 全屏 Plasma×Kaleidoscope 视觉 Burn（当前公开 `gpu_burn` / `gpu_burn_v3_fixed_steps_*` / shaderVersion=3）；历史 faceted-glass / Plasma Bloom legacy 身份按 `workloadVersion` 隔离 | **Windows：Vulkan/DX12/DX11/OpenGL 正式可用**。**Metal：M4 Pro / 16 steps / 15 秒实机通过**，stable 4.16 Gpix-step/s、CV 0.14%。`gpu_stress` 仍 Metal unsupported |
+| **Cinematic Liquid** | 固定镜头的真实 3D 粒子液体 + 粒子重建密度体积自由表面 | **Vulkan**：v1 与历史 optics_v4 正式成绩保留；当前 MPM `physical_scene_v8` **尚无正式 15s+第5秒抓帧成绩**；SPH 强制 `_preview`（四项 blocker）。**Metal：320,920 粒子 MLS-MPM + raymarch 已在 M4 Pro 6 秒实机通过**；成绩仍强制 `…_metal_preview`，正式跨 API 合同未完成。DX12/DX11/GL 液体未实现 |
 
 ### 3.0.1 三主项缺口清单（2026-07-19）
 
 | 主项 | Windows 还差 | macOS / Metal 还差 |
 |---|---|---|
-| **Particle** | 无合同级 blocker（基线已稳） | 真机 `stream` 15s 验收（含 **macOS 12**）；验证 `.gputrace` 抓帧 |
-| **GPU Burn** | 无 Metal 相关 blocker；可选后续 CoreBurn/错误校验 | 真机 `gpu_burn` 15s/`--iter 16` 验收（含 **macOS 12**）；验证抓帧 |
-| **Cinematic Liquid** | v8 正式 15s+第5秒 RenderDoc 成绩；SPH 四项正确性；跨后端 | 真 Mac 编译/冒烟 `liquidFragment`（含 **macOS 12**）；正式成绩不得混 Vulkan v8；SPH/v1 未移植 |
+| **Particle** | 无合同级 blocker（基线已稳） | 当前 M4 Pro 已验收；仍需实际 **macOS 12** 启动/短跑回归与公开发布签名/notarization |
+| **GPU Burn** | 无 Metal 相关 blocker；可选后续 CoreBurn/错误校验 | 当前 M4 Pro 15 秒已验收；仍需实际 **macOS 12** 短跑回归 |
+| **Cinematic Liquid** | v8 正式 15s+第5秒 RenderDoc 成绩；SPH 四项正确性；跨后端 | Metal preview 当前 M4 Pro 已验收；正式成绩不得混 Vulkan v8；SPH/v1 未移植；macOS 12 回归仍开放 |
 
 ### 3.0.2 macOS OS 底线（2026-07-19 用户锁定）
 
@@ -130,12 +130,13 @@
   - `ContentView.swift`：`#available(macOS 13, *)` → `NavigationSplitView`，否则 `NavigationView` + `.columns`
   - `GPUBenchmarkApp.swift`：`defaultSize` 仅 13+；12 仅保留 `minWidth/minHeight`
   - `GlassCard`：26+ Liquid Glass，12–15 Material（原有回退）
+- **2026-07-31 构建事实**：`scripts/build-macos.sh` 在 M4 Pro / Xcode 26.6 成功生成自包含、ad-hoc 签名的 `out/macos/arm64/Release/GPUBenchmark.app`；GUI 与 helper 均为 arm64 / `minos 12.0`，只依赖系统 framework/lib，Charts 为 weak link，未链接 Homebrew/Vulkan dylib。该事实证明交叉部署标记与当前系统运行，不替代实际 Monterey 运行。
 - **验收门槛**：在 Monterey 上至少冒烟 GUI 启动 + `gpu_benchmark --backend metal --workload stream --time 3`；15s 正式流程仍按三主项清单。
 - **构建约定**：在较新 Xcode（建议 26）交叉编译部署到 12+；不要求在 Monterey 本机用旧 Xcode 从源码构建（`.glassEffect` 依赖新 SDK 符号，已用 `#available` 包裹）。
 
 ### 3.0.3 iOS 实现规格（2026-07-19 用户锁定 — 给后续 AI 开工用）
 
-> **状态（2026-07-24 事实）**：**代码已写**（`ios-gui/` SwiftUI + `CAMetalLayer` → `ios_engine_host` → `MetalBackend::Run`；stream/gpu_burn 默认 3s + `RequestStop`）。**本 Windows 工作站未做 Xcode/iOS 编译；无模拟器/真机冒烟记录。** 引擎在 `TARGET_OS_IPHONE` 下真实追加 `_ios_preview`（例：`stream_v1_ios_preview`）；这仍是 preview 合同，不是桌面 15s。平台顺序：macOS → Android → **iOS**。
+> **状态（2026-07-31 checkpoint）**：仓库已有 `ios-gui/` SwiftUI + `CAMetalLayer` → `ios_engine_host` → `MetalBackend::Run` 垂直切片；stream/gpu_burn host 存在，Cinematic Liquid 的 Metal v2 backend 存在但 iOS host parser 与 bundle resource 尚未接通。已在本 Mac 用 Xcode 26.6 成功生成 iPhoneSimulator arm64 / iOS 16 / Metal-only / NO_GLFW 工程；第一次 `gpu_engine` build 因 mobile archive 错带桌面 `src/main.cpp`、其中 5 处 `std::system` 在 iOS SDK unavailable 而失败，`CMakeLists.txt` 已改为 iOS 排除 `main.cpp`，**但暂停点尚未复建验证**。Bridge/UI 仍引用不适合沙盒的 `cliMain`/`gpb_run`，不能声称三主项、CPU、抓帧或 App 已可用。`BenchResult.swift` 与新增 `MobileBenchmark.swift` 已开始补 schema/三主项能力模型，但尚未编译。无签名身份、无连接的 iPhone/iPad；模拟器和真机验收均未完成。当前执行顺序：macOS 0.2.6 双 DMG → **iOS/iPadOS**。
 
 #### A. 用户锁定
 
@@ -261,19 +262,19 @@ API 选择器：iOS 只列 **Metal**；其余 API 标 unsupported。
 
 | Workload id | 真实负载 | 后端代码状态 | 建议归类 |
 |---|---|---|---|
-| `stream` | 原始粒子 Euler 更新 + 点绘制；低算术强度，偏带宽 | Vulkan/DX12/DX11/OpenGL/**Metal（代码已落，待 Mac 验收）** | **主界面：Particle (Original)** |
-| `gpu_burn` | 当前公开合同为 Plasma×Kaleidoscope / `gpu_burn_v3_fixed_steps_*`（shaderVersion=3）：2 次全屏 opaque draw、固定 step FP32/SFU/INT；历史 faceted-glass 成绩组按 `workloadVersion` 隔离 | Vulkan/DX12/DX11/OpenGL；DX WARP；**Metal 已接线（待 Mac 验收）** | **主界面：GPU Burn**；`gpu_burn_v1` selector 保留历史 Plasma Bloom 身份 |
+| `stream` | 原始粒子 Euler 更新 + 点绘制；低算术强度，偏带宽 | Vulkan/DX12/DX11/OpenGL/**Metal（M4 Pro 15 秒 + `.gputrace` 已验收）** | **主界面：Particle (Original)** |
+| `gpu_burn` | 当前公开合同为 Plasma×Kaleidoscope / `gpu_burn_v3_fixed_steps_*`（shaderVersion=3）：2 次全屏 opaque draw、固定 step FP32/SFU/INT；历史 faceted-glass 成绩组按 `workloadVersion` 隔离 | Vulkan/DX12/DX11/OpenGL；DX WARP；**Metal（M4 Pro 15 秒已验收）** | **主界面：GPU Burn**；`gpu_burn_v1` selector 保留历史 Plasma Bloom 身份 |
 | `gpu_stress` | 独立 shader 的 4 次全屏 opaque overdraw；FP32/SFU/INT 循环，warmup 首秒自动标定到约 8 ms/draw-group | Vulkan/DX12/DX11/OpenGL；DX WARP；**Metal 仍明确 unsupported** | Other / Advanced：GraphicsBurn component |
 | `nbody` | tiled all-pairs 粒子计算 | 五后端 | Other / Advanced Compute |
 | `stress` | 全屏固定次数 fractal + `sin()`，fragment ALU/SFU | 五后端 | **Legacy Stress v1** |
 | `synthpeak` | 寄存器内合成峰值循环 | 五后端，精度能力不同 | Other / Advanced Synthetic |
 | `render3d` | 6 顶点实例化 billboard + 深度 | 五后端 | **Legacy 3D Prototype** |
 | `volumetric` | 程序化 FBM 体积 raymarch | 五后端代码已接入，但仓库结果无验证记录 | Other / Experimental；未来综合场景 pass |
-| `cinematic_liquid` | 3D MLS-MPM 或 `--liquid-solver sph` + 独立粒子 splat/binomial R32F 密度体积 + 最多 4 界面自由表面 ray path；GUI 文案为「流体 —— 互动水池」 | **正式合同仍以 Vulkan 为准**。Metal：MLS-MPM compute + raymarch present 已接线，成绩强制 `…_metal_preview`；真机验收与 SPH 正式合同未完成。DX12 曾接线后撤回；DX11/OpenGL 未实现 | **主界面：Cinematic Liquid / 互动水池**；当前 v8、Metal preview 与 SPH preview 必须按 `workloadVersion` 分组 |
+| `cinematic_liquid` | 3D MLS-MPM 或 `--liquid-solver sph` + 独立粒子 splat/binomial R32F 密度体积 + 最多 4 界面自由表面 ray path；GUI 文案为「流体 —— 互动水池」 | **正式合同仍以 Vulkan 为准**。Metal：320,920 粒子 MLS-MPM compute + raymarch present 已在 M4 Pro 6 秒通过，成绩强制 `…_metal_preview`；SPH 正式合同未完成。DX12 曾接线后撤回；DX11/OpenGL 未实现 | **主界面：Cinematic Liquid / 互动水池**；当前 v8、Metal preview 与 SPH preview 必须按 `workloadVersion` 分组 |
 
 仓库内历史 `results/results.json` 仍为 232 条：`stream=224`、`nbody=5`、`stress=1`、`synthpeak=1`、`render3d=1`、`volumetric=0`。本轮 smoke 数据刻意写到 `out/*/results`，没有污染历史库。新结果 schema 为 v2，记录 workloadVersion、最终标定参数与 capture 状态；旧结果读取时仍按 schema v1 兼容。
 
-公开 `gpu_burn` 当前成绩身份为可选手动步数的 `gpu_burn_v3_fixed_steps_<N>_kaleidoscope`（shaderVersion=3，Plasma×Kaleidoscope 视觉）；历史 faceted-glass / 自动标定结果按各自 `workloadVersion` 永久隔离。`gpu_burn_v1` selector 保留更早 Plasma Bloom 合同。Windows 上 Vulkan/DX12/DX11/OpenGL（含 WARP）可跑；**Metal 已接线、待真 Mac 验收**。RTX 5090 / Vulkan 历史标定数据（如 2048 steps → 13.199 ms render / 286 Gpix-step/s）仍有效，但不得改写身份。`gpu_stress_v1` 仍为 Advanced GraphicsBurn，**Metal unsupported**。液体：当前 MPM `physical_scene_v8` 尚无正式成绩；SPH 强制 `_preview`；Metal 仅为 `…_metal_preview`（raymarch 已接、待 Mac 验收）。跨后端液体与 GUI 细项仍开放。
+公开 `gpu_burn` 当前成绩身份为可选手动步数的 `gpu_burn_v3_fixed_steps_<N>_kaleidoscope`（shaderVersion=3，Plasma×Kaleidoscope 视觉）；历史 faceted-glass / 自动标定结果按各自 `workloadVersion` 永久隔离。`gpu_burn_v1` selector 保留更早 Plasma Bloom 合同。Windows 上 Vulkan/DX12/DX11/OpenGL（含 WARP）可跑；**Metal 已在 M4 Pro 完成 15 秒验收**。RTX 5090 / Vulkan 历史标定数据（如 2048 steps → 13.199 ms render / 286 Gpix-step/s）仍有效，但不得改写身份。`gpu_stress_v1` 仍为 Advanced GraphicsBurn，**Metal unsupported**。液体：当前 MPM `physical_scene_v8` 尚无正式成绩；SPH 强制 `_preview`；Metal 仅为 `…_metal_preview`（raymarch 已在 M4 Pro 冒烟通过）。跨后端正式合同仍开放。
 
 ### 3.3 为什么现有新测试“效果不好”的判断成立
 
@@ -420,7 +421,7 @@ probe 前把随包 `tools/RenderDoc` 设为进程级 `VK_IMPLICIT_LAYER_PATH` �
 ### macOS / iOS / HarmonyOS
 
 - **OS 底线 macOS 12 Monterey**（见 §3.0.2）：CMake + SwiftUI deployment 12.0；壳层/玻璃按系统版本回退；功能与成绩合同不按 OS 拆分。
-- macOS SwiftUI 已与 WinUI 真对齐（Run/CPU/History/Duration/Capture/API 多选等）；仍待 **Mac 编译 + Monterey 冒烟**。细节见 `macos-gui/README.md`、`docs/macos-notes.md`。
+- macOS SwiftUI 已完成平台等价工作流（Run/CPU/History/Duration/Capture/API 能力、Complete Suite、Fill Missing、原生 Charts、结构化错误摘要），并在 M4 Pro 编译、链接、独立启动；仍待 **实际 Monterey 冒烟**。细节见 `macos-gui/README.md`、`docs/macos-notes.md`。
 - **iOS：代码已写 / 本机未编译 / 未设备验收**（见 §3.0.3）。`ios-gui/` + `ios_engine_host` 存在；`CollectResult` 追加 `_ios_preview`。用户已锁定 **最低 iOS 16** + **iOS 26/27 = Liquid Glass**（16–25 Material）。共享 `GlassCard` 已预留 `iOS 26.0`。
 - HarmonyOS 仍是原始 Vulkan 粒子 demo，没有 workload suite、15 秒结果模型或抓帧编排。
 
@@ -542,6 +543,23 @@ PathService 已把 results/captures/reports/logs 改到
 
 ### 当前正在进行
 
+- [~] **2026-07-31 会话暂停点 — macOS 0.2.6 双架构 DMG**：
+  - 版本源已经对齐到 `0.2.6`（CMake、`macos-gui/Info.plist`、XcodeGen 工程配置）；原生 arm64 自包含 App 及三主项实跑记录见 §10。
+  - `scripts/build-macos.sh` 已扩展为按 `--arch arm64|x86_64` 构建，并校验 GUI/helper 的单一目标架构、`minos 12.0`、bundle 版本、只含系统动态依赖和 deep codesign；离线复用 GLFW 3.4 source 的 license 路径也已修正。
+  - **x86_64 交叉构建已通过**：`out/macos/x86_64/Release/GPUBenchmark.app` 的 SwiftUI GUI 与 helper 均为纯 x86_64、`minos 12.0`、ad-hoc 签名通过且无非系统动态依赖。该 slice 在 arm64 主机只完成静态验收，**没有在 Intel Mac 实跑**。
+  - 新的 `scripts/package-macos-dmg.sh` 与 `packaging/macos/README.txt.in` 已写入工作树；脚本会分别重建两 slice、放入 `Mangekyo.app` + `/Applications` 软链 + README/license/notices，生成 UDZO/HFS+ DMG，readonly 挂载后再次审计 bundle，再生成 SHA-256 清单。两个 shell 脚本 `bash -n` 通过。
+  - **暂停点尚未完成**：新脚本还没有从头重建 arm64，也没有实际运行 DMG 打包；因此 `Mangekyo-0.2.6-macos-arm64.dmg`、`Mangekyo-0.2.6-macos-x86_64.dmg` 和 checksum 清单此刻均不得写成已产出。
+- [~] **2026-07-31 会话暂停点 — iOS/iPadOS 引擎与构建链**：
+  - Xcode 26.6 下以 `CMAKE_SYSTEM_NAME=iOS`、arm64、deployment 16.0、`CODE_SIGNING_ALLOWED=NO` fresh configure **通过**；日志确认 Metal ON、Vulkan/DX/OpenGL OFF、NO_GLFW、`ios_engine_host` ON、`arm64-apple-ios16.0-simulator`。
+  - 第一次 `gpu_engine` build 的首要错误是 desktop `src/main.cpp` 内 5 个 `std::system` 在 iOS SDK unavailable；`CMakeLists.txt` 已将 mobile archive 与 desktop CLI 源图分开，**修复后复建尚未执行**。
+  - stream 与 gpu_burn 的 embedded host 已存在；Cinematic Liquid Metal v2 backend 已存在，但 host parser、第三个 `.metal` resource 与 runtime 尚未接通。Bridge 仍需从 `cliMain`/`gpb_run` 改为 `ProbeMetalDevices`、直接 workload API 与原生 CPU API。
+  - 不能把当前状态表述为“三个测试通过”：此刻只有 macOS 三主项有实跑证据；iOS 三主项均无 simulator/真机运行证据。
+- [~] **2026-07-31 会话暂停点 — iOS/iPadOS SwiftUI**：
+  - 已完成现有 6 页、macOS GUI 与 WinUI 的差距审计。现状问题包括：Run/CPU 仍会走 `gpb_run`/`cliMain`，embedded progress 固定不动，Capture 只有文案，History/Charts 尚无完整 schema normalization/export，About 仍有硬编码版本。
+  - 已改 `ios-gui/Mangekyo/Models/BenchResult.swift`：补 schema/platform/arch/stability/throttle 字段、workloadConfig 解析、execution mode、旧异常 bandwidth 分数隐藏与合同显示；已新增 `MobileBenchmark.swift` 定义三主 workload、移动 preview contract、请求/阶段/cancel/capture capability/结构化 issue。两者均**尚未 Swift 编译**。
+  - GUI 完成度只能记为架构/审计完成、第一批 model 在写；Run engine、History/Charts 导出、Settings/About、iPhone/iPad adaptive UI、iOS 16–25 Material 与 iOS 26 Glass 尚未完成，不能使用百分比替代验收。
+  - 当前机器可用目标包括 iPhone 16 Pro iOS 18.5、iPad Pro 11-inch (M4) iOS 18.5、iPhone 17 Pro iOS 26.5 模拟器；但暂停点尚未生成、安装或启动 App。`security find-identity -v -p codesigning` 为 0 个有效 identity，`xctrace` 无连接的 iPhone/iPad。
+- [x] **2026-07-31：macOS vertical slice 在 M4 Pro 实机收口**。默认 Apple CMake 改为 checksum-pinned GLFW 3.4 源码静态构建、Vulkan 默认 OFF、非 Windows CPack 默认 ZIP；严格 macOS 12 availability 构建及 ZIP package 通过。`scripts/build-macos.sh` 生成自包含、ad-hoc 签名的 arm64 App，GUI/helper `minos 12.0` 且无 Homebrew 动态依赖。SwiftUI 新增 Complete Suite / Fill Missing、原生 Charts、History mode/旧异常分数归一、结构化错误摘要与 bundle helper 发现。最终包内 helper 完成 1M Particle 15 秒 + `.gputrace`、GPU Burn 16 steps / 15 秒、Cinematic Liquid 320,920 粒子 / 6 秒 preview；App 脱离仓库启动/退出通过。**仍开放：实际 Monterey 回归、Developer ID/notarization/universal binary；Metal liquid 仍是独立 preview 合同。**
 - [x] 2026-07-21：用户要求开发默认编完整 GUI+CLI。新增 `scripts/build-windows.ps1`；`CopyGpuBenchmarkWorker` 扩展为同步 worker **与** HLSL/SPIR-V/OpenGL 资产。本机已用 preset 编过 CLI、MSBuild 编过 WinUI，并在 `gui/x64/Release` 验证 `compute.hlsl` 等可由该 target 自动补齐。双 FirePro D700 上仍见独立问题：Vulkan `vkCreateDevice failed`（与缺 shader 无关）；DX/OpenGL 缺文件问题在拷贝后应消失。正式发布脚本未改。
 - [x] 2026-07-18：按用户对 Full Analysis / All GPUs 实图反馈修正 WinUI 结果编排与软件设备显示。WARP/Basic Render 在 GPU 下拉框和本次 Summary 中保留真实软件渲染器名称，并追加当前 CPU 型号（例如 `Microsoft WARP (AMD Ryzen …)`），不再退化显示为 `GPU 2`。Full Analysis 会在启动前跳过 probe 已知不支持的 GPU×API（含非 fragment workload 的 DX11 compute 不可用）并在 Summary hint/raw output 列表说明；这些组合计为 unsupported/skipped、使用绿色完成状态，只有实际启动后非零退出才计为 failed/红色。另为“所选核显但 Windows/WGL 实际分配到另一 GL_RENDERER”增加专用 Summary 说明和状态文案；分类严格要求 OpenGL worker + CLI 精确 `cannot select GPU index`/`active GL_RENDERER` 标记，shader/context/driver/timeout 等其他 OpenGL 错误不会套用此说明。Release WinUI x64 已编译通过；尚未运行新的 Full Analysis/核显 OpenGL 矩阵或做 GUI 视觉点击验收。
 - [x] 2026-07-17：WinUI 四个秒数/时长 `NumberBox`（GPU duration、RenderDoc capture、CPU per-test、CPU warm-up）由 `Inline` 统一改为参考图对应的 `Compact` 竖向浮层按钮；补齐 Enter/页面外点击失焦、空值恢复与 `PopupThemeTransition`，避免 × 清空后 `NaN` 导致按钮全灰。数值合同未变，Release engine 与 WinUI x64 build 通过；按用户要求未启动最终 GUI，视觉手测仍待用户侧验收。
@@ -562,8 +580,8 @@ PathService 已把 results/captures/reports/logs 改到
 - [x] 2026-07-15：RTX 5090 Vulkan 正式 15 秒 + 5.1 秒 RenderDoc 通过，结果 id `20260715-170629-492`，Compute 10.572 ms、Render 1.553 ms、Total 12.125 ms、`263.98 MParticle-step/s`、966 measured frames；capture 0.103 秒排除，1 attempt/1 saved。CLI Release 与 WinUI Release x64 build 通过。
 - [x] 2026-07-15：stage verifier 已覆盖 3 个 surface SPIR-V；v1/v2 capture 命名已隔离；非 15 秒预览结果进入独立 `_preview` 组。
 - [ ] `cinematic_liquid_v2` 的 WinUI 交互/run/history、船/沉球/越沿粒子精确数值与视觉轨迹、跨 GPU 时间推进合同、Vulkan timestamp 边界和异常路径资源清理仍待验收；DX12/DX11/OpenGL 液体仍未实现（**Metal 已有 MLS-MPM + raymarch preview，见目标 C / §3.0.1**）。
-- [x] **2026-07-19：macOS 最低系统锁定为 12 Monterey（代码侧已改）**：CMake/`macos-gui` deployment 12.0；`NavigationView`/`defaultSize` 可用性回退；文档 `HANDOFF` / `macos-notes` / `macos-gui/README` / 根 `README` 已同步。**真机 Monterey 编译产物运行验收仍开放**。
-- [x] **2026-07-19：iOS 规格写入**；**2026-07-24：源码垂直切片已写入仓库**（`ios-gui/` + embed host）。最低 **iOS 16**；**iOS 26/27 = Liquid Glass**。`GlassCard` 预留 `iOS 26.0`。**本机无 iOS 编译产物；无模拟器/真机验收。**
+- [x] **2026-07-19 / 2026-07-31：macOS 12 底线与当前 Mac vertical slice**：CMake/`macos-gui` deployment 12.0；`NavigationView`/`defaultSize` 可用性回退；M4 Pro 已完成自包含 App、三主项、原生 `.gputrace` 与独立启动验收。**实际 Monterey 运行仍开放**。
+- [~] **2026-07-19：iOS 规格写入**；**2026-07-24：源码垂直切片写入仓库**；**2026-07-31：首次 Mac/Xcode configure 通过，首次 build 揭示 desktop `main.cpp` blocker并已改 source graph，复建待执行**。最低 **iOS 16**；**iOS 26/27 = Liquid Glass**。当前仍无成功 App build、模拟器运行或真机验收，详见本节顶部 checkpoint 与完整计划。
 - [x] 2026-07-15：安装/Release 链完成并实跑：安装 Inno Setup 6.7.3，以官方 RenderDoc 1.45 固定 archive+SHA 为输入，从头构建 CLI/WinUI、511-file stage、PE delay-import 审计、CPack ZIP、ZIP 内容复核与 Inno Setup；最终 v0.1.0 ZIP/Setup、`SHA256SUMS.txt`、`release-assets.json` 已生成。
 - [x] 2026-07-15：应用户要求完成 duck family v5 场景改造（经典造型大黄鸭 + 3 只小鸭、7 刚体、SDF/渲染/碰撞三处一致、bounding 剔除；`cinematic_liquid_v2_duck_family_v5`、`shaderVersion=7`、`sceneVersion=3`）。CLI Release 重建通过；验证细节见第 10 节。15 秒正式成绩尚未在新版本下重跑。
 - [x] 2026-07-15：用户恢复流体工作后完成 iterative optics v6：保留用户的 duck family，surface 改为 5x5x5 binomial（mix 0.90），最多 4 界面 Fresnel/Snell + 分段 Beer–Lambert/opaque depth sorting，`extinction=(30,10,8)`、linear exposure、density 边界归零；`cinematic_liquid_v2_iterative_optics_v6`、`shaderVersion=8`、`sceneVersion=3`。CLI/WinUI Release 构建通过，只有 6 秒短预览，尚无正式 15 秒成绩。
@@ -573,22 +591,152 @@ PathService 已把 results/captures/reports/logs 改到
 - [x] 2026-07-16：完成 Windows ARM64 原生本体、WinUI GUI、ZIP、Inno Setup 安装包、依赖与全链路构建审计。通过自动构建 ARM64 `vulkan-1.lib` 并处理 `vcruntime140_1.dll`，全量测试及 CPack 打包全部通过，产物生成于 `out/release/windows-arm64/`。
 - [x] 2026-07-17：用户订 **MIT** 根 `LICENSE`；CMake/CPack 默认 `ZIP;WIX`；发布主路径改为 WiX MSI（x64+ARM64 原生 Template）；Inno 降为 legacy。本机已产出 `Mangekyo-0.1.3-windows-{x64,arm64}.msi`（stage `projectDistributionLicense=true`）。
 - [x] 2026-07-17：互动水池（`cinematic_liquid`）跨 API 需求曾短暂接 DX12，后按用户要求 **撤回**，恢复 Vulkan-only；勿把未接线的 HLSL 草稿写成已支持。
-- [ ] **平台下一刀（用户 2026-07-19 改序）**：macOS — 代码侧 Particle/Burn/SwiftUI/液体 raymarch/MTLCapture + **OS 底线 12** 已落，**真 Mac（含 Monterey）编译与三主项验收仍开放**。**Windows 7 GUI** 已后移至 HarmonyOS 之后、PS3 之前。
+- [x] **macOS vertical slice（2026-07-31）**：Particle/Burn/SwiftUI/液体 raymarch/MTLCapture + **OS 底线 12** 已落；M4 Pro 当前系统编译、三主项、抓帧、签名与 App 启动通过。实际 Monterey 与公开发布签名/notarization 仍是 release gate，不再把“未在 Mac 编译”列为事实。
 - [x] 实际 MSI/ZIP 与动态 Vulkan loader 已完成构建/静态审计；显式 Vulkan 缺 loader 的异常路径也已加 guard。
 - [ ] 冻结 report worker、Authenticode signing、GT120 实卡与 clean-machine 安装/升级/卸载/抓帧验收仍开放（**项目 LICENSE 阻塞已解除**）。
 - [x] **日语 GUI 本地化（2026-07-18 / 0.2.0）**：`gui/i18n.h` 扩展 `Lang::Ja`、`tr(en,zh,ja)`、`trDyn`、`usesYmdDate`、`detectOsLangLabel`；OS 自动探测 `LANG_JAPANESE`；设置页语言下拉增加「日本語」；`MainWindow.xaml.cpp` 全表 UI 文案含第三参日语。安装器 WiX 向导仍为英文（可选后续加日语 MSI UI）；Inno legacy 仍为 EN + 简体中文 `.isl`。成绩合同与内部 id 不变。
 
+### 完整移植与发布计划（2026-07-31 checkpoint）
+
+以下计划以当前未提交工作树为起点，执行顺序是 **先封装 macOS 0.2.6 双 DMG，再完成 iOS/iPadOS**。每一阶段都必须分别记录“源码存在 / 编译通过 / simulator 运行 / 真机运行 / 可公开发布”，不得用后一阶段尚未取得的结论描述前一阶段。
+
+#### Phase 0 — 恢复现场与变更边界
+
+1. 开工先读本节、§3.0.1、§3.0.3、§10，再执行 `git status --short` / `git diff --check`。当前工作树本来就有大量 macOS vertical-slice 改动；不要 reset、checkout 或覆盖这些文件。
+2. `results/` 是用户未跟踪数据，始终排除在删除、清理、暂存与提交之外。`out/` 是可再生验证产物，不作为源码完成证据。
+3. 继续前先复核暂停点新增/修改：`scripts/build-macos.sh`、`scripts/package-macos-dmg.sh`、`packaging/macos/README.txt.in`、`CMakeLists.txt`、`ios-gui/Mangekyo/Models/BenchResult.swift`、`MobileBenchmark.swift`。后两个 Swift model 尚未 build，不能假定 API/初始化器自动兼容。
+4. 不新建分支，不提交/推送，除非用户另行明确要求。每完成一个阶段立刻更新本节与 §10，避免再次只有聊天记录、没有仓库交接事实。
+
+#### Phase 1 — macOS 0.2.6 Apple Silicon / Intel 工程 DMG
+
+1. **版本单一来源**：确认 CMake/CPack、`macos-gui/project.yml`、`Info.plist`、生成的 pbxproj、App bundle 与 DMG 文件名都为 `0.2.6`；GUI About 应从 bundle 读取版本，不再硬编码。Build number 可独立递增，但必须在两架构一致。
+2. **干净构建两个单架构 slice**：用 `scripts/build-macos.sh --configuration Release --arch arm64` 与 `--arch x86_64` 分别生成自包含 App。继续 source-build pinned GLFW 3.4、Metal-only、deployment 12.0、无 Homebrew/Vulkan runtime 泄漏。
+3. **每个 slice 的强制静态门**：对 GUI/helper 执行 `lipo -archs`/`file`、`vtool -show-build`、`otool -L`、`plutil` 与 `codesign --verify --deep --strict`；检查三个 Metal shader、项目 license、third-party notices、GLFW license 都在 bundle。任何单项失败都不得生成“已验证”DMG。
+4. **运行门**：
+   - arm64：重新运行 App 启动/退出、CLI help/Metal probe，并至少重跑三主项 short smoke；既有 15 秒 Particle+capture、15 秒 Burn、6 秒 Liquid 记录保留为正式证据。
+   - x86_64：在本 M4 Pro 可尝试 Rosetta smoke（若系统具备 Rosetta），但这仍不能替代 Intel 硬件；至少保留交叉构建静态验收。公开写法必须是“Intel slice 已交叉编译/静态验证，Intel Mac runtime 待验证”。
+   - macOS 12：部署标记不是运行证据；实际 Monterey 启动/短跑继续作为兼容性 release gate。
+5. **生成两个独立 DMG**：运行 `scripts/package-macos-dmg.sh --arch all`。预期产物：
+   - `out/macos/packages/Mangekyo-0.2.6-macos-arm64.dmg`
+   - `out/macos/packages/Mangekyo-0.2.6-macos-x86_64.dmg`
+   - `out/macos/packages/Mangekyo-0.2.6-macos-SHA256SUMS.txt`
+6. **DMG 内容/介质复验**：`hdiutil verify`，readonly mount，检查 `Mangekyo.app`、指向 `/Applications` 的软链、README、LICENSE、THIRD_PARTY_NOTICES；对挂载后的 App 再执行架构/minOS/依赖/签名/bundle 版本检查，detach 后验证 SHA-256。
+7. **工程包与公开包分界**：ad-hoc 签名双 DMG 可作为本地工程交付；公开下载仍需要 Developer ID Application 重签、notary submit/wait、staple、Gatekeeper (`spctl`) 和干净用户账户安装验证。不要把 ad-hoc DMG 写成“已公证发布”。
+8. 两个 DMG 均通过上述门后，更新根 README、`macos-gui/README.md`、`docs/macos-notes.md` 和本文件，列明真实路径/hash、机器/系统、arm64 runtime 与 x86_64 验证层级。
+
+#### Phase 2 — iOS/iPadOS 原生引擎边界
+
+1. **彻底拆开 desktop CLI 与 mobile archive**：iOS `gpu_engine` 不包含 `src/main.cpp`、终端菜单、`std::system`、process spawning、GLFW 或桌面路径假设；macOS/Windows CLI target 保持原行为。先复建 simulator static library，随后复建 macOS，防止 source-list 调整造成桌面回归。
+2. **Bridge 不再伪装 CLI**：移除 iOS App 对 `cliMain`/`gpb_run` 的依赖。设备探测直接调用 `ProbeMetalDevices`；GPU 运行通过 typed request 调 `ios_engine_host`；CPU 通过可取消的原生 `RunCpuBenchmark` adapter。若某能力尚未接好，Bridge 返回 typed unavailable/error，UI 禁用，不静默失败。
+3. **稳定的 C ABI / Swift wrapper** 至少包含：
+   - engine/app version、Metal device/capability probe；
+   - `start(workload, duration, capture options, CAMetalLayer)`；
+   - `requestStop(reason)`、`isRunning`、elapsed/phase/progress；
+   - structured error code/message/recovery；
+   - 最终 result JSON 与 capture outcome/path；
+   - CPU start/cancel/progress/result（如果本切片实现；否则明确 unavailable）。
+   生命周期须保证同一时刻只运行一个任务，Swift 对象销毁/进后台时不会留下 native thread 或悬空 layer。
+4. **路径与 sandbox**：结果写 Application Support，用户导出写临时/Documents 后走 Files/Share；不要使用 macOS `~/Library/...` 假设。所有 native 文件写入错误回传 UI，不能只写 stderr。
+5. **Capture**：iOS 仅使用 `MTLCaptureManager`，禁止 RenderDoc。请求成功必须返回真实存在的 `.gputrace`；SDK/device 不允许时返回 `captureUnavailable`，并说明原因。模拟器 capture 与真机 capture 分开记录。
+6. **构建产物**：先令 CMake Xcode target 在 `iphonesimulator arm64` 与 generic `iphoneos arm64 CODE_SIGNING_ALLOWED=NO` 编译通过；再决定 App 直接链接 per-SDK static lib，或产出不混淆 simulator/device slice 的 xcframework。不得将 simulator binary 塞进 device App。
+
+#### Phase 3 — iOS 三主 workload 合同
+
+1. **Particle / `stream`**：接通现有 embedded host，确认 particle count、duration、Metal device、统一内存、score unit 与 JSON schema；mobile timing/thermal 模型继续使用独立 `_ios_preview`（或经真机数据评审后的新版本），不得混入 desktop 15 秒榜。
+2. **GPU Burn / `gpu_burn`**：接通 16-step 安全 profile 与 `gpu_burn.metal`；确认真实 shader/workloadVersion 来自 engine result，而不是 Swift UI 硬编码。记录 frame/GPU timing、stable variance 与 throttle；模拟器成绩必须标 `simulator` 且不入正式排行。
+3. **Cinematic Liquid**：把 `cinematic_liquid` parser 接到现有 Metal v2 host，将 `cinematic_liquid_v2.metal` 纳入 iOS bundle，核对 320,920 particles / 128×64×96 / 10 substeps 与内存上限。移动端先保持明确的 Metal+iOS preview 合同；若为防内存/温控调整粒子数、substeps 或 duration，必须再升独立 workloadVersion。
+4. 三项共同规则：只暴露 Metal；预热、计分窗口、抓帧排除、取消、后台中止、错误 JSON 与保存路径语义一致；不支持的组合显式 unsupported。Swift `MobileBenchmark.expectedContract` 最终不得保留 `…` placeholder，也不得成为合同真相源，应显示 native result 的真实 version。
+5. “三个测试没问题”的最低证据分三层写：
+   - build pass：只能说明代码编译；
+   - simulator smoke：说明 UI/生命周期/模拟 Metal 路径可运行，不代表真机性能；
+   - physical device pass：每项实际完成、有可解析结果、无 crash/资源泄漏，才允许写 iOS 三主项通过。
+
+#### Phase 4 — SwiftUI 产品功能对齐
+
+1. 重写 `BenchEngine` 为 direct embedded async state machine：preparing/running/cancelling/completed/failed、基于 elapsed 的真实进度、重复启动保护、用户 cancel、scenePhase 进后台 cancel、结构化 issue 和最终 result decode。
+2. **Run**：三主项、duration、capture capability、Metal-only device info、progress/cancel/result summary；只有三个 host capability 全部通过才启用 Complete Suite / Fill Missing，部分支持时逐项说明。
+3. **CPU**：接 native CPU API 后再启用；若本切片没有 native adapter，页面保留但明确 unavailable，绝不调用 `gpb_run`。
+4. **History / Charts**：读取 schema v2/v4 及 legacy 数据；按 workloadVersion/device/platform 过滤；隐藏但保留异常 legacy score；使用原生 Charts（可用系统）和 SwiftUI fallback；JSON/CSV 导出到 Files 并提供 Share，失败显示 structured issue。
+5. **Settings / About**：语言 EN/简中/日语、主题/外观、存储说明/清理的安全范围、能力列表；版本从 `Bundle` 读取并显示 0.2.6，engine version 来自 Bridge。任何清理动作不得触碰用户未授权文件。
+6. **adaptive shell**：iPhone 使用 Tab/NavigationStack；iPad 使用 NavigationSplitView/合适宽度布局与旋转；Dynamic Type、VoiceOver label、safe area、键盘/弹窗与深浅色至少做 smoke。
+7. **视觉版本**：iOS 16–25 使用 Material/标准 SwiftUI；iOS 26+ 使用实际 `.glassEffect`/Liquid Glass 且有 availability guard。不能用 Material 截图冒充 Glass，也不能让 iOS 26 符号破坏 deployment 16 构建。
+
+#### Phase 5 — 版本、工程与 build matrix
+
+1. 将 `ios-gui/project.yml`、`Info.plist`、生成 pbxproj、App/About、Bridge engine version 全部对齐 `0.2.6`；确保 iPhone+iPad device families、deployment 16.0、Metal capture/Files sharing 等键只按真实能力配置。
+2. 资源 target membership 至少包含三个 `.metal` shader、Assets、本地化与需要的 notices；App 不依赖仓库相对路径或外部 CLI。
+3. fresh generate 工程后依次执行：
+   - iPhoneSimulator arm64 library/App Release build；
+   - iPhone 16 Pro / iOS 18.5 simulator build、install、launch；
+   - iPad Pro 11-inch (M4) / iOS 18.5 build、install、launch；
+   - iPhone 17 Pro / iOS 26.5 build、install、launch并检查 Glass；
+   - generic iOS device arm64 archive/build with signing disabled（编译/链接门）。
+4. 生成工程后再检查 pbxproj diff；不要同时手改 `project.yml` 和生成文件而让它们漂移。Swift/C++ warning 中涉及 concurrency、lifetime、availability、nullability 与 result decode 的问题必须关闭，不能只看 exit code。
+5. 每个 build 使用 fresh DerivedData/构建目录至少验证一次；增量成功不能替代 clean build。
+
+#### Phase 6 — 运行与回归验证梯度
+
+1. **模拟器基础**：启动、六页导航、phone/iPad adaptive、语言/主题、后台/前台、cancel、错误路径、History save/read、JSON/CSV export/share sheet；iOS 26.5 目视确认真正 Glass。
+2. **模拟器 workload**：若 simulator Metal 支持，则分别短跑 stream/burn/liquid 并解析 result；结果强制标 simulator/unranked。若 shader/capture/timestamp 能力不同，记录真实 unavailable，不通过 CPU fallback 伪造。
+3. **真机（正式必需）**：至少一台受支持 iPhone 与一台目标 iPad，逐项跑三主测试；记录设备/OS/SoC、duration、温控状态、内存峰值、score/stability、workloadVersion。验证 cancel、锁屏/来电或后台、内存压力、连续 Complete Suite、History/Charts/export。
+4. **真机 capture**：对至少一个 workload 请求 capture；成功时验证 `.gputrace` 可在 Mac Xcode 打开，失败时验证 JSON/UI 为 `captureUnavailable`。抓帧窗口不得进入正式计分。
+5. **iOS 16 底线**：当前 simulator inventory 没有 iOS 16 runtime；deployment 16 clean build 只是静态证据。发布前需补 iOS 16/17 真机或对应 runtime 的启动/短跑，或把“实际 iOS 16 未测”列为已知限制。
+6. **桌面回归**：iOS source graph/Bridge 修改后重建 macOS arm64 app，并至少跑 Metal probe + 三主项 short smoke；确保移动端条件编译没有破坏已通过的 macOS 0.2.6。
+
+#### Phase 7 — TestFlight / App Store 交付
+
+1. 当前机器没有有效 codesigning identity，也没有连接真机；需要用户提供 Apple Developer Team/证书/provisioning 或在 Xcode 登录后，才能做真机安装、Archive、TestFlight。
+2. 补齐 App icon/launch experience、PrivacyInfo.xcprivacy、数据收集/文件共享说明、后台能力最小化、export compliance 与第三方 notices；禁止运行时下载可执行代码或 RenderDoc。
+3. Product Archive 后做 Organizer Validate、签名/entitlements 审计、安装到干净设备、TestFlight internal smoke。App Store 文案必须把移动成绩标成独立合同，不宣称和 Windows/macOS 正式分数可直接比较。
+
+#### Phase 8 — 完成定义与剩余阻塞
+
+| 里程碑 | 必须满足 | 当前状态 |
+|---|---|---|
+| macOS 0.2.6 工程 DMG | 两 slice clean build；DMG readonly 挂载复验；SHA-256；arm64 runtime；Intel 层级诚实标注 | **进行中**：x86_64 build/static pass；DMG 脚本已写但未运行 |
+| macOS 0.2.6 公开发布 | Developer ID、notarization/staple、Gatekeeper、实际 Monterey；最好实际 Intel runtime | **阻塞于证书/外部机器** |
+| iOS source/build complete | mobile 无 CLI/process；三 host+shader；SwiftUI clean build；sim+generic-device build | **未完成**：configure pass；首次 build blocker 已修源码但未复建 |
+| iOS simulator vertical slice | iPhone+iPad+iOS26 启动；三项能跑或诚实 capability；History/export/background | **未开始运行验收** |
+| iOS/iPadOS 产品完成 | iPhone+iPad 真机三项、capture、温控/内存/后台、签名 archive/TestFlight | **阻塞于签名与物理设备，并且代码尚未完成** |
+
+**恢复后的最短正确执行链**：先运行并修到 `scripts/package-macos-dmg.sh --arch all` 全通过、登记两 DMG/hash；然后复建已排除 `main.cpp` 的 iOS `gpu_engine`；接着去除 Bridge/Swift 的 `cliMain`/`gpb_run`，接通三 workload+第三 shader；再完成 SwiftUI state/history/export；最后跑三类 simulator 与 generic device build。没有物理设备前可以完成“编译 + simulator vertical slice”，但不得把 iOS 三主项写成真机已通过或可发布。
+
 ### 推荐下一个实现切片
 
-用户在 **2026-07-19** 将 **Windows 7 GUI** 从 ARM64 之后挪到 **PS3 之前**（HarmonyOS 之后）。ARM64 原生本体与双语 Setup 主路径已落地。平台/产品切片按以下理解执行：
+用户在 **2026-07-19** 将 **Windows 7 GUI** 从 ARM64 之后挪到 **PS3 之前**（HarmonyOS 之后）；用户在 **2026-07-31** 又明确要求当前先完成 macOS 0.2.6 双 DMG、随后继续 iOS/iPadOS。因此最近的执行队列按以下理解：
 
 1. **Windows ARM64 vertical slice（已完成）**：含原生测项、GUI、ZIP 与原生 ARM64 中英双语 Setup。
-2. **macOS vertical slice（平台下一刀）**：Particle + GPU Burn + 液体 raymarch + MTLCapture + **deployment macOS 12** **代码已落 → 真机验收（优先含 Monterey 冒烟）**；SwiftUI 已对齐 → Mac 编译验收。
-3. **回到未关闭的正确性与自由模式**（可与平台刀并行由用户指定）：依次关闭 Cinematic Liquid SPH 的 frame-driven timestep、per-substep impulse clear、viscosity race、atomic scatter ordering；之后再做 Liquid Lab / Explore、GPU Burn Unlimited Soak 和 VRAM Integrity Soak。四项关闭前 SPH 始终 `_preview`，旧结果合同不变。
-4. **Windows 完整公开发布收口**仍开放：冻结 `report_worker`，签名证书，在干净 Windows 10/11 VM 验收 bundled RenderDoc 和完整 GUI-first Setup 安装/自定义路径/升级/卸载。
-5. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Collaboration；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
+2. **macOS vertical slice（功能完成，0.2.6 双 DMG 正在收口）**：先实际运行新打包脚本，取得 arm64/x86_64 两份 DMG 与 checksum；公开 release 仍补实际 Monterey、Developer ID/notarization 和 Intel runtime。
+3. **紧接着完成 iOS/iPadOS**：按上面的 Phase 2–7 完成 mobile engine、三主项、SwiftUI、simulator/device build 与真实验证。Android 由原顺序第三位临时后移到本轮 iOS 收口之后。
+4. **回到未关闭的正确性与自由模式**（可与平台刀并行由用户指定）：依次关闭 Cinematic Liquid SPH 的 frame-driven timestep、per-substep impulse clear、viscosity race、atomic scatter ordering；之后再做 Liquid Lab / Explore、GPU Burn Unlimited Soak 和 VRAM Integrity Soak。四项关闭前 SPH 始终 `_preview`，旧结果合同不变。
+5. **Windows 完整公开发布收口**仍开放：冻结 `report_worker`，签名证书，在干净 Windows 10/11 VM 验收 bundled RenderDoc 和完整 GUI-first Setup 安装/自定义路径/升级/卸载。
+6. 本轮 iOS 完成后回到 Android，再继续 Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Collaboration；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
 
 ## 10. 验证记录
+
+### 2026-07-31 暂停点：macOS x86_64 交叉构建、DMG 脚本与 iOS 首次 Xcode build
+
+- macOS x86_64：`scripts/build-macos.sh` 的实际交叉构建完整通过，产物为 `out/macos/x86_64/Release/GPUBenchmark.app`；GUI/helper 均只含 x86_64、`minos 12.0`、ad-hoc deep codesign 通过，`otool -L` 无非系统依赖。主机是 arm64，所以没有把它记为 Intel runtime pass。
+- macOS DMG：`scripts/package-macos-dmg.sh` 与 `packaging/macos/README.txt.in` 已存在，`bash -n scripts/build-macos.sh` 和 `bash -n scripts/package-macos-dmg.sh` 通过。**未执行实际 `hdiutil create/attach` 全链，因此无 DMG/hash 可登记。**
+- iOS configure 命令：
+  `cmake -S . -B /private/tmp/mangekyo-ios-audit.VHIRua -GXcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO`
+  结果为 **PASS**；Metal ON、其它 GPU API OFF、NO_GLFW、`ios_engine_host` ON、target 为 `arm64-apple-ios16.0-simulator`。
+- iOS 首次 build：
+  `cmake --build /private/tmp/mangekyo-ios-audit.VHIRua --config Release --target gpu_engine -- -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO`
+  结果为 **FAIL**；首要错误是 `src/main.cpp` 5 处 `std::system` 在 iOS SDK unavailable。`CMakeLists.txt` 已改为 iOS archive 排除 desktop `main.cpp`，但本会话为保存 handoff 而暂停，**修改后的 build 尚未重跑**。
+- iOS Swift：`BenchResult.swift` 和新增 `MobileBenchmark.swift` 只有源码 diff，尚无 `xcodebuild` 证据；不得因 model 存在就写 GUI 已支持三主项。
+- 环境限制：Xcode 26.6；有 iOS 18.5 的 iPhone/iPad 与 iOS 26.5 iPhone simulator；0 个有效 codesigning identity，无连接的 iPhone/iPad。generic-device 无签名编译仍可做，但真机安装/性能/capture/TestFlight 不能在当前权限与硬件状态下完成。
+
+### 2026-07-31 macOS M4 Pro 自包含 App、三主项与原生抓帧
+
+- 环境：Apple M4 Pro，macOS 26.5.2，Xcode 26.6；源码目标仍为 **macOS 12.0**。
+- `./scripts/build-macos.sh` 成功生成 `out/macos/arm64/Release/GPUBenchmark.app`。GUI/helper 均为 arm64、`LC_BUILD_VERSION minos 12.0`；`otool -L` 只有系统 framework/lib，Charts 为 weak framework，无 `/opt/homebrew` / `/usr/local` / Vulkan dylib；`codesign --verify --deep --strict` 通过。App 脱离仓库 `open -n` 启动并可正常退出。
+- 默认 CMake fresh configure/build/package 通过；非 Windows CPack 只启用 ZIP，产出 `Mangekyo-0.2.6-Darwin-arm64.zip` + SHA256。另以 `-Werror=unguarded-availability-new` 完成严格 macOS 12 build。GLFW 3.4 从 pinned URL/SHA 源码静态构建；没有使用本机 minos 26 的 Homebrew bottle。
+- 包内 helper：`stream --particles 1048576 --time 15 --capture 5` 成功，结果 `memory=Unified-memory`、63.987 GB/s，并写出真实 `.gputrace`（captureCount=1；抓帧窗口排除计分）。
+- 包内 helper：`gpu_burn --iter 16 --time 15 --no-renderdoc` 成功，render 7.092 ms、4.16 Gpix-step/s、stable CV 0.14%、early→late drop 0.1%。
+- 包内 helper：`cinematic_liquid --time 6 --no-renderdoc` 成功，正确报告 320,920 particles、128x64x96、10 substeps；compute 7.994 ms、render 14.263 ms。该结果仍属于 `_metal_preview`，不与 Vulkan v8 正式榜混排。
+- CPU `--cpu-benchmark all --cpu-time 0.1 --cpu-warmup 0.05 --cpu-no-save`、Metal headless stream/N-body/SynthPeak、windowed Render3D/Volumetric 也完成 smoke。`gpu_stress`、legacy fluid/v1 liquid 在 Metal 上继续显式 unsupported，不做静默 fallback。
+- 未完成/不得夸大：没有在实际 Monterey 系统运行；没有 Developer ID/notarization/universal binary；Metal Liquid 尚非正式跨 API 合同。
 
 ### 2026-07-21 Windows 开发默认 CLI+GUI 构建与同目录 shader
 

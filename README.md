@@ -46,7 +46,8 @@ as their own result groups (new `workloadVersion` whenever the timing or
 capture model differs), so existing Windows score comparisons are never
 affected. HarmonyOS already has an isolated Vulkan particle prototype, but it
 is not the current benchmark suite. Windows ARM64 packaging has landed; the
-next platform slice is macOS.
+macOS vertical slice is now validated on an M4 Pro, so Android is next unless
+the user changes the order.
 
 1. **Windows on ARM (ARM64)** — native CLI/WinUI plus a native bilingual
    ARM64 Setup executable landed; x64 uses the same installer implementation;
@@ -54,15 +55,19 @@ next platform slice is macOS.
 2. **macOS** — Product floor **macOS 12 Monterey** (CLI + SwiftUI). Metal code
    for the three primary workloads has landed: Particle + GPU Burn + Cinematic
    Liquid MLS-MPM/raymarch (`…_metal_preview`) + `MTLCaptureManager` (.gputrace).
-   SwiftUI is aligned with WinUI (Liquid Glass on 26, Material on 12–15). Still
-   open: real-Mac compile/smoke and formal acceptance.
+   The self-contained arm64 App, 15-second Particle/capture, 15-second GPU Burn,
+   Liquid preview, and independent GUI launch are validated on an M4 Pro.
+   Still open: an actual Monterey runtime smoke, Developer ID/notarization, and
+   (if needed for release) a universal binary.
 3. **Android** — reuses the Vulkan backend; GLFW does not support Android, so
    a NativeActivity/ANativeWindow surface layer and a new frontend are
    required. RenderDoc supports Android remote capture. Thermal throttling
    may require a separate mobile duration contract.
-4. **iOS** — Not started (after Android). Floor **iOS 16**. Metal only; no
-   RenderDoc; `MTLCaptureManager`; shared SwiftUI with macOS. **iOS 26 / 27
-   must use Liquid Glass** (Material on 16–25). See `HANDOFF.md` §3.0.3.
+4. **iOS** — Source vertical slice exists but has not been built or accepted on
+   a simulator/device. Floor **iOS 16**. Metal only; no RenderDoc;
+   `MTLCaptureManager`; SwiftUI follows the macOS information architecture.
+   **iOS 26 / 27 must use Liquid Glass** (Material on 16–25). See `HANDOFF.md`
+   §3.0.3.
 5. **Debian Linux** — technically the lowest-friction port: Vulkan/OpenGL
    backends, GLFW, RenderDoc and the XDG data path already exist; mostly
    build fixes, `.deb` packaging, CI and real-machine validation.
@@ -179,14 +184,12 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
 - `stream` is bandwidth-dominated (~0.15 FLOP/byte), so its GB/s score is mainly
   a working-set memory-throughput result rather than a complete GPU-performance
   score. `nbody` is a shared-memory-tiled all-pairs simulation that is genuinely
-  ALU/SFU-bound. `gpu_burn` is a versioned, auto-tuned visual GraphicsBurn: two
-  fixed-step fullscreen passes raymarch a perspective 3D Mangekyo crown built
-  from truncated cut gems and layered diamond shards. Planar SDF normals,
-  Fresnel reflection, chromatic refraction, absorption and camera parallax make
-  the geometry visibly faceted while consuming FP32/SFU/INT work.
+  ALU/SFU-bound. Public `gpu_burn` is the versioned Plasma × Kaleidoscope visual
+  burn: two fixed-step fullscreen passes consume FP32/SFU/INT work while keeping
+  the per-frame contract explicit in `workloadVersion`.
   `gpu_burn_v1` preserves a historical Plasma Bloom selector/result identity.
   Public `gpu_burn` runs on Vulkan, DX12, DX11, OpenGL (including DX WARP), and
-  **Metal** (`gpu_burn.metal`, pending real-Mac verification). `gpu_stress`
+  **Metal** (`gpu_burn.metal`, validated for 15 seconds on an M4 Pro). `gpu_stress`
   remains Metal-unsupported. Neither burn path is currently a hardware-error
   detector. `stress` is the unchanged legacy fractal test;
   `synthpeak` is a vkpeak-style
@@ -416,12 +419,15 @@ cmake --build build --config Release
 
 **macOS:**
 ```bash
-brew install glfw cmake
-cmake -S . -B build && cmake --build build --config Release
-./build/gpu_benchmark
+./scripts/build-macos.sh
+open out/macos/$(uname -m)/Release/GPUBenchmark.app
 ```
 
-Toggle individual backends with `-DENABLE_VULKAN=OFF`, `-DENABLE_DX12=ON`, etc.
+The script builds checksum-pinned GLFW 3.4 from source and stages a Metal-only,
+self-contained App; Homebrew is not required. See `macos-gui/README.md` for
+offline source overrides, signing, bundle layout, and validation details.
+Toggle individual developer backends with `-DENABLE_VULKAN=ON`,
+`-DENABLE_OPENGL=OFF`, etc.
 
 ## Run Mangekyo
 
@@ -527,6 +533,7 @@ It uses `VK_OHOS_surface` + XComponent instead of GLFW. See
 |----------|-------------|
 | [`docs/report.md`](docs/report.md) | Full cross-platform & cross-GPU performance analysis |
 | [`docs/benchmark-workload-suite.md`](docs/benchmark-workload-suite.md) | Workload suite design — bandwidth / compute / fill / peak axes, scoring |
+| [`docs/interpreting-stream-bandwidth.md`](docs/interpreting-stream-bandwidth.md) | What the Particle GB/s score means — byte accounting, cache vs memory, vendor peaks |
 | [`docs/nbody-workload-plan.md`](docs/nbody-workload-plan.md) | N-body compute workload — algorithm, scaling, integration |
 | [`docs/winui3-render3d-plan.md`](docs/winui3-render3d-plan.md) | WinUI3 integration, true-3D rendering, and RenderDoc plan |
 | [`docs/building.md`](docs/building.md) | Detailed build prerequisites and platform setup |

@@ -22,8 +22,8 @@ Windows build: prefer [`scripts/build-windows.ps1`](../scripts/build-windows.ps1
 | `vsync` | `false` | |
 | `headless` | `false` | |
 | `hostMemory` | `false` | |
-| `captureAtSec` | `-1.0` | <0 = no RenderDoc capture |
-| `renderDocEnabled` | `true` | master switch; `--no-renderdoc` skips DLL/API initialization and manual F12 |
+| `captureAtSec` | `-1.0` | <0 = no automatic GPU capture |
+| `renderDocEnabled` | `true` | historical field name for the capture master switch; `--no-renderdoc` disables RenderDoc and native Metal capture |
 | `fractalIter` / `peakIters` | `2000` / `16384` | stress / synthpeak |
 | n-body bodies | `65536` | `kNBodyDefaultBodies` |
 
@@ -118,7 +118,7 @@ loadable and are marked as legacy/unknown where those fields did not exist.
 | `--complete-suite` | run the formal 15-second matrix on every GPU and compiled API: Particle 65K/1M/4M/16M both windowed and headless, GPU Burn 64 steps, and Cinematic Liquid; windowed jobs request a 5-second capture and unsupported combinations are attempted and recorded |
 | `--fill-missing` | inspect both `results.json` and the real capture directory, then offer to run only missing scores/captures; known unsupported and previously failed combinations are reported but not retried |
 | `--yes` | confirm `--fill-missing` non-interactively (used by the GUI after its confirmation dialog) |
-| `--capture [sec]` | RenderDoc capture at T seconds (default 5) |
+| `--capture [sec]` | GPU capture at T seconds (default 5): RenderDoc `.rdc` where available, native Metal `.gputrace` on macOS |
 | `--full-analysis` | same as menu [5] |
 | `--results` / `--results-delete <id>` / `--results-clear` / `--results-export <csv>` | result management |
 | `--compare [id1 id2]` / `--list-gpus` / `--help` | compare / list GPUs / help; comparison groups keep windowed and headless execution separate |
@@ -191,14 +191,16 @@ authoritative P/E/Mid/LPE microarchitecture identification.
 | Tool | When | What |
 |---|---|---|
 | RenderDoc In-App API | during a run when `captureAtSec > 0` (menu 5/6/7/8) | captures `.rdc` via `renderdoc_app.h`; timed capture is clamped to `duration - 1s`, and disabled when duration is at most 1s |
+| `MTLCaptureManager` | Metal windowed run when capture is requested | captures a native `.gputrace`; the app enables Metal capture explicitly and records `captureUnavailable` if the destination is unavailable |
 | `renderdoccmd.exe convert` | after 5/6/7/8 if captures exist | `.rdc` → chrome JSON |
 | `python scripts/rdoc_analyse.py` | 5/6 only | `docs/rdoc_comparison.md` |
 | `python scripts/plot_results.py` | 5/6 only | `docs/images/*.png` |
 | `python scripts/export_report.py` | 5/6 only | `docs/results-table.md` + `docs/report.html` |
 
-`--renderdoc` enables RenderDoc injection and manual F12 capture independently
-of the automatic timer. `--no-renderdoc` is a true master-off switch: the worker
-does not initialize the RenderDoc DLL/API and ignores automatic/manual capture.
+`--renderdoc` enables the platform capture integration and manual F12 capture
+independently of the automatic timer. On Windows/Linux this means RenderDoc; on
+Metal it means `MTLCaptureManager`. `--no-renderdoc` is a true master-off switch:
+the worker initializes neither capture path and ignores automatic/manual capture.
 
 ## 5. GUI parity
 
