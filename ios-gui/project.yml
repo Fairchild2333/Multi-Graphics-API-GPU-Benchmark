@@ -12,6 +12,9 @@ settings:
     SWIFT_VERSION: "6.0"
     IPHONEOS_DEPLOYMENT_TARGET: "16.0"
     CLANG_CXX_LANGUAGE_STANDARD: "c++17"
+    GCC_PREPROCESSOR_DEFINITIONS:
+      - "HAVE_METAL=1"
+      - "GPU_BENCH_NO_GLFW=1"
 
 targets:
   Mangekyo:
@@ -27,18 +30,23 @@ targets:
         buildPhase: resources
       - path: ../shaders/gpu_burn.metal
         buildPhase: resources
+      - path: ../shaders/cinematic_liquid_v2.metal
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.fairchild.Mangekyo
-        INFOPLIST_GENERATION_CLASS: MangekyoApp
+        INFOPLIST_FILE: Info.plist
         SWIFT_OBJC_BRIDGING_HEADER: Mangekyo/Engine/GPUBenchmark-Bridging-Header.h
         HEADER_SEARCH_PATHS:
-          - "$(PROJECT_DIR)/../src"
+          - '"$(PROJECT_DIR)/../src"'
         LIBRARY_SEARCH_PATHS:
-          - "$(PROJECT_DIR)/../build-ios/Release-iphoneos"
-          - "$(PROJECT_DIR)/../build-ios/Release-iphonesimulator"
-          - "$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)"
-          - "$(PROJECT_DIR)/../build"
+          - '"$(PROJECT_DIR)/../build-ios/Release-iphoneos"'
+          - '"$(PROJECT_DIR)/../build-ios/Release-iphoneos/Release-iphoneos"'
+          - '"$(PROJECT_DIR)/../build-ios/Release-iphonesimulator"'
+          - '"$(PROJECT_DIR)/../build-ios/Release-iphonesimulator/Release-iphonesimulator"'
+          - '"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)"'
+          - '"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)"'
+          - '"$(PROJECT_DIR)/../build"'
         OTHER_LDFLAGS:
           - "-lgpu_engine"
           - "-lc++"

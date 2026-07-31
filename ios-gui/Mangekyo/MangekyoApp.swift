@@ -15,7 +15,7 @@ struct MangekyoApp: App {
                 .environmentObject(engine)
                 .preferredColorScheme(colorScheme)
         }
-        .onChange(of: scenePhase) { _, newPhase in
+        .onChange(of: scenePhase) { newPhase in
             switch newPhase {
             case .background:
                 // iOS: cancel running benchmark when entering background

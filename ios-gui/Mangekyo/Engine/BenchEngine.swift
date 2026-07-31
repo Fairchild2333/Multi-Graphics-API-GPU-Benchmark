@@ -61,7 +61,7 @@ final class BenchEngine: ObservableObject {
 
         let shaderDir = docs.appendingPathComponent("shaders", isDirectory: true)
         try? FileManager.default.createDirectory(at: shaderDir, withIntermediateDirectories: true)
-        for name in ["particle.metal", "gpu_burn.metal"] {
+        for name in ["particle.metal", "gpu_burn.metal", "cinematic_liquid_v2.metal"] {
             let dest = shaderDir.appendingPathComponent(name)
             if FileManager.default.fileExists(atPath: dest.path) { continue }
             if let src = Bundle.main.url(forResource: name, withExtension: nil)
@@ -236,8 +236,8 @@ final class BenchEngine: ObservableObject {
         // Prefer embedded host for single stream/gpu_burn preview-style jobs.
         if jobs.count == 1 {
             let job = jobs[0]
-            let wl = job.first(where: { ["stream", "gpu_burn", "particle"].contains($0) })
-                ?? job.dropFirst().first { ["stream", "gpu_burn"].contains($0) }
+            let wl = job.first(where: { ["stream", "gpu_burn", "particle", "cinematic_liquid"].contains($0) })
+                ?? job.dropFirst().first { ["stream", "gpu_burn", "cinematic_liquid"].contains($0) }
             if let wl, metalLayer != nil {
                 var seconds = 3.0
                 if let i = job.firstIndex(of: "--time"), i + 1 < job.count,
@@ -315,9 +315,10 @@ final class BenchEngine: ObservableObject {
             }
         }
 
-        let selfRef = await MainActor.run {
-            Unmanaged.passUnretained(self).toOpaque()
+        let selfRefBits = await MainActor.run {
+            UInt(bitPattern: Unmanaged.passUnretained(self).toOpaque())
         }
+        let selfRef = UnsafeMutableRawPointer(bitPattern: selfRefBits)
         _ = cPtrs.withUnsafeMutableBufferPointer { buf in
             gpb_run(buf.baseAddress, argc, callback, selfRef)
         }

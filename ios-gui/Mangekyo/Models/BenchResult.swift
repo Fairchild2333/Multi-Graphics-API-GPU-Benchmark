@@ -5,6 +5,7 @@ import Foundation
 struct BenchResult: Codable, Identifiable, Hashable {
     var id: String
     var timestamp: String
+    var resultSchemaVersion: UInt32?
     var appVersion: String?
 
     var workload: String
@@ -15,6 +16,9 @@ struct BenchResult: Codable, Identifiable, Hashable {
     var driverVersion: String
     var cpuName: String
     var osVersion: String
+    var platform: String?
+    var osArchitecture: String?
+    var processArchitecture: String?
     var memory: String
     var vramMB: UInt32
     var resWidth: UInt32
@@ -49,6 +53,9 @@ struct BenchResult: Codable, Identifiable, Hashable {
     var score: Double
     var scoreUnit: String
     var precision: String
+    var stableScore: Double?
+    var stableVariancePct: Double?
+    var throttlePct: Double?
 
     /// Parsed timestamp for sorting/filtering.
     var date: Date? {
@@ -65,5 +72,92 @@ struct BenchResult: Codable, Identifiable, Hashable {
     var displaySummary: String {
         String(format: "%@ | %@ | %@ | %.0f FPS | %.2f ms",
                graphicsApi, deviceName, difficulty, avgFps, avgTotalGpuMs)
+    }
+
+    /// Read a `key=value` item from the semicolon-delimited workload contract.
+    func workloadConfigValue(_ key: String) -> String? {
+        guard let workloadConfig else { return nil }
+        return workloadConfig
+            .split(separator: ";")
+            .lazy
+            .compactMap { component -> (String, String)? in
+                let pair = component.split(separator: "=", maxSplits: 1)
+                guard pair.count == 2 else { return nil }
+                return (
+                    pair[0].trimmingCharacters(in: .whitespacesAndNewlines),
+                    pair[1].trimmingCharacters(in: .whitespacesAndNewlines)
+                )
+            }
+            .first(where: { $0.0 == key })?
+            .1
+    }
+
+    /// Imported desktop records can describe modes that the iOS runner cannot
+    /// create. Keep them distinguishable without presenting them as available.
+    var executionMode: String {
+        var mode = workloadConfigValue("multiGpu")
+        if mode == nil {
+            if workloadVersion?.contains("_afr2") == true {
+                mode = "afr"
+            } else if workloadVersion?.contains("_sfr2") == true {
+                mode = "sfr"
+            }
+        }
+
+        if mode == "afr" {
+            switch workloadConfigValue("afrControl") {
+            case "implicit_driver_unverified":
+                return Localization.tr("AFR (unverified)", "AFR（未验证）", "AFR（未検証）")
+            case "explicit_vulkan_device_group":
+                return Localization.tr("AFR (experimental)", "AFR（实验）", "AFR（実験）")
+            case nil, "":
+                return Localization.tr("AFR (legacy)", "AFR（旧记录）", "AFR（旧記録）")
+            default:
+                return "AFR ×2"
+            }
+        }
+        if mode == "sfr" { return "SFR ×2" }
+        if headless { return "Headless" }
+        return Localization.tr("Single", "单卡", "単一 GPU")
+    }
+
+    /// Old bandwidth rows can contain impossible values produced by broken
+    /// timestamp queries. Preserve the JSON, but do not rank the value.
+    var hidesImplausibleLegacyScore: Bool {
+        let legacy = (resultSchemaVersion ?? 1) < 4 ||
+            appVersion?.isEmpty != false ||
+            appVersion == "Unknown (legacy)"
+        let bandwidthScore = scoreUnit.localizedCaseInsensitiveContains("GB/s")
+        guard legacy, bandwidthScore else { return false }
+        return !score.isFinite ||
+            !avgFps.isFinite ||
+            !avgComputeMs.isFinite ||
+            score > 10_000 ||
+            (score > 0 && avgFps <= 0)
+    }
+
+    var normalizedScore: Double {
+        guard !hidesImplausibleLegacyScore, score.isFinite, score > 0 else {
+            return 0
+        }
+        return score
+    }
+
+    var scoreDisplay: String {
+        if workload == "fluid" {
+            return Localization.tr("Unverified legacy", "未验证旧版", "未検証の旧版")
+        }
+        guard normalizedScore > 0 else {
+            return avgFps > 0 ? String(format: "%.0f FPS", avgFps) : "—"
+        }
+        let unit = scoreUnit.isEmpty ? "" : " \(scoreUnit)"
+        let precisionSuffix = precision.isEmpty ? "" : " (\(precision))"
+        return String(format: "%.1f", normalizedScore) + unit + precisionSuffix
+    }
+
+    var contractDisplay: String {
+        let schema = resultSchemaVersion.map { "schema \($0)" } ?? "legacy schema"
+        let version = workloadVersion?.isEmpty == false ? workloadVersion! : "legacy workload"
+        return "\(version) · \(schema)"
     }
 }

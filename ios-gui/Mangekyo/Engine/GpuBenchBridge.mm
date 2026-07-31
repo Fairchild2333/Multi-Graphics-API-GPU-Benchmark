@@ -1,11 +1,15 @@
 // GpuBenchBridge.mm — ObjC++ bridge between Swift UI and C++ gpu_engine library on iOS.
 // Handles stdout capture, working directory, and JSON serialization.
 
+#define HAVE_METAL 1
+#define GPU_BENCH_NO_GLFW 1
+
 #import "GpuBenchBridge.h"
 
 #include "gpu_engine.h"
 #include "benchmark_results.h"
 #include "ios_engine_host.h"
+#include "metal_probe.h"
 #include "path_service.h"
 
 #include <atomic>
@@ -211,69 +215,24 @@ char* gpb_last_error(void) {
 }
 
 char* gpb_engine_version(void) {
-    return strdup_alloc("mangekyo-ios-0.2.0-gpu_engine");
+    return strdup_alloc("mangekyo-ios-0.2.6-gpu_engine");
 }
 
 char* gpb_list_gpus(void) {
-    // Run cliMain with --list-gpus and capture stdout via pipe.
-    int pipefd[2];
-    if (pipe(pipefd) != 0) return strdup_alloc("[]");
-
-    int savedStdout = dup(STDOUT_FILENO);
-    dup2(pipefd[1], STDOUT_FILENO);
-    close(pipefd[1]);
-
-    // Flush C++ buffers before redirect
-    std::cout.flush();
-    fflush(stdout);
-
-    const char* argv[] = { "gpu_benchmark", "--list-gpus" };
-    gpu_bench::cliMain(2, const_cast<char**>(argv));
-
-    // Restore stdout
-    std::cout.flush();
-    fflush(stdout);
-    dup2(savedStdout, STDOUT_FILENO);
-    close(savedStdout);
-
-    // Read captured output
-    std::string output;
-    char buf[4096];
-    ssize_t n;
-    while ((n = read(pipefd[0], buf, sizeof(buf))) > 0)
-        output.append(buf, n);
-    close(pipefd[0]);
-
-    // Parse "GPU\t<index>\t<name>\t..." lines into JSON array
+    // Use ProbeMetalDevices() directly — cliMain is not available on iOS.
+    auto devices = gpu_bench::ProbeMetalDevices();
     std::ostringstream json;
     json << "[";
-    bool first = true;
-    std::istringstream ss(output);
-    std::string line;
-    while (std::getline(ss, line)) {
-        if (!line.empty() && line.back() == '\r') line.pop_back();
-        if (line.rfind("GPU\t", 0) != 0) continue;
-        // Split by tab
-        std::vector<std::string> fields;
-        std::stringstream ls(line);
-        std::string tok;
-        while (std::getline(ls, tok, '\t')) fields.push_back(tok);
-        // Expected: GPU, index, name, luidHi, luidLo, supportsMetal, supportsVulkan, supportsOpenGL, vramMB, ...
-        if (fields.size() < 3) continue;
-        if (!first) json << ",";
-        first = false;
-        json << "{\"index\":" << fields[1]
-             << ",\"name\":\"" << jsonEscape(fields[2]) << "\"";
-        // Parse additional fields if available
-        if (fields.size() > 8)
-            json << ",\"vramMB\":" << fields[8];
-        if (fields.size() > 5)
-            json << ",\"metal\":" << (fields[5] == "1" ? "true" : "false");
-        if (fields.size() > 6)
-            json << ",\"vulkan\":" << (fields[6] == "1" ? "true" : "false");
-        if (fields.size() > 7)
-            json << ",\"opengl\":" << (fields[7] == "1" ? "true" : "false");
-        json << "}";
+    for (size_t i = 0; i < devices.size(); ++i) {
+        if (i > 0) json << ",";
+        const auto& d = devices[i];
+        json << "{\"index\":" << i
+             << ",\"name\":\"" << jsonEscape(d.name) << "\""
+             << ",\"vramMB\":" << (d.vramBytes / (1024 * 1024))
+             << ",\"metal\":true"
+             << ",\"vulkan\":false"
+             << ",\"opengl\":false"
+             << "}";
     }
     json << "]";
     return strdup_alloc(json.str());
@@ -281,56 +240,48 @@ char* gpb_list_gpus(void) {
 
 int gpb_run(const char* const* argv, int argc,
             gpb_line_callback onLine, void* ctx) {
+    // iOS uses the embedded host exclusively — cliMain is not available.
+    // Parse minimal args to extract workload and time, then delegate to
+    // ios_host::RunWorkload.
     std::lock_guard<std::mutex> lock(g_runMutex);
 
-    // Create pipe for stdout capture
-    int pipefd[2];
-    if (pipe(pipefd) != 0) return -1;
+    std::string workload = "stream";
+    double seconds = 3.0;
+    for (int i = 0; i < argc; ++i) {
+        std::string a = argv[i];
+        if (a == "--workload" && i + 1 < argc) { workload = argv[++i]; }
+        else if (a == "--time" && i + 1 < argc) { seconds = std::atof(argv[++i]); }
+        else if (a == "stream" || a == "gpu_burn" || a == "cinematic_liquid") { workload = a; }
+    }
 
-    int savedStdout = dup(STDOUT_FILENO);
-    int savedStderr = dup(STDERR_FILENO);
-    dup2(pipefd[1], STDOUT_FILENO);
-    dup2(pipefd[1], STDERR_FILENO);
-    close(pipefd[1]);
+    std::string shaderDir, dataDir;
+    void* layer = nullptr;
+    {
+        std::lock_guard<std::mutex> lk(g_embedMutex);
+        layer = g_metalLayer;
+        shaderDir = g_shaderDir;
+        dataDir = g_dataDir;
+    }
 
-    // Reader thread: read from pipe and call back line by line
-    std::string lineBuffer;
-    bool readerDone = false;
-    std::thread reader([&]() {
-        char buf[4096];
-        ssize_t n;
-        while ((n = read(pipefd[0], buf, sizeof(buf))) > 0) {
-            for (ssize_t i = 0; i < n; ++i) {
-                if (buf[i] == '\n') {
-                    if (onLine) onLine(lineBuffer.c_str(), ctx);
-                    lineBuffer.clear();
-                } else if (buf[i] != '\r') {
-                    lineBuffer += buf[i];
-                }
-            }
-        }
-        // Flush remaining partial line
-        if (!lineBuffer.empty() && onLine)
-            onLine(lineBuffer.c_str(), ctx);
-        close(pipefd[0]);
-        readerDone = true;
-    });
+    gpu_bench::ios_host::RunRequest req;
+    req.metalLayer = layer;
+    req.shaderDir = shaderDir;
+    req.dataDir = dataDir;
+    req.workloadId = workload;
+    req.maxRunTimeSec = seconds > 0.0 ? seconds : 3.0;
 
-    // Run the engine
-    int result = gpu_bench::cliMain(argc, const_cast<char**>(argv));
+    if (onLine) {
+        std::string msg = "[iOS] Running " + workload + " via embedded host";
+        onLine(msg.c_str(), ctx);
+    }
 
-    // Restore stdout/stderr — this closes the write end of the pipe,
-    // causing the reader thread to exit.
-    std::cout.flush();
-    fflush(stdout);
-    fflush(stderr);
-    dup2(savedStdout, STDOUT_FILENO);
-    dup2(savedStderr, STDERR_FILENO);
-    close(savedStdout);
-    close(savedStderr);
-
-    reader.join();
-    return result;
+    std::string err;
+    int rc = gpu_bench::ios_host::RunWorkload(req, err);
+    if (rc != 0 && onLine) {
+        std::string msg = "[iOS] Error: " + (err.empty() ? "rc=" + std::to_string(rc) : err);
+        onLine(msg.c_str(), ctx);
+    }
+    return rc;
 }
 
 char* gpb_load_results(void) {

@@ -18,6 +18,7 @@ std::mutex g_runMutex;
 Workload ParseWorkload(const std::string& id) {
     if (id == "stream" || id == "particle") return Workload::Stream;
     if (id == "gpu_burn") return Workload::GpuBurnV1;
+    if (id == "cinematic_liquid") return Workload::CinematicLiquid;
     throw std::invalid_argument("unsupported iOS workload id: " + id);
 }
 
@@ -71,6 +72,9 @@ int RunWorkload(const RunRequest& request, std::string& errorOut) {
         if (cfg.workload == Workload::GpuBurnV1) {
             cfg.gpuBurnIter = kGpuBurnV3LightIter;
             cfg.difficultyLabel = "Light";
+        }
+        if (cfg.workload == Workload::CinematicLiquid) {
+            cfg.difficultyLabel = "Mobile";
         }
 
         auto app = std::make_unique<MetalBackend>(

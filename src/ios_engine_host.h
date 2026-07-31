@@ -12,7 +12,7 @@ struct RunRequest {
     void* metalLayer = nullptr;  // CAMetalLayer* (__bridge void*)
     std::string shaderDir;       // trailing slash expected by ReadFileBytes callers
     std::string dataDir;         // sets GPU_BENCH_DATA_DIR for sandbox results
-    std::string workloadId;      // "stream" | "gpu_burn"
+    std::string workloadId;      // "stream" | "gpu_burn" | "cinematic_liquid"
     double maxRunTimeSec = 3.0;
     std::uint32_t particleCount = 262144;
 };
