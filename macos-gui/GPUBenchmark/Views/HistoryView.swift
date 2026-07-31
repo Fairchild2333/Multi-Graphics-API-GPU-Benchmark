@@ -15,7 +15,7 @@ struct HistoryView: View {
     @State private var confirmClear = false
 
     enum SortOption: String, CaseIterable {
-        case timeNewest, scoreHigh, api, device, workload
+        case timeNewest, scoreHigh, api, device, workload, mode
         var label: String {
             switch self {
             case .timeNewest: return Localization.tr("Time (newest)", "时间（最新）", "時間（新しい順）")
@@ -23,6 +23,7 @@ struct HistoryView: View {
             case .api:        return Localization.tr("Graphics API", "图形 API", "グラフィックス API")
             case .device:     return Localization.tr("GPU / Renderer", "GPU / 渲染器", "GPU / レンダラ")
             case .workload:   return Localization.tr("Workload", "负载", "ワークロード")
+            case .mode:       return Localization.tr("Execution mode", "运行模式", "実行モード")
             }
         }
     }
@@ -41,63 +42,92 @@ struct HistoryView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
-                Text(Localization.tr("History", "历史", "履歴"))
-                    .font(.largeTitle).fontWeight(.bold)
+            Text(Localization.tr("History", "历史", "履歴"))
+                .font(.largeTitle).fontWeight(.bold)
 
-                Button(action: refresh) {
-                    Label(Localization.tr("Refresh", "刷新", "更新"), systemImage: "arrow.clockwise")
-                }
-                Button(role: .destructive, action: deleteSelected) {
-                    Label(Localization.tr("Delete selected", "删除选中", "選択を削除"), systemImage: "trash")
-                }
-                .disabled(selection.isEmpty)
+            // Scrolls sideways rather than reporting a minimum width, so this
+            // page does not force the window wider than any other page.
+            horizontalStrip {
+                HStack(spacing: 12) {
+                    Button(action: refresh) {
+                        Label(Localization.tr("Refresh", "刷新", "更新"), systemImage: "arrow.clockwise")
+                    }
+                    Button(role: .destructive, action: deleteSelected) {
+                        Label(Localization.tr("Delete selected", "删除选中", "選択を削除"), systemImage: "trash")
+                    }
+                    .disabled(selection.isEmpty)
 
-                Button(role: .destructive) { confirmClear = true } label: {
-                    Label(Localization.tr("Clear all", "清空全部", "すべて消去"), systemImage: "trash.fill")
-                }
-                .disabled(engine.results.isEmpty)
+                    Button(role: .destructive) { confirmClear = true } label: {
+                        Label(Localization.tr("Clear all", "清空全部", "すべて消去"), systemImage: "trash.fill")
+                    }
+                    .disabled(engine.results.isEmpty)
 
-                Spacer()
+                    Divider().frame(height: 16)
 
-                Button(Localization.tr("Open results folder", "打开结果文件夹", "結果フォルダを開く")) {
-                    engine.openResultsFolder()
-                }
-                Button(Localization.tr("Open captures folder", "打开抓帧文件夹", "キャプチャフォルダを開く")) {
-                    engine.openCapturesFolder()
+                    Button(Localization.tr("Open results folder", "打开结果文件夹", "結果フォルダを開く")) {
+                        engine.openResultsFolder()
+                    }
+                    Button(Localization.tr("Open captures folder", "打开抓帧文件夹", "キャプチャフォルダを開く")) {
+                        engine.openCapturesFolder()
+                    }
                 }
             }
 
-            HStack(spacing: 12) {
-                Picker(Localization.tr("Sort by", "排序", "並べ替え"), selection: $selectedSort) {
-                    ForEach(SortOption.allCases, id: \.self) { opt in
-                        Text(opt.label).tag(opt)
+            FormRow(spacing: 14) {
+                FormField(
+                    title: Localization.tr("Sort by", "排序", "並べ替え"),
+                    width: 180
+                ) {
+                    Picker("", selection: $selectedSort) {
+                        ForEach(SortOption.allCases, id: \.self) { opt in
+                            Text(opt.label).tag(opt)
+                        }
                     }
                 }
-                .frame(width: 180)
 
-                Picker("GPU", selection: $gpuFilter) {
-                    Text(Localization.tr("All GPUs", "所有 GPU", "すべての GPU")).tag("All")
-                    ForEach(uniqueDevices, id: \.self) { Text($0).tag($0) }
+                FormField(title: "GPU", width: 210) {
+                    Picker("", selection: $gpuFilter) {
+                        Text(Localization.tr("All GPUs", "所有 GPU", "すべての GPU")).tag("All")
+                        ForEach(uniqueDevices, id: \.self) { Text($0).tag($0) }
+                    }
                 }
-                .frame(width: 220)
 
-                Picker("API", selection: $apiFilter) {
-                    Text(Localization.tr("All APIs", "所有 API", "すべての API")).tag("All")
-                    ForEach(uniqueApis, id: \.self) { Text($0).tag($0) }
+                FormField(title: "API", width: 130) {
+                    Picker("", selection: $apiFilter) {
+                        Text(Localization.tr("All APIs", "所有 API", "すべての API")).tag("All")
+                        ForEach(uniqueApis, id: \.self) { Text($0).tag($0) }
+                    }
                 }
-                .frame(width: 140)
 
-                Picker(Localization.tr("Workload", "负载", "ワークロード"), selection: $workloadFilter) {
-                    Text(Localization.tr("All workloads", "所有负载", "すべてのワークロード")).tag("All")
-                    ForEach(uniqueWorkloads, id: \.self) { Text($0).tag($0) }
+                FormField(
+                    title: Localization.tr("Workload", "负载", "ワークロード"),
+                    width: 175
+                ) {
+                    Picker("", selection: $workloadFilter) {
+                        Text(Localization.tr("All workloads", "所有负载", "すべてのワークロード")).tag("All")
+                        ForEach(uniqueWorkloads, id: \.self) { Text($0).tag($0) }
+                    }
                 }
-                .frame(width: 180)
 
-                Picker(Localization.tr("Time range", "时间范围", "期間"), selection: $timeRange) {
-                    ForEach(TimeRange.allCases, id: \.self) { Text($0.label).tag($0) }
+                FormField(
+                    title: Localization.tr("Time range", "时间范围", "期間"),
+                    width: 150
+                ) {
+                    Picker("", selection: $timeRange) {
+                        ForEach(TimeRange.allCases, id: \.self) { Text($0.label).tag($0) }
+                    }
                 }
-                .frame(width: 150)
+            }
+
+            if hiddenLegacyScoreCount > 0 {
+                Label(
+                    Localization.tr(
+                        "\(hiddenLegacyScoreCount) implausible legacy bandwidth score(s) are shown as — and excluded from score sorting.",
+                        "\(hiddenLegacyScoreCount) 条异常旧版带宽成绩显示为 —，且不参与分数排序。",
+                        "\(hiddenLegacyScoreCount) 件の不自然な旧帯域スコアは — と表示し、スコア順から除外しています。"),
+                    systemImage: "exclamationmark.triangle")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             GlassCard(padding: 0) {
@@ -106,55 +136,57 @@ struct HistoryView: View {
                         Text(String(engine.results.firstIndex(where: { $0.id == r.id }).map { $0 + 1 } ?? 0))
                             .font(.caption).monospacedDigit()
                     }
-                    .width(min: 30, ideal: 40, max: 50)
+                    .width(min: 28, ideal: 40, max: 50)
 
                     TableColumn(Localization.tr("API", "API", "API"), value: \.graphicsApi)
-                        .width(min: 50, ideal: 65, max: 80)
+                        .width(min: 44, ideal: 65, max: 80)
 
                     TableColumn(Localization.tr("Device", "设备", "デバイス"), value: \.deviceName)
-                        .width(min: 120, ideal: 180)
+                        .width(min: 90, ideal: 180)
 
                     TableColumn(Localization.tr("Workload", "负载", "ワークロード"), value: \.workload)
-                        .width(min: 70, ideal: 90, max: 110)
+                        .width(min: 60, ideal: 90, max: 110)
+
+                    TableColumn(Localization.tr("Mode", "模式", "モード")) { r in
+                        Text(r.executionMode)
+                    }
+                    .width(min: 60, ideal: 100, max: 150)
 
                     TableColumn(Localization.tr("Version", "版本", "バージョン")) { r in
                         Text(r.workloadVersion ?? "—")
                             .font(.caption2)
                             .lineLimit(1)
                     }
-                    .width(min: 100, ideal: 160)
-
-                    TableColumn(Localization.tr("Difficulty", "难度", "難易度"), value: \.difficulty)
-                        .width(min: 60, ideal: 80, max: 100)
+                    .width(min: 80, ideal: 160)
 
                     TableColumn("FPS") { r in
                         Text(String(format: "%.0f", r.avgFps)).monospacedDigit()
                     }
-                    .width(min: 50, ideal: 70, max: 90)
+                    .width(min: 44, ideal: 70, max: 90)
 
                     TableColumn("GPU ms") { r in
                         Text(r.avgTotalGpuMs > 0
                              ? String(format: "%.3f", r.avgTotalGpuMs) : "N/A")
                             .monospacedDigit()
                     }
-                    .width(min: 60, ideal: 80, max: 100)
+                    .width(min: 56, ideal: 80, max: 100)
 
                     TableColumn(Localization.tr("Score", "分数", "スコア")) { r in
-                        Text(r.score > 0
-                             ? String(format: "%.1f %@", r.score, r.scoreUnit) : "—")
+                        Text(r.scoreDisplay)
                             .monospacedDigit()
                     }
-                    .width(min: 80, ideal: 120)
+                    .width(min: 70, ideal: 120)
 
-                    TableColumn(Localization.tr("Time", "时间", "時間"), value: \.timestamp) { r in
-                        Text(formatTimestamp(r.id)).font(.caption)
-                    }
-                    .width(min: 100, ideal: 140)
+                    TableColumn(
+                        Localization.tr("Time", "时间", "時間"),
+                        value: \.timestamp)
+                    .width(min: 90, ideal: 140)
                 }
                 .tableStyle(.inset(alternatesRowBackgrounds: true))
             }
         }
-        .padding(28)
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .onAppear { refresh() }
         .confirmationDialog(
             Localization.tr("Clear all results?", "清空全部结果？", "すべての結果を消去しますか？"),
@@ -167,6 +199,19 @@ struct HistoryView: View {
         }
     }
 
+    /// Keeps a wide control strip from forcing a minimum width on the pane.
+    @ViewBuilder
+    private func horizontalStrip<Content: View>(
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            content()
+                .padding(.vertical, 2)
+                .padding(.trailing, 4)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private var uniqueDevices: [String] {
         Array(Set(engine.results.map(\.deviceName))).sorted()
     }
@@ -175,6 +220,9 @@ struct HistoryView: View {
     }
     private var uniqueWorkloads: [String] {
         Array(Set(engine.results.map(\.workload))).sorted()
+    }
+    private var hiddenLegacyScoreCount: Int {
+        engine.results.lazy.filter(\.hidesImplausibleLegacyScore).count
     }
 
     private var filteredResults: [BenchResult] {
@@ -196,10 +244,17 @@ struct HistoryView: View {
 
         switch selectedSort {
         case .timeNewest: r.sort { $0.id > $1.id }
-        case .scoreHigh:  r.sort { $0.score > $1.score }
+        case .scoreHigh:  r.sort {
+            if $0.normalizedScore == $1.normalizedScore { return $0.id > $1.id }
+            return $0.normalizedScore > $1.normalizedScore
+        }
         case .api:        r.sort { $0.graphicsApi < $1.graphicsApi }
         case .device:     r.sort { $0.deviceName < $1.deviceName }
         case .workload:   r.sort { $0.workload < $1.workload }
+        case .mode:       r.sort {
+            if $0.executionMode == $1.executionMode { return $0.id > $1.id }
+            return $0.executionMode < $1.executionMode
+        }
         }
         return r
     }

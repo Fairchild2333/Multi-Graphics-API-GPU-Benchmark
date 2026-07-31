@@ -1,5 +1,6 @@
 // AboutView.swift — Version info, description, and GitHub link.
 
+import AppKit
 import SwiftUI
 
 struct AboutView: View {
@@ -13,19 +14,25 @@ struct AboutView: View {
                 GlassCard {
                     VStack(alignment: .leading, spacing: 14) {
                         HStack(spacing: 16) {
-                            Image(systemName: "cpu.fill")
-                                .font(.system(size: 48))
-                                .foregroundStyle(.tint)
+                            // The app artwork rather than an SF Symbol. This is
+                            // a normal image set, not the app icon set, because
+                            // only image sets honour a dark appearance — macOS
+                            // itself has no dark Dock icon before 26.
+                            Image("AppIconArt")
+                                .resizable()
+                                .interpolation(.high)
+                                .frame(width: 64, height: 64)
+                                .accessibilityHidden(true)
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Mangekyo")
                                     .font(.title2)
                                     .fontWeight(.bold)
                                 Text(Localization.tr(
                                     "Cross-API CPU & GPU Benchmark Suite",
-                                    "跨 API CPU 与 GPU 跑分套件"))
+                                    "跨 API CPU 与 GPU 测试套件"))
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
-                                Text("v1.0 — macOS Edition")
+                                Text("v\(appVersion) — macOS (\(archLabel))")
                                     .font(.callout)
                                     .foregroundStyle(.secondary)
                             }
@@ -35,21 +42,18 @@ struct AboutView: View {
 
                         Text(Localization.tr(
                             """
-                            Native macOS GPU frontend for Mangekyo, measuring compute and rendering \
-                            performance across Metal, Vulkan, and OpenGL. Features multiple \
-                            workloads (particle stream, N-body simulation, stress fractal, \
-                            synthetic peak throughput, 3D rendering) with real-time GPU timing.
-                            
-                            This is the native macOS SwiftUI front-end driving the C++ engine \
-                            in-process — no subprocess or shell invocation required.
+                            Mangekyo measures how fast your Mac's CPU and GPU are. It runs a set \
+                            of workloads — particles, GPU burn, and an interactive fluid pool — \
+                            and turns each run into a score you can compare.
+
+                            Every run is saved, so you can look back at past results in History \
+                            and compare them side by side in Charts.
                             """,
                             """
-                            Mangekyo 的原生 macOS GPU 前端，用于测量 Metal、Vulkan 和 OpenGL 的计算与渲染\
-                            性能。包含多种负载（粒子流、N 体模拟、压力分形、合成峰值吞吐、3D 渲染），\
-                            配有实时 GPU 计时。
-                            
-                            这是原生 macOS SwiftUI 前端，直接在进程内调用 C++ 引擎 —— \
-                            无需子进程或 Shell 调用。
+                            Mangekyo 用来测量 Mac 的 CPU 与 GPU 性能。它会运行一组负载——粒子、\
+                            GPU Burn、互动水池——并把每次运行换算成可以互相比较的成绩。
+
+                            每次运行都会自动保存，可以在「历史」里回看，在「图表」里对比。
                             """))
                             .font(.body)
                             .foregroundStyle(.secondary)
@@ -88,6 +92,22 @@ struct AboutView: View {
 
     // MARK: - Helpers
 
+    private var appVersion: String {
+        Bundle.main.object(
+            forInfoDictionaryKey: "CFBundleShortVersionString"
+        ) as? String ?? "Unknown"
+    }
+
+    private var archLabel: String {
+        #if arch(arm64)
+        return "arm64"
+        #elseif arch(x86_64)
+        return "x86_64"
+        #else
+        return "unknown"
+        #endif
+    }
+
     @ViewBuilder
     private func systemInfoRow(_ label: String, _ value: String) -> some View {
         HStack {
@@ -104,9 +124,14 @@ struct AboutView: View {
     private func cpuName() -> String {
         var size: Int = 0
         sysctlbyname("machdep.cpu.brand_string", nil, &size, nil, 0)
+        guard size > 1 else {
+            return architectureString()
+        }
         var buf = [CChar](repeating: 0, count: size)
         sysctlbyname("machdep.cpu.brand_string", &buf, &size, nil, 0)
-        return String(cString: buf)
+        let bytes = buf.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }
+        let name = String(decoding: bytes, as: UTF8.self)
+        return name.isEmpty ? architectureString() : name
     }
 
     private func memoryString() -> String {

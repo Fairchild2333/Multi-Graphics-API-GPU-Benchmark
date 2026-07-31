@@ -12,6 +12,12 @@ settings:
     SWIFT_VERSION: "6.0"
     MACOSX_DEPLOYMENT_TARGET: "12.0"
     CLANG_CXX_LANGUAGE_STANDARD: "c++17"
+    SUPPORTED_PLATFORMS: macosx
+    # scripts/build-macos.sh overrides these for custom output directories.
+    # The defaults match its source-built, static GLFW layout and avoid any
+    # Apple Silicon/Intel Homebrew prefix in the project.
+    GPU_BENCH_NATIVE_LIB_DIR: "$(PROJECT_DIR)/../out/build/macos-$(NATIVE_ARCH_ACTUAL)-$(CONFIGURATION)"
+    GPU_BENCH_GLFW_LIB_DIR: "$(GPU_BENCH_NATIVE_LIB_DIR)/_deps/glfw-build/src"
 
 targets:
   GPUBenchmark:
@@ -20,51 +26,43 @@ targets:
     deploymentTarget: "12.0"
     sources:
       - path: GPUBenchmark
-        excludes:
-          - "**/*.xcassets"
     settings:
       base:
+        PRODUCT_NAME: Mangekyo
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         PRODUCT_BUNDLE_IDENTIFIER: com.fairchild.GPUBenchmark
-        INFOPLIST_GENERATION_CLASS: GPUBenchmarkApp
         SWIFT_OBJC_BRIDGING_HEADER: GPUBenchmark/Engine/GPUBenchmark-Bridging-Header.h
         HEADER_SEARCH_PATHS:
+          - "$(inherited)"
           - "$(PROJECT_DIR)/../src"
         LIBRARY_SEARCH_PATHS:
-          - "$(PROJECT_DIR)/../build"
+          - "$(inherited)"
+          # Preserve spaces in the repository path after nested expansion.
+          - '"$(GPU_BENCH_NATIVE_LIB_DIR)"'
+          - '"$(GPU_BENCH_GLFW_LIB_DIR)"'
         OTHER_LDFLAGS:
+          - "$(inherited)"
           - "-lgpu_engine"
-          - "-lglad_gl43"
-          - "-lglfw"
-          - "-lvulkan"
+          - "-lglfw3"
           - "-framework Metal"
-          - "-framework MetalKit"
           - "-framework QuartzCore"
           - "-framework Cocoa"
-          - "-framework OpenGL"
           - "-framework CoreFoundation"
           - "-framework Foundation"
           - "-framework IOKit"
-          - "-framework IOSurface"
+          - "-weak_framework Charts"
         CLANG_CXX_LANGUAGE_STANDARD: "c++17"
-        # Let Xcode find Homebrew libraries
-        LIBRARY_SEARCH_PATHS[arch=arm64]:
-          - "$(PROJECT_DIR)/../build"
-          - "/opt/homebrew/lib"
-        LIBRARY_SEARCH_PATHS[arch=x86_64]:
-          - "$(PROJECT_DIR)/../build"
-          - "/usr/local/lib"
-        HEADER_SEARCH_PATHS:
-          - "$(PROJECT_DIR)/../src"
-          - "/opt/homebrew/include"
         LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
           - "@executable_path/../Frameworks"
-          - "/opt/homebrew/lib"
     info:
       path: Info.plist
       properties:
         CFBundleName: Mangekyo
         CFBundleDisplayName: Mangekyo
-        CFBundleShortVersionString: "0.1.0"
+        CFBundleShortVersionString: "0.2.6"
         CFBundleVersion: "1"
         LSMinimumSystemVersion: "12.0"
+        LSApplicationCategoryType: "public.app-category.utilities"
+        MetalCaptureEnabled: true
         NSHighResolutionCapable: true

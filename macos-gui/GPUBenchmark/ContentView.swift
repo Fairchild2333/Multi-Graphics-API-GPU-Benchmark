@@ -40,6 +40,9 @@ struct ContentView: View {
     @EnvironmentObject var engine: BenchEngine
     @State private var selection: SidebarItem = .run
     @Namespace private var animation
+    // Listen to language changes from Settings to refresh the whole UI.
+    @AppStorage("appLanguage") private var appLanguage: String = "auto"
+    @State private var uiRevision: Int = 0
 
     var body: some View {
         Group {
@@ -47,6 +50,9 @@ struct ContentView: View {
                 NavigationSplitView {
                     sidebar
                         .navigationTitle("Mangekyo")
+                        // `min` is what stops a wide detail page (History)
+                        // from squeezing the sidebar narrower than its labels.
+                        .navigationSplitViewColumnWidth(min: 200, ideal: 210, max: 280)
                 } detail: {
                     detail
                 }
@@ -55,13 +61,21 @@ struct ContentView: View {
                 NavigationView {
                     sidebar
                         .navigationTitle("Mangekyo")
-                        .frame(minWidth: 180, idealWidth: 200, maxWidth: 260)
+                        .frame(minWidth: 200, idealWidth: 210, maxWidth: 280)
                     detail
                 }
                 .navigationViewStyle(.columns)
             }
         }
+        .id(uiRevision) // Force full UI rebuild on language change
+        .onChange(of: appLanguage) { newValue in
+            Localization.current = AppLanguage(rawValue: newValue) ?? .auto_
+            engine.refreshLocalizedStatus()
+            uiRevision += 1
+        }
         .onAppear {
+            Localization.current = AppLanguage(rawValue: appLanguage) ?? .auto_
+            engine.refreshLocalizedStatus()
             if !engine.workingDirectory.isEmpty {
                 engine.refreshGpus()
             }
@@ -96,7 +110,9 @@ struct ContentView: View {
             case .about:    AboutView()
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // Pages start at the top of the pane; without an explicit alignment a
+        // short page (Charts with no data) floats in the vertical centre.
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 
@@ -114,9 +130,8 @@ struct SidebarButton: View {
                     .foregroundStyle(isSelected ? Color.accentColor : .primary)
                     .frame(width: 24, height: 24)
                 Text(item.localizedName)
-                    .font(.body)
+                    .font(isSelected ? .headline : .body)
                     .foregroundStyle(isSelected ? Color.accentColor : .primary)
-                    .fontWeight(isSelected ? .semibold : .regular)
                 Spacer()
             }
             .padding(.vertical, 8)
@@ -127,20 +142,17 @@ struct SidebarButton: View {
         .background {
             ZStack {
                 if isSelected {
-                    if #available(macOS 26.0, iOS 26.0, *) {
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.accentColor.opacity(0.12))
-                            .glassEffect(.regular.tint(Color.accentColor.opacity(0.2)).interactive(), in: .rect(cornerRadius: 10))
-                            .matchedGeometryEffect(id: "activeBackground", in: namespace)
-                    } else {
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.accentColor.opacity(0.12))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.accentColor.opacity(0.25), lineWidth: 1)
-                            )
-                            .matchedGeometryEffect(id: "activeBackground", in: namespace)
-                    }
+                    // Plain fill rather than a glass effect: the selection
+                    // moves on every page change, and a compositor-level
+                    // backdrop effect lags behind that animation instead of
+                    // sliding with it.
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.accentColor.opacity(0.14))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .strokeBorder(Color.accentColor.opacity(0.25), lineWidth: 1)
+                        )
+                        .matchedGeometryEffect(id: "activeBackground", in: namespace)
                 }
             }
         }

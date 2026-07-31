@@ -57,6 +57,7 @@ static std::string resultToJson(const gpu_bench::BenchmarkResult& r) {
     o << "{";
     o << "\"id\":\""          << jsonEscape(r.id) << "\",";
     o << "\"timestamp\":\""   << jsonEscape(r.timestamp) << "\",";
+    o << "\"resultSchemaVersion\":" << r.resultSchemaVersion << ",";
     o << "\"appVersion\":\""  << jsonEscape(r.appVersion) << "\",";
     o << "\"workload\":\""    << jsonEscape(r.workload) << "\",";
     o << "\"workloadVersion\":\"" << jsonEscape(r.workloadVersion) << "\",";
@@ -66,6 +67,9 @@ static std::string resultToJson(const gpu_bench::BenchmarkResult& r) {
     o << "\"driverVersion\":\"" << jsonEscape(r.driverVersion) << "\",";
     o << "\"cpuName\":\""     << jsonEscape(r.cpuName) << "\",";
     o << "\"osVersion\":\""   << jsonEscape(r.osVersion) << "\",";
+    o << "\"platform\":\""    << jsonEscape(r.platform) << "\",";
+    o << "\"osArchitecture\":\"" << jsonEscape(r.osArchitecture) << "\",";
+    o << "\"processArchitecture\":\"" << jsonEscape(r.processArchitecture) << "\",";
     o << "\"memory\":\""      << jsonEscape(r.memory) << "\",";
     o << "\"vramMB\":"        << r.vramMB << ",";
     o << "\"resWidth\":"      << r.resWidth << ",";
@@ -95,7 +99,10 @@ static std::string resultToJson(const gpu_bench::BenchmarkResult& r) {
     o << "\"bottleneck\":\""  << jsonEscape(r.bottleneck) << "\",";
     o << "\"score\":"         << r.score << ",";
     o << "\"scoreUnit\":\""   << jsonEscape(r.scoreUnit) << "\",";
-    o << "\"precision\":\""   << jsonEscape(r.precision) << "\"";
+    o << "\"precision\":\""   << jsonEscape(r.precision) << "\",";
+    o << "\"stableScore\":"   << r.stableScore << ",";
+    o << "\"stableVariancePct\":" << r.stableVariancePct << ",";
+    o << "\"throttlePct\":"   << r.throttlePct;
     o << "}";
     return o.str();
 }

@@ -11,15 +11,17 @@
 		3003398856F31FFD7517AF0F /* GPUBenchmarkApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 428EDF98B5EF16E5CD061702 /* GPUBenchmarkApp.swift */; };
 		324CE56B3629BD508C55A17F /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B780C1FCF3A143BE0C4FC4F /* GlassCard.swift */; };
 		551CC5E27733CBD92696B6C7 /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45FBBD285712A4940F91A64 /* ChartsView.swift */; };
+		646EC3B3D1B3902D0982603B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E2131DAE489907BE59D03E1F /* Assets.xcassets */; };
 		6490EEEE65DEEA7D9CBD6276 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A5D4F75593984C34C3D979F /* HistoryView.swift */; };
 		66F3FDA2D6171DDE8BBF9FA5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C10F46C195D3EE52ED640C2 /* ContentView.swift */; };
+		6D83F9C27CD88E75B57AEE2D /* CpuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF53EFA43CC15D0D52F44F2 /* CpuView.swift */; };
 		72B4A9CEC591F2CCE9E0ADFE /* GpuBenchBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6057119906B03100A2B750EC /* GpuBenchBridge.mm */; };
 		79BCD31676E6F857DB112150 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F65AC0E25F3B972B1C7E067 /* SettingsView.swift */; };
 		822737CDCEBC289F34EF2AD7 /* BenchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517B698D469EB75E2DF01C14 /* BenchResult.swift */; };
 		847779A7AEAAB3BC594F07D5 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5931797D1CD1890548F2D50F /* Localization.swift */; };
+		B9811C4A05E08124DB77D897 /* FormField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6A7F1A736B9BCFCD3F49B86 /* FormField.swift */; };
 		CF3EB0E6C6CCE4AB52BC4B17 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 292D8F0C76E8C53D937E8BC9 /* AboutView.swift */; };
 		DD389C242471EE7C4D674617 /* RunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65BBAE1016DDE442843EDFC /* RunView.swift */; };
-		E1CPUVIEW01BUILDFILE00001 /* CpuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1CPUVIEW01FILEREF00002 /* CpuView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,17 +36,20 @@
 		63A9861B7C813DD823C9C953 /* GpuBenchBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GpuBenchBridge.h; sourceTree = "<group>"; };
 		6B84C6BFB334455DFC2513AF /* BenchEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchEngine.swift; sourceTree = "<group>"; };
 		6F65AC0E25F3B972B1C7E067 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A6A7F1A736B9BCFCD3F49B86 /* FormField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormField.swift; sourceTree = "<group>"; };
 		B45FBBD285712A4940F91A64 /* ChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
 		B65BBAE1016DDE442843EDFC /* RunView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunView.swift; sourceTree = "<group>"; };
-		E1CPUVIEW01FILEREF00002 /* CpuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CpuView.swift; sourceTree = "<group>"; };
+		CCF53EFA43CC15D0D52F44F2 /* CpuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CpuView.swift; sourceTree = "<group>"; };
 		DB1E17A053B2F4CB03F9F87E /* GPUBenchmark-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GPUBenchmark-Bridging-Header.h"; sourceTree = "<group>"; };
 		DCA604AC7291DFD52E3ED90A /* GPUBenchmark.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GPUBenchmark.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E2131DAE489907BE59D03E1F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		4C261775AAF22A3AD18503AF /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				A6A7F1A736B9BCFCD3F49B86 /* FormField.swift */,
 				4B780C1FCF3A143BE0C4FC4F /* GlassCard.swift */,
 			);
 			path = Components;
@@ -63,7 +68,7 @@
 			children = (
 				292D8F0C76E8C53D937E8BC9 /* AboutView.swift */,
 				B45FBBD285712A4940F91A64 /* ChartsView.swift */,
-				E1CPUVIEW01FILEREF00002 /* CpuView.swift */,
+				CCF53EFA43CC15D0D52F44F2 /* CpuView.swift */,
 				5A5D4F75593984C34C3D979F /* HistoryView.swift */,
 				B65BBAE1016DDE442843EDFC /* RunView.swift */,
 				6F65AC0E25F3B972B1C7E067 /* SettingsView.swift */,
@@ -93,6 +98,7 @@
 		E079977A92CA850A8A7E836E /* GPUBenchmark */ = {
 			isa = PBXGroup;
 			children = (
+				E2131DAE489907BE59D03E1F /* Assets.xcassets */,
 				0C10F46C195D3EE52ED640C2 /* ContentView.swift */,
 				428EDF98B5EF16E5CD061702 /* GPUBenchmarkApp.swift */,
 				4C261775AAF22A3AD18503AF /* Components */,
@@ -120,6 +126,7 @@
 			buildConfigurationList = C25ADBAE899598C26F0313EC /* Build configuration list for PBXNativeTarget "GPUBenchmark" */;
 			buildPhases = (
 				72AFF8C2CFF4D6793CCD0A65 /* Sources */,
+				FA3D912C107810B24ACF8F4B /* Resources */,
 			);
 			buildRules = (
 			);
@@ -162,6 +169,17 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		FA3D912C107810B24ACF8F4B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				646EC3B3D1B3902D0982603B /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		72AFF8C2CFF4D6793CCD0A65 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -172,7 +190,8 @@
 				822737CDCEBC289F34EF2AD7 /* BenchResult.swift in Sources */,
 				551CC5E27733CBD92696B6C7 /* ChartsView.swift in Sources */,
 				66F3FDA2D6171DDE8BBF9FA5 /* ContentView.swift in Sources */,
-				E1CPUVIEW01BUILDFILE00001 /* CpuView.swift in Sources */,
+				6D83F9C27CD88E75B57AEE2D /* CpuView.swift in Sources */,
+				B9811C4A05E08124DB77D897 /* FormField.swift in Sources */,
 				3003398856F31FFD7517AF0F /* GPUBenchmarkApp.swift in Sources */,
 				324CE56B3629BD508C55A17F /* GlassCard.swift in Sources */,
 				72B4A9CEC591F2CCE9E0ADFE /* GpuBenchBridge.mm in Sources */,
@@ -193,43 +212,34 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				COMBINE_HIDPI_IMAGES = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
 					"$(PROJECT_DIR)/../src",
-					/opt/homebrew/include,
 				);
 				INFOPLIST_FILE = Info.plist;
-				INFOPLIST_GENERATION_CLASS = GPUBenchmarkApp;
 				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
 					"@executable_path/../Frameworks",
-					/opt/homebrew/lib,
 				);
 				LIBRARY_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../build",
-				);
-				"LIBRARY_SEARCH_PATHS[arch=arm64]" = (
-					"$(PROJECT_DIR)/../build",
-					/opt/homebrew/lib,
-				);
-				"LIBRARY_SEARCH_PATHS[arch=x86_64]" = (
-					"$(PROJECT_DIR)/../build",
-					/usr/local/lib,
+					"$(inherited)",
+					"\"$(GPU_BENCH_NATIVE_LIB_DIR)\"",
+					"\"$(GPU_BENCH_GLFW_LIB_DIR)\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				OTHER_LDFLAGS = (
+					"$(inherited)",
 					"-lgpu_engine",
-					"-lglad_gl43",
-					"-lglfw",
-					"-lvulkan",
+					"-lglfw3",
 					"-framework Metal",
-					"-framework MetalKit",
 					"-framework QuartzCore",
 					"-framework Cocoa",
-					"-framework OpenGL",
 					"-framework CoreFoundation",
 					"-framework Foundation",
 					"-framework IOKit",
-					"-framework IOSurface",
+					"-weak_framework Charts",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.fairchild.GPUBenchmark;
+				PRODUCT_NAME = Mangekyo;
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "GPUBenchmark/Engine/GPUBenchmark-Bridging-Header.h";
 			};
@@ -280,11 +290,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				GPU_BENCH_GLFW_LIB_DIR = "$(GPU_BENCH_NATIVE_LIB_DIR)/_deps/glfw-build/src";
+				GPU_BENCH_NATIVE_LIB_DIR = "$(PROJECT_DIR)/../out/build/macos-$(NATIVE_ARCH_ACTUAL)-$(CONFIGURATION)";
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
@@ -298,43 +311,34 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				COMBINE_HIDPI_IMAGES = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
 					"$(PROJECT_DIR)/../src",
-					/opt/homebrew/include,
 				);
 				INFOPLIST_FILE = Info.plist;
-				INFOPLIST_GENERATION_CLASS = GPUBenchmarkApp;
 				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
 					"@executable_path/../Frameworks",
-					/opt/homebrew/lib,
 				);
 				LIBRARY_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../build",
-				);
-				"LIBRARY_SEARCH_PATHS[arch=arm64]" = (
-					"$(PROJECT_DIR)/../build",
-					/opt/homebrew/lib,
-				);
-				"LIBRARY_SEARCH_PATHS[arch=x86_64]" = (
-					"$(PROJECT_DIR)/../build",
-					/usr/local/lib,
+					"$(inherited)",
+					"\"$(GPU_BENCH_NATIVE_LIB_DIR)\"",
+					"\"$(GPU_BENCH_GLFW_LIB_DIR)\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				OTHER_LDFLAGS = (
+					"$(inherited)",
 					"-lgpu_engine",
-					"-lglad_gl43",
-					"-lglfw",
-					"-lvulkan",
+					"-lglfw3",
 					"-framework Metal",
-					"-framework MetalKit",
 					"-framework QuartzCore",
 					"-framework Cocoa",
-					"-framework OpenGL",
 					"-framework CoreFoundation",
 					"-framework Foundation",
 					"-framework IOKit",
-					"-framework IOSurface",
+					"-weak_framework Charts",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.fairchild.GPUBenchmark;
+				PRODUCT_NAME = Mangekyo;
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "GPUBenchmark/Engine/GPUBenchmark-Bridging-Header.h";
 			};
@@ -391,12 +395,15 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				GPU_BENCH_GLFW_LIB_DIR = "$(GPU_BENCH_NATIVE_LIB_DIR)/_deps/glfw-build/src";
+				GPU_BENCH_NATIVE_LIB_DIR = "$(PROJECT_DIR)/../out/build/macos-$(NATIVE_ARCH_ACTUAL)-$(CONFIGURATION)";
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
