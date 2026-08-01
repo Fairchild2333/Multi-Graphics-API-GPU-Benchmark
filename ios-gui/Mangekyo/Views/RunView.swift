@@ -94,13 +94,59 @@ struct RunView: View {
     }
     private var usesBurnSteps: Bool { selectedWorkload == "gpu_burn" }
 
+    // MARK: - Option explanations (ported from the macOS RunView)
+
+    private var headlessHint: String {
+        Localization.tr(
+            "Pure compute mode: no swapchain, no rendering, no present. Scores come out much higher than a windowed run of the same workload and are not comparable with it. GPU capture is unavailable while headless.",
+            "纯计算模式：无交换链、无渲染、无 present。成绩会明显高于同一负载的窗口运行，两者不可直接比较。Headless 下无法抓帧。",
+            "純計算モード。ウィンドウ実行より大幅に高く出るため相互比較はできません。")
+    }
+
+    private var vsyncHint: String {
+        Localization.tr(
+            "Cap presentation to the display refresh rate. Leave it off for throughput runs.",
+            "把呈现限制到屏幕刷新率。测吞吐时请保持关闭。",
+            "呈示をリフレッシュレートに制限します。スループット測定ではオフに。")
+    }
+
+    private var hostMemoryHint: String {
+        Localization.tr(
+            "Keep the particle buffer in system RAM instead of VRAM. Apple silicon has unified memory and no separate VRAM to overflow, so this switch has no effect here. It is meaningful only for the Vulkan and OpenGL backends on discrete GPUs.",
+            "把粒子缓冲放在系统内存而非显存。Apple 芯片是统一内存，没有独立显存可爆，该开关在这里不起作用。它只对独立显卡上的 Vulkan 与 OpenGL 后端有意义。",
+            "パーティクルバッファをシステム RAM に置きます。Apple silicon はユニファイドメモリのため効果はありません。")
+    }
+
+    /// Particle buffer size in MB for the current selection.
+    private var particleBufferMB: Double? {
+        guard usesParticles else { return nil }
+        let raw = particlePreset == "custom"
+            ? customParticles.trimmingCharacters(in: .whitespaces)
+            : particlePreset
+        guard let count = Double(raw), count > 0 else { return nil }
+        // Particle = float4 position + float4 velocity.
+        return count * 32.0 / (1024.0 * 1024.0)
+    }
+
+    /// Warn when the working set is small enough to live in cache, because the
+    /// reported GB/s is then cache bandwidth rather than memory bandwidth.
+    private var particleBufferCaution: String? {
+        guard selectedWorkload == "stream", let mb = particleBufferMB, mb < 64
+        else { return nil }
+        let size = String(format: "%.0f MB", mb)
+        return Localization.tr(
+            "The particle buffer is only \(size), small enough to sit in cache, so the reported GB/s will be well above what memory can deliver. Use Heavy (128 MB) or Extreme (512 MB) for a memory reading, and only compare runs that used the same size.",
+            "当前粒子缓冲只有 \(size)，基本装得进缓存，报出的 GB/s 会远高于内存实际能提供的带宽。要测内存带宽请用 Heavy（128 MB）或 Extreme（512 MB），且只在相同档位之间比较。",
+            "パーティクルバッファは \(size) しかなくキャッシュに収まるため、メモリ帯域ではありません。")
+    }
+
     private var infoBanner: String {
         switch selectedWorkload {
         case "stream":
             return Localization.tr(
-                "Particle baseline. Embedded host writes stream_v1_ios_preview (not desktop 15s).",
-                "粒子基线。嵌入宿主写出 stream_v1_ios_preview（非桌面 15s）。",
-                "パーティクル基線。埋め込みは stream_v1_ios_preview（デスクトップ15sではない）。")
+                "Particle baseline; the embedded host writes stream_v1_ios_preview, not the desktop 15 s contract. The GB/s figure is derived — particles x an assumed 40 bytes each / compute time — not a hardware counter. The kernel actually moves about 48 B per particle, so the value runs roughly 17% conservative. Compare the same workload across devices, not against a vendor peak.",
+                "粒子基线；嵌入宿主写出 stream_v1_ios_preview，不是桌面的 15 秒合同。GB/s 是推算值——粒子数 × 假定的每粒子 40 字节 ÷ compute 时间——不是硬件计数器读数。内核实际每粒子搬运约 48 字节，因此偏保守约 17%。请横向比较同一负载在不同设备上的表现，不要和厂商标称峰值对比。",
+                "パーティクル基線。GB/s は想定 40 バイト/粒子から導いた値で、実際は約 48 バイト。カタログのピークとは比較しないでください。")
         case "gpu_burn":
             return Localization.tr(
                 "Burn light=16. Writes gpu_burn_v3_fixed_steps_16_kaleidoscope_ios_preview.",
@@ -213,9 +259,21 @@ struct RunView: View {
                 Text(infoBanner)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(8)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(RoundedRectangle(cornerRadius: 8).fill(Color.accentColor.opacity(0.08)))
+
+                if let caution = particleBufferCaution {
+                    Label {
+                        Text(caution).fixedSize(horizontal: false, vertical: true)
+                    } icon: {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
 
                 VStack(alignment: .leading, spacing: 12) {
                     VStack(alignment: .leading, spacing: 4) {
@@ -244,10 +302,10 @@ struct RunView: View {
                             Text(Localization.tr("Particles", "粒子数", "パーティクル数"))
                                 .font(.subheadline).foregroundStyle(.secondary)
                             Picker("", selection: $particlePreset) {
-                                Text("Light — 65K").tag("65536")
-                                Text("Medium — 1M").tag("1048576")
-                                Text("Heavy — 4M").tag("4194304")
-                                Text("Extreme — 16M").tag("16777216")
+                                Text("Light — 65K · 2 MB").tag("65536")
+                                Text("Medium — 1M · 32 MB").tag("1048576")
+                                Text("Heavy — 4M · 128 MB").tag("4194304")
+                                Text("Extreme — 16M · 512 MB").tag("16777216")
                                 Text(Localization.tr("Custom…", "自定义…", "カスタム…")).tag("custom")
                             }
                             .labelsHidden()
@@ -288,14 +346,16 @@ struct RunView: View {
                 Text(Localization.tr("Advanced", "高级选项", "詳細オプション"))
                     .font(.headline)
 
-                Toggle("Headless", isOn: $headless)
+                HintedToggle(title: "Headless", hint: headlessHint, isOn: $headless)
                     .disabled(usesBurnSteps || selectedWorkload == "cinematic_liquid")
                     .toggleStyle(.switch)
 
-                Toggle("V-Sync", isOn: $vsync)
+                HintedToggle(title: "V-Sync", hint: vsyncHint, isOn: $vsync)
                     .toggleStyle(.switch)
 
-                Toggle(Localization.tr("System memory", "系统内存", "システムメモリ"), isOn: $hostMemory)
+                HintedToggle(
+                    title: Localization.tr("System memory", "系统内存", "システムメモリ"),
+                    hint: hostMemoryHint, isOn: $hostMemory)
                     .toggleStyle(.switch)
 
                 Toggle(Localization.tr("Show legacy & advanced tests",
@@ -305,6 +365,7 @@ struct RunView: View {
                     .toggleStyle(.switch)
 
                 Toggle(Localization.tr("Capture at", "捕获于", "キャプチャ位置"), isOn: $captureOn)
+                    .disabled(headless)
                     .disabled(durationUnit == .unlimited)
                     .toggleStyle(.switch)
 

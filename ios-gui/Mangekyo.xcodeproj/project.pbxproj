@@ -18,6 +18,7 @@
 		88A62639E88609D6E0342F69 /* MobileBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74C87A9E05C083261AAE98B /* MobileBenchmark.swift */; };
 		93B31FFC719732890B07DDB9 /* GpuBenchBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = C84CE3174AC6B3C5BAB9B724 /* GpuBenchBridge.mm */; };
 		9DE4FDDC017A8C3417C7A8CA /* KeyboardDismiss.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6EE1FDD90B2261A38F8E256 /* KeyboardDismiss.swift */; };
+		A25BE0A3F94E6DB6FF9DDB64 /* InfoHint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A52987CDE0BA67BFB5FED1 /* InfoHint.swift */; };
 		B0AE4638F0309DCE5574778C /* BenchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0C82F1B47FC2424F2B07A17 /* BenchEngine.swift */; };
 		B35618E5CB04E9A3E744D6E1 /* MetalBenchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6884C8DB370841C338158927 /* MetalBenchView.swift */; };
 		D58A29985A7D81AC1DF43EB3 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5274CB3E41682D107BB897DB /* SettingsView.swift */; };
@@ -34,6 +35,7 @@
 		353B0148E85D849588E6D3C1 /* GPUBenchmark-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GPUBenchmark-Bridging-Header.h"; sourceTree = "<group>"; };
 		4967B6C277D550471842BF84 /* MangekyoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangekyoApp.swift; sourceTree = "<group>"; };
 		5274CB3E41682D107BB897DB /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		55A52987CDE0BA67BFB5FED1 /* InfoHint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoHint.swift; sourceTree = "<group>"; };
 		63361444C8D5FF46CED28E1E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		6884C8DB370841C338158927 /* MetalBenchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalBenchView.swift; sourceTree = "<group>"; };
 		6DA968052D30E0E5ACE58D5A /* Mangekyo.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Mangekyo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -121,6 +123,7 @@
 			isa = PBXGroup;
 			children = (
 				FBDC15072481334CBFE5FD45 /* GlassCard.swift */,
+				55A52987CDE0BA67BFB5FED1 /* InfoHint.swift */,
 				A6EE1FDD90B2261A38F8E256 /* KeyboardDismiss.swift */,
 				6884C8DB370841C338158927 /* MetalBenchView.swift */,
 			);
@@ -204,6 +207,7 @@
 				5D013F045E2EAD36998B384D /* GlassCard.swift in Sources */,
 				93B31FFC719732890B07DDB9 /* GpuBenchBridge.mm in Sources */,
 				EAB2C3F021760E2D29F1A49C /* HistoryView.swift in Sources */,
+				A25BE0A3F94E6DB6FF9DDB64 /* InfoHint.swift in Sources */,
 				9DE4FDDC017A8C3417C7A8CA /* KeyboardDismiss.swift in Sources */,
 				43F682296E2550FDC887B747 /* Localization.swift in Sources */,
 				7FDA716705493EFCD3C08B15 /* MangekyoApp.swift in Sources */,
