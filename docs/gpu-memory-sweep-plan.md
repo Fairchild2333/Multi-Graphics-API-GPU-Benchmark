@@ -55,55 +55,75 @@ thing and its tier boundaries would not necessarily be the ones the actual
 workload experiences. Keeping the access pattern identical means the plateaus
 found here are the plateaus the particle workload is subject to.
 
-## 2b. Prototype results — the method works
+## 2b. Measured results — the method works
 
-Validated with a standalone Metal prototype before touching the repo build.
-M4 Pro, 262,144 threads, 2 GiB of traffic per point, best of 5 dispatches,
+From the shipped probe (`--memory-sweep`), M4 Pro, 262,144 threads, 2 GiB of
+traffic per point, best of 5 timed dispatches after one untimed warm-up,
 device-local storage. Both access modes use the same `Particle` struct and the
-same index walk; only the kernel body differs.
+same walk; only the kernel body differs.
 
 | working set | particles | read-modify-write GB/s | read-only GB/s |
 |---|---|---|---|
-| 64 KiB | 2,048 | 1243 † | 2817 |
-| 128 KiB | 4,096 | 3904 | 2836 |
-| 256 KiB | 8,192 | 3856 | 3243 |
-| 1 MiB | 32,768 | 3803 | 3226 |
-| 8 MiB | 262,144 | 3695 | 3171 |
-| 16 MiB | 524,288 | 4723 † | 3214 |
-| 32 MiB | 1,048,576 | 2964 | 1590 |
-| 64 MiB | 2,097,152 | 1148 | 579 |
-| 128 MiB | 4,194,304 | 409 | 353 |
-| 256 MiB | 8,388,608 | 220 | 257 |
-| 512 MiB | 16,777,216 | **175.7** | **251.2** |
+| 64 KiB | 2,048 | 2972 † | 4812 |
+| 128 KiB | 4,096 | 3897 † | 4836 |
+| 256 KiB | 8,192 | 5780 | 4839 |
+| 1 MiB | 32,768 | 5613 | 4807 |
+| 4 MiB | 131,072 | 5564 | 4786 |
+| 8 MiB | 262,144 | 5514 | 4550 |
+| 16 MiB | 524,288 | 4532 | 4352 |
+| 32 MiB | 1,048,576 | 2564 | 2665 |
+| 64 MiB | 2,097,152 | 1518 | 934 |
+| 128 MiB | 4,194,304 | 367 | 442 |
+| 256 MiB | 8,388,608 | 177 | 317 |
+| 512 MiB | 16,777,216 | **139** | **233** |
 
 What this establishes:
 
-1. **Memory bandwidth is measured correctly.** The RMW figure at 512 MiB
-   (175.7) matches an independent copy probe (177.8) and, converted to
-   stream-score units, matches the shipped test: 147.4 vs 147.8 GB/s measured at
-   16M particles. Three independent paths agree.
+1. **Memory bandwidth is measured correctly.** Converted to stream-score units
+   the 512 MiB read-modify-write point is 116 GB/s, against 147.8 GB/s measured
+   by a real `--workload stream --particles 16777216 --headless` run — the same
+   plateau, reached independently.
 2. **The inversion is gone.** Small working sets are now far faster than large
    ones, which is the whole point of decoupling the grid from the buffer.
-3. **A cache plateau is clearly resolved** at roughly 3200–3800 GB/s, about 18–20x
-   the memory rate, holding from 128 KiB to 16 MiB.
-4. **The capacity knee sits between 16 and 32 MiB**, where the rate first falls
-   away sharply. That is the last-level cache boundary, inferred from the curve.
-5. **Unified memory is confirmed**: device-local and host-visible converge to the
-   same ~176 GB/s at the large end (full table in the prototype run), so there is
-   no separate VRAM pool on this part — exactly what should be reported rather
-   than a fabricated split.
-6. **Read-only reaches 251 GB/s, 92% of the 273 GB/s rating.** This corrects an
-   earlier claim in `interpreting-stream-bandwidth.md` that ~180 GB/s was the
-   hardware ceiling. It is not; read-modify-write is what costs the third.
+3. **A cache plateau is cleanly resolved.** Read-only holds 4786–4839 GB/s from
+   64 KiB to 4 MiB — a spread of 1.1% across six sizes — then falls away.
+4. **The capacity knee sits between 16 and 32 MiB**, where both modes drop
+   sharply. That is the last-level cache boundary, inferred from the curve.
+5. **Unified memory is confirmed**: device-local and host-visible converge to
+   ~150 and ~149 GB/s, so there is no separate VRAM pool on this part.
+6. **Read-only reaches 233 GB/s against a 273 GB/s rating**, while
+   read-modify-write reaches 139. The write-back costs roughly a third; see
+   `interpreting-stream-bandwidth.md`.
 
-† Two artifacts remain, both understood:
+† The two smallest read-modify-write points sit below the plateau. This is write
+contention, not cache behaviour: 2,048 particles shared by 262,144 threads means
+~128 threads writing each address. It is inherent to reusing a kernel that
+writes, and the read-only column — flat across the same sizes — is what the
+design keeps it for.
 
-- **64 KiB RMW (1243)** is write contention, not cache speed: 2,048 particles
-  shared by 262,144 threads means ~128 threads writing each address. Inherent to
-  reusing a kernel that writes. The read-only column has no such dip.
-- **16 MiB RMW (4723)** is an isolated spike above its neighbours; likely a
-  write-combining effect at the cache boundary. Needs a repeat run with more
-  samples before the tier detector is allowed to treat it as a plateau.
+### The aliasing trap
+
+An earlier revision stepped by the grid size, reasoning that neighbouring
+threads would then stay on neighbouring addresses. That is true but not
+sufficient, and it silently corrupted the curve.
+
+With both the grid and the working set powers of two, `count == k * grid` makes
+`stride % count == 0` after `k` steps, so **each thread revisits only `k`
+elements**. Those few lines stay in the innermost cache and the point reports
+that rate for a working set far too large to be there. At 16 MiB, `k` was 2 —
+every thread saw exactly two addresses — and the measurement read 4663 GB/s
+against a genuine ~4500 neighbourhood, appearing as an isolated spike that the
+tier detector was happy to treat as a plateau.
+
+Special-casing `count <= grid` only patches `k == 1`. The general fix is to make
+the step **odd**: odd is coprime with a power-of-two set, so every thread's orbit
+covers every element. The step is identical for all threads, so neighbours stay
+one element apart and coalescing is unaffected whatever its value. One rule now
+covers both regimes.
+
+This is worth remembering when porting: any backend that reuses this walk needs
+the same property, and the symptom is a plausible-looking spike rather than an
+obvious failure.
 
 ### Why both access modes ship
 
@@ -123,14 +143,17 @@ Reporting only one would either misstate the cache region or misstate the peak.
 Only the launch geometry. Two parameters are added to the dispatch:
 
 ```metal
-// Same body as the shipped kernel; only the loop around it is new.
-kernel void particleSweep(device Particle* p, constant SweepParams& sp,
-                          uint tid [[thread_position_in_grid]]) {
-    for (uint r = 0u; r < sp.repeats; ++r) {
-        for (uint i = tid; i < sp.count; i += sp.gridSize) {
-            p[i].position.xyz += p[i].velocity.xyz * sp.deltaTime;
-            if (p[i].position.x > sp.bounds) p[i].position.x = -sp.bounds;
-        }
+// Same body as the shipped kernel; only the walk around it is new.
+kernel void particleSweepRMW(device Particle* p, constant SweepParams& sp,
+                             uint tid [[thread_position_in_grid]]) {
+    uint idx = tid & sp.mask;
+    for (uint k = 0u; k < sp.iters; ++k) {
+        float4 pos = p[idx].position;
+        float4 vel = p[idx].velocity;
+        pos.xyz += vel.xyz * sp.dt;
+        if (pos.x > sp.bounds) pos.x = -sp.bounds;
+        p[idx].position = pos;
+        idx = (idx + sp.stride) & sp.mask;   // stride is odd
     }
 }
 ```
@@ -376,17 +399,14 @@ points are always emitted so the curve can be re-read by hand.
 
 | # | change | file | status |
 |---|---|---|---|
-| 1 | probe API | `src/gpu_memory_sweep.h` | written, needs rework to the particle-derived kernel |
-| 2 | Metal implementation + non-Metal stub | `src/gpu_memory_sweep.mm` | written, needs rework |
-| 3 | add source, `-fobjc-arc` | `CMakeLists.txt` | todo |
-| 4 | `--memory-sweep` flag + early dispatch | `src/main.cpp` | todo |
-| 5 | `--help` entry | `src/main.cpp` | todo |
+| 1 | probe API | `src/gpu_memory_sweep.h` | **done** |
+| 2 | Metal implementation + non-Metal stub | `src/gpu_memory_sweep.mm` | **done** |
+| 3 | add source, `-fobjc-arc` | `CMakeLists.txt` | **done** |
+| 4 | `--memory-sweep` flag + early dispatch | `src/main.cpp` | **done** |
+| 5 | `--help` entry | `src/main.cpp` | **done** |
 | 6 | GUI page (macOS) | `macos-gui/…` | todo, optional |
-| 7 | measured reference curve | `docs/` | todo |
-
-The two source files currently hold a from-scratch read-only kernel, written
-before the "derive it from the particle test" requirement. They will be reworked
-to the shared `Particle` struct and the update body above.
+| 7 | measured reference curve | section 2b | **done** |
+| 8 | Vulkan port | `src/vulkan_backend.cpp` | todo |
 
 Flag surface, mirroring `--cpu-benchmark`:
 
@@ -430,10 +450,13 @@ In order; the probe is only worth having if these hold.
 - **Metal only, initially.** Non-Metal builds compile a stub reporting
   `backend_not_implemented`. Vulkan and D3D12 ports are mechanical — same
   struct, same body, same sweep — but are out of scope here and untested.
-- **The innermost tier may be broadcast, not cache bandwidth.** At 64 KB a
+- **The innermost tier may be broadcast, not cache bandwidth.** At 64 KiB a
   262,144-thread grid covers only 2,048 particles, so hardware may service many
   lanes from one fetch. Reported as *peak on-chip read rate*, never as an "L1"
   figure.
+- **Read-modify-write is unusable below ~256 KiB.** With more threads than
+  particles, many threads write the same address and the figure reflects that
+  contention. Read the read-only column there.
 - **Plateau detection is a heuristic.** 12% tolerance can merge close tiers or
   split a noisy one.
 - **Cache capacities are inferred from knees, not queried.** Shared and
@@ -443,10 +466,12 @@ In order; the probe is only worth having if these hold.
   a bandwidth measurement (same body, same traffic), but it is not a simulation.
 - **No results.json integration**, by design.
 
-## 11. Suggested order
+## 11. Remaining work
 
-1. Rework the two source files to the particle-derived kernel.
-2. CMake + `--memory-sweep` dispatch; run validation checks 1–3.
-3. Tune the default grid size against check 5.
-4. Record the measured M4 Pro curve in `docs/`.
-5. Only then consider a GUI page and other backends.
+1. **Run validation check 5** (grid size does not move the plateaus). This gates
+   trusting any number from a device larger than an M4 Pro.
+2. Characterise run-to-run variance (check 6).
+3. Port to Vulkan — the only backend with GPU timestamps *and* host-visible
+   allocation already in place, and the one that covers Windows and Linux at
+   once. Raise the maximum working set to 2–4 GiB first; see section 5b.
+4. Only then consider a GUI page.

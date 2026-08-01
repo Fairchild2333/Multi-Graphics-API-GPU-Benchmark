@@ -190,7 +190,8 @@ if(ENABLE_METAL AND APPLE)
         list(APPEND BACKEND_SOURCES
             src/metal_backend.mm
             src/metal_probe.mm
-            src/metal_cinematic_liquid.mm)
+            src/metal_cinematic_liquid.mm
+            src/gpu_memory_sweep.mm)
         if(GPU_BENCH_IOS)
             list(APPEND BACKEND_SOURCES src/ios_engine_host.cpp)
         endif()
@@ -201,6 +202,7 @@ if(ENABLE_METAL AND APPLE)
             src/metal_backend.mm
             src/metal_probe.mm
             src/metal_cinematic_liquid.mm
+            src/gpu_memory_sweep.mm
             PROPERTIES COMPILE_FLAGS "-fobjc-arc"
         )
 

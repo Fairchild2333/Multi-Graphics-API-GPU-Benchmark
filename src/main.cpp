@@ -1,6 +1,7 @@
 #include "app_base.h"
 #include "benchmark_results.h"
 #include "cpu_benchmark.h"
+#include "gpu_memory_sweep.h"
 #include "gpu_engine.h"
 #include "path_service.h"
 
@@ -1166,11 +1167,41 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     bool headlessArgGiven = false;
     bool renderDocLayerRequested = false;
     bool cpuBenchmarkRequested = false;
+    bool memorySweepRequested = false;
+    gpu_bench::GpuMemorySweepConfig sweepCfg{};
     bool saveCpuResults = true;
     gpu_bench::CpuBenchmarkConfig cpuCfg;
     gpu_bench::BenchmarkConfig benchCfg;
 
     for (int i = 1; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--memory-sweep") == 0) {
+            memorySweepRequested = true;
+            continue;
+        }
+        if (std::strcmp(argv[i], "--memory-sweep-min-kib") == 0 && i + 1 < argc) {
+            sweepCfg.minKiB = std::strtoul(argv[++i], nullptr, 10);
+            continue;
+        }
+        if (std::strcmp(argv[i], "--memory-sweep-max-kib") == 0 && i + 1 < argc) {
+            sweepCfg.maxKiB = std::strtoul(argv[++i], nullptr, 10);
+            continue;
+        }
+        if (std::strcmp(argv[i], "--memory-sweep-traffic-mib") == 0 && i + 1 < argc) {
+            sweepCfg.trafficPerPointMiB = std::strtoul(argv[++i], nullptr, 10);
+            continue;
+        }
+        if (std::strcmp(argv[i], "--memory-sweep-repeats") == 0 && i + 1 < argc) {
+            sweepCfg.repeats = std::strtoul(argv[++i], nullptr, 10);
+            continue;
+        }
+        if (std::strcmp(argv[i], "--memory-sweep-threads") == 0 && i + 1 < argc) {
+            sweepCfg.threads = std::strtoul(argv[++i], nullptr, 10);
+            continue;
+        }
+        if (std::strcmp(argv[i], "--memory-sweep-no-host") == 0) {
+            sweepCfg.includeHostVisible = false;
+            continue;
+        }
         if (std::strcmp(argv[i], "--cpu-benchmark") == 0) {
             cpuBenchmarkRequested = true;
             // Preferred compact form: --cpu-benchmark per-core|multi|all.
@@ -1439,6 +1470,13 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --afr                               Shorthand for --multi-gpu afr\n"
                       << "  --sfr                               Shorthand for --multi-gpu sfr\n"
                       << "  --headless                           Pure compute mode (no window/rendering/present)\n"
+                      << "  --memory-sweep                       Sweep the GPU memory hierarchy and exit (Metal only)\n"
+                      << "  --memory-sweep-min-kib N             Smallest working set, KiB (default 64)\n"
+                      << "  --memory-sweep-max-kib N             Largest working set, KiB (default 524288)\n"
+                      << "  --memory-sweep-traffic-mib N         Bytes moved per point, MiB (default 2048)\n"
+                      << "  --memory-sweep-repeats N             Dispatches per point, best kept (default 5)\n"
+                      << "  --memory-sweep-threads N             Fixed grid size (default 262144)\n"
+                      << "  --memory-sweep-no-host               Skip the host-visible pass\n"
                       << "  --cpu-benchmark [per-core|multi|all] Run native CPU-only benchmark (default: all)\n"
                       << "  --cpu-mode <per-core|multi|all>      CPU mode alias used by the GUI\n"
                       << "  --renderdoc                         Enable available GPU capture integration / manual F12 capture\n"
@@ -1497,6 +1535,20 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     if (completeSuite && fillMissingSuite) {
         std::cerr << "--complete-suite and --fill-missing are mutually exclusive.\n";
         return 2;
+    }
+
+    // The memory sweep is a side path like the CPU benchmark: it allocates its
+    // own buffers, writes MEMSWEEP_* records rather than a BenchmarkResult, and
+    // never touches the particle workload or its score.
+    if (memorySweepRequested) {
+        sweepCfg.gpuIndex = gpuIndex < 0 ? 0u : static_cast<std::uint32_t>(gpuIndex);
+        const auto report = gpu_bench::RunGpuMemorySweep(sweepCfg, std::cout);
+        if (!report.supported) {
+            std::cerr << "Memory sweep unavailable: " << report.unsupportedReason
+                      << "\n";
+            return 3;
+        }
+        return 0;
     }
 
     // CPU benchmarking is a fully separate path. Return before GLFW, GPU/API
