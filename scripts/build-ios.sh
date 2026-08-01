@@ -150,6 +150,21 @@ for sdk in "${SDKS[@]}"; do
     fi
 
     if [[ -n "$APP_PATH" ]]; then
+        # Stage the Metal sources the same way build-macos.sh does. They cannot
+        # be target sources: Xcode would hand .metal to the Metal compiler and
+        # emit a default.metallib, but the engine compiles the source text at
+        # runtime. They also cannot use XcodeGen's `resources:` key — that key
+        # does not exist, so the entries were silently dropped and the app
+        # shipped with no shaders at all.
+        shaders_dir="${APP_PATH}/Shaders"
+        mkdir -p "$shaders_dir"
+        for shader in particle.metal gpu_burn.metal cinematic_liquid_v2.metal; do
+            install -m 0644 "${REPO_ROOT}/shaders/${shader}" "${shaders_dir}/${shader}"
+            # The host also probes the bundle root.
+            install -m 0644 "${REPO_ROOT}/shaders/${shader}" "${APP_PATH}/${shader}"
+        done
+        echo "  Staged $(ls "$shaders_dir" | wc -l | tr -d ' ') Metal shader sources"
+
         echo ""
         echo "  iOS app: $APP_PATH"
         echo "  SDK: $sdk"

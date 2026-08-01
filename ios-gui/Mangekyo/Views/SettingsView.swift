@@ -39,6 +39,7 @@ struct SettingsView: View {
                             .labelsHidden()
                             .onChange(of: appLanguage) { newValue in
                                 Localization.current = AppLanguage(rawValue: newValue) ?? .auto_
+                                engine.refreshLocalizedStatus()
                             }
                         }
 
@@ -69,6 +70,7 @@ struct SettingsView: View {
         }
         .onAppear {
             Localization.current = AppLanguage(rawValue: appLanguage) ?? .auto_
+            engine.refreshLocalizedStatus()
         }
     }
 }

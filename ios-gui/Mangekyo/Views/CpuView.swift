@@ -5,6 +5,9 @@ import SwiftUI
 struct CpuView: View {
     @EnvironmentObject var engine: BenchEngine
 
+    /// This page only ever reads and writes the CPU channel.
+    private var run: BenchChannelState { engine.cpuState }
+
     @State private var mode: String = "all"          // per-core | multi | all
     @State private var durationPreset: String = "1"  // 1 | 15
     @State private var secondsPerTest: String = "1"
@@ -87,18 +90,18 @@ struct CpuView: View {
                     GlassCard(padding: 16) {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
-                                Text(engine.statusText).fontWeight(.semibold)
+                                Text(run.statusText).fontWeight(.semibold)
                                 Spacer()
-                                Text(engine.progressLabel).foregroundStyle(.secondary)
+                                Text(run.progressLabel).foregroundStyle(.secondary)
                             }
-                            ProgressView(value: engine.progressFraction)
+                            ProgressView(value: run.progressFraction)
                         }
                     }
 
                     AccentGlassCard {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(Localization.tr("Summary", "摘要", "要約")).fontWeight(.semibold)
-                            Text(engine.lastScore.isEmpty ? "—" : engine.lastScore)
+                            Text(run.lastScore.isEmpty ? "—" : run.lastScore)
                                 .font(.title2).fontWeight(.semibold)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -110,18 +113,18 @@ struct CpuView: View {
                                 .font(.subheadline).foregroundStyle(.secondary)
                             ScrollViewReader { proxy in
                                 ScrollView {
-                                    Text(engine.logOutput.isEmpty
+                                    Text(run.logOutput.isEmpty
                                          ? Localization.tr("CPU output will appear here…",
                                                           "CPU 输出将显示在此处…",
                                                           "CPU 出力はここに表示されます…")
-                                         : engine.logOutput)
+                                         : run.logOutput)
                                         .font(.system(.caption, design: .monospaced))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .textSelection(.enabled)
                                         .id(logScrollID)
                                 }
                                 .frame(height: 180)
-                                .onChange(of: engine.logOutput) { _ in
+                                .onChange(of: run.logOutput) { _ in
                                     logScrollID += 1
                                     proxy.scrollTo(logScrollID, anchor: .bottom)
                                 }
@@ -135,11 +138,11 @@ struct CpuView: View {
             HStack {
                 Spacer()
                 Button(Localization.tr("Cancel", "取消", "キャンセル")) {
-                    engine.cancel()
+                    engine.cancel(channel: .cpu)
                 }
-                .disabled(!engine.isRunning)
+                .disabled(!run.isRunning)
                 Button(action: runCpu) {
-                    Text(Localization.tr("Run CPU Benchmark", "开始 CPU 跑分", "CPU ベンチマークを実行"))
+                    Text(Localization.tr("Run CPU Test", "开始 CPU 测试", "CPU ベンチマークを実行"))
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(engine.isRunning || engine.workingDirectory.isEmpty)
@@ -148,6 +151,7 @@ struct CpuView: View {
             .padding(.vertical, 12)
             .background(.ultraThinMaterial)
         }
+        .numericKeyboardDoneButton()
     }
 
     private var infoText: String {
@@ -166,6 +170,6 @@ struct CpuView: View {
             "--cpu-time", sec.isEmpty ? "1" : sec,
             "--cpu-warmup", warm.isEmpty ? "0.2" : warm,
         ]
-        engine.run(jobs: [args], needCharts: false)
+        engine.run(jobs: [args], needCharts: false, channel: .cpu)
     }
 }

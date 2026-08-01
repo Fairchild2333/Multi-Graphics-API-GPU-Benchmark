@@ -58,6 +58,13 @@ struct MetalBackend::Impl {
     std::string deviceName;
     std::uint32_t framesInFlight = kMaxFramesInFlight;
 
+    // Actual render target size. On the desktop this is the fixed window size;
+    // on iOS the host view computes it from its own bounds and contentsScale,
+    // and the engine must not overwrite that or the image is letterboxed into
+    // whatever aspect the desktop constant happens to be.
+    std::uint32_t renderWidth  = kWindowWidth;
+    std::uint32_t renderHeight = kWindowHeight;
+
     // Semaphore to limit frames in flight
     dispatch_semaphore_t frameSemaphore = nullptr;
 
@@ -177,7 +184,7 @@ struct MetalBackend::Impl {
                               sourceSlice:0
                               sourceLevel:0
                              sourceOrigin:MTLOriginMake(0, 0, 0)
-                               sourceSize:MTLSizeMake(kWindowWidth, kWindowHeight, 1)
+                               sourceSize:MTLSizeMake(renderWidth, renderHeight, 1)
                                 toTexture:drawable.texture
                          destinationSlice:0
                          destinationLevel:0
@@ -378,7 +385,18 @@ void MetalBackend::InitBackend() {
             impl_->metalLayer = (__bridge CAMetalLayer*)window_;
             impl_->metalLayer.device       = impl_->device;
             impl_->metalLayer.pixelFormat  = MTLPixelFormatBGRA8Unorm;
-            impl_->metalLayer.drawableSize = CGSizeMake(kWindowWidth, kWindowHeight);
+            // Adopt the size the host view already derived from its bounds
+            // instead of forcing the desktop's 1280x720. Only fall back to the
+            // constant when the layer has not been laid out yet.
+            CGSize hostSize = impl_->metalLayer.drawableSize;
+            if (hostSize.width < 1.0 || hostSize.height < 1.0) {
+                hostSize = CGSizeMake(kWindowWidth, kWindowHeight);
+                impl_->metalLayer.drawableSize = hostSize;
+            }
+            impl_->renderWidth  = static_cast<std::uint32_t>(hostSize.width);
+            impl_->renderHeight = static_cast<std::uint32_t>(hostSize.height);
+            std::cout << "[Metal] Render target follows host layer: "
+                      << impl_->renderWidth << "x" << impl_->renderHeight << "\n";
             impl_->metalLayer.framebufferOnly = YES;
             impl_->metalLayer.maximumDrawableCount = 3;
         }
@@ -393,6 +411,10 @@ void MetalBackend::InitBackend() {
         auto enableOffscreenIfNeeded = [&]() {
             if (config_.headless || config_.vsync || !impl_->metalLayer)
                 return;
+#if !TARGET_OS_OSX
+            // iOS renders directly into the host layer.
+            return;
+#else
 
             // framebufferOnly must be off so the drawable can be a blit
             // destination for the presenter.
@@ -404,8 +426,8 @@ void MetalBackend::InitBackend() {
             for (std::size_t i = 0; i < slots; ++i) {
                 MTLTextureDescriptor* texDesc =
                     [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
-                                                                       width:kWindowWidth
-                                                                      height:kWindowHeight
+                                                                       width:impl_->renderWidth
+                                                                      height:impl_->renderHeight
                                                                    mipmapped:NO];
                 texDesc.usage = MTLTextureUsageRenderTarget;
                 texDesc.storageMode = MTLStorageModePrivate;
@@ -423,6 +445,7 @@ void MetalBackend::InitBackend() {
 
             std::cout << "[Metal] Decoupled presenter: benchmark renders offscreen "
                          "uncapped, preview presents at display refresh\n";
+#endif
         };
 
         // --- Cinematic Liquid v2 (separate library / host) -----------------------
@@ -551,8 +574,8 @@ void MetalBackend::InitBackend() {
             if (render3d) {
                 MTLTextureDescriptor* dtd =
                     [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float
-                                                                       width:kWindowWidth
-                                                                      height:kWindowHeight
+                                                                       width:impl_->renderWidth
+                                                                      height:impl_->renderHeight
                                                                    mipmapped:NO];
                 dtd.usage       = MTLTextureUsageRenderTarget;
                 dtd.storageMode = MTLStorageModePrivate;
@@ -674,6 +697,37 @@ void MetalBackend::DrawFrame(float deltaTime) {
         }
 
         // === WINDOWED PATH ======================================================
+
+#if !TARGET_OS_OSX
+        // The host view resizes its layer on rotation. The engine only sampled
+        // the size at init, so after a rotation it kept rendering at the old
+        // aspect and the image was letterboxed again. Re-read it each frame:
+        // on iOS the drawable *is* the render target, so nothing has to be
+        // reallocated — only the aspect the shaders are given.
+        if (impl_->metalLayer) {
+            const CGSize live = impl_->metalLayer.drawableSize;
+            const auto liveW = static_cast<std::uint32_t>(live.width);
+            const auto liveH = static_cast<std::uint32_t>(live.height);
+            if (liveW >= 1 && liveH >= 1 &&
+                (liveW != impl_->renderWidth || liveH != impl_->renderHeight)) {
+                impl_->renderWidth  = liveW;
+                impl_->renderHeight = liveH;
+                // Depth is the one size-dependent allocation; only Render3D
+                // uses it, and it must match the new drawable.
+                if (impl_->depthTex) {
+                    MTLTextureDescriptor* dtd =
+                        [MTLTextureDescriptor
+                            texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float
+                                                         width:liveW
+                                                        height:liveH
+                                                     mipmapped:NO];
+                    dtd.usage       = MTLTextureUsageRenderTarget;
+                    dtd.storageMode = MTLStorageModePrivate;
+                    impl_->depthTex = [impl_->device newTextureWithDescriptor:dtd];
+                }
+            }
+        }
+#endif
 
         // --- Determine render target --------------------------------------------
         const bool usePresenter = impl_->presenterActive();
@@ -838,7 +892,8 @@ void MetalBackend::DrawFrame(float deltaTime) {
             [renderEnc setDepthStencilState:impl_->depthState];
             fractalElapsed_ += deltaTime;
             Render3DParams r3{};
-            const float aspect = (float)kWindowWidth / (float)kWindowHeight;
+            const float aspect = (float)impl_->renderWidth /
+                                 (float)impl_->renderHeight;
             render3dCamera(fractalElapsed_, aspect, /*flipY*/false, /*z01*/true,
                            r3.viewProj, r3.camRight, r3.camUp);
             r3.pointSize = 0.02f;

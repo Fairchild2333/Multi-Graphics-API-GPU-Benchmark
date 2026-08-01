@@ -118,7 +118,7 @@ struct BenchResult: Codable, Identifiable, Hashable {
         }
         if mode == "sfr" { return "SFR ×2" }
         if headless { return "Headless" }
-        return Localization.tr("Single", "单卡", "単一 GPU")
+        return Localization.tr("Single GPU", "单 GPU", "単一 GPU")
     }
 
     /// Old bandwidth rows can contain impossible values produced by broken

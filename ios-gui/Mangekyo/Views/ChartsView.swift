@@ -17,7 +17,7 @@ struct ChartsView: View {
                                 .foregroundStyle(.secondary)
                             Text(Localization.tr(
                                 "No benchmark results yet. Run some tests to see comparison charts.",
-                                "尚无跑分结果。运行一些测试以查看对比图表。",
+                                "尚无测试结果。运行一些测试以查看对比图表。",
                                 "ベンチマーク結果がありません。テストを実行してチャートを表示します。"))
                                 .multilineTextAlignment(.center)
                                 .foregroundStyle(.secondary)
@@ -31,7 +31,7 @@ struct ChartsView: View {
                     if !metalResults.isEmpty {
                         GlassCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                Text(Localization.tr("Metal GPU Benchmark Scores", "Metal GPU 跑分对比", "Metal GPU スコア比較"))
+                                Text(Localization.tr("Metal GPU Benchmark Scores", "Metal GPU 成绩对比", "Metal GPU スコア比較"))
                                     .font(.headline)
                                     .padding(.bottom, 4)
 
@@ -57,7 +57,7 @@ struct ChartsView: View {
                     if !cpuResults.isEmpty {
                         GlassCard {
                             VStack(alignment: .leading, spacing: 12) {
-                                Text(Localization.tr("CPU Benchmark Scores", "CPU 跑分对比", "CPU スコア比較"))
+                                Text(Localization.tr("CPU Benchmark Scores", "CPU 成绩对比", "CPU スコア比較"))
                                     .font(.headline)
                                     .padding(.bottom, 4)
 

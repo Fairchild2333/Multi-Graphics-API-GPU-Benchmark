@@ -10,18 +10,21 @@
 		43F682296E2550FDC887B747 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF6C90AAED2818E11DBC92F2 /* Localization.swift */; };
 		5BABD9E036A7CC5EE9D9AAE7 /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DECB5D16904FB6DC018CC0A /* ChartsView.swift */; };
 		5D013F045E2EAD36998B384D /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDC15072481334CBFE5FD45 /* GlassCard.swift */; };
+		6E93763792575E117AC0A674 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A8C6E577C30A5A9AD63A5F75 /* Assets.xcassets */; };
 		73E79E79DDEA231C2FA040D4 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D367CFD888155281F08AEA7 /* AboutView.swift */; };
 		7B901514A84C7BDA949B42F8 /* RunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BC9FB6C9D393A557A6D73A4 /* RunView.swift */; };
 		7D664B750B9264C72ACDA900 /* BenchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73DCDB01D78693EE7CBF269 /* BenchResult.swift */; };
 		7FDA716705493EFCD3C08B15 /* MangekyoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4967B6C277D550471842BF84 /* MangekyoApp.swift */; };
 		88A62639E88609D6E0342F69 /* MobileBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74C87A9E05C083261AAE98B /* MobileBenchmark.swift */; };
 		93B31FFC719732890B07DDB9 /* GpuBenchBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = C84CE3174AC6B3C5BAB9B724 /* GpuBenchBridge.mm */; };
+		9DE4FDDC017A8C3417C7A8CA /* KeyboardDismiss.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6EE1FDD90B2261A38F8E256 /* KeyboardDismiss.swift */; };
 		B0AE4638F0309DCE5574778C /* BenchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0C82F1B47FC2424F2B07A17 /* BenchEngine.swift */; };
 		B35618E5CB04E9A3E744D6E1 /* MetalBenchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6884C8DB370841C338158927 /* MetalBenchView.swift */; };
 		D58A29985A7D81AC1DF43EB3 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5274CB3E41682D107BB897DB /* SettingsView.swift */; };
 		E8EEF55A4ED061E3BDE113C1 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63361444C8D5FF46CED28E1E /* ContentView.swift */; };
 		EAB2C3F021760E2D29F1A49C /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A273DDDC31BE4EB2EFE3A5 /* HistoryView.swift */; };
 		EE784A6913678124A629B864 /* CpuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9258366C7B9E8DCAD1DA826D /* CpuView.swift */; };
+		F4ED1ACDB37E4DDADD4A4671 /* BenchmarkStageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A97EBA18D7D2031363CD97 /* BenchmarkStageView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,7 +37,10 @@
 		63361444C8D5FF46CED28E1E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		6884C8DB370841C338158927 /* MetalBenchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalBenchView.swift; sourceTree = "<group>"; };
 		6DA968052D30E0E5ACE58D5A /* Mangekyo.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Mangekyo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		71A97EBA18D7D2031363CD97 /* BenchmarkStageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkStageView.swift; sourceTree = "<group>"; };
 		9258366C7B9E8DCAD1DA826D /* CpuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CpuView.swift; sourceTree = "<group>"; };
+		A6EE1FDD90B2261A38F8E256 /* KeyboardDismiss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardDismiss.swift; sourceTree = "<group>"; };
+		A8C6E577C30A5A9AD63A5F75 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B73DCDB01D78693EE7CBF269 /* BenchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchResult.swift; sourceTree = "<group>"; };
 		C5C595B1503002D956FF38EE /* GpuBenchBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GpuBenchBridge.h; sourceTree = "<group>"; };
 		C84CE3174AC6B3C5BAB9B724 /* GpuBenchBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GpuBenchBridge.mm; sourceTree = "<group>"; };
@@ -86,6 +92,7 @@
 		9F201CF285F9FE2932F553FE /* Mangekyo */ = {
 			isa = PBXGroup;
 			children = (
+				A8C6E577C30A5A9AD63A5F75 /* Assets.xcassets */,
 				63361444C8D5FF46CED28E1E /* ContentView.swift */,
 				4967B6C277D550471842BF84 /* MangekyoApp.swift */,
 				F5A04C42C0D10F98C2F56CFE /* Components */,
@@ -100,6 +107,7 @@
 			isa = PBXGroup;
 			children = (
 				2D367CFD888155281F08AEA7 /* AboutView.swift */,
+				71A97EBA18D7D2031363CD97 /* BenchmarkStageView.swift */,
 				2DECB5D16904FB6DC018CC0A /* ChartsView.swift */,
 				9258366C7B9E8DCAD1DA826D /* CpuView.swift */,
 				F0A273DDDC31BE4EB2EFE3A5 /* HistoryView.swift */,
@@ -113,6 +121,7 @@
 			isa = PBXGroup;
 			children = (
 				FBDC15072481334CBFE5FD45 /* GlassCard.swift */,
+				A6EE1FDD90B2261A38F8E256 /* KeyboardDismiss.swift */,
 				6884C8DB370841C338158927 /* MetalBenchView.swift */,
 			);
 			path = Components;
@@ -126,6 +135,7 @@
 			buildConfigurationList = 32E64766713B688CB74B4CC9 /* Build configuration list for PBXNativeTarget "Mangekyo" */;
 			buildPhases = (
 				0B4A631B0FA82D51008DC55A /* Sources */,
+				BB5F776F84064152FF45014D /* Resources */,
 			);
 			buildRules = (
 			);
@@ -168,6 +178,17 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		BB5F776F84064152FF45014D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6E93763792575E117AC0A674 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		0B4A631B0FA82D51008DC55A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -176,12 +197,14 @@
 				73E79E79DDEA231C2FA040D4 /* AboutView.swift in Sources */,
 				B0AE4638F0309DCE5574778C /* BenchEngine.swift in Sources */,
 				7D664B750B9264C72ACDA900 /* BenchResult.swift in Sources */,
+				F4ED1ACDB37E4DDADD4A4671 /* BenchmarkStageView.swift in Sources */,
 				5BABD9E036A7CC5EE9D9AAE7 /* ChartsView.swift in Sources */,
 				E8EEF55A4ED061E3BDE113C1 /* ContentView.swift in Sources */,
 				EE784A6913678124A629B864 /* CpuView.swift in Sources */,
 				5D013F045E2EAD36998B384D /* GlassCard.swift in Sources */,
 				93B31FFC719732890B07DDB9 /* GpuBenchBridge.mm in Sources */,
 				EAB2C3F021760E2D29F1A49C /* HistoryView.swift in Sources */,
+				9DE4FDDC017A8C3417C7A8CA /* KeyboardDismiss.swift in Sources */,
 				43F682296E2550FDC887B747 /* Localization.swift in Sources */,
 				7FDA716705493EFCD3C08B15 /* MangekyoApp.swift in Sources */,
 				B35618E5CB04E9A3E744D6E1 /* MetalBenchView.swift in Sources */,

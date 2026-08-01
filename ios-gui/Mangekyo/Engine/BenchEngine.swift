@@ -18,29 +18,77 @@ struct GpuDevice: Identifiable, Hashable {
     let supportsOpenGL: Bool
 }
 
+/// GPU and CPU runs own separate console output, progress, and scores so one
+/// page never shows the other page's results.
+enum BenchChannel: String, Sendable, Hashable {
+    case gpu
+    case cpu
+}
+
+/// Everything a single benchmark page displays about its own last run.
+struct BenchChannelState: Sendable {
+    var logOutput: String = ""
+    var lastScore: String = ""
+    var statusText: String = ""
+    /// False once a run has written a real status, so a language switch does
+    /// not overwrite a completion message with the idle string.
+    var statusIsIdle: Bool = true
+    var progressFraction: Double = 0
+    var progressLabel: String = "0%"
+    var isRunning: Bool = false
+}
+
 /// Observable engine state for SwiftUI binding.
 @MainActor
 final class BenchEngine: ObservableObject {
     @Published var gpus: [GpuDevice] = []
-    @Published var logOutput: String = ""
-    @Published var isRunning: Bool = false
-    @Published var lastScore: String = ""
-    @Published var statusText: String = "Ready"
     @Published var workingDirectory: String = ""
     @Published var results: [BenchResult] = []
-    @Published var progressFraction: Double = 0
-    @Published var progressLabel: String = "0%"
     @Published var engineVersion: String = ""
     @Published var lastError: String = ""
 
+    /// Per-page run state. The GPU and CPU pages never share console output,
+    /// progress, scores, or status.
+    @Published var gpuState = BenchChannelState()
+    @Published var cpuState = BenchChannelState()
+
     /// Available graphics APIs on iOS (Metal only).
     static let availableAPIs = ["Metal"]
+
+    static var readyText: String {
+        Localization.tr("Ready", "就绪", "準備完了")
+    }
+
+    /// True while any channel is running; only one workload runs at a time.
+    var isRunning: Bool { gpuState.isRunning || cpuState.isRunning }
+
+    func state(for channel: BenchChannel) -> BenchChannelState {
+        channel == .gpu ? gpuState : cpuState
+    }
+
+    private func mutate(_ channel: BenchChannel, _ body: (inout BenchChannelState) -> Void) {
+        switch channel {
+        case .gpu: body(&gpuState)
+        case .cpu: body(&cpuState)
+        }
+    }
+
+    /// Re-render idle status strings after the UI language changes.
+    func refreshLocalizedStatus() {
+        if gpuState.statusIsIdle { gpuState.statusText = Self.readyText }
+        if cpuState.statusIsIdle { cpuState.statusText = Self.readyText }
+    }
+
+    /// Channel that owns the currently running workload.
+    private var activeChannel: BenchChannel = .gpu
 
     private var cancelRequested = false
     private var metalLayer: CAMetalLayer?
     private var pollTask: Task<Void, Never>?
 
     init() {
+        gpuState.statusText = Self.readyText
+        cpuState.statusText = Self.readyText
         prepareSandboxAndShaders()
         if let ver = gpb_engine_version() {
             engineVersion = String(cString: ver)
@@ -150,15 +198,20 @@ final class BenchEngine: ObservableObject {
         print("iOS Data Folder: \(path)")
     }
 
-    func cancel() {
+    func cancel(channel: BenchChannel) {
+        guard state(for: channel).isRunning else { return }
         cancelRequested = true
         gpb_stop_workload()
-        statusText = Localization.tr("Cancel requested…", "已请求取消…", "キャンセル要求済み…")
+        mutate(channel) {
+            $0.statusIsIdle = false
+            $0.statusText = Localization.tr(
+                "Cancel requested…", "已请求取消…", "キャンセル要求済み…")
+        }
     }
 
     func cancelIfRunning() {
         if isRunning || gpb_is_running() {
-            cancel()
+            cancel(channel: activeChannel)
         }
     }
 
@@ -167,18 +220,22 @@ final class BenchEngine: ObservableObject {
     func startPreview(workload: String, seconds: Double = 3.0) -> Bool {
         guard metalLayer != nil else {
             lastError = "Metal layer not ready"
-            statusText = lastError
+            mutate(.gpu) { $0.statusIsIdle = false; $0.statusText = "Metal layer not ready" }
             return false
         }
         guard !isRunning else { return false }
-        isRunning = true
+        activeChannel = .gpu
         cancelRequested = false
         lastError = ""
-        statusText = Localization.tr(
-            "Running \(workload) preview (\(Int(seconds))s)…",
-            "运行 \(workload) 预览（\(Int(seconds)) 秒）…",
-            "\(workload) プレビュー実行中（\(Int(seconds))秒）…")
-        logOutput += "=== Preview \(workload) \(seconds)s ===\n"
+        mutate(.gpu) {
+            $0.isRunning = true
+            $0.statusIsIdle = false
+            $0.statusText = Localization.tr(
+                "Running \(workload) preview (\(Int(seconds))s)…",
+                "运行 \(workload) 预览（\(Int(seconds)) 秒）…",
+                "\(workload) プレビュー実行中（\(Int(seconds))秒）…")
+            $0.logOutput += "=== Preview \(workload) \(seconds)s ===\n"
+        }
 
         let ok = gpb_start_workload(workload, seconds)
         if !ok {
@@ -186,37 +243,49 @@ final class BenchEngine: ObservableObject {
                 lastError = String(cString: err)
                 gpb_free(err)
             }
-            statusText = lastError.isEmpty ? "Start failed" : lastError
-            isRunning = false
+            mutate(.gpu) {
+                $0.statusIsIdle = false
+                $0.statusText = self.lastError.isEmpty ? "Start failed" : self.lastError
+                $0.isRunning = false
+            }
             return false
         }
-        startPolling()
+        startPolling(channel: .gpu)
         return true
     }
 
-    private func startPolling() {
+    private func startPolling(channel: BenchChannel) {
         pollTask?.cancel()
         pollTask = Task { [weak self] in
             while !Task.isCancelled {
                 let running = gpb_is_running()
                 await MainActor.run {
                     guard let self else { return }
-                    self.isRunning = running
+                    self.mutate(channel) { $0.isRunning = running }
                     if !running {
                         if let err = gpb_last_error() {
                             let s = String(cString: err)
                             gpb_free(err)
                             if !s.isEmpty {
                                 self.lastError = s
-                                self.logOutput += "ERROR: \(s)\n"
-                                self.statusText = s
+                                self.mutate(channel) {
+                                    $0.logOutput += "ERROR: \(s)\n"
+                                    $0.statusIsIdle = false
+                                    $0.statusText = s
+                                }
                             } else if self.cancelRequested {
-                                self.statusText = Localization.tr("Cancelled.", "已取消。", "キャンセルしました。")
+                                self.mutate(channel) {
+                                    $0.statusIsIdle = false
+                                    $0.statusText = Localization.tr("Cancelled.", "已取消。", "キャンセルしました。")
+                                }
                             } else {
-                                self.statusText = Localization.tr(
+                                self.mutate(channel) {
+                                    $0.statusIsIdle = false
+                                    $0.statusText = Localization.tr(
                                     "Preview done (ios_preview — do not mix with desktop scores).",
                                     "预览完成（ios_preview — 勿与桌面成绩混排）。",
                                     "プレビュー完了（ios_preview — デスクトップ成績と混在禁止）。")
+                                }
                             }
                         }
                         self.refreshResults()
@@ -230,8 +299,9 @@ final class BenchEngine: ObservableObject {
     }
 
     /// Run a sequence of benchmark jobs (legacy cliMain path).
-    func run(jobs: [[String]], needCharts: Bool) {
+    func run(jobs: [[String]], needCharts: Bool, channel: BenchChannel) {
         guard !isRunning, !jobs.isEmpty else { return }
+        activeChannel = channel
 
         // Prefer embedded host for single stream/gpu_burn preview-style jobs.
         if jobs.count == 1 {
@@ -249,20 +319,20 @@ final class BenchEngine: ObservableObject {
             }
         }
 
-        isRunning = true
         cancelRequested = false
-        logOutput = ""
-        lastScore = ""
-        progressFraction = 0
-        progressLabel = "0%"
-
-        statusText = jobs.count > 1
-            ? Localization.tr("Running… (multiple passes)",
-                               "运行中…（多趟）",
-                               "実行中…（複数パス）")
-            : Localization.tr("Running…",
-                               "运行中…",
-                               "実行中…")
+        mutate(channel) {
+            $0.isRunning = true
+            $0.logOutput = ""
+            $0.lastScore = ""
+            $0.progressFraction = 0
+            $0.progressLabel = "0%"
+            $0.statusIsIdle = false
+            $0.statusText = jobs.count > 1
+                ? Localization.tr("Running… (multiple passes)",
+                                   "运行中…（多趟）",
+                                   "実行中…（複数パス）")
+                : Localization.tr("Running…", "运行中…", "実行中…")
+        }
 
         let cwd = workingDirectory
         Task.detached { [weak self] in
@@ -274,31 +344,42 @@ final class BenchEngine: ObservableObject {
 
                 await MainActor.run {
                     let pct = Double(index) / Double(max(jobs.count, 1))
-                    self.progressFraction = pct
-                    self.progressLabel = String(format: "%.0f%%", pct * 100)
-                    self.logOutput += "=== Job \(index + 1) of \(jobs.count): \(job.joined(separator: " ")) ===\n"
+                    self.mutate(channel) {
+                        $0.progressFraction = pct
+                        $0.progressLabel = String(format: "%.0f%%", pct * 100)
+                        $0.logOutput += "=== Job \(index + 1) of \(jobs.count): "
+                            + "\(job.joined(separator: " ")) ===\n"
+                    }
                 }
 
-                await self.runViaBridge(job: job)
+                await self.runViaBridge(job: job, channel: channel)
             }
 
             await MainActor.run {
-                self.isRunning = false
-                self.progressFraction = 1
-                self.progressLabel = "100%"
                 self.refreshResults()
-                if self.cancelRequested {
-                    self.statusText = Localization.tr("Cancelled.", "已取消。", "キャンセルしました。")
-                } else if self.lastScore.isEmpty {
-                    self.statusText = Localization.tr("Done — see output / History.", "完成 —— 见输出/历史。", "完了 — 出力/履歴を確認。")
-                } else {
-                    self.statusText = Localization.tr("Done. \(self.lastScore)", "完成。\(self.lastScore)", "完了。\(self.lastScore)")
+                let cancelled = self.cancelRequested
+                self.mutate(channel) { st in
+                    st.isRunning = false
+                    st.progressFraction = 1
+                    st.progressLabel = "100%"
+                    st.statusIsIdle = false
+                    if cancelled {
+                        st.statusText = Localization.tr("Cancelled.", "已取消。", "キャンセルしました。")
+                    } else if st.lastScore.isEmpty {
+                        st.statusText = Localization.tr(
+                            "Done — see output / History.", "完成 —— 见输出/历史。",
+                            "完了 — 出力/履歴を確認。")
+                    } else {
+                        st.statusText = Localization.tr(
+                            "Done. \(st.lastScore)", "完成。\(st.lastScore)",
+                            "完了。\(st.lastScore)")
+                    }
                 }
             }
         }
     }
 
-    private func runViaBridge(job: [String]) async {
+    private func runViaBridge(job: [String], channel: BenchChannel) async {
         let cStrings = job.map { strdup($0) }
         let argc = Int32(cStrings.count)
         var cPtrs = cStrings.map { UnsafePointer($0) }
@@ -308,9 +389,14 @@ final class BenchEngine: ObservableObject {
             let str = String(cString: line)
             let eng = Unmanaged<BenchEngine>.fromOpaque(ctx).takeUnretainedValue()
             DispatchQueue.main.async { [eng, str] in
-                eng.logOutput += str + "\n"
-                if str.hasPrefix("Avg FPS:") || str.contains("Score:") {
-                    eng.lastScore = str.trimmingCharacters(in: .whitespaces)
+                // A C function pointer cannot capture the channel, so read the
+                // running one off the engine instead.
+                eng.mutate(eng.activeChannel) {
+                    $0.logOutput += str + "\n"
+                    if str.hasPrefix("Avg FPS:") || str.contains("Score:") ||
+                        str.contains("VRAM rate:") || str.contains("RAM rate:") {
+                        $0.lastScore = str.trimmingCharacters(in: .whitespaces)
+                    }
                 }
             }
         }

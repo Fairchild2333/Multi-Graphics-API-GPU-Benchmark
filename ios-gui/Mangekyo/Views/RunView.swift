@@ -43,6 +43,12 @@ struct WorkloadChoice: Identifiable, Hashable {
 struct RunView: View {
     @EnvironmentObject var engine: BenchEngine
 
+    /// This page only ever reads and writes the GPU channel.
+    private var run: BenchChannelState { engine.gpuState }
+
+    @State private var showStage = false
+    @State private var pendingJobs: [[String]] = []
+
     @State private var preset: BenchPreset = .custom
     @State private var selectedGpuIndex: Int = -1
     @State private var selectedWorkload: String = "stream"
@@ -119,7 +125,7 @@ struct RunView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    previewSurfaceCard
+                    engineCard
                     optionsCard
                     advancedCard
                     progressCard
@@ -131,6 +137,13 @@ struct RunView: View {
 
             actionBar
         }
+        .numericKeyboardDoneButton()
+        .fullScreenCover(isPresented: $showStage) {
+            BenchmarkStageView {
+                engine.run(jobs: pendingJobs, needCharts: false, channel: .gpu)
+            }
+            .environmentObject(engine)
+        }
         .onAppear {
             if !showLegacy && !primaryWorkloads.contains(where: { $0.id == selectedWorkload }) {
                 selectedWorkload = "stream"
@@ -140,17 +153,9 @@ struct RunView: View {
 
     // MARK: - Cards
 
-    private var previewSurfaceCard: some View {
+    private var engineCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 8) {
-                Text(Localization.tr("Metal preview surface", "Metal 预览表面", "Metal プレビュー面"))
-                    .font(.headline)
-                MetalBenchView { layer in
-                    engine.attachMetalLayer(layer)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 200)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
                 Text(Localization.tr(
                     "Engine: \(engine.engineVersion.isEmpty ? "…" : engine.engineVersion). stream/gpu_burn use embedded gpu_engine (ios_preview).",
                     "引擎：\(engine.engineVersion.isEmpty ? "…" : engine.engineVersion)。stream/gpu_burn 走嵌入式 gpu_engine（ios_preview）。",
@@ -327,11 +332,11 @@ struct RunView: View {
         GlassCard(padding: 16) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text(engine.statusText).fontWeight(.semibold)
+                    Text(run.statusText).fontWeight(.semibold)
                     Spacer()
-                    Text(engine.progressLabel).foregroundStyle(.secondary)
+                    Text(run.progressLabel).foregroundStyle(.secondary)
                 }
-                ProgressView(value: engine.progressFraction)
+                ProgressView(value: run.progressFraction)
             }
         }
     }
@@ -340,9 +345,9 @@ struct RunView: View {
         AccentGlassCard {
             VStack(alignment: .leading, spacing: 8) {
                 Text(Localization.tr("Summary", "摘要", "要約")).fontWeight(.semibold)
-                Text(engine.lastScore.isEmpty ? "—" : engine.lastScore)
+                Text(run.lastScore.isEmpty ? "—" : run.lastScore)
                     .font(.title2).fontWeight(.semibold)
-                    .foregroundStyle(engine.lastScore.isEmpty ? .secondary : .primary)
+                    .foregroundStyle(run.lastScore.isEmpty ? .secondary : .primary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -356,18 +361,18 @@ struct RunView: View {
             ) {
                 ScrollViewReader { proxy in
                     ScrollView {
-                        Text(engine.logOutput.isEmpty
+                        Text(run.logOutput.isEmpty
                              ? Localization.tr("Benchmark output will appear here…",
                                               "基准测试输出将显示在此处…",
                                               "ベンチマーク出力はここに表示されます…")
-                             : engine.logOutput)
+                             : run.logOutput)
                             .font(.system(.caption, design: .monospaced))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .textSelection(.enabled)
                             .id(logScrollID)
                     }
                     .frame(height: 180)
-                    .onChange(of: engine.logOutput) { _ in
+                    .onChange(of: run.logOutput) { _ in
                         logScrollID += 1
                         proxy.scrollTo(logScrollID, anchor: .bottom)
                     }
@@ -380,21 +385,21 @@ struct RunView: View {
         HStack {
             Spacer()
             Circle()
-                .fill(engine.isRunning ? Color.orange : Color.green)
+                .fill(run.isRunning ? Color.orange : Color.green)
                 .frame(width: 10, height: 10)
-            Text(engine.statusText)
+            Text(run.statusText)
                 .foregroundStyle(.secondary)
                 .font(.callout)
                 .lineLimit(1)
-            if engine.isRunning {
+            if run.isRunning {
                 ProgressView()
             }
             Button(Localization.tr("Cancel", "取消", "キャンセル")) {
-                engine.cancel()
+                engine.cancel(channel: .gpu)
             }
-            .disabled(!engine.isRunning)
+            .disabled(!run.isRunning)
             Button(action: runBenchmark) {
-                Text(Localization.tr("Run GPU Benchmark", "开始 GPU 跑分", "GPU ベンチマークを実行"))
+                Text(Localization.tr("Run GPU Test", "开始 GPU 测试", "GPU ベンチマークを実行"))
             }
             .buttonStyle(.borderedProminent)
             .disabled(engine.isRunning || engine.workingDirectory.isEmpty)
@@ -478,13 +483,14 @@ struct RunView: View {
     private func runBenchmark() {
         let jobs = buildPresetJobs()
         guard !jobs.isEmpty else {
-            engine.logOutput += Localization.tr(
+            engine.gpuState.logOutput += Localization.tr(
                 "[GUI] Nothing to run — check workload selection.\n",
                 "[GUI] 无可运行项 —— 请检查负载选择。\n",
                 "[GUI] 実行対象なし — ワークロードを確認。\n")
             return
         }
-        engine.run(jobs: jobs, needCharts: false)
+        pendingJobs = jobs
+        showStage = true
     }
 
     private func buildPresetJobs() -> [[String]] {
