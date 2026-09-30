@@ -73,6 +73,112 @@ For NVIDIA proprietary drivers, use:
 __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia ./build/gpu_benchmark --backend opengl
 ```
 
+### NVIDIA Jetson Xavier NX (JetPack 5.1.x, aarch64)
+
+> **Verification status: build-checked only.** An `ubuntu:20.04` container
+> matching the JetPack 5 userland (GCC 9.4, glibc 2.31, `libvulkan-dev`
+> 1.2.131, GLFW 3.3.2) configures, builds and links the CLI, and every engine
+> source compiles with `aarch64-linux-gnu-g++` 9.4. The CLI has not yet run on
+> real Jetson hardware.
+
+Xavier NX supports JetPack up to 5.1.x (Ubuntu 20.04); JetPack 6 does not
+support Xavier. JetPack 4.x ships GCC 7, whose C++17 `<filesystem>` support is
+incomplete, so it is not a supported target. Only the CLI runs on Jetson (the
+WinUI GUI is Windows-only). Available backends are Vulkan and OpenGL 4.3;
+Cinematic Liquid is Vulkan-only.
+
+**1. Dependencies.** Ubuntu 20.04 ships CMake 3.16, but the project requires
+3.22 or newer, so install CMake from pip. `glslc` is not packaged for Ubuntu
+20.04, so do not include it in the `apt` line.
+
+```bash
+sudo apt install build-essential libglfw3-dev libgl-dev libvulkan-dev vulkan-tools python3-pip
+pip3 install --user "cmake<4"
+```
+
+**2. Build.** Configuration prints `glslc not found – Vulkan shader compilation
+disabled.`; this is expected because SPIR-V comes from step 3.
+
+```bash
+~/.local/bin/cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DGPU_BENCH_ENABLE_PACKAGING=OFF
+~/.local/bin/cmake --build build -j6
+```
+
+**3. SPIR-V shaders.** SPIR-V is architecture-independent. Copy the `*.spv`
+files from a Windows build (`out/build/windows-x64-release/Release/*.spv`, 51
+files at 0.2.6) into `build/` beside `gpu_benchmark`, and copy them again
+whenever the GLSL sources under `shaders/` change. The OpenGL shader sources
+are copied into `build/` automatically.
+
+```bash
+scp out/build/windows-x64-release/Release/*.spv <user>@<jetson-ip>:<repo>/build/
+```
+
+**4. Before benchmarking.**
+
+- Log in to the Jetson desktop. Every GPU run, including `--headless`, calls
+  `glfwInit()`, and GLFW 3.3 requires X11. Over SSH, prefix GPU commands with
+  `DISPLAY=:0`.
+- Use a power mode that keeps all six CPU cores online, then lock the clocks.
+  Low-power `nvpmodel` modes take CPU cores offline, and the CPU benchmark
+  measures only the cores the OS allows. Check the current mode with
+  `sudo nvpmodel -q`, pick a six-core mode from `/etc/nvpmodel.conf` with
+  `sudo nvpmodel -m <id>`, then run `sudo jetson_clocks`.
+- `vulkaninfo --summary` should list the Tegra GPU.
+- RenderDoc has no official Linux ARM64 build, so pass `--no-renderdoc`. A
+  missing `librenderdoc.so` is not fatal, but the flag keeps runs explicit.
+
+**5. Run the four product workloads.** These commands mirror a WinUI Custom
+run (15 s, 1M particles, 64 GPU Burn steps) without capture. For Particle and
+GPU Burn, replace `--backend vulkan` with `--backend opengl` to measure the
+OpenGL backend. The CPU benchmark needs no display.
+
+```bash
+DISPLAY=:0 ./build/gpu_benchmark --time 15 --backend vulkan --gpu 0 --particles 1048576 --no-renderdoc
+DISPLAY=:0 ./build/gpu_benchmark --time 15 --backend vulkan --gpu 0 --workload gpu_burn --iter 64 --no-renderdoc
+DISPLAY=:0 ./build/gpu_benchmark --time 15 --backend vulkan --gpu 0 --workload cinematic_liquid --no-renderdoc
+./build/gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2
+```
+
+Results are appended to
+`~/.local/share/GpuComputeBenchmark/results/results.json` (or
+`$XDG_DATA_HOME/GpuComputeBenchmark/results/results.json`).
+
+**Plausibility checks.**
+
+- The Xavier NX CPU and GPU share LPDDR4x memory (51.2 GB/s theoretical), and
+  its caches cannot hold the 32 MiB working set of 1M particles. A Particle
+  result above 51.2 GB/s therefore indicates a timing or accounting error.
+  These results are not directly comparable with discrete GPUs whose L2 cache
+  holds the whole working set (for example, the RTX 5090's 96 MB L2).
+- A rough estimate from FP32 throughput and memory bandwidth puts Cinematic
+  Liquid at about 1 FPS on Xavier NX.
+
+**CPU software rendering (Mesa).** Linux uses Mesa's CPU rasterisers:
+lavapipe for Vulkan and llvmpipe for OpenGL. `--warp` applies only to
+DirectX. Make only lavapipe visible to Vulkan, so `--gpu 0` selects it, and
+force the Mesa GLX vendor for OpenGL, because Jetson otherwise uses NVIDIA's
+GL driver:
+
+```bash
+sudo apt install mesa-vulkan-drivers libgl1-mesa-dri libglx-mesa0
+VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.aarch64.json DISPLAY=:0 ./build/gpu_benchmark --time 15 --backend vulkan --gpu 0 --workload gpu_burn --iter 64 --no-renderdoc
+__GLX_VENDOR_LIBRARY_NAME=mesa LIBGL_ALWAYS_SOFTWARE=1 DISPLAY=:0 ./build/gpu_benchmark --time 15 --backend opengl --gpu 0 --particles 1048576 --no-renderdoc
+```
+
+- Both renderers report the device name `llvmpipe (...)`, and results store
+  that device with `isSoftware=true`, keeping them separate from hardware GPU
+  results.
+- **Do not use OpenGL/llvmpipe GPU Burn scores.** In an Ubuntu 20.04 +
+  Mesa 21.2.6 container, the GL timer reported 5.9 ms of render time per frame
+  while frames actually took about 330 ms (3 FPS), inflating the score about
+  40× (19.89 versus 0.48 Gpix-step/s on Vulkan/lavapipe). Vulkan/lavapipe
+  timers matched wall-clock frame time.
+- Cinematic Liquid on lavapipe took about 2.2 s per frame on a 16-thread
+  Ryzen 7 9800X3D. Jetson's six Carmel cores are expected to be much slower, so
+  use `--time 120` or longer; otherwise the run may measure no frames after the
+  2 s warm-up.
+
 ---
 
 ## Windows (x64 / ARM64)

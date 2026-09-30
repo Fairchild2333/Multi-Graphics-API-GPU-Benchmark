@@ -198,6 +198,12 @@ if(GPU_BENCH_IOS OR GPU_BENCH_ANDROID)
 else()
     target_link_libraries(gpu_engine PUBLIC glfw ${BACKEND_LIBS})
 endif()
+# glibc < 2.34 (e.g. Ubuntu 20.04 / Jetson JetPack 5) keeps dlopen/dlsym (RenderDoc
+# loader) and pthread_setaffinity_np (CPU benchmark) outside libc proper.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND NOT ANDROID)
+    find_package(Threads REQUIRED)
+    target_link_libraries(gpu_engine PUBLIC Threads::Threads ${CMAKE_DL_LIBS})
+endif()
 target_compile_definitions(gpu_engine PUBLIC
     ${BACKEND_DEFS}
     GPU_BENCH_APP_VERSION="${PROJECT_VERSION}"

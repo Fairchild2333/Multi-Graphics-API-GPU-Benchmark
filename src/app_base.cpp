@@ -12,6 +12,7 @@
 
 #include <atomic>
 #include <cmath>
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <random>
@@ -463,11 +464,7 @@ void AppBase::MainLoop() {
     // 256/2048-step frames.
     if (isGpuBurnWorkload(config_.workload)) {
         const std::string devName = GetDeviceName();
-        const bool softwareDevice =
-            devName.find("Basic Render") != std::string::npos ||
-            devName.find("WARP") != std::string::npos ||
-            devName.find("Software") != std::string::npos ||
-            devName.find("llvmpipe") != std::string::npos;
+        const bool softwareDevice = isSoftwareRendererName(devName);
         const auto softwareCap = gpuBurnMaxFixedIter(config_.workload);
         if (softwareDevice && config_.gpuBurnIter > softwareCap) {
             std::cout << "[GPU Burn] Software device detected ('" << devName
@@ -910,9 +907,7 @@ void AppBase::PrintSummary() const {
         : 0.0;
 
     const std::string devName = GetDeviceName();
-    const bool isSoftware = (devName.find("Basic Render") != std::string::npos ||
-                             devName.find("WARP") != std::string::npos ||
-                             devName.find("Software") != std::string::npos);
+    const bool isSoftware = isSoftwareRendererName(devName);
     const char* devLabel   = isSoftware ? "CPU Renderer:" : "GPU:";
     const char* timerLabel = isSoftware ? "Device Timing (ms)" : "GPU Timing (ms)";
     const char* totalLabel = isSoftware ? "Total:      " : "Total GPU:  ";
@@ -1545,9 +1540,7 @@ BenchmarkResult AppBase::CollectResult() const {
     r.framesInFlight = config_.framesInFlight;
 
     const std::string devName = GetDeviceName();
-    r.isSoftware = (devName.find("Basic Render") != std::string::npos ||
-                    devName.find("WARP") != std::string::npos ||
-                    devName.find("Software") != std::string::npos);
+    r.isSoftware = isSoftwareRendererName(devName);
 
     const double duration = std::max(0.0,
         benchEndTime_ - benchStartTime_ - excludedCaptureSec_);

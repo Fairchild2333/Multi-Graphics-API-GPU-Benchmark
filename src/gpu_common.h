@@ -164,6 +164,18 @@ inline bool needsDepthAttachment(Workload w) {
     return shapeOfWorkload(w) == WorkloadShape::InstancedBillboard;
 }
 
+// Returns true for CPU rasterisers: Microsoft WARP / Basic Render on Windows,
+// Mesa llvmpipe (OpenGL) and lavapipe (Vulkan, which also reports "llvmpipe")
+// on Linux. Shared by the burn step clamp, summary labels and result rows so
+// a CPU-rendered score is never recorded as a hardware GPU result.
+inline bool isSoftwareRendererName(const std::string& name) {
+    for (const char* marker : {"Basic Render", "WARP", "Software", "llvmpipe",
+                               "lavapipe", "softpipe", "swrast", "SwiftShader"}) {
+        if (name.find(marker) != std::string::npos) return true;
+    }
+    return false;
+}
+
 // Render3D default instance (billboard) count — moderate to keep overdraw sane.
 constexpr std::uint32_t kRender3DDefaultParticles = 262144;  // 256K
 
