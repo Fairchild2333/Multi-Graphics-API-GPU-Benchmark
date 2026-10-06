@@ -23,6 +23,13 @@ SwiftUI App
 gpu_benchmark / libgpu_engine.a  →  Metal / Vulkan / OpenGL backends
 ```
 
+## Checking without a Mac
+
+`scripts/check-apple.ps1` type-checks the engine wrapper, the models, the charts
+and the CPU, GPU and Charts pages with Swift 6 in a Linux container, and runs
+tests of the code that has no UI. It is not a build with the Apple SDK; see
+`scripts/apple-check/README.md` for what it covers and what it cannot.
+
 ## Prerequisites
 
 1. **Xcode 26** (or later) with macOS SDK

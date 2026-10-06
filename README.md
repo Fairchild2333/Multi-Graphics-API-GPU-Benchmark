@@ -66,6 +66,9 @@ next platform slice is macOS.
      run on a phone.
    - **Next step:** remote testing over adb (install, launch, logcat, pull
      results). The user enables USB debugging and approves the phone's prompt.
+     The debug build starts a test from the command line
+     (`am start ... --es run cpu_membw`) and mirrors the engine output to
+     logcat; see `android/README.md`. This has not been tried on a device.
 4. **iOS** — after Android. Floor **iOS 16**. Metal only; no RenderDoc;
    `MTLCaptureManager`; shared SwiftUI with macOS. **iOS 26 / 27 must use
    Liquid Glass** (Material on 16–25). See `HANDOFF.md` §3.0.3.

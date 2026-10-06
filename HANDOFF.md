@@ -611,6 +611,8 @@ PathService 已把 results/captures/reports/logs 改到
 - [x] **2026-10-06 GUI 里所有测试的图表**：GPU 页的成绩对比条形图和每帧耗时折线图、CPU 页的逐处理器柱状图、不依赖 Python 的 Charts 页，见第 10 节验证记录。
 - [x] **2026-10-06 CPU 缓存 / 内存带宽测试 `cpu_membw_v1`**：命令行版、WinUI CPU 页和曲线图，见 §3.8 与第 10 节验证记录。
 - [x] **2026-10-06 Android / iOS / macOS 前端补齐**：三端的 CPU 页接入算力测试和缓存 / 内存带宽测试，所有测试都有图表。Android `assembleDebug` 通过；iOS 和 macOS 只做过类型检查；三端都没有在设备上运行过。见第 10 节验证记录。
+- [x] **2026-10-06 Android 的 adb 入口**：引擎输出写入 logcat，debug 包可用启动参数直接开始一项测试；只编译通过，没有在设备上运行过。见 `android/README.md` 和第 10 节验证记录。
+- [x] **2026-10-06 Apple 检查脚本入库**：`scripts/check-apple.ps1`，改 iOS / macOS 的 Swift 代码后先跑它；它不是 Xcode 编译，范围见 `scripts/apple-check/README.md`。
 - [ ] **`cpu_membw_v1` 剩余步骤**：查清流式写入偏慢和 L2 曲线分段的原因；在 macOS、Windows ARM64、Jetson 和大小核 CPU 上实测；见 `docs/TODO.md`。
 - [ ] **macOS / iOS 按性能核、能效核分组测量（未做；2026-10-06 记录）**：
   - **现状：** macOS 和 iOS 不能把线程绑定到指定核心，所以 CPU 算力测试的"单核"模式和缓存 / 内存带宽测试的单线程扫描都跑在系统挑选的核心上，能效核测不到。引擎把这类结果标记为 `scheduler_managed`。
@@ -675,6 +677,23 @@ PathService 已把 results/captures/reports/logs 改到
 5. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Collaboration；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
 
 ## 10. 验证记录
+
+### 2026-10-06 Android 的 adb 入口和 Apple 检查脚本入库
+
+- **Android，方便用 adb 远程测试（只编译通过，没有设备，一次都没有运行过）：**
+  - 引擎打印的每一行同时写入 logcat，标签 `MangekyoEngine`（`mangekyo_jni.cpp`）。原来这些输出只显示在 App 界面里，`adb logcat` 看不到进度和成绩。
+  - debug 包支持启动参数：`adb shell am start -S -n com.mangekyo.benchmark/.MainActivity --es run <测试>`，App 打开后自动切到对应页面并开始。测试名为 `cpu_membw`、`cpu_all`、`cpu_per_core`、`cpu_multi`、`stream`、`gpu_burn`；`--ei seconds N` 可选。
+  - 开始、拒绝和结束都会在标签 `Mangekyo` 下打印一行（如 `RUN finished kind=cpu exit=0`），脚本可以等这一行。
+  - 启动参数只在 debug 包里生效，正式包会拒绝，避免手机上别的 App 用它触发测试。
+  - GPU 测试要等预览画面创建（最多 10 秒），所以屏幕必须亮着并解锁。
+  - 实现在 `core/AutoRun.kt`、`MainActivity.kt`（`singleTop` 加 `onNewIntent`）、`AppRoot.kt`、`CpuScreen.kt`、`GpuScreen.kt`；用法写在 `android/README.md`。
+  - **构建：** `assembleDebug` 通过。机器上装了 adb（37.0.1），但没有连接手机，也没有模拟器镜像。
+- **Apple 检查脚本入库：** `scripts/check-apple.ps1` 加 `scripts/apple-check/`（容器里跑的两个脚本、手写的替身模块、测试和引擎输出样例）。
+  - 测试 `tests.swift` 原来只是把结果打印出来看，现在改成 92 条断言，失败时脚本返回非零。
+  - 引擎输出样例取自这台机器的真实输出，已去掉本机路径。
+  - 从仓库里的位置实际跑了一遍：两端类型检查 0 错误，92 条断言全部通过，两端共用的六个文件内容一致，`aarch64-macos` 和 `x86_64-macos` 的目标文件都能编出来。
+  - 它能查什么、不能查什么写在 `scripts/apple-check/README.md`，结论不变：**这不是用 Xcode 编译**。
+- **Docker 镜像：** `swift:6.0-jammy`（4.31 GB）在跑完上面这一遍之后已经删除；下次运行 `check-apple.ps1` 时会重新下载。
 
 ### 2026-10-06 中文界面补全（Windows / Android / iOS / macOS）
 

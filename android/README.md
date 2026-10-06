@@ -17,6 +17,7 @@
 >   GPU 页的每帧耗时折线图；Charts 页的每项测试条形图。都用 Compose 绘制。
 > - **可编译**：`:app:assembleDebug` 通过，debug APK 约 33 MB。
 > - **界面语言**：中文和英文，跟随系统语言（`core/I18n.kt` 的 `tr(en, zh)`）；其他语言显示英文。
+> - **adb 远程测试**：引擎输出同时写入 logcat，debug 包支持用启动参数直接开始一项测试，见下方"用 adb 远程测试"。
 > - **仍未真机运行**；CPU 测试开始后不能取消。
 
 ## 已完成（相对脚手架）
@@ -53,6 +54,29 @@ cd android
 4. CPU 页选择测试模式后点 Run。缓存 / 内存带宽测试大约一分钟，手机会发热；
    存储测试会在 App 私有目录里写一个最大 1 GiB 的临时文件，测完删除。
    不需要安装 App 的另一条路：`scripts/build-android-cpumem.ps1` 编出的独立程序可以用 adb 直接运行。
+
+## 用 adb 远程测试
+
+debug 包可以不碰手机就开始一项测试（2026-10-06 加入；**只编译通过，没有在任何设备上试过**）。
+
+```bash
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb logcat -c
+adb shell am start -S -n com.mangekyo.benchmark/.MainActivity --es run cpu_membw
+adb logcat -s Mangekyo MangekyoEngine
+adb pull /sdcard/Android/data/com.mangekyo.benchmark/files/results/results.json
+```
+
+- **`--es run <测试>`：** `cpu_membw`（缓存 / 内存带宽）、`cpu_all`（单核 + 全核）、`cpu_per_core`、`cpu_multi`、
+  `stream`、`gpu_burn`。App 打开后自动切到对应页面并开始。
+- **`--ei seconds <N>`（可选）：** CPU 算力测试每项的秒数（默认 1），或 GPU 测试的时长（默认 3）。
+- **logcat 里有什么：**
+  - 标签 `MangekyoEngine`：引擎打印的每一行，包括进度、各级带宽和成绩；
+  - 标签 `Mangekyo`：`AUTORUN accepted / started / refused / failed` 和结束时的 `RUN finished kind=cpu exit=0`
+    或 `RUN finished kind=gpu score=...`，脚本可以等这一行。
+- **只在 debug 包里生效。** 正式包会拒绝并打印 `AUTORUN refused ... reason=release_build`，否则手机上任何 App 都能用这个参数让它开跑。
+- **GPU 测试需要屏幕亮着并解锁**，因为它要等预览画面创建出来（最多等 10 秒）。
+- 没有模拟点击，也不需要知道按钮坐标。
 
 ## Windows 开发注意
 

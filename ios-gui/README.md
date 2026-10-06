@@ -32,6 +32,13 @@ Intended path: in-process `gpu_engine` via Objective-C++ bridge + embedded Metal
 >   is not a build with the Apple SDK. The other views and the Objective-C++ bridge were
 >   not checked.
 
+## Checking without a Mac
+
+`scripts/check-apple.ps1` type-checks the engine wrapper, the models, the charts
+and the CPU, GPU and Charts pages with Swift 6 in a Linux container, and runs
+tests of the code that has no UI. It is not a build with the Apple SDK; see
+`scripts/apple-check/README.md` for what it covers and what it cannot.
+
 ## Prerequisite
 
 1. macOS 14+ with **Xcode 16+** (Xcode 26+ for Liquid Glass APIs).

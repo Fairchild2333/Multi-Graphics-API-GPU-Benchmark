@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.mangekyo.benchmark.core.AutoRun
 import com.mangekyo.benchmark.core.CpuRun
 import com.mangekyo.benchmark.core.DeviceInfo
 import com.mangekyo.benchmark.core.MemClass
@@ -79,13 +80,51 @@ fun CpuScreen() {
                 NativeBridge.pollOutput().forEach(run::consume)
                 if (run.running && !NativeBridge.isCliRunning()) {
                     NativeBridge.pollOutput().forEach(run::consume)
-                    run.finish(NativeBridge.cliExitCode())
+                    val exitCode = NativeBridge.cliExitCode()
+                    run.finish(exitCode)
+                    AutoRun.log("RUN finished kind=cpu exit=$exitCode")
                 }
             }
             delay(150)
         }
     }
     val canRun = NativeBridge.isEngineLoaded && !run.running
+
+    fun start(testMode: String, seconds: Int) {
+        val memory = testMode == "memory"
+        val args = if (memory) {
+            // Internal storage: the storage test needs unbuffered I/O.
+            arrayOf("--cpu-membw", "--cpu-membw-storage-dir", context.filesDir.absolutePath)
+        } else {
+            arrayOf(
+                "--cpu-benchmark", testMode,
+                "--cpu-time", seconds.toString(),
+                "--cpu-warmup", "0.2",
+            )
+        }
+        NativeBridge.pollOutput()  // drop lines left over from an earlier run
+        NativeBridge.outputOwner = "cpu"
+        run.begin(memory)
+        if (!NativeBridge.startCli(args)) {
+            run.finish(-1)
+            run.status = NativeBridge.lastError().ifEmpty { tr("Start failed", "启动失败") }
+        }
+    }
+
+    // A test requested over adb, see AutoRun.
+    val request = AutoRun.pending
+    LaunchedEffect(request) {
+        val wanted = request ?: return@LaunchedEffect
+        val wantedMode = AutoRun.cpuModes[wanted.test] ?: return@LaunchedEffect
+        AutoRun.pending = null
+        if (!NativeBridge.isEngineLoaded || run.running) {
+            AutoRun.log("AUTORUN refused test=${wanted.test} reason=busy_or_engine_missing")
+            return@LaunchedEffect
+        }
+        mode = wantedMode
+        start(wantedMode, if (wanted.seconds > 0) wanted.seconds else 1)
+        AutoRun.log("AUTORUN started test=${wanted.test}")
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -102,24 +141,7 @@ fun CpuScreen() {
             FloatingActionButton(
                 onClick = {
                     if (!canRun) return@FloatingActionButton
-                    val memory = mode == "memory"
-                    val args = if (memory) {
-                        // Internal storage: the storage test needs unbuffered I/O.
-                        arrayOf("--cpu-membw", "--cpu-membw-storage-dir", context.filesDir.absolutePath)
-                    } else {
-                        arrayOf(
-                            "--cpu-benchmark", mode,
-                            "--cpu-time", if (duration == "formal") "15" else "1",
-                            "--cpu-warmup", "0.2",
-                        )
-                    }
-                    NativeBridge.pollOutput()  // drop lines left over from an earlier run
-                    NativeBridge.outputOwner = "cpu"
-                    run.begin(memory)
-                    if (!NativeBridge.startCli(args)) {
-                        run.finish(-1)
-                        run.status = NativeBridge.lastError().ifEmpty { tr("Start failed", "启动失败") }
-                    }
+                    start(mode, if (duration == "formal") 15 else 1)
                 },
                 containerColor = if (canRun) {
                     MaterialTheme.colorScheme.primaryContainer

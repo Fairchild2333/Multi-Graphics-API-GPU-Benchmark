@@ -1,5 +1,6 @@
 package com.mangekyo.benchmark.ui.screens
 
+import com.mangekyo.benchmark.core.AutoRun
 import com.mangekyo.benchmark.core.GpuRun
 import com.mangekyo.benchmark.core.localizeScoreLine
 import com.mangekyo.benchmark.core.tr
@@ -84,6 +85,10 @@ fun GpuScreen() {
                 if (GpuRun.active && !running) {
                     NativeBridge.pollOutput().forEach(GpuRun::consume)
                     GpuRun.active = false
+                    AutoRun.log(
+                        "RUN finished kind=gpu score=" + GpuRun.scoreLine.ifEmpty { "none" } +
+                            NativeBridge.lastError().let { if (it.isEmpty()) "" else " error=$it" },
+                    )
                 }
             }
             delay(250)
@@ -93,6 +98,52 @@ fun GpuScreen() {
     val vulkanOk = selectedBackend == "Vulkan" && caps.vulkanLoaderPresent && NativeBridge.isEngineLoaded
     val runEnabled = vulkanOk && selectedWorkloadId.isNotEmpty() &&
         (selectedWorkloadId == "stream" || selectedWorkloadId == "gpu_burn")
+
+    fun start(workloadId: String, seconds: Double): Boolean {
+        NativeBridge.pollOutput()  // drop lines left over from an earlier run
+        NativeBridge.outputOwner = "gpu"
+        GpuRun.begin()
+        val ok = NativeBridge.startWorkload(workloadId, seconds)
+        if (!ok) GpuRun.active = false
+        statusText = if (ok) {
+            tr(
+                "Running $workloadId (${seconds.toInt()}s preview)",
+                "正在运行 $workloadId（${seconds.toInt()} 秒预览）",
+            )
+        } else {
+            NativeBridge.lastError().ifEmpty { tr("Start failed", "启动失败") }
+        }
+        running = NativeBridge.isRunning()
+        return ok
+    }
+
+    // A test requested over adb, see AutoRun.
+    val request = AutoRun.pending
+    LaunchedEffect(request) {
+        val wanted = request ?: return@LaunchedEffect
+        if (wanted.test !in AutoRun.gpuTests) return@LaunchedEffect
+        AutoRun.pending = null
+        if (!caps.vulkanLoaderPresent || !NativeBridge.isEngineLoaded) {
+            AutoRun.log("AUTORUN refused test=${wanted.test} reason=vulkan_or_engine_missing")
+            return@LaunchedEffect
+        }
+        selectedBackend = "Vulkan"
+        selectedWorkloadId = wanted.test
+        val seconds = if (wanted.seconds > 0) wanted.seconds.toDouble() else 3.0
+        // The preview surface appears a moment after the page; wait up to 10 s.
+        var started = false
+        for (attempt in 0 until 40) {
+            if (start(wanted.test, seconds)) {
+                started = true
+                break
+            }
+            delay(250)
+        }
+        AutoRun.log(
+            if (started) "AUTORUN started test=${wanted.test}"
+            else "AUTORUN failed test=${wanted.test} reason=${NativeBridge.lastError()}",
+        )
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -113,17 +164,7 @@ fun GpuScreen() {
                         NativeBridge.stopWorkload()
                         statusText = tr("Stop requested", "已请求停止")
                     } else if (runEnabled) {
-                        NativeBridge.pollOutput()  // drop lines left over from an earlier run
-                        NativeBridge.outputOwner = "gpu"
-                        GpuRun.begin()
-                        val ok = NativeBridge.startWorkload(selectedWorkloadId, 3.0)
-                        if (!ok) GpuRun.active = false
-                        statusText = if (ok) {
-                            tr("Running $selectedWorkloadId (3s preview)", "正在运行 $selectedWorkloadId（3 秒预览）")
-                        } else {
-                            NativeBridge.lastError().ifEmpty { tr("Start failed", "启动失败") }
-                        }
-                        running = NativeBridge.isRunning()
+                        start(selectedWorkloadId, 3.0)
                     }
                 },
                 containerColor = if (runEnabled || running) {

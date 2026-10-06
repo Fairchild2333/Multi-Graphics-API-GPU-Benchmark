@@ -74,6 +74,10 @@ private:
     void Append(char c) {
         if (c == '\n') {
             if (lines_.size() >= kMaxPendingLines) lines_.erase(lines_.begin(), lines_.begin() + 1000);
+            // Also to logcat, so a run can be followed over adb:
+            // adb logcat -s MangekyoEngine
+            if (!current_.empty())
+                __android_log_write(ANDROID_LOG_INFO, "MangekyoEngine", current_.c_str());
             lines_.push_back(current_);
             current_.clear();
         } else if (c != '\r') {

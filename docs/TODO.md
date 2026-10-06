@@ -162,11 +162,11 @@
     - **用户在手机上操作：** 打开"开发者选项"和"USB 调试"，插线后在手机弹窗里点"允许 USB 调试"。这一步只能由用户确认。
     - **Claude 用 adb 完成：**
       - 编译 `:app:assembleDebug`，再 `adb install` 安装并用 `adb shell am start` 启动；
-      - 用 `adb shell input` 模拟点击。更稳的做法是给 App 加一个 intent 参数，启动后自动开跑；
-      - 用 `adb logcat` 看日志，用 `adb exec-out screencap` 截图；
+      - ~~用 `adb shell input` 模拟点击~~：2026-10-06 起 debug 包支持启动参数，`adb shell am start -S -n com.mangekyo.benchmark/.MainActivity --es run <测试>` 打开后自动开跑，用法见 `android/README.md`；
+      - 用 `adb logcat -s Mangekyo MangekyoEngine` 看引擎输出和结束标记（2026-10-06 起引擎输出同时写入 logcat），用 `adb exec-out screencap` 截图；
       - debug 包可用 `run-as` 从应用专属目录取回 `results.json`。
     - **CPU 测试的另一条路：** 引擎已有 Android 的 CPU 绑核代码，可以用 NDK 编一个命令行程序，推到 `/data/local/tmp` 后用 `adb shell` 直接跑。目前 CMake 在 Android 下不生成命令行目标，需要小改。
-    - **验收：** 首次真机冒烟（启动、跑完、写出结果），并记录温控降频对成绩的影响。
+    - **验收：** 首次真机冒烟（启动、跑完、写出结果），并记录温控降频对成绩的影响。启动参数和 logcat 输出只编译通过，也要在这次冒烟里一并确认。
 - [ ] **4. iOS**（**源码垂直切片已写；本机未编译、未设备验收**；排在 Android 后）：**最低 iOS 16**；仅 Metal；`MTLCaptureManager`；SwiftUI；App Store。**iOS 26/27 = Liquid Glass**，16–25 Material。引擎写出 `*_ios_preview`。规格见 `HANDOFF.md` §3.0.3；状态见 `ios-gui/README.md`。
   - [ ] **iPhone 真机远程测试（需要一台 Mac；用户 2026-09-30 排入）**：
     - **前提：** iOS 应用只能在 Mac 上用 Xcode 编译和签名，这台 Windows 工作站做不到。iOS 代码目前从没编译过，所以第一步是编译通过。

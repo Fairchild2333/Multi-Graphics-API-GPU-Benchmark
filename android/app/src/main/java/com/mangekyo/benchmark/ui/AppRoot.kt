@@ -16,6 +16,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.NavHost
@@ -25,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import com.mangekyo.benchmark.ui.screens.ChartsScreen
 import com.mangekyo.benchmark.ui.screens.CpuScreen
 import com.mangekyo.benchmark.ui.screens.GpuScreen
+import com.mangekyo.benchmark.core.AutoRun
 import com.mangekyo.benchmark.core.tr
 import com.mangekyo.benchmark.ui.screens.HistoryScreen
 
@@ -52,6 +54,25 @@ fun AppRoot() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
+
+    // A test requested over adb opens its page; the page then starts it.
+    val request = AutoRun.pending
+    LaunchedEffect(request) {
+        val route = when {
+            request == null -> return@LaunchedEffect
+            request.test in AutoRun.gpuTests -> AppDestination.Gpu.route
+            else -> AppDestination.Cpu.route
+        }
+        if (navController.currentDestination?.route != route) {
+            navController.navigate(route) {
+                popUpTo(navController.graph.startDestinationId) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surface,
