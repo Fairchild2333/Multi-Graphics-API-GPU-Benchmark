@@ -51,6 +51,14 @@ cd android
    跑完后页面上的 "Last run" 卡片显示成绩和每帧耗时折线图。
 2. 跑分线程不占 UI；Stop 调用 `RequestStop()`。
 3. 写出结果时 `workloadVersion` 带 `_android_preview`，`platform=Android`。
+   每条成绩还记录这台手机的信息（2026-10-06 加入），历史页每条成绩下面有一行显示：
+   - **机型 `deviceModel`：** 厂商加型号，取自 `ro.product.manufacturer` 和 `ro.product.model`；
+   - **芯片 `cpuName`：** 取自 `ro.soc.manufacturer` 和 `ro.soc.model`（Android 12 起才有），
+     更早的系统退回到 `ro.hardware.chipname`，再退回到 `ro.board.platform`；
+   - **系统 `osVersion`：** 形如 `Android 14 (API 34)`，原来这里记的是内核版本；
+   - **内存 `systemMemoryMB`：** 系统能用的内存总量，比标称容量少几个百分点。
+
+   **这些字段只编译通过，没有在真机上核对过实际读到的文字。**
 4. CPU 页选择测试模式后点 Run。缓存 / 内存带宽测试大约一分钟，手机会发热；
    存储测试会在 App 私有目录里写一个最大 1 GiB 的临时文件，测完删除。
    不需要安装 App 的另一条路：`scripts/build-android-cpumem.ps1` 编出的独立程序可以用 adb 直接运行。

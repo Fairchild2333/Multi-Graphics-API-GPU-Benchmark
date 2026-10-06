@@ -130,7 +130,14 @@ fun HistoryScreen() {
                                 else -> "—"
                             }
                             Text(scoreText, style = MaterialTheme.typography.labelLarge)
-                            listOfNotNull(e.timestamp, e.abi?.let { "ABI $it" })
+                            if (e.machineLine.isNotEmpty()) {
+                                Text(
+                                    e.machineLine,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            listOfNotNull(e.timestamp, e.abi)
                                 .joinToString(" · ")
                                 .takeIf { it.isNotBlank() }
                                 ?.let {

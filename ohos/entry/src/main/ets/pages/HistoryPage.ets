@@ -74,6 +74,10 @@ export struct HistoryPage {
                 .fontSize(15)
                 .fontWeight(FontWeight.Medium)
                 .fontColor($r('sys.color.ohos_id_color_text_primary'))
+              if (entry.machineLine().length > 0) {
+                Text(entry.machineLine())
+                  .caption()
+              }
               Text(entry.timestamp)
                 .caption()
             }

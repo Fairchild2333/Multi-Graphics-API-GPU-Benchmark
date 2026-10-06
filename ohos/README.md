@@ -60,6 +60,14 @@ The SPIR-V shaders are packaged in `resources/rawfile/shaders/` and copied to
 the app's files directory at start-up, because the engine reads shaders as
 files. Results go to `results/results.json` in the app's files directory.
 
+Every result records the device model (brand, market name and model code), the
+system release and the memory, and the History page shows them in one line
+under each result. Model and release come from the system's deviceinfo
+interface, the memory from `/proc/meminfo`. The system has no interface for the
+name of the chip, so that is still read from `/proc/cpuinfo` and saved as
+`Unknown CPU` when it is not there; the model code then identifies the chip.
+**These fields compile and have not been checked on a device.**
+
 ## Build
 
 Needs DevEco Studio (checked with 26.0, which ships the SDK, hvigor, ohpm and

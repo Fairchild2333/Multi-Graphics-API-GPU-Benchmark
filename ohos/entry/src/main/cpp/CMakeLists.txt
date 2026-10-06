@@ -22,6 +22,7 @@ target_link_libraries(mangekyo
         libnative_window.so
         libvulkan.so
         libhilog_ndk.z.so
+        libdeviceinfo_ndk.z.so
 )
 
 # ---- SPIR-V for the two GPU tests (stream + gpu_burn) ----

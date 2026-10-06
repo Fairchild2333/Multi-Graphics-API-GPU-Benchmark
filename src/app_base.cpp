@@ -1,5 +1,6 @@
 #include "app_base.h"
 #include "path_service.h"
+#include "system_info.h"
 #include "renderdoc_app.h"
 
 #if !defined(GPU_BENCH_NO_GLFW)
@@ -78,6 +79,8 @@ constexpr double kCaptureEndMarginSec = 1.0;
 }  // namespace
 
 std::string AppBase::GetCpuName() {
+    // Phones name their system-on-chip through the system, not /proc/cpuinfo.
+    if (std::string soc = MobileSocName(); !soc.empty()) return soc;
 #ifdef _WIN32
     HKEY key = nullptr;
     if (RegOpenKeyExA(HKEY_LOCAL_MACHINE,
@@ -90,20 +93,24 @@ std::string AppBase::GetCpuName() {
             RegCloseKey(key);
             std::string name(buf);
             while (!name.empty() && name.front() == ' ') name.erase(name.begin());
+            while (!name.empty() && name.back() == ' ') name.pop_back();
             return name;
         }
         RegCloseKey(key);
     }
 #elif defined(__linux__)
-    std::ifstream cpuinfo("/proc/cpuinfo");
-    std::string line;
-    while (std::getline(cpuinfo, line)) {
-        if (line.rfind("model name", 0) == 0) {
-            auto pos = line.find(':');
-            if (pos != std::string::npos) {
-                std::string name = line.substr(pos + 1);
-                while (!name.empty() && name.front() == ' ') name.erase(name.begin());
-                return name;
+    // ARM kernels have no "model name" line; some name the chip as "Hardware".
+    for (const char* key : {"model name", "Hardware"}) {
+        std::ifstream cpuinfo("/proc/cpuinfo");
+        std::string line;
+        while (std::getline(cpuinfo, line)) {
+            if (line.rfind(key, 0) == 0) {
+                auto pos = line.find(':');
+                if (pos != std::string::npos) {
+                    std::string name = line.substr(pos + 1);
+                    while (!name.empty() && name.front() == ' ') name.erase(name.begin());
+                    if (!name.empty()) return name;
+                }
             }
         }
     }

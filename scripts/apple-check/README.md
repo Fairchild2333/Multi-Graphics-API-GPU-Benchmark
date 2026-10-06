@@ -20,7 +20,7 @@ the next run downloads it again.
 | Parser of engine output, chart geometry, translation of engine phrases | Compiled with Swift 6.0 and run on saved engine output (`tests.swift`, `fixtures/`) | These files compile and give the expected values |
 | `BenchEngine`, `CpuView`, `ChartsView`, `RunView`, the models and the chart views of both apps | Swift 6 type-check against the stand-in modules in `stubs/`, the real Foundation of Linux and the real C bridge header | No Swift language or concurrency error in these files, as far as the stand-ins match the SDK |
 | The files both apps share | Text comparison | The iOS and macOS copies are the same |
-| `cpu_membw.cpp`, `cpu_benchmark.cpp`, `cpumem_cli.cpp` | Compiled to arm64 and x64 macOS objects with the clang and macOS headers of zig (`zig_check.sh`) | The macOS code paths of the CPU tests compile |
+| `cpu_membw.cpp`, `cpu_benchmark.cpp`, `cpumem_cli.cpp`, `system_info.cpp`, `benchmark_results.cpp`, `path_service.cpp` | Compiled to arm64 and x64 macOS objects with the clang and macOS headers of zig (`zig_check.sh`) | The macOS code paths of the CPU tests, of the machine details and of the results file compile |
 
 ## What is not checked
 

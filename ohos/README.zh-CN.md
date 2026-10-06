@@ -48,6 +48,8 @@ gpu_engine（仓库根目录的 CMake 工程，OHOS 分支）
 
 SPIR-V 着色器打包在 `resources/rawfile/shaders/` 里，App 启动时复制到自己的文件目录，因为引擎按文件读取着色器。成绩写在 App 文件目录下的 `results/results.json`。
 
+每条成绩记录这台设备的机型（品牌、市场名称和型号代码）、系统版本和内存，历史页每条成绩下面有一行显示。机型和系统版本来自系统的 deviceinfo 接口，内存来自 `/proc/meminfo`。系统没有提供芯片名的接口，所以芯片名仍然从 `/proc/cpuinfo` 读，读不到时记为 `Unknown CPU`，这时要靠型号代码去查。**这些字段只编译通过，没有在设备上核对过。**
+
 ## 构建
 
 需要 DevEco Studio（已在 26.0 上验证，自带 SDK、hvigor、ohpm、node）和 Vulkan SDK 的 `glslc`。

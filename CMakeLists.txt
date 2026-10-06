@@ -82,6 +82,7 @@ set(COMMON_SOURCES
     src/benchmark_results.cpp
     src/cpu_benchmark.cpp
     src/path_service.cpp
+    src/system_info.cpp
     src/cinematic_liquid_v2_common.cpp
 )
 
@@ -265,6 +266,27 @@ endif()
 if(NOT GPU_BENCH_EMBEDDED)
     add_executable(gpu_benchmark src/cli_main.cpp)
     target_link_libraries(gpu_benchmark PRIVATE gpu_engine)
+endif()
+
+# ---- Result file compatibility test ----
+# Checks that results.json of older and newer builds is read, kept and
+# rewritten correctly. Built from three sources on their own, so it needs no
+# GPU library. Run it with: ctest --test-dir <build dir> -C Release
+option(GPU_BENCH_BUILD_TESTS "Build the result file compatibility test" ON)
+if(GPU_BENCH_BUILD_TESTS AND NOT GPU_BENCH_EMBEDDED)
+    enable_testing()
+    add_executable(results_compat_test
+        tests/results_compat_test.cpp
+        src/benchmark_results.cpp
+        src/path_service.cpp
+        src/system_info.cpp)
+    target_include_directories(results_compat_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    if(MSVC)
+        target_compile_options(results_compat_test PRIVATE /W4 /permissive- /utf-8)
+    else()
+        target_compile_options(results_compat_test PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+    add_test(NAME results_compat COMMAND results_compat_test)
 endif()
 
 if(MSVC)

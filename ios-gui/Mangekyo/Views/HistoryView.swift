@@ -229,6 +229,13 @@ struct HistoryRow: View {
                 }
             }
             
+            if !result.machineLine.isEmpty {
+                Text(result.machineLine)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+
             HStack {
                 Text(formatTimestamp(result.id))
                     .font(.caption2)

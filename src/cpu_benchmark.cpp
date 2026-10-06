@@ -1,5 +1,7 @@
 #include "cpu_benchmark.h"
 
+#include "system_info.h"
+
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -125,6 +127,8 @@ static std::string Hex64(std::uint64_t value) {
 }
 
 static std::string CpuName() {
+    // Phones name their system-on-chip through the system, not /proc/cpuinfo.
+    if (std::string soc = MobileSocName(); !soc.empty()) return soc;
 #if defined(_M_X64) || defined(_M_IX86)
     int regs[4]{};
     __cpuid(regs, static_cast<int>(0x80000000u));

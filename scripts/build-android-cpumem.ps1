@@ -45,6 +45,7 @@ foreach ($a in $Abi) {
         "-I", (Join-Path $repo "src"),
         (Join-Path $repo "src\cpu_membw.cpp"),
         (Join-Path $repo "src\cpu_benchmark.cpp"),
+        (Join-Path $repo "src\system_info.cpp"),
         (Join-Path $repo "src\cpumem_cli.cpp"),
         "-o", $out
     )

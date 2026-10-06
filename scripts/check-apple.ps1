@@ -10,8 +10,9 @@
        type-check of the engine wrapper, models, charts and the CPU, GPU and
        Charts pages of both apps against stand-in modules, and tests of the
        code that has no UI. See scripts/apple-check/README.md.
-    2. Engine (image python:3.12-slim plus zig from PyPI): compiles the CPU
-       test sources to arm64 and x64 macOS objects.
+    2. Engine (image python:3.12-slim plus zig from PyPI): compiles the engine
+       sources that need no GPU (CPU tests, machine details, results file) to
+       arm64 and x64 macOS objects.
 
     Neither is a build with the Apple SDK. Passing here means the code has no
     Swift language or concurrency errors in the checked files; only Xcode can
@@ -46,7 +47,7 @@ if (-not $SkipSwift) {
 }
 
 if (-not $SkipEngine) {
-    Write-Host "### Engine: macOS objects of the CPU test sources (zig)"
+    Write-Host "### Engine: macOS objects of the sources that need no GPU (zig)"
     docker run --rm -v "${repo}:/repo:ro" python:3.12-slim bash /repo/scripts/apple-check/zig_check.sh
     if ($LASTEXITCODE -ne 0) { $failed = $true }
 }

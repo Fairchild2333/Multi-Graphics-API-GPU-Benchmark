@@ -44,6 +44,51 @@ architecture. This distinguishes, for example, an x64 process running through
 Windows-on-Arm emulation from a native ARM64 process. Older records remain
 loadable and are marked as legacy/unknown where those fields did not exist.
 
+Since 2026-10-06 every saved result also names the machine it was measured on:
+
+- `deviceModel`: the make and model of a phone, tablet, Mac or brand-name PC.
+  A self-built PC, whose firmware holds only a placeholder, is named by its
+  mainboard. Empty where the system gives no name, as inside a container.
+- `systemMemoryMB`: the memory of the machine in MiB. Windows reports the
+  installed amount; the other systems report what the kernel can use, which is
+  a few percent less.
+- On Android and HarmonyOS, `osVersion` is the system release with its API
+  level instead of the kernel version, and on Android `cpuName` is the
+  system-on-chip name from the system properties.
+
+Results saved before that date lack the two new fields and still load.
+
+### Compatibility of `results.json`
+
+Builds of different ages share one results file, so the format follows these
+rules (reader and writer are in `src/benchmark_results.cpp`):
+
+- The file is a JSON array of result objects with one member per line. A
+  member is never renamed, removed or given another type or meaning; new
+  information goes into a new member.
+- **Older files.** A missing member takes a default. Every file written since
+  the first build loads.
+- **Newer files.** Members a build does not know are kept and written back
+  when it rewrites the file, and `resultSchemaVersion` is written back as
+  read. Builds made before 2026-10-06 (0.2.6 and earlier) ignore unknown
+  members when reading but drop them when they rewrite the file; avoid
+  deleting results with such a build if a newer one is also in use.
+- **Saving.** The new file is written beside the old one and swapped in, so a
+  reader never sees a half-written file and a crash leaves the old file whole.
+- **Damaged files.** A file that cannot be read in full (cut off, damaged, or
+  in a layout the build does not read) gives the results that can be read.
+  Before such a file is rewritten it is copied to
+  `results.json.bak-unreadable-<time>` in the same folder.
+- **Text.** Braces, a backslash at the end of a string and control characters
+  are written as `\u` escapes. This is valid JSON; builds up to 0.2.6 show
+  the escape as written, for example `\u007b`.
+
+`results_compat_test` checks all of this without a GPU:
+
+```bash
+ctest --test-dir build -C Release
+```
+
 ## 2. Interactive menu [0]–[10] (main.cpp:1026-1041)
 
 > All menu runs are **15s time mode + Stream workload + Medium (1M) particles +

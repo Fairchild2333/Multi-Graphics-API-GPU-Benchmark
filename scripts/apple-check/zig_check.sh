@@ -1,5 +1,6 @@
 #!/bin/bash
-# Compiles the CPU-test sources of the engine for macOS with the clang and the
+# Compiles the engine sources that need no GPU (the CPU tests, the machine
+# details and the results file) for macOS with the clang and the
 # macOS headers that ship with zig. Runs inside the python:3.12-slim container
 # with the repository mounted read-only at /repo; start it with
 # scripts/check-apple.ps1.
@@ -14,7 +15,8 @@ cd /tmp
 status=0
 for spec in "aarch64-macos" "x86_64-macos -mcpu=x86_64+evex512"; do
     echo "== $spec =="
-    for file in cpu_membw.cpp cpu_benchmark.cpp cpumem_cli.cpp; do
+    for file in cpu_membw.cpp cpu_benchmark.cpp cpumem_cli.cpp system_info.cpp \
+        benchmark_results.cpp path_service.cpp; do
         # shellcheck disable=SC2086
         python -m ziglang c++ -target $spec -std=c++17 -O2 -Wall -Wextra \
             -Wno-nullability-completeness -I/repo/src -c "/repo/src/$file" -o "$file.o" 2> err.txt

@@ -111,8 +111,12 @@ struct HistoryView: View {
                     TableColumn(Localization.tr("API", "API", "API"), value: \.graphicsApi)
                         .width(min: 50, ideal: 65, max: 80)
 
-                    TableColumn(Localization.tr("Device", "设备", "デバイス"), value: \.deviceName)
-                        .width(min: 120, ideal: 180)
+                    // The table already has the ten columns one builder allows; the
+                    // machine a result came from is shown when the pointer rests here.
+                    TableColumn(Localization.tr("Device", "设备", "デバイス"), value: \.deviceName) { r in
+                        Text(r.deviceName).help(r.machineLine)
+                    }
+                    .width(min: 120, ideal: 180)
 
                     TableColumn(Localization.tr("Workload", "负载", "ワークロード"), value: \.workload)
                         .width(min: 70, ideal: 90, max: 110)

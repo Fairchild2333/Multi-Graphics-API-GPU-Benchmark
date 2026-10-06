@@ -166,7 +166,7 @@
       - 用 `adb logcat -s Mangekyo MangekyoEngine` 看引擎输出和结束标记（2026-10-06 起引擎输出同时写入 logcat），用 `adb exec-out screencap` 截图；
       - debug 包可用 `run-as` 从应用专属目录取回 `results.json`。
     - **CPU 测试的另一条路：** 引擎已有 Android 的 CPU 绑核代码，可以用 NDK 编一个命令行程序，推到 `/data/local/tmp` 后用 `adb shell` 直接跑。目前 CMake 在 Android 下不生成命令行目标，需要小改。
-    - **验收：** 首次真机冒烟（启动、跑完、写出结果），并记录温控降频对成绩的影响。启动参数和 logcat 输出只编译通过，也要在这次冒烟里一并确认。
+    - **验收：** 首次真机冒烟（启动、跑完、写出结果），并记录温控降频对成绩的影响。启动参数和 logcat 输出只编译通过，也要在这次冒烟里一并确认。成绩里的机型、芯片、系统版本和内存（2026-10-06 加入）同样没有在真机上看过，一并核对。
 - [ ] **4. iOS**（**源码垂直切片已写；本机未编译、未设备验收**；排在 Android 后）：**最低 iOS 16**；仅 Metal；`MTLCaptureManager`；SwiftUI；App Store。**iOS 26/27 = Liquid Glass**，16–25 Material。引擎写出 `*_ios_preview`。规格见 `HANDOFF.md` §3.0.3；状态见 `ios-gui/README.md`。
   - [ ] **iPhone 真机远程测试（需要一台 Mac；用户 2026-09-30 排入）**：
     - **前提：** iOS 应用只能在 Mac 上用 Xcode 编译和签名，这台 Windows 工作站做不到。iOS 代码目前从没编译过，所以第一步是编译通过。
@@ -202,7 +202,7 @@
   - [x] **接入共享引擎（2026-10-06）**：原来的独立粒子演示已换成和安卓版对齐的 App（粒子测试、GPU Burn、CPU 算力测试、缓存 / 内存带宽扫描、历史、图表、中英文界面）。`scripts\build-ohos.ps1` 用 DevEco Studio 26.0 的工具链编出未签名的 HAP。**没有运行过。**
   - [ ] **上机验证**：
     - **用户要做的：** 在 DevEco Studio 里登录华为账号并生成自动签名；连接鸿蒙设备（打开开发者模式和 USB 调试），或者在 Device Manager 里下载模拟器镜像。
-    - **要确认的：** 界面显示和图表；Vulkan 能否创建 `VK_OHOS_surface`；应用沙箱是否允许绑核（`sched_setaffinity`）和读取缓存容量；`hdc` 启动参数和 hilog 输出。
+    - **要确认的：** 界面显示和图表；Vulkan 能否创建 `VK_OHOS_surface`；应用沙箱是否允许绑核（`sched_setaffinity`）和读取缓存容量；`hdc` 启动参数和 hilog 输出；成绩里的机型、系统版本和内存是否正确，芯片名能否从 `/proc/cpuinfo` 读到（系统没有提供芯片名的接口）。
   - [ ] **还没有做：** 流体测试、抓帧编排、正式的结果合同（现在的成绩都带 `_ohos_preview` 后缀）、签名和发布包、CPU 测试的取消。
 - [ ] **8. Windows 7 专用 GUI（PS3 之前）**：独立 Win32/DWM 前端与安装包，共享 `gpu_engine`/CLI/成绩 schema；Aero 能力探测与无 Aero 回退；不得携带 WinUI/WinAppSDK。
 - [ ] **9. PS3（探索性，永不进成绩体系）**：仅 homebrew（PSL1GHT/RSXGL）；RSX 无 compute/原子/GPU timestamp，PSGL≈GL ES 1.0+Cg，三主测试不可直移；至多独立仓库的固定管线情怀 demo。

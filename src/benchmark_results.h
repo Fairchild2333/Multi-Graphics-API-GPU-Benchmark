@@ -2,10 +2,20 @@
 
 #include <cstdint>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace gpu_bench {
 
+// One saved result. Builds of different ages read and rewrite the same
+// results.json, so the members follow these rules:
+//
+//   * A member keeps its name, type and meaning for good. New information
+//     goes into a new member with a default that means "not recorded".
+//   * A new member is also added to the list in benchmark_results.cpp; that
+//     list is all the reader and the writer need.
+//   * resultSchemaVersion is raised only when existing members of a result
+//     change meaning. Adding a member does not raise it.
 struct BenchmarkResult {
     std::string id;
     std::string timestamp;
@@ -23,6 +33,11 @@ struct BenchmarkResult {
     std::string platform;
     std::string osArchitecture;
     std::string processArchitecture;
+    // Make and model of the machine, and its installed memory. Filled in when
+    // a result is saved; empty and 0 in results saved before that was added.
+    // A self-built PC is named by its mainboard.
+    std::string deviceModel;
+    std::uint32_t systemMemoryMB = 0;
     std::string memory;
     std::uint32_t vramMB = 0;          // dedicated VRAM (0 = unknown / shared)
     std::uint32_t resWidth  = 0;
@@ -60,6 +75,11 @@ struct BenchmarkResult {
     double stableScore        = 0.0;
     double stableVariancePct  = -1.0;
     double throttlePct        = 0.0;
+
+    // Members of the file that this build does not know, as name and JSON
+    // text. A newer build saved them; they are written back unchanged, so
+    // rewriting the file with this build does not strip them.
+    std::vector<std::pair<std::string, std::string>> unknownFields;
 };
 
 std::string ResultsFilePath();
@@ -72,6 +92,17 @@ std::string CurrentPlatform();
 std::string CurrentOsArchitecture();
 std::string CurrentProcessArchitecture();
 
+// The text of a results file and back, without touching the disk.
+// intact is set to false when the text is not a complete array of result
+// objects (cut off, damaged, or a layout this build does not read); the
+// results that could still be read are returned.
+std::vector<BenchmarkResult> ParseResultsJson(const std::string& text,
+                                              bool* intact = nullptr);
+std::string SerializeResultsJson(const std::vector<BenchmarkResult>& results);
+
+// Reading never fails: a missing or damaged file gives the results that can be
+// read. Saving replaces the file in one step, and first keeps a copy
+// ("results.json.bak-unreadable-<time>") of a file it could not read in full.
 std::vector<BenchmarkResult> LoadResults();
 bool SaveResults(const std::vector<BenchmarkResult>& results);
 bool AppendResult(const BenchmarkResult& r);

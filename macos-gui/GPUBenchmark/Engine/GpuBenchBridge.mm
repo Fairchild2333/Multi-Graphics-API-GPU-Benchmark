@@ -66,6 +66,8 @@ static std::string resultToJson(const gpu_bench::BenchmarkResult& r) {
     o << "\"driverVersion\":\"" << jsonEscape(r.driverVersion) << "\",";
     o << "\"cpuName\":\""     << jsonEscape(r.cpuName) << "\",";
     o << "\"osVersion\":\""   << jsonEscape(r.osVersion) << "\",";
+    o << "\"deviceModel\":\"" << jsonEscape(r.deviceModel) << "\",";
+    o << "\"systemMemoryMB\":" << r.systemMemoryMB << ",";
     o << "\"memory\":\""      << jsonEscape(r.memory) << "\",";
     o << "\"vramMB\":"        << r.vramMB << ",";
     o << "\"resWidth\":"      << r.resWidth << ",";

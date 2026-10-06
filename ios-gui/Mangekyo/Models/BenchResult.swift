@@ -15,6 +15,9 @@ struct BenchResult: Codable, Identifiable, Hashable {
     var driverVersion: String
     var cpuName: String
     var osVersion: String
+    /// Model of the machine and its memory in MiB; missing in results saved by older versions.
+    var deviceModel: String?
+    var systemMemoryMB: UInt32?
     var memory: String
     var vramMB: UInt32
     var resWidth: UInt32
@@ -59,6 +62,24 @@ struct BenchResult: Codable, Identifiable, Hashable {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd-HHmmss"
         return formatter.date(from: prefix)
+    }
+
+    /// "Mac14,7 · macOS 15.1 · 16.0 GB RAM", from what the result has; empty for older results.
+    var machineLine: String {
+        var parts: [String] = []
+        let model = deviceModel ?? ""
+        if !model.isEmpty { parts.append(model) }
+        // A CPU result already shows the chip as its device name, and an
+        // iPhone's chip is only known through the model.
+        if !cpuName.isEmpty && cpuName != deviceName && !cpuName.hasPrefix("Unknown")
+            && (model.isEmpty || !cpuName.contains(model)) {
+            parts.append(cpuName)
+        }
+        if !osVersion.isEmpty && osVersion != "Unknown" { parts.append(osVersion) }
+        if let megabytes = systemMemoryMB, megabytes > 0 {
+            parts.append(String(format: "%.1f GB RAM", Double(megabytes) / 1024.0))
+        }
+        return parts.joined(separator: " · ")
     }
 
     /// Short display string for the result.

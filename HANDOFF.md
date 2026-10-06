@@ -13,6 +13,7 @@
 5. 不删除原始粒子测试，不改变其历史 workload id（`stream`）、确定性 seed、默认参数或旧结果含义，除非同时做结果 schema/version 迁移。
 6. GUI 是今后的主入口。CLI、WinUI、macOS GUI、图表和结果模型必须从同一份测试 metadata/registry 获取能力，避免再次出现 7/5/1 套状态漂移。
 7. **不要随便创建新分支**：未经用户明确同意，不得 `git switch -c` / `git checkout -b` 新建分支。在默认/主干分支上的改动按用户指示直接提交或暂存；如确需分支，先说明用途并征得同意。
+8. **成绩文件的兼容规则（2026-10-06 用户要求）**：`results.json` 由不同版本的程序共用。改 `BenchmarkResult` 时只能新增字段，不能改名、删除、改类型或改含义；新字段要加进 `src/benchmark_results.cpp` 的 `kFields` 表；改完运行 `ctest --test-dir build -C Release`，并重新编译 WinUI 界面。细则和已知限制见 §3.9。
 
 ## 2. 用户锁定的目标（A/B 两条产品主线 + C 平台移植优先级）
 
@@ -406,6 +407,30 @@ RenderDoc。当前已同时提供原生 C++ CLI 与独立 WinUI CPU 页面：
 - **Android / iOS / macOS App 接入（2026-10-06 追加）：** 三个前端的 CPU 页都有了这项测试的入口、表格和曲线图；Android 编译通过，iOS 和 macOS 只做过类型检查，三端都没有在设备上运行过。Apple 平台不能绑定线程，只测系统挑选的核心。见第 10 节验证记录。
 - **剩余步骤：** 见 `docs/TODO.md`。
 
+### 3.9 成绩文件 `results.json` 的前后兼容（2026-10-06）
+
+- **状态：** 代码已写。Windows 和 Linux 容器上实际运行并通过测试；用 0.1.0、0.2.5、0.2.6 三个旧版本的程序实测过和新版本轮流读写同一个文件。Android 和 HarmonyOS 只编译通过，macOS 只编出目标文件，iOS 没有编译。
+- **文件格式没有变：** 仍是一个 JSON 数组，每条成绩一个对象，每个字段占一行；`resultSchemaVersion` 仍是 4。
+- **规则（改成绩字段时必须遵守）：**
+  - 字段只增不改：不改名、不删除、不改类型、不改含义；新信息用新字段，默认值表示"没有记录"；
+  - 新字段加进 `kFields` 表（`src/benchmark_results.cpp`），读、写和字段在文件里的顺序都来自这张表；
+  - 只加字段时不提高 `resultSchemaVersion`，只有已有字段的含义变了才提高；
+  - 文件的整体布局不换（例如不在外面再包一层对象）；真要换格式就换一个文件名；
+  - 引擎是唯一写这个文件的程序。前端只读；Android 和 HarmonyOS 的"全部清除"是例外，它们写入一个空数组。
+- **读旧版本写的文件：** 缺的字段取默认值，和原来的读法逐字段一致。
+- **读更新版本写的文件：** 不认识的字段原样保留在 `BenchmarkResult::unknownFields` 里，重写文件时原样写回；`resultSchemaVersion` 按读到的值写回。
+- **旧版本读这个版本写的文件：** 0.2.6 及更早的版本靠数花括号切分成绩、按带引号的字段名查找，并且要求每个字段占一行。所以写文件时保持原来的布局，并把三种文字写成 `\u` 转义：字符串里的花括号、字符串结尾的反斜杠、内容恰好等于某个字段名的值。
+- **保护数据：**
+  - 保存时先写临时文件（`results.json.tmp`），再整体替换。读的一方不会看到写了一半的文件，中途崩溃也不会损坏原文件。
+  - 文件读不全（被截断、损坏，或是这个版本不认识的布局）时，能读的成绩照常读出；重写之前先把原文件另存为 `results.json.bak-unreadable-<时间>`，另存失败就不保存。
+  - 字段的类型不对（数字写成了字符串、`null`、`nan`）时取最接近的值，不会报错中断。非有限的数写成 0，控制字符写成转义。
+- **已知限制：**
+  - 0.2.6 及更早的版本，以及 2026-10-06 之前编出的开发版，重写文件时会丢掉它们不认识的字段，包括机型和内存。旧程序改不了，只能避免用旧版本删改成绩。
+  - 这些旧版本显示带 `\u` 转义的文字时会把转义符原样显示出来（例如 `\u007b`），数值不受影响；文件被它们重写之后，这段文字会一直带着转义符。
+  - 更新的版本如果在未知字段里写了带花括号字符串的嵌套对象，旧版本仍然会读错。以后的版本要继续遵守上面的写法。
+  - 两个程序同时保存时，后保存的会覆盖先保存的那一条；没有加跨进程的锁。
+- **测试：** `tests/results_compat_test.cpp`，CMake 目标 `results_compat_test`，153 条检查，不需要 GPU。里面有一份 0.2.6 读法的原样拷贝，用来证明旧版本读得了新文件；不要去"修"那份拷贝。
+
 ## 4. P0 正确性阻塞项
 
 GPU Burn `gpu_burn_v2_mangekyo_faceted_glass_v1` 已作为带版本的新主项接入；`gpu_burn_v1` 只作为公开 legacy 保留，两者均不与 `gpu_stress_v1` 或旧 `stress` 混分。当前液体 P0 只以 `physical_scene_v8` / SPH preview 的正确性清单为准。
@@ -615,6 +640,8 @@ PathService 已把 results/captures/reports/logs 改到
 - [ ] **HarmonyOS 上机验证**：需要用户在 DevEco Studio 里登录华为账号生成签名，并连接设备或下载模拟器镜像；然后确认界面显示、Vulkan、绑核、缓存容量读取和 hdc 启动参数。
 - [x] **2026-10-06 Android 的 adb 入口**：引擎输出写入 logcat，debug 包可用启动参数直接开始一项测试；只编译通过，没有在设备上运行过。见 `android/README.md` 和第 10 节验证记录。
 - [x] **2026-10-06 Apple 检查脚本入库**：`scripts/check-apple.ps1`，改 iOS / macOS 的 Swift 代码后先跑它；它不是 Xcode 编译，范围见 `scripts/apple-check/README.md`。
+- [x] **2026-10-06 成绩文件的前后兼容**：重写了 `results.json` 的读写。读更新版本的文件时保留不认识的字段；保存改为先写临时文件再替换；读不全的文件在重写前留副本。用三个旧版本的程序和这台机器上的 55 个真实成绩文件验证过。规则见 §1 第 8 条和 §3.9，记录见第 10 节。
+- [x] **2026-10-06 成绩里记录机器信息**：每条成绩新增机型（`deviceModel`）和内存（`systemMemoryMB`）；Android 和 HarmonyOS 的系统版本改记系统发行版本，Android 的芯片名取系统属性；移动端和 Apple 端的历史页显示这一行。Windows 和 Linux 容器实际运行过；Android、HarmonyOS、iOS、macOS 只编译或类型检查过，读到的文字没有在设备上核对。见第 10 节验证记录。
 - [ ] **`cpu_membw_v1` 剩余步骤**：查清流式写入偏慢和 L2 曲线分段的原因；在 macOS、Windows ARM64、Jetson 和大小核 CPU 上实测；见 `docs/TODO.md`。
 - [ ] **macOS / iOS 按性能核、能效核分组测量（未做；2026-10-06 记录）**：
   - **现状：** macOS 和 iOS 不能把线程绑定到指定核心，所以 CPU 算力测试的"单核"模式和缓存 / 内存带宽测试的单线程扫描都跑在系统挑选的核心上，能效核测不到。引擎把这类结果标记为 `scheduler_managed`。
@@ -679,6 +706,83 @@ PathService 已把 results/captures/reports/logs 改到
 5. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Collaboration；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
 
 ## 10. 验证记录
+
+### 2026-10-06 成绩文件的前后兼容
+
+- **起因：** 用户要求把前后兼容做好。读了成绩文件的读写代码（`src/benchmark_results.cpp`）和各端的读法，原来的实现有这些问题。它们都是读代码和写测试时发现的，这台机器上的真实成绩文件里一个都没有发生过：
+  - 不认识的字段在重写文件时被丢掉，所以旧版本会删掉新版本写的内容；
+  - 数字位置上不是数字时抛异常，WinUI 历史页有一处没有捕获，会直接崩溃；
+  - 文件读不出来（被截断，或是别的布局）时，下一次保存会用"读到的那一点"覆盖整个文件；
+  - 保存是直接覆盖写，写到一半崩溃文件就坏了；
+  - 字符串里有花括号、或者以反斜杠结尾时，读回来会错位；
+  - `nan` 和控制字符写进文件后不是合法的 JSON，HarmonyOS 端会整份历史都读不出来。
+- **改动：**
+  - **读：** 换成一个容错的 JSON 读取器。不认识的字段保留在 `BenchmarkResult::unknownFields`；类型不对的值取最接近的值；读不全的文件读出能读的部分。
+  - **写：** 布局和原来逐字节相同。新增：未知字段原样写回、`\u` 转义（控制字符，以及旧版本读不了的三种文字）、非有限的数写成 0。
+  - **保存：** 先写临时文件再整体替换；读不全的文件在重写前另存为 `results.json.bak-unreadable-<时间>`。
+  - **字段表：** 读和写共用一张 `kFields` 表，以后加字段只加一行。
+  - **新接口：** `ParseResultsJson()` 和 `SerializeResultsJson()`（不碰磁盘，测试用）。
+  - **测试：** 新增 `tests/results_compat_test.cpp` 和 CMake 目标 `results_compat_test`（选项 `GPU_BENCH_BUILD_TESTS`，默认开；嵌入式构建不编）。
+  - **前端：** Android 的 `ResultsStore.appendRawObject` 删掉了（没有调用方；解析失败时会用空数组覆盖文件）。HarmonyOS 的读取加了"不是数组"和"空条目"的判断。
+  - **顺带：** CSV 导出里带引号的字段按 CSV 规则写成两个引号。
+- **验证（实际运行，Windows 11，Ryzen 7 9800X3D）：**
+  - **和原来的实现对拍：** 这台机器上的 55 个真实成绩文件，共 11,892 条成绩（最早的格式没有版本号，另有版本 1、2、4）。旧读法和新读法逐字段相同，旧写法和新写法逐字节相同，重写两遍结果不变。最大的文件 710 KiB，读一遍约 10 ms，和原来一样。
+  - **测试：** `ctest` 通过，153 条检查全过。
+  - **旧版本的程序：** 用 `out/` 里留着的 0.1.0、0.2.5、0.2.6 三个 `gpu_benchmark.exe`。文件是用户真实成绩的副本（236 条）加一条新版本写的成绩、一条"更新版本"的成绩（带未知字段）和一条带花括号等文字的成绩，共 239 条。
+    - 三个旧版本都能列出全部 239 条，删掉一条后其余 238 条顺序和数值不变；
+    - 旧版本重写后丢掉了 `deviceModel`、`systemMemoryMB` 和未知字段，带转义的文字显示成 `Odd \u007bGPU\u007d name`，都在预期之内；
+    - 新版本能读旧版本重写过的文件并继续追加，没有触发留副本；
+    - 新版本自己删一条时，"更新版本"那条成绩的未知字段和版本号 9 都还在。
+  - **界面：** 重新编译的 WinUI 用临时数据目录打开这个混合文件，历史页正常显示旧成绩；只看不改时文件没有变化。
+  - 所有测试都在临时目录和副本上做，没有写过 `%LOCALAPPDATA%` 下的真实成绩文件。
+- **验证（Ubuntu 20.04 容器，GCC 9，实际运行）：** 引擎和测试编译零警告；`ctest` 通过，153 条全过；引擎在最早格式的文件上追加后旧成绩不变；在带未知字段的文件上追加后未知字段还在；文件被截断时留了副本并保存了新成绩。
+- **验证（只编译）：** Android `assembleDebug`；HarmonyOS `scripts/build-ohos.ps1`；macOS 目标文件（检查脚本新增了 `benchmark_results.cpp` 和 `path_service.cpp`，arm64 和 x64 都通过）。
+- **未验证：**
+  - Android、HarmonyOS、iOS、macOS 上没有运行过，包括"先写临时文件再替换"在应用沙箱里的行为；
+  - Swift 这一轮没有改，也没有重新做类型检查；
+  - WinUI 只确认了能打开和显示，没有在界面里做删除操作。
+
+### 2026-10-06 成绩里记录机型、系统版本、芯片和内存
+
+- **起因：** 用户问移动端的成绩是否记录了机型、系统版本和 CPU。读代码后发现三处缺口（没有在手机上看过实际内容）：
+  - 成绩里没有机型，也没有内存容量；
+  - Android 和 HarmonyOS 的 `osVersion` 记的是内核版本，不是系统版本；
+  - GPU 成绩的 `cpuName` 在 Linux 系的系统上只读 `/proc/cpuinfo` 的 `model name` 一行，ARM 内核没有这一行。
+- **改动：**
+  - 新增 `src/system_info.{h,cpp}`，各平台的读取方法都在这一个文件里；
+  - `BenchmarkResult` 增加 `deviceModel` 和 `systemMemoryMB`，由 `AppendResult()` 在保存时统一填写，所以所有测试、所有平台的成绩都带这两个字段；
+  - JSON 和 CSV 都写出这两个字段，CSV 的两列加在最后；
+  - `resultSchemaVersion` 仍是 4。两个字段是可选的，旧文件照常读取，旧成绩里它们是空和 0。
+- **各平台取值：**
+
+  | 平台 | 机型 `deviceModel` | 芯片 `cpuName` | 系统 `osVersion` | 内存 `systemMemoryMB` |
+  |---|---|---|---|---|
+  | Android | `ro.product.manufacturer` + `ro.product.model` | `ro.soc.manufacturer` + `ro.soc.model`（Android 12 起）；没有时依次退回 `ro.hardware.chipname`、`ro.board.platform` | `Android <版本> (API <级别>)` | `/proc/meminfo` 的 `MemTotal` |
+  | HarmonyOS | 品牌 + 市场名称 +（型号代码），来自 deviceinfo 接口 | 系统没有芯片名的接口，仍读 `/proc/cpuinfo` | `<系统名> <版本> (API <级别>)` | 同上 |
+  | iOS | 机型标识符（`hw.machine`） | 系统不给芯片名时记为 `Apple Silicon (<机型标识符>)` | `iOS <版本>`（原有） | `hw.memsize` |
+  | macOS | `hw.model` | 原有 | 原有 | `hw.memsize` |
+  | Windows | 固件里的系统厂商 + 系统名称；组装机的系统名称只是占位文字，改取主板厂商 + 主板型号 | 原有（GPU 成绩里去掉了末尾的空格） | 原有 | 固件报告的已安装容量 |
+  | Linux | 设备树的 `model`（ARM 开发板）；没有时取 DMI 的系统名称，再退回主板 | `model name`，没有时取 `Hardware` | 原有 | `MemTotal` |
+
+- **界面：**
+  - Android、HarmonyOS、iOS 的历史页在每条成绩下面加一行：机型 · 芯片 · 系统 · 内存；
+  - macOS 的历史表已经有 10 列，SwiftUI 一个表最多 10 列，所以改为鼠标停在"设备"一格上时显示；
+  - Windows 界面没有加显示。它重新编译了，否则它带的旧测试程序写不出新字段，在历史页删除一条成绩时还会把其余成绩的新字段丢掉。
+- **验证（实际运行）：**
+  - **Windows：** 重新编译引擎、命令行程序和 WinUI 界面。连续保存两条 CPU 成绩，两条都是 `deviceModel = ASUSTeK COMPUTER INC. ROG CROSSHAIR X670E HERO`、`systemMemoryMB = 98304`（这台机器是 2 × 48 GB）。把一个没有新字段的旧结果文件（23 条）复制出来再追加一条，变成 24 条，旧成绩内容不变。
+  - **Linux（Ubuntu 20.04 容器，GCC 9）：** 编译通过，`system_info.cpp` 没有警告；`systemMemoryMB = 46990`，和 `/proc/meminfo` 的 48118064 kB 一致；容器里没有 DMI 信息，`deviceModel` 为空，符合预期。
+- **验证（只编译）：**
+  - **Android：** `assembleDebug` 通过；独立 CPU 程序（`scripts\build-android-cpumem.ps1`）重新编出。
+  - **HarmonyOS：** `scripts\build-ohos.ps1` 通过，`BUILD SUCCESSFUL`。
+  - **macOS：** `system_info.cpp` 用 zig 编成 arm64 和 x64 的目标文件。`scripts\check-apple.ps1` 整套重新跑了一遍：两端 Swift 类型检查 0 错误，92 条断言通过，两端共用的六个文件内容一致。这不是用 Xcode 编译。
+- **未验证和已知限制：**
+  - Android、HarmonyOS、iOS、macOS 上实际读到的文字一次都没有看过。文档和代码注释里的 `Xiaomi 23049PCD8G`、`QTI SM8550`、`iPhone16,1` 之类只是格式示例。
+  - 引擎里 iOS 专用的分支（`TARGET_OS_IPHONE`）没有任何工具编译过，两个 Apple 桥接文件（`GpuBenchBridge.mm`）和两个 `HistoryView.swift` 也不在检查范围内。
+  - Linux 实机的 DMI 路径和 Jetson 的设备树路径没有试过。
+  - HarmonyOS 的芯片名可能记为 `Unknown CPU`，这时要靠型号代码去查。
+  - iOS 记的是机型标识符，不是 "A17 Pro" 这样的芯片名；要显示芯片名需要一张机型对照表，没有做。
+  - 除 Windows 外，内存记的是内核能用的总量，比标称容量少几个百分点。
+  - 应用沙箱是否允许读这些属性和 `/proc/meminfo`，要上机确认。
 
 ### 2026-10-06 HarmonyOS（鸿蒙）版接入共享引擎
 

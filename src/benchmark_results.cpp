@@ -1,11 +1,16 @@
 #include "benchmark_results.h"
 #include "path_service.h"
+#include "system_info.h"
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <limits>
+#include <locale>
 #include <map>
 #include <sstream>
 
@@ -55,46 +60,6 @@ std::string ResultsFilePath() {
     (void)migrated;
 
     return destination.u8string();
-}
-
-// ---------------------------------------------------------------------------
-// Minimal JSON helpers
-// ---------------------------------------------------------------------------
-
-static std::string JsonEscape(const std::string& s) {
-    std::string out;
-    out.reserve(s.size() + 8);
-    for (char c : s) {
-        switch (c) {
-        case '"':  out += "\\\""; break;
-        case '\\': out += "\\\\"; break;
-        case '\n': out += "\\n";  break;
-        case '\r': out += "\\r";  break;
-        case '\t': out += "\\t";  break;
-        default:   out += c;
-        }
-    }
-    return out;
-}
-
-static std::string JsonUnescape(const std::string& s) {
-    std::string out;
-    out.reserve(s.size());
-    for (size_t i = 0; i < s.size(); ++i) {
-        if (s[i] == '\\' && i + 1 < s.size()) {
-            switch (s[i + 1]) {
-            case '"':  out += '"';  ++i; break;
-            case '\\': out += '\\'; ++i; break;
-            case 'n':  out += '\n'; ++i; break;
-            case 'r':  out += '\r'; ++i; break;
-            case 't':  out += '\t'; ++i; break;
-            default:   out += s[i];
-            }
-        } else {
-            out += s[i];
-        }
-    }
-    return out;
 }
 
 // ---------------------------------------------------------------------------
@@ -179,6 +144,15 @@ std::string CurrentOsVersion() {
         return "macOS " + std::string(buf);
 #endif
     }
+#elif defined(__ANDROID__) || defined(__OHOS__)
+    // Neither has /etc/os-release, and the kernel version says nothing about
+    // the system release; ask the system itself.
+    {
+        const std::string release = MobileOsVersion();
+        if (!release.empty()) return release;
+        struct utsname un{};
+        if (uname(&un) == 0) return std::string(un.sysname) + " " + un.release;
+    }
 #elif defined(__linux__)
     std::ifstream osrel("/etc/os-release");
     std::string line;
@@ -249,238 +223,648 @@ std::string CurrentOsArchitecture() {
 }
 
 // ---------------------------------------------------------------------------
-// Serialize
+// The results file
+// ---------------------------------------------------------------------------
+//
+// results.json is a JSON array of result objects with one member per line.
+// Builds of different ages share it, in both directions:
+//
+//   * An older file read by this build: a member that is missing takes the
+//     value ApplyLegacyDefaults gives it, otherwise empty, 0 or false.
+//   * A newer file read by this build: members it does not know are kept in
+//     BenchmarkResult::unknownFields and written back.
+//   * A file of this build read by an older build: builds up to 0.2.6 find
+//     the objects by counting braces, look a member up by its quoted name and
+//     expect one member per line. The writer keeps that layout and keeps the
+//     text those builds stumble over out of strings (EscapeText). Such a
+//     build ignores the members it does not know, and drops them when it
+//     rewrites the file.
+//
+// kFields is the one list of members. The reader, the writer and the order of
+// the members in the file all come from it.
+
+namespace {
+
+struct Field {
+    const char* key;
+    std::string BenchmarkResult::* text = nullptr;
+    std::uint32_t BenchmarkResult::* count = nullptr;
+    bool BenchmarkResult::* flag = nullptr;
+    double BenchmarkResult::* real = nullptr;
+    int decimals = 3;
+};
+
+constexpr Field Text(const char* key, std::string BenchmarkResult::* member) {
+    return {key, member};
+}
+constexpr Field Count(const char* key, std::uint32_t BenchmarkResult::* member) {
+    return {key, nullptr, member};
+}
+constexpr Field Flag(const char* key, bool BenchmarkResult::* member) {
+    return {key, nullptr, nullptr, member};
+}
+constexpr Field Real(const char* key, double BenchmarkResult::* member, int decimals = 3) {
+    return {key, nullptr, nullptr, nullptr, member, decimals};
+}
+
+// In the order they are written. A new member goes where it reads best; the
+// position has no meaning to any reader.
+const Field kFields[] = {
+    Text ("id",                  &BenchmarkResult::id),
+    Text ("timestamp",           &BenchmarkResult::timestamp),
+    Count("resultSchemaVersion", &BenchmarkResult::resultSchemaVersion),
+    Text ("appVersion",          &BenchmarkResult::appVersion),
+    Text ("workload",            &BenchmarkResult::workload),
+    Text ("workloadVersion",     &BenchmarkResult::workloadVersion),
+    Text ("workloadConfig",      &BenchmarkResult::workloadConfig),
+    Text ("graphicsApi",         &BenchmarkResult::graphicsApi),
+    Text ("deviceName",          &BenchmarkResult::deviceName),
+    Text ("driverVersion",       &BenchmarkResult::driverVersion),
+    Text ("cpuName",             &BenchmarkResult::cpuName),
+    Text ("osVersion",           &BenchmarkResult::osVersion),
+    Text ("platform",            &BenchmarkResult::platform),
+    Text ("osArchitecture",      &BenchmarkResult::osArchitecture),
+    Text ("processArchitecture", &BenchmarkResult::processArchitecture),
+    Text ("deviceModel",         &BenchmarkResult::deviceModel),
+    Count("systemMemoryMB",      &BenchmarkResult::systemMemoryMB),
+    Text ("memory",              &BenchmarkResult::memory),
+    Count("vramMB",              &BenchmarkResult::vramMB),
+    Count("resWidth",            &BenchmarkResult::resWidth),
+    Count("resHeight",           &BenchmarkResult::resHeight),
+    Count("particleCount",       &BenchmarkResult::particleCount),
+    Text ("difficulty",          &BenchmarkResult::difficulty),
+    Flag ("vsync",               &BenchmarkResult::vsync),
+    Flag ("isSoftware",          &BenchmarkResult::isSoftware),
+    Flag ("headless",            &BenchmarkResult::headless),
+    Count("framesInFlight",      &BenchmarkResult::framesInFlight),
+
+    Real ("durationSec",         &BenchmarkResult::durationSec, 1),
+    Real ("warmupSec",           &BenchmarkResult::warmupSec, 1),
+    Count("measuredFrames",      &BenchmarkResult::measuredFrames),
+    Count("timingSamples",       &BenchmarkResult::timingSamples),
+
+    Real ("avgComputeMs",        &BenchmarkResult::avgComputeMs),
+    Real ("minComputeMs",        &BenchmarkResult::minComputeMs),
+    Real ("maxComputeMs",        &BenchmarkResult::maxComputeMs),
+    Real ("avgRenderMs",         &BenchmarkResult::avgRenderMs),
+    Real ("minRenderMs",         &BenchmarkResult::minRenderMs),
+    Real ("maxRenderMs",         &BenchmarkResult::maxRenderMs),
+    Real ("avgTotalGpuMs",       &BenchmarkResult::avgTotalGpuMs),
+    Real ("minTotalGpuMs",       &BenchmarkResult::minTotalGpuMs),
+    Real ("maxTotalGpuMs",       &BenchmarkResult::maxTotalGpuMs),
+
+    Real ("avgFps",              &BenchmarkResult::avgFps, 1),
+    Real ("avgFrameTimeMs",      &BenchmarkResult::avgFrameTimeMs),
+    Real ("gpuUtilisation",      &BenchmarkResult::gpuUtilisation, 1),
+
+    Real ("score",               &BenchmarkResult::score),
+    Text ("scoreUnit",           &BenchmarkResult::scoreUnit),
+    Text ("precision",           &BenchmarkResult::precision),
+    Text ("bottleneck",          &BenchmarkResult::bottleneck),
+    Real ("stableScore",         &BenchmarkResult::stableScore),
+    Real ("stableVariancePct",   &BenchmarkResult::stableVariancePct, 2),
+    Real ("throttlePct",         &BenchmarkResult::throttlePct, 2),
+};
+constexpr std::size_t kFieldCount = sizeof(kFields) / sizeof(kFields[0]);
+
+bool IsFieldName(const std::string& text) {
+    for (const Field& field : kFields) {
+        if (text == field.key) return true;
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// Writing
 // ---------------------------------------------------------------------------
 
-static std::string ResultToJson(const BenchmarkResult& r, int indent = 4) {
-    std::string pad(indent, ' ');
+void AppendUnicodeEscape(std::string& out, unsigned char c) {
+    static const char* const kHex = "0123456789abcdef";
+    out += "\\u00";
+    out += kHex[c >> 4];
+    out += kHex[c & 15];
+}
+
+// A string as JSON text. Three things are written as \u escapes although JSON
+// allows them plain, because builds up to 0.2.6 misread the file otherwise:
+// braces (they split the file by counting them), a backslash at the end of
+// the string (they take the closing quote for an escaped one), and the first
+// letter of a value that is itself the name of a member (they look a member
+// up by searching for its quoted name).
+std::string EscapeText(const std::string& s) {
+    std::string out;
+    out.reserve(s.size() + 8);
+    const bool looksLikeMember = IsFieldName(s);
+    for (std::size_t i = 0; i < s.size(); ++i) {
+        const unsigned char c = static_cast<unsigned char>(s[i]);
+        if (i == 0 && looksLikeMember) {
+            AppendUnicodeEscape(out, c);
+            continue;
+        }
+        switch (c) {
+        case '"':  out += "\\\""; break;
+        case '\n': out += "\\n";  break;
+        case '\r': out += "\\r";  break;
+        case '\t': out += "\\t";  break;
+        case '\\':
+            if (i + 1 == s.size()) AppendUnicodeEscape(out, c);
+            else out += "\\\\";
+            break;
+        case '{':
+        case '}':
+            AppendUnicodeEscape(out, c);
+            break;
+        default:
+            // The other control characters are not allowed plain in JSON.
+            if (c < 0x20 || c == 0x7f) AppendUnicodeEscape(out, c);
+            else out += static_cast<char>(c);
+        }
+    }
+    return out;
+}
+
+std::string ResultToJson(const BenchmarkResult& r) {
+    const std::string pad = "      ";
     std::ostringstream o;
+    o.imbue(std::locale::classic());   // "1234.5" whatever the process locale is
     o << std::fixed;
 
-    o << pad << "{\n";
-    auto str = [&](const char* k, const std::string& v) {
-        o << pad << "  \"" << k << "\": \"" << JsonEscape(v) << "\",\n";
-    };
-    auto u32 = [&](const char* k, std::uint32_t v) {
-        o << pad << "  \"" << k << "\": " << v << ",\n";
-    };
-    auto bl = [&](const char* k, bool v) {
-        o << pad << "  \"" << k << "\": " << (v ? "true" : "false") << ",\n";
-    };
-    auto dbl = [&](const char* k, double v, int prec = 3) {
-        o << pad << "  \"" << k << "\": " << std::setprecision(prec) << v << ",\n";
-    };
-
-    str("id",          r.id);
-    str("timestamp",   r.timestamp);
-    u32("resultSchemaVersion", r.resultSchemaVersion);
-    str("appVersion",      r.appVersion);
-    str("workload",       r.workload);
-    str("workloadVersion", r.workloadVersion);
-    str("workloadConfig",  r.workloadConfig);
-    str("graphicsApi",    r.graphicsApi);
-    str("deviceName",     r.deviceName);
-    str("driverVersion",  r.driverVersion);
-    str("cpuName",        r.cpuName);
-    str("osVersion",      r.osVersion);
-    str("platform",       r.platform);
-    str("osArchitecture", r.osArchitecture);
-    str("processArchitecture", r.processArchitecture);
-    str("memory",         r.memory);
-    u32("vramMB",         r.vramMB);
-    u32("resWidth",    r.resWidth);
-    u32("resHeight",   r.resHeight);
-    u32("particleCount", r.particleCount);
-    str("difficulty",  r.difficulty);
-    bl ("vsync",       r.vsync);
-    bl ("isSoftware",  r.isSoftware);
-    bl ("headless",    r.headless);
-    u32("framesInFlight", r.framesInFlight);
-
-    dbl("durationSec",    r.durationSec, 1);
-    dbl("warmupSec",      r.warmupSec, 1);
-    u32("measuredFrames", r.measuredFrames);
-    u32("timingSamples",  r.timingSamples);
-
-    dbl("avgComputeMs",  r.avgComputeMs);
-    dbl("minComputeMs",  r.minComputeMs);
-    dbl("maxComputeMs",  r.maxComputeMs);
-    dbl("avgRenderMs",   r.avgRenderMs);
-    dbl("minRenderMs",   r.minRenderMs);
-    dbl("maxRenderMs",   r.maxRenderMs);
-    dbl("avgTotalGpuMs", r.avgTotalGpuMs);
-    dbl("minTotalGpuMs", r.minTotalGpuMs);
-    dbl("maxTotalGpuMs", r.maxTotalGpuMs);
-
-    dbl("avgFps",         r.avgFps, 1);
-    dbl("avgFrameTimeMs", r.avgFrameTimeMs);
-    dbl("gpuUtilisation", r.gpuUtilisation, 1);
-
-    dbl("score",          r.score, 3);
-    str("scoreUnit",      r.scoreUnit);
-    str("precision",      r.precision);
-    o << pad << "  \"bottleneck\": \"" << JsonEscape(r.bottleneck) << "\",\n";
-    dbl("stableScore",       r.stableScore,       3);
-    dbl("stableVariancePct", r.stableVariancePct, 2);
-    o << pad << "  \"throttlePct\": " << std::setprecision(2) << r.throttlePct << "\n";
-    o << pad << "}";
+    o << "    {";
+    const char* separator = "\n";
+    for (const Field& field : kFields) {
+        o << separator << pad << "\"" << field.key << "\": ";
+        if (field.text) {
+            o << "\"" << EscapeText(r.*field.text) << "\"";
+        } else if (field.count) {
+            o << r.*field.count;
+        } else if (field.flag) {
+            o << (r.*field.flag ? "true" : "false");
+        } else {
+            // "nan" and "inf" are not JSON and stop other readers of the file.
+            const double value = r.*field.real;
+            o << std::setprecision(field.decimals) << (std::isfinite(value) ? value : 0.0);
+        }
+        separator = ",\n";
+    }
+    for (const auto& unknown : r.unknownFields) {
+        o << separator << pad << "\"" << EscapeText(unknown.first) << "\": " << unknown.second;
+    }
+    o << "\n    }";
     return o.str();
 }
 
 // ---------------------------------------------------------------------------
-// Deserialize
+// Reading
 // ---------------------------------------------------------------------------
 
-static BenchmarkResult JsonToResult(const std::string& json) {
+constexpr int kMaxNesting = 64;
+
+bool IsJsonSpace(char c) {
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+}
+
+void SkipSpace(const std::string& s, std::size_t& i) {
+    while (i < s.size() && IsJsonSpace(s[i])) ++i;
+}
+
+bool ReadHex4(const std::string& s, std::size_t& i, unsigned long& value) {
+    if (i + 4 > s.size()) return false;
+    value = 0;
+    for (std::size_t k = 0; k < 4; ++k) {
+        const char c = s[i + k];
+        unsigned long digit = 0;
+        if (c >= '0' && c <= '9') digit = static_cast<unsigned long>(c - '0');
+        else if (c >= 'a' && c <= 'f') digit = static_cast<unsigned long>(c - 'a' + 10);
+        else if (c >= 'A' && c <= 'F') digit = static_cast<unsigned long>(c - 'A' + 10);
+        else return false;
+        value = value * 16 + digit;
+    }
+    i += 4;
+    return true;
+}
+
+void AppendUtf8(std::string& out, unsigned long code) {
+    if (code >= 0xD800 && code <= 0xDFFF) code = 0xFFFD;   // half of a pair on its own
+    if (code < 0x80) {
+        out += static_cast<char>(code);
+    } else if (code < 0x800) {
+        out += static_cast<char>(0xC0 | (code >> 6));
+        out += static_cast<char>(0x80 | (code & 0x3F));
+    } else if (code < 0x10000) {
+        out += static_cast<char>(0xE0 | (code >> 12));
+        out += static_cast<char>(0x80 | ((code >> 6) & 0x3F));
+        out += static_cast<char>(0x80 | (code & 0x3F));
+    } else {
+        out += static_cast<char>(0xF0 | (code >> 18));
+        out += static_cast<char>(0x80 | ((code >> 12) & 0x3F));
+        out += static_cast<char>(0x80 | ((code >> 6) & 0x3F));
+        out += static_cast<char>(0x80 | (code & 0x3F));
+    }
+}
+
+// Reads the string that starts with the quote at s[i] and leaves i after the
+// closing quote. out may be null to only skip it. False when the text ends
+// inside the string.
+bool ReadString(const std::string& s, std::size_t& i, std::string* out) {
+    ++i;
+    while (i < s.size()) {
+        const char c = s[i++];
+        if (c == '"') return true;
+        if (c != '\\') {
+            if (out) out->push_back(c);
+            continue;
+        }
+        if (i >= s.size()) return false;
+        const char escaped = s[i++];
+        if (!out) {
+            continue;   // whatever follows a backslash is part of the string
+        }
+        switch (escaped) {
+        case 'n': out->push_back('\n'); break;
+        case 'r': out->push_back('\r'); break;
+        case 't': out->push_back('\t'); break;
+        case 'b': out->push_back('\b'); break;
+        case 'f': out->push_back('\f'); break;
+        case '"':
+        case '\\':
+        case '/':
+            out->push_back(escaped);
+            break;
+        case 'u': {
+            unsigned long code = 0;
+            if (!ReadHex4(s, i, code)) {
+                out->append("\\u");   // not an escape after all; keep the text
+                break;
+            }
+            // Characters beyond U+FFFF come as two escapes.
+            if (code >= 0xD800 && code <= 0xDBFF && i + 1 < s.size() && s[i] == '\\' && s[i + 1] == 'u') {
+                std::size_t next = i + 2;
+                unsigned long low = 0;
+                if (ReadHex4(s, next, low) && low >= 0xDC00 && low <= 0xDFFF) {
+                    code = 0x10000 + ((code - 0xD800) << 10) + (low - 0xDC00);
+                    i = next;
+                }
+            }
+            AppendUtf8(*out, code);
+            break;
+        }
+        default:
+            // Not a JSON escape. Older builds kept both characters; so does this one.
+            out->push_back('\\');
+            out->push_back(escaped);
+        }
+    }
+    return false;
+}
+
+// Moves i past one JSON value of any kind. A word without quotes may be
+// anything up to the next comma, bracket or space: older builds wrote "nan",
+// "inf" or "-nan(ind)" for a number that was not finite.
+bool SkipValue(const std::string& s, std::size_t& i, int nesting = 0) {
+    SkipSpace(s, i);
+    if (i >= s.size() || nesting > kMaxNesting) return false;
+    const char first = s[i];
+    if (first == '"') return ReadString(s, i, nullptr);
+    if (first == '{' || first == '[') {
+        const char closing = first == '{' ? '}' : ']';
+        ++i;
+        for (;;) {
+            SkipSpace(s, i);
+            if (i >= s.size()) return false;
+            if (s[i] == closing) {
+                ++i;
+                return true;
+            }
+            if (s[i] == ',') {
+                ++i;
+                continue;
+            }
+            if (first == '{') {
+                if (s[i] != '"' || !ReadString(s, i, nullptr)) return false;
+                SkipSpace(s, i);
+                if (i >= s.size() || s[i] != ':') return false;
+                ++i;
+            }
+            if (!SkipValue(s, i, nesting + 1)) return false;
+        }
+    }
+    const std::size_t start = i;
+    while (i < s.size() && !IsJsonSpace(s[i]) && s[i] != ',' && s[i] != '}' && s[i] != ']' &&
+           s[i] != '"' && s[i] != ':') {
+        ++i;
+    }
+    return i > start;
+}
+
+// A value of a member this build knows, before it is turned into the type of
+// the member. A member of another type than expected gives the nearest
+// sensible value, never an error: one odd value must not hide a whole history.
+struct MemberValue {
+    bool isString = false;
+    bool isWord = false;    // a number, true, false, null, or a word older builds wrote
+    std::string text;       // the decoded string, or the word as written
+};
+
+// Number text to a double, whatever the process locale is. Text that is not a
+// finite number gives 0.
+double ToNumber(const std::string& text) {
+    std::istringstream in(text);
+    in.imbue(std::locale::classic());
+    double value = 0.0;
+    in >> value;
+    return in.fail() || !std::isfinite(value) ? 0.0 : value;
+}
+
+std::string AsText(const MemberValue& value) {
+    if (value.isString) return value.text;
+    if (value.isWord && value.text != "null") return value.text;
+    return {};
+}
+
+double AsNumber(const MemberValue& value) {
+    if (!value.isString && !value.isWord) return 0.0;
+    if (value.isWord && value.text == "true") return 1.0;
+    return ToNumber(value.text);
+}
+
+std::uint32_t AsCount(const MemberValue& value) {
+    const double number = AsNumber(value);
+    if (number <= 0.0) return 0;
+    if (number >= static_cast<double>(std::numeric_limits<std::uint32_t>::max())) {
+        return std::numeric_limits<std::uint32_t>::max();
+    }
+    return static_cast<std::uint32_t>(number);
+}
+
+bool AsFlag(const MemberValue& value) {
+    if (!value.isString && !value.isWord) return false;
+    return value.text == "true" || ToNumber(value.text) != 0.0;
+}
+
+// What a result is before its members are read: everything empty, 0 or false.
+// The defaults of BenchmarkResult describe a new result, not a missing member.
+BenchmarkResult BlankResult() {
     BenchmarkResult r;
-
-    auto findStr = [&](const char* key) -> std::string {
-        std::string needle = std::string("\"") + key + "\"";
-        auto pos = json.find(needle);
-        if (pos == std::string::npos) return "";
-        pos = json.find(':', pos);
-        if (pos == std::string::npos) return "";
-        auto q1 = json.find('"', pos + 1);
-        if (q1 == std::string::npos) return "";
-        auto q2 = q1 + 1;
-        while (q2 < json.size() && !(json[q2] == '"' && json[q2 - 1] != '\\'))
-            ++q2;
-        return JsonUnescape(json.substr(q1 + 1, q2 - q1 - 1));
-    };
-
-    auto findNum = [&](const char* key) -> double {
-        std::string needle = std::string("\"") + key + "\"";
-        auto pos = json.find(needle);
-        if (pos == std::string::npos) return 0.0;
-        pos = json.find(':', pos);
-        if (pos == std::string::npos) return 0.0;
-        ++pos;
-        while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\t'))
-            ++pos;
-        return std::stod(json.substr(pos));
-    };
-
-    auto findBool = [&](const char* key) -> bool {
-        std::string needle = std::string("\"") + key + "\"";
-        auto pos = json.find(needle);
-        if (pos == std::string::npos) return false;
-        pos = json.find(':', pos);
-        if (pos == std::string::npos) return false;
-        return json.find("true", pos) < json.find('\n', pos);
-    };
-
-    r.id            = findStr("id");
-    r.timestamp     = findStr("timestamp");
-    r.resultSchemaVersion = static_cast<std::uint32_t>(findNum("resultSchemaVersion"));
-    if (r.resultSchemaVersion == 0) r.resultSchemaVersion = 1;
-    r.appVersion     = findStr("appVersion");
-    if (r.appVersion.empty()) r.appVersion = "Unknown (legacy)";
-    r.workload       = findStr("workload");
-    if (r.workload.empty()) r.workload = "stream";   // default for old results
-    r.workloadVersion = findStr("workloadVersion");
-    r.workloadConfig  = findStr("workloadConfig");
-    r.graphicsApi    = findStr("graphicsApi");
-    r.deviceName     = findStr("deviceName");
-    r.driverVersion  = findStr("driverVersion");
-    r.cpuName        = findStr("cpuName");
-    r.vramMB         = static_cast<std::uint32_t>(findNum("vramMB"));
-    r.osVersion      = findStr("osVersion");
-    r.platform       = findStr("platform");
-    r.osArchitecture = findStr("osArchitecture");
-    r.processArchitecture = findStr("processArchitecture");
-    if (r.platform.empty()) r.platform = "Unknown (legacy)";
-    if (r.osArchitecture.empty()) r.osArchitecture = "Unknown";
-    if (r.processArchitecture.empty()) r.processArchitecture = "Unknown";
-    r.memory         = findStr("memory");
-    r.resWidth      = static_cast<std::uint32_t>(findNum("resWidth"));
-    r.resHeight     = static_cast<std::uint32_t>(findNum("resHeight"));
-    r.particleCount = static_cast<std::uint32_t>(findNum("particleCount"));
-    r.difficulty    = findStr("difficulty");
-    r.vsync         = findBool("vsync");
-    r.isSoftware    = findBool("isSoftware");
-    r.headless      = findBool("headless");
-    r.framesInFlight = static_cast<std::uint32_t>(findNum("framesInFlight"));
-    if (r.framesInFlight == 0) r.framesInFlight = 2;  // default for old results
-
-    r.durationSec    = findNum("durationSec");
-    r.warmupSec      = findNum("warmupSec");
-    r.measuredFrames = static_cast<std::uint32_t>(findNum("measuredFrames"));
-    r.timingSamples  = static_cast<std::uint32_t>(findNum("timingSamples"));
-
-    r.avgComputeMs  = findNum("avgComputeMs");
-    r.minComputeMs  = findNum("minComputeMs");
-    r.maxComputeMs  = findNum("maxComputeMs");
-    r.avgRenderMs   = findNum("avgRenderMs");
-    r.minRenderMs   = findNum("minRenderMs");
-    r.maxRenderMs   = findNum("maxRenderMs");
-    r.avgTotalGpuMs = findNum("avgTotalGpuMs");
-    r.minTotalGpuMs = findNum("minTotalGpuMs");
-    r.maxTotalGpuMs = findNum("maxTotalGpuMs");
-
-    r.avgFps         = findNum("avgFps");
-    r.avgFrameTimeMs = findNum("avgFrameTimeMs");
-    r.gpuUtilisation = findNum("gpuUtilisation");
-    r.score          = findNum("score");
-    r.scoreUnit      = findStr("scoreUnit");
-    r.precision      = findStr("precision");
-    r.stableScore       = findNum("stableScore");
-    r.stableVariancePct = findNum("stableVariancePct");
-    r.throttlePct       = findNum("throttlePct");
-    r.bottleneck     = findStr("bottleneck");
-
+    for (const Field& field : kFields) {
+        if (field.text) (r.*field.text).clear();
+        else if (field.count) r.*field.count = 0;
+        else if (field.flag) r.*field.flag = false;
+        else r.*field.real = 0.0;
+    }
     return r;
 }
 
-// ---------------------------------------------------------------------------
-// File I/O
-// ---------------------------------------------------------------------------
+// What members that older builds did not write are taken to be.
+void ApplyLegacyDefaults(BenchmarkResult& r) {
+    if (r.resultSchemaVersion == 0) r.resultSchemaVersion = 1;
+    if (r.appVersion.empty()) r.appVersion = "Unknown (legacy)";
+    if (r.workload.empty()) r.workload = "stream";
+    if (r.platform.empty()) r.platform = "Unknown (legacy)";
+    if (r.osArchitecture.empty()) r.osArchitecture = "Unknown";
+    if (r.processArchitecture.empty()) r.processArchitecture = "Unknown";
+    if (r.framesInFlight == 0) r.framesInFlight = 2;
+}
 
-std::vector<BenchmarkResult> LoadResults() {
-    std::vector<BenchmarkResult> results;
-    std::ifstream in(ResultsFilePath());
-    if (!in.is_open()) return results;
+// Reads the object that starts with the brace at s[i] and leaves i after its
+// closing brace. False when the object is cut off or not well formed.
+bool ReadResult(const std::string& s, std::size_t& i, BenchmarkResult& r) {
+    r = BlankResult();
+    bool seen[kFieldCount] = {};
+    std::size_t expected = 0;   // members usually come in the order of kFields
 
-    std::string all((std::istreambuf_iterator<char>(in)),
-                     std::istreambuf_iterator<char>());
-    in.close();
-
-    size_t pos = 0;
-    while (pos < all.size()) {
-        auto start = all.find('{', pos);
-        if (start == std::string::npos) break;
-        int depth = 1;
-        auto end = start + 1;
-        while (end < all.size() && depth > 0) {
-            if (all[end] == '{') ++depth;
-            if (all[end] == '}') --depth;
-            ++end;
+    ++i;
+    for (;;) {
+        SkipSpace(s, i);
+        if (i >= s.size()) return false;
+        if (s[i] == '}') {
+            ++i;
+            break;
         }
-        if (depth == 0) {
-            results.push_back(JsonToResult(all.substr(start, end - start)));
+        if (s[i] == ',') {
+            ++i;
+            continue;
         }
-        pos = end;
+        if (s[i] != '"') return false;
+        std::string key;
+        if (!ReadString(s, i, &key)) return false;
+        SkipSpace(s, i);
+        if (i >= s.size() || s[i] != ':') return false;
+        ++i;
+        SkipSpace(s, i);
+        const std::size_t valueStart = i;
+        if (!SkipValue(s, i)) return false;
+
+        std::size_t index = kFieldCount;
+        for (std::size_t step = 0; step < kFieldCount; ++step) {
+            const std::size_t candidate = (expected + step) % kFieldCount;
+            if (key == kFields[candidate].key) {
+                index = candidate;
+                break;
+            }
+        }
+        if (index == kFieldCount) {
+            std::string raw = s.substr(valueStart, i - valueStart);
+            raw.erase(std::remove(raw.begin(), raw.end(), '\r'), raw.end());
+            r.unknownFields.emplace_back(std::move(key), std::move(raw));
+            continue;
+        }
+        expected = index + 1;
+        if (seen[index]) continue;   // the first one counts, as in older builds
+        seen[index] = true;
+
+        MemberValue value;
+        if (s[valueStart] == '"') {
+            value.isString = true;
+            std::size_t at = valueStart;
+            ReadString(s, at, &value.text);
+        } else if (s[valueStart] != '{' && s[valueStart] != '[') {
+            value.isWord = true;
+            value.text = s.substr(valueStart, i - valueStart);
+        }
+
+        const Field& field = kFields[index];
+        if (field.text) r.*field.text = AsText(value);
+        else if (field.count) r.*field.count = AsCount(value);
+        else if (field.flag) r.*field.flag = AsFlag(value);
+        else r.*field.real = AsNumber(value);
     }
+    ApplyLegacyDefaults(r);
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// The file on disk
+// ---------------------------------------------------------------------------
+
+std::filesystem::path ResultsPath() {
+    return std::filesystem::u8path(ResultsFilePath());
+}
+
+bool ReadWholeFile(const std::filesystem::path& path, std::string& text) {
+    // Binary: in text mode Windows ends the file at a Ctrl-Z byte.
+    std::ifstream in(path, std::ios::binary);
+    if (!in.is_open()) return false;
+    text.assign(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+    return true;
+}
+
+// Saving rewrites the whole file from what was read of it. When the file on
+// disk cannot be read in full (cut off by a crash, damaged, or in a layout of
+// a build far newer than this one), that would discard the rest for good, so
+// the file is first copied aside. False when it cannot be kept safe.
+bool KeepCopyOfUnreadableFile(const std::filesystem::path& path) {
+    std::error_code ec;
+    if (!std::filesystem::exists(path, ec)) return true;
+    std::string text;
+    if (!ReadWholeFile(path, text)) return false;
+    bool intact = true;
+    ParseResultsJson(text, &intact);
+    if (intact) return true;
+
+    std::filesystem::path copy = path;
+    copy += ".bak-unreadable-" + GenerateResultId();
+    std::filesystem::copy_file(path, copy, std::filesystem::copy_options::overwrite_existing, ec);
+    if (ec) {
+        std::cerr << "[results] " << path.filename().u8string()
+                  << " cannot be read in full and could not be copied aside; it is left as it is.\n";
+        return false;
+    }
+    std::cerr << "[results] " << path.filename().u8string()
+              << " could not be read in full. A copy was kept as "
+              << copy.filename().u8string() << ".\n";
+    return true;
+}
+
+bool WriteText(const std::filesystem::path& path, const std::string& text) {
+    std::ofstream out(path, std::ios::trunc);
+    if (!out.is_open()) return false;
+    out << text;
+    out.flush();
+    return out.good();
+}
+
+// Puts `from` in the place of `to` in one step, so that no reader ever sees a
+// half-written file and a crash leaves the old file whole.
+bool MoveOver(const std::filesystem::path& from, const std::filesystem::path& to) {
+#ifdef _WIN32
+    // Another program may have the file open for a moment (a second instance
+    // reading its history, a virus scanner); wait for it instead of giving up.
+    for (int attempt = 0; attempt < 40; ++attempt) {
+        if (MoveFileExW(from.c_str(), to.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) {
+            return true;
+        }
+        Sleep(25);
+    }
+    return false;
+#else
+    std::error_code ec;
+    std::filesystem::rename(from, to, ec);
+    return !ec;
+#endif
+}
+
+bool ReplaceFileText(const std::filesystem::path& path, const std::string& text) {
+    std::filesystem::path temporary = path;
+    temporary += ".tmp";
+    std::error_code ec;
+    bool created = false;
+    {
+        std::ofstream probe(temporary, std::ios::trunc);
+        created = probe.is_open();
+    }
+    if (created) {
+        if (!WriteText(temporary, text)) {
+            // No room for the new file. The old one is still whole; keep it.
+            std::filesystem::remove(temporary, ec);
+            return false;
+        }
+        if (MoveOver(temporary, path)) return true;
+        std::filesystem::remove(temporary, ec);
+    }
+    // The folder takes no second file, or the file system cannot swap files:
+    // write in place, as builds up to 0.2.6 always did.
+    return WriteText(path, text);
+}
+
+}  // namespace
+
+std::vector<BenchmarkResult> ParseResultsJson(const std::string& text, bool* intact) {
+    std::vector<BenchmarkResult> results;
+    bool complete = true;
+
+    std::size_t i = text.compare(0, 3, "\xEF\xBB\xBF") == 0 ? 3 : 0;
+    SkipSpace(text, i);
+    if (i < text.size()) {          // an empty file is a file with no results
+        if (text[i] != '[') {
+            complete = false;
+        } else {
+            ++i;
+            for (;;) {
+                SkipSpace(text, i);
+                if (i >= text.size()) {
+                    complete = false;   // cut off
+                    break;
+                }
+                if (text[i] == ']') {
+                    ++i;
+                    SkipSpace(text, i);
+                    if (i < text.size()) complete = false;   // something follows the array
+                    break;
+                }
+                if (text[i] == ',') {
+                    ++i;
+                    continue;
+                }
+                if (text[i] == '{') {
+                    BenchmarkResult result;
+                    if (!ReadResult(text, i, result)) {
+                        complete = false;
+                        break;
+                    }
+                    results.push_back(std::move(result));
+                } else {
+                    // Not a result object; this build has no way to keep it.
+                    complete = false;
+                    if (!SkipValue(text, i)) break;
+                }
+            }
+        }
+    }
+    if (intact) *intact = complete;
     return results;
 }
 
-bool SaveResults(const std::vector<BenchmarkResult>& results) {
-    std::ofstream out(ResultsFilePath());
-    if (!out.is_open()) return false;
-
-    out << "[\n";
-    for (size_t i = 0; i < results.size(); ++i) {
-        out << ResultToJson(results[i]);
-        if (i + 1 < results.size()) out << ",";
-        out << "\n";
+std::string SerializeResultsJson(const std::vector<BenchmarkResult>& results) {
+    std::string text = "[\n";
+    for (std::size_t i = 0; i < results.size(); ++i) {
+        text += ResultToJson(results[i]);
+        if (i + 1 < results.size()) text += ",";
+        text += "\n";
     }
-    out << "]\n";
-    out.close();
-    return true;
+    text += "]\n";
+    return text;
+}
+
+std::vector<BenchmarkResult> LoadResults() {
+    std::string text;
+    if (!ReadWholeFile(ResultsPath(), text)) return {};
+    return ParseResultsJson(text);
+}
+
+bool SaveResults(const std::vector<BenchmarkResult>& results) {
+    const std::filesystem::path path = ResultsPath();
+    if (!KeepCopyOfUnreadableFile(path)) return false;
+    return ReplaceFileText(path, SerializeResultsJson(results));
 }
 
 bool AppendResult(const BenchmarkResult& r) {
     auto results = LoadResults();
     results.push_back(r);
+    // Every new result names the machine it was measured on. Done here, so no
+    // test has to remember it.
+    BenchmarkResult& saved = results.back();
+    if (saved.deviceModel.empty()) saved.deviceModel = SystemDeviceModel();
+    if (saved.systemMemoryMB == 0) saved.systemMemoryMB = SystemMemoryMB();
     return SaveResults(results);
 }
 
@@ -823,11 +1207,18 @@ bool ExportResultsCsv(const std::string& path,
            "avgRenderMs,minRenderMs,maxRenderMs,"
            "avgTotalGpuMs,minTotalGpuMs,maxTotalGpuMs,"
            "avgFps,avgFrameTimeMs,gpuUtilisation,bottleneck,"
-           "score,scoreUnit,precision,stableScore,stableVariancePct,throttlePct\n";
+           "score,scoreUnit,precision,stableScore,stableVariancePct,throttlePct,"
+           "deviceModel,systemMemoryMB\n";
 
     for (const auto& r : results) {
+        // A quote inside a quoted CSV field is written twice.
         auto q = [](const std::string& s) {
-            return "\"" + s + "\"";
+            std::string quoted = "\"";
+            for (char c : s) {
+                if (c == '"') quoted += '"';
+                quoted += c;
+            }
+            return quoted + "\"";
         };
         out << std::fixed << std::setprecision(3)
             << q(r.id) << ","
@@ -877,7 +1268,9 @@ bool ExportResultsCsv(const std::string& path,
             << q(r.precision) << ","
             << r.stableScore << ","
             << std::setprecision(2) << r.stableVariancePct << ","
-            << r.throttlePct << "\n";
+            << r.throttlePct << ","
+            << q(r.deviceModel) << ","
+            << r.systemMemoryMB << "\n";
     }
 
     out.close();
