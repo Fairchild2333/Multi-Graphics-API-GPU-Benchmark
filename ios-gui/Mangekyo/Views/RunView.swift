@@ -124,6 +124,7 @@ struct RunView: View {
                     advancedCard
                     progressCard
                     summaryCard
+                    GpuRunChartsCard(jobs: engine.runOutput.jobs)
                     cliCard
                 }
                 .padding(16)
@@ -239,16 +240,16 @@ struct RunView: View {
                             Text(Localization.tr("Particles", "粒子数", "パーティクル数"))
                                 .font(.subheadline).foregroundStyle(.secondary)
                             Picker("", selection: $particlePreset) {
-                                Text("Light — 65K").tag("65536")
-                                Text("Medium — 1M").tag("1048576")
-                                Text("Heavy — 4M").tag("4194304")
-                                Text("Extreme — 16M").tag("16777216")
+                                Text(Localization.tr("Light — 65K", "轻量 —— 65K", "Light — 65K")).tag("65536")
+                                Text(Localization.tr("Medium — 1M", "中等 —— 1M", "Medium — 1M")).tag("1048576")
+                                Text(Localization.tr("Heavy — 4M", "重载 —— 4M", "Heavy — 4M")).tag("4194304")
+                                Text(Localization.tr("Extreme — 16M", "极限 —— 16M", "Extreme — 16M")).tag("16777216")
                                 Text(Localization.tr("Custom…", "自定义…", "カスタム…")).tag("custom")
                             }
                             .labelsHidden()
                         }
                         if particlePreset == "custom" {
-                            TextField("multiple of 256", text: $customParticles)
+                            TextField(Localization.tr("multiple of 256", "256 的倍数", "256 の倍数"), text: $customParticles)
                                 .textFieldStyle(.roundedBorder)
                                 .keyboardType(.numberPad)
                         }
@@ -259,9 +260,9 @@ struct RunView: View {
                             Text(Localization.tr("GPU Burn steps", "GPU Burn 步数", "GPU Burn ステップ"))
                                 .font(.subheadline).foregroundStyle(.secondary)
                             Picker("", selection: $burnPreset) {
-                                Text("Light — 16").tag("16")
-                                Text("Medium — 64").tag("64")
-                                Text("Heavy — 256").tag("256")
+                                Text(Localization.tr("Light — 16", "轻量 —— 16", "Light — 16")).tag("16")
+                                Text(Localization.tr("Medium — 64", "中等 —— 64", "Medium — 64")).tag("64")
+                                Text(Localization.tr("Heavy — 256", "重载 —— 256", "Heavy — 256")).tag("256")
                                 Text(Localization.tr("Custom…", "自定义…", "カスタム…")).tag("custom")
                             }
                             .labelsHidden()
@@ -287,7 +288,7 @@ struct RunView: View {
                     .disabled(usesBurnSteps || selectedWorkload == "cinematic_liquid")
                     .toggleStyle(.switch)
 
-                Toggle("V-Sync", isOn: $vsync)
+                Toggle(Localization.tr("V-Sync", "垂直同步", "垂直同期"), isOn: $vsync)
                     .toggleStyle(.switch)
 
                 Toggle(Localization.tr("System memory", "系统内存", "システムメモリ"), isOn: $hostMemory)

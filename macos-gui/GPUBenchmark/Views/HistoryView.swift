@@ -132,7 +132,7 @@ struct HistoryView: View {
                     }
                     .width(min: 50, ideal: 70, max: 90)
 
-                    TableColumn("GPU ms") { r in
+                    TableColumn(Localization.tr("GPU ms", "GPU 耗时（ms）", "GPU ms")) { r in
                         Text(r.avgTotalGpuMs > 0
                              ? String(format: "%.3f", r.avgTotalGpuMs) : "N/A")
                             .monospacedDigit()

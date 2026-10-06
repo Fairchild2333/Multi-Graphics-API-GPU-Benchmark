@@ -959,6 +959,18 @@ namespace
             if (pos != std::string::npos)
                 line.replace(pos, std::strlen(p.en), i18n::tr(p.en, p.zh, p.ja));
         }
+        // The time after the figure: "(0.024 ms compute)", "(1.2 ms render)".
+        constexpr Pair tails[] = {
+            { " ms compute", " ms 计算", " ms コンピュート" },
+            { " ms render", " ms 渲染", " ms レンダー" },
+        };
+        for (auto const& p : tails)
+        {
+            const std::string to = i18n::tr(p.en, p.zh, p.ja);
+            for (auto pos = line.find(p.en); pos != std::string::npos;
+                 pos = line.find(p.en, pos + to.size()))
+                line.replace(pos, std::strlen(p.en), to);
+        }
         return line;
     }
 
@@ -1611,6 +1623,94 @@ namespace
         Grid::SetRow(note, row);
         Grid::SetColumnSpan(note, columns);
         host.Children().Append(note);
+    }
+
+    // The engine names the paging target and the reason for skipping the
+    // storage test in English. These are all the phrases it uses.
+    std::string localizeEngineText(std::string const& text)
+    {
+        auto after = [&](char const* prefix) -> std::string
+        {
+            return text.rfind(prefix, 0) == 0 ? text.substr(std::strlen(prefix)) : std::string();
+        };
+        if (const std::string drive = after("page file on "); !drive.empty())
+            return i18n::trDyn(text, drive + " 盘上的页面文件", drive + " のページファイル");
+        if (const std::string device = after("swap on "); !device.empty())
+            return i18n::trDyn(text, device + " 上的交换分区", device + " のスワップ");
+        struct Phrase { char const* en; char const* zh; char const* ja; };
+        static constexpr Phrase phrases[] = {
+            { "no page file",
+              "没有页面文件", "ページファイルなし" },
+            { "zram (memory is compressed in RAM; no drive is involved)",
+              "zram（内存在 RAM 里压缩，不经过硬盘）", "zram（メモリを RAM 内で圧縮、ドライブは使いません）" },
+            { "no swap",
+              "没有交换分区", "スワップなし" },
+            { "none (iOS compresses memory and does not page to storage)",
+              "无（iOS 只压缩内存，不向存储换页）", "なし（iOS はメモリを圧縮し、ストレージにページングしません）" },
+            { "swap files in /private/var/vm",
+              "/private/var/vm 里的交换文件", "/private/var/vm のスワップファイル" },
+            { "unknown",
+              "未知", "不明" },
+            { "no temporary directory",
+              "没有可用的临时目录", "一時ディレクトリがありません" },
+            { "the directory is on tmpfs, which is memory and not a drive",
+              "目录位于 tmpfs，它是内存而不是硬盘", "ディレクトリが tmpfs 上にあります（メモリであり、ドライブではありません）" },
+            { "the directory does not exist",
+              "目录不存在", "ディレクトリが存在しません" },
+            { "not enough free space for the test file",
+              "剩余空间不足以写测试文件", "テストファイル用の空き容量が不足しています" },
+            { "allocation failed",
+              "内存分配失败", "メモリの確保に失敗しました" },
+            { "the test file could not be created",
+              "无法创建测试文件", "テストファイルを作成できませんでした" },
+            { "a read or write on the test file failed",
+              "读写测试文件时出错", "テストファイルの読み書きに失敗しました" },
+            { "switched off",
+              "已关闭", "オフ" },
+        };
+        for (auto const& phrase : phrases)
+            if (text == phrase.en) return i18n::tr(phrase.en, phrase.zh, phrase.ja);
+        return text;
+    }
+
+    // The theme and language chosen on the Settings page, kept between runs in
+    // <data root>/gui_settings.txt. Both are indices of their combo boxes.
+    struct UiPrefs { int theme{ 0 }; int language{ 0 }; };
+
+    std::filesystem::path uiPrefsPath()
+    {
+        return gpu_bench::paths::DataRoot() / "gui_settings.txt";
+    }
+
+    UiPrefs loadUiPrefs()
+    {
+        UiPrefs prefs;
+        try
+        {
+            std::ifstream file(uiPrefsPath());
+            std::string line;
+            while (std::getline(file, line))
+            {
+                const auto equals = line.find('=');
+                if (equals == std::string::npos) continue;
+                const std::string key = line.substr(0, equals);
+                const int value = std::atoi(line.c_str() + equals + 1);
+                if (key == "theme" && value >= 0 && value <= 2) prefs.theme = value;
+                else if (key == "language" && value >= 0 && value <= 3) prefs.language = value;
+            }
+        }
+        catch (...) {}
+        return prefs;
+    }
+
+    void saveUiPrefs(UiPrefs const& prefs)
+    {
+        try
+        {
+            std::ofstream file(uiPrefsPath(), std::ios::trunc);
+            file << "theme=" << prefs.theme << "\nlanguage=" << prefs.language << "\n";
+        }
+        catch (...) {}
     }
 
     // Number that follows `key` in `line`, or `fallback`.
@@ -2977,7 +3077,19 @@ MainWindow::MainWindow()
     });
     updateCaptionButtonColors();
 
-    i18n::initLang(nullptr);
+    // Restore the theme and language chosen on the Settings page. An explicit
+    // MANGEKYO_LANG still decides the language of this run.
+    {
+        const UiPrefs prefs = loadUiPrefs();
+        const bool languageFromEnv = std::getenv("MANGEKYO_LANG") != nullptr;
+        static const char* const kLangTags[] = { nullptr, "en", "zh", "ja" };
+        m_suppressCombo = true;
+        ThemeBox().SelectedIndex(prefs.theme);
+        LangBox().SelectedIndex(languageFromEnv ? 0 : prefs.language);
+        m_suppressCombo = false;
+        if (prefs.theme != 0) applyTheme(prefs.theme);
+        i18n::initLang(languageFromEnv ? nullptr : kLangTags[prefs.language]);
+    }
     applyLanguage();
     configureCpuNumberBoxes();
 
@@ -3903,6 +4015,7 @@ void MainWindow::OnThemeChanged(IInspectable const&, SelectionChangedEventArgs c
 {
     if (!m_uiReady || m_suppressCombo) return;
     applyTheme(ThemeBox().SelectedIndex());
+    saveUiPrefs({ (std::max)(0, ThemeBox().SelectedIndex()), (std::max)(0, LangBox().SelectedIndex()) });
 }
 
 void MainWindow::OnLangChanged(IInspectable const&, SelectionChangedEventArgs const&)
@@ -3913,6 +4026,7 @@ void MainWindow::OnLangChanged(IInspectable const&, SelectionChangedEventArgs co
     else if (idx == 2) i18n::initLang("zh");
     else if (idx == 3) i18n::initLang("ja");
     else               i18n::initLang(nullptr);  // Auto
+    saveUiPrefs({ (std::max)(0, ThemeBox().SelectedIndex()), (std::max)(0, idx) });
     applyLanguage();
 }
 
@@ -3944,8 +4058,18 @@ void MainWindow::applyLanguage()
     CpuOutputExpander().Header(locContent("Raw CLI output (live tail)", "原始 CLI 输出（实时尾部）", "生 CLI 出力（ライブ末尾）"));
     CpuCancelButton().Content(locContent("Cancel", "取消", "キャンセル"));
     CpuRunButton().Content(locContent("Run CPU Benchmark", "开始 CPU 测试", "CPU ベンチマークを実行"));
+    // The progress label keeps the wording of the run that last wrote it; only
+    // its idle text follows the language.
+    auto isIdleLabel = [](hstring const& text)
+    {
+        return text == L"Ready" || text == u8("就绪") || text == u8("準備完了");
+    };
     if (!m_cpuRunning.load())
+    {
         setCpuStatus(StatusLight::Ready, locText("Ready", "就绪", "準備完了"));
+        if (isIdleLabel(CpuCurrentCoreText().Text()))
+            CpuCurrentCoreText().Text(locText("Ready", "就绪", "準備完了"));
+    }
 
     GpuOutputExpander().Header(locContent("Raw CLI output", "原始 CLI 输出", "生 CLI 出力"));
 
@@ -4117,7 +4241,11 @@ void MainWindow::applyLanguage()
     RunButton().Content(locContent("Run GPU Benchmark", "开始 GPU 测试", "GPU ベンチマークを実行"));
     GpuCancelButton().Content(locContent("Cancel", "取消", "キャンセル"));
     if (m_activeTask.load() != ActiveTask::GpuBenchmark)
+    {
         setGpuStatus(StatusLight::Ready, locText("Ready", "就绪", "準備完了"));
+        if (isIdleLabel(GpuStageText().Text()))
+            GpuStageText().Text(locText("Ready", "就绪", "準備完了"));
+    }
 
     HistoryTitle().Text(locText("History", "历史", "履歴"));
     RefreshButton().Content(locContent("Refresh", "刷新", "更新"));
@@ -4207,6 +4335,7 @@ void MainWindow::applyLanguage()
     refreshCombo(ParticlePresetBox());
     refreshCombo(BurnStepPresetBox());
     refreshCombo(CpuModeBox());
+    refreshCombo(MultiGpuBox());
     refreshCombo(CpuDurationPresetBox());
     if (GpuBox().Items().Size() > 0)
     {
@@ -4809,8 +4938,10 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                     const auto affinity = cpuField(parsed, { "affinity_capability" });
                     std::ostringstream label;
                     label << (name.empty() ? m_cpuName : name);
-                    if (logical) label << "  |  " << *logical << " logical";
-                    if (physical) label << " / " << *physical << " physical";
+                    if (logical)
+                        label << "  |  " << *logical << i18n::tr(" logical", " 个逻辑处理器", " 論理");
+                    if (physical)
+                        label << " / " << *physical << i18n::tr(" physical", " 个物理核心", " 物理");
                     if (!affinity.empty()) label << "  |  " << affinity;
                     CpuNameText().Text(u8(label.str()));
                     return;
@@ -5111,8 +5242,8 @@ void MainWindow::handleCpuMemLine(std::string const& line)
         m_cpuMemAllThreads = static_cast<int>(memBwNumber(fields, "all_threads"));
         std::ostringstream label;
         label << (fields["name"].empty() ? m_cpuName : fields["name"])
-              << "  |  " << fields["logical_count"] << " logical / "
-              << fields["physical_count"] << " physical";
+              << "  |  " << fields["logical_count"] << i18n::tr(" logical", " 个逻辑处理器", " 論理")
+              << " / " << fields["physical_count"] << i18n::tr(" physical", " 个物理核心", " 物理");
         if (!fields["vector"].empty()) label << "  |  " << fields["vector"];
         CpuNameText().Text(u8(label.str()));
     }
@@ -5353,7 +5484,8 @@ void MainWindow::renderCpuMemResults()
     {
         std::ostringstream text;
         text << i18n::tr("Storage behind virtual memory", "虚拟内存所在的存储", "仮想メモリのストレージ");
-        if (!m_cpuMemStorage.backing.empty()) text << " (" << m_cpuMemStorage.backing << ")";
+        if (!m_cpuMemStorage.backing.empty())
+            text << " (" << localizeEngineText(m_cpuMemStorage.backing) << ")";
         if (m_cpuMemStorage.measured)
         {
             auto whole = [](double value) { return withThousands(value); };
@@ -5373,7 +5505,8 @@ void MainWindow::renderCpuMemResults()
         else
         {
             text << i18n::tr(": not measured", "：未测量", ": 未測定");
-            if (!m_cpuMemStorage.skipped.empty()) text << " (" << m_cpuMemStorage.skipped << ")";
+            if (!m_cpuMemStorage.skipped.empty())
+                text << " (" << localizeEngineText(m_cpuMemStorage.skipped) << ")";
         }
         appendText(text.str(), false, false);
         rowCount += 2;  // this line usually wraps

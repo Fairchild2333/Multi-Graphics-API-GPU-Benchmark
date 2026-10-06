@@ -61,15 +61,18 @@ next platform slice is macOS.
    required. RenderDoc supports Android remote capture. Thermal throttling
    may require a separate mobile duration contract.
    - **Current status:** a Vulkan slice (Particle and 16-step GPU Burn, 3 s
-     `_android_preview` runs) builds with `assembleDebug`. It has never run on
-     a phone.
+     `_android_preview` runs) plus the CPU page (compute test and the cache
+     and memory sweep, with charts) builds with `assembleDebug`. It has never
+     run on a phone.
    - **Next step:** remote testing over adb (install, launch, logcat, pull
      results). The user enables USB debugging and approves the phone's prompt.
 4. **iOS** — after Android. Floor **iOS 16**. Metal only; no RenderDoc;
    `MTLCaptureManager`; shared SwiftUI with macOS. **iOS 26 / 27 must use
    Liquid Glass** (Material on 16–25). See `HANDOFF.md` §3.0.3.
-   - **Current status:** the source slice is written but has never been
-     compiled; iOS builds require a Mac with Xcode.
+   - **Current status:** the source slice, including the CPU sweep and the
+     charts, is written but has never been built with Xcode; iOS builds
+     require a Mac. Parts of the Swift code pass a type-check on Linux
+     against stand-ins for SwiftUI.
    - **Next step:** remote device testing through SSH to a Mac with
      `xcodebuild` and `xcrun devicectl`. The user provides Apple ID signing and
      enables Developer Mode on the iPhone.
@@ -398,7 +401,9 @@ The CPU page also offers **Cache & memory bandwidth** (`--cpu-membw`,
   a History row whose score is the all-core memory read rate in GB/s.
 - **Phones:** `scripts/build-android-cpumem.ps1` builds a stand-alone binary
   that runs over adb. It has been compiled for four Android ABIs but not yet
-  run on a phone.
+  run on a phone. The Android, iOS and macOS apps have the sweep on their CPU
+  page; none of them has run on a device yet, and iOS and macOS cannot bind a
+  thread to a core, so they measure only the core the system picks.
 
 On a Ryzen 7 9800X3D with dual-channel DDR5-6400 (2026-10-06), one thread
 read 588 GB/s in L1, 240 GB/s in L2, 136 GB/s in L3 and 55-61 GB/s in memory.

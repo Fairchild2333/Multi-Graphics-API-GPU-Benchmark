@@ -15,6 +15,7 @@
 #include <iostream>
 #include <mutex>
 #include <sstream>
+#include <streambuf>
 #include <string>
 #include <thread>
 #include <unistd.h>
@@ -114,6 +115,53 @@ static std::mutex g_workerMutex;
 static std::thread g_worker;
 static std::string g_lastError;
 
+// What an embedded run prints to std::cout lands here, split into lines that
+// the app collects with gpb_poll_output(). The engine prints from one thread
+// at a time; the lock only guards against the collecting thread.
+class LineQueueBuffer : public std::streambuf {
+public:
+    std::vector<std::string> Drain() {
+        std::lock_guard<std::mutex> lock(mutex_);
+        std::vector<std::string> lines;
+        lines.swap(lines_);
+        return lines;
+    }
+
+protected:
+    int_type overflow(int_type ch) override {
+        if (traits_type::eq_int_type(ch, traits_type::eof())) return traits_type::not_eof(ch);
+        std::lock_guard<std::mutex> lock(mutex_);
+        Append(traits_type::to_char_type(ch));
+        return ch;
+    }
+
+    std::streamsize xsputn(const char* text, std::streamsize count) override {
+        std::lock_guard<std::mutex> lock(mutex_);
+        for (std::streamsize i = 0; i < count; ++i) Append(text[i]);
+        return count;
+    }
+
+private:
+    // Nobody may be collecting; keep the newest lines only.
+    static constexpr std::size_t kMaxPendingLines = 20000;
+
+    void Append(char c) {
+        if (c == '\n') {
+            if (lines_.size() >= kMaxPendingLines) lines_.erase(lines_.begin(), lines_.begin() + 1000);
+            lines_.push_back(current_);
+            current_.clear();
+        } else if (c != '\r') {
+            current_.push_back(c);
+        }
+    }
+
+    std::mutex mutex_;
+    std::vector<std::string> lines_;
+    std::string current_;
+};
+
+static LineQueueBuffer g_embeddedOutput;
+
 static void JoinWorkerUnlocked() {
     if (g_worker.joinable())
         g_worker.join();
@@ -183,7 +231,12 @@ bool gpb_start_workload(const char* workload_id, double seconds) {
         req.workloadId = workload;
         req.maxRunTimeSec = seconds > 0.0 ? seconds : 3.0;
         std::string err;
+        // Keep the lines of this run for gpb_poll_output().
+        std::cout.flush();
+        std::streambuf* const consoleOutput = std::cout.rdbuf(&g_embeddedOutput);
         const int rc = gpu_bench::ios_host::RunWorkload(req, err);
+        std::cout.flush();
+        std::cout.rdbuf(consoleOutput);
         {
             std::lock_guard<std::mutex> lock(g_workerMutex);
             if (rc != 0)
@@ -203,6 +256,15 @@ void gpb_stop_workload(void) {
 bool gpb_is_running(void) {
     return g_workerAlive.load(std::memory_order_acquire) ||
            gpu_bench::ios_host::IsRunning();
+}
+
+char* gpb_poll_output(void) {
+    std::string text;
+    for (const std::string& line : g_embeddedOutput.Drain()) {
+        text += line;
+        text += '\n';
+    }
+    return strdup_alloc(text);
 }
 
 char* gpb_last_error(void) {

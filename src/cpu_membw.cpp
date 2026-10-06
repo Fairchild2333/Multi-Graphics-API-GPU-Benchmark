@@ -39,6 +39,11 @@
 #endif
 #if defined(__APPLE__)
 #include <sys/sysctl.h>
+#if TARGET_OS_IPHONE
+#include <os/proc.h>
+#else
+#include <mach/mach.h>
+#endif
 #endif
 #endif
 
@@ -698,6 +703,22 @@ MemoryInfo QueryMemory() {
     std::uint64_t total = 0;
     std::size_t size = sizeof(total);
     if (sysctlbyname("hw.memsize", &total, &size, nullptr, 0) == 0) info.totalBytes = total;
+#if TARGET_OS_IPHONE
+    // What this app may still allocate before the system ends it. Zero where
+    // the system gives no figure; the sweep then uses its fixed ceilings.
+    info.availableBytes = os_proc_available_memory();
+#else
+    // Free pages and pages the system can reclaim without paging out.
+    vm_statistics64_data_t vm{};
+    mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
+    const long pageSize = sysconf(_SC_PAGESIZE);
+    if (pageSize > 0 &&
+        host_statistics64(mach_host_self(), HOST_VM_INFO64,
+                          reinterpret_cast<host_info64_t>(&vm), &count) == KERN_SUCCESS) {
+        info.availableBytes = (static_cast<std::uint64_t>(vm.free_count) + vm.inactive_count) *
+                              static_cast<std::uint64_t>(pageSize);
+    }
+#endif
 #endif
     return info;
 }

@@ -120,7 +120,9 @@
     - **验证：** 见 `HANDOFF.md` 第 10 节。大小核和"从曲线识别"两条路径是在 9800X3D 上用诊断开关验证的；Android 程序只编译通过，没有在手机上运行。
   - [ ] **遗留：**
     - **没有在任何手机或大小核 CPU 上实际运行过。** 需要接上手机后用 adb 跑一遍，核对各级缓存与芯片资料是否一致。
-    - **Android App 的 CPU 页还是空壳**（原有的 CPU 算力测试也没接），iOS / macOS App 没有这项测试的入口；iOS 和 macOS 不能绑定线程，只能测一类核心。
+    - ~~Android App 的 CPU 页还是空壳，iOS / macOS App 没有这项测试的入口~~：2026-10-06 三个前端都已接入，并带表格和曲线图。Android 编译通过；iOS 和 macOS 只做过类型检查，没有用 Xcode 编译；三端都没有在设备上运行过。
+    - **iOS 和 macOS 不能绑定线程**，单线程扫描跑在系统挑选的核心上，能效核测不到。可以试的办法：用线程的 QoS 等级把线程放到能效核上（后台等级只在能效核上运行），并读取 `hw.perflevel1` 的缓存容量。还没有做。
+    - **Android App 里的 CPU 测试不能取消**，开始后只能等它跑完。
     - **存储成绩没有和 CrystalDiskMark 等工具对比**（Windows 自带的 `winsat` 需要管理员权限）。GUI 里没有"跳过存储测试"的开关，每次运行都会写盘。
     - **流式写入偏慢的原因没有查：** 9800X3D 上流式写入只有 30 GB/s（单线程和 8 线程相同），C 运行库的 `memset` 和 `rep stosb` 也是这个速度，而 `CLZERO` 能到 75 GB/s。
     - **L2 曲线不平的原因没有查：** 64–384 KiB 为 230–245 GB/s，512–768 KiB 为 300–320 GB/s，与测试程序的分片方式无关。
@@ -147,6 +149,7 @@
   - [x] SwiftUI ↔ WinUI 真对齐（Run/CPU/History/Duration/Capture/API 多选）— **待 Mac 编译验收**
   - [x] Metal 液体：raymarch present（`liquidFragment` / `_metal_preview`）— **待真 Mac 编译与冒烟**
   - [ ] 真 Mac 三主项冒烟 + 15s 正式流程
+  - [x] CPU 页的缓存 / 内存带宽测试和三个页面的图表（2026-10-06）— **待 Mac 编译验收**。本轮在 Linux 容器里做类型检查时发现 `BenchEngine.swift` 有一处无法编译、一处会让界面卡死，都已修掉；`ContentView`、`HistoryView`、`SettingsView`、`AboutView` 没有检查过，第一次用 Xcode 编译时可能还会报错。
   - [x] `MTLCaptureManager`(.gputrace) 接线（F12/`--capture`/`--capture-frame`）— **待真 Mac 验证**
 - [ ] **3. Android**：RenderDoc Android 远程抓帧；评估温控对 15 秒 Burst 语义的影响；GLES 降级 / 液体 / 正式移动 duration。
   - [x] **Vulkan 垂直切片（2026-07-24）**：ANativeWindow + `gpu_engine` + Compose GPU 页 Run/Stop（stream / gpu_burn light=16，默认 3s）。**Windows 本机 `assembleDebug` 通过；未真机。** 引擎真实写出 `*_android_preview`。
@@ -155,7 +158,7 @@
   - [x] **UI 壳（2026-07-20/24）**：Compose + Material 3 四页；动态取色 12+；满载可 Stop。registry 仅展示已接线 GPU 项及真实 `*_android_preview` 字符串。
   - [ ] **ES 2.0 legacy tier（用户 2026-07-20 锁定底线：Tegra 3/4 必须支持）**：简化 fragment-only GPU Burn（避开 highp，Tegra 3 仅 FP20）新组 `gpu_burn_es2_legacy_v1`；粒子改 CPU(NEON) 物理 + GPU 渲染或纯 fragment 填充率测试（新 workloadVersion，不与 `stream` 混排）；液体 unsupported；墙钟计时、无 RenderDoc（用户已确认不要求）；独立 legacy APK（设备停在 Android 4.1–5.1，minSdk 约束），主包不背包袱。详见 HANDOFF 目标 C 第 3 条。
   - [ ] **Android 真机远程测试（adb；用户 2026-09-30 排入）**：
-    - **现状：** App 从没在真机上跑过。只接入了 Particle 和 GPU Burn（固定 16 步），默认 3 秒预览，成绩带 `_android_preview` 后缀。流体和 CPU 测试都没接入。
+    - **现状：** App 从没在真机上跑过。GPU 页接入了 Particle 和 GPU Burn（固定 16 步），默认 3 秒预览，成绩带 `_android_preview` 后缀；CPU 页在 2026-10-06 接入了算力测试和缓存 / 内存带宽测试，并带图表。流体没有接入。
     - **用户在手机上操作：** 打开"开发者选项"和"USB 调试"，插线后在手机弹窗里点"允许 USB 调试"。这一步只能由用户确认。
     - **Claude 用 adb 完成：**
       - 编译 `:app:assembleDebug`，再 `adb install` 安装并用 `adb shell am start` 启动；

@@ -8,7 +8,16 @@
 >   （例：`stream_v1_android_preview`、
 >   `gpu_burn_v3_fixed_steps_16_kaleidoscope_android_preview`）。
 >   默认时长为宿主 3s preview，**不是**桌面 15s 正式合同；禁止与 Windows 榜混排。
-> - **未做**：GLES 3.1 降级、液体、CPU mixed 宿主、温控 15s Burst、正式移动 duration 合同、发布包。
+> - **未做**：GLES 3.1 降级、液体、温控 15s Burst、正式移动 duration 合同、发布包。
+>
+> 2026-10-06 追加：
+> - **CPU 页已接入**：CPU 算力测试（`cpu_mixed_v1`）和缓存 / 内存带宽测试
+>   （`cpu_membw_v1_android_preview`）。两项都在 App 进程内的原生线程上运行引擎的命令行入口。
+> - **图表**：CPU 页的逐处理器柱状图、各类核心和全核的带宽曲线、存储读写条形图；
+>   GPU 页的每帧耗时折线图；Charts 页的每项测试条形图。都用 Compose 绘制。
+> - **可编译**：`:app:assembleDebug` 通过，debug APK 约 33 MB。
+> - **界面语言**：中文和英文，跟随系统语言（`core/I18n.kt` 的 `tr(en, zh)`）；其他语言显示英文。
+> - **仍未真机运行**；CPU 测试开始后不能取消。
 
 ## 已完成（相对脚手架）
 
@@ -21,6 +30,9 @@
 - JNI：Surface 生命周期、后台线程 Run、`RequestStop` 协作取消
 - SPIR-V：构建时 `glslc` → `assets/shaders/`（particle + compute + gpu_burn）
 - UI registry 展示与引擎一致的 `*_android_preview` 版本字符串（仅 stream / gpu_burn）
+- CPU 页：JNI `nativeStartCli` 在原生线程上运行 `gpu_bench::cliMain`；引擎输出经
+  `std::cout` / `std::cerr` 缓冲区收集，界面用 `nativePollOutput` 轮询（`core/EngineOutput.kt` 解析）
+- 图表：`ui/components/Charts.kt`（折线图、柱状图、条形图，Compose `Canvas` 绘制）
 
 ## 构建
 
@@ -35,8 +47,12 @@ cd android
 ## 运行说明
 
 1. API 24+ 且 Vulkan loader 可用时，GPU 页可选 Stream / GPU Burn（light steps=16），点 Run（默认 3s）。
+   跑完后页面上的 "Last run" 卡片显示成绩和每帧耗时折线图。
 2. 跑分线程不占 UI；Stop 调用 `RequestStop()`。
 3. 写出结果时 `workloadVersion` 带 `_android_preview`，`platform=Android`。
+4. CPU 页选择测试模式后点 Run。缓存 / 内存带宽测试大约一分钟，手机会发热；
+   存储测试会在 App 私有目录里写一个最大 1 GiB 的临时文件，测完删除。
+   不需要安装 App 的另一条路：`scripts/build-android-cpumem.ps1` 编出的独立程序可以用 adb 直接运行。
 
 ## Windows 开发注意
 
@@ -45,5 +61,5 @@ cd android
 
 ## 主要待实现
 
-真机冒烟、GLES 3.1 / EGL 降级、温控 15s Burst 合同、液体、CPU 宿主、
+真机冒烟、GLES 3.1 / EGL 降级、温控 15s Burst 合同、液体、CPU 测试的取消、
 独立 ES 2.0 legacy APK、抓帧策略。

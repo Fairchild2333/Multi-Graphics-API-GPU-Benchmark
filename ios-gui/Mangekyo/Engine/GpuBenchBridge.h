@@ -23,6 +23,9 @@ void gpb_set_metal_layer(void* ca_metal_layer);  // CAMetalLayer* as __bridge vo
 bool gpb_start_workload(const char* workload_id, double seconds);  // stream|gpu_burn
 void gpb_stop_workload(void);   // -> gpu_bench::RequestStop()
 bool gpb_is_running(void);
+// Lines an embedded run printed since the last call, each ending in a line feed.
+// malloc'd; caller gpb_free().
+char* gpb_poll_output(void);
 char* gpb_last_error(void);     // malloc'd; caller gpb_free()
 char* gpb_engine_version(void); // malloc'd; caller gpb_free()
 

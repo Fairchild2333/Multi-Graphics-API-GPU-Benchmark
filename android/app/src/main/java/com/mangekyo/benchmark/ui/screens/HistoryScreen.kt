@@ -31,6 +31,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.mangekyo.benchmark.core.ResultsStore
+import com.mangekyo.benchmark.core.tr
+import com.mangekyo.benchmark.core.workloadTitle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +44,7 @@ fun HistoryScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("History") },
+                title = { Text(tr("History", "历史")) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 ),
@@ -54,7 +56,7 @@ fun HistoryScreen() {
                         },
                         enabled = entries.isNotEmpty(),
                     ) {
-                        Icon(Icons.Filled.DeleteSweep, contentDescription = "Clear all")
+                        Icon(Icons.Filled.DeleteSweep, contentDescription = tr("Clear all", "全部清除"))
                     }
                 },
             )
@@ -69,12 +71,16 @@ fun HistoryScreen() {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    "No results yet",
+                    tr("No results yet", "还没有成绩"),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    "Scores will appear here after the engine writes results.json under app-specific storage. " +
-                        "Group by workloadVersion / ABI — never mix Windows desktop lanes.",
+                    tr(
+                        "Scores will appear here after the engine writes results.json under app-specific storage. " +
+                            "Group by workloadVersion / ABI — never mix Windows desktop lanes.",
+                        "引擎把成绩写入 App 专属目录下的 results.json 后，会显示在这里。" +
+                            "成绩按测试版本和 ABI 分组，不要和 Windows 桌面版的成绩放在一起比较。",
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -105,7 +111,7 @@ fun HistoryScreen() {
                             verticalArrangement = Arrangement.spacedBy(2.dp),
                         ) {
                             Text(
-                                "${e.workload} · ${e.graphicsApi}",
+                                "${workloadTitle(e.workload)} · ${e.graphicsApi}",
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Text(

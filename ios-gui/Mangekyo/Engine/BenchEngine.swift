@@ -25,11 +25,13 @@ final class BenchEngine: ObservableObject {
     @Published var logOutput: String = ""
     @Published var isRunning: Bool = false
     @Published var lastScore: String = ""
-    @Published var statusText: String = "Ready"
+    @Published var statusText: String = Localization.tr("Ready", "就绪", "準備完了")
     @Published var workingDirectory: String = ""
     @Published var results: [BenchResult] = []
     @Published var progressFraction: Double = 0
     @Published var progressLabel: String = "0%"
+    /// The output of the current or last run, parsed for the result tables and charts.
+    @Published var runOutput = RunOutput()
     @Published var engineVersion: String = ""
     @Published var lastError: String = ""
 
@@ -37,6 +39,9 @@ final class BenchEngine: ObservableObject {
     static let availableAPIs = ["Metal"]
 
     private var cancelRequested = false
+    /// Output that does not end in a line break yet.
+    private var pendingOutput = ""
+    private var shownStage: RunOutput.Stage?
     private var metalLayer: CAMetalLayer?
     private var pollTask: Task<Void, Never>?
 
@@ -166,7 +171,8 @@ final class BenchEngine: ObservableObject {
     @discardableResult
     func startPreview(workload: String, seconds: Double = 3.0) -> Bool {
         guard metalLayer != nil else {
-            lastError = "Metal layer not ready"
+            lastError = Localization.tr("Metal layer not ready", "Metal 画面尚未就绪",
+                                        "Metal レイヤーの準備ができていません")
             statusText = lastError
             return false
         }
@@ -178,7 +184,10 @@ final class BenchEngine: ObservableObject {
             "Running \(workload) preview (\(Int(seconds))s)…",
             "运行 \(workload) 预览（\(Int(seconds)) 秒）…",
             "\(workload) プレビュー実行中（\(Int(seconds))秒）…")
-        logOutput += "=== Preview \(workload) \(seconds)s ===\n"
+        // A new run gets new charts; lines left over from an earlier run are dropped.
+        resetRunOutput()
+        if let stale = gpb_poll_output() { gpb_free(stale) }
+        appendLine("=== Preview \(workload) \(seconds)s ===")
 
         let ok = gpb_start_workload(workload, seconds)
         if !ok {
@@ -186,7 +195,8 @@ final class BenchEngine: ObservableObject {
                 lastError = String(cString: err)
                 gpb_free(err)
             }
-            statusText = lastError.isEmpty ? "Start failed" : lastError
+            statusText = lastError.isEmpty
+                ? Localization.tr("Start failed", "启动失败", "開始に失敗しました") : lastError
             isRunning = false
             return false
         }
@@ -202,7 +212,9 @@ final class BenchEngine: ObservableObject {
                 await MainActor.run {
                     guard let self else { return }
                     self.isRunning = running
+                    self.drainEmbeddedOutput()
                     if !running {
+                        self.flushOutput()
                         if let err = gpb_last_error() {
                             let s = String(cString: err)
                             gpb_free(err)
@@ -255,6 +267,7 @@ final class BenchEngine: ObservableObject {
         lastScore = ""
         progressFraction = 0
         progressLabel = "0%"
+        resetRunOutput()
 
         statusText = jobs.count > 1
             ? Localization.tr("Running… (multiple passes)",
@@ -276,13 +289,15 @@ final class BenchEngine: ObservableObject {
                     let pct = Double(index) / Double(max(jobs.count, 1))
                     self.progressFraction = pct
                     self.progressLabel = String(format: "%.0f%%", pct * 100)
-                    self.logOutput += "=== Job \(index + 1) of \(jobs.count): \(job.joined(separator: " ")) ===\n"
+                    self.flushOutput()
+                    self.appendLine("=== Job \(index + 1) of \(jobs.count): \(job.joined(separator: " ")) ===")
                 }
 
                 await self.runViaBridge(job: job)
             }
 
             await MainActor.run {
+                self.flushOutput()
                 self.isRunning = false
                 self.progressFraction = 1
                 self.progressLabel = "100%"
@@ -298,7 +313,8 @@ final class BenchEngine: ObservableObject {
         }
     }
 
-    private func runViaBridge(job: [String]) async {
+    // Not on the main actor: gpb_run blocks until the run has finished.
+    nonisolated private func runViaBridge(job: [String]) async {
         let cStrings = job.map { strdup($0) }
         let argc = Int32(cStrings.count)
         var cPtrs = cStrings.map { UnsafePointer($0) }
@@ -308,20 +324,97 @@ final class BenchEngine: ObservableObject {
             let str = String(cString: line)
             let eng = Unmanaged<BenchEngine>.fromOpaque(ctx).takeUnretainedValue()
             DispatchQueue.main.async { [eng, str] in
-                eng.logOutput += str + "\n"
-                if str.hasPrefix("Avg FPS:") || str.contains("Score:") {
-                    eng.lastScore = str.trimmingCharacters(in: .whitespaces)
-                }
+                eng.appendLine(str)
             }
         }
 
-        let selfRef = await MainActor.run {
-            Unmanaged.passUnretained(self).toOpaque()
-        }
+        let selfRef = Unmanaged.passUnretained(self).toOpaque()
         _ = cPtrs.withUnsafeMutableBufferPointer { buf in
             gpb_run(buf.baseAddress, argc, callback, selfRef)
         }
         for ptr in cStrings { free(ptr) }
+    }
+
+    /// Collects what the embedded run printed since the last call.
+    private func drainEmbeddedOutput() {
+        guard let text = gpb_poll_output() else { return }
+        let chunk = String(cString: text)
+        gpb_free(text)
+        if !chunk.isEmpty { appendOutput(chunk) }
+    }
+
+    // MARK: - Engine output
+
+    /// Adds engine output that may end in the middle of a line.
+    private func appendOutput(_ chunk: String) {
+        pendingOutput += chunk
+        while let lineEnd = pendingOutput.firstIndex(where: { $0.isNewline }) {
+            let line = String(pendingOutput[..<lineEnd])
+            pendingOutput.removeSubrange(...lineEnd)
+            appendLine(line)
+        }
+    }
+
+    /// Adds the rest of the output once a run has ended.
+    private func flushOutput() {
+        guard !pendingOutput.isEmpty else { return }
+        let line = pendingOutput
+        pendingOutput = ""
+        appendLine(line)
+    }
+
+    /// Adds one line to the log and to the parsed results that feed the charts.
+    private func appendLine(_ line: String) {
+        logOutput += line + "\n"
+        if line.hasPrefix("Avg FPS:") || line.contains("Score:") {
+            lastScore = Localization.scoreLine(line.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
+        runOutput.consume(line)
+        // The CPU tests report their own progress.
+        if let fraction = runOutput.progress {
+            progressFraction = fraction
+            progressLabel = String(format: "%.0f%%", fraction * 100)
+        }
+        if let stage = runOutput.stage, stage != shownStage {
+            shownStage = stage
+            statusText = Self.stageText(stage)
+        }
+    }
+
+    private func resetRunOutput() {
+        runOutput = RunOutput()
+        pendingOutput = ""
+        shownStage = nil
+    }
+
+    private static func stageText(_ stage: RunOutput.Stage) -> String {
+        func phaseText(_ phase: RunOutput.Phase) -> String {
+            switch phase {
+            case .warmUp: return Localization.tr("warming up", "预热", "ウォームアップ")
+            case .measure: return Localization.tr("measuring", "测量", "測定中")
+            case .finish: return Localization.tr("finishing", "收尾", "仕上げ")
+            }
+        }
+        switch stage {
+        case .cpuCore(let label, let phase):
+            return label + " · " + phaseText(phase)
+        case .cpuAllCores(let phase):
+            return Localization.tr("All cores", "全核", "全コア") + " · " + phaseText(phase)
+        case .sweepOneThread:
+            return Localization.tr("One thread · sweeping data-set sizes", "单线程 · 扫描数据量",
+                                   "1 スレッド · データセットサイズをスイープ")
+        case .sweepAllCores:
+            return Localization.tr("All cores · sweeping data-set sizes", "全核 · 扫描数据量",
+                                   "全コア · データセットサイズをスイープ")
+        case .storage:
+            return Localization.tr("Storage · reading and writing a test file", "存储 · 读写测试文件",
+                                   "ストレージ · テストファイルの読み書き")
+        case .pageMapping:
+            return Localization.tr("Virtual memory · mapping pages", "虚拟内存 · 映射页面",
+                                   "仮想メモリ · ページの割り当て")
+        case .error(let message):
+            return message
+        }
     }
 
     func refreshResults() {

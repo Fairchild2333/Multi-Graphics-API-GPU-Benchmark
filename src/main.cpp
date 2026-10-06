@@ -251,6 +251,14 @@ static gpu_bench::BenchmarkResult MakeStoredCpuMemBwResult(
                         config.sampleMs == defaults.sampleMs;
     stored.workloadVersion = std::string(gpu_bench::kCpuMemBwWorkloadVersion) +
                              (formal ? "" : "_preview");
+    // The phone default ends the sweep at 256 MiB, so phone results never
+    // share a group with desktop ones, as with the other mobile workloads.
+#if defined(__ANDROID__)
+    stored.workloadVersion =
+        std::string(gpu_bench::kCpuMemBwWorkloadVersion) + "_android_preview";
+#elif defined(__APPLE__) && TARGET_OS_IPHONE
+    stored.workloadVersion = std::string(gpu_bench::kCpuMemBwWorkloadVersion) + "_ios_preview";
+#endif
     stored.graphicsApi = "CPU";
     stored.deviceName = report.cpuName;
     stored.cpuName = report.cpuName;

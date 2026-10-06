@@ -45,28 +45,31 @@ object CapabilityGate {
         val notes = mutableListOf<String>()
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            notes += "Vulkan loader requires API 24+"
+            notes += tr("Vulkan loader requires API 24+", "Vulkan 加载器需要 Android 7.0（API 24）以上")
         } else if (!loader) {
-            notes += "libvulkan.so not loadable"
+            notes += tr("libvulkan.so not loadable", "无法加载 libvulkan.so")
         }
         if (!vulkanHw) {
-            notes += "No Vulkan hardware feature advertised"
+            notes += tr("No Vulkan hardware feature advertised", "设备没有声明 Vulkan 硬件特性")
         }
 
         val preferred = when {
             loader -> GraphicsBackend.Vulkan
             glesMajor >= 3 && glesMinor >= 1 -> GraphicsBackend.Gles31
             glesMajor >= 3 -> {
-                notes += "GL ES $glesLabel present but 3.1+ required for main GLES path"
+                notes += tr(
+                    "GL ES $glesLabel present but 3.1+ required for main GLES path",
+                    "设备支持 GL ES $glesLabel，但 GL ES 路径需要 3.1 以上",
+                )
                 GraphicsBackend.Unsupported
             }
             else -> GraphicsBackend.Unsupported
         }
         if (preferred == GraphicsBackend.Gles31) {
-            notes += "Using GL ES path (Vulkan unavailable)"
+            notes += tr("Using GL ES path (Vulkan unavailable)", "Vulkan 不可用，改用 GL ES 路径")
         }
         if (preferred == GraphicsBackend.Unsupported) {
-            notes += "No supported GPU backend on this device"
+            notes += tr("No supported GPU backend on this device", "这台设备没有受支持的图形后端")
         }
 
         return CapabilitySnapshot(

@@ -58,6 +58,29 @@ object NativeBridge {
         if (loaded) nativeStopWorkload()
     }
 
+    /**
+     * The page that started the current run, "gpu" or "cpu". Only that page
+     * collects the lines the engine prints.
+     */
+    @Volatile
+    var outputOwner: String = ""
+
+    /** Lines the engine printed since the last call. */
+    fun pollOutput(): Array<String> = if (loaded) nativePollOutput() else emptyArray()
+
+    /**
+     * Runs the engine's command-line entry point with [args] on a native
+     * thread. Used for the CPU tests, which need no surface.
+     */
+    fun startCli(args: Array<String>): Boolean {
+        if (!loaded || !pathsReady) return false
+        return nativeStartCli(args)
+    }
+
+    fun isCliRunning(): Boolean = loaded && nativeIsCliRunning()
+
+    fun cliExitCode(): Int = if (loaded) nativeCliExitCode() else -1
+
     private fun copyAssetDir(context: Context, assetPath: String, outDir: File) {
         val names = context.assets.list(assetPath) ?: return
         for (name in names) {
@@ -84,4 +107,8 @@ object NativeBridge {
     private external fun nativeStopWorkload()
     private external fun nativeIsRunning(): Boolean
     private external fun nativeLastError(): String
+    private external fun nativePollOutput(): Array<String>
+    private external fun nativeStartCli(args: Array<String>): Boolean
+    private external fun nativeIsCliRunning(): Boolean
+    private external fun nativeCliExitCode(): Int
 }

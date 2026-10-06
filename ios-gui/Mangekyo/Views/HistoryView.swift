@@ -236,7 +236,8 @@ struct HistoryRow: View {
                 
                 Spacer()
                 
-                Text("GPU: \(String(format: "%.2f", result.avgTotalGpuMs))ms | Diff: \(result.difficulty)")
+                Text(Localization.tr("GPU: ", "GPU 耗时：", "GPU: ") + String(format: "%.2f", result.avgTotalGpuMs) + " ms | "
+                     + Localization.tr("Difficulty: ", "难度：", "難易度: ") + result.difficulty)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }

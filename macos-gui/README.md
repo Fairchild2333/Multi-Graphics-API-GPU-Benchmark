@@ -69,12 +69,20 @@ chart scripts.
 
 | Page | Features |
 |------|----------|
-| **GPU / Run** | Custom + Full Analysis; multi-select API (supported / unsupported); Duration seconds/minutes/hours/frames/Until Cancel; particle & Burn presets; capture-at-N; legacy toggle; progress; Cancel; open results/captures |
-| **CPU** | per-core / multi / all; Quick 1s & Formal 15s; warm-up; summary + log |
+| **GPU / Run** | Custom + Full Analysis; multi-select API (supported / unsupported); Duration seconds/minutes/hours/frames/Until Cancel; particle & Burn presets; capture-at-N; legacy toggle; progress; Cancel; open results/captures; charts of the run (scores of the jobs, GPU time per frame) |
+| **CPU** | per-core / multi / all; Quick 1s & Formal 15s; warm-up; summary + log; one bar per logical processor; cache & memory bandwidth sweep (`--cpu-membw`) with level tables, log-log curves and storage bars |
 | **History** | Table + sort; GPU/API/workload/time filters; `workloadVersion` column; clear all; open folders |
-| **Charts** | `scripts/plot_workloads.py` PNGs; open charts folder |
+| **Charts** | One bar chart per test from the saved results, drawn in SwiftUI (no Python needed); the Full Analysis presets still write PNGs with `scripts/plot_workloads.py` |
 | **Settings** | Theme; language Auto/EN/简体中文/日本語; working directory |
 | **About** | Version, description, GitHub link, system info |
+
+> **Status (2026-10-06):** the CPU sweep, the charts and several fixes in
+> `BenchEngine.swift` were written on Windows. They pass a Swift 6 type-check on
+> Linux against hand-written stand-ins for SwiftUI and AppKit, which is not a
+> build with the Apple SDK. Nothing here has been built with Xcode or run on a
+> Mac since these changes. `ContentView`, `HistoryView`, `SettingsView` and
+> `AboutView` were not checked. macOS does not let an app bind a thread to a
+> core, so the one-thread sweep runs on the core the system picks.
 
 ## Compatibility
 
@@ -99,12 +107,15 @@ macos-gui/
     ├── ContentView.swift          # NavigationSplitView shell
     ├── Views/
     │   ├── RunView.swift
+    │   ├── CpuView.swift
     │   ├── HistoryView.swift
     │   ├── ChartsView.swift
     │   ├── SettingsView.swift
     │   └── AboutView.swift
     ├── Components/
-    │   └── GlassCard.swift        # Liquid Glass card (+ fallback)
+    │   ├── GlassCard.swift        # Liquid Glass card (+ fallback)
+    │   ├── BenchCharts.swift      # Line, column and bar charts (SwiftUI Canvas)
+    │   └── ResultCharts.swift     # Result tables and charts of the pages
     ├── Engine/
     │   ├── BenchEngine.swift      # @Observable state management
     │   ├── GpuBenchBridge.h       # C interface
@@ -112,5 +123,7 @@ macos-gui/
     │   └── GPUBenchmark-Bridging-Header.h
     └── Models/
         ├── BenchResult.swift      # Codable result model
+        ├── EngineOutput.swift     # Parses engine output into chart data
+        ├── ChartGeometry.swift    # Scales, ticks and positions of the charts
         └── Localization.swift     # i18n (EN/ZH)
 ```

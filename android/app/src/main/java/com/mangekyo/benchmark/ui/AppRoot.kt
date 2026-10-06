@@ -25,17 +25,26 @@ import androidx.navigation.compose.rememberNavController
 import com.mangekyo.benchmark.ui.screens.ChartsScreen
 import com.mangekyo.benchmark.ui.screens.CpuScreen
 import com.mangekyo.benchmark.ui.screens.GpuScreen
+import com.mangekyo.benchmark.core.tr
 import com.mangekyo.benchmark.ui.screens.HistoryScreen
 
 /**
  * Information architecture mirrors WinUI / SwiftUI: GPU / CPU / History / Charts.
  * Workload capability must eventually come from the shared C++ registry (HANDOFF rule 6).
  */
-enum class AppDestination(val route: String, val label: String, val icon: ImageVector) {
-    Gpu("gpu", "GPU", Icons.Filled.Speed),
-    Cpu("cpu", "CPU", Icons.Filled.Memory),
-    History("history", "History", Icons.Filled.History),
-    Charts("charts", "Charts", Icons.Filled.BarChart),
+enum class AppDestination(
+    val route: String,
+    private val en: String,
+    private val zh: String,
+    val icon: ImageVector,
+) {
+    Gpu("gpu", "GPU", "GPU", Icons.Filled.Speed),
+    Cpu("cpu", "CPU", "CPU", Icons.Filled.Memory),
+    History("history", "History", "历史", Icons.Filled.History),
+    Charts("charts", "Charts", "图表", Icons.Filled.BarChart);
+
+    /** Read on every use, so it follows a change of the system language. */
+    val label: String get() = tr(en, zh)
 }
 
 @Composable

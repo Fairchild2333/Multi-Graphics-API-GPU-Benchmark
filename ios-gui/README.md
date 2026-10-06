@@ -14,6 +14,23 @@ Intended path: in-process `gpu_engine` via Objective-C++ bridge + embedded Metal
 >   Default host duration is 3s preview — **not** desktop 15s; do not mix with desktop groups.
 > - **Not done**: formal mobile duration/thermal contract, liquid via embedded host,
 >   App Store packaging, Mac CI.
+>
+> Added 2026-10-06 (still not built with Xcode, still not run on a device):
+> - **CPU page**: a fourth mode, cache and memory bandwidth (`--cpu-membw`, result
+>   `cpu_membw_v1_ios_preview`), with level tables, log-log curves and storage bars; the
+>   compute test shows one bar per logical processor. iOS cannot bind a thread to a core,
+>   so the one-thread sweep runs on the core the system picks.
+> - **GPU page**: a chart of the GPU time per frame after a run. The bridge collects what
+>   the embedded run prints (`gpb_poll_output`).
+> - **Charts page**: one bar chart per test from the saved results, drawn with SwiftUI
+>   `Canvas` (the Swift Charts dependency is gone).
+> - **Engine wrapper**: `gpb_run` no longer runs on the main actor, where it froze the UI
+>   until the run ended.
+> - **Checked on Linux only**: the parser and the chart geometry were compiled and run with
+>   Swift 6.0.3 on real engine output. `CpuView`, `ChartsView`, `RunView` and `BenchEngine`
+>   pass a Swift 6 type-check against hand-written stand-ins for SwiftUI and UIKit, which
+>   is not a build with the Apple SDK. The other views and the Objective-C++ bridge were
+>   not checked.
 
 ## Prerequisite
 
@@ -65,6 +82,10 @@ set duration (default 3s), tap Run. Stop remains available under load.
 | `gpb_set_metal_layer` / `gpb_start_workload` | Bridge → `ios_engine_host` |
 | `MetalBackend` + `SetEmbeddedWindow` | NO_GLFW iOS path |
 | `RequestStop` | Cooperative cancel from Swift / scenePhase |
+| `gpb_poll_output` | Lines the embedded run printed, for the run chart |
+| `Models/EngineOutput.swift` | Parses engine output into tables and chart data |
+| `Models/ChartGeometry.swift` | Scales, ticks and positions of the charts |
+| `Components/BenchCharts.swift`, `ResultCharts.swift` | Charts and result views (shared with macOS) |
 
 Bundled resources: `shaders/particle.metal`, `shaders/gpu_burn.metal` (copied into Documents at launch).
 Data root: app Documents via `GPU_BENCH_DATA_DIR`.

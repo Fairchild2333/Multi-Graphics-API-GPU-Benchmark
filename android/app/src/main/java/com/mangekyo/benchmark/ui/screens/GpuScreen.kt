@@ -1,5 +1,12 @@
 package com.mangekyo.benchmark.ui.screens
 
+import com.mangekyo.benchmark.core.GpuRun
+import com.mangekyo.benchmark.core.localizeScoreLine
+import com.mangekyo.benchmark.core.tr
+import com.mangekyo.benchmark.ui.components.ChartSeries
+import com.mangekyo.benchmark.ui.components.LineChart
+import com.mangekyo.benchmark.ui.components.seriesColors
+
 import androidx.compose.ui.*
 
 import androidx.compose.foundation.layout.Arrangement
@@ -71,6 +78,14 @@ fun GpuScreen() {
     LaunchedEffect(Unit) {
         while (true) {
             running = NativeBridge.isRunning()
+            // Collect what the engine printed while this page owns the run.
+            if (NativeBridge.outputOwner == "gpu") {
+                NativeBridge.pollOutput().forEach(GpuRun::consume)
+                if (GpuRun.active && !running) {
+                    NativeBridge.pollOutput().forEach(GpuRun::consume)
+                    GpuRun.active = false
+                }
+            }
             delay(250)
         }
     }
@@ -83,7 +98,7 @@ fun GpuScreen() {
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = { Text("GPU Benchmark") },
+                title = { Text(tr("GPU Benchmark", "GPU 跑分")) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
@@ -96,13 +111,17 @@ fun GpuScreen() {
                 onClick = {
                     if (running) {
                         NativeBridge.stopWorkload()
-                        statusText = "Stop requested"
+                        statusText = tr("Stop requested", "已请求停止")
                     } else if (runEnabled) {
+                        NativeBridge.pollOutput()  // drop lines left over from an earlier run
+                        NativeBridge.outputOwner = "gpu"
+                        GpuRun.begin()
                         val ok = NativeBridge.startWorkload(selectedWorkloadId, 3.0)
+                        if (!ok) GpuRun.active = false
                         statusText = if (ok) {
-                            "Running $selectedWorkloadId (3s preview)"
+                            tr("Running $selectedWorkloadId (3s preview)", "正在运行 $selectedWorkloadId（3 秒预览）")
                         } else {
-                            NativeBridge.lastError().ifEmpty { "Start failed" }
+                            NativeBridge.lastError().ifEmpty { tr("Start failed", "启动失败") }
                         }
                         running = NativeBridge.isRunning()
                     }
@@ -119,9 +138,9 @@ fun GpuScreen() {
                 },
             ) {
                 if (running) {
-                    Icon(Icons.Filled.Stop, contentDescription = "Stop")
+                    Icon(Icons.Filled.Stop, contentDescription = tr("Stop", "停止"))
                 } else {
-                    Icon(Icons.Filled.PlayArrow, contentDescription = "Run")
+                    Icon(Icons.Filled.PlayArrow, contentDescription = tr("Run", "运行"))
                 }
             }
         },
@@ -145,14 +164,14 @@ fun GpuScreen() {
                         modifier = Modifier.padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Text("Preview surface", style = MaterialTheme.typography.titleMedium)
+                        Text(tr("Preview surface", "预览画面"), style = MaterialTheme.typography.titleMedium)
                         BenchmarkSurface(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(200.dp),
                         )
                         Text(
-                            text = "Engine: ${NativeBridge.engineVersion()}",
+                            text = tr("Engine: ", "引擎：") + NativeBridge.engineVersion(),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -161,7 +180,7 @@ fun GpuScreen() {
             }
 
             item {
-                Text("Backend", style = MaterialTheme.typography.titleMedium)
+                Text(tr("Backend", "图形后端"), style = MaterialTheme.typography.titleMedium)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(
                         selected = selectedBackend == "Vulkan",
@@ -183,8 +202,8 @@ fun GpuScreen() {
                         onClick = {},
                         label = {
                             Text(
-                                if (caps.vulkanLoaderPresent) "Vulkan loader OK"
-                                else "Vulkan unavailable",
+                                if (caps.vulkanLoaderPresent) tr("Vulkan loader OK", "Vulkan 加载器可用")
+                                else tr("Vulkan unavailable", "Vulkan 不可用"),
                             )
                         },
                     )
@@ -193,7 +212,7 @@ fun GpuScreen() {
                         label = { Text("GL ES ${caps.glesVersionLabel}") },
                     )
                     if (caps.vulkanHardwareFeature) {
-                        AssistChip(onClick = {}, label = { Text("Vulkan HW feature") })
+                        AssistChip(onClick = {}, label = { Text(tr("Vulkan HW feature", "Vulkan 硬件特性")) })
                     }
                     AssistChip(onClick = {}, label = { Text(caps.abi) })
                     AssistChip(onClick = {}, label = { Text(caps.androidRelease) })
@@ -209,9 +228,12 @@ fun GpuScreen() {
             }
 
             item {
-                Text("Workloads", style = MaterialTheme.typography.titleMedium)
+                Text(tr("Workloads", "测试项目"), style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = "Engine writes *_android_preview (3s embed, not desktop 15s) — do not mix with Windows groups.",
+                    text = tr(
+                        "Engine writes *_android_preview (3s embed, not desktop 15s) — do not mix with Windows groups.",
+                        "成绩的版本带 _android_preview 后缀（内嵌运行 3 秒，不是桌面版的 15 秒），不要和 Windows 的成绩放在一起比较。",
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -239,7 +261,7 @@ fun GpuScreen() {
                         )
                         if (workload.isPreview) {
                             Text(
-                                text = "preview",
+                                text = tr("preview", "预览"),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.tertiary,
                                 modifier = Modifier.padding(top = 4.dp),
@@ -249,12 +271,60 @@ fun GpuScreen() {
                 }
             }
 
+            if (GpuRun.scoreLine.isNotEmpty() || GpuRun.fpsLine.isNotEmpty() || GpuRun.samples.size >= 2) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        ),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Text(tr("Last run", "最近一次运行"), style = MaterialTheme.typography.titleMedium)
+                            if (GpuRun.scoreLine.isNotEmpty()) {
+                                Text(localizeScoreLine(GpuRun.scoreLine), style = MaterialTheme.typography.titleMedium)
+                            }
+                            if (GpuRun.fpsLine.isNotEmpty()) {
+                                Text(localizeScoreLine(GpuRun.fpsLine), style = MaterialTheme.typography.bodyMedium)
+                            }
+                            // GPU time per frame over the measured part of the run.
+                            val colors = seriesColors()
+                            val measured = GpuRun.samples.filter { !it.warmup }
+                            val series = listOf(
+                                ChartSeries(tr("Compute", "计算"), colors[0], measured.map { it.seconds to it.computeMs }),
+                                ChartSeries(tr("Render", "渲染"), colors[1], measured.map { it.seconds to it.renderMs }),
+                            ).filter { line -> line.points.size >= 2 && line.points.any { it.second > 0.0005 } }
+                            if (series.isNotEmpty()) {
+                                Text(
+                                    tr(
+                                        "GPU time per frame (ms) over the run, after warm-up",
+                                        "每帧 GPU 耗时（ms）随运行时间变化，不含预热",
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                LineChart(series, logBytes = false)
+                            }
+                        }
+                    }
+                }
+            }
+
             item {
                 Text(
                     text = when {
                         statusText.isNotEmpty() -> statusText
-                        !vulkanOk -> "Vulkan Run needs API 24+ loader + Surface. GLES path not wired yet."
-                        else -> "Preview Run: 3s Stream/GPU Burn via gpu_engine. Scores are android_preview — do not mix with Windows."
+                        !vulkanOk -> tr(
+                            "Vulkan Run needs API 24+ loader + Surface. GLES path not wired yet.",
+                            "运行需要 Android 7.0（API 24）以上的 Vulkan 加载器和可用的预览画面；GL ES 路径还没有接入。",
+                        )
+                        else -> tr(
+                            "Preview Run: 3s Stream/GPU Burn via gpu_engine. Scores are android_preview — do not mix with Windows.",
+                            "预览运行：粒子测试或 GPU Burn 跑 3 秒。成绩属于 android_preview，不要和 Windows 的成绩放在一起比较。",
+                        )
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

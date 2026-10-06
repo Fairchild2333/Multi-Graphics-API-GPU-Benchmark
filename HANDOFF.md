@@ -402,7 +402,8 @@ RenderDoc。当前已同时提供原生 C++ CLI 与独立 WinUI CPU 页面：
   - 系统不报告缓存容量时从曲线平台识别各级缓存，也用来找系统没报告的缓存；
   - 新增存储读写测试（顺序 1 MiB、随机 4 KiB，不经过系统缓存）；
   - 模块改为所有平台都编译；`src/cpumem_cli.cpp` 加 `scripts/build-android-cpumem.ps1` 可编出通过 adb 运行的 Android 独立程序。
-  - **没有在任何手机或大小核 CPU 上实际运行过**；Android App 的 CPU 页仍是空壳。
+  - **没有在任何手机或大小核 CPU 上实际运行过。**
+- **Android / iOS / macOS App 接入（2026-10-06 追加）：** 三个前端的 CPU 页都有了这项测试的入口、表格和曲线图；Android 编译通过，iOS 和 macOS 只做过类型检查，三端都没有在设备上运行过。Apple 平台不能绑定线程，只测系统挑选的核心。见第 10 节验证记录。
 - **剩余步骤：** 见 `docs/TODO.md`。
 
 ## 4. P0 正确性阻塞项
@@ -477,6 +478,7 @@ probe 前把随包 `tools/RenderDoc` 设为进程级 `VK_IMPLICIT_LAYER_PATH` �
 - **OS 底线 macOS 12 Monterey**（见 §3.0.2）：CMake + SwiftUI deployment 12.0；壳层/玻璃按系统版本回退；功能与成绩合同不按 OS 拆分。
 - macOS SwiftUI 已与 WinUI 真对齐（Run/CPU/History/Duration/Capture/API 多选等）；仍待 **Mac 编译 + Monterey 冒烟**。细节见 `macos-gui/README.md`、`docs/macos-notes.md`。
 - **iOS：代码已写 / 本机未编译 / 未设备验收**（见 §3.0.3）。`ios-gui/` + `ios_engine_host` 存在；`CollectResult` 追加 `_ios_preview`。用户已锁定 **最低 iOS 16** + **iOS 26/27 = Liquid Glass**（16–25 Material）。共享 `GlassCard` 已预留 `iOS 26.0`。
+- **2026-10-06：** macOS 和 iOS 的 CPU 页接入缓存 / 内存带宽测试，GPU 页、CPU 页和 Charts 页的图表改为 SwiftUI 自己绘制；同时修掉了 `BenchEngine.swift` 里一处无法编译的写法和会让界面卡死的阻塞调用。只在 Linux 容器里做过类型检查，**仍未用 Xcode 编译**。见第 10 节验证记录。
 - HarmonyOS 仍是原始 Vulkan 粒子 demo，没有 workload suite、15 秒结果模型或抓帧编排。
 
 ### 已知文档漂移
@@ -608,7 +610,15 @@ PathService 已把 results/captures/reports/logs 改到
 - [x] **2026-10-05 `membw_v1` GUI 曲线图**，见 §3.7 与第 10 节验证记录。
 - [x] **2026-10-06 GUI 里所有测试的图表**：GPU 页的成绩对比条形图和每帧耗时折线图、CPU 页的逐处理器柱状图、不依赖 Python 的 Charts 页，见第 10 节验证记录。
 - [x] **2026-10-06 CPU 缓存 / 内存带宽测试 `cpu_membw_v1`**：命令行版、WinUI CPU 页和曲线图，见 §3.8 与第 10 节验证记录。
+- [x] **2026-10-06 Android / iOS / macOS 前端补齐**：三端的 CPU 页接入算力测试和缓存 / 内存带宽测试，所有测试都有图表。Android `assembleDebug` 通过；iOS 和 macOS 只做过类型检查；三端都没有在设备上运行过。见第 10 节验证记录。
 - [ ] **`cpu_membw_v1` 剩余步骤**：查清流式写入偏慢和 L2 曲线分段的原因；在 macOS、Windows ARM64、Jetson 和大小核 CPU 上实测；见 `docs/TODO.md`。
+- [ ] **macOS / iOS 按性能核、能效核分组测量（未做；2026-10-06 记录）**：
+  - **现状：** macOS 和 iOS 不能把线程绑定到指定核心，所以 CPU 算力测试的"单核"模式和缓存 / 内存带宽测试的单线程扫描都跑在系统挑选的核心上，能效核测不到。引擎把这类结果标记为 `scheduler_managed`。
+  - **可行的办法（只是按对 Apple 芯片的了解，没有实现，也没有在 Mac 上试过）：** 指定某一个核心做不到，但可以分成"性能核一组、能效核一组"来测。做法是设置线程的 QoS 等级：后台等级（`QOS_CLASS_BACKGROUND`）的线程只在能效核上运行，高等级（如 `QOS_CLASS_USER_INTERACTIVE`）的线程优先在性能核上运行。两类核心的数量和缓存容量系统分别报告（`hw.nperflevels`、`hw.perflevel0.*`、`hw.perflevel1.*`）。
+  - **已知的坑：** 能效核在后台等级下可能被降频，测出来的数字会低于能效核的实际能力，结果里必须写明这一点。
+  - **不涉及：** Intel Mac 没有大小核。
+  - **动手前要确认的：** 上面的接口名和行为都没有在设备上核对过；iOS 上是否同样有效也不清楚。
+  - **要改的地方：** `src/cpu_benchmark.cpp` 的 `ProbeAppleTopology()`（现在不区分核心类别）；`src/cpu_membw.cpp` 的 `PinCurrentThread()` 和 `PlatformCanPin()`；两个 Apple 前端里按 `schedulerManaged` 显示的说明文字。
 - [ ] **`membw_v1` 剩余步骤**：访存延迟测试（定位缓存容量）、移植到 DX12/DX11/OpenGL/Metal、从 History 重画曲线、RX 6900 XT 和 vkpeak 外部对照，见 `docs/TODO.md`。`stream_v2` 仍暂缓，粒子测试 v1 保持不变。
 - [ ] **实机远程测试（用户 2026-09-30 排入）**：
   - NVIDIA Jetson Xavier NX：通过 SSH，跑三个 GPU 主测试和 CPU 测试；
@@ -665,6 +675,53 @@ PathService 已把 results/captures/reports/logs 改到
 5. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Collaboration；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
 
 ## 10. 验证记录
+
+### 2026-10-06 中文界面补全（Windows / Android / iOS / macOS）
+
+- **Windows（已在界面上逐页核对）：**
+  - **语言和主题现在会保存。** 原来每次启动都回到"自动"，在英文系统上就是英文，每次都要重新选。现在选择写入数据目录下的 `gui_settings.txt`，下次启动时恢复；设置了环境变量 `MANGEKYO_LANG` 时仍以环境变量为准。
+  - 补上漏翻的文字：进度卡片左侧的空闲文字"Ready"、"双 GPU"下拉框里的"Off"（译文早就有，但切换语言后下拉框不刷新）、CPU 页标题下的"16 logical / 8 physical"、成绩行里的"ms compute / ms render"、存储一行里引擎给出的英文说明（如 `page file on C:` 显示为"C: 盘上的页面文件"，以及跳过存储测试的各种原因）。
+  - **核对方法：** `GPU_BENCH_DATA_DIR` 指向临时目录，切到简体中文后关闭再启动，不碰设置页直接进入中文；用 UI Automation 导出六个页面上全部文字（包括滚动区域以外的），并跑了一遍缓存 / 内存带宽测试和一遍默认的粒子测试。剩下带英文字母的只有专有名词、API 名称、单位、测试版本号，以及有意保留的"Headless"、"RenderDoc"、"FPS"。
+  - 标题栏按钮和信息图标的无障碍名称（Minimize、Close 等）来自系统，跟随 Windows 的显示语言，不受 App 的语言设置影响。
+- **Android：** 原来全部是写死的英文。新增 `core/I18n.kt`（`tr(en, zh)`，跟随系统语言），四个页面、能力检测提示、测试项目名称、CPU 测试的状态文字都有了中文；成绩行和引擎的英文说明用和 Windows 相同的译法。只有中文和英文两种语言，其他语言显示英文。`assembleDebug` 通过；没有在设备上看过实际显示。
+- **iOS 和 macOS：** 补上粒子数和 Burn 步数预设、"垂直同步"、输入框占位文字、历史页的列名和行内文字、关于页的版本和许可证、引擎包装层的"就绪 / 启动失败"；成绩行和引擎的英文说明通过 `Localization.scoreLine` / `Localization.engineText` 翻译，日文也一并补上。`Localization.swift` 在容器里用 Swift 6 真实编译并运行过，三种语言的输出都核对了；其余改动只做了类型检查，没有用 Xcode 编译。
+- **本轮的成绩数字只用来核对文字，不是正式成绩：** 缓存 / 内存带宽测试的内存读带宽这几次是 50.6–50.7 GB/s（单线程），比当天早些时候的 55–61 GB/s 低，测试前后刚做过编译，原因没有查。
+
+### 2026-10-06 Android / iOS / macOS 前端：CPU 测试和图表
+
+- **结论：** 三个前端的代码都已写好。Android 编译通过；iOS 和 macOS 没有用 Xcode 编译过，只在 Linux 容器里做了类型检查。三个前端都没有在真实设备上运行过。
+- **Android（`android/`）：**
+  - CPU 页原来是空壳，现在接入了 CPU 算力测试和缓存 / 内存带宽测试；两项都在 App 进程内的原生线程上调用引擎的命令行入口（JNI `nativeStartCli`）。
+  - 引擎打印的内容通过替换 `std::cout` / `std::cerr` 的缓冲区收集，界面用 `nativePollOutput` 轮询。
+  - 图表用 Compose 绘制：逐处理器柱状图；每类核心和全核各一张带缓存容量标记的双对数曲线图；存储读写条形图；GPU 页"Last run"卡片里的每帧耗时折线图；Charts 页的每项测试条形图。
+  - 缓存 / 内存带宽测试在 Android 上写出的版本是 `cpu_membw_v1_android_preview`，iOS 上是 `cpu_membw_v1_ios_preview`（`src/main.cpp`）。
+  - **构建：** `.\gradlew.bat :app:assembleDebug --no-configuration-cache`，`BUILD SUCCESSFUL`，四个 ABI，debug APK 约 33 MB。构建时工作区里的版本是 Gradle 9.6.0、AGP 9.4.1（这两个版本号不是本轮修改的）。
+  - **没有做：** 没有连接手机或模拟器，一次都没有运行；CPU 测试开始后不能取消。界面文字当时只有英文，同一天稍后补上了中文，见上一条记录。
+- **iOS 和 macOS（`ios-gui/`、`macos-gui/`）：**
+  - 新增四个两端内容相同的文件：`Models/EngineOutput.swift`（解析引擎输出）、`Models/ChartGeometry.swift`（坐标轴和刻度计算）、`Components/BenchCharts.swift`（用 SwiftUI `Canvas` 绘图）、`Components/ResultCharts.swift`（结果表格和图表）。macOS 的 `project.pbxproj` 已登记这四个文件；iOS 用 XcodeGen 按目录收集，不需要登记。
+  - CPU 页增加第四种模式"缓存与内存带宽"（`--cpu-membw`），显示各级缓存表格、曲线图、存储条形图；算力测试增加逐处理器柱状图。进度条和状态文字跟随引擎的 `CPU_PROGRESS` / `CPUMEM_PROGRESS`。
+  - GPU 页在摘要下方增加"本次运行的图表"：多个任务的成绩条形图和每个任务的每帧耗时折线图。iOS 的嵌入式预览原来不向界面输出任何内容，桥接层新增 `gpb_poll_output()` 收集它的输出。
+  - Charts 页改为读取保存的成绩直接绘制，macOS 这一页不再需要 Python，iOS 不再使用 Swift Charts。macOS 的 Full Analysis 预设仍会调用 `plot_workloads.py` 生成 PNG。
+  - **引擎（`src/cpu_membw.cpp`）：** Apple 平台原来不查询空闲内存，"最多使用一半空闲内存"的限制不生效；现在 macOS 用 `host_statistics64`，iOS 用 `os_proc_available_memory`。
+  - **Apple 平台不能把线程绑定到核心**，所以单线程扫描跑在系统挑选的核心上，能效核不会单独测量；界面说明里已写明。
+  - **算力测试的"单核"模式在 Apple 平台上不是真正的逐核：** 它对每个逻辑处理器各跑一次单线程测试，但每次跑在哪个核心由系统决定（引擎标记为 `scheduler_managed`）。两端的柱状图在这种情况下标题改为"单线程各次运行的成绩"并写明这一点，行标签不再显示处理器编号。按性能核 / 能效核分组测量（用线程 QoS 等级）还没有做，做法和已知的坑见第 9 节。
+- **类型检查时发现并修掉的原有问题**（这些代码是 2026-07 在 Windows 上写的，从未编译过）：
+  - macOS `BenchEngine.swift`：`needCharts && !(await …)` 在 `&&` 的右侧使用 `await`，无法编译。
+  - 两端 `BenchEngine.swift`：`runViaProcess` / `runViaBridge` 是主线程上的方法，却一直阻塞到测试结束，界面会卡死，输出要到结束后才出现；现在改为 `nonisolated`。
+  - 两端 `BenchEngine.swift`：把 `UnsafeMutableRawPointer` 从主线程闭包里返回，Swift 6 模式下是错误。
+  - macOS：子进程输出按读取块切分，一行可能被切成两段；现在在主线程上拼成整行，并在子进程退出后最多等 2 秒读完剩余输出。
+  - macOS `RunView.swift`：`.filter(allow)` 在 Swift 6.0 下报"call can throw"，改成闭包。
+  - iOS 桥接文件：本轮第一次打补丁时转义符被写成了真正的换行，类型检查发现后已修正。
+- **验证方法和范围：**
+  - **解析和坐标计算（真实编译并运行）：** 在 `swift:6.0-jammy` 容器里用 Swift 6.0.3 编译 `EngineOutput.swift` 和 `ChartGeometry.swift`，输入本机引擎的真实输出（缓存 / 内存扫描、算力测试、两个 GPU 任务）。解析出的数值与引擎输出一致：L1 / L2 / L3 为 48 KiB / 1 MiB / 96 MiB，单线程读 587 / 244 / 153 GB/s（这次扫描上限设为 64 MiB，内存一行标为未稳定），16 个逻辑处理器的成绩，两个 GPU 任务各 3 个非预热采样。
+  - **界面代码（只做类型检查）：** 同一个容器里以 Swift 6 模式检查两端的 `Models/`、新增的两个 `Components/` 文件、`CpuView`、`ChartsView`、`RunView`、`BenchEngine`，结果 0 个错误、0 个警告。SwiftUI、AppKit、UIKit、QuartzCore 用的是手写的替身模块，Foundation 是 Linux 上的真实实现，C 桥接头文件是真实文件。**这不是用 Apple SDK 编译**，SDK 接口与替身不一致的地方查不出来。
+  - **引擎的 Apple 分支（交叉编译到目标文件）：** 用 zig 0.16 自带的 clang 和 macOS 头文件，把 `cpu_membw.cpp`、`cpu_benchmark.cpp`、`cpumem_cli.cpp` 编译到 `aarch64-macos` 和 `x86_64-macos`，都通过，只有 `cpu_benchmark.cpp` 一个原有的未使用成员警告。x86_64 需要在命令行加上 `evex512` 特性，AVX-512 内核才能通过；Android NDK 的 clang 不需要，Apple 的 clang 是否需要没有验证。
+  - **Windows 回归：** 重新编译 `gpu_benchmark` 和 `gpu_engine`，短扫描（上限 16 MiB）正常结束。
+- **未验证：**
+  - 没有用 Xcode 编译过任何一端；没有在 Mac、iPhone、Android 手机或模拟器上运行过。
+  - iOS 的 `os_proc_available_memory` 分支和 Objective-C++ 桥接文件没有任何编译器检查过（zig 不带 iOS 头文件）。
+  - 两端的 `ContentView`、`HistoryView`、`SettingsView`、`AboutView`、`GlassCard`、`MetalBenchView` 和 App 入口本轮没有改动，也没有做类型检查，里面可能还有同类问题。
+  - 图表的实际显示效果（文字是否重叠、深色模式、窄屏）在三个前端上都没有看过。
 
 ### 2026-10-06 GUI 里所有测试的图表
 
