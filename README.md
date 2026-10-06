@@ -60,12 +60,29 @@ next platform slice is macOS.
    a NativeActivity/ANativeWindow surface layer and a new frontend are
    required. RenderDoc supports Android remote capture. Thermal throttling
    may require a separate mobile duration contract.
-4. **iOS** — Not started (after Android). Floor **iOS 16**. Metal only; no
-   RenderDoc; `MTLCaptureManager`; shared SwiftUI with macOS. **iOS 26 / 27
-   must use Liquid Glass** (Material on 16–25). See `HANDOFF.md` §3.0.3.
+   - **Current status:** a Vulkan slice (Particle and 16-step GPU Burn, 3 s
+     `_android_preview` runs) builds with `assembleDebug`. It has never run on
+     a phone.
+   - **Next step:** remote testing over adb (install, launch, logcat, pull
+     results). The user enables USB debugging and approves the phone's prompt.
+4. **iOS** — after Android. Floor **iOS 16**. Metal only; no RenderDoc;
+   `MTLCaptureManager`; shared SwiftUI with macOS. **iOS 26 / 27 must use
+   Liquid Glass** (Material on 16–25). See `HANDOFF.md` §3.0.3.
+   - **Current status:** the source slice is written but has never been
+     compiled; iOS builds require a Mac with Xcode.
+   - **Next step:** remote device testing through SSH to a Mac with
+     `xcodebuild` and `xcrun devicectl`. The user provides Apple ID signing and
+     enables Developer Mode on the iPhone.
 5. **Debian Linux** — technically the lowest-friction port: Vulkan/OpenGL
    backends, GLFW, RenderDoc and the XDG data path already exist; mostly
    build fixes, `.deb` packaging, CI and real-machine validation.
+   - **Build status:** Ubuntu 20.04 / JetPack 5 build blockers were fixed on
+     2026-09-30 and verified in a container. Build steps for the NVIDIA Jetson
+     Xavier NX are in [`docs/building.md`](docs/building.md).
+   - **Next step:** real-hardware acceptance on the Jetson over SSH, covering
+     the four primary tests and optional lavapipe CPU rendering.
+
+   Remote device test plans are tracked in [`docs/TODO.md`](docs/TODO.md).
 6. **WebGPU** — per the established plan: unified capability registry first,
    then a native Dawn-pinned backend porting Stream → GPU Burn → Cinematic
    Liquid, then a `/web` browser frontend. Results use separate version ids
@@ -151,7 +168,8 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
 
 | Axis | `--workload` | Stresses | Metric | Knobs |
 |------|--------------|----------|--------|-------|
-| **Bandwidth** | `stream` (default) | Particle working-set memory traffic | GB/s | `--particles` |
+| **Particle throughput** | `stream` (default) | Particle working-set memory traffic (v1 scores 40 B/particle; not a VRAM bandwidth figure) | GB/s | `--particles` |
+| **Memory bandwidth** | `membw` | VRAM, cache (L2 / L1) and PCIe bandwidth across a 1 MiB–2 GiB data-set sweep (Vulkan only; in the CLI and the WinUI GPU page) | GB/s | `--membw-max-mib` |
 | **Compute (achievable)** | `nbody` | FP32 ALU + SFU + shared memory | GFLOP/s | `--bodies` |
 | **Primary visual GPU burn** | `gpu_burn` | Perspective 3D cut-glass crown and layered diamond shards; fixed-step SDF/FP32/SFU/INT + overdraw | Gpix-step/s | fixed `--iter 16..2048`; software renderers cap at 64 |
 | **Legacy visual GPU burn** | `gpu_burn_v1` | Preserved Plasma Bloom v1 contract and shader | Gpix-step/s | fixed `--iter 16..2048`; software renderers cap at 64 |
@@ -163,7 +181,8 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
 | **3D cinematic liquid** | `cinematic_liquid` | 320,920-particle MLS-MPM + particle-splatted 3D density volume + iterative free-surface optics; optional SPH preview | MParticle-step/s | Vulkan v8 formal score still open; Metal = compute + raymarch present (`…_metal_preview`); `--liquid-solver mpm\|sph` |
 
 ```bash
-./build/gpu_benchmark --benchmark --headless                          # Stream — bandwidth (GB/s)
+./build/gpu_benchmark --benchmark --headless                          # Stream — particle throughput (GB/s, v1 40 B estimate)
+./build/gpu_benchmark --workload membw --gpu 0                         # VRAM / cache bandwidth sweep (GB/s, Vulkan)
 ./build/gpu_benchmark --benchmark --workload nbody --bodies 65536      # N-body — achievable GFLOP/s
 ./build/gpu_benchmark --time 15 --workload gpu_burn --capture 5        # Primary 15 s Mangekyo Kaleidoscope visual burn
 ./build/gpu_benchmark --time 15 --workload gpu_burn_v1 --capture 5     # Preserved Plasma Bloom v1 visual burn
@@ -176,9 +195,44 @@ See [`HANDOFF.md`](HANDOFF.md) before treating code presence as validated suppor
 ./build/gpu_benchmark --backend vulkan --time 15 --workload cinematic_liquid --liquid-solver sph
 ```
 
-- `stream` is bandwidth-dominated (~0.15 FLOP/byte), so its GB/s score is mainly
-  a working-set memory-throughput result rather than a complete GPU-performance
-  score. `nbody` is a shared-memory-tiled all-pairs simulation that is genuinely
+- `stream` is bandwidth-dominated (~0.15 FLOP/byte). Its GB/s score is a
+  particle-update throughput index, not a VRAM or L2 bandwidth figure:
+  - **Byte count:** the formula assumes 40 bytes per particle. A 2026-09-30
+    audit measured about 64 bytes of real traffic per particle; on an RTX 5090,
+    the v1 kernel ran as fast as a full 32 B read + 32 B write kernel.
+  - **Cross-vendor skew:** on an AMD RDNA2 iGPU, the v1 kernel's partial
+    write-back takes 35–43% longer than a full write-back, so a single rescale
+    factor cannot convert old scores.
+  - **Cache residency:** the default 1M particles (32 MiB) fit inside large L2
+    caches and AMD Infinity Caches; only runs of 16M or more particles approach
+    VRAM behaviour.
+
+  The shader and formula are deliberately unchanged so historical results stay
+  comparable. See [`docs/benchmark-workload-suite.md`](docs/benchmark-workload-suite.md)
+  §6 for the data.
+
+  Real VRAM and cache bandwidth is measured by the separate `membw` workload
+  (`membw_v1`, Vulkan only). It runs from the CLI and from the WinUI GPU page
+  as "Memory Bandwidth — VRAM / Cache / PCIe", where the summary shows the
+  plateaus and three log-log charts show the curves:
+  - **Execution:** compute-only runs, with GPU timestamps around each dispatch.
+  - **Method:** many workgroups each stream a 512 KiB chunk, and the data set
+    is swept from 1 MiB to 2 GiB.
+  - **Accounting:** read, write and copy kernels count the bytes actually
+    requested.
+  - **Output:** a bandwidth-versus-size curve with a cache plateau and a memory
+    plateau; the score is the read memory plateau.
+
+  On an RTX 5090 (2026-10-05) it measured 1536 GB/s VRAM read, which is 86% of
+  the 1792 GB/s theoretical bandwidth, and a 6.7 TB/s L2 plateau from 3 MiB to
+  96 MiB. Its separate L1 sweep measured about 55 TB/s with every SM busy and
+  an L1 capacity of 128–192 KiB per SM. Its system-memory pass, where every
+  byte crosses PCIe, measured 13.1 GB/s; that card was running on a PCIe 5.0 x4
+  link, whose limit is 15.75 GB/s per direction. See
+  [`docs/cli-reference.md`](docs/cli-reference.md) for the method and its
+  limits, and [`docs/TODO.md`](docs/TODO.md) for the remaining steps.
+
+  `nbody` is a shared-memory-tiled all-pairs simulation that is genuinely
   ALU/SFU-bound. `gpu_burn` is a versioned, auto-tuned visual GraphicsBurn: two
   fixed-step fullscreen passes raymarch a perspective 3D Mangekyo crown built
   from truncated cut gems and layered diamond shards. Planar SDF normals,
@@ -325,6 +379,33 @@ gpu_benchmark.exe --cpu-benchmark per-core|multi|all
                   [--cpu-no-save]
 ```
 
+The CPU page also offers **Cache & memory bandwidth** (`--cpu-membw`,
+`cpu_membw_v1`):
+
+- **Method:** read, write and copy kernels sweep the data-set size from 4 KiB
+  to 1 GiB, first on one pinned thread and then with one thread on every
+  physical core.
+- **Mixed core types:** a CPU with performance and efficiency cores (or a
+  phone SoC with big, middle and little cores) gets one single-thread sweep
+  per core type.
+- **Levels:** L1, L2, L3 (and L4 where the CPU has one) and memory are read
+  off the curve with the cache sizes the OS reports. Where the OS reports no
+  size, as on many phones, the levels are read off the plateaus of the curve.
+- **Virtual memory:** it times how fast the OS maps new pages, and how fast
+  the drive behind virtual memory reads and writes (sequential 1 MiB and
+  random 4 KiB requests on a 1 GiB temporary file).
+- **Output:** a level table, log-log charts with the cache sizes marked, and
+  a History row whose score is the all-core memory read rate in GB/s.
+- **Phones:** `scripts/build-android-cpumem.ps1` builds a stand-alone binary
+  that runs over adb. It has been compiled for four Android ABIs but not yet
+  run on a phone.
+
+On a Ryzen 7 9800X3D with dual-channel DDR5-6400 (2026-10-06), one thread
+read 588 GB/s in L1, 240 GB/s in L2, 136 GB/s in L3 and 55-61 GB/s in memory.
+All eight cores together read 55 GB/s from memory, which is 54% of the
+102.4 GB/s theoretical bandwidth. See
+[`docs/cli-reference.md`](docs/cli-reference.md) for the method and its limits.
+
 Linux/Android enumerate the process's allowed CPU set and require pthread
 affinity to succeed and read back as the requested single CPU; success uses the
 separate `strict_sched_affinity` identity, while failure is invalid and exits 3.
@@ -347,8 +428,11 @@ strict-affinity scores.
 │   ├── app_base.h/cpp          # Shared base class (window, particles, timing)
 │   ├── benchmark_results.h/cpp # Result persistence, comparison tables, CSV export
 │   ├── cpu_benchmark.h/cpp     # Native supplementary CPU kernel/topology runner
+│   ├── cpu_membw.h/cpp         # CPU cache / memory bandwidth sweep (cpu_membw_v1)
+│   ├── cpumem_cli.cpp          # Stand-alone entry point for that sweep (Android over adb)
 │   ├── gpu_common.h            # Shared types (BenchmarkConfig, BackToMenuException)
 │   ├── vulkan_backend.h/cpp    # Vulkan
+│   ├── vulkan_membw.h/cpp      # Vulkan memory-bandwidth sweep (membw_v1, compute-only)
 │   ├── dx12_backend.h/cpp      # DirectX 12
 │   ├── dx11_backend.h/cpp      # DirectX 11
 │   ├── opengl_backend.h/cpp    # OpenGL 4.3
@@ -457,6 +541,9 @@ navigation destinations, and CPU/GPU/chart jobs are mutually exclusive.
 # Run only one stage
 ./build/gpu_benchmark --cpu-benchmark per-core
 ./build/gpu_benchmark --cpu-benchmark multi
+
+# Cache (L1-L4) and memory bandwidth sweep, about 25 s
+./build/gpu_benchmark --cpu-membw
 ```
 
 `--cpu-mode` remains a compatibility alias; new scripts should prefer the

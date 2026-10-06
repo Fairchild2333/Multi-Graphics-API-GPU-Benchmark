@@ -71,6 +71,12 @@ set(BACKEND_SOURCES "")
 set(BACKEND_LIBS "")
 set(BACKEND_DEFS "")
 
+# The CPU cache / memory bandwidth sweep needs no GPU and is built everywhere,
+# so that the mobile front-ends can call it too. src/cpumem_cli.cpp is a
+# stand-alone entry point for it (see scripts/build-android-cpumem.ps1).
+list(APPEND COMMON_SOURCES src/cpu_membw.cpp)
+list(APPEND BACKEND_DEFS HAVE_CPU_MEMBW)
+
 # ---- Vulkan backend (optional) ----
 if(ENABLE_VULKAN)
     if(ANDROID)
@@ -85,9 +91,11 @@ if(ENABLE_VULKAN)
     else()
         find_package(Vulkan QUIET)
         if(Vulkan_FOUND)
-            list(APPEND BACKEND_SOURCES src/vulkan_backend.cpp)
+            # vulkan_membw.cpp is the standalone compute-only memory-bandwidth
+            # sweep; it is desktop-CLI only, so Android/iOS builds are unchanged.
+            list(APPEND BACKEND_SOURCES src/vulkan_backend.cpp src/vulkan_membw.cpp)
             list(APPEND BACKEND_LIBS    Vulkan::Vulkan)
-            list(APPEND BACKEND_DEFS    HAVE_VULKAN GLFW_INCLUDE_VULKAN)
+            list(APPEND BACKEND_DEFS    HAVE_VULKAN HAVE_VULKAN_MEMBW GLFW_INCLUDE_VULKAN)
             message(STATUS "Vulkan backend: ENABLED")
         else()
             message(STATUS "Vulkan backend: DISABLED (Vulkan SDK not found)")
@@ -297,6 +305,10 @@ if(ENABLE_VULKAN AND Vulkan_FOUND)
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_fp64.comp
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_int32.comp
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_fp16.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/membw_read.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/membw_write.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/membw_copy.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/membw_l1.comp
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/render3d.vert
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/render3d.frag
         )

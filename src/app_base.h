@@ -39,6 +39,10 @@ public:
     virtual bool NeedsOpenGLContext() const { return false; }
     const std::string& GetLastCapturePath() const { return lastCapturePath_; }
 
+    // Host CPU name for result writers that do not run through AppBase
+    // (the standalone memory-bandwidth sweep).
+    static std::string HostCpuName() { return GetCpuName(); }
+
 protected:
     virtual void InitBackend()            = 0;
     virtual void DrawFrame(float deltaTime) = 0;

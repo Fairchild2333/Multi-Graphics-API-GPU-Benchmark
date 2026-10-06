@@ -1,0 +1,52 @@
+#version 450
+
+// Memory-bandwidth sweep (membw_v1): read kernel.
+//
+// Every workgroup streams one chunk of the data set. A chunk is
+// stripesPerChunk stripes of 256 vec4 (16 bytes each), so the default
+// 128-stripe chunk is 512 KiB — larger than a per-SM/CU L1, which forces
+// repeated reads of the same chunk to be served by L2 / the last-level cache.
+// The host controls the data-set size through chunkCount and the amount of
+// work through the number of dispatched groups, so small data sets still keep
+// the whole GPU busy.
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+layout(set = 0, binding = 0, std430) readonly buffer SourceBuffer {
+    vec4 data[];
+} src;
+
+layout(set = 0, binding = 2, std430) buffer SinkBuffer {
+    vec4 value[];
+} sink;
+
+layout(push_constant) uniform MemBwParams {
+    uint chunkCount;       // distinct chunks in the data set
+    uint stripesPerChunk;  // 256-element stripes per chunk (even)
+    uint totalGroups;      // groups that do work; padding groups return early
+    uint groupsX;          // dispatch width, used to flatten the 2D group index
+    uint seed;             // write kernel only
+    float never;           // value the checksum can never reach
+} params;
+
+void main() {
+    const uint group = gl_WorkGroupID.x + gl_WorkGroupID.y * params.groupsX;
+    if (group >= params.totalGroups) return;
+
+    const uint base = (group % params.chunkCount) * params.stripesPerChunk * 256u
+                    + gl_LocalInvocationID.x;
+
+    // Two independent loads per iteration keep two requests in flight per thread.
+    vec4 acc0 = vec4(0.0);
+    vec4 acc1 = vec4(0.0);
+    for (uint stripe = 0u; stripe < params.stripesPerChunk; stripe += 2u) {
+        acc0 += src.data[base + stripe * 256u];
+        acc1 += src.data[base + (stripe + 1u) * 256u];
+    }
+
+    // The data is positive (see membw_write.comp), so this store never happens,
+    // but the compiler cannot prove that and therefore has to keep every load.
+    const vec4 acc = acc0 + acc1;
+    if (acc.x + acc.y + acc.z + acc.w == params.never)
+        sink.value[gl_LocalInvocationID.x] = acc;
+}

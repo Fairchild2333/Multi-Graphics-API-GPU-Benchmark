@@ -32,6 +32,7 @@
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <fstream>
 #include <functional>
 #include <map>
@@ -903,6 +904,41 @@ namespace
         // Normalise legacy worker wording before the English early return too.
         replaceRate("Liquid rate:", "Fluid rate:", "流体速率:", "流体レート:");
         if (i18n::currentLang() == i18n::Lang::En) return line;
+        // Memory-bandwidth summary lines are composed by extractMemBwScore();
+        // translate their fixed phrases without touching other score lines.
+        constexpr char const* memBwLabels[] = {
+            "VRAM bandwidth:", "System memory bandwidth:", "Largest data sets:",
+            "Cache plateau:", "L1 cache:", "PCIe to system memory:" };
+        for (auto const* label : memBwLabels)
+        {
+            if (line.rfind(label, 0) != 0) continue;
+            struct Phrase { char const* en; char const* zh; char const* ja; };
+            constexpr Phrase phrases[] = {
+                { "System memory bandwidth:", "系统内存带宽:", "システムメモリ帯域:" },
+                { "VRAM bandwidth:", "显存带宽:", "VRAM 帯域:" },
+                { "Largest data sets:", "最大数据量:", "最大データセット:" },
+                { "(memory plateau not reached)", "（未到达内存平台）", "（メモリ平坦部に未到達）" },
+                { "Cache plateau:", "缓存平台:", "キャッシュ平坦部:" },
+                { "L1 cache:", "L1 缓存:", "L1 キャッシュ:" },
+                { "PCIe to system memory:", "PCIe（系统内存）:", "PCIe（システムメモリ）:" },
+                { "all SMs/CUs busy", "全部 SM/CU 满载", "全 SM/CU 稼働" },
+                { "per SM/CU", "单个 SM/CU", "SM/CU あたり" },
+                { "capacity", "容量", "容量" },
+                { "driver copy", "驱动复制", "ドライバーコピー" },
+                { " read ", " 读 ", " 読み取り " },
+                { " write ", " 写 ", " 書き込み " },
+                { " copy ", " 复制 ", " コピー " },
+            };
+            for (auto const& phrase : phrases)
+            {
+                const std::string from = phrase.en;
+                const std::string to = i18n::tr(phrase.en, phrase.zh, phrase.ja);
+                for (auto pos = line.find(from); pos != std::string::npos;
+                     pos = line.find(from, pos + to.size()))
+                    line.replace(pos, from.size(), to);
+            }
+            return line;
+        }
         struct Pair { char const* en; char const* zh; char const* ja; };
         constexpr Pair pairs[] = {
             { "Avg FPS:", "平均帧率:", "平均 FPS:" },
@@ -941,6 +977,763 @@ namespace
             start = nl + 1;
         }
         return out;
+    }
+
+    // Tab-separated "key=value" fields of one MEMBW_* protocol line.
+    std::map<std::string, std::string> memBwFields(std::string const& line)
+    {
+        std::map<std::string, std::string> fields;
+        std::istringstream row(line);
+        std::string item;
+        while (std::getline(row, item, '\t'))
+        {
+            const auto eq = item.find('=');
+            if (eq != std::string::npos)
+                fields[item.substr(0, eq)] = item.substr(eq + 1);
+        }
+        return fields;
+    }
+
+    double memBwNumber(std::map<std::string, std::string> const& fields, char const* key)
+    {
+        const auto it = fields.find(key);
+        if (it == fields.end()) return 0.0;
+        try { return std::stod(it->second); } catch (...) { return 0.0; }
+    }
+
+    std::string memBwRate(double gbps)
+    {
+        std::ostringstream text;
+        text << std::fixed << std::setprecision(gbps >= 1000.0 ? 0 : 1) << gbps;
+        return text.str();
+    }
+
+    std::string memBwSize(double bytes)
+    {
+        std::ostringstream text;
+        const double kib = bytes / 1024.0;
+        if (kib < 1024.0) { text << static_cast<long long>(kib + 0.5) << " KiB"; return text.str(); }
+        const double mib = kib / 1024.0;
+        if (mib >= 1024.0 && std::fabs(mib / 1024.0 - std::round(mib / 1024.0)) < 0.01)
+        {
+            text << static_cast<long long>(std::llround(mib / 1024.0)) << " GiB";
+            return text.str();
+        }
+        const bool whole = std::fabs(mib - std::round(mib)) < 0.01;
+        text << std::fixed << std::setprecision(whole ? 0 : 1) << mib << " MiB";
+        return text.str();
+    }
+
+    // ---- Memory-bandwidth curves -----------------------------------------
+    std::vector<MemBwCurvePoint> parseMemBwPoints(std::string const& out, bool& systemMemory)
+    {
+        std::vector<MemBwCurvePoint> points;
+        systemMemory = false;
+        std::istringstream ss(out);
+        std::string line;
+        while (std::getline(ss, line))
+        {
+            if (!line.empty() && line.back() == '\r') line.pop_back();
+            if (line.rfind("MEMBW_DEVICE\t", 0) == 0)
+            {
+                auto fields = memBwFields(line);
+                systemMemory = fields.count("memory") && fields["memory"] == "system";
+            }
+            else if (line.rfind("MEMBW_POINT\t", 0) == 0)
+            {
+                auto fields = memBwFields(line);
+                MemBwCurvePoint point{ fields["kernel"], memBwNumber(fields, "dataset_bytes"),
+                                       memBwNumber(fields, "median_gbps") };
+                if (point.bytes > 0.0 && point.gbps > 0.0) points.push_back(std::move(point));
+            }
+        }
+        return points;
+    }
+
+    std::string withThousands(double value)
+    {
+        std::string digits = std::to_string(static_cast<long long>(std::llround(value)));
+        for (int i = static_cast<int>(digits.size()) - 3; i > 0; i -= 3)
+            digits.insert(static_cast<size_t>(i), ",");
+        return digits;
+    }
+
+    // Axis ticks and tooltips: "6,725", "61.5", "0.5".
+    std::string memBwChartRate(double gbps, bool tick)
+    {
+        if (gbps >= 100.0) return withThousands(gbps);
+        std::ostringstream text;
+        if (tick) text << gbps;
+        else text << std::fixed << std::setprecision(1) << gbps;
+        return text.str();
+    }
+
+    Windows::UI::Color memBwColor(std::uint32_t rgb, std::uint8_t alpha = 255)
+    {
+        return Windows::UI::Color{ alpha, static_cast<std::uint8_t>(rgb >> 16),
+                                   static_cast<std::uint8_t>(rgb >> 8),
+                                   static_cast<std::uint8_t>(rgb) };
+    }
+
+    // The smallest of 1, 2, 5 x 10^k that is at least `raw`: a tick spacing.
+    double niceStep(double raw)
+    {
+        if (!(raw > 0.0)) return 1.0;
+        const double magnitude = std::pow(10.0, std::floor(std::log10(raw)));
+        const double fraction = raw / magnitude;
+        return (fraction <= 1.0 ? 1.0 : fraction <= 2.0 ? 2.0 : fraction <= 5.0 ? 5.0 : 10.0) *
+               magnitude;
+    }
+
+    // "1,863", "74.7", "0.024": three significant digits, no trailing zeros.
+    std::string plotNumber(double value)
+    {
+        if (std::fabs(value) >= 1000.0) return withThousands(value);
+        std::ostringstream text;
+        text << std::setprecision(3) << value;
+        return text.str();
+    }
+
+    struct MemBwPlotSeries
+    {
+        std::string label;       // legend and tooltip
+        std::string shortLabel;  // direct label at the line end
+        Windows::UI::Color color;
+        std::vector<std::pair<double, double>> points; // bytes, GB/s; ascending bytes
+    };
+
+    // A vertical reference mark on the x axis, such as a cache capacity.
+    struct MemBwPlotMarker
+    {
+        double bytes;
+        std::string label; // short text above the plot
+        std::string tip;   // tooltip of that text
+    };
+
+    // Draws one log-log line chart into a Canvas: hairline grid, 2 px lines,
+    // an end dot with a surface ring, a direct label at each line end unless
+    // it would collide, and a larger invisible hover target with a tooltip on
+    // every measured point. Reference marks are dashed and labelled above.
+    // The axes are log-log over bytes for the bandwidth sweeps. With `linear`
+    // they are seconds against a value in `unit`, and the value axis starts
+    // at zero.
+    void drawMemBwPlot(Canvas const& canvas, double width, double height,
+                       std::vector<MemBwPlotSeries> const& series, bool dark,
+                       std::vector<MemBwPlotMarker> const& markers = {},
+                       bool linear = false, std::string const& unit = "GB/s")
+    {
+        using namespace winrt::Microsoft::UI::Xaml::Shapes;
+        canvas.Children().Clear();
+        canvas.Width(width);
+        canvas.Height(height);
+
+        // Text and chrome use text / stroke tones, never a series colour.
+        const SolidColorBrush textPrimary(dark ? memBwColor(0xFFFFFF) : memBwColor(0x000000, 0xE4));
+        const SolidColorBrush textSecondary(dark ? memBwColor(0xFFFFFF, 0xC5)
+                                                 : memBwColor(0x000000, 0x9E));
+        const SolidColorBrush grid(dark ? memBwColor(0xFFFFFF, 0x1F) : memBwColor(0x000000, 0x1A));
+        const SolidColorBrush surface(dark ? memBwColor(0x2B2B2B) : memBwColor(0xFBFBFB));
+        const SolidColorBrush hitFill(memBwColor(0x000000, 0));
+
+        double xLo = (std::numeric_limits<double>::max)(), xHi = 0.0;
+        double yLo = (std::numeric_limits<double>::max)(), yHi = 0.0;
+        for (auto const& s : series)
+            for (auto const& [bytes, gbps] : s.points)
+            {
+                xLo = (std::min)(xLo, bytes); xHi = (std::max)(xHi, bytes);
+                yLo = (std::min)(yLo, gbps);  yHi = (std::max)(yHi, gbps);
+            }
+        if (xHi <= xLo || yHi <= 0.0) return;
+
+        auto tx = [&](double v) { return linear ? v : std::log2(v); };
+        auto ty = [&](double v) { return linear ? v : std::log10(v); };
+        const double lxLo = tx(xLo), lxHi = tx(xHi);
+        double lyLo = linear ? 0.0 : ty(yLo), lyHi = ty(yHi);
+        const double pad = linear ? lyHi * 0.08 : (std::max)(0.05, (lyHi - lyLo) * 0.08);
+        if (!linear) lyLo -= pad;
+        lyHi += pad;
+
+        const double left = 54.0, right = 88.0, bottom = 26.0;
+        const double top = markers.empty() ? 10.0 : 28.0;
+        const double plotW = (std::max)(40.0, width - left - right);
+        const double plotH = (std::max)(40.0, height - top - bottom);
+        auto px = [&](double bytes) {
+            return left + (tx(bytes) - lxLo) / (lxHi - lxLo) * plotW;
+        };
+        auto py = [&](double gbps) {
+            return top + (lyHi - ty(gbps)) / (lyHi - lyLo) * plotH;
+        };
+        auto addText = [&](std::string const& text, double x, double y, double boxWidth,
+                           TextAlignment alignment, SolidColorBrush const& brush)
+        {
+            TextBlock block;
+            block.Text(u8(text));
+            block.FontSize(12.0);
+            block.Foreground(brush);
+            if (boxWidth > 0.0)
+            {
+                block.Width(boxWidth);
+                block.TextAlignment(alignment);
+            }
+            Canvas::SetLeft(block, x);
+            Canvas::SetTop(block, y);
+            canvas.Children().Append(block);
+        };
+
+        // Y ticks at 1-2-5 steps; fall back to decades or finer steps so there
+        // are between two and six of them.
+        auto ticksFor = [&](std::initializer_list<double> multipliers)
+        {
+            std::vector<double> ticks;
+            for (int e = static_cast<int>(std::floor(lyLo)) - 1;
+                 e <= static_cast<int>(std::ceil(lyHi)); ++e)
+                for (double m : multipliers)
+                {
+                    const double value = m * std::pow(10.0, e);
+                    const double lv = std::log10(value);
+                    if (lv >= lyLo - 1e-9 && lv <= lyHi + 1e-9) ticks.push_back(value);
+                }
+            std::sort(ticks.begin(), ticks.end());
+            return ticks;
+        };
+        std::vector<double> yTicks;
+        if (linear)
+        {
+            const double step = niceStep(lyHi / 4.0);
+            for (double value = 0.0; value <= lyHi + step * 1e-6; value += step)
+                yTicks.push_back(value);
+        }
+        else
+        {
+            yTicks = ticksFor({ 1.0, 2.0, 5.0 });
+            if (yTicks.size() > 6) yTicks = ticksFor({ 1.0 });
+            if (yTicks.size() < 2) yTicks = ticksFor({ 1.0, 1.5, 2.0, 3.0, 5.0, 7.0 });
+        }
+        for (double tick : yTicks)
+        {
+            Line line;
+            line.X1(left); line.X2(left + plotW);
+            line.Y1(py(tick)); line.Y2(py(tick));
+            line.Stroke(grid);
+            line.StrokeThickness(1.0);
+            canvas.Children().Append(line);
+            addText(linear ? plotNumber(tick) : memBwChartRate(tick, true), 0.0, py(tick) - 8.0,
+                    left - 8.0, TextAlignment::Right, textSecondary);
+        }
+
+        // X ticks at powers of four (16 KiB, 64 KiB, ... 1 MiB, 4 MiB, ... 1 GiB),
+        // or at powers of sixteen when a long sweep would crowd the labels.
+        std::vector<double> xTicks;
+        if (linear)
+        {
+            // Whole seconds at a 1-2-5 spacing, about 70 px apart.
+            const double step = niceStep((xHi - xLo) / (std::max)(2.0, plotW / 70.0));
+            for (double value = std::ceil(xLo / step - 1e-9) * step; value <= xHi + step * 1e-6;
+                 value += step)
+                xTicks.push_back(value);
+        }
+        else
+        {
+            const double tickStep = plotW / (lxHi - lxLo) * 2.0 >= 56.0 ? 4.0 : 16.0;
+            for (double bytes = 1024.0; bytes <= xHi * 1.0001; bytes *= tickStep)
+                if (bytes >= xLo * 0.9999) xTicks.push_back(bytes);
+            if (xTicks.size() < 2)
+            {
+                xTicks.clear();
+                for (double bytes = 1024.0; bytes <= xHi * 1.0001; bytes *= 2.0)
+                    if (bytes >= xLo * 0.9999) xTicks.push_back(bytes);
+            }
+        }
+        Line axis;
+        axis.X1(left); axis.X2(left + plotW);
+        axis.Y1(top + plotH); axis.Y2(top + plotH);
+        axis.Stroke(grid);
+        axis.StrokeThickness(1.0);
+        canvas.Children().Append(axis);
+        for (double tick : xTicks)
+        {
+            Line mark;
+            mark.X1(px(tick)); mark.X2(px(tick));
+            mark.Y1(top + plotH); mark.Y2(top + plotH + 4.0);
+            mark.Stroke(grid);
+            mark.StrokeThickness(1.0);
+            canvas.Children().Append(mark);
+            addText(linear ? plotNumber(tick) + " s" : memBwSize(tick), px(tick) - 36.0,
+                    top + plotH + 6.0, 72.0, TextAlignment::Center, textSecondary);
+        }
+
+        const SolidColorBrush markStroke(dark ? memBwColor(0xFFFFFF, 0x55)
+                                              : memBwColor(0x000000, 0x4D));
+        for (auto const& marker : markers)
+        {
+            if (marker.bytes < xLo || marker.bytes > xHi) continue;
+            Line rule;
+            rule.X1(px(marker.bytes)); rule.X2(px(marker.bytes));
+            rule.Y1(top); rule.Y2(top + plotH);
+            rule.Stroke(markStroke);
+            rule.StrokeThickness(1.0);
+            DoubleCollection dashes;
+            dashes.Append(3.0);
+            dashes.Append(3.0);
+            rule.StrokeDashArray(dashes);
+            canvas.Children().Append(rule);
+
+            TextBlock label;
+            label.Text(u8(marker.label));
+            label.FontSize(12.0);
+            label.Foreground(textSecondary);
+            label.Width(80.0);
+            label.TextAlignment(TextAlignment::Center);
+            if (!marker.tip.empty())
+                ToolTipService::SetToolTip(label, winrt::box_value(u8(marker.tip)));
+            Canvas::SetLeft(label, px(marker.bytes) - 40.0);
+            Canvas::SetTop(label, top - 22.0);
+            canvas.Children().Append(label);
+        }
+
+        // Lines first, then end dots and labels, then hover targets on top.
+        for (auto const& s : series)
+        {
+            if (s.points.size() < 2) continue;
+            Polyline line;
+            for (auto const& [bytes, gbps] : s.points)
+                line.Points().Append(Windows::Foundation::Point{
+                    static_cast<float>(px(bytes)), static_cast<float>(py(gbps)) });
+            line.Stroke(SolidColorBrush(s.color));
+            line.StrokeThickness(2.0);
+            line.StrokeLineJoin(PenLineJoin::Round);
+            line.StrokeStartLineCap(PenLineCap::Round);
+            line.StrokeEndLineCap(PenLineCap::Round);
+            canvas.Children().Append(line);
+        }
+        // Lines that end close together get no direct label at all: their end
+        // dots overlap, so a label would sit beside the wrong colour. The
+        // legend identifies them instead.
+        auto endsAlone = [&](MemBwPlotSeries const& candidate)
+        {
+            const double y = py(candidate.points.back().second);
+            for (auto const& other : series)
+            {
+                if (&other == &candidate || other.points.size() < 2) continue;
+                if (std::fabs(py(other.points.back().second) - y) < 16.0) return false;
+            }
+            return true;
+        };
+        // Label every line end or none, so no series looks singled out.
+        bool labelEnds = true;
+        for (auto const& s : series)
+            if (s.points.size() >= 2 && !endsAlone(s)) labelEnds = false;
+        for (auto const& s : series)
+        {
+            if (s.points.size() < 2) continue;
+            const double endX = px(s.points.back().first);
+            const double endY = py(s.points.back().second);
+            Ellipse dot;  // 8 px fill inside a 2 px surface ring
+            dot.Width(12.0);
+            dot.Height(12.0);
+            dot.Fill(SolidColorBrush(s.color));
+            dot.Stroke(surface);
+            dot.StrokeThickness(2.0);
+            Canvas::SetLeft(dot, endX - 6.0);
+            Canvas::SetTop(dot, endY - 6.0);
+            canvas.Children().Append(dot);
+
+            if (labelEnds)
+                addText(s.shortLabel, endX + 10.0, endY - 9.0, 0.0, TextAlignment::Left,
+                        textPrimary);
+        }
+        for (auto const& s : series)
+            for (auto const& [bytes, gbps] : s.points)
+            {
+                Ellipse target;
+                target.Width(22.0);
+                target.Height(22.0);
+                target.Fill(hitFill);
+                Canvas::SetLeft(target, px(bytes) - 11.0);
+                Canvas::SetTop(target, py(gbps) - 11.0);
+                ToolTipService::SetToolTip(target, winrt::box_value(u8(linear
+                    ? s.label + "  ·  " + plotNumber(bytes) + " s  ·  " + plotNumber(gbps) + " " + unit
+                    : s.label + "  ·  " + memBwSize(bytes) + "  ·  " +
+                      memBwChartRate(gbps, false) + " GB/s")));
+                canvas.Children().Append(target);
+            }
+    }
+
+    struct MemBwBar
+    {
+        std::string label;
+        double value;
+        std::string tip; // tooltip; empty uses the label and the value
+    };
+
+    // Bars in one hue: they show one measure, and a label names each of them.
+    // - Horizontal, value at the bar end: a few named items.
+    // - Vertical on a value axis: many numbered items.
+    // Bars are 2 px apart at least and have 4 px rounded ends.
+    void drawBarPlot(Canvas const& canvas, double width, std::vector<MemBwBar> const& bars,
+                     bool vertical, std::string const& unit, bool dark)
+    {
+        using namespace winrt::Microsoft::UI::Xaml::Shapes;
+        canvas.Children().Clear();
+        canvas.Width(width);
+        canvas.Height(0.0);
+        double maxValue = 0.0;
+        for (auto const& bar : bars) maxValue = (std::max)(maxValue, bar.value);
+        if (bars.empty() || maxValue <= 0.0) return;
+
+        const SolidColorBrush textPrimary(dark ? memBwColor(0xFFFFFF) : memBwColor(0x000000, 0xE4));
+        const SolidColorBrush textSecondary(dark ? memBwColor(0xFFFFFF, 0xC5)
+                                                 : memBwColor(0x000000, 0x9E));
+        const SolidColorBrush grid(dark ? memBwColor(0xFFFFFF, 0x1F) : memBwColor(0x000000, 0x1A));
+        const SolidColorBrush fill(memBwColor(dark ? 0x3987e5 : 0x2a78d6));
+        auto addText = [&](std::string const& text, double x, double y, double boxWidth,
+                           TextAlignment alignment, SolidColorBrush const& brush)
+        {
+            TextBlock block;
+            block.Text(u8(text));
+            block.FontSize(12.0);
+            block.Foreground(brush);
+            if (boxWidth > 0.0)
+            {
+                block.Width(boxWidth);
+                block.TextAlignment(alignment);
+                block.TextTrimming(TextTrimming::CharacterEllipsis);
+            }
+            Canvas::SetLeft(block, x);
+            Canvas::SetTop(block, y);
+            canvas.Children().Append(block);
+        };
+        auto addBar = [&](MemBwBar const& bar, double x, double y, double w, double h)
+        {
+            winrt::Microsoft::UI::Xaml::Shapes::Rectangle shape;
+            shape.Width(w);
+            shape.Height(h);
+            const double radius = (std::min)(4.0, (std::min)(w, h) / 2.0);
+            shape.RadiusX(radius);
+            shape.RadiusY(radius);
+            shape.Fill(fill);
+            Canvas::SetLeft(shape, x);
+            Canvas::SetTop(shape, y);
+            ToolTipService::SetToolTip(shape, winrt::box_value(u8(
+                bar.tip.empty() ? bar.label + "  ·  " + plotNumber(bar.value) + " " + unit
+                                : bar.tip)));
+            canvas.Children().Append(shape);
+        };
+
+        if (!vertical)
+        {
+            // Characters, counting a multi-byte one once: an estimate of the
+            // label width that keeps short label sets compact.
+            size_t longest = 0;
+            for (auto const& bar : bars)
+            {
+                size_t characters = 0;
+                for (unsigned char c : bar.label) characters += (c & 0xC0) != 0x80 ? 1u : 0u;
+                longest = (std::max)(longest, characters);
+            }
+            const double labelWidth = std::clamp(longest * 7.4 + 12.0, 60.0, width * 0.45);
+            const double valueWidth = 120.0;
+            const double plotWidth = (std::max)(40.0, width - labelWidth - valueWidth);
+            const double rowHeight = 30.0, barHeight = 18.0;
+            for (size_t i = 0; i < bars.size(); ++i)
+            {
+                const double y = static_cast<double>(i) * rowHeight;
+                const double length = (std::max)(2.0, bars[i].value / maxValue * plotWidth);
+                addText(bars[i].label, 0.0, y + 6.0, labelWidth - 8.0, TextAlignment::Left,
+                        textSecondary);
+                addBar(bars[i], labelWidth, y + (rowHeight - barHeight) / 2.0, length, barHeight);
+                addText(plotNumber(bars[i].value) + " " + unit, labelWidth + length + 8.0, y + 6.0,
+                        0.0, TextAlignment::Left, textPrimary);
+            }
+            canvas.Height(static_cast<double>(bars.size()) * rowHeight + 4.0);
+            return;
+        }
+
+        const double left = 54.0, right = 12.0, top = 10.0, bottom = 26.0, height = 230.0;
+        const double plotWidth = (std::max)(40.0, width - left - right);
+        const double plotHeight = height - top - bottom;
+        const double axisMax = maxValue * 1.08;
+        const double step = niceStep(axisMax / 4.0);
+        for (double tick = 0.0; tick <= axisMax + step * 1e-6; tick += step)
+        {
+            const double y = top + (1.0 - tick / axisMax) * plotHeight;
+            Line line;
+            line.X1(left); line.X2(left + plotWidth);
+            line.Y1(y); line.Y2(y);
+            line.Stroke(grid);
+            line.StrokeThickness(1.0);
+            canvas.Children().Append(line);
+            addText(plotNumber(tick), 0.0, y - 8.0, left - 8.0, TextAlignment::Right, textSecondary);
+        }
+        const double slot = plotWidth / static_cast<double>(bars.size());
+        const double barWidth = std::clamp(slot - 2.0, 2.0, 28.0);
+        // Label every bar where there is room, otherwise every second, fifth, ...
+        const size_t labelEvery = static_cast<size_t>((std::max)(1.0, std::ceil(26.0 / slot)));
+        for (size_t i = 0; i < bars.size(); ++i)
+        {
+            const double x = left + (static_cast<double>(i) + 0.5) * slot;
+            const double barHeight = (std::max)(1.0, bars[i].value / axisMax * plotHeight);
+            addBar(bars[i], x - barWidth / 2.0, top + plotHeight - barHeight, barWidth, barHeight);
+            if (i % labelEvery == 0)
+                addText(bars[i].label, x - 20.0, top + plotHeight + 6.0, 40.0, TextAlignment::Center,
+                        textSecondary);
+        }
+        canvas.Height(height);
+    }
+
+    // One chart of a small-multiples layout: lines over a log-log or linear
+    // plane, or bars when `bars` is set.
+    struct MemBwChart
+    {
+        std::string title;
+        std::string subtitle;
+        std::vector<MemBwPlotSeries> series;
+        std::vector<MemBwPlotMarker> markers;
+        bool linear{ false };       // seconds against a value in `unit`
+        std::string unit{ "GB/s" };
+        std::vector<MemBwBar> bars;
+        bool verticalBars{ false };
+        bool fullWidth{ false };    // takes a row of its own
+    };
+
+    // Lays charts out in `host` as small multiples: as many columns as fit at
+    // a readable width, the rest wrapping to new rows, each chart with its
+    // title, subtitle, legend and plot, and one note line below them all.
+    void layoutMemBwCharts(Grid const& host, std::vector<MemBwChart> const& charts,
+                           double hostWidth, bool dark, winrt::hstring const& noteText)
+    {
+        const double gap = 24.0, minCell = 400.0;
+        int narrow = 0;
+        for (auto const& chart : charts) narrow += chart.fullWidth ? 0 : 1;
+        const int columns = (std::max)(1, (std::min)((std::max)(1, narrow),
+            static_cast<int>((hostWidth + gap) / (minCell + gap))));
+        const double cellWidth = (hostWidth - gap * (columns - 1)) / columns;
+        for (int c = 0; c < columns; ++c)
+        {
+            ColumnDefinition column;
+            column.Width(GridLengthHelper::FromValueAndType(1.0, GridUnitType::Star));
+            host.ColumnDefinitions().Append(column);
+        }
+
+        const SolidColorBrush textSecondary(dark ? memBwColor(0xFFFFFF, 0xC5)
+                                                 : memBwColor(0x000000, 0x9E));
+        int row = 0, column = 0;
+        for (auto const& chart : charts)
+        {
+            StackPanel cell;
+            cell.Spacing(2.0);
+
+            TextBlock title;
+            title.Text(u8(chart.title));
+            title.FontSize(14.0);
+            title.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
+            title.TextWrapping(TextWrapping::Wrap);
+            cell.Children().Append(title);
+
+            TextBlock subtitle;
+            subtitle.Text(u8(chart.subtitle));
+            subtitle.FontSize(12.0);
+            subtitle.Foreground(textSecondary);
+            subtitle.TextWrapping(TextWrapping::Wrap);
+            cell.Children().Append(subtitle);
+
+            // A legend is always present for two or more series.
+            if (chart.bars.empty() && chart.series.size() >= 2)
+            {
+                StackPanel legend;
+                legend.Orientation(Orientation::Horizontal);
+                legend.Spacing(14.0);
+                legend.Margin(ThicknessHelper::FromLengths(0.0, 4.0, 0.0, 0.0));
+                for (auto const& s : chart.series)
+                {
+                    StackPanel entry;
+                    entry.Orientation(Orientation::Horizontal);
+                    entry.Spacing(6.0);
+                    Microsoft::UI::Xaml::Shapes::Rectangle key;
+                    key.Width(14.0);
+                    key.Height(3.0);
+                    key.RadiusX(1.5);
+                    key.RadiusY(1.5);
+                    key.Fill(SolidColorBrush(s.color));
+                    key.VerticalAlignment(VerticalAlignment::Center);
+                    entry.Children().Append(key);
+                    TextBlock name;
+                    name.Text(u8(s.label));
+                    name.FontSize(12.0);
+                    name.Foreground(textSecondary);
+                    entry.Children().Append(name);
+                    legend.Children().Append(entry);
+                }
+                cell.Children().Append(legend);
+            }
+
+            Canvas canvas;
+            canvas.Margin(ThicknessHelper::FromLengths(0.0, 6.0, 0.0, 0.0));
+            canvas.HorizontalAlignment(HorizontalAlignment::Left);
+            const double width = chart.fullWidth ? hostWidth : cellWidth;
+            if (!chart.bars.empty())
+                drawBarPlot(canvas, width, chart.bars, chart.verticalBars, chart.unit, dark);
+            else
+                drawMemBwPlot(canvas, width, chart.markers.empty() ? 230.0 : 248.0, chart.series,
+                              dark, chart.markers, chart.linear, chart.unit);
+            cell.Children().Append(canvas);
+
+            if (chart.fullWidth)
+            {
+                if (column != 0) { ++row; column = 0; }
+                Grid::SetRow(cell, row);
+                Grid::SetColumnSpan(cell, columns);
+                ++row;
+            }
+            else
+            {
+                Grid::SetRow(cell, row);
+                Grid::SetColumn(cell, column);
+                if (++column == columns) { column = 0; ++row; }
+            }
+            host.Children().Append(cell);
+        }
+        if (column != 0) ++row;
+        for (int r = 0; r <= row; ++r)
+        {
+            RowDefinition definition;
+            definition.Height(GridLengthHelper::Auto());
+            host.RowDefinitions().Append(definition);
+        }
+        if (noteText.empty()) return;
+
+        // The exact values stay reachable without hovering.
+        TextBlock note;
+        note.Text(noteText);
+        note.FontSize(12.0);
+        note.Foreground(textSecondary);
+        note.TextWrapping(TextWrapping::Wrap);
+        Grid::SetRow(note, row);
+        Grid::SetColumnSpan(note, columns);
+        host.Children().Append(note);
+    }
+
+    // Number that follows `key` in `line`, or `fallback`.
+    double numberAfter(std::string const& line, char const* key, double fallback = 0.0)
+    {
+        const auto position = line.find(key);
+        if (position == std::string::npos) return fallback;
+        try { return std::stod(line.substr(position + std::strlen(key))); }
+        catch (...) { return fallback; }
+    }
+
+    // The periodic "[GPU Timing] Compute: .. ms | Render: .. ms | Total: .. ms
+    // | FPS: .. | T: .. s" lines of one worker.
+    std::vector<GpuRunSample> parseGpuRunSamples(std::string const& out)
+    {
+        std::vector<GpuRunSample> samples;
+        std::istringstream ss(out);
+        std::string line;
+        while (std::getline(ss, line))
+        {
+            if (line.rfind("[GPU Timing] Compute:", 0) != 0 && line.rfind("[Timing] Compute:", 0) != 0)
+                continue;
+            GpuRunSample sample;
+            sample.computeMs = numberAfter(line, "Compute:");
+            sample.renderMs = numberAfter(line, "Render:");
+            // A worker without the "T:" field prints one line a second.
+            sample.seconds = numberAfter(line, "| T:", static_cast<double>(samples.size() + 1));
+            sample.warmup = line.find("(warm-up)") != std::string::npos;
+            samples.push_back(sample);
+        }
+        return samples;
+    }
+
+    // "VRAM rate:   1863.24 GB/s  (0.023 ms compute)" -> "VRAM rate", 1863.24, "GB/s".
+    bool parseScoreValue(std::string const& scoreLine, std::string& name, double& value,
+                         std::string& unit)
+    {
+        const auto colon = scoreLine.find(':');
+        if (colon == std::string::npos) return false;
+        const char* begin = scoreLine.c_str() + colon + 1;
+        char* end = nullptr;
+        const double parsed = std::strtod(begin, &end);
+        if (end == begin || !(parsed > 0.0)) return false;
+        name = scoreLine.substr(0, colon);
+        value = parsed;
+        const std::string rest(end);
+        const auto first = rest.find_first_not_of(' ');
+        unit.clear();
+        if (first != std::string::npos)
+        {
+            const auto last = rest.find(' ', first);
+            unit = rest.substr(first, last == std::string::npos ? std::string::npos : last - first);
+        }
+        return true;
+    }
+
+    // Builds the multi-line English summary of a memory-bandwidth worker from
+    // its MEMBW_* lines. Empty when the output has no such summary. The fixed
+    // phrases are translated by localizeScoreLineOne().
+    std::string extractMemBwScore(std::string const& out)
+    {
+        std::map<std::string, std::string> device, l1, host;
+        std::map<std::string, std::map<std::string, std::string>> kernels;
+        std::istringstream ss(out);
+        std::string line;
+        while (std::getline(ss, line))
+        {
+            if (!line.empty() && line.back() == '\r') line.pop_back();
+            if (line.rfind("MEMBW_DEVICE\t", 0) == 0) device = memBwFields(line);
+            else if (line.rfind("MEMBW_L1\t", 0) == 0) l1 = memBwFields(line);
+            else if (line.rfind("MEMBW_HOST\t", 0) == 0) host = memBwFields(line);
+            else if (line.rfind("MEMBW_SUMMARY\t", 0) == 0)
+            {
+                auto fields = memBwFields(line);
+                kernels[fields["kernel"]] = fields;
+            }
+        }
+        const auto readIt = kernels.find("read");
+        if (readIt == kernels.end()) return {};
+        auto const& read = readIt->second;
+
+        const bool systemMemory = device.count("memory") && device.at("memory") == "system";
+        std::string text;
+        if (memBwNumber(read, "memory_plateau_reached") > 0.5)
+        {
+            text = systemMemory ? "System memory bandwidth:" : "VRAM bandwidth:";
+            text += " read " + memBwRate(memBwNumber(read, "memory_gbps")) + " GB/s";
+            if (kernels.count("write"))
+                text += "  ·  write " + memBwRate(memBwNumber(kernels["write"], "memory_gbps")) + " GB/s";
+            if (kernels.count("copy"))
+                text += "  ·  copy " + memBwRate(memBwNumber(kernels["copy"], "memory_gbps")) + " GB/s";
+        }
+        else
+        {
+            text = "Largest data sets: read " + memBwRate(memBwNumber(read, "memory_gbps")) +
+                   " GB/s (memory plateau not reached)";
+        }
+        if (memBwNumber(read, "cache_gbps") > 0.0)
+        {
+            text += "\nCache plateau: read " + memBwRate(memBwNumber(read, "cache_gbps")) +
+                    " GB/s (" + memBwSize(memBwNumber(read, "cache_from_bytes")) + " – " +
+                    memBwSize(memBwNumber(read, "cache_to_bytes")) + ")";
+        }
+        if (memBwNumber(l1, "full_load_gbps") > 0.0)
+        {
+            text += "\nL1 cache: " + memBwRate(memBwNumber(l1, "full_load_gbps")) +
+                    " GB/s all SMs/CUs busy  ·  " +
+                    memBwRate(memBwNumber(l1, "single_group_gbps")) + " GB/s per SM/CU";
+            if (memBwNumber(l1, "capacity_high_bytes") > 0.0)
+            {
+                text += "  ·  capacity " + memBwSize(memBwNumber(l1, "capacity_low_bytes")) +
+                        " – " + memBwSize(memBwNumber(l1, "capacity_high_bytes"));
+            }
+        }
+        if (memBwNumber(host, "measured") > 0.5)
+        {
+            text += "\nPCIe to system memory: read " + memBwRate(memBwNumber(host, "read_gbps")) +
+                    " GB/s  ·  write " + memBwRate(memBwNumber(host, "write_gbps")) +
+                    " GB/s  ·  driver copy " +
+                    memBwRate(memBwNumber(host, "copy_to_device_gbps")) + " / " +
+                    memBwRate(memBwNumber(host, "copy_to_host_gbps")) + " GB/s";
+        }
+        return text;
     }
 
     // Returns an English score line (CLI wording). Call localizeScoreLine() for UI.
@@ -1051,7 +1844,8 @@ namespace
         return v;
     }
 
-    // Adapter the worker actually used, from the last "GPU:" summary line.
+    // Adapter the worker actually used, from the last "GPU:" summary line or,
+    // for the memory-bandwidth sweep, from its MEMBW_DEVICE line.
     std::string extractGpuName(std::string const& out)
     {
         std::istringstream ss(out);
@@ -1059,6 +1853,11 @@ namespace
         while (std::getline(ss, line))
         {
             auto trimmed = trimScoreLine(line);
+            if (trimmed.rfind("MEMBW_DEVICE\t", 0) == 0)
+            {
+                auto fields = memBwFields(trimmed);
+                if (fields.count("name")) name = fields["name"];
+            }
             if (trimmed.rfind("GPU:", 0) == 0)
             {
                 auto value = trimmed.substr(4);
@@ -1743,10 +2542,12 @@ namespace
         if (id == "render3d")   return i18n::tr("Legacy 3D Prototype — Billboards", "旧版 3D 原型 —— Billboard", "旧版 3D プロトタイプ — Billboard");
         if (id == "volumetric") return i18n::tr("Volumetric — Experimental Raymarch", "体积渲染 —— 实验性 Raymarch", "ボリューム — 実験的レイマーチ");
         if (id == "cinematic_liquid") return i18n::tr("Fluid — Interactive Pool", "流体 —— 互动水池", "流体 — インタラクティブプール");
+        if (id == "membw")      return i18n::tr("Memory Bandwidth — VRAM / Cache / PCIe", "显存带宽 —— 显存 / 缓存 / PCIe", "メモリ帯域 — VRAM / キャッシュ / PCIe");
         if (id == "cinematic_liquid_v1") return i18n::tr("Legacy Cinematic Liquid v1 — Dam Break", "旧版电影化液体 v1 —— 溃坝", "旧版シネマティック液体 v1 — ダムブレイク");
         if (id == "fluid")      return i18n::tr("Other / Legacy 2D Fluid", "其他 / 旧版 2D 流体", "その他 / 旧版 2D 流体");
         if (id == "cpu_single_core") return i18n::tr("CPU — Single-core", "CPU —— 单核", "CPU — コア別");
         if (id == "cpu_multi_core")  return i18n::tr("CPU — All-core", "CPU —— 全核", "CPU — 全コア");
+        if (id == "cpu_membw")       return i18n::tr("CPU — Cache & memory bandwidth", "CPU —— 缓存与内存带宽", "CPU — キャッシュ / メモリ帯域");
         return id;
     }
 
@@ -1768,7 +2569,8 @@ namespace
 
     bool isPrimaryGpuWorkload(std::string const& key)
     {
-        return key == "stream" || key == "gpu_burn" || key == "cinematic_liquid";
+        return key == "stream" || key == "gpu_burn" || key == "cinematic_liquid" ||
+               key == "membw";
     }
 
     bool isLegacyGpuWorkload(std::string const& key)
@@ -1811,6 +2613,9 @@ namespace
 
     std::string historyExecutionMode(gpu_bench::BenchmarkResult const& result)
     {
+        // The memory-bandwidth sweep has no windowed variant to contrast with.
+        if (result.workload == "membw")
+            return i18n::tr("Compute", "纯计算", "コンピュート");
         auto mode = workloadConfigValue(result, "multiGpu");
         if (mode.empty())
         {
@@ -1906,6 +2711,16 @@ namespace
 
     std::string workloadRunLabel(gpu_bench::BenchmarkResult const& result)
     {
+        if (result.workload == "membw" || result.workload == "cpu_membw")
+        {
+            auto label = workloadLabel(result.workload);
+            const std::string preview = "_preview";
+            if (result.workloadVersion.size() >= preview.size() &&
+                result.workloadVersion.compare(result.workloadVersion.size() - preview.size(),
+                                               preview.size(), preview) == 0)
+                label += i18n::tr(" [preview]", "（预览）", "（プレビュー）");
+            return label;
+        }
         if (result.headless && result.workload == "stream")
             return workloadLabel("headless_compute");
         auto label = workloadLabel(result.workload);
@@ -2146,6 +2961,10 @@ MainWindow::MainWindow()
     RootShell().ActualThemeChanged([this](auto&&, auto&&) {
         updateResizeBackdropColor();
         updateCaptionButtonColors();
+        renderMemBwCharts();
+        renderGpuRunCharts();
+        renderCpuMemCharts();
+        if (ChartsPage().Visibility() == Visibility::Visible) renderChartsPage();
     });
     m_gpuCancelEvent = makeManualResetEvent();
     Closed([this](auto&&, auto&&) {
@@ -2592,6 +3411,189 @@ void MainWindow::renderResultScore()
     }
 }
 
+// Builds the memory-bandwidth charts of the last run as small multiples: one
+// chart per sweep, each with its own log-log axes, because the sweeps differ
+// by orders of magnitude and the L1 sweep has a different x quantity.
+void MainWindow::renderMemBwCharts()
+{
+    auto host = MemBwChartHost();
+    host.Children().Clear();
+    host.ColumnDefinitions().Clear();
+    host.RowDefinitions().Clear();
+    if (m_memBwPoints.empty())
+    {
+        host.Visibility(Visibility::Collapsed);
+        return;
+    }
+
+    const bool dark = RootShell().ActualTheme() != ElementTheme::Light;
+    // Categorical slots 1-3 (blue, orange, aqua), validated for both modes.
+    const std::uint32_t lightSlots[3] = { 0x2a78d6, 0xeb6834, 0x1baf7a };
+    const std::uint32_t darkSlots[3] = { 0x3987e5, 0xd95926, 0x199e70 };
+    auto slotColor = [&](int slot) { return memBwColor(dark ? darkSlots[slot] : lightSlots[slot]); };
+
+    struct SeriesDef { const char* kernel; std::string label; std::string shortLabel; int slot; };
+    struct PanelDef { std::string title; std::string subtitle; std::vector<SeriesDef> series; };
+    const std::string readLabel = i18n::tr("Read", "读", "読み取り");
+    const std::string writeLabel = i18n::tr("Write", "写", "書き込み");
+    const std::string copyLabel = i18n::tr("Copy", "复制", "コピー");
+    const std::string bySize = i18n::tr(
+        "GB/s by data-set size, log scales",
+        "带宽（GB/s）随数据量变化，双对数坐标",
+        "データセットサイズ別の GB/s（両対数）");
+    const std::vector<PanelDef> panels = {
+        { m_memBwSystemMemory
+              ? i18n::tr("System memory and cache", "系统内存与缓存", "システムメモリとキャッシュ")
+              : i18n::tr("VRAM and cache", "显存与缓存", "VRAM とキャッシュ"),
+          bySize,
+          { { "read", readLabel, readLabel, 0 }, { "write", writeLabel, writeLabel, 1 },
+            { "copy", copyLabel, copyLabel, 2 } } },
+        { i18n::tr("System memory over PCIe", "经 PCIe 访问系统内存", "PCIe 経由のシステムメモリ"),
+          bySize,
+          { { "host_read", readLabel, readLabel, 0 }, { "host_write", writeLabel, writeLabel, 1 } } },
+        { i18n::tr("L1 cache", "L1 缓存", "L1 キャッシュ"),
+          i18n::tr("GB/s by private block size per workgroup, log scales",
+                   "带宽（GB/s）随每个工作组的私有数据块大小变化，双对数坐标",
+                   "ワークグループごとの専用ブロックサイズ別の GB/s（両対数）"),
+          { { "l1", i18n::tr("All SMs/CUs busy", "全部 SM/CU 满载", "全 SM/CU 稼働"),
+              i18n::tr("All busy", "满载", "全稼働"), 0 },
+            { "l1_single", i18n::tr("One SM/CU", "单个 SM/CU", "SM/CU 1 基"),
+              i18n::tr("One", "单个", "1 基"), 1 } } },
+    };
+
+    std::vector<MemBwChart> charts;
+    for (auto const& panel : panels)
+    {
+        MemBwChart chart{ panel.title, panel.subtitle, {}, {} };
+        for (auto const& def : panel.series)
+        {
+            MemBwPlotSeries plot{ def.label, def.shortLabel, slotColor(def.slot), {} };
+            for (auto const& point : m_memBwPoints)
+                if (point.kernel == def.kernel) plot.points.emplace_back(point.bytes, point.gbps);
+            std::sort(plot.points.begin(), plot.points.end());
+            if (plot.points.size() >= 2) chart.series.push_back(std::move(plot));
+        }
+        if (!chart.series.empty()) charts.push_back(std::move(chart));
+    }
+    if (charts.empty())
+    {
+        host.Visibility(Visibility::Collapsed);
+        return;
+    }
+    host.Visibility(Visibility::Visible);
+
+    double hostWidth = host.ActualWidth();
+    if (hostWidth < 200.0) hostWidth = ResultText().ActualWidth();
+    if (hostWidth < 200.0) hostWidth = 900.0;
+    m_memBwChartWidth = hostWidth;
+    layoutMemBwCharts(host, charts, hostWidth, dark, locText(
+        "Hover a line for exact values. The full table is in the CLI output below.",
+        "把鼠标悬停在曲线上可查看精确数值；完整表格见下方的 CLI 输出。",
+        "線にカーソルを合わせると正確な値を表示します。全データは下の CLI 出力にあります。"));
+}
+
+// Charts of the last GPU run other than the memory-bandwidth sweep: the scores
+// of its jobs side by side when there are several, and for every job the GPU
+// time per frame over the measured part of the run.
+void MainWindow::renderGpuRunCharts()
+{
+    auto host = GpuRunChartHost();
+    host.Children().Clear();
+    host.ColumnDefinitions().Clear();
+    host.RowDefinitions().Clear();
+    if (m_gpuRunCharts.empty())
+    {
+        host.Visibility(Visibility::Collapsed);
+        return;
+    }
+
+    const bool dark = RootShell().ActualTheme() != ElementTheme::Light;
+    // Categorical slots 1-2 (blue, orange), validated for both modes.
+    const auto computeColor = memBwColor(dark ? 0x3987e5 : 0x2a78d6);
+    const auto renderColor = memBwColor(dark ? 0xd95926 : 0xeb6834);
+    const std::string computeLabel = i18n::tr("Compute", "计算", "コンピュート");
+    const std::string renderLabel = i18n::tr("Render", "渲染", "レンダー");
+
+    std::vector<MemBwChart> charts;
+
+    // Scores side by side, when the jobs report one measure in one unit.
+    std::vector<MemBwBar> bars;
+    std::string metric, unit;
+    bool comparable = true;
+    for (auto const& job : m_gpuRunCharts)
+    {
+        if (job.score <= 0.0) continue;
+        if (bars.empty()) { metric = job.metric; unit = job.unit; }
+        else if (job.metric != metric || job.unit != unit) comparable = false;
+        bars.push_back({ job.label, job.score, {} });
+    }
+    if (comparable && bars.size() >= 2)
+    {
+        MemBwChart chart{
+            i18n::tr("Score of every job in this run", "本次运行各项的成绩", "この実行の各ジョブのスコア"),
+            (unit.empty() ? metric : unit) + i18n::tr(", higher is better", "，越高越好", "、高いほど良い"), {}, {} };
+        chart.bars = std::move(bars);
+        chart.unit = unit;
+        chart.fullWidth = true;
+        charts.push_back(std::move(chart));
+    }
+
+    const std::string timeSubtitle = i18n::tr(
+        "GPU time per frame (ms) over the run, after warm-up",
+        "每帧 GPU 耗时（ms）随运行时间变化，不含预热",
+        "フレームあたりの GPU 時間（ms）の推移（ウォームアップ後）");
+    for (auto const& job : m_gpuRunCharts)
+    {
+        MemBwPlotSeries compute{ computeLabel, computeLabel, computeColor, {} };
+        MemBwPlotSeries render{ renderLabel, renderLabel, renderColor, {} };
+        double computeMax = 0.0, renderMax = 0.0;
+        for (auto const& sample : job.samples)
+        {
+            if (sample.warmup) continue;
+            compute.points.emplace_back(sample.seconds, sample.computeMs);
+            render.points.emplace_back(sample.seconds, sample.renderMs);
+            computeMax = (std::max)(computeMax, sample.computeMs);
+            renderMax = (std::max)(renderMax, sample.renderMs);
+        }
+        MemBwChart chart{ job.label, timeSubtitle, {}, {} };
+        chart.linear = true;
+        chart.unit = "ms";
+        // A pass that takes no measurable time is left out.
+        if (compute.points.size() >= 2 && computeMax > 0.0005) chart.series.push_back(std::move(compute));
+        if (render.points.size() >= 2 && renderMax > 0.0005) chart.series.push_back(std::move(render));
+        if (!chart.series.empty()) charts.push_back(std::move(chart));
+    }
+    if (charts.empty())
+    {
+        host.Visibility(Visibility::Collapsed);
+        return;
+    }
+    host.Visibility(Visibility::Visible);
+
+    double hostWidth = host.ActualWidth();
+    if (hostWidth < 200.0) hostWidth = ResultText().ActualWidth();
+    if (hostWidth < 200.0) hostWidth = 900.0;
+    m_gpuRunChartWidth = hostWidth;
+    layoutMemBwCharts(host, charts, hostWidth, dark, locText(
+        "Hover a point or a bar for exact values. The full output is in the CLI output below.",
+        "把鼠标悬停在数据点或条形上可查看精确数值；完整输出见下方的 CLI 输出。",
+        "点やバーにカーソルを合わせると正確な値を表示します。全出力は下の CLI 出力にあります。"));
+}
+
+void MainWindow::OnGpuRunChartHostSizeChanged(IInspectable const&, SizeChangedEventArgs const& args)
+{
+    // Only the width matters; redrawing changes the height, which must not loop.
+    if (m_gpuRunCharts.empty()) return;
+    if (std::fabs(args.NewSize().Width - m_gpuRunChartWidth) > 1.0) renderGpuRunCharts();
+}
+
+void MainWindow::OnMemBwChartHostSizeChanged(IInspectable const&, SizeChangedEventArgs const& args)
+{
+    // Only the width matters; redrawing changes the height, which must not loop.
+    if (m_memBwPoints.empty()) return;
+    if (std::fabs(args.NewSize().Width - m_memBwChartWidth) > 1.0) renderMemBwCharts();
+}
+
 void MainWindow::updateResultHint()
 {
     // Host-memory runs report "RAM rate:" (see localizeScoreLine). The number is
@@ -2885,6 +3887,7 @@ void MainWindow::showPage(int index)
     }
     if (active) animatePageIn(active);
     if (index == 1) refreshHistory();
+    if (index == 2) renderChartsPage();
 }
 
 void MainWindow::OnNavSelectionChanged(NavigationView const&, NavigationViewSelectionChangedEventArgs const& args)
@@ -2919,26 +3922,25 @@ void MainWindow::applyLanguage()
     NavCpu().Content(locContent("CPU", "CPU", "CPU"));
     CpuTitle().Text(locText("CPU Benchmark", "CPU 测试", "CPU ベンチマーク"));
     CpuNameText().Text(u8(m_cpuName));
-    CpuInfo().Message(locText(
-        "Measures CPU compute throughput with dense math loops on logical processors (single-core and multi-core).",
-        "测 CPU 算力：用密集运算循环压测逻辑核心，对比单核与多核吞吐。", "論理プロセッサ上の高密度演算ループで CPU 計算スループットを測定します（シングルコアとマルチコア）。"));
     CpuModeBox().Header(locContent("Test mode", "测试模式", "テストモード"));
     CpuModePerCore().Content(locContent("Single-core", "单核", "コア別"));
     CpuModeMulti().Content(locContent("All-core", "全核", "全コア"));
     CpuModeAll().Content(locContent("Single-core + All-core", "单核 + 全核", "コア別 + 全コア"));
+    CpuModeMemory().Content(locContent("Cache & memory bandwidth", "缓存与内存带宽", "キャッシュ / メモリ帯域"));
     CpuDurationPresetBox().Header(locContent("Duration preset", "时长预设", "時間プリセット"));
     CpuDurationQuick().Content(locContent("Quick (1 s)", "快速（1 秒）", "クイック（1 秒）"));
     CpuDurationFormal().Content(locContent("Formal (15 s)", "正式（15 秒）", "正式（15 秒）"));
     CpuTimeBox().Header(locContent("Seconds per test", "每项测试秒数", "テストごとの秒数"));
     CpuWarmupBox().Header(locContent("Warm-up seconds", "预热秒数", "ウォームアップ秒数"));
-    CpuDurationHint().Text(locText(
-        "Single-core duration is applied once to each logical processor; the formal preset can take a long time.",
-        "单核测试会依次测试每个逻辑处理器；正式测试可能需要较长时间。", "コア別時間は各論理プロセッサに個別適用されます。正式プリセットは長時間かかることがあります。"));
-    CpuPerCoreTitle().Text(locText("Single-core results", "单核成绩", "論理プロセッサ別の結果"));
     CpuSummaryTitle().Text(locText("Summary", "汇总", "サマリー"));
     GpuSummaryTitle().Text(locText("Summary", "汇总", "サマリー"));
-    CpuAverageLabel().Text(locText("Single-core result", "单核成绩", "コア別平均"));
-    CpuMultiLabel().Text(locText("All-core result", "全核成绩", "全コア結果"));
+    // Info text, hint and result captions depend on the kind of CPU test shown.
+    updateCpuModeControls();
+    if (m_cpuMemView)
+    {
+        renderCpuMemResults();
+        renderCpuMemCharts();
+    }
     CpuOutputExpander().Header(locContent("Raw CLI output (live tail)", "原始 CLI 输出（实时尾部）", "生 CLI 出力（ライブ末尾）"));
     CpuCancelButton().Content(locContent("Cancel", "取消", "キャンセル"));
     CpuRunButton().Content(locContent("Run CPU Benchmark", "开始 CPU 测试", "CPU ベンチマークを実行"));
@@ -3000,6 +4002,9 @@ void MainWindow::applyLanguage()
     WorkloadCinematicLiquid().Content(locContent("Fluid — Interactive Pool",
                                                   "流体 —— 互动水池", "流体 — インタラクティブプール"));
     WorkloadCinematicLiquid().Tag(box_value(hstring(L"cinematic_liquid")));
+    WorkloadMemBw().Content(locContent("Memory Bandwidth — VRAM / Cache / PCIe",
+                                       "显存带宽 —— 显存 / 缓存 / PCIe", "メモリ帯域 — VRAM / キャッシュ / PCIe"));
+    WorkloadMemBw().Tag(box_value(hstring(L"membw")));
     WorkloadCinematicLiquidV1().Content(locContent("Other / Legacy Cinematic Liquid v1 — Dam Break",
                                                     "其他 / 旧版电影化液体 v1 —— 溃坝", "その他 / 旧版シネマティック液体 v1 — ダムブレイク"));
     WorkloadCinematicLiquidV1().Tag(box_value(hstring(L"cinematic_liquid_v1")));
@@ -3160,7 +4165,7 @@ void MainWindow::applyLanguage()
     HistoryLegacyBox().Content(locContent("Show legacy tests", "显示旧版测试", "旧版テストを表示"));
     HistoryHeadlessBox().Content(locContent("Show headless", "显示 headless", "Headless を表示"));
     ChartsTitle().Text(locText("Charts", "图表", "チャート"));
-    GenChartsButton().Content(locContent("Generate Charts", "生成图表", "チャートを生成"));
+    GenChartsButton().Content(locContent("Refresh", "刷新", "更新"));
 
     SettingsTitle().Text(locText("Settings", "设置", "設定"));
     ThemeBox().Header(locContent("Theme", "主题", "テーマ"));
@@ -3220,6 +4225,10 @@ void MainWindow::applyLanguage()
     updateDurationValueEnabled();
     if (!m_lastScoreEn.empty())
         renderResultScore();
+    renderMemBwCharts();   // chart titles and legends are localised too
+    renderGpuRunCharts();
+    if (!m_cpuMemView) renderCpuCoreChart();
+    if (ChartsPage().Visibility() == Visibility::Visible) renderChartsPage();
     updateResultHint();
     // Mid-run language switch: refresh progress / status that were baked in the
     // previous language when the worker started.
@@ -3418,11 +4427,13 @@ void MainWindow::OnCpuRun(IInspectable const&, RoutedEventArgs const&)
     if (m_cpuRunning.load()) return;
 
     auto mode = selected(CpuModeBox());
-    if (mode != "per-core" && mode != "multi" && mode != "all") mode = "all";
+    if (mode != "per-core" && mode != "multi" && mode != "all" && mode != "memory") mode = "all";
     const double seconds = CpuTimeBox().Value();
     const double warmup = CpuWarmupBox().Value();
-    if (!std::isfinite(seconds) || seconds < 0.1 || seconds > 3600.0 ||
-        !std::isfinite(warmup) || warmup < 0.0 || warmup > 60.0)
+    // The cache / memory sweep has its own fixed timing.
+    if (mode != "memory" &&
+        (!std::isfinite(seconds) || seconds < 0.1 || seconds > 3600.0 ||
+         !std::isfinite(warmup) || warmup < 0.0 || warmup > 60.0))
     {
         setCpuStatus(StatusLight::Error, locText(
             "Enter a valid duration and warm-up time.",
@@ -3591,6 +4602,10 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
     m_cpuCancelRequested.store(false);
     m_cpuHadProtocolError = false;
     m_cpuCoreLabels.clear();
+    const bool memoryMode = mode == "memory";
+    m_cpuMemView = memoryMode;
+    clearCpuResults();
+    updateCpuModeControls();
 
     CpuCoreResultsList().Items().Clear();
     CpuAverageResult().Text(L"\x2014");
@@ -3613,7 +4628,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
     auto dispatcher = m_dispatcher;
 
     std::thread([this, strong, dispatcher, engine, workingDirectory,
-                 mode = std::move(mode), seconds, warmupSeconds]()
+                 mode = std::move(mode), seconds, warmupSeconds, memoryMode]()
     {
       try
       {
@@ -3634,9 +4649,8 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                 setTaskbarProgress(false, 0.0);
                 CpuCancelButton().IsEnabled(false);
                 CpuModeBox().IsEnabled(true);
-                CpuDurationPresetBox().IsEnabled(true);
-                CpuTimeBox().IsEnabled(true);
-                CpuWarmupBox().IsEnabled(true);
+                updateCpuModeControls();
+                if (!m_cpuMemView) renderCpuCoreChart();
 
                 if (cancelled)
                 {
@@ -3682,10 +4696,24 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
 
         std::wostringstream command;
         command.imbue(std::locale::classic());
-        command << L'"' << engine.wstring() << L"\" --cpu-benchmark ";
-        command << std::wstring(mode.begin(), mode.end());
-        command << L" --cpu-time " << std::setprecision(12) << seconds
-                << L" --cpu-warmup " << std::setprecision(12) << warmupSeconds;
+        if (memoryMode)
+        {
+            command << L'"' << engine.wstring() << L"\" --cpu-membw";
+            // Diagnostic: extra worker arguments, such as
+            // "--cpu-membw-debug-classes 2" to see the mixed-core layout on a
+            // CPU with one core type.
+            wchar_t extra[512]{};
+            const DWORD extraLength = ::GetEnvironmentVariableW(
+                L"GPU_BENCH_CPUMEM_EXTRA_ARGS", extra, 512);
+            if (extraLength > 0 && extraLength < 512) command << L' ' << extra;
+        }
+        else
+        {
+            command << L'"' << engine.wstring() << L"\" --cpu-benchmark ";
+            command << std::wstring(mode.begin(), mode.end());
+            command << L" --cpu-time " << std::setprecision(12) << seconds
+                    << L" --cpu-warmup " << std::setprecision(12) << warmupSeconds;
+        }
         auto commandLine = command.str();
         std::vector<wchar_t> mutableCommand(commandLine.begin(), commandLine.end());
         mutableCommand.push_back(L'\0');
@@ -3734,10 +4762,10 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                 ::TerminateProcess(process.hProcess, ERROR_CANCELLED);
         }
 
-        auto dispatchLines = [this, strong, dispatcher](std::vector<std::string> lines)
+        auto dispatchLines = [this, strong, dispatcher, memoryMode](std::vector<std::string> lines)
         {
             if (lines.empty()) return;
-            dispatcher.TryEnqueue([this, strong, lines = std::move(lines)]()
+            dispatcher.TryEnqueue([this, strong, memoryMode, lines = std::move(lines)]()
             {
                 auto raw = std::wstring(CpuOutputBox().Text().c_str());
                 for (auto const& line : lines)
@@ -3756,6 +4784,12 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                         raw.size() - kMaxVisibleCpuOutput : firstLine + 1);
                 }
                 CpuOutputBox().Text(raw);
+
+                if (memoryMode)
+                {
+                    for (auto const& line : lines) handleCpuMemLine(line);
+                    return;
+                }
 
                 std::size_t lastProgress = lines.size();
                 for (std::size_t i = 0; i < lines.size(); ++i)
@@ -3866,6 +4900,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                     if (!valid || affinity == "failed" || affinity == "partial")
                         row = "!  " + row;
                     CpuCoreResultsList().Items().Append(box_value(u8(row)));
+                    m_cpuCoreScores.push_back({ core, *score, unit, label });
                     return;
                 }
                 if (kind == "summary")
@@ -3908,6 +4943,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
 
         std::string pending;
         std::vector<std::string> uiBatch;
+        bool sawMemoryDone = false;
         auto lastUiDispatch = std::chrono::steady_clock::now();
         auto flushUiBatch = [&]()
         {
@@ -3920,11 +4956,13 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
         {
             if (!line.empty() && line.back() == '\r') line.pop_back();
             const auto parsed = parseCpuProtocolLine(line);
-            protocolAudit.observe(parsed);
+            if (!memoryMode) protocolAudit.observe(parsed);
+            const bool memoryDone = memoryMode && line.rfind("CPUMEM_DONE\t", 0) == 0;
+            sawMemoryDone = sawMemoryDone || memoryDone;
             uiBatch.push_back(std::move(line));
             const auto now = std::chrono::steady_clock::now();
             const bool important = parsed.type == CpuLineType::Result ||
-                                   parsed.type == CpuLineType::Error;
+                                   parsed.type == CpuLineType::Error || memoryDone;
             if (important || uiBatch.size() >= 128 ||
                 now - lastUiDispatch >= std::chrono::milliseconds(250))
                 flushUiBatch();
@@ -3965,7 +5003,10 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
         // the process had already ended. Late UI input cannot bypass protocol
         // completeness checks.
         if (exitCode == 0 && pipeError.empty())
-            pipeError = protocolAudit.validate(mode);
+        {
+            if (!memoryMode) pipeError = protocolAudit.validate(mode);
+            else if (!sawMemoryDone) pipeError = "the cache / memory sweep ended without its summary";
+        }
         finish(exitCode, std::move(pipeError));
       }
       catch (...)
@@ -3976,9 +5017,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
               endTask(ActiveTask::CpuBenchmark);
               CpuCancelButton().IsEnabled(false);
               CpuModeBox().IsEnabled(true);
-              CpuDurationPresetBox().IsEnabled(true);
-              CpuTimeBox().IsEnabled(true);
-              CpuWarmupBox().IsEnabled(true);
+              updateCpuModeControls();
               setCpuStatus(StatusLight::Error, locText("Failed", "运行失败", "失敗"));
               CpuCurrentCoreText().Text(locText(
                   "CPU worker failed with an unexpected exception.",
@@ -3986,6 +5025,532 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
           });
       }
     }).detach();
+}
+
+// ---- CPU cache / memory sweep -------------------------------------------------
+void MainWindow::OnCpuModeChanged(IInspectable const&, SelectionChangedEventArgs const&)
+{
+    if (!m_uiReady || m_cpuRunning.load()) return;
+    // Ignore the transient "nothing selected" of a combo refresh.
+    if (CpuModeBox().SelectedIndex() < 0) return;
+    const bool memory = selected(CpuModeBox()) == "memory";
+    if (memory == m_cpuMemView) return;
+    // The page shows one kind of result at a time.
+    m_cpuMemView = memory;
+    clearCpuResults();
+    updateCpuModeControls();
+}
+
+void MainWindow::updateCpuModeControls()
+{
+    const bool memory = m_cpuMemView;
+    const bool running = m_cpuRunning.load();
+    // The sweep has its own fixed timing.
+    CpuDurationPresetBox().IsEnabled(!running && !memory);
+    CpuTimeBox().IsEnabled(!running && !memory);
+    CpuWarmupBox().IsEnabled(!running && !memory);
+    // A finished sweep sizes the card to its table in renderCpuMemResults().
+    if (!memory) CpuResultsGrid().Height(260.0);
+    else if (m_cpuMemLevels.empty()) CpuResultsGrid().Height(400.0);
+    if (memory)
+    {
+        CpuInfo().Message(locText(
+            "Measures how fast the CPU reads, writes and copies data at each level: L1, L2, L3 (and L4 where present), then memory, and how fast the drive behind virtual memory reads and writes. One thread of every core type first, then one thread on every core.",
+            "测量 CPU 在各级缓存（L1、L2、L3，有 L4 时也包括）和内存上的读、写、复制速度，以及虚拟内存所在硬盘的读写速度：每种核心先各测一个线程，再每个物理核心一个线程。",
+            "L1・L2・L3（搭載時は L4）とメモリの各階層での CPU の読み取り・書き込み・コピー速度と、仮想メモリのあるドライブの読み書き速度を測定します。まずコア種別ごとに 1 スレッド、次に全コアで 1 スレッドずつ。"));
+        CpuDurationHint().Text(locText(
+            "The sweep takes about 40 seconds and ends with a storage test that writes a 1 GiB temporary file to the drive behind virtual memory. Duration settings do not apply.",
+            "一次扫描约 40 秒，最后会做存储测试：在虚拟内存所在的硬盘上写一个 1 GiB 的临时文件。时长设置对这项测试无效。",
+            "掃引は約 40 秒かかり、最後に仮想メモリのあるドライブへ 1 GiB の一時ファイルを書き込むストレージテストを行います。時間設定は適用されません。"));
+        CpuPerCoreTitle().Text(locText(
+            "Bandwidth by level, GB/s — 1T is one thread, nT is one thread on each of n cores",
+            "各级带宽（GB/s）—— 1T 为单线程，nT 为 n 个核心各一个线程",
+            "階層別の帯域（GB/s）— 1T は 1 スレッド、nT は n コアで 1 スレッドずつ"));
+        CpuAverageLabel().Text(locText("Memory read, one thread", "内存读取，单线程", "メモリ読み取り（1 スレッド）"));
+        CpuMultiLabel().Text(locText("Memory read, all cores", "内存读取，全核", "メモリ読み取り（全コア）"));
+    }
+    else
+    {
+        CpuInfo().Message(locText(
+            "Measures CPU compute throughput with dense math loops on logical processors (single-core and multi-core).",
+            "测 CPU 算力：用密集运算循环压测逻辑核心，对比单核与多核吞吐。", "論理プロセッサ上の高密度演算ループで CPU 計算スループットを測定します（シングルコアとマルチコア）。"));
+        CpuDurationHint().Text(locText(
+            "Single-core duration is applied once to each logical processor; the formal preset can take a long time.",
+            "单核测试会依次测试每个逻辑处理器；正式测试可能需要较长时间。", "コア別時間は各論理プロセッサに個別適用されます。正式プリセットは長時間かかることがあります。"));
+        CpuPerCoreTitle().Text(locText("Single-core results", "单核成绩", "論理プロセッサ別の結果"));
+        CpuAverageLabel().Text(locText("Single-core result", "单核成绩", "コア別平均"));
+        CpuMultiLabel().Text(locText("All-core result", "全核成绩", "全コア結果"));
+    }
+}
+
+void MainWindow::clearCpuResults()
+{
+    m_cpuMemLevels.clear();
+    m_cpuMemPoints.clear();
+    m_cpuMemCaches.clear();
+    m_cpuMemClasses.clear();
+    m_cpuCoreScores.clear();
+    m_cpuMemStorage = CpuMemStorageInfo{};
+    m_cpuMemAllThreads = 0;
+    m_cpuMemPageMeasured = false;
+    m_cpuMemDone = false;
+    CpuCoreResultsList().Items().Clear();
+    CpuAverageResult().Text(L"\x2014");
+    CpuMultiResult().Text(L"\x2014");
+    renderCpuMemCharts();
+}
+
+// One CPUMEM_* record of the cache / memory sweep. UI thread only.
+void MainWindow::handleCpuMemLine(std::string const& line)
+{
+    if (line.rfind("CPUMEM_", 0) != 0) return;
+    const std::string type = line.substr(0, line.find('\t'));
+    auto fields = memBwFields(line);
+    if (type == "CPUMEM_META")
+    {
+        m_cpuMemAllThreads = static_cast<int>(memBwNumber(fields, "all_threads"));
+        std::ostringstream label;
+        label << (fields["name"].empty() ? m_cpuName : fields["name"])
+              << "  |  " << fields["logical_count"] << " logical / "
+              << fields["physical_count"] << " physical";
+        if (!fields["vector"].empty()) label << "  |  " << fields["vector"];
+        CpuNameText().Text(u8(label.str()));
+    }
+    else if (type == "CPUMEM_CLASS")
+    {
+        m_cpuMemClasses.push_back({ static_cast<int>(memBwNumber(fields, "rank")), fields["mode"],
+                                    fields["name"], static_cast<int>(memBwNumber(fields, "cores")),
+                                    static_cast<int>(memBwNumber(fields, "reference_logical_index")) });
+    }
+    else if (type == "CPUMEM_CACHE")
+    {
+        m_cpuMemCaches.push_back({ static_cast<int>(memBwNumber(fields, "class")),
+                                   static_cast<int>(memBwNumber(fields, "level")),
+                                   memBwNumber(fields, "size_bytes"),
+                                   (std::max)(1, static_cast<int>(memBwNumber(fields, "shared_cores"))) });
+    }
+    else if (type == "CPUMEM_POINT")
+    {
+        MemBwCurvePoint point{ fields["mode"] + "/" + fields["kernel"],
+                               memBwNumber(fields, "block_bytes"),
+                               memBwNumber(fields, "median_gbps") };
+        if (point.bytes > 0.0 && point.gbps > 0.0) m_cpuMemPoints.push_back(std::move(point));
+    }
+    else if (type == "CPUMEM_PROGRESS")
+    {
+        const double percent = std::clamp(memBwNumber(fields, "fraction") * 100.0, 0.0, 100.0);
+        CpuProgressBar().Value(percent);
+        std::wostringstream progress;
+        progress << std::fixed << std::setprecision(1) << percent << L'%';
+        CpuProgressText().Text(progress.str());
+        setTaskbarProgress(true, percent / 100.0);
+        const auto mode = fields["mode"];
+        CpuCurrentCoreText().Text(
+            mode.rfind("single", 0) == 0
+                ? locText("One thread · sweeping data-set sizes", "单线程 · 扫描数据量", "1 スレッド · データセットサイズを掃引中")
+            : mode == "all"
+                ? locText("All cores · sweeping data-set sizes", "全核 · 扫描数据量", "全コア · データセットサイズを掃引中")
+            : mode == "storage"
+                ? locText("Storage · reading and writing a test file", "存储 · 读写测试文件", "ストレージ · テストファイルを読み書き中")
+                : locText("Virtual memory · mapping pages", "虚拟内存 · 映射页面", "仮想メモリ · ページ割り当て"));
+    }
+    else if (type == "CPUMEM_LEVEL")
+    {
+        CpuMemLevelRow row;
+        row.mode = fields["mode"];
+        row.level = fields["level"];
+        row.cacheBytes = memBwNumber(fields, "cache_bytes");
+        row.read = memBwNumber(fields, "read_gbps");
+        row.write = memBwNumber(fields, "write_gbps");
+        row.copy = memBwNumber(fields, "copy_gbps");
+        row.writeStream = memBwNumber(fields, "write_nt_gbps");
+        row.copyStream = memBwNumber(fields, "copy_nt_gbps");
+        row.zeroFill = memBwNumber(fields, "zero_gbps");
+        row.measured = memBwNumber(fields, "measured") > 0.5;
+        row.settled = memBwNumber(fields, "settled") > 0.5;
+        row.fromCurve = memBwNumber(fields, "from_curve") > 0.5;
+        row.capacityLow = memBwNumber(fields, "capacity_low_bytes");
+        row.capacityHigh = memBwNumber(fields, "capacity_high_bytes");
+        m_cpuMemLevels.push_back(std::move(row));
+    }
+    else if (type == "CPUMEM_PAGEFAULT")
+    {
+        m_cpuMemPageMeasured = memBwNumber(fields, "measured") > 0.5;
+        m_cpuMemPageGbps = memBwNumber(fields, "gbps");
+        m_cpuMemPageNs = memBwNumber(fields, "ns_per_page");
+        m_cpuMemPageBytes = memBwNumber(fields, "page_bytes");
+    }
+    else if (type == "CPUMEM_STORAGE")
+    {
+        m_cpuMemStorage.seen = true;
+        m_cpuMemStorage.measured = memBwNumber(fields, "measured") > 0.5;
+        m_cpuMemStorage.directIo = memBwNumber(fields, "direct_io") > 0.5;
+        m_cpuMemStorage.backing = fields["backing"];
+        m_cpuMemStorage.skipped = fields["skipped"];
+        m_cpuMemStorage.seqRead = memBwNumber(fields, "seq_read_mbps");
+        m_cpuMemStorage.seqWrite = memBwNumber(fields, "seq_write_mbps");
+        m_cpuMemStorage.randRead = memBwNumber(fields, "rand_read_mbps");
+        m_cpuMemStorage.randWrite = memBwNumber(fields, "rand_write_mbps");
+        m_cpuMemStorage.randReadIops = memBwNumber(fields, "rand_read_iops");
+        m_cpuMemStorage.randWriteIops = memBwNumber(fields, "rand_write_iops");
+    }
+    else if (type == "CPUMEM_DONE")
+    {
+        m_cpuMemDone = true;
+        renderCpuMemResults();
+        renderCpuMemCharts();
+    }
+}
+
+// Rebuilds the level table and the two headline figures of the last sweep.
+// The fastest core class shares its rows with the all-core figures; every
+// further class of a mixed-core CPU gets its own block of rows.
+void MainWindow::renderCpuMemResults()
+{
+    CpuCoreResultsList().Items().Clear();
+    CpuAverageResult().Text(L"\x2014");
+    CpuMultiResult().Text(L"\x2014");
+    if (m_cpuMemLevels.empty()) return;
+
+    auto find = [&](std::string const& mode, std::string const& level) -> const CpuMemLevelRow*
+    {
+        for (auto const& row : m_cpuMemLevels)
+            if (row.mode == mode && row.level == level) return &row;
+        return nullptr;
+    };
+    bool hasAll = false;
+    for (auto const& row : m_cpuMemLevels) hasAll = hasAll || row.mode == "all";
+    std::vector<CpuMemClassInfo> classes = m_cpuMemClasses;
+    if (classes.empty()) classes.push_back({ 0, "single", "", 0, 0 });
+    const bool mixed = classes.size() > 1;
+
+    const std::string readWord = i18n::tr("read", "读", "読込");
+    const std::string writeWord = i18n::tr("write", "写", "書込");
+    const std::string copyWord = i18n::tr("copy", "复制", "コピー");
+    const std::string allTag = std::to_string((std::max)(1, m_cpuMemAllThreads)) + "T";
+    const size_t columnCount = hasAll ? 7 : 4;
+    auto rate = [](double value) { return value > 0.0 ? memBwRate(value) : std::string("-"); };
+
+    // A line is either a table row (cells) or a caption (text).
+    struct Line { std::vector<std::string> cells; std::string text; bool dim{ false }; };
+    std::vector<Line> lines;
+    lines.push_back({ { i18n::tr("Level and size", "层级与容量", "階層と容量"),
+                        "1T " + readWord, "1T " + writeWord, "1T " + copyWord,
+                        allTag + " " + readWord, allTag + " " + writeWord, allTag + " " + copyWord },
+                      {}, true });
+    bool anyFromCurve = false;
+    for (auto const& cpuClass : classes)
+    {
+        if (mixed)
+        {
+            std::string caption = std::string(i18n::tr("Core class ", "核心类别 ", "コアクラス ")) +
+                std::to_string(cpuClass.rank) + "  \xC2\xB7  " + cpuClass.name + "  \xC2\xB7  " +
+                std::to_string(cpuClass.cores) + i18n::tr(" cores", " 个核心", " コア");
+            lines.push_back({ {}, std::move(caption), false });
+        }
+        // The all-core figures stand beside the fastest class only.
+        const bool withAll = cpuClass.rank == classes.front().rank;
+        for (auto const& levelRow : m_cpuMemLevels)
+        {
+            if (levelRow.mode != cpuClass.mode) continue;
+            const auto* one = &levelRow;
+            const auto* all = withAll ? find("all", levelRow.level) : nullptr;
+            const bool memory = levelRow.level == "memory";
+            auto cells = [&](const CpuMemLevelRow* row, double CpuMemLevelRow::* a,
+                             double CpuMemLevelRow::* b, double CpuMemLevelRow::* c)
+            {
+                const bool ok = row && row->measured;
+                return std::vector<std::string>{
+                    ok && a ? rate(row->*a) : "-", ok && b ? rate(row->*b) : "-",
+                    ok && c ? rate(row->*c) : "-" };
+            };
+            auto addRow = [&](std::string name, double CpuMemLevelRow::* a,
+                              double CpuMemLevelRow::* b, double CpuMemLevelRow::* c)
+            {
+                Line line;
+                line.cells.push_back(std::move(name));
+                for (auto& cell : cells(one, a, b, c)) line.cells.push_back(std::move(cell));
+                for (auto& cell : cells(all, a, b, c)) line.cells.push_back(std::move(cell));
+                lines.push_back(std::move(line));
+            };
+            std::string name = memory ? std::string(i18n::tr("Memory", "内存", "メモリ")) : levelRow.level;
+            if (!memory && levelRow.fromCurve)
+            {
+                anyFromCurve = true;
+                name += levelRow.capacityHigh > 0.0
+                    ? "  " + memBwSize(levelRow.capacityLow) + "\xE2\x80\x93" + memBwSize(levelRow.capacityHigh) + " *"
+                    : "  > " + memBwSize(levelRow.capacityLow) + " *";
+            }
+            else if (!memory)
+            {
+                name += "  " + memBwSize(levelRow.cacheBytes);
+            }
+            addRow(std::move(name), &CpuMemLevelRow::read, &CpuMemLevelRow::write,
+                   &CpuMemLevelRow::copy);
+            if (!memory) continue;
+            const bool streaming = one->writeStream > 0.0 || (all && all->writeStream > 0.0);
+            const bool zero = one->zeroFill > 0.0 || (all && all->zeroFill > 0.0);
+            if (streaming)
+                addRow(i18n::tr("  streaming stores", "  流式写入", "  ストリーミング書込"),
+                       nullptr, &CpuMemLevelRow::writeStream, &CpuMemLevelRow::copyStream);
+            if (zero)
+                addRow(i18n::tr("  CLZERO zero fill", "  CLZERO 清零", "  CLZERO ゼロ埋め"),
+                       nullptr, &CpuMemLevelRow::zeroFill, nullptr);
+        }
+    }
+
+    // Names are left-aligned, figures right-aligned, in a fixed-pitch font.
+    std::vector<size_t> widths(columnCount, 0);
+    for (auto const& line : lines)
+        for (size_t c = 0; c < columnCount && c < line.cells.size(); ++c)
+            widths[c] = (std::max)(widths[c], utf8DisplayWidth(line.cells[c]));
+    auto appendText = [&](std::string const& text, bool fixedPitch, bool dim)
+    {
+        TextBlock block;
+        block.Text(u8(text));
+        if (fixedPitch) block.FontFamily(Media::FontFamily(L"Consolas"));
+        else block.TextWrapping(TextWrapping::Wrap);
+        if (dim) block.Opacity(0.78);
+        CpuCoreResultsList().Items().Append(block);
+    };
+    for (auto const& line : lines)
+    {
+        if (line.cells.empty())
+        {
+            appendText(line.text, false, false);
+            continue;
+        }
+        std::string text;
+        for (size_t c = 0; c < columnCount && c < line.cells.size(); ++c)
+        {
+            const auto& cell = line.cells[c];
+            if (c > 0) text += "  ";
+            if (c == 0) text += padDisplay(cell, widths[c]);
+            else text += std::string(widths[c] - utf8DisplayWidth(cell), ' ') + cell;
+        }
+        appendText(text, true, line.dim);
+    }
+    size_t rowCount = lines.size();
+    if (anyFromCurve)
+    {
+        appendText(i18n::tr(
+            "* The system reports no size for this cache; its capacity was read off the curve and lies in this range.",
+            "* 系统没有报告这级缓存的容量；容量是从曲线上读出来的，落在这个范围内。",
+            "* このキャッシュの容量はシステムから報告されないため、曲線から読み取った範囲です。"), false, true);
+        ++rowCount;
+    }
+    if (m_cpuMemPageMeasured)
+    {
+        std::ostringstream text;
+        text << i18n::tr("Virtual memory, mapping new pages: ", "虚拟内存，映射新页面：", "仮想メモリ、新規ページの割り当て: ")
+             << memBwRate(m_cpuMemPageGbps) << " GB/s  \xC2\xB7  "
+             << static_cast<long long>(std::llround(m_cpuMemPageNs)) << " ns / "
+             << memBwSize(m_cpuMemPageBytes) << i18n::tr(" page", " 页", " ページ");
+        appendText(text.str(), false, false);
+        ++rowCount;
+    }
+    if (m_cpuMemStorage.seen)
+    {
+        std::ostringstream text;
+        text << i18n::tr("Storage behind virtual memory", "虚拟内存所在的存储", "仮想メモリのストレージ");
+        if (!m_cpuMemStorage.backing.empty()) text << " (" << m_cpuMemStorage.backing << ")";
+        if (m_cpuMemStorage.measured)
+        {
+            auto whole = [](double value) { return withThousands(value); };
+            text << i18n::tr(": sequential read ", "：顺序读 ", ": シーケンシャル読込 ") << whole(m_cpuMemStorage.seqRead)
+                 << i18n::tr(" MB/s, write ", " MB/s，写 ", " MB/s、書込 ") << whole(m_cpuMemStorage.seqWrite)
+                 << " MB/s  \xC2\xB7  "
+                 << i18n::tr("4 KiB random read ", "4 KiB 随机读 ", "4 KiB ランダム読込 ")
+                 << memBwRate(m_cpuMemStorage.randRead) << " MB/s (" << whole(m_cpuMemStorage.randReadIops)
+                 << " IOPS)" << i18n::tr(", write ", "，写 ", "、書込 ")
+                 << memBwRate(m_cpuMemStorage.randWrite) << " MB/s (" << whole(m_cpuMemStorage.randWriteIops)
+                 << " IOPS)";
+            if (!m_cpuMemStorage.directIo)
+                text << i18n::tr("  [buffered I/O: the file cache may inflate these]",
+                                 "  [走了系统文件缓存，数字可能偏高]",
+                                 "  [バッファ付き I/O: 実際より高い可能性があります]");
+        }
+        else
+        {
+            text << i18n::tr(": not measured", "：未测量", ": 未測定");
+            if (!m_cpuMemStorage.skipped.empty()) text << " (" << m_cpuMemStorage.skipped << ")";
+        }
+        appendText(text.str(), false, false);
+        rowCount += 2;  // this line usually wraps
+    }
+    CpuResultsGrid().Height(std::clamp(100.0 + 40.0 * static_cast<double>(rowCount), 400.0, 760.0));
+
+    auto headline = [&](const CpuMemLevelRow* row, int threads)
+    {
+        if (!row || !row->measured) return std::string("\xE2\x80\x94");
+        std::string value = memBwRate(row->read) + " GB/s";
+        if (threads > 1)
+            value += "  (" + std::to_string(threads) + i18n::tr(" threads", " 线程", " スレッド") + ")";
+        if (!row->settled)
+            value += i18n::tr("  [not settled]", "  [未稳定]", "  [未収束]");
+        return value;
+    };
+    CpuAverageResult().Text(u8(headline(find(classes.front().mode, "memory"), 1)));
+    CpuMultiResult().Text(u8(headline(find("all", "memory"), m_cpuMemAllThreads)));
+}
+
+// Small multiples: one chart per core class and one for all cores, with the
+// same series colours as the GPU memory-bandwidth charts and the cache
+// capacities as reference marks.
+void MainWindow::renderCpuMemCharts()
+{
+    // The card is shared with the chart of the compute test.
+    if (!m_cpuMemView)
+    {
+        renderCpuCoreChart();
+        return;
+    }
+    auto host = CpuMemChartHost();
+    host.Children().Clear();
+    host.ColumnDefinitions().Clear();
+    host.RowDefinitions().Clear();
+    if (!m_cpuMemView || !m_cpuMemDone || m_cpuMemPoints.empty())
+    {
+        CpuMemChartCard().Visibility(Visibility::Collapsed);
+        return;
+    }
+
+    const bool dark = RootShell().ActualTheme() != ElementTheme::Light;
+    // Categorical slots 1-3 (blue, orange, aqua), validated for both modes.
+    const std::uint32_t lightSlots[3] = { 0x2a78d6, 0xeb6834, 0x1baf7a };
+    const std::uint32_t darkSlots[3] = { 0x3987e5, 0xd95926, 0x199e70 };
+    auto slotColor = [&](int slot) { return memBwColor(dark ? darkSlots[slot] : lightSlots[slot]); };
+
+    const std::string readLabel = i18n::tr("Read", "读", "読み取り");
+    const std::string writeLabel = i18n::tr("Write", "写", "書き込み");
+    const std::string copyLabel = i18n::tr("Copy", "复制", "コピー");
+    const std::string subtitle = i18n::tr(
+        "GB/s by data-set size per thread, log scales",
+        "带宽（GB/s）随每个线程的数据量变化，双对数坐标",
+        "スレッドあたりのデータセットサイズ別の GB/s（両対数）");
+    const int allThreads = (std::max)(1, m_cpuMemAllThreads);
+    std::vector<CpuMemClassInfo> classes = m_cpuMemClasses;
+    if (classes.empty()) classes.push_back({ 0, "single", "", 0, 0 });
+    const bool mixed = classes.size() > 1;
+
+    // cacheClass < 0: no reference marks.
+    struct Panel { std::string mode; std::string title; int threads; int cacheClass; };
+    std::vector<Panel> panels;
+    for (auto const& cpuClass : classes)
+    {
+        std::string title = i18n::tr("One thread", "单线程", "1 スレッド");
+        if (mixed) title += " \xE2\x80\x94 " + cpuClass.name;
+        panels.push_back({ cpuClass.mode, std::move(title), 1, cpuClass.rank });
+    }
+    panels.push_back({ "all",
+                       std::string(i18n::tr("All cores", "全核", "全コア")) + " \xE2\x80\x94 " +
+                           std::to_string(allThreads) + i18n::tr(" threads", " 个线程", " スレッド"),
+                       allThreads, mixed ? -1 : classes.front().rank });
+    const struct { const char* kernel; const std::string* label; int slot; } kernels[] = {
+        { "read", &readLabel, 0 }, { "write", &writeLabel, 1 }, { "copy", &copyLabel, 2 } };
+
+    std::vector<MemBwChart> charts;
+    for (auto const& panel : panels)
+    {
+        MemBwChart chart{ panel.title, subtitle, {}, {} };
+        for (auto const& kernel : kernels)
+        {
+            MemBwPlotSeries plot{ *kernel.label, *kernel.label, slotColor(kernel.slot), {} };
+            const std::string key = panel.mode + "/" + kernel.kernel;
+            for (auto const& point : m_cpuMemPoints)
+                if (point.kernel == key) plot.points.emplace_back(point.bytes, point.gbps);
+            std::sort(plot.points.begin(), plot.points.end());
+            if (plot.points.size() >= 2) chart.series.push_back(std::move(plot));
+        }
+        if (chart.series.empty()) continue;
+        // A cache shared by several of the running threads counts per thread.
+        for (auto const& cache : m_cpuMemCaches)
+        {
+            if (cache.cpuClass != panel.cacheClass) continue;
+            const int sharers = (std::max)(1, (std::min)(panel.threads, cache.sharedCores));
+            const double share = cache.sizeBytes / sharers;
+            std::string label = "L" + std::to_string(cache.level);
+            std::string tip = label + ": " + memBwSize(cache.sizeBytes);
+            if (sharers > 1)
+            {
+                label += " \xC3\xB7 " + std::to_string(sharers);
+                tip += i18n::tr(" shared by ", "，由 ", "、") + std::to_string(sharers) +
+                       i18n::tr(" threads, ", " 个线程共享，每线程 ", " スレッドで共有、1 スレッドあたり ") +
+                       memBwSize(share) + i18n::tr(" each", "", "");
+            }
+            chart.markers.push_back({ share, std::move(label), std::move(tip) });
+        }
+        charts.push_back(std::move(chart));
+    }
+    if (charts.empty())
+    {
+        CpuMemChartCard().Visibility(Visibility::Collapsed);
+        return;
+    }
+    CpuMemChartCard().Visibility(Visibility::Visible);
+
+    // The card has the width of the CLI card below it; 16 px padding a side.
+    double hostWidth = host.ActualWidth();
+    if (hostWidth < 200.0) hostWidth = CpuCliHost().ActualWidth() - 34.0;
+    if (hostWidth < 200.0) hostWidth = 900.0;
+    m_cpuMemChartWidth = hostWidth;
+    layoutMemBwCharts(host, charts, hostWidth, dark, locText(
+        "Dashed lines mark the cache sizes the system reports. Hover a line for exact values; the full table is in the raw CLI output below.",
+        "虚线标出系统报告的各级缓存容量。把鼠标悬停在曲线上可查看精确数值；完整表格见下方的原始 CLI 输出。",
+        "破線はシステムが報告する各キャッシュの容量です。線にカーソルを合わせると正確な値を表示します。全データは下の生 CLI 出力にあります。"));
+}
+
+// CPU compute test: the score of every logical processor as one bar each.
+void MainWindow::renderCpuCoreChart()
+{
+    auto host = CpuMemChartHost();
+    host.Children().Clear();
+    host.ColumnDefinitions().Clear();
+    host.RowDefinitions().Clear();
+    if (m_cpuMemView || m_cpuCoreScores.size() < 2)
+    {
+        CpuMemChartCard().Visibility(Visibility::Collapsed);
+        return;
+    }
+
+    auto scores = m_cpuCoreScores;
+    std::sort(scores.begin(), scores.end(),
+              [](CpuCoreScore const& a, CpuCoreScore const& b) { return a.core < b.core; });
+    const std::string unit = scores.front().unit;
+    MemBwChart chart{
+        i18n::tr("Score of every logical processor", "各逻辑处理器的成绩", "論理プロセッサ別スコア"),
+        unit + i18n::tr(", one thread at a time, higher is better",
+                        "，每次只跑一个线程，越高越好", "、1 スレッドずつ、高いほど良い"),
+        {}, {} };
+    for (auto const& entry : scores)
+    {
+        chart.bars.push_back({ std::to_string(entry.core + 1), entry.score,
+                               "#" + std::to_string(entry.core + 1) + "  " + entry.label +
+                                   "  \xC2\xB7  " + plotNumber(entry.score) + " " + entry.unit });
+    }
+    chart.verticalBars = true;
+    chart.unit = unit;
+    chart.fullWidth = true;
+
+    CpuMemChartCard().Visibility(Visibility::Visible);
+    const bool dark = RootShell().ActualTheme() != ElementTheme::Light;
+    double hostWidth = host.ActualWidth();
+    if (hostWidth < 200.0) hostWidth = CpuCliHost().ActualWidth() - 34.0;
+    if (hostWidth < 200.0) hostWidth = 900.0;
+    m_cpuMemChartWidth = hostWidth;
+    layoutMemBwCharts(host, { chart }, hostWidth, dark, locText(
+        "The number under a bar is the row number in the list above. Hover a bar for the processor and its exact score.",
+        "条形下方的数字是上方列表里的行号。把鼠标悬停在条形上可查看对应的处理器和精确成绩。",
+        "バーの下の数字は上のリストの行番号です。バーにカーソルを合わせるとプロセッサと正確なスコアを表示します。"));
+}
+
+void MainWindow::OnCpuMemChartHostSizeChanged(IInspectable const&, SizeChangedEventArgs const& args)
+{
+    // Only the width matters; redrawing changes the height, which must not loop.
+    const bool hasCharts = m_cpuMemView ? m_cpuMemDone && !m_cpuMemPoints.empty()
+                                        : m_cpuCoreScores.size() >= 2;
+    if (!hasCharts) return;
+    if (std::fabs(args.NewSize().Width - m_cpuMemChartWidth) > 1.0) renderCpuMemCharts();
 }
 
 void MainWindow::updateExtraLabel()
@@ -4003,8 +5568,12 @@ void MainWindow::updateExtraLabel()
     bool showParticles = particleTest || (workloadSelectable && particleWorkload);
     bool showBurnSteps = workloadSelectable && gpuBurnWorkload;
     bool fixedQualityLiquid = wl == "cinematic_liquid" || wl == "cinematic_liquid_v1";
+    // The memory-bandwidth sweep has a fixed contract: no parameter, duration,
+    // window or capture applies to it.
+    bool memBwWorkload = workloadSelectable && wl == "membw";
     bool showExtra = flightsTest ||
-        (workloadSelectable && !particleWorkload && !gpuBurnWorkload && !fixedQualityLiquid);
+        (workloadSelectable && !particleWorkload && !gpuBurnWorkload && !fixedQualityLiquid &&
+         !memBwWorkload);
     bool fluidWorkload = workloadSelectable && wl == "fluid";
     std::string infoWl = workloadSelectable ? wl : "stream";
 
@@ -4030,13 +5599,14 @@ void MainWindow::updateExtraLabel()
     bool headlessSupported = (customRun || fullAnalysis) &&
         !(gpuBurnWorkload || wl == "gpu_stress" || wl == "stress"
         || wl == "render3d" || wl == "volumetric" || wl == "fluid"
-        || wl == "cinematic_liquid" || wl == "cinematic_liquid_v1");
+        || wl == "cinematic_liquid" || wl == "cinematic_liquid_v1" || wl == "membw");
     if (!headlessSupported) HeadlessBox().IsChecked(false);
     HeadlessBox().IsEnabled(headlessSupported && !suitePreset);
-    bool hostMemorySupported = !(workloadSelectable && fixedQualityLiquid) && !suitePreset;
+    bool hostMemorySupported = !(workloadSelectable && fixedQualityLiquid) && !suitePreset &&
+                               !memBwWorkload;
     if (!hostMemorySupported) HostMemBox().IsChecked(false);
     HostMemBox().IsEnabled(hostMemorySupported);
-    VsyncBox().IsEnabled(!suitePreset);
+    VsyncBox().IsEnabled(!suitePreset && !memBwWorkload);
     ShowLegacyBox().IsEnabled(!suitePreset);
     syncMultiGpuControls();
 
@@ -4092,6 +5662,14 @@ void MainWindow::updateExtraLabel()
         WorkloadInfo().Message(locText(
             "Simulates and renders a 3D liquid scene with solid objects (Vulkan only).",
             "模拟并渲染带固体的 3D 液体场景（目前仅支持 Vulkan）。", "固体を含む 3D 液体シーンをシミュレートして描画します（Vulkan のみ）。"));
+    }
+    else if (infoWl == "membw")
+    {
+        WorkloadInfo().Title(locText("Memory bandwidth", "显存带宽", "メモリ帯域"));
+        WorkloadInfo().Message(locText(
+            "Sweeps the data-set size to measure VRAM, cache (L2 / L1) and PCIe bandwidth. Compute only, no window, Vulkan only; takes about 10–30 s. Close other GPU programs first.",
+            "按数据量扫描，测出显存、缓存（L2 / L1）和 PCIe 的带宽。只做计算、不开窗口，仅支持 Vulkan，约需 10–30 秒。请先关闭其他占用 GPU 的程序。",
+            "データセットサイズを掃引し、VRAM・キャッシュ（L2 / L1）・PCIe の帯域を測ります。計算のみでウィンドウなし、Vulkan のみ、約 10–30 秒。他の GPU プログラムは先に閉じてください。"));
     }
     else if (infoWl == "cinematic_liquid_v1")
     {
@@ -4252,9 +5830,11 @@ void MainWindow::rebuildApiPicker(bool preserveSelection)
     auto workloadItem = WorkloadBox().SelectedItem().try_as<ComboBoxItem>();
     const bool vulkanOnlyWorkload =
         workload == "cinematic_liquid" || workload == "cinematic_liquid_v1" ||
+        workload == "membw" ||
         (workloadItem &&
          (workloadItem == WorkloadCinematicLiquid() ||
-          workloadItem == WorkloadCinematicLiquidV1()));
+          workloadItem == WorkloadCinematicLiquidV1() ||
+          workloadItem == WorkloadMemBw()));
     for (auto const& api : kRunApis)
     {
         if (vulkanOnlyWorkload && api.token != "vulkan")
@@ -4529,6 +6109,8 @@ void MainWindow::OnWorkloadChanged(IInspectable const&, SelectionChangedEventArg
     }
     updateExtraLabel();
     if (m_gpuEnumerationComplete) rebuildApiPicker(true);
+    // RenderDoc / capture availability depends on the workload as well.
+    syncCaptureControls();
 }
 
 void MainWindow::applyMultiGpuRenderDocOverride(bool active)
@@ -4701,8 +6283,10 @@ void MainWindow::updateDurationValueEnabled()
 {
     const int preset = PresetBox().SelectedIndex();
     const bool suitePreset = preset == 7 || preset == 8;
-    DurationUnitBox().IsEnabled(!suitePreset);
-    DurationValueBox().IsEnabled(!suitePreset && !isUnlimitedDuration());
+    const bool memBw = (preset == 1 || preset == 2 || preset == 3) &&
+                       selected(WorkloadBox()) == "membw";
+    DurationUnitBox().IsEnabled(!suitePreset && !memBw);
+    DurationValueBox().IsEnabled(!suitePreset && !memBw && !isUnlimitedDuration());
 }
 
 double MainWindow::durationAmountValue()
@@ -4788,8 +6372,11 @@ void MainWindow::syncCaptureControls()
     const bool multiGpuOn = multiGpuMode == "afr" || multiGpuMode == "sfr";
     const int preset = PresetBox().SelectedIndex();
     const bool suitePreset = preset == 7 || preset == 8;
-    RenderDocBox().IsEnabled(!suitePreset && !headlessOn && !multiGpuOn);
-    const bool canCapture = !suitePreset && renderDocOn && !headlessOn && hasSafeCapturePoint;
+    const bool memBw = (preset == 1 || preset == 2 || preset == 3) &&
+                       selected(WorkloadBox()) == "membw";
+    RenderDocBox().IsEnabled(!suitePreset && !headlessOn && !multiGpuOn && !memBw);
+    const bool canCapture = !suitePreset && renderDocOn && !headlessOn && hasSafeCapturePoint &&
+                            !memBw;
     CaptureBox().IsEnabled(canCapture);
     CaptureValueBox().IsEnabled(canCapture && captureOn);
     m_suppressRenderDocUi = false;
@@ -5081,6 +6668,46 @@ std::vector<std::vector<std::string>> MainWindow::buildPresetJobs(
             appendCapture(dest);
     };
 
+    // Memory-bandwidth sweep: one standalone Vulkan compute worker per GPU.
+    // It takes no duration, capture, run-mode or per-API arguments, and it is
+    // launched without --gui-worker so no RenderDoc module is preloaded.
+    if ((p == 1 || p == 2 || p == 3) && selected(WorkloadBox()) == "membw")
+    {
+        std::vector<int> targets;
+        if (p == 3)
+        {
+            targets = m_gpuIndices;
+            if (targets.empty()) targets.push_back(-1);
+        }
+        else
+        {
+            targets.push_back(selectedGpu);
+        }
+        std::vector<std::vector<std::string>> jobs;
+        for (int gpu : targets)
+        {
+            auto gpuIt = std::find(m_gpuIndices.begin(), m_gpuIndices.end(), gpu);
+            const size_t gpuPos = gpuIt == m_gpuIndices.end()
+                ? m_gpuIndices.size()
+                : static_cast<size_t>(std::distance(m_gpuIndices.begin(), gpuIt));
+            if (gpuPos < m_gpuApiSupport.size() && !m_gpuApiSupport[gpuPos][0])
+            {
+                std::string gpuLabel = gpuPos < m_gpuNames.size()
+                    ? (isSoftwareGpu(m_gpuNames[gpuPos])
+                           ? softwareGpuDisplayName(m_gpuNames[gpuPos], m_cpuName)
+                           : m_gpuNames[gpuPos])
+                    : "GPU " + std::to_string(gpu);
+                skippedJobs.push_back(gpuLabel + " — Vulkan");
+                continue;
+            }
+            std::vector<std::string> a = { m_enginePath, "--workload", "membw",
+                                           "--backend", "vulkan", "--no-renderdoc" };
+            if (gpu >= 0) { a.push_back("--gpu"); a.push_back(std::to_string(gpu)); }
+            jobs.push_back(std::move(a));
+        }
+        return jobs;
+    }
+
     switch (p)
     {
         case 0:  // [0] Quick run — best API / GPU, Medium, stream
@@ -5154,7 +6781,12 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
     if (cancelEvent) ::ResetEvent(static_cast<HANDLE>(cancelEvent.get()));
     Busy().IsActive(true);
     GpuCancelButton().IsEnabled(true);
-    setGpuStatus(StatusLight::Running, jobs.size() > 1
+    // Memory-bandwidth workers are compute-only and ignore the duration controls.
+    const bool memBwJobs = !jobs.empty() &&
+        std::find(jobs.front().begin(), jobs.front().end(), "membw") != jobs.front().end();
+    setGpuStatus(StatusLight::Running, memBwJobs
+        ? locText("Running… (compute only, no window)", "运行中…（只做计算，不开窗口）", "実行中…（計算のみ、ウィンドウなし）")
+        : jobs.size() > 1
         ? locText("Running… (multiple passes; render windows may appear)", "运行中…（多次；可能弹出渲染窗口）", "実行中…（複数パス；描画ウィンドウが表示される場合があります）")
         : locText("Running… (a separate render window may appear)", "运行中…（可能弹出独立渲染窗口）", "実行中…（別ウィンドウが表示される場合があります）"));
     m_lastScoreEn.clear();
@@ -5164,6 +6796,10 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
     m_lastPostProcessFailed = false;
     ResultText().Text(L"—");
     updateResultHint();
+    m_memBwPoints.clear();
+    renderMemBwCharts();
+    m_gpuRunCharts.clear();
+    renderGpuRunCharts();
     OutputBox().Text({});
 
     // Progress: workers report no live protocol, so estimate per-job duration
@@ -5177,6 +6813,12 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
         else if (unit == "hours")   sec = amount * 3600.0;
         m_gpuProgressIndeterminate = isUnlimitedDuration();
         m_gpuProgressJobExpectedSec = sec + 6.0; // warmup + init + save overhead
+        if (memBwJobs)
+        {
+            // A full sweep takes roughly 10-30 s depending on the PCIe link.
+            m_gpuProgressIndeterminate = false;
+            m_gpuProgressJobExpectedSec = 30.0;
+        }
         m_gpuProgressJobs = jobs.size();
         m_gpuProgressJobIndex = 0;
         m_gpuProgressApiLabel.clear();
@@ -5277,6 +6919,9 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
         };
         std::string currentGpuGroup;
         bool cacheResident = false;
+        std::vector<MemBwCurvePoint> memBwPoints;
+        bool memBwSystemMemory = false;
+        std::vector<GpuRunChart> gpuRunCharts;
         for (size_t jobIndex = 0; jobIndex < jobs.size(); ++jobIndex)
         {
             if (m_gpuCancelRequested.load())
@@ -5630,6 +7275,16 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                 auto workerCaps = parseCapturePaths(res.output);
                 caps.insert(caps.end(), workerCaps.begin(), workerCaps.end());
                 std::string sc = extractScore(res.output);
+                const std::string rawScore = sc;
+                bool memBwScore = false;
+                if (sc.empty())
+                {
+                    sc = extractMemBwScore(res.output);
+                    memBwScore = !sc.empty();
+                    // The chart shows the most recent worker when several GPUs ran.
+                    if (memBwScore)
+                        memBwPoints = parseMemBwPoints(res.output, memBwSystemMemory);
+                }
                 if (!sc.empty())
                 {
                     if (scoreTextLooksImplausible(sc))
@@ -5652,7 +7307,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                         const double ws = extractWorkingSetMiB(res.output);
                         if (ws > 0.0 && ws < 128.0) cacheResident = true;
                     }
-                    if (jobs.size() > 1)
+                    if (jobs.size() > 1 && !memBwScore)
                     {
                         std::string label = jobArgValue(job, "--backend");
                         for (auto const& api : kRunApis)
@@ -5692,6 +7347,22 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                     if (gpuName.empty() || gpuName == "(unknown)")
                     {
                         gpuName = gpuArg.empty() ? "GPU" : "GPU " + gpuArg;
+                    }
+                    // A suite worker runs many tests in one process; its
+                    // samples do not belong to one job.
+                    const bool suiteJob =
+                        std::find(job.begin(), job.end(), "--complete-suite") != job.end() ||
+                        std::find(job.begin(), job.end(), "--fill-missing") != job.end();
+                    if (!memBwScore && !suiteJob)
+                    {
+                        GpuRunChart chart;
+                        std::string api = jobArgValue(job, "--backend");
+                        for (auto const& known : kRunApis)
+                            if (api == known.token) { api = known.label; break; }
+                        chart.label = api.empty() ? gpuName : gpuName + " \xE2\x80\x94 " + api;
+                        parseScoreValue(rawScore, chart.metric, chart.score, chart.unit);
+                        chart.samples = parseGpuRunSamples(res.output);
+                        gpuRunCharts.push_back(std::move(chart));
                     }
                     if (gpuName != currentGpuGroup)
                     {
@@ -5961,7 +7632,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
 
         all = clipForUi(std::move(all));
         if (!disp || !disp.TryEnqueue([this, strong, all, lastScore, cacheResident,
-                         needCharts, failedJobs,
+                         memBwPoints, memBwSystemMemory, gpuRunCharts, needCharts, failedJobs,
                          succeededJobs, postProcessFailed, postProcessStatus,
                          reportedSkippedJobs, openGlRoutingMismatches, gpuRunIssues, cancelled]()
         {
@@ -5974,6 +7645,11 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
             {
                 OutputBox().Text(u8(all));
                 GpuCancelButton().IsEnabled(false);
+                m_memBwPoints = memBwPoints;
+                m_memBwSystemMemory = memBwSystemMemory;
+                renderMemBwCharts();
+                m_gpuRunCharts = gpuRunCharts;
+                renderGpuRunCharts();
                 m_lastScoreCacheHint = cacheResident;
                 m_lastSkippedJobs = reportedSkippedJobs;
                 m_lastGpuRunIssues = gpuRunIssues;
@@ -6172,27 +7848,28 @@ void MainWindow::OnRun(IInspectable const&, RoutedEventArgs const&)
         const auto wl = selected(WorkloadBox());
         auto wlItem = WorkloadBox().SelectedItem().try_as<ComboBoxItem>();
         const bool vulkanOnly =
-            wl == "cinematic_liquid" || wl == "cinematic_liquid_v1" ||
+            wl == "cinematic_liquid" || wl == "cinematic_liquid_v1" || wl == "membw" ||
             (wlItem && (wlItem == WorkloadCinematicLiquid() ||
-                        wlItem == WorkloadCinematicLiquidV1()));
+                        wlItem == WorkloadCinematicLiquidV1() ||
+                        wlItem == WorkloadMemBw()));
         bool vulkanDetected = false;
         for (auto const& capabilities : m_gpuApiSupport)
             vulkanDetected = vulkanDetected || capabilities[0]; // {vulkan,...}
         if (vulkanOnly && !vulkanDetected)
         {
             ResultText().Text(locText(
-                "This fluid workload requires Vulkan, and no Vulkan support was "
+                "This test requires Vulkan, and no Vulkan support was "
                 "detected on this device.",
-                "该流体测试仅支持 Vulkan，当前设备未检测到 Vulkan 支持。", "この流体ワークロードは Vulkan が必要ですが、このデバイスで Vulkan サポートが検出されませんでした。"));
+                "该测试仅支持 Vulkan，当前设备未检测到 Vulkan 支持。", "このテストは Vulkan が必要ですが、このデバイスで Vulkan サポートが検出されませんでした。"));
             setGpuStatus(StatusLight::Error,
                          locText("Vulkan not available.", "Vulkan 不可用。", "Vulkan を利用できません。"));
         }
         else if (vulkanOnly)
         {
             ResultText().Text(locText(
-                "This fluid workload runs on Vulkan only — select Vulkan in the "
+                "This test runs on Vulkan only — select Vulkan in the "
                 "Graphics API list.",
-                "该流体测试仅支持 Vulkan，请在图形 API 中勾选 Vulkan。", "この流体ワークロードは Vulkan のみです。グラフィックス API で Vulkan を選択してください。"));
+                "该测试仅支持 Vulkan，请在图形 API 中勾选 Vulkan。", "このテストは Vulkan のみです。グラフィックス API で Vulkan を選択してください。"));
             setGpuStatus(StatusLight::Error,
                          locText("No graphics API selected.", "尚未选择图形 API。", "グラフィックス API が選択されていません。"));
         }
@@ -6441,7 +8118,7 @@ void MainWindow::rebuildHistoryFilters(bool preserveSelection)
         {
             if (historyKey.rfind("cpu_", 0) == 0) continue;
             if (!m_showLegacyHistory && isLegacyGpuWorkload(historyKey)) continue;
-            if (!m_showHeadlessHistory && r.headless) continue;
+            if (!m_showHeadlessHistory && r.headless && r.workload != "membw") continue;
             ++workloadCounts[historyKey];
             if (r.particleCount > 0 && workloadUsesParticles(historyKey))
                 ++particleCounts[r.particleCount];
@@ -6478,7 +8155,7 @@ void MainWindow::rebuildHistoryFilters(bool preserveSelection)
         addStringFilters(ApiFilterPanel(), apiCounts, prevApis,
                          { "Vulkan", "DX12", "DX11", "OpenGL" },
                          [](std::string const& key) { return apiLabel(key); });
-        std::vector<std::string> preferred = { "stream", "gpu_burn", "cinematic_liquid" };
+        std::vector<std::string> preferred = { "stream", "gpu_burn", "cinematic_liquid", "membw" };
         if (m_showLegacyHistory)
         {
             for (auto const* id : { "gpu_stress", "nbody", "synthpeak", "stress", "render3d",
@@ -6525,7 +8202,7 @@ void MainWindow::rebuildHistoryFilters(bool preserveSelection)
     else
     {
         addStringFilters(WorkloadFilterPanel(), workloadCounts, prevWorkloads,
-                         { "cpu_single_core", "cpu_multi_core" },
+                         { "cpu_single_core", "cpu_multi_core", "cpu_membw" },
                          [](std::string const& key) { return workloadLabel(key); });
     }
 }
@@ -6679,7 +8356,8 @@ void MainWindow::applyHistoryView()
             const auto wlKey = historyWorkloadKey(r);
             if (!cpuCat && !m_showLegacyHistory &&
                 isLegacyGpuWorkload(wlKey)) continue;
-            if (!cpuCat && !m_showHeadlessHistory && r.headless) continue;
+            if (!cpuCat && !m_showHeadlessHistory && r.headless &&
+                r.workload != "membw") continue;
             if (hasApiFilter && allowedApis.find(r.graphicsApi) == allowedApis.end()) continue;
             if (hasWorkloadFilter && allowedWorkloads.find(wlKey) == allowedWorkloads.end()) continue;
             // Param filters only apply to workloads that use that dimension.
@@ -6841,7 +8519,9 @@ void MainWindow::applyHistoryView()
                         if (!r->precision.empty()) o << " (" << r->precision << ')';
                         return o.str(); }()
                 : "-";
-            x.fps  = std::to_string((int)r->avgFps);
+            // The memory-bandwidth sweep renders no frames.
+            x.fps  = r->workload == "membw" ? std::string("-")
+                                            : std::to_string((int)r->avgFps);
             rows.push_back(std::move(x));
         }
 
@@ -6976,7 +8656,8 @@ void MainWindow::applyHistoryView()
                     if (!r->precision.empty()) o << " (" << r->precision << ')';
                     return o.str(); }()
             : "-";
-        x.fps  = std::to_string((int)r->avgFps);
+        x.fps  = r->workload == "membw" ? std::string("-")
+                                        : std::to_string((int)r->avgFps);
         rows.push_back(std::move(x));
     }
 
@@ -7073,100 +8754,107 @@ void MainWindow::OnOpenCapturesFolder(IInspectable const&, RoutedEventArgs const
     openFolderInExplorer(&gpu_bench::paths::CapturesDirectory);
 }
 
-// ---- charts (run plot_workloads.py, then show the PNGs) --------------------
+// ---- charts page -----------------------------------------------------------
+// One bar chart per test that has saved results: the best score of every
+// device and API under the newest version of that test. Results of different
+// versions are not comparable, so older versions are left out.
+void MainWindow::renderChartsPage()
+{
+    auto host = ChartsHost();
+    host.Children().Clear();
+    host.ColumnDefinitions().Clear();
+    host.RowDefinitions().Clear();
+
+    std::vector<gpu_bench::BenchmarkResult> results;
+    try { results = gpu_bench::LoadResults(); } catch (...) {}
+    std::map<std::string, std::vector<const gpu_bench::BenchmarkResult*>> byWorkload;
+    for (auto const& result : results)
+    {
+        // The legacy 2D fluid score was never verified.
+        if (result.score <= 0.0 || result.workload == "fluid") continue;
+        byWorkload[historyWorkloadKey(result)].push_back(&result);
+    }
+
+    std::vector<std::string> order = { "stream", "headless_compute", "gpu_burn", "cinematic_liquid",
+                                       "membw", "cpu_single_core", "cpu_multi_core", "cpu_membw" };
+    for (auto const& entry : byWorkload)
+        if (std::find(order.begin(), order.end(), entry.first) == order.end())
+            order.push_back(entry.first);
+
+    std::vector<MemBwChart> charts;
+    size_t resultCount = 0;
+    for (auto const& workload : order)
+    {
+        const auto found = byWorkload.find(workload);
+        if (found == byWorkload.end()) continue;
+        auto const& rows = found->second;
+        const auto* newest = *std::max_element(rows.begin(), rows.end(),
+            [](auto const* a, auto const* b) { return a->timestamp < b->timestamp; });
+        const bool cpu = isCpuHistoryResult(*newest);
+
+        // Best score per device (and API) under the newest version.
+        std::map<std::string, const gpu_bench::BenchmarkResult*> best;
+        for (auto const* row : rows)
+        {
+            if (row->workloadVersion != newest->workloadVersion) continue;
+            ++resultCount;
+            std::string label = cpu
+                ? normalizeCpuName(row->cpuName.empty() ? row->deviceName : row->cpuName)
+                : normalizeGpuName(row->deviceName) + " \xE2\x80\x94 " + row->graphicsApi;
+            auto& slot = best[label];
+            if (!slot || row->score > slot->score) slot = row;
+        }
+        if (best.empty()) continue;
+
+        MemBwChart chart;
+        chart.title = workloadLabel(workload);
+        chart.unit = newest->scoreUnit;
+        chart.subtitle = newest->scoreUnit +
+            (cpu ? i18n::tr(", best saved score per device", "，每个设备保存过的最好成绩",
+                            "、デバイスごとの最高スコア")
+                 : i18n::tr(", best saved score per device and API", "，每个设备和 API 保存过的最好成绩",
+                            "、デバイス・API ごとの最高スコア")) +
+            (newest->workloadVersion.empty() ? std::string() : "  \xC2\xB7  " + newest->workloadVersion);
+        for (auto const& entry : best)
+            chart.bars.push_back({ entry.first, entry.second->score, {} });
+        chart.fullWidth = true;
+        charts.push_back(std::move(chart));
+    }
+
+    if (charts.empty())
+    {
+        ChartsStatus().Text(locText("No saved results yet. Run a test first.",
+                                    "还没有保存的成绩，请先运行一项测试。",
+                                    "保存された結果がありません。先にテストを実行してください。"));
+        return;
+    }
+    const bool dark = RootShell().ActualTheme() != ElementTheme::Light;
+    double hostWidth = host.ActualWidth();
+    if (hostWidth < 200.0) hostWidth = ChartsPage().ActualWidth() - 80.0;
+    if (hostWidth < 200.0) hostWidth = 900.0;
+    // Bars read best at a moderate length.
+    hostWidth = (std::min)(hostWidth, 1100.0);
+    m_chartsPageWidth = host.ActualWidth();
+    layoutMemBwCharts(host, charts, hostWidth, dark, locText(
+        "Each chart uses only the results of the newest version of its test. Hover a bar for the exact value; every run is listed on the History page.",
+        "每张图只使用该测试最新版本的成绩。把鼠标悬停在条形上可查看精确数值；每一次运行都列在历史页里。",
+        "各チャートはそのテストの最新バージョンの結果だけを使います。バーにカーソルを合わせると正確な値を表示します。すべての実行は履歴ページにあります。"));
+    ChartsStatus().Text(u8(i18n::trDyn(
+        std::to_string(charts.size()) + " chart(s) from " + std::to_string(resultCount) + " result(s)",
+        std::to_string(charts.size()) + " 张图表，来自 " + std::to_string(resultCount) + " 条成绩",
+        "チャート " + std::to_string(charts.size()) + " 枚（結果 " + std::to_string(resultCount) + " 件）")));
+}
+
 void MainWindow::OnGenerateCharts(IInspectable const&, RoutedEventArgs const&)
 {
-    if (m_enginePath.empty()) { ChartsStatus().Text(locText("Engine/repo not found.", "未找到引擎/仓库。", "エンジン/リポジトリが見つかりません。")); return; }
-    auto repo = pathFromUtf8(m_enginePath).parent_path().parent_path().parent_path();
-    if (!std::filesystem::exists(repo / "scripts" / "plot_workloads.py"))
-    { ChartsStatus().Text(locText("scripts/plot_workloads.py not found.", "未找到 scripts/plot_workloads.py。", "scripts/plot_workloads.py が見つかりません。")); return; }
-    const auto python = findPythonExecutable();
-    if (python.empty())
-    {
-        ChartsStatus().Text(locText(
-            "Charts unavailable: this package does not yet include the frozen report worker.",
-            "图表不可用：当前安装包尚未包含冻结的报告工具。", "チャートは利用できません：このパッケージには凍結済みレポートワーカーがまだ含まれていません。"));
-        return;
-    }
+    renderChartsPage();
+}
 
-    const auto resultsPath = pathFromUtf8(gpu_bench::ResultsFilePath());
-    const auto imageDir = resultsPath.parent_path().parent_path() / L"reports" / L"images";
-    std::error_code ec;
-    std::filesystem::create_directories(imageDir, ec);
-    if (ec)
-    {
-        ChartsStatus().Text(locText("Could not create the reports directory.",
-                                    "无法创建报告目录。", "レポートディレクトリを作成できませんでした。"));
-        return;
-    }
-
-    if (!tryBeginTask(ActiveTask::Charts))
-    {
-        ChartsStatus().Text(locText(
-            "Another benchmark or report task is already running.",
-            "另一个测试或报告任务正在运行。", "別のベンチマークまたはレポートタスクが既に実行中です。"));
-        return;
-    }
-    ChartsBusy().IsActive(true);
-    ChartsStatus().Text(locText("Running plot_workloads.py…", "正在运行 plot_workloads.py…", "plot_workloads.py を実行中…"));
-
-    auto strong = get_strong();
-    auto disp = m_dispatcher;
-    std::wstring repoW = repo.wstring();
-    const auto pythonW = python.wstring();
-    const auto resultsW = resultsPath.wstring();
-    const auto imageDirW = imageDir.wstring();
-    std::thread([this, strong, disp, repoW, pythonW, resultsW, imageDirW]()
-    {
-      try
-      {
-        auto result = runProcess(
-            L"\"" + pythonW + L"\" \"scripts\\plot_workloads.py\" --input \""
-            + resultsW + L"\" --out \"" + imageDirW + L"\"", repoW);
-        disp.TryEnqueue([this, strong, imageDirW, result = std::move(result)]()
-        {
-            ChartsPanel().Children().Clear();
-            std::filesystem::path imgDir(imageDirW);
-            const char* names[] = { "workload_stream", "workload_gpu_burn", "workload_gpu_stress",
-                                    "workload_nbody", "workload_stress",
-                                    "workload_render3d", "workload_volumetric",
-                                    "workload_cinematic_liquid", "workload_synthpeak" };
-            int shown = 0;
-            for (auto n : names)
-            {
-                auto p = imgDir / (std::string(n) + ".png");
-                if (!std::filesystem::exists(p)) continue;
-                Media::Imaging::BitmapImage bmp;
-                bmp.CreateOptions(Media::Imaging::BitmapCreateOptions::IgnoreImageCache);
-                bmp.UriSource(fileUri(p));
-                Image img; img.Source(bmp); img.Stretch(Stretch::Uniform);
-                img.MaxWidth(900); img.HorizontalAlignment(HorizontalAlignment::Left);
-                ChartsPanel().Children().Append(img);
-                ++shown;
-            }
-            const auto count = std::to_string(shown);
-            ChartsStatus().Text(result.exitCode == 0
-                ? u8(i18n::trDyn(
-                    "Done — " + count + " chart(s)",
-                    "完成 —— " + count + " 张图表",
-                    "完了 — チャート " + count + " 枚"))
-                : u8(i18n::trDyn(
-                    "python exited with " + std::to_string(result.exitCode),
-                    "python 退出码 " + std::to_string(result.exitCode),
-                    "python 終了コード " + std::to_string(result.exitCode))));
-            endTask(ActiveTask::Charts); ChartsBusy().IsActive(false);
-        });
-      }
-      catch (...)
-      {
-          disp.TryEnqueue([this, strong]()
-          {
-              ChartsStatus().Text(locText("Chart generation failed.", "图表生成失败", "チャート生成に失敗しました。"));
-              endTask(ActiveTask::Charts);
-              ChartsBusy().IsActive(false);
-          });
-      }
-    }).detach();
+void MainWindow::OnChartsHostSizeChanged(IInspectable const&, SizeChangedEventArgs const& args)
+{
+    // Only the width matters; redrawing changes the height, which must not loop.
+    if (ChartsPage().Visibility() != Visibility::Visible) return;
+    if (std::fabs(args.NewSize().Width - m_chartsPageWidth) > 1.0) renderChartsPage();
 }
 
 }

@@ -1,8 +1,10 @@
 #include "app_base.h"
 #include "benchmark_results.h"
 #include "cpu_benchmark.h"
+#include "cpu_membw.h"
 #include "gpu_engine.h"
 #include "path_service.h"
+#include "vulkan_membw.h"
 
 #if defined(_WIN32) && defined(HAVE_VULKAN)
 #include "renderdoc_app.h"
@@ -213,6 +215,182 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
     }
     stored.workloadConfig = contract.str();
     return stored;
+}
+
+#ifdef HAVE_CPU_MEMBW
+static gpu_bench::BenchmarkResult MakeStoredCpuMemBwResult(
+    const gpu_bench::CpuMemBwReport& report,
+    const gpu_bench::CpuMemBwConfig& config) {
+    const auto findLevel = [](const gpu_bench::CpuMemBwModeSummary& mode, const char* name)
+        -> const gpu_bench::CpuMemBwLevelSummary* {
+        for (const auto& level : mode.levels)
+            if (level.name == name && level.measured) return &level;
+        return nullptr;
+    };
+    const auto* allMemory = findLevel(report.all, "memory");
+    const auto* singleMemory = findLevel(report.single, "memory");
+    const auto* headline = allMemory ? allMemory : singleMemory;
+
+    gpu_bench::BenchmarkResult stored;
+    stored.id = gpu_bench::GenerateResultId() + "-cpu-membw";
+    stored.timestamp = gpu_bench::GenerateTimestamp();
+    stored.resultSchemaVersion = 4;
+    stored.appVersion = gpu_bench::CurrentAppVersion();
+    stored.workload = gpu_bench::kCpuMemBwWorkloadId;
+    // The formal contract is the default sweep with the widest vectors and a
+    // settled memory plateau; anything else is kept in a preview group.
+    const gpu_bench::CpuMemBwConfig defaults;
+    const bool formal = headline && headline->settled &&
+                        !report.datasetLimitedByMemory &&
+                        config.maxDatasetBytes == defaults.maxDatasetBytes &&
+                        config.vectorBytes == defaults.vectorBytes &&
+                        config.levelsFromCurve == defaults.levelsFromCurve &&
+                        config.debugSplitClasses == 0 && !config.debugHideLastCache &&
+                        config.warmupRuns == defaults.warmupRuns &&
+                        config.measuredRuns == defaults.measuredRuns &&
+                        config.sampleMs == defaults.sampleMs;
+    stored.workloadVersion = std::string(gpu_bench::kCpuMemBwWorkloadVersion) +
+                             (formal ? "" : "_preview");
+    stored.graphicsApi = "CPU";
+    stored.deviceName = report.cpuName;
+    stored.cpuName = report.cpuName;
+    stored.osVersion = gpu_bench::CurrentOsVersion();
+    stored.platform = gpu_bench::CurrentPlatform();
+    stored.osArchitecture = gpu_bench::CurrentOsArchitecture();
+    stored.processArchitecture = gpu_bench::CurrentProcessArchitecture();
+    stored.difficulty = "Sweep";
+    stored.headless = true;
+    stored.framesInFlight = 0;
+    stored.durationSec = report.durationSec;
+    stored.timingSamples = static_cast<std::uint32_t>(
+        report.points.size() * report.measuredRuns);
+    stored.score = headline ? headline->readGBps : 0.0;
+    stored.scoreUnit = "GB/s";
+    stored.precision = report.vectorName;
+    stored.bottleneck = "Memory bandwidth";
+
+    std::ostringstream contract;
+    contract << std::fixed << std::setprecision(1)
+             << "score=" << (allMemory ? "all_core_memory_read" : "single_thread_memory_read")
+             << ";vector=" << report.vectorName
+             << ";vectorBytes=" << report.vectorBytes
+             << ";physicalCores=" << report.physicalCores
+             << ";logicalProcessors=" << report.logicalProcessors
+             << ";allCoreThreads=" << report.all.threads
+             << ";affinity=" << report.affinity
+             << ";cacheSource=" << report.cacheSource;
+    for (const auto& cache : report.caches) {
+        contract << ";cacheL" << cache.level << "KiB=" << cache.sizeBytes / 1024
+                 << ";cacheL" << cache.level << "SharedCores=" << cache.sharedByCores;
+    }
+    // Levels of every core class ("single", "single_1", ...) and of all cores.
+    std::vector<std::pair<std::string, const gpu_bench::CpuMemBwModeSummary*>> modes;
+    contract << ";coreClasses=" << report.classes.size();
+    for (const auto& cpuClass : report.classes) {
+        modes.emplace_back(cpuClass.summary.mode, &cpuClass.summary);
+        contract << ";class" << cpuClass.rank << "Name=" << cpuClass.name
+                 << ";class" << cpuClass.rank << "Cores=" << cpuClass.coreCount
+                 << ";class" << cpuClass.rank << "CacheSource=" << cpuClass.cacheSource;
+    }
+    modes.emplace_back("all", &report.all);
+    for (const auto& entry : modes) {
+        for (const auto& level : entry.second->levels) {
+            if (!level.measured) continue;
+            const std::string key = entry.first + "_" + level.name;
+            if (level.fromCurve) {
+                contract << ';' << key << "_capacityLowKiB=" << level.capacityLowBytes / 1024
+                         << ';' << key << "_capacityHighKiB=" << level.capacityHighBytes / 1024;
+            }
+            contract << ';' << key << "_read=" << level.readGBps
+                     << ';' << key << "_write=" << level.writeGBps
+                     << ';' << key << "_copy=" << level.copyGBps
+                     << ';' << key << "_fromKiB=" << level.fromBytes / 1024
+                     << ';' << key << "_toKiB=" << level.toBytes / 1024;
+            if (level.name == "memory") {
+                contract << ';' << key << "_writeStream=" << level.writeStreamGBps
+                         << ';' << key << "_copyStream=" << level.copyStreamGBps
+                         << ';' << key << "_zeroFill=" << level.zeroFillGBps
+                         << ';' << key << "_settled=" << (level.settled ? 1 : 0);
+            }
+        }
+    }
+    contract << ";pageFaultMeasured=" << (report.pageFault.measured ? 1 : 0)
+             << ";pageFaultGBps=" << std::setprecision(2) << report.pageFault.gbps
+             << ";pageFaultNsPerPage=" << std::setprecision(0) << report.pageFault.nsPerPage
+             << ";pageBytes=" << report.pageFault.pageBytes
+             << ";storageMeasured=" << (report.storage.measured ? 1 : 0)
+             << ";storageBacking=" << report.storage.backing
+             << ";storageOnPagingDrive=" << (report.storage.onPagingDrive ? 1 : 0)
+             << ";storageDirectIo=" << (report.storage.directIo ? 1 : 0)
+             << ";storageFileMiB=" << report.storage.fileBytes / (1024 * 1024)
+             << ";storageSeqReadMBps=" << report.storage.seqReadMBps
+             << ";storageSeqWriteMBps=" << report.storage.seqWriteMBps
+             << ";storageRandReadMBps=" << report.storage.randReadMBps
+             << ";storageRandWriteMBps=" << report.storage.randWriteMBps
+             << ";maxDatasetMiB=" << report.single.maxBlockBytes / (1024 * 1024)
+             << ";warmupRuns=" << report.warmupRuns
+             << ";measuredRuns=" << report.measuredRuns
+             << ";sampleMs=" << report.sampleMs
+             << ";remeasuredPoints=" << report.remeasuredPoints
+             << ";aggregation=median;timing=wall_clock";
+    // Full curves as "<data set KiB per thread>:<median GB/s>" pairs.
+    contract << std::setprecision(1);
+    for (const auto& entry : modes) {
+        const std::string& mode = entry.first;
+        for (const char* kernel : {"read", "write", "copy", "write_nt", "copy_nt", "zero"}) {
+            contract << ";curve_" << mode << '_' << kernel << '=';
+            bool first = true;
+            for (const auto& point : report.points) {
+                if (point.mode != mode || point.kernel != kernel) continue;
+                if (!first) contract << ',';
+                first = false;
+                contract << point.blockBytes / 1024 << ':' << point.medianGBps;
+            }
+        }
+    }
+    stored.workloadConfig = contract.str();
+    return stored;
+}
+#endif
+
+// Runs `--cpu-membw`. Returns the process exit code.
+static int RunCpuMemoryBandwidthCli(gpu_bench::CpuMemBwConfig config, bool saveResult) {
+#ifdef HAVE_CPU_MEMBW
+#ifndef _WIN32
+    // The working directory may be on tmpfs; the results directory is on a drive.
+    if (config.storageTest && config.storageDir.empty()) {
+        const auto resultsDir = std::filesystem::path(gpu_bench::ResultsFilePath()).parent_path();
+        std::error_code ec;
+        std::filesystem::create_directories(resultsDir, ec);
+        if (!ec) config.storageDir = resultsDir.string();
+    }
+#endif
+    const auto report = gpu_bench::RunCpuMemoryBandwidth(config, std::cout);
+    if (!report.valid) {
+        std::cerr << "CPU memory bandwidth sweep failed: "
+                  << (report.error.empty() ? "no valid result" : report.error) << "\n";
+        return 1;
+    }
+    if (saveResult) {
+        try {
+            const auto stored = MakeStoredCpuMemBwResult(report, config);
+            if (gpu_bench::AppendResult(stored)) {
+                std::cout << "[Results] Saved as " << stored.id << " -> "
+                          << gpu_bench::ResultsFilePath() << '\n';
+            } else {
+                std::cerr << "[Results] Warning: failed to append the CPU memory result.\n";
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "[Results] Warning: CPU memory result storage failed: "
+                      << e.what() << '\n';
+        }
+    }
+    return 0;
+#else
+    (void)config; (void)saveResult;
+    std::cerr << "The CPU memory bandwidth sweep is only built into the desktop CLI.\n";
+    return 2;
+#endif
 }
 
 static std::string ExeDirectory(const char* argv0) {
@@ -1130,6 +1308,185 @@ static void PrintGpuTable(const std::vector<GpuInfo>& gpus) {
 
 // ---------------------------------------------------------------------------
 
+#ifdef HAVE_VULKAN_MEMBW
+static gpu_bench::BenchmarkResult MakeStoredMemBwResult(
+    const gpu_bench::MemBwReport& report,
+    const gpu_bench::MemBwConfig& config,
+    const GpuInfo& gpu) {
+    gpu_bench::BenchmarkResult stored;
+    stored.id = gpu_bench::GenerateResultId() + "-membw";
+    stored.timestamp = gpu_bench::GenerateTimestamp();
+    stored.resultSchemaVersion = 4;
+    stored.appVersion = gpu_bench::CurrentAppVersion();
+    stored.workload = gpu_bench::kMemBwWorkloadId;
+    // The formal contract is the default sweep reaching the memory plateau.
+    // A shortened or cache-bound sweep is kept in a separate preview group.
+    const gpu_bench::MemBwConfig defaults;
+    const bool formal = report.read.memoryPlateauReached &&
+                        config.maxDatasetBytes == defaults.maxDatasetBytes &&
+                        config.warmupRuns == defaults.warmupRuns &&
+                        config.measuredRuns == defaults.measuredRuns;
+    stored.workloadVersion = std::string(gpu_bench::kMemBwWorkloadVersion) +
+                             (formal ? "" : "_preview");
+    stored.graphicsApi = "Vulkan";
+    stored.deviceName = gpu.name.empty() ? report.deviceName : gpu.name;
+    stored.driverVersion = report.driverVersion;
+    stored.cpuName = gpu_bench::AppBase::HostCpuName();
+    stored.osVersion = gpu_bench::CurrentOsVersion();
+    stored.platform = gpu_bench::CurrentPlatform();
+    stored.osArchitecture = gpu_bench::CurrentOsArchitecture();
+    stored.processArchitecture = gpu_bench::CurrentProcessArchitecture();
+    stored.memory = report.unifiedMemory ? "Unified-memory" : "Device-local";
+    stored.vramMB = gpu.vramMB > 0 ? static_cast<std::uint32_t>(gpu.vramMB)
+                                   : report.deviceLocalHeapMB;
+    stored.difficulty = "Sweep";
+    stored.isSoftware = report.isSoftware;
+    stored.headless = true;
+    stored.framesInFlight = 0;
+    stored.durationSec = report.durationSec;
+    stored.timingSamples = static_cast<std::uint32_t>(
+        report.points.size() * report.measuredRuns);
+    stored.score = report.read.memoryGBps;
+    stored.scoreUnit = "GB/s";
+    stored.bottleneck = report.isSoftware ? "Software" : "Memory bandwidth";
+
+    constexpr double kMiBf = 1024.0 * 1024.0;
+    std::ostringstream contract;
+    contract << std::fixed << std::setprecision(1)
+             << "score=read_memory_plateau"
+             << ";readMemoryGBps=" << report.read.memoryGBps
+             << ";readCacheGBps=" << report.read.cacheGBps
+             << ";readCacheFromMiB=" << report.read.cacheFromBytes / kMiBf
+             << ";readCacheToMiB=" << report.read.cacheToBytes / kMiBf
+             << ";readCacheKneeMiB=" << report.read.cacheKneeBytes / kMiBf
+             << ";writeMemoryGBps=" << report.write.memoryGBps
+             << ";writeCacheGBps=" << report.write.cacheGBps
+             << ";copyMemoryGBps=" << report.copy.memoryGBps
+             << ";copyCacheGBps=" << report.copy.cacheGBps
+             << ";l1FullLoadGBps=" << report.l1.fullLoadGBps
+             << ";l1FullLoadBlockKiB=" << report.l1.fullLoadBlockBytes / 1024
+             << ";l1SingleGroupGBps=" << report.l1.singleGroupGBps
+             << ";l1CapacityLowKiB=" << report.l1.capacityLowBytes / 1024
+             << ";l1CapacityHighKiB=" << report.l1.capacityHighBytes / 1024
+             << ";hostMeasured=" << (report.host.measured ? 1 : 0)
+             << ";hostReadGBps=" << report.host.read.memoryGBps
+             << ";hostWriteGBps=" << report.host.write.memoryGBps
+             << ";hostCopyToDeviceGBps=" << report.host.copyToDeviceGBps
+             << ";hostCopyToHostGBps=" << report.host.copyToHostGBps
+             << ";memoryKind=" << (report.unifiedMemory ? "unified" : "device_local")
+             << ";chunkKiB=" << report.chunkBytes / 1024
+             << ";elementBytes=16"
+             << ";maxDatasetMiB=" << report.maxDatasetBytes / (1024 * 1024)
+             << ";datasetLimitedByDevice=" << (report.datasetLimitedByDevice ? 1 : 0)
+             << ";memoryPlateauReached=" << (report.read.memoryPlateauReached ? 1 : 0)
+             << ";warmupRuns=" << report.warmupRuns
+             << ";measuredRuns=" << report.measuredRuns
+             << ";aggregation=median"
+             << ";timing=" << report.timingSource
+             << ";timestampAnomalies=" << report.timestampAnomalies;
+    // Full curves as "<data set MiB>:<median GB/s>" pairs.
+    for (const char* kernel : {"read", "write", "copy", "host_read", "host_write"}) {
+        contract << ";curve_" << kernel << "=";
+        bool first = true;
+        for (const auto& point : report.points) {
+            if (point.kernel != kernel) continue;
+            if (!first) contract << ',';
+            first = false;
+            contract << point.datasetBytes / kMiBf << ':' << point.medianGBps;
+        }
+    }
+    // L1 curves as "<private block KiB>:<median GB/s>" pairs.
+    for (const char* kernel : {"l1", "l1_single"}) {
+        contract << ";curve_" << kernel << "=";
+        bool first = true;
+        for (const auto& point : report.points) {
+            if (point.kernel != kernel) continue;
+            if (!first) contract << ',';
+            first = false;
+            contract << point.datasetBytes / 1024 << ':' << point.medianGBps;
+        }
+    }
+    stored.workloadConfig = contract.str();
+    return stored;
+}
+#endif
+
+// Runs `--workload membw`. Returns the process exit code.
+static int RunMemoryBandwidthCli(const std::vector<GpuInfo>& gpus,
+                                 std::int32_t gpuIndex,
+                                 const std::string& backend,
+                                 const std::string& shaderDir,
+                                 gpu_bench::MemBwConfig config,
+                                 bool saveResult) {
+#ifdef HAVE_VULKAN_MEMBW
+    if (backend != "auto" && backend != "vulkan") {
+        std::cerr << "The membw workload is currently Vulkan-only; '" << backend
+                  << "' is not supported.\n";
+        return 2;
+    }
+    if (!VulkanLoaderAvailable()) {
+        std::cerr << "The membw workload needs Vulkan, but vulkan-1.dll is not installed.\n";
+        return 1;
+    }
+
+    // --gpu selects from the probed list; otherwise prefer a discrete hardware
+    // GPU, then any hardware GPU, then a software Vulkan device.
+    std::int32_t chosen = -1;
+    if (gpuIndex >= 0) {
+        if (static_cast<std::size_t>(gpuIndex) >= gpus.size()) {
+            std::cerr << "GPU index " << gpuIndex << " is out of range (0-"
+                      << (gpus.empty() ? 0 : gpus.size() - 1) << ").\n";
+            return 1;
+        }
+        chosen = gpuIndex;
+    } else {
+        int bestRank = -1;
+        for (std::size_t i = 0; i < gpus.size(); ++i) {
+            if (!gpus[i].supportsVulkan) continue;
+            const int rank = gpus[i].isSoftware ? 0 : gpus[i].isDiscrete ? 2 : 1;
+            if (rank > bestRank) {
+                bestRank = rank;
+                chosen = static_cast<std::int32_t>(i);
+            }
+        }
+    }
+    if (chosen < 0 || !gpus[static_cast<std::size_t>(chosen)].supportsVulkan ||
+        gpus[static_cast<std::size_t>(chosen)].vkPhysDevIndex < 0) {
+        std::cerr << "No Vulkan-capable GPU is available for the membw workload"
+                  << (chosen >= 0 ? " at the requested --gpu index" : "") << ".\n";
+        return 1;
+    }
+    const GpuInfo& gpu = gpus[static_cast<std::size_t>(chosen)];
+    config.physicalDeviceIndex = gpu.vkPhysDevIndex;
+    config.shaderDir = shaderDir;
+
+    const auto report = gpu_bench::RunVulkanMemoryBandwidth(config, std::cout);
+    if (!report.valid) {
+        std::cerr << "Memory bandwidth sweep failed: "
+                  << (report.error.empty() ? "no valid read result" : report.error) << "\n";
+        return 1;
+    }
+    if (saveResult) {
+        try {
+            const auto stored = MakeStoredMemBwResult(report, config, gpu);
+            if (gpu_bench::AppendResult(stored)) {
+                std::cout << "[Results] Saved as " << stored.id << " -> "
+                          << gpu_bench::ResultsFilePath() << '\n';
+            } else {
+                std::cerr << "[Results] Warning: failed to append the membw result.\n";
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "[Results] Warning: membw result storage failed: " << e.what() << '\n';
+        }
+    }
+    return 0;
+#else
+    (void)gpus; (void)gpuIndex; (void)backend; (void)shaderDir; (void)config; (void)saveResult;
+    std::cerr << "The membw workload requires a desktop build with the Vulkan backend.\n";
+    return 2;
+#endif
+}
+
 int gpu_bench::cliMain(int argc, char* argv[]) {
 #ifdef _WIN32
     SetUnhandledExceptionFilter(CrashHandler);
@@ -1150,6 +1507,12 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     bool renderDocLayerRequested = false;
     bool cpuBenchmarkRequested = false;
     bool saveCpuResults = true;
+    bool membwRequested = false;
+    bool saveMembwResults = true;
+    gpu_bench::MemBwConfig membwCfg;
+    bool cpuMembwRequested = false;
+    bool saveCpuMembwResults = true;
+    gpu_bench::CpuMemBwConfig cpuMembwCfg;
     gpu_bench::CpuBenchmarkConfig cpuCfg;
     gpu_bench::BenchmarkConfig benchCfg;
 
@@ -1187,6 +1550,77 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                 std::cerr << "--cpu-warmup must be a finite value from 0 to 60 seconds.\n";
                 return 2;
             }
+        } else if (std::strcmp(argv[i], "--membw-max-mib") == 0 && i + 1 < argc) {
+            int mib = 0;
+            if (!SafeStoi(argv[++i], mib) || mib < 1 || mib > 65536) {
+                std::cerr << "--membw-max-mib must be an integer from 1 to 65536.\n";
+                return 2;
+            }
+            membwCfg.maxDatasetBytes = static_cast<std::uint64_t>(mib) << 20;
+        } else if (std::strcmp(argv[i], "--membw-max-mib") == 0) {
+            std::cerr << argv[i] << " requires a value.\n";
+            return 2;
+        } else if (std::strcmp(argv[i], "--membw-no-save") == 0) {
+            saveMembwResults = false;
+        } else if (std::strcmp(argv[i], "--cpu-membw") == 0) {
+            cpuMembwRequested = true;
+        } else if (std::strcmp(argv[i], "--cpu-membw-max-mib") == 0 && i + 1 < argc) {
+            cpuMembwRequested = true;
+            int mib = 0;
+            if (!SafeStoi(argv[++i], mib) || mib < 1 || mib > 65536) {
+                std::cerr << "--cpu-membw-max-mib must be an integer from 1 to 65536.\n";
+                return 2;
+            }
+            cpuMembwCfg.maxDatasetBytes = static_cast<std::uint64_t>(mib) << 20;
+        } else if (std::strcmp(argv[i], "--cpu-membw-vector") == 0 && i + 1 < argc) {
+            cpuMembwRequested = true;
+            const std::string bits = argv[++i];
+            if (bits == "auto") cpuMembwCfg.vectorBytes = 0;
+            else if (bits == "128") cpuMembwCfg.vectorBytes = 16;
+            else if (bits == "256") cpuMembwCfg.vectorBytes = 32;
+            else if (bits == "512") cpuMembwCfg.vectorBytes = 64;
+            else {
+                std::cerr << "--cpu-membw-vector must be auto, 128, 256 or 512.\n";
+                return 2;
+            }
+        } else if (std::strcmp(argv[i], "--cpu-membw-curve-levels") == 0) {
+            cpuMembwRequested = true;
+            cpuMembwCfg.levelsFromCurve = true;
+        } else if (std::strcmp(argv[i], "--cpu-membw-no-storage") == 0) {
+            cpuMembwRequested = true;
+            cpuMembwCfg.storageTest = false;
+        } else if (std::strcmp(argv[i], "--cpu-membw-storage-dir") == 0 && i + 1 < argc) {
+            cpuMembwRequested = true;
+            cpuMembwCfg.storageDir = argv[++i];
+        } else if (std::strcmp(argv[i], "--cpu-membw-storage-mib") == 0 && i + 1 < argc) {
+            cpuMembwRequested = true;
+            int mib = 0;
+            if (!SafeStoi(argv[++i], mib) || mib < 32 || mib > 65536) {
+                std::cerr << "--cpu-membw-storage-mib must be an integer from 32 to 65536.\n";
+                return 2;
+            }
+            cpuMembwCfg.storageFileBytes = static_cast<std::uint64_t>(mib) << 20;
+        } else if (std::strcmp(argv[i], "--cpu-membw-debug-classes") == 0 && i + 1 < argc) {
+            cpuMembwRequested = true;
+            int classes = 0;
+            if (!SafeStoi(argv[++i], classes) || classes < 2 || classes > 8) {
+                std::cerr << "--cpu-membw-debug-classes must be an integer from 2 to 8.\n";
+                return 2;
+            }
+            cpuMembwCfg.debugSplitClasses = static_cast<std::uint32_t>(classes);
+        } else if (std::strcmp(argv[i], "--cpu-membw-debug-hide-llc") == 0) {
+            cpuMembwRequested = true;
+            cpuMembwCfg.debugHideLastCache = true;
+        } else if (std::strcmp(argv[i], "--cpu-membw-max-mib") == 0 ||
+                   std::strcmp(argv[i], "--cpu-membw-vector") == 0 ||
+                   std::strcmp(argv[i], "--cpu-membw-storage-dir") == 0 ||
+                   std::strcmp(argv[i], "--cpu-membw-storage-mib") == 0 ||
+                   std::strcmp(argv[i], "--cpu-membw-debug-classes") == 0) {
+            std::cerr << argv[i] << " requires a value.\n";
+            return 2;
+        } else if (std::strcmp(argv[i], "--cpu-membw-no-save") == 0) {
+            cpuMembwRequested = true;
+            saveCpuMembwResults = false;
         } else if (std::strcmp(argv[i], "--cpu-no-save") == 0) {
             cpuBenchmarkRequested = true;
             saveCpuResults = false;
@@ -1284,7 +1718,10 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                                      benchCfg.workload = gpu_bench::Workload::CinematicLiquidV1;
             else if (w == "fluid")
                                      benchCfg.workload = gpu_bench::Workload::Fluid;
-            else std::cerr << "Unknown workload '" << w << "' (use stream|nbody|gpu_burn|gpu_stress|stress|synthpeak|render3d|volumetric|cinematic_liquid|cinematic_liquid_v1|fluid)\n";
+            // Standalone compute-only sweep; it does not run through a backend.
+            else if (w == "membw" || w == "memory_bandwidth")
+                                     membwRequested = true;
+            else std::cerr << "Unknown workload '" << w << "' (use stream|nbody|gpu_burn|gpu_stress|stress|synthpeak|render3d|volumetric|cinematic_liquid|cinematic_liquid_v1|fluid|membw)\n";
         } else if (std::strcmp(argv[i], "--precision") == 0 && i + 1 < argc) {
             std::string pr = argv[++i];
             if (pr == "fp32")       benchCfg.peakPrecision = gpu_bench::Precision::FP32;
@@ -1429,8 +1866,18 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --cpu-time <seconds>                 Total measurement time per CPU test (default: 1)\n"
                       << "  --cpu-warmup <seconds>               CPU warm-up time per test (default: 0.15)\n"
                       << "  --cpu-no-save                        Do not append successful CPU summaries to results.json\n"
+                      << "  --cpu-membw                          Run the CPU cache / memory bandwidth sweep (L1-L4, memory, page mapping)\n"
+                      << "  --cpu-membw-max-mib <MiB>            cpu-membw: largest single-thread data set (default: 1024)\n"
+                      << "  --cpu-membw-vector <auto|128|256|512> cpu-membw: vector width of the kernels (default: auto = widest)\n"
+                      << "  --cpu-membw-no-save                  cpu-membw: do not append the result to results.json\n"
+                      << "  --cpu-membw-curve-levels             cpu-membw: read the cache levels off the curve, not from the OS\n"
+                      << "  --cpu-membw-no-storage               cpu-membw: skip the storage test (writes no file)\n"
+                      << "  --cpu-membw-storage-dir <path>       cpu-membw: directory for the storage test file\n"
+                      << "  --cpu-membw-storage-mib <MiB>        cpu-membw: size of the storage test file (default: 1024)\n"
+                      << "  --membw-max-mib <MiB>                membw: largest data set of the sweep (default: 2048)\n"
+                      << "  --membw-no-save                      membw: do not append the result to results.json\n"
                       << "  --particles <count>                 Particle count (skips difficulty menu, rounded to 256)\n"
-                      << "  --workload <stream|nbody|gpu_burn|gpu_stress|stress|synthpeak|render3d|volumetric|cinematic_liquid|cinematic_liquid_v1|fluid>\n"
+                      << "  --workload <stream|nbody|gpu_burn|gpu_stress|stress|synthpeak|render3d|volumetric|cinematic_liquid|cinematic_liquid_v1|fluid|membw>\n"
                       << "                                      particle / N-body / Plasma x Kaleidoscope GPU Burn / GraphicsBurn component / legacy fractal / peak / 3D / volume / 3D liquid / legacy 2D fluid\n"
                       << "  --bodies <count>                    N-body body count (implies --workload nbody; default 65536)\n"
                       << "  --iter <count>                      GPU Burn fixed steps (16-2048) / GraphicsBurn / legacy fractal / SynthPeak\n"
@@ -1481,6 +1928,10 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         std::cerr << "--complete-suite and --fill-missing are mutually exclusive.\n";
         return 2;
     }
+
+    // The CPU memory sweep, like the CPU benchmark below, needs no GPU.
+    if (cpuMembwRequested)
+        return RunCpuMemoryBandwidthCli(cpuMembwCfg, saveCpuMembwResults);
 
     // CPU benchmarking is a fully separate path. Return before GLFW, GPU/API
     // probing, shader discovery, or a graphics window is initialised.
@@ -1871,6 +2322,17 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     }
 
     PrintGpuTable(gpus);
+
+    // The memory-bandwidth sweep is a standalone compute-only path: it needs
+    // the probed GPU list for --gpu, but no backend object, window or menu.
+    if (membwRequested) {
+        const int membwExit = RunMemoryBandwidthCli(
+            gpus, gpuIndex, backend, shaderDir, membwCfg, saveMembwResults);
+#if !defined(GPU_BENCH_NO_GLFW)
+        if (!gpu_bench::skipGlfwTerminate) glfwTerminate();
+#endif
+        return membwExit;
+    }
 
     bool directBenchmark = (backend != "auto") || benchmarkArgGiven || runAll ||
                            completeSuite || fillMissingSuite || timeArgGiven;

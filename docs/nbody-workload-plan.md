@@ -12,7 +12,7 @@
 
 ## 1. 为什么是 N-body
 
-当前 `compute.comp` 每个粒子只做 3 个乘加 + 1 次比较，读写约 40 字节 →
+当前 `compute.comp` 每个粒子只做 3 个乘加 + 1 次比较，读写约 40 字节（这是计分公式使用的估算值；2026-09-30 实测硬件流量约为每粒子 64 字节，见 [`benchmark-workload-suite.md`](benchmark-workload-suite.md) §6）→
 **算术强度 ≈ 0.15 FLOP/byte，纯带宽瓶颈**，测不出算力。
 
 N-body 引力（all-pairs）是业界公认的 GPU compute 标杆负载（NVIDIA *GPU Gems 3*）：

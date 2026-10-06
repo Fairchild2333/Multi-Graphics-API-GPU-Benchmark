@@ -1,0 +1,48 @@
+#version 450
+
+// Memory-bandwidth sweep (membw_v1): write kernel.
+//
+// Uses the same chunk addressing as membw_read.comp. It also initialises the
+// source buffer: the stored values come from an integer hash of the element
+// index, so the data is not compressible, and they stay in [1, 2) so the read
+// kernel's never-true checksum test holds. The hash is kept to two multiplies
+// and a few bit operations so the kernel stays memory-bound on small GPUs.
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+layout(set = 0, binding = 0, std430) writeonly buffer SourceBuffer {
+    vec4 data[];
+} dst;
+
+layout(push_constant) uniform MemBwParams {
+    uint chunkCount;
+    uint stripesPerChunk;
+    uint totalGroups;
+    uint groupsX;
+    uint seed;
+    float never;
+} params;
+
+vec4 hashValue(uint index) {
+    uint a = (index + params.seed) * 2654435761u;
+    a ^= a >> 15;
+    const uint b = a * 2246822519u;
+    // 0x3F800000 is the bit pattern of 1.0; the low 23 bits become the mantissa.
+    const uvec4 mantissa = uvec4(a, a >> 9, b, b >> 9) & 0x007FFFFFu;
+    return uintBitsToFloat(mantissa | 0x3F800000u);
+}
+
+void main() {
+    const uint group = gl_WorkGroupID.x + gl_WorkGroupID.y * params.groupsX;
+    if (group >= params.totalGroups) return;
+
+    const uint base = (group % params.chunkCount) * params.stripesPerChunk * 256u
+                    + gl_LocalInvocationID.x;
+
+    for (uint stripe = 0u; stripe < params.stripesPerChunk; stripe += 2u) {
+        const uint first = base + stripe * 256u;
+        const uint second = base + (stripe + 1u) * 256u;
+        dst.data[first] = hashValue(first);
+        dst.data[second] = hashValue(second);
+    }
+}

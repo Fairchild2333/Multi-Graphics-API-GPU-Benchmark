@@ -31,6 +31,104 @@
 - [ ] **GT 120 实卡验收**：在 Windows 10 1809+ / NVIDIA 342.01 环境先跑 Stream/Particle Light/Medium、GPU Burn 安全自动标定、Legacy Fractal/Volumetric 与 4,096-body N-body；确认 DirectCompute feature bit、GPU timestamp、15 秒生命周期、第 5 秒 RenderDoc、TDR 余量和结果 metadata。未完成前只能称“SM4 编译/代码路径通过”，不能称 GT 120 已验证。若目标机是 Windows 7，另建 legacy CLI/OS 包；当前 WinUI 安装器不支持 Win7。
 - [ ] **紧接 v2 — Liquid Lab / Explore**：复用 v2 场景提供无限时间、自由 orbit/WASD 视角、暂停/单步/重置、物体/流体/螺旋桨参数调整，以及充气池/玻璃水缸环境预设；明确标为不可计分，默认不自动 RenderDoc，不得写入正式 benchmark history。正式 Benchmark 与 Explore 切换时必须重建固定资源、恢复 seed 并校验 scene hash。
 - [ ] **紧接 v2 — GPU Burn Unlimited Soak**：使用当前主 `gpu_burn` Mangekyo Kaleidoscope v2 管线持续运行直到用户停止，而不是复用 legacy `gpu_burn_v1` 或 Other/Legacy 的旧 `gpu_stress_v1`；GUI 必须在满载时仍能 Stop，持续显示运行时长、滚动 GPU time/FPS、利用率、温度/功耗（可得时）和降频趋势。固定 `15s + 第 5 秒 RenderDoc` 继续只负责可比较跑分；Soak 默认不抓帧、不写正式 score。
+- [ ] **独立的显存 / L2 带宽测试 `membw_v1`（用户 2026-09-30 排入；2026-10-05 完成第一步）**：粒子测试（`stream_v1`）测不出真正的显存和 L2 带宽（原因与数据见 [`benchmark-workload-suite.md`](benchmark-workload-suite.md) §6），所以另做一个专门的测试，粒子测试保持不变。用法、方法和限制见 [`cli-reference.md`](cli-reference.md) 的 "Memory-bandwidth sweep" 一节。
+  - [x] **第一步：Vulkan 命令行版**（`--workload membw`，2026-10-05）。实现在 `src/vulkan_membw.cpp`，是独立路径：自己创建 Vulkan 设备，只做计算，不开窗口，不抓帧，没有改动五个后端和粒子测试。
+    - **访存方式：** 只读（主成绩）、只写、复制三个 kernel。每个线程一次读写 16 字节（vec4），每轮访问两处地址；只读 kernel 用一个永远不成立的条件写回，防止读取被优化掉。
+    - **测缓存的方法（参考 gpu-benches `gpu-l2-cache`）：** 每个工作组读一块 512 KiB 的数据，用不同数据块的个数控制数据量，从 1 MiB 扫到 2 GiB；工作组总数单独校准，让每次派发在任何数据量下都持续约 4 ms。
+    - **计时与统计：** 每次派发单独提交，并用 GPU 时间戳包住；每个数据点预热 3 次、正式测 10 次，成绩取中位数，同时保存最快值。字节数按实际请求量计算，缓冲区内容由整数哈希生成，不可压缩。
+    - **输出：** 每个 kernel 一张表，外加显存平台（最大三个数据量的中位数）和缓存平台（明显高于显存平台的最长平坦段）；同时输出制表符分隔的 `MEMBW_POINT` / `MEMBW_SUMMARY` 行。核显和软件设备标为"系统内存"。
+    - **成绩：** workload 为 `membw`，分数是只读显存平台（GB/s）。默认扫描且到达显存平台时版本为 `membw_v1`，否则为 `membw_v1_preview`。
+  - [x] **第一步验证（2026-10-05）：**
+    - **RTX 5090**（驱动 616.92，GPU 空闲）：显存读 1536 GB/s，为理论值 1792 的 86%，连跑三次为 1542 / 1536 / 1528；写 1352–1364 GB/s，复制 1342–1354 GB/s；L2 平台约 6.6–6.7 TB/s（3–96 MiB），96 MiB 之后开始下降，与 96 MB 的 L2 容量相符。与 2026-09-30 粒子只读对照 kernel 的 1503 GB/s 一致。
+    - **AMD 核显**（9800X3D，共用 DDR5-6400）：读 58 GB/s，写 55 GB/s，4 MiB 到 2 GiB 基本是平线；复制在 16 MiB 以内约 64 GB/s，更大时约 40 GB/s，原因未查。
+    - **Linux**（`ubuntu:20.04` 容器，GCC 9.4）：新模块编译无警告，aarch64 交叉编译通过；在 lavapipe 上跑通，记为软件渲染和 `membw_v1_preview`。
+  - [x] **L1 测试（2026-10-05，用户要求追加）**：新增 `shaders/membw_l1.comp`，每个工作组反复读自己私有的一块数据，数据块从 16 KiB 扫到 1 MiB。跑两遍：`l1` 用 4096 个工作组让全部 SM/CU 满载，`l1_single` 只用一个工作组（即一个 SM/CU）。汇总取最快数据块附近的平台作为 L1 读速率，并用单工作组曲线第一次下降的位置给出每个 SM/CU 的 L1 容量范围。
+    - **RTX 5090：**
+      - 单工作组在 16–96 KiB 稳定在约 287 GB/s，128 KiB 约 247 GB/s，192 KiB 掉到约 90 GB/s，256 KiB 以上约 82 GB/s（由 L2 提供）。程序判定 L1 容量在 128–192 KiB 之间，连跑三次一致。
+      - 满载时 16–24 KiB 约 55 TB/s，折合每个 SM 约 326 GB/s，即每周期约 128 字节，与 gpu-benches 在其他 NVIDIA 卡上的结果一致；32 KiB 约 27 TB/s，64–96 KiB 回到约 6.2 TB/s 的 L2 速率，384 KiB 以上为约 1.5 TB/s 的显存速率。
+      - **必须把工作组固定在一个 SM 上：** 不做处理时，NVIDIA 驱动会把单个工作组的 warp 分散到多个 SM，单工作组曲线每次运行都不同（速率在 288、410、540 GB/s 之间跳，容量拐点跑到 1 MiB）。kernel 里声明一个共享变量并调用一次 `barrier()` 之后，结果稳定。
+    - **AMD 核显（RDNA2，9800X3D）：**
+      - 单工作组出现三次下降：16 KiB 为 168 GB/s，24–64 KiB 为 127 GB/s，96–256 KiB 为 88 GB/s，384 KiB 以上为 38 GB/s。程序只报告第一次下降，即 L1 容量在 16–24 KiB 之间；后两级对应哪一层缓存没有确认。
+      - 满载时 16–32 KiB 约 220–260 GB/s，48 KiB 以上回到约 60 GB/s 的内存速率。
+    - **限制：**
+      - L1 读速率同时受指令执行速率限制（每次 16 字节读取后跟 4 次浮点加法），是这个 kernel 能达到的速率，不是硬件上限；
+      - 满载平台的终点低于 L1 容量，因为一个 SM/CU 上同时运行多个工作组；
+      - 多级小缓存的设备只在表格里能看到后续台阶，汇总不报告。
+  - [x] **独显读写系统内存（2026-10-05，用户要求追加）**：只读和只写 kernel 在一块位于系统内存的缓冲区上再跑一遍（`host_read` / `host_write`，最大 2 GiB），再用 `vkCmdCopyBuffer` 在系统内存和显存之间各复制一次。每个字节都要经过 PCIe，所以大数据量的平台就是链路在该方向上的可用带宽。核显和软件设备跳过这一段。
+    - **RTX 5090 实测：** `host_read` 为 13.1 GB/s，`host_write` 为 13.0 GB/s，驱动复制两个方向都是 12.0 GB/s。
+    - **链路宽度：** `nvidia-smi` 和 Windows 设备属性都显示这张卡当前跑在 **PCIe 5.0 x4**（最大 x16），单方向理论值为 15.75 GB/s，实测是它的 83%。这与之前记录的 x8 不一致，x4 的原因（主板通道分配、插槽或接触）没有查。
+    - **小数据量被缓存：** `host_read` 在 1 MiB 时为 450 GB/s，8 MiB 为 62 GB/s，32 MiB 以上才稳定在 13 GB/s；`host_write` 从 1 MiB 起就是 12–13 GB/s。说明显卡会缓存已经取回的系统内存数据。
+    - **限制：** 程序读不到链路代数和宽度（Vulkan 不提供），只在输出里给出每条通道的理论值供人工对照；没有在 x8 / x16 链路或 AMD、Intel 独显上测过。
+  - [ ] **第一步遗留：**
+    - **理论值校验没做：** Vulkan 不提供显存频率和位宽，所以程序不会自动判断"超过理论值即无效"。需要厂商表或 NVML/ADL 才能实现。
+    - **缓存容量不精确：** GPU 同时运行的工作组多于数据块个数时，多个工作组会经由缓存共享同一块数据，缓存到显存的过渡段被拉宽（5090 上 128–384 MiB 偏高）。精确容量要靠第二步的延迟测试。
+    - **小数据量受 L1 影响：** 5090 上 3 MiB 以下比 L2 平台快（1 MiB 时约 19 TB/s），程序已标注不算 L2 成绩。
+    - **外部对照没做：** RX 6900 XT 的 Infinity Cache 平台（gpu-benches 公布约 1.92 TB/s）和 vkpeak `copy-d2d` 都还没对比。vkpeak 用 CPU 计时，只按缓冲区大小计一次字节，换算时要注意。
+    - **其他设备没测：** Intel、摩尔线程、Adreno、Jetson。时间戳不随工作量变化的驱动会自动改用墙钟计时，这条路径只在代码里实现了，没有在真实设备上触发过。
+  - [ ] **第二步：** 加随机顺序的访存延迟测试（每个缓存行只读一次），用来准确定位 L2 / Infinity Cache 的容量。
+  - [x] **第三步（一）：接入 WinUI 的运行页和 History（2026-10-05）**：
+    - **入口：** GPU 页的测试项目下拉框新增 "Memory Bandwidth — VRAM / Cache / PCIe"（中文为"显存带宽 —— 显存 / 缓存 / PCIe"），和粒子、Plasma、流体并列，默认可见。
+    - **控件：** 选中后图形 API 只列 Vulkan；时长、Headless、V-Sync、系统内存、RenderDoc 和抓帧都禁用。
+    - **运行：** 每个 GPU 启动一个 `--workload membw --backend vulkan --no-renderdoc` worker，不带 `--gui-worker`，避免预加载 RenderDoc；进度条按 30 秒估算。
+    - **结果：** 结果区显示四行汇总（显存或系统内存带宽、缓存平台、L1、PCIe），由 worker 输出的 `MEMBW_*` 行生成，并支持中日文。
+    - **History：** 显示正式名称，模式列为 "Compute"，帧率列为 "-"，预览成绩带 "[preview]"；不受"显示 headless"开关影响。
+    - **验证：** 用界面自动化在 RTX 5090（GPU 选自动）和 AMD 核显上各跑通一次，结果区和 History 均截图确认。
+  - [x] **第三步（二）：GUI 曲线图（2026-10-05）**：
+    - **内容：** 结果区的汇总下方画出最多三张双对数折线图：显存（或系统内存）与缓存、经 PCIe 访问系统内存、L1。三张图分开画，是因为三组扫描相差几个数量级，而且 L1 的横轴是每个工作组的私有数据块大小。
+    - **画法：** 直接用 XAML 的 Canvas 和 Polyline 绘制，不依赖 Python。线宽 2 px，线尾有圆点；两条以上的线一定有图例；一张图里所有线尾都彼此分得开时才在线尾标名字，否则都只靠图例（2026-10-06 由"逐条判断"改为"全标或全不标"）。每个数据点有一个 22 px 的悬停区域，提示框显示曲线名、数据量和带宽。
+    - **配色：** 读、写、复制固定用蓝、橙、青三色，明暗两套色值分别通过了色觉障碍可分辨性校验；坐标和文字用文字色，不用曲线色。
+    - **布局：** 按结果区宽度自动排成一到三列；窗口缩放、主题切换和语言切换时重画。
+    - **验证：** 在 RTX 5090 上运行后截图检查了浅色英文和深色中文两种界面。
+  - [ ] **第三步（三）：GUI 遗留**
+    - 曲线图只显示最近一次运行；从 History 里选一条旧成绩不能重画曲线（数据已保存在成绩的 `workloadConfig` 里）。多个 GPU 一起跑时只画最后一个。
+    - 悬停提示没有实际用鼠标验证；日文界面没有实际查看；窄窗口下的单列布局没有截图检查。
+    - ~~Charts 页不包含这项测试~~：2026-10-06 起 Charts 页由 GUI 自己绘制，已包含这项测试。
+    - "全部 GPU"预设和 Full Analysis 预设没有实际运行过；macOS / iOS / Android 前端没有接入。
+    - GUI 打开时测得的显存读带宽比纯命令行低约 5%（约 1465 对 1536 GB/s），推测是窗口自身的绘制占用了 GPU。
+  - [ ] **第三步（四）：** 移植到 DX12 / DX11 / OpenGL / Metal。
+  - **许可证：** 代码全部自己写。gpu-benches 为 GPL-3.0，只借鉴方法；clamchowder/Microbenchmarks 为 Apache-2.0；BabelStream 为自定义许可证，改动后的版本不得称为 BabelStream 成绩。
+- [x] **GUI 里所有测试的图表（用户 2026-10-06 提出，当天完成）**：图表都由 GUI 自己用 XAML 绘制，不依赖 Python。
+  - **GPU 页，运行结束后：**
+    - 一次运行有多个任务时，画各任务成绩的对比条形图（每个 GPU 和 API 一条）；
+    - 每个任务画一张折线图：每帧 GPU 耗时随运行时间的变化，计算和渲染各一条线，不含预热；
+    - 显存带宽测试仍显示它自己的带宽曲线；"Complete test"和"Fill missing"两个预设一个进程里跑很多项，不画运行图表。
+  - **CPU 页，运行结束后：** 算力测试画每个逻辑处理器成绩的柱状图；缓存与内存测试仍显示带宽曲线。
+  - **Charts 页：** 改为读取保存的成绩直接绘制，每项测试一张条形图（各设备和 API 在该测试最新版本下的最好成绩），包含两项带宽测试和 CPU 测试；原来这一页要靠 Python 脚本生成图片，安装包里不可用。
+  - **引擎改动：** worker 每秒打印的 `[GPU Timing]` 行末尾新增 `T: 秒数`，预热期间的行带 `(warm-up)`，图表的时间轴取自这里。
+  - **验证：** 见 `HANDOFF.md` 第 10 节。
+  - **遗留：** 鼠标悬停提示和日文界面没有实际查看；多 GPU 一起跑的对比图没有实测；不能从 History 里选一条旧成绩重画它的运行图表。
+- [ ] **CPU 缓存 / 内存带宽测试 `cpu_membw_v1`（用户 2026-10-05 提出；2026-10-06 完成命令行版和 WinUI 接入）**：测 CPU 在 L1、L2、L3（有 L4 时也包括）和内存上的读、写、复制速度，以及操作系统映射新页面的速度。用法、方法和限制见 [`cli-reference.md`](cli-reference.md) 的 "CPU cache and memory bandwidth sweep" 一节。
+  - [x] **命令行版**（`--cpu-membw`，2026-10-06）。实现在 `src/cpu_membw.cpp`，是独立路径，不需要 GPU，只编进桌面版；原有的 CPU 算力测试没有改动。
+    - **内核：** 读、写、复制三种，自动选用 CPU 支持的最宽向量（AVX-512 / AVX2 / SSE2 / NEON）。
+    - **扫描：** 数据量从 4 KiB 到 1 GiB；先单线程，再每个物理核心一个线程，每个线程用自己的数据块。
+    - **分层：** 缓存容量从操作系统读取，按容量把曲线上的点归到各级缓存和内存。
+    - **内存写入的另外两种方式：** 流式写入（x86-64），以及 AMD 的 `CLZERO` 清零。
+    - **虚拟内存：** 测"映射新页面"的速度，不测页面文件。
+  - [x] **WinUI 接入（2026-10-06）**：CPU 页的测试模式新增"缓存与内存带宽"；结果区是一张各级带宽表（单线程和全核并排）和两张双对数曲线图，图上用虚线标出各级缓存容量；History 的 CPU 分类显示这项成绩。
+  - [x] **验证（2026-10-06，Ryzen 7 9800X3D，2×48 GB DDR5-6400，Windows 11）：**
+    - **单线程：** L1 读 588 GB/s、写 329 GB/s；L2 读 240 GB/s；L3 读 136 GB/s；内存读 55–61 GB/s。
+    - **全核（8 线程）：** 内存读 54–55 GB/s，为双通道 DDR5-6400 理论值 102.4 GB/s 的 54%；写 27 GB/s；复制 40 GB/s。
+    - **L1 与理论值：** 写入每周期 1 条 64 字节指令，329 GB/s 对应约 5.15 GHz，与实际频率一致；读取每周期约 1.8 条，是 2 条上限的 89%。
+    - **与核显对比：** 核显（2026-10-05 测）读同一组内存为 58–62 GB/s，两者访问同一组内存条。
+    - **稳定性：** 命令行跑 4 次、GUI 跑 2 次。单线程各级缓存读带宽的差别在 2% 以内；全核的缓存级成绩差别较大（L1 读 4242–4525 GB/s，另有一次 GUI 运行为 3535 GB/s）；单线程内存读为 55–61 GB/s。
+    - **Linux：** Ubuntu 20.04 容器（GCC 9）里新文件编译无警告并跑通，单线程成绩与 Windows 一致；aarch64 交叉编译通过，没有运行。
+  - [x] **大小核、SoC 缓存和存储读写（2026-10-06，用户提出"移动端大小核心"后追加）**：
+    - **大小核：** 按系统报告的性能等级把核心分类，每一类各做一遍单线程扫描，用它自己的缓存容量分层；这类 CPU 的全核扫描只报告内存。
+    - **系统不报告缓存容量时：** 从读曲线的平台识别各级缓存，容量给出一个范围。同样的方法也用来找系统没有报告的缓存（例如 SoC 的系统级缓存）。
+    - **存储读写：** 在虚拟内存所在的硬盘上建一个最大 1 GiB 的临时文件，测顺序 1 MiB 和随机 4 KiB 的读写速度（不经过系统缓存，一次一个请求）。
+    - **手机上怎么跑：** `scripts/build-android-cpumem.ps1` 用 NDK 编出独立程序 `mangekyo_cpumem`，用 adb 推到手机上运行，不需要安装 App。
+    - **验证：** 见 `HANDOFF.md` 第 10 节。大小核和"从曲线识别"两条路径是在 9800X3D 上用诊断开关验证的；Android 程序只编译通过，没有在手机上运行。
+  - [ ] **遗留：**
+    - **没有在任何手机或大小核 CPU 上实际运行过。** 需要接上手机后用 adb 跑一遍，核对各级缓存与芯片资料是否一致。
+    - **Android App 的 CPU 页还是空壳**（原有的 CPU 算力测试也没接），iOS / macOS App 没有这项测试的入口；iOS 和 macOS 不能绑定线程，只能测一类核心。
+    - **存储成绩没有和 CrystalDiskMark 等工具对比**（Windows 自带的 `winsat` 需要管理员权限）。GUI 里没有"跳过存储测试"的开关，每次运行都会写盘。
+    - **流式写入偏慢的原因没有查：** 9800X3D 上流式写入只有 30 GB/s（单线程和 8 线程相同），C 运行库的 `memset` 和 `rep stosb` 也是这个速度，而 `CLZERO` 能到 75 GB/s。
+    - **L2 曲线不平的原因没有查：** 64–384 KiB 为 230–245 GB/s，512–768 KiB 为 300–320 GB/s，与测试程序的分片方式无关。
+    - **没有实测过的平台：** macOS、Windows ARM64、真实的 ARM 设备（包括 Jetson）、带 L4 的 CPU、大小核 CPU、超过 64 个逻辑处理器的机器、多路 NUMA 机器。
+    - **GUI：** 鼠标悬停提示和日文界面没有实际查看；曲线图只显示最近一次运行，不能从 History 重画。
+    - **页面文件速度没有测**，原因见命令行文档；如果需要，应当另做一个硬盘测试。
+    - **没有做随机访问延迟测试**，所以不能直接量出各级缓存的访问延迟。
+- [ ] **暂缓（用户 2026-09-30 决定）— `stream_v2`**：把粒子测试改为整粒子读写，每粒子流量确定为 64 B。这会让新成绩与旧成绩无法直接比较（AMD 核显上旧 kernel 慢 35–43%，不能统一乘以 1.6 换算），所以暂不做，v1 保持不变。
 - [ ] **紧接 v2 — VRAM Integrity Soak**：新增独立 `vram_memtest`，按显存 budget 的安全比例分块写入 address/random/walking-bit 等 pattern、设备端读回校验并累计错误，持续到用户停止；区分独显 VRAM 与 UMA，共享内存不能误标为显存，OOM/device-lost 必须可恢复。原始 `stream` 继续是 15 秒带宽成绩，不能冒充显存正确性测试。
 - [x] **换机发布构建链**：Windows Vulkan loader 已 delay-load+双重 guard；官方 RenderDoc 1.45、self-contained WinUI/CLI、MSVC runtime、511-file stage、逐文件 SHA、ZIP 解包复核、Inno Setup 6.7.3、最终 ZIP/Setup/SHA256SUMS/release-assets 均已实际生成。候选位于 `out/release/windows-x64`；Setup SHA-256 `f301426776b8ad2bd816a3f6de55463fd4b2f6be0ca3c7f691bfd8108aca0436`。
 - [ ] **公开发布 gate**：用户确认根项目 LICENSE；配置 Authenticode signing；冻结并接入 `report_worker.exe`；在无 VS/Python/Vulkan SDK/RenderDoc/VC Redist 的干净 Windows 10/11 上验证安装/升级/卸载、无 `vulkan-1.dll` 的 DX11/WARP 启动、GUI orchestration、四 API 第 5 秒 bundled RenderDoc 抓帧；再用 clean commit/tag 重建，移除 `sourceTreeDirty=true` 后上传 GitHub Release。
@@ -56,8 +154,46 @@
   - [ ] **SDK/ABI 合同（2026-07-20 锁定）**：主包 minSdk 21 / targetSdk 最新（脚手架已抬到 minSdk 23）；NDK r27+ 开 16 KB 页对齐；结果写应用专属目录；Vulkan 运行时门控（API ≥24 + dlopen 成功，否则 ES 3.1）；四 ABI 全原生编译 **armeabi-v7a / arm64-v8a / x86 / x86_64**，结果 metadata 记录真实 ABI；legacy APK 仅 armeabi-v7a、targetSdk 可较低。详见 HANDOFF 目标 C 第 3 条。
   - [x] **UI 壳（2026-07-20/24）**：Compose + Material 3 四页；动态取色 12+；满载可 Stop。registry 仅展示已接线 GPU 项及真实 `*_android_preview` 字符串。
   - [ ] **ES 2.0 legacy tier（用户 2026-07-20 锁定底线：Tegra 3/4 必须支持）**：简化 fragment-only GPU Burn（避开 highp，Tegra 3 仅 FP20）新组 `gpu_burn_es2_legacy_v1`；粒子改 CPU(NEON) 物理 + GPU 渲染或纯 fragment 填充率测试（新 workloadVersion，不与 `stream` 混排）；液体 unsupported；墙钟计时、无 RenderDoc（用户已确认不要求）；独立 legacy APK（设备停在 Android 4.1–5.1，minSdk 约束），主包不背包袱。详见 HANDOFF 目标 C 第 3 条。
+  - [ ] **Android 真机远程测试（adb；用户 2026-09-30 排入）**：
+    - **现状：** App 从没在真机上跑过。只接入了 Particle 和 GPU Burn（固定 16 步），默认 3 秒预览，成绩带 `_android_preview` 后缀。流体和 CPU 测试都没接入。
+    - **用户在手机上操作：** 打开"开发者选项"和"USB 调试"，插线后在手机弹窗里点"允许 USB 调试"。这一步只能由用户确认。
+    - **Claude 用 adb 完成：**
+      - 编译 `:app:assembleDebug`，再 `adb install` 安装并用 `adb shell am start` 启动；
+      - 用 `adb shell input` 模拟点击。更稳的做法是给 App 加一个 intent 参数，启动后自动开跑；
+      - 用 `adb logcat` 看日志，用 `adb exec-out screencap` 截图；
+      - debug 包可用 `run-as` 从应用专属目录取回 `results.json`。
+    - **CPU 测试的另一条路：** 引擎已有 Android 的 CPU 绑核代码，可以用 NDK 编一个命令行程序，推到 `/data/local/tmp` 后用 `adb shell` 直接跑。目前 CMake 在 Android 下不生成命令行目标，需要小改。
+    - **验收：** 首次真机冒烟（启动、跑完、写出结果），并记录温控降频对成绩的影响。
 - [ ] **4. iOS**（**源码垂直切片已写；本机未编译、未设备验收**；排在 Android 后）：**最低 iOS 16**；仅 Metal；`MTLCaptureManager`；SwiftUI；App Store。**iOS 26/27 = Liquid Glass**，16–25 Material。引擎写出 `*_ios_preview`。规格见 `HANDOFF.md` §3.0.3；状态见 `ios-gui/README.md`。
+  - [ ] **iPhone 真机远程测试（需要一台 Mac；用户 2026-09-30 排入）**：
+    - **前提：** iOS 应用只能在 Mac 上用 Xcode 编译和签名，这台 Windows 工作站做不到。iOS 代码目前从没编译过，所以第一步是编译通过。
+    - **用户在 Mac 和 iPhone 上操作：**
+      - Mac 打开"远程登录"（SSH），并配置密钥登录；
+      - 在 Xcode 里登录 Apple ID（免费账号签名 7 天过期）；
+      - iPhone 打开"开发者模式"，并信任这台 Mac。
+    - **Claude 通过 SSH 连进 Mac 完成：**
+      - 用 `xcodegen` 生成工程，再用 `xcodebuild` 编译；
+      - 用 `xcrun devicectl device install app` 安装，用 `xcrun devicectl device process launch` 启动；
+      - 从应用沙盒拷回结果文件。
+    - **自动开跑：** iOS 没有 `adb input` 那样简单的点击工具，需要给 App 加一个启动参数让它自动开跑。
+    - **现状：** 只接入了 Metal 的 Particle 和 GPU Burn（3 秒预览），没有流体，CPU 模式也没验收。
 - [ ] **5. Debian Linux**：构建修正、`.deb` 打包、CI 与实机验证（后端/GLFW/RenderDoc/XDG 路径均已有，摩擦最低）。
+  - [x] **2026-09-30 构建修复**（提交 `a894c8a`）：Ubuntu 20.04 / JetPack 5 可以编译和链接（补 `<cstring>`，链接 Threads 与 dl）。只做了容器验证：x86_64 完整构建 + aarch64 交叉编译全部引擎源文件。llvmpipe/lavapipe 的成绩现在标记为软件渲染。步骤见 [`building.md`](building.md) 的 Jetson 一节。
+  - [ ] **NVIDIA Jetson Xavier NX 实机验收（NV 开发板；用户 2026-09-30 排入）**：
+    - **用户准备：**
+      - 刷好 JetPack 5.1.x，登录桌面（GPU 测试需要 `DISPLAY=:0`）；
+      - 用 micro-USB 线（地址 `192.168.55.1`）或局域网连接这台电脑，并配置 SSH 密钥登录（Claude 不能代输密码）；
+      - 需要 sudo 的步骤由用户执行：`apt install` 装依赖，`nvpmodel` 切到 6 核模式，然后运行 `jetson_clocks`。
+    - **Claude 通过 SSH 完成：**
+      - 编译（用 pip 安装的 CMake），并从 Windows 构建中复制 `.spv`；
+      - 跑 Particle（Vulkan + OpenGL，1M 和 16M）、GPU Burn 64 步（Vulkan + OpenGL）、流体（Vulkan）、正式 CPU 测试（15 s / 0.2 s）；
+      - 可选：用 lavapipe 跑一遍软件渲染对比，其中流体用 `--time 120`；
+      - 取回 `~/.local/share/GpuComputeBenchmark/results/results.json`。
+    - **合理性检查：**
+      - Particle v1 分数超过 51.2 GB/s（LPDDR4x 理论值）就说明计时或统计出错；如果实际流量同样是每粒子 64 B，v1 分数的实际上限约为 32 GB/s；
+      - 流体预计约 1 FPS；
+      - CPU 应得到 6 行单核结果。
+    - **顺带：** 在 Volta 核显上重复粒子字节数对照实验（原 kernel 对比整粒子读写），补齐第三个厂商架构的数据。
 - [ ] **6. WebGPU**：按既定路线——capability registry P0 → 固定 Dawn 版本原生后端（Stream → GPU Burn → Cinematic Liquid）→ `/web` 浏览器前端；独立版本 id（`stream_webgpu_v1` 等），无可靠 timestamp 不产生正式 score（对应上方“原生 WebGPU 后端”与 `/web` 两条任务）。
 - [ ] **7. HarmonyOS PC / 鸿蒙**：把现有 `ohos/` 独立 Vulkan 粒子 demo 升级为正式产品端口；补统一 workload registry、主 CLI/GUI、GPU Burn/Cinematic Liquid、结果合同与适合该平台的抓帧编排。现有 demo 不能标为已完成移植。
 - [ ] **8. Windows 7 专用 GUI（PS3 之前）**：独立 Win32/DWM 前端与安装包，共享 `gpu_engine`/CLI/成绩 schema；Aero 能力探测与无 Aero 回退；不得携带 WinUI/WinAppSDK。

@@ -171,6 +171,7 @@
                                             <ComboBoxItem x:Name="WorkloadStream" Tag="stream">Particle — Memory Throughput</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadGpuBurn" Tag="gpu_burn">Mangekyo Kaleidoscope — GPU Burn</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadCinematicLiquid" Tag="cinematic_liquid">Fluid — Interactive Pool</ComboBoxItem>
+                                            <ComboBoxItem x:Name="WorkloadMemBw" Tag="membw">Memory Bandwidth — VRAM / Cache / PCIe</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadGpuStress" Tag="gpu_stress">GraphicsBurn v1 / Component (Advanced)</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadNBody" Tag="nbody">N-Body — Advanced Compute</ComboBoxItem>
                                             <ComboBoxItem x:Name="WorkloadSynthPeak" Tag="synthpeak">SynthPeak — Advanced Synthetic</ComboBoxItem>
@@ -358,6 +359,11 @@
                                     <TextBlock x:Name="ResultHint" Visibility="Collapsed"
                                                FontSize="12" TextWrapping="Wrap"
                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <!-- Memory-bandwidth curves; filled by renderMemBwCharts(). -->
+                                    <Grid x:Name="MemBwChartHost" Visibility="Collapsed"
+                                          Margin="0,12,0,4" ColumnSpacing="24" RowSpacing="20"
+                                          SizeChanged="OnMemBwChartHostSizeChanged"/>
+                                    <Grid x:Name="GpuRunChartHost" Visibility="Collapsed" Margin="0,12,0,4" ColumnSpacing="24" RowSpacing="20" SizeChanged="OnGpuRunChartHostSizeChanged"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
                                         <Button x:Name="GpuOpenResultsButton" Content="Open results folder"
                                                 Click="OnOpenResultsFolder"/>
@@ -445,10 +451,12 @@
                                             <ColumnDefinition Width="*" MinWidth="0"/>
                                         </Grid.ColumnDefinitions>
                                         <ComboBox x:Name="CpuModeBox" Grid.Column="0" Header="Test mode"
-                                                  SelectedIndex="2" HorizontalAlignment="Stretch">
+                                                  SelectedIndex="2" HorizontalAlignment="Stretch"
+                                                  SelectionChanged="OnCpuModeChanged">
                                             <ComboBoxItem x:Name="CpuModePerCore" Tag="per-core">Single-core</ComboBoxItem>
                                             <ComboBoxItem x:Name="CpuModeMulti" Tag="multi">All-core</ComboBoxItem>
                                             <ComboBoxItem x:Name="CpuModeAll" Tag="all">Single-core + All-core</ComboBoxItem>
+                                            <ComboBoxItem x:Name="CpuModeMemory" Tag="memory">Cache &amp; memory bandwidth</ComboBoxItem>
                                         </ComboBox>
                                         <ComboBox x:Name="CpuDurationPresetBox" Grid.Column="1" Header="Duration preset"
                                                   SelectedIndex="0" HorizontalAlignment="Stretch"
@@ -492,7 +500,7 @@
                             </Border>
 
                             <!-- Fixed height so ListView can scroll inside the page ScrollViewer. -->
-                            <Grid ColumnSpacing="12" Height="260"
+                            <Grid x:Name="CpuResultsGrid" ColumnSpacing="12" Height="260"
                                   HorizontalAlignment="Stretch">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="2*" MinWidth="0"/>
@@ -536,6 +544,15 @@
                                     </StackPanel>
                                 </Border>
                             </Grid>
+
+                            <!-- Bandwidth curves of the last cache / memory sweep. -->
+                            <Border x:Name="CpuMemChartCard" Visibility="Collapsed" Padding="16" MinWidth="0"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="8">
+                                <Grid x:Name="CpuMemChartHost" ColumnSpacing="24" RowSpacing="20"
+                                      SizeChanged="OnCpuMemChartHostSizeChanged"/>
+                            </Border>
 
                             <!-- CLI follows page content (not pinned above the action bar). -->
                             <Border x:Name="CpuCliHost" Padding="12" MinWidth="0"
@@ -810,7 +827,8 @@
                         <TextBlock x:Name="ChartsStatus" VerticalAlignment="Bottom"/>
                     </StackPanel>
                     <ScrollViewer Grid.Row="1">
-                        <StackPanel x:Name="ChartsPanel" Spacing="12"/>
+                        <Grid x:Name="ChartsHost" Margin="0,4,12,12" ColumnSpacing="24" RowSpacing="28"
+                              SizeChanged="OnChartsHostSizeChanged"/>
                     </ScrollViewer>
                 </Grid>
 

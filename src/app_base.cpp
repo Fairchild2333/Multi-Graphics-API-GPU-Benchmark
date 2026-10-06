@@ -751,6 +751,10 @@ void AppBase::ReportTimingIfDue(double deltaTime) {
                   << avgCompute << " ms | Render: " << avgRender
                   << " ms | Total: " << avgTotal
                   << " ms | FPS: " << static_cast<int>(fps);
+        // Seconds since the run began, so that a front-end can plot the
+        // samples over time and leave the warm-up ones out.
+        std::cout << " | T: " << std::setprecision(1) << (gpuBenchGetTime() - runStartTime_)
+                  << " s" << (warmupDone_ ? "" : " (warm-up)") << std::setprecision(3);
 
         if (config_.benchmarkMode) {
             std::cout << " | Frame " << totalFrameCount_ << "/"
