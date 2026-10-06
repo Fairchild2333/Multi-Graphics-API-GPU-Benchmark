@@ -1,8 +1,13 @@
 // The app shell: GPU, CPU, History and Charts, the same four pages as the
-// other front ends.
+// other front ends. The tabs stand at the bottom of a narrow window and move
+// to the side from 600 vp (an opened foldable, a tablet, a 2-in-1, a TV).
+//
+// This shell runs on every system. On HarmonyOS 6.1 and later EntryAbility
+// loads IndexHds.ets instead.
 
 import { tr } from '../common/I18n';
-import { appState, runController } from '../common/RunController';
+import { appState } from '../common/RunController';
+import { startShellTimer, tabItem } from '../common/Shell';
 import { ChartsPage } from './ChartsPage';
 import { CpuPage } from './CpuPage';
 import { GpuPage } from './GpuPage';
@@ -15,14 +20,8 @@ struct Index {
   private timer: number = -1;
 
   aboutToAppear(): void {
-    // Collect engine output and finished runs a few times a second.
-    this.timer = setInterval(() => {
-      runController.tick();
-      if (appState.requestedTab >= 0) {
-        this.tabs.changeIndex(appState.requestedTab);
-        appState.requestedTab = -1;
-      }
-    }, 200);
+    appState.floatingTabs = false;
+    this.timer = startShellTimer(this.tabs);
   }
 
   aboutToDisappear(): void {
@@ -30,29 +29,35 @@ struct Index {
   }
 
   build() {
-    Tabs({ barPosition: BarPosition.End, controller: this.tabs }) {
+    Tabs({ barPosition: appState.sideTabs ? BarPosition.Start : BarPosition.End, controller: this.tabs }) {
       TabContent() {
         GpuPage()
       }
-      .tabBar('GPU')
+      .tabBar(tabItem($r('sys.symbol.gauge_with_dots_needle_33percent'), 'GPU'))
 
       TabContent() {
         CpuPage()
       }
-      .tabBar('CPU')
+      .tabBar(tabItem($r('sys.symbol.memory_module'), 'CPU'))
 
       TabContent() {
         HistoryPage()
       }
-      .tabBar(tr('History', '历史'))
+      .tabBar(tabItem($r('sys.symbol.clock'), tr('History', '历史')))
 
       TabContent() {
         ChartsPage()
       }
-      .tabBar(tr('Charts', '图表'))
+      .tabBar(tabItem($r('sys.symbol.histogram'), tr('Charts', '图表')))
     }
+    .vertical(appState.sideTabs)
     .width('100%')
     .height('100%')
     .backgroundColor($r('sys.color.ohos_id_color_background'))
+    .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+      if (typeof newValue.width === 'number') {
+        appState.windowWidth = newValue.width;
+      }
+    })
   }
 }

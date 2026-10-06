@@ -1,24 +1,19 @@
 package com.mangekyo.benchmark.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +44,7 @@ import com.mangekyo.benchmark.core.formatBytes
 import com.mangekyo.benchmark.core.formatNumber
 import com.mangekyo.benchmark.core.localizeEngineText
 import com.mangekyo.benchmark.core.tr
+import com.mangekyo.benchmark.ui.AdaptivePanes
 import com.mangekyo.benchmark.ui.components.BarRows
 import com.mangekyo.benchmark.ui.components.ChartMarker
 import com.mangekyo.benchmark.ui.components.ChartSeries
@@ -138,11 +134,13 @@ fun CpuScreen() {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = {
-                    if (!canRun) return@FloatingActionButton
+                    if (!canRun) return@ExtendedFloatingActionButton
                     start(mode, if (duration == "formal") 15 else 1)
                 },
+                icon = { Icon(Icons.Filled.PlayArrow, contentDescription = null) },
+                text = { Text(if (run.running) tr("Running", "运行中") else tr("Run", "运行")) },
                 containerColor = if (canRun) {
                     MaterialTheme.colorScheme.primaryContainer
                 } else {
@@ -153,144 +151,136 @@ fun CpuScreen() {
                 } else {
                     MaterialTheme.colorScheme.onSurfaceVariant
                 },
-            ) {
-                Icon(Icons.Filled.PlayArrow, contentDescription = tr("Run", "运行"))
-            }
+            )
         },
     ) { inner ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(inner)
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Box(Modifier.height(4.dp))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
-            ) {
-                Column(
-                    modifier = Modifier.padding(14.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Text(
-                        text = if (mode == "memory") {
-                            tr("Cache & memory bandwidth", "缓存与内存带宽")
-                        } else {
-                            tr("CPU compute throughput", "CPU 计算吞吐")
-                        },
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                    Text(
-                        text = run.cpuLabel.ifEmpty {
-                            DeviceInfo.socLabel() + " · " + tr("$cores logical", "$cores 个逻辑处理器") +
-                                " · ABI ${DeviceInfo.primaryAbi()}"
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                }
-            }
-
-            Text(tr("Test", "测试"), style = MaterialTheme.typography.titleMedium)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(
-                    "per-core" to tr("Single-core", "单核"),
-                    "multi" to tr("All-core", "全核"),
-                    "all" to tr("Single + all-core", "单核 + 全核"),
-                    "memory" to tr("Cache & memory", "缓存与内存"),
-                ).forEach { (id, label) ->
-                    FilterChip(
-                        selected = mode == id,
-                        onClick = { mode = id },
-                        enabled = !run.running,
-                        label = { Text(label) },
-                    )
-                }
-            }
-
-            if (mode != "memory") {
-                Text(tr("Duration", "时长"), style = MaterialTheme.typography.titleMedium)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(
-                        selected = duration == "quick",
-                        onClick = { duration = "quick" },
-                        enabled = !run.running,
-                        label = { Text(tr("Quick 1 s", "快速 1 秒")) },
-                    )
-                    FilterChip(
-                        selected = duration == "formal",
-                        onClick = { duration = "formal" },
-                        enabled = !run.running,
-                        label = { Text(tr("Formal 15 s", "正式 15 秒")) },
-                    )
-                }
-            }
-
-            Text(
-                text = if (mode == "memory") {
-                    tr(
-                        "Sweeps the data-set size on one thread of every core type, then on all cores, and reads " +
-                            "L1, L2, the shared cache and memory off the curve. It ends with a storage test that " +
-                            "writes a temporary file of up to 1 GiB. A run cannot be cancelled.",
-                        "先用每类核心的一个线程、再用全部核心扫描数据量，从曲线上读出 L1、L2、共享缓存和内存各自的带宽。" +
-                            "最后是存储测试，会写一个最大 1 GiB 的临时文件。运行开始后不能取消。",
-                    )
-                } else {
-                    tr(
-                        "The single-core test runs once on every logical processor; the formal preset takes " +
-                            "15 s for each. A run cannot be cancelled.",
-                        "单核测试会在每个逻辑处理器上各跑一次；正式预设每次 15 秒。运行开始后不能取消。",
-                    )
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            if (run.running || run.finished) {
+        AdaptivePanes(
+            modifier = Modifier.padding(inner),
+            primary = {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
                     ),
                 ) {
                     Column(
                         modifier = Modifier.padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        Row {
-                            Text(run.status, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-                            Text(
-                                "${(run.progress * 100).toInt()}%",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        LinearProgressIndicator(progress = { run.progress }, modifier = Modifier.fillMaxWidth())
+                        Text(
+                            text = if (mode == "memory") {
+                                tr("Cache & memory bandwidth", "缓存与内存带宽")
+                            } else {
+                                tr("CPU compute throughput", "CPU 计算吞吐")
+                            },
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                        Text(
+                            text = run.cpuLabel.ifEmpty {
+                                DeviceInfo.socLabel() + " · " + tr("$cores logical", "$cores 个逻辑处理器") +
+                                    " · ABI ${DeviceInfo.primaryAbi()}"
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
                     }
                 }
-            }
 
-            if (run.memoryTest) MemoryResults() else ComputeResults()
-
-            if (run.log.isNotEmpty()) {
-                ResultCard(tr("Raw output (last lines)", "原始输出（最后几行）")) {
-                    Text(
-                        text = run.log.takeLast(40).joinToString("\n") { it.replace('\t', ' ') },
-                        style = MaterialTheme.typography.bodySmall,
-                        fontFamily = FontFamily.Monospace,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                Text(tr("Test", "测试"), style = MaterialTheme.typography.titleMedium)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(
+                        "per-core" to tr("Single-core", "单核"),
+                        "multi" to tr("All-core", "全核"),
+                        "all" to tr("Single + all-core", "单核 + 全核"),
+                        "memory" to tr("Cache & memory", "缓存与内存"),
+                    ).forEach { (id, label) ->
+                        FilterChip(
+                            selected = mode == id,
+                            onClick = { mode = id },
+                            enabled = !run.running,
+                            label = { Text(label) },
+                        )
+                    }
                 }
-            }
-            Box(modifier = Modifier.height(72.dp))
-        }
+
+                if (mode != "memory") {
+                    Text(tr("Duration", "时长"), style = MaterialTheme.typography.titleMedium)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = duration == "quick",
+                            onClick = { duration = "quick" },
+                            enabled = !run.running,
+                            label = { Text(tr("Quick 1 s", "快速 1 秒")) },
+                        )
+                        FilterChip(
+                            selected = duration == "formal",
+                            onClick = { duration = "formal" },
+                            enabled = !run.running,
+                            label = { Text(tr("Formal 15 s", "正式 15 秒")) },
+                        )
+                    }
+                }
+
+                Text(
+                    text = if (mode == "memory") {
+                        tr(
+                            "Sweeps the data-set size on one thread of every core type, then on all cores, and reads " +
+                                "L1, L2, the shared cache and memory off the curve. It ends with a storage test that " +
+                                "writes a temporary file of up to 1 GiB. A run cannot be cancelled.",
+                            "先用每类核心的一个线程、再用全部核心扫描数据量，从曲线上读出 L1、L2、共享缓存和内存各自的带宽。" +
+                                "最后是存储测试，会写一个最大 1 GiB 的临时文件。运行开始后不能取消。",
+                        )
+                    } else {
+                        tr(
+                            "The single-core test runs once on every logical processor; the formal preset takes " +
+                                "15 s for each. A run cannot be cancelled.",
+                            "单核测试会在每个逻辑处理器上各跑一次；正式预设每次 15 秒。运行开始后不能取消。",
+                        )
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                if (run.running || run.finished) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        ),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Row {
+                                Text(run.status, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+                                Text(
+                                    "${(run.progress * 100).toInt()}%",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            LinearProgressIndicator(progress = { run.progress }, modifier = Modifier.fillMaxWidth())
+                        }
+                    }
+                }
+            },
+            secondary = {
+                if (run.memoryTest) MemoryResults() else ComputeResults()
+
+                if (run.log.isNotEmpty()) {
+                    ResultCard(tr("Raw output (last lines)", "原始输出（最后几行）")) {
+                        Text(
+                            text = run.log.takeLast(40).joinToString("\n") { it.replace('\t', ' ') },
+                            style = MaterialTheme.typography.bodySmall,
+                            fontFamily = FontFamily.Monospace,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            },
+        )
     }
 }
 

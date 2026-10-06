@@ -42,8 +42,36 @@ export class AppState {
   @Trace requestedTab: number = -1;
   /** Grows whenever a run may have saved a result. */
   @Trace resultsRevision: number = 0;
+  /**
+   * Width of the app's window in vp, kept up to date by the shell. It is the
+   * window that counts, not the device: a foldable that is opened, a tablet in
+   * split screen and a freely resized window all change it while the app runs.
+   */
+  @Trace windowWidth: number = 360;
+  /** True when the tab bar floats over the pages (the shell for HarmonyOS 6.1 and later). */
+  @Trace floatingTabs: boolean = false;
   filesDir: string = '';
   debuggable: boolean = false;
+
+  /** From 600 vp the tabs stand at the side instead of at the bottom. */
+  get sideTabs(): boolean {
+    return this.windowWidth >= 600;
+  }
+
+  /** From 840 vp a page shows its two halves beside each other. */
+  get twoPane(): boolean {
+    return this.windowWidth >= 840;
+  }
+
+  /** The margin between the content of a page and the edge of the window. */
+  get margin(): number {
+    return this.windowWidth >= 600 ? 24 : 16;
+  }
+
+  /** Room the pages leave at their end for a tab bar that floats over them. */
+  get bottomInset(): number {
+    return this.floatingTabs && !this.sideTabs ? 96 : 0;
+  }
 }
 
 export const appState: AppState = new AppState();

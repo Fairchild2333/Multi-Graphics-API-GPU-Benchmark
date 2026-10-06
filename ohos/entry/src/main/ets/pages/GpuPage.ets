@@ -1,6 +1,7 @@
 // GPU page: the preview surface the engine draws into, the two tests the
 // HarmonyOS host can start, and the result of the last run with its chart.
 
+import { AdaptivePanes } from '../components/AdaptivePanes';
 import { Card } from '../components/Card';
 import { ChartSeries, LineChart } from '../components/Charts';
 import { gpuRun } from '../common/EngineOutput';
@@ -73,94 +74,103 @@ export struct GpuPage {
       '预览运行：粒子测试或 GPU Burn 跑 3 秒。成绩属于 ohos_preview，不要和桌面版的成绩放在一起比较。');
   }
 
-  build() {
-    Scroll() {
-      Column({ space: 12 }) {
-        Text(tr('GPU Benchmark', 'GPU 跑分'))
-          .fontSize(24)
-          .fontWeight(FontWeight.Bold)
-          .fontColor($r('sys.color.ohos_id_color_text_primary'))
+  /** The preview and the button that starts a run. */
+  @Builder
+  controls() {
+    Text(tr('GPU Benchmark', 'GPU 跑分'))
+      .fontSize(24)
+      .fontWeight(FontWeight.Bold)
+      .fontColor($r('sys.color.ohos_id_color_text_primary'))
 
-        Card({ title: tr('Preview surface', '预览画面') }) {
-          XComponent({ id: 'mangekyo_surface', type: XComponentType.SURFACE, libraryname: 'mangekyo' })
-            .width('100%')
-            .height(200)
-          Text(tr('Engine: ', '引擎：') + appState.engineVersion)
-            .caption()
-        }
-
-        Card({ title: tr('Workloads', '测试项目') }) {
-          Text(tr('Results carry the _ohos_preview suffix (a 3 s run inside the app, not the 15 s of the desktop version).',
-            '成绩的版本带 _ohos_preview 后缀（App 内运行 3 秒，不是桌面版的 15 秒）。'))
-            .caption()
-          ForEach(GPU_WORKLOADS, (workload: GpuWorkload) => {
-            Column({ space: 2 }) {
-              Text(tr(workload.nameEn, workload.nameZh))
-                .fontSize(15)
-                .fontWeight(FontWeight.Medium)
-                .fontColor($r('sys.color.ohos_id_color_text_primary'))
-              Text(workload.version)
-                .caption()
-            }
-            .alignItems(HorizontalAlign.Start)
-            .width('100%')
-            .padding(12)
-            .borderRadius(12)
-            .backgroundColor(appState.gpuWorkload === workload.id
-              ? $r('sys.color.ohos_id_color_component_activated')
-              : $r('sys.color.ohos_id_color_background'))
-            .onClick(() => {
-              if (!appState.gpuRunning) {
-                appState.gpuWorkload = workload.id;
-              }
-            })
-          }, (workload: GpuWorkload) => workload.id)
-        }
-
-        Row({ space: 12 }) {
-          Button(appState.gpuRunning ? tr('Stop', '停止') : tr('Run', '运行'))
-            .enabled(appState.engineReady)
-            .onClick(() => {
-              if (appState.gpuRunning) {
-                runController.stopGpu();
-              } else {
-                runController.startGpu(appState.gpuWorkload, 3);
-              }
-            })
-          Text(this.statusText())
-            .caption()
-            .layoutWeight(1)
-        }
+    Card({ title: tr('Preview surface', '预览画面') }) {
+      XComponent({ id: 'mangekyo_surface', type: XComponentType.SURFACE, libraryname: 'mangekyo' })
         .width('100%')
+        // A fixed shape, so the picture is the same on a phone, an opened
+        // foldable and a tablet.
+        .aspectRatio(16 / 9)
+      Text(tr('Engine: ', '引擎：') + appState.engineVersion)
+        .caption()
+    }
 
-        if (gpuRun.scoreLine.length > 0 || gpuRun.fpsLine.length > 0 || gpuRun.samples.length >= 2) {
-          Card({ title: tr('Last run', '最近一次运行') }) {
-            if (gpuRun.scoreLine.length > 0) {
-              Text(localizeScoreLine(gpuRun.scoreLine))
-                .fontSize(16)
-                .fontWeight(FontWeight.Medium)
-                .fontColor($r('sys.color.ohos_id_color_text_primary'))
-            }
-            if (gpuRun.fpsLine.length > 0) {
-              Text(localizeScoreLine(gpuRun.fpsLine))
-                .fontSize(14)
-                .fontColor($r('sys.color.ohos_id_color_text_primary'))
-            }
-            if (this.timingSeries().length > 0) {
-              Text(tr('GPU time per frame (ms) over the run, after warm-up',
-                '每帧 GPU 耗时（ms）随运行时间变化，不含预热'))
-                .caption()
-              LineChart({ series: this.timingSeries(), logBytes: false, dark: appState.dark })
-            }
+    Row({ space: 12 }) {
+      Button(appState.gpuRunning ? tr('Stop', '停止') : tr('Run', '运行'))
+        .enabled(appState.engineReady)
+        .onClick(() => {
+          if (appState.gpuRunning) {
+            runController.stopGpu();
+          } else {
+            runController.startGpu(appState.gpuWorkload, 3);
           }
-        }
-      }
-      .padding(16)
-      .width('100%')
+        })
+      Text(this.statusText())
+        .caption()
+        .layoutWeight(1)
     }
     .width('100%')
-    .height('100%')
-    .align(Alignment.Top)
-    .scrollBar(BarState.Off)
+  }
+
+  /** The tests to choose from and the result of the last run. */
+  @Builder
+  results() {
+    Card({ title: tr('Workloads', '测试项目') }) {
+      Text(tr('Results carry the _ohos_preview suffix (a 3 s run inside the app, not the 15 s of the desktop version).',
+        '成绩的版本带 _ohos_preview 后缀（App 内运行 3 秒，不是桌面版的 15 秒）。'))
+        .caption()
+      ForEach(GPU_WORKLOADS, (workload: GpuWorkload) => {
+        Column({ space: 2 }) {
+          Text(tr(workload.nameEn, workload.nameZh))
+            .fontSize(15)
+            .fontWeight(FontWeight.Medium)
+            .fontColor($r('sys.color.ohos_id_color_text_primary'))
+          Text(workload.version)
+            .caption()
+        }
+        .alignItems(HorizontalAlign.Start)
+        .width('100%')
+        .padding(12)
+        .borderRadius(12)
+        .backgroundColor(appState.gpuWorkload === workload.id
+          ? $r('sys.color.ohos_id_color_component_activated')
+          : $r('sys.color.ohos_id_color_background'))
+        .onClick(() => {
+          if (!appState.gpuRunning) {
+            appState.gpuWorkload = workload.id;
+          }
+        })
+      }, (workload: GpuWorkload) => workload.id)
+    }
+
+    if (gpuRun.scoreLine.length > 0 || gpuRun.fpsLine.length > 0 || gpuRun.samples.length >= 2) {
+      Card({ title: tr('Last run', '最近一次运行') }) {
+        if (gpuRun.scoreLine.length > 0) {
+          Text(localizeScoreLine(gpuRun.scoreLine))
+            .fontSize(16)
+            .fontWeight(FontWeight.Medium)
+            .fontColor($r('sys.color.ohos_id_color_text_primary'))
+        }
+        if (gpuRun.fpsLine.length > 0) {
+          Text(localizeScoreLine(gpuRun.fpsLine))
+            .fontSize(14)
+            .fontColor($r('sys.color.ohos_id_color_text_primary'))
+        }
+        if (this.timingSeries().length > 0) {
+          Text(tr('GPU time per frame (ms) over the run, after warm-up',
+            '每帧 GPU 耗时（ms）随运行时间变化，不含预热'))
+            .caption()
+          LineChart({ series: this.timingSeries(), logBytes: false, dark: appState.dark })
+        }
+      }
+    }
+  }
+
+  build() {
+    AdaptivePanes({
+      primary: () => {
+        this.controls()
+      },
+      secondary: () => {
+        this.results()
+      }
+    })
   }
 }

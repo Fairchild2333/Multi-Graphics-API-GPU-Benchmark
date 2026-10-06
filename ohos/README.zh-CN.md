@@ -50,6 +50,15 @@ SPIR-V 着色器打包在 `resources/rawfile/shaders/` 里，App 启动时复制
 
 每条成绩记录这台设备的机型（品牌、市场名称和型号代码）、系统版本和内存，历史页每条成绩下面有一行显示。机型和系统版本来自系统的 deviceinfo 接口，内存来自 `/proc/meminfo`。系统没有提供芯片名的接口，所以芯片名仍然从 `/proc/cpuinfo` 读，读不到时记为 `Unknown CPU`，这时要靠型号代码去查。**这些字段只编译通过，没有在设备上核对过。**
 
+## 窗口宽度、设备类型和新界面
+
+2026-10-06 加入，**只编译通过，没有在任何设备或模拟器上看过**。
+
+- **布局按窗口宽度切换：** 600 vp 以下页签在底部、单列；600 vp 起页签竖排在侧边；840 vp 起每页分成左右两栏。历史页和图表页是网格。预览画面固定 16:9。
+- **设备类型：** phone、tablet、2in1、tv、car。
+- **两套外壳：** `pages/Index.ets` 适用于所有系统；HarmonyOS 6.1（API 23）以上的手机、平板和二合一改为加载 `pages/IndexHds.ets`，它用 UI Design Kit 的悬浮页签和系统材质。选择在 `EntryAbility.ets` 里。编译 `IndexHds.ets` 时的"接口版本高于兼容版本"警告是预期的。
+- **系统材质：** 新外壳的悬浮页签用了它；`module.json5` 里打开了应用级开关（HarmonyOS 7 起对系统控件生效）。按华为文档，普通组件上的材质只在标题栏和底部页签栏里生效，所以内容卡片没有用。
+
 ## 构建
 
 需要 DevEco Studio（已在 26.0 上验证，自带 SDK、hvigor、ohpm、node）和 Vulkan SDK 的 `glslc`。

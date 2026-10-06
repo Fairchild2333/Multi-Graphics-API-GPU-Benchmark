@@ -2,7 +2,16 @@ package com.mangekyo.benchmark.ui
 
 import androidx.compose.ui.*
 
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.History
@@ -10,15 +19,20 @@ import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarItem
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.WideNavigationRail
+import androidx.compose.material3.WideNavigationRailItem
+import androidx.compose.material3.WideNavigationRailValue
+import androidx.compose.material3.rememberWideNavigationRailState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -49,6 +63,27 @@ enum class AppDestination(
     val label: String get() = tr(en, zh)
 }
 
+private fun NavHostController.open(route: String) {
+    if (currentDestination?.route == route) return
+    navigate(route) {
+        popUpTo(graph.startDestinationId) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
+/**
+ * The shell of the app. A narrow window has the destinations in a bar at the
+ * bottom; from 600 dp they move to a rail at the side, which also shows their
+ * names beside the icons from 1200 dp. Bar and rail are the navigation
+ * components of Material 3 Expressive.
+ *
+ * The pages sit at one place in the composition whatever the width, so opening
+ * a foldable or resizing the window in the middle of a test only moves the
+ * navigation and does not rebuild the page or its preview surface.
+ */
 @Composable
 fun AppRoot() {
     val navController = rememberNavController()
@@ -63,54 +98,73 @@ fun AppRoot() {
             request.test in AutoRun.gpuTests -> AppDestination.Gpu.route
             else -> AppDestination.Cpu.route
         }
-        if (navController.currentDestination?.route != route) {
-            navController.navigate(route) {
-                popUpTo(navController.graph.startDestinationId) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
-        }
+        navController.open(route)
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
-        bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                windowInsets = NavigationBarDefaults.windowInsets,
-            ) {
-                AppDestination.entries.forEach { dest ->
-                    NavigationBarItem(
-                        selected = currentRoute == dest.route,
-                        onClick = {
-                            if (currentRoute != dest.route) {
-                                navController.navigate(dest.route) {
-                                    popUpTo(navController.graph.startDestinationId) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val windowWidth = windowWidthOf(maxWidth)
+        val sideNavigation = windowWidth.sideNavigation
+        val railState = rememberWideNavigationRailState()
+        val railExpanded = railState.targetValue == WideNavigationRailValue.Expanded
+        LaunchedEffect(windowWidth) {
+            railState.snapTo(
+                if (windowWidth == WindowWidth.Large) WideNavigationRailValue.Expanded
+                else WideNavigationRailValue.Collapsed,
+            )
+        }
+
+        CompositionLocalProvider(LocalWindowWidth provides windowWidth) {
+            Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
+                Row(modifier = Modifier.fillMaxSize()) {
+                    if (sideNavigation) {
+                        WideNavigationRail(state = railState) {
+                            AppDestination.entries.forEach { dest ->
+                                WideNavigationRailItem(
+                                    selected = currentRoute == dest.route,
+                                    onClick = { navController.open(dest.route) },
+                                    icon = { Icon(dest.icon, contentDescription = null) },
+                                    label = { Text(dest.label) },
+                                    railExpanded = railExpanded,
+                                )
+                            }
+                        }
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        // The pages lay out their own bars. The edge that the
+                        // navigation already covers must not be padded again.
+                        val covered = WindowInsets.systemBars.only(
+                            if (sideNavigation) WindowInsetsSides.Start else WindowInsetsSides.Bottom,
+                        )
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .consumeWindowInsets(covered),
+                        ) {
+                            NavHost(
+                                navController = navController,
+                                startDestination = AppDestination.Gpu.route,
+                            ) {
+                                composable(AppDestination.Gpu.route) { GpuScreen() }
+                                composable(AppDestination.Cpu.route) { CpuScreen() }
+                                composable(AppDestination.History.route) { HistoryScreen() }
+                                composable(AppDestination.Charts.route) { ChartsScreen() }
+                            }
+                        }
+                        if (!sideNavigation) {
+                            ShortNavigationBar {
+                                AppDestination.entries.forEach { dest ->
+                                    ShortNavigationBarItem(
+                                        selected = currentRoute == dest.route,
+                                        onClick = { navController.open(dest.route) },
+                                        icon = { Icon(dest.icon, contentDescription = null) },
+                                        label = { Text(dest.label) },
+                                    )
                                 }
                             }
-                        },
-                        icon = { Icon(dest.icon, contentDescription = dest.label) },
-                        label = { Text(dest.label) },
-                    )
+                        }
+                    }
                 }
             }
-        },
-    ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = AppDestination.Gpu.route,
-            modifier = Modifier.padding(innerPadding),
-        ) {
-            composable(AppDestination.Gpu.route) { GpuScreen() }
-            composable(AppDestination.Cpu.route) { CpuScreen() }
-            composable(AppDestination.History.route) { HistoryScreen() }
-            composable(AppDestination.Charts.route) { ChartsScreen() }
         }
     }
 }

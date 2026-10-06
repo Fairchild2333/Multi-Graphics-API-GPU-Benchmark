@@ -3,6 +3,7 @@
 // page shows the results and their charts as the engine prints them.
 
 import { LengthMetrics } from '@kit.ArkUI';
+import { AdaptivePanes } from '../components/AdaptivePanes';
 import { Card } from '../components/Card';
 import { BarItem, BarRows, ChartMarker, ChartSeries, ColumnChart, LineChart } from '../components/Charts';
 import { CoreScore, cpuRun, MemClass, MemLevel, StorageResult } from '../common/EngineOutput';
@@ -261,196 +262,203 @@ export struct CpuPage {
     return text;
   }
 
-  build() {
-    Scroll() {
-      Column({ space: 12 }) {
-        Text(tr('CPU Benchmark', 'CPU 跑分'))
-          .fontSize(24)
-          .fontWeight(FontWeight.Bold)
-          .fontColor($r('sys.color.ohos_id_color_text_primary'))
+  /** The choice of test, the button that starts it and its progress. */
+  @Builder
+  controls() {
+    Text(tr('CPU Benchmark', 'CPU 跑分'))
+      .fontSize(24)
+      .fontWeight(FontWeight.Bold)
+      .fontColor($r('sys.color.ohos_id_color_text_primary'))
 
-        Card({ title: this.memoryMode() ? tr('Cache & memory bandwidth', '缓存与内存带宽')
-          : tr('CPU compute throughput', 'CPU 计算吞吐') }) {
-          if (cpuRun.cpuLabel.length > 0) {
-            Text(cpuRun.cpuLabel)
-              .caption()
-          }
-          Flex({ wrap: FlexWrap.Wrap, space: { main: LengthMetrics.vp(8), cross: LengthMetrics.vp(8) } }) {
-            ForEach(CPU_MODES, (choice: ModeChoice) => {
-              Button(tr(choice.en, choice.zh))
-                .fontSize(13)
-                .height(32)
-                .fontColor(appState.cpuMode === choice.id ? Color.White
-                  : $r('sys.color.ohos_id_color_text_primary'))
-                .backgroundColor(appState.cpuMode === choice.id ? $r('sys.color.ohos_id_color_emphasize')
-                  : $r('sys.color.ohos_id_color_button_normal'))
-                .enabled(!cpuRun.running)
-                .onClick(() => {
-                  appState.cpuMode = choice.id;
-                })
-            }, (choice: ModeChoice) => choice.id)
-          }
-          if (!this.memoryMode()) {
-            Row({ space: 8 }) {
-              Button(tr('Quick 1 s', '快速 1 秒'))
-                .fontSize(13)
-                .height(32)
-                .fontColor(!this.formal ? Color.White : $r('sys.color.ohos_id_color_text_primary'))
-                .backgroundColor(!this.formal ? $r('sys.color.ohos_id_color_emphasize')
-                  : $r('sys.color.ohos_id_color_button_normal'))
-                .enabled(!cpuRun.running)
-                .onClick(() => {
-                  this.formal = false;
-                })
-              Button(tr('Formal 15 s', '正式 15 秒'))
-                .fontSize(13)
-                .height(32)
-                .fontColor(this.formal ? Color.White : $r('sys.color.ohos_id_color_text_primary'))
-                .backgroundColor(this.formal ? $r('sys.color.ohos_id_color_emphasize')
-                  : $r('sys.color.ohos_id_color_button_normal'))
-                .enabled(!cpuRun.running)
-                .onClick(() => {
-                  this.formal = true;
-                })
-            }
-          }
-          Text(this.memoryMode()
-            ? tr('Sweeps the data-set size on one thread of every core type, then on all cores, and reads L1, L2, ' +
-              'the shared cache and memory off the curve. It ends with a storage test that writes a temporary ' +
-              'file of up to 1 GiB. A run cannot be cancelled.',
-              '先用每类核心的一个线程、再用全部核心扫描数据量，从曲线上读出 L1、L2、共享缓存和内存各自的带宽。' +
-                '最后是存储测试，会写一个最大 1 GiB 的临时文件。运行开始后不能取消。')
-            : tr('The single-core test runs once on every logical processor; the formal preset takes 15 s for ' +
-              'each. A run cannot be cancelled.',
-              '单核测试会在每个逻辑处理器上各跑一次；正式预设每次 15 秒。运行开始后不能取消。'))
-            .caption()
-          Button(tr('Run', '运行'))
-            .enabled(this.canRun())
+    Card({ title: this.memoryMode() ? tr('Cache & memory bandwidth', '缓存与内存带宽')
+      : tr('CPU compute throughput', 'CPU 计算吞吐') }) {
+      if (cpuRun.cpuLabel.length > 0) {
+        Text(cpuRun.cpuLabel)
+          .caption()
+      }
+      Flex({ wrap: FlexWrap.Wrap, space: { main: LengthMetrics.vp(8), cross: LengthMetrics.vp(8) } }) {
+        ForEach(CPU_MODES, (choice: ModeChoice) => {
+          Button(tr(choice.en, choice.zh))
+            .fontSize(13)
+            .height(32)
+            .fontColor(appState.cpuMode === choice.id ? Color.White
+              : $r('sys.color.ohos_id_color_text_primary'))
+            .backgroundColor(appState.cpuMode === choice.id ? $r('sys.color.ohos_id_color_emphasize')
+              : $r('sys.color.ohos_id_color_button_normal'))
+            .enabled(!cpuRun.running)
             .onClick(() => {
-              runController.startCpu(appState.cpuMode, this.formal ? 15 : 1);
+              appState.cpuMode = choice.id;
+            })
+        }, (choice: ModeChoice) => choice.id)
+      }
+      if (!this.memoryMode()) {
+        Row({ space: 8 }) {
+          Button(tr('Quick 1 s', '快速 1 秒'))
+            .fontSize(13)
+            .height(32)
+            .fontColor(!this.formal ? Color.White : $r('sys.color.ohos_id_color_text_primary'))
+            .backgroundColor(!this.formal ? $r('sys.color.ohos_id_color_emphasize')
+              : $r('sys.color.ohos_id_color_button_normal'))
+            .enabled(!cpuRun.running)
+            .onClick(() => {
+              this.formal = false;
+            })
+          Button(tr('Formal 15 s', '正式 15 秒'))
+            .fontSize(13)
+            .height(32)
+            .fontColor(this.formal ? Color.White : $r('sys.color.ohos_id_color_text_primary'))
+            .backgroundColor(this.formal ? $r('sys.color.ohos_id_color_emphasize')
+              : $r('sys.color.ohos_id_color_button_normal'))
+            .enabled(!cpuRun.running)
+            .onClick(() => {
+              this.formal = true;
             })
         }
+      }
+      Text(this.memoryMode()
+        ? tr('Sweeps the data-set size on one thread of every core type, then on all cores, and reads L1, L2, ' +
+          'the shared cache and memory off the curve. It ends with a storage test that writes a temporary ' +
+          'file of up to 1 GiB. A run cannot be cancelled.',
+          '先用每类核心的一个线程、再用全部核心扫描数据量，从曲线上读出 L1、L2、共享缓存和内存各自的带宽。' +
+            '最后是存储测试，会写一个最大 1 GiB 的临时文件。运行开始后不能取消。')
+        : tr('The single-core test runs once on every logical processor; the formal preset takes 15 s for ' +
+          'each. A run cannot be cancelled.',
+          '单核测试会在每个逻辑处理器上各跑一次；正式预设每次 15 秒。运行开始后不能取消。'))
+        .caption()
+      Button(tr('Run', '运行'))
+        .enabled(this.canRun())
+        .onClick(() => {
+          runController.startCpu(appState.cpuMode, this.formal ? 15 : 1);
+        })
+    }
 
-        if (cpuRun.running || cpuRun.finished) {
-          Card() {
-            Row() {
-              Text(cpuRun.status)
-                .fontSize(14)
-                .fontWeight(FontWeight.Medium)
-                .fontColor($r('sys.color.ohos_id_color_text_primary'))
-                .layoutWeight(1)
-              Text(Math.round(cpuRun.progress * 100).toString() + '%')
+    if (cpuRun.running || cpuRun.finished) {
+      Card() {
+        Row() {
+          Text(cpuRun.status)
+            .fontSize(14)
+            .fontWeight(FontWeight.Medium)
+            .fontColor($r('sys.color.ohos_id_color_text_primary'))
+            .layoutWeight(1)
+          Text(Math.round(cpuRun.progress * 100).toString() + '%')
+            .caption()
+        }
+        .width('100%')
+        Progress({ value: cpuRun.progress * 100, total: 100, type: ProgressType.Linear })
+          .width('100%')
+      }
+    }
+  }
+
+  /** What the last run measured. */
+  @Builder
+  results() {
+    if (cpuRun.memoryTest) {
+      ForEach(this.classes(), (cpuClass: MemClass) => {
+        SweepCard({ title: this.classTitle(cpuClass), mode: cpuClass.mode, cacheClass: cpuClass.rank, threads: 1 })
+      }, (cpuClass: MemClass) => cpuClass.rank.toString() + cpuClass.mode)
+      SweepCard({
+        title: tr(`All cores — ${cpuRun.allThreads} threads, GB/s (sizes are per thread)`,
+          `全核 —— ${cpuRun.allThreads} 个线程，GB/s（数据量按每个线程计）`),
+        mode: 'all',
+        // With mixed cores the threads of the all-core run see different caches.
+        cacheClass: this.classes().length > 1 ? -1 : this.classes()[0].rank,
+        threads: Math.max(1, cpuRun.allThreads)
+      })
+      if (cpuRun.pageMapping.length > 0 || cpuRun.storage !== undefined) {
+        Card({ title: tr('Virtual memory and storage', '虚拟内存与存储') }) {
+          if (cpuRun.pageMapping.length > 0) {
+            Text(tr('Mapping new pages: ', '映射新页面：') + cpuRun.pageMapping)
+              .fontSize(13)
+              .fontColor($r('sys.color.ohos_id_color_text_primary'))
+          }
+          if (cpuRun.storage !== undefined) {
+            if (cpuRun.storage.backing.length > 0) {
+              Text(tr('The system pages to: ', '系统换页到：') + localizeEngineText(cpuRun.storage.backing))
                 .caption()
             }
-            .width('100%')
-            Progress({ value: cpuRun.progress * 100, total: 100, type: ProgressType.Linear })
-              .width('100%')
-          }
-        }
-
-        if (cpuRun.memoryTest) {
-          ForEach(this.classes(), (cpuClass: MemClass) => {
-            SweepCard({ title: this.classTitle(cpuClass), mode: cpuClass.mode, cacheClass: cpuClass.rank, threads: 1 })
-          }, (cpuClass: MemClass) => cpuClass.rank.toString() + cpuClass.mode)
-          SweepCard({
-            title: tr(`All cores — ${cpuRun.allThreads} threads, GB/s (sizes are per thread)`,
-              `全核 —— ${cpuRun.allThreads} 个线程，GB/s（数据量按每个线程计）`),
-            mode: 'all',
-            // With mixed cores the threads of the all-core run see different caches.
-            cacheClass: this.classes().length > 1 ? -1 : this.classes()[0].rank,
-            threads: Math.max(1, cpuRun.allThreads)
-          })
-          if (cpuRun.pageMapping.length > 0 || cpuRun.storage !== undefined) {
-            Card({ title: tr('Virtual memory and storage', '虚拟内存与存储') }) {
-              if (cpuRun.pageMapping.length > 0) {
-                Text(tr('Mapping new pages: ', '映射新页面：') + cpuRun.pageMapping)
-                  .fontSize(13)
-                  .fontColor($r('sys.color.ohos_id_color_text_primary'))
-              }
-              if (cpuRun.storage !== undefined) {
-                if (cpuRun.storage.backing.length > 0) {
-                  Text(tr('The system pages to: ', '系统换页到：') + localizeEngineText(cpuRun.storage.backing))
-                    .caption()
-                }
-                if (cpuRun.storage.measured) {
-                  Text(tr('Storage, sequential 1 MiB (MB/s)', '存储，顺序 1 MiB（MB/s）'))
-                    .caption()
-                  BarRows({
-                    items: [new BarItem(tr('Read', '读'), cpuRun.storage.seqRead),
-                      new BarItem(tr('Write', '写'), cpuRun.storage.seqWrite)],
-                    unit: 'MB/s',
-                    dark: appState.dark
-                  })
-                  Text(tr('Storage, random 4 KiB, one request at a time (MB/s)', '存储，随机 4 KiB，每次一个请求（MB/s）'))
-                    .caption()
-                  BarRows({
-                    items: [new BarItem(tr('Read', '读'), cpuRun.storage.randRead),
-                      new BarItem(tr('Write', '写'), cpuRun.storage.randWrite)],
-                    unit: 'MB/s',
-                    dark: appState.dark
-                  })
-                  Text(this.requestsText(cpuRun.storage))
-                    .caption()
-                } else {
-                  Text(tr('Storage not measured', '存储未测量') + (cpuRun.storage.skipped.length > 0
-                    ? tr(': ', '：') + localizeEngineText(cpuRun.storage.skipped) : ''))
-                    .caption()
-                }
-              }
-            }
-          }
-        } else {
-          if (cpuRun.singleSummary.length > 0 || cpuRun.multiSummary.length > 0) {
-            Card({ title: tr('Summary', '摘要') }) {
-              if (cpuRun.singleSummary.length > 0) {
-                Text(tr('Single-core average', '单核平均'))
-                  .caption()
-                Text(cpuRun.singleSummary)
-                  .fontSize(20)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor($r('sys.color.ohos_id_color_text_primary'))
-              }
-              if (cpuRun.multiSummary.length > 0) {
-                Text(tr('All-core', '全核'))
-                  .caption()
-                Text(cpuRun.multiSummary)
-                  .fontSize(20)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor($r('sys.color.ohos_id_color_text_primary'))
-              }
-            }
-          }
-          if (cpuRun.coreScores.length >= 2) {
-            Card({
-              title: tr('Score of every logical processor', '各逻辑处理器的成绩') + ` (${cpuRun.coreScores[0].unit})`
-            }) {
-              ColumnChart({
-                values: this.sortedScores().map((score: CoreScore) => score.score),
-                labels: this.sortedScores().map((score: CoreScore) => (score.core + 1).toString()),
+            if (cpuRun.storage.measured) {
+              Text(tr('Storage, sequential 1 MiB (MB/s)', '存储，顺序 1 MiB（MB/s）'))
+                .caption()
+              BarRows({
+                items: [new BarItem(tr('Read', '读'), cpuRun.storage.seqRead),
+                  new BarItem(tr('Write', '写'), cpuRun.storage.seqWrite)],
+                unit: 'MB/s',
                 dark: appState.dark
               })
-              ForEach(this.sortedScores(), (score: CoreScore) => {
-                Text(`#${score.core + 1}  ${score.label}  ·  ${formatNumber(score.score)} ${score.unit}`)
-                  .caption()
-              }, (score: CoreScore) => score.core.toString() + score.score.toString())
+              Text(tr('Storage, random 4 KiB, one request at a time (MB/s)', '存储，随机 4 KiB，每次一个请求（MB/s）'))
+                .caption()
+              BarRows({
+                items: [new BarItem(tr('Read', '读'), cpuRun.storage.randRead),
+                  new BarItem(tr('Write', '写'), cpuRun.storage.randWrite)],
+                unit: 'MB/s',
+                dark: appState.dark
+              })
+              Text(this.requestsText(cpuRun.storage))
+                .caption()
+            } else {
+              Text(tr('Storage not measured', '存储未测量') + (cpuRun.storage.skipped.length > 0
+                ? tr(': ', '：') + localizeEngineText(cpuRun.storage.skipped) : ''))
+                .caption()
             }
-          }
-        }
-
-        if (cpuRun.logTail.length > 0) {
-          Card({ title: tr('Raw output (last lines)', '原始输出（最后几行）') }) {
-            Text(cpuRun.logTail)
-              .fontSize(11)
-              .fontColor($r('sys.color.ohos_id_color_text_secondary'))
           }
         }
       }
-      .padding(16)
-      .width('100%')
+    } else {
+      if (cpuRun.singleSummary.length > 0 || cpuRun.multiSummary.length > 0) {
+        Card({ title: tr('Summary', '摘要') }) {
+          if (cpuRun.singleSummary.length > 0) {
+            Text(tr('Single-core average', '单核平均'))
+              .caption()
+            Text(cpuRun.singleSummary)
+              .fontSize(20)
+              .fontWeight(FontWeight.Medium)
+              .fontColor($r('sys.color.ohos_id_color_text_primary'))
+          }
+          if (cpuRun.multiSummary.length > 0) {
+            Text(tr('All-core', '全核'))
+              .caption()
+            Text(cpuRun.multiSummary)
+              .fontSize(20)
+              .fontWeight(FontWeight.Medium)
+              .fontColor($r('sys.color.ohos_id_color_text_primary'))
+          }
+        }
+      }
+      if (cpuRun.coreScores.length >= 2) {
+        Card({
+          title: tr('Score of every logical processor', '各逻辑处理器的成绩') + ` (${cpuRun.coreScores[0].unit})`
+        }) {
+          ColumnChart({
+            values: this.sortedScores().map((score: CoreScore) => score.score),
+            labels: this.sortedScores().map((score: CoreScore) => (score.core + 1).toString()),
+            dark: appState.dark
+          })
+          ForEach(this.sortedScores(), (score: CoreScore) => {
+            Text(`#${score.core + 1}  ${score.label}  ·  ${formatNumber(score.score)} ${score.unit}`)
+              .caption()
+          }, (score: CoreScore) => score.core.toString() + score.score.toString())
+        }
+      }
     }
-    .width('100%')
-    .height('100%')
-    .align(Alignment.Top)
-    .scrollBar(BarState.Off)
+
+    if (cpuRun.logTail.length > 0) {
+      Card({ title: tr('Raw output (last lines)', '原始输出（最后几行）') }) {
+        Text(cpuRun.logTail)
+          .fontSize(11)
+          .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+      }
+    }
+  }
+
+  build() {
+    AdaptivePanes({
+      primary: () => {
+        this.controls()
+      },
+      secondary: () => {
+        this.results()
+      }
+    })
   }
 }

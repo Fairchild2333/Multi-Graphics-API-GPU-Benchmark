@@ -640,6 +640,8 @@ PathService 已把 results/captures/reports/logs 改到
 - [ ] **HarmonyOS 上机验证**：需要用户在 DevEco Studio 里登录华为账号生成签名，并连接设备或下载模拟器镜像；然后确认界面显示、Vulkan、绑核、缓存容量读取和 hdc 启动参数。
 - [x] **2026-10-06 Android 的 adb 入口**：引擎输出写入 logcat，debug 包可用启动参数直接开始一项测试；只编译通过，没有在设备上运行过。见 `android/README.md` 和第 10 节验证记录。
 - [x] **2026-10-06 Apple 检查脚本入库**：`scripts/check-apple.ps1`，改 iOS / macOS 的 Swift 代码后先跑它；它不是 Xcode 编译，范围见 `scripts/apple-check/README.md`。
+- [x] **2026-10-06 Android 和 HarmonyOS 的大屏、折叠屏和新界面（只写了代码）**：两端都按窗口宽度切换布局（侧边导航、两栏、网格），预览画面固定 16:9；Android 用上 Material 3 Expressive 的导航组件，HarmonyOS 6.1 以上用悬浮页签。两端都能编译；按用户要求没有在模拟器或设备上运行，界面没有看过。见第 10 节验证记录。
+- [ ] **在模拟器上看一遍上面这些改动**：用户已装好 Android（API 24、API 37）和 HarmonyOS（Phone、TripleFold、2in1 Foldable、TV、Car）的模拟器，但要求先不要启动。要看的项目列在第 10 节那条记录的"未验证"里。HarmonyOS 工程还没有签名配置。
 - [x] **2026-10-06 成绩文件的前后兼容**：重写了 `results.json` 的读写。读更新版本的文件时保留不认识的字段；保存改为先写临时文件再替换；读不全的文件在重写前留副本。用三个旧版本的程序和这台机器上的 55 个真实成绩文件验证过。规则见 §1 第 8 条和 §3.9，记录见第 10 节。
 - [x] **2026-10-06 成绩里记录机器信息**：每条成绩新增机型（`deviceModel`）和内存（`systemMemoryMB`）；Android 和 HarmonyOS 的系统版本改记系统发行版本，Android 的芯片名取系统属性；移动端和 Apple 端的历史页显示这一行。Windows 和 Linux 容器实际运行过；Android、HarmonyOS、iOS、macOS 只编译或类型检查过，读到的文字没有在设备上核对。见第 10 节验证记录。
 - [ ] **`cpu_membw_v1` 剩余步骤**：查清流式写入偏慢和 L2 曲线分段的原因；在 macOS、Windows ARM64、Jetson 和大小核 CPU 上实测；见 `docs/TODO.md`。
@@ -706,6 +708,40 @@ PathService 已把 results/captures/reports/logs 改到
 5. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Collaboration；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
 
 ## 10. 验证记录
+
+### 2026-10-06 Android 和 HarmonyOS：大屏、折叠屏和新界面（只写了代码）
+
+- **状态：** 代码已写，`assembleDebug` 和 `scripts\build-ohos.ps1` 都通过。**用户要求只写代码、不测试，所以没有在任何模拟器或设备上运行，界面一眼都没看过。** 下面的"会怎样显示"都是按代码推断的。
+- **原来的情况（读代码得出）：** 两端都只有手机布局：底部导航加一列拉满宽度的卡片，预览画面是"拉满宽度 × 200"。Android 在折叠屏展开或分屏拖动时会重建页面；HarmonyOS 装不到 TV 和车机上。
+- **两端共同的做法：**
+  - 按**窗口**宽度分档，不按设备类型：600 起导航从底部移到侧边，840 起一页分成左右两栏，各自滚动；
+  - 单栏时内容最宽 720，不再无限拉宽；
+  - 历史页改成网格（1 到 3 列），图表页在宽窗口上并排两张；
+  - 预览画面固定 16:9；
+  - 放预览画面的那一栏在两种布局里处于同一位置，所以运行中折叠、旋转、改窗口大小时预览画面不会被销毁重建。
+- **Android：**
+  - 新文件 `ui/AdaptiveLayout.kt`（宽度分档 `WindowWidth`、两栏容器 `AdaptivePanes`）；`ui/AppRoot.kt` 重写。
+  - 导航：窄窗口用 `ShortNavigationBar`，600 dp 起用 `WideNavigationRail`，1200 dp 起侧栏展开显示文字。
+  - `AndroidManifest.xml` 的 `configChanges` 增加 `smallestScreenSize`、`density`、`keyboard`、`navigation`，折叠屏展开、分屏拖动、接上键盘时不再重建 Activity。
+  - 去掉了外层的 Scaffold。原来外层的边距没有标记为已处理，每页的标题栏很可能会再加一次状态栏高度（这个问题本身也没有在设备上确认过）。
+  - **Material 3 Expressive 能用的只有一部分。** 工程用的 material3 是 1.4.0，其中公开的 Expressive 接口只有上面两个导航组件；它的主题、动效方案、强调字重和放大的圆角在 1.4.0 里都是 `internal`。所以另外只做了两件事：主题里的圆角改成 16 / 20 / 32 dp，运行按钮改成带文字的。其余 Expressive 组件在 1.5 的预览版里，没有引入。
+  - 没有新增依赖。折叠屏的铰链位置和半开姿态（需要 `androidx.window`）没有处理。
+  - **不用预览版（用户 2026-10-06 决定）。** 当天查到的情况：material3 最新是 1.5.0-alpha29，最新的 Compose BOM（2026.09.00）仍然对应 1.4.0，所以 Expressive 的其余组件要等 1.5 出正式版。在那之前只用稳定接口补了一处：GPU 页里被选中的测试卡片，圆角和颜色用弹簧动画变化。
+- **HarmonyOS：**
+  - 新文件 `components/AdaptivePanes.ets`、`common/Shell.ets`、`pages/IndexHds.ets`；`AppState` 增加窗口宽度和由它推出的几个属性。
+  - `module.json5`：设备类型增加 `tv` 和 `car`，最小窗口 360 × 480。
+  - 页签加了系统图标；600 vp 起页签竖排在侧边。历史页和图表页用 `GridRow`。
+  - **新外壳只在 HarmonyOS 6.1（API 23）以上的手机、平板、二合一上加载。** `EntryAbility` 按系统版本、设备类型和系统能力选择加载 `pages/IndexHds`（UI Design Kit 的 `HdsTabs`，悬浮页签加系统材质）还是原来的 `pages/Index`。SDK 标明这些接口在 TV 和车机上不可用，所以那两类设备始终用原来的外壳。
+  - 编译器对 `IndexHds.ets` 有 15 条警告，内容是"接口从 6.0 / 6.1 起支持，而兼容版本是 5.0.0(12)"以及"TV、车机不可用"，都在预期之内；其他文件没有警告。
+  - **系统材质（鸿蒙对应苹果"液态玻璃"的东西，SDK 里叫 immersive material）用在哪里：**
+    - 6.1 以上的新外壳里，悬浮页签用了它；
+    - `module.json5` 增加了 `ohos.arkui.UIMaterial.state = enable`。HarmonyOS 7（API 26）上，对话框、菜单、开关、滑块、半模态面板这些系统控件默认带材质；更早的系统忽略这一项。App 现在几乎没用到这些控件，所以眼下看不出区别。
+    - **内容卡片不能用。** 华为文档（`@ohos.arkui.uiMaterial`，2026-09-24 版）写明：普通组件上的沉浸式材质只在 Navigation 的标题栏和底部页签栏里生效，放在其他区域不生效。所以没有给卡片加。
+- **未验证（全部要在模拟器或设备上看）：**
+  - 两端在手机、展开的折叠屏、平板上的实际显示，包括侧边导航、两栏的比例和滚动；
+  - Android：顶部和底部的边距是否正确；折叠、分屏、旋转时页面是否真的不重建，预览画面改变大小后引擎是否正常；`WideNavigationRail` 展开和收起；
+  - HarmonyOS：`HdsTabs` 悬浮页签的样子、页面底部留的 96 vp 是否合适、它是否真的浮在内容上；页签图标在 5.1 的系统上是否存在；老系统上不加载 `IndexHds` 这个判断是否如预期；TV 上用遥控器能否操作；车机上的显示；
+  - 两端运行中改变窗口大小时测试是否继续。
 
 ### 2026-10-06 成绩文件的前后兼容
 

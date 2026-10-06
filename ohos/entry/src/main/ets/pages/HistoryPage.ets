@@ -59,33 +59,38 @@ export struct HistoryPage {
           Text(resultsPath(appState.filesDir))
             .caption()
         } else {
-          ForEach(this.entries, (entry: ResultEntry) => {
-            Card() {
-              Text(workloadTitle(entry.workload) + ' · ' + entry.graphicsApi)
-                .fontSize(15)
-                .fontWeight(FontWeight.Medium)
-                .fontColor($r('sys.color.ohos_id_color_text_primary'))
-              Text(entry.deviceName)
-                .fontSize(13)
-                .fontColor($r('sys.color.ohos_id_color_text_primary'))
-              Text(entry.workloadVersion)
-                .caption()
-              Text(this.scoreText(entry))
-                .fontSize(15)
-                .fontWeight(FontWeight.Medium)
-                .fontColor($r('sys.color.ohos_id_color_text_primary'))
-              if (entry.machineLine().length > 0) {
-                Text(entry.machineLine())
-                  .caption()
+          // One column on a phone, two on an opened foldable, three on a tablet.
+          GridRow({ columns: { sm: 1, md: 2, lg: 3 }, gutter: 12 }) {
+            ForEach(this.entries, (entry: ResultEntry) => {
+              GridCol() {
+                Card() {
+                  Text(workloadTitle(entry.workload) + ' · ' + entry.graphicsApi)
+                    .fontSize(15)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                  Text(entry.deviceName)
+                    .fontSize(13)
+                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                  Text(entry.workloadVersion)
+                    .caption()
+                  Text(this.scoreText(entry))
+                    .fontSize(15)
+                    .fontWeight(FontWeight.Medium)
+                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                  if (entry.machineLine().length > 0) {
+                    Text(entry.machineLine())
+                      .caption()
+                  }
+                  Text(entry.timestamp)
+                    .caption()
+                }
               }
-              Text(entry.timestamp)
-                .caption()
-            }
-          }, (entry: ResultEntry, index: number) => index.toString() + entry.id + entry.timestamp)
+            }, (entry: ResultEntry, index: number) => index.toString() + entry.id + entry.timestamp)
+          }
         }
       }
       .alignItems(HorizontalAlign.Start)
-      .padding(16)
+      .padding({ left: appState.margin, right: appState.margin, top: 16, bottom: 16 + appState.bottomInset })
       .width('100%')
     }
     .width('100%')

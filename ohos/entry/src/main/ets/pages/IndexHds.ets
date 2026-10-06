@@ -1,0 +1,71 @@
+// The app shell for HarmonyOS 6.1 (API 23) and later: the same four pages as
+// Index.ets, in the tabs of the UI Design Kit. On a narrow window the tab bar
+// floats over the page on the system material; from 600 vp the tabs stand at
+// the side, as in Index.ets.
+//
+// EntryAbility loads this page only where the kit and the floating style
+// exist. Nothing else imports it, so an older system never loads the kit.
+
+import { hdsMaterial, HdsTabs, HdsTabsController } from '@kit.UIDesignKit';
+import { tr } from '../common/I18n';
+import { appState } from '../common/RunController';
+import { startShellTimer, tabItem } from '../common/Shell';
+import { ChartsPage } from './ChartsPage';
+import { CpuPage } from './CpuPage';
+import { GpuPage } from './GpuPage';
+import { HistoryPage } from './HistoryPage';
+
+@Entry
+@ComponentV2
+struct IndexHds {
+  private tabs: HdsTabsController = new HdsTabsController();
+  private timer: number = -1;
+
+  aboutToAppear(): void {
+    appState.floatingTabs = true;
+    this.timer = startShellTimer(this.tabs);
+  }
+
+  aboutToDisappear(): void {
+    clearInterval(this.timer);
+  }
+
+  build() {
+    HdsTabs({ barPosition: appState.sideTabs ? BarPosition.Start : BarPosition.End, controller: this.tabs }) {
+      TabContent() {
+        GpuPage()
+      }
+      .tabBar(tabItem($r('sys.symbol.gauge_with_dots_needle_33percent'), 'GPU'))
+
+      TabContent() {
+        CpuPage()
+      }
+      .tabBar(tabItem($r('sys.symbol.memory_module'), 'CPU'))
+
+      TabContent() {
+        HistoryPage()
+      }
+      .tabBar(tabItem($r('sys.symbol.clock'), tr('History', '历史')))
+
+      TabContent() {
+        ChartsPage()
+      }
+      .tabBar(tabItem($r('sys.symbol.histogram'), tr('Charts', '图表')))
+    }
+    .vertical(appState.sideTabs)
+    // The pages run on under the floating bar and leave room for it at their
+    // end (AppState.bottomInset).
+    .barOverlap(!appState.sideTabs)
+    .barFloatingStyle(appState.sideTabs ? undefined : {
+      systemMaterialEffect: { materialType: hdsMaterial.MaterialType.ADAPTIVE }
+    })
+    .width('100%')
+    .height('100%')
+    .backgroundColor($r('sys.color.ohos_id_color_background'))
+    .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+      if (typeof newValue.width === 'number') {
+        appState.windowWidth = newValue.width;
+      }
+    })
+  }
+}

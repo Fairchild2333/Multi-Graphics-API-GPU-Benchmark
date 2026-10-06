@@ -134,21 +134,26 @@ export struct ChartsPage {
             'device here.', '先在 GPU 页或 CPU 页运行一项测试，这里会为每项测试画一张图，显示各设备的最好成绩。'))
             .caption()
         } else {
-          ForEach(this.charts, (chart: WorkloadChart) => {
-            Card({ title: workloadTitle(chart.workload) }) {
-              Text(this.subtitle(chart))
-                .caption()
-              BarRows({ items: chart.bars, unit: chart.unit, dark: appState.dark })
-            }
-          }, (chart: WorkloadChart) => chart.workload + chart.version + chart.bars.length.toString())
+          GridRow({ columns: { sm: 1, md: 1, lg: 2 }, gutter: 12 }) {
+            ForEach(this.charts, (chart: WorkloadChart) => {
+              GridCol() {
+                Card({ title: workloadTitle(chart.workload) }) {
+                  Text(this.subtitle(chart))
+                    .caption()
+                  BarRows({ items: chart.bars, unit: chart.unit, dark: appState.dark })
+                }
+              }
+            }, (chart: WorkloadChart) => chart.workload + chart.version + chart.bars.length.toString())
+          }
           Text(tr('Each chart uses only the results of the newest version of its test. Every run is listed on ' +
             'the History page.', '每张图只使用该测试最新版本的成绩；每一次运行都列在历史页里。'))
             .caption()
         }
       }
       .alignItems(HorizontalAlign.Start)
-      .padding(16)
+      .padding({ left: appState.margin, right: appState.margin, top: 16, bottom: 16 + appState.bottomInset })
       .width('100%')
+      .constraintSize({ maxWidth: appState.twoPane ? 1200 : 720 })
     }
     .width('100%')
     .height('100%')

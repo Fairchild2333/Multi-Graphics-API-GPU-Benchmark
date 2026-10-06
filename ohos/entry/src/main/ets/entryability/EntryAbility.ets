@@ -1,5 +1,6 @@
 import { AbilityConstant, bundleManager, Configuration, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { window } from '@kit.ArkUI';
+import { deviceInfo } from '@kit.BasicServicesKit';
 import { resetLanguage } from '../common/I18n';
 import { appState, logLine, runController } from '../common/RunController';
 
@@ -27,7 +28,13 @@ export default class EntryAbility extends UIAbility {
   }
 
   onWindowStageCreate(windowStage: window.WindowStage): void {
-    windowStage.loadContent('pages/Index', (err) => {
+    // HarmonyOS 6.1 (API 23) brought the floating tab bar on the system
+    // material; systems that have it get the shell built with it. The SDK
+    // marks these interfaces as unavailable to TVs and cars.
+    const kitDevices: string[] = ['phone', 'tablet', '2in1'];
+    const newShell: boolean = deviceInfo.sdkApiVersion >= 23 && kitDevices.includes(deviceInfo.deviceType) &&
+      canIUse('SystemCapability.UIDesign.HDSComponent.Core');
+    windowStage.loadContent(newShell ? 'pages/IndexHds' : 'pages/Index', (err) => {
       if (err.code) {
         logLine('loadContent failed: ' + JSON.stringify(err));
       }

@@ -4,10 +4,19 @@
     "type": "entry",
     "description": "$string:module_desc",
     "mainElement": "EntryAbility",
-    "deviceTypes": ["phone", "tablet", "2in1"],
+    "deviceTypes": ["phone", "tablet", "2in1", "tv", "car"],
     "deliveryWithInstall": true,
     "installationFree": false,
     "pages": "$profile:main_pages",
+    // HarmonyOS 7 (API 26): system controls of this app (dialogs, menus, switches,
+    // sliders, sheets) take the immersive system material by default. Older
+    // systems ignore the entry.
+    "metadata": [
+      {
+        "name": "ohos.arkui.UIMaterial.state",
+        "value": "enable"
+      }
+    ],
     "abilities": [
       {
         "name": "EntryAbility",
@@ -18,6 +27,8 @@
         "startWindowIcon": "$media:app_icon",
         "startWindowBackground": "$color:start_window_background",
         "exported": true,
+        "minWindowWidth": 360,
+        "minWindowHeight": 480,
         "skills": [
           {
             "entities": ["entity.system.home"],

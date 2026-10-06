@@ -10,17 +10,18 @@ import com.mangekyo.benchmark.ui.components.seriesColors
 
 import androidx.compose.ui.*
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
@@ -31,7 +32,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -51,6 +52,7 @@ import com.mangekyo.benchmark.core.CapabilityGate
 import com.mangekyo.benchmark.core.GraphicsBackend
 import com.mangekyo.benchmark.core.NativeBridge
 import com.mangekyo.benchmark.core.WorkloadRegistry
+import com.mangekyo.benchmark.ui.AdaptivePanes
 import com.mangekyo.benchmark.ui.components.BenchmarkSurface
 
 /** GPU page shell aligned with WinUI. Engine start/cancel still TODO. */
@@ -158,7 +160,7 @@ fun GpuScreen() {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = {
                     if (running) {
                         NativeBridge.stopWorkload()
@@ -167,6 +169,10 @@ fun GpuScreen() {
                         start(selectedWorkloadId, 3.0)
                     }
                 },
+                icon = {
+                    Icon(if (running) Icons.Filled.Stop else Icons.Filled.PlayArrow, contentDescription = null)
+                },
+                text = { Text(if (running) tr("Stop", "停止") else tr("Run", "运行")) },
                 containerColor = if (runEnabled || running) {
                     MaterialTheme.colorScheme.primaryContainer
                 } else {
@@ -177,24 +183,12 @@ fun GpuScreen() {
                 } else {
                     MaterialTheme.colorScheme.onSurfaceVariant
                 },
-            ) {
-                if (running) {
-                    Icon(Icons.Filled.Stop, contentDescription = tr("Stop", "停止"))
-                } else {
-                    Icon(Icons.Filled.PlayArrow, contentDescription = tr("Run", "运行"))
-                }
-            }
+            )
         },
     ) { inner ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(inner)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            item {
-                Box(modifier = Modifier.height(4.dp))
+        AdaptivePanes(
+            modifier = Modifier.padding(inner),
+            primary = {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
@@ -206,10 +200,12 @@ fun GpuScreen() {
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Text(tr("Preview surface", "预览画面"), style = MaterialTheme.typography.titleMedium)
+                        // A fixed shape, so the picture is the same on a phone,
+                        // an opened foldable and a tablet.
                         BenchmarkSurface(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(200.dp),
+                                .aspectRatio(16f / 9f),
                         )
                         Text(
                             text = tr("Engine: ", "引擎：") + NativeBridge.engineVersion(),
@@ -218,102 +214,131 @@ fun GpuScreen() {
                         )
                     }
                 }
-            }
 
-            item {
-                Text(tr("Backend", "图形后端"), style = MaterialTheme.typography.titleMedium)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(
-                        selected = selectedBackend == "Vulkan",
-                        onClick = { selectedBackend = "Vulkan" },
-                        enabled = caps.vulkanLoaderPresent,
-                        label = { Text("Vulkan") },
-                    )
-                    FilterChip(
-                        selected = selectedBackend == "GLES31",
-                        onClick = { selectedBackend = "GLES31" },
-                        label = { Text("GL ES 3.1") },
-                    )
-                }
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(top = 8.dp),
-                ) {
-                    AssistChip(
-                        onClick = {},
-                        label = {
-                            Text(
-                                if (caps.vulkanLoaderPresent) tr("Vulkan loader OK", "Vulkan 加载器可用")
-                                else tr("Vulkan unavailable", "Vulkan 不可用"),
-                            )
-                        },
-                    )
-                    AssistChip(
-                        onClick = {},
-                        label = { Text("GL ES ${caps.glesVersionLabel}") },
-                    )
-                    if (caps.vulkanHardwareFeature) {
-                        AssistChip(onClick = {}, label = { Text(tr("Vulkan HW feature", "Vulkan 硬件特性")) })
+                Column {
+                    Text(tr("Backend", "图形后端"), style = MaterialTheme.typography.titleMedium)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = selectedBackend == "Vulkan",
+                            onClick = { selectedBackend = "Vulkan" },
+                            enabled = caps.vulkanLoaderPresent,
+                            label = { Text("Vulkan") },
+                        )
+                        FilterChip(
+                            selected = selectedBackend == "GLES31",
+                            onClick = { selectedBackend = "GLES31" },
+                            label = { Text("GL ES 3.1") },
+                        )
                     }
-                    AssistChip(onClick = {}, label = { Text(caps.abi) })
-                    AssistChip(onClick = {}, label = { Text(caps.androidRelease) })
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
+                        AssistChip(
+                            onClick = {},
+                            label = {
+                                Text(
+                                    if (caps.vulkanLoaderPresent) tr("Vulkan loader OK", "Vulkan 加载器可用")
+                                    else tr("Vulkan unavailable", "Vulkan 不可用"),
+                                )
+                            },
+                        )
+                        AssistChip(
+                            onClick = {},
+                            label = { Text("GL ES ${caps.glesVersionLabel}") },
+                        )
+                        if (caps.vulkanHardwareFeature) {
+                            AssistChip(onClick = {}, label = { Text(tr("Vulkan HW feature", "Vulkan 硬件特性")) })
+                        }
+                        AssistChip(onClick = {}, label = { Text(caps.abi) })
+                        AssistChip(onClick = {}, label = { Text(caps.androidRelease) })
+                    }
+                    caps.notes.forEach { note ->
+                        Text(
+                            text = note,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                    }
                 }
-                caps.notes.forEach { note ->
-                    Text(
-                        text = note,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp),
-                    )
-                }
-            }
 
-            item {
-                Text(tr("Workloads", "测试项目"), style = MaterialTheme.typography.titleMedium)
                 Text(
-                    text = tr(
-                        "Engine writes *_android_preview (3s embed, not desktop 15s) — do not mix with Windows groups.",
-                        "成绩的版本带 _android_preview 后缀（内嵌运行 3 秒，不是桌面版的 15 秒），不要和 Windows 的成绩放在一起比较。",
-                    ),
+                    text = when {
+                        statusText.isNotEmpty() -> statusText
+                        !vulkanOk -> tr(
+                            "Vulkan Run needs API 24+ loader + Surface. GLES path not wired yet.",
+                            "运行需要 Android 7.0（API 24）以上的 Vulkan 加载器和可用的预览画面；GL ES 路径还没有接入。",
+                        )
+                        else -> tr(
+                            "Preview Run: 3s Stream/GPU Burn via gpu_engine. Scores are android_preview — do not mix with Windows.",
+                            "预览运行：粒子测试或 GPU Burn 跑 3 秒。成绩属于 android_preview，不要和 Windows 的成绩放在一起比较。",
+                        )
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-            }
+            },
+            secondary = {
+                Column {
+                    Text(tr("Workloads", "测试项目"), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = tr(
+                            "Engine writes *_android_preview (3s embed, not desktop 15s) — do not mix with Windows groups.",
+                            "成绩的版本带 _android_preview 后缀（内嵌运行 3 秒，不是桌面版的 15 秒），不要和 Windows 的成绩放在一起比较。",
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
 
-            items(WorkloadRegistry.gpuWorkloads, key = { it.id }) { workload ->
-                val selected = workload.id == selectedWorkloadId
-                Card(
-                    onClick = { selectedWorkloadId = workload.id },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (selected) {
+                WorkloadRegistry.gpuWorkloads.forEach { workload ->
+                    val selected = workload.id == selectedWorkloadId
+                    // Material 3 Expressive marks a selection by shape as well as
+                    // by colour, and moves between the two with a spring. Its own
+                    // components for this are not in the stable library yet.
+                    val corner by animateDpAsState(
+                        targetValue = if (selected) 28.dp else 16.dp,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMediumLow,
+                        ),
+                        label = "workloadCorner",
+                    )
+                    val container by animateColorAsState(
+                        targetValue = if (selected) {
                             MaterialTheme.colorScheme.secondaryContainer
                         } else {
                             MaterialTheme.colorScheme.surfaceContainerHighest
                         },
-                    ),
-                ) {
-                    Column(modifier = Modifier.padding(14.dp)) {
-                        Text(workload.displayName, style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            text = workload.workloadVersion,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        if (workload.isPreview) {
+                        label = "workloadContainer",
+                    )
+                    Card(
+                        onClick = { selectedWorkloadId = workload.id },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(corner),
+                        colors = CardDefaults.cardColors(containerColor = container),
+                    ) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Text(workload.displayName, style = MaterialTheme.typography.titleMedium)
                             Text(
-                                text = tr("preview", "预览"),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.tertiary,
-                                modifier = Modifier.padding(top = 4.dp),
+                                text = workload.workloadVersion,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            if (workload.isPreview) {
+                                Text(
+                                    text = tr("preview", "预览"),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    modifier = Modifier.padding(top = 4.dp),
+                                )
+                            }
                         }
                     }
                 }
-            }
 
-            if (GpuRun.scoreLine.isNotEmpty() || GpuRun.fpsLine.isNotEmpty() || GpuRun.samples.size >= 2) {
-                item {
+                if (GpuRun.scoreLine.isNotEmpty() || GpuRun.fpsLine.isNotEmpty() || GpuRun.samples.size >= 2) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
@@ -352,26 +377,7 @@ fun GpuScreen() {
                         }
                     }
                 }
-            }
-
-            item {
-                Text(
-                    text = when {
-                        statusText.isNotEmpty() -> statusText
-                        !vulkanOk -> tr(
-                            "Vulkan Run needs API 24+ loader + Surface. GLES path not wired yet.",
-                            "运行需要 Android 7.0（API 24）以上的 Vulkan 加载器和可用的预览画面；GL ES 路径还没有接入。",
-                        )
-                        else -> tr(
-                            "Preview Run: 3s Stream/GPU Burn via gpu_engine. Scores are android_preview — do not mix with Windows.",
-                            "预览运行：粒子测试或 GPU Burn 跑 3 秒。成绩属于 android_preview，不要和 Windows 的成绩放在一起比较。",
-                        )
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Box(modifier = Modifier.height(72.dp))
-            }
-        }
+            },
+        )
     }
 }

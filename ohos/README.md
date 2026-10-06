@@ -68,6 +68,25 @@ name of the chip, so that is still read from `/proc/cpuinfo` and saved as
 `Unknown CPU` when it is not there; the model code then identifies the chip.
 **These fields compile and have not been checked on a device.**
 
+## Window width, device types and the newer look
+
+Added on 2026-10-06. **Compiled only; never seen on a device or an emulator.**
+
+- **The layout follows the width of the window:** tabs at the bottom and one
+  column below 600 vp; tabs at the side from 600 vp; two panes beside each
+  other from 840 vp. History and Charts are grids. The preview is always 16:9.
+- **Device types:** phone, tablet, 2in1, tv, car.
+- **Two shells:** `pages/Index.ets` runs everywhere. Phones, tablets and 2-in-1s
+  on HarmonyOS 6.1 (API 23) or later load `pages/IndexHds.ets` instead, which
+  uses the floating tab bar and system material of the UI Design Kit. The
+  choice is made in `EntryAbility.ets`. The compiler warnings about interfaces
+  newer than the compatible version in `IndexHds.ets` are expected.
+- **System material:** the floating tab bar of the newer shell uses it, and
+  `module.json5` switches it on for the app (system controls take it from
+  HarmonyOS 7). Huawei's documentation says that on ordinary components the
+  material only takes effect in a title bar or the bottom tab bar, so the
+  content cards do not use it.
+
 ## Build
 
 Needs DevEco Studio (checked with 26.0, which ships the SDK, hvigor, ohpm and
