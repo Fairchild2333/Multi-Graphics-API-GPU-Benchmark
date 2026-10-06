@@ -162,6 +162,7 @@ public struct Alignment: Equatable, Sendable {
     public static let top = Alignment()
     public static let bottom = Alignment()
     public static let topLeading = Alignment()
+    public static let topTrailing = Alignment()
 }
 
 public enum TextAlignment: Sendable { case leading, center, trailing }
@@ -464,6 +465,29 @@ extension View {
     public func cornerRadius(_ radius: CGFloat, antialiased: Bool = true) -> some View { EmptyView() }
 }
 
+// MARK: - Used by the iOS app only
+// The macOS app must not use these: fullScreenCover and the two modifiers for
+// the system bars do not exist on macOS.
+
+public struct ZStack<Content: View> {
+    @MainActor public init(alignment: Alignment = .center, @ViewBuilder content: () -> Content) {}
+}
+extension ZStack: View { public var body: Never { fatalError() } }
+
+public enum ContentMode: Sendable { case fit, fill }
+public enum Visibility: Sendable { case automatic, visible, hidden }
+
+extension View {
+    public func fullScreenCover<Content: View>(isPresented: Binding<Bool>, onDismiss: (() -> Void)? = nil,
+                                               @ViewBuilder content: @escaping () -> Content) -> some View { EmptyView() }
+    public func ignoresSafeArea() -> some View { EmptyView() }
+    public func aspectRatio(_ aspectRatio: CGFloat? = nil, contentMode: ContentMode) -> some View { EmptyView() }
+    public func statusBarHidden(_ hidden: Bool = true) -> some View { EmptyView() }
+    public func persistentSystemOverlays(_ visibility: Visibility) -> some View { EmptyView() }
+    public func onDisappear(perform action: (() -> Void)? = nil) -> some View { EmptyView() }
+    public func environmentObject<T: ObservableObject>(_ object: T) -> some View { EmptyView() }
+}
+
 public struct PlainButtonStyle: PrimitiveButtonStyle { public init() {} }
 extension PrimitiveButtonStyle where Self == PlainButtonStyle {
     public static var plain: PlainButtonStyle { PlainButtonStyle() }
@@ -476,4 +500,5 @@ extension Color {
     public static let blue = Color(red: 0, green: 0, blue: 0)
     public static let gray = Color(red: 0, green: 0, blue: 0)
     public static let clear = Color(red: 0, green: 0, blue: 0)
+    public static let black = Color(red: 0, green: 0, blue: 0)
 }

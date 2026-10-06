@@ -20,8 +20,20 @@ call the engine's command-line entry point.
 >   `gpu_burn_v3_fixed_steps_16_kaleidoscope_ohos_preview`; the cache and
 >   memory sweep saves `cpu_membw_v1_ohos_preview`. Runs take 3 s, not the 15 s
 >   of the desktop version; do not mix them with desktop scores.
-> - **Not done**: the fluid test, frame capture, a formal mobile duration
->   contract, signing and release packages, cancelling a CPU test.
+> - **Not done**: frame capture, a formal mobile duration contract, signing
+>   and release packages, cancelling a CPU test.
+>
+> Added 2026-10-07 (**builds, still never run**):
+> - **Fluid** (`cinematic_liquid`): runs full screen; a 3 s run is saved as
+>   `cinematic_liquid_v2_physical_scene_v8_preview_ohos_preview`.
+> - **VRAM / GPU cache bandwidth** (`membw`): saved as `membw_v1_ohos_preview`.
+>   It only computes and shows no picture, so it runs through the engine's
+>   command-line entry, like the CPU tests.
+> - **Heavier forms of the particle and GPU Burn tests**: `stream_heavy`
+>   (1M particles), `gpu_burn_medium` (64 steps), `gpu_burn_heavy` (256 steps).
+> - **GPU tests run full screen in landscape** and always render 1280 × 720.
+> - The same code has run on the Android emulator; `VK_OHOS_surface`, the fixed
+>   buffer size and the switch to landscape have not been seen on HarmonyOS.
 
 ## Features
 
@@ -74,7 +86,10 @@ Added on 2026-10-06. **Compiled only; never seen on a device or an emulator.**
 
 - **The layout follows the width of the window:** tabs at the bottom and one
   column below 600 vp; tabs at the side from 600 vp; two panes beside each
-  other from 840 vp. History and Charts are grids. The preview is always 16:9.
+  other from 840 vp. History and Charts are grids.
+- **GPU tests run full screen (2026-10-07):** a test turns the screen to
+  landscape and shows the picture alone. It always renders 1280 x 720 and the
+  system scales it. The page no longer has a small preview. Compiled only.
 - **Device types:** phone, tablet, 2in1, tv, car.
 - **Two shells:** `pages/Index.ets` runs everywhere. Phones, tablets and 2-in-1s
   on HarmonyOS 6.1 (API 23) or later load `pages/IndexHds.ets` instead, which
@@ -130,7 +145,8 @@ hdc hilog | grep Mangekyo
 ```
 
 - **`--ps run <test>`**: `cpu_membw`, `cpu_all`, `cpu_per_core`, `cpu_multi`,
-  `stream`, `gpu_burn`.
+  `stream`, `stream_heavy`, `gpu_burn`, `gpu_burn_medium`, `gpu_burn_heavy`,
+  `cinematic_liquid` (fluid), `membw` (VRAM / GPU cache bandwidth).
 - **`--pi seconds <N>`** (optional): seconds per CPU compute test, or the
   length of a GPU run.
 - **Log**: the tag `MangekyoEngine` carries every line the engine prints; the

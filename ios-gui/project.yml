@@ -27,6 +27,8 @@ targets:
         buildPhase: resources
       - path: ../shaders/gpu_burn.metal
         buildPhase: resources
+      - path: ../shaders/cinematic_liquid_v2.metal
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.fairchild.Mangekyo

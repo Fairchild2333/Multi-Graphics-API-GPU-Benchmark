@@ -15,7 +15,7 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
 
     var icon: String {
         switch self {
-        case .run:      return "play.fill"
+        case .run:      return "cube.fill"
         case .cpu:      return "cpu"
         case .history:  return "clock.fill"
         case .charts:   return "chart.bar.fill"

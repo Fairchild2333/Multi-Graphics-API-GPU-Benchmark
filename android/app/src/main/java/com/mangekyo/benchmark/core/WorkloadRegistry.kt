@@ -7,8 +7,8 @@ package com.mangekyo.benchmark.core
  * `_android_preview`（并写入 `scoreContract=preview_not_desktop_15s`）。
  * 此处字符串必须与引擎写出一致，禁止再写假的 placeholder 名。
  *
- * 仅列出当前 JNI 宿主真正可启动的项（stream / gpu_burn light=16）。
- * 液体未接线，不出现在可跑列表。
+ * 仅列出当前 JNI 宿主真正可启动的项。同一项测试有轻重几档：轻的那档跑不满 GPU、
+ * 帧率顶着屏幕刷新率时，成绩不准，要换重的。
  */
 data class WorkloadInfo(
     val id: String,
@@ -30,13 +30,51 @@ object WorkloadRegistry {
             isPreview = true,
         ),
         WorkloadInfo(
+            "stream_heavy",
+            "Stream / Particle (1M)",
+            "粒子 —— 内存吞吐（100 万）",
+            "stream_v1_android_preview",
+            isPreview = true,
+        ),
+        WorkloadInfo(
             "gpu_burn",
             "GPU Burn (light 16)",
             "GPU Burn（轻量 16 步）",
             "gpu_burn_v3_fixed_steps_16_kaleidoscope_android_preview",
             isPreview = true,
         ),
+        WorkloadInfo(
+            "gpu_burn_medium",
+            "GPU Burn (medium 64)",
+            "GPU Burn（中等 64 步）",
+            "gpu_burn_v3_fixed_steps_64_kaleidoscope_android_preview",
+            isPreview = true,
+        ),
+        WorkloadInfo(
+            "gpu_burn_heavy",
+            "GPU Burn (heavy 256)",
+            "GPU Burn（重度 256 步）",
+            "gpu_burn_v3_fixed_steps_256_kaleidoscope_android_preview",
+            isPreview = true,
+        ),
+        WorkloadInfo(
+            "cinematic_liquid",
+            "Fluid — interactive pool",
+            "流体 —— 互动水池",
+            "cinematic_liquid_v2_physical_scene_v8_preview_android_preview",
+            isPreview = true,
+        ),
+        WorkloadInfo(
+            "membw",
+            "Memory bandwidth — VRAM / cache",
+            "显存带宽 —— 显存 / 缓存",
+            "membw_v1_android_preview",
+            isPreview = true,
+        ),
     )
+
+    /** Tests of the GPU page that need no picture: they run through the engine's command-line entry. */
+    val gpuCommandLineTests: Set<String> = setOf("membw")
 
     /** CPU 页的两项测试，均通过引擎的命令行入口在本机线程上运行。 */
     val cpuWorkloads: List<WorkloadInfo> = listOf(

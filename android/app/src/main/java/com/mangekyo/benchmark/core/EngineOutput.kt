@@ -250,11 +250,30 @@ object CpuRun {
 }
 
 /** State of the last GPU run: its timing samples and the score lines of the summary. */
+/** One measurement of the VRAM / cache bandwidth sweep. */
+data class MemoryPoint(val kernel: String, val bytes: Double, val gbps: Double)
+
+/** What one kernel of that sweep reached in the cache and in memory, GB/s. */
+data class MemoryLevelLine(val kernel: String, val cacheGbps: Double, val memoryGbps: Double)
+
 object GpuRun {
     var active by mutableStateOf(false)
+
+    /** A test has the whole screen: the shell hides its navigation and the GPU page shows only the picture. */
+    var fullscreen by mutableStateOf(false)
     val samples = mutableStateListOf<GpuSample>()
     var scoreLine by mutableStateOf("")
     var fpsLine by mutableStateOf("")
+
+    /** The frame rate was held at the display's refresh rate, so the score may be too low. */
+    var displayLimited by mutableStateOf(false)
+
+    /**
+     * The VRAM / cache bandwidth sweep: one point per kernel ("read", "write",
+     * "copy") and data-set size, and for every kernel its cache and memory level.
+     */
+    val memoryPoints = mutableStateListOf<MemoryPoint>()
+    val memoryLevels = mutableStateListOf<MemoryLevelLine>()
 
     private val rateKeys = listOf(
         "RAM rate:", "VRAM rate:", "Memory rate:", "Compute rate:", "Burn rate:", "Stress rate:",
@@ -266,7 +285,16 @@ object GpuRun {
         samples.clear()
         scoreLine = ""
         fpsLine = ""
+        displayLimited = false
+        memoryPoints.clear()
+        memoryLevels.clear()
     }
+
+    private fun field(line: String, key: String): String? =
+        line.split('\t').firstOrNull { it.startsWith("$key=") }?.substring(key.length + 1)
+
+    /** The "Avg FPS" of the run, or null before it is known. */
+    val averageFps: Double? get() = numberAfter(fpsLine, "Avg FPS:")
 
     private fun numberAfter(line: String, key: String): Double? {
         val at = line.indexOf(key)
@@ -287,7 +315,31 @@ object GpuRun {
             )
             return
         }
+        if (line.startsWith("MEMBW_POINT")) {
+            val kernel = field(line, "kernel") ?: return
+            val bytes = field(line, "dataset_bytes")?.toDoubleOrNull() ?: return
+            val rate = field(line, "median_gbps")?.toDoubleOrNull() ?: return
+            memoryPoints.add(MemoryPoint(kernel, bytes, rate))
+            return
+        }
+        if (line.startsWith("MEMBW_SUMMARY")) {
+            val kernel = field(line, "kernel") ?: return
+            memoryLevels.add(
+                MemoryLevelLine(
+                    kernel,
+                    field(line, "cache_gbps")?.toDoubleOrNull() ?: 0.0,
+                    field(line, "memory_gbps")?.toDoubleOrNull() ?: 0.0,
+                ),
+            )
+            // The score of this test is how fast the GPU reads its memory.
+            if (kernel == "read" && scoreLine.isEmpty()) {
+                scoreLine = "Memory rate: " + (field(line, "memory_gbps") ?: "0") + " GB/s"
+            }
+            return
+        }
         val trimmed = line.trim()
+        // The engine's own verdict: frames had to wait for the display.
+        if (trimmed.startsWith(">> Display-bound")) displayLimited = true
         if (scoreLine.isEmpty() && rateKeys.any { trimmed.startsWith(it) }) {
             scoreLine = trimmed.replace(Regex(" {2,}"), " ")
         } else if (fpsLine.isEmpty() && trimmed.startsWith("Avg FPS:")) {

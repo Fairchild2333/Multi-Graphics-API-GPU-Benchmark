@@ -17,10 +17,11 @@ void gpb_set_working_dir(const char* dir);
 
 // Embedded Metal host (mirrors Android NativeBridge).
 // shader_dir / data_dir must be absolute UTF-8 paths; shader_dir should contain
-// particle.metal and gpu_burn.metal (usually copied from the app bundle).
+// particle.metal, gpu_burn.metal and cinematic_liquid_v2.metal (copied from the app bundle).
 void gpb_init_paths(const char* shader_dir, const char* data_dir);
 void gpb_set_metal_layer(void* ca_metal_layer);  // CAMetalLayer* as __bridge void*
-bool gpb_start_workload(const char* workload_id, double seconds);  // stream|gpu_burn
+// workload_id: stream, stream_heavy, gpu_burn, gpu_burn_medium, gpu_burn_heavy or cinematic_liquid.
+bool gpb_start_workload(const char* workload_id, double seconds);
 void gpb_stop_workload(void);   // -> gpu_bench::RequestStop()
 bool gpb_is_running(void);
 // Lines an embedded run printed since the last call, each ending in a line feed.

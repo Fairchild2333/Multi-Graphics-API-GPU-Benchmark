@@ -275,6 +275,7 @@ namespace winrt::gpu_bench_gui::implementation
             Dx11SynchronizedTiming, // informational: invalid D3D11 timestamps replaced by sync timing
             OpenGlSynchronizedTiming, // informational: invalid GL timestamps replaced by sync timing
             SuspectResult, // informational: retained score appears physically implausible
+            DisplayBound, // informational: frames waited for the display, the score may be too low
             Unknown,
         };
 

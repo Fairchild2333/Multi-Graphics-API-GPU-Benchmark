@@ -141,6 +141,8 @@ struct GpuJob: Hashable, Identifiable, Sendable {
     var samples: [GpuSample] = []
     var scoreLine = ""
     var fpsLine = ""
+    /// The engine found that every frame waited for the display, so the score may be too low.
+    var displayLimited = false
 
     /// "VRAM rate:   1863.24 GB/s  (0.023 ms compute)" -> "VRAM rate", 1863.24, "GB/s".
     var score: (name: String, value: Double, unit: String)? {
@@ -314,6 +316,7 @@ struct RunOutput: Sendable {
     private mutating func consumeSummary(_ line: String) {
         guard !jobs.isEmpty else { return }
         let trimmed = line.trimmingCharacters(in: .whitespaces)
+        if trimmed.hasPrefix(">> Display-bound") { jobs[jobs.count - 1].displayLimited = true }
         let isScore = Self.rateKeys.contains { trimmed.hasPrefix($0) }
         guard isScore || trimmed.hasPrefix("Avg FPS:") else { return }
         let compact = trimmed.split(separator: " ").joined(separator: " ")

@@ -4,6 +4,8 @@
 
 import bridge from 'libmangekyo.so';
 import { common } from '@kit.AbilityKit';
+import { display, window } from '@kit.ArkUI';
+import { deviceInfo } from '@kit.BasicServicesKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { cpuRun, gpuRun } from './EngineOutput';
@@ -25,7 +27,11 @@ export const CPU_TEST_MODES: Map<string, string> = new Map<string, string>([
   ['cpu_multi', 'multi'],
 ]);
 
-export const GPU_TESTS: string[] = ['stream', 'gpu_burn'];
+export const GPU_TESTS: string[] =
+  ['stream', 'stream_heavy', 'gpu_burn', 'gpu_burn_medium', 'gpu_burn_heavy', 'cinematic_liquid', 'membw'];
+
+/** GPU tests without a picture; they run through the engine's command-line entry. */
+export const GPU_COMMAND_LINE_TESTS: string[] = ['membw'];
 
 @ObservedV2
 export class AppState {
@@ -48,6 +54,9 @@ export class AppState {
    * split screen and a freely resized window all change it while the app runs.
    */
   @Trace windowWidth: number = 360;
+  @Trace windowHeight: number = 780;
+  /** A GPU test has the whole screen: the shell shows the picture alone over its pages. */
+  @Trace gpuFullscreen: boolean = false;
   /** True when the tab bar floats over the pages (the shell for HarmonyOS 6.1 and later). */
   @Trace floatingTabs: boolean = false;
   filesDir: string = '';
@@ -79,11 +88,14 @@ export const appState: AppState = new AppState();
 class PendingRequest {
   test: string;
   seconds: number;
+  /** True for a test named on the command line; its start and failure are logged for a script. */
+  fromCommandLine: boolean;
   attempts: number = 0;
 
-  constructor(test: string, seconds: number) {
+  constructor(test: string, seconds: number, fromCommandLine: boolean) {
     this.test = test;
     this.seconds = seconds;
+    this.fromCommandLine = fromCommandLine;
   }
 }
 
@@ -91,6 +103,10 @@ export class RunController {
   /** The page that started the current run: 'gpu', 'cpu' or ''. */
   private owner: string = '';
   private pending: PendingRequest | undefined = undefined;
+  /** True while a GPU test without a picture runs through the command-line entry. */
+  private gpuCommandLine: boolean = false;
+  /** The window of the app, set by EntryAbility; a GPU test turns it to landscape and hides the system bars. */
+  mainWindow: window.Window | undefined = undefined;
 
   /**
    * Copies the SPIR-V shaders out of the app package, because the engine
@@ -140,7 +156,7 @@ export class RunController {
       logLine(`AUTORUN refused test=${test} reason=unknown_test`);
       return;
     }
-    this.pending = new PendingRequest(test, seconds);
+    this.pending = new PendingRequest(test, seconds, true);
     appState.requestedTab = CPU_TEST_MODES.has(test) ? 1 : 0;
     logLine(`AUTORUN accepted test=${test}`);
   }
@@ -187,9 +203,101 @@ export class RunController {
     return ok;
   }
 
+  /**
+   * Starts a GPU test from the page. A test takes the whole screen: the shell
+   * first shows the picture alone, and the test starts once that surface
+   * exists (startPending), which takes a moment because the screen may turn.
+   */
+  runGpu(workloadId: string, seconds: number): void {
+    if (!appState.engineReady || cpuRun.running || appState.gpuRunning || this.pending !== undefined) {
+      return;
+    }
+    if (GPU_COMMAND_LINE_TESTS.indexOf(workloadId) >= 0) {
+      this.startGpuCommandLine(workloadId);
+      return;
+    }
+    this.pending = new PendingRequest(workloadId, seconds, false);
+    this.enterFullscreen();
+  }
+
+  /** The VRAM / cache bandwidth sweep computes only: no picture, no full screen. */
+  private startGpuCommandLine(workloadId: string): boolean {
+    bridge.pollOutput();  // drop lines left over from an earlier run
+    this.owner = 'gpu';
+    gpuRun.begin();
+    const ok: boolean = bridge.startCli(['--workload', workloadId, '--api', 'vulkan', '--gpu', '0']);
+    this.gpuCommandLine = ok;
+    if (ok) {
+      appState.gpuStatus = tr(`Running ${workloadId}; this takes a minute or two`, `正在运行 ${workloadId}，需要一两分钟`);
+    } else {
+      gpuRun.active = false;
+      const error: string = bridge.lastError();
+      appState.gpuStatus = error.length > 0 ? error : tr('Start failed', '启动失败');
+    }
+    appState.gpuRunning = ok;
+    return ok;
+  }
+
   stopGpu(): void {
+    if (this.gpuCommandLine) {
+      return;   // the sweep has no stop; it ends by itself
+    }
     bridge.stopWorkload();
     appState.gpuStatus = tr('Stop requested', '已请求停止');
+    // Nothing runs yet: give the screen back at once.
+    if (!bridge.isRunning()) {
+      this.pending = undefined;
+      this.leaveFullscreen();
+    }
+  }
+
+  private enterFullscreen(): void {
+    if (appState.gpuFullscreen) {
+      return;
+    }
+    appState.gpuFullscreen = true;
+    appState.gpuStatus = tr('Starting…', '正在启动…');
+    this.applyWindowMode(true);
+  }
+
+  private leaveFullscreen(): void {
+    if (!appState.gpuFullscreen) {
+      return;
+    }
+    appState.gpuFullscreen = false;
+    this.applyWindowMode(false);
+  }
+
+  /**
+   * Gives the window to a test, or back: landscape, no system bars, screen
+   * kept on. Only phones and tablets turn; a 2-in-1 keeps its window frame.
+   * The SDK marks the turning and the full-screen layout as unavailable on
+   * the other device types, so they are not called there.
+   */
+  private applyWindowMode(test: boolean): void {
+    const win: window.Window | undefined = this.mainWindow;
+    if (win === undefined) {
+      return;
+    }
+    const type: string = deviceInfo.deviceType;
+    const handheld: boolean = type === 'phone' || type === 'tablet';
+    try {
+      if (handheld) {
+        win.setPreferredOrientation(test ? window.Orientation.AUTO_ROTATION_LANDSCAPE
+          : window.Orientation.UNSPECIFIED).catch(() => {
+        });
+      }
+      if (type !== '2in1') {
+        win.setWindowLayoutFullScreen(test).catch(() => {
+        });
+        win.setWindowSystemBarEnable(test ? [] : ['status', 'navigation']).catch(() => {
+        });
+      }
+      win.setWindowKeepScreenOn(test).catch(() => {
+      });
+    } catch (e) {
+      logLine('window mode not applied: ' + JSON.stringify(e));
+    }
   }
 
   /** Called a few times a second. */
@@ -209,9 +317,10 @@ export class RunController {
       }
     } else if (this.owner === 'gpu') {
       gpuRun.consumeAll(lines);
-      const running: boolean = bridge.isRunning();
+      const running: boolean = bridge.isRunning() || (this.gpuCommandLine && bridge.isCliRunning());
       appState.gpuRunning = running;
       if (gpuRun.active && !running) {
+        this.gpuCommandLine = false;
         gpuRun.consumeAll(bridge.pollOutput());
         gpuRun.active = false;
         appState.resultsRevision++;
@@ -219,6 +328,18 @@ export class RunController {
         appState.gpuStatus = error.length > 0 ? error : tr('Done', '完成');
         logLine('RUN finished kind=gpu score=' + (gpuRun.scoreLine.length > 0 ? gpuRun.scoreLine : 'none') +
           (error.length > 0 ? ' error=' + error : ''));
+        this.leaveFullscreen();
+        // Besides the engine's own verdict: a frame rate that sits on the
+        // refresh rate of the display was held there by it.
+        try {
+          const refresh: number = display.getDefaultDisplaySync().refreshRate;
+          const fps: number = gpuRun.averageFps();
+          if (isFinite(fps) && refresh > 1 && Math.abs(fps - refresh) < refresh * 0.04) {
+            gpuRun.displayLimited = true;
+          }
+        } catch (e) {
+          logLine('refresh rate not available: ' + JSON.stringify(e));
+        }
       }
     }
     this.startPending();
@@ -243,13 +364,28 @@ export class RunController {
     }
     // A GPU test needs the preview surface, which appears a moment after the page: wait up to 10 s.
     appState.gpuWorkload = wanted.test;
+    if (GPU_COMMAND_LINE_TESTS.indexOf(wanted.test) >= 0) {
+      this.pending = undefined;
+      const started: boolean = this.startGpuCommandLine(wanted.test);
+      if (wanted.fromCommandLine) {
+        logLine(started ? `AUTORUN started test=${wanted.test}`
+          : `AUTORUN failed test=${wanted.test} reason=${bridge.lastError()}`);
+      }
+      return;
+    }
+    this.enterFullscreen();
     wanted.attempts++;
     if (bridge.hasSurface() && this.startGpu(wanted.test, wanted.seconds > 0 ? wanted.seconds : 3)) {
       this.pending = undefined;
-      logLine(`AUTORUN started test=${wanted.test}`);
+      if (wanted.fromCommandLine) {
+        logLine(`AUTORUN started test=${wanted.test}`);
+      }
     } else if (wanted.attempts > 50) {
       this.pending = undefined;
-      logLine(`AUTORUN failed test=${wanted.test} reason=${bridge.lastError()}`);
+      this.leaveFullscreen();
+      if (wanted.fromCommandLine) {
+        logLine(`AUTORUN failed test=${wanted.test} reason=${bridge.lastError()}`);
+      }
     }
   }
 }

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <ctime>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -66,18 +67,28 @@ std::string ResultsFilePath() {
 // ID / timestamp generation
 // ---------------------------------------------------------------------------
 
+// Local calendar time. POSIX lets localtime_r skip reading the time zone, and
+// the C library of Android 7 does: without tzset() the first call in a process
+// answered in UTC, so the first result of a run got an id hours away from its
+// own timestamp (seen on the API 24 emulator, 2026-10-07).
+static std::tm LocalTime(std::time_t time) {
+    std::tm tm{};
+#ifdef _WIN32
+    localtime_s(&tm, &time);
+#else
+    tzset();
+    localtime_r(&time, &tm);
+#endif
+    return tm;
+}
+
 std::string GenerateResultId() {
     auto now  = std::chrono::system_clock::now();
     auto time = std::chrono::system_clock::to_time_t(now);
     auto ms   = std::chrono::duration_cast<std::chrono::milliseconds>(
                     now.time_since_epoch()) % 1000;
 
-    std::tm tm{};
-#ifdef _WIN32
-    localtime_s(&tm, &time);
-#else
-    localtime_r(&time, &tm);
-#endif
+    const std::tm tm = LocalTime(time);
 
     std::ostringstream oss;
     oss << std::put_time(&tm, "%Y%m%d-%H%M%S")
@@ -88,12 +99,7 @@ std::string GenerateResultId() {
 std::string GenerateTimestamp() {
     auto now  = std::chrono::system_clock::now();
     auto time = std::chrono::system_clock::to_time_t(now);
-    std::tm tm{};
-#ifdef _WIN32
-    localtime_s(&tm, &time);
-#else
-    localtime_r(&time, &tm);
-#endif
+    const std::tm tm = LocalTime(time);
     std::ostringstream oss;
     oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
     return oss.str();

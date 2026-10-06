@@ -641,7 +641,10 @@ PathService 已把 results/captures/reports/logs 改到
 - [x] **2026-10-06 Android 的 adb 入口**：引擎输出写入 logcat，debug 包可用启动参数直接开始一项测试；只编译通过，没有在设备上运行过。见 `android/README.md` 和第 10 节验证记录。
 - [x] **2026-10-06 Apple 检查脚本入库**：`scripts/check-apple.ps1`，改 iOS / macOS 的 Swift 代码后先跑它；它不是 Xcode 编译，范围见 `scripts/apple-check/README.md`。
 - [x] **2026-10-06 Android 和 HarmonyOS 的大屏、折叠屏和新界面（只写了代码）**：两端都按窗口宽度切换布局（侧边导航、两栏、网格），预览画面固定 16:9；Android 用上 Material 3 Expressive 的导航组件，HarmonyOS 6.1 以上用悬浮页签。两端都能编译；按用户要求没有在模拟器或设备上运行，界面没有看过。见第 10 节验证记录。
-- [ ] **在模拟器上看一遍上面这些改动**：用户已装好 Android（API 24、API 37）和 HarmonyOS（Phone、TripleFold、2in1 Foldable、TV、Car）的模拟器，但要求先不要启动。要看的项目列在第 10 节那条记录的"未验证"里。HarmonyOS 工程还没有签名配置。
+- [x] **2026-10-07 Android 在模拟器上跑通**：Android 17（API 37，x86_64）和 Android 7.0（API 24，x86）两个模拟器。修了三个只有运行才能发现的问题（GPU 测试一启动就崩溃、预览画面被盖住、Android 7 上第一条成绩的编号用了 UTC）。布局、折叠时不重建、adb 入口、成绩里的机器信息都看过了。见第 10 节验证记录。模拟器里的数字不是成绩。
+- [x] **2026-10-07 各平台对齐**：流体和显存带宽测试接入 Android 和 HarmonyOS；iOS 运行页改成和它们相同的测试列表加全屏运行；"帧率被刷新率限制"的判定扩到 DX12、DX11、OpenGL，Windows 界面显示提示。Android 在模拟器上跑过，HarmonyOS 只编译，iOS 只做过类型检查。详见第 10 节。
+- [ ] **HarmonyOS 在模拟器上看一遍**：用户已装好 Phone、TripleFold、2in1 Foldable、TV、Car 五个模拟器，还没有启动过。要看的项目列在第 10 节"大屏、折叠屏和新界面"那条记录的"未验证"里。工程还没有签名配置。Android 上发现的 Vulkan 崩溃在鸿蒙上走的是同一段代码，已经一起修了，但没有在鸿蒙上验证。
+- [ ] **Android 真机**：模拟器验证不了的有芯片名（模拟器报的是 `AOSP ranchu`）、大小核、温控，以及带宽类测试的数字。
 - [x] **2026-10-06 成绩文件的前后兼容**：重写了 `results.json` 的读写。读更新版本的文件时保留不认识的字段；保存改为先写临时文件再替换；读不全的文件在重写前留副本。用三个旧版本的程序和这台机器上的 55 个真实成绩文件验证过。规则见 §1 第 8 条和 §3.9，记录见第 10 节。
 - [x] **2026-10-06 成绩里记录机器信息**：每条成绩新增机型（`deviceModel`）和内存（`systemMemoryMB`）；Android 和 HarmonyOS 的系统版本改记系统发行版本，Android 的芯片名取系统属性；移动端和 Apple 端的历史页显示这一行。Windows 和 Linux 容器实际运行过；Android、HarmonyOS、iOS、macOS 只编译或类型检查过，读到的文字没有在设备上核对。见第 10 节验证记录。
 - [ ] **`cpu_membw_v1` 剩余步骤**：查清流式写入偏慢和 L2 曲线分段的原因；在 macOS、Windows ARM64、Jetson 和大小核 CPU 上实测；见 `docs/TODO.md`。
@@ -708,6 +711,107 @@ PathService 已把 results/captures/reports/logs 改到
 5. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Collaboration；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
 
 ## 10. 验证记录
+
+### 2026-10-07 各平台对齐：移动端流体和显存带宽、iOS 运行页、刷新率判定
+
+- **移动端现在能跑的测试：**
+
+  | 测试 | Android | HarmonyOS | iOS |
+  |---|---|---|---|
+  | 粒子（26 万 / 100 万） | 模拟器上跑过 | 只编译 | 只做过类型检查 |
+  | GPU Burn（16 / 64 / 256 步） | 模拟器上跑过 | 只编译 | 只做过类型检查 |
+  | 流体（互动水池） | 模拟器上跑过 | 只编译 | 只做过类型检查 |
+  | 显存 / GPU 缓存带宽 | 模拟器上跑过 | 只编译 | 没有（这项测试只有 Vulkan 版） |
+  | CPU 缓存、内存带宽和存储读写 | 模拟器上跑过 | 只编译 | 只做过类型检查 |
+  | CPU 算力 | 模拟器上跑过 | 只编译 | 只做过类型检查 |
+
+- **流体（`cinematic_liquid`）：**
+  - Android 和 HarmonyOS 的宿主（`src/android_engine_host.cpp`、`src/ohos_engine_host.cpp`）认这个名字，全屏运行，和粒子、GPU Burn 走同一条路。
+  - 流体和显存带宽的着色器打进了两个 App：Android 的 `android/app/src/main/cpp/CMakeLists.txt` 和 `scripts/build-ohos.ps1` 按文件名匹配 `cinematic_liquid_*`、`mls_mpm_*`、`membw_*`，现在一共 38 个 `.spv`。
+  - 保存的测试名是引擎写的，3 秒运行时是 `cinematic_liquid_v2_physical_scene_v8_preview_android_preview`（HarmonyOS 结尾是 `_ohos_preview`）；界面上显示的名字已经改成和它一致。
+- **显存 / GPU 缓存带宽（`membw`）：**
+  - `src/vulkan_membw.cpp` 编进了 Android 和 HarmonyOS 的引擎（`HAVE_VULKAN_MEMBW`）。这项测试只做计算，没有画面，所以不走全屏，而是和 CPU 测试一样走引擎的命令行入口：`--workload membw --api vulkan --gpu 0`。
+  - 命令行入口原来在可执行文件旁边找着色器，App 里没有这个位置。新增环境变量 `GPU_BENCH_SHADER_DIR`，由 JNI 和 NAPI 设置，**只在 Android 和 HarmonyOS 的构建里读取**，桌面版不受影响。
+  - **手机上的成绩单独分组：** 保存的测试名是 `membw_v1_android_preview` / `membw_v1_ohos_preview`（`src/main.cpp`），和 CPU 带宽测试的做法一样。**改之前在模拟器上存成了 `membw_v1`，和桌面正式成绩同组**，是这次核对结果文件时发现的。
+  - GPU 页显示读、写、复制三条曲线和各自的缓存 / 显存带宽。
+- **iOS 运行页重写（`ios-gui/Mangekyo/Views/RunView.swift`）：**
+  - **原来的问题：** 页面是从 macOS 版搬过来的，GPU 选择、Headless、垂直同步、系统内存、抓帧、粒子数和步数这些选项，iOS 的宿主一个都不读；默认选中的粒子测试因为参数里没有 `stream` 这个词，走不到内嵌宿主；流体在列表里但宿主不认。
+  - **现在：** 和 Android、HarmonyOS 相同的六项测试（粒子两档、GPU Burn 三档、流体），时长 3 / 10 / 15 秒，点"运行"后横屏全屏（`fullScreenCover`），跑完自动回到页面，显示成绩和图表。
+  - iOS 宿主（`src/ios_engine_host.cpp`）认 `stream_heavy`、`gpu_burn_medium`、`gpu_burn_heavy`、`cinematic_liquid`；`cinematic_liquid_v2.metal` 加进了 App 的资源（`ios-gui/project.yml`），启动时和另外两个着色器一起拷到 Documents（改为每次启动都重新拷，原来拷过就不再更新）。
+  - `MetalBenchView` 不再按视图大小改 `drawableSize`。原来的写法会在布局或转屏时把渲染尺寸改掉，而分数按 1280 × 720 计算，和 Android 上修过的是同一类问题。
+  - 横屏靠新加的 `Components/ScreenOrientation.swift`（应用代理返回当前允许的方向，加 `requestGeometryUpdate`）。
+  - `MangekyoApp.swift` 里 `onChange(of:)` 用了两个参数的闭包，那是 iOS 17 的接口，而 App 支持到 iOS 16，改成了一个参数的写法。
+  - **验证程度：** `RunView.swift` 和 `BenchEngine.swift` 通过了 Swift 6 类型检查（`scripts/check-apple.ps1`，0 错误）。`MetalBenchView.swift`、`ScreenOrientation.swift`、`MangekyoApp.swift`、`ios_engine_host.cpp` 和 Metal 后端**没有任何工具检查过**。iOS App 至今没有用 Xcode 编译过。
+- **"帧率被刷新率限制"的判定覆盖所有 API：**
+  - 原来只有 Vulkan 和 Metal 后端会设置 `presentFollowsDisplay_`。现在 `AppBase` 构造时按"开了垂直同步且有窗口"设初值，Vulkan 和 Metal 再按设备的实际情况覆盖。
+  - **Windows 界面**把引擎的 `>> Display-bound` 显示成一条运行提示（`GpuRunIssueKind::DisplayBound`），文字和其他平台一致，多一句"请关闭垂直同步"。
+  - **实测（Windows，RTX 5090，240 Hz，16384 个粒子，开垂直同步）：** DX12 240 FPS、GPU 忙碌 0.2%，判为 Display-bound；OpenGL 239 FPS、0.3%，判为 Display-bound。
+  - **DX11 判定不出来：** 同样条件下 239 FPS，但渲染时间量出来是 4.144 ms（不开垂直同步时是 0.062 ms），正好是一帧的时长，GPU 忙碌算成 99.8%，被判为 GPU-bound。也就是 DX11 开垂直同步时，驱动给的 GPU 时间戳把等屏幕的时间算进去了。这是原有的计时特性，没有改。粒子测试的分数只用计算时间（0.003 ms），不受影响。
+  - **Vulkan 在 NVIDIA 上开垂直同步并不限帧：** 引擎在垂直同步打开时优先选 `mailbox`，同样条件下跑到 3331 FPS，成绩里 `vsync` 仍记为 true。这也是原有行为，没有改，记在这里供以后决定。
+- **验证（Android 17 模拟器，实际运行）：**
+  - 流体：全屏运行，320,920 个粒子，215.94 MParticle-step/s；保存名和界面一致。
+  - 显存带宽：读 1439 GB/s，保存为 `membw_v1_android_preview`；曲线显示正常。
+  - 模拟器里的数字不是成绩：GPU 是宿主机的 RTX 5090，时间戳来自虚拟 GPU。
+- **验证（Windows）：** 引擎、界面重新编译，0 个新警告；`ctest` 通过。Windows 界面里的新提示**没有打开界面看过**，只确认了它匹配的那一行引擎确实会打印。
+- **验证（HarmonyOS）：** `scripts\build-ohos.ps1` 编译通过（HAP 7.1 MB）。没有运行。
+- **没有做：** HarmonyOS 上机；iOS 用 Xcode 编译和上机；Android 真机；iOS 和 macOS 上的显存带宽测试（需要先有 Metal 版）。
+
+### 2026-10-07 移动端 GPU 测试：固定渲染尺寸、全屏运行、图标
+
+- **起因：** 用户问预览画面为什么这么小、会不会影响性能。查下来**会，而且成绩算错了**：
+  - 安卓和鸿蒙的交换链取的是预览控件的像素尺寸（手机上是 932 × 524），渲染的像素数跟着预览区大小变；
+  - 但分数和成绩里的分辨率一直按桌面版的常量 1280 × 720 计算。
+  - 结果是 GPU Burn 的分数被高估（手机预览下约 1.9 倍），并且随布局变化：同一个模拟器上出现过 224.8 和 297.7 两个数。
+  - iOS 和 macOS 不受影响，Metal 后端一直把渲染尺寸固定在 1280 × 720。
+- **引擎的改动：**
+  - 安卓和鸿蒙（`GPU_BENCH_EMBEDDED_VULKAN`）的交换链固定为 `kWindowWidth × kWindowHeight`，由系统缩放到显示区域；鸿蒙通过 `SET_BUFFER_GEOMETRY` 设置。
+  - `AppBase` 新增 `renderWidth_ / renderHeight_`，分数和成绩里的分辨率按实际渲染尺寸计算。桌面版这两个值始终是常量，行为不变。
+  - 安卓和鸿蒙的 `preTransform` 改为不旋转，横屏时由系统旋转画面。
+- **界面的改动（安卓和鸿蒙相同）：**
+  - GPU 测试开始时横屏占满屏幕，隐藏系统栏，屏幕常亮，只显示画面、测试名称和"停止"按钮；跑完回到页面。返回键等于停止。
+  - 页面里原来的小预览去掉了，换成一段说明。
+  - 流程是先切到全屏、等新的渲染表面建好再启动引擎，所以运行中不会销毁表面。
+- **图标和文字：**
+  - GPU 页的图标在所有平台改成立方体，各用自己的风格：Windows 用 Segoe Fluent Icons 的 `F158`，iOS / macOS 用 SF Symbols 的 `cube.fill`；Material 图标集和鸿蒙的系统符号里没有立方体，安卓和鸿蒙用同一个三面实心立方体（安卓画成矢量图，鸿蒙是 `ic_cube.svg`）。
+  - 安卓原来没有启动图标（清单里没写，显示的是系统默认图标），现在用 Windows 版的图标（`gui/app.ico`）生成了自适应图标。
+  - 安卓 GPU 页的"图形后端 / Backend"改为"图形 API / API"；其他平台本来就叫 API。
+- **验证（Android 17 模拟器，实际运行）：**
+  - GPU Burn 全屏运行：截图是横屏 2424 × 1080，画面 16:9 居中；引擎报告 1280 × 720，跑完自动回到竖屏页面。
+  - **修正后的数字和桌面版对得上：** 模拟器里 128.27 Gpix-step/s（每帧渲染 0.230 ms），同一块 RTX 5090 在 Windows 上同样 16 步是 131.12 Gpix-step/s（0.225 ms）。修正前模拟器报的是 224.8。
+  - 启动图标、立方体图标、"API"字样都在模拟器上看过。
+- **验证（Windows，实际运行）：** 引擎、界面重新编译，`ctest` 通过；GPU Burn 仍报告 1280 × 720，数字和以前一样。
+- **只编译、没有运行：** HarmonyOS 的全屏运行和固定渲染尺寸（`SET_BUFFER_GEOMETRY` 是否生效、横屏和隐藏系统栏的实际表现都没有看过；编译器提示转屏和全屏布局在二合一、TV、车机上不可用，代码里按设备类型跳过了）。iOS / macOS 只改了一个图标名，没有编译。Windows 的新图标没有打开界面看。
+- **帧率和屏幕刷新率（用户追问后补充）：**
+  - **能不能超过刷新率，取决于系统给不给不同步的显示方式。** 引擎在垂直同步关闭时依次要 `immediate`、`mailbox`，都没有才用 `fifo`（跟随刷新率）。现在每次运行都会打印一行 `[Vulkan] Present mode: ...`。
+  - **Android 模拟器给的是 `mailbox`**，不受刷新率限制：60 Hz 的虚拟屏幕上粒子测试 1212 FPS、GPU Burn 重度 284 FPS。真机上是不是也这样，没有设备，没有验证。
+  - **iOS 一定跟随刷新率**（系统没有关闭的开关），所以 iOS 上轻量测试必然顶着 60 或 120 FPS。鸿蒙的情况不知道。
+  - **顶着刷新率时的处理（用户决定）：** 不去绕过，而是提示成绩可能不准、请换更重的测试。引擎里新增判定：显示方式跟随刷新率，并且 GPU 忙碌比例低于 80%，就在摘要里打印 `>> Display-bound: ...`，成绩的 `bottleneck` 记为 `Display-bound`，`vsync` 记为 true。Android、HarmonyOS、iOS、macOS 的"最近一次运行"里看到这一行就显示警告。Android 和 HarmonyOS 另外加了一条：平均帧率和屏幕刷新率相差不到 4% 也提示。
+  - **实测到这个判定（Windows）：** 9800X3D 的核显开垂直同步跑 16384 个粒子，显示方式是 `fifo`，帧率正好 240（显示器刷新率），GPU 忙碌 3.4%，引擎给出 `Display-bound`。同一块核显跑 100 万粒子时 GPU 忙碌 83%，判为 GPU-bound，没有误报。
+  - **移动端补了更重的档位**，否则提示里的"换更重的测试"没有可选项：粒子 100 万（`stream_heavy`）、GPU Burn 中等 64 步和重度 256 步（`gpu_burn_medium`、`gpu_burn_heavy`）。adb / hdc 的启动参数也认这几个名字。模拟器上 256 步是 187.5 Gpix-step/s（每帧 2.5 ms）。
+- **没有做：** 真机上的显示方式和帧率；鸿蒙上机；iOS 的警告只做过类型检查。
+
+### 2026-10-07 Android 在模拟器上实际运行
+
+- **环境：** Android 模拟器 37.2.12，宿主是这台 Windows 工作站（RTX 5090，Ryzen 7 9800X3D）。两个虚拟设备：`Pixel_10a`（Android 17，API 37，x86_64，16 KB 页）和 `Medium_Phone`（Android 7.0，API 24，x86）。这是 App 第一次真正运行。
+- **模拟器起不来的原因（和 App 无关）：** 报错是 "It seems too many emulator instances are running on this machine"。实际原因是这台机器的 TCP 动态端口范围被改成从 1024 开始，Hyper-V 把 5533–6634 等端口段整段保留了，模拟器要用的 5554–5682 一个都绑不上。用户用管理员权限把范围改回默认值（49152 起），并手工保留了 5554–5683，之后正常。
+- **运行后发现并修掉的三个问题：**
+  - **GPU 测试一启动就崩溃（Android 17）。** 崩在系统的 `libvulkan.so` 里，地址 0。原因：安卓和鸿蒙的 Vulkan 实例是按 1.0 创建的，但 `vulkan_backend.cpp` 在设备支持 1.2 时会去调 1.1 的 `vkGetPhysicalDeviceProperties2`（为了取驱动名称）。安卓的加载器会给出这个函数的地址，再跳进一个空的驱动入口。现在嵌入式构建跳过这一段。鸿蒙走同一段代码，一起修了，没有在鸿蒙上验证。
+  - **预览画面看不到渲染。** `BenchmarkSurface` 给 `SurfaceView` 设了背景色，这个背景画在窗口里，盖在渲染画面前面。去掉背景后预览正常；没跑过测试时改用一层占位色盖住。
+  - **Android 7.0 上，每次启动后第一条成绩的编号是 UTC 时间**，和它自己的时间戳差了时区的小时数。原因是旧版系统库的 `localtime_r` 不会自己读时区。现在转换前先调 `tzset()`。
+- **顺带改的：** 运行结束后状态文字改为"已完成"（原来一直停在"正在运行"）；历史页改为最新的在最前；失败且一帧都没画出来时恢复占位色。
+- **看过并且正常的（Android 17）：**
+  - 启动、四个页面、浅色和深色、中文和英文；顶部只有一份状态栏高度，底部导航正常。
+  - adb 入口：`cpu_multi`、`cpu_all`、`cpu_membw`、`stream`、`gpu_burn` 都能自动开始，logcat 里有 `AUTORUN accepted / started` 和 `RUN finished`，引擎输出在 `MangekyoEngine` 标签下。
+  - 成绩文件：`deviceModel = Google sdk_gphone16k_x86_64`、`cpuName = AOSP ranchu`、`osVersion = Android 17 (API 37)`、`systemMemoryMB = 3912`（设备的 `MemTotal` 是 4006172 kB），历史页那一行显示正确。
+  - 宽屏布局：用 `wm size` 和 `wm density` 把屏幕改成 1000 × 1200 dp 和 1280 × 800 dp。侧边导航、两栏、1200 dp 以上导航展开显示文字，都和设计一致。
+  - **运行中改屏幕大小：** GPU Burn 运行到一半时把屏幕从平板大小改回手机大小，进程号不变，引擎没有重启，测试正常跑完（13.5 秒，16200 帧），预览画面一直在。
+- **看过并且正常的（Android 7.0）：** 启动和布局正常；没有 Vulkan 驱动，GPU 测试给出"No Vulkan physical device found"，不崩溃；CPU 测试跑完并保存；`deviceModel = Google Android SDK built for x86`，`osVersion = Android 7.0 (API 24)`，内存 2022 MB。
+- **模拟器里的数字不能当成绩，其中两个明显不对：**
+  - 粒子测试报 1490 GB/s（计算耗时 0.007 ms）。26 万个粒子不可能这么快，是虚拟 GPU 的时间戳不可信。
+  - 缓存 / 内存带宽测试里 L1、L2、L3、内存的单线程读速度全是 7–8 GB/s，没有台阶。这台机器原生的 L1 是 588 GB/s。原因没有查，可能是虚拟机里读时钟很慢。
+- **改完之后的回归：** Windows 的引擎、命令行程序、界面重新编译，`ctest` 通过，新存的成绩编号和时间戳一致；HarmonyOS 重新编译通过。
+- **没有做：** HarmonyOS 的模拟器还没有启动过；Android 真机没有；用手指点界面的操作只试了导航和滚动，按钮主要是靠 adb 参数触发的。
+- **用 Git Bash 跑 adb 的注意事项：** 设备上的路径（`/sdcard/...`）会被 Git Bash 改写成 Windows 路径，命令前要加 `MSYS_NO_PATHCONV=1`，或者在 PowerShell 里运行。
 
 ### 2026-10-06 Android 和 HarmonyOS：大屏、折叠屏和新界面（只写了代码）
 

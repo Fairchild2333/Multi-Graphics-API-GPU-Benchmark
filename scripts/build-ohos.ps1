@@ -61,7 +61,12 @@ if (-not $glslc) {
 }
 $shaderOut = Join-Path $ohos "entry\src\main\resources\rawfile\shaders"
 New-Item -ItemType Directory -Force $shaderOut | Out-Null
-foreach ($shader in "particle.vert", "particle.frag", "compute.comp", "fractal.vert", "gpu_burn.frag") {
+# Particle and GPU Burn, every stage of the fluid, and the VRAM / cache bandwidth sweep.
+$shaderNames = @("particle.vert", "particle.frag", "compute.comp", "fractal.vert", "gpu_burn.frag")
+$shaderNames += Get-ChildItem (Join-Path $repo "shaders") -File |
+    Where-Object { $_.Name -match "^(cinematic_liquid_.*\.(comp|vert|frag)|mls_mpm_.*\.comp|membw_.*\.comp)$" } |
+    ForEach-Object { $_.Name }
+foreach ($shader in $shaderNames) {
     & $glslc --target-env=vulkan1.0 (Join-Path $repo "shaders\$shader") -o (Join-Path $shaderOut "$shader.spv")
     if ($LASTEXITCODE -ne 0) {
         Write-Host "glslc failed for $shader"

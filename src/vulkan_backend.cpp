@@ -460,6 +460,13 @@ void VulkanBackend::PickPhysicalDevice() {
     // Try Vulkan 1.2 driver properties for a more descriptive string (only if device supports 1.2+).
     // Use dynamic lookup to avoid linking against vkGetPhysicalDeviceProperties2,
     // which doesn't exist in Vulkan 1.0 loaders and would cause a startup crash.
+    //
+    // Not on the embedded hosts: their instance is created as Vulkan 1.0, and
+    // a 1.1 instance command must not be called on it whatever the device
+    // supports. Android's loader hands out an address for the command all the
+    // same and then jumps through an empty driver entry (seen as a crash at
+    // address 0 on the Android 17 emulator, 2026-10-07).
+#if !defined(GPU_BENCH_EMBEDDED_VULKAN)
     if (props.apiVersion >= VK_API_VERSION_1_2) {
         auto pfnGetProps2 = reinterpret_cast<PFN_vkGetPhysicalDeviceProperties2>(
             vkGetInstanceProcAddr(instance_, "vkGetPhysicalDeviceProperties2"));
@@ -476,6 +483,7 @@ void VulkanBackend::PickPhysicalDevice() {
                 driverVersion_ = std::string(driverProps.driverName) + " " + driverVersion_;
         }
     }
+#endif
 
     std::cout << "Selected GPU [" << chosen << "]: " << deviceName_
               << "  |  Driver: " << driverVersion_ << std::endl;
@@ -776,27 +784,24 @@ VkPresentModeKHR VulkanBackend::ChooseSwapPresentMode(
 }
 
 VkExtent2D VulkanBackend::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& caps) const {
+#if defined(GPU_BENCH_EMBEDDED_VULKAN)
+    // A test always renders kWindowWidth x kWindowHeight, as on the desktop,
+    // whatever the size of the view that shows it; the system scales the
+    // picture to the view. Taking the size of the view instead made the work
+    // per frame, and so the score, depend on how large the app happened to
+    // draw its preview (found on the Android emulator, 2026-10-07).
+    int w = static_cast<int>(kWindowWidth);
+    int h = static_cast<int>(kWindowHeight);
+#if defined(__OHOS__)
+    // HarmonyOS takes the buffer size from the window, so set it there.
+    if (auto* nativeWindow = static_cast<OHNativeWindow*>(window_)) {
+        OH_NativeWindow_NativeWindowHandleOpt(nativeWindow, SET_BUFFER_GEOMETRY, w, h);
+    }
+#endif
+#else
     if (caps.currentExtent.width != std::numeric_limits<std::uint32_t>::max())
         return caps.currentExtent;
     int w = 0, h = 0;
-#if defined(__ANDROID__)
-    if (auto* nativeWindow = static_cast<ANativeWindow*>(window_)) {
-        w = ANativeWindow_getWidth(nativeWindow);
-        h = ANativeWindow_getHeight(nativeWindow);
-    } else {
-        w = static_cast<int>(kWindowWidth);
-        h = static_cast<int>(kWindowHeight);
-    }
-#elif defined(__OHOS__)
-    // GET_BUFFER_GEOMETRY returns the height first, then the width.
-    auto* nativeWindow = static_cast<OHNativeWindow*>(window_);
-    if (!nativeWindow ||
-        OH_NativeWindow_NativeWindowHandleOpt(nativeWindow, GET_BUFFER_GEOMETRY, &h, &w) != 0 ||
-        w <= 0 || h <= 0) {
-        w = static_cast<int>(kWindowWidth);
-        h = static_cast<int>(kWindowHeight);
-    }
-#else
     glfwGetFramebufferSize(window_, &w, &h);
 #endif
     return {
@@ -810,6 +815,22 @@ void VulkanBackend::CreateSwapChain() {
     auto fmt = ChooseSwapSurfaceFormat(sc.formats);
     auto pm  = ChooseSwapPresentMode(sc.presentModes);
     auto ext = ChooseSwapExtent(sc.capabilities);
+
+    // Say how frames reach the screen. With "immediate" or "mailbox" the test
+    // renders as fast as it can; with "fifo" every frame waits for the display.
+    const char* presentName = pm == VK_PRESENT_MODE_IMMEDIATE_KHR      ? "immediate"
+                            : pm == VK_PRESENT_MODE_MAILBOX_KHR        ? "mailbox"
+                            : pm == VK_PRESENT_MODE_FIFO_RELAXED_KHR   ? "fifo_relaxed"
+                                                                       : "fifo";
+    const bool followsDisplay = pm == VK_PRESENT_MODE_FIFO_KHR || pm == VK_PRESENT_MODE_FIFO_RELAXED_KHR;
+    std::cout << "[Vulkan] Present mode: " << presentName
+              << (followsDisplay ? " (frames follow the refresh rate)" : " (not tied to the refresh rate)")
+              << std::endl;
+    if (followsDisplay && !config_.vsync) {
+        std::cout << "[Vulkan] This device offers no unsynchronised presentation; "
+                     "the frame rate is limited by the display." << std::endl;
+    }
+    presentFollowsDisplay_ = followsDisplay;
 
     // Request at least framesInFlight+1 images so the GPU doesn't stall
     // waiting for the presentation engine to release an image.
@@ -838,7 +859,18 @@ void VulkanBackend::CreateSwapChain() {
         ci.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     }
 
+#if defined(GPU_BENCH_EMBEDDED_VULKAN)
+    // The frame is drawn upright whichever way the device is held; the system
+    // turns it to the screen. Passing on the current transform would promise
+    // a picture that is already rotated.
+    ci.preTransform   = (sc.capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
+                            ? VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR
+                            : sc.capabilities.currentTransform;
+    renderWidth_      = ext.width;
+    renderHeight_     = ext.height;
+#else
     ci.preTransform   = sc.capabilities.currentTransform;
+#endif
     ci.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     ci.presentMode    = pm;
     ci.clipped        = VK_TRUE;

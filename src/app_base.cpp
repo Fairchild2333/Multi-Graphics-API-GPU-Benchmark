@@ -132,6 +132,9 @@ AppBase::AppBase(std::int32_t gpuIndex, std::string shaderDir,
     : requestedGpuIndex_(gpuIndex),
       shaderDir_(std::move(shaderDir)),
       config_(config) {
+    // With V-Sync on, every API shows a frame in step with the display. The
+    // Vulkan and Metal backends replace this with what the device really does.
+    presentFollowsDisplay_ = config_.vsync && !config_.headless;
     if (!config_.benchmarkMode && config_.maxRunTimeSec > 0.0) {
         // The duration is the complete wall-clock run, including warmup. A
         // fixed two-second warmup consumed all of a 1-2 second preview and
@@ -950,7 +953,7 @@ void AppBase::PrintSummary() const {
         << "\n"
         << std::setw(14) << "Memory:"     << (config_.hostMemory ? "System RAM (host-visible)" : "Device-local VRAM") << "\n"
         << std::setw(14) << "Mode:"       << (config_.headless ? "Headless (compute only)" : "Windowed") << "\n"
-        << std::setw(14) << "Resolution:" << kWindowWidth << "x" << kWindowHeight << "\n";
+        << std::setw(14) << "Resolution:" << renderWidth_ << "x" << renderHeight_ << "\n";
     if (isGpuBurnWorkload(config_.workload))
         std::cout << std::setw(14) << "Workload:"
                   << "GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)\n";
@@ -1059,24 +1062,24 @@ void AppBase::PrintSummary() const {
         }
 
         if (config_.workload == Workload::StressFractal && avgRender > 0.0) {
-            const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+            const double pixels = static_cast<double>(renderWidth_) * renderHeight_;
             const double renderSec = avgRender / 1000.0;
             const double giters = pixels * config_.fractalIter / renderSec / 1e9;
             std::cout << "Iterations:   " << config_.fractalIter << " /pixel  ("
-                << kWindowWidth << "x" << kWindowHeight << " px)\n"
+                << renderWidth_ << "x" << renderHeight_ << " px)\n"
                 << std::setprecision(2)
                 << "Fill rate:    " << giters << " G-iter/s  ("
                 << std::setprecision(3) << avgRender << " ms render)\n";
         }
 
         if (config_.workload == Workload::GpuStressV1 && avgRender > 0.0) {
-            const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+            const double pixels = static_cast<double>(renderWidth_) * renderHeight_;
             const double renderSec = avgRender / 1000.0;
             const double giters = pixels * config_.gpuStressIter
                                 * kGpuStressV1DrawsPerFrame / renderSec / 1e9;
             std::cout << "GPU Stress:   v1, " << kGpuStressV1DrawsPerFrame
                 << " draws x " << config_.gpuStressIter << " iterations/pixel  ("
-                << kWindowWidth << "x" << kWindowHeight << " px)\n"
+                << renderWidth_ << "x" << renderHeight_ << " px)\n"
                 << "Anti-DCE signal: uint checksum in R/G + FP recurrence in B\n"
                 << std::setprecision(2)
                 << "Stress rate:  " << giters << " Gpix-iter/s  ("
@@ -1084,14 +1087,14 @@ void AppBase::PrintSummary() const {
         }
 
         if (isGpuBurnWorkload(config_.workload) && avgRender > 0.0) {
-            const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+            const double pixels = static_cast<double>(renderWidth_) * renderHeight_;
             const double renderSec = avgRender / 1000.0;
             const double gsteps = pixels * config_.gpuBurnIter
                                 * gpuBurnDrawsPerFrame(config_.workload) / renderSec / 1e9;
             std::cout << "GPU Burn:     v1 r2 Plasma x Kaleidoscope, "
                 << gpuBurnDrawsPerFrame(config_.workload)
                 << " draws x " << config_.gpuBurnIter << " fixed steps/pixel  ("
-                << kWindowWidth << "x" << kWindowHeight << " px)\n"
+                << renderWidth_ << "x" << renderHeight_ << " px)\n"
                 << "Visual:       "
                 << "solid Plasma Bloom foreground + woven Mangekyo background"
                 << '\n'
@@ -1101,11 +1104,11 @@ void AppBase::PrintSummary() const {
         }
 
         if (config_.workload == Workload::Volumetric && avgRender > 0.0) {
-            const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+            const double pixels = static_cast<double>(renderWidth_) * renderHeight_;
             const double renderSec = avgRender / 1000.0;
             const double gsamples = pixels * config_.volumetricSteps / renderSec / 1e9;
             std::cout << "Steps:        " << config_.volumetricSteps << " /pixel  ("
-                << kWindowWidth << "x" << kWindowHeight << " px)\n"
+                << renderWidth_ << "x" << renderHeight_ << " px)\n"
                 << std::setprecision(2)
                 << "Vol rate:     " << gsamples << " GSample/s  ("
                 << std::setprecision(3) << avgRender << " ms render)\n";
@@ -1210,6 +1213,11 @@ void AppBase::PrintSummary() const {
         } else if (sfr) {
             std::cout << ">> SFR is not saturating the presentation critical path; compare "
                          "against AFR and single-GPU throughput before keeping it.\n";
+        } else if (presentFollowsDisplay_ && perDeviceUtil < 0.8) {
+            std::cout << ">> Display-bound: every frame waits for the display, so the GPU is idle "
+                      << static_cast<int>((1.0 - perDeviceUtil) * 100.0)
+                      << "% of the time.\n"
+                      << "   -> The score may be too low. Use a heavier test.\n";
         } else if (perDeviceUtil < 0.5) {
             std::cout << ">> CPU-bound: GPU is idle "
                       << static_cast<int>((1.0 - perDeviceUtil) * 100.0)
@@ -1543,15 +1551,15 @@ BenchmarkResult AppBase::CollectResult() const {
     else
         r.memory = config_.hostMemory ? "System-RAM" : "Device-local";
     r.vramMB      = config_.vramMB;
-    r.resWidth    = kWindowWidth;
-    r.resHeight   = kWindowHeight;
+    r.resWidth    = renderWidth_;
+    r.resHeight   = renderHeight_;
     // GPU Burn allocates a tiny internal compatibility buffer but does not
     // process particles. Persist zero so History/capture metadata cannot imply
     // that the visual burn score came from a 256-particle workload.
     r.particleCount = isGpuBurnWorkload(config_.workload)
         ? 0u : config_.particleCount;
     r.difficulty  = config_.difficultyLabel;
-    r.vsync       = config_.vsync;
+    r.vsync       = config_.vsync || presentFollowsDisplay_;
     r.headless    = config_.headless;
     r.framesInFlight = config_.framesInFlight;
 
@@ -1587,6 +1595,8 @@ BenchmarkResult AppBase::CollectResult() const {
         r.bottleneck = "Software";
     else if (benchSampleCount_ == 0)
         r.bottleneck = "Unknown";
+    else if (presentFollowsDisplay_ && r.gpuUtilisation < 0.8)
+        r.bottleneck = "Display-bound";
     else if (r.gpuUtilisation < 0.5)
         r.bottleneck = "CPU-bound";
     else if (r.gpuUtilisation > 0.8)
@@ -1605,21 +1615,21 @@ BenchmarkResult AppBase::CollectResult() const {
         r.score = n * n * kNBodyFlopsPerInteraction / computeSec / 1e9;
         r.scoreUnit = "GFLOP/s";
     } else if (config_.workload == Workload::StressFractal && renderSec > 0.0) {
-        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        const double pixels = static_cast<double>(renderWidth_) * renderHeight_;
         r.score = pixels * config_.fractalIter / renderSec / 1e9;
         r.scoreUnit = "G-iter/s";
     } else if (config_.workload == Workload::GpuStressV1 && renderSec > 0.0) {
-        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        const double pixels = static_cast<double>(renderWidth_) * renderHeight_;
         r.score = pixels * config_.gpuStressIter * kGpuStressV1DrawsPerFrame
                 / renderSec / 1e9;
         r.scoreUnit = "Gpix-iter/s";
     } else if (isGpuBurnWorkload(config_.workload) && renderSec > 0.0) {
-        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        const double pixels = static_cast<double>(renderWidth_) * renderHeight_;
         r.score = pixels * config_.gpuBurnIter * gpuBurnDrawsPerFrame(config_.workload)
                 / renderSec / 1e9;
         r.scoreUnit = "Gpix-step/s";
     } else if (config_.workload == Workload::Volumetric && renderSec > 0.0) {
-        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        const double pixels = static_cast<double>(renderWidth_) * renderHeight_;
         r.score = pixels * config_.volumetricSteps / renderSec / 1e9;
         r.scoreUnit = "GSample/s";
     } else if (config_.workload == Workload::Render3D && renderSec > 0.0) {
@@ -1673,18 +1683,18 @@ double AppBase::computeAxisScore(double computeMs, double renderMs) const {
     } else if (config_.workload == Workload::NBody && computeSec > 0.0) {
         return n * n * kNBodyFlopsPerInteraction / computeSec / 1e9;
     } else if (config_.workload == Workload::StressFractal && renderSec > 0.0) {
-        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        const double pixels = static_cast<double>(renderWidth_) * renderHeight_;
         return pixels * config_.fractalIter / renderSec / 1e9;
     } else if (config_.workload == Workload::GpuStressV1 && renderSec > 0.0) {
-        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        const double pixels = static_cast<double>(renderWidth_) * renderHeight_;
         return pixels * config_.gpuStressIter * kGpuStressV1DrawsPerFrame
              / renderSec / 1e9;
     } else if (isGpuBurnWorkload(config_.workload) && renderSec > 0.0) {
-        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        const double pixels = static_cast<double>(renderWidth_) * renderHeight_;
         return pixels * config_.gpuBurnIter * gpuBurnDrawsPerFrame(config_.workload)
              / renderSec / 1e9;
     } else if (config_.workload == Workload::Volumetric && renderSec > 0.0) {
-        const double pixels = static_cast<double>(kWindowWidth) * kWindowHeight;
+        const double pixels = static_cast<double>(renderWidth_) * renderHeight_;
         return pixels * config_.volumetricSteps / renderSec / 1e9;
     } else if (config_.workload == Workload::Render3D && renderSec > 0.0) {
         return n / renderSec / 1e6;

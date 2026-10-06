@@ -66,16 +66,15 @@ final class BenchEngine: ObservableObject {
 
         let shaderDir = docs.appendingPathComponent("shaders", isDirectory: true)
         try? FileManager.default.createDirectory(at: shaderDir, withIntermediateDirectories: true)
-        for name in ["particle.metal", "gpu_burn.metal"] {
+        for name in ["particle.metal", "gpu_burn.metal", "cinematic_liquid_v2.metal"] {
             let dest = shaderDir.appendingPathComponent(name)
-            if FileManager.default.fileExists(atPath: dest.path) { continue }
-            if let src = Bundle.main.url(forResource: name, withExtension: nil)
+            guard let src = Bundle.main.url(forResource: name, withExtension: nil)
                 ?? Bundle.main.url(forResource: (name as NSString).deletingPathExtension,
-                                   withExtension: (name as NSString).pathExtension) {
-                try? FileManager.default.copyItem(at: src, to: dest)
-            } else if let src = Bundle.main.url(forResource: "shaders/\(name)", withExtension: nil) {
-                try? FileManager.default.copyItem(at: src, to: dest)
-            }
+                                   withExtension: (name as NSString).pathExtension)
+                ?? Bundle.main.url(forResource: "shaders/\(name)", withExtension: nil) else { continue }
+            // Copied at every launch: an update of the app may bring a newer source.
+            try? FileManager.default.removeItem(at: dest)
+            try? FileManager.default.copyItem(at: src, to: dest)
         }
         gpb_init_paths(shaderDir.path, docs.path)
         setenv("GPU_BENCH_DATA_DIR", docs.path, 1)
@@ -167,7 +166,8 @@ final class BenchEngine: ObservableObject {
         }
     }
 
-    /// 3s embedded Metal preview (stream / gpu_burn). Requires CAMetalLayer.
+    /// Starts a GPU test of the embedded host in the attached CAMetalLayer.
+    /// `workload` is one of the ids of `GpuTest.all`.
     @discardableResult
     func startPreview(workload: String, seconds: Double = 3.0) -> Bool {
         guard metalLayer != nil else {
@@ -185,6 +185,8 @@ final class BenchEngine: ObservableObject {
             "运行 \(workload) 预览（\(Int(seconds)) 秒）…",
             "\(workload) プレビュー実行中（\(Int(seconds))秒）…")
         // A new run gets new charts; lines left over from an earlier run are dropped.
+        logOutput = ""
+        lastScore = ""
         resetRunOutput()
         if let stale = gpb_poll_output() { gpb_free(stale) }
         appendLine("=== Preview \(workload) \(seconds)s ===")
@@ -241,25 +243,10 @@ final class BenchEngine: ObservableObject {
         }
     }
 
-    /// Run a sequence of benchmark jobs (legacy cliMain path).
+    /// Runs jobs through the engine's command-line entry: the CPU tests.
+    /// GPU tests need a picture and start with `startPreview`.
     func run(jobs: [[String]], needCharts: Bool) {
         guard !isRunning, !jobs.isEmpty else { return }
-
-        // Prefer embedded host for single stream/gpu_burn preview-style jobs.
-        if jobs.count == 1 {
-            let job = jobs[0]
-            let wl = job.first(where: { ["stream", "gpu_burn", "particle"].contains($0) })
-                ?? job.dropFirst().first { ["stream", "gpu_burn"].contains($0) }
-            if let wl, metalLayer != nil {
-                var seconds = 3.0
-                if let i = job.firstIndex(of: "--time"), i + 1 < job.count,
-                   let v = Double(job[i + 1]) {
-                    seconds = min(max(v, 1.0), 15.0)
-                }
-                _ = startPreview(workload: wl == "particle" ? "stream" : wl, seconds: seconds)
-                return
-            }
-        }
 
         isRunning = true
         cancelRequested = false

@@ -19,6 +19,14 @@
 > - **界面语言**：中文和英文，跟随系统语言（`core/I18n.kt` 的 `tr(en, zh)`）；其他语言显示英文。
 > - **adb 远程测试**：引擎输出同时写入 logcat，debug 包支持用启动参数直接开始一项测试，见下方"用 adb 远程测试"。
 > - **仍未真机运行**；CPU 测试开始后不能取消。
+>
+> 2026-10-07 追加（在 Android 17 模拟器上实际跑过，真机没有）：
+> - **流体**（`cinematic_liquid`）已接入，全屏运行，3 秒运行保存为
+>   `cinematic_liquid_v2_physical_scene_v8_preview_android_preview`。上面 2026-07-24 的"未做"里的液体不再适用。
+> - **显存 / GPU 缓存带宽**（`membw`）已接入，保存为 `membw_v1_android_preview`。它只做计算，没有画面，
+>   和 CPU 测试一样走引擎的命令行入口；着色器目录通过环境变量 `GPU_BENCH_SHADER_DIR` 告诉引擎。
+> - **粒子和 GPU Burn 的更重档位**：`stream_heavy`（100 万粒子）、`gpu_burn_medium`（64 步）、`gpu_burn_heavy`（256 步）。
+> - **GPU 测试全屏横屏运行**，渲染尺寸固定 1280 × 720。
 
 ## 已完成（相对脚手架）
 
@@ -48,7 +56,8 @@ cd android
 ## 运行说明
 
 1. API 24+ 且 Vulkan loader 可用时，GPU 页可选 Stream / GPU Burn（light steps=16），点 Run（默认 3s）。
-   跑完后页面上的 "Last run" 卡片显示成绩和每帧耗时折线图。
+   测试会横屏占满屏幕运行，跑完回到页面，"Last run" 卡片显示成绩和每帧耗时折线图。
+   渲染尺寸固定为 1280 × 720（和桌面版相同），由系统缩放到屏幕，所以成绩不随屏幕大小和分辨率变化。
 2. 跑分线程不占 UI；Stop 调用 `RequestStop()`。
 3. 写出结果时 `workloadVersion` 带 `_android_preview`，`platform=Android`。
    每条成绩还记录这台手机的信息（2026-10-06 加入），历史页每条成绩下面有一行显示：
@@ -65,20 +74,22 @@ cd android
 
 ## 窗口宽度和折叠屏
 
-2026-10-06 加入，**只编译通过，没有在任何设备或模拟器上看过**。
+2026-10-06 加入；2026-10-07 在 Android 17 的模拟器上看过（用 `wm size` 改屏幕大小），真机和真正的折叠屏没有试过。
 
 - 布局按窗口宽度切换（`ui/AdaptiveLayout.kt`），不看设备类型：
   - 600 dp 以下：底部导航栏，单列；
   - 600 dp 起：导航移到侧边；
   - 840 dp 起：每页分成左右两栏；1200 dp 起侧边导航展开显示文字。
-- 预览画面固定 16:9。
+- GPU 测试全屏运行，画面固定 16:9（2026-10-07 起；页面里不再有小预览）。
+- 如果帧率被屏幕刷新率限制住、GPU 没有跑满，"最近一次运行"里会提示成绩可能偏低，这时请换更重的档位。
+  logcat 里的 `[Vulkan] Present mode:` 一行说明这次运行是否跟随刷新率。
 - 折叠屏展开或合上、分屏拖动、旋转、接上键盘时不重建 Activity（`AndroidManifest.xml` 的 `configChanges`），正在运行的测试和预览画面不受影响。
 - 导航栏和导航侧栏是 Material 3 Expressive 的组件。material3 1.4 里 Expressive 的其余部分还没有公开；它们在 1.5 的预览版里，这个工程不用预览版，等 1.5 出正式版再换。
 - 没有处理折叠屏的铰链位置和半开姿态。
 
 ## 用 adb 远程测试
 
-debug 包可以不碰手机就开始一项测试（2026-10-06 加入；**只编译通过，没有在任何设备上试过**）。
+debug 包可以不碰手机就开始一项测试（2026-10-06 加入；2026-10-07 在 Android 17 和 Android 7.0 的模拟器上实际跑通，真机还没有试过）。
 
 ```bash
 adb install -r app/build/outputs/apk/debug/app-debug.apk
@@ -89,7 +100,9 @@ adb pull /sdcard/Android/data/com.mangekyo.benchmark/files/results/results.json
 ```
 
 - **`--es run <测试>`：** `cpu_membw`（缓存 / 内存带宽）、`cpu_all`（单核 + 全核）、`cpu_per_core`、`cpu_multi`、
-  `stream`、`gpu_burn`。App 打开后自动切到对应页面并开始。
+  `stream`、`stream_heavy`（100 万粒子）、`gpu_burn`、`gpu_burn_medium`（64 步）、`gpu_burn_heavy`（256 步）、
+  `cinematic_liquid`（流体）、`membw`（显存 / GPU 缓存带宽，约 20 秒）。
+  App 打开后自动切到对应页面并开始。
 - **`--ei seconds <N>`（可选）：** CPU 算力测试每项的秒数（默认 1），或 GPU 测试的时长（默认 3）。
 - **logcat 里有什么：**
   - 标签 `MangekyoEngine`：引擎打印的每一行，包括进度、各级带宽和成绩；
@@ -98,6 +111,8 @@ adb pull /sdcard/Android/data/com.mangekyo.benchmark/files/results/results.json
 - **只在 debug 包里生效。** 正式包会拒绝并打印 `AUTORUN refused ... reason=release_build`，否则手机上任何 App 都能用这个参数让它开跑。
 - **GPU 测试需要屏幕亮着并解锁**，因为它要等预览画面创建出来（最多等 10 秒）。
 - 没有模拟点击，也不需要知道按钮坐标。
+- 在 Git Bash 里运行时，命令前要加 `MSYS_NO_PATHCONV=1`，否则 `/sdcard/...` 会被改写成 Windows 路径；PowerShell 不受影响。
+- 模拟器里的成绩数字不可信（虚拟 GPU 的计时、虚拟机里的时钟都有问题），只用来确认功能。
 
 ## Windows 开发注意
 

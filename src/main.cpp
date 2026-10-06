@@ -1338,6 +1338,13 @@ static gpu_bench::BenchmarkResult MakeStoredMemBwResult(
                         config.measuredRuns == defaults.measuredRuns;
     stored.workloadVersion = std::string(gpu_bench::kMemBwWorkloadVersion) +
                              (formal ? "" : "_preview");
+    // A phone result never shares a group with a desktop one, as with the
+    // other mobile tests.
+#if defined(__ANDROID__)
+    stored.workloadVersion = std::string(gpu_bench::kMemBwWorkloadVersion) + "_android_preview";
+#elif defined(__OHOS__)
+    stored.workloadVersion = std::string(gpu_bench::kMemBwWorkloadVersion) + "_ohos_preview";
+#endif
     stored.graphicsApi = "Vulkan";
     stored.deviceName = gpu.name.empty() ? report.deviceName : gpu.name;
     stored.driverVersion = report.driverVersion;
@@ -2279,7 +2286,15 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         }
     }
 
-    const std::string shaderDir = ExeDirectory(argv[0]);
+    // The shaders lie beside the executable. The Android and HarmonyOS apps
+    // have no such folder; they name the one they unpacked the shaders into.
+    std::string shaderDir = ExeDirectory(argv[0]);
+#if defined(__ANDROID__) || defined(__OHOS__)
+    if (const char* embedded = std::getenv("GPU_BENCH_SHADER_DIR"); embedded && *embedded) {
+        shaderDir = embedded;
+        if (shaderDir.back() != '/') shaderDir += '/';
+    }
+#endif
 
 #ifdef _WIN32
     // Vulkan capture needs the RenderDoc implicit layer before vkCreateInstance.

@@ -13,6 +13,15 @@ export function tabItem(symbol: Resource, label: string): BottomTabBarStyle {
 }
 
 /**
+ * An entry of the tab bar with a picture of the app instead of a system
+ * symbol. The GPU page is a cube on every platform, and the system symbols of
+ * HarmonyOS have no cube.
+ */
+export function tabImageItem(image: Resource, label: string): BottomTabBarStyle {
+  return new BottomTabBarStyle(image, label);
+}
+
+/**
  * Collects engine output and finished runs a few times a second, and shows the
  * tab a command-line request asks for. Returns the timer to clear again.
  */

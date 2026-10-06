@@ -321,6 +321,9 @@ napi_value StartCli(napi_env env, napi_callback_info info) {
     g_cliThread = std::thread([arguments]() mutable {
         // path_service reads GPU_BENCH_DATA_DIR once; set it before any result is saved.
         if (!g_dataDir.empty()) setenv("GPU_BENCH_DATA_DIR", g_dataDir.c_str(), 1);
+        // The command-line entry looks for shaders beside an executable; here they
+        // are the files unpacked from the app's resources.
+        if (!g_shaderDir.empty()) setenv("GPU_BENCH_SHADER_DIR", g_shaderDir.c_str(), 1);
         std::vector<char*> argv;
         for (auto& argument : arguments) argv.push_back(argument.data());
         int exitCode = 1;

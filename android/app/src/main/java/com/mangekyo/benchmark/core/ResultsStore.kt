@@ -79,7 +79,7 @@ class ResultsStore(private val context: Context) {
                         ),
                     )
                 }
-            }
+            }.sortedByDescending { it.timestamp.orEmpty() }  // newest first, as on the other platforms
         } catch (_: Exception) {
             emptyList()
         }

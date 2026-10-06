@@ -3848,6 +3848,12 @@ void MainWindow::updateResultHint()
                     "该成绩可能异常：驱动报告的带宽或计时不符合合理范围。原始数值已保留，便于排查。",
                     "このスコアは異常な可能性があります。報告された帯域幅または計測値が妥当な範囲と一致しません。診断用に元の値は保存されています。");
                 break;
+            case GpuRunIssueKind::DisplayBound:
+                message = locText(
+                    "The frame rate was held at the refresh rate of the display, so the GPU was not kept busy and the score may be too low. Turn V-Sync off or run a heavier test.",
+                    "帧率被屏幕刷新率限制住了，GPU 没有跑满，成绩可能偏低、不准确。请关闭垂直同步，或换负载更高的测试。",
+                    "フレームレートがディスプレイのリフレッシュレートで頭打ちになり、GPU に十分な負荷がかかっていないため、スコアが低く出ている可能性があります。垂直同期をオフにするか、より負荷の高いテストを実行してください。");
+                break;
             case GpuRunIssueKind::Unknown:
             default:
                 message = locText(
@@ -7395,6 +7401,20 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                     std::string::npos)
                 {
                     GpuRunIssue issue{ GpuRunIssueKind::Dx11SynchronizedTiming,
+                                       jobTargetLabel(job) };
+                    const bool duplicate = std::any_of(
+                        gpuRunIssues.begin(), gpuRunIssues.end(),
+                        [&](GpuRunIssue const& existing)
+                        {
+                            return existing.kind == issue.kind &&
+                                   existing.target == issue.target;
+                        });
+                    if (!duplicate) gpuRunIssues.push_back(std::move(issue));
+                }
+                // The engine's own verdict: every frame waited for the display.
+                if (res.output.find(">> Display-bound") != std::string::npos)
+                {
+                    GpuRunIssue issue{ GpuRunIssueKind::DisplayBound,
                                        jobTargetLabel(job) };
                     const bool duplicate = std::any_of(
                         gpuRunIssues.begin(), gpuRunIssues.end(),

@@ -80,6 +80,15 @@ struct GpuRunChartsCard: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(Localization.tr("Charts of this run", "本次运行的图表", "この実行のチャート"))
                         .fontWeight(.semibold)
+                    if jobs.contains(where: { $0.displayLimited }) {
+                        Text(Localization.tr(
+                            "The frame rate was held at the refresh rate of the display, so the GPU was not kept "
+                                + "busy and the score may be too low. Run a heavier test.",
+                            "帧率被屏幕刷新率限制住了，GPU 没有跑满，成绩可能偏低、不准确。请换负载更高的测试。",
+                            "フレームレートがディスプレイのリフレッシュレートで頭打ちになり、GPU に十分な負荷がかかっていないため、スコアが低く出ている可能性があります。より負荷の高いテストを実行してください。"))
+                            .font(.caption)
+                            .foregroundStyle(Color.orange)
+                    }
                     if !bars.isEmpty {
                         VStack(alignment: .leading, spacing: 6) {
                             Text(scoreUnit + Localization.tr(", score of every job, higher is better",

@@ -6,8 +6,9 @@
 // loads IndexHds.ets instead.
 
 import { tr } from '../common/I18n';
-import { appState } from '../common/RunController';
-import { startShellTimer, tabItem } from '../common/Shell';
+import { appState, runController } from '../common/RunController';
+import { GpuFullscreen } from '../components/GpuFullscreen';
+import { startShellTimer, tabImageItem, tabItem } from '../common/Shell';
 import { ChartsPage } from './ChartsPage';
 import { CpuPage } from './CpuPage';
 import { GpuPage } from './GpuPage';
@@ -28,35 +29,54 @@ struct Index {
     clearInterval(this.timer);
   }
 
-  build() {
-    Tabs({ barPosition: appState.sideTabs ? BarPosition.Start : BarPosition.End, controller: this.tabs }) {
-      TabContent() {
-        GpuPage()
-      }
-      .tabBar(tabItem($r('sys.symbol.gauge_with_dots_needle_33percent'), 'GPU'))
-
-      TabContent() {
-        CpuPage()
-      }
-      .tabBar(tabItem($r('sys.symbol.memory_module'), 'CPU'))
-
-      TabContent() {
-        HistoryPage()
-      }
-      .tabBar(tabItem($r('sys.symbol.clock'), tr('History', '历史')))
-
-      TabContent() {
-        ChartsPage()
-      }
-      .tabBar(tabItem($r('sys.symbol.histogram'), tr('Charts', '图表')))
+  /** Back stops a running GPU test instead of leaving the app. */
+  onBackPress(): boolean {
+    if (appState.gpuFullscreen) {
+      runController.stopGpu();
+      return true;
     }
-    .vertical(appState.sideTabs)
+    return false;
+  }
+
+  build() {
+    Stack() {
+      Tabs({ barPosition: appState.sideTabs ? BarPosition.Start : BarPosition.End, controller: this.tabs }) {
+        TabContent() {
+          GpuPage()
+        }
+        .tabBar(tabImageItem($r('app.media.ic_cube'), 'GPU'))
+
+        TabContent() {
+          CpuPage()
+        }
+        .tabBar(tabItem($r('sys.symbol.memory_module'), 'CPU'))
+
+        TabContent() {
+          HistoryPage()
+        }
+        .tabBar(tabItem($r('sys.symbol.clock'), tr('History', '历史')))
+
+        TabContent() {
+          ChartsPage()
+        }
+        .tabBar(tabItem($r('sys.symbol.histogram'), tr('Charts', '图表')))
+      }
+      .vertical(appState.sideTabs)
+      .width('100%')
+      .height('100%')
+      .backgroundColor($r('sys.color.ohos_id_color_background'))
+
+      // A running GPU test covers the pages with the picture alone.
+      if (appState.gpuFullscreen) {
+        GpuFullscreen()
+      }
+    }
     .width('100%')
     .height('100%')
-    .backgroundColor($r('sys.color.ohos_id_color_background'))
     .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-      if (typeof newValue.width === 'number') {
+      if (typeof newValue.width === 'number' && typeof newValue.height === 'number') {
         appState.windowWidth = newValue.width;
+        appState.windowHeight = newValue.height;
       }
     })
   }

@@ -31,7 +31,9 @@ target_include_directories(mangekyo_jni PRIVATE "${MANGEKYO_REPO_ROOT}/src")
 # 16 KB page alignment: required for targetSdk 15+ uncompressed .so (HANDOFF).
 target_link_options(mangekyo_jni PRIVATE "-Wl,-z,max-page-size=16384")
 
-# ---- SPIR-V for vertical slice (stream + gpu_burn) ----
+# ---- SPIR-V of the tests the app can start ----
+# Particle and GPU Burn, the fluid (every cinematic_liquid_* and mls_mpm_*
+# stage) and the VRAM / cache bandwidth sweep (membw_*).
 set(ANDROID_SHADER_SOURCES
     "${MANGEKYO_REPO_ROOT}/shaders/particle.vert"
     "${MANGEKYO_REPO_ROOT}/shaders/particle.frag"
@@ -39,6 +41,14 @@ set(ANDROID_SHADER_SOURCES
     "${MANGEKYO_REPO_ROOT}/shaders/fractal.vert"
     "${MANGEKYO_REPO_ROOT}/shaders/gpu_burn.frag"
 )
+file(GLOB ANDROID_EXTRA_SHADER_SOURCES
+    "${MANGEKYO_REPO_ROOT}/shaders/cinematic_liquid_*.comp"
+    "${MANGEKYO_REPO_ROOT}/shaders/cinematic_liquid_*.vert"
+    "${MANGEKYO_REPO_ROOT}/shaders/cinematic_liquid_*.frag"
+    "${MANGEKYO_REPO_ROOT}/shaders/mls_mpm_*.comp"
+    "${MANGEKYO_REPO_ROOT}/shaders/membw_*.comp"
+)
+list(APPEND ANDROID_SHADER_SOURCES ${ANDROID_EXTRA_SHADER_SOURCES})
 find_program(GLSLC_EXECUTABLE glslc
     HINTS
         "$ENV{VULKAN_SDK}/Bin"

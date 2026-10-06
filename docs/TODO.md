@@ -158,7 +158,8 @@
   - [x] **UI 壳（2026-07-20/24）**：Compose + Material 3 四页；动态取色 12+；满载可 Stop。registry 仅展示已接线 GPU 项及真实 `*_android_preview` 字符串。
   - [ ] **ES 2.0 legacy tier（用户 2026-07-20 锁定底线：Tegra 3/4 必须支持）**：简化 fragment-only GPU Burn（避开 highp，Tegra 3 仅 FP20）新组 `gpu_burn_es2_legacy_v1`；粒子改 CPU(NEON) 物理 + GPU 渲染或纯 fragment 填充率测试（新 workloadVersion，不与 `stream` 混排）；液体 unsupported；墙钟计时、无 RenderDoc（用户已确认不要求）；独立 legacy APK（设备停在 Android 4.1–5.1，minSdk 约束），主包不背包袱。详见 HANDOFF 目标 C 第 3 条。
   - [ ] **Android 真机远程测试（adb；用户 2026-09-30 排入）**：
-    - **现状：** App 从没在真机上跑过。GPU 页接入了 Particle 和 GPU Burn（固定 16 步），默认 3 秒预览，成绩带 `_android_preview` 后缀；CPU 页在 2026-10-06 接入了算力测试和缓存 / 内存带宽测试，并带图表。流体没有接入。
+    - **模拟器（2026-10-07）：** 已在 Android 17 和 Android 7.0 的模拟器上跑通，并修了三个只有运行才能发现的问题，见 HANDOFF 第 10 节。下面说的"真机"仍然没有做。
+    - **现状：** App 从没在真机上跑过。GPU 页接入了 Particle 和 GPU Burn（固定 16 步），默认 3 秒预览，成绩带 `_android_preview` 后缀；CPU 页在 2026-10-06 接入了算力测试和缓存 / 内存带宽测试，并带图表。2026-10-07 接入了流体、显存 / GPU 缓存带宽，以及粒子和 GPU Burn 的更重档位，GPU 测试改为全屏运行，都在模拟器上跑过。
     - **用户在手机上操作：** 打开"开发者选项"和"USB 调试"，插线后在手机弹窗里点"允许 USB 调试"。这一步只能由用户确认。
     - **Claude 用 adb 完成：**
       - 编译 `:app:assembleDebug`，再 `adb install` 安装并用 `adb shell am start` 启动；
@@ -179,7 +180,7 @@
       - 用 `xcrun devicectl device install app` 安装，用 `xcrun devicectl device process launch` 启动；
       - 从应用沙盒拷回结果文件。
     - **自动开跑：** iOS 没有 `adb input` 那样简单的点击工具，需要给 App 加一个启动参数让它自动开跑。
-    - **现状：** 只接入了 Metal 的 Particle 和 GPU Burn（3 秒预览），没有流体，CPU 模式也没验收。
+    - **现状：** 2026-10-07 运行页改成和 Android 相同的六项测试（粒子两档、GPU Burn 三档、流体）加全屏运行；只做过 Swift 类型检查，没有用 Xcode 编译过，CPU 模式也没验收。没有显存带宽测试（只有 Vulkan 版）。
 - [ ] **5. Debian Linux**：构建修正、`.deb` 打包、CI 与实机验证（后端/GLFW/RenderDoc/XDG 路径均已有，摩擦最低）。
   - [x] **2026-09-30 构建修复**（提交 `a894c8a`）：Ubuntu 20.04 / JetPack 5 可以编译和链接（补 `<cstring>`，链接 Threads 与 dl）。只做了容器验证：x86_64 完整构建 + aarch64 交叉编译全部引擎源文件。llvmpipe/lavapipe 的成绩现在标记为软件渲染。步骤见 [`building.md`](building.md) 的 Jetson 一节。
   - [ ] **NVIDIA Jetson Xavier NX 实机验收（NV 开发板；用户 2026-09-30 排入）**：
@@ -203,7 +204,8 @@
   - [ ] **上机验证**：
     - **用户要做的：** 在 DevEco Studio 里登录华为账号并生成自动签名；连接鸿蒙设备（打开开发者模式和 USB 调试），或者在 Device Manager 里下载模拟器镜像。
     - **要确认的：** 界面显示和图表；Vulkan 能否创建 `VK_OHOS_surface`；应用沙箱是否允许绑核（`sched_setaffinity`）和读取缓存容量；`hdc` 启动参数和 hilog 输出；成绩里的机型、系统版本和内存是否正确，芯片名能否从 `/proc/cpuinfo` 读到（系统没有提供芯片名的接口）。
-  - [ ] **还没有做：** 流体测试、抓帧编排、正式的结果合同（现在的成绩都带 `_ohos_preview` 后缀）、签名和发布包、CPU 测试的取消。
+  - [x] **流体和显存 / GPU 缓存带宽（2026-10-07）**：和 Android 一起接入，只编译通过，没有运行过。
+  - [ ] **还没有做：** 抓帧编排、正式的结果合同（现在的成绩都带 `_ohos_preview` 后缀）、签名和发布包、CPU 测试的取消。
 - [ ] **8. Windows 7 专用 GUI（PS3 之前）**：独立 Win32/DWM 前端与安装包，共享 `gpu_engine`/CLI/成绩 schema；Aero 能力探测与无 Aero 回退；不得携带 WinUI/WinAppSDK。
 - [ ] **9. PS3（探索性，永不进成绩体系）**：仅 homebrew（PSL1GHT/RSXGL）；RSX 无 compute/原子/GPU timestamp，PSGL≈GL ES 1.0+Cg，三主测试不可直移；至多独立仓库的固定管线情怀 demo。
 - [ ] **10. Lumia 1520 legacy Windows Phone（探索性，永不进成绩体系；2026-07-20 排入）**：骁龙 800 / Adreno 330,但 WP8.1/W10M 驱动仅暴露 D3D11 **FL 9_3**(无 compute/UAV)→ 形态同 ES 2.0 legacy tier:简化 fragment Burn、粒子 CPU(NEON) 物理、液体 unsupported;WinRT/UWP + CoreWindow 前端,VS2015/VS2013 工具链,开发者模式侧载(商店已死);墙钟计时,成绩自成体系;shader 优先经 archived ANGLE 复用 Tegra 3/4 的 GLSL ES legacy shader,备选 HLSL 9_3 重写;独立小工程。详见 HANDOFF 目标 C 第 10 条。

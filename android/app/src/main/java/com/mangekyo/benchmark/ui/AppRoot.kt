@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Memory
-import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShortNavigationBar
@@ -31,7 +30,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -41,8 +44,45 @@ import com.mangekyo.benchmark.ui.screens.ChartsScreen
 import com.mangekyo.benchmark.ui.screens.CpuScreen
 import com.mangekyo.benchmark.ui.screens.GpuScreen
 import com.mangekyo.benchmark.core.AutoRun
+import com.mangekyo.benchmark.core.GpuRun
 import com.mangekyo.benchmark.core.tr
 import com.mangekyo.benchmark.ui.screens.HistoryScreen
+
+/**
+ * A cube of three filled faces, in the filled style of the other navigation
+ * icons. Every platform shows the GPU page as a cube in its own icon style;
+ * the Material icon set has none, so it is drawn here.
+ */
+private val CubeIcon: ImageVector by lazy {
+    ImageVector.Builder(
+        name = "Cube",
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 24f,
+        viewportHeight = 24f,
+    ).apply {
+        path(fill = SolidColor(Color.Black)) {
+            // top
+            moveTo(12f, 2.6f)
+            lineTo(20f, 7f)
+            lineTo(12f, 11.4f)
+            lineTo(4f, 7f)
+            close()
+            // left
+            moveTo(3.4f, 8.6f)
+            lineTo(11.3f, 12.9f)
+            lineTo(11.3f, 21.6f)
+            lineTo(3.4f, 17.2f)
+            close()
+            // right
+            moveTo(20.6f, 8.6f)
+            lineTo(12.7f, 12.9f)
+            lineTo(12.7f, 21.6f)
+            lineTo(20.6f, 17.2f)
+            close()
+        }
+    }.build()
+}
 
 /**
  * Information architecture mirrors WinUI / SwiftUI: GPU / CPU / History / Charts.
@@ -54,7 +94,7 @@ enum class AppDestination(
     private val zh: String,
     val icon: ImageVector,
 ) {
-    Gpu("gpu", "GPU", "GPU", Icons.Filled.Speed),
+    Gpu("gpu", "GPU", "GPU", CubeIcon),
     Cpu("cpu", "CPU", "CPU", Icons.Filled.Memory),
     History("history", "History", "历史", Icons.Filled.History),
     Charts("charts", "Charts", "图表", Icons.Filled.BarChart);
@@ -104,6 +144,8 @@ fun AppRoot() {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val windowWidth = windowWidthOf(maxWidth)
         val sideNavigation = windowWidth.sideNavigation
+        // A running GPU test has the screen to itself.
+        val fullscreen = GpuRun.fullscreen
         val railState = rememberWideNavigationRailState()
         val railExpanded = railState.targetValue == WideNavigationRailValue.Expanded
         LaunchedEffect(windowWidth) {
@@ -116,7 +158,7 @@ fun AppRoot() {
         CompositionLocalProvider(LocalWindowWidth provides windowWidth) {
             Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
                 Row(modifier = Modifier.fillMaxSize()) {
-                    if (sideNavigation) {
+                    if (sideNavigation && !fullscreen) {
                         WideNavigationRail(state = railState) {
                             AppDestination.entries.forEach { dest ->
                                 WideNavigationRailItem(
@@ -150,7 +192,7 @@ fun AppRoot() {
                                 composable(AppDestination.Charts.route) { ChartsScreen() }
                             }
                         }
-                        if (!sideNavigation) {
+                        if (!sideNavigation && !fullscreen) {
                             ShortNavigationBar {
                                 AppDestination.entries.forEach { dest ->
                                     ShortNavigationBarItem(

@@ -31,9 +31,9 @@
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Name="NavRun" Content="GPU" Tag="0" IsSelected="True">
                     <NavigationViewItem.Icon>
-                        <!-- SpeedHigh: Fluent performance gauge — closer to GPU/benchmark
-                             than the old TV/monitor glyph, and distinct from CPU's chip. -->
-                        <FontIcon Glyph="&#xEC4A;"/>
+                        <!-- A cube: the GPU page has this icon on every platform, each in
+                             its own icon style. -->
+                        <FontIcon Glyph="&#xF158;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem x:Name="NavCpu" Content="CPU" Tag="5">

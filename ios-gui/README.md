@@ -32,6 +32,25 @@ Intended path: in-process `gpu_engine` via Objective-C++ bridge + embedded Metal
 >   is not a build with the Apple SDK. The other views and the Objective-C++ bridge were
 >   not checked.
 
+> Added 2026-10-07 (still not built with Xcode, still not run on a device):
+> - **GPU page rewritten** to match the Android and HarmonyOS apps: six tests
+>   (particle at 262,144 and 1M particles, GPU Burn at 16, 64 and 256 steps, fluid), a
+>   duration of 3, 10 or 15 s, and a run that takes over the screen in landscape and
+>   returns to the page when it ends. The page it replaces was a copy of the macOS one;
+>   the iOS host read none of its options, and its default test did not reach the
+>   embedded host.
+> - **Fluid** runs through the embedded host: `cinematic_liquid_v2.metal` is bundled, and a
+>   run is saved as `cinematic_liquid_v2_physical_scene_v8_metal_preview_ios_preview`.
+> - **Fixed render size**: `MetalBenchView` no longer sets the drawable size from the size
+>   of the view. The engine renders 1280 × 720 and computes the score from that.
+> - **Landscape** while a test runs: `Components/ScreenOrientation.swift` (an application
+>   delegate that returns the allowed orientations, and `requestGeometryUpdate`).
+> - **iOS 16**: `MangekyoApp` used the form of `onChange(of:)` that needs iOS 17; fixed.
+> - **No VRAM bandwidth test here**: that test exists for Vulkan only.
+> - **Checked**: `RunView.swift` and `BenchEngine.swift` pass the Swift 6 type-check.
+>   `MetalBenchView.swift`, `ScreenOrientation.swift`, `MangekyoApp.swift`,
+>   `src/ios_engine_host.cpp` and the Metal backend were not checked by any tool.
+
 ## Checking without a Mac
 
 `scripts/check-apple.ps1` type-checks the engine wrapper, the models, the charts
@@ -94,5 +113,6 @@ set duration (default 3s), tap Run. Stop remains available under load.
 | `Models/ChartGeometry.swift` | Scales, ticks and positions of the charts |
 | `Components/BenchCharts.swift`, `ResultCharts.swift` | Charts and result views (shared with macOS) |
 
-Bundled resources: `shaders/particle.metal`, `shaders/gpu_burn.metal` (copied into Documents at launch).
+Bundled resources: `shaders/particle.metal`, `shaders/gpu_burn.metal`, `shaders/cinematic_liquid_v2.metal`
+(copied into Documents at every launch).
 Data root: app Documents via `GPU_BENCH_DATA_DIR`.

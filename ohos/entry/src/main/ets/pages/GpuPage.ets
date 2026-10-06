@@ -1,10 +1,12 @@
-// GPU page: the preview surface the engine draws into, the two tests the
-// HarmonyOS host can start, and the result of the last run with its chart.
+// GPU page: the tests the HarmonyOS host can start and the result of the last
+// run with its chart. A test with a picture runs full screen (GpuFullscreen);
+// the memory sweep computes only and runs through the command-line entry.
 
 import { AdaptivePanes } from '../components/AdaptivePanes';
 import { Card } from '../components/Card';
 import { ChartSeries, LineChart } from '../components/Charts';
-import { gpuRun } from '../common/EngineOutput';
+import { gpuRun, MemoryLevelLine } from '../common/EngineOutput';
+import { formatNumber } from '../common/Format';
 import { localizeScoreLine, tr } from '../common/I18n';
 import { appState, runController } from '../common/RunController';
 
@@ -25,8 +27,16 @@ class GpuWorkload {
 // The versions are the ones the engine writes on HarmonyOS; see AppBase::CollectResult.
 const GPU_WORKLOADS: GpuWorkload[] = [
   new GpuWorkload('stream', 'Stream / Particle', '粒子 —— 内存吞吐', 'stream_v1_ohos_preview'),
+  new GpuWorkload('stream_heavy', 'Stream / Particle (1M)', '粒子 —— 内存吞吐（100 万）', 'stream_v1_ohos_preview'),
   new GpuWorkload('gpu_burn', 'GPU Burn (light 16)', 'GPU Burn（轻量 16 步）',
     'gpu_burn_v3_fixed_steps_16_kaleidoscope_ohos_preview'),
+  new GpuWorkload('gpu_burn_medium', 'GPU Burn (medium 64)', 'GPU Burn（中等 64 步）',
+    'gpu_burn_v3_fixed_steps_64_kaleidoscope_ohos_preview'),
+  new GpuWorkload('gpu_burn_heavy', 'GPU Burn (heavy 256)', 'GPU Burn（重度 256 步）',
+    'gpu_burn_v3_fixed_steps_256_kaleidoscope_ohos_preview'),
+  new GpuWorkload('cinematic_liquid', 'Fluid — interactive pool', '流体 —— 互动水池',
+    'cinematic_liquid_v2_physical_scene_v8_preview_ohos_preview'),
+  new GpuWorkload('membw', 'Memory bandwidth — VRAM / cache', '显存带宽 —— 显存 / 缓存', 'membw_v1_ohos_preview'),
 ];
 
 @Extend(Text)
@@ -38,6 +48,36 @@ function caption() {
 @ComponentV2
 export struct GpuPage {
   /** GPU time per frame over the measured part of the run. */
+  /** The memory sweep: GB/s over the size of the data set, one line per kernel. */
+  private memorySeries(): ChartSeries[] {
+    const read: ChartSeries = new ChartSeries(tr('Read', '读'), 0);
+    const write: ChartSeries = new ChartSeries(tr('Write', '写'), 1);
+    const copy: ChartSeries = new ChartSeries(tr('Copy', '复制'), 2);
+    for (const point of gpuRun.memoryPoints) {
+      if (point.kernel === 'read') {
+        read.add(point.bytes, point.gbps);
+      } else if (point.kernel === 'write') {
+        write.add(point.bytes, point.gbps);
+      } else if (point.kernel === 'copy') {
+        copy.add(point.bytes, point.gbps);
+      }
+    }
+    const series: ChartSeries[] = [];
+    for (const item of [read, write, copy]) {
+      if (item.xs.length >= 2) {
+        series.push(item);
+      }
+    }
+    return series;
+  }
+
+  private memoryLevelText(level: MemoryLevelLine): string {
+    const name: string = level.kernel === 'read' ? tr('Read', '读')
+      : level.kernel === 'write' ? tr('Write', '写') : level.kernel === 'copy' ? tr('Copy', '复制') : level.kernel;
+    return tr(`${name}: cache ${formatNumber(level.cacheGbps)} GB/s, memory ${formatNumber(level.memoryGbps)} GB/s`,
+      `${name}：缓存 ${formatNumber(level.cacheGbps)} GB/s，显存 ${formatNumber(level.memoryGbps)} GB/s`);
+  }
+
   private timingSeries(): ChartSeries[] {
     const compute: ChartSeries = new ChartSeries(tr('Compute', '计算'), 0);
     const render: ChartSeries = new ChartSeries(tr('Render', '渲染'), 1);
@@ -82,12 +122,12 @@ export struct GpuPage {
       .fontWeight(FontWeight.Bold)
       .fontColor($r('sys.color.ohos_id_color_text_primary'))
 
-    Card({ title: tr('Preview surface', '预览画面') }) {
-      XComponent({ id: 'mangekyo_surface', type: XComponentType.SURFACE, libraryname: 'mangekyo' })
-        .width('100%')
-        // A fixed shape, so the picture is the same on a phone, an opened
-        // foldable and a tablet.
-        .aspectRatio(16 / 9)
+    Card({ title: tr('Runs full screen', '全屏运行') }) {
+      Text(tr('A test takes over the screen in landscape. It always renders 1280 × 720, as the desktop version ' +
+        'does, and the system scales the picture to the screen, so a score does not depend on the size or ' +
+        'resolution of the display.',
+        '测试开始后横屏占满屏幕。渲染尺寸固定为 1280 × 720，和桌面版相同，再由系统缩放到屏幕，所以成绩不随屏幕大小和分辨率变化。'))
+        .caption()
       Text(tr('Engine: ', '引擎：') + appState.engineVersion)
         .caption()
     }
@@ -99,7 +139,7 @@ export struct GpuPage {
           if (appState.gpuRunning) {
             runController.stopGpu();
           } else {
-            runController.startGpu(appState.gpuWorkload, 3);
+            runController.runGpu(appState.gpuWorkload, 3);
           }
         })
       Text(this.statusText())
@@ -140,7 +180,8 @@ export struct GpuPage {
       }, (workload: GpuWorkload) => workload.id)
     }
 
-    if (gpuRun.scoreLine.length > 0 || gpuRun.fpsLine.length > 0 || gpuRun.samples.length >= 2) {
+    if (gpuRun.scoreLine.length > 0 || gpuRun.fpsLine.length > 0 || gpuRun.samples.length >= 2 ||
+      gpuRun.memoryPoints.length > 0) {
       Card({ title: tr('Last run', '最近一次运行') }) {
         if (gpuRun.scoreLine.length > 0) {
           Text(localizeScoreLine(gpuRun.scoreLine))
@@ -152,6 +193,23 @@ export struct GpuPage {
           Text(localizeScoreLine(gpuRun.fpsLine))
             .fontSize(14)
             .fontColor($r('sys.color.ohos_id_color_text_primary'))
+        }
+        if (gpuRun.displayLimited) {
+          Text(tr('The frame rate was held at the refresh rate of the display, so the GPU was not kept busy and ' +
+            'this score may be too low. Run a heavier test.',
+            '帧率被屏幕刷新率限制住了，GPU 没有跑满，这个成绩可能偏低、不准确。请换负载更高的测试。'))
+            .fontSize(12)
+            .fontColor($r('sys.color.ohos_id_color_warning'))
+        }
+        if (gpuRun.memoryPoints.length > 0) {
+          ForEach(gpuRun.memoryLevels, (level: MemoryLevelLine) => {
+            Text(this.memoryLevelText(level))
+              .fontSize(14)
+              .fontColor($r('sys.color.ohos_id_color_text_primary'))
+          }, (level: MemoryLevelLine) => level.kernel)
+          Text(tr('GB/s over the size of the data set', 'GB/s 随数据量变化'))
+            .caption()
+          LineChart({ series: this.memorySeries(), logBytes: true, dark: appState.dark })
         }
         if (this.timingSeries().length > 0) {
           Text(tr('GPU time per frame (ms) over the run, after warm-up',

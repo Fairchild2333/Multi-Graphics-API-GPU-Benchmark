@@ -399,18 +399,67 @@ function collapseSpaces(text: string): string {
 }
 
 /** State of the last GPU run: its timing samples and the score lines of the summary. */
+/** One measurement of the VRAM / cache bandwidth sweep. */
+export class MemoryPoint {
+  kernel: string;
+  bytes: number;
+  gbps: number;
+
+  constructor(kernel: string, bytes: number, gbps: number) {
+    this.kernel = kernel;
+    this.bytes = bytes;
+    this.gbps = gbps;
+  }
+}
+
+/** What one kernel of that sweep reached in the cache and in memory, GB/s. */
+export class MemoryLevelLine {
+  kernel: string;
+  cacheGbps: number;
+  memoryGbps: number;
+
+  constructor(kernel: string, cacheGbps: number, memoryGbps: number) {
+    this.kernel = kernel;
+    this.cacheGbps = cacheGbps;
+    this.memoryGbps = memoryGbps;
+  }
+}
+
+/** The value of `key=` in a tab-separated line of the engine, or '' when it is not there. */
+function tabField(line: string, key: string): string {
+  for (const part of line.split('\t')) {
+    if (part.startsWith(key + '=')) {
+      return part.substring(key.length + 1);
+    }
+  }
+  return '';
+}
+
 @ObservedV2
 export class GpuRunState {
   @Trace active: boolean = false;
   @Trace samples: GpuSample[] = [];
   @Trace scoreLine: string = '';
   @Trace fpsLine: string = '';
+  /** The frame rate was held at the display's refresh rate, so the score may be too low. */
+  @Trace displayLimited: boolean = false;
+  /** The VRAM / cache bandwidth sweep: its points, and the two levels of every kernel. */
+  @Trace memoryPoints: MemoryPoint[] = [];
+  @Trace memoryLevels: MemoryLevelLine[] = [];
 
   begin(): void {
     this.active = true;
     this.samples = [];
     this.scoreLine = '';
     this.fpsLine = '';
+    this.displayLimited = false;
+    this.memoryPoints = [];
+    this.memoryLevels = [];
+  }
+
+  /** The "Avg FPS" of the run, or NaN before it is known. */
+  averageFps(): number {
+    return numberAfter(this.fpsLine, 'Avg FPS:');
   }
 
   consumeAll(lines: string[]): void {
@@ -432,7 +481,30 @@ export class GpuRunState {
         line.indexOf('(warm-up)') >= 0));
       return;
     }
+    if (line.startsWith('MEMBW_POINT')) {
+      const bytes: number = Number(tabField(line, 'dataset_bytes'));
+      const rate: number = Number(tabField(line, 'median_gbps'));
+      if (isFinite(bytes) && isFinite(rate) && bytes > 0) {
+        this.memoryPoints.push(new MemoryPoint(tabField(line, 'kernel'), bytes, rate));
+      }
+      return;
+    }
+    if (line.startsWith('MEMBW_SUMMARY')) {
+      const kernel: string = tabField(line, 'kernel');
+      const memory: number = Number(tabField(line, 'memory_gbps'));
+      const cache: number = Number(tabField(line, 'cache_gbps'));
+      this.memoryLevels.push(new MemoryLevelLine(kernel, isFinite(cache) ? cache : 0, isFinite(memory) ? memory : 0));
+      // The score of this test is how fast the GPU reads its memory.
+      if (kernel === 'read' && this.scoreLine.length === 0) {
+        this.scoreLine = 'Memory rate: ' + tabField(line, 'memory_gbps') + ' GB/s';
+      }
+      return;
+    }
     const trimmed: string = line.trim();
+    // The engine's own verdict: frames had to wait for the display.
+    if (trimmed.startsWith('>> Display-bound')) {
+      this.displayLimited = true;
+    }
     if (this.fpsLine.length === 0 && trimmed.startsWith('Avg FPS:')) {
       this.fpsLine = collapseSpaces(trimmed);
       return;

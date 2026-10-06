@@ -3,11 +3,13 @@
 #include "gpu_engine.h"
 #include "metal_backend.h"
 
+#include <algorithm>
 #include <atomic>
 #include <cstdlib>
 #include <exception>
 #include <memory>
 #include <mutex>
+#include <stdexcept>
 
 namespace gpu_bench::ios_host {
 namespace {
@@ -16,8 +18,11 @@ std::atomic<bool> g_running{false};
 std::mutex g_runMutex;
 
 Workload ParseWorkload(const std::string& id) {
-    if (id == "stream" || id == "particle") return Workload::Stream;
-    if (id == "gpu_burn") return Workload::GpuBurnV1;
+    // "<test>_medium" and "<test>_heavy" are the same test with more work per
+    // frame, for devices on which the light one does not keep the GPU busy.
+    if (id == "stream" || id == "particle" || id == "stream_heavy") return Workload::Stream;
+    if (id == "gpu_burn" || id == "gpu_burn_medium" || id == "gpu_burn_heavy") return Workload::GpuBurnV1;
+    if (id == "cinematic_liquid") return Workload::CinematicLiquid;
     throw std::invalid_argument("unsupported iOS workload id: " + id);
 }
 
@@ -69,8 +74,13 @@ int RunWorkload(const RunRequest& request, std::string& errorOut) {
         cfg.headless = false;
         cfg.vsync = true;  // iOS display path; avoid offscreen ProMotion bypass
         if (cfg.workload == Workload::GpuBurnV1) {
-            cfg.gpuBurnIter = kGpuBurnV3LightIter;
-            cfg.difficultyLabel = "Light";
+            const bool heavy = request.workloadId == "gpu_burn_heavy";
+            const bool medium = request.workloadId == "gpu_burn_medium";
+            cfg.gpuBurnIter = heavy ? kGpuBurnV3HeavyIter : medium ? kGpuBurnV3MediumIter : kGpuBurnV3LightIter;
+            cfg.difficultyLabel = heavy ? "Heavy" : medium ? "Medium" : "Light";
+        } else if (request.workloadId == "stream_heavy") {
+            cfg.particleCount = 1048576;   // the desktop's Medium: four times the usual number here
+            cfg.difficultyLabel = "Heavy";
         }
 
         auto app = std::make_unique<MetalBackend>(

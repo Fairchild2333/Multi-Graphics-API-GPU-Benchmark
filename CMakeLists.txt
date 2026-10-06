@@ -103,22 +103,26 @@ if(ENABLE_VULKAN)
         # JNI shared library (see android/.../CMakeLists.txt). CapabilityGate
         # still dlopen-probes before Run so API 23 devices without Vulkan never
         # enter the workload path.
+        # vulkan_membw.cpp (the VRAM / cache bandwidth sweep) needs no window,
+        # so the app runs it through the command-line entry, like the CPU tests.
         list(APPEND BACKEND_SOURCES src/vulkan_backend.cpp
+                                    src/vulkan_membw.cpp
                                     src/android_engine_host.cpp)
-        list(APPEND BACKEND_DEFS    HAVE_VULKAN)
+        list(APPEND BACKEND_DEFS    HAVE_VULKAN HAVE_VULKAN_MEMBW)
         message(STATUS "Vulkan backend: ENABLED (Android NDK / ANativeWindow)")
     elseif(OHOS)
         # The HarmonyOS SDK ships the Vulkan headers; libvulkan.so is linked
         # into the app's NAPI library (see ohos/entry/src/main/cpp).
         list(APPEND BACKEND_SOURCES src/vulkan_backend.cpp
+                                    src/vulkan_membw.cpp
                                     src/ohos_engine_host.cpp)
-        list(APPEND BACKEND_DEFS    HAVE_VULKAN)
+        list(APPEND BACKEND_DEFS    HAVE_VULKAN HAVE_VULKAN_MEMBW)
         message(STATUS "Vulkan backend: ENABLED (HarmonyOS / OHNativeWindow)")
     else()
         find_package(Vulkan QUIET)
         if(Vulkan_FOUND)
             # vulkan_membw.cpp is the standalone compute-only memory-bandwidth
-            # sweep; it is desktop-CLI only, so Android/iOS builds are unchanged.
+            # sweep, started from the command line.
             list(APPEND BACKEND_SOURCES src/vulkan_backend.cpp src/vulkan_membw.cpp)
             list(APPEND BACKEND_LIBS    Vulkan::Vulkan)
             list(APPEND BACKEND_DEFS    HAVE_VULKAN HAVE_VULKAN_MEMBW GLFW_INCLUDE_VULKAN)

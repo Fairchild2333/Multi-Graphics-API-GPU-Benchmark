@@ -13,7 +13,16 @@
 > - **成绩身份**：GPU 测试写出 `stream_v1_ohos_preview`、
 >   `gpu_burn_v3_fixed_steps_16_kaleidoscope_ohos_preview`；缓存 / 内存带宽测试写出
 >   `cpu_membw_v1_ohos_preview`。默认 3 秒预览，不是桌面版的 15 秒，不能和桌面成绩混排。
-> - **没有做**：流体测试、抓帧、正式的移动端时长合同、签名和发布包、CPU 测试的取消。
+> - **没有做**：抓帧、正式的移动端时长合同、签名和发布包、CPU 测试的取消。
+>
+> 2026-10-07 追加（**只编译通过，仍然没有运行过**）：
+> - **流体**（`cinematic_liquid`）：全屏运行，3 秒运行保存为
+>   `cinematic_liquid_v2_physical_scene_v8_preview_ohos_preview`。
+> - **显存 / GPU 缓存带宽**（`membw`）：保存为 `membw_v1_ohos_preview`。它只做计算，没有画面，
+>   和 CPU 测试一样走引擎的命令行入口。
+> - **粒子和 GPU Burn 的更重档位**：`stream_heavy`（100 万粒子）、`gpu_burn_medium`（64 步）、`gpu_burn_heavy`（256 步）。
+> - **GPU 测试全屏横屏运行**，渲染尺寸固定 1280 × 720。
+> - 同样的代码在 Android 模拟器上跑过；鸿蒙这边的 `VK_OHOS_surface`、固定缓冲区尺寸和横屏都没有看过。
 
 ## 功能
 
@@ -54,7 +63,9 @@ SPIR-V 着色器打包在 `resources/rawfile/shaders/` 里，App 启动时复制
 
 2026-10-06 加入，**只编译通过，没有在任何设备或模拟器上看过**。
 
-- **布局按窗口宽度切换：** 600 vp 以下页签在底部、单列；600 vp 起页签竖排在侧边；840 vp 起每页分成左右两栏。历史页和图表页是网格。预览画面固定 16:9。
+- **布局按窗口宽度切换：** 600 vp 以下页签在底部、单列；600 vp 起页签竖排在侧边；840 vp 起每页分成左右两栏。历史页和图表页是网格。
+- **GPU 测试全屏运行（2026-10-07）：** 开始时横屏占满屏幕，只显示画面；渲染尺寸固定为 1280 × 720，由系统缩放。页面里不再有小预览。只编译通过，没有运行过。
+- **帧率顶着屏幕刷新率时**，"最近一次运行"里会提示成绩可能偏低，请换更重的档位（粒子 100 万、GPU Burn 64 步 / 256 步）。
 - **设备类型：** phone、tablet、2in1、tv、car。
 - **两套外壳：** `pages/Index.ets` 适用于所有系统；HarmonyOS 6.1（API 23）以上的手机、平板和二合一改为加载 `pages/IndexHds.ets`，它用 UI Design Kit 的悬浮页签和系统材质。选择在 `EntryAbility.ets` 里。编译 `IndexHds.ets` 时的"接口版本高于兼容版本"警告是预期的。
 - **系统材质：** 新外壳的悬浮页签用了它；`module.json5` 里打开了应用级开关（HarmonyOS 7 起对系统控件生效）。按华为文档，普通组件上的材质只在标题栏和底部页签栏里生效，所以内容卡片没有用。
@@ -90,7 +101,8 @@ hdc shell aa start -a EntryAbility -b com.mangekyo.benchmark --ps run cpu_membw
 hdc hilog | grep Mangekyo
 ```
 
-- **`--ps run <测试>`**：`cpu_membw`、`cpu_all`、`cpu_per_core`、`cpu_multi`、`stream`、`gpu_burn`。
+- **`--ps run <测试>`**：`cpu_membw`、`cpu_all`、`cpu_per_core`、`cpu_multi`、`stream`、`stream_heavy`、
+  `gpu_burn`、`gpu_burn_medium`、`gpu_burn_heavy`、`cinematic_liquid`（流体）、`membw`（显存 / GPU 缓存带宽）。
 - **`--pi seconds <N>`**（可选）：CPU 算力测试每项的秒数，或 GPU 测试的时长。
 - **日志**：标签 `MangekyoEngine` 是引擎打印的每一行；标签 `Mangekyo` 下有
   `AUTORUN accepted / started / refused / failed` 和结束时的 `RUN finished kind=cpu exit=0`。

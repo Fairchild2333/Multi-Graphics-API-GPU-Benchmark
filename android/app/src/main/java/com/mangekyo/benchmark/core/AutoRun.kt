@@ -32,7 +32,9 @@ object AutoRun {
         "cpu_multi" to "multi",
     )
 
-    val gpuTests = setOf("stream", "gpu_burn")
+    val gpuTests = setOf(
+        "stream", "stream_heavy", "gpu_burn", "gpu_burn_medium", "gpu_burn_heavy", "cinematic_liquid", "membw",
+    )
 
     /** The request that no page has started yet. */
     var pending by mutableStateOf<Request?>(null)

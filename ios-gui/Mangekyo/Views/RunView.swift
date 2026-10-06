@@ -1,128 +1,84 @@
-// RunView.swift — GPU Run page adapted for iOS.
+// RunView.swift — the GPU page of the iOS app.
+//
+// The same tests as the Android and HarmonyOS apps, started the same way: a
+// test takes over the screen in landscape while it runs (GpuFullscreenRun),
+// then this page shows its result and chart. The engine always renders
+// 1280 x 720 and the system scales the picture to the screen.
 
 import SwiftUI
+import QuartzCore
 
-enum BenchPreset: String, CaseIterable, Identifiable {
-    case custom
-    var id: String { rawValue }
-
-    var label: String {
-        switch self {
-        case .custom:
-            return Localization.tr(
-                "Custom run (choose GPU / workload)",
-                "自定义运行（选择 GPU / 负载）",
-                "カスタム実行（GPU / ワークロードを選択）")
-        }
-    }
-}
-
-enum DurationUnit: String, CaseIterable, Identifiable {
-    case seconds, minutes, hours, frames, unlimited
-    var id: String { rawValue }
-    var label: String {
-        switch self {
-        case .seconds:   return Localization.tr("Seconds", "秒", "秒")
-        case .minutes:   return Localization.tr("Minutes", "分钟", "分")
-        case .hours:     return Localization.tr("Hours", "小时", "時間")
-        case .frames:    return Localization.tr("Frames", "帧", "フレーム")
-        case .unlimited: return Localization.tr("Until Cancel", "直到取消", "キャンセルまで")
-        }
-    }
-}
-
-struct WorkloadChoice: Identifiable, Hashable {
+/// A test the iOS engine host can start (src/ios_engine_host.cpp).
+///
+/// A test has lighter and heavier forms. When the light one does not keep the
+/// GPU busy, the frame rate stops at the refresh rate of the display and the
+/// score is too low; the heavier one is for that case.
+struct GpuTest: Identifiable, Hashable {
     let id: String
     let en: String
     let zh: String
     let ja: String
-    let primary: Bool
+    /// The name the engine saves a run of this test under.
+    let savedAs: String
+
     var label: String { Localization.tr(en, zh, ja) }
+
+    static let all: [GpuTest] = [
+        GpuTest(id: "stream",
+                en: "Particle — memory throughput",
+                zh: "粒子 —— 内存吞吐",
+                ja: "パーティクル — メモリ帯域",
+                savedAs: "stream_v1_ios_preview"),
+        GpuTest(id: "stream_heavy",
+                en: "Particle — memory throughput (1M)",
+                zh: "粒子 —— 内存吞吐（100 万）",
+                ja: "パーティクル — メモリ帯域（100 万）",
+                savedAs: "stream_v1_ios_preview"),
+        GpuTest(id: "gpu_burn",
+                en: "GPU Burn (light 16)",
+                zh: "GPU Burn（轻量 16 步）",
+                ja: "GPU Burn（ライト 16）",
+                savedAs: "gpu_burn_v3_fixed_steps_16_kaleidoscope_ios_preview"),
+        GpuTest(id: "gpu_burn_medium",
+                en: "GPU Burn (medium 64)",
+                zh: "GPU Burn（中等 64 步）",
+                ja: "GPU Burn（ミディアム 64）",
+                savedAs: "gpu_burn_v3_fixed_steps_64_kaleidoscope_ios_preview"),
+        GpuTest(id: "gpu_burn_heavy",
+                en: "GPU Burn (heavy 256)",
+                zh: "GPU Burn（重度 256 步）",
+                ja: "GPU Burn（ヘビー 256）",
+                savedAs: "gpu_burn_v3_fixed_steps_256_kaleidoscope_ios_preview"),
+        GpuTest(id: "cinematic_liquid",
+                en: "Fluid — interactive pool",
+                zh: "流体 —— 互动水池",
+                ja: "流体 — インタラクティブプール",
+                savedAs: "cinematic_liquid_v2_physical_scene_v8_metal_preview_ios_preview"),
+    ]
 }
 
 struct RunView: View {
     @EnvironmentObject var engine: BenchEngine
 
-    @State private var preset: BenchPreset = .custom
-    @State private var selectedGpuIndex: Int = -1
-    @State private var selectedWorkload: String = "stream"
-    @State private var selectedPrecision: String = "fp32"
-    @State private var showLegacy = false
-
-    @State private var durationUnit: DurationUnit = .seconds
-    @State private var durationValue: String = "3"
-
-    @State private var particlePreset: String = "1048576"
-    @State private var customParticles: String = ""
-    @State private var burnPreset: String = "16"
-    @State private var customBurnSteps: String = ""
-
-    @State private var headless = false
-    @State private var vsync = false
-    @State private var hostMemory = false
-    @State private var captureOn = true
-    @State private var captureSec: String = "5"
+    @State private var selectedTest = "stream"
+    @State private var seconds = 3
+    /// A test is on screen, or about to be.
+    @State private var fullscreen = false
 
     @State private var logExpanded = false
     @State private var logScrollID = 0
 
-    private let primaryWorkloads: [WorkloadChoice] = [
-        .init(id: "stream", en: "Particle — Memory Throughput", zh: "粒子 —— 内存吞吐", ja: "パーティクル — メモリ帯域", primary: true),
-        .init(id: "gpu_burn", en: "Plasma x Kaleidoscope — GPU Burn", zh: "等离子晶核 × 万花镜 —— GPU Burn", ja: "プラズマ核 × カレイドスコープ — GPU Burn", primary: true),
-        .init(id: "cinematic_liquid", en: "Fluid — Interactive Pool", zh: "流体 —— 互动水池", ja: "流体 — インタラクティブプール", primary: true),
-    ]
-    private let advancedWorkloads: [WorkloadChoice] = [
-        .init(id: "nbody", en: "N-Body — Advanced Compute", zh: "N 体 —— 高级计算", ja: "N 体 — 高度計算", primary: false),
-        .init(id: "synthpeak", en: "SynthPeak — Advanced Synthetic", zh: "SynthPeak —— 高级合成", ja: "SynthPeak — 高度合成", primary: false),
-        .init(id: "stress", en: "Legacy Stress v1 — Fragment ALU/SFU", zh: "旧版压力 v1 —— 片元 ALU/SFU", ja: "旧ストレステスト v1", primary: false),
-        .init(id: "render3d", en: "Legacy 3D Prototype — Billboards", zh: "旧版 3D 原型 —— 广告牌", ja: "旧 3D プロトタイプ", primary: false),
-        .init(id: "volumetric", en: "Volumetric — Experimental Raymarch", zh: "体素 —— 实验性光线行进", ja: "ボリューメトリック — 実験", primary: false),
-    ]
-
-    private var visibleWorkloads: [WorkloadChoice] {
-        showLegacy ? primaryWorkloads + advancedWorkloads : primaryWorkloads
-    }
-
-    private var usesParticles: Bool {
-        ["stream", "nbody", "render3d"].contains(selectedWorkload)
-    }
-    private var usesBurnSteps: Bool { selectedWorkload == "gpu_burn" }
-
-    private var infoBanner: String {
-        switch selectedWorkload {
-        case "stream":
-            return Localization.tr(
-                "Particle baseline. Embedded host writes stream_v1_ios_preview (not desktop 15s).",
-                "粒子基线。嵌入宿主写出 stream_v1_ios_preview（非桌面 15s）。",
-                "パーティクル基線。埋め込みは stream_v1_ios_preview（デスクトップ15sではない）。")
-        case "gpu_burn":
-            return Localization.tr(
-                "Burn light=16. Writes gpu_burn_v3_fixed_steps_16_kaleidoscope_ios_preview.",
-                "Burn light=16。写出 gpu_burn_v3_fixed_steps_16_kaleidoscope_ios_preview。",
-                "Burn light=16。書き出し gpu_burn_v3_fixed_steps_16_kaleidoscope_ios_preview。")
-        case "cinematic_liquid":
-            return Localization.tr(
-                "Interactive pool. Not on ios_engine_host yet; desktop Metal uses …_metal_preview.",
-                "互动水池。尚未接 ios_engine_host；桌面 Metal 为 …_metal_preview。",
-                "インタラクティブプール。ios_engine_host 未接続。デスクトップ Metal は …_metal_preview。")
-        case "synthpeak":
-            return Localization.tr(
-                "Synthetic peak FLOPS/IOPS. FP64 unsupported on Apple GPUs.",
-                "合成峰值 FLOPS/IOPS。Apple GPU 不支持 FP64。",
-                "合成ピーク。Apple GPU は FP64 非対応。")
-        default:
-            return Localization.tr("Advanced / experimental workload.", "高级 / 实验负载。", "高度 / 実験ワークロード。")
-        }
+    private var test: GpuTest {
+        GpuTest.all.first { $0.id == selectedTest } ?? GpuTest.all[0]
     }
 
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    previewSurfaceCard
-                    optionsCard
-                    advancedCard
-                    progressCard
+                    fullscreenCard
+                    testsCard
+                    durationCard
                     summaryCard
                     GpuRunChartsCard(jobs: engine.runOutput.jobs)
                     cliCard
@@ -132,215 +88,98 @@ struct RunView: View {
 
             actionBar
         }
-        .onAppear {
-            if !showLegacy && !primaryWorkloads.contains(where: { $0.id == selectedWorkload }) {
-                selectedWorkload = "stream"
-            }
+        .fullScreenCover(isPresented: $fullscreen) {
+            GpuFullscreenRun(test: test, seconds: seconds, isPresented: $fullscreen)
+                .environmentObject(engine)
         }
     }
 
     // MARK: - Cards
 
-    private var previewSurfaceCard: some View {
+    private var fullscreenCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 8) {
-                Text(Localization.tr("Metal preview surface", "Metal 预览表面", "Metal プレビュー面"))
+                Text(Localization.tr("Runs full screen", "全屏运行", "全画面で実行"))
                     .font(.headline)
-                MetalBenchView { layer in
-                    engine.attachMetalLayer(layer)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 200)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
                 Text(Localization.tr(
-                    "Engine: \(engine.engineVersion.isEmpty ? "…" : engine.engineVersion). stream/gpu_burn use embedded gpu_engine (ios_preview).",
-                    "引擎：\(engine.engineVersion.isEmpty ? "…" : engine.engineVersion)。stream/gpu_burn 走嵌入式 gpu_engine（ios_preview）。",
-                    "エンジン：\(engine.engineVersion.isEmpty ? "…" : engine.engineVersion)。stream/gpu_burn は埋め込み gpu_engine（ios_preview）。"))
+                    "A test takes over the screen in landscape. It always renders 1280 × 720, as the desktop "
+                        + "version does, and the system scales the picture to the screen, so a score does not "
+                        + "depend on the size or resolution of the display.",
+                    "测试开始后横屏占满屏幕。渲染尺寸固定为 1280 × 720，和桌面版相同，再由系统缩放到屏幕，"
+                        + "所以成绩不随屏幕大小和分辨率变化。",
+                    "テストは横向きで画面全体を使います。描画サイズはデスクトップ版と同じ 1280 × 720 に固定され、"
+                        + "システムが画面に合わせて拡大縮小するため、スコアは画面の大きさや解像度に左右されません。"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(Localization.tr("API: Metal", "图形 API：Metal", "API：Metal")
+                     + " · "
+                     + Localization.tr("Engine: ", "引擎：", "エンジン：")
+                     + (engine.engineVersion.isEmpty ? "…" : engine.engineVersion))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
-    private var optionsCard: some View {
+    private var testsCard: some View {
         GlassCard {
-            VStack(alignment: .leading, spacing: 16) {
-                labeledPicker(Localization.tr("Preset", "预设", "プリセット"), selection: $preset) {
-                    ForEach(BenchPreset.allCases) { p in
-                        Text(p.label).tag(p)
-                    }
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("GPU").font(.subheadline).foregroundStyle(.secondary)
-                    Picker("", selection: $selectedGpuIndex) {
-                        Text(Localization.tr("(auto)", "（自动）", "（自動）")).tag(-1)
-                        ForEach(engine.gpus) { g in
-                            Text("\(g.index): \(g.name)").tag(g.index)
-                        }
-                    }
-                    .labelsHidden()
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(Localization.tr("Workload", "负载", "ワークロード"))
-                        .font(.subheadline).foregroundStyle(.secondary)
-                    Picker("", selection: $selectedWorkload) {
-                        ForEach(visibleWorkloads) { w in
-                            Text(w.label).tag(w.id)
-                        }
-                    }
-                    .labelsHidden()
-                }
-
-                if selectedWorkload == "synthpeak" {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(Localization.tr("Precision", "精度", "精度"))
-                            .font(.subheadline).foregroundStyle(.secondary)
-                        Picker("", selection: $selectedPrecision) {
-                            Text("fp32").tag("fp32")
-                            Text("fp16").tag("fp16")
-                            Text("int32").tag("int32")
-                        }
-                        .labelsHidden()
-                    }
-                }
-
-                Text(infoBanner)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(8)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(RoundedRectangle(cornerRadius: 8).fill(Color.accentColor.opacity(0.08)))
-
-                VStack(alignment: .leading, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(Localization.tr("Duration", "时长", "时间"))
-                            .font(.subheadline).foregroundStyle(.secondary)
-                        Picker("", selection: $durationUnit) {
-                            ForEach(DurationUnit.allCases) { u in
-                                Text(u.label).tag(u)
+            VStack(alignment: .leading, spacing: 12) {
+                Text(Localization.tr("Tests", "测试项目", "テスト"))
+                    .font(.headline)
+                ForEach(GpuTest.all) { item in
+                    Button {
+                        selectedTest = item.id
+                    } label: {
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: item.id == selectedTest ? "largecircle.fill.circle" : "circle")
+                                .foregroundStyle(item.id == selectedTest ? Color.accentColor : Color.gray)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(item.label)
+                                    .foregroundStyle(.primary)
+                                Text(item.savedAs)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
                             }
-                        }
-                        .labelsHidden()
-                    }
-
-                    if durationUnit != .unlimited {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(Localization.tr("Value", "数值", "値"))
-                                .font(.subheadline).foregroundStyle(.secondary)
-                            TextField(durationUnit == .frames ? "600" : "15", text: $durationValue)
-                                .textFieldStyle(.roundedBorder)
-                                .keyboardType(.numberPad)
+                            Spacer(minLength: 0)
                         }
                     }
-
-                    if usesParticles {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(Localization.tr("Particles", "粒子数", "パーティクル数"))
-                                .font(.subheadline).foregroundStyle(.secondary)
-                            Picker("", selection: $particlePreset) {
-                                Text(Localization.tr("Light — 65K", "轻量 —— 65K", "Light — 65K")).tag("65536")
-                                Text(Localization.tr("Medium — 1M", "中等 —— 1M", "Medium — 1M")).tag("1048576")
-                                Text(Localization.tr("Heavy — 4M", "重载 —— 4M", "Heavy — 4M")).tag("4194304")
-                                Text(Localization.tr("Extreme — 16M", "极限 —— 16M", "Extreme — 16M")).tag("16777216")
-                                Text(Localization.tr("Custom…", "自定义…", "カスタム…")).tag("custom")
-                            }
-                            .labelsHidden()
-                        }
-                        if particlePreset == "custom" {
-                            TextField(Localization.tr("multiple of 256", "256 的倍数", "256 の倍数"), text: $customParticles)
-                                .textFieldStyle(.roundedBorder)
-                                .keyboardType(.numberPad)
-                        }
-                    }
-
-                    if usesBurnSteps {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(Localization.tr("GPU Burn steps", "GPU Burn 步数", "GPU Burn ステップ"))
-                                .font(.subheadline).foregroundStyle(.secondary)
-                            Picker("", selection: $burnPreset) {
-                                Text(Localization.tr("Light — 16", "轻量 —— 16", "Light — 16")).tag("16")
-                                Text(Localization.tr("Medium — 64", "中等 —— 64", "Medium — 64")).tag("64")
-                                Text(Localization.tr("Heavy — 256", "重载 —— 256", "Heavy — 256")).tag("256")
-                                Text(Localization.tr("Custom…", "自定义…", "カスタム…")).tag("custom")
-                            }
-                            .labelsHidden()
-                        }
-                        if burnPreset == "custom" {
-                            TextField("16–2048", text: $customBurnSteps)
-                                .textFieldStyle(.roundedBorder)
-                                .keyboardType(.numberPad)
-                        }
-                    }
+                    .buttonStyle(.plain)
+                    .disabled(engine.isRunning)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
-    private var advancedCard: some View {
+    private var durationCard: some View {
         GlassCard(padding: 16) {
-            VStack(alignment: .leading, spacing: 14) {
-                Text(Localization.tr("Advanced", "高级选项", "詳細オプション"))
+            VStack(alignment: .leading, spacing: 8) {
+                Text(Localization.tr("Duration", "时长", "時間"))
                     .font(.headline)
-
-                Toggle("Headless", isOn: $headless)
-                    .disabled(usesBurnSteps || selectedWorkload == "cinematic_liquid")
-                    .toggleStyle(.switch)
-
-                Toggle(Localization.tr("V-Sync", "垂直同步", "垂直同期"), isOn: $vsync)
-                    .toggleStyle(.switch)
-
-                Toggle(Localization.tr("System memory", "系统内存", "システムメモリ"), isOn: $hostMemory)
-                    .toggleStyle(.switch)
-
-                Toggle(Localization.tr("Show legacy & advanced tests",
-                                       "显示旧版与高级测试",
-                                       "レガシー/高度テストを表示"),
-                       isOn: $showLegacy)
-                    .toggleStyle(.switch)
-
-                Toggle(Localization.tr("Capture at", "捕获于", "キャプチャ位置"), isOn: $captureOn)
-                    .disabled(durationUnit == .unlimited)
-                    .toggleStyle(.switch)
-
-                if captureOn && durationUnit != .unlimited {
-                    HStack {
-                        TextField("5", text: $captureSec)
-                            .textFieldStyle(.roundedBorder)
-                            .keyboardType(.numberPad)
-                            .frame(width: 80)
-                        Text("s").foregroundStyle(.secondary)
-                    }
+                Picker("", selection: $seconds) {
+                    Text(Localization.tr("3 s", "3 秒", "3 秒")).tag(3)
+                    Text(Localization.tr("10 s", "10 秒", "10 秒")).tag(10)
+                    Text(Localization.tr("15 s", "15 秒", "15 秒")).tag(15)
                 }
-
+                .labelsHidden()
+                .pickerStyle(.segmented)
+                .disabled(engine.isRunning)
                 Text(Localization.tr(
-                    "On iOS, capture records captureUnavailable until MTLCaptureManager is wired; the capture window is still excluded from scores when requested.",
-                    "iOS 上在接入 MTLCaptureManager 前会诚实标记 captureUnavailable；请求抓帧时成绩仍排除该窗口。",
-                    "iOS では MTLCaptureManager 接続前は captureUnavailable。要求時は成績からキャプチャ窓を除外。"))
+                    "Results of this app are saved as previews and are never ranked with desktop scores.",
+                    "这个 App 的成绩按预览保存，不和桌面成绩一起排名。",
+                    "このアプリの結果はプレビューとして保存され、デスクトップのスコアとは並べられません。"))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
-        }
-    }
-
-    private var progressCard: some View {
-        GlassCard(padding: 16) {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text(engine.statusText).fontWeight(.semibold)
-                    Spacer()
-                    Text(engine.progressLabel).foregroundStyle(.secondary)
-                }
-                ProgressView(value: engine.progressFraction)
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
     private var summaryCard: some View {
         AccentGlassCard {
             VStack(alignment: .leading, spacing: 8) {
-                Text(Localization.tr("Summary", "摘要", "要約")).fontWeight(.semibold)
+                Text(Localization.tr("Last run", "最近一次运行", "直近の実行")).fontWeight(.semibold)
                 Text(engine.lastScore.isEmpty ? "—" : engine.lastScore)
                     .font(.title2).fontWeight(.semibold)
                     .foregroundStyle(engine.lastScore.isEmpty ? .secondary : .primary)
@@ -352,7 +191,7 @@ struct RunView: View {
     private var cliCard: some View {
         GlassCard(padding: 12) {
             DisclosureGroup(
-                Localization.tr("Raw CLI output", "原始 CLI 输出", "生の CLI 出力"),
+                Localization.tr("Raw engine output", "引擎原始输出", "エンジンの生出力"),
                 isExpanded: $logExpanded
             ) {
                 ScrollViewReader { proxy in
@@ -379,7 +218,6 @@ struct RunView: View {
 
     private var actionBar: some View {
         HStack {
-            Spacer()
             Circle()
                 .fill(engine.isRunning ? Color.orange : Color.green)
                 .frame(width: 10, height: 10)
@@ -387,109 +225,70 @@ struct RunView: View {
                 .foregroundStyle(.secondary)
                 .font(.callout)
                 .lineLimit(1)
-            if engine.isRunning {
-                ProgressView()
-            }
-            Button(Localization.tr("Cancel", "取消", "キャンセル")) {
-                engine.cancel()
-            }
-            .disabled(!engine.isRunning)
-            Button(action: runBenchmark) {
-                Text(Localization.tr("Run GPU Benchmark", "开始 GPU 跑分", "GPU ベンチマークを実行"))
+            Spacer()
+            Button {
+                fullscreen = true
+            } label: {
+                Text(Localization.tr("Run", "运行", "実行"))
             }
             .buttonStyle(.borderedProminent)
-            .disabled(engine.isRunning || engine.workingDirectory.isEmpty)
+            .disabled(engine.isRunning || fullscreen || engine.workingDirectory.isEmpty)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(.ultraThinMaterial)
     }
+}
 
-    private func labeledPicker<V: Hashable, Content: View>(
-        _ title: String, selection: Binding<V>, @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title).font(.headline)
-            Picker("", selection: selection, content: content)
-                .labelsHidden()
-                .pickerStyle(.menu)
-                .frame(maxWidth: .infinity, alignment: .leading)
+/// The picture of a running test over the whole screen.
+///
+/// The test starts in the layer of this view as soon as the layer exists, and
+/// the view closes itself when the run has ended. The layer keeps the 16 : 9
+/// shape of the 1280 x 720 picture the engine renders.
+private struct GpuFullscreenRun: View {
+    @EnvironmentObject var engine: BenchEngine
+
+    let test: GpuTest
+    let seconds: Int
+    @Binding var isPresented: Bool
+
+    /// The test was started in the layer of this view.
+    @State private var started = false
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Color.black.ignoresSafeArea()
+
+            // MetalBenchView reports its layer once, outside any view update.
+            MetalBenchView { layer in
+                start(in: layer)
+            }
+            .aspectRatio(16.0 / 9.0, contentMode: .fit)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            Button {
+                engine.cancel()
+            } label: {
+                Label(Localization.tr("Stop", "停止", "停止"), systemImage: "stop.fill")
+            }
+            .buttonStyle(.borderedProminent)
+            .padding(16)
+        }
+        .statusBarHidden(true)
+        .persistentSystemOverlays(.hidden)
+        .onAppear { ScreenOrientation.setLandscape(true) }
+        .onDisappear { ScreenOrientation.setLandscape(false) }
+        .onChange(of: engine.isRunning) { running in
+            if started && !running { isPresented = false }
         }
     }
 
-    // MARK: - Job building
-
-    private func durationArgs() -> [String] {
-        if durationUnit == .unlimited { return ["--no-time-limit"] }
-        let raw = Double(durationValue.trimmingCharacters(in: .whitespaces)) ?? 15
-        switch durationUnit {
-        case .frames:
-            return ["--benchmark", "\(Int(raw))"]
-        case .minutes:
-            return ["--time", "\(Int(raw * 60))"]
-        case .hours:
-            return ["--time", "\(Int(raw * 3600))"]
-        default:
-            if raw == floor(raw) { return ["--time", "\(Int(raw))"] }
-            return ["--time", String(raw)]
+    private func start(in layer: CAMetalLayer) {
+        guard !started else { return }
+        started = true
+        engine.attachMetalLayer(layer)
+        if !engine.startPreview(workload: test.id, seconds: Double(seconds)) {
+            isPresented = false
         }
-    }
-
-    private func particleArgs() -> [String] {
-        guard usesParticles else { return [] }
-        let n = particlePreset == "custom"
-            ? customParticles.trimmingCharacters(in: .whitespaces)
-            : particlePreset
-        guard !n.isEmpty else { return [] }
-        let flag = selectedWorkload == "nbody" ? "--bodies" : "--particles"
-        return [flag, n]
-    }
-
-    private func burnArgs() -> [String] {
-        guard usesBurnSteps else { return [] }
-        let n = burnPreset == "custom"
-            ? customBurnSteps.trimmingCharacters(in: .whitespaces)
-            : burnPreset
-        guard !n.isEmpty else { return [] }
-        return ["--iter", n]
-    }
-
-    private func captureArgs() -> [String] {
-        guard captureOn, durationUnit != .unlimited else { return [] }
-        let s = captureSec.trimmingCharacters(in: .whitespaces)
-        return ["--capture", s.isEmpty ? "5" : s]
-    }
-
-    private func buildOne(backend: String, gpu: Int?, extra: [String] = []) -> [String] {
-        var a = ["gpu_benchmark"] + durationArgs()
-        a += ["--backend", "metal"] // iOS: metal-only
-        if let g = gpu, g >= 0 { a += ["--gpu", "\(g)"] }
-        if selectedWorkload != "stream" { a += ["--workload", selectedWorkload] }
-        if selectedWorkload == "synthpeak" { a += ["--precision", selectedPrecision] }
-        a += particleArgs()
-        a += burnArgs()
-        if headless { a.append("--headless") }
-        if vsync { a.append("--vsync") }
-        if hostMemory { a.append("--host-memory") }
-        a += captureArgs()
-        a += extra
-        return a
-    }
-
-    private func runBenchmark() {
-        let jobs = buildPresetJobs()
-        guard !jobs.isEmpty else {
-            engine.logOutput += Localization.tr(
-                "[GUI] Nothing to run — check workload selection.\n",
-                "[GUI] 无可运行项 —— 请检查负载选择。\n",
-                "[GUI] 実行対象なし — ワークロードを確認。\n")
-            return
-        }
-        engine.run(jobs: jobs, needCharts: false)
-    }
-
-    private func buildPresetJobs() -> [[String]] {
-        let gpu = selectedGpuIndex
-        return [buildOne(backend: "metal", gpu: gpu >= 0 ? gpu : nil)]
     }
 }

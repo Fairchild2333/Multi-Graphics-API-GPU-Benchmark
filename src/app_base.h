@@ -44,6 +44,20 @@ public:
     static std::string HostCpuName() { return GetCpuName(); }
 
 protected:
+    // The size the frames are rendered at; the scores count pixels by it.
+    // The desktop window is always kWindowWidth x kWindowHeight. An embedded
+    // host draws into a surface of the app, and its backend reports here what
+    // the swapchain really got.
+    std::uint32_t renderWidth_  = kWindowWidth;
+    std::uint32_t renderHeight_ = kWindowHeight;
+
+    // True when the backend can only hand a frame over in step with the
+    // display (V-Sync asked for, or a system that offers nothing else). A
+    // light test then leaves the GPU idle between frames, and a GPU that is
+    // not kept busy may clock down, so the summary calls such a run
+    // "Display-bound" and warns that its score may be too low.
+    bool presentFollowsDisplay_ = false;
+
     virtual void InitBackend()            = 0;
     virtual void DrawFrame(float deltaTime) = 0;
     virtual void CleanupBackend()         = 0;

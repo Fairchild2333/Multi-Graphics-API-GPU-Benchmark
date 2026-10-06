@@ -28,6 +28,11 @@ export default class EntryAbility extends UIAbility {
   }
 
   onWindowStageCreate(windowStage: window.WindowStage): void {
+    try {
+      runController.mainWindow = windowStage.getMainWindowSync();
+    } catch (e) {
+      logLine('main window not available: ' + JSON.stringify(e));
+    }
     // HarmonyOS 6.1 (API 23) brought the floating tab bar on the system
     // material; systems that have it get the shell built with it. The SDK
     // marks these interfaces as unavailable to TVs and cars.
