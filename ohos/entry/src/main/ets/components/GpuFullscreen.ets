@@ -4,6 +4,7 @@
 // so the picture is 16:9; a window of another shape gets black bars instead of
 // a stretched image.
 
+import { gpuTestName } from '../common/GpuOptions';
 import { tr } from '../common/I18n';
 import { appState, runController } from '../common/RunController';
 
@@ -23,7 +24,7 @@ export struct GpuFullscreen {
 
       Column() {
         Column({ space: 2 }) {
-          Text(appState.gpuWorkload)
+          Text(gpuTestName(appState.gpuWorkload))
             .fontSize(16)
             .fontWeight(FontWeight.Medium)
             .fontColor(Color.White)

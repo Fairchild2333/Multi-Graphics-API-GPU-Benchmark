@@ -1,6 +1,7 @@
 #include "vulkan_membw.h"
 
 #include "gpu_common.h"
+#include "gpu_engine.h"
 
 #include <vulkan/vulkan.h>
 
@@ -882,6 +883,10 @@ std::uint64_t Runner::CalibratePasses(std::size_t kernel, std::uint32_t chunkCou
 
 MemBwPoint Runner::MeasurePoint(std::size_t kernel, std::uint32_t chunkCount,
                                 const char* name) {
+    // An app that embeds the engine may stop the sweep (RequestStop). A sweep
+    // that was cut short has no levels to report, so it ends as an error and
+    // nothing is saved.
+    if (StopRequested()) throw std::runtime_error(kMemBwStopped);
     const std::uint64_t passes = CalibratePasses(kernel, chunkCount);
     for (std::uint32_t i = 0; i < config_.warmupRuns; ++i) Dispatch(kernel, chunkCount, passes);
 
@@ -902,6 +907,7 @@ MemBwPoint Runner::MeasurePoint(std::size_t kernel, std::uint32_t chunkCount,
 // L1 sweep point. Under full load every concurrently running workgroup gets
 // its own block; the single-group variant runs one workgroup, i.e. one SM/CU.
 MemBwPoint Runner::MeasureL1Point(bool singleGroup, std::uint32_t stripes) {
+    if (StopRequested()) throw std::runtime_error(kMemBwStopped);
     const std::uint64_t blockBytes = stripes * kStripeBytes;
     const std::uint64_t totalStripes = static_cast<std::uint64_t>(maxChunks_) * kStripesPerChunk;
     const std::uint32_t blocks = singleGroup ? 1u : static_cast<std::uint32_t>(

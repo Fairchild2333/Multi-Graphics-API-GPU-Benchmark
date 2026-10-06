@@ -8,60 +8,116 @@
 import SwiftUI
 import QuartzCore
 
-/// A test the iOS engine host can start (src/ios_engine_host.cpp).
-///
-/// A test has lighter and heavier forms. When the light one does not keep the
-/// GPU busy, the frame rate stops at the refresh rate of the display and the
-/// score is too low; the heavier one is for that case.
+/// A test the iOS engine host can start (src/ios_engine_host.cpp), named as
+/// in the desktop app.
 struct GpuTest: Identifiable, Hashable {
     let id: String
     let en: String
     let zh: String
     let ja: String
-    /// The name the engine saves a run of this test under.
-    let savedAs: String
 
     var label: String { Localization.tr(en, zh, ja) }
 
     static let all: [GpuTest] = [
         GpuTest(id: "stream",
-                en: "Particle — memory throughput",
+                en: "Particle — Memory Throughput",
                 zh: "粒子 —— 内存吞吐",
-                ja: "パーティクル — メモリ帯域",
-                savedAs: "stream_v1_ios_preview"),
-        GpuTest(id: "stream_heavy",
-                en: "Particle — memory throughput (1M)",
-                zh: "粒子 —— 内存吞吐（100 万）",
-                ja: "パーティクル — メモリ帯域（100 万）",
-                savedAs: "stream_v1_ios_preview"),
+                ja: "パーティクル — メモリスループット"),
         GpuTest(id: "gpu_burn",
-                en: "GPU Burn (light 16)",
-                zh: "GPU Burn（轻量 16 步）",
-                ja: "GPU Burn（ライト 16）",
-                savedAs: "gpu_burn_v3_fixed_steps_16_kaleidoscope_ios_preview"),
-        GpuTest(id: "gpu_burn_medium",
-                en: "GPU Burn (medium 64)",
-                zh: "GPU Burn（中等 64 步）",
-                ja: "GPU Burn（ミディアム 64）",
-                savedAs: "gpu_burn_v3_fixed_steps_64_kaleidoscope_ios_preview"),
-        GpuTest(id: "gpu_burn_heavy",
-                en: "GPU Burn (heavy 256)",
-                zh: "GPU Burn（重度 256 步）",
-                ja: "GPU Burn（ヘビー 256）",
-                savedAs: "gpu_burn_v3_fixed_steps_256_kaleidoscope_ios_preview"),
+                en: "Plasma x Kaleidoscope — GPU Burn",
+                zh: "等离子晶核 × 万花镜 —— GPU Burn",
+                ja: "プラズマ核 × カレイドスコープ — GPU Burn"),
         GpuTest(id: "cinematic_liquid",
-                en: "Fluid — interactive pool",
+                en: "Fluid — Interactive Pool",
                 zh: "流体 —— 互动水池",
-                ja: "流体 — インタラクティブプール",
-                savedAs: "cinematic_liquid_v2_physical_scene_v8_metal_preview_ios_preview"),
+                ja: "流体 — インタラクティブプール"),
     ]
+}
+
+/// A preset of a setting: its value and its name.
+struct GpuPreset: Identifiable, Hashable {
+    let value: Int
+    let en: String
+    let zh: String
+    let ja: String
+
+    var id: Int { value }
+    var label: String { Localization.tr(en, zh, ja) }
+}
+
+/// The size of a GPU test, chosen as in the desktop app: the same presets,
+/// the same names, the same limits. The engine host takes the choice as part
+/// of the name of the test, for example "stream?particles=4194304"
+/// (src/embedded_request.h).
+enum GpuOptions {
+    /// Stands for "Custom…" in a list of presets.
+    static let custom = -1
+
+    static let particlePresets: [GpuPreset] = [
+        GpuPreset(value: 65_536, en: "Light — 65K", zh: "轻量 —— 65K", ja: "Light — 65K"),
+        GpuPreset(value: 1_048_576, en: "Medium — 1M", zh: "中等 —— 1M", ja: "Medium — 1M"),
+        GpuPreset(value: 4_194_304, en: "Heavy — 4M", zh: "重载 —— 4M", ja: "Heavy — 4M"),
+        GpuPreset(value: 16_777_216, en: "Extreme — 16M", zh: "极限 —— 16M", ja: "Extreme — 16M"),
+    ]
+    static let stepPresets: [GpuPreset] = [
+        GpuPreset(value: 16, en: "Light — 16", zh: "轻量 — 16", ja: "Light — 16"),
+        GpuPreset(value: 64, en: "Medium — 64", zh: "中等 — 64", ja: "Medium — 64"),
+        GpuPreset(value: 256, en: "Heavy — 256", zh: "重载 — 256", ja: "Heavy — 256"),
+    ]
+    static let secondPresets: [GpuPreset] = [
+        GpuPreset(value: 3, en: "3 s", zh: "3 秒", ja: "3 秒"),
+        GpuPreset(value: 15, en: "15 s", zh: "15 秒", ja: "15 秒"),
+        GpuPreset(value: 60, en: "60 s", zh: "60 秒", ja: "60 秒"),
+    ]
+
+    // What the desktop app selects at first.
+    static let defaultParticles = 1_048_576
+    static let defaultSteps = 16
+    static let defaultSeconds = 15
+
+    static let particleRange = 1...67_108_864
+    static let stepRange = 16...2048
+    static let secondRange = 1...3600
+
+    /// The value of a choice: the preset, or the number typed for "Custom…";
+    /// nil when that is not valid.
+    static func resolve(choice: Int, custom text: String, range: ClosedRange<Int>) -> Int? {
+        if choice != custom { return choice }
+        guard let value = Int(text.trimmingCharacters(in: .whitespaces)), range.contains(value) else { return nil }
+        return value
+    }
+
+    /// What the engine host is asked to run.
+    static func request(test: String, particles: Int, steps: Int) -> String {
+        switch test {
+        case "stream": return "stream?particles=\(particles)"
+        case "gpu_burn": return "gpu_burn?steps=\(steps)"
+        default: return test
+        }
+    }
+
+    /// The name the engine saves a run under.
+    static func savedAs(test: String, steps: Int) -> String {
+        switch test {
+        case "stream": return "stream_v1_ios_preview"
+        case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview"
+        case "cinematic_liquid": return "cinematic_liquid_v2_physical_scene_v8_metal_preview_ios_preview"
+        default: return test
+        }
+    }
 }
 
 struct RunView: View {
     @EnvironmentObject var engine: BenchEngine
 
     @State private var selectedTest = "stream"
-    @State private var seconds = 3
+    // The size of the selected test and its duration, as in the desktop app.
+    @State private var particleChoice = GpuOptions.defaultParticles
+    @State private var customParticles = ""
+    @State private var stepChoice = GpuOptions.defaultSteps
+    @State private var customSteps = ""
+    @State private var secondChoice = GpuOptions.defaultSeconds
+    @State private var customSeconds = ""
     /// A test is on screen, or about to be.
     @State private var fullscreen = false
 
@@ -72,13 +128,31 @@ struct RunView: View {
         GpuTest.all.first { $0.id == selectedTest } ?? GpuTest.all[0]
     }
 
+    private var particles: Int? {
+        GpuOptions.resolve(choice: particleChoice, custom: customParticles, range: GpuOptions.particleRange)
+    }
+    private var steps: Int? {
+        GpuOptions.resolve(choice: stepChoice, custom: customSteps, range: GpuOptions.stepRange)
+    }
+    private var seconds: Int? {
+        GpuOptions.resolve(choice: secondChoice, custom: customSeconds, range: GpuOptions.secondRange)
+    }
+    private var optionsValid: Bool {
+        guard seconds != nil else { return false }
+        switch selectedTest {
+        case "stream": return particles != nil
+        case "gpu_burn": return steps != nil
+        default: return true
+        }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     fullscreenCard
                     testsCard
-                    durationCard
+                    settingsCard
                     summaryCard
                     GpuRunChartsCard(jobs: engine.runOutput.jobs)
                     cliCard
@@ -89,7 +163,13 @@ struct RunView: View {
             actionBar
         }
         .fullScreenCover(isPresented: $fullscreen) {
-            GpuFullscreenRun(test: test, seconds: seconds, isPresented: $fullscreen)
+            GpuFullscreenRun(
+                title: test.label,
+                request: GpuOptions.request(test: selectedTest,
+                                            particles: particles ?? GpuOptions.defaultParticles,
+                                            steps: steps ?? GpuOptions.defaultSteps),
+                seconds: seconds ?? GpuOptions.defaultSeconds,
+                isPresented: $fullscreen)
                 .environmentObject(engine)
         }
     }
@@ -137,7 +217,7 @@ struct RunView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(item.label)
                                     .foregroundStyle(.primary)
-                                Text(item.savedAs)
+                                Text(GpuOptions.savedAs(test: item.id, steps: steps ?? GpuOptions.defaultSteps))
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                             }
@@ -152,19 +232,33 @@ struct RunView: View {
         }
     }
 
-    private var durationCard: some View {
+    private var settingsCard: some View {
         GlassCard(padding: 16) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(Localization.tr("Duration", "时长", "時間"))
+            VStack(alignment: .leading, spacing: 14) {
+                Text(Localization.tr("Settings", "测试设置", "設定"))
                     .font(.headline)
-                Picker("", selection: $seconds) {
-                    Text(Localization.tr("3 s", "3 秒", "3 秒")).tag(3)
-                    Text(Localization.tr("10 s", "10 秒", "10 秒")).tag(10)
-                    Text(Localization.tr("15 s", "15 秒", "15 秒")).tag(15)
+                if selectedTest == "stream" {
+                    presetRow(title: Localization.tr("Particles", "粒子数", "パーティクル数"),
+                              presets: GpuOptions.particlePresets,
+                              choice: $particleChoice,
+                              custom: $customParticles,
+                              hint: Localization.tr("multiple of 256", "256 的倍数", "256 の倍数"),
+                              valid: particles != nil)
                 }
-                .labelsHidden()
-                .pickerStyle(.segmented)
-                .disabled(engine.isRunning)
+                if selectedTest == "gpu_burn" {
+                    presetRow(title: Localization.tr("GPU Burn steps", "GPU Burn 步数", "GPU Burn ステップ数"),
+                              presets: GpuOptions.stepPresets,
+                              choice: $stepChoice,
+                              custom: $customSteps,
+                              hint: "16–2048",
+                              valid: steps != nil)
+                }
+                presetRow(title: Localization.tr("Duration", "运行时长", "実行時間"),
+                          presets: GpuOptions.secondPresets,
+                          choice: $secondChoice,
+                          custom: $customSeconds,
+                          hint: Localization.tr("seconds, 1–3600", "秒，1–3600", "秒、1–3600"),
+                          valid: seconds != nil)
                 Text(Localization.tr(
                     "Results of this app are saved as previews and are never ranked with desktop scores.",
                     "这个 App 的成绩按预览保存，不和桌面成绩一起排名。",
@@ -173,6 +267,38 @@ struct RunView: View {
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    /// One setting: its presets with "Custom…" at the end, and a number field
+    /// while that is selected.
+    private func presetRow(title: String, presets: [GpuPreset], choice: Binding<Int>, custom: Binding<String>,
+                           hint: String, valid: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Picker("", selection: choice) {
+                ForEach(presets) { preset in
+                    Text(preset.label).tag(preset.value)
+                }
+                Text(Localization.tr("Custom…", "自定义…", "カスタム…")).tag(GpuOptions.custom)
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .disabled(engine.isRunning)
+            if choice.wrappedValue == GpuOptions.custom {
+                TextField(hint, text: custom)
+                    .textFieldStyle(.roundedBorder)
+                    .keyboardType(.numberPad)
+                    .disabled(engine.isRunning)
+                if !valid {
+                    Text(Localization.tr("This number is not in the allowed range.", "这个数值不在允许的范围内。",
+                                         "この数値は許可された範囲にありません。"))
+                        .font(.caption2)
+                        .foregroundStyle(Color.orange)
+                }
+            }
         }
     }
 
@@ -232,7 +358,7 @@ struct RunView: View {
                 Text(Localization.tr("Run", "运行", "実行"))
             }
             .buttonStyle(.borderedProminent)
-            .disabled(engine.isRunning || fullscreen || engine.workingDirectory.isEmpty)
+            .disabled(engine.isRunning || fullscreen || engine.workingDirectory.isEmpty || !optionsValid)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -248,7 +374,10 @@ struct RunView: View {
 private struct GpuFullscreenRun: View {
     @EnvironmentObject var engine: BenchEngine
 
-    let test: GpuTest
+    /// The name of the test, for the reader.
+    let title: String
+    /// The test and its size, for the engine host.
+    let request: String
     let seconds: Int
     @Binding var isPresented: Bool
 
@@ -266,12 +395,18 @@ private struct GpuFullscreenRun: View {
             .aspectRatio(16.0 / 9.0, contentMode: .fit)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            Button {
-                engine.cancel()
-            } label: {
-                Label(Localization.tr("Stop", "停止", "停止"), systemImage: "stop.fill")
+            HStack(alignment: .top) {
+                Text(title)
+                    .font(.headline)
+                    .foregroundStyle(Color.white)
+                Spacer()
+                Button {
+                    engine.cancel()
+                } label: {
+                    Label(Localization.tr("Stop", "停止", "停止"), systemImage: "stop.fill")
+                }
+                .buttonStyle(.borderedProminent)
             }
-            .buttonStyle(.borderedProminent)
             .padding(16)
         }
         .statusBarHidden(true)
@@ -287,7 +422,7 @@ private struct GpuFullscreenRun: View {
         guard !started else { return }
         started = true
         engine.attachMetalLayer(layer)
-        if !engine.startPreview(workload: test.id, seconds: Double(seconds)) {
+        if !engine.startPreview(workload: request, seconds: Double(seconds)) {
             isPresented = false
         }
     }

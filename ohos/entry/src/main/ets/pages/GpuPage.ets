@@ -1,43 +1,21 @@
-// GPU page: the tests the HarmonyOS host can start and the result of the last
-// run with its chart. A test with a picture runs full screen (GpuFullscreen);
-// the memory sweep computes only and runs through the command-line entry.
+// GPU page: the tests the HarmonyOS host can start, the size and duration of
+// the selected one (as in the desktop app) and the result of the last run with
+// its chart. A test with a picture runs full screen (GpuFullscreen); the memory
+// sweep computes only and runs through the command-line entry.
 
+import { deviceInfo } from '@kit.BasicServicesKit';
 import { AdaptivePanes } from '../components/AdaptivePanes';
 import { Card } from '../components/Card';
+import { PresetRow } from '../components/PresetRow';
 import { ChartSeries, LineChart } from '../components/Charts';
 import { gpuRun, MemoryLevelLine } from '../common/EngineOutput';
 import { formatNumber } from '../common/Format';
+import {
+  DEFAULT_SECONDS, DEFAULT_STEPS, GPU_WORKLOADS, gpuRequest, gpuSavedAs, GpuTest, PARTICLE_LIMITS,
+  PARTICLE_PRESETS, resolveChoice, SECOND_LIMITS, SECOND_PRESETS, STEP_LIMITS, STEP_PRESETS
+} from '../common/GpuOptions';
 import { localizeScoreLine, tr } from '../common/I18n';
 import { appState, runController } from '../common/RunController';
-
-class GpuWorkload {
-  id: string;
-  nameEn: string;
-  nameZh: string;
-  version: string;
-
-  constructor(id: string, nameEn: string, nameZh: string, version: string) {
-    this.id = id;
-    this.nameEn = nameEn;
-    this.nameZh = nameZh;
-    this.version = version;
-  }
-}
-
-// The versions are the ones the engine writes on HarmonyOS; see AppBase::CollectResult.
-const GPU_WORKLOADS: GpuWorkload[] = [
-  new GpuWorkload('stream', 'Stream / Particle', '粒子 —— 内存吞吐', 'stream_v1_ohos_preview'),
-  new GpuWorkload('stream_heavy', 'Stream / Particle (1M)', '粒子 —— 内存吞吐（100 万）', 'stream_v1_ohos_preview'),
-  new GpuWorkload('gpu_burn', 'GPU Burn (light 16)', 'GPU Burn（轻量 16 步）',
-    'gpu_burn_v3_fixed_steps_16_kaleidoscope_ohos_preview'),
-  new GpuWorkload('gpu_burn_medium', 'GPU Burn (medium 64)', 'GPU Burn（中等 64 步）',
-    'gpu_burn_v3_fixed_steps_64_kaleidoscope_ohos_preview'),
-  new GpuWorkload('gpu_burn_heavy', 'GPU Burn (heavy 256)', 'GPU Burn（重度 256 步）',
-    'gpu_burn_v3_fixed_steps_256_kaleidoscope_ohos_preview'),
-  new GpuWorkload('cinematic_liquid', 'Fluid — interactive pool', '流体 —— 互动水池',
-    'cinematic_liquid_v2_physical_scene_v8_preview_ohos_preview'),
-  new GpuWorkload('membw', 'Memory bandwidth — VRAM / cache', '显存带宽 —— 显存 / 缓存', 'membw_v1_ohos_preview'),
-];
 
 @Extend(Text)
 function caption() {
@@ -103,15 +81,54 @@ export struct GpuPage {
     return series;
   }
 
+  // The chosen size and duration; -1 while a typed number is outside its range.
+  private particles(): number {
+    return resolveChoice(appState.gpuParticleChoice, appState.gpuCustomParticles, PARTICLE_LIMITS);
+  }
+
+  private steps(): number {
+    return resolveChoice(appState.gpuStepChoice, appState.gpuCustomSteps, STEP_LIMITS);
+  }
+
+  private seconds(): number {
+    return resolveChoice(appState.gpuSecondChoice, appState.gpuCustomSeconds, SECOND_LIMITS);
+  }
+
+  private optionsValid(): boolean {
+    if (appState.gpuWorkload === 'membw') {
+      return true;
+    }
+    if (this.seconds() < 0) {
+      return false;
+    }
+    if (appState.gpuWorkload === 'stream') {
+      return this.particles() > 0;
+    }
+    if (appState.gpuWorkload === 'gpu_burn') {
+      return this.steps() > 0;
+    }
+    return true;
+  }
+
+  /** A two-in-one shows the picture in the window of the app, as Windows and macOS do. */
+  private windowed(): boolean {
+    return deviceInfo.deviceType === '2in1';
+  }
+
   private statusText(): string {
+    // A custom value outside its range is why "Run" is off; that comes before
+    // what the last run left here.
+    if (!appState.gpuRunning && appState.engineReady && !this.optionsValid()) {
+      return tr('The custom value is not in its range.', '自定义的数值不在允许的范围内。');
+    }
     if (appState.gpuStatus.length > 0) {
       return appState.gpuStatus;
     }
     if (!appState.engineReady) {
       return tr('The native engine could not be loaded.', '无法加载原生引擎。');
     }
-    return tr('Preview run: 3 s of Particle or GPU Burn. Scores are ohos_preview; do not mix them with desktop scores.',
-      '预览运行：粒子测试或 GPU Burn 跑 3 秒。成绩属于 ohos_preview，不要和桌面版的成绩放在一起比较。');
+    return tr('Scores are ohos_preview; do not mix them with desktop scores.',
+      '成绩属于 ohos_preview，不要和桌面版的成绩放在一起比较。');
   }
 
   /** The preview and the button that starts a run. */
@@ -122,11 +139,16 @@ export struct GpuPage {
       .fontWeight(FontWeight.Bold)
       .fontColor($r('sys.color.ohos_id_color_text_primary'))
 
-    Card({ title: tr('Runs full screen', '全屏运行') }) {
-      Text(tr('A test takes over the screen in landscape. It always renders 1280 × 720, as the desktop version ' +
-        'does, and the system scales the picture to the screen, so a score does not depend on the size or ' +
-        'resolution of the display.',
-        '测试开始后横屏占满屏幕。渲染尺寸固定为 1280 × 720，和桌面版相同，再由系统缩放到屏幕，所以成绩不随屏幕大小和分辨率变化。'))
+    Card({ title: this.windowed() ? tr('Runs in this window', '在窗口内运行') : tr('Runs full screen', '全屏运行') }) {
+      Text(this.windowed()
+        ? tr('The picture of a test is shown in this window, as on Windows and macOS. It always renders ' +
+          '1280 × 720 and is scaled to the window, so a score does not depend on the size of the window.',
+          '测试画面显示在这个窗口里，和 Windows、macOS 版一样不强制全屏。渲染尺寸固定为 1280 × 720，再缩放到窗口，' +
+            '所以成绩不随窗口大小变化。')
+        : tr('A test takes over the screen in landscape. It always renders 1280 × 720, as the desktop version ' +
+          'does, and the system scales the picture to the screen, so a score does not depend on the size or ' +
+          'resolution of the display.',
+          '测试开始后横屏占满屏幕。渲染尺寸固定为 1280 × 720，和桌面版相同，再由系统缩放到屏幕，所以成绩不随屏幕大小和分辨率变化。'))
         .caption()
       Text(tr('Engine: ', '引擎：') + appState.engineVersion)
         .caption()
@@ -134,12 +156,12 @@ export struct GpuPage {
 
     Row({ space: 12 }) {
       Button(appState.gpuRunning ? tr('Stop', '停止') : tr('Run', '运行'))
-        .enabled(appState.engineReady)
+        .enabled(appState.engineReady && (appState.gpuRunning || this.optionsValid()))
         .onClick(() => {
           if (appState.gpuRunning) {
             runController.stopGpu();
           } else {
-            runController.runGpu(appState.gpuWorkload, 3);
+            runController.runGpu(gpuRequest(appState.gpuWorkload, this.particles(), this.steps()), this.seconds());
           }
         })
       Text(this.statusText())
@@ -149,37 +171,101 @@ export struct GpuPage {
     .width('100%')
   }
 
-  /** The tests to choose from and the result of the last run. */
+  /** The tests to choose from. */
   @Builder
-  results() {
+  tests() {
     Card({ title: tr('Workloads', '测试项目') }) {
-      Text(tr('Results carry the _ohos_preview suffix (a 3 s run inside the app, not the 15 s of the desktop version).',
-        '成绩的版本带 _ohos_preview 后缀（App 内运行 3 秒，不是桌面版的 15 秒）。'))
+      Text(tr('A result is saved under the name shown below the test.', '成绩按测试名下面那一行的名字保存。'))
         .caption()
-      ForEach(GPU_WORKLOADS, (workload: GpuWorkload) => {
+      ForEach(GPU_WORKLOADS, (workload: GpuTest) => {
         Column({ space: 2 }) {
           Text(tr(workload.nameEn, workload.nameZh))
             .fontSize(15)
             .fontWeight(FontWeight.Medium)
-            .fontColor($r('sys.color.ohos_id_color_text_primary'))
-          Text(workload.version)
-            .caption()
+            .fontColor(appState.gpuWorkload === workload.id
+              ? $r('sys.color.font_on_primary')
+              : $r('sys.color.ohos_id_color_text_primary'))
+          Text(gpuSavedAs(workload.id, this.steps() > 0 ? this.steps() : DEFAULT_STEPS,
+            this.seconds() > 0 ? this.seconds() : DEFAULT_SECONDS))
+            .fontSize(12)
+            .fontColor(appState.gpuWorkload === workload.id
+              ? $r('sys.color.font_on_secondary')
+              : $r('sys.color.ohos_id_color_text_secondary'))
         }
         .alignItems(HorizontalAlign.Start)
         .width('100%')
         .padding(12)
         .borderRadius(12)
         .backgroundColor(appState.gpuWorkload === workload.id
-          ? $r('sys.color.ohos_id_color_component_activated')
+          ? $r('sys.color.comp_background_emphasize')
           : $r('sys.color.ohos_id_color_background'))
         .onClick(() => {
           if (!appState.gpuRunning) {
             appState.gpuWorkload = workload.id;
           }
         })
-      }, (workload: GpuWorkload) => workload.id)
+      }, (workload: GpuTest) => workload.id)
     }
 
+    // The size of the selected test and its duration; the memory sweep has neither.
+    if (appState.gpuWorkload !== 'membw') {
+      Card({ title: tr('Settings', '测试设置') }) {
+        if (appState.gpuWorkload === 'stream') {
+          PresetRow({
+            title: tr('Particles', '粒子数'),
+            presets: PARTICLE_PRESETS,
+            choice: appState.gpuParticleChoice,
+            custom: appState.gpuCustomParticles,
+            hint: tr('multiple of 256', '256 的倍数'),
+            valid: this.particles() > 0,
+            active: !appState.gpuRunning,
+            onChoice: (value: number) => {
+              appState.gpuParticleChoice = value;
+            },
+            onCustom: (text: string) => {
+              appState.gpuCustomParticles = text;
+            }
+          })
+        }
+        if (appState.gpuWorkload === 'gpu_burn') {
+          PresetRow({
+            title: tr('GPU Burn steps', 'GPU Burn 步数'),
+            presets: STEP_PRESETS,
+            choice: appState.gpuStepChoice,
+            custom: appState.gpuCustomSteps,
+            hint: '16–2048',
+            valid: this.steps() > 0,
+            active: !appState.gpuRunning,
+            onChoice: (value: number) => {
+              appState.gpuStepChoice = value;
+            },
+            onCustom: (text: string) => {
+              appState.gpuCustomSteps = text;
+            }
+          })
+        }
+        PresetRow({
+          title: tr('Duration', '运行时长'),
+          presets: SECOND_PRESETS,
+          choice: appState.gpuSecondChoice,
+          custom: appState.gpuCustomSeconds,
+          hint: tr('seconds, 1–3600', '秒，1–3600'),
+          valid: this.seconds() > 0,
+          active: !appState.gpuRunning,
+          onChoice: (value: number) => {
+            appState.gpuSecondChoice = value;
+          },
+          onCustom: (text: string) => {
+            appState.gpuCustomSeconds = text;
+          }
+        })
+      }
+    }
+  }
+
+  /** The result of the last run, with its chart. */
+  @Builder
+  lastRun() {
     if (gpuRun.scoreLine.length > 0 || gpuRun.fpsLine.length > 0 || gpuRun.samples.length >= 2 ||
       gpuRun.memoryPoints.length > 0) {
       Card({ title: tr('Last run', '最近一次运行') }) {
@@ -227,7 +313,10 @@ export struct GpuPage {
         this.controls()
       },
       secondary: () => {
-        this.results()
+        this.tests()
+      },
+      result: () => {
+        this.lastRun()
       }
     })
   }

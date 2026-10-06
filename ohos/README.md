@@ -32,8 +32,21 @@ call the engine's command-line entry point.
 > - **Heavier forms of the particle and GPU Burn tests**: `stream_heavy`
 >   (1M particles), `gpu_burn_medium` (64 steps), `gpu_burn_heavy` (256 steps).
 > - **GPU tests run full screen in landscape** and always render 1280 × 720.
-> - The same code has run on the Android emulator; `VK_OHOS_surface`, the fixed
->   buffer size and the switch to landscape have not been seen on HarmonyOS.
+> - The same code has run on the Android emulator.
+>
+> Added 2026-10-07 (**run on the emulators of DevEco Studio**; the unsigned HAP
+> installs there as it is):
+> - **Works**: HarmonyOS 5.1.1 phone and tri-fold (pages, CPU tests), 6.1.1 TV
+>   (pages, GPU Burn), 7.0 two-in-one (pages, CPU tests, particle, GPU Burn, the
+>   floating tab bar). GPU Burn gives the same number as on Windows and on the
+>   Android emulator with the same graphics card.
+> - **Limits of the emulators**: the 5.1.1 images have no Vulkan driver, so no GPU
+>   test runs there; the virtual GPU of 6.1.1 and 7.0 lacks the texture format
+>   the fluid needs, and its timing of the particle test and of the memory sweep
+>   cannot be trusted. The car emulator (7.0 Beta1) has to be started from
+>   DevEco Studio with an account signed in.
+> - **Not checked**: a real device, a car, the full-screen picture on a device of
+>   the phone type. See section 10 of `HANDOFF.md` in the repository root.
 
 ## Features
 
@@ -145,8 +158,13 @@ hdc hilog | grep Mangekyo
 ```
 
 - **`--ps run <test>`**: `cpu_membw`, `cpu_all`, `cpu_per_core`, `cpu_multi`,
-  `stream`, `stream_heavy`, `gpu_burn`, `gpu_burn_medium`, `gpu_burn_heavy`,
+  `stream` (particle, 1M by default), `gpu_burn` (16 steps by default),
   `cinematic_liquid` (fluid), `membw` (VRAM / GPU cache bandwidth).
+- **A GPU test may carry its size**: `--ps run "stream?particles=4194304"`,
+  `--ps run "gpu_burn?steps=128"` (particles are rounded up to 256, steps are
+  16 to 2048). The older names `stream_heavy`, `gpu_burn_medium` and
+  `gpu_burn_heavy` still work. The GPU page offers the same settings, with the
+  presets and defaults of the Windows app.
 - **`--pi seconds <N>`** (optional): seconds per CPU compute test, or the
   length of a GPU run.
 - **Log**: the tag `MangekyoEngine` carries every line the engine prints; the

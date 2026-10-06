@@ -47,7 +47,8 @@ object AutoRun {
             log("AUTORUN refused test=$test reason=release_build")
             return
         }
-        if (test !in cpuModes && test !in gpuTests) {
+        // A GPU test may carry its size: "stream?particles=4194304", "gpu_burn?steps=64".
+        if (test !in cpuModes && test.substringBefore('?') !in gpuTests) {
             log("AUTORUN refused test=$test reason=unknown_test")
             return
         }

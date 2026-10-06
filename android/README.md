@@ -27,6 +27,10 @@
 >   和 CPU 测试一样走引擎的命令行入口；着色器目录通过环境变量 `GPU_BENCH_SHADER_DIR` 告诉引擎。
 > - **粒子和 GPU Burn 的更重档位**：`stream_heavy`（100 万粒子）、`gpu_burn_medium`（64 步）、`gpu_burn_heavy`（256 步）。
 > - **GPU 测试全屏横屏运行**，渲染尺寸固定 1280 × 720。
+> - **显存带宽测试可以中途停止**（只编译通过，这一点没有在模拟器上点过）；被停止的运行不保存成绩。
+> - **测试设置和 Windows 对齐**：GPU 页列出四项测试，选中后可以选粒子数（65K / 1M / 4M / 16M / 自定义）、
+>   GPU Burn 步数（16 / 64 / 256 / 自定义 16–2048）和运行时长（3 / 15 / 60 秒 / 自定义），默认值和 Windows 相同
+>   （1M、16 步、15 秒）。在模拟器上点选并运行过。
 
 ## 已完成（相对脚手架）
 
@@ -100,8 +104,10 @@ adb pull /sdcard/Android/data/com.mangekyo.benchmark/files/results/results.json
 ```
 
 - **`--es run <测试>`：** `cpu_membw`（缓存 / 内存带宽）、`cpu_all`（单核 + 全核）、`cpu_per_core`、`cpu_multi`、
-  `stream`、`stream_heavy`（100 万粒子）、`gpu_burn`、`gpu_burn_medium`（64 步）、`gpu_burn_heavy`（256 步）、
-  `cinematic_liquid`（流体）、`membw`（显存 / GPU 缓存带宽，约 20 秒）。
+  `stream`（粒子，默认 100 万）、`gpu_burn`（默认 16 步）、`cinematic_liquid`（流体）、
+  `membw`（显存 / GPU 缓存带宽，约 20 秒）。
+- **GPU 测试可以带设置：** `--es run "stream?particles=4194304"`、`--es run "gpu_burn?steps=128"`
+  （粒子数向上取整到 256，步数 16–2048）。旧名字 `stream_heavy`、`gpu_burn_medium`、`gpu_burn_heavy` 仍然可用。
   App 打开后自动切到对应页面并开始。
 - **`--ei seconds <N>`（可选）：** CPU 算力测试每项的秒数（默认 1），或 GPU 测试的时长（默认 3）。
 - **logcat 里有什么：**

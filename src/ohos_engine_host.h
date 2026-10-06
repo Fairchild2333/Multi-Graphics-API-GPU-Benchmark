@@ -16,9 +16,10 @@ struct RunRequest {
     NativeWindow* window = nullptr;
     std::string shaderDir;   // SPIR-V files; a trailing slash is added if missing
     std::string dataDir;     // sets GPU_BENCH_DATA_DIR for the results path
-    std::string workloadId;  // "stream" | "gpu_burn" (others are rejected for now)
+    // The test and its size, e.g. "stream?particles=4194304" or "gpu_burn?steps=64";
+    // see embedded_request.h.
+    std::string workloadId;
     double maxRunTimeSec = 3.0;
-    std::uint32_t particleCount = 262144;  // lighter than the desktop 1M, as on Android
 };
 
 // Blocking: constructs VulkanBackend and runs it on the calling thread.

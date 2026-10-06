@@ -22,7 +22,14 @@
 >   和 CPU 测试一样走引擎的命令行入口。
 > - **粒子和 GPU Burn 的更重档位**：`stream_heavy`（100 万粒子）、`gpu_burn_medium`（64 步）、`gpu_burn_heavy`（256 步）。
 > - **GPU 测试全屏横屏运行**，渲染尺寸固定 1280 × 720。
-> - 同样的代码在 Android 模拟器上跑过；鸿蒙这边的 `VK_OHOS_surface`、固定缓冲区尺寸和横屏都没有看过。
+> - 同样的代码在 Android 模拟器上跑过。
+>
+> 2026-10-07 追加（**在 DevEco 的模拟器上实际运行**，未签名的 HAP 可以直接安装）：
+> - **跑通的**：HarmonyOS 5.1.1 手机和三折叠（界面、CPU 测试）、6.1.1 TV（界面、GPU Burn）、7.0 二合一
+>   （界面、CPU 测试、粒子、GPU Burn、悬浮页签）。GPU Burn 的成绩和 Windows、Android 模拟器上同一块显卡的数字一致。
+> - **模拟器的限制**：5.1.1 的镜像没有 Vulkan 驱动，GPU 测试跑不了；6.1.1 和 7.0 的虚拟 GPU 不支持流体需要的纹理格式，
+>   粒子和显存带宽的计时也不可信。车机模拟器（7.0 Beta1）要从登录了账号的 DevEco 里启动。
+> - **没有验证**：真机、车机、手机类型设备上的全屏画面。详见仓库根目录 `HANDOFF.md` 第 10 节。
 
 ## 功能
 
@@ -94,15 +101,18 @@ SPIR-V 着色器打包在 `resources/rawfile/shaders/` 里，App 启动时复制
 
 ## 用 hdc 远程测试
 
-debug 包可以不碰设备就开始一项测试（**只编译通过，没有在设备上试过**）：
+debug 包可以不碰设备就开始一项测试（2026-10-07 在模拟器上试过，真机没有）：
 
 ```bash
 hdc shell aa start -a EntryAbility -b com.mangekyo.benchmark --ps run cpu_membw
 hdc hilog | grep Mangekyo
 ```
 
-- **`--ps run <测试>`**：`cpu_membw`、`cpu_all`、`cpu_per_core`、`cpu_multi`、`stream`、`stream_heavy`、
-  `gpu_burn`、`gpu_burn_medium`、`gpu_burn_heavy`、`cinematic_liquid`（流体）、`membw`（显存 / GPU 缓存带宽）。
+- **`--ps run <测试>`**：`cpu_membw`、`cpu_all`、`cpu_per_core`、`cpu_multi`、`stream`（粒子，默认 100 万）、
+  `gpu_burn`（默认 16 步）、`cinematic_liquid`（流体）、`membw`（显存 / GPU 缓存带宽）。
+- **GPU 测试可以带设置**：`--ps run "stream?particles=4194304"`、`--ps run "gpu_burn?steps=128"`
+  （粒子数向上取整到 256，步数 16–2048）。旧名字 `stream_heavy`、`gpu_burn_medium`、`gpu_burn_heavy` 仍然可用。
+  GPU 页上也可以选同样的设置，预设和默认值与 Windows 版相同。
 - **`--pi seconds <N>`**（可选）：CPU 算力测试每项的秒数，或 GPU 测试的时长。
 - **日志**：标签 `MangekyoEngine` 是引擎打印的每一行；标签 `Mangekyo` 下有
   `AUTORUN accepted / started / refused / failed` 和结束时的 `RUN finished kind=cpu exit=0`。

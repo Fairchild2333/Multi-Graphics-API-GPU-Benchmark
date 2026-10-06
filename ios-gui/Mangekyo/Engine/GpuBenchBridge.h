@@ -20,7 +20,8 @@ void gpb_set_working_dir(const char* dir);
 // particle.metal, gpu_burn.metal and cinematic_liquid_v2.metal (copied from the app bundle).
 void gpb_init_paths(const char* shader_dir, const char* data_dir);
 void gpb_set_metal_layer(void* ca_metal_layer);  // CAMetalLayer* as __bridge void*
-// workload_id: stream, stream_heavy, gpu_burn, gpu_burn_medium, gpu_burn_heavy or cinematic_liquid.
+// workload_id: stream, gpu_burn or cinematic_liquid, with its size where it has one:
+// "stream?particles=4194304", "gpu_burn?steps=64" (src/embedded_request.h).
 bool gpb_start_workload(const char* workload_id, double seconds);
 void gpb_stop_workload(void);   // -> gpu_bench::RequestStop()
 bool gpb_is_running(void);

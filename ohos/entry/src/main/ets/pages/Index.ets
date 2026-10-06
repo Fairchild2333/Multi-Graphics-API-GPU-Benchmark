@@ -49,7 +49,8 @@ struct Index {
         TabContent() {
           CpuPage()
         }
-        .tabBar(tabItem($r('sys.symbol.memory_module'), 'CPU'))
+        // The system symbols have no processor; the nearest one is a memory module.
+        .tabBar(tabImageItem($r('app.media.ic_chip'), 'CPU'))
 
         TabContent() {
           HistoryPage()

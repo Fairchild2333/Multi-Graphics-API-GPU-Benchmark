@@ -39,6 +39,8 @@ export default class EntryAbility extends UIAbility {
     const kitDevices: string[] = ['phone', 'tablet', '2in1'];
     const newShell: boolean = deviceInfo.sdkApiVersion >= 23 && kitDevices.includes(deviceInfo.deviceType) &&
       canIUse('SystemCapability.UIDesign.HDSComponent.Core');
+    logLine(`shell=${newShell ? 'floating' : 'plain'} api=${deviceInfo.sdkApiVersion} device=${deviceInfo.deviceType}` +
+      ` hds=${canIUse('SystemCapability.UIDesign.HDSComponent.Core')}`);
     windowStage.loadContent(newShell ? 'pages/IndexHds' : 'pages/Index', (err) => {
       if (err.code) {
         logLine('loadContent failed: ' + JSON.stringify(err));

@@ -167,7 +167,8 @@ final class BenchEngine: ObservableObject {
     }
 
     /// Starts a GPU test of the embedded host in the attached CAMetalLayer.
-    /// `workload` is one of the ids of `GpuTest.all`.
+    /// `workload` is a test of `GpuTest.all`, with its size where it has one:
+    /// "stream?particles=4194304", "gpu_burn?steps=64".
     @discardableResult
     func startPreview(workload: String, seconds: Double = 3.0) -> Bool {
         guard metalLayer != nil else {
@@ -180,16 +181,18 @@ final class BenchEngine: ObservableObject {
         isRunning = true
         cancelRequested = false
         lastError = ""
+        // The name without the size: the status line and the chart legend show it.
+        let name = workload.split(separator: "?").first.map(String.init) ?? workload
         statusText = Localization.tr(
-            "Running \(workload) preview (\(Int(seconds))s)…",
-            "运行 \(workload) 预览（\(Int(seconds)) 秒）…",
-            "\(workload) プレビュー実行中（\(Int(seconds))秒）…")
+            "Running \(name), \(Int(seconds)) s…",
+            "正在运行 \(name)，\(Int(seconds)) 秒…",
+            "\(name) を実行中（\(Int(seconds)) 秒）…")
         // A new run gets new charts; lines left over from an earlier run are dropped.
         logOutput = ""
         lastScore = ""
         resetRunOutput()
         if let stale = gpb_poll_output() { gpb_free(stale) }
-        appendLine("=== Preview \(workload) \(seconds)s ===")
+        appendLine("=== Preview \(name) \(seconds)s ===")
 
         let ok = gpb_start_workload(workload, seconds)
         if !ok {

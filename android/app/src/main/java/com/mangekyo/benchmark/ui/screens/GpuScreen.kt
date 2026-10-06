@@ -1,6 +1,7 @@
 package com.mangekyo.benchmark.ui.screens
 
 import com.mangekyo.benchmark.core.AutoRun
+import com.mangekyo.benchmark.core.GpuOptions
 import com.mangekyo.benchmark.core.GpuRun
 import com.mangekyo.benchmark.core.formatNumber
 import com.mangekyo.benchmark.core.localizeScoreLine
@@ -38,6 +39,8 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
@@ -51,6 +54,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -84,6 +88,24 @@ fun GpuScreen() {
     var selectedWorkloadId by rememberSaveable {
         mutableStateOf(WorkloadRegistry.gpuWorkloads.firstOrNull()?.id.orEmpty())
     }
+    // The size of the selected test and its duration, as in the desktop app.
+    var particleChoice by rememberSaveable { mutableStateOf(GpuOptions.DEFAULT_PARTICLES) }
+    var customParticles by rememberSaveable { mutableStateOf("") }
+    var stepChoice by rememberSaveable { mutableStateOf(GpuOptions.DEFAULT_STEPS) }
+    var customSteps by rememberSaveable { mutableStateOf("") }
+    var secondChoice by rememberSaveable { mutableStateOf(GpuOptions.DEFAULT_SECONDS) }
+    var customSeconds by rememberSaveable { mutableStateOf("") }
+    val particles = GpuOptions.resolve(particleChoice, customParticles, GpuOptions.particleRange)
+    val steps = GpuOptions.resolve(stepChoice, customSteps, GpuOptions.stepRange)
+    val seconds = GpuOptions.resolve(secondChoice, customSeconds, GpuOptions.secondRange)
+    val optionsValid = when (selectedWorkloadId) {
+        "stream" -> particles != null && seconds != null
+        "gpu_burn" -> steps != null && seconds != null
+        "cinematic_liquid" -> seconds != null
+        else -> true
+    }
+    fun testName(id: String): String =
+        WorkloadRegistry.gpuWorkloads.firstOrNull { it.id == id }?.displayName ?: id
     var selectedBackend by rememberSaveable {
         mutableStateOf(
             when (caps.preferredBackend) {
@@ -101,6 +123,8 @@ fun GpuScreen() {
     var launchFromAdb by remember { mutableStateOf(false) }
     // A test without a picture runs through the command-line entry.
     var commandLineRun by remember { mutableStateOf(false) }
+    // The user stopped that test.
+    var commandLineStopped by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         while (true) {
             running = NativeBridge.isRunning() || (commandLineRun && NativeBridge.isCliRunning())
@@ -110,9 +134,14 @@ fun GpuScreen() {
                 if (GpuRun.active && !running) {
                     NativeBridge.pollOutput().forEach(GpuRun::consume)
                     GpuRun.active = false
-                    statusText = NativeBridge.lastError().ifEmpty { tr("Finished", "已完成") }
+                    statusText = if (commandLineStopped) {
+                        tr("Stopped; nothing was saved", "已停止，没有保存成绩")
+                    } else {
+                        NativeBridge.lastError().ifEmpty { tr("Finished", "已完成") }
+                    }
                     GpuRun.fullscreen = false
                     commandLineRun = false
+                    commandLineStopped = false
                     // Besides the engine's own verdict: a frame rate that sits on
                     // the refresh rate of the display was held there by it.
                     val fps = GpuRun.averageFps
@@ -130,7 +159,7 @@ fun GpuScreen() {
     }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val vulkanOk = selectedBackend == "Vulkan" && caps.vulkanLoaderPresent && NativeBridge.isEngineLoaded
-    val runEnabled = vulkanOk && WorkloadRegistry.gpuWorkloads.any { it.id == selectedWorkloadId }
+    val runEnabled = vulkanOk && optionsValid && WorkloadRegistry.gpuWorkloads.any { it.id == selectedWorkloadId }
 
     fun start(workloadId: String, seconds: Double): Boolean {
         NativeBridge.pollOutput()  // drop lines left over from an earlier run
@@ -140,8 +169,8 @@ fun GpuScreen() {
         if (!ok) GpuRun.active = false
         statusText = if (ok) {
             tr(
-                "Running $workloadId (${seconds.toInt()}s preview)",
-                "正在运行 $workloadId（${seconds.toInt()} 秒预览）",
+                "Running ${testName(selectedWorkloadId)}, ${seconds.toInt()} s",
+                "正在运行 ${testName(selectedWorkloadId)}，${seconds.toInt()} 秒",
             )
         } else {
             NativeBridge.lastError().ifEmpty { tr("Start failed", "启动失败") }
@@ -157,9 +186,13 @@ fun GpuScreen() {
         GpuRun.begin()
         val ok = NativeBridge.startCli(arrayOf("--workload", workloadId, "--api", "vulkan", "--gpu", "0"))
         commandLineRun = ok
+        commandLineStopped = false
         if (!ok) GpuRun.active = false
         statusText = if (ok) {
-            tr("Running $workloadId; this takes a minute or two", "正在运行 $workloadId，需要一两分钟")
+            tr(
+                "Running ${testName(workloadId)}; this takes about a minute, longer on a slow GPU",
+                "正在运行 ${testName(workloadId)}，大约一分钟，GPU 慢的设备更久",
+            )
         } else {
             NativeBridge.lastError().ifEmpty { tr("Start failed", "启动失败") }
         }
@@ -171,14 +204,27 @@ fun GpuScreen() {
     val request = AutoRun.pending
     LaunchedEffect(request) {
         val wanted = request ?: return@LaunchedEffect
-        if (wanted.test !in AutoRun.gpuTests) return@LaunchedEffect
+        if (wanted.test.substringBefore('?') !in AutoRun.gpuTests) return@LaunchedEffect
         AutoRun.pending = null
         if (!caps.vulkanLoaderPresent || !NativeBridge.isEngineLoaded) {
             AutoRun.log("AUTORUN refused test=${wanted.test} reason=vulkan_or_engine_missing")
             return@LaunchedEffect
         }
         selectedBackend = "Vulkan"
-        selectedWorkloadId = wanted.test
+        val asked = GpuOptions.parse(wanted.test)
+        selectedWorkloadId = asked.testId
+        asked.particles?.let { count ->
+            particleChoice = if (GpuOptions.particlePresets.any { it.value == count }) count else GpuOptions.CUSTOM
+            if (particleChoice == GpuOptions.CUSTOM) customParticles = count.toString()
+        }
+        asked.steps?.let { count ->
+            stepChoice = if (GpuOptions.stepPresets.any { it.value == count }) count else GpuOptions.CUSTOM
+            if (stepChoice == GpuOptions.CUSTOM) customSteps = count.toString()
+        }
+        // Without "--ei seconds" a test from adb runs for 3 s.
+        val askedSeconds = if (wanted.seconds > 0) wanted.seconds else 3
+        secondChoice = if (GpuOptions.secondPresets.any { it.value == askedSeconds }) askedSeconds else GpuOptions.CUSTOM
+        if (secondChoice == GpuOptions.CUSTOM) customSeconds = askedSeconds.toString()
         if (wanted.test in WorkloadRegistry.gpuCommandLineTests) {
             val started = startCommandLineTest(wanted.test)
             AutoRun.log(
@@ -188,7 +234,7 @@ fun GpuScreen() {
             return@LaunchedEffect
         }
         launchFromAdb = true
-        launch = wanted.test to (if (wanted.seconds > 0) wanted.seconds.toDouble() else 3.0)
+        launch = wanted.test to askedSeconds.toDouble()
         GpuRun.fullscreen = true
     }
 
@@ -256,13 +302,21 @@ fun GpuScreen() {
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
-                    if (running && commandLineRun) {
-                        // The sweep has no stop; it ends by itself.
-                    } else if (running) {
+                    if (running) {
+                        // A test with a picture ends at once; the sweep ends
+                        // after the point it is measuring.
                         NativeBridge.stopWorkload()
+                        if (commandLineRun) commandLineStopped = true
                         statusText = tr("Stop requested", "已请求停止")
                     } else if (runEnabled) {
-                        requestRun(selectedWorkloadId, 3.0)
+                        requestRun(
+                            GpuOptions.request(
+                                selectedWorkloadId,
+                                particles ?: GpuOptions.DEFAULT_PARTICLES,
+                                steps ?: GpuOptions.DEFAULT_STEPS,
+                            ),
+                            (seconds ?: GpuOptions.DEFAULT_SECONDS).toDouble(),
+                        )
                     }
                 },
                 icon = {
@@ -365,14 +419,20 @@ fun GpuScreen() {
 
                 Text(
                     text = when {
+                        // A custom value outside its range is why "Run" is off;
+                        // that comes before what the last run left here.
+                        !running && vulkanOk && !optionsValid -> tr(
+                            "The custom value is not in its range.",
+                            "自定义的数值不在允许的范围内。",
+                        )
                         statusText.isNotEmpty() -> statusText
                         !vulkanOk -> tr(
                             "Vulkan Run needs API 24+ loader + Surface. GLES path not wired yet.",
                             "运行需要 Android 7.0（API 24）以上的 Vulkan 加载器和可用的预览画面；GL ES 路径还没有接入。",
                         )
                         else -> tr(
-                            "Preview Run: 3s Stream/GPU Burn via gpu_engine. Scores are android_preview — do not mix with Windows.",
-                            "预览运行：粒子测试或 GPU Burn 跑 3 秒。成绩属于 android_preview，不要和 Windows 的成绩放在一起比较。",
+                            "Scores are android_preview; do not mix them with desktop scores.",
+                            "成绩属于 android_preview，不要和桌面版的成绩放在一起比较。",
                         )
                     },
                     style = MaterialTheme.typography.bodySmall,
@@ -384,8 +444,8 @@ fun GpuScreen() {
                     Text(tr("Workloads", "测试项目"), style = MaterialTheme.typography.titleMedium)
                     Text(
                         text = tr(
-                            "Engine writes *_android_preview (3s embed, not desktop 15s) — do not mix with Windows groups.",
-                            "成绩的版本带 _android_preview 后缀（内嵌运行 3 秒，不是桌面版的 15 秒），不要和 Windows 的成绩放在一起比较。",
+                            "A result is saved under the name shown below the test.",
+                            "成绩按测试名下面那一行的名字保存。",
                         ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -422,7 +482,11 @@ fun GpuScreen() {
                         Column(modifier = Modifier.padding(14.dp)) {
                             Text(workload.displayName, style = MaterialTheme.typography.titleMedium)
                             Text(
-                                text = workload.workloadVersion,
+                                text = GpuOptions.savedAs(
+                                    workload.id,
+                                    steps ?: GpuOptions.DEFAULT_STEPS,
+                                    seconds ?: GpuOptions.DEFAULT_SECONDS,
+                                ),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -434,6 +498,62 @@ fun GpuScreen() {
                                     modifier = Modifier.padding(top = 4.dp),
                                 )
                             }
+                        }
+                    }
+                }
+
+                if (selectedWorkloadId != "membw") {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        ),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Text(tr("Settings", "测试设置"), style = MaterialTheme.typography.titleMedium)
+                            if (selectedWorkloadId == "stream") {
+                                PresetChips(
+                                    title = tr("Particles", "粒子数"),
+                                    presets = GpuOptions.particlePresets,
+                                    choice = particleChoice,
+                                    onChoice = { particleChoice = it },
+                                    custom = customParticles,
+                                    onCustom = { customParticles = it },
+                                    customLabel = tr("Custom particles", "自定义粒子数"),
+                                    customHint = tr("multiple of 256", "256 的倍数"),
+                                    valid = particles != null,
+                                    enabled = !running,
+                                )
+                            }
+                            if (selectedWorkloadId == "gpu_burn") {
+                                PresetChips(
+                                    title = tr("GPU Burn steps", "GPU Burn 步数"),
+                                    presets = GpuOptions.stepPresets,
+                                    choice = stepChoice,
+                                    onChoice = { stepChoice = it },
+                                    custom = customSteps,
+                                    onCustom = { customSteps = it },
+                                    customLabel = tr("Custom steps", "自定义步数"),
+                                    customHint = "16–2048",
+                                    valid = steps != null,
+                                    enabled = !running,
+                                )
+                            }
+                            PresetChips(
+                                title = tr("Duration", "运行时长"),
+                                presets = GpuOptions.secondPresets,
+                                choice = secondChoice,
+                                onChoice = { secondChoice = it },
+                                custom = customSeconds,
+                                onCustom = { customSeconds = it },
+                                customLabel = tr("Custom seconds", "自定义秒数"),
+                                customHint = "1–3600",
+                                valid = seconds != null,
+                                enabled = !running,
+                            )
                         }
                     }
                 }
@@ -595,3 +715,54 @@ private fun FullscreenRun(title: String, status: String, onStop: () -> Unit) {
     }
 }
 
+/**
+ * One setting of a test: a row of presets with "Custom…" at its end, and a
+ * number field while that is selected. The same choices as in the desktop app.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun PresetChips(
+    title: String,
+    presets: List<GpuOptions.Preset>,
+    choice: Int,
+    onChoice: (Int) -> Unit,
+    custom: String,
+    onCustom: (String) -> Unit,
+    customLabel: String,
+    customHint: String,
+    valid: Boolean,
+    enabled: Boolean,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(title, style = MaterialTheme.typography.titleSmall)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            presets.forEach { preset ->
+                FilterChip(
+                    selected = choice == preset.value,
+                    onClick = { onChoice(preset.value) },
+                    enabled = enabled,
+                    label = { Text(preset.label) },
+                )
+            }
+            FilterChip(
+                selected = choice == GpuOptions.CUSTOM,
+                onClick = { onChoice(GpuOptions.CUSTOM) },
+                enabled = enabled,
+                label = { Text(tr("Custom…", "自定义…")) },
+            )
+        }
+        if (choice == GpuOptions.CUSTOM) {
+            OutlinedTextField(
+                value = custom,
+                onValueChange = { text -> onCustom(text.filter(Char::isDigit).take(9)) },
+                label = { Text(customLabel) },
+                placeholder = { Text(customHint) },
+                isError = !valid,
+                singleLine = true,
+                enabled = enabled,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}

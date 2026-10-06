@@ -14,9 +14,10 @@ struct RunRequest {
     ANativeWindow* window = nullptr;
     std::string shaderDir;   // trailing slash expected by ReadFileBytes callers
     std::string dataDir;     // sets GPU_BENCH_DATA_DIR for results path
-    std::string workloadId;  // "stream" | "gpu_burn" (others rejected for now)
+    // The test and its size, e.g. "stream?particles=4194304" or "gpu_burn?steps=64";
+    // see embedded_request.h.
+    std::string workloadId;
     double maxRunTimeSec = 3.0;
-    std::uint32_t particleCount = 262144;  // lighter than desktop 1M for first slice
 };
 
 // Blocking: constructs VulkanBackend and runs AppBase::Run on the calling thread.

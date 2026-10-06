@@ -1,5 +1,6 @@
 #include "ohos_engine_host.h"
 
+#include "embedded_request.h"
 #include "gpu_engine.h"
 #include "vulkan_backend.h"
 
@@ -16,15 +17,6 @@ namespace {
 
 std::atomic<bool> g_running{false};
 std::mutex g_runMutex;
-
-Workload ParseWorkload(const std::string& id) {
-    // "<test>_medium" and "<test>_heavy" are the same test with more work per
-    // frame, for devices on which the light one does not keep the GPU busy.
-    if (id == "stream" || id == "particle" || id == "stream_heavy") return Workload::Stream;
-    if (id == "gpu_burn" || id == "gpu_burn_medium" || id == "gpu_burn_heavy") return Workload::GpuBurnV1;
-    if (id == "cinematic_liquid") return Workload::CinematicLiquid;
-    throw std::invalid_argument("unsupported HarmonyOS workload id: " + id);
-}
 
 std::string EnsureTrailingSlash(std::string path) {
     if (path.empty()) return path;
@@ -65,23 +57,13 @@ int RunWorkload(const RunRequest& request, std::string& errorOut) {
 
     try {
         BenchmarkConfig cfg;
-        cfg.workload = ParseWorkload(request.workloadId);
+        // The test and its size, as the desktop command line sets them.
+        ApplyEmbeddedTest(request.workloadId, cfg);
         cfg.maxRunTimeSec = request.maxRunTimeSec > 0.0 ? request.maxRunTimeSec : 3.0;
-        cfg.warmupTimeSec = std::min(0.5, cfg.maxRunTimeSec * 0.2);
-        cfg.particleCount = request.particleCount;
         cfg.renderDocEnabled = false;
         cfg.captureAtSec = -1.0;
         cfg.captureAtFrame = -1;
         cfg.headless = false;
-        if (cfg.workload == Workload::GpuBurnV1) {
-            const bool heavy = request.workloadId == "gpu_burn_heavy";
-            const bool medium = request.workloadId == "gpu_burn_medium";
-            cfg.gpuBurnIter = heavy ? kGpuBurnV3HeavyIter : medium ? kGpuBurnV3MediumIter : kGpuBurnV3LightIter;
-            cfg.difficultyLabel = heavy ? "Heavy" : medium ? "Medium" : "Light";
-        } else if (request.workloadId == "stream_heavy") {
-            cfg.particleCount = 1048576;   // the desktop's Medium: four times the usual number here
-            cfg.difficultyLabel = "Heavy";
-        }
 
         auto app = std::make_unique<VulkanBackend>(
             /*gpuIndex=*/0, EnsureTrailingSlash(request.shaderDir), cfg);

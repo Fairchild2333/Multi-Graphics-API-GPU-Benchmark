@@ -501,4 +501,5 @@ extension Color {
     public static let gray = Color(red: 0, green: 0, blue: 0)
     public static let clear = Color(red: 0, green: 0, blue: 0)
     public static let black = Color(red: 0, green: 0, blue: 0)
+    public static let white = Color(red: 0, green: 0, blue: 0)
 }

@@ -9,6 +9,10 @@ import { deviceInfo } from '@kit.BasicServicesKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { cpuRun, gpuRun } from './EngineOutput';
+import {
+  CUSTOM, DEFAULT_PARTICLES, DEFAULT_SECONDS, DEFAULT_STEPS, gpuRequestId, gpuTestName, isPreset, parseGpuRequest,
+  ParsedRequest, PARTICLE_PRESETS, SECOND_PRESETS, STEP_PRESETS
+} from './GpuOptions';
 import { tr } from './I18n';
 
 const LOG_DOMAIN: number = 0x0000;
@@ -43,6 +47,14 @@ export class AppState {
   @Trace gpuRunning: boolean = false;
   @Trace gpuStatus: string = '';
   @Trace gpuWorkload: string = 'stream';
+  // The size of the selected GPU test and its duration, as in the desktop app:
+  // the value of a preset or CUSTOM, and what is typed for "Custom…".
+  @Trace gpuParticleChoice: number = DEFAULT_PARTICLES;
+  @Trace gpuCustomParticles: string = '';
+  @Trace gpuStepChoice: number = DEFAULT_STEPS;
+  @Trace gpuCustomSteps: string = '';
+  @Trace gpuSecondChoice: number = DEFAULT_SECONDS;
+  @Trace gpuCustomSeconds: string = '';
   @Trace cpuMode: string = 'all';
   /** The tab a command-line request wants to be shown, or -1. */
   @Trace requestedTab: number = -1;
@@ -59,6 +71,8 @@ export class AppState {
   @Trace gpuFullscreen: boolean = false;
   /** True when the tab bar floats over the pages (the shell for HarmonyOS 6.1 and later). */
   @Trace floatingTabs: boolean = false;
+  /** The gap the app keeps below a floating tab bar where the system keeps none. */
+  @Trace floatingBarGap: number = 0;
   filesDir: string = '';
   debuggable: boolean = false;
 
@@ -79,7 +93,7 @@ export class AppState {
 
   /** Room the pages leave at their end for a tab bar that floats over them. */
   get bottomInset(): number {
-    return this.floatingTabs && !this.sideTabs ? 96 : 0;
+    return this.floatingTabs && !this.sideTabs ? 96 + this.floatingBarGap : 0;
   }
 }
 
@@ -105,6 +119,8 @@ export class RunController {
   private pending: PendingRequest | undefined = undefined;
   /** True while a GPU test without a picture runs through the command-line entry. */
   private gpuCommandLine: boolean = false;
+  /** The user stopped that test. */
+  private gpuStopped: boolean = false;
   /** The window of the app, set by EntryAbility; a GPU test turns it to landscape and hides the system bars. */
   mainWindow: window.Window | undefined = undefined;
 
@@ -152,13 +168,37 @@ export class RunController {
       logLine(`AUTORUN refused test=${test} reason=release_build`);
       return;
     }
-    if (!CPU_TEST_MODES.has(test) && GPU_TESTS.indexOf(test) < 0) {
+    if (!CPU_TEST_MODES.has(test) && GPU_TESTS.indexOf(gpuRequestId(test)) < 0) {
       logLine(`AUTORUN refused test=${test} reason=unknown_test`);
       return;
     }
     this.pending = new PendingRequest(test, seconds, true);
     appState.requestedTab = CPU_TEST_MODES.has(test) ? 1 : 0;
     logLine(`AUTORUN accepted test=${test}`);
+  }
+
+  /** The page shows the test and the size a command-line request asks for. */
+  private showRequest(wanted: PendingRequest): void {
+    const asked: ParsedRequest = parseGpuRequest(wanted.test);
+    appState.gpuWorkload = asked.testId;
+    if (asked.particles > 0) {
+      appState.gpuParticleChoice = isPreset(PARTICLE_PRESETS, asked.particles) ? asked.particles : CUSTOM;
+      if (appState.gpuParticleChoice === CUSTOM) {
+        appState.gpuCustomParticles = asked.particles.toString();
+      }
+    }
+    if (asked.steps > 0) {
+      appState.gpuStepChoice = isPreset(STEP_PRESETS, asked.steps) ? asked.steps : CUSTOM;
+      if (appState.gpuStepChoice === CUSTOM) {
+        appState.gpuCustomSteps = asked.steps.toString();
+      }
+    }
+    // Without "--pi seconds" a test from hdc runs for 3 s.
+    const seconds: number = wanted.seconds > 0 ? wanted.seconds : 3;
+    appState.gpuSecondChoice = isPreset(SECOND_PRESETS, seconds) ? seconds : CUSTOM;
+    if (appState.gpuSecondChoice === CUSTOM) {
+      appState.gpuCustomSeconds = seconds.toString();
+    }
   }
 
   get cpuBusy(): boolean {
@@ -192,8 +232,8 @@ export class RunController {
     gpuRun.begin();
     const ok: boolean = bridge.startWorkload(workloadId, seconds);
     if (ok) {
-      appState.gpuStatus = tr(`Running ${workloadId} (${Math.round(seconds)} s preview)`,
-        `正在运行 ${workloadId}（${Math.round(seconds)} 秒预览）`);
+      const name: string = gpuTestName(appState.gpuWorkload);
+      appState.gpuStatus = tr(`Running ${name}, ${Math.round(seconds)} s`, `正在运行 ${name}，${Math.round(seconds)} 秒`);
     } else {
       gpuRun.active = false;
       const error: string = bridge.lastError();
@@ -227,8 +267,11 @@ export class RunController {
     gpuRun.begin();
     const ok: boolean = bridge.startCli(['--workload', workloadId, '--api', 'vulkan', '--gpu', '0']);
     this.gpuCommandLine = ok;
+    this.gpuStopped = false;
     if (ok) {
-      appState.gpuStatus = tr(`Running ${workloadId}; this takes a minute or two`, `正在运行 ${workloadId}，需要一两分钟`);
+      const name: string = gpuTestName(workloadId);
+      appState.gpuStatus = tr(`Running ${name}; this takes about a minute, longer on a slow GPU`,
+        `正在运行 ${name}，大约一分钟，GPU 慢的设备更久`);
     } else {
       gpuRun.active = false;
       const error: string = bridge.lastError();
@@ -239,11 +282,12 @@ export class RunController {
   }
 
   stopGpu(): void {
-    if (this.gpuCommandLine) {
-      return;   // the sweep has no stop; it ends by itself
-    }
     bridge.stopWorkload();
     appState.gpuStatus = tr('Stop requested', '已请求停止');
+    if (this.gpuCommandLine) {
+      this.gpuStopped = true;   // the sweep ends after the point it is measuring
+      return;
+    }
     // Nothing runs yet: give the screen back at once.
     if (!bridge.isRunning()) {
       this.pending = undefined;
@@ -325,9 +369,14 @@ export class RunController {
         gpuRun.active = false;
         appState.resultsRevision++;
         const error: string = bridge.lastError();
-        appState.gpuStatus = error.length > 0 ? error : tr('Done', '完成');
+        if (this.gpuStopped) {
+          appState.gpuStatus = tr('Stopped; nothing was saved', '已停止，没有保存成绩');
+        } else {
+          appState.gpuStatus = error.length > 0 ? error : tr('Done', '完成');
+        }
         logLine('RUN finished kind=gpu score=' + (gpuRun.scoreLine.length > 0 ? gpuRun.scoreLine : 'none') +
-          (error.length > 0 ? ' error=' + error : ''));
+          (this.gpuStopped ? ' stopped' : '') + (error.length > 0 ? ' error=' + error : ''));
+        this.gpuStopped = false;
         this.leaveFullscreen();
         // Besides the engine's own verdict: a frame rate that sits on the
         // refresh rate of the display was held there by it.
@@ -363,7 +412,9 @@ export class RunController {
       return;
     }
     // A GPU test needs the preview surface, which appears a moment after the page: wait up to 10 s.
-    appState.gpuWorkload = wanted.test;
+    if (wanted.fromCommandLine && wanted.attempts === 0) {
+      this.showRequest(wanted);
+    }
     if (GPU_COMMAND_LINE_TESTS.indexOf(wanted.test) >= 0) {
       this.pending = undefined;
       const started: boolean = this.startGpuCommandLine(wanted.test);

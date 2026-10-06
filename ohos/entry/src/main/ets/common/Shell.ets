@@ -5,11 +5,23 @@
 import { SymbolGlyphModifier } from '@kit.ArkUI';
 import { appState, runController } from './RunController';
 
+// The colours of a tab entry are set here. Left to the system, a TV draws the
+// name of the selected entry in a colour that does not show on the page (seen
+// on the HarmonyOS 6.1 TV emulator, 2026-10-07).
+const TAB_LABEL: LabelStyle = {
+  selectedColor: $r('sys.color.font_emphasize'),
+  unselectedColor: $r('sys.color.font_secondary')
+};
+
 /** An entry of the tab bar: a system symbol above (or beside) its name. */
 export function tabItem(symbol: Resource, label: string): BottomTabBarStyle {
-  const icon: TabBarSymbol = new TabBarSymbol();
-  icon.normal = new SymbolGlyphModifier(symbol);
-  return new BottomTabBarStyle(icon, label);
+  // TabBarSymbol is a type only: the system has no such constructor, and
+  // `new TabBarSymbol()` ends the app at launch with a ReferenceError.
+  const icon: TabBarSymbol = {
+    normal: new SymbolGlyphModifier(symbol).fontColor([$r('sys.color.icon_secondary')]),
+    selected: new SymbolGlyphModifier(symbol).fontColor([$r('sys.color.icon_emphasize')])
+  };
+  return new BottomTabBarStyle(icon, label).labelStyle(TAB_LABEL);
 }
 
 /**
@@ -18,7 +30,11 @@ export function tabItem(symbol: Resource, label: string): BottomTabBarStyle {
  * HarmonyOS have no cube.
  */
 export function tabImageItem(image: Resource, label: string): BottomTabBarStyle {
-  return new BottomTabBarStyle(image, label);
+  const colours: TabBarIconStyle = {
+    selectedColor: $r('sys.color.icon_emphasize'),
+    unselectedColor: $r('sys.color.icon_secondary')
+  };
+  return new BottomTabBarStyle(image, label).iconStyle(colours).labelStyle(TAB_LABEL);
 }
 
 /**

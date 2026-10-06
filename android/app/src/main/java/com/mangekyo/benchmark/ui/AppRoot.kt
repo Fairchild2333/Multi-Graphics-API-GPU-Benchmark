@@ -135,7 +135,7 @@ fun AppRoot() {
     LaunchedEffect(request) {
         val route = when {
             request == null -> return@LaunchedEffect
-            request.test in AutoRun.gpuTests -> AppDestination.Gpu.route
+            request.test.substringBefore('?') in AutoRun.gpuTests -> AppDestination.Gpu.route
             else -> AppDestination.Cpu.route
         }
         navController.open(route)

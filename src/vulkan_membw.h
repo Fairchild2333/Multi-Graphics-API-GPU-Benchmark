@@ -10,6 +10,8 @@ namespace gpu_bench {
 // Stable score contract of the memory-bandwidth sweep. It is a separate
 // workload: its results never share a comparison group with `stream`.
 inline constexpr char kMemBwWorkloadId[] = "membw";
+// `MemBwReport::error` of a sweep that RequestStop() ended early.
+inline constexpr char kMemBwStopped[] = "stopped";
 inline constexpr char kMemBwWorkloadVersion[] = "membw_v1";
 
 struct MemBwConfig {

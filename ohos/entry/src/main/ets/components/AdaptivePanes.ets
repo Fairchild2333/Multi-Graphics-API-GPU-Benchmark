@@ -2,9 +2,14 @@
 // above `secondary`; from 840 vp the two stand beside each other and scroll on
 // their own.
 //
-// `primary` is built at the same place in both layouts. What it holds, the
-// preview surface of a running test in particular, therefore survives a fold,
-// a rotation or a resize of the window.
+// `primary` is built at the same place in both layouts. What it holds
+// therefore survives a fold, a rotation or a resize of the window.
+//
+// `result` is what a run produced. It ends the single column; with two columns
+// it stands under `primary`, beside `secondary`, where it shows without
+// scrolling. The component decides this itself: a condition written inside one
+// of the builders a page passes in is not rendered (seen on the HarmonyOS 7.0
+// emulator, 2026-10-07).
 
 import { appState } from '../common/RunController';
 
@@ -19,14 +24,18 @@ export struct AdaptivePanes {
 
   @BuilderParam primary: () => void = this.emptyPane;
   @BuilderParam secondary: () => void = this.emptyPane;
+  @BuilderParam result: () => void = this.emptyPane;
 
   build() {
     Row({ space: appState.twoPane ? 24 : 0 }) {
       Scroll() {
         Column({ space: 12 }) {
           this.primary()
-          if (!appState.twoPane) {
+          if (appState.twoPane) {
+            this.result()
+          } else {
             this.secondary()
+            this.result()
           }
         }
         .alignItems(HorizontalAlign.Start)

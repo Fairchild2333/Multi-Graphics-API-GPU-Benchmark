@@ -148,8 +148,21 @@ void VulkanBackend::CreateInstance() {
     ci.enabledExtensionCount   = static_cast<std::uint32_t>(extensions.size());
     ci.ppEnabledExtensionNames = extensions.data();
 
-    if (vkCreateInstance(&ci, nullptr, &instance_) != VK_SUCCESS)
-        throw std::runtime_error("vkCreateInstance failed");
+    const VkResult created = vkCreateInstance(&ci, nullptr, &instance_);
+    if (created != VK_SUCCESS) {
+        // Say why, and what the loader offers: a device without a Vulkan
+        // driver and one without the surface extension need different answers.
+        std::cout << "[Vulkan] Instance extensions offered (" << availableExtensions.size() << "):";
+        for (const auto& ext : availableExtensions) std::cout << ' ' << ext.extensionName;
+        std::cout << std::endl;
+        const char* reason = created == VK_ERROR_INCOMPATIBLE_DRIVER   ? "no Vulkan driver on this device"
+                           : created == VK_ERROR_EXTENSION_NOT_PRESENT ? "a required instance extension is missing"
+                           : created == VK_ERROR_LAYER_NOT_PRESENT     ? "a requested layer is missing"
+                           : created == VK_ERROR_INITIALIZATION_FAILED ? "initialisation failed"
+                                                                       : "unexpected error";
+        throw std::runtime_error(std::string("vkCreateInstance failed: ") + reason + " (VkResult " +
+                                 std::to_string(static_cast<int>(created)) + ")");
+    }
 
     LoadDebugUtilsFunctions();
 }

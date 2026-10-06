@@ -47,6 +47,11 @@ Intended path: in-process `gpu_engine` via Objective-C++ bridge + embedded Metal
 >   delegate that returns the allowed orientations, and `requestGeometryUpdate`).
 > - **iOS 16**: `MangekyoApp` used the form of `onChange(of:)` that needs iOS 17; fixed.
 > - **No VRAM bandwidth test here**: that test exists for Vulkan only.
+> - **Settings as in the Windows app**: three tests (particle, GPU Burn, fluid); the
+>   selected one takes a particle count (65K, 1M, 4M, 16M or custom), GPU Burn steps (16,
+>   64, 256 or custom 16 to 2048) and a duration (3, 15, 60 s or custom). The host reads
+>   the size from the name of the test, e.g. `stream?particles=4194304`
+>   (`src/embedded_request.h`).
 > - **Checked**: `RunView.swift` and `BenchEngine.swift` pass the Swift 6 type-check.
 >   `MetalBenchView.swift`, `ScreenOrientation.swift`, `MangekyoApp.swift`,
 >   `src/ios_engine_host.cpp` and the Metal backend were not checked by any tool.

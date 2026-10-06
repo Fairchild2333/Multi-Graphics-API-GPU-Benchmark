@@ -643,7 +643,8 @@ PathService 已把 results/captures/reports/logs 改到
 - [x] **2026-10-06 Android 和 HarmonyOS 的大屏、折叠屏和新界面（只写了代码）**：两端都按窗口宽度切换布局（侧边导航、两栏、网格），预览画面固定 16:9；Android 用上 Material 3 Expressive 的导航组件，HarmonyOS 6.1 以上用悬浮页签。两端都能编译；按用户要求没有在模拟器或设备上运行，界面没有看过。见第 10 节验证记录。
 - [x] **2026-10-07 Android 在模拟器上跑通**：Android 17（API 37，x86_64）和 Android 7.0（API 24，x86）两个模拟器。修了三个只有运行才能发现的问题（GPU 测试一启动就崩溃、预览画面被盖住、Android 7 上第一条成绩的编号用了 UTC）。布局、折叠时不重建、adb 入口、成绩里的机器信息都看过了。见第 10 节验证记录。模拟器里的数字不是成绩。
 - [x] **2026-10-07 各平台对齐**：流体和显存带宽测试接入 Android 和 HarmonyOS；iOS 运行页改成和它们相同的测试列表加全屏运行；"帧率被刷新率限制"的判定扩到 DX12、DX11、OpenGL，Windows 界面显示提示。Android 在模拟器上跑过，HarmonyOS 只编译，iOS 只做过类型检查。详见第 10 节。
-- [ ] **HarmonyOS 在模拟器上看一遍**：用户已装好 Phone、TripleFold、2in1 Foldable、TV、Car 五个模拟器，还没有启动过。要看的项目列在第 10 节"大屏、折叠屏和新界面"那条记录的"未验证"里。工程还没有签名配置。Android 上发现的 Vulkan 崩溃在鸿蒙上走的是同一段代码，已经一起修了，但没有在鸿蒙上验证。
+- [x] **2026-10-07 HarmonyOS 在模拟器上跑通**：手机、三折叠、TV、二合一四个模拟器；修了启动崩溃、TV 上的选中颜色、显存带宽不能停止等问题，见第 10 节。车机模拟器要用户从 DevEco 启动。
+- [ ] **HarmonyOS 还没看的**：车机模拟器（`Huawei_Car`，7.0 Beta1）要用户从登录了账号的 DevEco 设备管理器里启动，命令行启动缺授权文件；手机类型设备上的全屏横屏画面（两个 5.1.1 的手机模拟器没有 Vulkan 驱动）；6.1 以上手机上的悬浮页签；TV 遥控器的焦点操作；真机。
 - [ ] **Android 真机**：模拟器验证不了的有芯片名（模拟器报的是 `AOSP ranchu`）、大小核、温控，以及带宽类测试的数字。
 - [x] **2026-10-06 成绩文件的前后兼容**：重写了 `results.json` 的读写。读更新版本的文件时保留不认识的字段；保存改为先写临时文件再替换；读不全的文件在重写前留副本。用三个旧版本的程序和这台机器上的 55 个真实成绩文件验证过。规则见 §1 第 8 条和 §3.9，记录见第 10 节。
 - [x] **2026-10-06 成绩里记录机器信息**：每条成绩新增机型（`deviceModel`）和内存（`systemMemoryMB`）；Android 和 HarmonyOS 的系统版本改记系统发行版本，Android 的芯片名取系统属性；移动端和 Apple 端的历史页显示这一行。Windows 和 Linux 容器实际运行过；Android、HarmonyOS、iOS、macOS 只编译或类型检查过，读到的文字没有在设备上核对。见第 10 节验证记录。
@@ -711,6 +712,92 @@ PathService 已把 results/captures/reports/logs 改到
 5. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Collaboration；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
 
 ## 10. 验证记录
+
+### 2026-10-07 移动端 GPU 测试的设置项和 Windows 对齐
+
+- **起因：** 用户指出安卓和鸿蒙的测试列表不能细调，要和 Windows 一样。原来的做法是把"粒子 26 万 / 100 万""GPU Burn 16 / 64 / 256 步"列成七个固定项，时长固定 3 秒。
+- **现在（Android、HarmonyOS、iOS 相同）：**
+  - 测试列表是四项，名字和 Windows 一致：粒子 —— 内存吞吐、等离子晶核 × 万花镜 —— GPU Burn、流体 —— 互动水池、显存带宽 —— 显存 / 缓存（iOS 没有最后一项）。
+  - 选中的测试下面是"测试设置"，预设、名字和范围都照 Windows：
+    - **粒子数**：轻量 65K、中等 1M、重载 4M、极限 16M、自定义（256 的倍数，上限 67,108,864）。默认中等 1M。
+    - **GPU Burn 步数**：轻量 16、中等 64、重载 256、自定义（16–2048）。默认轻量 16。
+    - **运行时长**：3 秒、15 秒、60 秒、自定义（1–3600 秒）。默认 15 秒，和 Windows 一样。显存带宽没有时长。
+  - 每项测试下面那行保存名随设置变化，例如 128 步是 `gpu_burn_v3_fixed_steps_128_kaleidoscope_android_preview`；流体跑满 15 秒是 `cinematic_liquid_v2_physical_scene_v8_android_preview`，其他时长带 `_preview`。
+  - **没有搬过来的 Windows 选项：** Headless、系统内存、多 GPU、RenderDoc、抓帧，移动端宿主没有对应的实现；垂直同步也没有加（移动端的显示方式由系统决定，见下面刷新率那条记录）。
+- **引擎：**
+  - 三个移动宿主共用 `src/embedded_request.h`。测试名可以带设置：`stream?particles=4194304`、`gpu_burn?steps=64`。旧名字 `stream_heavy`、`gpu_burn_medium`、`gpu_burn_heavy` 仍然可用。
+  - 设置按桌面命令行的做法落到配置里：粒子数向上取整到 256，标签是 Light / Medium / Heavy / Extreme / Custom；GPU Burn 的步数夹在 16–2048，粒子缓冲取最小值，标签是 `GPU Burn v3 / Selectable fixed steps`；流体的通用粒子缓冲取最小值，`framesInFlight = 1`，标签是 `Cinematic Liquid v2`。
+  - **预热改为引擎自己的规则**（2 秒，短于 8 秒的运行取时长的四分之一），和桌面一样。原来移动端固定最多 0.5 秒。所以手机上 15 秒的运行现在是 2 秒预热加 13 秒测量。
+  - **不带设置的 `stream` 现在是 1,048,576 个粒子**（原来是 262,144），和 Windows 的默认值一致。之前的移动端成绩都来自模拟器，没有需要保留可比性的真机成绩。
+  - adb / hdc 的启动参数也可以带设置：`--es run "gpu_burn?steps=128"`。不带 `seconds` 时仍然跑 3 秒。页面会显示这次请求的测试和设置。
+- **HarmonyOS 的其他改动（用户指出的）：**
+  - **CPU 页签的图标**原来是内存条（系统符号里没有处理器，用了最接近的 `memory_module`），现在是自己画的芯片（`ic_chip.svg`）。
+  - **悬浮页签离窗口底边太近。** 手机上系统在底部留有导航条的区域，页签自然离开边缘；二合一设备的自由窗口没有这块区域，页签贴在边上。现在窗口底部没有系统保留区域时加 16 vp 的间距（`barBottomMargin`）。
+  - **二合一设备上的说明文字**改为"在窗口内运行"：测试画面显示在 App 的窗口里，和 Windows、macOS 一样不强制全屏。行为本身没有变。
+  - 自定义数值不在范围内时，"运行"按钮不可用，旁边的文字说明原因。
+- **验证（Android 17 模拟器，实际运行）：**
+  - 界面上选"重载 4M + 3 秒"运行：引擎报告 4,194,304 个粒子（Heavy），工作集 128 MiB，预热 0.75 秒；成绩里的粒子数和标签正确。
+  - adb 带设置的 GPU Burn 128 步：181.50 Gpix-step/s，保存名带 `128`；页面切到 GPU Burn、自定义 128、3 秒。
+  - 流体 15 秒：预热 2.0 秒、测量 13.0 秒，保存为 `cinematic_liquid_v2_physical_scene_v8_android_preview`，通用粒子缓冲 256。
+- **验证（HarmonyOS 7.0 二合一模拟器，实际运行）：**
+  - 界面上选 GPU Burn、中等 64、3 秒运行：173.55 Gpix-step/s。
+  - hdc 带设置的 128 步：185.31；再在界面上按"运行"（用页面上显示的自定义 128）：185.63。Android 模拟器同一块显卡是 181.50。
+  - hdc 带设置的粒子 65,536：引擎报告 Light。
+  - 芯片图标、"在窗口内运行"的文字、悬浮页签的底边距都在截图里看过。
+  - **没有验证：在自定义输入框里打字。** 模拟器的系统输入法（小艺键盘）第一次使用时弹出隐私协议，同意与否应由用户决定，所以选了取消并退出。自定义数值是通过 hdc 请求带进页面的。
+  - 输入法窗口关闭的那一刻正在启动的一次运行失败了（`vkAcquireNextImageKHR failed`），界面显示了错误，没有崩溃；之后的运行正常。没有再追。
+- **验证（Windows）：** 引擎重新编译，`ctest` 通过。这轮没有改桌面的行为。
+- **只做过类型检查：** iOS 运行页的同样改动（`scripts/check-apple.ps1` 通过）。iOS 宿主的 C++ 改动和另外两个宿主是同一份代码，但没有为 iOS 编译过。
+- **回答用户的两个问题：**
+  - **粒子和流体在鸿蒙上能不能跑：** 粒子在 6.1.1 和 7.0 的模拟器上能跑。流体在模拟器上不能：虚拟 GPU 不报告 `R32_SFLOAT` 既可采样又可作存储图像，而这是 Vulkan 规范要求每个实现都支持的，所以符合规范的真机驱动应该没有这个问题，但没有真机，没有验证。Android 模拟器上流体能跑。
+  - **鸿蒙 5 上：** 5.1.1 的模拟器镜像没有 Vulkan 驱动，任何 GPU 测试都跑不了，只能跑 CPU 测试。真机是否有驱动要上真机才知道。App 的最低版本是 HarmonyOS 5.0.0(12)，代码上没有排除它。
+  - **手机形态为什么没有悬浮页签：** 这个页签是 HarmonyOS 6.1（API 23）才有的系统组件（SDK 里 `HdsTabsFloatingStyle` 标注 `@since 6.1.0(23)`）。装的两个手机类模拟器都是 5.1.1，所以走普通页签。6.1 以上的手机会显示，但没有这样的模拟器，没有看过。
+
+### 2026-10-07 HarmonyOS 在模拟器上实际运行
+
+- **环境：** DevEco Studio 26.0 的模拟器，宿主是这台 Windows 工作站（RTX 5090，Ryzen 7 9800X3D）。这是鸿蒙版第一次真正运行。未签名的 HAP 可以直接装进模拟器，不需要签名。
+- **怎么从命令行启动：** `Emulator.exe -hvd <名字> -path %LOCALAPPDATA%\Huawei\Emulator\deployed -imageRoot %LOCALAPPDATA%\Huawei\Sdk`（`Emulator.exe` 在 DevEco 的 `tools\emulator` 下），停止用 `Emulator.exe -stop <名字>`。一次只能开一个，都占 `127.0.0.1:5555`。`aa force-stop` 之后要等两秒再 `aa start`，否则启动请求被系统接受后丢掉，没有窗口也没有日志。
+- **四个模拟器的结果：**
+
+  | 模拟器 | 系统 | 界面 | CPU 测试 | GPU 测试 |
+  |---|---|---|---|---|
+  | `Huawei_Phone` | 5.1.1（API 19） | 四个页面正常 | 算力、缓存 / 内存 / 存储都跑通 | **跑不了**：系统有 Vulkan 加载器但没有驱动（`VK_ERROR_INCOMPATIBLE_DRIVER`） |
+  | `Huawei_TripleFold` | 5.1.1（API 19） | 折叠是手机布局，展开是侧边导航加两栏 | 跑通 | 同上，没有驱动 |
+  | `Huawei_TV` | 6.1.1（API 24） | 4K 全屏，侧边导航加两栏 | 没有单独测 | GPU Burn 跑通，画面铺满整个屏幕 |
+  | `Huawei_2in1_Foldable` | 7.0（API 26） | 窗口化，可以拖动改变大小 | 跑通 | 粒子、GPU Burn 三档跑通；流体和显存带宽见下 |
+
+- **`Huawei_Car`（7.0 Beta1）没有启动：** 日志是 `can not read uuid file` / `can not read sn`。它的镜像标着 `os.isPublic=false`，要由登录了账号的 DevEco 启动；命令行启动缺这份授权文件。需要用户在 DevEco 的设备管理器里启动它。
+- **运行后发现并修掉的问题：**
+  - **一启动就崩溃（所有系统）。** `ReferenceError: TabBarSymbol is not defined`。`TabBarSymbol` 在 SDK 里声明成类，但系统里没有这个构造函数，`new TabBarSymbol()` 编译能过、运行就崩。改成对象字面量（`common/Shell.ets`）。**鸿蒙版在这之前从来没有能启动过。**
+  - **TV 上选中的页签文字看不见、选中的测试项几乎没有高亮。** 系统默认的"选中"颜色在 TV 上是很浅的灰色。页签的图标和文字、选中的测试项改用明确的品牌色（`icon_emphasize`、`font_emphasize`、`comp_background_emphasize`、`font_on_primary`）。
+  - **显存带宽测试不能中途停止。** 在 7.0 模拟器上每个数据点要 5–37 秒，一共 119 个点，而页面上的"停止"对它不起作用。引擎现在在每个数据点之前检查 `StopRequested()`，被停止的扫描不保存成绩；Android 和 HarmonyOS 的"停止"按钮都接上了。入口会先清掉上一次测试留下的停止请求。桌面版不受影响（Windows 界面是结束子进程）。
+  - **两栏布局下"最近一次运行"在测试列表下面，要滚动才看得到。** `AdaptivePanes` 加了第三个位置 `result`：两栏时放在"运行"按钮下面，单栏时放在最后。
+  - **`vkCreateInstance failed` 没有说原因。** 现在带上原因和 `VkResult`，并打印加载器提供的实例扩展。5.1.1 模拟器上就是靠这个确认"有加载器、没有驱动"。
+- **顺带知道的：** 我第一次改两栏布局时，把条件判断写在了页面传给 `AdaptivePanes` 的构建函数里，结果两边都不渲染。条件要由接收的组件自己判断。
+- **数字对得上的地方（同一块 RTX 5090）：**
+
+  | GPU Burn | Windows | Android 模拟器 | HarmonyOS 7.0 模拟器 | HarmonyOS 6.1.1 TV 模拟器（4K 屏） |
+  |---|---|---|---|---|
+  | 16 步，Gpix-step/s | 131.12 | 128.27 | 128.80 | 128.82 |
+  | 每帧渲染，ms | 0.225 | 0.230 | 0.229 | 0.229 |
+  | 256 步，Gpix-step/s | 没有测 | 187.5 | 190.59 | 没有测 |
+
+  - 这说明鸿蒙上固定 1280 × 720 渲染生效了（`SET_BUFFER_GEOMETRY`），分数不随屏幕分辨率变化。
+  - 7.0 模拟器上 16 步连跑 8 次，128.56–128.85，相差 0.2%。
+- **模拟器里不可信的数字：**
+  - 粒子测试：计算 8.6 ms，1.22 GB/s（Android 模拟器上同一块卡是 0.007 ms）。
+  - 显存带宽：一次读 64 GiB 的调度报 0.009 ms，折合 770 万 GB/s，物理上不可能。虚拟 GPU 的计算时间戳两个方向都会错。
+  - 流体：引擎拒绝运行，`Cinematic Liquid v2 requires sampled+storage R32_SFLOAT 3D images`，虚拟 GPU 不报告这项能力。界面显示了原因，没有崩溃。
+  - CPU 带宽各级缓存几乎一样快（7–14 GB/s），和 Android 模拟器上的现象相同。
+- **看过并且正常的：**
+  - 四个页面、中文和英文（模拟器两次启动系统语言不一样，两种都看到了）、立方体图标。
+  - hdc 入口：`cpu_all`、`cpu_multi`、`cpu_membw`、`stream`、`gpu_burn`、`gpu_burn_heavy`、`cinematic_liquid`、`membw` 都能自动开始，hilog 里有 `AUTORUN accepted / started` 和 `RUN finished`。
+  - 绑核被系统允许（`strict_sched_affinity`），缓存容量读得到（L1 48 KiB、L2 1 MiB、L3 96 MiB，是宿主 CPU 的），存储测试用直接读写跑通。
+  - 成绩文件：`platform = HarmonyOS`、`osVersion = HarmonyOS 5.1.0 (API 19)` / `HarmonyOS 7.0.0 (API 26)`、`deviceModel = HUAWEI emulator`、`cpuName` 来自 `/proc/cpuinfo`、`systemMemoryMB = 3933`（设备的 `MemTotal` 是 4027396 kB）。失败和被停止的运行没有留下成绩。
+  - **GPU 测试的画面：** TV 上铺满 4K 屏幕；二合一设备不能强制全屏和横屏，画面显示在 App 自己的窗口里，16:9，不变形。5.1.1 手机上 Vulkan 不可用，全屏只看到了进入和退出，没有看到画面。
+  - **新外壳（悬浮页签）：** 7.0 的二合一模拟器上加载的是 `IndexHds`（日志 `shell=floating api=26 device=2in1 hds=true`）。窗口宽的时候是侧边导航；把窗口拖窄到 600 vp 以下，页签变成悬浮在内容上方的胶囊，内容从它下面滚过。拖动过程中 App 没有重启。TV 按设备类型走普通外壳（`shell=plain api=24 device=tv`）。
+  - **三折叠：** 用户在模拟器上手动切换了折叠状态（屏幕宽度 3184 → 2048 → 1008 → 3184），App 进程没有变，测试结果保留，布局跟着切换。用命令切换不行（`hidumper -s DisplayManagerService -a -p / -z / -y` 在模拟器上不改变屏幕）。
+- **没有验证的：** 车机；真机（芯片名、大小核、温控、真实的 GPU 数字）；手机类型设备上的全屏横屏画面（两个手机模拟器都没有 Vulkan 驱动）；HarmonyOS 6.1 以上手机上的悬浮页签（没有这样的模拟器，只在二合一上看过）；TV 上用遥控器焦点操作。
 
 ### 2026-10-07 各平台对齐：移动端流体和显存带宽、iOS 运行页、刷新率判定
 

@@ -1477,7 +1477,13 @@ static int RunMemoryBandwidthCli(const std::vector<GpuInfo>& gpus,
     config.physicalDeviceIndex = gpu.vkPhysDevIndex;
     config.shaderDir = shaderDir;
 
+    // A stop asked for during an earlier test must not end this one.
+    gpu_bench::ClearStopRequest();
     const auto report = gpu_bench::RunVulkanMemoryBandwidth(config, std::cout);
+    if (!report.valid && report.error == gpu_bench::kMemBwStopped) {
+        std::cout << "Memory bandwidth sweep stopped; nothing was saved.\n";
+        return 1;
+    }
     if (!report.valid) {
         std::cerr << "Memory bandwidth sweep failed: "
                   << (report.error.empty() ? "no valid read result" : report.error) << "\n";

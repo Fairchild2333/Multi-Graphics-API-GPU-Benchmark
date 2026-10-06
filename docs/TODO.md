@@ -201,7 +201,8 @@
 - [ ] **6. WebGPU**：按既定路线——capability registry P0 → 固定 Dawn 版本原生后端（Stream → GPU Burn → Cinematic Liquid）→ `/web` 浏览器前端；独立版本 id（`stream_webgpu_v1` 等），无可靠 timestamp 不产生正式 score（对应上方“原生 WebGPU 后端”与 `/web` 两条任务）。
 - [ ] **7. HarmonyOS PC / 鸿蒙**：把 `ohos/` 升级为正式产品端口。
   - [x] **接入共享引擎（2026-10-06）**：原来的独立粒子演示已换成和安卓版对齐的 App（粒子测试、GPU Burn、CPU 算力测试、缓存 / 内存带宽扫描、历史、图表、中英文界面）。`scripts\build-ohos.ps1` 用 DevEco Studio 26.0 的工具链编出未签名的 HAP。**没有运行过。**
-  - [ ] **上机验证**：
+  - [x] **模拟器（2026-10-07）**：手机、三折叠、TV、二合一四个模拟器上实际运行，修了启动崩溃等问题；5.1.1 的模拟器没有 Vulkan 驱动，GPU 测试只在 6.1.1 和 7.0 上跑过。见 HANDOFF 第 10 节。
+  - [ ] **上机验证**（真机和车机仍然没有做）：
     - **用户要做的：** 在 DevEco Studio 里登录华为账号并生成自动签名；连接鸿蒙设备（打开开发者模式和 USB 调试），或者在 Device Manager 里下载模拟器镜像。
     - **要确认的：** 界面显示和图表；Vulkan 能否创建 `VK_OHOS_surface`；应用沙箱是否允许绑核（`sched_setaffinity`）和读取缓存容量；`hdc` 启动参数和 hilog 输出；成绩里的机型、系统版本和内存是否正确，芯片名能否从 `/proc/cpuinfo` 读到（系统没有提供芯片名的接口）。
   - [x] **流体和显存 / GPU 缓存带宽（2026-10-07）**：和 Android 一起接入，只编译通过，没有运行过。

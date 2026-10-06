@@ -6,6 +6,7 @@
 // EntryAbility loads this page only where the kit and the floating style
 // exist. Nothing else imports it, so an older system never loads the kit.
 
+import { window } from '@kit.ArkUI';
 import { hdsMaterial, HdsTabs, HdsTabsController } from '@kit.UIDesignKit';
 import { tr } from '../common/I18n';
 import { appState, runController } from '../common/RunController';
@@ -24,7 +25,24 @@ struct IndexHds {
 
   aboutToAppear(): void {
     appState.floatingTabs = true;
+    appState.floatingBarGap = this.systemKeepsBottomArea() ? 0 : 16;
     this.timer = startShellTimer(this.tabs);
+  }
+
+  /**
+   * True where the system keeps an area at the bottom of the window for
+   * itself, as a phone does for its navigation bar. The floating bar then
+   * stands clear of the edge already; in a free window of a two-in-one it
+   * would sit right on it.
+   */
+  private systemKeepsBottomArea(): boolean {
+    try {
+      const area: window.AvoidArea | undefined =
+        runController.mainWindow?.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
+      return area !== undefined && area.bottomRect.height > 0;
+    } catch (e) {
+      return false;
+    }
   }
 
   aboutToDisappear(): void {
@@ -51,7 +69,8 @@ struct IndexHds {
         TabContent() {
           CpuPage()
         }
-        .tabBar(tabItem($r('sys.symbol.memory_module'), 'CPU'))
+        // The system symbols have no processor; the nearest one is a memory module.
+        .tabBar(tabImageItem($r('app.media.ic_chip'), 'CPU'))
 
         TabContent() {
           HistoryPage()
@@ -68,7 +87,8 @@ struct IndexHds {
       // end (AppState.bottomInset).
       .barOverlap(!appState.sideTabs)
       .barFloatingStyle(appState.sideTabs ? undefined : {
-        systemMaterialEffect: { materialType: hdsMaterial.MaterialType.ADAPTIVE }
+        systemMaterialEffect: { materialType: hdsMaterial.MaterialType.ADAPTIVE },
+        barBottomMargin: appState.floatingBarGap
       })
       .width('100%')
       .height('100%')
