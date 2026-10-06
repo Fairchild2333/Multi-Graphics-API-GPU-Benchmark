@@ -1,36 +1,58 @@
-import { hilog } from '@kit.PerformanceAnalysisKit';
+// The app shell: GPU, CPU, History and Charts, the same four pages as the
+// other front ends.
 
-const TAG = 'GpuBench';
+import { tr } from '../common/I18n';
+import { appState, runController } from '../common/RunController';
+import { ChartsPage } from './ChartsPage';
+import { CpuPage } from './CpuPage';
+import { GpuPage } from './GpuPage';
+import { HistoryPage } from './HistoryPage';
 
 @Entry
-@Component
+@ComponentV2
 struct Index {
-  private xComponentController: XComponentController = new XComponentController();
+  private tabs: TabsController = new TabsController();
+  private timer: number = -1;
+
+  aboutToAppear(): void {
+    // Collect engine output and finished runs a few times a second.
+    this.timer = setInterval(() => {
+      runController.tick();
+      if (appState.requestedTab >= 0) {
+        this.tabs.changeIndex(appState.requestedTab);
+        appState.requestedTab = -1;
+      }
+    }, 200);
+  }
+
+  aboutToDisappear(): void {
+    clearInterval(this.timer);
+  }
 
   build() {
-    Stack() {
-      XComponent({
-        id: 'vulkan_surface',
-        type: XComponentType.SURFACE,
-        libraryname: 'gpubench',
-        controller: this.xComponentController
-      })
-        .onLoad(() => {
-          hilog.info(0x0000, TAG, 'XComponent onLoad — native surface created');
-        })
-        .onDestroy(() => {
-          hilog.info(0x0000, TAG, 'XComponent onDestroy — native surface destroyed');
-        })
-        .width('100%')
-        .height('100%')
+    Tabs({ barPosition: BarPosition.End, controller: this.tabs }) {
+      TabContent() {
+        GpuPage()
+      }
+      .tabBar('GPU')
 
-      Text('Mangekyo — Cross-API CPU & GPU Benchmark Suite')
-        .fontSize(16)
-        .fontColor('#88FFFFFF')
-        .position({ x: 16, y: 16 })
+      TabContent() {
+        CpuPage()
+      }
+      .tabBar('CPU')
+
+      TabContent() {
+        HistoryPage()
+      }
+      .tabBar(tr('History', '历史'))
+
+      TabContent() {
+        ChartsPage()
+      }
+      .tabBar(tr('Charts', '图表'))
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#0A1424')
+    .backgroundColor($r('sys.color.ohos_id_color_background'))
   }
 }

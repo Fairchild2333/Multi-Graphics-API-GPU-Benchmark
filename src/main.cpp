@@ -256,6 +256,8 @@ static gpu_bench::BenchmarkResult MakeStoredCpuMemBwResult(
 #if defined(__ANDROID__)
     stored.workloadVersion =
         std::string(gpu_bench::kCpuMemBwWorkloadVersion) + "_android_preview";
+#elif defined(__OHOS__)
+    stored.workloadVersion = std::string(gpu_bench::kCpuMemBwWorkloadVersion) + "_ohos_preview";
 #elif defined(__APPLE__) && TARGET_OS_IPHONE
     stored.workloadVersion = std::string(gpu_bench::kCpuMemBwWorkloadVersion) + "_ios_preview";
 #endif

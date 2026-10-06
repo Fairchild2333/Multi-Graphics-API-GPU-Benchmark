@@ -7,6 +7,8 @@
 #if defined(GPU_BENCH_NO_GLFW)
 #if defined(__ANDROID__)
 #define VK_USE_PLATFORM_ANDROID_KHR
+#elif defined(__OHOS__)
+#define VK_USE_PLATFORM_OHOS
 #endif
 #include <vulkan/vulkan.h>
 #else

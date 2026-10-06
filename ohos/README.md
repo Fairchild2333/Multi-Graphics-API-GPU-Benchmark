@@ -1,142 +1,125 @@
-# Mangekyo — HarmonyOS (OHOS) Vulkan Build
+# Mangekyo — HarmonyOS app
 
-[中文](README.zh-CN.md)
+[简体中文](README.zh-CN.md)
 
-This directory contains the HarmonyOS application that runs the same Vulkan
-particle simulation as the Windows/Linux build, using HarmonyOS native APIs.
+The HarmonyOS app: ArkTS pages on top of the `gpu_engine` shared with every
+other platform. Vulkan draws into the window of an XComponent; the CPU tests
+call the engine's command-line entry point.
+
+> Status (2026-10-06, fact layers):
+> - **Code written**: four pages (GPU, CPU, History, Charts), the NAPI bridge
+>   and the engine's HarmonyOS host (`src/ohos_engine_host.*`).
+> - **Builds**: an unsigned HAP (`arm64-v8a` and `x86_64`, about 6 MB) from the
+>   command line on Windows, with the tools of DevEco Studio 26.0. The ArkTS
+>   compiler reports no errors or warnings.
+> - **Never run**: no HarmonyOS device is connected, no emulator image is
+>   installed and no signing configuration exists. How it looks, whether
+>   Vulkan works, whether the system lets the app bind threads to cores and
+>   whether the charts are right has not been checked.
+> - **Score identity**: the GPU tests save `stream_v1_ohos_preview` and
+>   `gpu_burn_v3_fixed_steps_16_kaleidoscope_ohos_preview`; the cache and
+>   memory sweep saves `cpu_membw_v1_ohos_preview`. Runs take 3 s, not the 15 s
+>   of the desktop version; do not mix them with desktop scores.
+> - **Not done**: the fluid test, frame capture, a formal mobile duration
+>   contract, signing and release packages, cancelling a CPU test.
+
+## Features
+
+| Page | Content |
+|---|---|
+| **GPU** | Preview surface; Particle and GPU Burn (16 fixed steps), 3 s each; the score and a chart of the GPU time per frame after a run |
+| **CPU** | Compute test (single-core, all-core, both; 1 s or 15 s) and the cache and memory sweep; level tables, log-log curves, storage bars, one bar per logical processor |
+| **History** | Every saved result; clear all |
+| **Charts** | One bar chart per test: the best score of every device under the newest version of the test |
+
+The interface is in English and Chinese and follows the system language.
 
 ## Architecture
 
 ```text
-ArkTS Entry (Index.ets)
-  └── XComponent (type: SURFACE)
-        └── NAPI Module (libgpubench.so)
-              ├── napi_init.cpp       — XComponent lifecycle callbacks
-              └── vulkan_renderer.cpp — Vulkan compute + graphics pipeline
-                    └── vkCreateSurfaceOHOS() from OHNativeWindow
+ArkTS (entry/src/main/ets)
+  pages/        Index (four tabs), GpuPage, CpuPage, HistoryPage, ChartsPage
+  components/   Card, Charts (line, column and bar charts on a Canvas)
+  common/       RunController (starts tests, collects output), EngineOutput
+                (parses engine output), ResultsStore (reads results.json),
+                I18n, Format
+        |  import bridge from 'libmangekyo.so'
+        v
+NAPI (entry/src/main/cpp/napi_init.cpp -> libmangekyo.so)
+  - XComponent callbacks: receive the OHNativeWindow
+  - startWorkload / stopWorkload: GPU tests, drawn into the preview surface
+  - startCli: CPU tests, the engine's command line on a native thread
+  - pollOutput: every line the engine prints (also sent to hilog, tag
+    MangekyoEngine)
+        v
+gpu_engine (the root CMake project, OHOS branch)
+  - src/ohos_engine_host.cpp -> VulkanBackend (vkCreateSurfaceOHOS)
 ```
 
-The ArkTS layer is minimal — it provides a full-screen XComponent that hands
-an `OHNativeWindow` to the C++ layer. All GPU work happens in native code.
+The SPIR-V shaders are packaged in `resources/rawfile/shaders/` and copied to
+the app's files directory at start-up, because the engine reads shaders as
+files. Results go to `results/results.json` in the app's files directory.
 
-## Prerequisites
+## Build
 
-| Dependency | Notes |
-|------------|-------|
-| **CodeArts IDE** | For HarmonyOS PC (VSCode-based), or DevEco Studio 5.0+ |
-| **Node.js & npm** | Built-in on HarmonyOS PC (`/data/app/bin/`). For DevEco, use built-in tools |
-| **HarmonyOS SDK (API 12+)** | Includes Vulkan headers and `libvulkan.so` |
-| **SPIR-V shaders** | Pre-compiled from the project's GLSL sources |
+Needs DevEco Studio (checked with 26.0, which ships the SDK, hvigor, ohpm and
+node) and `glslc` from the Vulkan SDK.
 
-## Prepare Shaders
+```powershell
+.\scripts\build-ohos.ps1
+```
 
-Compile the GLSL shaders to SPIR-V and place them in the rawfile directory.
-On a machine with Vulkan SDK installed:
+The script compiles the shaders into the rawfile resources, then runs
+`ohpm install` and `hvigorw assembleHap`. The result is
+`ohos\entry\build\default\outputs\default\entry-default-unsigned.hap`.
+
+You can also open the `ohos/` folder in DevEco Studio and build there. **Run
+the script once before the first build in the IDE** (or at least let it compile
+the shaders): the resources are packaged before the native library is built,
+and a fresh checkout has no `.spv` files yet, so the first package would lack
+the shaders and the GPU tests would fail.
+
+**Keep the repository path short.** The native build nests its files deeply. With the
+repository under a path of well over a hundred characters, CMake warns that object paths
+exceed 250 characters and the build then fails (`ninja: error: loading 'build.ninja'`).
+A drive letter mapped with `subst` does not help: the build tools resolve the real path.
+
+## Installing on a device
+
+An unsigned HAP cannot be installed on a real device. Sign in to DevEco Studio
+with a Huawei account, then **File > Project Structure > Signing Configs >
+Automatically generate signature**, and run. An emulator needs a system image
+from **Device Manager** first. Both steps are yours to do; neither has been
+done on this machine.
+
+## Testing over hdc
+
+A debug build starts a test without touching the device (**compiled only,
+never tried on a device**):
 
 ```bash
-glslc shaders/compute.comp  -o ohos/entry/src/main/resources/rawfile/shaders/compute.comp.spv
-glslc shaders/particle.vert -o ohos/entry/src/main/resources/rawfile/shaders/particle.vert.spv
-glslc shaders/particle.frag -o ohos/entry/src/main/resources/rawfile/shaders/particle.frag.spv
+hdc shell aa start -a EntryAbility -b com.mangekyo.benchmark --ps run cpu_membw
+hdc hilog | grep Mangekyo
 ```
 
-If `glslc` is not available locally, copy the pre-built `.spv` files from the
-Windows `build/Release/` directory into `ohos/entry/src/main/resources/rawfile/shaders/`.
+- **`--ps run <test>`**: `cpu_membw`, `cpu_all`, `cpu_per_core`, `cpu_multi`,
+  `stream`, `gpu_burn`.
+- **`--pi seconds <N>`** (optional): seconds per CPU compute test, or the
+  length of a GPU run.
+- **Log**: the tag `MangekyoEngine` carries every line the engine prints; the
+  tag `Mangekyo` carries `AUTORUN accepted / started / refused / failed` and,
+  at the end, `RUN finished kind=cpu exit=0`.
+- The launch parameter works in debug builds only. A GPU test needs the screen
+  on and unlocked.
 
-## Build with DevEco Studio
+## Known risks (all to be checked on a device)
 
-1. Open DevEco Studio
-2. **File → Open Project** → select the `ohos/` directory
-3. Connect your HarmonyOS PC or device
-4. Click **Build → Build Hap(s)/APP(s)** or press **Ctrl+F9**
-5. Run on device with **Run → Run 'entry'**
-
-## Build from Command Line (CodeArts IDE on HarmonyOS PC)
-
-If building natively on the HarmonyOS PC using the hvigor toolchain:
-
-**1. Configure system environment**
-
-Add the system app bin path and npm global bin to your `~/.zshrc`:
-
-```bash
-echo 'export PATH=/data/app/bin:$PATH' >> ~/.zshrc
-echo 'export PATH="$(npm prefix -g)/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
-```
-
-**2. Install hvigor build tools**
-
-```bash
-npm config set @ohos:registry=https://repo.harmonyos.com/npm/
-npm install -g @ohos/hvigor @ohos/hvigor-ohos-plugin
-```
-
-**3. Compile the project**
-
-```bash
-cd ohos
-hvigor assembleHap --mode module -p module=entry
-```
-
-> If hvigor complains about project structure or version mismatches, ensure your
-> global `@ohos/hvigor` version matches the project's `oh-package.json5` or
-> `hvigor/hvigor-config.json5`.
-
-## Install and Run
-
-The output `.hap` file will be in:
-
-```
-entry/build/default/outputs/default/entry-default-signed.hap
-```
-
-Push to device via hdc:
-
-```bash
-hdc install entry/build/default/outputs/default/entry-default-signed.hap
-```
-
-Or run directly from DevEco Studio.
-
-## GPU Profiling Output
-
-Timing information is logged via HiLog. View it with:
-
-```bash
-hdc shell hilog | grep GpuBench
-```
-
-Sample output:
-
-```
-Compute: 0.031 ms | Render: 0.054 ms | Total: 0.112 ms | FPS: 3200
-```
-
-## Project Structure
-
-```text
-ohos/
-├── AppScope/
-│   ├── app.json5                          # Application metadata
-│   └── resources/base/element/string.json
-├── entry/
-│   ├── build-profile.json5                # Native build config (CMake path, ABI)
-│   ├── hvigorfile.ts
-│   └── src/main/
-│       ├── ets/
-│       │   ├── entryability/EntryAbility.ets  # UIAbility lifecycle
-│       │   └── pages/Index.ets               # Full-screen XComponent
-│       ├── cpp/
-│       │   ├── CMakeLists.txt                 # Links libvulkan.so etc.
-│       │   ├── napi_init.cpp                  # NAPI + XComponent callbacks
-│       │   ├── vulkan_renderer.h              # Renderer interface
-│       │   └── vulkan_renderer.cpp            # Full Vulkan pipeline
-│       ├── module.json5                       # Module config
-│       └── resources/
-│           ├── base/
-│           │   ├── element/string.json
-│           │   └── profile/main_pages.json
-│           └── rawfile/shaders/               # SPIR-V files go here
-├── build-profile.json5                    # Project-level build config
-└── hvigorfile.ts
-```
+- **Binding threads to cores**: the engine uses `sched_setaffinity`. If the app
+  sandbox forbids it, the compute test is rejected as invalid and the sweep is
+  marked as not bound.
+- **Cache sizes**: read from `/sys/devices/system/cpu`. If the sandbox hides
+  them, the cache levels are read off the curve instead.
+- **Vulkan**: the engine asks for Vulkan 1.0 entry points only; whether devices
+  and the emulator all offer `VK_OHOS_surface` has not been checked.
+- **Storage test**: writes a temporary file of up to 1 GiB in the app's files
+  directory.

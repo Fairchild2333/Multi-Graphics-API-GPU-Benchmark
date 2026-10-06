@@ -36,6 +36,24 @@ if(ANDROID)
     set(GPU_BENCH_IOS OFF)
 endif()
 
+# ---- HarmonyOS platform setup (OHNativeWindow Vulkan; no GLFW / DX / Metal / GL) ----
+if(OHOS)
+    set(ENABLE_VULKAN ON CACHE BOOL "Vulkan backend" FORCE)
+    set(ENABLE_DX12 OFF CACHE BOOL "DX12 backend" FORCE)
+    set(ENABLE_DX11 OFF CACHE BOOL "DX11 backend" FORCE)
+    set(ENABLE_OPENGL OFF CACHE BOOL "OpenGL backend" FORCE)
+    set(ENABLE_METAL OFF CACHE BOOL "Metal backend" FORCE)
+    add_compile_definitions(GPU_BENCH_NO_GLFW GPU_BENCH_OHOS)
+    set(GPU_BENCH_OHOS ON)
+endif()
+
+# Hosts that embed the engine in an app: no GLFW, no CLI executable, no packaging.
+if(GPU_BENCH_IOS OR GPU_BENCH_ANDROID OR GPU_BENCH_OHOS)
+    set(GPU_BENCH_EMBEDDED ON)
+else()
+    set(GPU_BENCH_EMBEDDED OFF)
+endif()
+
 # ---- Options ----
 option(ENABLE_VULKAN "Build with Vulkan backend" ON)
 if(WIN32)
@@ -52,8 +70,8 @@ else()
 endif()
 option(ENABLE_OPENGL "Build with OpenGL 4.3 backend" ON)
 
-# ---- GLFW (required by desktop backends; skipped on iOS / Android) ----
-if(NOT GPU_BENCH_IOS AND NOT GPU_BENCH_ANDROID)
+# ---- GLFW (required by desktop backends; skipped on iOS / Android / HarmonyOS) ----
+if(NOT GPU_BENCH_EMBEDDED)
     find_package(glfw3 REQUIRED)
 endif()
 
@@ -88,6 +106,13 @@ if(ENABLE_VULKAN)
                                     src/android_engine_host.cpp)
         list(APPEND BACKEND_DEFS    HAVE_VULKAN)
         message(STATUS "Vulkan backend: ENABLED (Android NDK / ANativeWindow)")
+    elseif(OHOS)
+        # The HarmonyOS SDK ships the Vulkan headers; libvulkan.so is linked
+        # into the app's NAPI library (see ohos/entry/src/main/cpp).
+        list(APPEND BACKEND_SOURCES src/vulkan_backend.cpp
+                                    src/ohos_engine_host.cpp)
+        list(APPEND BACKEND_DEFS    HAVE_VULKAN)
+        message(STATUS "Vulkan backend: ENABLED (HarmonyOS / OHNativeWindow)")
     else()
         find_package(Vulkan QUIET)
         if(Vulkan_FOUND)
@@ -201,7 +226,7 @@ endif()
 
 # ---- Engine library (shared by the CLI and the WinUI3 C++/WinRT GUI) ----
 add_library(gpu_engine STATIC ${COMMON_SOURCES} ${BACKEND_SOURCES})
-if(GPU_BENCH_IOS OR GPU_BENCH_ANDROID)
+if(GPU_BENCH_EMBEDDED)
     target_link_libraries(gpu_engine PUBLIC ${BACKEND_LIBS})
 else()
     target_link_libraries(gpu_engine PUBLIC glfw ${BACKEND_LIBS})
@@ -237,7 +262,7 @@ if(MSVC AND ENABLE_VULKAN AND Vulkan_FOUND)
 endif()
 
 # ---- CLI executable (thin entry point -> gpu_bench::cliMain) ----
-if(NOT GPU_BENCH_IOS AND NOT GPU_BENCH_ANDROID)
+if(NOT GPU_BENCH_EMBEDDED)
     add_executable(gpu_benchmark src/cli_main.cpp)
     target_link_libraries(gpu_benchmark PRIVATE gpu_engine)
 endif()
@@ -431,9 +456,9 @@ endif()
 # release payload use the same target and shader lists. The first deliverable
 # is the Windows x64 CLI core; GUI, RenderDoc and the frozen report worker are
 # optional payloads until their remaining path/runtime blockers are removed.
-# Android / iOS embed gpu_engine only — no CLI / CPack.
+# Android / iOS / HarmonyOS embed gpu_engine only — no CLI / CPack.
 option(GPU_BENCH_ENABLE_PACKAGING "Generate install and CPack release rules" ON)
-if(ANDROID OR GPU_BENCH_ANDROID OR GPU_BENCH_IOS)
+if(ANDROID OR GPU_BENCH_EMBEDDED)
     set(GPU_BENCH_ENABLE_PACKAGING OFF CACHE BOOL "Generate install and CPack release rules" FORCE)
 endif()
 if(GPU_BENCH_ENABLE_PACKAGING)

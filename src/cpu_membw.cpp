@@ -604,7 +604,7 @@ bool PinCurrentThread(const CpuLogicalProcessor& cpu) {
     cpu_set_t requested;
     CPU_ZERO(&requested);
     CPU_SET(cpu.logicalIndex, &requested);
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__OHOS__)
     return sched_setaffinity(0, sizeof(requested), &requested) == 0;
 #else
     return pthread_setaffinity_np(pthread_self(), sizeof(requested), &requested) == 0;

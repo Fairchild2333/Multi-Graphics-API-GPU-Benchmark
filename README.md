@@ -44,8 +44,8 @@ when no `vulkan-1.dll` is installed.
 Planned porting order after the current Windows x64 work settles. Ports land
 as their own result groups (new `workloadVersion` whenever the timing or
 capture model differs), so existing Windows score comparisons are never
-affected. HarmonyOS already has an isolated Vulkan particle prototype, but it
-is not the current benchmark suite. Windows ARM64 packaging has landed; the
+affected. The HarmonyOS app now sits on the shared engine and builds, but has
+never run on a device. Windows ARM64 packaging has landed; the
 next platform slice is macOS.
 
 1. **Windows on ARM (ARM64)** — native CLI/WinUI plus a native bilingual
@@ -95,11 +95,14 @@ next platform slice is macOS.
    (e.g. `stream_webgpu_v1`) and record the underlying implementation; no
    formal score without reliable GPU timestamps, and browser runs have no
    RenderDoc capture.
-7. **HarmonyOS PC / 鸿蒙** — promote the existing standalone `ohos/` Vulkan
-   particle demo into a real product port: align the workload registry, CLI/GUI,
-   result contracts and platform-appropriate capture path with the main suite.
-   The current prototype has none of that full-suite integration, so this item
-   remains unstarted.
+7. **HarmonyOS PC / 鸿蒙** — the `ohos/` app now uses the shared engine:
+   Particle, GPU Burn, both CPU tests, History and Charts, in English and
+   Chinese.
+   - **Current status:** `scripts/build-ohos.ps1` builds an unsigned HAP with
+     the tools of DevEco Studio 26.0. It has never run on a device or an
+     emulator. Results use their own group (`_ohos_preview`).
+   - **Next step:** sign it in DevEco Studio and check it on a device. The
+     fluid test, frame capture and a formal result contract are not done.
 8. **Windows 7 dedicated GUI (before PS3)** — separate Win32/DWM frontend and
    installer sharing `gpu_engine` / CLI / result schema; Aero capability probe
    with non-Aero fallback; must not ship WinUI / Windows App SDK.
@@ -612,9 +615,10 @@ Each backend overrides:
 
 ## HarmonyOS PC
 
-A standalone HarmonyOS application is provided in the `ohos/` directory.
-It uses `VK_OHOS_surface` + XComponent instead of GLFW. See
-[ohos/README.md](ohos/README.md) for build and run instructions.
+The HarmonyOS app is in the `ohos/` directory: ArkTS pages on top of the shared
+engine, with `VK_OHOS_surface` + XComponent instead of GLFW. It builds from
+the command line (`scripts/build-ohos.ps1`) but has not been run on a device.
+See [ohos/README.md](ohos/README.md) for the status, build and test notes.
 
 ## Further Reading
 

@@ -14,12 +14,16 @@
 
 #if defined(__ANDROID__)
 #include <android/native_window.h>
+#elif defined(__OHOS__)
+#include <native_window/external_window.h>
 #endif
 
-
-#if defined(__ANDROID__)
-// NDK libvulkan is a Vulkan 1.0 stub: 1.1 device-group entry points are absent.
-// Multi-GPU AFR is desktop-only; keep single-GPU Android paths compiling.
+// Android and HarmonyOS draw into a window that the host app owns, and stay on
+// Vulkan 1.0 entry points with one GPU. The NDK libvulkan is a 1.0 stub without
+// the 1.1 device-group entry points; HarmonyOS exports them, but its app uses
+// the same single-GPU path. Multi-GPU AFR is desktop-only.
+#if defined(__ANDROID__) || defined(__OHOS__)
+#define GPU_BENCH_EMBEDDED_VULKAN 1
 #endif
 namespace gpu_bench {
 
@@ -104,7 +108,7 @@ void VulkanBackend::CreateInstance() {
     appInfo.pEngineName        = "Mangekyo";
     appInfo.engineVersion      = VK_MAKE_VERSION(0, 1, 0);
     // Android primary floor is Vulkan 1.0 (Tegra K1). Desktop keeps 1.1.
-#if defined(__ANDROID__)
+#if defined(GPU_BENCH_EMBEDDED_VULKAN)
     appInfo.apiVersion         = VK_API_VERSION_1_0;
 #else
     appInfo.apiVersion         = VK_API_VERSION_1_1;
@@ -115,6 +119,9 @@ void VulkanBackend::CreateInstance() {
 #if defined(__ANDROID__)
         extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
         extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
+#elif defined(__OHOS__)
+        extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+        extensions.push_back(VK_OHOS_SURFACE_EXTENSION_NAME);
 #else
         std::uint32_t glfwExtCount = 0;
         const char** glfwExts = glfwGetRequiredInstanceExtensions(&glfwExtCount);
@@ -198,6 +205,15 @@ void VulkanBackend::CreateSurface() {
     ci.window = nativeWindow;
     if (vkCreateAndroidSurfaceKHR(instance_, &ci, nullptr, &surface_) != VK_SUCCESS)
         throw std::runtime_error("vkCreateAndroidSurfaceKHR failed");
+#elif defined(__OHOS__)
+    auto* nativeWindow = static_cast<OHNativeWindow*>(window_);
+    if (!nativeWindow)
+        throw std::runtime_error("HarmonyOS Vulkan surface requires OHNativeWindow");
+    VkSurfaceCreateInfoOHOS ci{};
+    ci.sType  = VK_STRUCTURE_TYPE_SURFACE_CREATE_INFO_OHOS;
+    ci.window = nativeWindow;
+    if (vkCreateSurfaceOHOS(instance_, &ci, nullptr, &surface_) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateSurfaceOHOS failed");
 #else
     if (glfwCreateWindowSurface(instance_, window_, nullptr, &surface_) != VK_SUCCESS)
         throw std::runtime_error("glfwCreateWindowSurface failed");
@@ -378,8 +394,8 @@ void VulkanBackend::PickPhysicalDevice() {
     physicalDevice_ = devices[chosen];
 
     if (config_.multiGpuMode == MultiGpuMode::Afr) {
-#if defined(__ANDROID__)
-        throw std::runtime_error("Vulkan AFR is not supported on Android");
+#if defined(GPU_BENCH_EMBEDDED_VULKAN)
+        throw std::runtime_error("Vulkan AFR is not supported on Android or HarmonyOS");
 #else
         std::uint32_t groupCount = 0;
         VkResult groupResult = vkEnumeratePhysicalDeviceGroups(instance_, &groupCount, nullptr);
@@ -512,7 +528,7 @@ void VulkanBackend::CreateLogicalDevice() {
     if (supported.shaderFloat64) features.shaderFloat64 = VK_TRUE;
 
     // Query FP16 (shaderFloat16) support for the SynthPeak FP16 variant.
-#if defined(__ANDROID__)
+#if defined(GPU_BENCH_EMBEDDED_VULKAN)
     // Android NDK libvulkan stubs are 1.0; skip Features2 / FP16 for now.
     const bool fp16Supported = false;
 #else
@@ -576,7 +592,7 @@ void VulkanBackend::CreateLogicalDevice() {
                          "device-mask submissions share one VkQueue and this driver "
                          "may serialize them.\n";
         }
-#if !defined(__ANDROID__)
+#if !defined(GPU_BENCH_EMBEDDED_VULKAN)
         VkDeviceGroupPresentCapabilitiesKHR caps{};
         caps.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_PRESENT_CAPABILITIES_KHR;
         const VkResult capsResult = vkGetDeviceGroupPresentCapabilitiesKHR(device_, &caps);
@@ -768,6 +784,15 @@ VkExtent2D VulkanBackend::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& caps)
         w = ANativeWindow_getWidth(nativeWindow);
         h = ANativeWindow_getHeight(nativeWindow);
     } else {
+        w = static_cast<int>(kWindowWidth);
+        h = static_cast<int>(kWindowHeight);
+    }
+#elif defined(__OHOS__)
+    // GET_BUFFER_GEOMETRY returns the height first, then the width.
+    auto* nativeWindow = static_cast<OHNativeWindow*>(window_);
+    if (!nativeWindow ||
+        OH_NativeWindow_NativeWindowHandleOpt(nativeWindow, GET_BUFFER_GEOMETRY, &h, &w) != 0 ||
+        w <= 0 || h <= 0) {
         w = static_cast<int>(kWindowWidth);
         h = static_cast<int>(kWindowHeight);
     }
@@ -1737,7 +1762,7 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         ? (currentFrame_ % afrDeviceCount_) : 0u;
     const std::uint32_t afrDeviceMask = 1u << afrDeviceIndex;
     VkResult res = VK_SUCCESS;
-#if defined(__ANDROID__)
+#if defined(GPU_BENCH_EMBEDDED_VULKAN)
     res = vkAcquireNextImageKHR(device_, swapChain_, UINT64_MAX,
                                 imageAvailableSemaphores_[currentFrame_],
                                 VK_NULL_HANDLE, &imageIndex);

@@ -198,7 +198,12 @@
       - CPU 应得到 6 行单核结果。
     - **顺带：** 在 Volta 核显上重复粒子字节数对照实验（原 kernel 对比整粒子读写），补齐第三个厂商架构的数据。
 - [ ] **6. WebGPU**：按既定路线——capability registry P0 → 固定 Dawn 版本原生后端（Stream → GPU Burn → Cinematic Liquid）→ `/web` 浏览器前端；独立版本 id（`stream_webgpu_v1` 等），无可靠 timestamp 不产生正式 score（对应上方“原生 WebGPU 后端”与 `/web` 两条任务）。
-- [ ] **7. HarmonyOS PC / 鸿蒙**：把现有 `ohos/` 独立 Vulkan 粒子 demo 升级为正式产品端口；补统一 workload registry、主 CLI/GUI、GPU Burn/Cinematic Liquid、结果合同与适合该平台的抓帧编排。现有 demo 不能标为已完成移植。
+- [ ] **7. HarmonyOS PC / 鸿蒙**：把 `ohos/` 升级为正式产品端口。
+  - [x] **接入共享引擎（2026-10-06）**：原来的独立粒子演示已换成和安卓版对齐的 App（粒子测试、GPU Burn、CPU 算力测试、缓存 / 内存带宽扫描、历史、图表、中英文界面）。`scripts\build-ohos.ps1` 用 DevEco Studio 26.0 的工具链编出未签名的 HAP。**没有运行过。**
+  - [ ] **上机验证**：
+    - **用户要做的：** 在 DevEco Studio 里登录华为账号并生成自动签名；连接鸿蒙设备（打开开发者模式和 USB 调试），或者在 Device Manager 里下载模拟器镜像。
+    - **要确认的：** 界面显示和图表；Vulkan 能否创建 `VK_OHOS_surface`；应用沙箱是否允许绑核（`sched_setaffinity`）和读取缓存容量；`hdc` 启动参数和 hilog 输出。
+  - [ ] **还没有做：** 流体测试、抓帧编排、正式的结果合同（现在的成绩都带 `_ohos_preview` 后缀）、签名和发布包、CPU 测试的取消。
 - [ ] **8. Windows 7 专用 GUI（PS3 之前）**：独立 Win32/DWM 前端与安装包，共享 `gpu_engine`/CLI/成绩 schema；Aero 能力探测与无 Aero 回退；不得携带 WinUI/WinAppSDK。
 - [ ] **9. PS3（探索性，永不进成绩体系）**：仅 homebrew（PSL1GHT/RSXGL）；RSX 无 compute/原子/GPU timestamp，PSGL≈GL ES 1.0+Cg，三主测试不可直移；至多独立仓库的固定管线情怀 demo。
 - [ ] **10. Lumia 1520 legacy Windows Phone（探索性，永不进成绩体系；2026-07-20 排入）**：骁龙 800 / Adreno 330,但 WP8.1/W10M 驱动仅暴露 D3D11 **FL 9_3**(无 compute/UAV)→ 形态同 ES 2.0 legacy tier:简化 fragment Burn、粒子 CPU(NEON) 物理、液体 unsupported;WinRT/UWP + CoreWindow 前端,VS2015/VS2013 工具链,开发者模式侧载(商店已死);墙钟计时,成绩自成体系;shader 优先经 archived ANGLE 复用 Tegra 3/4 的 GLSL ES legacy shader,备选 HLSL 9_3 重写;独立小工程。详见 HANDOFF 目标 C 第 10 条。

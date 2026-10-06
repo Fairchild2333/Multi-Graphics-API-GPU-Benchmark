@@ -201,6 +201,8 @@ std::string CurrentOsVersion() {
 std::string CurrentPlatform() {
 #if defined(__ANDROID__)
     return "Android";
+#elif defined(__OHOS__)
+    return "HarmonyOS";
 #elif defined(__APPLE__)
 #if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
     return "iOS";

@@ -436,8 +436,9 @@ public:
                            actual.Group == requested.Group && actual.Mask == requested.Mask;
             }
         }
-#elif defined(__ANDROID__)
-        // Bionic: sched_*affinity. glibc pthread_*affinity_np is unavailable.
+#elif defined(__ANDROID__) || defined(__OHOS__)
+        // Bionic and the HarmonyOS C library have sched_*affinity only; the
+        // pthread_*affinity_np calls of glibc are unavailable.
         CPU_ZERO(&previous_);
         havePrevious_ = sched_getaffinity(0, sizeof(previous_), &previous_) == 0;
         cpu_set_t requested;
@@ -484,7 +485,7 @@ public:
     ~ThreadAffinityScope() {
 #ifdef _WIN32
         if (changed_) SetThreadGroupAffinity(GetCurrentThread(), &previous_, nullptr);
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) || defined(__OHOS__)
         if (changed_ && havePrevious_)
             sched_setaffinity(0, sizeof(previous_), &previous_);
 #elif defined(__linux__)

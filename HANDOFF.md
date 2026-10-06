@@ -79,7 +79,7 @@
 4. **iOS**（**2026-07-24 事实：代码已写，本机未编译、未模拟器/真机验收**——`ios-gui/` + `ios_engine_host` + `gpb_*` 桥；`CollectResult` 在 iPhone 目标下追加 `_ios_preview`）。用户锁定细节见 **§3.0.3**（最低 **iOS 16**；**iOS 26/27 = Liquid Glass**）。摘要：Metal-only + SwiftUI；无 RenderDoc；`MTLCaptureManager`；App Store/沙盒；温控/正式 duration 合同仍开放。
 5. **Debian Linux**：技术摩擦最低——Vulkan/OpenGL 后端、GLFW、RenderDoc、XDG 数据路径全部已有；主要是构建修正、`.deb` 打包、CI 与实机验证。**2026-09-30**：Ubuntu 20.04 / JetPack 5 的构建阻塞已修复（提交 `a894c8a`，仅做过容器验证，未在真机上运行），见第 10 节。
 6. **WebGPU**：按第 11 节既定路线执行——先统一 capability registry（P0），再固定 Dawn 版本的原生后端，依次移植 Stream、GPU Burn、Cinematic Liquid，最后 `/web` 浏览器前端。结果使用独立临时版本 id（如 `stream_webgpu_v1`），记录 `apiImplementation/underlyingBackend/timingMode`；timestamp-query 是可选能力，没有可靠 GPU timestamp 不产生正式 score；浏览器无 RenderDoc，抓帧标注不可用。
-7. **HarmonyOS PC / 鸿蒙**：仓库已有 `ohos/` 的独立 Vulkan 粒子 demo，但没有统一 workload registry、GPU Burn/Cinematic Liquid、主 CLI/GUI、15 秒结果合同或抓帧编排。该移植项是把它升级为与主产品边界一致的正式端口；在能力与捕获模型明确前必须使用独立结果组，不能把现有 demo 写成已完成移植。
+7. **HarmonyOS PC / 鸿蒙**：**2026-10-06 起 `ohos/` 已改为接入共享 `gpu_engine` 的 App**（粒子测试、GPU Burn、CPU 算力测试、缓存 / 内存带宽扫描、历史和图表），能用 DevEco Studio 26.0 的工具链编出未签名的 HAP，但**没有在任何设备或模拟器上运行过**。成绩使用独立的结果组（`_ohos_preview` 后缀）。流体测试、抓帧编排、正式的 15 秒结果合同、签名和发布包都还没有做，不能写成已完成移植。见 `ohos/README.zh-CN.md` 和第 10 节验证记录。
 8. **Windows 7 专用 GUI（排在 HarmonyOS 之后、PS3 之前）**：当前 WinUI 3 / Windows App SDK 与现有安装器最低版本是 Windows 10 1809，不能通过改 manifest 假装支持 Windows 7。另建共享 `gpu_engine`/CLI worker/结果 schema 的原生 Win32 兼容前端与独立安装包；优先使用 DWM/Aero 能力（例如玻璃区域、非客户区整合、主题化控件、Direct2D/DirectWrite），但必须运行时探测 DWM composition，并在 Aero Basic、经典主题、远程桌面或 DWM 关闭时正常回退，不能把透明/模糊当硬依赖。
    - Windows 7 包不得携带 WinUI/WinAppSDK payload；需要单独审计 toolset、Windows SDK、VC runtime、GLFW、DX11 FL10/SM4 与抓帧工具的 Win7 兼容版本。若没有可安全再分发且实测可用的 RenderDoc 组合，第 5 秒抓帧必须明确显示 unavailable，而不是降级到含义不同的捕获或伪造成功。GUI 外观不同不应改变 GPU/CPU 计时与成绩组；任何实际 worker、timer 或 capture 合同差异才触发新 `workloadVersion`。
 9. **PS3（探索性，永不进成绩体系）**：官方开发授权已停止，只能 homebrew（PSL1GHT/RSXGL）；RSX 无 compute/SSBO/原子/GPU timestamp，PSGL≈OpenGL ES 1.0+Cg 而非桌面 GL 4.3，三个主测试均不可直移。至多做隔离的固定管线情怀 demo，建议独立仓库，不进入正式成绩合同与 GUI 主界面。
@@ -479,7 +479,7 @@ probe 前把随包 `tools/RenderDoc` 设为进程级 `VK_IMPLICIT_LAYER_PATH` �
 - macOS SwiftUI 已与 WinUI 真对齐（Run/CPU/History/Duration/Capture/API 多选等）；仍待 **Mac 编译 + Monterey 冒烟**。细节见 `macos-gui/README.md`、`docs/macos-notes.md`。
 - **iOS：代码已写 / 本机未编译 / 未设备验收**（见 §3.0.3）。`ios-gui/` + `ios_engine_host` 存在；`CollectResult` 追加 `_ios_preview`。用户已锁定 **最低 iOS 16** + **iOS 26/27 = Liquid Glass**（16–25 Material）。共享 `GlassCard` 已预留 `iOS 26.0`。
 - **2026-10-06：** macOS 和 iOS 的 CPU 页接入缓存 / 内存带宽测试，GPU 页、CPU 页和 Charts 页的图表改为 SwiftUI 自己绘制；同时修掉了 `BenchEngine.swift` 里一处无法编译的写法和会让界面卡死的阻塞调用。只在 Linux 容器里做过类型检查，**仍未用 Xcode 编译**。见第 10 节验证记录。
-- HarmonyOS 仍是原始 Vulkan 粒子 demo，没有 workload suite、15 秒结果模型或抓帧编排。
+- **HarmonyOS（2026-10-06）：** 原来的独立粒子演示已换成接入共享引擎的 App，四个页面与安卓版对齐；用真实工具链编译通过，**没有运行过**。没有流体测试、15 秒结果合同和抓帧编排。见 `ohos/README.zh-CN.md`。
 
 ### 已知文档漂移
 
@@ -611,6 +611,8 @@ PathService 已把 results/captures/reports/logs 改到
 - [x] **2026-10-06 GUI 里所有测试的图表**：GPU 页的成绩对比条形图和每帧耗时折线图、CPU 页的逐处理器柱状图、不依赖 Python 的 Charts 页，见第 10 节验证记录。
 - [x] **2026-10-06 CPU 缓存 / 内存带宽测试 `cpu_membw_v1`**：命令行版、WinUI CPU 页和曲线图，见 §3.8 与第 10 节验证记录。
 - [x] **2026-10-06 Android / iOS / macOS 前端补齐**：三端的 CPU 页接入算力测试和缓存 / 内存带宽测试，所有测试都有图表。Android `assembleDebug` 通过；iOS 和 macOS 只做过类型检查；三端都没有在设备上运行过。见第 10 节验证记录。
+- [x] **2026-10-06 HarmonyOS 版接入共享引擎**：`ohos/` 从独立演示改为和安卓版对齐的 App，`scripts\build-ohos.ps1` 可以从命令行编出未签名的 HAP；没有设备、模拟器镜像和签名，一次都没有运行过。见第 10 节验证记录。
+- [ ] **HarmonyOS 上机验证**：需要用户在 DevEco Studio 里登录华为账号生成签名，并连接设备或下载模拟器镜像；然后确认界面显示、Vulkan、绑核、缓存容量读取和 hdc 启动参数。
 - [x] **2026-10-06 Android 的 adb 入口**：引擎输出写入 logcat，debug 包可用启动参数直接开始一项测试；只编译通过，没有在设备上运行过。见 `android/README.md` 和第 10 节验证记录。
 - [x] **2026-10-06 Apple 检查脚本入库**：`scripts/check-apple.ps1`，改 iOS / macOS 的 Swift 代码后先跑它；它不是 Xcode 编译，范围见 `scripts/apple-check/README.md`。
 - [ ] **`cpu_membw_v1` 剩余步骤**：查清流式写入偏慢和 L2 曲线分段的原因；在 macOS、Windows ARM64、Jetson 和大小核 CPU 上实测；见 `docs/TODO.md`。
@@ -677,6 +679,34 @@ PathService 已把 results/captures/reports/logs 改到
 5. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Collaboration；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
 
 ## 10. 验证记录
+
+### 2026-10-06 HarmonyOS（鸿蒙）版接入共享引擎
+
+- **结论：** 代码已写，能用真实工具链编出未签名的 HAP；**没有在任何鸿蒙设备或模拟器上运行过**。
+- **原来的状态：** `ohos/` 是一个独立的 Vulkan 粒子演示，自带一份渲染器（`vulkan_renderer.cpp`），和主引擎无关；工程缺少 hvigor 配置、包描述文件和图标等，实际上编不出来。
+- **现在的状态：**
+  - **引擎：** 新增 `src/ohos_engine_host.{h,cpp}`（对应安卓的 `android_engine_host`），根目录 `CMakeLists.txt` 增加 OHOS 分支；`vulkan_backend.cpp` 增加 `vkCreateSurfaceOHOS` 等鸿蒙分支，和安卓共用"单 GPU、只用 Vulkan 1.0 入口"的路径（宏 `GPU_BENCH_EMBEDDED_VULKAN`）。旧的独立渲染器已删除。
+  - **绑核：** 鸿蒙的 C 库没有 `pthread_setaffinity_np`，和安卓一样改用 `sched_setaffinity`（`cpu_benchmark.cpp`、`cpu_membw.cpp`）。这是用鸿蒙工具链实际编译时才发现的。
+  - **NAPI 桥接：** `ohos/entry/src/main/cpp/napi_init.cpp`，生成 `libmangekyo.so`：接收 XComponent 的窗口、启动 / 停止 GPU 测试、在原生线程上运行引擎的命令行入口（CPU 测试）、收集引擎输出（同时写入 hilog，标签 `MangekyoEngine`）。
+  - **界面（ArkTS）：** GPU、CPU、历史、图表四个页面，功能与安卓版对齐：粒子测试和 GPU Burn（3 秒预览）、CPU 算力测试、缓存 / 内存带宽扫描、各级缓存表格、Canvas 绘制的曲线图 / 柱状图 / 条形图、中英文界面（跟随系统语言）。
+  - **远程测试入口：** debug 包支持 `hdc shell aa start -a EntryAbility -b com.mangekyo.benchmark --ps run <测试>`，用法见 `ohos/README.zh-CN.md`。
+  - **成绩身份：** `stream_v1_ohos_preview`、`gpu_burn_v3_fixed_steps_16_kaleidoscope_ohos_preview`、`cpu_membw_v1_ohos_preview`，平台字段为 `HarmonyOS`。
+- **构建（实际执行过）：**
+  - 环境：DevEco Studio 26.0（SDK API 26、hvigor 6.26.8），Windows 11；`scripts\build-ohos.ps1` 先编译着色器，再执行 `ohpm install` 和 `hvigorw assembleHap`。
+  - 结果：`BUILD SUCCESSFUL`，`entry-default-unsigned.hap` 约 6.2 MB，包内有 `arm64-v8a` 和 `x86_64` 两个架构的 `libmangekyo.so`、五个 SPIR-V 着色器和 ArkTS 字节码。ArkTS 编译器没有警告。
+  - 着色器必须在打包之前生成：第一次构建时资源打包早于原生库编译，包里缺着色器；所以脚本把编译着色器放在最前面。
+- **回归（因为改了引擎源码和根 CMake）：**
+  - Windows：重新配置并编译 `gpu_benchmark`、`gpu_engine`，通过；
+  - Android：`assembleDebug` 通过；
+  - Linux（Ubuntu 20.04 容器，GCC 9）：配置和编译通过，CPU 算力测试和缓存 / 内存扫描各跑了一遍短的，退出码都是 0；
+  - WinUI 界面这一轮没有重新编译（界面源码没有改动）。
+- **没有运行的原因：** 没有连接鸿蒙设备；机器上没有模拟器系统镜像；没有签名配置（需要用户在 DevEco Studio 里登录华为账号后自动生成）。
+- **未验证（都要在设备上确认）：**
+  - 界面的实际显示、深色模式、图表是否画对；ArkTS 的状态刷新是否按预期工作；
+  - 设备是否提供 `VK_OHOS_surface`，粒子测试和 GPU Burn 能否跑完并写出成绩；
+  - 应用沙箱是否允许 `sched_setaffinity`（不允许的话算力测试会被判为无效）、能否读到 `/sys/devices/system/cpu` 下的缓存容量；
+  - `hdc` 启动参数和 hilog 输出。
+- **没有做：** 流体测试、抓帧、正式的移动端时长合同、签名和发布包、CPU 测试的取消。
 
 ### 2026-10-06 Android 的 adb 入口和 Apple 检查脚本入库
 

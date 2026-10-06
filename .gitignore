@@ -18,6 +18,17 @@
 /android/**/.cxx/
 /android/local.properties
 
+# HarmonyOS (DevEco Studio / hvigor)
+/ohos/.hvigor/
+/ohos/.idea/
+/ohos/build/
+/ohos/**/build/
+/ohos/**/.cxx/
+/ohos/**/oh_modules/
+/ohos/local.properties
+/ohos/**/oh-package-lock.json5
+/ohos/oh-package-lock.json5
+
 # ---- WinUI / MSBuild GUI outputs (any arch + intermediates) ----
 /gui/x64/
 /gui/x86/

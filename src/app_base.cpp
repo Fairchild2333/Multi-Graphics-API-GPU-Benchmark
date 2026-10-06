@@ -1496,6 +1496,11 @@ BenchmarkResult AppBase::CollectResult() const {
     r.workloadVersion += "_android_preview";
     workloadConfig << ";embedHost=android_anativewindow"
                    << ";scoreContract=preview_not_desktop_15s";
+#elif defined(__OHOS__)
+    // Same reasoning for the HarmonyOS host, which draws into an XComponent.
+    r.workloadVersion += "_ohos_preview";
+    workloadConfig << ";embedHost=ohos_xcomponent"
+                   << ";scoreContract=preview_not_desktop_15s";
 #elif defined(__APPLE__) && TARGET_OS_IPHONE
     r.workloadVersion += "_ios_preview";
     workloadConfig << ";embedHost=ios_cametallayer"
