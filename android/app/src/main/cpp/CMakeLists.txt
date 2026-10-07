@@ -51,7 +51,8 @@ set(ANDROID_SHADER_SOURCES
     "${MANGEKYO_REPO_ROOT}/shaders/fractal.vert"
     "${MANGEKYO_REPO_ROOT}/shaders/gpu_burn.frag"
 )
-file(GLOB ANDROID_EXTRA_SHADER_SOURCES
+# CONFIGURE_DEPENDS: a shader added later is found without a clean build.
+file(GLOB ANDROID_EXTRA_SHADER_SOURCES CONFIGURE_DEPENDS
     "${MANGEKYO_REPO_ROOT}/shaders/cinematic_liquid_*.comp"
     "${MANGEKYO_REPO_ROOT}/shaders/cinematic_liquid_*.vert"
     "${MANGEKYO_REPO_ROOT}/shaders/cinematic_liquid_*.frag"

@@ -44,6 +44,13 @@ constexpr std::uint32_t kL1FullLoadBlocks = 4096;
 // sweep stops once a single dispatch takes longer than this.
 constexpr std::uint32_t kMaxHostChunks = 4096;
 constexpr double kHostSlowDispatchMs = 500.0;
+// Data check (membw_check.comp): the sink is read back as words. Group 0 sets
+// the first kGroupSize of them to kCheckRan, and a thread that loaded a value
+// other than the one stored sets its word among the next kGroupSize.
+constexpr std::uint32_t kCheckRan = 0x4D42434Bu;
+constexpr std::uint32_t kCheckWords = 2 * kGroupSize;
+// The system-memory pass needs a buffer of at least this many chunks (64 MiB).
+constexpr std::uint32_t kMinHostChunks = 128;
 
 // Must match the push-constant block of the membw_*.comp kernels. `repeats` is
 // only declared by membw_l1.comp.
@@ -67,6 +74,7 @@ struct KernelInfo {
 constexpr std::size_t kReadKernel = 0;
 constexpr std::size_t kWriteKernel = 1;
 constexpr std::size_t kL1Kernel = 3;
+constexpr std::size_t kCheckKernel = 4;  // never timed
 // The first kSweepKernelCount entries run the data-set sweep; the L1 kernel
 // has its own sweep over the private block size.
 constexpr std::size_t kSweepKernelCount = 3;
@@ -75,6 +83,7 @@ const KernelInfo kKernels[] = {
     {"write", "membw_write.comp.spv", kChunkBytes,     "16 B stores"},
     {"copy",  "membw_copy.comp.spv",  2 * kChunkBytes, "16 B load + 16 B store"},
     {"l1",    "membw_l1.comp.spv",    0,               "16 B loads from a private block"},
+    {"check", "membw_check.comp.spv", 0,               "loads compared with what was stored"},
 };
 constexpr std::size_t kKernelCount = sizeof(kKernels) / sizeof(kKernels[0]);
 
@@ -297,6 +306,11 @@ private:
     void WriteDescriptorSet(VkDescriptorSet set, VkBuffer source);
     void MeasureHostMemory(MemBwReport& report);
     Sample SubmitCopy(VkBuffer source, VkBuffer destination, VkDeviceSize bytes);
+    Sample SubmitClear(VkBuffer buffer);
+    void CreateReadback();
+    enum class DataCheck { Good, Wrong, NotRun };
+    DataCheck CheckData(std::uint32_t chunkCount, std::uint32_t& wrongThreads);
+    bool FillChecked(bool hostBuffer, std::uint32_t& chunkCount, std::uint32_t minChunks);
     Sample Execute();
     void DestroyBuffer(Buffer& buffer);
     void Destroy();
@@ -330,6 +344,8 @@ private:
     Buffer destination_;
     Buffer sink_;
     Buffer host_;                    // system-memory buffer; null when skipped
+    Buffer readback_;                // CPU-visible copy of the sink, for the data check
+    void* readbackMapped_ = nullptr;
     std::uint32_t maxChunks_ = 0;
     std::uint32_t hostChunks_ = 0;
 
@@ -565,6 +581,7 @@ void Runner::CreateBuffers(MemBwReport& report) {
     }
     if (!TryCreateBuffer(kGroupSize * kElementBytes, sink_))
         throw std::runtime_error("Could not allocate the sink buffer");
+    CreateReadback();
 
     maxChunks_ = static_cast<std::uint32_t>(chunks);
     report.maxDatasetBytes = chunks * kChunkBytes;
@@ -577,12 +594,53 @@ void Runner::CreateBuffers(MemBwReport& report) {
         return;
     }
     std::uint32_t hostChunks = (std::min)(maxChunks_, kMaxHostChunks);
-    while (hostChunks >= 128 && !TryCreateBuffer(hostChunks * kChunkBytes, host_, true))
+    while (hostChunks >= kMinHostChunks && !TryCreateBuffer(hostChunks * kChunkBytes, host_, true))
         hostChunks /= 2;
     if (host_.buffer) {
         hostChunks_ = hostChunks;
     } else {
         report.host.skippedReason = "no system-memory buffer of at least 64 MiB could be allocated";
+    }
+}
+
+// A small buffer the CPU can read. Without one the data check cannot run; the
+// sweep then goes ahead unchecked and says so.
+void Runner::CreateReadback() {
+    VkBufferCreateInfo bi{};
+    bi.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bi.size = kCheckWords * sizeof(std::uint32_t);
+    bi.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    bi.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    if (vkCreateBuffer(device_, &bi, nullptr, &readback_.buffer) != VK_SUCCESS) {
+        readback_.buffer = VK_NULL_HANDLE;
+        return;
+    }
+    VkMemoryRequirements requirements{};
+    vkGetBufferMemoryRequirements(device_, readback_.buffer, &requirements);
+    // Coherent memory if there is any; other host-visible memory is brought up
+    // to date by the invalidate call in CheckData().
+    std::uint32_t typeIndex = memoryProps_.memoryTypeCount;
+    for (std::uint32_t i = 0; i < memoryProps_.memoryTypeCount; ++i) {
+        if ((requirements.memoryTypeBits & (1u << i)) == 0) continue;
+        const VkMemoryPropertyFlags flags = memoryProps_.memoryTypes[i].propertyFlags;
+        if ((flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) == 0) continue;
+        if ((flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) != 0) { typeIndex = i; break; }
+        if (typeIndex == memoryProps_.memoryTypeCount) typeIndex = i;
+    }
+    VkMemoryAllocateInfo ai{};
+    ai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    ai.allocationSize = requirements.size;
+    ai.memoryTypeIndex = typeIndex;
+    if (typeIndex == memoryProps_.memoryTypeCount ||
+        vkAllocateMemory(device_, &ai, nullptr, &readback_.memory) != VK_SUCCESS) {
+        readback_.memory = VK_NULL_HANDLE;
+        DestroyBuffer(readback_);
+        return;
+    }
+    if (vkBindBufferMemory(device_, readback_.buffer, readback_.memory, 0) != VK_SUCCESS ||
+        vkMapMemory(device_, readback_.memory, 0, VK_WHOLE_SIZE, 0, &readbackMapped_) != VK_SUCCESS) {
+        readbackMapped_ = nullptr;
+        DestroyBuffer(readback_);
     }
 }
 
@@ -776,6 +834,96 @@ Runner::Sample Runner::SubmitCopy(VkBuffer source, VkBuffer destination, VkDevic
     if (queryPool_)
         vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TRANSFER_BIT, queryPool_, 1);
     return Execute();
+}
+
+// Sets a whole buffer to zero, submitted like a dispatch.
+Runner::Sample Runner::SubmitClear(VkBuffer buffer) {
+    Check(vkResetCommandBuffer(cmd_, 0), "vkResetCommandBuffer");
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    Check(vkBeginCommandBuffer(cmd_, &beginInfo), "vkBeginCommandBuffer");
+    if (queryPool_) {
+        vkCmdResetQueryPool(cmd_, queryPool_, 0, 2);
+        vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queryPool_, 0);
+    }
+    vkCmdFillBuffer(cmd_, buffer, 0, VK_WHOLE_SIZE, 0);
+    if (queryPool_)
+        vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TRANSFER_BIT, queryPool_, 1);
+    return Execute();
+}
+
+// Runs the check kernel once over the first chunkCount chunks of the buffer
+// bound at binding 0, which the write kernel has just filled. wrongThreads is
+// how many of the kGroupSize thread positions met a value other than the one
+// stored (a count of positions, not of elements).
+Runner::DataCheck Runner::CheckData(std::uint32_t chunkCount, std::uint32_t& wrongThreads) {
+    wrongThreads = 0;
+    if (!readbackMapped_) return DataCheck::NotRun;
+    SubmitClear(sink_.buffer);
+    Submit(kCheckKernel, chunkCount, kStripesPerChunk, chunkCount, 0);
+    SubmitCopy(sink_.buffer, readback_.buffer, kCheckWords * sizeof(std::uint32_t));
+    VkMappedMemoryRange range{};
+    range.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    range.memory = readback_.memory;
+    range.size = VK_WHOLE_SIZE;
+    vkInvalidateMappedMemoryRanges(device_, 1, &range);
+    std::uint32_t words[kCheckWords];
+    std::memcpy(words, readbackMapped_, sizeof(words));
+    for (std::uint32_t i = 0; i < kGroupSize; ++i)
+        if (words[i] != kCheckRan) return DataCheck::NotRun;
+    for (std::uint32_t i = kGroupSize; i < kCheckWords; ++i)
+        if (words[i] != 0) ++wrongThreads;
+    return wrongThreads == 0 ? DataCheck::Good : DataCheck::Wrong;
+}
+
+// Fills the source buffer (or the system-memory buffer) through the write
+// kernel and checks that the kernels load from it what was stored. A buffer
+// that fails is replaced by one of half the size: some drivers advertise a
+// storage-buffer range they cannot address (seen on an Adreno 660, which
+// loads zeros from a 512 MiB buffer and is correct at 256 MiB). Returns false
+// when no buffer of at least minChunks holds its data. The destination buffer
+// always has the size of the source buffer and is not checked on its own.
+bool Runner::FillChecked(bool hostBuffer, std::uint32_t& chunkCount, std::uint32_t minChunks) {
+    const char* what = hostBuffer ? "system-memory buffer" : "buffer";
+    activeSet_ = hostBuffer ? hostSet_ : descriptorSet_;
+    while (true) {
+        Dispatch(kWriteKernel, chunkCount, 1);
+        std::uint32_t wrongThreads = 0;
+        const DataCheck check = CheckData(chunkCount, wrongThreads);
+        if (check == DataCheck::Good) {
+            out_ << "[membw] Data check: the kernels load from the " << what << " of "
+                 << FormatMiB(chunkCount * kChunkBytes) << " what was stored in it.\n";
+            return true;
+        }
+        if (check == DataCheck::NotRun) {
+            out_ << "[membw] Data check: could not be done on this device, so the " << what
+                 << " of " << FormatMiB(chunkCount * kChunkBytes) << " is used unchecked.\n";
+            return true;
+        }
+        out_ << "[membw] Data check: a " << what << " of " << FormatMiB(chunkCount * kChunkBytes)
+             << " does not give back what was stored in it (" << wrongThreads << " of "
+             << kGroupSize << " thread positions met a wrong value)";
+        const std::uint32_t smaller = chunkCount / 2;
+        if (smaller < minChunks) {
+            out_ << ".\n";
+            return false;
+        }
+        out_ << "; trying " << FormatMiB(smaller * kChunkBytes) << ".\n";
+        const VkDeviceSize size = smaller * kChunkBytes;
+        if (hostBuffer) {
+            DestroyBuffer(host_);
+            if (!TryCreateBuffer(size, host_, true)) return false;
+        } else {
+            DestroyBuffer(source_);
+            DestroyBuffer(destination_);
+            if (!TryCreateBuffer(size, source_) || !TryCreateBuffer(size, destination_))
+                throw std::runtime_error("Could not allocate the smaller buffers");
+        }
+        chunkCount = smaller;
+        WriteDescriptorSet(descriptorSet_, source_.buffer);
+        if (hostSet_ && host_.buffer) WriteDescriptorSet(hostSet_, host_.buffer);
+    }
 }
 
 // Ends the recorded command buffer, runs it alone on the queue and reads back
@@ -974,9 +1122,13 @@ MemBwPoint Runner::MeasureL1Point(bool singleGroup, std::uint32_t stripes) {
 // crosses the PCIe link, so the largest data sets give the usable link rate.
 void Runner::MeasureHostMemory(MemBwReport& report) {
     if (!host_.buffer) return;
-    activeSet_ = hostSet_;
     // Fill the host buffer through the GPU so the read kernel sees valid data.
-    Dispatch(kWriteKernel, hostChunks_, 1);
+    if (!FillChecked(true, hostChunks_, kMinHostChunks)) {
+        report.host.skippedReason =
+            "no system-memory buffer of at least 64 MiB gives back the data stored in it";
+        activeSet_ = descriptorSet_;
+        return;
+    }
 
     const struct { std::size_t kernel; const char* name; const char* description; } passes[] = {
         {kReadKernel, "host_read", "16 B loads from system memory (system memory -> GPU)"},
@@ -1057,8 +1209,14 @@ void Runner::Run(MemBwReport& report) {
     CreatePipelines();
     CreateCommandObjects();
 
-    // Fill the whole source buffer with incompressible data before any read.
-    Dispatch(kWriteKernel, maxChunks_, 1);
+    // Fill the whole source buffer with incompressible data before any read,
+    // and make sure the kernels see in it what was stored.
+    if (!FillChecked(false, maxChunks_, 2))
+        throw std::runtime_error("The device does not give back the data stored in a 1 MiB buffer");
+    report.maxDatasetBytes = maxChunks_ * kChunkBytes;
+    report.datasetLimitedByDevice = report.maxDatasetBytes < config_.maxDatasetBytes;
+    // The driver copies of the system-memory pass go through the destination buffer.
+    hostChunks_ = (std::min)(hostChunks_, maxChunks_);
     DecideTimingSource(report);
 
     const char* memoryLabel = report.unifiedMemory ? "system memory" : "VRAM";
@@ -1221,6 +1379,7 @@ void Runner::Destroy() {
         if (descriptorPool_) vkDestroyDescriptorPool(device_, descriptorPool_, nullptr);
         if (setLayout_) vkDestroyDescriptorSetLayout(device_, setLayout_, nullptr);
         DestroyBuffer(host_);
+        DestroyBuffer(readback_);
         DestroyBuffer(sink_);
         DestroyBuffer(destination_);
         DestroyBuffer(source_);

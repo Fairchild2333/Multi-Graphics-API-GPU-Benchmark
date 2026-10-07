@@ -241,6 +241,16 @@ panel. When several GPUs run in one job list, the charts show the last one.
   distinct chunks sets the data-set size, which is swept from 1 MiB to
   `--membw-max-mib` in ×1.5 / ×2 steps. The number of dispatched workgroups is
   calibrated separately so that each dispatch lasts about 4 ms at any size.
+- **Data check:** before anything is timed, the buffer is filled by the write
+  kernel and a fifth kernel (`membw_check.comp`, never timed) loads every
+  element and compares it with the value that was stored. If any differs, the
+  buffer is replaced by one of half the size and checked again, and the sweep
+  ends at that size (`ceiling lowered by the device`). The outcome is printed
+  as a `[membw] Data check:` line. Reason: a driver may advertise a
+  storage-buffer range it cannot address. An Adreno 660 (driver 512.530)
+  reports 512 MiB, loads zeros from a buffer of that size without touching
+  memory and reported 116 GB/s for it; at 256 MiB it is correct (32.7 GB/s).
+  The system-memory buffer of the PCIe pass is checked the same way.
 - **Timing:** each dispatch is submitted on its own and bracketed by GPU
   timestamps. Each point runs 3 warm-up and 10 measured dispatches; the median
   is the score and the fastest run is also printed. If the timestamps do not

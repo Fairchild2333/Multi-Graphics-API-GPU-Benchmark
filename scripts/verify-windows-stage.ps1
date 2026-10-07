@@ -248,7 +248,7 @@ if ($manifest) {
           'synthpeak_fp32.comp.spv','synthpeak_fp64.comp.spv',
           'synthpeak_int32.comp.spv','synthpeak_fp16.comp.spv',
           'membw_read.comp.spv','membw_write.comp.spv','membw_copy.comp.spv',
-          'membw_l1.comp.spv',
+          'membw_l1.comp.spv','membw_check.comp.spv',
           'render3d.vert.spv',
           'render3d.frag.spv') | ForEach-Object { $shaderNames.Add($_) }
         Test-DelayLoadedVulkan $cliPath 'CLI'

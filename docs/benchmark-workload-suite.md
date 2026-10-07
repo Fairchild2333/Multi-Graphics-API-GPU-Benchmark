@@ -229,6 +229,10 @@ out[gid] = a0+a1+a2+a3;   // 写出，防止编译器把循环优化掉（dead-c
   扫描数据量，按实际请求的字节数计算。用法和方法见 [`cli-reference.md`](cli-reference.md)，剩余步骤见
   [`TODO.md`](TODO.md)。RTX 5090 上测得显存读 1536 GB/s（理论值的 86%），与 6.3 节只读对照 kernel 的
   1503 GB/s 一致；L2 平台约 6.7 TB/s。
+  2026-10-08 起，计时之前先做一次数据校验：写内核填完缓冲后，一个不计时的内核（`membw_check.comp`）
+  把每个元素读出来和写进去的值比，不一致就把缓冲减半重试。原因是有的驱动报的存储缓冲上限它自己用不了：
+  Adreno 660 报 512 MiB，但从这么大的缓冲里读到的全是 0，曾经测出 116 GB/s 的"读"；256 MiB 时正确（32.7 GB/s）。
+  计时内核和 `membw_v1` 的计分方式都没变，能通过校验的设备成绩不变。
   方法参考以下项目：
   - [RRZE-HPC/gpu-benches](https://github.com/te42kyfo/gpu-benches)：GPL-3.0，只借鉴方法，不复制代码；
   - [clamchowder/Microbenchmarks](https://github.com/clamchowder/Microbenchmarks)：Apache-2.0；

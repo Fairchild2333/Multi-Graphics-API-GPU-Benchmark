@@ -25,6 +25,8 @@
 >   `cinematic_liquid_v2_physical_scene_v8_preview_android_preview`。上面 2026-07-24 的"未做"里的液体不再适用。
 > - **显存 / GPU 缓存带宽**（`membw`）已接入，保存为 `membw_v1_android_preview`。它只做计算，没有画面，
 >   和 CPU 测试一样走引擎的命令行入口；着色器目录通过环境变量 `GPU_BENCH_SHADER_DIR` 告诉引擎。
+>   2026-10-08 起它在计时前校验缓冲里的数据，读到的和写进去的不一致就把缓冲减半重试
+>   （Adreno 660 报 512 MiB 的上限但只在 256 MiB 时正确），日志里是 `[membw] Data check:` 开头的一行。
 > - **粒子和 GPU Burn 的更重档位**：`stream_heavy`（100 万粒子）、`gpu_burn_medium`（64 步）、`gpu_burn_heavy`（256 步）。
 > - **GPU 测试全屏横屏运行**，渲染尺寸固定 1280 × 720。
 > - **显存带宽测试可以中途停止**（只编译通过，这一点没有在模拟器上点过）；被停止的运行不保存成绩。

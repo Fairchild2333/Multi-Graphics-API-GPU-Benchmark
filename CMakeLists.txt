@@ -376,6 +376,7 @@ if(ENABLE_VULKAN AND Vulkan_FOUND)
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/membw_write.comp
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/membw_copy.comp
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/membw_l1.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/membw_check.comp
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/render3d.vert
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/render3d.frag
         )
