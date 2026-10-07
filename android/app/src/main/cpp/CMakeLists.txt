@@ -9,6 +9,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(MANGEKYO_REPO_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../../..")
 get_filename_component(MANGEKYO_REPO_ROOT "${MANGEKYO_REPO_ROOT}" ABSOLUTE)
 
+# A benchmark must not measure unoptimised code. The app's debug variant, the
+# one that can be started over adb, configures CMake with the Debug build
+# type, which compiles the engine without optimisation: on the same CPU that
+# halved the CPU scores (found 2026-10-07 on the first phone). The engine and
+# the bridge get the optimisation of a release build in every variant.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O2 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O2 -DNDEBUG")
+endif()
+
 # Pull in root engine as a subdirectory (ANDROID branch skips GLFW / CLI).
 add_subdirectory("${MANGEKYO_REPO_ROOT}" "${CMAKE_BINARY_DIR}/mangekyo_engine" EXCLUDE_FROM_ALL)
 

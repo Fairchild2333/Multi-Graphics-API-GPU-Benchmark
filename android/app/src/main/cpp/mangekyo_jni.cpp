@@ -159,6 +159,8 @@ Java_com_mangekyo_benchmark_core_NativeBridge_nativeStartCli(JNIEnv* env, jobjec
         for (auto& argument : arguments) argv.push_back(argument.data());
         int exitCode = 1;
         try {
+            // A stop asked for during an earlier test must not end this one.
+            gpu_bench::ClearStopRequest();
             exitCode = gpu_bench::cliMain(static_cast<int>(argv.size()), argv.data());
         } catch (const std::exception& ex) {
             std::cout << "[error] " << ex.what() << std::endl;

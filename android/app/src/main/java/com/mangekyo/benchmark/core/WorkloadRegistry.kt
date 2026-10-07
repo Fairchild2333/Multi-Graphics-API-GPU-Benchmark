@@ -57,7 +57,7 @@ object WorkloadRegistry {
     )
 
     /** Tests of the GPU page that need no picture: they run through the engine's command-line entry. */
-    val gpuCommandLineTests: Set<String> = setOf("membw")
+    val gpuCommandLineTests: Set<String> = setOf("membw", "stream_headless")
 
     /** CPU 页的两项测试，均通过引擎的命令行入口在本机线程上运行。 */
     val cpuWorkloads: List<WorkloadInfo> = listOf(

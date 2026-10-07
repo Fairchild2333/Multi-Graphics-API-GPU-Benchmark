@@ -122,10 +122,13 @@ export function isPreset(presets: Preset[], value: number): boolean {
   return false;
 }
 
-/** What the engine host is asked to run. */
-export function gpuRequest(testId: string, particles: number, steps: number): string {
+/**
+ * What the engine is asked to run. A headless particle test computes only: it
+ * shows no picture and runs through the command-line entry.
+ */
+export function gpuRequest(testId: string, particles: number, steps: number, headless: boolean): string {
   if (testId === 'stream') {
-    return `stream?particles=${particles}`;
+    return `${headless ? 'stream_headless' : 'stream'}?particles=${particles}`;
   }
   if (testId === 'gpu_burn') {
     return `gpu_burn?steps=${steps}`;
@@ -162,12 +165,24 @@ export class ParsedRequest {
   testId: string;
   particles: number;
   steps: number;
+  headless: boolean = false;
 
   constructor(testId: string, particles: number, steps: number) {
     this.testId = testId;
     this.particles = particles;
     this.steps = steps;
   }
+}
+
+/** The arguments of a test that runs through the engine's command-line entry. */
+export function gpuCommandLine(request: string, seconds: number): string[] {
+  const id: string = gpuRequestId(request);
+  if (id === 'stream_headless') {
+    const particles: number = parseGpuRequest(request).particles;
+    return ['--backend', 'vulkan', '--gpu', '0', '--workload', 'stream', '--particles', particles.toString(),
+      '--headless', '--time', seconds.toString(), '--no-renderdoc'];
+  }
+  return ['--workload', id, '--backend', 'vulkan', '--gpu', '0'];
 }
 
 export function parseGpuRequest(request: string): ParsedRequest {
@@ -197,6 +212,11 @@ export function parseGpuRequest(request: string): ParsedRequest {
   }
   if (id === 'stream_heavy') {
     return new ParsedRequest('stream', particles > 0 ? particles : 1048576, 0);
+  }
+  if (id === 'stream_headless') {
+    const asked: ParsedRequest = new ParsedRequest('stream', particles > 0 ? particles : DEFAULT_PARTICLES, 0);
+    asked.headless = true;
+    return asked;
   }
   if (id === 'gpu_burn') {
     return new ParsedRequest('gpu_burn', 0, steps > 0 ? steps : DEFAULT_STEPS);

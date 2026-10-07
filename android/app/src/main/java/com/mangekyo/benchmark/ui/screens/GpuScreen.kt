@@ -75,6 +75,7 @@ import com.mangekyo.benchmark.core.NativeBridge
 import com.mangekyo.benchmark.core.WorkloadRegistry
 import com.mangekyo.benchmark.ui.AdaptivePanes
 import com.mangekyo.benchmark.ui.components.BenchmarkSurface
+import com.mangekyo.benchmark.ui.components.KeepScreenOn
 
 /** GPU page shell aligned with WinUI. Engine start/cancel still TODO. */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -94,6 +95,8 @@ fun GpuScreen() {
     var stepChoice by rememberSaveable { mutableStateOf(GpuOptions.DEFAULT_STEPS) }
     var customSteps by rememberSaveable { mutableStateOf("") }
     var secondChoice by rememberSaveable { mutableStateOf(GpuOptions.DEFAULT_SECONDS) }
+    // Particle test only: compute without a picture, as "Headless" in the desktop app.
+    var headless by rememberSaveable { mutableStateOf(false) }
     var customSeconds by rememberSaveable { mutableStateOf("") }
     val particles = GpuOptions.resolve(particleChoice, customParticles, GpuOptions.particleRange)
     val steps = GpuOptions.resolve(stepChoice, customSteps, GpuOptions.stepRange)
@@ -179,20 +182,28 @@ fun GpuScreen() {
         return ok
     }
 
-    // The VRAM / cache bandwidth sweep computes only: no picture, no full screen.
-    fun startCommandLineTest(workloadId: String): Boolean {
+    // The VRAM / cache bandwidth sweep and the headless particle test compute
+    // only: no picture, no full screen. They run through the command-line entry.
+    fun startCommandLineTest(request: String, seconds: Int): Boolean {
         NativeBridge.pollOutput()  // drop lines left over from an earlier run
         NativeBridge.outputOwner = "gpu"
         GpuRun.begin()
-        val ok = NativeBridge.startCli(arrayOf("--workload", workloadId, "--api", "vulkan", "--gpu", "0"))
+        val ok = NativeBridge.startCli(GpuOptions.commandLine(request, seconds))
         commandLineRun = ok
         commandLineStopped = false
         if (!ok) GpuRun.active = false
         statusText = if (ok) {
-            tr(
-                "Running ${testName(workloadId)}; this takes about a minute, longer on a slow GPU",
-                "正在运行 ${testName(workloadId)}，大约一分钟，GPU 慢的设备更久",
-            )
+            if (request.substringBefore('?') == "stream_headless") {
+                tr(
+                    "Running ${testName("stream")} (headless), $seconds s",
+                    "正在运行 ${testName("stream")}（Headless），$seconds 秒",
+                )
+            } else {
+                tr(
+                    "Running ${testName(request)}; this takes about a minute, longer on a slow GPU",
+                    "正在运行 ${testName(request)}，大约一分钟，GPU 慢的设备更久",
+                )
+            }
         } else {
             NativeBridge.lastError().ifEmpty { tr("Start failed", "启动失败") }
         }
@@ -221,12 +232,13 @@ fun GpuScreen() {
             stepChoice = if (GpuOptions.stepPresets.any { it.value == count }) count else GpuOptions.CUSTOM
             if (stepChoice == GpuOptions.CUSTOM) customSteps = count.toString()
         }
+        headless = asked.headless
         // Without "--ei seconds" a test from adb runs for 3 s.
         val askedSeconds = if (wanted.seconds > 0) wanted.seconds else 3
         secondChoice = if (GpuOptions.secondPresets.any { it.value == askedSeconds }) askedSeconds else GpuOptions.CUSTOM
         if (secondChoice == GpuOptions.CUSTOM) customSeconds = askedSeconds.toString()
-        if (wanted.test in WorkloadRegistry.gpuCommandLineTests) {
-            val started = startCommandLineTest(wanted.test)
+        if (wanted.test.substringBefore('?') in WorkloadRegistry.gpuCommandLineTests) {
+            val started = startCommandLineTest(wanted.test, askedSeconds)
             AutoRun.log(
                 if (started) "AUTORUN started test=${wanted.test}"
                 else "AUTORUN failed test=${wanted.test} reason=${NativeBridge.lastError()}",
@@ -242,8 +254,8 @@ fun GpuScreen() {
     // alone; the test starts once that surface exists, which takes a moment
     // because the screen may have to turn to landscape first.
     fun requestRun(workloadId: String, seconds: Double) {
-        if (workloadId in WorkloadRegistry.gpuCommandLineTests) {
-            startCommandLineTest(workloadId)
+        if (workloadId.substringBefore('?') in WorkloadRegistry.gpuCommandLineTests) {
+            startCommandLineTest(workloadId, seconds.toInt())
             return
         }
         launchFromAdb = false
@@ -271,6 +283,8 @@ fun GpuScreen() {
         }
         launch = null
     }
+
+    KeepScreenOn(commandLineRun && running)
 
     if (GpuRun.fullscreen) {
         FullscreenRun(
@@ -314,6 +328,7 @@ fun GpuScreen() {
                                 selectedWorkloadId,
                                 particles ?: GpuOptions.DEFAULT_PARTICLES,
                                 steps ?: GpuOptions.DEFAULT_STEPS,
+                                headless,
                             ),
                             (seconds ?: GpuOptions.DEFAULT_SECONDS).toDouble(),
                         )
@@ -527,6 +542,22 @@ fun GpuScreen() {
                                     valid = particles != null,
                                     enabled = !running,
                                 )
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    FilterChip(
+                                        selected = headless,
+                                        onClick = { headless = !headless },
+                                        enabled = !running,
+                                        label = { Text("Headless") },
+                                    )
+                                    Text(
+                                        tr(
+                                            "Headless computes only: nothing is drawn and no picture is shown.",
+                                            "Headless 只做计算：不渲染，也不显示画面。",
+                                        ),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
                             }
                             if (selectedWorkloadId == "gpu_burn") {
                                 PresetChips(

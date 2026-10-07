@@ -44,6 +44,7 @@ import com.mangekyo.benchmark.core.formatBytes
 import com.mangekyo.benchmark.core.formatNumber
 import com.mangekyo.benchmark.core.localizeEngineText
 import com.mangekyo.benchmark.core.tr
+import com.mangekyo.benchmark.ui.components.KeepScreenOn
 import com.mangekyo.benchmark.ui.AdaptivePanes
 import com.mangekyo.benchmark.ui.components.BarRows
 import com.mangekyo.benchmark.ui.components.ChartMarker
@@ -68,6 +69,8 @@ fun CpuScreen() {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val cores = remember { Runtime.getRuntime().availableProcessors() }
     val run = CpuRun
+    // A CPU test takes minutes; the screen must not turn off in between.
+    KeepScreenOn(run.running)
 
     // Collect the engine output while this page owns the run.
     LaunchedEffect(Unit) {

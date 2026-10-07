@@ -93,6 +93,12 @@ cd android
 
 ## 用 adb 远程测试
 
+**debug 包的引擎是按 `-O2` 编的。** 2026-10-07 之前它按 `-O0` 编译，那之前的 CPU 成绩都无效。
+
+**一键跑完整的一套：** `scripts\adb-suite.ps1 -Install` 依次跑 13 项（粒子四档窗口和 Headless、GPU Burn 64 步、流体、
+显存带宽、CPU 算力、CPU 缓存 / 内存 / 存储），GPU 测试每项 15 秒，结果收在 `out\adb\<机型>-<时间>\`。
+手机要解锁；小米手机还要在开发者选项里打开"USB 安装"。脚本的说明见它开头的注释。
+
 debug 包可以不碰手机就开始一项测试（2026-10-06 加入；2026-10-07 在 Android 17 和 Android 7.0 的模拟器上实际跑通，真机还没有试过）。
 
 ```bash
@@ -106,6 +112,7 @@ adb pull /sdcard/Android/data/com.mangekyo.benchmark/files/results/results.json
 - **`--es run <测试>`：** `cpu_membw`（缓存 / 内存带宽）、`cpu_all`（单核 + 全核）、`cpu_per_core`、`cpu_multi`、
   `stream`（粒子，默认 100 万）、`gpu_burn`（默认 16 步）、`cinematic_liquid`（流体）、
   `membw`（显存 / GPU 缓存带宽，约 20 秒）。
+- **Headless 粒子测试：** `--es run "stream_headless?particles=1048576"`，只计算、不显示画面。
 - **GPU 测试可以带设置：** `--es run "stream?particles=4194304"`、`--es run "gpu_burn?steps=128"`
   （粒子数向上取整到 256，步数 16–2048）。旧名字 `stream_heavy`、`gpu_burn_medium`、`gpu_burn_heavy` 仍然可用。
   App 打开后自动切到对应页面并开始。

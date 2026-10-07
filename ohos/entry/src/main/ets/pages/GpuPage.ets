@@ -161,7 +161,8 @@ export struct GpuPage {
           if (appState.gpuRunning) {
             runController.stopGpu();
           } else {
-            runController.runGpu(gpuRequest(appState.gpuWorkload, this.particles(), this.steps()), this.seconds());
+            runController.runGpu(gpuRequest(appState.gpuWorkload, this.particles(), this.steps(),
+              appState.gpuHeadless), this.seconds());
           }
         })
       Text(this.statusText())
@@ -226,6 +227,20 @@ export struct GpuPage {
               appState.gpuCustomParticles = text;
             }
           })
+          Button('Headless')
+            .fontSize(13)
+            .height(32)
+            .fontColor(appState.gpuHeadless ? $r('sys.color.font_on_primary')
+              : $r('sys.color.ohos_id_color_text_primary'))
+            .backgroundColor(appState.gpuHeadless ? $r('sys.color.comp_background_emphasize')
+              : $r('sys.color.ohos_id_color_button_normal'))
+            .enabled(!appState.gpuRunning)
+            .onClick(() => {
+              appState.gpuHeadless = !appState.gpuHeadless;
+            })
+          Text(tr('Headless computes only: nothing is drawn and no picture is shown.',
+            'Headless 只做计算：不渲染，也不显示画面。'))
+            .caption()
         }
         if (appState.gpuWorkload === 'gpu_burn') {
           PresetRow({

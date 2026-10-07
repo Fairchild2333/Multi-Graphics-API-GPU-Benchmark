@@ -160,6 +160,8 @@ hdc hilog | grep Mangekyo
 - **`--ps run <test>`**: `cpu_membw`, `cpu_all`, `cpu_per_core`, `cpu_multi`,
   `stream` (particle, 1M by default), `gpu_burn` (16 steps by default),
   `cinematic_liquid` (fluid), `membw` (VRAM / GPU cache bandwidth).
+- **Headless particle test**: `--ps run "stream_headless?particles=1048576"` computes
+  only and shows no picture (builds; not run yet).
 - **A GPU test may carry its size**: `--ps run "stream?particles=4194304"`,
   `--ps run "gpu_burn?steps=128"` (particles are rounded up to 256, steps are
   16 to 2048). The older names `stream_heavy`, `gpu_burn_medium` and

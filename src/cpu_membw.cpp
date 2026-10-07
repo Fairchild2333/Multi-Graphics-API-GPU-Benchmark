@@ -1,6 +1,7 @@
 #include "cpu_membw.h"
 
 #include "cpu_benchmark.h"
+#include "cpu_parked_cores.h"
 
 #include <algorithm>
 #include <atomic>
@@ -604,11 +605,16 @@ bool PinCurrentThread(const CpuLogicalProcessor& cpu) {
     cpu_set_t requested;
     CPU_ZERO(&requested);
     CPU_SET(cpu.logicalIndex, &requested);
+    // A phone parks cores it has no work for and refuses a thread that asks
+    // for one of them; the cores are woken first (cpu_parked_cores.h). Every
+    // caller pins before it measures.
+    return parked_cores::SetAffinityWaking([&requested] {
 #if defined(__ANDROID__) || defined(__OHOS__)
-    return sched_setaffinity(0, sizeof(requested), &requested) == 0;
+        return sched_setaffinity(0, sizeof(requested), &requested) == 0 ? 0 : errno;
 #else
-    return pthread_setaffinity_np(pthread_self(), sizeof(requested), &requested) == 0;
+        return pthread_setaffinity_np(pthread_self(), sizeof(requested), &requested);
 #endif
+    });
 #else
     (void)cpu;
     return false;

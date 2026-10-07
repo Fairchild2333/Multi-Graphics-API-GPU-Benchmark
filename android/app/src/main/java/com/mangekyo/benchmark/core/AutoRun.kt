@@ -33,7 +33,8 @@ object AutoRun {
     )
 
     val gpuTests = setOf(
-        "stream", "stream_heavy", "gpu_burn", "gpu_burn_medium", "gpu_burn_heavy", "cinematic_liquid", "membw",
+        "stream", "stream_heavy", "stream_headless", "gpu_burn", "gpu_burn_medium", "gpu_burn_heavy",
+        "cinematic_liquid", "membw",
     )
 
     /** The request that no page has started yet. */

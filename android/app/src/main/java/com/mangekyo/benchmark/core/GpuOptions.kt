@@ -47,11 +47,27 @@ object GpuOptions {
     fun resolve(choice: Int, custom: String, range: IntRange): Int? =
         if (choice != CUSTOM) choice else custom.trim().toIntOrNull()?.takeIf { it in range }
 
-    /** What the engine host is asked to run. */
-    fun request(testId: String, particles: Int, steps: Int): String = when (testId) {
-        "stream" -> "stream?particles=$particles"
+    /**
+     * What the engine is asked to run. A headless particle test computes only:
+     * it shows no picture and runs through the command-line entry.
+     */
+    fun request(testId: String, particles: Int, steps: Int, headless: Boolean = false): String = when (testId) {
+        "stream" -> (if (headless) "stream_headless" else "stream") + "?particles=$particles"
         "gpu_burn" -> "gpu_burn?steps=$steps"
         else -> testId
+    }
+
+    /** The arguments of a test that runs through the engine's command-line entry. */
+    fun commandLine(request: String, seconds: Int): Array<String> {
+        val id = request.substringBefore('?')
+        if (id == "stream_headless") {
+            val particles = parse(request).particles ?: DEFAULT_PARTICLES
+            return arrayOf(
+                "--backend", "vulkan", "--gpu", "0", "--workload", "stream", "--particles", particles.toString(),
+                "--headless", "--time", seconds.toString(), "--no-renderdoc",
+            )
+        }
+        return arrayOf("--workload", id, "--backend", "vulkan", "--gpu", "0")
     }
 
     /** The name the engine saves a run under. */
@@ -66,7 +82,7 @@ object GpuOptions {
     }
 
     /** A request as adb names it, taken apart: the test of the page, and the size it asks for. */
-    data class Parsed(val testId: String, val particles: Int?, val steps: Int?)
+    data class Parsed(val testId: String, val particles: Int?, val steps: Int?, val headless: Boolean = false)
 
     fun parse(request: String): Parsed {
         val id = request.substringBefore('?')
@@ -78,6 +94,7 @@ object GpuOptions {
         return when (id) {
             "stream", "particle" -> Parsed("stream", options["particles"] ?: DEFAULT_PARTICLES, null)
             "stream_heavy" -> Parsed("stream", options["particles"] ?: 1048576, null)
+            "stream_headless" -> Parsed("stream", options["particles"] ?: DEFAULT_PARTICLES, null, headless = true)
             "gpu_burn" -> Parsed("gpu_burn", null, options["steps"] ?: DEFAULT_STEPS)
             "gpu_burn_medium" -> Parsed("gpu_burn", null, options["steps"] ?: 64)
             "gpu_burn_heavy" -> Parsed("gpu_burn", null, options["steps"] ?: 256)

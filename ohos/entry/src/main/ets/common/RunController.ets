@@ -10,7 +10,8 @@ import { fileIo as fs } from '@kit.CoreFileKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { cpuRun, gpuRun } from './EngineOutput';
 import {
-  CUSTOM, DEFAULT_PARTICLES, DEFAULT_SECONDS, DEFAULT_STEPS, gpuRequestId, gpuTestName, isPreset, parseGpuRequest,
+  CUSTOM, DEFAULT_PARTICLES, DEFAULT_SECONDS, DEFAULT_STEPS, gpuCommandLine, gpuRequestId, gpuTestName, isPreset,
+  parseGpuRequest,
   ParsedRequest, PARTICLE_PRESETS, SECOND_PRESETS, STEP_PRESETS
 } from './GpuOptions';
 import { tr } from './I18n';
@@ -31,11 +32,11 @@ export const CPU_TEST_MODES: Map<string, string> = new Map<string, string>([
   ['cpu_multi', 'multi'],
 ]);
 
-export const GPU_TESTS: string[] =
-  ['stream', 'stream_heavy', 'gpu_burn', 'gpu_burn_medium', 'gpu_burn_heavy', 'cinematic_liquid', 'membw'];
+export const GPU_TESTS: string[] = ['stream', 'stream_heavy', 'stream_headless', 'gpu_burn', 'gpu_burn_medium',
+  'gpu_burn_heavy', 'cinematic_liquid', 'membw'];
 
 /** GPU tests without a picture; they run through the engine's command-line entry. */
-export const GPU_COMMAND_LINE_TESTS: string[] = ['membw'];
+export const GPU_COMMAND_LINE_TESTS: string[] = ['membw', 'stream_headless'];
 
 @ObservedV2
 export class AppState {
@@ -55,6 +56,8 @@ export class AppState {
   @Trace gpuCustomSteps: string = '';
   @Trace gpuSecondChoice: number = DEFAULT_SECONDS;
   @Trace gpuCustomSeconds: string = '';
+  /** Particle test only: compute without a picture, as "Headless" in the desktop app. */
+  @Trace gpuHeadless: boolean = false;
   @Trace cpuMode: string = 'all';
   /** The tab a command-line request wants to be shown, or -1. */
   @Trace requestedTab: number = -1;
@@ -177,10 +180,25 @@ export class RunController {
     logLine(`AUTORUN accepted test=${test}`);
   }
 
+  /**
+   * A CPU test or a memory sweep takes minutes; a device that turns its screen
+   * off in between slows the app down and spoils the measurement. (A test with
+   * a picture keeps the screen on in applyWindowMode.)
+   */
+  private keepScreenOn(on: boolean): void {
+    try {
+      this.mainWindow?.setWindowKeepScreenOn(on).catch(() => {
+      });
+    } catch (e) {
+      logLine('keep screen on not applied: ' + JSON.stringify(e));
+    }
+  }
+
   /** The page shows the test and the size a command-line request asks for. */
   private showRequest(wanted: PendingRequest): void {
     const asked: ParsedRequest = parseGpuRequest(wanted.test);
     appState.gpuWorkload = asked.testId;
+    appState.gpuHeadless = asked.headless;
     if (asked.particles > 0) {
       appState.gpuParticleChoice = isPreset(PARTICLE_PRESETS, asked.particles) ? asked.particles : CUSTOM;
       if (appState.gpuParticleChoice === CUSTOM) {
@@ -216,7 +234,9 @@ export class RunController {
     bridge.pollOutput();  // drop lines left over from an earlier run
     this.owner = 'cpu';
     cpuRun.begin(memory);
+    this.keepScreenOn(true);
     if (!bridge.startCli(args)) {
+      this.keepScreenOn(false);
       cpuRun.finish(-1);
       const error: string = bridge.lastError();
       cpuRun.status = error.length > 0 ? error : tr('Start failed', '启动失败');
@@ -252,26 +272,35 @@ export class RunController {
     if (!appState.engineReady || cpuRun.running || appState.gpuRunning || this.pending !== undefined) {
       return;
     }
-    if (GPU_COMMAND_LINE_TESTS.indexOf(workloadId) >= 0) {
-      this.startGpuCommandLine(workloadId);
+    if (GPU_COMMAND_LINE_TESTS.indexOf(gpuRequestId(workloadId)) >= 0) {
+      this.startGpuCommandLine(workloadId, seconds);
       return;
     }
     this.pending = new PendingRequest(workloadId, seconds, false);
     this.enterFullscreen();
   }
 
-  /** The VRAM / cache bandwidth sweep computes only: no picture, no full screen. */
-  private startGpuCommandLine(workloadId: string): boolean {
+  /**
+   * The VRAM / cache bandwidth sweep and the headless particle test compute
+   * only: no picture, no full screen. They run through the command-line entry.
+   */
+  private startGpuCommandLine(request: string, seconds: number): boolean {
     bridge.pollOutput();  // drop lines left over from an earlier run
     this.owner = 'gpu';
     gpuRun.begin();
-    const ok: boolean = bridge.startCli(['--workload', workloadId, '--api', 'vulkan', '--gpu', '0']);
+    const ok: boolean = bridge.startCli(gpuCommandLine(request, seconds));
     this.gpuCommandLine = ok;
     this.gpuStopped = false;
+    this.keepScreenOn(ok);
     if (ok) {
-      const name: string = gpuTestName(workloadId);
-      appState.gpuStatus = tr(`Running ${name}; this takes about a minute, longer on a slow GPU`,
-        `正在运行 ${name}，大约一分钟，GPU 慢的设备更久`);
+      if (gpuRequestId(request) === 'stream_headless') {
+        const name: string = gpuTestName('stream');
+        appState.gpuStatus = tr(`Running ${name} (headless), ${seconds} s`, `正在运行 ${name}（Headless），${seconds} 秒`);
+      } else {
+        const name: string = gpuTestName(request);
+        appState.gpuStatus = tr(`Running ${name}; this takes about a minute, longer on a slow GPU`,
+          `正在运行 ${name}，大约一分钟，GPU 慢的设备更久`);
+      }
     } else {
       gpuRun.active = false;
       const error: string = bridge.lastError();
@@ -356,6 +385,7 @@ export class RunController {
         cpuRun.consumeAll(bridge.pollOutput());
         const exitCode: number = bridge.cliExitCode();
         cpuRun.finish(exitCode);
+        this.keepScreenOn(false);
         appState.resultsRevision++;
         logLine(`RUN finished kind=cpu exit=${exitCode}`);
       }
@@ -364,6 +394,9 @@ export class RunController {
       const running: boolean = bridge.isRunning() || (this.gpuCommandLine && bridge.isCliRunning());
       appState.gpuRunning = running;
       if (gpuRun.active && !running) {
+        if (this.gpuCommandLine) {
+          this.keepScreenOn(false);
+        }
         this.gpuCommandLine = false;
         gpuRun.consumeAll(bridge.pollOutput());
         gpuRun.active = false;
@@ -415,9 +448,9 @@ export class RunController {
     if (wanted.fromCommandLine && wanted.attempts === 0) {
       this.showRequest(wanted);
     }
-    if (GPU_COMMAND_LINE_TESTS.indexOf(wanted.test) >= 0) {
+    if (GPU_COMMAND_LINE_TESTS.indexOf(gpuRequestId(wanted.test)) >= 0) {
       this.pending = undefined;
-      const started: boolean = this.startGpuCommandLine(wanted.test);
+      const started: boolean = this.startGpuCommandLine(wanted.test, wanted.seconds > 0 ? wanted.seconds : 3);
       if (wanted.fromCommandLine) {
         logLine(started ? `AUTORUN started test=${wanted.test}`
           : `AUTORUN failed test=${wanted.test} reason=${bridge.lastError()}`);
