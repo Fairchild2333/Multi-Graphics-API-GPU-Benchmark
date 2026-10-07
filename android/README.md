@@ -8,7 +8,7 @@
 >   （例：`stream_v1_android_preview`、
 >   `gpu_burn_v3_fixed_steps_16_kaleidoscope_android_preview`）。
 >   默认时长为宿主 3s preview，**不是**桌面 15s 正式合同；禁止与 Windows 榜混排。
-> - **未做**：GLES 3.1 降级、液体、温控 15s Burst、正式移动 duration 合同、发布包。
+> - **未做**：温控 15s Burst、正式移动 duration 合同、发布包。（OpenGL ES 3.1 已在 2026-10-07 接入，见下面"图形 API"。）
 >
 > 2026-10-06 追加：
 > - **CPU 页已接入**：CPU 算力测试（`cpu_mixed_v1`）和缓存 / 内存带宽测试
@@ -91,12 +91,31 @@ cd android
 - 导航栏和导航侧栏是 Material 3 Expressive 的组件。material3 1.4 里 Expressive 的其余部分还没有公开；它们在 1.5 的预览版里，这个工程不用预览版，等 1.5 出正式版再换。
 - 没有处理折叠屏的铰链位置和半开姿态。
 
+## 图形 API
+
+GPU 页可以选 **Vulkan**、**OpenGL ES 3.1** 或 **OpenGL ES 2.0**（后两个 2026-10-07 加入）。
+
+- OpenGL ES 3.1 下有两项测试：粒子测试（含 Headless）和 GPU Burn。流体和显存带宽只有 Vulkan。
+- OpenGL ES 2.0 下只有 GPU Burn，而且是另写的一个着色器（`shaders/gpu_burn_es2.frag`），成绩单独成组
+  `gpu_burn_es2_legacy_v1_...`，一律用墙钟计时。adb 请求里加 `api=gles2`。
+- 引擎里是 `src/gles_backend.cpp`，用 EGL。着色器是桌面 OpenGL 那一份，只换版本行，所以每帧的工作量和桌面 OpenGL 相同。
+- 成绩的名字不变，`graphicsApi` 是 `OpenGL ES`，历史和图表里和 Vulkan 分开。
+- 计时用 `GL_EXT_disjoint_timer_query`；驱动没有它、或者它的时间戳不可信时，退回到墙钟计时（等 GPU 做完再看 CPU 时钟），这时小数据量的成绩会偏低。等 GPU 用的是 EGL 栅栏，不是 `glFinish`：有的手机上 `glFinish` 一睡就是 4 ms。
+- 有画面的测试每帧都完整绘制并计时，但屏幕上的画面一秒只更新约 30 次：每帧都交换的话，手机会把下一帧压到屏幕刷新之后才执行，帧率被锁在刷新率上，GPU 还会因为闲着而降频。
+- adb 请求里加 `api=gles`：`--es run "stream?particles=1048576&api=gles"`。
+- 粒子测试的计算着色器每组 256 个调用，OpenGL ES 3.1 只保证 128。驱动只给到 128 的设备（如 Mali-T860）上，
+  引擎自动改用 128 分组、组数翻倍；成绩存到带 `_wg128` 的独立分组，日志、摘要和"最近一次运行"卡片上都有说明。
+  在两种都能跑的 Adreno 740 上，128 分组在 65,536 粒子时和 256 分组相同，100 万以上时高 2–3%。
+  要在支持 256 的设备上强制用 128 做对照，请求里再加 `workgroup=128`。
+
 ## 用 adb 远程测试
 
 **debug 包的引擎是按 `-O2` 编的。** 2026-10-07 之前它按 `-O0` 编译，那之前的 CPU 成绩都无效。
 
-**一键跑完整的一套：** `scripts\adb-suite.ps1 -Install` 依次跑 13 项（粒子四档窗口和 Headless、GPU Burn 64 步、流体、
-显存带宽、CPU 算力、CPU 缓存 / 内存 / 存储），GPU 测试每项 15 秒，结果收在 `out\adb\<机型>-<时间>\`。
+**一键跑完整的一套：** `scripts\adb-suite.ps1 -Install` 依次跑 29 项（GPU Burn 在每个 API 下都跑 16 / 64 / 256 三档，下面写 64 步的地方都是这三档）：Vulkan 下粒子四档窗口和 Headless、GPU Burn 64 步、流体、
+显存带宽；OpenGL ES 3.1 下粒子四档窗口和 Headless、GPU Burn 64 步（名字以 `gles-` 开头）；OpenGL ES 2.0 下它自己的
+GPU Burn 64 步（`gles2-gpu-burn-64`）；再加 CPU 算力、CPU 缓存 / 内存 / 存储。
+GPU 测试每项 15 秒，结果收在 `out\adb\<机型>-<时间>\`。`-Only "^gles"` 只跑 OpenGL ES 的 10 项。
 手机要解锁；小米手机还要在开发者选项里打开"USB 安装"。脚本的说明见它开头的注释。
 
 debug 包可以不碰手机就开始一项测试（2026-10-06 加入；2026-10-07 在 Android 17 和 Android 7.0 的模拟器上实际跑通，真机还没有试过）。
@@ -134,5 +153,5 @@ adb pull /sdcard/Android/data/com.mangekyo.benchmark/files/results/results.json
 
 ## 主要待实现
 
-真机冒烟、GLES 3.1 / EGL 降级、温控 15s Burst 合同、液体、CPU 测试的取消、
+温控 15s Burst 合同、CPU 测试的取消、
 独立 ES 2.0 legacy APK、抓帧策略。

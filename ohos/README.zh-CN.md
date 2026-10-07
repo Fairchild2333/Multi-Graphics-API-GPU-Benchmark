@@ -111,6 +111,12 @@ hdc hilog | grep Mangekyo
 - **`--ps run <测试>`**：`cpu_membw`、`cpu_all`、`cpu_per_core`、`cpu_multi`、`stream`（粒子，默认 100 万）、
   `gpu_burn`（默认 16 步）、`cinematic_liquid`（流体）、`membw`（显存 / GPU 缓存带宽）。
 - **Headless 粒子测试**：`--ps run "stream_headless?particles=1048576"`，只计算、不显示画面（只编译通过，没有运行过）。
+- **OpenGL ES 3.1**（2026-10-07 加入）：GPU 页的"图形 API"可以选它，hdc 请求里加 `api=gles`，例如
+  `--ps run "'stream?particles=1048576&api=gles'"`（`&` 要用引号包住）。有粒子测试（含 Headless）和 GPU Burn 两项，流体和显存带宽只有 Vulkan。
+  着色器是桌面 OpenGL 那一份，只换版本行。在 7.0 和 5.1.1 的模拟器上跑通；**5.1.1 的镜像没有 Vulkan 驱动，这两项现在可以用 OpenGL ES 跑**。
+  模拟器不提供 GPU 时间戳，数字不是成绩；真机没有试过。
+- **OpenGL ES 2.0**（2026-10-07 加入）：只有 GPU Burn，是另写的着色器，成绩单独成组（`gpu_burn_es2_legacy_v1_...`），用墙钟计时。
+  请求里加 `api=gles2`，例如 `--ps run "'gpu_burn?steps=64&api=gles2'"`。在 5.1.1 的模拟器上跑通，真机没有试过。
 - **GPU 测试可以带设置**：`--ps run "stream?particles=4194304"`、`--ps run "gpu_burn?steps=128"`
   （粒子数向上取整到 256，步数 16–2048）。旧名字 `stream_heavy`、`gpu_burn_medium`、`gpu_burn_heavy` 仍然可用。
   GPU 页上也可以选同样的设置，预设和默认值与 Windows 版相同。

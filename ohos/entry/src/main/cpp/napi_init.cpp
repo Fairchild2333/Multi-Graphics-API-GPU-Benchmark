@@ -210,6 +210,13 @@ napi_value EngineVersion(napi_env env, napi_callback_info) {
     return String(env, "mangekyo-ohos-" GPU_BENCH_APP_VERSION "-gpu_engine");
 }
 
+// esParticleWorkGroupSize(): number
+napi_value EsParticleWorkGroupSize(napi_env env, napi_callback_info) {
+    napi_value result = nullptr;
+    napi_create_uint32(env, gpu_bench::ohos_host::EsParticleWorkGroupSize(), &result);
+    return result;
+}
+
 // hasSurface(): boolean
 napi_value HasSurface(napi_env env, napi_callback_info) {
     std::lock_guard<std::mutex> lock(g_windowMutex);
@@ -249,16 +256,20 @@ napi_value StartWorkload(napi_env env, napi_callback_info info) {
         g_lastError = "already running";
         return Boolean(env, false);
     }
+    // A headless test draws nothing and starts without a surface.
+    const bool needsWindow = workload.rfind("stream_headless", 0) != 0;
     OHNativeWindow* window = nullptr;
-    {
-        std::lock_guard<std::mutex> windowLock(g_windowMutex);
-        window = g_window;
-        // Keep the window alive for the whole run.
-        if (window) OH_NativeWindow_NativeObjectReference(window);
-    }
-    if (!window) {
-        g_lastError = "no native window (wait for the preview surface)";
-        return Boolean(env, false);
+    if (needsWindow) {
+        {
+            std::lock_guard<std::mutex> windowLock(g_windowMutex);
+            window = g_window;
+            // Keep the window alive for the whole run.
+            if (window) OH_NativeWindow_NativeObjectReference(window);
+        }
+        if (!window) {
+            g_lastError = "no native window (wait for the preview surface)";
+            return Boolean(env, false);
+        }
     }
     JoinWorkerUnlocked();
     g_lastError.clear();
@@ -274,7 +285,7 @@ napi_value StartWorkload(napi_env env, napi_callback_info info) {
         std::string error;
         const int rc = gpu_bench::ohos_host::RunWorkload(request, error);
         std::cout.flush();
-        OH_NativeWindow_NativeObjectUnreference(window);
+        if (window) OH_NativeWindow_NativeObjectUnreference(window);
         {
             std::lock_guard<std::mutex> errorLock(g_workerMutex);
             if (rc != 0) g_lastError = error.empty() ? ("run failed rc=" + std::to_string(rc)) : error;
@@ -359,6 +370,8 @@ napi_value Init(napi_env env, napi_value exports) {
     const napi_property_descriptor functions[] = {
         {"initPaths", nullptr, InitPaths, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"engineVersion", nullptr, EngineVersion, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"esParticleWorkGroupSize", nullptr, EsParticleWorkGroupSize, nullptr, nullptr, nullptr, napi_default,
+         nullptr},
         {"hasSurface", nullptr, HasSurface, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"isRunning", nullptr, IsRunning, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"lastError", nullptr, LastError, nullptr, nullptr, nullptr, napi_default, nullptr},

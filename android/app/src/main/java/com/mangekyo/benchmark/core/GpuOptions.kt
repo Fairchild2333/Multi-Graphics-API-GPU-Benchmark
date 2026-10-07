@@ -6,9 +6,25 @@ package com.mangekyo.benchmark.core
  *
  * The engine host takes the choice as part of the name of the test, for
  * example "stream?particles=4194304" or "gpu_burn?steps=64"
- * (src/embedded_request.h).
+ * (src/embedded_request.h). "api=gles" in a request selects OpenGL ES 3.1,
+ * "api=gles2" OpenGL ES 2.0.
  */
 object GpuOptions {
+    /** The graphics APIs, as a request names them. */
+    const val API_VULKAN = "vulkan"
+    const val API_GLES = "gles"
+    const val API_GLES2 = "gles2"
+
+    /**
+     * The tests an API has. Vulkan has all of them, OpenGL ES 3.1 the particle
+     * test and GPU Burn, OpenGL ES 2.0 a GPU Burn of its own and nothing else.
+     */
+    fun testsOf(api: String): Set<String> = when (api) {
+        API_GLES -> setOf("stream", "gpu_burn")
+        API_GLES2 -> setOf("gpu_burn")
+        else -> WorkloadRegistry.gpuWorkloads.map { it.id }.toSet()
+    }
+
     /** A preset: its value, and its name in English and Chinese. */
     data class Preset(val value: Int, val nameEn: String, val nameZh: String) {
         val label: String get() = tr(nameEn, nameZh)
@@ -48,14 +64,31 @@ object GpuOptions {
         if (choice != CUSTOM) choice else custom.trim().toIntOrNull()?.takeIf { it in range }
 
     /**
-     * What the engine is asked to run. A headless particle test computes only:
-     * it shows no picture and runs through the command-line entry.
+     * What the engine is asked to run. A headless particle test computes only
+     * and shows no picture. [api] is one of the API_ names above.
      */
-    fun request(testId: String, particles: Int, steps: Int, headless: Boolean = false): String = when (testId) {
-        "stream" -> (if (headless) "stream_headless" else "stream") + "?particles=$particles"
-        "gpu_burn" -> "gpu_burn?steps=$steps"
-        else -> testId
+    fun request(
+        testId: String,
+        particles: Int,
+        steps: Int,
+        headless: Boolean = false,
+        api: String = API_VULKAN,
+    ): String {
+        val test = when (testId) {
+            "stream" -> (if (headless) "stream_headless" else "stream") + "?particles=$particles"
+            "gpu_burn" -> "gpu_burn?steps=$steps"
+            else -> testId
+        }
+        return if (api == API_VULKAN) test else test + (if ('?' in test) "&" else "?") + "api=$api"
     }
+
+    /**
+     * True for a test that runs through the engine's command-line entry: the
+     * memory sweep and the headless particle test under Vulkan. Under OpenGL
+     * ES the headless test runs in the engine host, which makes its context.
+     */
+    fun runsOnCommandLine(request: String): Boolean =
+        request.substringBefore('?') in WorkloadRegistry.gpuCommandLineTests && parse(request).api == API_VULKAN
 
     /** The arguments of a test that runs through the engine's command-line entry. */
     fun commandLine(request: String, seconds: Int): Array<String> {
@@ -71,9 +104,25 @@ object GpuOptions {
     }
 
     /** The name the engine saves a run under. */
-    fun savedAs(testId: String, steps: Int, seconds: Int): String = when (testId) {
-        "stream" -> "stream_v1_android_preview"
-        "gpu_burn" -> "gpu_burn_v3_fixed_steps_${steps}_kaleidoscope_android_preview"
+    fun savedAs(
+        testId: String,
+        steps: Int,
+        seconds: Int,
+        api: String = API_VULKAN,
+        esParticleWorkGroupSize: Int = 0,
+    ): String = when (testId) {
+        // Under OpenGL ES the engine may have to use smaller work groups than
+        // its own 256, and saves such a result in a group of its own.
+        "stream" ->
+            if (api == API_GLES && esParticleWorkGroupSize in 1..255) {
+                "stream_v1_wg${esParticleWorkGroupSize}_android_preview"
+            } else {
+                "stream_v1_android_preview"
+            }
+        "gpu_burn" ->
+            // OpenGL ES 2.0 is always timed by wall clock, which the engine marks in the name.
+            if (api == API_GLES2) "gpu_burn_es2_legacy_v1_fixed_steps_${steps}_android_preview_sync_timing"
+            else "gpu_burn_v3_fixed_steps_${steps}_kaleidoscope_android_preview"
         "cinematic_liquid" ->
             if (seconds == 15) "cinematic_liquid_v2_physical_scene_v8_android_preview"
             else "cinematic_liquid_v2_physical_scene_v8_preview_android_preview"
@@ -82,15 +131,27 @@ object GpuOptions {
     }
 
     /** A request as adb names it, taken apart: the test of the page, and the size it asks for. */
-    data class Parsed(val testId: String, val particles: Int?, val steps: Int?, val headless: Boolean = false)
+    data class Parsed(
+        val testId: String,
+        val particles: Int?,
+        val steps: Int?,
+        val headless: Boolean = false,
+        val api: String = API_VULKAN,
+    )
 
     fun parse(request: String): Parsed {
         val id = request.substringBefore('?')
-        val options = request.substringAfter('?', "").split('&').mapNotNull { pair ->
+        val pairs = request.substringAfter('?', "").split('&')
+        val options = pairs.mapNotNull { pair ->
             val name = pair.substringBefore('=')
             val value = pair.substringAfter('=', "").toIntOrNull()
             if (value == null) null else name to value
         }.toMap()
+        val api = pairs.firstOrNull { it.startsWith("api=") }?.substringAfter('=') ?: API_VULKAN
+        return parseTest(id, options).copy(api = api)
+    }
+
+    private fun parseTest(id: String, options: Map<String, Int>): Parsed {
         return when (id) {
             "stream", "particle" -> Parsed("stream", options["particles"] ?: DEFAULT_PARTICLES, null)
             "stream_heavy" -> Parsed("stream", options["particles"] ?: 1048576, null)

@@ -1,5 +1,5 @@
 # Mangekyo HarmonyOS native library: the NAPI bridge plus the shared gpu_engine
-# (Vulkan in the window of an XComponent, and the CPU tests).
+# (Vulkan or OpenGL ES in the window of an XComponent, and the CPU tests).
 cmake_minimum_required(VERSION 3.16)
 project(mangekyo_ohos CXX)
 
@@ -31,6 +31,8 @@ target_link_libraries(mangekyo
         libace_ndk.z.so
         libnative_window.so
         libvulkan.so
+        libEGL.so
+        libGLESv3.so
         libhilog_ndk.z.so
         libdeviceinfo_ndk.z.so
 )
@@ -55,6 +57,16 @@ find_program(GLSLC_EXECUTABLE glslc
 )
 set(OHOS_RAWFILE_SHADERS "${CMAKE_CURRENT_LIST_DIR}/../resources/rawfile/shaders")
 file(MAKE_DIRECTORY "${OHOS_RAWFILE_SHADERS}")
+
+# ---- OpenGL ES: the desktop OpenGL sources of the particle test and GPU Burn ----
+# The OpenGL ES backend compiles them on the device and changes only their
+# version line, so they travel as text. The two gpu_burn_es2 files are the GPU
+# Burn that OpenGL ES 2.0 can run. scripts/build-ohos.ps1 copies them too.
+foreach(GL_SHADER compute_gl.comp particle_gl.vert particle_gl.frag fractal_gl.vert gpu_burn_gl.frag
+                  gpu_burn_es2.vert gpu_burn_es2.frag)
+    configure_file("${MANGEKYO_REPO_ROOT}/shaders/${GL_SHADER}"
+                   "${OHOS_RAWFILE_SHADERS}/${GL_SHADER}" COPYONLY)
+endforeach()
 
 if(GLSLC_EXECUTABLE)
     set(OHOS_SPV_OUTPUTS "")

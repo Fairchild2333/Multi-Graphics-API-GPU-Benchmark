@@ -956,7 +956,9 @@ void AppBase::PrintSummary() const {
         << std::setw(14) << "Resolution:" << renderWidth_ << "x" << renderHeight_ << "\n";
     if (isGpuBurnWorkload(config_.workload))
         std::cout << std::setw(14) << "Workload:"
-                  << "GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)\n";
+                  << (config_.gpuBurnEs2Legacy
+                          ? "GPU Burn ES 2.0 legacy v1 / Quasicrystal plasma (no particle data)\n"
+                          : "GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)\n");
     else
         std::cout << std::setw(14) << "Particles:" << config_.particleCount
                   << " (" << config_.difficultyLabel << ")\n";
@@ -1014,6 +1016,14 @@ void AppBase::PrintSummary() const {
                 << "Working set:  " << workingSetMiB << " MiB\n"
                 << rateLabel << memoryRate << " GB/s  ("
                 << std::setprecision(3) << avgCompute << " ms compute)\n";
+            // Read by the front ends, which show it next to the score.
+            if (config_.computeWorkGroupSize != kComputeWorkGroupSize) {
+                std::cout << ">> Work groups of " << config_.computeWorkGroupSize << " invocations, not "
+                          << kComputeWorkGroupSize << ": this result is in a score group of its own (_wg"
+                          << config_.computeWorkGroupSize << "). On a GPU that runs both, groups of "
+                          << config_.computeWorkGroupSize << " read the same at 65,536 particles and 2-3% "
+                             "higher at a million and more.\n";
+            }
         }
 
         if (config_.workload == Workload::NBody && avgCompute > 0.0) {
@@ -1091,12 +1101,16 @@ void AppBase::PrintSummary() const {
             const double renderSec = avgRender / 1000.0;
             const double gsteps = pixels * config_.gpuBurnIter
                                 * gpuBurnDrawsPerFrame(config_.workload) / renderSec / 1e9;
-            std::cout << "GPU Burn:     v1 r2 Plasma x Kaleidoscope, "
+            std::cout << "GPU Burn:     "
+                << (config_.gpuBurnEs2Legacy ? "ES 2.0 legacy v1 quasicrystal plasma, "
+                                             : "v1 r2 Plasma x Kaleidoscope, ")
                 << gpuBurnDrawsPerFrame(config_.workload)
                 << " draws x " << config_.gpuBurnIter << " fixed steps/pixel  ("
                 << renderWidth_ << "x" << renderHeight_ << " px)\n"
                 << "Visual:       "
-                << "solid Plasma Bloom foreground + woven Mangekyo background"
+                << (config_.gpuBurnEs2Legacy
+                        ? "waves in seven directions, two draws added together, mediump"
+                        : "solid Plasma Bloom foreground + woven Mangekyo background")
                 << '\n'
                 << std::setprecision(2)
                 << "Burn rate:    " << gsteps << " Gpix-step/s  ("
@@ -1295,6 +1309,11 @@ BenchmarkResult AppBase::CollectResult() const {
             r.workloadVersion = "stream_v1";
             workloadConfig << "particles=" << config_.particleCount
                            << ";bytesPerParticle=40";
+            // The same work in smaller work groups is still another shader.
+            if (config_.computeWorkGroupSize != kComputeWorkGroupSize) {
+                r.workloadVersion += "_wg" + std::to_string(config_.computeWorkGroupSize);
+                workloadConfig << ";computeWorkGroupSize=" << config_.computeWorkGroupSize;
+            }
             break;
         case Workload::NBody:
             r.workloadVersion = "nbody_v1";
@@ -1309,6 +1328,19 @@ BenchmarkResult AppBase::CollectResult() const {
                            << ";autoTune=" << (config_.gpuStressAutoTune ? "true" : "false");
             break;
         case Workload::GpuBurnV1:
+            if (config_.gpuBurnEs2Legacy) {
+                // Another shader, so another group: never beside gpu_burn_v3.
+                r.workloadVersion = "gpu_burn_es2_legacy_v1_fixed_steps_"
+                                  + std::to_string(config_.gpuBurnIter);
+                workloadConfig << "steps=" << config_.gpuBurnIter
+                               << ";draws=" << kGpuBurnV1DrawsPerFrame
+                               << ";shaderVersion=" << kGpuBurnEs2LegacyShaderVersion
+                               << ";loadModel=fixed_selectable_per_frame"
+                               << ";autoTune=false"
+                               << ";precision=mediump"
+                               << ";visual=quasicrystal_plasma_es2";
+                break;
+            }
             // v3 records the selected fixed step count. Keep v2 fixed-256 and
             // calibrated r2 results in their historical groups.
             r.workloadVersion = "gpu_burn_v3_fixed_steps_"

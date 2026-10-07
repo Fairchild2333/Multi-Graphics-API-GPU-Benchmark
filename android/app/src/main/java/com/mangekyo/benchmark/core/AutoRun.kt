@@ -14,8 +14,9 @@ import androidx.compose.runtime.setValue
  *
  * Tests: cpu_membw, cpu_all, cpu_per_core, cpu_multi, stream, gpu_burn. The
  * optional `--ei seconds N` sets the seconds per CPU compute test or the
- * length of a GPU run. Debug builds only: in a release build any other app on
- * the phone could start a run this way.
+ * length of a GPU run. A GPU test may name its size and OpenGL ES:
+ * "stream?particles=4194304&api=gles". Debug builds only: in a release build
+ * any other app on the phone could start a run this way.
  *
  * Progress goes to logcat: `adb logcat -s Mangekyo MangekyoEngine`.
  */

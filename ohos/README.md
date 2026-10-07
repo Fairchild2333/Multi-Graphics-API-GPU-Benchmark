@@ -162,6 +162,17 @@ hdc hilog | grep Mangekyo
   `cinematic_liquid` (fluid), `membw` (VRAM / GPU cache bandwidth).
 - **Headless particle test**: `--ps run "stream_headless?particles=1048576"` computes
   only and shows no picture (builds; not run yet).
+- **OpenGL ES 3.1** (added 2026-10-07): choose it under "API" on the GPU page, or add
+  `api=gles` to a request, for example `--ps run "'stream?particles=1048576&api=gles'"`
+  (quote the `&`). It has the particle test (also headless) and GPU Burn; the fluid and
+  the memory sweep need Vulkan. The shaders are the desktop OpenGL ones with another
+  version line. It runs on the 7.0 and the 5.1.1 emulators; the 5.1.1 images have no
+  Vulkan driver, so these two tests are what a GPU can run there. The emulators offer
+  no GPU timestamps, so their numbers are not results; no real device was tried.
+- **OpenGL ES 2.0** (added 2026-10-07): GPU Burn only, with a shader of its own, saved in
+  its own group (`gpu_burn_es2_legacy_v1_...`) and timed by wall clock. Add `api=gles2`
+  to a request, for example `--ps run "'gpu_burn?steps=64&api=gles2'"`. It runs on the
+  5.1.1 emulator; no real device was tried.
 - **A GPU test may carry its size**: `--ps run "stream?particles=4194304"`,
   `--ps run "gpu_burn?steps=128"` (particles are rounded up to 256, steps are
   16 to 2048). The older names `stream_heavy`, `gpu_burn_medium` and

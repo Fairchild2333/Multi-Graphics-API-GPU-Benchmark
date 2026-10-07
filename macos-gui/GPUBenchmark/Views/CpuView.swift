@@ -18,7 +18,7 @@ struct CpuView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(Localization.tr("CPU Benchmark", "CPU 跑分", "CPU ベンチマーク"))
+                        Text(Localization.tr("CPU Benchmark", "CPU 测试", "CPU ベンチマーク"))
                             .font(.largeTitle).fontWeight(.bold)
                         Text(Localization.tr(
                             "Measures CPU compute throughput with dense math loops on logical processors (single-core and multi-core), or the bandwidth of every cache level and of memory.",
@@ -46,7 +46,7 @@ struct CpuView: View {
                 Button(action: runCpu) {
                     Text(memoryMode
                          ? Localization.tr("Run Cache & Memory Test", "开始缓存与内存测试", "キャッシュ / メモリテストを実行")
-                         : Localization.tr("Run CPU Benchmark", "开始 CPU 跑分", "CPU ベンチマークを実行"))
+                         : Localization.tr("Run CPU Benchmark", "开始 CPU 测试", "CPU ベンチマークを実行"))
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)

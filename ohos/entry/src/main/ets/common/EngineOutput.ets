@@ -443,6 +443,12 @@ export class GpuRunState {
   @Trace fpsLine: string = '';
   /** The frame rate was held at the display's refresh rate, so the score may be too low. */
   @Trace displayLimited: boolean = false;
+  /**
+   * The size of the compute work groups when the particle test did not run in
+   * its own (256): the driver allows no more than this. 0 otherwise. Such a
+   * result is in a score group of its own.
+   */
+  @Trace workGroupSize: number = 0;
   /** The VRAM / cache bandwidth sweep: its points, and the two levels of every kernel. */
   @Trace memoryPoints: MemoryPoint[] = [];
   @Trace memoryLevels: MemoryLevelLine[] = [];
@@ -453,6 +459,7 @@ export class GpuRunState {
     this.scoreLine = '';
     this.fpsLine = '';
     this.displayLimited = false;
+    this.workGroupSize = 0;
     this.memoryPoints = [];
     this.memoryLevels = [];
   }
@@ -504,6 +511,12 @@ export class GpuRunState {
     // The engine's own verdict: frames had to wait for the display.
     if (trimmed.startsWith('>> Display-bound')) {
       this.displayLimited = true;
+    }
+    // The engine ran the particle test in smaller work groups than its own.
+    const workGroups: string = '>> Work groups of ';
+    if (trimmed.startsWith(workGroups)) {
+      const size: number = parseInt(trimmed.substring(workGroups.length), 10);
+      this.workGroupSize = isNaN(size) ? 0 : size;
     }
     if (this.fpsLine.length === 0 && trimmed.startsWith('Avg FPS:')) {
       this.fpsLine = collapseSpaces(trimmed);

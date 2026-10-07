@@ -3,6 +3,7 @@
 //
 // The engine host takes a size as part of the name of the test, for example
 // "stream?particles=4194304" or "gpu_burn?steps=64" (src/embedded_request.h).
+// "api=gles" in a request selects OpenGL ES 3.1, "api=gles2" OpenGL ES 2.0.
 
 import { tr } from './I18n';
 
@@ -24,6 +25,29 @@ export const GPU_WORKLOADS: GpuTest[] = [
   new GpuTest('cinematic_liquid', 'Fluid — Interactive Pool', '流体 —— 互动水池'),
   new GpuTest('membw', 'Memory Bandwidth — VRAM / Cache', '显存带宽 —— 显存 / 缓存'),
 ];
+
+/** The graphics APIs, as a request names them. */
+export const API_VULKAN: string = 'vulkan';
+export const API_GLES: string = 'gles';
+export const API_GLES2: string = 'gles2';
+
+/**
+ * The tests an API has. Vulkan has all of them, OpenGL ES 3.1 the particle
+ * test and GPU Burn, OpenGL ES 2.0 a GPU Burn of its own and nothing else.
+ */
+export function gpuTestsOf(api: string): string[] {
+  if (api === API_GLES) {
+    return ['stream', 'gpu_burn'];
+  }
+  if (api === API_GLES2) {
+    return ['gpu_burn'];
+  }
+  const all: string[] = [];
+  for (const test of GPU_WORKLOADS) {
+    all.push(test.id);
+  }
+  return all;
+}
 
 export function gpuTestName(id: string): string {
   for (const test of GPU_WORKLOADS) {
@@ -123,26 +147,38 @@ export function isPreset(presets: Preset[], value: number): boolean {
 }
 
 /**
- * What the engine is asked to run. A headless particle test computes only: it
- * shows no picture and runs through the command-line entry.
+ * What the engine is asked to run. A headless particle test computes only and
+ * shows no picture. `api` is one of the API_ names above.
  */
-export function gpuRequest(testId: string, particles: number, steps: number, headless: boolean): string {
+export function gpuRequest(testId: string, particles: number, steps: number, headless: boolean,
+  api: string): string {
+  let test: string = testId;
   if (testId === 'stream') {
-    return `${headless ? 'stream_headless' : 'stream'}?particles=${particles}`;
+    test = `${headless ? 'stream_headless' : 'stream'}?particles=${particles}`;
+  } else if (testId === 'gpu_burn') {
+    test = `gpu_burn?steps=${steps}`;
   }
-  if (testId === 'gpu_burn') {
-    return `gpu_burn?steps=${steps}`;
+  if (api === API_VULKAN) {
+    return test;
   }
-  return testId;
+  return test + (test.indexOf('?') >= 0 ? '&' : '?') + 'api=' + api;
 }
 
 /** The name the engine saves a run under. */
-export function gpuSavedAs(testId: string, steps: number, seconds: number): string {
+export function gpuSavedAs(testId: string, steps: number, seconds: number, api: string,
+  esParticleWorkGroupSize: number = 0): string {
   if (testId === 'stream') {
+    // Under OpenGL ES the engine may have to use smaller work groups than its
+    // own 256, and saves such a result in a group of its own.
+    if (api === API_GLES && esParticleWorkGroupSize > 0 && esParticleWorkGroupSize < 256) {
+      return `stream_v1_wg${esParticleWorkGroupSize}_ohos_preview`;
+    }
     return 'stream_v1_ohos_preview';
   }
   if (testId === 'gpu_burn') {
-    return `gpu_burn_v3_fixed_steps_${steps}_kaleidoscope_ohos_preview`;
+    // OpenGL ES 2.0 is always timed by wall clock, which the engine marks in the name.
+    return api === API_GLES2 ? `gpu_burn_es2_legacy_v1_fixed_steps_${steps}_ohos_preview_sync_timing`
+      : `gpu_burn_v3_fixed_steps_${steps}_kaleidoscope_ohos_preview`;
   }
   if (testId === 'cinematic_liquid') {
     return seconds === 15 ? 'cinematic_liquid_v2_physical_scene_v8_ohos_preview'
@@ -166,6 +202,8 @@ export class ParsedRequest {
   particles: number;
   steps: number;
   headless: boolean = false;
+  /** One of the API_ names. */
+  api: string = API_VULKAN;
 
   constructor(testId: string, particles: number, steps: number) {
     this.testId = testId;
@@ -189,9 +227,14 @@ export function parseGpuRequest(request: string): ParsedRequest {
   const id: string = gpuRequestId(request);
   let particles: number = 0;
   let steps: number = 0;
+  let api: string = API_VULKAN;
   const mark: number = request.indexOf('?');
   if (mark >= 0) {
     for (const pair of request.substring(mark + 1).split('&')) {
+      if (pair.indexOf('api=') === 0) {
+        api = pair.substring(4);
+        continue;
+      }
       const equals: number = pair.indexOf('=');
       if (equals < 0) {
         continue;
@@ -207,6 +250,12 @@ export function parseGpuRequest(request: string): ParsedRequest {
       }
     }
   }
+  const asked: ParsedRequest = parseGpuTest(id, particles, steps);
+  asked.api = api;
+  return asked;
+}
+
+function parseGpuTest(id: string, particles: number, steps: number): ParsedRequest {
   if (id === 'stream' || id === 'particle') {
     return new ParsedRequest('stream', particles > 0 ? particles : DEFAULT_PARTICLES, 0);
   }

@@ -167,7 +167,7 @@ struct RunView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    Text(Localization.tr("GPU Benchmark", "GPU 跑分", "GPU ベンチマーク"))
+                    Text(Localization.tr("GPU Benchmark", "GPU 测试", "GPU ベンチマーク"))
                         .font(.largeTitle).fontWeight(.bold)
 
                     optionsCard
@@ -502,7 +502,7 @@ struct RunView: View {
             }
             .disabled(!engine.isRunning)
             Button(action: runBenchmark) {
-                Text(Localization.tr("Run GPU Benchmark", "开始 GPU 跑分", "GPU ベンチマークを実行"))
+                Text(Localization.tr("Run GPU Benchmark", "开始 GPU 测试", "GPU ベンチマークを実行"))
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)

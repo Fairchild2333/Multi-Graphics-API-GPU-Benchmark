@@ -153,10 +153,12 @@
   - [x] `MTLCaptureManager`(.gputrace) 接线（F12/`--capture`/`--capture-frame`）— **待真 Mac 验证**
 - [ ] **3. Android**：RenderDoc Android 远程抓帧；评估温控对 15 秒 Burst 语义的影响；GLES 降级 / 液体 / 正式移动 duration。
   - [x] **Vulkan 垂直切片（2026-07-24）**：ANativeWindow + `gpu_engine` + Compose GPU 页 Run/Stop（stream / gpu_burn light=16，默认 3s）。**Windows 本机 `assembleDebug` 通过；未真机。** 引擎真实写出 `*_android_preview`。
-  - [ ] 主路径补齐：GL ES 3.1/3.2 后端（GLSL ES 重写、EGL、`EXT_disjoint_timer_query` 探测）；设备分界线为 **K1 及以后 = 主路径，Tegra 3/4 = legacy tier**。
+  - [x] **GL ES 3.1 后端（2026-10-07）**：`src/gles_backend.cpp`，EGL，`EXT_disjoint_timer_query`，粒子测试和 GPU Burn（用户定的范围，不含流体）；Android 和 HarmonyOS 都接了，见 HANDOFF §10。
+  - [ ] 仍未做：设备分界线为 **K1 及以后 = 主路径，Tegra 3/4 = legacy tier**。
   - [ ] **SDK/ABI 合同（2026-07-20 锁定）**：主包 minSdk 21 / targetSdk 最新（脚手架已抬到 minSdk 23）；NDK r27+ 开 16 KB 页对齐；结果写应用专属目录；Vulkan 运行时门控（API ≥24 + dlopen 成功，否则 ES 3.1）；四 ABI 全原生编译 **armeabi-v7a / arm64-v8a / x86 / x86_64**，结果 metadata 记录真实 ABI；legacy APK 仅 armeabi-v7a、targetSdk 可较低。详见 HANDOFF 目标 C 第 3 条。
   - [x] **UI 壳（2026-07-20/24）**：Compose + Material 3 四页；动态取色 12+；满载可 Stop。registry 仅展示已接线 GPU 项及真实 `*_android_preview` 字符串。
-  - [ ] **ES 2.0 legacy tier（用户 2026-07-20 锁定底线：Tegra 3/4 必须支持）**：简化 fragment-only GPU Burn（避开 highp，Tegra 3 仅 FP20）新组 `gpu_burn_es2_legacy_v1`；粒子改 CPU(NEON) 物理 + GPU 渲染或纯 fragment 填充率测试（新 workloadVersion，不与 `stream` 混排）；液体 unsupported；墙钟计时、无 RenderDoc（用户已确认不要求）；独立 legacy APK（设备停在 Android 4.1–5.1，minSdk 约束），主包不背包袱。详见 HANDOFF 目标 C 第 3 条。
+  - [x] **ES 2.0 的 GPU Burn（2026-10-07，用户定：ES 2.0 只做这一项）**：`shaders/gpu_burn_es2.*`，分组 `gpu_burn_es2_legacy_v1`，墙钟计时；目前是现有 App 里的 "OpenGL ES 2.0" 选项，Android 和 HarmonyOS 都有。真机没跑过，见 HANDOFF §10。
+  - [ ] **ES 2.0 legacy tier 剩下的部分（用户 2026-07-20 锁定底线：Tegra 3/4 必须支持）**：简化 fragment-only GPU Burn（避开 highp，Tegra 3 仅 FP20）新组 `gpu_burn_es2_legacy_v1`；粒子改 CPU(NEON) 物理 + GPU 渲染或纯 fragment 填充率测试（新 workloadVersion，不与 `stream` 混排）；液体 unsupported；墙钟计时、无 RenderDoc（用户已确认不要求）；独立 legacy APK（设备停在 Android 4.1–5.1，minSdk 约束），主包不背包袱。详见 HANDOFF 目标 C 第 3 条。
   - [ ] **Android 真机远程测试（adb；用户 2026-09-30 排入）**：
     - **模拟器（2026-10-07）：** 已在 Android 17 和 Android 7.0 的模拟器上跑通，并修了三个只有运行才能发现的问题，见 HANDOFF 第 10 节。下面说的"真机"仍然没有做。
     - **现状：** App 从没在真机上跑过。GPU 页接入了 Particle 和 GPU Burn（固定 16 步），默认 3 秒预览，成绩带 `_android_preview` 后缀；CPU 页在 2026-10-06 接入了算力测试和缓存 / 内存带宽测试，并带图表。2026-10-07 接入了流体、显存 / GPU 缓存带宽，以及粒子和 GPU Burn 的更重档位，GPU 测试改为全屏运行，都在模拟器上跑过。

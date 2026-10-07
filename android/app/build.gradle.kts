@@ -50,6 +50,15 @@ android {
     }
 }
 
+// The shaders under src/main/assets/shaders are written by the native build:
+// CMake compiles the SPIR-V and copies the OpenGL sources there. They have to
+// be in place before the assets are packaged, or a first build ships without
+// them (found 2026-10-07: the OpenGL ES test could not open compute_gl.comp).
+tasks.matching { it.name == "mergeDebugAssets" || it.name == "mergeReleaseAssets" }.configureEach {
+    val nativeBuild = if (name == "mergeDebugAssets") "buildCMakeDebug" else "buildCMakeRelWithDebInfo"
+    dependsOn(tasks.matching { it.name.startsWith(nativeBuild) })
+}
+
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)

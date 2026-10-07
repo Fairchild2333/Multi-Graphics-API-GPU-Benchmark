@@ -22,6 +22,8 @@ data class CapabilitySnapshot(
     val glesVersionLabel: String,
     val glesMajor: Int,
     val glesMinor: Int,
+    /** Work-group size of the particle test under OpenGL ES: 256, 128, or 0 when not known. */
+    val esParticleWorkGroupSize: Int,
     val preferredBackend: GraphicsBackend,
     val abi: String,
     val androidRelease: String,
@@ -47,7 +49,10 @@ object CapabilityGate {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             notes += tr("Vulkan loader requires API 24+", "Vulkan 加载器需要 Android 7.0（API 24）以上")
         } else if (!loader) {
-            notes += tr("libvulkan.so not loadable", "无法加载 libvulkan.so")
+            notes += tr(
+                "No Vulkan device: no driver, or libvulkan.so cannot be loaded",
+                "没有可用的 Vulkan 设备（没有驱动，或无法加载 libvulkan.so）",
+            )
         }
         if (!vulkanHw) {
             notes += tr("No Vulkan hardware feature advertised", "设备没有声明 Vulkan 硬件特性")
@@ -78,6 +83,8 @@ object CapabilityGate {
             glesVersionLabel = glesLabel,
             glesMajor = glesMajor,
             glesMinor = glesMinor,
+            esParticleWorkGroupSize =
+                if (glesMajor > 3 || (glesMajor == 3 && glesMinor >= 1)) NativeBridge.esParticleWorkGroupSize() else 0,
             preferredBackend = preferred,
             abi = DeviceInfo.primaryAbi(),
             androidRelease = "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})",

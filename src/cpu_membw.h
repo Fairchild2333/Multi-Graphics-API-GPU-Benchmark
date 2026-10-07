@@ -66,7 +66,7 @@ struct CpuMemBwPoint {
 // Bandwidth of one level of the hierarchy: the median over the data sets that
 // fit that level and no smaller one.
 struct CpuMemBwLevelSummary {
-    std::string name;             // L1 | L2 | L3 | L4 | memory
+    std::string name;             // L1 | L2 | L3 | L4 | SoC | memory
     std::uint64_t cacheBytes = 0;  // capacity of one cache instance, 0 for memory
     std::uint64_t fromBytes = 0;
     std::uint64_t toBytes = 0;
@@ -180,5 +180,16 @@ struct CpuMemBwReport {
 // none. Also times page mapping and the drive behind virtual memory. Prints
 // human-readable tables plus tab-separated CPUMEM_* records.
 CpuMemBwReport RunCpuMemoryBandwidth(const CpuMemBwConfig& config, std::ostream& out);
+
+// Reads the cache levels of one mode of a sweep off its curve again, the way
+// the sweep does on a system that reports no cache sizes, and prints the
+// summary table. A saved result keeps its curves, so its levels can be read
+// with the rules of a newer build without measuring anything again.
+// `systemCacheAfterL3`: a level after the third is the system cache of an SoC
+// (ARM systems); otherwise it is called L4.
+CpuMemBwModeSummary RereadCpuMemBwLevels(const std::vector<CpuMemBwPoint>& points,
+                                         const std::string& mode, std::uint32_t threads,
+                                         bool systemCacheAfterL3, const std::string& title,
+                                         std::ostream& out);
 
 }  // namespace gpu_bench

@@ -6,14 +6,25 @@
 .DESCRIPTION
     The series is what was run on every GPU with the Windows app (the particle
     test at its four sizes, shown and headless, GPU Burn and the fluid), with
-    the two cache tests added. On Android there is one API, Vulkan.
+    the two cache tests added. Android has three APIs: Vulkan runs everything,
+    OpenGL ES 3.1 the particle test and GPU Burn, OpenGL ES 2.0 a simpler GPU
+    Burn of its own.
 
-      particle test, shown     65,536 / 1,048,576 / 4,194,304 / 16,777,216
-      particle test, headless  the same four sizes
-      GPU Burn                 64 steps
-      fluid
-      VRAM / GPU cache bandwidth
-      CPU compute              every core alone, then all cores
+      Vulkan
+        particle test, shown     65,536 / 1,048,576 / 4,194,304 / 16,777,216
+        particle test, headless  the same four sizes
+        GPU Burn                 16 / 64 / 256 steps, the three presets
+        fluid
+        VRAM / GPU cache bandwidth
+      OpenGL ES 3.1 (test names start with "gles-")
+        particle test, shown and headless, the same four sizes
+        GPU Burn                 16 / 64 / 256 steps
+      OpenGL ES 2.0 (test names start with "gles2-")
+        GPU Burn of its own      16 / 64 / 256 steps; its own score group
+
+    GPU Burn runs at all three presets because the earlier Windows results
+    have it at 16 and at 256 steps for every GPU and API (64 only once).
+      CPU compute                every core alone, then all cores
       CPU cache, memory and storage
 
     A GPU test runs for 15 s (2 s warm-up, 13 s measured), as a formal run on
@@ -41,10 +52,18 @@
     every test starts, for example on an emulator. Not for results.
 
 .PARAMETER Only
-    Runs only the tests whose name matches this pattern, e.g. -Only "burn|fluid".
+    Runs only the tests whose name matches this pattern, e.g. -Only "burn|fluid",
+    -Only "^gles" for the OpenGL ES tests, -Only "^(?!gles)" for all the others.
 
 .PARAMETER CoolDownSeconds
     Pause after every test. Default 30.
+
+.PARAMETER StartBelowC
+    Before every test, waits until the battery is no warmer than this many
+    degrees Celsius and the system reports no thermal throttling, for at most
+    ten minutes. For a phone that slows down when warm: a Black Shark 5 Pro
+    (Snapdragon 8 Gen 1) took 14.0 ms for a step it does in 8.7 ms when cool,
+    once its battery had reached 38 C. Default 0: no such wait.
 
 .EXAMPLE
     .\scripts\adb-suite.ps1 -Install
@@ -57,7 +76,8 @@ param(
     [switch]$Install,
     [switch]$Quick,
     [string]$Only = "",
-    [int]$CoolDownSeconds = 30
+    [int]$CoolDownSeconds = 30,
+    [double]$StartBelowC = 0
 )
 
 $repo = Split-Path -Parent $PSScriptRoot
@@ -180,9 +200,25 @@ $tests = @(
     @{ name = "particle-1m-headless";  run = "stream_headless?particles=1048576";  seconds = $gpuSeconds; wait = 120 },
     @{ name = "particle-4m-headless";  run = "stream_headless?particles=4194304";  seconds = $gpuSeconds; wait = 120 },
     @{ name = "particle-16m-headless"; run = "stream_headless?particles=16777216"; seconds = $gpuSeconds; wait = 180 },
+    @{ name = "gpu-burn-16";           run = "gpu_burn?steps=16";                  seconds = $gpuSeconds; wait = 180 },
     @{ name = "gpu-burn-64";           run = "gpu_burn?steps=64";                  seconds = $gpuSeconds; wait = 180 },
+    @{ name = "gpu-burn-256";          run = "gpu_burn?steps=256";                 seconds = $gpuSeconds; wait = 240 },
     @{ name = "fluid";                 run = "cinematic_liquid";                   seconds = $gpuSeconds; wait = 240 },
     @{ name = "vram-bandwidth";        run = "membw";                              seconds = 0;           wait = 1800 },
+    @{ name = "gles-particle-65k";          run = "stream?particles=65536&api=gles";             seconds = $gpuSeconds; wait = 120 },
+    @{ name = "gles-particle-1m";           run = "stream?particles=1048576&api=gles";           seconds = $gpuSeconds; wait = 120 },
+    @{ name = "gles-particle-4m";           run = "stream?particles=4194304&api=gles";           seconds = $gpuSeconds; wait = 120 },
+    @{ name = "gles-particle-16m";          run = "stream?particles=16777216&api=gles";          seconds = $gpuSeconds; wait = 180 },
+    @{ name = "gles-particle-65k-headless"; run = "stream_headless?particles=65536&api=gles";    seconds = $gpuSeconds; wait = 120 },
+    @{ name = "gles-particle-1m-headless";  run = "stream_headless?particles=1048576&api=gles";  seconds = $gpuSeconds; wait = 120 },
+    @{ name = "gles-particle-4m-headless";  run = "stream_headless?particles=4194304&api=gles";  seconds = $gpuSeconds; wait = 120 },
+    @{ name = "gles-particle-16m-headless"; run = "stream_headless?particles=16777216&api=gles"; seconds = $gpuSeconds; wait = 180 },
+    @{ name = "gles-gpu-burn-16";           run = "gpu_burn?steps=16&api=gles";                  seconds = $gpuSeconds; wait = 180 },
+    @{ name = "gles-gpu-burn-64";           run = "gpu_burn?steps=64&api=gles";                  seconds = $gpuSeconds; wait = 180 },
+    @{ name = "gles-gpu-burn-256";          run = "gpu_burn?steps=256&api=gles";                 seconds = $gpuSeconds; wait = 240 },
+    @{ name = "gles2-gpu-burn-16";          run = "gpu_burn?steps=16&api=gles2";                 seconds = $gpuSeconds; wait = 180 },
+    @{ name = "gles2-gpu-burn-64";          run = "gpu_burn?steps=64&api=gles2";                 seconds = $gpuSeconds; wait = 180 },
+    @{ name = "gles2-gpu-burn-256";         run = "gpu_burn?steps=256&api=gles2";                seconds = $gpuSeconds; wait = 240 },
     @{ name = "cpu-compute";           run = "cpu_all";                            seconds = $cpuSeconds; wait = 1800 },
     @{ name = "cpu-cache-memory";      run = "cpu_membw";                          seconds = 0;           wait = 1800 }
 )
@@ -194,17 +230,42 @@ function Get-Temperature {
     return $null
 }
 
+function Get-ThermalStatus {
+    # 0 while the system holds nothing back for heat, 1 and up when it does;
+    # nothing on a device that does not say. Android 9 and older have no such
+    # service and answer on the error stream.
+    $line = (Invoke-Adb shell dumpsys thermalservice 2>$null) | Where-Object { $_ -match "^Thermal Status:\s*(\d+)" } | Select-Object -First 1
+    if ($line -and $line -match "^Thermal Status:\s*(\d+)") { return [int]$Matches[1] }
+    return $null
+}
+
 $summary = @()
 $index = 0
 foreach ($test in $tests) {
     $index++
     if ($Only -and $test.name -notmatch $Only) { continue }
     $log = Join-Path $out ("{0:D2}-{1}.log" -f $index, $test.name)
+    if ($StartBelowC -gt 0) {
+        $cooling = [Diagnostics.Stopwatch]::StartNew()
+        while ($cooling.Elapsed.TotalSeconds -lt 600 -and (Test-Device)) {
+            $now = Get-Temperature
+            if ($null -ne $now -and $now -le $StartBelowC -and -not (Get-ThermalStatus)) { break }
+            Start-Sleep -Seconds 10
+        }
+    }
     $temperature = Get-Temperature
-    Write-Host ("[{0:D2}/{1}] {2,-22} battery {3} C ..." -f $index, $tests.Count, $test.name, $temperature) -NoNewline
+    $thermal = Get-ThermalStatus
+    Write-Host ("[{0:D2}/{1}] {2,-26} battery {3} C ..." -f $index, $tests.Count, $test.name, $temperature) -NoNewline
 
     Invoke-Adb shell input keyevent KEYCODE_WAKEUP | Out-Null
     Invoke-Adb logcat -c | Out-Null
+    # The app's lines go to the file as they come. Reading them back at the end
+    # loses the start of a long test on a device that logs a lot: a Quest 3
+    # fills its log buffer in a minute or two.
+    $captureArgs = @()
+    if ($Serial) { $captureArgs += "-s", $Serial }
+    $captureArgs += "logcat", "-s", "Mangekyo:V", "MangekyoEngine:V"
+    $capture = Start-Process $adb -ArgumentList $captureArgs -RedirectStandardOutput $log -WindowStyle Hidden -PassThru
     $command = "am start -S -n $package/.MainActivity --es run '$($test.run)'"
     if ($test.seconds -gt 0) { $command += " --ei seconds $($test.seconds)" }
     Invoke-Adb shell $command | Out-Null
@@ -216,17 +277,26 @@ foreach ($test in $tests) {
     while ($watch.Elapsed.TotalSeconds -lt $test.wait) {
         Start-Sleep -Seconds 2
         if (-not (Test-Device)) {
-            # Give a short drop-out half a minute to mend itself.
+            # A device that adb has marked "offline" stays so until adb is told
+            # to reconnect; it then takes the phone up to a minute, during
+            # which it shows as "unauthorized". The test goes on meanwhile.
+            & $adb reconnect offline | Out-Null
             $gone = [Diagnostics.Stopwatch]::StartNew()
-            while (-not (Test-Device) -and $gone.Elapsed.TotalSeconds -lt 30) { Start-Sleep -Seconds 3 }
+            while (-not (Test-Device) -and $gone.Elapsed.TotalSeconds -lt 75) { Start-Sleep -Seconds 3 }
             if (-not (Test-Device)) { $lost = $true; break }
         }
-        $lines = @(Invoke-Adb logcat -d -s Mangekyo:V)
+        $lines = @(Get-Content $log -Encoding UTF8 -ErrorAction SilentlyContinue)
+        # The capture ends when adb drops out; what the buffer still holds then
+        # is the only way to see the end of the test.
+        if ($capture.HasExited) { $lines += @(Invoke-Adb logcat -d -s Mangekyo:V) }
         if (-not $accepted -and ($lines -match "AUTORUN accepted")) { $accepted = $true }
         $end = $lines | Where-Object { $_ -match "RUN finished|AUTORUN refused|AUTORUN failed" } | Select-Object -Last 1
         if ($end) { break }
         if (-not $accepted -and $watch.Elapsed.TotalSeconds -gt 25) { break }
     }
+    $captureLost = $capture.HasExited
+    if (-not $captureLost) { Stop-Process -Id $capture.Id -Force -ErrorAction SilentlyContinue }
+    $capture.WaitForExit(5000) | Out-Null
     if ($lost) {
         Write-Host (" DEVICE LOST after {0:N0} s" -f $watch.Elapsed.TotalSeconds)
         $summary += [pscustomobject]@{
@@ -235,8 +305,11 @@ foreach ($test in $tests) {
         }
         break
     }
-    Invoke-Adb logcat -d -s Mangekyo:V MangekyoEngine:V | Set-Content -Encoding utf8 $log
-    $engine = Get-Content $log
+    if ($captureLost) {
+        # Whatever came after the capture ended, as far as the buffer has it.
+        Invoke-Adb logcat -d -s Mangekyo:V MangekyoEngine:V | Add-Content -Encoding utf8 $log
+    }
+    $engine = @(Get-Content $log -Encoding UTF8 -ErrorAction SilentlyContinue)
 
     $status = "ok"
     $detail = ""
@@ -273,8 +346,14 @@ foreach ($test in $tests) {
     $verdict = $engine | Where-Object { $_ -match ">> (Display-bound|CPU-bound)" } | Select-Object -Last 1
     $note = ""
     if ($verdict -match ">> Display-bound") { $note = "held at the refresh rate: the score may be too low" }
-    $present = $engine | Where-Object { $_ -match "\[Vulkan\] Present mode: (\S+)" } | Select-Object -Last 1
+    $present = $engine | Where-Object { $_ -match "\[(?:Vulkan|OpenGL ES)\] Present mode: (\S+)" } | Select-Object -Last 1
     if ($present -match "Present mode: (\S+)") { $note = (($note, "present $($Matches[1])") | Where-Object { $_ }) -join "; " }
+    # OpenGL ES without a usable GPU clock times a frame from the CPU side.
+    if ($engine | Where-Object { $_ -match "using synchronized wall-clock timing|timed by wall clock" }) {
+        $note = (($note, "timed by wall clock") | Where-Object { $_ }) -join "; "
+    }
+
+    if ($thermal) { $note = (($note, "thermal status $thermal at the start") | Where-Object { $_ }) -join "; " }
 
     Write-Host (" {0} in {1:N0} s  {2}" -f $status, $watch.Elapsed.TotalSeconds, $detail)
     $summary += [pscustomobject]@{

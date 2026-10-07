@@ -6,6 +6,7 @@
 #include <android/native_window_jni.h>
 #include <dlfcn.h>
 #include <jni.h>
+#include <vulkan/vulkan.h>
 
 #include <atomic>
 #include <cstdlib>
@@ -191,11 +192,46 @@ Java_com_mangekyo_benchmark_core_NativeBridge_nativeEngineVersion(JNIEnv* env, j
 
 JNIEXPORT jboolean JNICALL
 Java_com_mangekyo_benchmark_core_NativeBridge_nativeProbeVulkan(JNIEnv*, jobject) {
+    // True when a Vulkan device can be had, not merely the loader. A phone may
+    // ship libvulkan.so without a driver behind it: a Mi 5C (Mali-T860,
+    // Android 7.1.2) does, and every Vulkan test on it ended with "No Vulkan
+    // physical device found" after the page had listed Vulkan as supported.
+    // Everything goes through dlsym, so the library still loads where the
+    // loader is missing altogether.
     void* lib = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
     if (!lib) return JNI_FALSE;
-    const bool ok = dlsym(lib, "vkGetInstanceProcAddr") != nullptr;
+    bool ok = false;
+    const auto getProc = reinterpret_cast<PFN_vkGetInstanceProcAddr>(dlsym(lib, "vkGetInstanceProcAddr"));
+    const auto createInstance = getProc
+        ? reinterpret_cast<PFN_vkCreateInstance>(getProc(VK_NULL_HANDLE, "vkCreateInstance")) : nullptr;
+    if (createInstance) {
+        VkApplicationInfo app{};
+        app.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+        app.apiVersion = VK_API_VERSION_1_0;
+        VkInstanceCreateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        info.pApplicationInfo = &app;
+        VkInstance instance = VK_NULL_HANDLE;
+        if (createInstance(&info, nullptr, &instance) == VK_SUCCESS && instance != VK_NULL_HANDLE) {
+            const auto enumerate = reinterpret_cast<PFN_vkEnumeratePhysicalDevices>(
+                getProc(instance, "vkEnumeratePhysicalDevices"));
+            const auto destroy = reinterpret_cast<PFN_vkDestroyInstance>(getProc(instance, "vkDestroyInstance"));
+            std::uint32_t count = 0;
+            if (enumerate) {
+                const VkResult result = enumerate(instance, &count, nullptr);
+                ok = (result == VK_SUCCESS || result == VK_INCOMPLETE) && count > 0;
+            }
+            if (destroy) destroy(instance, nullptr);
+        }
+    }
     dlclose(lib);
+    ALOGI("vulkan probe: %s", ok ? "a device is present" : "no device");
     return ok ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_mangekyo_benchmark_core_NativeBridge_nativeEsParticleWorkGroupSize(JNIEnv*, jobject) {
+    return static_cast<jint>(gpu_bench::android_host::EsParticleWorkGroupSize());
 }
 
 JNIEXPORT void JNICALL
@@ -276,29 +312,33 @@ Java_com_mangekyo_benchmark_core_NativeBridge_nativeStartWorkload(JNIEnv* env, j
         return JNI_FALSE;
     }
 
-    ANativeWindow* window = nullptr;
-    {
-        std::lock_guard<std::mutex> lock(g_windowMutex);
-        window = g_window;
-        if (window)
-            ANativeWindow_acquire(window);
-    }
-    if (!window) {
-        std::lock_guard<std::mutex> lock(g_workerMutex);
-        g_lastError = "no ANativeWindow (wait for SurfaceView)";
-        return JNI_FALSE;
-    }
-
     const char* wid = env->GetStringUTFChars(workloadId, nullptr);
     std::string workload = wid ? wid : "stream";
     if (wid) env->ReleaseStringUTFChars(workloadId, wid);
+
+    // A headless test draws nothing and starts without a surface.
+    const bool needsWindow = workload.rfind("stream_headless", 0) != 0;
+    ANativeWindow* window = nullptr;
+    if (needsWindow) {
+        {
+            std::lock_guard<std::mutex> lock(g_windowMutex);
+            window = g_window;
+            if (window)
+                ANativeWindow_acquire(window);
+        }
+        if (!window) {
+            std::lock_guard<std::mutex> lock(g_workerMutex);
+            g_lastError = "no ANativeWindow (wait for SurfaceView)";
+            return JNI_FALSE;
+        }
+    }
 
     {
         std::lock_guard<std::mutex> lock(g_workerMutex);
         if (g_workerAlive.load(std::memory_order_acquire) ||
             g_cliAlive.load(std::memory_order_acquire) ||
             gpu_bench::android_host::IsRunning()) {
-            ANativeWindow_release(window);
+            if (window) ANativeWindow_release(window);
             g_lastError = "already running";
             return JNI_FALSE;
         }
@@ -316,7 +356,7 @@ Java_com_mangekyo_benchmark_core_NativeBridge_nativeStartWorkload(JNIEnv* env, j
 
             std::string err;
             const int rc = gpu_bench::android_host::RunWorkload(req, err);
-            ANativeWindow_release(window);
+            if (window) ANativeWindow_release(window);
             {
                 std::lock_guard<std::mutex> lock(g_workerMutex);
                 if (rc != 0)

@@ -5,6 +5,13 @@ export const initPaths: (shaderDir: string, dataDir: string) => void;
 
 export const engineVersion: () => string;
 
+/**
+ * The size of the compute work groups the particle test uses under OpenGL ES
+ * here: 256, 128 where the driver allows no more, 0 where it cannot run or
+ * while a test is running.
+ */
+export const esParticleWorkGroupSize: () => number;
+
 /** True once the preview surface of the GPU page exists. */
 export const hasSurface: () => boolean;
 

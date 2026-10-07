@@ -6,7 +6,8 @@ import java.io.File
 import java.io.FileOutputStream
 
 /**
- * JNI bridge to libmangekyo_jni (gpu_engine / VulkanBackend on a worker thread).
+ * JNI bridge to libmangekyo_jni (gpu_engine on a worker thread, with the
+ * Vulkan or the OpenGL ES backend).
  * Formal score contract still preview — results use android path + preview versions.
  */
 object NativeBridge {
@@ -27,6 +28,13 @@ object NativeBridge {
 
     fun probeVulkan(): Boolean = loaded && nativeProbeVulkan()
 
+    /**
+     * The size of the compute work groups the particle test uses under OpenGL
+     * ES here: 256, 128 where the driver allows no more, 0 where it cannot run
+     * or while a test is running.
+     */
+    fun esParticleWorkGroupSize(): Int = if (loaded) nativeEsParticleWorkGroupSize() else 0
+
     fun isRunning(): Boolean = loaded && nativeIsRunning()
 
     fun lastError(): String = if (loaded) nativeLastError() else "engine-not-loaded"
@@ -34,7 +42,15 @@ object NativeBridge {
     fun init(context: Context) {
         if (!loaded || pathsReady) return
         val shaderDir = File(context.filesDir, "shaders").apply { mkdirs() }
-        copyAssetDir(context, "shaders", shaderDir)
+        // The shaders are unpacked again after every install or update: a file
+        // left from an older build would otherwise stay in use under its name.
+        val stamp = File(shaderDir, ".unpacked-for")
+        val installed = runCatching {
+            context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime.toString()
+        }.getOrDefault("")
+        val current = installed.isNotEmpty() && runCatching { stamp.readText() }.getOrDefault("") == installed
+        copyAssetDir(context, "shaders", shaderDir, overwrite = !current)
+        if (!current && installed.isNotEmpty()) runCatching { stamp.writeText(installed) }
         val dataDir = context.getExternalFilesDir(null) ?: context.filesDir
         File(dataDir, "results").mkdirs()
         nativeInitPaths(shaderDir.absolutePath, dataDir.absolutePath)
@@ -81,16 +97,16 @@ object NativeBridge {
 
     fun cliExitCode(): Int = if (loaded) nativeCliExitCode() else -1
 
-    private fun copyAssetDir(context: Context, assetPath: String, outDir: File) {
+    private fun copyAssetDir(context: Context, assetPath: String, outDir: File, overwrite: Boolean) {
         val names = context.assets.list(assetPath) ?: return
         for (name in names) {
             val childAsset = if (assetPath.isEmpty()) name else "$assetPath/$name"
             val children = context.assets.list(childAsset)
             if (children != null && children.isNotEmpty()) {
-                copyAssetDir(context, childAsset, File(outDir, name).apply { mkdirs() })
+                copyAssetDir(context, childAsset, File(outDir, name).apply { mkdirs() }, overwrite)
             } else {
                 val out = File(outDir, name)
-                if (out.exists() && out.length() > 0L) continue
+                if (!overwrite && out.exists() && out.length() > 0L) continue
                 context.assets.open(childAsset).use { input ->
                     FileOutputStream(out).use { output -> input.copyTo(output) }
                 }
@@ -100,6 +116,7 @@ object NativeBridge {
 
     private external fun nativeEngineVersion(): String
     private external fun nativeProbeVulkan(): Boolean
+    private external fun nativeEsParticleWorkGroupSize(): Int
     private external fun nativeInitPaths(shaderDir: String, dataDir: String)
     private external fun nativeSetSurface(surface: Surface?)
     private external fun nativeResizeSurface(width: Int, height: Int)

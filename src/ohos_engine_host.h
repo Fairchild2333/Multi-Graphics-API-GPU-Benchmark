@@ -28,4 +28,7 @@ int RunWorkload(const RunRequest& request, std::string& errorOut);
 
 bool IsRunning();
 
+// See EsParticleWorkGroupSize in gles_backend.h; 0 while a test is running.
+std::uint32_t EsParticleWorkGroupSize();
+
 }  // namespace gpu_bench::ohos_host

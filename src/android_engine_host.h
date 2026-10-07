@@ -1,7 +1,7 @@
 #pragma once
 
-// Android-embedded host for gpu_engine (ANativeWindow + VulkanBackend::Run).
-// Formal score contract / GLES fallback are intentionally out of scope here.
+// Android-embedded host for gpu_engine: runs one test on an ANativeWindow with
+// the Vulkan backend or, when the request says "api=gles", the OpenGL ES one.
 
 #include <android/native_window.h>
 
@@ -11,6 +11,7 @@
 namespace gpu_bench::android_host {
 
 struct RunRequest {
+    // Where the picture goes. Only a headless OpenGL ES test may leave it out.
     ANativeWindow* window = nullptr;
     std::string shaderDir;   // trailing slash expected by ReadFileBytes callers
     std::string dataDir;     // sets GPU_BENCH_DATA_DIR for results path
@@ -20,10 +21,13 @@ struct RunRequest {
     double maxRunTimeSec = 3.0;
 };
 
-// Blocking: constructs VulkanBackend and runs AppBase::Run on the calling thread.
+// Blocking: constructs the backend and runs AppBase::Run on the calling thread.
 // Returns 0 on success, non-zero on failure. Cooperative cancel via RequestStop().
 int RunWorkload(const RunRequest& request, std::string& errorOut);
 
 bool IsRunning();
+
+// See EsParticleWorkGroupSize in gles_backend.h; 0 while a test is running.
+std::uint32_t EsParticleWorkGroupSize();
 
 }  // namespace gpu_bench::android_host

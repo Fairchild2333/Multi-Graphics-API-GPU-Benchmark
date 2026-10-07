@@ -265,7 +265,7 @@ export struct CpuPage {
   /** The choice of test, the button that starts it and its progress. */
   @Builder
   controls() {
-    Text(tr('CPU Benchmark', 'CPU 跑分'))
+    Text(tr('CPU Benchmark', 'CPU 测试'))
       .fontSize(24)
       .fontWeight(FontWeight.Bold)
       .fontColor($r('sys.color.ohos_id_color_text_primary'))

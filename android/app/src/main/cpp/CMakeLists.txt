@@ -69,6 +69,16 @@ set(ANDROID_ASSETS_SHADERS
     "${CMAKE_CURRENT_LIST_DIR}/../assets/shaders")
 file(MAKE_DIRECTORY "${ANDROID_ASSETS_SHADERS}")
 
+# ---- OpenGL ES: the desktop OpenGL sources of the particle test and GPU Burn ----
+# The OpenGL ES backend compiles them on the phone and changes only their
+# version line, so they travel as text. The two gpu_burn_es2 files are the
+# GPU Burn that OpenGL ES 2.0 can run.
+foreach(GL_SHADER compute_gl.comp particle_gl.vert particle_gl.frag fractal_gl.vert gpu_burn_gl.frag
+                  gpu_burn_es2.vert gpu_burn_es2.frag)
+    configure_file("${MANGEKYO_REPO_ROOT}/shaders/${GL_SHADER}"
+                   "${ANDROID_ASSETS_SHADERS}/${GL_SHADER}" COPYONLY)
+endforeach()
+
 if(GLSLC_EXECUTABLE)
     set(ANDROID_SPV_OUTPUTS "")
     foreach(SHADER ${ANDROID_SHADER_SOURCES})

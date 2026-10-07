@@ -129,7 +129,7 @@ fun CpuScreen() {
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = { Text(tr("CPU Benchmark", "CPU 跑分")) },
+                title = { Text(tr("CPU Benchmark", "CPU 测试")) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 ),

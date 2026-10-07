@@ -42,7 +42,7 @@ struct CpuView: View {
                 Button(action: runCpu) {
                     Text(memoryMode
                          ? Localization.tr("Run Cache & Memory Test", "开始缓存与内存测试", "キャッシュ / メモリテストを実行")
-                         : Localization.tr("Run CPU Benchmark", "开始 CPU 跑分", "CPU ベンチマークを実行"))
+                         : Localization.tr("Run CPU Benchmark", "开始 CPU 测试", "CPU ベンチマークを実行"))
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(engine.isRunning || engine.workingDirectory.isEmpty)

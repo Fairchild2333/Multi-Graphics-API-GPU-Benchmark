@@ -835,16 +835,32 @@ void Runner::DecideTimingSource(MemBwReport& report) {
         Dispatch(kReadKernel, chunks, passes * 4);  // warm-up
         double small = (std::numeric_limits<double>::max)();
         double large = (std::numeric_limits<double>::max)();
+        double largeWall = (std::numeric_limits<double>::max)();
         for (int i = 0; i < 2; ++i) {
             small = (std::min)(small, Dispatch(kReadKernel, chunks, passes).gpuMs);
-            large = (std::min)(large, Dispatch(kReadKernel, chunks, passes * 4).gpuMs);
+            const Sample sample = Dispatch(kReadKernel, chunks, passes * 4);
+            large = (std::min)(large, sample.gpuMs);
+            largeWall = (std::min)(largeWall, sample.wallMs);
         }
         const double ratio = small > 0.0 ? large / small : 0.0;
         useGpuTimestamps_ = ratio >= 2.5 && ratio <= 6.0;
+        out_ << "[membw] Timing check: a read of " << FormatMiB(passes * 4 * chunks * kChunkBytes)
+             << " took " << std::fixed << std::setprecision(3) << large << " ms by the GPU's clock, "
+             << largeWall << " ms by wall clock.\n";
         if (!useGpuTimestamps_) {
             out_ << "[membw] GPU timestamps do not scale with the workload (x4 work -> x"
                  << std::fixed << std::setprecision(2) << ratio
                  << " time); falling back to wall-clock timing.\n";
+        } else if (large < 0.5 * largeWall && largeWall - large > 2.0) {
+            // They can scale with the work and still leave most of it out. An
+            // Adreno 660 (driver 512.530, 2026-10-07) read 116 GB/s at every
+            // data-set size up to 512 MiB, twice what its memory can deliver.
+            // The margin of 2 ms keeps the cost of a submit and a wake-up, which
+            // only the wall clock sees, from deciding this on a fast GPU.
+            useGpuTimestamps_ = false;
+            out_ << "[membw] GPU timestamps cover " << std::fixed << std::setprecision(2) << large
+                 << " ms of a dispatch that took " << largeWall
+                 << " ms by wall clock; falling back to wall-clock timing.\n";
         }
     }
     report.timingSource = useGpuTimestamps_ ? "gpu_timestamp" : "wall_clock";

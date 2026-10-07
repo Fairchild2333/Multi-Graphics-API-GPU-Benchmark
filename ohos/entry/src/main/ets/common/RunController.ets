@@ -10,7 +10,8 @@ import { fileIo as fs } from '@kit.CoreFileKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { cpuRun, gpuRun } from './EngineOutput';
 import {
-  CUSTOM, DEFAULT_PARTICLES, DEFAULT_SECONDS, DEFAULT_STEPS, gpuCommandLine, gpuRequestId, gpuTestName, isPreset,
+  API_GLES, API_VULKAN, CUSTOM, DEFAULT_PARTICLES, DEFAULT_SECONDS, DEFAULT_STEPS, gpuCommandLine, gpuRequestId,
+  gpuTestName, gpuTestsOf, isPreset,
   parseGpuRequest,
   ParsedRequest, PARTICLE_PRESETS, SECOND_PRESETS, STEP_PRESETS
 } from './GpuOptions';
@@ -45,6 +46,8 @@ export class AppState {
   /** False until the shaders are in place and the engine knows its folders. */
   @Trace engineReady: boolean = false;
   @Trace engineVersion: string = '';
+  /** Work-group size of the particle test under OpenGL ES: 256, 128, or 0 when not known. */
+  @Trace esParticleWorkGroupSize: number = 0;
   @Trace gpuRunning: boolean = false;
   @Trace gpuStatus: string = '';
   @Trace gpuWorkload: string = 'stream';
@@ -58,6 +61,8 @@ export class AppState {
   @Trace gpuCustomSeconds: string = '';
   /** Particle test only: compute without a picture, as "Headless" in the desktop app. */
   @Trace gpuHeadless: boolean = false;
+  /** The graphics API of the GPU page: 'vulkan', 'gles' (OpenGL ES 3.1) or 'gles2'. */
+  @Trace gpuApi: string = API_VULKAN;
   @Trace cpuMode: string = 'all';
   /** The tab a command-line request wants to be shown, or -1. */
   @Trace requestedTab: number = -1;
@@ -155,6 +160,7 @@ export class RunController {
     try {
       bridge.initPaths(shaderDir, filesDir);
       appState.engineVersion = bridge.engineVersion();
+      appState.esParticleWorkGroupSize = bridge.esParticleWorkGroupSize();
       appState.engineReady = true;
     } catch (e) {
       logLine('engine not available: ' + JSON.stringify(e));
@@ -174,6 +180,13 @@ export class RunController {
     if (!CPU_TEST_MODES.has(test) && GPU_TESTS.indexOf(gpuRequestId(test)) < 0) {
       logLine(`AUTORUN refused test=${test} reason=unknown_test`);
       return;
+    }
+    if (!CPU_TEST_MODES.has(test)) {
+      const asked: ParsedRequest = parseGpuRequest(test);
+      if (gpuTestsOf(asked.api).indexOf(asked.testId) < 0) {
+        logLine(`AUTORUN refused test=${test} reason=test_not_under_this_api`);
+        return;
+      }
     }
     this.pending = new PendingRequest(test, seconds, true);
     appState.requestedTab = CPU_TEST_MODES.has(test) ? 1 : 0;
@@ -199,6 +212,7 @@ export class RunController {
     const asked: ParsedRequest = parseGpuRequest(wanted.test);
     appState.gpuWorkload = asked.testId;
     appState.gpuHeadless = asked.headless;
+    appState.gpuApi = asked.api;
     if (asked.particles > 0) {
       appState.gpuParticleChoice = isPreset(PARTICLE_PRESETS, asked.particles) ? asked.particles : CUSTOM;
       if (appState.gpuParticleChoice === CUSTOM) {
@@ -273,7 +287,7 @@ export class RunController {
       return;
     }
     if (GPU_COMMAND_LINE_TESTS.indexOf(gpuRequestId(workloadId)) >= 0) {
-      this.startGpuCommandLine(workloadId, seconds);
+      this.startWithoutPicture(workloadId, seconds);
       return;
     }
     this.pending = new PendingRequest(workloadId, seconds, false);
@@ -308,6 +322,36 @@ export class RunController {
     }
     appState.gpuRunning = ok;
     return ok;
+  }
+
+  /**
+   * The headless particle test under OpenGL ES: no picture and no full screen
+   * either, but it runs in the engine host, which makes the context it needs.
+   */
+  private startGpuHeadless(request: string, seconds: number): boolean {
+    bridge.pollOutput();  // drop lines left over from an earlier run
+    this.owner = 'gpu';
+    gpuRun.begin();
+    const ok: boolean = bridge.startWorkload(request, seconds);
+    this.gpuCommandLine = ok;
+    this.gpuStopped = false;
+    this.keepScreenOn(ok);
+    if (ok) {
+      const name: string = gpuTestName('stream');
+      appState.gpuStatus = tr(`Running ${name} (headless), ${seconds} s`, `正在运行 ${name}（Headless），${seconds} 秒`);
+    } else {
+      gpuRun.active = false;
+      const error: string = bridge.lastError();
+      appState.gpuStatus = error.length > 0 ? error : tr('Start failed', '启动失败');
+    }
+    appState.gpuRunning = ok;
+    return ok;
+  }
+
+  /** A test without a picture: through the command line, or in the host under OpenGL ES. */
+  private startWithoutPicture(request: string, seconds: number): boolean {
+    return parseGpuRequest(request).api === API_GLES ? this.startGpuHeadless(request, seconds)
+      : this.startGpuCommandLine(request, seconds);
   }
 
   stopGpu(): void {
@@ -450,7 +494,7 @@ export class RunController {
     }
     if (GPU_COMMAND_LINE_TESTS.indexOf(gpuRequestId(wanted.test)) >= 0) {
       this.pending = undefined;
-      const started: boolean = this.startGpuCommandLine(wanted.test, wanted.seconds > 0 ? wanted.seconds : 3);
+      const started: boolean = this.startWithoutPicture(wanted.test, wanted.seconds > 0 ? wanted.seconds : 3);
       if (wanted.fromCommandLine) {
         logLine(started ? `AUTORUN started test=${wanted.test}`
           : `AUTORUN failed test=${wanted.test} reason=${bridge.lastError()}`);

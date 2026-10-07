@@ -22,7 +22,7 @@ struct AboutView: View {
                                     .fontWeight(.bold)
                                 Text(Localization.tr(
                                     "Cross-API CPU & GPU Benchmark Suite",
-                                    "跨 API CPU 与 GPU 跑分套件"))
+                                    "跨 API CPU 与 GPU 测试套件"))
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                                 Text(Localization.tr("v1.0 — macOS Edition", "v1.0 —— macOS 版", "v1.0 — macOS 版"))

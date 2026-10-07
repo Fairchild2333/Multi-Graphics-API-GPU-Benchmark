@@ -120,3 +120,9 @@ Desktop.ini
 # Accidental console dumps
 stdout.txt
 stderr.txt
+
+# Copies of shaders/*_gl.* that the mobile builds put beside the SPIR-V
+android/app/src/main/assets/shaders/*_gl.*
+android/app/src/main/assets/shaders/*_es2.*
+ohos/entry/src/main/resources/rawfile/shaders/*_gl.*
+ohos/entry/src/main/resources/rawfile/shaders/*_es2.*

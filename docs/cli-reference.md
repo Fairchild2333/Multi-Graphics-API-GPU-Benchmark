@@ -180,6 +180,7 @@ ctest --test-dir build -C Release
 | `--cpu-membw-no-storage` | skip the storage test, so that no file is written |
 | `--cpu-membw-storage-dir <path>` | directory for the storage test file; default is the temp directory on Windows and the results directory elsewhere |
 | `--cpu-membw-storage-mib <MiB>` | size of the storage test file; default `1024`, range `32..65536` |
+| `--cpu-membw-reread <results.json>` | reads the cache levels of every saved `cpu_membw` result in the file again, off the curves the result keeps, with the rules of this build; measures nothing and does not change the file |
 | `--cpu-membw-debug-classes <N>` / `--cpu-membw-debug-hide-llc` | diagnostics: treat the cores as `N` classes, and ignore the last cache the OS reports; both make the result a preview |
 | `--workload membw` | run the standalone memory-bandwidth sweep (Vulkan only, compute-only, no window); `--gpu` selects the device and `--backend` must be `auto` or `vulkan` |
 | `--membw-max-mib <MiB>` | largest data set of the `membw` sweep; default `2048`, range `1..65536`; a non-default value makes the result a preview |

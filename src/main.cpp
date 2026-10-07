@@ -363,6 +363,133 @@ static gpu_bench::BenchmarkResult MakeStoredCpuMemBwResult(
 }
 #endif
 
+// Runs `--cpu-membw-reread <file>`: reads the cache levels of every CPU cache
+// result in a results file again, off the curves the result keeps, with the
+// rules of this build. Nothing is measured and the file is not changed.
+static int RereadCpuMemoryBandwidthCli(const std::string& path) {
+    std::ifstream file(std::filesystem::u8path(path), std::ios::binary);
+    if (!file) {
+        std::cerr << "Cannot open " << path << "\n";
+        return 2;
+    }
+    std::ostringstream buffer;
+    buffer << file.rdbuf();
+    std::string text = buffer.str();
+    if (text.compare(0, 3, "\xEF\xBB\xBF") == 0) text.erase(0, 3);
+
+    bool intact = true;
+    const auto results = gpu_bench::ParseResultsJson(text, &intact);
+    if (!intact)
+        std::cerr << "[warn] The file is damaged or cut off; reading what can be read.\n";
+
+    std::uint32_t found = 0;
+    for (const auto& result : results) {
+        if (result.workload != gpu_bench::kCpuMemBwWorkloadId) continue;
+        ++found;
+
+        // The settings of a result: "key=value" pairs separated by ';'.
+        std::map<std::string, std::string> fields;
+        std::istringstream pairs(result.workloadConfig);
+        for (std::string pair; std::getline(pairs, pair, ';');) {
+            const std::size_t equals = pair.find('=');
+            if (equals != std::string::npos) fields[pair.substr(0, equals)] = pair.substr(equals + 1);
+        }
+        const auto field = [&](const std::string& key) {
+            const auto it = fields.find(key);
+            return it == fields.end() ? std::string() : it->second;
+        };
+
+        // The curves: "curve_<mode>_<kernel>=<KiB>:<GB/s>,...".
+        std::vector<gpu_bench::CpuMemBwPoint> points;
+        std::vector<std::string> modes;
+        for (const auto& entry : fields) {
+            const std::string& key = entry.first;
+            if (key.compare(0, 6, "curve_") != 0) continue;
+            std::string mode;
+            std::string kernel;
+            for (const char* name : {"write_nt", "copy_nt", "read", "write", "copy", "zero"}) {
+                const std::string suffix = std::string("_") + name;
+                if (key.size() > 6 + suffix.size() &&
+                    key.compare(key.size() - suffix.size(), suffix.size(), suffix) == 0) {
+                    mode = key.substr(6, key.size() - 6 - suffix.size());
+                    kernel = name;
+                    break;
+                }
+            }
+            if (mode.empty()) continue;
+            if (kernel == "read") modes.push_back(mode);
+            std::istringstream samples(entry.second);
+            for (std::string sample; std::getline(samples, sample, ',');) {
+                const std::size_t colon = sample.find(':');
+                if (colon == std::string::npos) continue;
+                gpu_bench::CpuMemBwPoint point;
+                point.mode = mode;
+                point.kernel = kernel;
+                point.blockBytes = std::strtoull(sample.c_str(), nullptr, 10) * 1024ull;
+                point.medianGBps = std::strtod(sample.c_str() + colon + 1, nullptr);
+                point.bestGBps = point.medianGBps;
+                points.push_back(point);
+            }
+        }
+
+        std::cout << "\n========== " << result.id << "  " << result.timestamp << "  "
+                  << (result.deviceModel.empty() ? result.deviceName
+                                                 : result.deviceModel + " / " + result.deviceName)
+                  << " ==========\n";
+        if (modes.empty()) {
+            std::cout << "This result keeps no curves; its levels cannot be read again.\n";
+            continue;
+        }
+        const bool arm = result.processArchitecture.find("ARM") != std::string::npos ||
+                         field("vector") == "NEON";
+        const std::uint32_t classCount =
+            static_cast<std::uint32_t>(std::strtoul(field("coreClasses").c_str(), nullptr, 10));
+        const std::uint32_t allThreads =
+            static_cast<std::uint32_t>(std::strtoul(field("allCoreThreads").c_str(), nullptr, 10));
+
+        // The fastest class first, all cores last.
+        std::sort(modes.begin(), modes.end(), [](const std::string& a, const std::string& b) {
+            const auto rank = [](const std::string& mode) {
+                if (mode == "single") return 0ul;
+                if (mode == "all") return 1000ul;
+                return std::strtoul(mode.c_str() + mode.rfind('_') + 1, nullptr, 10);
+            };
+            return rank(a) < rank(b);
+        });
+        for (const std::string& mode : modes) {
+            const bool all = mode == "all";
+            const std::string classRank =
+                all ? std::string() : (mode == "single" ? "0" : mode.substr(mode.rfind('_') + 1));
+            std::string source = all ? field("cacheSource") : field("class" + classRank + "CacheSource");
+            if (source.empty()) source = field("cacheSource");
+            const std::string title = all
+                ? "all cores (" + std::to_string(allThreads) + " threads, data set sizes are per thread)"
+                : "class " + classRank + ", " + field("class" + classRank + "Name") + ", one thread";
+            if (source != "curve") {
+                std::cout << "\n--- " << title << " ---\n"
+                          << "Its levels come from the cache sizes the system reported; nothing to read again.\n";
+                continue;
+            }
+            if (all && classCount > 1) {
+                std::cout << "\n--- " << title << " ---\n"
+                          << "A CPU with several core types reports memory only for all cores: "
+                          << field("all_memory_read") << " / " << field("all_memory_write") << " / "
+                          << field("all_memory_copy") << " GB/s (read / write / copy), unchanged.\n";
+                continue;
+            }
+            gpu_bench::RereadCpuMemBwLevels(points, mode, all ? (std::max)(1u, allThreads) : 1u, arm,
+                                            title, std::cout);
+        }
+    }
+    if (found == 0) {
+        std::cout << "No CPU cache result (cpu_membw) in " << path << "\n";
+        return 1;
+    }
+    std::cout << "\nRead from the saved curves, which keep one decimal: a figure may differ from the"
+              << "\nsaved summary in its last digit. The file was not changed.\n";
+    return 0;
+}
+
 // Runs `--cpu-membw`. Returns the process exit code.
 static int RunCpuMemoryBandwidthCli(gpu_bench::CpuMemBwConfig config, bool saveResult) {
 #ifdef HAVE_CPU_MEMBW
@@ -1534,6 +1661,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     bool saveMembwResults = true;
     gpu_bench::MemBwConfig membwCfg;
     bool cpuMembwRequested = false;
+    std::string cpuMembwRereadPath;
     bool saveCpuMembwResults = true;
     gpu_bench::CpuMemBwConfig cpuMembwCfg;
     gpu_bench::CpuBenchmarkConfig cpuCfg;
@@ -1634,7 +1762,10 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         } else if (std::strcmp(argv[i], "--cpu-membw-debug-hide-llc") == 0) {
             cpuMembwRequested = true;
             cpuMembwCfg.debugHideLastCache = true;
-        } else if (std::strcmp(argv[i], "--cpu-membw-max-mib") == 0 ||
+        } else if (std::strcmp(argv[i], "--cpu-membw-reread") == 0 && i + 1 < argc) {
+            cpuMembwRereadPath = argv[++i];
+        } else if (std::strcmp(argv[i], "--cpu-membw-reread") == 0 ||
+                   std::strcmp(argv[i], "--cpu-membw-max-mib") == 0 ||
                    std::strcmp(argv[i], "--cpu-membw-vector") == 0 ||
                    std::strcmp(argv[i], "--cpu-membw-storage-dir") == 0 ||
                    std::strcmp(argv[i], "--cpu-membw-storage-mib") == 0 ||
@@ -1894,6 +2025,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --cpu-membw-vector <auto|128|256|512> cpu-membw: vector width of the kernels (default: auto = widest)\n"
                       << "  --cpu-membw-no-save                  cpu-membw: do not append the result to results.json\n"
                       << "  --cpu-membw-curve-levels             cpu-membw: read the cache levels off the curve, not from the OS\n"
+                      << "  --cpu-membw-reread <results.json>    Read the cache levels of saved cpu-membw results again from their curves (measures nothing, changes nothing)\n"
                       << "  --cpu-membw-no-storage               cpu-membw: skip the storage test (writes no file)\n"
                       << "  --cpu-membw-storage-dir <path>       cpu-membw: directory for the storage test file\n"
                       << "  --cpu-membw-storage-mib <MiB>        cpu-membw: size of the storage test file (default: 1024)\n"
@@ -1951,6 +2083,10 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         std::cerr << "--complete-suite and --fill-missing are mutually exclusive.\n";
         return 2;
     }
+
+    // Reading saved results again needs neither a GPU nor a measurement.
+    if (!cpuMembwRereadPath.empty())
+        return RereadCpuMemoryBandwidthCli(cpuMembwRereadPath);
 
     // The CPU memory sweep, like the CPU benchmark below, needs no GPU.
     if (cpuMembwRequested)

@@ -229,6 +229,22 @@ else()
     message(STATUS "OpenGL backend: DISABLED (by option)")
 endif()
 
+# ---- OpenGL ES 3.1 backend (Android, HarmonyOS: the particle test and GPU Burn) ----
+# A phone has OpenGL ES where the desktop has OpenGL. The backend is its own
+# file (src/gles_backend.cpp) and uses the desktop OpenGL shader sources.
+if(ANDROID)
+    list(APPEND BACKEND_SOURCES src/gles_backend.cpp)
+    list(APPEND BACKEND_LIBS    EGL GLESv3)
+    list(APPEND BACKEND_DEFS    HAVE_GLES)
+    message(STATUS "OpenGL ES backend: ENABLED (Android NDK / EGL)")
+elseif(OHOS)
+    # libEGL.so and libGLESv3.so are linked into the app's NAPI library
+    # (see ohos/entry/src/main/cpp), as libvulkan.so is.
+    list(APPEND BACKEND_SOURCES src/gles_backend.cpp)
+    list(APPEND BACKEND_DEFS    HAVE_GLES)
+    message(STATUS "OpenGL ES backend: ENABLED (HarmonyOS / EGL)")
+endif()
+
 # ---- Engine library (shared by the CLI and the WinUI3 C++/WinRT GUI) ----
 add_library(gpu_engine STATIC ${COMMON_SOURCES} ${BACKEND_SOURCES})
 if(GPU_BENCH_EMBEDDED)

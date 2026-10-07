@@ -269,6 +269,13 @@ object GpuRun {
     var displayLimited by mutableStateOf(false)
 
     /**
+     * The size of the compute work groups when the particle test did not run in
+     * its own (256): the driver allows no more than this. 0 otherwise. Such a
+     * result is in a score group of its own.
+     */
+    var workGroupSize by mutableStateOf(0)
+
+    /**
      * The VRAM / cache bandwidth sweep: one point per kernel ("read", "write",
      * "copy") and data-set size, and for every kernel its cache and memory level.
      */
@@ -286,6 +293,7 @@ object GpuRun {
         scoreLine = ""
         fpsLine = ""
         displayLimited = false
+        workGroupSize = 0
         memoryPoints.clear()
         memoryLevels.clear()
     }
@@ -340,6 +348,10 @@ object GpuRun {
         val trimmed = line.trim()
         // The engine's own verdict: frames had to wait for the display.
         if (trimmed.startsWith(">> Display-bound")) displayLimited = true
+        // The engine ran the particle test in smaller work groups than its own.
+        if (trimmed.startsWith(">> Work groups of ")) {
+            workGroupSize = trimmed.removePrefix(">> Work groups of ").takeWhile { it.isDigit() }.toIntOrNull() ?: 0
+        }
         if (scoreLine.isEmpty() && rateKeys.any { trimmed.startsWith(it) }) {
             scoreLine = trimmed.replace(Regex(" {2,}"), " ")
         } else if (fpsLine.isEmpty() && trimmed.startsWith("Avg FPS:")) {

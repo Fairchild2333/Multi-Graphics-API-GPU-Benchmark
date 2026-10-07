@@ -46,7 +46,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.delay
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -161,8 +160,24 @@ fun GpuScreen() {
         }
     }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    val vulkanOk = selectedBackend == "Vulkan" && caps.vulkanLoaderPresent && NativeBridge.isEngineLoaded
-    val runEnabled = vulkanOk && optionsValid && WorkloadRegistry.gpuWorkloads.any { it.id == selectedWorkloadId }
+    // OpenGL ES 3.1 has compute shaders and so two of the tests; OpenGL ES 2.0
+    // has a GPU Burn of its own.
+    val glesAvailable = caps.glesMajor > 3 || (caps.glesMajor == 3 && caps.glesMinor >= 1)
+    val gles2Available = caps.glesMajor >= 2
+    fun apiAvailable(name: String): Boolean = when (name) {
+        GpuOptions.API_GLES -> glesAvailable
+        GpuOptions.API_GLES2 -> gles2Available
+        else -> caps.vulkanLoaderPresent
+    }
+    val api = when (selectedBackend) {
+        "GLES31" -> GpuOptions.API_GLES
+        "GLES2" -> GpuOptions.API_GLES2
+        else -> GpuOptions.API_VULKAN
+    }
+    val apiReady = NativeBridge.isEngineLoaded && selectedBackend != "Unsupported" && apiAvailable(api)
+    val testOnApi = selectedWorkloadId in GpuOptions.testsOf(api)
+    val runEnabled = apiReady && testOnApi && optionsValid &&
+        WorkloadRegistry.gpuWorkloads.any { it.id == selectedWorkloadId }
 
     fun start(workloadId: String, seconds: Double): Boolean {
         NativeBridge.pollOutput()  // drop lines left over from an earlier run
@@ -211,18 +226,53 @@ fun GpuScreen() {
         return ok
     }
 
+    // The headless particle test under OpenGL ES: no picture and no full screen
+    // either, but it runs in the engine host, which makes the context it needs.
+    fun startHeadlessTest(request: String, seconds: Int): Boolean {
+        NativeBridge.pollOutput()  // drop lines left over from an earlier run
+        NativeBridge.outputOwner = "gpu"
+        GpuRun.begin()
+        val ok = NativeBridge.startWorkload(request, seconds.toDouble())
+        commandLineRun = ok
+        commandLineStopped = false
+        if (!ok) GpuRun.active = false
+        statusText = if (ok) {
+            tr(
+                "Running ${testName("stream")} (headless), $seconds s",
+                "正在运行 ${testName("stream")}（Headless），$seconds 秒",
+            )
+        } else {
+            NativeBridge.lastError().ifEmpty { tr("Start failed", "启动失败") }
+        }
+        running = ok
+        return ok
+    }
+
     // A test requested over adb, see AutoRun.
     val request = AutoRun.pending
     LaunchedEffect(request) {
         val wanted = request ?: return@LaunchedEffect
         if (wanted.test.substringBefore('?') !in AutoRun.gpuTests) return@LaunchedEffect
         AutoRun.pending = null
-        if (!caps.vulkanLoaderPresent || !NativeBridge.isEngineLoaded) {
-            AutoRun.log("AUTORUN refused test=${wanted.test} reason=vulkan_or_engine_missing")
+        val asked = GpuOptions.parse(wanted.test)
+        if (!NativeBridge.isEngineLoaded || !apiAvailable(asked.api)) {
+            val missing = when (asked.api) {
+                GpuOptions.API_GLES -> "gles31_or_engine_missing"
+                GpuOptions.API_GLES2 -> "gles2_or_engine_missing"
+                else -> "vulkan_or_engine_missing"
+            }
+            AutoRun.log("AUTORUN refused test=${wanted.test} reason=$missing")
             return@LaunchedEffect
         }
-        selectedBackend = "Vulkan"
-        val asked = GpuOptions.parse(wanted.test)
+        if (asked.testId !in GpuOptions.testsOf(asked.api)) {
+            AutoRun.log("AUTORUN refused test=${wanted.test} reason=test_not_under_this_api")
+            return@LaunchedEffect
+        }
+        selectedBackend = when (asked.api) {
+            GpuOptions.API_GLES -> "GLES31"
+            GpuOptions.API_GLES2 -> "GLES2"
+            else -> "Vulkan"
+        }
         selectedWorkloadId = asked.testId
         asked.particles?.let { count ->
             particleChoice = if (GpuOptions.particlePresets.any { it.value == count }) count else GpuOptions.CUSTOM
@@ -238,7 +288,11 @@ fun GpuScreen() {
         secondChoice = if (GpuOptions.secondPresets.any { it.value == askedSeconds }) askedSeconds else GpuOptions.CUSTOM
         if (secondChoice == GpuOptions.CUSTOM) customSeconds = askedSeconds.toString()
         if (wanted.test.substringBefore('?') in WorkloadRegistry.gpuCommandLineTests) {
-            val started = startCommandLineTest(wanted.test, askedSeconds)
+            val started = if (GpuOptions.runsOnCommandLine(wanted.test)) {
+                startCommandLineTest(wanted.test, askedSeconds)
+            } else {
+                startHeadlessTest(wanted.test, askedSeconds)
+            }
             AutoRun.log(
                 if (started) "AUTORUN started test=${wanted.test}"
                 else "AUTORUN failed test=${wanted.test} reason=${NativeBridge.lastError()}",
@@ -255,7 +309,11 @@ fun GpuScreen() {
     // because the screen may have to turn to landscape first.
     fun requestRun(workloadId: String, seconds: Double) {
         if (workloadId.substringBefore('?') in WorkloadRegistry.gpuCommandLineTests) {
-            startCommandLineTest(workloadId, seconds.toInt())
+            if (GpuOptions.runsOnCommandLine(workloadId)) {
+                startCommandLineTest(workloadId, seconds.toInt())
+            } else {
+                startHeadlessTest(workloadId, seconds.toInt())
+            }
             return
         }
         launchFromAdb = false
@@ -305,7 +363,7 @@ fun GpuScreen() {
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = { Text(tr("GPU Benchmark", "GPU 跑分")) },
+                title = { Text(tr("GPU Benchmark", "GPU 测试")) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
@@ -329,6 +387,7 @@ fun GpuScreen() {
                                 particles ?: GpuOptions.DEFAULT_PARTICLES,
                                 steps ?: GpuOptions.DEFAULT_STEPS,
                                 headless,
+                                api,
                             ),
                             (seconds ?: GpuOptions.DEFAULT_SECONDS).toDouble(),
                         )
@@ -367,11 +426,8 @@ fun GpuScreen() {
                         Text(tr("Runs full screen", "全屏运行"), style = MaterialTheme.typography.titleMedium)
                         Text(
                             text = tr(
-                                "A test takes over the screen in landscape. It always renders 1280 × 720, as the " +
-                                    "desktop version does, and the system scales the picture to the screen, so a " +
-                                    "score does not depend on the size or resolution of the display.",
-                                "测试开始后横屏占满屏幕。渲染尺寸固定为 1280 × 720，和桌面版相同，再由系统缩放到屏幕，" +
-                                    "所以成绩不随屏幕大小和分辨率变化。",
+                                "A test takes over the screen in landscape. It always renders 1280 × 720.",
+                                "测试开始后横屏占满屏幕。渲染尺寸固定为 1280 × 720。",
                             ),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -396,32 +452,37 @@ fun GpuScreen() {
                         FilterChip(
                             selected = selectedBackend == "GLES31",
                             onClick = { selectedBackend = "GLES31" },
-                            label = { Text("GL ES 3.1") },
+                            enabled = glesAvailable,
+                            label = { Text("OpenGL ES 3.1") },
+                        )
+                        FilterChip(
+                            selected = selectedBackend == "GLES2",
+                            onClick = { selectedBackend = "GLES2" },
+                            enabled = gles2Available,
+                            label = { Text("OpenGL ES 2.0") },
                         )
                     }
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    // What the device has, as plain text: these are facts about it, not
+                    // choices, and must not look like the chips above.
+                    // The first line names the same three APIs as the chips, so that
+                    // each one is said to be there or left out.
+                    val offered = listOfNotNull(
+                        if (caps.vulkanLoaderPresent) "Vulkan" else null,
+                        if (glesAvailable) "OpenGL ES 3.1" else null,
+                        if (gles2Available) "OpenGL ES 2.0" else null,
+                    ).joinToString(tr(", ", "、")).ifEmpty { tr("none", "无") }
+                    Text(
+                        text = tr("This device supports: ", "本机支持：") + offered,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 8.dp),
-                    ) {
-                        AssistChip(
-                            onClick = {},
-                            label = {
-                                Text(
-                                    if (caps.vulkanLoaderPresent) tr("Vulkan loader OK", "Vulkan 加载器可用")
-                                    else tr("Vulkan unavailable", "Vulkan 不可用"),
-                                )
-                            },
-                        )
-                        AssistChip(
-                            onClick = {},
-                            label = { Text("GL ES ${caps.glesVersionLabel}") },
-                        )
-                        if (caps.vulkanHardwareFeature) {
-                            AssistChip(onClick = {}, label = { Text(tr("Vulkan HW feature", "Vulkan 硬件特性")) })
-                        }
-                        AssistChip(onClick = {}, label = { Text(caps.abi) })
-                        AssistChip(onClick = {}, label = { Text(caps.androidRelease) })
-                    }
+                    )
+                    Text(
+                        text = tr("System: ", "系统：") + caps.androidRelease + " · " + caps.abi +
+                            tr(" · driver's OpenGL ES version ", " · 驱动的 OpenGL ES 版本 ") + caps.glesVersionLabel,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     caps.notes.forEach { note ->
                         Text(
                             text = note,
@@ -432,27 +493,33 @@ fun GpuScreen() {
                     }
                 }
 
-                Text(
-                    text = when {
+                // Why "Run" is off, or what the last run left here; nothing otherwise.
+                val notice = when {
                         // A custom value outside its range is why "Run" is off;
                         // that comes before what the last run left here.
-                        !running && vulkanOk && !optionsValid -> tr(
+                        !running && apiReady && testOnApi && !optionsValid -> tr(
                             "The custom value is not in its range.",
                             "自定义的数值不在允许的范围内。",
                         )
+                        !running && apiReady && !testOnApi -> tr(
+                            "This test is not available under the selected API. OpenGL ES 3.1 has the particle " +
+                                "test and GPU Burn; OpenGL ES 2.0 has a GPU Burn of its own.",
+                            "所选的图形 API 下没有这项测试。OpenGL ES 3.1 有粒子测试和 GPU Burn；OpenGL ES 2.0 只有它自己的 GPU Burn。",
+                        )
                         statusText.isNotEmpty() -> statusText
-                        !vulkanOk -> tr(
-                            "Vulkan Run needs API 24+ loader + Surface. GLES path not wired yet.",
-                            "运行需要 Android 7.0（API 24）以上的 Vulkan 加载器和可用的预览画面；GL ES 路径还没有接入。",
+                        !apiReady -> tr(
+                            "A run needs Vulkan (Android 7.0 or later) or OpenGL ES.",
+                            "运行需要 Vulkan（Android 7.0 以上）或 OpenGL ES。",
                         )
-                        else -> tr(
-                            "Scores are android_preview; do not mix them with desktop scores.",
-                            "成绩属于 android_preview，不要和桌面版的成绩放在一起比较。",
-                        )
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                        else -> ""
+                    }
+                if (notice.isNotEmpty()) {
+                    Text(
+                        text = notice,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             },
             secondary = {
                 Column {
@@ -501,10 +568,24 @@ fun GpuScreen() {
                                     workload.id,
                                     steps ?: GpuOptions.DEFAULT_STEPS,
                                     seconds ?: GpuOptions.DEFAULT_SECONDS,
+                                    api,
+                                    caps.esParticleWorkGroupSize,
                                 ),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            if (workload.id !in GpuOptions.testsOf(api)) {
+                                Text(
+                                    text = if (workload.id in GpuOptions.testsOf(GpuOptions.API_GLES)) {
+                                        tr("Vulkan or OpenGL ES 3.1", "需要 Vulkan 或 OpenGL ES 3.1")
+                                    } else {
+                                        tr("Vulkan only", "仅 Vulkan")
+                                    },
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.padding(top = 4.dp),
+                                )
+                            }
                             if (workload.isPreview) {
                                 Text(
                                     text = tr("preview", "预览"),
@@ -615,6 +696,23 @@ fun GpuScreen() {
                                         "The frame rate was held at the refresh rate of the display, so the GPU was " +
                                             "not kept busy and this score may be too low. Run a heavier test.",
                                         "帧率被屏幕刷新率限制住了，GPU 没有跑满，这个成绩可能偏低、不准确。请换负载更高的测试。",
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                            if (GpuRun.workGroupSize > 0) {
+                                val size = GpuRun.workGroupSize
+                                Text(
+                                    tr(
+                                        "This device's OpenGL ES driver allows compute work groups of $size only, so " +
+                                            "the particle test ran in groups of $size instead of 256. The result is " +
+                                            "saved in a group of its own (its name has _wg$size) and is not one of " +
+                                            "the results in groups of 256: on a GPU that runs both it read the same " +
+                                            "at 65,536 particles and 2-3% higher at a million and more.",
+                                        "这台设备的 OpenGL ES 驱动只支持 $size 线程的工作组，粒子测试改用 $size 分组运行" +
+                                            "（标准是 256）。成绩单独保存为一组（名字带 _wg$size），不和 256 分组的成绩" +
+                                            "混在一起：在两种都能跑的 GPU 上，65,536 粒子时两者相同，100 万以上时它高 2–3%。",
                                     ),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.error,

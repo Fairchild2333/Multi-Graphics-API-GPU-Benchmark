@@ -98,6 +98,20 @@ constexpr std::uint32_t kMaxRemeasure = 2;
 constexpr double kPlateauSpread = 1.15;
 constexpr std::size_t kPlateauMinPoints = 3;
 constexpr double kLevelDrop = 1.15;
+// The system cache behind the last cache of the CPU can be so small that only
+// two data sets of the sweep fall into it (8 and 12 MiB on a Snapdragon 8 Gen
+// 2, whose 5 MiB system cache follows an 8 MiB L3). Two data sets directly
+// before the memory tail are a level when they agree this closely and stand
+// clear of both neighbours by kLevelDrop.
+constexpr double kShortPlateauSpread = 1.05;
+// On an ARM system a cache the OS does not list, or a fourth level on the
+// curve, is the system cache of the SoC, which the CPU shares with the GPU and
+// other parts. Elsewhere such a level keeps a number.
+#if defined(CPUMEM_ARM64)
+constexpr bool kSystemCacheNaming = true;
+#else
+constexpr bool kSystemCacheNaming = false;
+#endif
 // Storage test: 1 MiB sequential requests and 4 KiB random requests on a file
 // that is written once beforehand.
 constexpr std::size_t kStorageBlockBytes = 1024 * 1024;
@@ -1339,6 +1353,16 @@ std::vector<Plateau> DetectPlateaus(const Curve& curve, bool& flatTail) {
             } else {
                 plateaus.push_back({start, end, level});
             }
+        } else if (flatTail && end + 1 == cacheEnd && end - start + 1 == 2 && !plateaus.empty()) {
+            // A short level directly before memory: see kShortPlateauSpread.
+            const double slower = (std::min)(curve.rates[start], curve.rates[end]);
+            const double faster = (std::max)(curve.rates[start], curve.rates[end]);
+            const double level = levelOf(start, end);
+            const double tail = levelOf(tailStart, count - 1);
+            if (slower > 0.0 && faster / slower <= kShortPlateauSpread &&
+                plateaus.back().level >= level * kLevelDrop && level >= tail * kLevelDrop) {
+                plateaus.push_back({start, end, level});
+            }
         }
         start = end + 1;
     }
@@ -1359,10 +1383,18 @@ CpuMemBwLevelSummary CurveLevel(const std::string& name, const ModeCurves& curve
     return level;
 }
 
+// The name of the n-th cache the OS does not list (0-based): "SoC" on an ARM
+// system, the next level number elsewhere.
+std::string UnlistedLevelName(std::size_t index, std::uint32_t lastListedLevel, bool systemCache) {
+    if (!systemCache) return "L" + std::to_string(lastListedLevel + 1 + index);
+    return index == 0 ? "SoC" : "SoC" + std::to_string(index + 1);
+}
+
 // Levels from the cache sizes the OS reports.
 CpuMemBwModeSummary SummariseMode(const std::vector<CpuMemBwPoint>& points,
                                   const std::string& mode, std::uint32_t threads,
-                                  const std::vector<CpuCacheLevel>& caches) {
+                                  const std::vector<CpuCacheLevel>& caches,
+                                  bool systemCacheNaming = kSystemCacheNaming) {
     CpuMemBwModeSummary summary;
     summary.mode = mode;
     summary.threads = threads;
@@ -1421,7 +1453,7 @@ CpuMemBwModeSummary SummariseMode(const std::vector<CpuMemBwPoint>& points,
         if (flatTail && !above.empty()) {
             for (std::size_t i = 0; i + 1 < above.size(); ++i) {
                 summary.levels.push_back(CurveLevel(
-                    "L" + std::to_string(caches.back().level + 1 + i), curves, above[i],
+                    UnlistedLevelName(i, caches.back().level, systemCacheNaming), curves, above[i],
                     &above[i + 1]));
             }
             memory = CpuMemBwLevelSummary();
@@ -1437,8 +1469,11 @@ CpuMemBwModeSummary SummariseMode(const std::vector<CpuMemBwPoint>& points,
 
 // Levels from the shape of the curve alone, for systems that report no cache
 // sizes: every plateau but the last is a cache level, the flat tail is memory.
+// A CPU has three levels of its own at most; with `systemCacheNaming` a level
+// after the third is the system cache of the SoC.
 CpuMemBwModeSummary SummariseFromCurve(const std::vector<CpuMemBwPoint>& points,
-                                       const std::string& mode, std::uint32_t threads) {
+                                       const std::string& mode, std::uint32_t threads,
+                                       bool systemCacheNaming = kSystemCacheNaming) {
     CpuMemBwModeSummary summary;
     summary.mode = mode;
     summary.threads = threads;
@@ -1451,7 +1486,9 @@ CpuMemBwModeSummary SummariseFromCurve(const std::vector<CpuMemBwPoint>& points,
     const std::vector<Plateau> plateaus = DetectPlateaus(read, flatTail);
     const std::size_t cacheCount = flatTail ? plateaus.size() - 1 : plateaus.size();
     for (std::size_t i = 0; i < cacheCount; ++i) {
-        summary.levels.push_back(CurveLevel("L" + std::to_string(i + 1), curves, plateaus[i],
+        const std::string name = i < 3 ? "L" + std::to_string(i + 1)
+                                       : UnlistedLevelName(i - 3, 3, systemCacheNaming);
+        summary.levels.push_back(CurveLevel(name, curves, plateaus[i],
                                             i + 1 < plateaus.size() ? &plateaus[i + 1] : nullptr));
     }
     CpuMemBwLevelSummary memory;
@@ -1468,13 +1505,17 @@ CpuMemBwModeSummary SummariseFromCurve(const std::vector<CpuMemBwPoint>& points,
     return summary;
 }
 
-void PrintSummary(const CpuMemBwModeSummary& summary, const std::string& title, std::ostream& out) {
+// `protocol`: also print the CPUMEM_LEVEL lines that front ends read.
+void PrintSummary(const CpuMemBwModeSummary& summary, const std::string& title, std::ostream& out,
+                  bool protocol = true) {
     out << "\n--- Summary: " << title << " ---\n"
         << "Level              Cache size          Data sets used       Read      Write       Copy"
            "   GB/s\n";
     bool anyFromCurve = false;
+    bool anySystemCache = false;
     for (const auto& level : summary.levels) {
         const bool memory = level.name == "memory";
+        anySystemCache = anySystemCache || level.name.rfind("SoC", 0) == 0;
         std::string size = "-";
         if (!memory && level.fromCurve) {
             anyFromCurve = true;
@@ -1514,6 +1555,7 @@ void PrintSummary(const CpuMemBwModeSummary& summary, const std::string& title, 
                     << level.readHighGBps << " GB/s across these data sets\n";
             }
         }
+        if (!protocol) continue;
         out << "CPUMEM_LEVEL\tmode=" << summary.mode << "\tlevel=" << level.name
             << "\tcache_bytes=" << level.cacheBytes
             << "\tfrom_bytes=" << level.fromBytes << "\tto_bytes=" << level.toBytes
@@ -1534,6 +1576,11 @@ void PrintSummary(const CpuMemBwModeSummary& summary, const std::string& title, 
     if (anyFromCurve) {
         out << "         * read off the curve, because the OS reports no size for this cache: its\n"
             << "           capacity lies between the two data sets shown\n";
+    }
+    if (anySystemCache) {
+        out << "         SoC: a cache behind the CPU's own levels that the OS does not list. On a\n"
+            << "           phone chip it is the system cache, which the CPU shares with the GPU and\n"
+            << "           other parts; its capacity above includes the caches before it\n";
     }
 }
 
@@ -1735,7 +1782,28 @@ bool PlanStorage(const CpuMemBwConfig& config, CpuMemBwStorage& storage,
     }
     if (zram) storage.backing = "zram (memory is compressed in RAM; no drive is involved)";
     else if (!first.empty()) storage.backing = "swap on " + first;
-    else storage.backing = "no swap";
+    else {
+        // An Android app may not read /proc/swaps, and every phone tested on
+        // 2026-10-07 was reported as having no swap while it had 8 GiB of it.
+        // The total in /proc/meminfo is open to everyone.
+        std::uint64_t swapKiB = 0;
+        std::ifstream meminfo("/proc/meminfo");
+        while (std::getline(meminfo, line)) {
+            if (line.rfind("SwapTotal:", 0) == 0) {
+                swapKiB = std::strtoull(line.c_str() + 10, nullptr, 10);
+                break;
+            }
+        }
+        if (swapKiB == 0) {
+            storage.backing = "no swap";
+        } else {
+            storage.backing = "swap of " + std::to_string(swapKiB / 1024) +
+                              " MiB, held by something this process may not see";
+#if defined(__ANDROID__)
+            storage.backing += " (on Android normally zram: memory is compressed in RAM, no drive is involved)";
+#endif
+        }
+    }
     struct statfs filesystem {};
     if (statfs(directory.c_str(), &filesystem) == 0 &&
         static_cast<unsigned long>(filesystem.f_type) == 0x01021994ul) {
@@ -2357,6 +2425,15 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
 }
 
 }  // namespace
+
+CpuMemBwModeSummary RereadCpuMemBwLevels(const std::vector<CpuMemBwPoint>& points,
+                                         const std::string& mode, std::uint32_t threads,
+                                         bool systemCacheAfterL3, const std::string& title,
+                                         std::ostream& out) {
+    CpuMemBwModeSummary summary = SummariseFromCurve(points, mode, threads, systemCacheAfterL3);
+    PrintSummary(summary, title, out, /*protocol=*/false);
+    return summary;
+}
 
 CpuMemBwReport RunCpuMemoryBandwidth(const CpuMemBwConfig& config, std::ostream& out) {
     CpuMemBwReport report;

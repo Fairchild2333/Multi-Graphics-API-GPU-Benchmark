@@ -73,6 +73,13 @@ foreach ($shader in $shaderNames) {
         exit 1
     }
 }
+# OpenGL ES compiles its shaders on the device: the desktop OpenGL sources of
+# the particle test and GPU Burn go into the package as text, and so does the
+# GPU Burn of OpenGL ES 2.0.
+foreach ($shader in @("compute_gl.comp", "particle_gl.vert", "particle_gl.frag", "fractal_gl.vert", "gpu_burn_gl.frag",
+        "gpu_burn_es2.vert", "gpu_burn_es2.frag")) {
+    Copy-Item (Join-Path $repo "shaders\$shader") (Join-Path $shaderOut $shader) -Force
+}
 Write-Host "Shaders compiled to $shaderOut"
 
 # ---- 2. Packages and 3. the HAP ----
