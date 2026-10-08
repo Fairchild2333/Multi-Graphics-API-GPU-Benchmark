@@ -65,6 +65,8 @@ private:
     void Present();
     void FindGpuWait();
     void WaitForGpu();
+    void CheckWaitCoversCompute();
+    void WaitForComputeByReadback();
 
     // The OpenGL ES 2.0 GPU Burn.
     bool Es2() const { return config_.gpuBurnEs2Legacy; }
@@ -90,6 +92,11 @@ private:
     std::uint32_t ssbo_ = 0;
     std::uint32_t vao_  = 0;
     std::uint32_t ubo_  = 0;
+
+    // One particle's worth of bytes that the CPU reads back; see
+    // WaitForComputeByReadback.
+    std::uint32_t readbackBuffer_ = 0;
+    bool          computeWaitByReadback_ = false;
 
     // OpenGL ES 2.0: the triangle's corners, and where the shader takes them
     // and its two parameters.

@@ -56,7 +56,8 @@
     -Only "^gles" for the OpenGL ES tests, -Only "^(?!gles)" for all the others.
 
 .PARAMETER CoolDownSeconds
-    Pause after every test. Default 30.
+    Pause after every test. Default 30. A test the device refuses within a few
+    seconds (no Vulkan driver, say) is not followed by a pause.
 
 .PARAMETER StartBelowC
     Before every test, waits until the battery is no warmer than this many
@@ -361,7 +362,9 @@ foreach ($test in $tests) {
         BatteryC = $temperature; Result = $detail; Note = $note
     }
     if ($status -eq "NOT STARTED") { break }
-    if ($CoolDownSeconds -gt 0) { Start-Sleep -Seconds $CoolDownSeconds }
+    # A test the device refused at once did no work: there is nothing to cool.
+    $refusedAtOnce = $status -eq "FAILED" -and $watch.Elapsed.TotalSeconds -lt 6
+    if ($CoolDownSeconds -gt 0 -and -not $refusedAtOnce) { Start-Sleep -Seconds $CoolDownSeconds }
 }
 
 if (Test-Device) {

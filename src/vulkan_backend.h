@@ -46,6 +46,10 @@ public:
     std::string GetBackendName()    const override { return "Vulkan"; }
     std::string GetDeviceName()     const override { return deviceName_; }
     std::string GetDriverVersion()  const override { return driverVersion_; }
+    std::string GetTimingMode()     const override {
+        return synchronizedTimingFallback_
+            ? "synchronized_wall_clock" : "gpu_timestamp_query";
+    }
 
 protected:
     void InitBackend()            override;
@@ -273,6 +277,15 @@ private:
     float       timestampPeriodNs_  = 0.0f;
     bool        timestampsSupported_ = false;
 
+    // Without timestamp queries a frame is timed by wall clock: its compute
+    // part goes into a command buffer of its own and is waited for, then the
+    // rest of the frame is.
+    bool            synchronizedTimingFallback_ = false;
+    VkCommandBuffer syncComputeCmd_   = VK_NULL_HANDLE;
+    VkFence         syncComputeFence_ = VK_NULL_HANDLE;
+    VkCommandBuffer syncFrameCmd_     = VK_NULL_HANDLE;
+    double          syncComputeMs_    = 0.0;
+
     PFN_vkCmdBeginDebugUtilsLabelEXT  vkCmdBeginDebugUtilsLabel_  = nullptr;
     PFN_vkCmdEndDebugUtilsLabelEXT    vkCmdEndDebugUtilsLabel_    = nullptr;
     PFN_vkSetDebugUtilsObjectNameEXT  vkSetDebugUtilsObjectName_  = nullptr;
@@ -341,6 +354,9 @@ private:
     void CreateSyncObjects();
     void CreateTimestampQueryPool();
     void CollectTimestampResults(std::uint32_t frameSlot);
+    void EnableSynchronizedTimingFallback(const char* reason);
+    VkCommandBuffer BeginComputePart(VkCommandBuffer frameCmd);
+    VkCommandBuffer EndComputePart(VkCommandBuffer cmd);
     void CleanupSwapChain();
 };
 

@@ -61,6 +61,9 @@ cd android
 
 ## 运行说明
 
+0. 最低 Android 6.0（API 23）。原生库不链接 `libvulkan.so`（6.0 没有这个库，链接了整个库就加载不了，连 CPU 测试都跑不了，
+   2026-10-08 在小米平板 2 上发现），Vulkan 的函数在库加载时从系统里取（`app/src/main/cpp/vulkan_loader.h`）；
+   引擎新用到一个 Vulkan 函数时要把名字加进 `vulkan_functions.inc`，否则链接报错。没有 Vulkan 的系统上 OpenGL ES 和 CPU 测试照常可用。
 1. API 24+ 且 Vulkan loader 可用时，GPU 页可选 Stream / GPU Burn（light steps=16），点 Run（默认 3s）。
    测试会横屏占满屏幕运行，跑完回到页面，"Last run" 卡片显示成绩和每帧耗时折线图。
    渲染尺寸固定为 1280 × 720（和桌面版相同），由系统缩放到屏幕，所以成绩不随屏幕大小和分辨率变化。
@@ -97,12 +100,16 @@ cd android
 
 GPU 页可以选 **Vulkan**、**OpenGL ES 3.1** 或 **OpenGL ES 2.0**（后两个 2026-10-07 加入）。
 
+- Vulkan 的计时用 GPU 时间戳。驱动没有时间戳的设备（如 Mali-G52 驱动 r25，`timestampValidBits` 为 0）上，
+  2026-10-08 起退回到墙钟计时：一帧的计算部分单独提交、等它做完，再提交其余部分；成绩存到带 `_sync_timing` 的独立分组，
+  和 OpenGL ES 退回墙钟时一样。在此之前这类设备上 Vulkan 测试能跑但没有成绩。
 - OpenGL ES 3.1 下有两项测试：粒子测试（含 Headless）和 GPU Burn。流体和显存带宽只有 Vulkan。
 - OpenGL ES 2.0 下只有 GPU Burn，而且是另写的一个着色器（`shaders/gpu_burn_es2.frag`），成绩单独成组
   `gpu_burn_es2_legacy_v1_...`，一律用墙钟计时。adb 请求里加 `api=gles2`。
 - 引擎里是 `src/gles_backend.cpp`，用 EGL。着色器是桌面 OpenGL 那一份，只换版本行，所以每帧的工作量和桌面 OpenGL 相同。
 - 成绩的名字不变，`graphicsApi` 是 `OpenGL ES`，历史和图表里和 Vulkan 分开。
 - 计时用 `GL_EXT_disjoint_timer_query`；驱动没有它、或者它的时间戳不可信时，退回到墙钟计时（等 GPU 做完再看 CPU 时钟），这时小数据量的成绩会偏低。等 GPU 用的是 EGL 栅栏，不是 `glFinish`：有的手机上 `glFinish` 一睡就是 4 ms。
+  有的驱动（PowerVR Rogue GX6250）的栅栏不等计算着色器做完，粒子的一步读出来总是 0.3 ms；引擎开跑前核对一次（日志里 `Wait check:` 一行），这种驱动上改成"拷一个粒子出来读回"来等。
 - 有画面的测试每帧都完整绘制并计时，但屏幕上的画面一秒只更新约 30 次：每帧都交换的话，手机会把下一帧压到屏幕刷新之后才执行，帧率被锁在刷新率上，GPU 还会因为闲着而降频。
 - adb 请求里加 `api=gles`：`--es run "stream?particles=1048576&api=gles"`。
 - 粒子测试的计算着色器每组 256 个调用，OpenGL ES 3.1 只保证 128。驱动只给到 128 的设备（如 Mali-T860）上，

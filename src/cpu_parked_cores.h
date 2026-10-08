@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <system_error>
@@ -152,6 +153,61 @@ private:
         static Shared shared;
         return shared;
     }
+};
+
+// Processors that are switched off rather than parked. MediaTek's hot-plug
+// governor takes idle cores offline: /sys/devices/system/cpu/online then names
+// fewer processors than .../present, the missing ones have no cpufreq files to
+// class them by, and a list of the processors in use leaves them out. They are
+// back within a second once there is work for them.
+//
+// Found 2026-10-08 on an MT8176 tablet (6 cores, 1 or 2 of them online at
+// rest): the all-core test ran 3 threads and the cache test found 5 cores.
+//
+// While an object of this class lives the cores are kept busy. The constructor
+// returns when every present processor is online, when no further one has come
+// online for kOnlineSettle, or after kOnlineTimeout: a system may hold a core
+// off for reasons of its own (a Mi 5C kept two of eight off under any load).
+inline constexpr std::chrono::milliseconds kOnlineTimeout{4000};
+inline constexpr std::chrono::milliseconds kOnlineSettle{1500};
+inline constexpr std::chrono::milliseconds kOnlinePoll{10};
+
+class AllOnline {
+public:
+    AllOnline() {
+        const int present = CountCpus("/sys/devices/system/cpu/present");
+        int online = CountCpus("/sys/devices/system/cpu/online");
+        if (present <= 0 || online <= 0 || online >= present) return;
+        load_ = std::make_unique<Load>();
+        const auto begin = std::chrono::steady_clock::now();
+        auto lastChange = begin;
+        while (online < present) {
+            std::this_thread::sleep_for(kOnlinePoll);
+            const auto now = std::chrono::steady_clock::now();
+            const int count = CountCpus("/sys/devices/system/cpu/online");
+            if (count != online) {
+                online = count;
+                lastChange = now;
+            }
+            if (now - lastChange > kOnlineSettle || now - begin > kOnlineTimeout) break;
+        }
+    }
+
+    AllOnline(const AllOnline&) = delete;
+    AllOnline& operator=(const AllOnline&) = delete;
+
+private:
+    static int CountCpus(const char* path) {
+        std::ifstream file(path);
+        std::string list;
+        if (!std::getline(file, list)) return 0;
+        cpu_set_t set;
+        CPU_ZERO(&set);
+        AddCpuList(list, set);
+        return CPU_COUNT(&set);
+    }
+
+    std::unique_ptr<Load> load_;
 };
 
 // Calls `set`, which pins the calling thread to one processor and returns 0 or

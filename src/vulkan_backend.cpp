@@ -5,6 +5,7 @@
 #include "mini_mat.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <iostream>
@@ -1504,6 +1505,7 @@ void VulkanBackend::CreateTimestampQueryPool() {
 
     if (fams[idx.graphicsFamily.value()].timestampValidBits == 0) {
         std::cout << "[Profiling] Timestamps not supported -- disabled.\n";
+        EnableSynchronizedTimingFallback("the driver has none");
         return;
     }
 
@@ -1517,6 +1519,7 @@ void VulkanBackend::CreateTimestampQueryPool() {
     ci.queryCount = kTimestampsPerFrame * config_.framesInFlight;
     if (vkCreateQueryPool(device_, &ci, nullptr, &timestampQueryPool_) != VK_SUCCESS) {
         std::cerr << "[Profiling] Failed to create query pool -- disabled.\n";
+        EnableSynchronizedTimingFallback("no query pool could be made");
         return;
     }
 
@@ -1543,6 +1546,69 @@ void VulkanBackend::CollectTimestampResults(std::uint32_t slot) {
         static_cast<double>(ts[1] - ts[0]) * toMs,
         static_cast<double>(ts[3] - ts[2]) * toMs,
         static_cast<double>(ts[3] - ts[0]) * toMs);
+}
+
+// A driver without timestamp queries left every Vulkan test without a score:
+// a Mali-G52 with driver r25p1 in a TCL television (2026-10-08) reports
+// timestampValidBits 0. A frame is then timed by wall clock, as the other
+// backends do it, and the result says so.
+void VulkanBackend::EnableSynchronizedTimingFallback(const char* reason) {
+    // Each GPU of a group would need a compute submit of its own.
+    if (synchronizedTimingFallback_ || deviceGroupAfr_) return;
+    synchronizedTimingFallback_ = true;
+    std::cout << "[Profiling] Vulkan timestamp queries are unavailable ("
+              << reason << "); using synchronized wall-clock timing."
+              << std::endl;
+}
+
+// With wall-clock timing the compute part of a frame is recorded into a
+// command buffer of its own. With timestamps both calls hand back the frame's
+// command buffer and nothing else happens.
+VkCommandBuffer VulkanBackend::BeginComputePart(VkCommandBuffer frameCmd) {
+    if (!synchronizedTimingFallback_) return frameCmd;
+    if (syncComputeCmd_ == VK_NULL_HANDLE) {
+        VkCommandBufferAllocateInfo ai{};
+        ai.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        ai.commandPool        = commandPool_;
+        ai.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        ai.commandBufferCount = 1;
+        VkFenceCreateInfo fi{};
+        fi.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        if (vkAllocateCommandBuffers(device_, &ai, &syncComputeCmd_) != VK_SUCCESS ||
+            vkCreateFence(device_, &fi, nullptr, &syncComputeFence_) != VK_SUCCESS)
+            throw std::runtime_error("Failed to create the compute-part command buffer");
+    }
+    vkResetCommandBuffer(syncComputeCmd_, 0);
+    VkCommandBufferBeginInfo bi{};
+    bi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    if (vkBeginCommandBuffer(syncComputeCmd_, &bi) != VK_SUCCESS)
+        throw std::runtime_error("vkBeginCommandBuffer (compute part) failed");
+    syncFrameCmd_ = frameCmd;
+    return syncComputeCmd_;
+}
+
+// Submits the compute part, waits for it and keeps how long that took.
+VkCommandBuffer VulkanBackend::EndComputePart(VkCommandBuffer cmd) {
+    if (!synchronizedTimingFallback_) return cmd;
+    if (vkEndCommandBuffer(cmd) != VK_SUCCESS)
+        throw std::runtime_error("vkEndCommandBuffer (compute part) failed");
+
+    VkSubmitInfo si{};
+    si.sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    si.commandBufferCount = 1;
+    si.pCommandBuffers    = &cmd;
+
+    const auto begin = std::chrono::steady_clock::now();
+    const VkResult res = vkQueueSubmit(graphicsQueue_, 1, &si, syncComputeFence_);
+    if (res != VK_SUCCESS)
+        throw std::runtime_error("vkQueueSubmit (compute part) failed (VkResult " +
+                                 std::to_string(static_cast<int>(res)) + ")");
+    vkWaitForFences(device_, 1, &syncComputeFence_, VK_TRUE, UINT64_MAX);
+    syncComputeMs_ = std::chrono::duration<double, std::milli>(
+        std::chrono::steady_clock::now() - begin).count();
+    vkResetFences(device_, 1, &syncComputeFence_);
+    return syncFrameCmd_;
 }
 
 // -----------------------------------------------------------------------
@@ -1603,6 +1669,7 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
             vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, timestampQueryPool_, tsBase + 1);
     } else {
     // --- Compute pass ---
+    cmd = BeginComputePart(cmd);
     BeginDebugLabel(cmd, "Particle Compute", 0.2f, 0.8f, 0.2f);
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline_);
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
@@ -1625,6 +1692,7 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
 
     if (timestampsSupported_)
         vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, timestampQueryPool_, tsBase + 1);
+    cmd = EndComputePart(cmd);
 
     // --- SSBO barrier: compute write → vertex read ---
     BeginDebugLabel(cmd, "SSBO Barrier (Compute -> Vertex)", 0.9f, 0.9f, 0.2f);
@@ -1707,7 +1775,19 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
         VkBuffer     bufs[] = { particleBuffer_ };
         VkDeviceSize offs[] = { 0 };
         vkCmdBindVertexBuffers(cmd, 0, 1, bufs, offs);
+#if defined(GPU_BENCH_ANDROID) || defined(GPU_BENCH_OHOS)
+        // The same points in the same order, 65,536 to a draw. One draw of a
+        // million points or more loses the GPU device on a Quest 2 (Adreno
+        // 650, driver 512.819.0, 2026-10-08): vkQueueSubmit returns
+        // VK_ERROR_DEVICE_LOST at once, with 1,048,576 particles and above,
+        // while the headless test and OpenGL ES run the same counts. In
+        // pieces it runs. The desktop draw is left as it was.
+        constexpr std::uint32_t kPointsPerDraw = 65536;
+        for (std::uint32_t first = 0; first < config_.particleCount; first += kPointsPerDraw)
+            vkCmdDraw(cmd, (std::min)(kPointsPerDraw, config_.particleCount - first), 1, first, 0);
+#else
         vkCmdDraw(cmd, config_.particleCount, 1, 0, 0);
+#endif
     }
     vkCmdEndRenderPass(cmd);
     EndDebugLabel(cmd);
@@ -1791,11 +1871,18 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         si.commandBufferCount = 1;
         si.pCommandBuffers    = &cmd;
 
+        const auto syncBegin = std::chrono::steady_clock::now();
         VkResult res = vkQueueSubmit(computeQueue_, 1, &si, inFlightFences_[currentFrame_]);
         if (res != VK_SUCCESS)
             throw std::runtime_error("vkQueueSubmit (headless) failed");
 
         timestampSlotReady_[currentFrame_] = timestampsSupported_;
+        if (synchronizedTimingFallback_) {
+            vkWaitForFences(device_, 1, &inFlightFences_[currentFrame_], VK_TRUE, UINT64_MAX);
+            const double computeMs = std::chrono::duration<double, std::milli>(
+                std::chrono::steady_clock::now() - syncBegin).count();
+            AccumulateTiming(computeMs, 0.0, computeMs);
+        }
 
         currentFrame_ = (currentFrame_ + 1) % config_.framesInFlight;
         return;
@@ -1836,6 +1923,7 @@ void VulkanBackend::DrawFrame(float deltaTime) {
     imagesInFlight_[imageIndex] = inFlightFences_[currentFrame_];
 
     vkResetFences(device_, 1, &inFlightFences_[currentFrame_]);
+    syncComputeMs_ = 0.0;
     RecordCommandBuffer(imageIndex, deltaTime, afrDeviceMask);
 
     VkSemaphore          waitSem[]   = { imageAvailableSemaphores_[currentFrame_] };
@@ -1861,6 +1949,7 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         si.pNext = &groupSubmit;
     }
 
+    const auto syncRenderBegin = std::chrono::steady_clock::now();
     res = vkQueueSubmit(graphicsQueue_, 1, &si, inFlightFences_[currentFrame_]);
     if (res != VK_SUCCESS) {
         std::string msg = "vkQueueSubmit failed (VkResult " + std::to_string(static_cast<int>(res)) + ")";
@@ -1869,6 +1958,13 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         throw std::runtime_error(msg);
     }
     timestampSlotReady_[currentFrame_] = timestampsSupported_;
+    if (synchronizedTimingFallback_) {
+        // The compute part was waited for while the frame was recorded.
+        vkWaitForFences(device_, 1, &inFlightFences_[currentFrame_], VK_TRUE, UINT64_MAX);
+        const double renderMs = std::chrono::duration<double, std::milli>(
+            std::chrono::steady_clock::now() - syncRenderBegin).count();
+        AccumulateTiming(syncComputeMs_, renderMs, syncComputeMs_ + renderMs);
+    }
 
     VkSwapchainKHR chains[] = { swapChain_ };
     VkPresentInfoKHR pi{};
@@ -1919,6 +2015,8 @@ void VulkanBackend::CleanupBackend() {
         if (sem) vkDestroySemaphore(device_, sem, nullptr);
     for (auto fen : inFlightFences_)
         if (fen) vkDestroyFence(device_, fen, nullptr);
+    if (syncComputeFence_)          { vkDestroyFence(device_, syncComputeFence_, nullptr); syncComputeFence_ = VK_NULL_HANDLE; }
+    syncComputeCmd_ = VK_NULL_HANDLE;   // freed with the command pool
     if (timestampQueryPool_)        { vkDestroyQueryPool(device_, timestampQueryPool_, nullptr); }
     // Stateful workload cleanup must run BEFORE the generic pipeline destroy
     // because their render pipelines are aliased into the generic slots.
@@ -2347,6 +2445,7 @@ void VulkanBackend::CleanupFluidResources() {
 
 void VulkanBackend::RecordFluidFrame(VkCommandBuffer cmd, float deltaTime,
                                      std::uint32_t imageIndex, std::uint32_t timestampBase) {
+    cmd = BeginComputePart(cmd);
     const std::uint32_t N = fluid_.gridSize;
     const float stepDt = std::clamp(deltaTime, 0.0f, 1.0f / 30.0f);
     fluid_.simTime += std::clamp(deltaTime, 0.0f, 0.1f);
@@ -2422,6 +2521,7 @@ void VulkanBackend::RecordFluidFrame(VkCommandBuffer cmd, float deltaTime,
         vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                             timestampQueryPool_, timestampBase + 2);
     }
+    cmd = EndComputePart(cmd);
 
     // Render pass: read the canonical stateA and present.
     if (!config_.headless) {
@@ -3748,6 +3848,7 @@ void VulkanBackend::CleanupCinematicLiquidResources() {
 void VulkanBackend::RecordCinematicLiquidV2Frame(VkCommandBuffer cmd, float deltaTime,
                                                   std::uint32_t imageIndex,
                                                   std::uint32_t timestampBase) {
+    cmd = BeginComputePart(cmd);
     auto& r = cinematicLiquid_;
     const std::uint32_t gridCellCount = r.gridX * r.gridY * r.gridZ;
     const std::uint32_t particleGroups = (r.particleCount + 255u) / 256u;
@@ -3976,6 +4077,7 @@ void VulkanBackend::RecordCinematicLiquidV2Frame(VkCommandBuffer cmd, float delt
         vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                             timestampQueryPool_, timestampBase + 2);
     }
+    cmd = EndComputePart(cmd);
 
     BeginDebugLabel(cmd, "Cinematic Liquid v2: Pool Raymarch", 0.03f, 0.36f, 0.94f);
     VkClearValue clear{};
@@ -4232,6 +4334,7 @@ void VulkanBackend::RecordCinematicLiquidSphFrame(VkCommandBuffer cmd,
                                                   float deltaTime,
                                                   std::uint32_t imageIndex,
                                                   std::uint32_t timestampBase) {
+    cmd = BeginComputePart(cmd);
     auto& r = cinematicLiquid_;
     const std::uint32_t particleGroups = (r.particleCount + 255u) / 256u;
     const std::uint32_t gridCellCount = r.gridX * r.gridY * r.gridZ;
@@ -4616,6 +4719,7 @@ void VulkanBackend::RecordCinematicLiquidSphFrame(VkCommandBuffer cmd,
         vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                             timestampQueryPool_, timestampBase + 2);
     }
+    cmd = EndComputePart(cmd);
 
     // Camera path and raymarch identical to v2 so the SPH slice can be
     // compared frame-for-frame against the MLS-MPM captures.
@@ -4660,6 +4764,7 @@ void VulkanBackend::RecordCinematicLiquidSphFrame(VkCommandBuffer cmd,
 void VulkanBackend::RecordCinematicLiquidFrame(VkCommandBuffer cmd, float deltaTime,
                                                 std::uint32_t imageIndex,
                                                 std::uint32_t timestampBase) {
+    cmd = BeginComputePart(cmd);
     auto& r = cinematicLiquid_;
     const std::uint32_t gridCellCount = r.gridX * r.gridY * r.gridZ;
     const std::uint32_t particleGroups = (r.particleCount + 255u) / 256u;
@@ -4804,6 +4909,7 @@ void VulkanBackend::RecordCinematicLiquidFrame(VkCommandBuffer cmd, float deltaT
         vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                             timestampQueryPool_, timestampBase + 2);
     }
+    cmd = EndComputePart(cmd);
 
     BeginDebugLabel(cmd, "Cinematic Liquid: Density Raymarch", 0.04f, 0.35f, 0.92f);
     VkClearValue clear{};

@@ -140,7 +140,7 @@
 
 ## 平台移植优先级（用户锁定；2026-07-19 将 Win7 GUI 挪到 PS3 前）
 
-顺序：**Win ARM64 → macOS → Android → iOS → Debian Linux → WebGPU → HarmonyOS PC / 鸿蒙 → Windows 7 专用 GUI（Aero）→ PS3（探索性）→ Lumia 1520 legacy WP（探索性）→ iPhone 4 legacy iOS（探索性）→ Dual-GPU Collaboration（双卡协作，功能项）**。除现有隔离的 HarmonyOS Vulkan 粒子 demo 外，完整产品移植均未开始；该 demo 不等于 workload suite 已移植。不改变上方产品主线的切片顺序，平台移植在其后展开。逐平台落地时：能力不齐明确 unsupported、不静默 fallback；计时/抓帧模型不同的实现必须使用新 `workloadVersion` 独立成组，现有 Windows 成绩组的 A/B 对比不受影响。详细逐平台要点见 `HANDOFF.md` 目标 C。
+顺序：**Win ARM64 → macOS → Android → iOS → Debian Linux → WebGPU → HarmonyOS PC / 鸿蒙 → Windows 7 专用 GUI（Aero）→ PS3（探索性）→ Lumia 1520 legacy WP（探索性）→ iPhone 4 legacy iOS（探索性）→ Dual-GPU Collaboration（双卡协作，功能项）→ HTC HD2（探索性）**。除现有隔离的 HarmonyOS Vulkan 粒子 demo 外，完整产品移植均未开始；该 demo 不等于 workload suite 已移植。不改变上方产品主线的切片顺序，平台移植在其后展开。逐平台落地时：能力不齐明确 unsupported、不静默 fallback；计时/抓帧模型不同的实现必须使用新 `workloadVersion` 独立成组，现有 Windows 成绩组的 A/B 对比不受影响。详细逐平台要点见 `HANDOFF.md` 目标 C。
 
 - [x] **1. Win ARM64**：原生 CLI/WinUI + 原生 ARM64 中英双语 Setup 闭环已落地；x64 使用同一安装器实现，WiX MSI 仅为内嵌中间层；clean-machine/签名仍开放。
 - [ ] **2. macOS（下一平台刀）**：
@@ -214,6 +214,7 @@
 - [ ] **10. Lumia 1520 legacy Windows Phone（探索性，永不进成绩体系；2026-07-20 排入）**：骁龙 800 / Adreno 330,但 WP8.1/W10M 驱动仅暴露 D3D11 **FL 9_3**(无 compute/UAV)→ 形态同 ES 2.0 legacy tier:简化 fragment Burn、粒子 CPU(NEON) 物理、液体 unsupported;WinRT/UWP + CoreWindow 前端,VS2015/VS2013 工具链,开发者模式侧载(商店已死);墙钟计时,成绩自成体系;shader 优先经 archived ANGLE 复用 Tegra 3/4 的 GLSL ES legacy shader,备选 HLSL 9_3 重写;独立小工程。详见 HANDOFF 目标 C 第 10 条。
 - [ ] **11. iPhone 4 legacy iOS（探索性，永不进成绩体系；2026-07-20 排入）**：OS X 10.11 + Xcode 7.3.1（free provisioning、armv7、deployment iOS 7.x，需老 Intel Mac/虚拟机）；不精简主工程，独立仓库或 `legacy-ios/` 小工程，仅复用 Android ES 2.0 legacy tier 的 GLSL ES shader/workload 定义；EAGL + UIKit + ObjC 宿主，粒子 CPU 物理，SGX535 单独更低预设；墙钟计时、无抓帧、成绩不进主 History；仅自签侧载（7 天过期），无 App Store。主 iOS 计划（iOS 16 + Metal）不受影响。详见 HANDOFF 目标 C 第 11 条。
 - [ ] **12. Dual-GPU Collaboration（双卡协作模式，功能项；首个验证目标 Boot Camp 下 Mac Pro 2013 双 D700）**：Plasma/GPU Burn 的 DX12 AFR 已在强制 4 flights、禁用 RenderDoc 后实测约 2×；DX12 SFR 也已完成 50/50 半屏 + Tier-1 cross-node buffer 合成，16 steps 为 0.62× 负优化、128 steps 为 1.47×（仍低于 AFR），隔离为 `..._sfr2`。Vulkan 因 AMD 20.45.40.15 只暴露一个 graphics queue 而串行。DX11 窗口隐式 AFR 无提升；最终 AMD AGS 6.3.1 探针虽枚举到两张 D700，但显式/驱动 AFR 都返回 `crossfireAPI=0`、`crossfireGPUCount=1`，本机 FireGL 栈已判定不可用。OpenGL 虽由 `WGL_AMD_gpu_association` 枚举到两个 ID，但驱动拒绝为 GPU 2 创建 associated context，显式 SFR 已判定不可用并撤回原型。后续仅覆盖：(a) Original Particle 固定总粒子数分片并合成同一帧；(b) 当前 Cinematic Liquid 只验证模拟/渲染跨帧流水线，必须证明同一固定 workload 加速。传统 CrossFire/隐式 AFR 不可由应用强制；N-body、重复液体模拟、液体域分解和长时双卡烤机均不做。
+- [ ] **13. HTC HD2（探索性，永不进成绩体系；2026-10-08 排入，排在已有各项之后）**：QSD8250 / Adreno 200，原装 Windows Mobile 6.5。先看实际装的系统：刷了 Android 就直接用两个命令行工具（`mangekyo_cpumem` 静态版、`mangekyo_es2burn`），不用开发，成绩只有日志；仍是 Windows Mobile 6.5 则默认不做（VS2008 + WM6 SDK 的独立小工程）。详见 HANDOFF 目标 C 第 13 条。
 
 > 状态提示：请先阅读根目录 [`HANDOFF.md`](../HANDOFF.md)。当前事实、两条产品主线、P0 阻塞和下一实现切片以 HANDOFF 为准；本文件保留专题任务与历史上下文。每次工作应先更新 HANDOFF，再同步这里。
 

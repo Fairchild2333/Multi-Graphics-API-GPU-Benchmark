@@ -266,7 +266,8 @@ target_compile_definitions(gpu_engine PUBLIC
     GPU_BENCH_VERSION_PATCH=${PROJECT_VERSION_PATCH})
 target_include_directories(gpu_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 if(ANDROID)
-    # Headers only here; the consuming shared lib links libvulkan.
+    # Headers only here. The app's library does not link libvulkan either: it
+    # loads it at run time (android/app/src/main/cpp/vulkan_loader.h).
     find_library(ANDROID_VULKAN_LIB vulkan)
     if(ANDROID_VULKAN_LIB)
         target_include_directories(gpu_engine PUBLIC ${CMAKE_SYSROOT}/usr/include)

@@ -1,5 +1,5 @@
 # Mangekyo Android JNI — links gpu_engine (Vulkan / ANativeWindow).
-# HANDOFF: no GLFW; Vulkan via NDK stub lib; 16 KB page size; four ABIs.
+# HANDOFF: no GLFW; Vulkan loaded at run time (vulkan_loader.h); 16 KB page size; four ABIs.
 cmake_minimum_required(VERSION 3.22)
 project(mangekyo_android CXX)
 
@@ -24,19 +24,27 @@ add_subdirectory("${MANGEKYO_REPO_ROOT}" "${CMAKE_BINARY_DIR}/mangekyo_engine" E
 
 find_library(log-lib log)
 find_library(android-lib android)
-# Link the NDK vulkan stub by name. Native build uses ANDROID_PLATFORM=24 so
-# libvulkan exists in the sysroot; Java minSdk stays 23 with CapabilityGate.
-set(VULKAN_ANDROID_LIB vulkan)
 
-add_library(mangekyo_jni SHARED mangekyo_jni.cpp)
+# libvulkan.so is not linked. Android 6.0 (API 23, the app's minSdk) has none,
+# and a library that names it among those it needs does not load there at all.
+# The engine reaches Vulkan through pointers that vulkan_loader.cpp fills in
+# when the library loads; vulkan_loader.h declares them and goes in front of
+# every source file of the engine and of the bridge. The native build targets
+# android-23 like the app (app/build.gradle.kts).
+add_library(mangekyo_jni SHARED mangekyo_jni.cpp vulkan_loader.cpp)
 target_link_libraries(mangekyo_jni
     PRIVATE
         gpu_engine
         ${android-lib}
         ${log-lib}
-        ${VULKAN_ANDROID_LIB}
+        ${CMAKE_DL_LIBS}
 )
 target_include_directories(mangekyo_jni PRIVATE "${MANGEKYO_REPO_ROOT}/src")
+foreach(VULKAN_USER gpu_engine mangekyo_jni)
+    target_compile_definitions(${VULKAN_USER} PRIVATE VK_NO_PROTOTYPES)
+    target_compile_options(${VULKAN_USER} PRIVATE
+        "SHELL:-include \"${CMAKE_CURRENT_LIST_DIR}/vulkan_loader.h\"")
+endforeach()
 
 # 16 KB page alignment: required for targetSdk 15+ uncompressed .so (HANDOFF).
 target_link_options(mangekyo_jni PRIVATE "-Wl,-z,max-page-size=16384")

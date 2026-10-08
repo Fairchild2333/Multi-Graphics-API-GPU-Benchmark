@@ -14,7 +14,10 @@ object NativeBridge {
     private val loaded: Boolean = try {
         System.loadLibrary("mangekyo_jni")
         true
-    } catch (_: UnsatisfiedLinkError) {
+    } catch (e: UnsatisfiedLinkError) {
+        // Say why: on Android 6.0 this failed silently for a missing system
+        // library, and every test was refused as "engine missing".
+        android.util.Log.e("Mangekyo", "The engine library did not load: ${e.message}")
         false
     }
 

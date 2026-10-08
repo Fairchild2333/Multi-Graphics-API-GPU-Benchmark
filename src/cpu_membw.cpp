@@ -48,15 +48,22 @@
 #endif
 #endif
 
-#if (defined(_M_X64) && !defined(_M_ARM64EC)) || defined(__x86_64__)
-#define CPUMEM_X64 1
+// 64-bit x86, and 32-bit x86 as Android builds it (SSE2 is part of that ABI):
+// without the second a 32-bit build ran the scalar kernels (an Atom tablet on
+// Android 6.0, 2026-10-08), as a 32-bit ARM build did before it.
+#if (defined(_M_X64) && !defined(_M_ARM64EC)) || defined(__x86_64__) || \
+    (defined(__i386__) && defined(__SSE2__))
+#define CPUMEM_X86 1
 #include <immintrin.h>
 #if !defined(_MSC_VER)
 #include <cpuid.h>
 #include <x86intrin.h>
 #endif
-#elif defined(_M_ARM64) || defined(__aarch64__)
-#define CPUMEM_ARM64 1
+// 64-bit ARM, and 32-bit ARM built with NEON: the kernels use nothing that
+// ARMv7 NEON lacks. Without this a 32-bit build ran the scalar kernels (a
+// Tegra K1 tablet, 2026-10-08) and its figures compared with nothing else.
+#elif defined(_M_ARM64) || defined(__aarch64__) || (defined(__arm__) && defined(__ARM_NEON))
+#define CPUMEM_ARM_NEON 1
 #include <arm_neon.h>
 #endif
 
@@ -107,7 +114,7 @@ constexpr double kShortPlateauSpread = 1.05;
 // On an ARM system a cache the OS does not list, or a fourth level on the
 // curve, is the system cache of the SoC, which the CPU shares with the GPU and
 // other parts. Elsewhere such a level keeps a number.
-#if defined(CPUMEM_ARM64)
+#if defined(CPUMEM_ARM_NEON)
 constexpr bool kSystemCacheNaming = true;
 #else
 constexpr bool kSystemCacheNaming = false;
@@ -162,7 +169,7 @@ struct KernelSet {
 // memset.
 // ---------------------------------------------------------------------------
 
-#if defined(CPUMEM_X64)
+#if defined(CPUMEM_X86)
 
 std::uint64_t ReadSse2(const std::uint8_t* data, std::size_t bytes, std::size_t passes) {
     __m128i a0 = _mm_setzero_si128(), a1 = a0, a2 = a0, a3 = a0;
@@ -477,7 +484,7 @@ X64Features DetectX64Features() {
     return features;
 }
 
-#elif defined(CPUMEM_ARM64)
+#elif defined(CPUMEM_ARM_NEON)
 
 std::uint64_t ReadNeon(const std::uint8_t* data, std::size_t bytes, std::size_t passes) {
     uint64x2_t a0 = vdupq_n_u64(0), a1 = a0, a2 = a0, a3 = a0;
@@ -564,7 +571,7 @@ void CopyScalar(const std::uint8_t* source, std::uint8_t* destination, std::size
 // Picks the kernels for the requested vector size, or the widest supported
 // one when `vectorBytes` is 0. Throws when the CPU lacks the requested size.
 KernelSet SelectKernels(std::uint32_t vectorBytes) {
-#if defined(CPUMEM_X64)
+#if defined(CPUMEM_X86)
     const X64Features features = DetectX64Features();
     const WriteFn zeroFill = features.clzero ? ZeroFillClzero : nullptr;
     if (vectorBytes == 0) vectorBytes = features.avx512f ? 64u : features.avx2 ? 32u : 16u;
@@ -580,7 +587,7 @@ KernelSet SelectKernels(std::uint32_t vectorBytes) {
         return {"SSE2", 16, ReadSse2, WriteSse2, CopySse2, WriteStreamSse2, CopyStreamSse2,
                 zeroFill};
     }
-#elif defined(CPUMEM_ARM64)
+#elif defined(CPUMEM_ARM_NEON)
     if (vectorBytes == 0 || vectorBytes == 16) {
         return {"NEON", 16, ReadNeon, WriteNeon, CopyNeon, nullptr, nullptr, nullptr};
     }
@@ -598,11 +605,11 @@ KernelSet SelectKernels(std::uint32_t vectorBytes) {
 // ---------------------------------------------------------------------------
 
 void CpuRelax() {
-#if defined(CPUMEM_X64)
+#if defined(CPUMEM_X86)
     _mm_pause();
-#elif defined(CPUMEM_ARM64) && defined(_MSC_VER)
+#elif defined(CPUMEM_ARM_NEON) && defined(_MSC_VER)
     __yield();
-#elif defined(CPUMEM_ARM64)
+#elif defined(CPUMEM_ARM_NEON)
     __asm__ __volatile__("yield");
 #endif
 }
@@ -1672,8 +1679,8 @@ public:
 #endif
     }
 
-    // Buffered fallback: asks the OS to forget the cached pages of the file,
-    // so the next reads come from the drive.
+    // Asks the OS to forget the cached pages of the file, so the next reads
+    // come from the drive. Nothing to forget where unbuffered I/O works.
     void DropCache() {
 #if !defined(_WIN32) && defined(POSIX_FADV_DONTNEED)
         posix_fadvise(fd_, 0, 0, POSIX_FADV_DONTNEED);
@@ -1909,7 +1916,11 @@ CpuMemBwStorage MeasureStorage(const CpuMemBwConfig& config) {
         double best = 0.0;
         const auto begin = Clock::now();
         for (std::uint32_t pass = 0; ok && pass < (write ? 3u : 8u); ++pass) {
-            if (!write && !storage.directIo) file.DropCache();
+            // Also for a file opened unbuffered: a file system may accept the
+            // flag and buffer all the same. A TCL television (Android 11,
+            // 2026-10-08) read 2222 MB/s from a drive that writes 14 MB/s,
+            // every pass after the first out of the file cache.
+            if (!write) file.DropCache();
             const auto passStart = Clock::now();
             for (std::uint64_t offset = 0; ok && offset < written; offset += kStorageBlockBytes) {
                 if (write) stampBlock();
@@ -1932,7 +1943,7 @@ CpuMemBwStorage MeasureStorage(const CpuMemBwConfig& config) {
     const std::uint64_t pages = written / kStoragePageBytes;
     std::uint64_t random = 0x9E3779B97F4A7C15ull;
     const auto randomAccess = [&](bool write) {
-        if (!write && !storage.directIo) file.DropCache();
+        if (!write) file.DropCache();
         std::uint64_t operations = 0;
         const auto begin = Clock::now();
         do {

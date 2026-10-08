@@ -19,10 +19,13 @@
 #include <cstdint>
 #include <cstring>
 #include <iostream>
+#include <iterator>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #ifndef EGL_OPENGL_ES3_BIT
@@ -372,6 +375,7 @@ void GlesBackend::InitBackend() {
     }
 
     CheckTimestampsAgainstWallClock();
+    CheckWaitCoversCompute();
 
     std::cout << "[OpenGL ES Init] Initialisation complete." << std::endl;
 }
@@ -736,6 +740,89 @@ void GlesBackend::WaitForGpu() {
     glFinish();
 }
 
+// Waits for the particle step by asking for its result: one particle is copied
+// into a buffer of its own and that buffer is read. The particle buffer itself
+// is never mapped, so a driver has no reason to treat it differently.
+void GlesBackend::WaitForComputeByReadback() {
+    glBindBuffer(GL_COPY_READ_BUFFER, ssbo_);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, readbackBuffer_);
+    glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sizeof(Particle));
+    if (glMapBufferRange(GL_COPY_WRITE_BUFFER, 0, sizeof(Particle), GL_MAP_READ_BIT))
+        glUnmapBuffer(GL_COPY_WRITE_BUFFER);
+    glBindBuffer(GL_COPY_READ_BUFFER, 0);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+}
+
+// Wall-clock timing ends the particle step with WaitForGpu(), and that is only
+// a measurement if the wait covers compute work. On a PowerVR Rogue GX6250
+// (2026-10-08) it does not: the fence passed 0.3 ms after a dispatch whatever
+// the particle count, and the step was paid for later, outside the measured
+// time (a headless frame of 4,194,304 particles took 41 ms and read 0.3 ms, a
+// rate of 640 GB/s). So before a run, some steps are done the way a frame does
+// them, one step and one wait, and after every wait glFinish is asked whether
+// anything is left. If the wait was real, glFinish returns at once. If much is
+// left, every step is waited for by reading one particle back from then on.
+//
+// What this check must not do, each of which an earlier version did that day:
+//   - Take the cost of a read-back for work left over. On an Adreno 650
+//     (Quest 2) glFinish returned 0.005 ms after the wait, so nothing was left,
+//     and a read-back then took 1.3 to 5.2 ms whatever the work. So glFinish is
+//     the judge, and what an idle glFinish costs is taken off.
+//   - Do many steps in a row before one wait. On the PowerVR only the last
+//     part of such a row was left over (18 ms of 230 ms for 256 steps of 65,536
+//     particles), which passed, while in a frame the one step is that last part.
+void GlesBackend::CheckWaitCoversCompute() {
+    if (isGpuBurnWorkload(config_.workload)) return;
+    using Clock = std::chrono::steady_clock;
+    const auto ms = [](Clock::time_point begin, Clock::time_point end) {
+        return std::chrono::duration<double, std::milli>(end - begin).count();
+    };
+
+    glGenBuffers(1, &readbackBuffer_);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, readbackBuffer_);
+    glBufferData(GL_COPY_WRITE_BUFFER, sizeof(Particle), nullptr, GL_DYNAMIC_READ);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+
+    const GLuint groups =
+        (config_.particleCount + config_.computeWorkGroupSize - 1) / config_.computeWorkGroupSize;
+    // A step of zero length leaves every particle where it is.
+    const float params[4] = {0.0f, 1.0f, 0.0f, 0.0f};
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo_);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(params), params);
+    glUseProgram(computeProgram_);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_);
+
+    constexpr int kSteps = 16;
+    constexpr double kLeftFloorMs = 0.05;  // a step; less than this is the cost of asking
+    glFinish();
+    double waitedMs = 0.0;
+    double leftMs = 0.0;
+    for (int step = 0; step < kSteps; ++step) {
+        const auto begin = Clock::now();
+        glDispatchCompute(groups, 1, 1);
+        glMemoryBarrier(GL_ALL_BARRIER_BITS);
+        WaitForGpu();
+        const auto waited = Clock::now();
+        glFinish();
+        const auto finished = Clock::now();
+        glFinish();  // with nothing pending: what asking costs
+        const auto idle = Clock::now();
+        waitedMs += ms(begin, waited);
+        leftMs += (std::max)(0.0, ms(waited, finished) - ms(finished, idle));
+    }
+    while (glGetError() != GL_NO_ERROR) {}
+
+    std::cout << "[Profiling] Wait check: over " << kSteps << " particle steps the wait took " << waitedMs
+              << " ms and glFinish found " << leftMs << " ms of work left after it." << std::endl;
+    if (leftMs > (std::max)(kSteps * kLeftFloorMs, 0.3 * waitedMs)) {
+        computeWaitByReadback_ = true;
+        std::cout << "[Profiling] Waiting for the GPU does not cover compute work on this driver; under "
+                     "wall-clock timing each particle step is waited for by reading one particle back."
+                  << std::endl;
+    }
+}
+
 // Shows the frame that was just drawn, but not every frame: a picture about
 // thirty times a second. Every frame is still drawn in full and measured.
 //
@@ -864,7 +951,8 @@ void GlesBackend::DrawFrame(float deltaTime) {
     double synchronizedComputeMs = 0.0;
     if (synchronizedTiming) {
         glMemoryBarrier(GL_ALL_BARRIER_BITS);
-        WaitForGpu();
+        if (computeWaitByReadback_) WaitForComputeByReadback();
+        else WaitForGpu();
         synchronizedComputeMs = elapsedMs(synchronizedComputeBegin, Clock::now());
     }
 
@@ -1009,6 +1097,7 @@ void GlesBackend::CleanupBackend() {
 
         if (triangleVbo_)    { glDeleteBuffers(1, &triangleVbo_);    triangleVbo_ = 0; }
         if (ubo_)            { glDeleteBuffers(1, &ubo_);            ubo_ = 0; }
+        if (readbackBuffer_) { glDeleteBuffers(1, &readbackBuffer_); readbackBuffer_ = 0; }
         if (vao_)            { glDeleteVertexArrays(1, &vao_);       vao_ = 0; }
         if (ssbo_)           { glDeleteBuffers(1, &ssbo_);           ssbo_ = 0; }
         if (computeProgram_) { glDeleteProgram(computeProgram_);     computeProgram_ = 0; }

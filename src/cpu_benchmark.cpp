@@ -353,6 +353,10 @@ static std::vector<CpuLogicalProcessor> ProbeLinuxTopology(std::string& source) 
     // sched_getaffinity() leaves out the cores a phone has parked for want of
     // work, so the configured mask is read as well: a parked core belongs to
     // the machine and comes back when it is given work (cpu_parked_cores.h).
+    //
+    // Cores a hot-plug governor has switched off are brought back first and
+    // held for as long as this function reads their files.
+    const parked_cores::AllOnline allOnline;
     std::vector<int> logicalIds;
     cpu_set_t allowed;
     cpu_set_t configured;
@@ -971,6 +975,11 @@ CpuBenchmarkReport ProbeCpuTopology() {
     report.affinityCapability = PlatformAffinityCapability();
     report.workloadVersion = std::string(kCpuBenchmarkWorkloadVersion) + "_" +
                              report.affinityCapability;
+    // The test does much 64-bit integer work, which 32-bit code does in several
+    // instructions per operation: a Cortex-A15 running it as 32-bit code scored
+    // less than half of a 64-bit Cortex-A53 per GHz (2026-10-08). Such results
+    // are a group of their own and are not charted with 64-bit ones.
+    if (sizeof(void*) == 4) report.workloadVersion += "_32bit";
 #ifdef _WIN32
     report.processors = ProbeWindowsCpuSets(report.topologySource);
     if (report.processors.empty())

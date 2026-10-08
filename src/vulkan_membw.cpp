@@ -87,6 +87,22 @@ const KernelInfo kKernels[] = {
 };
 constexpr std::size_t kKernelCount = sizeof(kKernels) / sizeof(kKernels[0]);
 
+// Memory the system can still give out, in bytes; 0 where that is not known
+// (only the Linux family is asked: Linux, Android, HarmonyOS).
+std::uint64_t AvailableSystemMemoryBytes() {
+#if defined(__linux__)
+    std::ifstream file("/proc/meminfo");
+    std::string key;
+    std::string rest;
+    std::uint64_t value = 0;
+    while (file >> key >> value) {
+        std::getline(file, rest);
+        if (key == "MemAvailable:") return value * 1024;
+    }
+#endif
+    return 0;
+}
+
 void Check(VkResult result, const char* what) {
     if (result != VK_SUCCESS) {
         throw std::runtime_error(std::string(what) + " failed (VkResult " +
@@ -568,6 +584,14 @@ void Runner::CreateBuffers(MemBwReport& report) {
     limit = (std::min)(limit, static_cast<std::uint64_t>(props_.limits.maxStorageBufferRange));
     limit = (std::min)(limit, maxAllocationBytes_);
     if (deviceLocalHeapBytes_ > 0) limit = (std::min)(limit, deviceLocalHeapBytes_ / 4);
+    // A GPU that shares the system's memory reports all of that memory as its
+    // heap, in use or not. A TV with 2.8 GiB installed and 1.5 GiB available
+    // (2026-10-08) was given two buffers of 700 MiB and did nothing but page
+    // for minutes. Half of what is available may go to the two buffers.
+    if (report.unifiedMemory) {
+        const std::uint64_t available = AvailableSystemMemoryBytes();
+        if (available > 0) limit = (std::min)(limit, available / 4);
+    }
 
     std::uint64_t chunks = limit / kChunkBytes;
     while (true) {

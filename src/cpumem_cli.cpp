@@ -3,6 +3,7 @@
 // phone reached over adb. It prints what `gpu_benchmark --cpu-membw` prints
 // and saves nothing. Build it with scripts/build-android-cpumem.ps1.
 
+#include "cpu_benchmark.h"
 #include "cpu_membw.h"
 
 #include <cstdlib>
@@ -13,6 +14,7 @@ namespace {
 
 void PrintUsage() {
     std::cerr << "Usage: mangekyo_cpumem [options]\n"
+              << "       mangekyo_cpumem --compute   the CPU compute test instead (formal settings)\n"
               << "  --max-mib <MiB>       largest single-thread data set (1-65536)\n"
               << "  --curve-levels        read the cache levels off the curve, not from the OS\n"
               << "  --no-storage          skip the storage test (writes no file)\n"
@@ -32,6 +34,21 @@ bool ParseMiB(const char* text, unsigned long low, unsigned long high, std::uint
 }  // namespace
 
 int main(int argc, char* argv[]) {
+    // --compute runs the CPU compute test instead, with the settings of a
+    // formal run: all cores first, then every core on its own. It is for a
+    // device the app cannot be installed on (older than Android 6.0).
+    if (argc == 2 && std::string(argv[1]) == "--compute") {
+        gpu_bench::CpuBenchmarkConfig compute;
+        compute.mode = gpu_bench::CpuBenchmarkMode::All;
+        compute.measureSeconds = 15.0;
+        compute.warmupSeconds = 0.2;
+        compute.roundCount = 3;
+        const gpu_bench::CpuBenchmarkReport report = gpu_bench::RunCpuBenchmark(compute, std::cout);
+        bool valid = report.multiCore.valid && !report.perCore.empty();
+        for (const auto& core : report.perCore) valid = valid && core.valid;
+        return valid ? 0 : 3;
+    }
+
     gpu_bench::CpuMemBwConfig config;
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
