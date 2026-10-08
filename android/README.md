@@ -103,6 +103,8 @@ GPU 页可以选 **Vulkan**、**OpenGL ES 3.1** 或 **OpenGL ES 2.0**（后两�
 - Vulkan 的计时用 GPU 时间戳。驱动没有时间戳的设备（如 Mali-G52 驱动 r25，`timestampValidBits` 为 0）上，
   2026-10-08 起退回到墙钟计时：一帧的计算部分单独提交、等它做完，再提交其余部分；成绩存到带 `_sync_timing` 的独立分组，
   和 OpenGL ES 退回墙钟时一样。在此之前这类设备上 Vulkan 测试能跑但没有成绩。
+  有时间戳的驱动也会在开跑前核对一次（只对窗口粒子测试；日志里 `[Profiling] Timestamp check:` 一行）：
+  计算部分的时间戳读数不到墙钟的一半时同样改用墙钟。Maleoon 916 在一帧接一帧提交时就是这样。
 - OpenGL ES 3.1 下有两项测试：粒子测试（含 Headless）和 GPU Burn。流体和显存带宽只有 Vulkan。
 - OpenGL ES 2.0 下只有 GPU Burn，而且是另写的一个着色器（`shaders/gpu_burn_es2.frag`），成绩单独成组
   `gpu_burn_es2_legacy_v1_...`，一律用墙钟计时。adb 请求里加 `api=gles2`。

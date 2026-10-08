@@ -364,8 +364,10 @@ Windows x64 is the only verified slice. On a Ryzen 7 9800X3D the Release CLI
 enumerated 16 logical processors / 8 physical cores through Windows CPU Sets,
 strictly pinned every per-core and multi-core worker, and completed with exit 0.
 Windows falls back to processor-core relationships when CPU Sets are unavailable;
-strict-affinity failure makes the result invalid, returns exit code 3 and is not
-persisted. Performance/Efficiency/Middle/LPE names are explicitly **inferred
+a per-core result whose thread could not be held is invalid, makes the run return
+exit code 3 and is not persisted. The multi-core result does not depend on the
+pinning since 2026-10-08: it is saved whenever it was measured, with the number of
+pinned threads beside it. Performance/Efficiency/Middle/LPE names are explicitly **inferred
 rank labels** derived from OS metadata, not authoritative microarchitecture
 identification.
 

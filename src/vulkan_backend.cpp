@@ -80,6 +80,7 @@ void VulkanBackend::InitBackend() {
     }
     CreateSyncObjects();
     CreateTimestampQueryPool();
+    CheckTimestampsAgainstWallClock();
 
     SetObjectName(VK_OBJECT_TYPE_BUFFER,   reinterpret_cast<std::uint64_t>(particleBuffer_),   "Particle SSBO");
     SetObjectName(VK_OBJECT_TYPE_PIPELINE, reinterpret_cast<std::uint64_t>(computePipeline_),  "Compute Pipeline");
@@ -1556,9 +1557,81 @@ void VulkanBackend::EnableSynchronizedTimingFallback(const char* reason) {
     // Each GPU of a group would need a compute submit of its own.
     if (synchronizedTimingFallback_ || deviceGroupAfr_) return;
     synchronizedTimingFallback_ = true;
-    std::cout << "[Profiling] Vulkan timestamp queries are unavailable ("
+    timestampsSupported_ = false;   // no queries are written from here on
+    std::cout << "[Profiling] Vulkan timestamp queries cannot be used ("
               << reason << "); using synchronized wall-clock timing."
               << std::endl;
+}
+
+// A driver may stamp the end of the compute pass before that work is done when
+// a render pass follows in the same command buffer. A Maleoon 916 (MateBook
+// Pro, HarmonyOS 7, 2026-10-08) read 0.002 ms for a step of 4,194,304
+// particles that takes 11 ms; the rest appeared as render time, the frame's
+// total was right, and the score came out as 643 GB/s. Its headless runs,
+// which have no render pass, were right.
+//
+// So before a shown particle run the compute part is timed both ways, as the
+// OpenGL ES backend does it: by the GPU's clock in a frame as the test draws
+// it, and by wall clock in a command buffer of its own. The frames of the
+// check take enough steps that submitting and waiting do not weigh; a step of
+// zero length leaves every particle where it is. Android and HarmonyOS only:
+// the desktop is left as it was.
+void VulkanBackend::CheckTimestampsAgainstWallClock() {
+#if defined(GPU_BENCH_EMBEDDED_VULKAN)
+    if (!timestampsSupported_ || synchronizedTimingFallback_ || config_.headless ||
+        config_.workload != Workload::Stream) return;
+
+    constexpr std::uint32_t kParticleSteps = 16777216;
+    checkDispatchRepeats_ = (std::min)(256u, (std::max)(1u,
+        (kParticleSteps + config_.particleCount - 1) / config_.particleCount));
+    checkingTimestamps_ = true;
+
+    // By wall clock: the compute part submitted alone, as the fallback does it.
+    double wallMs = (std::numeric_limits<double>::max)();
+    timestampsSupported_ = false;
+    synchronizedTimingFallback_ = true;
+    for (int attempt = 0; attempt < 2; ++attempt) {
+        DrawFrame(0.0f);
+        wallMs = (std::min)(wallMs, syncComputeMs_);
+    }
+    synchronizedTimingFallback_ = false;
+    timestampsSupported_ = true;
+
+    // By the GPU's clock: the frame as a run draws it. The compute part of
+    // the frame in `slot`, or less than nothing where the stamps are no use.
+    const auto computeMsOf = [this](std::uint32_t slot) {
+        vkWaitForFences(device_, 1, &inFlightFences_[slot], VK_TRUE, UINT64_MAX);
+        std::uint64_t ts[kTimestampsPerFrame]{};
+        const VkResult read = vkGetQueryPoolResults(device_, timestampQueryPool_,
+            slot * kTimestampsPerFrame, kTimestampsPerFrame, sizeof(ts), ts, sizeof(std::uint64_t),
+            VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
+        timestampSlotReady_[slot] = false;   // not a sample of the run
+        if (read != VK_SUCCESS || ts[1] < ts[0]) return -1.0;
+        return static_cast<double>(ts[1] - ts[0]) * static_cast<double>(timestampPeriodNs_) / 1'000'000.0;
+    };
+    // First each frame waited for, the better of two.
+    double gpuMs = 0.0;
+    for (int attempt = 0; attempt < 2; ++attempt) {
+        const std::uint32_t slot = currentFrame_;
+        DrawFrame(0.0f);
+        gpuMs = (std::max)(gpuMs, computeMsOf(slot));
+    }
+    // Then one frame behind the other, as a run submits them, and the worse of
+    // the last ones: the Maleoon's stamps were right for a frame that had the
+    // GPU to itself and wrong for one that followed another.
+    for (std::uint32_t frame = 0; frame < 2 * config_.framesInFlight; ++frame) DrawFrame(0.0f);
+    double pacedGpuMs = (std::numeric_limits<double>::max)();
+    for (std::uint32_t slot = 0; slot < config_.framesInFlight; ++slot)
+        pacedGpuMs = (std::min)(pacedGpuMs, computeMsOf(slot));
+    checkingTimestamps_ = false;
+    checkDispatchRepeats_ = 1;
+
+    std::cout << "[Profiling] Timestamp check: " << gpuMs << " ms by the GPU's clock ("
+              << pacedGpuMs << " ms with one frame behind the other), "
+              << wallMs << " ms by wall clock." << std::endl;
+    if ((std::min)(gpuMs, pacedGpuMs) < 0.5 * wallMs)
+        EnableSynchronizedTimingFallback("its timestamps do not cover the compute part of a frame");
+#endif
 }
 
 // With wall-clock timing the compute part of a frame is recorded into a
@@ -1599,6 +1672,8 @@ VkCommandBuffer VulkanBackend::EndComputePart(VkCommandBuffer cmd) {
     si.commandBufferCount = 1;
     si.pCommandBuffers    = &cmd;
 
+    // Nothing of an earlier frame may still be under way when the clock starts.
+    vkQueueWaitIdle(graphicsQueue_);
     const auto begin = std::chrono::steady_clock::now();
     const VkResult res = vkQueueSubmit(graphicsQueue_, 1, &si, syncComputeFence_);
     if (res != VK_SUCCESS)
@@ -1688,6 +1763,21 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
                            sizeof(ComputeParams), &params);
     }
     vkCmdDispatch(cmd, config_.particleCount / kComputeWorkGroupSize, 1, 1);
+    // More than the one step of a frame is taken by the timestamp check only.
+    for (std::uint32_t repeat = 1; repeat < checkDispatchRepeats_; ++repeat) {
+        VkBufferMemoryBarrier betweenSteps{};
+        betweenSteps.sType               = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+        betweenSteps.srcAccessMask       = VK_ACCESS_SHADER_WRITE_BIT;
+        betweenSteps.dstAccessMask       = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+        betweenSteps.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        betweenSteps.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        betweenSteps.buffer              = particleBuffer_;
+        betweenSteps.size                = VK_WHOLE_SIZE;
+        vkCmdPipelineBarrier(cmd,
+            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+            0, 0, nullptr, 1, &betweenSteps, 0, nullptr);
+        vkCmdDispatch(cmd, config_.particleCount / kComputeWorkGroupSize, 1, 1);
+    }
     EndDebugLabel(cmd);
 
     if (timestampsSupported_)
@@ -1805,7 +1895,7 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
 
 void VulkanBackend::DrawFrame(float deltaTime) {
     vkWaitForFences(device_, 1, &inFlightFences_[currentFrame_], VK_TRUE, UINT64_MAX);
-    CollectTimestampResults(currentFrame_);
+    if (!checkingTimestamps_) CollectTimestampResults(currentFrame_);
 
     if (config_.headless) {
         // --- Headless: compute-only path ---
@@ -1963,7 +2053,8 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         vkWaitForFences(device_, 1, &inFlightFences_[currentFrame_], VK_TRUE, UINT64_MAX);
         const double renderMs = std::chrono::duration<double, std::milli>(
             std::chrono::steady_clock::now() - syncRenderBegin).count();
-        AccumulateTiming(syncComputeMs_, renderMs, syncComputeMs_ + renderMs);
+        if (!checkingTimestamps_)
+            AccumulateTiming(syncComputeMs_, renderMs, syncComputeMs_ + renderMs);
     }
 
     VkSwapchainKHR chains[] = { swapChain_ };

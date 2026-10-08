@@ -356,7 +356,10 @@ export struct CpuPage {
     if (cpuRun.memoryTest) {
       ForEach(this.classes(), (cpuClass: MemClass) => {
         SweepCard({ title: this.classTitle(cpuClass), mode: cpuClass.mode, cacheClass: cpuClass.rank, threads: 1 })
-      }, (cpuClass: MemClass) => cpuClass.rank.toString() + cpuClass.mode)
+        // The key carries the name and the core count: the card shown before a
+        // run stands for "class 0" too, and with a key of rank and mode alone
+        // it was kept for the real class 0 and showed "· · 0 cores".
+      }, (cpuClass: MemClass) => `${cpuClass.rank}/${cpuClass.mode}/${cpuClass.name}/${cpuClass.cores}`)
       SweepCard({
         title: tr(`All cores — ${cpuRun.allThreads} threads, GB/s (sizes are per thread)`,
           `全核 —— ${cpuRun.allThreads} 个线程，GB/s（数据量按每个线程计）`),

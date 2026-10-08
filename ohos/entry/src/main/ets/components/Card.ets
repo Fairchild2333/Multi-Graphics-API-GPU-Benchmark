@@ -23,7 +23,9 @@ export struct Card {
     .alignItems(HorizontalAlign.Start)
     .padding(14)
     .borderRadius(16)
-    .backgroundColor($r('sys.color.ohos_id_color_sub_background'))
+    // A fill that is a little apart from the page in light and in dark mode.
+    // ohos_id_color_sub_background is black in dark mode, as the page is.
+    .backgroundColor($r('sys.color.comp_background_secondary'))
     .width('100%')
   }
 }

@@ -516,8 +516,12 @@ non-persistent smoke first:
 Expected Windows acceptance signals are exit code 0, `CPU_META` reporting
 `strict_group_affinity`, one valid `CPU_RESULT kind=core` for every available
 logical processor, and a valid multi result with `pinned_threads=thread_count`.
-Exit code 3 means the strict affinity/completion contract failed; such results
-must not be packaged as validation data or persisted.
+Exit code 3 means the strict affinity/completion contract failed for a
+per-processor result; those results are not persisted and must not be packaged
+as validation data. Since 2026-10-08 the all-core result does not depend on the
+pinning (twenty busy threads fill twenty processors wherever the system puts
+them): it is valid whenever it was measured, `pinned_threads` says how many
+threads were held, and it is saved even when a per-processor result is not.
 
 The formal score command is intentionally long, especially on high-thread-count
 systems: 15 seconds is applied separately to every logical processor and then to

@@ -285,6 +285,10 @@ private:
     VkFence         syncComputeFence_ = VK_NULL_HANDLE;
     VkCommandBuffer syncFrameCmd_     = VK_NULL_HANDLE;
     double          syncComputeMs_    = 0.0;
+    // Set only while CheckTimestampsAgainstWallClock draws its frames: how
+    // many steps the compute pass takes, and that these frames are no samples.
+    std::uint32_t   checkDispatchRepeats_ = 1;
+    bool            checkingTimestamps_   = false;
 
     PFN_vkCmdBeginDebugUtilsLabelEXT  vkCmdBeginDebugUtilsLabel_  = nullptr;
     PFN_vkCmdEndDebugUtilsLabelEXT    vkCmdEndDebugUtilsLabel_    = nullptr;
@@ -355,6 +359,7 @@ private:
     void CreateTimestampQueryPool();
     void CollectTimestampResults(std::uint32_t frameSlot);
     void EnableSynchronizedTimingFallback(const char* reason);
+    void CheckTimestampsAgainstWallClock();
     VkCommandBuffer BeginComputePart(VkCommandBuffer frameCmd);
     VkCommandBuffer EndComputePart(VkCommandBuffer cmd);
     void CleanupSwapChain();

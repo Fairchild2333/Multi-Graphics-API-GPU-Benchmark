@@ -45,8 +45,20 @@ call the engine's command-line entry point.
 >   the fluid needs, and its timing of the particle test and of the memory sweep
 >   cannot be trusted. The car emulator (7.0 Beta1) has to be started from
 >   DevEco Studio with an account signed in.
-> - **Not checked**: a real device, a car, the full-screen picture on a device of
->   the phone type. See section 10 of `HANDOFF.md` in the repository root.
+> - **Not checked**: a car, the full-screen picture on a device of the phone
+>   type. See section 10 of `HANDOFF.md` in the repository root.
+>
+> Added 2026-10-08 (**run on a real device**: a HUAWEI MateBook Pro, HarmonyOS 7.0,
+> Kirin X90, Maleoon 916):
+> - **Works**: installing the signed HAP, every CPU test, and under all three
+>   APIs every GPU test except the two OpenGL ES particle tests at 16,777,216
+>   particles (27 of the 29 tests of `scripts\hdc-suite.ps1`).
+> - **Three things the device showed, all fixed**: ten cores of two threads were
+>   taken for twenty cores; the system does not hold a thread to one big-core
+>   processor, so CPU results there are `scheduler_managed` as on macOS; and the
+>   Vulkan timestamps of a shown particle frame are wrong when one frame follows
+>   another, which a check before the run now finds (such runs are timed by wall
+>   clock). Details in section 10 of `HANDOFF.md`.
 
 ## Features
 
@@ -141,16 +153,37 @@ A drive letter mapped with `subst` does not help: the build tools resolve the re
 
 ## Installing on a device
 
-An unsigned HAP cannot be installed on a real device. Sign in to DevEco Studio
-with a Huawei account, then **File > Project Structure > Signing Configs >
-Automatically generate signature**, and run. An emulator needs a system image
-from **Device Manager** first. Both steps are yours to do; neither has been
-done on this machine.
+An unsigned HAP cannot be installed on a real device (`hdc install` answers
+`code:9568320 error: no signature file`). Sign the project once:
+
+1. Connect the device, with USB debugging on.
+2. Open this folder in DevEco Studio, signed in with a Huawei account.
+3. **File > Project Structure > Project > Signing Configs**, tick
+   **Automatically generate signature**, Apply.
+
+`scripts\build-ohos.ps1` then also writes `entry-default-signed.hap`, and
+`hdc install -r` takes it. An emulator needs a system image from **Device
+Manager** and takes the unsigned HAP.
+
+- **DevEco Studio does not open a project whose path has a space in it** ("Invalid
+  path"). Give it a path without one through a directory junction to the
+  repository, for example
+  `New-Item -ItemType Junction -Path C:\Users\<you>\mangekyo -Target "<repository>"`,
+  and open `C:\Users\<you>\mangekyo\ohos`. The command-line build is not
+  affected and runs from the real path.
+- **Do not commit the signing configuration.** Signing writes the paths of your
+  certificate files and an encrypted password into `build-profile.json5`; they
+  belong to one machine and one account.
 
 ## Testing over hdc
 
-A debug build starts a test without touching the device (**compiled only,
-never tried on a device**):
+`scripts\hdc-suite.ps1` runs the standard series of 29 tests on a connected
+device and brings the results back to `out\hdc\<model>-<time>\` (`-Install`
+installs the HAP first, `-Quick` only checks that every test starts, `-Only`
+picks tests by name). It is `scripts\adb-suite.ps1` for hdc: same tests, same
+durations.
+
+A debug build starts a single test without touching the device:
 
 ```bash
 hdc shell aa start -a EntryAbility -b com.mangekyo.benchmark --ps run cpu_membw
@@ -186,13 +219,32 @@ hdc hilog | grep Mangekyo
 - The launch parameter works in debug builds only. A GPU test needs the screen
   on and unlocked.
 
-## Known risks (all to be checked on a device)
+## What a real device does differently
 
-- **Binding threads to cores**: the engine uses `sched_setaffinity`. If the app
-  sandbox forbids it, the compute test is rejected as invalid and the sweep is
-  marked as not bound.
-- **Cache sizes**: read from `/sys/devices/system/cpu`. If the sandbox hides
-  them, the cache levels are read off the curve instead.
+Seen on the MateBook Pro (2026-10-08); a phone may differ.
+
+- **Binding threads to cores**: the system's own kernel pins a thread to a
+  small-core or middle-core processor, but answers a mask that names one
+  big-core processor with all of `4-19`, and its `sched_getcpu()` counts cores,
+  not processors. The engine finds this out before a CPU test and then saves
+  the results as `scheduler_managed`. An emulator runs a Linux kernel, pins
+  everything and stays strict.
+- **Cores and threads**: `topology/core_id` is numbered per processor there; the
+  engine reads which processors share a core from `thread_siblings_list`.
+- **Cache sizes**: the app may read `/sys/devices/system/cpu`, but the cache
+  sizes could not be had from it, so the cache levels are read off the curve.
+- **The debugging shell reads almost nothing** (not `/proc/cpuinfo`, no battery,
+  no thermal state, no CPU clock), so the series cannot record the power source,
+  the performance mode or a temperature. Note them by hand.
+- **The app runs in a window** on a PC; a GPU test still draws 1280 x 720.
+- **Dark mode**: an app with no `resources/dark` directory that does not call
+  `setColorMode` keeps its system colours light in dark mode, while the floating
+  tab bar's material goes dark. `EntryAbility` now calls
+  `setColorMode(COLOR_MODE_NOT_SET)` so the app follows the system (seen in dark
+  mode on a Mate 60 Pro; light mode was not looked at again).
+
+## Known risks (still to be checked)
+
 - **Vulkan**: the engine asks for Vulkan 1.0 entry points only; whether devices
   and the emulator all offer `VK_OHOS_surface` has not been checked.
 - **Storage test**: writes a temporary file of up to 1 GiB in the app's files

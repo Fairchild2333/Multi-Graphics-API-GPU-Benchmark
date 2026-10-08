@@ -348,8 +348,13 @@ detailed logical-processor rows remain in stdout/the current GUI session.
 Windows formal results require strict group affinity. Linux/Android require
 pthread affinity to succeed and read back as the requested sole CPU under the
 separate `strict_sched_affinity` identity. A failed required bind marks the
-affected result invalid, returns exit code 3 and prevents persistence. macOS
-reports `scheduler_managed`; affinity capability, timing and `multi` sequence are
+affected per-core result invalid, returns exit code 3 and keeps the per-core
+summary from being saved. The multi-core result does not depend on the pinning
+(since 2026-10-08): it is valid whenever it was measured, records how many of its
+threads were pinned, and is saved also when a per-core result is not. macOS
+reports `scheduler_managed`, and so does a HarmonyOS device whose kernel does not
+hold a thread to every processor (found by a probe before the test; the
+emulators, on a Linux kernel, stay strict); affinity capability, timing and `multi` sequence are
 part of the stored result identity, so unlike contracts do not share a comparison
 group. Core-class names prefixed with `Inferred` are OS-metadata ranks, not
 authoritative P/E/Mid/LPE microarchitecture identification.

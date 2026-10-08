@@ -2109,13 +2109,14 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         if (!perCoreValid || !multiValid) {
             std::cerr << "CPU benchmark did not meet its affinity/completion contract; "
                          "see CPU_ERROR and valid=0 records above.\n";
-            return 3;
         }
+        // Each part is saved on its own merit: an all-core result is not thrown
+        // away because a processor of the per-processor part could not be held.
         if (saveCpuResults) {
             bool saved = true;
             bool storageExceptionReported = false;
             try {
-                if (perCoreRequested) {
+                if (perCoreRequested && perCoreValid) {
                     const auto stored = MakeStoredCpuResult(report, cpuCfg, false);
                     const bool thisSaved = gpu_bench::AppendResult(stored);
                     saved = thisSaved && saved;
@@ -2123,7 +2124,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                         std::cout << "[Results] Saved CPU per-core summary as " << stored.id
                                   << " -> " << gpu_bench::ResultsFilePath() << '\n';
                 }
-                if (multiRequested) {
+                if (multiRequested && multiValid) {
                     const auto stored = MakeStoredCpuResult(report, cpuCfg, true);
                     const bool thisSaved = gpu_bench::AppendResult(stored);
                     saved = thisSaved && saved;
@@ -2140,7 +2141,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             if (!saved && !storageExceptionReported)
                 std::cerr << "[Results] Warning: failed to append one or more CPU summaries.\n";
         }
-        return 0;
+        return perCoreValid && multiValid ? 0 : 3;
     }
 
     // ---- N-body workload normalisation ----

@@ -6,6 +6,15 @@ import { appState, logLine, runController } from '../common/RunController';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+    // Follow the system's light or dark mode. An app that neither says so nor
+    // has a dark resource directory keeps its system colours light in dark
+    // mode; only the floating tab bar's material went dark (Mate 60 Pro,
+    // 2026-10-08).
+    try {
+      this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
+    } catch (e) {
+      logLine('setColorMode failed: ' + JSON.stringify(e));
+    }
     appState.dark = this.context.config.colorMode === ConfigurationConstant.ColorMode.COLOR_MODE_DARK;
     try {
       const info: bundleManager.BundleInfo =
