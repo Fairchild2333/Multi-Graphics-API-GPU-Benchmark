@@ -310,3 +310,14 @@ Capture filenames now include workload, size and Burn tier, so the suite can
 verify the capture belonging to each result. Cancelling the macOS suite stops
 the worker process group as well as its controller. Short OpenGL runs at all
 three tiers passed on 2026-10-12; the full 18-job series has not been run yet.
+
+
+The GPU footer has a direct **Test all projects** button: it selects the complete
+available series and starts it in one click, including CPU work. The adjacent
+**Results folder** button opens the shared storage directory in Finder. CPU and
+GPU results use the same `results.json` (plural), normally under
+`~/Library/Application Support/GpuComputeBenchmark/results/`.
+
+API labels use their standard names: Metal, Vulkan and OpenGL. The distributed
+app enables Metal and native OpenGL 4.1; Vulkan remains disabled. A macOS Vulkan
+build would normally use MoltenVK over Metal, so it is a translation-layer path.

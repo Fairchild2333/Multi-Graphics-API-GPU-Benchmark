@@ -210,6 +210,18 @@ final class BenchEngine: ObservableObject {
     @Published var cpuState = BenchChannelState()
 
 
+    nonisolated static func apiDisplayName(_ api: String) -> String {
+        switch api.lowercased() {
+        case "metal": return "Metal"
+        case "vulkan": return "Vulkan"
+        case "opengl": return "OpenGL"
+        case "cpu": return "CPU"
+        case "dx11": return "DX11"
+        case "dx12": return "DX12"
+        default: return api
+        }
+    }
+
     /// Available graphics APIs on macOS (no DX).
     static let availableAPIs = ["Auto", "Metal", "Vulkan", "OpenGL"]
 
@@ -360,7 +372,7 @@ final class BenchEngine: ObservableObject {
         }
         let details = ["metal", "vulkan", "opengl", "dx12", "dx11", "cpu"].compactMap { api -> String? in
             guard let count = availableSuiteApiCounts[api], count > 0 else { return nil }
-            let label = api == "metal" ? "Metal" : api == "opengl" ? "OpenGL" : api.uppercased()
+            let label = Self.apiDisplayName(api)
             return label + " " + String(count)
         }.joined(separator: " · ")
         return Localization.tr("Available now: \(total) tests", "当前可用：\(total) 项", "対応：\(total) テスト")
@@ -1110,7 +1122,7 @@ final class BenchEngine: ObservableObject {
         }
         var parts: [String] = []
         if let backend = value(after: "--backend") {
-            parts.append(backend.uppercased())
+            parts.append(Self.apiDisplayName(backend))
         }
         if let gpu = value(after: "--gpu") {
             parts.append("GPU \(gpu)")

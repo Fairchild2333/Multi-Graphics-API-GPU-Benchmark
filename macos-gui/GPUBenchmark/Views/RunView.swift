@@ -118,7 +118,6 @@ struct RunView: View {
         if engine.gpus.contains(where: { $0.supportsMetal }) { s.append("metal") }
         if engine.gpus.contains(where: { $0.supportsVulkan }) { s.append("vulkan") }
         if engine.gpus.contains(where: { $0.supportsOpenGL && ($0.supportsOpenGLCompute || selectedWorkload == "gpu_burn") }) { s.append("opengl") }
-        if s.isEmpty { s = ["metal", "vulkan", "opengl"] }
         return s
     }
 
@@ -135,7 +134,7 @@ struct RunView: View {
         if selectedApis.isEmpty {
             return Localization.tr("Auto (best available)", "自动（最佳可用）", "自動（最良）")
         }
-        return selectedApis.sorted().map { $0.uppercased() }.joined(separator: ", ")
+        return selectedApis.sorted().map { BenchEngine.apiDisplayName($0) }.joined(separator: ", ")
     }
 
     private var usesParticles: Bool {
@@ -303,6 +302,9 @@ struct RunView: View {
             if !showLegacy && !primaryWorkloads.contains(where: { $0.id == selectedWorkload }) {
                 selectedWorkload = "stream"
             }
+        }
+        .onChange(of: selectedWorkload) { _ in
+            selectedApis.formIntersection(supportedApis)
         }
         .confirmationDialog(
             Localization.tr(
@@ -492,23 +494,25 @@ struct RunView: View {
             Divider()
             Text(Localization.tr("Supported", "支持", "対応"))
             ForEach(supportedApis, id: \.self) { api in
-                Toggle(api.uppercased(), isOn: bindingForApi(api))
+                Toggle(BenchEngine.apiDisplayName(api), isOn: bindingForApi(api))
             }
             if !unsupportedApis.isEmpty {
                 Divider()
                 Text(Localization.tr(
                     "Not reported as supported", "未报告为支持", "未対応として報告"))
                 ForEach(unsupportedApis, id: \.self) { api in
-                    Toggle(api.uppercased(), isOn: bindingForApi(api))
+                    Toggle(BenchEngine.apiDisplayName(api), isOn: bindingForApi(api))
+                        .disabled(true)
                 }
             }
         } label: {
             Text(apiSummary).lineLimit(1)
         }
+        .disabled(engine.gpus.isEmpty)
         .help(Localization.tr(
-            "Unsupported selections remain available and will be reported by the CLI.",
-            "仍可勾选不受支持的项；CLI 会报告失败原因。",
-            "非対応の選択も可能で、CLI が理由を報告します。"))
+            "Only APIs supported by the current workload can be selected. macOS Vulkan uses a Metal translation layer such as MoltenVK.",
+            "仅可选择当前负载支持的 API。macOS 的 Vulkan 需要 MoltenVK 等转译到 Metal 的实现。",
+            "現在のワークロードに対応する API のみ選択できます。macOS の Vulkan は MoltenVK などで Metal に変換されます。"))
     }
 
     private func bindingForApi(_ api: String) -> Binding<Bool> {
@@ -695,8 +699,16 @@ struct RunView: View {
     }
 
     private var actionBar: some View {
-        HStack {
-            Spacer()
+        HStack(spacing: 10) {
+            Button {
+                engine.openResultsFolder()
+            } label: {
+                Label(Localization.tr("Results folder", "结果文件夹", "結果フォルダ"), systemImage: "folder")
+            }
+            .help(Localization.tr("CPU and GPU scores are saved together in results.json.",
+                                   "CPU 与 GPU 成绩统一保存在 results.json。",
+                                   "CPU / GPU スコアは results.json にまとめて保存されます。"))
+            Spacer(minLength: 8)
             Circle()
                 .fill(run.isRunning ? Color.orange : Color.green)
                 .frame(width: 10, height: 10)
@@ -711,6 +723,13 @@ struct RunView: View {
                 engine.cancel(channel: .gpu)
             }
             .disabled(!run.isRunning)
+            Button(action: runAllTests) {
+                Text(Localization.tr("Test all projects", "一键测试全部项目", "全項目を一括実行"))
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.large)
+            .help(engine.availableSuiteSummary)
+            .disabled(engine.isRunning || engine.availableSuiteApiCounts.isEmpty)
             Button(action: runBenchmark) {
                 Text(isFormalSuitePreset
                      ? Localization.tr("Run Complete Series", "运行完整测试", "完全テストを実行")
@@ -793,6 +812,12 @@ struct RunView: View {
         if backend != "opengl" { a += captureArgs() }
         a += extra
         return a
+    }
+
+    private func runAllTests() {
+        guard !engine.isRunning, !engine.availableSuiteApiCounts.isEmpty else { return }
+        preset = .completeSuite
+        startBenchmark()
     }
 
     private func runBenchmark() {
