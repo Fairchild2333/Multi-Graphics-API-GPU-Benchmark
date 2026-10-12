@@ -33,7 +33,7 @@ From the repository root:
 ./scripts/build-macos.sh
 ```
 
-The command builds a native-architecture, Metal-only Release app and verifies
+The command builds a native-architecture, Metal + OpenGL 4.1 Release app and verifies
 the result. Its final output is:
 
 ```text
@@ -129,10 +129,10 @@ or App Store archive.
 |---|:---:|---|
 | Metal | Yes | Native and the supported macOS path |
 | Vulkan | No | Optional developer CLI path through a separately supplied Monterey-compatible MoltenVK loader/ICD |
-| OpenGL | No | The benchmark needs OpenGL 4.3 compute/SSBO; macOS stops at 4.1 |
+| OpenGL | Yes | Native 4.1 GPU Burn (16/64/256 steps); compute workloads need 4.3 and are excluded |
 | DX11 / DX12 | No | Windows-only |
 
-The default bundle is intentionally Metal-only. It does not copy
+The default bundle is intentionally Metal + OpenGL 4.1. It does not copy
 `vulkan-loader`, MoltenVK, or other Homebrew dylibs. An optional Vulkan build
 must be treated as a separate developer configuration and must prove that both
 the loader and ICD support the selected deployment target.
@@ -277,3 +277,36 @@ The GPU page exposes a native Metal cache/memory probe. Its particle-derived
 curves and `metal_memory_sweep_v1_preview` saved results are separate from
 Vulkan `membw_v1`. A final data point can still be cache-assisted. The CLI keeps
 its original no-save default; `--memory-sweep-save` explicitly saves a preview.
+
+## Complete series and API availability
+
+The mobile adb runner contains 29 jobs across Vulkan, OpenGL ES 3.1, OpenGL
+ES 2.0 and CPU. The desktop complete series uses the same particle sizes and
+three Burn tiers, but generates jobs only for available API/workload pairs.
+Unavailable APIs do not create placeholder or skipped jobs.
+
+On the verified Apple M4 Pro this gives **18 jobs**:
+
+- Metal: 8 particle runs (65K/1M/4M/16M, rendered + compute only), 3 GPU Burn
+  tiers (16/64/256), interactive pool and the native memory diagnostic: 13.
+- OpenGL 4.1: the 3 GPU Burn tiers. No compute shaders or SSBOs are needed.
+- CPU: one compute series and one cache/memory/storage sweep: 2.
+
+The app displays the detected count before starting. CLI inspection is also
+available without running a benchmark:
+
+```bash
+out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark --suite-list
+```
+
+Timed GPU passes and CPU compute steps use 15 seconds. Memory sweeps use their
+own sample-based duration. Only rendered Metal passes request native capture;
+OpenGL capture is unavailable on macOS and is not requested. Native OpenGL
+uses synchronized wall-clock timing when the driver has no usable timer queries,
+with a separate `_sync_timing` score group. The current flow is not a fixed
+29-job list; its count changes with detected APIs/devices.
+
+Capture filenames now include workload, size and Burn tier, so the suite can
+verify the capture belonging to each result. Cancelling the macOS suite stops
+the worker process group as well as its controller. Short OpenGL runs at all
+three tiers passed on 2026-10-12; the full 18-job series has not been run yet.

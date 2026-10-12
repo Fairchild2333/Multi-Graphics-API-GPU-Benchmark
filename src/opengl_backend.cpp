@@ -24,6 +24,15 @@ namespace gpu_bench {
 
 std::uint32_t OpenGLBackend::CompileShaderGL(const std::string& path, std::uint32_t type) {
     auto src = ReadFileBytes(path);
+    if (gl41GraphicsOnly_) {
+        std::string text(src.begin(), src.end());
+        const auto version = text.find("#version 430");
+        if (version != std::string::npos) text.replace(version, 12, "#version 410");
+        const std::string layout = "layout(binding = 1, std140)";
+        const auto binding = text.find(layout);
+        if (binding != std::string::npos) text.replace(binding, layout.size(), "layout(std140)");
+        src.assign(text.begin(), text.end());
+    }
     src.push_back('\0');
 
     GLuint shader = glCreateShader(type);
@@ -82,9 +91,11 @@ void OpenGLBackend::InitBackend() {
     driverVersion_ = glVerStr;
     std::cout << "[OpenGL Init] " << deviceName_ << "  |  GL " << glVerStr << std::endl;
 
+    gl41GraphicsOnly_ = GLAD_VERSION_MAJOR(gladVer) == 4 && GLAD_VERSION_MINOR(gladVer) < 3;
     if (GLAD_VERSION_MAJOR(gladVer) < 4 ||
-        (GLAD_VERSION_MAJOR(gladVer) == 4 && GLAD_VERSION_MINOR(gladVer) < 3)) {
-        throw std::runtime_error("OpenGL 4.3+ required for compute shaders");
+        (GLAD_VERSION_MAJOR(gladVer) == 4 && GLAD_VERSION_MINOR(gladVer) < 1) ||
+        (gl41GraphicsOnly_ && !isGpuBurnWorkload(config_.workload))) {
+        throw std::runtime_error("OpenGL 4.1 supports GPU Burn only; compute workloads require OpenGL 4.3+");
     }
 
     if (config_.vsync)
@@ -127,7 +138,7 @@ void OpenGLBackend::InitBackend() {
 }
 
 void OpenGLBackend::CreateShaders() {
-    {
+    if (!isFragmentOnlyWorkload(config_.workload)) {
         std::string csFile;
         if (config_.workload == Workload::SynthPeak) {
             if (config_.peakPrecision == Precision::FP16) {
@@ -163,10 +174,22 @@ void OpenGLBackend::CreateShaders() {
         auto vs = CompileShaderGL(shaderDir_ + vsf, GL_VERTEX_SHADER);
         auto fs = CompileShaderGL(shaderDir_ + fsf, GL_FRAGMENT_SHADER);
         renderProgram_ = LinkProgramGL(vs, fs);
+        if (gl41GraphicsOnly_) {
+            const GLuint block = glGetUniformBlockIndex(renderProgram_, "GpuBurnV1Params");
+            if (block == GL_INVALID_INDEX) throw std::runtime_error("GPU Burn uniform block missing");
+            glUniformBlockBinding(renderProgram_, block, 1);
+        }
     }
 }
 
 void OpenGLBackend::CreateParticleBuffers() {
+    if (isFragmentOnlyWorkload(config_.workload)) {
+        glGenVertexArrays(1, &vao_);
+        glGenBuffers(1, &ubo_);
+        glBindBuffer(GL_UNIFORM_BUFFER, ubo_);
+        glBufferData(GL_UNIFORM_BUFFER, 16, nullptr, GL_DYNAMIC_DRAW);
+        return;
+    }
     const GLsizeiptr bufferSize =
         static_cast<GLsizeiptr>(sizeof(Particle) * config_.particleCount);
 

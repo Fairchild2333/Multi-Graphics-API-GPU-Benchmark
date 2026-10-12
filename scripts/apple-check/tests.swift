@@ -147,6 +147,24 @@ check.equal(suite.jobs.map { $0.label }, ["#1", "#2"], "suite: one entry per tes
 check.equal(suite.jobs.map { $0.samples.map { $0.seconds } }, [[1.0, 2.0], [1.0, 2.0]], "suite: sample times")
 check.equal(suite.jobs.map { $0.scoreLine }, ["VRAM rate: 10.5 GB/s", "VRAM rate: 12.5 GB/s"], "suite: scores")
 
+// Suite protocol keeps sizes and tiers identifiable without adding CPU work to GPU charts.
+let previousLanguage = Localization.current
+Localization.current = .en
+let nativeSuite = RunOutput.parse("""
+SUITE_RUN\tindex=1\ttotal=18\tbackend=metal\tworkload=stream\tparticles=65536\tsteps=0\theadless=1
+[GPU Timing] Compute: 1.0 ms | Render: 0 ms | Total: 1 ms | FPS: 100 | T: 3.0 s
+VRAM rate: 10 GB/s
+SUITE_RUN\tindex=2\ttotal=18\tbackend=opengl\tworkload=gpu_burn\tparticles=0\tsteps=64\theadless=0
+[GPU Timing] Compute: 0 ms | Render: 2.0 ms | Total: 2 ms | FPS: 50 | T: 3.0 s
+Burn rate: 20 Gpix-step/s
+SUITE_RUN\tindex=17\ttotal=18\tbackend=cpu\tworkload=cpu_all\tparticles=0\tsteps=0\theadless=1
+""")
+check.equal(nativeSuite.jobs.count, 2, "native suite: CPU does not create a GPU chart")
+check.equal(nativeSuite.jobs.map { $0.label }, ["Metal · Particle · 65K · Headless", "OpenGL · GPU Burn 64"], "native suite: variant labels")
+check.equal(nativeSuite.jobs.map { $0.samples.count }, [1, 1], "native suite: independent timing samples")
+check.equal(nativeSuite.jobs.last?.score?.unit ?? "", "Gpix-step/s", "native suite: Burn score unit")
+Localization.current = previousLanguage
+
 // MARK: - Chart geometry
 
 @MainActor func curves(_ output: RunOutput, _ mode: String) -> [PlotSeries] {

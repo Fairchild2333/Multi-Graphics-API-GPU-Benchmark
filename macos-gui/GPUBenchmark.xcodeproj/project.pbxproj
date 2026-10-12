@@ -7,13 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1AB7BE24B0B616923E144EE3 /* BenchCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9196AE67084DD657E941248 /* BenchCharts.swift */; };
 		21A4560CFD01F4D29255A363 /* BenchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B84C6BFB334455DFC2513AF /* BenchEngine.swift */; };
 		3003398856F31FFD7517AF0F /* GPUBenchmarkApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 428EDF98B5EF16E5CD061702 /* GPUBenchmarkApp.swift */; };
 		324CE56B3629BD508C55A17F /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B780C1FCF3A143BE0C4FC4F /* GlassCard.swift */; };
-		A1B2C3D4E5F60718293A4B08 /* ChartGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B07 /* ChartGeometry.swift */; };
-		A1B2C3D4E5F60718293A4B06 /* EngineOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B05 /* EngineOutput.swift */; };
-		A1B2C3D4E5F60718293A4B04 /* ResultCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B03 /* ResultCharts.swift */; };
-		A1B2C3D4E5F60718293A4B02 /* BenchCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B01 /* BenchCharts.swift */; };
 		551CC5E27733CBD92696B6C7 /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45FBBD285712A4940F91A64 /* ChartsView.swift */; };
 		646EC3B3D1B3902D0982603B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E2131DAE489907BE59D03E1F /* Assets.xcassets */; };
 		6490EEEE65DEEA7D9CBD6276 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A5D4F75593984C34C3D979F /* HistoryView.swift */; };
@@ -23,20 +20,20 @@
 		79BCD31676E6F857DB112150 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F65AC0E25F3B972B1C7E067 /* SettingsView.swift */; };
 		822737CDCEBC289F34EF2AD7 /* BenchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517B698D469EB75E2DF01C14 /* BenchResult.swift */; };
 		847779A7AEAAB3BC594F07D5 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5931797D1CD1890548F2D50F /* Localization.swift */; };
+		B08F6211CFC5AAC9FA7420C3 /* ResultCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D8153D95C66A9CF541873C /* ResultCharts.swift */; };
 		B9811C4A05E08124DB77D897 /* FormField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6A7F1A736B9BCFCD3F49B86 /* FormField.swift */; };
 		CF3EB0E6C6CCE4AB52BC4B17 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 292D8F0C76E8C53D937E8BC9 /* AboutView.swift */; };
+		D4D033E301C3B8A9FBDC2701 /* EngineOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = B970883FB2CF30DA5DECDF63 /* EngineOutput.swift */; };
 		DD389C242471EE7C4D674617 /* RunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65BBAE1016DDE442843EDFC /* RunView.swift */; };
+		FF47829506461BA34375ECC3 /* ChartGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0354B0FF1CE54A908E765E /* ChartGeometry.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0C10F46C195D3EE52ED640C2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		292D8F0C76E8C53D937E8BC9 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		29D8153D95C66A9CF541873C /* ResultCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultCharts.swift; sourceTree = "<group>"; };
 		428EDF98B5EF16E5CD061702 /* GPUBenchmarkApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUBenchmarkApp.swift; sourceTree = "<group>"; };
 		4B780C1FCF3A143BE0C4FC4F /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassCard.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F60718293A4B07 /* ChartGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGeometry.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F60718293A4B05 /* EngineOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineOutput.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F60718293A4B03 /* ResultCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultCharts.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F60718293A4B01 /* BenchCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchCharts.swift; sourceTree = "<group>"; };
 		517B698D469EB75E2DF01C14 /* BenchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchResult.swift; sourceTree = "<group>"; };
 		5931797D1CD1890548F2D50F /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
 		5A5D4F75593984C34C3D979F /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
@@ -47,20 +44,23 @@
 		A6A7F1A736B9BCFCD3F49B86 /* FormField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormField.swift; sourceTree = "<group>"; };
 		B45FBBD285712A4940F91A64 /* ChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
 		B65BBAE1016DDE442843EDFC /* RunView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunView.swift; sourceTree = "<group>"; };
+		B9196AE67084DD657E941248 /* BenchCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchCharts.swift; sourceTree = "<group>"; };
+		B970883FB2CF30DA5DECDF63 /* EngineOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineOutput.swift; sourceTree = "<group>"; };
 		CCF53EFA43CC15D0D52F44F2 /* CpuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CpuView.swift; sourceTree = "<group>"; };
 		DB1E17A053B2F4CB03F9F87E /* GPUBenchmark-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GPUBenchmark-Bridging-Header.h"; sourceTree = "<group>"; };
 		DCA604AC7291DFD52E3ED90A /* GPUBenchmark.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GPUBenchmark.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E2131DAE489907BE59D03E1F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FE0354B0FF1CE54A908E765E /* ChartGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGeometry.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		4C261775AAF22A3AD18503AF /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				B9196AE67084DD657E941248 /* BenchCharts.swift */,
 				A6A7F1A736B9BCFCD3F49B86 /* FormField.swift */,
 				4B780C1FCF3A143BE0C4FC4F /* GlassCard.swift */,
-				A1B2C3D4E5F60718293A4B03 /* ResultCharts.swift */,
-				A1B2C3D4E5F60718293A4B01 /* BenchCharts.swift */,
+				29D8153D95C66A9CF541873C /* ResultCharts.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -123,8 +123,8 @@
 			isa = PBXGroup;
 			children = (
 				517B698D469EB75E2DF01C14 /* BenchResult.swift */,
-				A1B2C3D4E5F60718293A4B07 /* ChartGeometry.swift */,
-				A1B2C3D4E5F60718293A4B05 /* EngineOutput.swift */,
+				FE0354B0FF1CE54A908E765E /* ChartGeometry.swift */,
+				B970883FB2CF30DA5DECDF63 /* EngineOutput.swift */,
 				5931797D1CD1890548F2D50F /* Localization.swift */,
 			);
 			path = Models;
@@ -198,21 +198,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				CF3EB0E6C6CCE4AB52BC4B17 /* AboutView.swift in Sources */,
+				1AB7BE24B0B616923E144EE3 /* BenchCharts.swift in Sources */,
 				21A4560CFD01F4D29255A363 /* BenchEngine.swift in Sources */,
 				822737CDCEBC289F34EF2AD7 /* BenchResult.swift in Sources */,
+				FF47829506461BA34375ECC3 /* ChartGeometry.swift in Sources */,
 				551CC5E27733CBD92696B6C7 /* ChartsView.swift in Sources */,
 				66F3FDA2D6171DDE8BBF9FA5 /* ContentView.swift in Sources */,
 				6D83F9C27CD88E75B57AEE2D /* CpuView.swift in Sources */,
+				D4D033E301C3B8A9FBDC2701 /* EngineOutput.swift in Sources */,
 				B9811C4A05E08124DB77D897 /* FormField.swift in Sources */,
 				3003398856F31FFD7517AF0F /* GPUBenchmarkApp.swift in Sources */,
 				324CE56B3629BD508C55A17F /* GlassCard.swift in Sources */,
-				A1B2C3D4E5F60718293A4B08 /* ChartGeometry.swift in Sources */,
-				A1B2C3D4E5F60718293A4B06 /* EngineOutput.swift in Sources */,
-				A1B2C3D4E5F60718293A4B04 /* ResultCharts.swift in Sources */,
-				A1B2C3D4E5F60718293A4B02 /* BenchCharts.swift in Sources */,
 				72B4A9CEC591F2CCE9E0ADFE /* GpuBenchBridge.mm in Sources */,
 				6490EEEE65DEEA7D9CBD6276 /* HistoryView.swift in Sources */,
 				847779A7AEAAB3BC594F07D5 /* Localization.swift in Sources */,
+				B08F6211CFC5AAC9FA7420C3 /* ResultCharts.swift in Sources */,
 				DD389C242471EE7C4D674617 /* RunView.swift in Sources */,
 				79BCD31676E6F857DB112150 /* SettingsView.swift in Sources */,
 			);
@@ -246,6 +246,8 @@
 					"$(inherited)",
 					"-lgpu_engine",
 					"-lglfw3",
+					"-lglad_gl43",
+					"-framework OpenGL",
 					"-framework Metal",
 					"-framework QuartzCore",
 					"-framework Cocoa",
@@ -345,6 +347,8 @@
 					"$(inherited)",
 					"-lgpu_engine",
 					"-lglfw3",
+					"-lglad_gl43",
+					"-framework OpenGL",
 					"-framework Metal",
 					"-framework QuartzCore",
 					"-framework Cocoa",

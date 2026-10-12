@@ -1,5 +1,36 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
+## 2026-10-12 Complete-series correction and native OpenGL 4.1
+
+The user meant the adb 29-job series, not the old 10-job desktop GPU matrix.
+Their latest instruction supersedes the interim 29-slot/skip proposal: APIs
+that are unavailable do not enter the queue. Native macOS OpenGL 4.1 is now
+built and probed; its 16/64/256 GPU Burn tiers run with no compute shader or
+SSBO, GLSL 4.10 and explicit uniform-block binding. Particle compute still
+requires GL 4.3 and is excluded from GL4.1. Current M4 Pro plan: Metal 13,
+OpenGL 3, CPU 2 = 18. `--suite-list` is a read-only manifest inspection.
+
+The old macOS GPU bridge parsed the CLI TSV columns incorrectly; corrected
+metadata and external-helper probing avoid Cocoa calls from a GUI background
+thread. The complete UI displays its detected count and includes CPU result
+charts. OpenGL requests no macOS capture. Native capture names now contain the
+workload and configuration, matching the suite's real-file checks; previously
+native traces had only device/time names and could be falsely reported missing.
+Suite cancellation forwards to the complete worker process group (tested with
+non-GPU controller/worker/grandchild processes).
+
+Three short, isolated OpenGL runs passed and saved positive scores; driver
+`4.1 Metal - 91.7` has no timestamp queries so `_sync_timing` is used. Matrix,
+capture-naming and process-cancellation tests pass alongside result compatibility.
+Apple Silicon/Intel macOS and iOS device/simulator builds pass. Shared Swift
+parser/geometry tests now pass 96/96; CTest passes 3/3. A short native capture
+created a trace with the exact workload/size filename. Cancelled suite progress
+retains its completed count instead of showing 100%.
+
+The user's complete test remains stopped; do not start the full series again
+without a new request. Android's adb/hdc lists remain unchanged.
+
+
 ## 2026-10-12 Apple integration verified with Xcode
 
 - Merged origin/main `111db53` while preserving the three local Apple commits.

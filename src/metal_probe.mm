@@ -16,6 +16,7 @@ std::vector<MetalGpuInfo> ProbeMetalDevices() {
     MetalGpuInfo info;
     info.name         = [systemDevice.name UTF8String];
     info.vramBytes    = systemDevice.recommendedMaxWorkingSetSize;
+    info.hasUnifiedMemory = systemDevice.hasUnifiedMemory;
     info.isHeadless   = false;
     info.isLowPower   = false;
     info.isRemovable  = false;
@@ -34,6 +35,7 @@ std::vector<MetalGpuInfo> ProbeMetalDevices() {
         MetalGpuInfo info;
         info.name         = [dev.name UTF8String];
         info.vramBytes    = dev.recommendedMaxWorkingSetSize;
+        info.hasUnifiedMemory = dev.hasUnifiedMemory;
         info.isHeadless   = dev.isHeadless;
         info.isLowPower   = dev.isLowPower;
         info.isRemovable  = dev.isRemovable;

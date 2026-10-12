@@ -44,6 +44,8 @@ targets:
           - "$(inherited)"
           - "-lgpu_engine"
           - "-lglfw3"
+          - "-lglad_gl43"
+          - "-framework OpenGL"
           - "-framework Metal"
           - "-framework QuartzCore"
           - "-framework Cocoa"

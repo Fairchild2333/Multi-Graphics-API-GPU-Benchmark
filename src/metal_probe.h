@@ -11,6 +11,7 @@ namespace gpu_bench {
 struct MetalGpuInfo {
     std::string name;
     std::uint64_t vramBytes   = 0;
+    bool hasUnifiedMemory = false;
     bool isHeadless           = false;
     bool isLowPower           = false;
     bool isRemovable          = false;

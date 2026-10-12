@@ -238,7 +238,28 @@ struct RunOutput: Sendable {
 
     mutating func consume(_ rawLine: String) {
         let line = rawLine.hasSuffix("\r") ? String(rawLine.dropLast()) : rawLine
-        if line.hasPrefix("=== ") {
+        if line.hasPrefix("SUITE_RUN\t") {
+            let f = Self.fields(line)
+            let workload = f["workload"] ?? ""
+            if (f["backend"] ?? "") != "cpu" && workload != "membw" {
+                beginJob(header: "=== gpu_benchmark --backend " + (f["backend"] ?? "")
+                    + " --workload " + workload + " --particles " + (f["particles"] ?? "0")
+                    + " --iter " + (f["steps"] ?? "0") + (f["headless"] == "1" ? " --headless" : "") + " ===")
+                let api = f["backend"] == "metal" ? "Metal" : f["backend"] == "opengl" ? "OpenGL" : (f["backend"] ?? "").uppercased()
+                var details = [api]
+                switch workload {
+                case "stream":
+                    details.append(Localization.tr("Particle", "粒子", "パーティクル"))
+                    let count = f["particles"] ?? ""
+                    details.append(["65536": "65K", "1048576": "1M", "4194304": "4M", "16777216": "16M"][count] ?? count)
+                    if f["headless"] == "1" { details.append("Headless") }
+                case "gpu_burn": details.append("GPU Burn " + (f["steps"] ?? ""))
+                default: details.append(Localization.tr("Fluid", "流体", "流体"))
+                }
+                jobBaseLabel = details.joined(separator: " · ")
+                jobs[jobs.count - 1].label = jobBaseLabel
+            }
+        } else if line.hasPrefix("=== ") {
             beginJob(header: line)
         } else if line.hasPrefix("[GPU Timing] Compute:") || line.hasPrefix("[Timing] Compute:") {
             addSample(line)

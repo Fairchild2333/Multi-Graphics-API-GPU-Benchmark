@@ -111,21 +111,17 @@ char* gpb_list_gpus(void) {
         std::stringstream ls(line);
         std::string tok;
         while (std::getline(ls, tok, '\t')) fields.push_back(tok);
-        // Expected: GPU, index, name, luidHi, luidLo, supportsMetal, supportsVulkan, supportsOpenGL, vramMB, ...
-        if (fields.size() < 3) continue;
+        // Legacy fields 0..10 retain their CLI order. Apple metadata is appended.
+        if (fields.size() < 11) continue;
         if (!first) json << ",";
         first = false;
         json << "{\"index\":" << fields[1]
-             << ",\"name\":\"" << jsonEscape(fields[2]) << "\"";
-        // Parse additional fields if available
-        if (fields.size() > 8)
-            json << ",\"vramMB\":" << fields[8];
-        if (fields.size() > 5)
-            json << ",\"metal\":" << (fields[5] == "1" ? "true" : "false");
-        if (fields.size() > 6)
-            json << ",\"vulkan\":" << (fields[6] == "1" ? "true" : "false");
-        if (fields.size() > 7)
-            json << ",\"opengl\":" << (fields[7] == "1" ? "true" : "false");
+             << ",\"name\":\"" << jsonEscape(fields[2]) << "\""
+             << ",\"vulkan\":" << (fields[3] == "1" ? "true" : "false")
+             << ",\"opengl\":" << (fields[6] == "1" ? "true" : "false")
+             << ",\"metal\":" << (fields.size() > 11 && fields[11] == "1" ? "true" : "false")
+             << ",\"openglCompute\":" << (fields.size() > 12 && fields[12] == "1" ? "true" : "false")
+             << ",\"vramMB\":" << (fields.size() > 13 ? fields[13] : "0");
         json << "}";
     }
     json << "]";

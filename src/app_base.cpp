@@ -1,4 +1,5 @@
 #include "app_base.h"
+#include "capture_naming.h"
 #include "path_service.h"
 #include "system_info.h"
 #include "renderdoc_app.h"
@@ -290,63 +291,8 @@ void AppBase::UpdateRenderDocCapturePath() {
     if (!rdocApi_) return;
     auto* api = static_cast<RENDERDOC_API_1_6_0*>(rdocApi_);
 
-    auto captureTag = [](std::string value, const char* fallback) {
-        const std::string original = value;
-        for (auto& ch : value) {
-            const auto byte = static_cast<unsigned char>(ch);
-            if (byte < 0x20 || ch == ' ' || ch == '.' || ch == '(' || ch == ')' ||
-                std::strchr("<>:\"/\\|?*", ch) != nullptr)
-                ch = '_';
-        }
-        value.erase(std::unique(value.begin(), value.end(),
-            [](char a, char b) { return a == '_' && b == '_'; }), value.end());
-        while (!value.empty() && value.front() == '_') value.erase(value.begin());
-        while (!value.empty() && value.back() == '_') value.pop_back();
-        if (value.empty()) value = fallback;
-
-        // Keep the complete capture path comfortably below legacy MAX_PATH,
-        // while a stable suffix prevents two long GPU names from colliding.
-        if (value.size() > 80) {
-            std::uint32_t hash = 2166136261u;
-            for (unsigned char byte : original) {
-                hash ^= byte;
-                hash *= 16777619u;
-            }
-            std::size_t cut = 64;
-            while (cut > 0 && cut < value.size() &&
-                   (static_cast<unsigned char>(value[cut]) & 0xC0u) == 0x80u)
-                --cut;
-            value.resize(cut);
-            std::ostringstream suffix;
-            suffix << '_' << std::hex << std::setw(8) << std::setfill('0') << hash;
-            value += suffix.str();
-        }
-        return value;
-    };
-
-    std::string backendTag = captureTag(GetBackendName(), "api");
-    std::string gpuTag = captureTag(
-        config_.gpuDisplayName.empty() ? GetDeviceName() : config_.gpuDisplayName,
-        "gpu");
-
-    std::string pathTemplate = rdocCaptureDir_ + backendTag + "_" + gpuTag
-                             + "_" + workloadId(config_.workload);
-    if (config_.workload == Workload::CinematicLiquidV1)
-        pathTemplate += "_v1_shader" +
-                        std::to_string(kCinematicLiquidShaderVersion);
-    else if (config_.workload == Workload::CinematicLiquid)
-        pathTemplate += "_v2_shader" +
-                        std::to_string(kCinematicLiquidV2ShaderVersion);
-    else if (config_.workload == Workload::GpuBurnV1)
-        pathTemplate += "_v1_shader" + std::to_string(kGpuBurnV1ShaderVersion);
-
-    // Append flights/particles info when overridden
-    if (config_.framesInFlight != kMaxFramesInFlight)
-        pathTemplate += "_flights" + std::to_string(config_.framesInFlight);
-    if (config_.particlesOverridden &&
-        (config_.workload == Workload::Stream ||
-         config_.workload == Workload::Render3D))
-        pathTemplate += "_particles" + std::to_string(config_.particleCount);
+    const std::string pathTemplate = rdocCaptureDir_ + CaptureFileStem(GetBackendName(),
+        config_.gpuDisplayName.empty() ? GetDeviceName() : config_.gpuDisplayName, config_);
 
     api->SetCaptureFilePathTemplate(pathTemplate.c_str());
 }
@@ -433,10 +379,16 @@ void AppBase::InitWindow() {
     if (NeedsOpenGLContext()) {
         glfwWindowHint(GLFW_CLIENT_API,            GLFW_OPENGL_API);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,  4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,  3);
+#if defined(__APPLE__)
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, isGpuBurnWorkload(config_.workload) ? 1 : 3);
+#else
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+#endif
         glfwWindowHint(GLFW_OPENGL_PROFILE,         GLFW_OPENGL_CORE_PROFILE);
 #ifdef __APPLE__
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT,  GL_TRUE);
+        // Keep the scored 1280x720 viewport equal to the drawable on Retina displays.
+        glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 #endif
     } else {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -566,17 +518,10 @@ void AppBase::MainLoop() {
             captureDuringMeasurement = warmupDone_;
             // Unique path under the platform captures directory.
             const auto capDir = paths::CapturesDirectory();
-            std::string safeName = GetDeviceName();
-            for (char& c : safeName) {
-                if (c == ' ' || c == '/' || c == '\\' || c == ':' || c == '|')
-                    c = '_';
-            }
-            if (safeName.empty())
-                safeName = "GPU";
-            const std::string hint =
-                (capDir / ("Metal_" + safeName + "_" +
-                           std::to_string(static_cast<long long>(
-                               gpuBenchGetTime() * 1000.0)))).string();
+            const std::string stem = CaptureFileStem(GetBackendName(),
+                config_.gpuDisplayName.empty() ? GetDeviceName() : config_.gpuDisplayName, config_);
+            const std::string hint = (capDir / (stem + "_" +
+                std::to_string(static_cast<long long>(gpuBenchGetTime() * 1000.0)))).string();
             if (BeginNativeGpuCapture(hint)) {
                 capturingNative = true;
             } else {

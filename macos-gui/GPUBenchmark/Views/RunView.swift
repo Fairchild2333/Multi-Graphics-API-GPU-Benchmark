@@ -25,9 +25,9 @@ enum BenchPreset: String, CaseIterable, Identifiable {
                 "フル分析 — 選択ワークロード / 全 GPU × 選択 API（+ キャプチャ + チャート）")
         case .completeSuite:
             return Localization.tr(
-                "Complete test — all formal scores, headless and native captures",
-                "完整测试 —— 全部正式成绩、无头模式与原生抓帧",
-                "完全テスト — 全正式スコア、ヘッドレス、ネイティブキャプチャ")
+                "Complete test — available GPU and CPU tests",
+                "完整测试 —— 可用 GPU 与 CPU 项目",
+                "完全テスト — 対応する GPU / CPU テスト")
         case .fillMissing:
             return Localization.tr(
                 "Fill missing — incomplete formal scores and captures",
@@ -117,7 +117,7 @@ struct RunView: View {
         var s: [String] = []
         if engine.gpus.contains(where: { $0.supportsMetal }) { s.append("metal") }
         if engine.gpus.contains(where: { $0.supportsVulkan }) { s.append("vulkan") }
-        if engine.gpus.contains(where: { $0.supportsOpenGL }) { s.append("opengl") }
+        if engine.gpus.contains(where: { $0.supportsOpenGL && ($0.supportsOpenGLCompute || selectedWorkload == "gpu_burn") }) { s.append("opengl") }
         if s.isEmpty { s = ["metal", "vulkan", "opengl"] }
         return s
     }
@@ -159,7 +159,7 @@ struct RunView: View {
     /// reported GB/s is then cache bandwidth and can exceed what the memory
     /// system can actually deliver.
     private var particleBufferCaution: String? {
-        guard selectedWorkload == "stream", let mb = particleBufferMB, mb < 64 else {
+        guard !isFormalSuitePreset, selectedWorkload == "stream", let mb = particleBufferMB, mb < 64 else {
             return nil
         }
         let size = String(format: "%.0f MB", mb)
@@ -199,6 +199,11 @@ struct RunView: View {
             "ワークロード一覧に旧版・実験的な項目を表示します。比較用で、正式スコアには含まれません。")
     }
 
+    private var captureSupportedForSelection: Bool {
+        if isFormalSuitePreset || selectedApis.isEmpty { return engine.gpus.contains { $0.supportsMetal } }
+        return selectedApis.contains("metal")
+    }
+
     private var captureHint: String {
         Localization.tr(
             "Record one GPU frame at the given second. On macOS this uses Metal's built-in MTLCaptureManager and writes a .gputrace to the Captures folder — nothing to install, though Xcode is needed to open the file. Capture adds overhead, but its time is excluded from the score. It runs no later than one second before the test ends and is unavailable for runs of one second or less, or while Headless is on.",
@@ -208,10 +213,10 @@ struct RunView: View {
 
     private var infoBanner: String {
         if preset == .completeSuite {
-            return Localization.tr(
-                "Runs the formal 15-second matrix on every detected GPU and compiled macOS API: four Particle sizes windowed + headless, GPU Burn, Cinematic Liquid, and native captures where supported.",
-                "在每个已检测 GPU 与已编译的 macOS API 上运行正式 15 秒矩阵：四档粒子窗口/无头、GPU Burn、互动水池，并在支持时进行原生抓帧。",
-                "検出した全 GPU とビルド済み macOS API で正式 15 秒マトリクス（4 段階 Particle、ウィンドウ/ヘッドレス、GPU Burn、Cinematic Liquid、対応時のネイティブキャプチャ）を実行します。")
+            return engine.availableSuiteSummary + "\n" + Localization.tr(
+                "Runs only available APIs: four Particle sizes with rendering and compute only, GPU Burn at 16/64/256 steps, fluid and GPU memory; CPU compute and CPU memory once per machine. GPU runs and each CPU compute step use 15 seconds. Native capture is requested only on Metal.",
+                "按实际可用 API 生成清单：四档粒子有画面/纯计算、GPU Burn 16/64/256 步、流体与 GPU 内存；每台机器再测一次 CPU 算力和 CPU 内存。GPU 与每个 CPU 算力步骤为 15 秒；仅 Metal 请求原生抓帧。OpenGL 4.1 只加入 GPU Burn 三档。",
+                "対応する API の Particle 4 段階、GPU Burn 16/64/256、流体、GPU メモリ、CPU 計算と CPU メモリを実行します。Metal のみネイティブキャプチャを要求します。")
         }
         if preset == .fillMissing {
             return Localization.tr(
@@ -274,6 +279,12 @@ struct RunView: View {
                     summaryCard
                     GpuRunChartsCard(jobs: run.runOutput.jobs)
                     GpuMemoryResultsCard(output: run.runOutput)
+                    if run.isSuiteRun && run.runOutput.hasComputeResults {
+                        CpuComputeResultsCard(output: run.runOutput)
+                    }
+                    if run.isSuiteRun && run.runOutput.hasMemoryResults {
+                        CpuMemoryResultsView(output: run.runOutput)
+                    }
                     GlassCard {
                         Button(Localization.tr("Run GPU Cache & Memory Probe", "运行 GPU 缓存与内存探测", "GPU キャッシュ / メモリ測定")) {
                             engine.run(jobs: [["gpu_benchmark", "--memory-sweep", "--memory-sweep-save"]],
@@ -543,8 +554,8 @@ struct RunView: View {
                         // Headless has no swapchain and no render pass, so
                         // there is nothing to capture; the worker reports
                         // captureUnavailable rather than producing a trace.
-                        .disabled(durationUnit == .unlimited || headless)
-                    if captureOn && !headless && durationUnit != .unlimited {
+                        .disabled(durationUnit == .unlimited || headless || !captureSupportedForSelection)
+                    if captureOn && !headless && durationUnit != .unlimited && captureSupportedForSelection {
                         TextField("5", text: $captureSec)
                             .textFieldStyle(.roundedBorder)
                             .labelsHidden()
@@ -702,12 +713,12 @@ struct RunView: View {
             .disabled(!run.isRunning)
             Button(action: runBenchmark) {
                 Text(isFormalSuitePreset
-                     ? Localization.tr("Run Formal Suite", "运行正式套件", "正式スイートを実行")
+                     ? Localization.tr("Run Complete Series", "运行完整测试", "完全テストを実行")
                      : Localization.tr("Run GPU Benchmark", "开始 GPU 测试", "GPU ベンチマークを実行"))
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
-            .disabled(engine.isRunning)
+            .disabled(engine.isRunning || (isFormalSuitePreset && engine.availableSuiteApiCounts.isEmpty))
         }
         .padding(.horizontal, 28)
         .padding(.vertical, 12)
@@ -758,7 +769,7 @@ struct RunView: View {
     }
 
     private func captureArgs() -> [String] {
-        guard captureOn, durationUnit != .unlimited else { return [] }
+        guard captureOn, captureSupportedForSelection, durationUnit != .unlimited else { return [] }
         let s = captureSec.trimmingCharacters(in: .whitespaces)
         return ["--capture", s.isEmpty ? "5" : s]
     }
@@ -779,7 +790,7 @@ struct RunView: View {
         if headless { a.append("--headless") }
         if vsync { a.append("--vsync") }
         if hostMemory { a.append("--host-memory") }
-        a += captureArgs()
+        if backend != "opengl" { a += captureArgs() }
         a += extra
         return a
     }
@@ -812,6 +823,8 @@ struct RunView: View {
         // Skip known-hopeless liquid×non-vulkan / stress×metal when Auto expands.
         func allow(_ backend: String) -> Bool {
             if backend.isEmpty { return true }
+            if backend == "opengl" && selectedWorkload != "gpu_burn" &&
+                !engine.gpus.contains(where: { $0.supportsOpenGLCompute }) { return false }
             if selectedWorkload == "cinematic_liquid" && backend != "vulkan" && backend != "metal" {
                 return false
             }

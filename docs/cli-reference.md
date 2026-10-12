@@ -604,3 +604,14 @@ Bounds and sampling options are `--memory-sweep-min-kib`,
 `--memory-sweep-repeats`, `--memory-sweep-threads`, and
 `--memory-sweep-no-host`. Allocation bounds are reduced to the device/app
 memory budget. Cancellation or failed GPU commands do not save a result.
+
+
+### Available complete series
+
+`--suite-list` probes the device/API capabilities and prints `SUITE_PLAN` and
+`SUITE_JOB` records without measuring or saving scores. `--complete-suite` now
+uses that available-job list: four rendered and four compute-only particle
+sizes, GPU Burn 16/64/256, fluid and GPU memory where supported, then CPU compute
+and CPU cache/memory once per machine. Native macOS OpenGL 4.1 runs GPU Burn
+only, with no capture request. The current Metal + OpenGL Mac has 18 jobs;
+Android adb's 29 jobs include additional OpenGL ES API variants.

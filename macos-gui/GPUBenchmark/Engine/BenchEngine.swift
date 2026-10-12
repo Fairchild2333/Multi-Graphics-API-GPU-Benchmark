@@ -15,6 +15,7 @@ struct GpuDevice: Identifiable, Hashable {
     let supportsMetal: Bool
     let supportsVulkan: Bool
     let supportsOpenGL: Bool
+    let supportsOpenGLCompute: Bool
 }
 
 enum BenchRunIssueKind: String, Hashable, Sendable {
@@ -149,6 +150,7 @@ struct BenchChannelState: Sendable {
     var progressLabel: String = "0%"
     var isRunning: Bool = false
     var runOutput = RunOutput()
+    var isSuiteRun = false
     var runSummary = BenchRunSummary()
     /// All-core score of the current CPU run, in MWork/s.
     var cpuAllCoreScore: Double?
@@ -198,6 +200,7 @@ private final class BridgeOutputContext: @unchecked Sendable {
 @MainActor
 final class BenchEngine: ObservableObject {
     @Published var gpus: [GpuDevice] = []
+    @Published var availableSuiteApiCounts: [String: Int] = [:]
     @Published var workingDirectory: String = ""
     @Published var results: [BenchResult] = []
 
@@ -319,18 +322,16 @@ final class BenchEngine: ObservableObject {
 
     func refreshGpus() {
         let cwd = workingDirectory
+        let worker = resolveCliExecutable()
         Task.detached {
-            if !cwd.isEmpty {
-                gpb_set_working_dir(cwd)
-            }
-            guard let json = gpb_list_gpus() else { return }
-            let jsonStr = String(cString: json)
-            gpb_free(json)
+            guard let worker else { return }
+            let jsonStr = Self.probeGpuJson(worker: worker, directory: cwd)
 
             guard let data = jsonStr.data(using: .utf8),
                   let arr = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]]
             else { return }
 
+            let suiteCounts = arr.isEmpty ? [:] : Self.probeSuiteCounts(worker: worker, directory: cwd)
             let devices = arr.compactMap { dict -> GpuDevice? in
                 guard let idx = dict["index"] as? Int,
                       let name = dict["name"] as? String else { return nil }
@@ -341,13 +342,70 @@ final class BenchEngine: ObservableObject {
                     vramMB: dict["vramMB"] as? Int ?? dict["vram"] as? Int ?? 0,
                     supportsMetal: dict["metal"] as? Bool ?? false,
                     supportsVulkan: dict["vulkan"] as? Bool ?? false,
-                    supportsOpenGL: dict["opengl"] as? Bool ?? false
+                    supportsOpenGL: dict["opengl"] as? Bool ?? false,
+                    supportsOpenGLCompute: dict["openglCompute"] as? Bool ?? false
                 )
             }
             await MainActor.run {
                 self.gpus = devices
+                self.availableSuiteApiCounts = suiteCounts
             }
         }
+    }
+
+    var availableSuiteSummary: String {
+        let total = availableSuiteApiCounts.values.reduce(0, +)
+        guard total > 0 else {
+            return Localization.tr("Detecting available tests…", "正在检测可用项目…", "対応テストを検出中…")
+        }
+        let details = ["metal", "vulkan", "opengl", "dx12", "dx11", "cpu"].compactMap { api -> String? in
+            guard let count = availableSuiteApiCounts[api], count > 0 else { return nil }
+            let label = api == "metal" ? "Metal" : api == "opengl" ? "OpenGL" : api.uppercased()
+            return label + " " + String(count)
+        }.joined(separator: " · ")
+        return Localization.tr("Available now: \(total) tests", "当前可用：\(total) 项", "対応：\(total) テスト")
+            + " (" + details + ")"
+    }
+
+    /// GLFW/Cocoa probing runs on the helper's main thread, never inside a GUI background task.
+    nonisolated private static func probeOutput(worker: String, directory: String, arguments: [String]) -> String {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: worker)
+        process.arguments = arguments
+        process.currentDirectoryURL = URL(fileURLWithPath: directory)
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = FileHandle.nullDevice
+        do {
+            try process.run()
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            process.waitUntilExit()
+            return process.terminationStatus == 0 ? String(decoding: data, as: UTF8.self) : ""
+        } catch { return "" }
+    }
+
+    nonisolated private static func probeGpuJson(worker: String, directory: String) -> String {
+        let output = probeOutput(worker: worker, directory: directory, arguments: ["--list-gpus"])
+        let devices = output.split(whereSeparator: \.isNewline).compactMap { line -> [String: Any]? in
+            let f = line.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+            guard f.count >= 14, f[0] == "GPU", let index = Int(f[1]) else { return nil }
+            return ["index": index, "name": f[2], "vulkan": f[3] == "1", "opengl": f[6] == "1",
+                    "metal": f[11] == "1", "openglCompute": f[12] == "1", "vramMB": Int(f[13]) ?? 0]
+        }
+        guard let json = try? JSONSerialization.data(withJSONObject: devices) else { return "[]" }
+        return String(decoding: json, as: UTF8.self)
+    }
+
+    nonisolated private static func probeSuiteCounts(worker: String, directory: String) -> [String: Int] {
+        let output = probeOutput(worker: worker, directory: directory, arguments: ["--suite-list"])
+        var counts: [String: Int] = [:]
+        var planned = 0
+        for line in output.split(whereSeparator: \.isNewline) {
+            let fields = RunOutput.fields(String(line))
+            if line.hasPrefix("SUITE_PLAN\t") { planned = Int(fields["total"] ?? "") ?? 0 }
+            if line.hasPrefix("SUITE_JOB\t"), let api = fields["backend"] { counts[api, default: 0] += 1 }
+        }
+        return counts.values.reduce(0, +) == planned ? counts : [:]
     }
 
     var resultsDirectory: String {
@@ -437,6 +495,7 @@ final class BenchEngine: ObservableObject {
             $0.lastScore = ""
             $0.progressFraction = 0
             $0.progressLabel = "0%"
+            $0.isSuiteRun = jobs.contains { $0.contains("--complete-suite") || $0.contains("--fill-missing") }
             $0.runSummary = BenchRunSummary(planned: jobs.count)
             $0.cpuAllCoreScore = nil
             $0.cpuSingleCoreScore = nil
@@ -500,8 +559,14 @@ final class BenchEngine: ObservableObject {
                 let cancelled = self.cancelRequested
                 self.mutate(channel) { state in
                     state.isRunning = false
-                    state.progressFraction = 1
-                    state.progressLabel = "100%"
+                    if cancelled {
+                        state.progressFraction = state.runSummary.planned > 0
+                            ? Double(state.runSummary.completed) / Double(state.runSummary.planned) : state.progressFraction
+                        state.progressLabel = "\(state.runSummary.completed)/\(state.runSummary.planned)"
+                    } else {
+                        state.progressFraction = 1
+                        state.progressLabel = "100%"
+                    }
                     state.statusText = Self.completionText(
                         state: state, cancelled: cancelled)
                 }
@@ -803,6 +868,7 @@ final class BenchEngine: ObservableObject {
               let total = Self.recordInteger(line, key: "total"),
               total > 0
         else { return }
+        gpuState.runSummary.planned = total
         gpuState.progressFraction = min(1, Double(index - 1) / Double(total))
         gpuState.progressLabel = "\(index)/\(total)"
     }
@@ -844,7 +910,6 @@ final class BenchEngine: ObservableObject {
     }
 
     private func record(outcome: BenchJobOutcome, job: [String], channel: BenchChannel) {
-        guard !outcome.cancelled else { return }
         var summary = state(for: channel).runSummary
         let lines = outcome.output.components(separatedBy: .newlines)
         let suiteResults = lines.filter { $0.hasPrefix("SUITE_RESULT\t") }
@@ -854,6 +919,7 @@ final class BenchEngine: ObservableObject {
             job.contains("--complete-suite") ||
             job.contains("--fill-missing")
 
+        if outcome.cancelled && !isSuite { return }
         if isSuite {
             if let plannedLine = lines.first(where: {
                 $0.trimmingCharacters(in: .whitespaces).hasPrefix("Planned now:")
@@ -861,7 +927,6 @@ final class BenchEngine: ObservableObject {
                 summary.planned = planned
             }
             for line in suiteSkips {
-                summary.completed += 1
                 summary.skipped += 1
                 let status = Self.recordField(line, key: "status") ?? "unsupported"
                 let target = Self.suiteTarget(line)
@@ -1080,7 +1145,7 @@ final class BenchEngine: ObservableObject {
         mutate(channel) { state in
             state.logOutput += line + "\n"
             state.runOutput.consume(line)
-            if let fraction = state.runOutput.progress {
+            if !state.isSuiteRun, let fraction = state.runOutput.progress {
                 state.progressFraction = fraction
                 state.progressLabel = String(format: "%.0f%%", fraction * 100)
             }

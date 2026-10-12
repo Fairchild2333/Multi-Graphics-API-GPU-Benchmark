@@ -133,7 +133,7 @@ if(NOT GPU_BENCH_IOS)
     # Keeping main.cpp in the mobile archive pulled in process spawning
     # (std::system), terminal menus and desktop-only orchestration that are both
     # unavailable in the iOS SDK and inappropriate inside an app sandbox.
-    list(PREPEND COMMON_SOURCES src/main.cpp)
+    list(PREPEND COMMON_SOURCES src/main.cpp src/suite_process.cpp)
 endif()
 
 set(BACKEND_SOURCES "")
@@ -360,6 +360,14 @@ if(GPU_BENCH_BUILD_TESTS AND NOT GPU_BENCH_EMBEDDED)
         target_compile_options(results_compat_test PRIVATE -Wall -Wextra -Wpedantic)
     endif()
     add_test(NAME results_compat COMMAND results_compat_test)
+    add_executable(complete_suite_test tests/complete_suite_test.cpp)
+    target_include_directories(complete_suite_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    add_test(NAME complete_suite COMMAND complete_suite_test)
+    if(APPLE)
+        add_executable(suite_process_test tests/suite_process_test.cpp src/suite_process.cpp)
+        target_include_directories(suite_process_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+        add_test(NAME suite_process COMMAND suite_process_test)
+    endif()
 endif()
 
 if(MSVC)

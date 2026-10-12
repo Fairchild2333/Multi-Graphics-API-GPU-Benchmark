@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Build one Metal-only macOS CLI/SwiftUI architecture slice, then stage a
+# Build one Metal/OpenGL macOS CLI/SwiftUI architecture slice, then stage a
 # self-contained app. Apple clang can cross-compile the Intel slice on Apple
 # Silicon (and vice versa); runtime smokes are deliberately limited to the
 # native host slice.
@@ -42,7 +42,7 @@ Environment:
 
 This is a single-architecture developer build. Static validation runs for both
 native and cross-built slices; CLI runtime smokes run only for the host slice.
-It does not notarize the app. Vulkan/MoltenVK and OpenGL are excluded.
+It does not notarize the app. Vulkan/MoltenVK is excluded. Native OpenGL 4.1 runs GPU Burn only.
 EOF
 }
 
@@ -143,7 +143,7 @@ elif [[ ! -d "${project_file}" ]]; then
     exit 1
 fi
 
-echo "Configuring Metal-only engine (macOS ${DEPLOYMENT_TARGET}, ${architecture})..."
+echo "Configuring Metal/OpenGL engine (macOS ${DEPLOYMENT_TARGET}, ${architecture})..."
 cmake_configure_args=(
     -S "${REPO_ROOT}"
     -B "${build_dir}"
@@ -153,7 +153,7 @@ cmake_configure_args=(
     -DGPU_BENCH_BUILD_GLFW_FROM_SOURCE=ON
     -DENABLE_METAL=ON
     -DENABLE_VULKAN=OFF
-    -DENABLE_OPENGL=OFF
+    -DENABLE_OPENGL=ON
     -DENABLE_DX11=OFF
     -DENABLE_DX12=OFF
     -DGPU_BENCH_ENABLE_PACKAGING=OFF
@@ -218,7 +218,7 @@ shaders_dir="${stage_app}/Contents/Resources/Shaders"
 licenses_dir="${stage_app}/Contents/Resources/Licenses"
 mkdir -p "${helpers_dir}" "${frameworks_dir}" "${shaders_dir}" "${licenses_dir}"
 install -m 0755 "${cli_binary}" "${helpers_dir}/gpu_benchmark"
-for shader in particle.metal gpu_burn.metal cinematic_liquid_v2.metal; do
+for shader in particle.metal gpu_burn.metal cinematic_liquid_v2.metal fractal_gl.vert gpu_burn_gl.frag; do
     install -m 0644 "${REPO_ROOT}/shaders/${shader}" "${shaders_dir}/${shader}"
     # The engine resolves shaders beside argv[0]. Keep a bundle-internal
     # relative symlink there while the signed resource itself lives in the
@@ -336,7 +336,7 @@ echo "  App: ${final_app}"
 echo "  CLI: ${final_app}/Contents/Helpers/gpu_benchmark"
 echo "  Version: ${bundle_version}"
 echo "  Architecture: ${architecture}"
-echo "  API: Metal only"
+echo "  API: Metal + native OpenGL 4.1 GPU Burn"
 echo "  Minimum OS: macOS ${DEPLOYMENT_TARGET}"
 echo "  Signing: ${sign_identity} (not notarized)"
 echo "  Runtime: ${runtime_verification}"

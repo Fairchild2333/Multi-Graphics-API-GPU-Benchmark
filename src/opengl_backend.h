@@ -28,6 +28,7 @@ protected:
     void WaitIdle()                 override;
 
 private:
+    bool gl41GraphicsOnly_ = false;
     void CreateShaders();
     void CreateParticleBuffers();
     void CreateTimestampQueries();
