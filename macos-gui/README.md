@@ -319,5 +319,29 @@ GPU results use the same `results.json` (plural), normally under
 `~/Library/Application Support/GpuComputeBenchmark/results/`.
 
 API labels use their standard names: Metal, Vulkan and OpenGL. The distributed
-app enables Metal and native OpenGL 4.1; Vulkan remains disabled. A macOS Vulkan
-build would normally use MoltenVK over Metal, so it is a translation-layer path.
+app enables Metal and native OpenGL 4.1; Vulkan remains off by default. The **Allow translated APIs (MoltenVK)** switch
+exposes the available translation path and includes it in the complete series.
+On the verified arm64 build, the count is 18 with the switch off and 31 with
+it on (13 extra Vulkan jobs). The preference is saved and cannot change during
+a run. Builds without a compatible MoltenVK runtime keep Vulkan unavailable.
+
+
+## Optional translated API runtime
+
+`scripts/build-macos.sh` can bundle an existing MoltenVK dylib that matches the
+architecture and encodes a compatible macOS deployment floor. Set
+`GPU_BENCH_MOLTENVK_LIBRARY` for a custom library. It links MoltenVK directly,
+without the local Vulkan SDK loader (the installed loader requires macOS 27).
+The distributed runtime is relocatable, signed and includes its license.
+On this machine MoltenVK is available for arm64; the Intel slice remains usable
+with Metal/OpenGL when no matching runtime is present.
+
+The CLI opt-in is `--allow-translated-api`. Without it, the macOS worker neither
+probes Vulkan nor includes it in the series, and an explicit Vulkan request is
+rejected. MoltenVK scores use a separate `_moltenvk` workload-version suffix
+and record `apiImplementation=MoltenVK;translatedTo=Metal`.
+
+Verified: build/signature checks, default policy (18 jobs, no Vulkan), explicit
+opt-in policy (31 jobs, Vulkan available), and rejection without opt-in. These
+are capability/policy checks; no translated performance run or full series was
+started during this change.

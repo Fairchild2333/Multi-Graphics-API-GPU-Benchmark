@@ -615,3 +615,13 @@ sizes, GPU Burn 16/64/256, fluid and GPU memory where supported, then CPU comput
 and CPU cache/memory once per machine. Native macOS OpenGL 4.1 runs GPU Burn
 only, with no capture request. The current Metal + OpenGL Mac has 18 jobs;
 Android adb's 29 jobs include additional OpenGL ES API variants.
+
+
+### macOS translated API opt-in
+
+`--allow-translated-api` enables the optional bundled MoltenVK path. It is off
+by default and mirrors the macOS app's **Allow translated APIs** switch. The
+switch gates both API selection and the complete-series manifest. Direct
+MoltenVK results carry `_moltenvk` and translation metadata, keeping their
+score groups separate from native Vulkan. A missing compatible runtime does
+not become an available API merely because the switch is enabled.

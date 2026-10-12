@@ -1540,6 +1540,12 @@ BenchmarkResult AppBase::CollectResult() const {
     workloadConfig << ";timingMode=" << timingMode;
     if (timingMode == "synchronized_wall_clock")
         r.workloadVersion += "_sync_timing";
+#ifdef GPU_BENCH_MOLTENVK
+    if (GetBackendName() == "Vulkan") {
+        r.workloadVersion += "_moltenvk";
+        workloadConfig << ";apiImplementation=MoltenVK;translatedTo=Metal";
+    }
+#endif
     r.workloadConfig = workloadConfig.str();
     r.graphicsApi    = GetBackendName();
     r.deviceName     = config_.gpuDisplayName.empty() ? GetDeviceName() : config_.gpuDisplayName;

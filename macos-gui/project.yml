@@ -17,6 +17,7 @@ settings:
     # The defaults match its source-built, static GLFW layout and avoid any
     # Apple Silicon/Intel Homebrew prefix in the project.
     GPU_BENCH_NATIVE_LIB_DIR: "$(PROJECT_DIR)/../out/build/macos-$(NATIVE_ARCH_ACTUAL)-$(CONFIGURATION)"
+    GPU_BENCH_TRANSLATED_LDFLAGS: ""
     GPU_BENCH_GLFW_LIB_DIR: "$(GPU_BENCH_NATIVE_LIB_DIR)/_deps/glfw-build/src"
 
 targets:
@@ -40,11 +41,13 @@ targets:
           # Preserve spaces in the repository path after nested expansion.
           - '"$(GPU_BENCH_NATIVE_LIB_DIR)"'
           - '"$(GPU_BENCH_GLFW_LIB_DIR)"'
+          - '"$(GPU_BENCH_NATIVE_LIB_DIR)/translated"'
         OTHER_LDFLAGS:
           - "$(inherited)"
           - "-lgpu_engine"
           - "-lglfw3"
           - "-lglad_gl43"
+          - "$(GPU_BENCH_TRANSLATED_LDFLAGS)"
           - "-framework OpenGL"
           - "-framework Metal"
           - "-framework QuartzCore"

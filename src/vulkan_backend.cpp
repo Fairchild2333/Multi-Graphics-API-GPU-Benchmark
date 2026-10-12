@@ -565,6 +565,9 @@ void VulkanBackend::CreateLogicalDevice() {
 #endif
 
     std::vector<const char*> deviceExts;
+#ifdef GPU_BENCH_MOLTENVK
+    deviceExts.push_back("VK_KHR_portability_subset");
+#endif
     if (!config_.headless)
         deviceExts.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
     if (fp16Supported)

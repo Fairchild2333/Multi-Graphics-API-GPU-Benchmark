@@ -42,7 +42,7 @@ Environment:
 
 This is a single-architecture developer build. Static validation runs for both
 native and cross-built slices; CLI runtime smokes run only for the host slice.
-It does not notarize the app. Vulkan/MoltenVK is excluded. Native OpenGL 4.1 runs GPU Burn only.
+It does not notarize the app. Compatible MoltenVK may be bundled, but remains off unless translated APIs are enabled. Native OpenGL 4.1 runs GPU Burn only.
 EOF
 }
 
@@ -168,6 +168,26 @@ if [[ -n "${GPU_BENCH_GLFW_SOURCE_DIR:-}" ]]; then
     glfw_license="${glfw_source}/LICENSE.md"
     cmake_configure_args+=("-DFETCHCONTENT_SOURCE_DIR_GLFW=${glfw_source}")
 fi
+# Optional direct MoltenVK runtime. It remains opt-in at run time, and must
+# match this slice and the product's deployment floor. No SDK loader is bundled.
+translated_ldflags=""
+moltenvk_binary=""
+for candidate in "${GPU_BENCH_MOLTENVK_LIBRARY:-}" /opt/homebrew/lib/libMoltenVK.dylib /usr/local/lib/libMoltenVK.dylib; do
+    [[ -n "${candidate}" && -f "${candidate}" ]] || continue
+    lipo -verify_arch "${architecture}" "${candidate}" >/dev/null 2>&1 || continue
+    moltenvk_min_os="$(xcrun vtool -show-build "${candidate}" | awk '/minos/ { print $2; exit }')"
+    [[ "${moltenvk_min_os}" == "12.0" || "${moltenvk_min_os}" == "11.0" ]] || continue
+    mkdir -p "${build_dir}/translated"
+    moltenvk_binary="${build_dir}/translated/libMoltenVK.dylib"
+    if [[ -f "${moltenvk_binary}" ]]; then chmod u+w "${moltenvk_binary}"; fi
+    cp "${candidate}" "${moltenvk_binary}"
+    chmod 0755 "${moltenvk_binary}"
+    install_name_tool -id '@rpath/libMoltenVK.dylib' "${moltenvk_binary}"
+    codesign --force --sign "-" --timestamp=none "${moltenvk_binary}"
+    cmake_configure_args+=( -DENABLE_VULKAN=ON "-DVulkan_LIBRARY=${moltenvk_binary}" )
+    translated_ldflags="-lMoltenVK"
+    break
+done
 cmake "${cmake_configure_args[@]}"
 cmake --build "${build_dir}" --config "${configuration}" --parallel
 # An existing configure may point FetchContent at another verified source tree.
@@ -198,6 +218,7 @@ xcodebuild \
     MACOSX_DEPLOYMENT_TARGET="${DEPLOYMENT_TARGET}" \
     GPU_BENCH_NATIVE_LIB_DIR="${build_dir}" \
     GPU_BENCH_GLFW_LIB_DIR="$(dirname "${glfw_library}")" \
+    GPU_BENCH_TRANSLATED_LDFLAGS="${translated_ldflags}" \
     build
 
 built_app="${derived_data_dir}/Build/Products/${configuration}/Mangekyo.app"
@@ -225,6 +246,20 @@ for shader in particle.metal gpu_burn.metal cinematic_liquid_v2.metal fractal_gl
     # canonical Resources directory (Helpers must contain code, not data).
     ln -s "../Resources/Shaders/${shader}" "${helpers_dir}/${shader}"
 done
+if [[ -n "${moltenvk_binary}" ]]; then
+    install -m 0755 "${moltenvk_binary}" "${frameworks_dir}/libMoltenVK.dylib"
+    for spv in "${build_dir}"/*.spv; do
+        [[ -f "${spv}" ]] || continue
+        install -m 0644 "${spv}" "${shaders_dir}/$(basename "${spv}")"
+        ln -s "../Resources/Shaders/$(basename "${spv}")" "${helpers_dir}/$(basename "${spv}")"
+    done
+    for license_file in "$(dirname "$(dirname "${candidate}")")/opt/molten-vk/LICENSE" /opt/homebrew/opt/molten-vk/LICENSE /usr/local/opt/molten-vk/LICENSE; do
+        if [[ -f "${license_file}" ]]; then
+            install -m 0644 "${license_file}" "${licenses_dir}/MoltenVK-LICENSE.txt"
+            break
+        fi
+    done
+fi
 install -m 0644 "${REPO_ROOT}/LICENSE" "${licenses_dir}/Mangekyo-LICENSE.txt"
 install -m 0644 "${REPO_ROOT}/THIRD_PARTY_NOTICES.md" \
     "${licenses_dir}/THIRD_PARTY_NOTICES.md"
@@ -296,6 +331,10 @@ if [[ -z "${source_version}" || "${bundle_version}" != "${source_version}" ]]; t
 fi
 
 sign_identity="${MACOS_SIGN_IDENTITY:--}"
+if [[ -n "${moltenvk_binary}" ]]; then
+    install_name_tool -delete_rpath "${build_dir}/translated" "${helper_binary}"
+    codesign --force --sign "${sign_identity}" --timestamp=none "${frameworks_dir}/libMoltenVK.dylib"
+fi
 codesign --force --sign "${sign_identity}" --timestamp=none "${helper_binary}"
 codesign --force --sign "${sign_identity}" --timestamp=none "${stage_app}"
 codesign --verify --deep --strict --verbose=1 "${stage_app}"

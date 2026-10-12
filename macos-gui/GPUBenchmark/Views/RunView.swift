@@ -116,13 +116,13 @@ struct RunView: View {
     private var supportedApis: [String] {
         var s: [String] = []
         if engine.gpus.contains(where: { $0.supportsMetal }) { s.append("metal") }
-        if engine.gpus.contains(where: { $0.supportsVulkan }) { s.append("vulkan") }
+        if engine.allowTranslatedApis && engine.gpus.contains(where: { $0.supportsVulkan }) { s.append("vulkan") }
         if engine.gpus.contains(where: { $0.supportsOpenGL && ($0.supportsOpenGLCompute || selectedWorkload == "gpu_burn") }) { s.append("opengl") }
         return s
     }
 
     private var unsupportedApis: [String] {
-        let all = ["metal", "vulkan", "opengl"]
+        let all = ["metal", "opengl"] + (engine.allowTranslatedApis ? ["vulkan"] : [])
         return all.filter { !supportedApis.contains($0) }
     }
 
@@ -303,6 +303,9 @@ struct RunView: View {
                 selectedWorkload = "stream"
             }
         }
+        .onChange(of: engine.allowTranslatedApis) { enabled in
+            if !enabled { selectedApis.remove("vulkan") }
+        }
         .onChange(of: selectedWorkload) { _ in
             selectedApis.formIntersection(supportedApis)
         }
@@ -343,6 +346,12 @@ struct RunView: View {
                     .frame(maxWidth: 560, alignment: .leading)
                 }
 
+                Toggle(Localization.tr("Allow translated APIs (MoltenVK)", "允许转译 API（MoltenVK）", "変換 API を許可（MoltenVK）"), isOn: $engine.allowTranslatedApis)
+                    .toggleStyle(.switch)
+                    .disabled(engine.isRunning)
+                    .help(Localization.tr("Off by default. Enable it to select available Vulkan over Metal and include it in the complete series.",
+                        "默认关闭。开启后才可选择可用的 Vulkan 转译路径，并将其加入完整测试。转译成绩单独分组。",
+                        "既定では無効。Metal 上の Vulkan を選択・完全テストに含めるには有効にします。"))
                 FormRow {
                     FormField(title: "GPU", width: 190) {
                         Picker("", selection: $selectedGpuIndex) {

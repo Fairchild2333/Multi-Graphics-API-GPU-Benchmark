@@ -506,7 +506,8 @@ static bool GpuNamesReferToSameAdapter(const std::string& a,
 }
 
 static std::vector<GpuInfo> ProbeGpus(
-    [[maybe_unused]] const std::filesystem::path& guiWorkerRenderDocDll = {}) {
+    [[maybe_unused]] const std::filesystem::path& guiWorkerRenderDocDll = {},
+    [[maybe_unused]] bool allowTranslatedApis = false) {
     std::vector<GpuInfo> gpus;
 
 #ifdef _WIN32
@@ -697,7 +698,11 @@ static std::vector<GpuInfo> ProbeGpus(
 
     // --- Vulkan probe (if compiled in) ---
 #ifdef HAVE_VULKAN
-    if (VulkanLoaderAvailable()) {
+    if (VulkanLoaderAvailable()
+#ifdef GPU_BENCH_MOLTENVK
+        && allowTranslatedApis
+#endif
+    ) {
 #ifdef _WIN32
         // Delay the explicit preload until after DXGI/D3D probing. Loading
         // RenderDoc any earlier would unnecessarily change those probes by
@@ -1071,6 +1076,9 @@ static gpu_bench::BenchmarkResult MakeStoredMemBwResult(
 #elif defined(__OHOS__)
     stored.workloadVersion = std::string(gpu_bench::kMemBwWorkloadVersion) + "_ohos_preview";
 #endif
+#ifdef GPU_BENCH_MOLTENVK
+    stored.workloadVersion += "_moltenvk";
+#endif
     stored.graphicsApi = "Vulkan";
     stored.deviceName = gpu.name.empty() ? report.deviceName : gpu.name;
     stored.driverVersion = report.driverVersion;
@@ -1149,6 +1157,9 @@ static gpu_bench::BenchmarkResult MakeStoredMemBwResult(
             contract << point.datasetBytes / 1024 << ':' << point.medianGBps;
         }
     }
+#ifdef GPU_BENCH_MOLTENVK
+    contract << ";apiImplementation=MoltenVK;translatedTo=Metal";
+#endif
     stored.workloadConfig = contract.str();
     return stored;
 }
@@ -1266,6 +1277,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     bool completeSuite = false;
     bool fillMissingSuite = false;
     bool listCompleteSuite = false;
+    bool allowTranslatedApis = false;
     bool assumeSuiteYes = false;
     bool listGpus = false;
     bool timeArgGiven = false;   // explicit --time => run directly (no menu)
@@ -1436,6 +1448,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                    std::strcmp(argv[i], "--cpu-warmup") == 0) {
             std::cerr << argv[i] << " requires a value.\n";
             return 2;
+        } else if (std::strcmp(argv[i], "--allow-translated-api") == 0) {
+            allowTranslatedApis = true;
         } else if (std::strcmp(argv[i], "--backend") == 0 && i + 1 < argc) {
             backend = argv[++i];
         } else if (std::strcmp(argv[i], "--gpu") == 0 && i + 1 < argc) {
@@ -1712,6 +1726,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --results-clear                     Delete all saved results\n"
                       << "  --results-export <file.csv>         Export results to CSV file\n"
                       << "  --run-all                            Benchmark every GPU x API combination, then exit\n"
+                      << "  --allow-translated-api              Opt into optional macOS Vulkan-to-Metal translation\n"
                       << "  --suite-list                         List available suite jobs without running them\n"
                       << "  --complete-suite                     Run the available GPU/CPU series (unavailable APIs/workloads are omitted)\n"
                       << "  --fill-missing                       Run only missing formal-suite scores/captures; keep prior failures unsupported\n"
@@ -2096,7 +2111,14 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
 #endif
 
     // ---- Phase 1: Probe all GPUs and APIs ----
-    auto gpus = ProbeGpus(guiWorkerRenderDocDll);
+#ifdef GPU_BENCH_MOLTENVK
+    if (backend == "vulkan" && !allowTranslatedApis) {
+        std::cerr << "Vulkan on macOS uses MoltenVK. Enable translated APIs before selecting it.\n";
+        return 2;
+    }
+    glfwInitVulkanLoader(vkGetInstanceProcAddr);
+#endif
+    auto gpus = ProbeGpus(guiWorkerRenderDocDll, allowTranslatedApis);
 
     // Machine-readable GPU list for external front-ends (WinUI launcher).
     // One line per GPU: GPU<TAB>index<TAB>name<TAB>vk<TAB>dx12<TAB>dx11<TAB>ogl
@@ -2424,6 +2446,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                 childArgs.insert(childArgs.end(), {"--backend", job.backend, "--gpu", std::to_string(job.gpuIndex), "--workload", job.workload});
                 if (job.workload != "membw") childArgs.insert(childArgs.end(), {"--time", "15"});
                 if (benchCfg.guiWorker) childArgs.push_back("--gui-worker");
+                if (allowTranslatedApis) childArgs.push_back("--allow-translated-api");
                 if (job.workload == "stream") childArgs.insert(childArgs.end(), {"--particles", std::to_string(job.particleCount)});
                 else if (job.workload == "gpu_burn") childArgs.insert(childArgs.end(), {"--iter", std::to_string(job.burnSteps)});
                 if (job.headless) childArgs.insert(childArgs.end(), {"--headless", "--no-renderdoc"});

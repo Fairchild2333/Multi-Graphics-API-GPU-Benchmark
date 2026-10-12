@@ -199,6 +199,12 @@ private final class BridgeOutputContext: @unchecked Sendable {
 /// Observable engine state for SwiftUI binding.
 @MainActor
 final class BenchEngine: ObservableObject {
+    @Published var allowTranslatedApis = UserDefaults.standard.bool(forKey: "allowTranslatedApis") {
+        didSet {
+            UserDefaults.standard.set(allowTranslatedApis, forKey: "allowTranslatedApis")
+            refreshGpus()
+        }
+    }
     @Published var gpus: [GpuDevice] = []
     @Published var availableSuiteApiCounts: [String: Int] = [:]
     @Published var workingDirectory: String = ""
@@ -335,15 +341,16 @@ final class BenchEngine: ObservableObject {
     func refreshGpus() {
         let cwd = workingDirectory
         let worker = resolveCliExecutable()
+        let translated = allowTranslatedApis
         Task.detached {
             guard let worker else { return }
-            let jsonStr = Self.probeGpuJson(worker: worker, directory: cwd)
+            let jsonStr = Self.probeGpuJson(worker: worker, directory: cwd, translated: translated)
 
             guard let data = jsonStr.data(using: .utf8),
                   let arr = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]]
             else { return }
 
-            let suiteCounts = arr.isEmpty ? [:] : Self.probeSuiteCounts(worker: worker, directory: cwd)
+            let suiteCounts = arr.isEmpty ? [:] : Self.probeSuiteCounts(worker: worker, directory: cwd, translated: translated)
             let devices = arr.compactMap { dict -> GpuDevice? in
                 guard let idx = dict["index"] as? Int,
                       let name = dict["name"] as? String else { return nil }
@@ -359,6 +366,7 @@ final class BenchEngine: ObservableObject {
                 )
             }
             await MainActor.run {
+                guard self.allowTranslatedApis == translated else { return }
                 self.gpus = devices
                 self.availableSuiteApiCounts = suiteCounts
             }
@@ -396,8 +404,8 @@ final class BenchEngine: ObservableObject {
         } catch { return "" }
     }
 
-    nonisolated private static func probeGpuJson(worker: String, directory: String) -> String {
-        let output = probeOutput(worker: worker, directory: directory, arguments: ["--list-gpus"])
+    nonisolated private static func probeGpuJson(worker: String, directory: String, translated: Bool) -> String {
+        let output = probeOutput(worker: worker, directory: directory, arguments: ["--list-gpus"] + (translated ? ["--allow-translated-api"] : []))
         let devices = output.split(whereSeparator: \.isNewline).compactMap { line -> [String: Any]? in
             let f = line.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
             guard f.count >= 14, f[0] == "GPU", let index = Int(f[1]) else { return nil }
@@ -408,8 +416,8 @@ final class BenchEngine: ObservableObject {
         return String(decoding: json, as: UTF8.self)
     }
 
-    nonisolated private static func probeSuiteCounts(worker: String, directory: String) -> [String: Int] {
-        let output = probeOutput(worker: worker, directory: directory, arguments: ["--suite-list"])
+    nonisolated private static func probeSuiteCounts(worker: String, directory: String, translated: Bool) -> [String: Int] {
+        let output = probeOutput(worker: worker, directory: directory, arguments: ["--suite-list"] + (translated ? ["--allow-translated-api"] : []))
         var counts: [String: Int] = [:]
         var planned = 0
         for line in output.split(whereSeparator: \.isNewline) {
@@ -515,6 +523,8 @@ final class BenchEngine: ObservableObject {
             $0.statusText = Self.runningText(jobCount: jobs.count, channel: channel)
         }
 
+        let effectiveJobs = allowTranslatedApis
+            ? jobs.map { $0 + ["--allow-translated-api"] } : jobs
         let cwd = workingDirectory
         let cli = resolveCliExecutable()
         Task.detached { [weak self] in
@@ -523,7 +533,7 @@ final class BenchEngine: ObservableObject {
                 gpb_set_working_dir(cwd)
             }
 
-            for (index, job) in jobs.enumerated() {
+            for (index, job) in effectiveJobs.enumerated() {
                 if await MainActor.run(body: { self.cancelRequested }) { break }
 
                 await MainActor.run {

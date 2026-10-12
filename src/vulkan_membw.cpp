@@ -512,6 +512,11 @@ void Runner::CreateDevice() {
     ci.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     ci.queueCreateInfoCount = 1;
     ci.pQueueCreateInfos = &queueInfo;
+#ifdef GPU_BENCH_MOLTENVK
+    const char* portabilitySubset = "VK_KHR_portability_subset";
+    ci.enabledExtensionCount = 1;
+    ci.ppEnabledExtensionNames = &portabilitySubset;
+#endif
     Check(vkCreateDevice(physical_, &ci, nullptr, &device_), "vkCreateDevice");
     vkGetDeviceQueue(device_, queueFamily_, 0, &queue_);
 }

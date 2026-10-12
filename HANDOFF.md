@@ -1,5 +1,28 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
+## 2026-10-12 Translated API opt-in (latest user preference)
+
+The user's final instruction supersedes outright removal: retain Vulkan behind
+an **Allow translated APIs (MoltenVK)** switch, default OFF, and expose it in
+API selection only after opt-in. The stored preference gates capability probes,
+custom GPU jobs, complete/fill-missing jobs and suite children. With the current
+arm64 runtime: OFF = 18 jobs/no Vulkan; ON = 31 jobs/13 Vulkan additions.
+Without the flag an explicit CLI Vulkan request exits 2 before initialization.
+
+The host has an arm64 MoltenVK dylib with minos 12.0; its Vulkan SDK loader has
+minos 27.0. The build therefore optionally copies/links/signs compatible
+MoltenVK directly, with a relative bundled runtime path, its license and SPIR-V
+resources. No new SDK loader is shipped. Direct MoltenVK has no instance
+portability-enumeration extension (unlike the SDK loader); device portability
+subset is enabled. Intel falls back to Metal/OpenGL if no matching runtime is
+available. MoltenVK scores carry `_moltenvk` and explicit translation metadata.
+
+Only builds, signatures, capability enumeration and policy-manifest checks were
+performed. Do not claim translated workload/performance acceptance or restart
+the complete series: the user has not turned on the new switch or requested a
+new benchmark run in this task.
+
+
 ## 2026-10-12 Complete-series correction and native OpenGL 4.1
 
 The user meant the adb 29-job series, not the old 10-job desktop GPU matrix.
