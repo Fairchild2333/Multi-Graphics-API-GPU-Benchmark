@@ -101,7 +101,10 @@ vertex FractalVtxOut fractalVertex(uint vid [[vertex_id]]) {
     FractalVtxOut out;
     float2 uv = float2((vid << 1) & 2, vid & 2);
     out.uv = uv;
-    out.position = float4(uv * 2.0 - 1.0, 0.0, 1.0);
+    // Metal NDC Y points up; flip to match Vulkan/GLSL convention.
+    float2 ndc = uv * 2.0 - 1.0;
+    ndc.y = -ndc.y;
+    out.position = float4(ndc, 0.0, 1.0);
     return out;
 }
 
@@ -138,7 +141,10 @@ vertex VolVtxOut volumetricVertex(uint vid [[vertex_id]]) {
     VolVtxOut out;
     float2 uv = float2((vid << 1) & 2, vid & 2);
     out.uv = uv;
-    out.position = float4(uv * 2.0 - 1.0, 0.0, 1.0);
+    // Metal NDC Y points up; flip to match Vulkan/GLSL convention.
+    float2 ndc = uv * 2.0 - 1.0;
+    ndc.y = -ndc.y;
+    out.position = float4(ndc, 0.0, 1.0);
     return out;
 }
 

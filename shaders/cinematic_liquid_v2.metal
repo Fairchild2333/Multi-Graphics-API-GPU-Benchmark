@@ -29,7 +29,7 @@ struct LiquidV2Params {
 struct SurfaceParams {
     uint4 volumeSizeAndCount;
     float4 volumeMinVoxel;
-    float4 kernel;
+    float4 kernelParams;
     uint4 contract;
 };
 
@@ -43,6 +43,19 @@ constant float3x3 kMat3Zero = float3x3(float3(0.0), float3(0.0), float3(0.0));
 
 inline void atomicAddInt(device atomic_int* addr, int delta) {
     atomic_fetch_add_explicit(addr, delta, memory_order_relaxed);
+}
+
+inline void atomicAddBodyImpulse(device BodyImpulse* impulses,
+                                 uint bodyIndex,
+                                 uint component,
+                                 int delta) {
+    device atomic_int* words =
+        (device atomic_int*)(impulses + bodyIndex);
+    atomic_fetch_add_explicit(words + component, delta, memory_order_relaxed);
+}
+
+inline float3x3 OuterProduct(float3 column, float3 row) {
+    return float3x3(column * row.x, column * row.y, column * row.z);
 }
 
 // Shared with Vulkan GLSL contract (2^29 - 1).
@@ -86,7 +99,9 @@ kernel void clearGrid(
     device atomic_int* densityAtomic [[buffer(5)]],
     texture3d<float, access::read_write> densityVolume [[texture(0)]],
     texture3d<float, access::read_write> whitewaterVolume [[texture(1)]],
-    uint3 gid [[thread_position_in_grid]]
+    uint3 gid [[thread_position_in_grid]],
+    uint3 tgid [[threadgroup_position_in_grid]],
+    uint3 tid [[thread_position_in_threadgroup]]
 )
 {
 
@@ -110,6 +125,15 @@ kernel void clearGrid(
 }
 
 // ===== p2gMass =====
+// Cinematic Liquid v2 pass 2: APIC particle-to-grid mass and momentum.
+
+float p2gMass_fixedScale(constant LiquidV2Params& params);
+int p2gMass_encodeFixedSigned(constant LiquidV2Params& params, float v);
+int p2gMass_encodeFixedPositive(constant LiquidV2Params& params, float v);
+float3 p2gMass_quadraticWeights(float x);
+bool p2gMass_insideGrid(int3 n, int3 s);
+uint p2gMass_gridIndex(constant LiquidV2Params& params, int3 n);
+
 float p2gMass_fixedScale(constant LiquidV2Params& params) { return max(abs(params.material.z), 1.0); }
 
 int p2gMass_encodeFixedSigned(constant LiquidV2Params& params, float v) {
@@ -150,7 +174,9 @@ kernel void p2gMass(
     device atomic_int* densityAtomic [[buffer(5)]],
     texture3d<float, access::read_write> densityVolume [[texture(0)]],
     texture3d<float, access::read_write> whitewaterVolume [[texture(1)]],
-    uint3 gid [[thread_position_in_grid]]
+    uint3 gid [[thread_position_in_grid]],
+    uint3 tgid [[threadgroup_position_in_grid]],
+    uint3 tid [[thread_position_in_threadgroup]]
 )
 {
 
@@ -196,6 +222,18 @@ kernel void p2gMass(
 }
 
 // ===== p2gStress =====
+// Cinematic Liquid v2 pass 3: density estimate and pressure/viscous stress
+// scatter.  The stress model and APIC kernel intentionally match v1 so a v2
+// score increase reflects the larger scene and rigid coupling, not a changed
+// constitutive model.
+
+float p2gStress_fixedScale(constant LiquidV2Params& params);
+float p2gStress_decodeFixed(constant LiquidV2Params& params, int v);
+int p2gStress_encodeFixedSigned(constant LiquidV2Params& params, float v);
+float3 p2gStress_quadraticWeights(float x);
+bool p2gStress_insideGrid(int3 n, int3 s);
+uint p2gStress_gridIndex(constant LiquidV2Params& params, int3 n);
+
 float p2gStress_fixedScale(constant LiquidV2Params& params) { return max(abs(params.material.z), 1.0); }
 
 float p2gStress_decodeFixed(constant LiquidV2Params& params, int v) { return float(v) / p2gStress_fixedScale(params); }
@@ -233,7 +271,9 @@ kernel void p2gStress(
     device atomic_int* densityAtomic [[buffer(5)]],
     texture3d<float, access::read_write> densityVolume [[texture(0)]],
     texture3d<float, access::read_write> whitewaterVolume [[texture(1)]],
-    uint3 gid [[thread_position_in_grid]]
+    uint3 gid [[thread_position_in_grid]],
+    uint3 tgid [[threadgroup_position_in_grid]],
+    uint3 tid [[thread_position_in_threadgroup]]
 )
 {
 
@@ -266,7 +306,7 @@ kernel void p2gStress(
                 if (!p2gStress_insideGrid(node, gridSize)) continue;
                 float weight = wx[x] * wy[y] * wz[z];
                 interpolatedMass += weight * max(
-                    p2gStress_decodeFixed(grid[p2gStress_gridIndex(params, node)].mass), 0.0);
+                    p2gStress_decodeFixed(params, grid[p2gStress_gridIndex(params, node)].mass), 0.0);
             }
         }
     }
@@ -302,6 +342,60 @@ kernel void p2gStress(
 }
 
 // ===== gridUpdate =====
+// Cinematic Liquid v2 pass 4: convert nodal momentum to velocity, enforce the
+// finite pool and moving compound-body boundaries, inject the motor-boat
+// propeller wake, and atomically return equal-and-opposite impulses to the
+// rigid bodies.
+
+
+
+constant int gridUpdate_BODY_DUCK = 0;
+constant int gridUpdate_BODY_PLAY_BALL = 1;
+constant int gridUpdate_BODY_ANCHORED_BOAT = 2;
+constant int gridUpdate_BODY_SINK_BALL = 3;
+constant uint gridUpdate_MAX_BODIES = 32u;
+constant float gridUpdate_DAM_GATE_X = -0.66;
+constant float gridUpdate_DAM_GATE_HALF_Z = 1.36;
+constant float gridUpdate_DAM_GATE_TOP = 1.72;
+// Keep this identical to mls_mpm_g2p_v2.comp.  A one-time 4 s GPU-state reset
+// in the host stages the high block; it then collapses immediately and
+// physically, matching the reference scene rather than a delayed gate trick.
+constant float gridUpdate_DAM_GATE_RELEASE_TIME = 0.0;
+constant float gridUpdate_kBodyContributionLimit = 16777215.0;
+
+float gridUpdate_gridFixedScale(constant LiquidV2Params& params);
+float gridUpdate_bodyFixedScale(constant LiquidV2Params& params);
+float gridUpdate_decodeGrid(constant LiquidV2Params& params, int v);
+int gridUpdate_encodeGrid(constant LiquidV2Params& params, float v);
+int gridUpdate_encodeBody(constant LiquidV2Params& params, float v);
+uint gridUpdate_gridIndex(constant LiquidV2Params& params, uint3 c);
+float4 gridUpdate_safeQuaternion(float4 q);
+float3 gridUpdate_rotateByQuaternion(float4 q, float3 v);
+float3 gridUpdate_inverseRotateByQuaternion(float4 q, float3 v);
+float gridUpdate_sdSphere(float3 p, float r);
+float gridUpdate_sdEllipsoid(float3 p, float3 r);
+float gridUpdate_sdCapsule(float3 p, float3 a, float3 b, float r);
+float gridUpdate_smoothUnion(float a, float b, float k);
+float gridUpdate_duckSdf(float3 p, float4 shape0, float4 shape1);
+float gridUpdate_bodyBoundingRadius(BodyState body);
+float gridUpdate_bodySdf(BodyState body, float3 worldPoint);
+float3 gridUpdate_bodyNormal(BodyState body, float3 worldPoint, float epsilon);
+float3 gridUpdate_collideStationary(constant LiquidV2Params& params, float3 velocity, float3 inwardNormal);
+float3 gridUpdate_collideBody(constant LiquidV2Params& params, float3 velocity, float3 surfaceVelocity, float3 outwardNormal,
+                 BodyState body);
+void gridUpdate_addBodyImpulse(constant LiquidV2Params& params, device BodyImpulse* impulses, uint index, float3 impulse, float3 torque,
+                    float displacedMass, bool contact);
+float gridUpdate_roundedRectangleDistance(float2 p, float2 halfExtent, float radius);
+float2 gridUpdate_roundedRectangleNormal(float2 p, float2 halfExtent,
+                            float radius, float epsilon);
+void gridUpdate_applySimulationDomainBoundary(constant LiquidV2Params& params, float3 worldPosition, float dx,
+                                   thread float3& velocity);
+void gridUpdate_applyFinitePoolWall(constant LiquidV2Params& params, float3 worldPosition, float dx,
+                         thread float3& velocity);
+void gridUpdate_applyDamGate(constant LiquidV2Params& params, float3 worldPosition, float dx, thread float3& velocity);
+void gridUpdate_applyPropeller(constant LiquidV2Params& params, device BodyImpulse* impulses, BodyState boat, uint bodyIndex, float3 worldPosition,
+                    float cellMass, float dt, thread float3& velocity);
+
 float gridUpdate_gridFixedScale(constant LiquidV2Params& params) { return max(abs(params.material.z), 1.0); }
 
 float gridUpdate_bodyFixedScale(constant LiquidV2Params& params) { return max(abs(params.coupling.x), 1.0); }
@@ -316,8 +410,8 @@ int gridUpdate_encodeGrid(constant LiquidV2Params& params, float v) {
 
 int gridUpdate_encodeBody(constant LiquidV2Params& params, float v) {
     return int(round(clamp(v * gridUpdate_bodyFixedScale(params),
-                           -kBodyContributionLimit,
-                            kBodyContributionLimit)));
+                           -gridUpdate_kBodyContributionLimit,
+                            gridUpdate_kBodyContributionLimit)));
 }
 
 uint gridUpdate_gridIndex(constant LiquidV2Params& params, uint3 c) {
@@ -368,34 +462,31 @@ float gridUpdate_duckSdf(float3 p, float4 shape0, float4 shape1) {
     float3 headCenter = float3(shape1.y, shape1.z, 0.0);
     float beakLength = max(shape1.w, 0.02);
 
-    float belly = gridUpdate_sdEllipsoid(
-        p - float3(0.0, -0.04 * bodyRadius.y, 0.0),
+    float belly = gridUpdate_sdEllipsoid(p - float3(0.0, -0.04 * bodyRadius.y, 0.0),
         float3(bodyRadius.x, 0.84 * bodyRadius.y, bodyRadius.z));
-    float tail = gridUpdate_sdEllipsoid(
-        p - float3(-0.72 * bodyRadius.x, 0.28 * bodyRadius.y, 0.0),
+    float tail = gridUpdate_sdEllipsoid(p - float3(-0.72 * bodyRadius.x, 0.28 * bodyRadius.y, 0.0),
         bodyRadius * float3(0.44, 0.30, 0.42));
     float duck = gridUpdate_smoothUnion(belly, tail, 0.30 * bodyRadius.y);
     duck = gridUpdate_smoothUnion(duck, gridUpdate_sdSphere(p - headCenter, headRadius),
                        0.45 * headRadius);
     float3 beakCenter = headCenter +
         float3(headRadius + 0.30 * beakLength, -0.20 * headRadius, 0.0);
-    float beak = gridUpdate_sdEllipsoid(
-        p - beakCenter,
+    float beak = gridUpdate_sdEllipsoid(p - beakCenter,
         float3(0.60 * beakLength, 0.24 * headRadius, 0.46 * headRadius));
     return gridUpdate_smoothUnion(duck, beak, 0.12 * headRadius);
 }
 
 float gridUpdate_bodyBoundingRadius(BodyState body) {
     int type = int(round(body.positionType.w));
-    if (type == BODY_PLAY_BALL || type == BODY_SINK_BALL)
+    if (type == gridUpdate_BODY_PLAY_BALL || type == gridUpdate_BODY_SINK_BALL)
         return max(body.shape0.x, 0.01);
-    if (type == BODY_DUCK) {
+    if (type == gridUpdate_BODY_DUCK) {
         float3 bodyRadius = max(abs(body.shape0.xyz), float3(0.02));
         float headReach = length(float2(body.shape1.y, body.shape1.z)) +
                           max(body.shape1.x, 0.02) + max(body.shape1.w, 0.02);
         return max(length(bodyRadius), headReach);
     }
-    if (type == BODY_ANCHORED_BOAT) {
+    if (type == gridUpdate_BODY_ANCHORED_BOAT) {
         float3 h = max(abs(body.shape0.xyz), float3(0.02));
         float aftReach = length(float2(max(body.shape1.y, h.x), 1.15 * h.y)) +
                          0.25 * max(body.shape1.x, 0.02);
@@ -408,16 +499,15 @@ float gridUpdate_bodySdf(BodyState body, float3 worldPoint) {
     float3 p = gridUpdate_inverseRotateByQuaternion(body.orientation, worldPoint - body.positionType.xyz);
     int type = int(round(body.positionType.w));
 
-    if (type == BODY_PLAY_BALL || type == BODY_SINK_BALL)
+    if (type == gridUpdate_BODY_PLAY_BALL || type == gridUpdate_BODY_SINK_BALL)
         return gridUpdate_sdSphere(p, body.shape0.x);
 
-    if (type == BODY_DUCK)
+    if (type == gridUpdate_BODY_DUCK)
         return gridUpdate_duckSdf(p, body.shape0, body.shape1);
 
-    if (type == BODY_ANCHORED_BOAT) {
+    if (type == gridUpdate_BODY_ANCHORED_BOAT) {
         float3 h = max(abs(body.shape0.xyz), float3(0.02));
-        float hullDistance = gridUpdate_sdEllipsoid(
-            p + float3(0.0, 0.28 * h.y, 0.0), h);
+        float hullDistance = gridUpdate_sdEllipsoid(p + float3(0.0, 0.28 * h.y, 0.0), h);
         float propRadius = max(body.shape1.x, 0.02);
         float aft = max(body.shape1.y, h.x);
         float3 shaftA = float3(-0.62 * h.x, -1.15 * h.y, 0.0);
@@ -466,16 +556,16 @@ float3 gridUpdate_collideBody(constant LiquidV2Params& params, float3 velocity, 
 
 void gridUpdate_addBodyImpulse(constant LiquidV2Params& params, device BodyImpulse* impulses, uint index, float3 impulse, float3 torque,
                     float displacedMass, bool contact) {
-    atomicAddInt((device atomic_int*)&impulses[index].linImpulse.x, gridUpdate_encodeBody(params, impulse.x));
-    atomicAddInt((device atomic_int*)&impulses[index].linImpulse.y, gridUpdate_encodeBody(params, impulse.y));
-    atomicAddInt((device atomic_int*)&impulses[index].linImpulse.z, gridUpdate_encodeBody(params, impulse.z));
+    atomicAddBodyImpulse(impulses, index, 0u, gridUpdate_encodeBody(params, impulse.x));
+    atomicAddBodyImpulse(impulses, index, 1u, gridUpdate_encodeBody(params, impulse.y));
+    atomicAddBodyImpulse(impulses, index, 2u, gridUpdate_encodeBody(params, impulse.z));
     if (displacedMass > 0.0)
-        atomicAddInt((device atomic_int*)&impulses[index].linImpulse.w, max(gridUpdate_encodeBody(params, displacedMass), 0));
-    atomicAddInt((device atomic_int*)&impulses[index].angImpulse.x, gridUpdate_encodeBody(params, torque.x));
-    atomicAddInt((device atomic_int*)&impulses[index].angImpulse.y, gridUpdate_encodeBody(params, torque.y));
-    atomicAddInt((device atomic_int*)&impulses[index].angImpulse.z, gridUpdate_encodeBody(params, torque.z));
+        atomicAddBodyImpulse(impulses, index, 3u, max(gridUpdate_encodeBody(params, displacedMass), 0));
+    atomicAddBodyImpulse(impulses, index, 4u, gridUpdate_encodeBody(params, torque.x));
+    atomicAddBodyImpulse(impulses, index, 5u, gridUpdate_encodeBody(params, torque.y));
+    atomicAddBodyImpulse(impulses, index, 6u, gridUpdate_encodeBody(params, torque.z));
     if (contact)
-        atomicAddInt((device atomic_int*)&impulses[index].angImpulse.w, 1);
+        atomicAddBodyImpulse(impulses, index, 7u, 1);
 }
 
 float gridUpdate_roundedRectangleDistance(float2 p, float2 halfExtent, float radius) {
@@ -498,28 +588,28 @@ float2 gridUpdate_roundedRectangleNormal(float2 p, float2 halfExtent,
 }
 
 void gridUpdate_applySimulationDomainBoundary(constant LiquidV2Params& params, float3 worldPosition, float dx,
-                                   thread float3 velocity) {
+                                   thread float3& velocity) {
     float boundary = max(params.material.w, 0.0) * dx;
     float3 domainMin = params.gridOriginDx.xyz + float3(boundary);
     float3 domainMax = params.gridOriginDx.xyz +
         float3(params.gridSizeAndCount.xyz - uint3(1u, 1u, 1u)) * dx - float3(boundary);
 
     if (worldPosition.x < domainMin.x + dx)
-        velocity = gridUpdate_collideStationary(velocity, float3(1.0, 0.0, 0.0));
+        velocity = gridUpdate_collideStationary(params, velocity, float3(1.0, 0.0, 0.0));
     if (worldPosition.x > domainMax.x - dx)
-        velocity = gridUpdate_collideStationary(velocity, float3(-1.0, 0.0, 0.0));
+        velocity = gridUpdate_collideStationary(params, velocity, float3(-1.0, 0.0, 0.0));
     if (worldPosition.y < max(domainMin.y, params.pool.z) + dx)
-        velocity = gridUpdate_collideStationary(velocity, float3(0.0, 1.0, 0.0));
+        velocity = gridUpdate_collideStationary(params, velocity, float3(0.0, 1.0, 0.0));
     if (worldPosition.y > domainMax.y - dx)
-        velocity = gridUpdate_collideStationary(velocity, float3(0.0, -1.0, 0.0));
+        velocity = gridUpdate_collideStationary(params, velocity, float3(0.0, -1.0, 0.0));
     if (worldPosition.z < domainMin.z + dx)
-        velocity = gridUpdate_collideStationary(velocity, float3(0.0, 0.0, 1.0));
+        velocity = gridUpdate_collideStationary(params, velocity, float3(0.0, 0.0, 1.0));
     if (worldPosition.z > domainMax.z - dx)
-        velocity = gridUpdate_collideStationary(velocity, float3(0.0, 0.0, -1.0));
+        velocity = gridUpdate_collideStationary(params, velocity, float3(0.0, 0.0, -1.0));
 }
 
 void gridUpdate_applyFinitePoolWall(constant LiquidV2Params& params, float3 worldPosition, float dx,
-                         thread float3 velocity) {
+                         thread float3& velocity) {
     float3 rawMin = params.gridOriginDx.xyz;
     float3 rawMax = params.gridOriginDx.xyz +
         float3(params.gridSizeAndCount.xyz - uint3(1u, 1u, 1u)) * dx;
@@ -547,29 +637,28 @@ void gridUpdate_applyFinitePoolWall(constant LiquidV2Params& params, float3 worl
         velocity = gridUpdate_collideStationary(params, velocity, outward);
 }
 
-void gridUpdate_applyDamGate(constant LiquidV2Params& params, float3 worldPosition, float dx, thread float3 velocity) {
-    if (params.pool.w >= DAM_GATE_RELEASE_TIME ||
-        abs(worldPosition.z) > DAM_GATE_HALF_Z ||
-        worldPosition.y > DAM_GATE_TOP ||
-        abs(worldPosition.x - DAM_GATE_X) > 1.35 * dx) return;
+void gridUpdate_applyDamGate(constant LiquidV2Params& params, float3 worldPosition, float dx, thread float3& velocity) {
+    if (params.pool.w >= gridUpdate_DAM_GATE_RELEASE_TIME ||
+        abs(worldPosition.z) > gridUpdate_DAM_GATE_HALF_Z ||
+        worldPosition.y > gridUpdate_DAM_GATE_TOP ||
+        abs(worldPosition.x - gridUpdate_DAM_GATE_X) > 1.35 * dx) return;
 
     // A two-sided temporary wall stores the tall left reservoir.  Removing
     // this constraint releases a genuine MLS-MPM dam-break; no render-only
     // displacement or procedural wave is added.
-    if (worldPosition.x <= DAM_GATE_X && velocity.x > 0.0)
-        velocity = gridUpdate_collideStationary(velocity, float3(-1.0, 0.0, 0.0));
-    else if (worldPosition.x > DAM_GATE_X && velocity.x < 0.0)
-        velocity = gridUpdate_collideStationary(velocity, float3(1.0, 0.0, 0.0));
+    if (worldPosition.x <= gridUpdate_DAM_GATE_X && velocity.x > 0.0)
+        velocity = gridUpdate_collideStationary(params, velocity, float3(-1.0, 0.0, 0.0));
+    else if (worldPosition.x > gridUpdate_DAM_GATE_X && velocity.x < 0.0)
+        velocity = gridUpdate_collideStationary(params, velocity, float3(1.0, 0.0, 0.0));
 }
 
 void gridUpdate_applyPropeller(constant LiquidV2Params& params, device BodyImpulse* impulses, BodyState boat, uint bodyIndex, float3 worldPosition,
-                    float cellMass, float dt, thread float3 velocity) {
+                    float cellMass, float dt, thread float3& velocity) {
     float radius = max(boat.shape1.x, 0.0);
     if (radius <= 0.0 || params.coupling.w <= 0.0) return;
 
     float3 axis = gridUpdate_rotateByQuaternion(boat.orientation, float3(-1.0, 0.0, 0.0));
-    float3 propellerCentre = boat.positionType.xyz + gridUpdate_rotateByQuaternion(
-        boat.orientation,
+    float3 propellerCentre = boat.positionType.xyz + gridUpdate_rotateByQuaternion(boat.orientation,
         float3(-max(boat.shape1.y, boat.shape0.x),
              -1.15 * boat.shape0.y, 0.0));
     float3 delta = worldPosition - propellerCentre;
@@ -600,7 +689,7 @@ void gridUpdate_applyPropeller(constant LiquidV2Params& params, device BodyImpul
 
     float3 fluidImpulse = cellMass * deltaVelocity;
     float3 bodyImpulse = -fluidImpulse;
-    gridUpdate_addBodyImpulse(bodyIndex, bodyImpulse,
+    gridUpdate_addBodyImpulse(params, impulses, bodyIndex, bodyImpulse,
                    cross(propellerCentre - boat.positionType.xyz, bodyImpulse),
                    0.0, length(deltaVelocity) > 1.0e-6);
 }
@@ -615,7 +704,9 @@ kernel void gridUpdate(
     device atomic_int* densityAtomic [[buffer(5)]],
     texture3d<float, access::read_write> densityVolume [[texture(0)]],
     texture3d<float, access::read_write> whitewaterVolume [[texture(1)]],
-    uint3 gid [[thread_position_in_grid]]
+    uint3 gid [[thread_position_in_grid]],
+    uint3 tgid [[threadgroup_position_in_grid]],
+    uint3 tid [[thread_position_in_threadgroup]]
 )
 {
 
@@ -642,7 +733,7 @@ kernel void gridUpdate(
     gridUpdate_applyFinitePoolWall(params, worldPosition, dx, velocity);
     gridUpdate_applyDamGate(params, worldPosition, dx, velocity);
 
-    uint bodyCount = min(params.scene.x, MAX_BODIES);
+    uint bodyCount = min(params.scene.x, gridUpdate_MAX_BODIES);
     float restDensity = max(params.simulation.z, 1.0e-6);
     float restMassPerCell = restDensity * dx * dx * dx;
     float contactBand = 0.75 * dx;
@@ -651,7 +742,7 @@ kernel void gridUpdate(
         BodyState body = bodies[bodyIndex];
         int type = int(round(body.positionType.w));
 
-        if (type == BODY_ANCHORED_BOAT && bodyIndex == params.scene.y)
+        if (type == gridUpdate_BODY_ANCHORED_BOAT && bodyIndex == params.scene.y)
             gridUpdate_applyPropeller(params, impulses, body, bodyIndex, worldPosition, mass, dt, velocity);
 
         // Conservative sphere cull: with the duck family the body list grew
@@ -687,7 +778,7 @@ kernel void gridUpdate(
 
         velocity = gridUpdate_collideBody(params, velocity, surfaceVelocity, normal, body);
 
-        if (type == BODY_SINK_BALL && body.linVelInvMass.y < -0.75) {
+        if (type == gridUpdate_BODY_SINK_BALL && body.linVelInvMass.y < -0.75) {
             // PIC/APIC damps the high-frequency ring jet of a sphere entry.
             // Restore that missing pressure redirection in simulation space:
             // nodes around the moving equator receive an outward/upward crown
@@ -709,7 +800,7 @@ kernel void gridUpdate(
         // buoyancy reaction, so its opposite is the complete body impulse.
         // Adding buoyancyImpulse again here would violate momentum balance.
         float3 bodyImpulse = -mass * (velocity - before);
-        gridUpdate_addBodyImpulse(bodyIndex, bodyImpulse,
+        gridUpdate_addBodyImpulse(params, impulses, bodyIndex, bodyImpulse,
                        cross(arm, bodyImpulse),
                        restDensity * displacedVolume, true);
     }
@@ -725,6 +816,57 @@ kernel void gridUpdate(
 }
 
 // ===== g2p =====
+// Cinematic Liquid v2 pass 5: APIC grid-to-particle transfer, advection and
+// a particle-level compound-body tunnelling guard.  Any final velocity change
+// made by that guard is returned to BodyImpulse, preserving two-way coupling.
+
+
+
+constant int g2p_BODY_DUCK = 0;
+constant int g2p_BODY_PLAY_BALL = 1;
+constant int g2p_BODY_ANCHORED_BOAT = 2;
+constant int g2p_BODY_SINK_BALL = 3;
+constant uint g2p_MAX_BODIES = 32u;
+constant float g2p_DAM_GATE_X = -0.66;
+constant float g2p_DAM_GATE_HALF_Z = 1.36;
+constant float g2p_DAM_GATE_TOP = 1.72;
+// The scored choreography re-stages the complete particle block at 4 s, so
+// the reference-style dam is released immediately instead of being allowed to
+// slump vertically behind an invisible gate before its horizontal release.
+constant float g2p_DAM_GATE_RELEASE_TIME = 0.0;
+constant float g2p_kBodyContributionLimit = 16777215.0;
+
+float g2p_gridFixedScale(constant LiquidV2Params& params);
+float g2p_bodyFixedScale(constant LiquidV2Params& params);
+float g2p_decodeGrid(constant LiquidV2Params& params, int v);
+int g2p_encodeBody(constant LiquidV2Params& params, float v);
+float3 g2p_quadraticWeights(float x);
+bool g2p_insideGrid(int3 n, int3 s);
+uint g2p_gridIndex(constant LiquidV2Params& params, int3 n);
+float4 g2p_safeQuaternion(float4 q);
+float3 g2p_rotateByQuaternion(float4 q, float3 v);
+float3 g2p_inverseRotateByQuaternion(float4 q, float3 v);
+float g2p_sdSphere(float3 p, float r);
+float g2p_sdEllipsoid(float3 p, float3 r);
+float g2p_sdCapsule(float3 p, float3 a, float3 b, float r);
+float g2p_smoothUnion(float a, float b, float k);
+float g2p_duckSdf(float3 p, float4 shape0, float4 shape1);
+float g2p_bodyBoundingRadius(BodyState body);
+float g2p_bodySdf(BodyState body, float3 worldPoint);
+float3 g2p_bodyNormal(BodyState body, float3 p, float e);
+float3 g2p_collideVelocity(float3 velocity, float3 surfaceVelocity, float3 normal,
+                     float restitution, float friction);
+void g2p_addBodyImpulse(constant LiquidV2Params& params, device BodyImpulse* impulses, uint index, float3 impulse, float3 torque);
+float g2p_roundedRectangleDistance(float2 p, float2 halfExtent, float radius);
+float2 g2p_roundedRectangleNormal(float2 p, float2 halfExtent,
+                            float radius, float epsilon);
+void g2p_constrainSimulationDomain(constant LiquidV2Params& params, float radius, thread float3& position,
+                               thread float3& velocity);
+void g2p_constrainFinitePoolWall(constant LiquidV2Params& params, float particleRadius, float3 previousPosition,
+                             thread float3& position, thread float3& velocity);
+void g2p_constrainDamGate(constant LiquidV2Params& params, float radius, float3 previousPosition,
+                      thread float3& position, thread float3& velocity);
+
 float g2p_gridFixedScale(constant LiquidV2Params& params) { return max(abs(params.material.z), 1.0); }
 
 float g2p_bodyFixedScale(constant LiquidV2Params& params) { return max(abs(params.coupling.x), 1.0); }
@@ -733,8 +875,8 @@ float g2p_decodeGrid(constant LiquidV2Params& params, int v) { return float(v) /
 
 int g2p_encodeBody(constant LiquidV2Params& params, float v) {
     return int(round(clamp(v * g2p_bodyFixedScale(params),
-                           -kBodyContributionLimit,
-                            kBodyContributionLimit)));
+                           -g2p_kBodyContributionLimit,
+                            g2p_kBodyContributionLimit)));
 }
 
 float3 g2p_quadraticWeights(float x) {
@@ -797,34 +939,31 @@ float g2p_duckSdf(float3 p, float4 shape0, float4 shape1) {
     float3 headCenter = float3(shape1.y, shape1.z, 0.0);
     float beakLength = max(shape1.w, 0.02);
 
-    float belly = g2p_sdEllipsoid(
-        p - float3(0.0, -0.04 * bodyRadius.y, 0.0),
+    float belly = g2p_sdEllipsoid(p - float3(0.0, -0.04 * bodyRadius.y, 0.0),
         float3(bodyRadius.x, 0.84 * bodyRadius.y, bodyRadius.z));
-    float tail = g2p_sdEllipsoid(
-        p - float3(-0.72 * bodyRadius.x, 0.28 * bodyRadius.y, 0.0),
+    float tail = g2p_sdEllipsoid(p - float3(-0.72 * bodyRadius.x, 0.28 * bodyRadius.y, 0.0),
         bodyRadius * float3(0.44, 0.30, 0.42));
     float duck = g2p_smoothUnion(belly, tail, 0.30 * bodyRadius.y);
     duck = g2p_smoothUnion(duck, g2p_sdSphere(p - headCenter, headRadius),
                        0.45 * headRadius);
     float3 beakCenter = headCenter +
         float3(headRadius + 0.30 * beakLength, -0.20 * headRadius, 0.0);
-    float beak = g2p_sdEllipsoid(
-        p - beakCenter,
+    float beak = g2p_sdEllipsoid(p - beakCenter,
         float3(0.60 * beakLength, 0.24 * headRadius, 0.46 * headRadius));
     return g2p_smoothUnion(duck, beak, 0.12 * headRadius);
 }
 
 float g2p_bodyBoundingRadius(BodyState body) {
     int type = int(round(body.positionType.w));
-    if (type == BODY_PLAY_BALL || type == BODY_SINK_BALL)
+    if (type == g2p_BODY_PLAY_BALL || type == g2p_BODY_SINK_BALL)
         return max(body.shape0.x, 0.01);
-    if (type == BODY_DUCK) {
+    if (type == g2p_BODY_DUCK) {
         float3 bodyRadius = max(abs(body.shape0.xyz), float3(0.02));
         float headReach = length(float2(body.shape1.y, body.shape1.z)) +
                           max(body.shape1.x, 0.02) + max(body.shape1.w, 0.02);
         return max(length(bodyRadius), headReach);
     }
-    if (type == BODY_ANCHORED_BOAT) {
+    if (type == g2p_BODY_ANCHORED_BOAT) {
         float3 h = max(abs(body.shape0.xyz), float3(0.02));
         float aftReach = length(float2(max(body.shape1.y, h.x), 1.15 * h.y)) +
                          0.25 * max(body.shape1.x, 0.02);
@@ -836,11 +975,11 @@ float g2p_bodyBoundingRadius(BodyState body) {
 float g2p_bodySdf(BodyState body, float3 worldPoint) {
     float3 p = g2p_inverseRotateByQuaternion(body.orientation, worldPoint - body.positionType.xyz);
     int type = int(round(body.positionType.w));
-    if (type == BODY_PLAY_BALL || type == BODY_SINK_BALL)
+    if (type == g2p_BODY_PLAY_BALL || type == g2p_BODY_SINK_BALL)
         return g2p_sdSphere(p, body.shape0.x);
-    if (type == BODY_DUCK)
+    if (type == g2p_BODY_DUCK)
         return g2p_duckSdf(p, body.shape0, body.shape1);
-    if (type == BODY_ANCHORED_BOAT) {
+    if (type == g2p_BODY_ANCHORED_BOAT) {
         float3 h = max(abs(body.shape0.xyz), float3(0.02));
         float propRadius = max(body.shape1.x, 0.02);
         float aft = max(body.shape1.y, h.x);
@@ -874,13 +1013,13 @@ float3 g2p_collideVelocity(float3 velocity, float3 surfaceVelocity, float3 norma
 }
 
 void g2p_addBodyImpulse(constant LiquidV2Params& params, device BodyImpulse* impulses, uint index, float3 impulse, float3 torque) {
-    atomicAddInt((device atomic_int*)&impulses[index].linImpulse.x, g2p_encodeBody(params, impulse.x));
-    atomicAddInt((device atomic_int*)&impulses[index].linImpulse.y, g2p_encodeBody(params, impulse.y));
-    atomicAddInt((device atomic_int*)&impulses[index].linImpulse.z, g2p_encodeBody(params, impulse.z));
-    atomicAddInt((device atomic_int*)&impulses[index].angImpulse.x, g2p_encodeBody(params, torque.x));
-    atomicAddInt((device atomic_int*)&impulses[index].angImpulse.y, g2p_encodeBody(params, torque.y));
-    atomicAddInt((device atomic_int*)&impulses[index].angImpulse.z, g2p_encodeBody(params, torque.z));
-    atomicAddInt((device atomic_int*)&impulses[index].angImpulse.w, 1);
+    atomicAddBodyImpulse(impulses, index, 0u, g2p_encodeBody(params, impulse.x));
+    atomicAddBodyImpulse(impulses, index, 1u, g2p_encodeBody(params, impulse.y));
+    atomicAddBodyImpulse(impulses, index, 2u, g2p_encodeBody(params, impulse.z));
+    atomicAddBodyImpulse(impulses, index, 4u, g2p_encodeBody(params, torque.x));
+    atomicAddBodyImpulse(impulses, index, 5u, g2p_encodeBody(params, torque.y));
+    atomicAddBodyImpulse(impulses, index, 6u, g2p_encodeBody(params, torque.z));
+    atomicAddBodyImpulse(impulses, index, 7u, 1);
 }
 
 float g2p_roundedRectangleDistance(float2 p, float2 halfExtent, float radius) {
@@ -902,8 +1041,8 @@ float2 g2p_roundedRectangleNormal(float2 p, float2 halfExtent,
     return g2 > 1.0e-12 ? gradient * rsqrt(g2) : float2(1.0, 0.0);
 }
 
-void g2p_constrainSimulationDomain(constant LiquidV2Params& params, float radius, thread float3 position,
-                               thread float3 velocity) {
+void g2p_constrainSimulationDomain(constant LiquidV2Params& params, float radius, thread float3& position,
+                               thread float3& velocity) {
     float dx = max(abs(params.gridOriginDx.w), 1.0e-6);
     float margin = max(params.material.w, 1.5) * dx + radius;
     float3 domainMin = params.gridOriginDx.xyz + float3(margin);
@@ -942,7 +1081,7 @@ void g2p_constrainSimulationDomain(constant LiquidV2Params& params, float radius
 }
 
 void g2p_constrainFinitePoolWall(constant LiquidV2Params& params, float particleRadius, float3 previousPosition,
-                             thread float3 position, thread float3 velocity) {
+                             thread float3& position, thread float3& velocity) {
     float dx = max(abs(params.gridOriginDx.w), 1.0e-6);
     float3 rawMin = params.gridOriginDx.xyz;
     float3 rawMax = params.gridOriginDx.xyz +
@@ -979,20 +1118,20 @@ void g2p_constrainFinitePoolWall(constant LiquidV2Params& params, float particle
 }
 
 void g2p_constrainDamGate(constant LiquidV2Params& params, float radius, float3 previousPosition,
-                      thread float3 position, thread float3 velocity) {
-    if (params.pool.w >= DAM_GATE_RELEASE_TIME ||
-        abs(position.z) > DAM_GATE_HALF_Z + radius ||
-        position.y > DAM_GATE_TOP + radius) return;
+                      thread float3& position, thread float3& velocity) {
+    if (params.pool.w >= g2p_DAM_GATE_RELEASE_TIME ||
+        abs(position.z) > g2p_DAM_GATE_HALF_Z + radius ||
+        position.y > g2p_DAM_GATE_TOP + radius) return;
 
-    if (previousPosition.x <= DAM_GATE_X &&
-        position.x + radius > DAM_GATE_X) {
-        position.x = DAM_GATE_X - radius;
+    if (previousPosition.x <= g2p_DAM_GATE_X &&
+        position.x + radius > g2p_DAM_GATE_X) {
+        position.x = g2p_DAM_GATE_X - radius;
         velocity = g2p_collideVelocity(velocity, float3(0.0, 0.0, 0.0),
                                    float3(-1.0, 0.0, 0.0),
                                    params.collision.x, params.collision.y);
-    } else if (previousPosition.x > DAM_GATE_X &&
-               position.x - radius < DAM_GATE_X) {
-        position.x = DAM_GATE_X + radius;
+    } else if (previousPosition.x > g2p_DAM_GATE_X &&
+               position.x - radius < g2p_DAM_GATE_X) {
+        position.x = g2p_DAM_GATE_X + radius;
         velocity = g2p_collideVelocity(velocity, float3(0.0, 0.0, 0.0),
                                    float3(1.0, 0.0, 0.0),
                                    params.collision.x, params.collision.y);
@@ -1009,7 +1148,9 @@ kernel void g2p(
     device atomic_int* densityAtomic [[buffer(5)]],
     texture3d<float, access::read_write> densityVolume [[texture(0)]],
     texture3d<float, access::read_write> whitewaterVolume [[texture(1)]],
-    uint3 gid [[thread_position_in_grid]]
+    uint3 gid [[thread_position_in_grid]],
+    uint3 tgid [[threadgroup_position_in_grid]],
+    uint3 tid [[thread_position_in_threadgroup]]
 )
 {
 
@@ -1048,7 +1189,7 @@ kernel void g2p(
                     g2p_decodeGrid(params, grid[index].vz));
                 float3 dpos = (float3(offset) - fractional) * dx;
                 newVelocity += weight * gridVelocity;
-                newC += affineScale * weight * outerProduct(gridVelocity, dpos);
+                newC += affineScale * weight * OuterProduct(gridVelocity, dpos);
                 validWeight += weight;
             }
         }
@@ -1064,7 +1205,7 @@ kernel void g2p(
 
     float3 newPosition = particle.position.xyz + dt * newVelocity;
     float particleRadius = 0.42 * dx;
-    uint bodyCount = min(params.scene.x, MAX_BODIES);
+    uint bodyCount = min(params.scene.x, g2p_MAX_BODIES);
     float particleMass = max(params.material.y, 0.0);
 
     for (uint bodyIndex = 0u; bodyIndex < bodyCount; ++bodyIndex) {
@@ -1082,13 +1223,12 @@ kernel void g2p(
         float3 surfaceVelocity = body.linVelInvMass.xyz +
             cross(body.angVelInvInertia.xyz, arm);
         float3 before = newVelocity;
-        newVelocity = g2p_collideVelocity(
-            newVelocity, surfaceVelocity, normal,
+        newVelocity = g2p_collideVelocity(newVelocity, surfaceVelocity, normal,
             max(params.collision.x, body.material.x),
             max(params.collision.y, body.material.y) * max(params.coupling.z, 0.0));
         float3 bodyImpulse = -particleMass * (newVelocity - before);
         if (dot(bodyImpulse, bodyImpulse) > 1.0e-16)
-            g2p_addBodyImpulse(bodyIndex, bodyImpulse, cross(arm, bodyImpulse));
+            g2p_addBodyImpulse(params, impulses, bodyIndex, bodyImpulse, cross(arm, bodyImpulse));
     }
 
     g2p_constrainDamGate(params, particleRadius, particle.position.xyz,
@@ -1109,6 +1249,40 @@ kernel void g2p(
 }
 
 // ===== rigidIntegrate =====
+// Cinematic Liquid v2 rigid integration.  Exactly one 32-lane workgroup must
+// be dispatched.  All body states are snapshotted in shared memory before
+// integration and again before pair contacts, avoiding cross-workgroup races.
+
+
+
+constant int rigidIntegrate_BODY_DUCK = 0;
+constant int rigidIntegrate_BODY_PLAY_BALL = 1;
+constant int rigidIntegrate_BODY_ANCHORED_BOAT = 2;
+constant int rigidIntegrate_BODY_SINK_BALL = 3;
+constant uint rigidIntegrate_MAX_BODIES = 32u;
+// The sphere must have enough real free-fall time to strike the shallow pool
+// before the fixed 5 s capture.  Air drag is handled separately below; this is
+// a genuine gravity release, not a prescribed crane trajectory.
+constant float rigidIntegrate_SINK_BALL_RELEASE_TIME = 4.28;
+constant float rigidIntegrate_SINK_BALL_START_Y = 1.65;
+constant float2 rigidIntegrate_BOAT_TETHER_ANCHOR_XZ = float2(1.25, 0.50);
+
+float rigidIntegrate_bodyFixedScale(constant LiquidV2Params& params);
+float3 rigidIntegrate_decodeImpulse(constant LiquidV2Params& params, int3 v);
+float4 rigidIntegrate_safeQuaternion(float4 q);
+float4 rigidIntegrate_quaternionMultiply(float4 a, float4 b);
+float3 rigidIntegrate_rotateByQuaternion(float4 q, float3 v);
+float4 rigidIntegrate_integrateOrientation(float4 q, float3 worldAngularVelocity, float dt);
+float rigidIntegrate_bodyBoundingRadius(BodyState body);
+float rigidIntegrate_bodyBottomExtent(BodyState body);
+float3 rigidIntegrate_collideVelocity(float3 velocity, float3 normal,
+                     float restitution, float friction);
+void rigidIntegrate_solveBodyPair(uint selfIndex, BodyState other,
+                   thread BodyState& current);
+void rigidIntegrate_constrainToPool(constant LiquidV2Params& params, float horizontalRadius, float bottomExtent,
+                     thread BodyState& body);
+bool rigidIntegrate_finiteVector(float3 v);
+
 float rigidIntegrate_bodyFixedScale(constant LiquidV2Params& params) { return max(abs(params.coupling.x), 1.0); }
 
 float3 rigidIntegrate_decodeImpulse(constant LiquidV2Params& params, int3 v) { return float3(v) / rigidIntegrate_bodyFixedScale(params); }
@@ -1136,27 +1310,27 @@ float4 rigidIntegrate_integrateOrientation(float4 q, float3 worldAngularVelocity
 
 float rigidIntegrate_bodyBoundingRadius(BodyState body) {
     int type = int(round(body.positionType.w));
-    if (type == BODY_PLAY_BALL || type == BODY_SINK_BALL)
+    if (type == rigidIntegrate_BODY_PLAY_BALL || type == rigidIntegrate_BODY_SINK_BALL)
         return max(body.shape0.x, 0.01);
-    if (type == BODY_DUCK) {
+    if (type == rigidIntegrate_BODY_DUCK) {
         float bodyRadius = length(max(abs(body.shape0.xyz), float3(0.01)));
         float headRadius = max(body.shape1.x, 0.01);
         float headReach = length(float2(body.shape1.y, body.shape1.z)) +
                           headRadius + max(body.shape1.w, 0.0);
         return max(bodyRadius, headReach);
     }
-    if (type == BODY_ANCHORED_BOAT)
+    if (type == rigidIntegrate_BODY_ANCHORED_BOAT)
         return length(max(abs(body.shape0.xyz), float3(0.01)));
     return 0.01;
 }
 
 float rigidIntegrate_bodyBottomExtent(BodyState body) {
     int type = int(round(body.positionType.w));
-    if (type == BODY_PLAY_BALL || type == BODY_SINK_BALL)
+    if (type == rigidIntegrate_BODY_PLAY_BALL || type == rigidIntegrate_BODY_SINK_BALL)
         return max(body.shape0.x, 0.01);
-    if (type == BODY_ANCHORED_BOAT)
+    if (type == rigidIntegrate_BODY_ANCHORED_BOAT)
         return max(1.36 * abs(body.shape0.y), 0.04);
-    if (type == BODY_DUCK)
+    if (type == rigidIntegrate_BODY_DUCK)
         return max(abs(body.shape0.y), 0.04);
     return 0.01;
 }
@@ -1171,7 +1345,7 @@ float3 rigidIntegrate_collideVelocity(float3 velocity, float3 normal,
 }
 
 void rigidIntegrate_solveBodyPair(uint selfIndex, BodyState other,
-                   thread BodyState current) {
+                   thread BodyState& current) {
     float inverseMassA = max(current.linVelInvMass.w, 0.0);
     float inverseMassB = max(other.linVelInvMass.w, 0.0);
     float inverseMassSum = inverseMassA + inverseMassB;
@@ -1218,7 +1392,7 @@ void rigidIntegrate_solveBodyPair(uint selfIndex, BodyState other,
 }
 
 void rigidIntegrate_constrainToPool(constant LiquidV2Params& params, float horizontalRadius, float bottomExtent,
-                     thread BodyState body) {
+                     thread BodyState& body) {
     float dx = max(abs(params.gridOriginDx.w), 1.0e-6);
     float padding = max(params.material.w, 0.0) * dx;
     float3 domainMinimum = params.gridOriginDx.xyz + float3(padding);
@@ -1243,26 +1417,21 @@ void rigidIntegrate_constrainToPool(constant LiquidV2Params& params, float horiz
     float f = max(body.material.y, params.collision.y);
     if (body.positionType.x < minimum.x) {
         body.positionType.x = minimum.x;
-        body.linVelInvMass.xyz = rigidIntegrate_collideVelocity(
-            body.linVelInvMass.xyz, float3(1,0,0), e, f);
+        body.linVelInvMass.xyz = rigidIntegrate_collideVelocity(body.linVelInvMass.xyz, float3(1,0,0), e, f);
     } else if (body.positionType.x > maximum.x) {
         body.positionType.x = maximum.x;
-        body.linVelInvMass.xyz = rigidIntegrate_collideVelocity(
-            body.linVelInvMass.xyz, float3(-1,0,0), e, f);
+        body.linVelInvMass.xyz = rigidIntegrate_collideVelocity(body.linVelInvMass.xyz, float3(-1,0,0), e, f);
     }
     if (body.positionType.z < minimum.z) {
         body.positionType.z = minimum.z;
-        body.linVelInvMass.xyz = rigidIntegrate_collideVelocity(
-            body.linVelInvMass.xyz, float3(0,0,1), e, f);
+        body.linVelInvMass.xyz = rigidIntegrate_collideVelocity(body.linVelInvMass.xyz, float3(0,0,1), e, f);
     } else if (body.positionType.z > maximum.z) {
         body.positionType.z = maximum.z;
-        body.linVelInvMass.xyz = rigidIntegrate_collideVelocity(
-            body.linVelInvMass.xyz, float3(0,0,-1), e, f);
+        body.linVelInvMass.xyz = rigidIntegrate_collideVelocity(body.linVelInvMass.xyz, float3(0,0,-1), e, f);
     }
     if (body.positionType.y < minimum.y) {
         body.positionType.y = minimum.y;
-        body.linVelInvMass.xyz = rigidIntegrate_collideVelocity(
-            body.linVelInvMass.xyz, float3(0,1,0), e, f);
+        body.linVelInvMass.xyz = rigidIntegrate_collideVelocity(body.linVelInvMass.xyz, float3(0,1,0), e, f);
         body.angVelInvInertia.xyz *= 1.0 - clamp(f, 0.0, 0.95);
     }
 
@@ -1279,8 +1448,7 @@ void rigidIntegrate_constrainToPool(constant LiquidV2Params& params, float horiz
             float2 inward = -normalize(radial + float2(1.0e-8));
             body.positionType.xz = centre + cornerCentre -
                                    inward * cornerRadius;
-            body.linVelInvMass.xyz = rigidIntegrate_collideVelocity(
-                body.linVelInvMass.xyz,
+            body.linVelInvMass.xyz = rigidIntegrate_collideVelocity(body.linVelInvMass.xyz,
                 float3(inward.x, 0.0, inward.y), e, f);
         }
     }
@@ -1300,18 +1468,22 @@ kernel void rigidIntegrate(
     device atomic_int* densityAtomic [[buffer(5)]],
     texture3d<float, access::read_write> densityVolume [[texture(0)]],
     texture3d<float, access::read_write> whitewaterVolume [[texture(1)]],
-    uint3 gid [[thread_position_in_grid]]
+    uint3 gid [[thread_position_in_grid]],
+    uint3 tgid [[threadgroup_position_in_grid]],
+    uint3 tid [[thread_position_in_threadgroup]]
 )
 {
+    threadgroup BodyState initialStates[32];
+    threadgroup BodyState predictedStates[32];
 
-    if (gl_WorkGroupID.x != 0u || gl_WorkGroupID.y != 0u ||
-        gl_WorkGroupID.z != 0u) return;
+    if (tgid.x != 0u || tgid.y != 0u ||
+        tgid.z != 0u) return;
 
-    uint lane = gl_LocalInvocationID.x;
-    uint bodyCount = min(params.scene.x, MAX_BODIES);
+    uint lane = tid.x;
+    uint bodyCount = min(params.scene.x, rigidIntegrate_MAX_BODIES);
     if (lane < bodyCount)
         initialStates[lane] = bodies[lane];
-    barrier();
+    threadgroup_barrier(mem_flags::mem_threadgroup);
 
     if (lane < bodyCount) {
         BodyState body = initialStates[lane];
@@ -1320,8 +1492,8 @@ kernel void rigidIntegrate(
         float inverseInertia = max(body.angVelInvInertia.w, 0.0);
         float dt = clamp(params.simulation.x, 0.0, 1.0 / 30.0);
 
-        bool heldSinkBall = lane == 3u && type == BODY_SINK_BALL &&
-                            params.pool.w < SINK_BALL_RELEASE_TIME;
+        bool heldSinkBall = lane == 3u && type == rigidIntegrate_BODY_SINK_BALL &&
+                            params.pool.w < rigidIntegrate_SINK_BALL_RELEASE_TIME;
         // A zero inverse mass is the only hard anchor.  The motor boat now has
         // finite mass and receives the equal-and-opposite propeller impulse;
         // a soft horizontal tether below keeps it in the hero composition.
@@ -1332,7 +1504,7 @@ kernel void rigidIntegrate(
                 // gravity.  The previous smoothstep crane reached the water
                 // with zero velocity, so it displaced water slowly instead of
                 // producing a physically coupled entry splash.
-                body.positionType.y = SINK_BALL_START_Y;
+                body.positionType.y = rigidIntegrate_SINK_BALL_START_Y;
                 body.linVelInvMass.xyz = float3(0.0, 0.0, 0.0);
             } else {
                 body.linVelInvMass.xyz = float3(0.0, 0.0, 0.0);
@@ -1351,7 +1523,7 @@ kernel void rigidIntegrate(
             body.angVelInvInertia.xyz += angularImpulse * inverseInertia;
             body.linVelInvMass.y += params.simulation.y * dt;
 
-            if (type == BODY_DUCK && body.shape0.w > 0.0) {
+            if (type == rigidIntegrate_BODY_DUCK && body.shape0.w > 0.0) {
                 float3 bodyUp = rigidIntegrate_rotateByQuaternion(body.orientation,
                                                  float3(0.0, 1.0, 0.0));
                 float3 restoringAxis = cross(bodyUp, float3(0.0, 1.0, 0.0));
@@ -1359,8 +1531,8 @@ kernel void rigidIntegrate(
                     (body.shape0.w * inverseInertia * dt);
             }
 
-            if (type == BODY_ANCHORED_BOAT) {
-                float2 offset = body.positionType.xz - BOAT_TETHER_ANCHOR_XZ;
+            if (type == rigidIntegrate_BODY_ANCHORED_BOAT) {
+                float2 offset = body.positionType.xz - rigidIntegrate_BOAT_TETHER_ANCHOR_XZ;
                 // A compliant mooring permits visible thrust, bob and yaw but
                 // avoids a deterministic benchmark scene losing the boat.
                 float2 tetherForce = -18.0 * offset -
@@ -1376,12 +1548,12 @@ kernel void rigidIntegrate(
 
             float linearDamping = max(body.material.z, 0.0);
             float angularDamping = max(body.material.w, 0.0);
-            if (type == BODY_SINK_BALL) {
+            if (type == rigidIntegrate_BODY_SINK_BALL) {
                 // material.z/w describe water drag.  Applying them in air gave
                 // the ball a fake 2.45 m/s terminal velocity despite -9.81 m/s².
                 linearDamping = 0.015 + linearDamping * submergedFraction;
                 angularDamping = 0.025 + angularDamping * submergedFraction;
-            } else if (type == BODY_ANCHORED_BOAT) {
+            } else if (type == rigidIntegrate_BODY_ANCHORED_BOAT) {
                 linearDamping = 0.04 + linearDamping * submergedFraction;
                 angularDamping = 0.06 + angularDamping * submergedFraction;
             }
@@ -1403,13 +1575,13 @@ kernel void rigidIntegrate(
             predictedStates[lane] = body;
         }
     }
-    barrier();
+    threadgroup_barrier(mem_flags::mem_threadgroup);
 
     if (lane >= bodyCount) return;
     BodyState current = predictedStates[lane];
     int type = int(round(current.positionType.w));
-    bool heldSinkBall = lane == 3u && type == BODY_SINK_BALL &&
-                        params.pool.w < SINK_BALL_RELEASE_TIME;
+    bool heldSinkBall = lane == 3u && type == rigidIntegrate_BODY_SINK_BALL &&
+                        params.pool.w < rigidIntegrate_SINK_BALL_RELEASE_TIME;
     bool anchored = current.linVelInvMass.w <= 0.0;
 
     if (!heldSinkBall && !anchored) {
@@ -1417,7 +1589,7 @@ kernel void rigidIntegrate(
             if (otherIndex == lane) continue;
             rigidIntegrate_solveBodyPair(lane, predictedStates[otherIndex], current);
         }
-        rigidIntegrate_constrainToPool(rigidIntegrate_bodyBoundingRadius(current),
+        rigidIntegrate_constrainToPool(params, rigidIntegrate_bodyBoundingRadius(current),
                         rigidIntegrate_bodyBottomExtent(current), current);
     }
 
@@ -1436,6 +1608,16 @@ kernel void rigidIntegrate(
 }
 
 // ===== resolveWhitewater =====
+// Cinematic Liquid v2 density resolve.  This keeps the simulation grid in
+// fixed-point storage and exposes a filterable R32F density field to the
+// independent v2 presentation pipeline.
+
+uint resolveWhitewater_gridIndex(constant LiquidV2Params& params, uint3 c);
+bool resolveWhitewater_insideGrid(constant LiquidV2Params& params, int3 c);
+float resolveWhitewater_fixedScale(constant LiquidV2Params& params);
+float resolveWhitewater_normalizedDensityAt(constant LiquidV2Params& params, device GridCell* grid, int3 c, float restCellMass);
+float3 resolveWhitewater_velocityAt(constant LiquidV2Params& params, constant SurfaceParams& surface, device GridCell* grid, int3 c);
+
 uint resolveWhitewater_gridIndex(constant LiquidV2Params& params, uint3 c) {
     return c.x + params.gridSizeAndCount.x *
                  (c.y + params.gridSizeAndCount.y * c.z);
@@ -1450,14 +1632,14 @@ float resolveWhitewater_fixedScale(constant LiquidV2Params& params) { return max
 
 float resolveWhitewater_normalizedDensityAt(constant LiquidV2Params& params, device GridCell* grid, int3 c, float restCellMass) {
     if (!resolveWhitewater_insideGrid(params, c)) return 0.0;
-    float mass = float(max(grid[resolveWhitewater_gridIndex(uint3(c))].mass, 0)) /
+    float mass = float(max(grid[resolveWhitewater_gridIndex(params, uint3(c))].mass, 0)) /
                  resolveWhitewater_fixedScale(params);
     return clamp(mass / max(restCellMass, 1.0e-8), 0.0, 4.0);
 }
 
 float3 resolveWhitewater_velocityAt(constant LiquidV2Params& params, constant SurfaceParams& surface, device GridCell* grid, int3 c) {
     if (!resolveWhitewater_insideGrid(params, c)) return float3(0.0, 0.0, 0.0);
-    GridCell cell = grid[resolveWhitewater_gridIndex(uint3(c))];
+    GridCell cell = grid[resolveWhitewater_gridIndex(params, uint3(c))];
     if (cell.mass <= 0) return float3(0.0, 0.0, 0.0);
     // grid_update_v2 replaces accumulated momentum with encoded velocity.
     // Dividing by mass again here inflated free-surface velocity by 15x or
@@ -1475,7 +1657,9 @@ kernel void resolveWhitewater(
     device atomic_int* densityAtomic [[buffer(5)]],
     texture3d<float, access::read_write> densityVolume [[texture(0)]],
     texture3d<float, access::read_write> whitewaterVolume [[texture(1)]],
-    uint3 gid [[thread_position_in_grid]]
+    uint3 gid [[thread_position_in_grid]],
+    uint3 tgid [[threadgroup_position_in_grid]],
+    uint3 tid [[thread_position_in_threadgroup]]
 )
 {
 
@@ -1496,9 +1680,9 @@ kernel void resolveWhitewater(
     // physical signals from six grid neighbours instead of copying its SPH
     // neighbour table or inventing screen-space paint.
     int3 c = int3(coord);
-    const int3 directions[6] = int3[6](
+    const int3 directions[6] = {
         int3(1,0,0), int3(-1,0,0), int3(0,1,0),
-        int3(0,-1,0), int3(0,0,1), int3(0,0,-1));
+        int3(0,-1,0), int3(0,0,1), int3(0,0,-1)};
     float3 velocity = resolveWhitewater_velocityAt(params, surface, grid, c);
     float convergingFlow = 0.0;
     float velocityMismatch = 0.0;
@@ -1587,9 +1771,30 @@ kernel void resolveWhitewater(
 }
 
 // ===== surfaceClear =====
-uint surfaceClear_volumeIndex(constant LiquidV2Params& params, uint3 coord) {
-    return coord.x + params.volumeSizeAndCount.x *
-        (coord.y + params.volumeSizeAndCount.y * coord.z);
+// Cinematic Liquid v2 render-density reconstruction, pass 1/3.
+//
+// Clear the fixed-point density accumulator independently of the MLS-MPM
+// simulation grid.  Keeping this volume separate lets presentation use a
+// smooth SPH kernel without changing the simulation or its score contract.
+
+
+
+// Five float4 members deliberately preserve the 80-byte v2 Particle ABI.
+
+
+
+
+
+
+
+
+// Shared 64-byte ABI for all three surface-reconstruction passes.
+
+uint surfaceClear_volumeIndex(constant SurfaceParams& surface, uint3 coord);
+
+uint surfaceClear_volumeIndex(constant SurfaceParams& surface, uint3 coord) {
+    return coord.x + surface.volumeSizeAndCount.x *
+        (coord.y + surface.volumeSizeAndCount.y * coord.z);
 }
 
 kernel void surfaceClear(
@@ -1602,25 +1807,52 @@ kernel void surfaceClear(
     device atomic_int* densityAtomic [[buffer(5)]],
     texture3d<float, access::read_write> densityVolume [[texture(0)]],
     texture3d<float, access::read_write> whitewaterVolume [[texture(1)]],
-    uint3 gid [[thread_position_in_grid]]
+    uint3 gid [[thread_position_in_grid]],
+    uint3 tgid [[threadgroup_position_in_grid]],
+    uint3 tid [[thread_position_in_threadgroup]]
 )
 {
 
     uint3 coord = gid.xyz;
-    if (any(coord >= params.volumeSizeAndCount.xyz)) return;
+    if (any(coord >= surface.volumeSizeAndCount.xyz)) return;
 
-    densityAtomic[surfaceClear_volumeIndex(params, coord)] = 0u;
+    atomic_store_explicit(&densityAtomic[surfaceClear_volumeIndex(surface, coord)], 0, memory_order_relaxed);
 
 }
 
 // ===== surfaceSplat =====
-uint surfaceSplat_volumeIndex(constant LiquidV2Params& params, uint3 coord) {
-    return coord.x + params.volumeSizeAndCount.x *
-        (coord.y + params.volumeSizeAndCount.y * coord.z);
+// Cinematic Liquid v2 render-density reconstruction, pass 2/3.
+//
+// One invocation splats one simulation particle into an independent density
+// volume.  Density is accumulated as unsigned fixed point because Vulkan 1.1
+// does not guarantee floating-point image atomics.
+
+
+
+// Five float4 members deliberately preserve the 80-byte v2 Particle ABI.
+
+
+
+
+
+
+
+
+// Shared 64-byte ABI for all three surface-reconstruction passes.
+
+
+constant float surfaceSplat_PI = 3.14159265358979323846;
+
+uint surfaceSplat_volumeIndex(constant SurfaceParams& surface, uint3 coord);
+float3 surfaceSplat_voxelCenter(constant SurfaceParams& surface, int3 coord, float voxelSize);
+
+uint surfaceSplat_volumeIndex(constant SurfaceParams& surface, uint3 coord) {
+    return coord.x + surface.volumeSizeAndCount.x *
+        (coord.y + surface.volumeSizeAndCount.y * coord.z);
 }
 
-float3 surfaceSplat_voxelCenter(constant LiquidV2Params& params, int3 coord, float voxelSize) {
-    return params.volumeMinVoxel.xyz +
+float3 surfaceSplat_voxelCenter(constant SurfaceParams& surface, int3 coord, float voxelSize) {
+    return surface.volumeMinVoxel.xyz +
         (float3(coord) + float3(0.5, 0.5, 0.5)) * voxelSize;
 }
 
@@ -1634,20 +1866,22 @@ kernel void surfaceSplat(
     device atomic_int* densityAtomic [[buffer(5)]],
     texture3d<float, access::read_write> densityVolume [[texture(0)]],
     texture3d<float, access::read_write> whitewaterVolume [[texture(1)]],
-    uint3 gid [[thread_position_in_grid]]
+    uint3 gid [[thread_position_in_grid]],
+    uint3 tgid [[threadgroup_position_in_grid]],
+    uint3 tid [[thread_position_in_threadgroup]]
 )
 {
 
     uint particleIndex = gid.x;
-    if (particleIndex >= params.volumeSizeAndCount.w) return;
+    if (particleIndex >= surface.volumeSizeAndCount.w) return;
 
-    float h = params.kernel.x;
-    float particleMassOverRestDensity = params.kernel.y;
-    float fixedScale = params.kernel.z;
-    float voxelSize = params.volumeMinVoxel.w;
+    float h = surface.kernelParams.x;
+    float particleMassOverRestDensity = surface.kernelParams.y;
+    float fixedScale = surface.kernelParams.z;
+    float voxelSize = surface.volumeMinVoxel.w;
     if (h <= 0.0 || particleMassOverRestDensity <= 0.0 ||
         fixedScale <= 0.0 || voxelSize <= 0.0 ||
-        any(equal(params.volumeSizeAndCount.xyz, uint3(0u, 0u, 0u)))) return;
+        any(surface.volumeSizeAndCount.xyz == uint3(0u, 0u, 0u))) return;
 
     float3 particlePosition = particles[particleIndex].position.xyz;
 
@@ -1655,23 +1889,23 @@ kernel void surfaceSplat(
     // particle kernel.  These bounds are derived from that same centre map:
     //     centre = volumeMin + (index + 0.5) * voxelSize
     float3 lowerCoordinate =
-        (particlePosition - float3(h) - params.volumeMinVoxel.xyz) / voxelSize - float3(0.5, 0.5, 0.5);
+        (particlePosition - float3(h) - surface.volumeMinVoxel.xyz) / voxelSize - float3(0.5, 0.5, 0.5);
     float3 upperCoordinate =
-        (particlePosition + float3(h) - params.volumeMinVoxel.xyz) / voxelSize - float3(0.5, 0.5, 0.5);
+        (particlePosition + float3(h) - surface.volumeMinVoxel.xyz) / voxelSize - float3(0.5, 0.5, 0.5);
     int3 first = int3(ceil(lowerCoordinate));
     int3 last = int3(floor(upperCoordinate));
-    int3 volumeMax = int3(params.volumeSizeAndCount.xyz) - int3(1, 1, 1);
+    int3 volumeMax = int3(surface.volumeSizeAndCount.xyz) - int3(1, 1, 1);
     first = clamp(first, int3(0, 0, 0), volumeMax);
     last = clamp(last, int3(0, 0, 0), volumeMax);
-    if (any(greaterThan(first, last))) return;
+    if (any(first > last)) return;
 
-    float kernelCoefficient = 15.0 / (2.0 * PI * h * h * h * h * h);
+    float kernelCoefficient = 15.0 / (2.0 * surfaceSplat_PI * h * h * h * h * h);
     for (int z = first.z; z <= last.z; ++z) {
         for (int y = first.y; y <= last.y; ++y) {
             for (int x = first.x; x <= last.x; ++x) {
                 int3 coord = int3(x, y, z);
                 float distanceToParticle =
-                    length(surfaceSplat_voxelCenter(params, coord, voxelSize) - particlePosition);
+                    length(surfaceSplat_voxelCenter(surface, coord, voxelSize) - particlePosition);
                 if (distanceToParticle > h) continue;
 
                 float hMinusR = h - distanceToParticle;
@@ -1682,7 +1916,7 @@ kernel void surfaceSplat(
                 if (encodedDensity == 0u) continue;
 
                 atomicAddInt(&densityAtomic[
-                    surfaceSplat_volumeIndex(uint3(coord))], (int)(encodedDensity));
+                    surfaceSplat_volumeIndex(surface, uint3(coord))], int(encodedDensity));
             }
         }
     }
@@ -1690,17 +1924,38 @@ kernel void surfaceSplat(
 }
 
 // ===== surfaceResolve =====
-uint surfaceResolve_volumeIndex(constant LiquidV2Params& params, uint3 coord) {
-    return coord.x + params.volumeSizeAndCount.x *
-        (coord.y + params.volumeSizeAndCount.y * coord.z);
+// Cinematic Liquid v2 render-density reconstruction, pass 3/3.
+// Decode the fixed-point particle splats into the filterable R32F volume used
+// by the ray marcher.
+
+
+
+// Five float4 members deliberately preserve the 80-byte v2 Particle ABI.
+
+
+
+
+
+
+
+
+// Shared 64-byte ABI for all three surface-reconstruction passes.
+
+uint surfaceResolve_volumeIndex(constant SurfaceParams& surface, uint3 coord);
+float surfaceResolve_decodedDensityAt(constant SurfaceParams& surface, device atomic_int* densityAtomic, int3 coord);
+float surfaceResolve_binomialWeight5(int offset);
+
+uint surfaceResolve_volumeIndex(constant SurfaceParams& surface, uint3 coord) {
+    return coord.x + surface.volumeSizeAndCount.x *
+        (coord.y + surface.volumeSizeAndCount.y * coord.z);
 }
 
-float surfaceResolve_decodedDensityAt(constant LiquidV2Params& params, device atomic_int* densityAtomic, int3 coord) {
+float surfaceResolve_decodedDensityAt(constant SurfaceParams& surface, device atomic_int* densityAtomic, int3 coord) {
     if (any(coord < int3(0, 0, 0)) ||
-        any(coord >= int3(params.volumeSizeAndCount.xyz)))
+        any(coord >= int3(surface.volumeSizeAndCount.xyz)))
         return 0.0;
-    return float(densityAtomic[
-        surfaceResolve_volumeIndex(uint3(coord))]) / max(params.kernel.z, 1.0);
+    return float(atomic_load_explicit(&densityAtomic[
+        surfaceResolve_volumeIndex(surface, uint3(coord))], memory_order_relaxed)) / max(surface.kernelParams.z, 1.0);
 }
 
 float surfaceResolve_binomialWeight5(int offset) {
@@ -1718,16 +1973,18 @@ kernel void surfaceResolve(
     device atomic_int* densityAtomic [[buffer(5)]],
     texture3d<float, access::read_write> densityVolume [[texture(0)]],
     texture3d<float, access::read_write> whitewaterVolume [[texture(1)]],
-    uint3 gid [[thread_position_in_grid]]
+    uint3 gid [[thread_position_in_grid]],
+    uint3 tgid [[threadgroup_position_in_grid]],
+    uint3 tid [[thread_position_in_threadgroup]]
 )
 {
 
     uint3 coord = gid.xyz;
-    if (any(coord >= params.volumeSizeAndCount.xyz)) return;
+    if (any(coord >= surface.volumeSizeAndCount.xyz)) return;
 
-    float fixedScale = params.kernel.z;
-    float maxDensity = max(params.kernel.w, 0.0);
-    float density = fixedScale > 0.0 ? surfaceResolve_decodedDensityAt(int3(coord)) : 0.0;
+    float fixedScale = surface.kernelParams.z;
+    float maxDensity = max(surface.kernelParams.w, 0.0);
+    float density = fixedScale > 0.0 ? surfaceResolve_decodedDensityAt(surface, densityAtomic, int3(coord)) : 0.0;
 
     // MLS-MPM preserves volume well, but its advected particle lattice is less
     // neighbour-regular than the reference SPH set. A reconstruction-only
@@ -1744,7 +2001,7 @@ kernel void surfaceResolve(
             for (int x = -2; x <= 2; ++x) {
                 float wx = surfaceResolve_binomialWeight5(x);
                 gaussianDensity += wx * wy * wz *
-                    surfaceResolve_decodedDensityAt(int3(coord) + int3(x, y, z));
+                    surfaceResolve_decodedDensityAt(surface, densityAtomic, int3(coord) + int3(x, y, z));
             }
         }
     }
@@ -1811,7 +2068,11 @@ vertex LiqVtxOut liquidVertex(uint vid [[vertex_id]]) {
     LiqVtxOut out;
     float2 uv = float2((vid << 1) & 2, vid & 2);
     out.uv = uv;
-    out.position = float4(uv * 2.0 - 1.0, 0.0, 1.0);
+    // Metal NDC Y points up (+1 top, -1 bottom); Vulkan Y points down.
+    // Flip Y so the fragment shader's UV-to-ray mapping matches Vulkan.
+    float2 ndc = uv * 2.0 - 1.0;
+    ndc.y = -ndc.y;
+    out.position = float4(ndc, 0.0, 1.0);
     return out;
 }
 
@@ -1862,6 +2123,72 @@ constant int HIT_POOL_LINER = 7;
 // opaque pool hit would stop the ray before the water and hide the very volume
 // the low hero camera is meant to show.  It is composited as one bounded thin
 // dielectric layer after the first visible scene surface has been resolved.
+
+float liquidFragment_hash12(float2 p);
+float liquidFragment_valueNoise2(float2 p);
+float liquidFragment_lowFrequencyNoise2(float2 p);
+float3 liquidFragment_finishColor(constant LiquidRenderV2Params& rp, float3 linearColor, float vignette);
+float liquidFragment_dielectricFresnel(float cosIncident, float etaIncident,
+                         float etaTransmitted);
+float4 liquidFragment_safeQuaternion(float4 q);
+float3 liquidFragment_rotateByQuaternion(float4 q, float3 v);
+float3 liquidFragment_inverseRotateByQuaternion(float4 q, float3 v);
+float2 liquidFragment_intersectBox(float3 ro, float3 rd, float3 boxMin, float3 boxMax);
+float liquidFragment_intersectSphereLocal(float3 ro, float3 rd, float3 centre, float radius,
+                           thread float3& normal);
+float liquidFragment_intersectEllipsoidLocal(float3 ro, float3 rd, float3 centre, float3 radii,
+                              thread float3& normal);
+float liquidFragment_intersectBoxLocal(float3 ro, float3 rd, float3 centre, float3 halfExtent,
+                        thread float3& normal);
+float liquidFragment_intersectCapsuleLocal(float3 ro, float3 rd, float3 a, float3 b, float radius,
+                            thread float3& normal);
+float liquidFragment_sdSphereSigned(float3 p, float r);
+float liquidFragment_sdEllipsoidSigned(float3 p, float3 r);
+float liquidFragment_smoothUnion(float a, float b, float k);
+float liquidFragment_duckSdf(float3 p, float3 bodyRadius, float headRadius, float3 headCenter,
+              float beakLength);
+SceneHit liquidFragment_emptyHit();
+void liquidFragment_acceptHit(float t, float3 worldNormal, float3 color, float roughness,
+               int kind, thread SceneHit& hit);
+float3 liquidFragment_colourfulBallColor(float3 localPoint, float radius, float3 base);
+void liquidFragment_traceBody(constant LiquidRenderV2Params& rp, RenderBodyState body, float3 ro, float3 rd, thread SceneHit& hit);
+float liquidFragment_roundedRectangleDistance(float2 p, float2 halfExtent, float radius);
+void liquidFragment_poolDistances(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, float3 p, thread float& lowerRing, thread float& upperRing,
+                   thread float& liner);
+float liquidFragment_poolSdf(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, float3 p);
+float3 liquidFragment_poolNormal(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, float3 p);
+void liquidFragment_tracePool(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, float3 ro, float3 rd, thread SceneHit& hit);
+void liquidFragment_poolMembraneDimensions(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, thread float2& centre, thread float2& wallHalfExtent,
+                            thread float& cornerRadius, thread float& bottomY,
+                            thread float& topY, thread float& thickness);
+float liquidFragment_poolMembraneSdf(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, float3 p);
+float3 liquidFragment_poolMembraneNormal(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, float3 p);
+ClearPoolHit liquidFragment_traceClearPool(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, float3 ro, float3 rd, float visibleDistance);
+float3 liquidFragment_sky(constant LiquidRenderV2Params& rp, float3 direction);
+float3 liquidFragment_applyClearPvc(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, float3 background, float3 ro, float3 rd,
+                   float firstVisibleDistance);
+float3 liquidFragment_grassAlbedo(float2 p, float distanceToCamera);
+float3 liquidFragment_grassNormal(float2 p, float distanceToCamera);
+bool liquidFragment_insidePoolFootprint(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, float2 p);
+SceneHit liquidFragment_traceOpaque(constant LiquidRenderV2Params& rp, device RenderBodyState* bodies, texture3d<float> densityVolume, float3 ro, float3 rd);
+float3 liquidFragment_shadeOpaqueHit(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, sampler densSampler, SceneHit hit, float3 ro, float3 rd);
+float3 liquidFragment_sampleOpaque(constant LiquidRenderV2Params& rp, device RenderBodyState* bodies, texture3d<float> densityVolume, sampler densSampler, float3 ro, float3 rd);
+float3 liquidFragment_worldToUv(constant LiquidRenderV2Params& rp, float3 p);
+float liquidFragment_densityAt(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, sampler densSampler, float3 p);
+float liquidFragment_whitewaterAt(constant LiquidRenderV2Params& rp, texture3d<float> whitewaterVolume, sampler wwSampler, float3 p);
+float liquidFragment_fluidSunVisibility(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, sampler densSampler, float3 p, float3 lightDirection);
+float liquidFragment_whitewaterAlongRay(constant LiquidRenderV2Params& rp, texture3d<float> whitewaterVolume, sampler wwSampler, float3 ro, float3 rd, float nearT, float farT);
+float3 liquidFragment_liquidNormal(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, sampler densSampler, float3 p);
+bool liquidFragment_findLiquidSurface(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, sampler densSampler, float4 fragPosition, float3 ro, float3 rd, float nearT, float farT,
+                       thread float& hitT, thread float& stepLength);
+bool liquidFragment_traceLiquidInterior(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, sampler densSampler, float3 ro, float3 rd, float maximumDistance,
+                         float stride, thread float& exitT,
+                         thread float& opticalThickness);
+float3 liquidFragment_liquidTransmittance(float opticalThickness);
+float liquidFragment_probeLiquidThickness(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, sampler densSampler, float3 ro, float3 rd, float maximumDistance);
+float liquidFragment_integrateLiquidThickness(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, sampler densSampler, float3 ro, float3 rd, float maximumDistance);
+bool liquidFragment_findNextLiquidEntry(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, sampler densSampler, float4 fragPosition, float3 ro, float3 rd, float maximumDistance,
+                         thread float& entryT, thread float& stepLength);
 
 float liquidFragment_hash12(float2 p) {
     float3 p3 = fract(float3(p.xyx) * 0.1031);
@@ -2093,12 +2420,12 @@ void liquidFragment_acceptHit(float t, float3 worldNormal, float3 color, float r
 
 float3 liquidFragment_colourfulBallColor(float3 localPoint, float radius, float3 base) {
     float3 n = normalize(localPoint / max(radius, 1.0e-4));
-    float longitude = atan(n.z, n.x) / (2.0 * PI) + 0.5;
+    float longitude = atan2(n.z, n.x) / (2.0 * PI) + 0.5;
     float segment = floor(fract(longitude) * 6.0);
-    float3 palette[6] = float3[6](
+    const float3 palette[6] = {
         float3(0.96, 0.12, 0.08), float3(1.00, 0.62, 0.04),
         float3(0.96, 0.90, 0.08), float3(0.06, 0.72, 0.30),
-        float3(0.05, 0.36, 0.96), float3(0.66, 0.12, 0.92));
+        float3(0.05, 0.36, 0.96), float3(0.66, 0.12, 0.92)};
     float3 stripe = palette[int(segment)];
     float cap = smoothstep(0.50, 0.75, abs(n.y));
     return mix(mix(max(base, float3(0.08)), stripe, 0.82),
@@ -2748,7 +3075,7 @@ float3 liquidFragment_liquidNormal(constant LiquidRenderV2Params& rp, texture3d<
     return -normalize(gradient + float3(1.0e-7));
 }
 
-bool liquidFragment_findLiquidSurface(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, sampler densSampler, float3 ro, float3 rd, float nearT, float farT,
+bool liquidFragment_findLiquidSurface(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, sampler densSampler, float4 fragPosition, float3 ro, float3 rd, float nearT, float farT,
                        thread float& hitT, thread float& stepLength) {
     uint requestedSteps = clamp(rp.render.x, 24u,
                                 uint(MAX_PRIMARY_STEPS));
@@ -2779,7 +3106,7 @@ bool liquidFragment_findLiquidSurface(constant LiquidRenderV2Params& rp, texture
     // Stable sub-step jitter suppresses banding.  Its amplitude plus the
     // 0.75-voxel base stride still keeps the largest first interval below one
     // minimum world-space voxel.  All later intervals use the same stride.
-    float jitter = (liquidFragment_hash12(gl_FragCoord.xy) - 0.5) * stepLength * 0.20;
+    float jitter = (liquidFragment_hash12(fragPosition.xy) - 0.5) * stepLength * 0.20;
     float previousT = clamp(nearT + jitter, nearT, farT);
     float previousDensity = liquidFragment_densityAt(rp, densityVolume, densSampler, ro + rd * previousT) - iso;
 
@@ -2913,7 +3240,7 @@ float liquidFragment_integrateLiquidThickness(constant LiquidRenderV2Params& rp,
     return thickness;
 }
 
-bool liquidFragment_findNextLiquidEntry(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, sampler densSampler, float3 ro, float3 rd, float maximumDistance,
+bool liquidFragment_findNextLiquidEntry(constant LiquidRenderV2Params& rp, texture3d<float> densityVolume, sampler densSampler, float4 fragPosition, float3 ro, float3 rd, float maximumDistance,
                          thread float& entryT, thread float& stepLength) {
     float2 range = liquidFragment_intersectBox(ro, rd, rp.volumeMinIso.xyz,
                               rp.volumeMaxStep.xyz);
@@ -2924,7 +3251,7 @@ bool liquidFragment_findNextLiquidEntry(constant LiquidRenderV2Params& rp, textu
         stepLength = 0.0;
         return false;
     }
-    return liquidFragment_findLiquidSurface(rp, densityVolume, densSampler, ro, rd, nearT, farT, entryT, stepLength);
+    return liquidFragment_findLiquidSurface(rp, densityVolume, densSampler, fragPosition, ro, rd, nearT, farT, entryT, stepLength);
 }
 
 fragment float4 liquidFragment(
@@ -2937,6 +3264,7 @@ fragment float4 liquidFragment(
     sampler wwSampler [[sampler(1)]]
 )
 {
+    float4 fragPosition = in.position;
 
     float2 screen = in.uv * 2.0 - 1.0;
     screen.x *= rp.targetAspect.w;
@@ -2957,7 +3285,7 @@ fragment float4 liquidFragment(
     float farT = volumeHit.y;
     float liquidHitT = 0.0;
     float primaryStep = 0.0;
-    bool hitLiquid = farT > nearT && liquidFragment_findLiquidSurface(rp, densityVolume, densSampler, ro, rd, nearT, farT, liquidHitT, primaryStep);
+    bool hitLiquid = farT > nearT && liquidFragment_findLiquidSurface(rp, densityVolume, densSampler, fragPosition, ro, rd, nearT, farT, liquidHitT, primaryStep);
 
     // This comparison is the essential water-front/water-back ordering rule.
     if (!hitLiquid || opaque.t < liquidHitT) {
@@ -2974,7 +3302,7 @@ fragment float4 liquidFragment(
         float vignette = saturate(1.0 - 0.16 *
             dot(screen * float2(0.42, 0.68), screen * float2(0.42, 0.68)));
         return float4(liquidFragment_finishColor(rp, color, vignette), 1.0);
-        return;
+
     }
 
     float3 surface = ro + rd * liquidHitT;
@@ -3106,7 +3434,7 @@ fragment float4 liquidFragment(
                 nextSurfaceT, segmentThickness);
             throughput *= liquidFragment_liquidTransmittance(segmentThickness);
         } else {
-            foundNextSurface = liquidFragment_findNextLiquidEntry(rp, densityVolume, densSampler, nextOrigin, rayDirection, eventLimit,
+            foundNextSurface = liquidFragment_findNextLiquidEntry(rp, densityVolume, densSampler, fragPosition, nextOrigin, rayDirection, eventLimit,
                 nextSurfaceT, nextStep);
         }
 

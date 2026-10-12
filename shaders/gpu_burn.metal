@@ -20,7 +20,10 @@ vertex BurnVtxOut gpuBurnVertex(uint vid [[vertex_id]]) {
     BurnVtxOut out;
     float2 uv = float2((vid << 1) & 2, vid & 2);
     out.uv = uv;
-    out.position = float4(uv * 2.0 - 1.0, 0.0, 1.0);
+    // Metal NDC Y points up; flip to match Vulkan/GLSL convention.
+    float2 ndc = uv * 2.0 - 1.0;
+    ndc.y = -ndc.y;
+    out.position = float4(ndc, 0.0, 1.0);
     return out;
 }
 
@@ -33,10 +36,10 @@ vertex BurnVtxOut gpuBurnVertex(uint vid [[vertex_id]]) {
 
 // ABI-compatible location/size with gpu_stress.frag, but with product-specific
 // field semantics. The host must provide exactly 16 bytes.
-const float kPi       = 3.141592653589793;
-const float kTau      = 6.283185307179586;
-const float kFar      = 6.0;
-const float kHitEps   = 0.006;
+constant float kPi       = 3.141592653589793;
+constant float kTau      = 6.283185307179586;
+constant float kFar      = 6.0;
+constant float kHitEps   = 0.006;
 
 float2 rotate2(float2 p, float angle) {
     float c = cos(angle);

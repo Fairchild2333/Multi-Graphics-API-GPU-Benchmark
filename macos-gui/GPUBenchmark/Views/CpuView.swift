@@ -12,6 +12,8 @@ struct CpuView: View {
     @State private var logScrollID = 0
 
     private var memoryMode: Bool { mode == "memory" }
+    /// This page only ever reads and writes the CPU channel.
+    private var run: BenchChannelState { engine.cpuState }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -26,6 +28,7 @@ struct CpuView: View {
                             "論理プロセッサ上の密集数学ループで CPU スループットを測定（単一/複数コア）、または各キャッシュ階層とメモリの帯域を測定します。"))
                             .font(.callout)
                             .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
                     optionsCard
@@ -39,10 +42,20 @@ struct CpuView: View {
 
             HStack {
                 Spacer()
-                Button(Localization.tr("Cancel", "取消", "キャンセル")) {
-                    engine.cancel()
+                Circle()
+                    .fill(run.isRunning ? Color.orange : Color.green)
+                    .frame(width: 10, height: 10)
+                Text(run.statusText)
+                    .foregroundStyle(.secondary)
+                    .font(.callout)
+                    .lineLimit(1)
+                if run.isRunning {
+                    ProgressView().controlSize(.small)
                 }
-                .disabled(!engine.isRunning)
+                Button(Localization.tr("Cancel", "取消", "キャンセル")) {
+                    engine.cancel(channel: .cpu)
+                }
+                .disabled(!run.isRunning)
                 Button(action: runCpu) {
                     Text(memoryMode
                          ? Localization.tr("Run Cache & Memory Test", "开始缓存与内存测试", "キャッシュ / メモリテストを実行")
@@ -140,11 +153,11 @@ struct CpuView: View {
         GlassCard(padding: 16) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text(engine.statusText).fontWeight(.semibold)
+                    Text(run.statusText).fontWeight(.semibold)
                     Spacer()
-                    Text(engine.progressLabel).foregroundStyle(.secondary)
+                    Text(run.progressLabel).foregroundStyle(.secondary)
                 }
-                ProgressView(value: engine.progressFraction)
+                ProgressView(value: run.progressFraction)
             }
         }
     }
@@ -180,7 +193,7 @@ struct CpuView: View {
                          scoreText(output.singleAverage))
             summaryValue(Localization.tr("All-core", "全核", "全コア"), scoreText(output.multiScore))
         } else {
-            Text(engine.lastScore.isEmpty ? "—" : engine.lastScore)
+            Text(run.lastScore.isEmpty ? "—" : run.lastScore)
                 .font(.title2).fontWeight(.semibold)
         }
     }
@@ -211,18 +224,18 @@ struct CpuView: View {
                     .font(.subheadline).foregroundStyle(.secondary)
                 ScrollViewReader { proxy in
                     ScrollView {
-                        Text(engine.logOutput.isEmpty
+                        Text(run.logOutput.isEmpty
                              ? Localization.tr("CPU output will appear here…",
                                               "CPU 输出将显示在此处…",
                                               "CPU 出力はここに表示されます…")
-                             : engine.logOutput)
+                             : run.logOutput)
                             .font(.system(.caption, design: .monospaced))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .textSelection(.enabled)
                             .id(logScrollID)
                     }
                     .frame(height: 180)
-                    .onChange(of: engine.logOutput) { _ in
+                    .onChange(of: run.logOutput) { _ in
                         logScrollID += 1
                         proxy.scrollTo(logScrollID, anchor: .bottom)
                     }
@@ -285,7 +298,7 @@ struct CpuView: View {
 
     private func runCpu() {
         if memoryMode {
-            engine.run(jobs: [["gpu_benchmark", "--cpu-membw"]], needCharts: false)
+            engine.run(jobs: [["gpu_benchmark", "--cpu-membw"]], needCharts: false, channel: .cpu)
             return
         }
         let sec = secondsPerTest.trimmingCharacters(in: .whitespaces)
@@ -296,6 +309,7 @@ struct CpuView: View {
             "--cpu-time", sec.isEmpty ? "1" : sec,
             "--cpu-warmup", warm.isEmpty ? "0.2" : warm,
         ]
-        engine.run(jobs: [args], needCharts: false)
+        // Prefer direct mode; engine CLI accepts --cpu-benchmark <mode>
+        engine.run(jobs: [args], needCharts: false, channel: .cpu)
     }
 }

@@ -1,0 +1,428 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		43F682296E2550FDC887B747 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF6C90AAED2818E11DBC92F2 /* Localization.swift */; };
+		5BABD9E036A7CC5EE9D9AAE7 /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DECB5D16904FB6DC018CC0A /* ChartsView.swift */; };
+		5D013F045E2EAD36998B384D /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDC15072481334CBFE5FD45 /* GlassCard.swift */; };
+		73E79E79DDEA231C2FA040D4 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D367CFD888155281F08AEA7 /* AboutView.swift */; };
+		7B901514A84C7BDA949B42F8 /* RunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BC9FB6C9D393A557A6D73A4 /* RunView.swift */; };
+		7D664B750B9264C72ACDA900 /* BenchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73DCDB01D78693EE7CBF269 /* BenchResult.swift */; };
+		7FDA716705493EFCD3C08B15 /* MangekyoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4967B6C277D550471842BF84 /* MangekyoApp.swift */; };
+		88A62639E88609D6E0342F69 /* MobileBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74C87A9E05C083261AAE98B /* MobileBenchmark.swift */; };
+		93B31FFC719732890B07DDB9 /* GpuBenchBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = C84CE3174AC6B3C5BAB9B724 /* GpuBenchBridge.mm */; };
+		B0AE4638F0309DCE5574778C /* BenchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0C82F1B47FC2424F2B07A17 /* BenchEngine.swift */; };
+		B35618E5CB04E9A3E744D6E1 /* MetalBenchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6884C8DB370841C338158927 /* MetalBenchView.swift */; };
+		D58A29985A7D81AC1DF43EB3 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5274CB3E41682D107BB897DB /* SettingsView.swift */; };
+		E8EEF55A4ED061E3BDE113C1 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63361444C8D5FF46CED28E1E /* ContentView.swift */; };
+		EAB2C3F021760E2D29F1A49C /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A273DDDC31BE4EB2EFE3A5 /* HistoryView.swift */; };
+		EE784A6913678124A629B864 /* CpuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9258366C7B9E8DCAD1DA826D /* CpuView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1BC9FB6C9D393A557A6D73A4 /* RunView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunView.swift; sourceTree = "<group>"; };
+		2D367CFD888155281F08AEA7 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		2DECB5D16904FB6DC018CC0A /* ChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
+		353B0148E85D849588E6D3C1 /* GPUBenchmark-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GPUBenchmark-Bridging-Header.h"; sourceTree = "<group>"; };
+		4967B6C277D550471842BF84 /* MangekyoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangekyoApp.swift; sourceTree = "<group>"; };
+		5274CB3E41682D107BB897DB /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		63361444C8D5FF46CED28E1E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		6884C8DB370841C338158927 /* MetalBenchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalBenchView.swift; sourceTree = "<group>"; };
+		6DA968052D30E0E5ACE58D5A /* Mangekyo.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Mangekyo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9258366C7B9E8DCAD1DA826D /* CpuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CpuView.swift; sourceTree = "<group>"; };
+		B73DCDB01D78693EE7CBF269 /* BenchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchResult.swift; sourceTree = "<group>"; };
+		C5C595B1503002D956FF38EE /* GpuBenchBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GpuBenchBridge.h; sourceTree = "<group>"; };
+		C84CE3174AC6B3C5BAB9B724 /* GpuBenchBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GpuBenchBridge.mm; sourceTree = "<group>"; };
+		D0C82F1B47FC2424F2B07A17 /* BenchEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchEngine.swift; sourceTree = "<group>"; };
+		D74C87A9E05C083261AAE98B /* MobileBenchmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileBenchmark.swift; sourceTree = "<group>"; };
+		EF6C90AAED2818E11DBC92F2 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
+		F0A273DDDC31BE4EB2EFE3A5 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		FBDC15072481334CBFE5FD45 /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassCard.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		1586E7B9EC016E5588D8589D = {
+			isa = PBXGroup;
+			children = (
+				9F201CF285F9FE2932F553FE /* Mangekyo */,
+				8FC8F23FF0A7461E1C81D30B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		16D655BD9429401B01D9409B /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B73DCDB01D78693EE7CBF269 /* BenchResult.swift */,
+				EF6C90AAED2818E11DBC92F2 /* Localization.swift */,
+				D74C87A9E05C083261AAE98B /* MobileBenchmark.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		2D8BE20E13C3FF5B1C0CDC1A /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				D0C82F1B47FC2424F2B07A17 /* BenchEngine.swift */,
+				C5C595B1503002D956FF38EE /* GpuBenchBridge.h */,
+				C84CE3174AC6B3C5BAB9B724 /* GpuBenchBridge.mm */,
+				353B0148E85D849588E6D3C1 /* GPUBenchmark-Bridging-Header.h */,
+			);
+			path = Engine;
+			sourceTree = "<group>";
+		};
+		8FC8F23FF0A7461E1C81D30B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6DA968052D30E0E5ACE58D5A /* Mangekyo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9F201CF285F9FE2932F553FE /* Mangekyo */ = {
+			isa = PBXGroup;
+			children = (
+				63361444C8D5FF46CED28E1E /* ContentView.swift */,
+				4967B6C277D550471842BF84 /* MangekyoApp.swift */,
+				F5A04C42C0D10F98C2F56CFE /* Components */,
+				2D8BE20E13C3FF5B1C0CDC1A /* Engine */,
+				16D655BD9429401B01D9409B /* Models */,
+				F506D804B8E35D2A95818731 /* Views */,
+			);
+			path = Mangekyo;
+			sourceTree = "<group>";
+		};
+		F506D804B8E35D2A95818731 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2D367CFD888155281F08AEA7 /* AboutView.swift */,
+				2DECB5D16904FB6DC018CC0A /* ChartsView.swift */,
+				9258366C7B9E8DCAD1DA826D /* CpuView.swift */,
+				F0A273DDDC31BE4EB2EFE3A5 /* HistoryView.swift */,
+				1BC9FB6C9D393A557A6D73A4 /* RunView.swift */,
+				5274CB3E41682D107BB897DB /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		F5A04C42C0D10F98C2F56CFE /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				FBDC15072481334CBFE5FD45 /* GlassCard.swift */,
+				6884C8DB370841C338158927 /* MetalBenchView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		17FF3C4850A3B6240519E3C0 /* Mangekyo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 32E64766713B688CB74B4CC9 /* Build configuration list for PBXNativeTarget "Mangekyo" */;
+			buildPhases = (
+				0B4A631B0FA82D51008DC55A /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Mangekyo;
+			packageProductDependencies = (
+			);
+			productName = Mangekyo;
+			productReference = 6DA968052D30E0E5ACE58D5A /* Mangekyo.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		7E72F24170DBF50BCA2C2592 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = D585FA24BA763027410154AD /* Build configuration list for PBXProject "Mangekyo" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 1586E7B9EC016E5588D8589D;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 8FC8F23FF0A7461E1C81D30B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				17FF3C4850A3B6240519E3C0 /* Mangekyo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0B4A631B0FA82D51008DC55A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73E79E79DDEA231C2FA040D4 /* AboutView.swift in Sources */,
+				B0AE4638F0309DCE5574778C /* BenchEngine.swift in Sources */,
+				7D664B750B9264C72ACDA900 /* BenchResult.swift in Sources */,
+				5BABD9E036A7CC5EE9D9AAE7 /* ChartsView.swift in Sources */,
+				E8EEF55A4ED061E3BDE113C1 /* ContentView.swift in Sources */,
+				EE784A6913678124A629B864 /* CpuView.swift in Sources */,
+				5D013F045E2EAD36998B384D /* GlassCard.swift in Sources */,
+				93B31FFC719732890B07DDB9 /* GpuBenchBridge.mm in Sources */,
+				EAB2C3F021760E2D29F1A49C /* HistoryView.swift in Sources */,
+				43F682296E2550FDC887B747 /* Localization.swift in Sources */,
+				7FDA716705493EFCD3C08B15 /* MangekyoApp.swift in Sources */,
+				B35618E5CB04E9A3E744D6E1 /* MetalBenchView.swift in Sources */,
+				88A62639E88609D6E0342F69 /* MobileBenchmark.swift in Sources */,
+				7B901514A84C7BDA949B42F8 /* RunView.swift in Sources */,
+				D58A29985A7D81AC1DF43EB3 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		333443BB04E8B5EE3F5EC114 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"HAVE_METAL=1",
+					"GPU_BENCH_NO_GLFW=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		B99713010D7DE4F7BA29DE67 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				HEADER_SEARCH_PATHS = (
+					"\"$(PROJECT_DIR)/../src\"",
+				);
+				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"\"$(PROJECT_DIR)/../build-ios/Release-iphoneos\"",
+					"\"$(PROJECT_DIR)/../build-ios/Release-iphoneos/Release-iphoneos\"",
+					"\"$(PROJECT_DIR)/../build-ios/Release-iphonesimulator\"",
+					"\"$(PROJECT_DIR)/../build-ios/Release-iphonesimulator/Release-iphonesimulator\"",
+					"\"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"",
+					"\"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"",
+					"\"$(PROJECT_DIR)/../build\"",
+				);
+				OTHER_LDFLAGS = (
+					"-lgpu_engine",
+					"-lc++",
+					"-framework Metal",
+					"-framework MetalKit",
+					"-framework QuartzCore",
+					"-framework UIKit",
+					"-framework CoreFoundation",
+					"-framework Foundation",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.fairchild.Mangekyo;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "Mangekyo/Engine/GPUBenchmark-Bridging-Header.h";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C668CCDC5D7CE1E89DB406A5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"HAVE_METAL=1",
+					"GPU_BENCH_NO_GLFW=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		F38A60E29AD269A1ED8BF031 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				HEADER_SEARCH_PATHS = (
+					"\"$(PROJECT_DIR)/../src\"",
+				);
+				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"\"$(PROJECT_DIR)/../build-ios/Release-iphoneos\"",
+					"\"$(PROJECT_DIR)/../build-ios/Release-iphoneos/Release-iphoneos\"",
+					"\"$(PROJECT_DIR)/../build-ios/Release-iphonesimulator\"",
+					"\"$(PROJECT_DIR)/../build-ios/Release-iphonesimulator/Release-iphonesimulator\"",
+					"\"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"",
+					"\"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"",
+					"\"$(PROJECT_DIR)/../build\"",
+				);
+				OTHER_LDFLAGS = (
+					"-lgpu_engine",
+					"-lc++",
+					"-framework Metal",
+					"-framework MetalKit",
+					"-framework QuartzCore",
+					"-framework UIKit",
+					"-framework CoreFoundation",
+					"-framework Foundation",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.fairchild.Mangekyo;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "Mangekyo/Engine/GPUBenchmark-Bridging-Header.h";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		32E64766713B688CB74B4CC9 /* Build configuration list for PBXNativeTarget "Mangekyo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B99713010D7DE4F7BA29DE67 /* Debug */,
+				F38A60E29AD269A1ED8BF031 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D585FA24BA763027410154AD /* Build configuration list for PBXProject "Mangekyo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C668CCDC5D7CE1E89DB406A5 /* Debug */,
+				333443BB04E8B5EE3F5EC114 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 7E72F24170DBF50BCA2C2592 /* Project object */;
+}

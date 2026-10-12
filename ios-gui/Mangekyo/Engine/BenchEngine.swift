@@ -251,6 +251,21 @@ final class BenchEngine: ObservableObject {
     func run(jobs: [[String]], needCharts: Bool) {
         guard !isRunning, !jobs.isEmpty else { return }
 
+        // Prefer embedded host for single stream/gpu_burn preview-style jobs.
+        if jobs.count == 1 {
+            let job = jobs[0]
+            let wl = job.first(where: { ["stream", "gpu_burn", "particle", "cinematic_liquid"].contains($0) })
+                ?? job.dropFirst().first { ["stream", "gpu_burn", "cinematic_liquid"].contains($0) }
+            if let wl, metalLayer != nil {
+                var seconds = 3.0
+                if let i = job.firstIndex(of: "--time"), i + 1 < job.count,
+                   let v = Double(job[i + 1]) {
+                    seconds = min(max(v, 1.0), 15.0)
+                }
+                _ = startPreview(workload: wl == "particle" ? "stream" : wl, seconds: seconds)
+                return
+            }
+        }
         isRunning = true
         cancelRequested = false
         logOutput = ""
@@ -318,7 +333,10 @@ final class BenchEngine: ObservableObject {
             }
         }
 
-        let selfRef = Unmanaged.passUnretained(self).toOpaque()
+        let selfRefBits = await MainActor.run {
+            UInt(bitPattern: Unmanaged.passUnretained(self).toOpaque())
+        }
+        let selfRef = UnsafeMutableRawPointer(bitPattern: selfRefBits)
         _ = cPtrs.withUnsafeMutableBufferPointer { buf in
             gpb_run(buf.baseAddress, argc, callback, selfRef)
         }

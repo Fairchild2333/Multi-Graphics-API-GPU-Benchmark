@@ -27,7 +27,9 @@ final class Localization {
     /// Resolve the effective language (handles "auto").
     static var effectiveLang: AppLanguage {
         if current != .auto_ { return current }
-        let lang = Locale.current.language.languageCode?.identifier ?? "en"
+        // `Locale.Language` is macOS 13-only. The BCP-47 preference list is
+        // available on Monterey and preserves the same zh/ja auto-detection.
+        let lang = Locale.preferredLanguages.first ?? Locale.current.identifier
         if lang.hasPrefix("zh") { return .zh }
         if lang.hasPrefix("ja") { return .ja }
         return .en

@@ -8,26 +8,19 @@ struct GPUBenchmarkApp: App {
     @AppStorage("appTheme") private var appTheme: String = "system"
 
     var body: some Scene {
-        // defaultSize is macOS 13+; Monterey keeps the min frame only.
-        if #available(macOS 13.0, *) {
-            WindowGroup {
-                root
-            }
-            .windowStyle(.automatic)
-            .defaultSize(width: 1100, height: 750)
-        } else {
-            WindowGroup {
-                root
-            }
-            .windowStyle(.automatic)
+        WindowGroup {
+            root
         }
+        .windowStyle(.automatic)
     }
 
     private var root: some View {
         ContentView()
             .environmentObject(engine)
             .preferredColorScheme(colorScheme)
-            .frame(minWidth: 900, minHeight: 600)
+            // Wide enough that the option rows still fit beside a 200 pt
+            // sidebar at the smallest allowed window size.
+            .frame(minWidth: 980, minHeight: 620)
     }
 
     private var colorScheme: ColorScheme? {

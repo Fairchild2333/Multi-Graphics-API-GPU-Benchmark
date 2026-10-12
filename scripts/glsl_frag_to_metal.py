@@ -66,6 +66,13 @@ def convert_body(glsl: str) -> str:
     def tr(s: str) -> str:
         s = s.replace("uvec2", "uint2").replace("uvec3", "uint3").replace("uvec4", "uint4")
         s = s.replace("vec2", "float2").replace("vec3", "float3").replace("vec4", "float4")
+        # GLSL output parameters are references in MSL; `out`/`inout` are not
+        # Metal type qualifiers.
+        s = re.sub(
+            r"\b(?:out|inout)\s+((?:float|uint|int|bool)(?:[234])?)\s+([A-Za-z_]\w*)",
+            r"thread \1& \2",
+            s,
+        )
         s = s.replace("mix(", "mix(")  # same
         s = s.replace("fract(", "fract(")
         s = s.replace("atan(", "atan2(")  # Metal atan2(y,x); GLSL atan(y,x) two-arg
@@ -86,6 +93,9 @@ def convert_body(glsl: str) -> str:
     body = body.replace("atan(", "ATAN2(")
     helpers = tr(helpers).replace("ATAN2(", "atan2(")
     body = tr(body).replace("ATAN2(", "atan2(")
+    # MSL requires program-scope data to declare an address space. Local
+    # function constants remain ordinary C++ const values.
+    helpers = re.sub(r"(?m)^const\s+", "constant ", helpers)
 
     # Fix return vec4 → already return float4(...)
     # GLSL `return` after outColor= became return vec4 → return float4 — good

@@ -12,20 +12,26 @@ struct GlassCard<Content: View>: View {
     var body: some View {
         content()
             .padding(padding)
-            .background {
-                if #available(macOS 26.0, iOS 26.0, *) {
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .fill(.clear)
-                        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
-                } else {
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .fill(.ultraThinMaterial)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: cornerRadius)
-                                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
-                        )
-                }
-            }
+            // Content that paints its own opaque background — `Table` most
+            // visibly — otherwise squares off the card and cuts straight
+            // through the glass edge and its shadow.
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+            // Deliberately not `glassEffect`. Liquid Glass draws the card and
+            // its shadow as a compositor-level backdrop effect rather than as
+            // part of the view's own drawing, so the shadow is bounded and
+            // updated by that layer: it looks sheared off at the edges, lags a
+            // beat behind on page changes, and smears while scrolling. A
+            // material fill plus an ordinary `.shadow` is drawn inline with the
+            // content, so it tracks the card exactly.
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(.regularMaterial)
+                    .shadow(color: .black.opacity(0.12), radius: 7, x: 0, y: 3)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+            )
     }
 }
 
@@ -37,19 +43,21 @@ struct AccentGlassCard<Content: View>: View {
     var body: some View {
         content()
             .padding(16)
-            .background {
-                if #available(macOS 26.0, iOS 26.0, *) {
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .fill(Color.accentColor.opacity(0.15))
-                        .glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
-                } else {
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .fill(Color.accentColor.opacity(0.12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: cornerRadius)
-                                .stroke(Color.accentColor.opacity(0.3), lineWidth: 1)
-                        )
-                }
-            }
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+            // Same reasoning as GlassCard: shadow drawn inline, not by a
+            // compositor backdrop effect.
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(.regularMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .fill(Color.accentColor.opacity(0.14))
+                    )
+                    .shadow(color: .black.opacity(0.12), radius: 7, x: 0, y: 3)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .strokeBorder(Color.accentColor.opacity(0.28), lineWidth: 1)
+            )
     }
 }

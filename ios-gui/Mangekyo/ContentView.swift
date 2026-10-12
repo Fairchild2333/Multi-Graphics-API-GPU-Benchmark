@@ -69,9 +69,18 @@ struct ContentView: View {
     }
 
     private var sidebar: some View {
-        List(SidebarItem.allCases, selection: $selection) { item in
-            Label(item.localizedName, systemImage: item.icon)
-                .tag(item)
+        List {
+            ForEach(SidebarItem.allCases) { item in
+                Button {
+                    selection = item
+                } label: {
+                    HStack {
+                        Label(item.localizedName, systemImage: item.icon)
+                            .foregroundStyle(selection == item ? Color.accentColor : .primary)
+                        Spacer()
+                    }
+                }
+            }
         }
     }
 

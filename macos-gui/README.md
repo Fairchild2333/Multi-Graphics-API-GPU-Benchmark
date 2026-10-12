@@ -1,13 +1,10 @@
-# Mangekyo for macOS (SwiftUI + Liquid Glass)
+# Mangekyo for macOS
 
-Native macOS SwiftUI front-end for Mangekyo — the Cross-API CPU & GPU Benchmark Suite.
-**Minimum OS: macOS 12 Monterey.** Uses **Liquid Glass** on macOS 26 (Tahoe)
-with Material fallback on 12–15. Build with a current Xcode (26 recommended);
-run on Monterey+.
+Native SwiftUI front-end for Mangekyo, backed by the same C++ benchmark engine
+as the CLI. The supported product floor is **macOS 12 Monterey**. macOS 26+
+uses Liquid Glass; macOS 12–15 use the Material/standard-control fallback.
 
-**iOS (future, not in this target):** floor **iOS 16**; **iOS 26/27 = Liquid
-Glass**, 16–25 Material. `#available(iOS 26.0, *)` already on `GlassCard`.
-Full build/surface/acceptance spec: root `HANDOFF.md` §3.0.3. No iOS target yet.
+## Build the CLI and app
 
 ## Architecture
 
@@ -30,49 +27,92 @@ and the CPU, GPU and Charts pages with Swift 6 in a Linux container, and runs
 tests of the code that has no UI. It is not a build with the Apple SDK; see
 `scripts/apple-check/README.md` for what it covers and what it cannot.
 
-## Prerequisites
-
-1. **Xcode 26** (or later) with macOS SDK
-2. **CMake** — to build the engine static library
-3. **Homebrew** — for `glfw`, `vulkan-loader` (optional), etc.
-4. **XcodeGen** (optional) — to regenerate the `.xcodeproj` from `project.yml`
-
-## Build & Run
-
-### Step 1: Build the engine library
+From the repository root:
 
 ```bash
-cd /path/to/Vulkan-GPU-Compute-Microbenchmark
-cmake -S . -B build
-cmake --build build --config Release
-ls build/libgpu_engine.a   # confirm it exists
+./scripts/build-macos.sh
 ```
 
-### Step 2: Generate Xcode project (if needed)
+The command builds a native-architecture, Metal-only Release app and verifies
+the result. Its final output is:
+
+```text
+out/macos/<arm64|x86_64>/Release/GPUBenchmark.app
+```
+
+Launch it with Finder, or during development:
 
 ```bash
-# Install XcodeGen if you don't have it:
-brew install xcodegen
-
-cd macos-gui
-xcodegen generate
+open out/macos/$(uname -m)/Release/GPUBenchmark.app
 ```
 
-### Step 3: Open and run in Xcode
+The staged app contains:
+
+```text
+GPUBenchmark.app/
+└── Contents/
+    ├── MacOS/GPUBenchmark
+    ├── Helpers/
+    │   ├── gpu_benchmark
+    │   └── *.metal -> ../Resources/Shaders/*.metal
+    └── Resources/
+        ├── Shaders/
+        └── Licenses/
+```
+
+The GUI looks for the bundled worker first. It therefore does not need a
+repository checkout or a manually selected repository working directory after
+staging. Scores, captures, reports, and logs use:
+
+```text
+~/Library/Application Support/GpuComputeBenchmark/
+```
+
+Set `GPU_BENCH_DATA_DIR` only when an isolated data root is useful for testing.
+
+### Requirements
+
+- macOS with Xcode 26 and its macOS SDK
+- CMake 3.22 or newer
+- Network access on the first configure, unless a GLFW 3.4 source tree is
+  supplied through `GPU_BENCH_GLFW_SOURCE_DIR`
+
+Homebrew, a Homebrew library prefix, Python, and XcodeGen are **not** runtime or
+normal build requirements. CMake downloads a checksum-pinned GLFW 3.4 source
+archive and builds it statically with `CMAKE_OSX_DEPLOYMENT_TARGET=12.0`. This
+avoids accidentally shipping a Homebrew bottle built for a newer macOS.
+
+Useful options:
 
 ```bash
-open GPUBenchmark.xcodeproj
-# Or build from command line:
-xcodebuild -project GPUBenchmark.xcodeproj -scheme GPUBenchmark -configuration Debug build
+./scripts/build-macos.sh --configuration Debug
+./scripts/build-macos.sh --regenerate-project
+./scripts/build-macos.sh --help
 ```
 
-### Step 4: Set working directory
+`--regenerate-project` is the only path that requires XcodeGen. The generated
+and tracked `.xcodeproj` remains buildable without it.
 
-On first launch, go to **Settings** → **Working Directory** and select the
-repository root. This is needed so the app can find `results/`, shaders, and
-chart scripts.
+### What the script verifies
 
-## Features (parity with Windows WinUI 3 GUI)
+The script fails instead of staging a misleading app when any of these checks
+fail:
+
+- CMake CLI and `libgpu_engine.a` were not produced;
+- the pinned, static GLFW archive was not produced;
+- Xcode could not compile/link the SwiftUI app;
+- either Mach-O executable has a non-system/Homebrew dynamic dependency;
+- either executable's minimum OS is not macOS 12.0;
+- the staged code signature is invalid; or
+- the bundled CLI cannot complete `--help` and Metal-device enumeration smokes
+  from a temporary working directory outside the bundle/repository assets.
+
+The default signature is ad-hoc and suitable for local testing. Set
+`MACOS_SIGN_IDENTITY` to a local Developer ID identity when appropriate. The
+script does **not** create a universal binary, installer, notarization ticket,
+or App Store archive.
+
+### Page Overview
 
 | Page | Features |
 |------|----------|
@@ -83,28 +123,105 @@ chart scripts.
 | **Settings** | Theme; language Auto/EN/简体中文/日本語; working directory |
 | **About** | Version, description, GitHub link, system info |
 
-> **Status (2026-10-06):** the CPU sweep, the charts and several fixes in
-> `BenchEngine.swift` were written on Windows. They pass a Swift 6 type-check on
-> Linux against hand-written stand-ins for SwiftUI and AppKit, which is not a
-> build with the Apple SDK. Nothing here has been built with Xcode or run on a
-> Mac since these changes. `ContentView`, `HistoryView`, `SettingsView` and
-> `AboutView` were not checked. macOS does not let an app bind a thread to a
-> core, so the one-thread sweep runs on the core the system picks.
+## Backend contract
 
-## Compatibility
+| Backend | Default `.app` | macOS status |
+|---|:---:|---|
+| Metal | Yes | Native and the supported macOS path |
+| Vulkan | No | Optional developer CLI path through a separately supplied Monterey-compatible MoltenVK loader/ICD |
+| OpenGL | No | The benchmark needs OpenGL 4.3 compute/SSBO; macOS stops at 4.1 |
+| DX11 / DX12 | No | Windows-only |
 
-| macOS Version | Liquid Glass | Shell | Functional |
-|---------------|:------------:|:-----:|:----------:|
-| macOS 26+     | ✅ Full      | NavigationSplitView | ✅ |
-| macOS 13–15   | ❌ Material  | NavigationSplitView | ✅ |
-| macOS 12      | ❌ Material  | NavigationView columns | ✅ |
-| < macOS 12    | —            | — | ❌ (deployment target 12.0) |
+The default bundle is intentionally Metal-only. It does not copy
+`vulkan-loader`, MoltenVK, or other Homebrew dylibs. An optional Vulkan build
+must be treated as a separate developer configuration and must prove that both
+the loader and ICD support the selected deployment target.
 
-CLI/`gpu_engine` CMake deployment target is also **12.0**.
+## GUI scope
 
-## File Structure
+The macOS app currently provides:
 
+- GPU custom runs, full analysis, Complete Suite, and Fill Missing presets;
+- duration in seconds/minutes/hours/frames/until-cancel;
+- Metal-native capture requests, progress, cancellation, and structured run
+  issue reporting;
+- CPU quick/formal runs;
+- normalized/filterable History;
+- native comparison charts (Swift Charts on macOS 13+, SwiftUI bar fallback on
+  Monterey), with no Python dependency;
+- Settings, About, English, Simplified Chinese, and Japanese UI.
+
+Platform-specific Windows features are not presented as macOS parity:
+
+- DX11, DX12, WARP, and DX12 AFR/SFR are not available;
+- RenderDoc is replaced by `MTLCaptureManager` and `.gputrace`;
+- macOS CPU scheduling is scheduler-managed rather than strict Windows thread
+  affinity.
+
+## Workload and acceptance status
+
+| Workload | Metal implementation | Release status |
+|---|---|---|
+| `stream` | Native compute + render, unified-memory metadata, offscreen formal timing | 15-second M4 Pro run + native capture passed; Monterey runtime remains open |
+| `gpu_burn` | Native Plasma × Kaleidoscope path | 15-second packaged-helper acceptance run passed on M4 Pro |
+| `cinematic_liquid` | MLS-MPM + Metal raymarch presentation | 6-second packaged-helper smoke passed; remains a `_metal_preview` score group and is not comparable with formal Vulkan v8 |
+| `gpu_stress` | No Metal implementation | Explicitly unsupported |
+
+Developer smoke commands for a completed bundle:
+
+```bash
+APP="out/macos/$(uname -m)/Release/GPUBenchmark.app"
+HELPER="$APP/Contents/Helpers/gpu_benchmark"
+
+"$HELPER" --backend metal --workload stream --particles 1048576 --time 15
+"$HELPER" --backend metal --workload gpu_burn --time 15 --iter 16
+"$HELPER" --backend metal --workload cinematic_liquid --time 6
 ```
+Capture validation must additionally confirm that a requested capture produces
+a real `.gputrace` under the captures directory. A score with
+`captureUnavailable` is not capture acceptance. The app declares
+`MetalCaptureEnabled=true`; its external worker also enables
+`MTL_CAPTURE_ENABLED` so `MTLCaptureManager` can write a trace when the OS and
+device support the requested destination.
+
+Building on a current macOS proves SDK compatibility and the encoded deployment
+target; it does not prove runtime compatibility with Monterey. A release still
+needs an actual macOS 12 launch/UI/worker smoke on supported Intel or Apple
+hardware.
+
+### Verified development smoke (2026-07-31)
+
+On an Apple M4 Pro with Xcode 26.6 / macOS SDK 26.5:
+
+- the canonical Release script completed and produced the app path above;
+- both GUI and worker encode `minos 12.0`, and `otool -L` found no non-system
+  or Homebrew dependency;
+- Charts is a weak system-framework load;
+- ad-hoc deep signature verification passed;
+- the staged `.app` opened independently of the repository working directory
+  and quit cleanly;
+- the bundled helper completed a 1-second, 65,536-particle Metal `stream`
+  capture and wrote a real 8.4 MB `.gputrace` in an isolated data directory.
+- the packaged helper also completed the canonical 15-second, 1,048,576-particle
+  `stream` run with a real native capture, a 15-second `gpu_burn` acceptance
+  run, and a 6-second `cinematic_liquid` preview smoke.
+
+This is current-host build/runtime evidence, not the still-required macOS 12
+acceptance matrix.
+
+## Xcode development
+
+`project.yml` is the source for the tracked Xcode project. It contains no
+`/opt/homebrew`, `/usr/local`, or repository-specific absolute library path.
+The normal workflow is to run `scripts/build-macos.sh` once, then open:
+
+```bash
+open macos-gui/GPUBenchmark.xcodeproj
+```
+
+## Project structure
+
+```text
 macos-gui/
 ├── project.yml                    # XcodeGen project spec
 ├── Info.plist
@@ -134,3 +251,11 @@ macos-gui/
         ├── ChartGeometry.swift    # Scales, ticks and positions of the charts
         └── Localization.swift     # i18n (EN/ZH)
 ```
+```
+
+The project defaults its native library paths to the script's CMake output for
+the active architecture/configuration. Custom build directories can be passed
+to the script; the script supplies their resolved values to `xcodebuild`.
+
+The separate iPhone/iPad application now lives under `ios-gui/`; it is not a
+future target inside this macOS project.

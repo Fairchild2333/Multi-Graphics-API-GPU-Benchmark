@@ -1,5 +1,64 @@
 # Mangekyo macOS Platform Notes
 
+## 可复现构建与交付合同
+
+默认的 macOS 开发交付入口是：
+
+```bash
+./scripts/build-macos.sh
+```
+
+脚本同时构建 CMake CLI/静态引擎与 SwiftUI App，并把最终产物放到：
+
+```text
+out/macos/<arch>/<Configuration>/GPUBenchmark.app
+```
+
+默认产物为单架构、**Metal-only** 的本地测试 App：
+
+- `gpu_benchmark` 与三个 Metal shader 位于
+  `Contents/Helpers/`，GUI 优先运行这个 bundle 内 worker；
+- GLFW 3.4 由 CMake 通过固定 URL 与 SHA-256 从源码静态构建，继承
+  `CMAKE_OSX_DEPLOYMENT_TARGET=12.0`；
+- 不捆绑 Homebrew 的 GLFW、`vulkan-loader` 或 MoltenVK dylib；
+- Mach-O 检查拒绝残留 `/opt/homebrew`、`/usr/local` 等非系统动态依赖；
+- GUI 和 worker 都检查 `LC_BUILD_VERSION minos=12.0`；
+- 完成 ad-hoc（或用户指定 identity）签名，并在临时工作目录运行 bundle 内
+  CLI 的 `--help` 与 Metal 设备枚举 smoke。
+
+因此正常构建不依赖固定 Homebrew 前缀，也不要求 App 位于仓库内或手动
+选择仓库工作目录。结果数据走：
+
+```text
+~/Library/Application Support/GpuComputeBenchmark/
+```
+
+首次 CMake configure 需要下载 GLFW；离线构建可设置
+`GPU_BENCH_GLFW_SOURCE_DIR` 指向已有 GLFW 3.4 源码目录。XcodeGen 仅在显式
+传 `--regenerate-project` 时需要。
+
+这仍不是公开发行流水线：目前没有 universal binary、Developer ID
+发布签名、notarization、DMG/PKG 或 App Store archive。新 SDK 编出的
+`minos=12.0` 也不等价于 Monterey 真机验收，发布前仍须在 macOS 12 上完成
+启动、GUI、worker 与至少一条短时 Metal smoke。
+
+### 2026-07-31 当前开发机验证
+
+Apple M4 Pro / Xcode 26.6 / macOS SDK 26.5 上已验证：
+
+- canonical Release 脚本成功，GUI 与 worker 均为 arm64、`minos 12.0`；
+- `otool -L` 无 Homebrew/其他非系统依赖，Charts 为 weak framework；
+- deep codesign 校验通过；
+- App 在隔离临时工作目录启动并稳定存活到 smoke 主动结束；
+- bundle 内 worker 以 65,536 粒子跑 1 秒 `stream`，成功写出真实约
+  8.4 MB `.gputrace`，成绩/抓帧均写入 `/private/tmp` 隔离目录而非仓库。
+- packaged helper 的正式参数 `stream`（1,048,576 粒子、15 秒）也已完成，
+  并写出真实原生抓帧。
+- packaged helper 的 15 秒 `gpu_burn` 与 6 秒 `cinematic_liquid` preview
+  验收均已完成；最终 `.app` 也已脱离仓库工作目录独立打开并正常退出。
+
+以上只证明当前开发机链路；完整正式矩阵与 macOS 12 真机验收仍开放。
+
 ## OS 版本底线
 
 | 组件 | 最低系统 | 说明 |
@@ -103,13 +162,18 @@ macOS ProMotion 显示器（120Hz）会在运行几秒后将帧率锁定在 120 
 
 粒子缓冲使用 `MTLResourceStorageModeShared`，成绩 JSON 的 `memory` 记为 `Unified-memory`（不是离散 VRAM）。`--capture` / F12 / `--capture-frame` 走 `MTLCaptureManager` 写出 `.gputrace`；失败时必须写明 `captureUnavailable`，不得假装 RenderDoc 成功。
 
-## 三主项 + Metal 状态（2026-07-19）
+SwiftUI bundle 的 `Info.plist` 必须带 `MetalCaptureEnabled=YES`。GUI 启动
+`Contents/Helpers/gpu_benchmark` 时也设置 `MTL_CAPTURE_ENABLED=1`，覆盖
+macOS 14+ 的外部 worker 路径；macOS 12/13 仍以 bundle Info key 为基础。
+验收必须检查真实 `.gputrace` 文件，而不是只检查退出码或成绩存在。
+
+## 三主项 + Metal 状态（2026-07-31）
 
 | 主项 | Windows | Metal / macOS | 还差 |
 |------|---------|---------------|------|
-| **Particle (`stream`)** | 正式可用 | 代码已对齐合同 + MTLCapture | 真 Mac 15s 验收；验证 `.gputrace` |
-| **GPU Burn (`gpu_burn`)** | 正式可用（Vulkan/DX*/GL） | `gpu_burn.metal` 已接线（**不再 unsupported**） | 真 Mac 15s/`--iter 16` 验收 |
-| **Cinematic Liquid** | Vulkan v8 场景在、**无 v8 正式成绩**；SPH=`_preview` | MLS-MPM + **raymarch present**；成绩强制 `…_metal_preview` | 真 Mac 编译/冒烟；正式合同；SPH/v1 未移植 |
+| **Particle (`stream`)** | 正式可用 | M4 Pro 15s + `.gputrace` 已通过 | macOS 12 真机验收 |
+| **GPU Burn (`gpu_burn`)** | 正式可用（Vulkan/DX*/GL） | M4 Pro packaged helper 15s 验收已通过（**不再 unsupported**） | macOS 12 真机验收 |
+| **Cinematic Liquid** | Vulkan v8 场景在、**无 v8 正式成绩**；SPH=`_preview` | MLS-MPM + raymarch present；M4 Pro packaged helper 6s smoke 已通过；成绩强制 `…_metal_preview` | 正式合同；macOS 12 真机；SPH/v1 未移植 |
 
 验收命令（真 Mac）：
 
@@ -119,7 +183,10 @@ gpu_benchmark --backend metal --workload gpu_burn --time 15 --iter 16
 gpu_benchmark --backend metal --workload cinematic_liquid --time 6   # preview only
 ```
 
-SwiftUI（`macos-gui/`）已与 WinUI 真对齐（Run/CPU/History/Duration/Capture/API 多选/日语）。液体 Metal 可跑但必须标 preview，不得混入 Vulkan v8 榜。
+SwiftUI（`macos-gui/`）已有 Run/CPU/History/Charts/Settings/About、
+Complete Suite、Fill Missing、Duration、Capture、API 多选与英/中/日 UI。
+这代表工作流对齐，不代表平台能力完全相同：DX/WARP/AFR/SFR/RenderDoc
+仍为 Windows 专属。液体 Metal 必须标 preview，不得混入 Vulkan v8 榜。
 
 ### 优化措施
 
@@ -175,23 +242,28 @@ Apple Silicon 在 GPU compute 上性能合理，但点云/粒子渲染（大量�
 
 ## 编译注意事项
 
-### CMakeLists.txt
+### CMake / GLFW
 
-`project()` 需声明所有编译语言，否则 macOS 上 C 和 OBJCXX 编译器变量未正确初始化：
+主工程先声明 C/C++，在 Apple source-build GLFW 与 Metal 路径中再显式
+`enable_language(OBJC)` / `enable_language(OBJCXX)`。macOS 默认
+`GPU_BENCH_BUILD_GLFW_FROM_SOURCE=ON`，避免 `find_package(glfw3)` 误取一个
+最低系统版本高于 Monterey 的 Homebrew bottle。交付脚本另行固定：
 
-```cmake
-# 正确
-project(GpuComputeBenchmark LANGUAGES C CXX OBJCXX)
-
-# 错误 — macOS 上会报 CMAKE_C_COMPILE_OBJECT missing
-project(GpuComputeBenchmark LANGUAGES CXX)
+```text
+ENABLE_METAL=ON
+ENABLE_VULKAN=OFF
+ENABLE_OPENGL=OFF
+GPU_BENCH_BUILD_GLFW_FROM_SOURCE=ON
 ```
+
+若开发者关闭 source-build 开关并使用外部 GLFW，必须自行检查该库的架构与
+`LC_BUILD_VERSION`；“能在当前 Mac 链接”不能证明它能在 macOS 12 加载。
 
 ### RenderDoc
 
 RenderDoc 不支持 macOS。代码中 RenderDoc 相关逻辑需用 `#if defined(_WIN32) || defined(__linux__)` 包裹，否则 macOS 编译报错（`RENDERDOC_GetAPI` undeclared）。
 
-### Python 依赖
+### 可选 Python 报告脚本
 
 macOS 新版（Homebrew Python 3.12+）默认启用 PEP 668 外部管理环境，`pip install` 会报错。解决方案：
 
@@ -202,6 +274,10 @@ pip3 install jinja2 --break-system-packages
 # 方案2：用虚拟环境
 python3 -m venv venv && source venv/bin/activate && pip install jinja2
 ```
+
+原生 macOS Charts 页面不依赖 Python：macOS 13+ 使用 Swift Charts，Monterey
+使用 SwiftUI bar fallback。上面的 Python 环境仅适用于仓库里的可选报告/
+批处理脚本。
 
 ## 测试环境
 

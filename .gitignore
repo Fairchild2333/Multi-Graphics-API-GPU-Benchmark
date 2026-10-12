@@ -126,3 +126,7 @@ android/app/src/main/assets/shaders/*_gl.*
 android/app/src/main/assets/shaders/*_es2.*
 ohos/entry/src/main/resources/rawfile/shaders/*_gl.*
 ohos/entry/src/main/resources/rawfile/shaders/*_es2.*
+results/
+macos-gui/theme_check2
+macos-gui/theme_check2.swift
+scripts/__pycache__/
