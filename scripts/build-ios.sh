@@ -13,14 +13,26 @@ IOS_GUI_DIR="${REPO_ROOT}/ios-gui"
 CONFIGURATION="${CONFIGURATION:-Release}"
 SDK=""
 CLEAN=false
+REGENERATE=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --sdk)           SDK="$2"; shift 2;;
-        --configuration) CONFIGURATION="$2"; shift 2;;
+        --sdk)           [[ $# -ge 2 ]] || { echo "--sdk needs a value" >&2; exit 2; }; SDK="$2"; shift 2;;
+        --configuration) [[ $# -ge 2 ]] || { echo "--configuration needs a value" >&2; exit 2; }; CONFIGURATION="$2"; shift 2;;
         --clean)         CLEAN=true; shift;;
+        --regenerate-project) REGENERATE=true; shift;;
+        -h|--help)
+            echo "Usage: scripts/build-ios.sh [--sdk iphoneos|iphonesimulator] [--configuration Debug|Release] [--clean] [--regenerate-project]"
+            exit 0;;
         *)               echo "Unknown option: $1"; exit 1;;
     esac
+done
+
+[[ "$(uname -s)" == "Darwin" ]] || { echo "iOS builds require macOS and Xcode" >&2; exit 2; }
+case "$SDK" in ""|iphoneos|iphonesimulator) ;; *) echo "Unknown iOS SDK: $SDK" >&2; exit 2;; esac
+case "$CONFIGURATION" in Debug|Release) ;; *) echo "Configuration must be Debug or Release" >&2; exit 2;; esac
+for tool in cmake xcodebuild xcrun; do
+    command -v "$tool" >/dev/null || { echo "Required tool not found: $tool" >&2; exit 2; }
 done
 
 # Determine SDK list
@@ -102,14 +114,13 @@ echo "================================================================="
 echo "  Generating iOS Xcode project (XcodeGen)"
 echo "================================================================="
 
-if ! command -v xcodegen &>/dev/null; then
-    echo "  XcodeGen not found. Installing via Homebrew..."
-    brew install xcodegen
+if $REGENERATE; then
+    command -v xcodegen >/dev/null || { echo "--regenerate-project requires XcodeGen" >&2; exit 2; }
+    (cd "$IOS_GUI_DIR" && xcodegen generate)
+elif [[ ! -d "${IOS_GUI_DIR}/Mangekyo.xcodeproj" ]]; then
+    echo "Tracked Xcode project missing; use --regenerate-project with XcodeGen" >&2
+    exit 2
 fi
-
-cd "$IOS_GUI_DIR"
-xcodegen generate
-echo "  Generated: ${IOS_GUI_DIR}/Mangekyo.xcodeproj"
 
 # --------------------------------------------------------------------------
 # Step 3: Build iOS app

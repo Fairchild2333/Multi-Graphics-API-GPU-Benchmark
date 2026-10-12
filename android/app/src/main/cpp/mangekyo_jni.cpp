@@ -6,11 +6,17 @@
 #include <android/native_window_jni.h>
 #include <dlfcn.h>
 #include <jni.h>
+#include <vulkan/vulkan.h>
 
 #include <atomic>
+#include <cstdlib>
+#include <exception>
+#include <iostream>
 #include <mutex>
+#include <streambuf>
 #include <string>
 #include <thread>
+#include <vector>
 
 #define LOG_TAG "MangekyoJni"
 #define ALOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
@@ -35,9 +41,149 @@ void JoinWorkerUnlocked() {
         g_worker.join();
     g_workerAlive.store(false, std::memory_order_release);
 }
+
+// Everything the engine prints to std::cout / std::cerr lands here, split into
+// lines that the UI collects with nativePollOutput(). The engine prints from
+// one thread at a time; the lock only guards against the collecting thread.
+class LineQueueBuffer : public std::streambuf {
+public:
+    std::vector<std::string> Drain() {
+        std::lock_guard<std::mutex> lock(mutex_);
+        std::vector<std::string> lines;
+        lines.swap(lines_);
+        return lines;
+    }
+
+protected:
+    int_type overflow(int_type ch) override {
+        if (traits_type::eq_int_type(ch, traits_type::eof())) return traits_type::not_eof(ch);
+        std::lock_guard<std::mutex> lock(mutex_);
+        Append(traits_type::to_char_type(ch));
+        return ch;
+    }
+
+    std::streamsize xsputn(const char* text, std::streamsize count) override {
+        std::lock_guard<std::mutex> lock(mutex_);
+        for (std::streamsize i = 0; i < count; ++i) Append(text[i]);
+        return count;
+    }
+
+private:
+    // Nobody may be collecting; keep the newest lines only.
+    static constexpr std::size_t kMaxPendingLines = 20000;
+
+    void Append(char c) {
+        if (c == '\n') {
+            if (lines_.size() >= kMaxPendingLines) lines_.erase(lines_.begin(), lines_.begin() + 1000);
+            // Also to logcat, so a run can be followed over adb:
+            // adb logcat -s MangekyoEngine
+            if (!current_.empty())
+                __android_log_write(ANDROID_LOG_INFO, "MangekyoEngine", current_.c_str());
+            lines_.push_back(current_);
+            current_.clear();
+        } else if (c != '\r') {
+            current_.push_back(c);
+        }
+    }
+
+    std::mutex mutex_;
+    std::vector<std::string> lines_;
+    std::string current_;
+};
+
+LineQueueBuffer g_output;
+
+// CPU-only tests run through the engine's command-line entry point on their
+// own thread; they need no surface.
+std::atomic<bool> g_cliAlive{false};
+std::atomic<int> g_cliExitCode{0};
+std::thread g_cliThread;
 }  // namespace
 
 extern "C" {
+
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM*, void*) {
+    std::cout.rdbuf(&g_output);
+    std::cerr.rdbuf(&g_output);
+    return JNI_VERSION_1_6;
+}
+
+// Lines printed by the engine since the last call.
+JNIEXPORT jobjectArray JNICALL
+Java_com_mangekyo_benchmark_core_NativeBridge_nativePollOutput(JNIEnv* env, jobject) {
+    const std::vector<std::string> lines = g_output.Drain();
+    jclass stringClass = env->FindClass("java/lang/String");
+    jobjectArray result =
+        env->NewObjectArray(static_cast<jsize>(lines.size()), stringClass, nullptr);
+    for (std::size_t i = 0; i < lines.size(); ++i) {
+        jstring text = env->NewStringUTF(lines[i].c_str());
+        env->SetObjectArrayElement(result, static_cast<jsize>(i), text);
+        env->DeleteLocalRef(text);
+    }
+    return result;
+}
+
+// Runs `gpu_benchmark <args>` in-process on a worker thread. Only the CPU
+// paths are meant to be started this way: they return before any GPU work.
+JNIEXPORT jboolean JNICALL
+Java_com_mangekyo_benchmark_core_NativeBridge_nativeStartCli(JNIEnv* env, jobject,
+                                                             jobjectArray args) {
+    std::vector<std::string> arguments{"gpu_benchmark"};
+    const jsize count = args ? env->GetArrayLength(args) : 0;
+    for (jsize i = 0; i < count; ++i) {
+        auto item = static_cast<jstring>(env->GetObjectArrayElement(args, i));
+        if (!item) continue;
+        const char* text = env->GetStringUTFChars(item, nullptr);
+        if (text) {
+            arguments.emplace_back(text);
+            env->ReleaseStringUTFChars(item, text);
+        }
+        env->DeleteLocalRef(item);
+    }
+
+    std::lock_guard<std::mutex> lock(g_workerMutex);
+    if (g_cliAlive.load(std::memory_order_acquire) ||
+        g_workerAlive.load(std::memory_order_acquire) || gpu_bench::android_host::IsRunning()) {
+        g_lastError = "already running";
+        return JNI_FALSE;
+    }
+    if (g_cliThread.joinable()) g_cliThread.join();
+    g_lastError.clear();
+    g_cliAlive.store(true, std::memory_order_release);
+    g_cliThread = std::thread([arguments]() mutable {
+        // path_service reads GPU_BENCH_DATA_DIR once; set it before any result is saved.
+        if (!g_dataDir.empty()) setenv("GPU_BENCH_DATA_DIR", g_dataDir.c_str(), 1);
+        // The command-line entry looks for shaders beside an executable; here they
+        // are the files unpacked from the app's assets.
+        if (!g_shaderDir.empty()) setenv("GPU_BENCH_SHADER_DIR", g_shaderDir.c_str(), 1);
+        std::vector<char*> argv;
+        for (auto& argument : arguments) argv.push_back(argument.data());
+        int exitCode = 1;
+        try {
+            // A stop asked for during an earlier test must not end this one.
+            gpu_bench::ClearStopRequest();
+            exitCode = gpu_bench::cliMain(static_cast<int>(argv.size()), argv.data());
+        } catch (const std::exception& ex) {
+            std::cout << "[error] " << ex.what() << std::endl;
+        } catch (...) {
+            std::cout << "[error] unknown native exception" << std::endl;
+        }
+        std::cout.flush();
+        g_cliExitCode.store(exitCode, std::memory_order_release);
+        g_cliAlive.store(false, std::memory_order_release);
+    });
+    return JNI_TRUE;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_mangekyo_benchmark_core_NativeBridge_nativeIsCliRunning(JNIEnv*, jobject) {
+    return g_cliAlive.load(std::memory_order_acquire) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_mangekyo_benchmark_core_NativeBridge_nativeCliExitCode(JNIEnv*, jobject) {
+    return g_cliExitCode.load(std::memory_order_acquire);
+}
 
 JNIEXPORT jstring JNICALL
 Java_com_mangekyo_benchmark_core_NativeBridge_nativeEngineVersion(JNIEnv* env, jobject) {
@@ -46,11 +192,46 @@ Java_com_mangekyo_benchmark_core_NativeBridge_nativeEngineVersion(JNIEnv* env, j
 
 JNIEXPORT jboolean JNICALL
 Java_com_mangekyo_benchmark_core_NativeBridge_nativeProbeVulkan(JNIEnv*, jobject) {
+    // True when a Vulkan device can be had, not merely the loader. A phone may
+    // ship libvulkan.so without a driver behind it: a Mi 5C (Mali-T860,
+    // Android 7.1.2) does, and every Vulkan test on it ended with "No Vulkan
+    // physical device found" after the page had listed Vulkan as supported.
+    // Everything goes through dlsym, so the library still loads where the
+    // loader is missing altogether.
     void* lib = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
     if (!lib) return JNI_FALSE;
-    const bool ok = dlsym(lib, "vkGetInstanceProcAddr") != nullptr;
+    bool ok = false;
+    const auto getProc = reinterpret_cast<PFN_vkGetInstanceProcAddr>(dlsym(lib, "vkGetInstanceProcAddr"));
+    const auto createInstance = getProc
+        ? reinterpret_cast<PFN_vkCreateInstance>(getProc(VK_NULL_HANDLE, "vkCreateInstance")) : nullptr;
+    if (createInstance) {
+        VkApplicationInfo app{};
+        app.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+        app.apiVersion = VK_API_VERSION_1_0;
+        VkInstanceCreateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        info.pApplicationInfo = &app;
+        VkInstance instance = VK_NULL_HANDLE;
+        if (createInstance(&info, nullptr, &instance) == VK_SUCCESS && instance != VK_NULL_HANDLE) {
+            const auto enumerate = reinterpret_cast<PFN_vkEnumeratePhysicalDevices>(
+                getProc(instance, "vkEnumeratePhysicalDevices"));
+            const auto destroy = reinterpret_cast<PFN_vkDestroyInstance>(getProc(instance, "vkDestroyInstance"));
+            std::uint32_t count = 0;
+            if (enumerate) {
+                const VkResult result = enumerate(instance, &count, nullptr);
+                ok = (result == VK_SUCCESS || result == VK_INCOMPLETE) && count > 0;
+            }
+            if (destroy) destroy(instance, nullptr);
+        }
+    }
     dlclose(lib);
+    ALOGI("vulkan probe: %s", ok ? "a device is present" : "no device");
     return ok ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_mangekyo_benchmark_core_NativeBridge_nativeEsParticleWorkGroupSize(JNIEnv*, jobject) {
+    return static_cast<jint>(gpu_bench::android_host::EsParticleWorkGroupSize());
 }
 
 JNIEXPORT void JNICALL
@@ -131,28 +312,33 @@ Java_com_mangekyo_benchmark_core_NativeBridge_nativeStartWorkload(JNIEnv* env, j
         return JNI_FALSE;
     }
 
-    ANativeWindow* window = nullptr;
-    {
-        std::lock_guard<std::mutex> lock(g_windowMutex);
-        window = g_window;
-        if (window)
-            ANativeWindow_acquire(window);
-    }
-    if (!window) {
-        std::lock_guard<std::mutex> lock(g_workerMutex);
-        g_lastError = "no ANativeWindow (wait for SurfaceView)";
-        return JNI_FALSE;
-    }
-
     const char* wid = env->GetStringUTFChars(workloadId, nullptr);
     std::string workload = wid ? wid : "stream";
     if (wid) env->ReleaseStringUTFChars(workloadId, wid);
 
+    // A headless test draws nothing and starts without a surface.
+    const bool needsWindow = workload.rfind("stream_headless", 0) != 0;
+    ANativeWindow* window = nullptr;
+    if (needsWindow) {
+        {
+            std::lock_guard<std::mutex> lock(g_windowMutex);
+            window = g_window;
+            if (window)
+                ANativeWindow_acquire(window);
+        }
+        if (!window) {
+            std::lock_guard<std::mutex> lock(g_workerMutex);
+            g_lastError = "no ANativeWindow (wait for SurfaceView)";
+            return JNI_FALSE;
+        }
+    }
+
     {
         std::lock_guard<std::mutex> lock(g_workerMutex);
         if (g_workerAlive.load(std::memory_order_acquire) ||
+            g_cliAlive.load(std::memory_order_acquire) ||
             gpu_bench::android_host::IsRunning()) {
-            ANativeWindow_release(window);
+            if (window) ANativeWindow_release(window);
             g_lastError = "already running";
             return JNI_FALSE;
         }
@@ -170,7 +356,7 @@ Java_com_mangekyo_benchmark_core_NativeBridge_nativeStartWorkload(JNIEnv* env, j
 
             std::string err;
             const int rc = gpu_bench::android_host::RunWorkload(req, err);
-            ANativeWindow_release(window);
+            if (window) ANativeWindow_release(window);
             {
                 std::lock_guard<std::mutex> lock(g_workerMutex);
                 if (rc != 0)

@@ -1,4 +1,8 @@
 #include "gpu_memory_sweep.h"
+#include "gpu_engine.h"
+#include "benchmark_results.h"
+#include <iostream>
+#include <sstream>
 
 #include <algorithm>
 #include <cmath>
@@ -10,6 +14,9 @@
 
 #import <Metal/Metal.h>
 #import <TargetConditionals.h>
+#if TARGET_OS_IPHONE
+#include <os/proc.h>
+#endif
 
 namespace gpu_bench {
 namespace {
@@ -42,6 +49,17 @@ struct SweepParams {
     float dt;
     float bounds;
 };
+
+kernel void sweepInit(device Particle* p [[buffer(0)]],
+                      constant uint& count [[buffer(1)]],
+                      uint tid [[thread_position_in_grid]]) {
+    if (tid >= count) return;
+    uint a = (tid + 17u) * 2654435761u;
+    a ^= a >> 15;
+    uint b = a * 2246822519u;
+    p[tid].position = as_type<float4>((uint4(a, b, a >> 9, b >> 9) & 0x007fffffu) | 0x3f800000u);
+    p[tid].velocity = float4(0.001f, 0.002f, 0.003f, 0.0f);
+}
 
 kernel void particleSweepRMW(device Particle* p [[buffer(0)]],
                              constant SweepParams& sp [[buffer(1)]],
@@ -139,6 +157,13 @@ std::vector<GpuMemoryTier> DetectTiers(
 GpuMemorySweepReport RunGpuMemorySweep(const GpuMemorySweepConfig& config,
                                        std::ostream& out) {
     GpuMemorySweepReport report;
+    if (config.minKiB == 0 || config.maxKiB < config.minKiB || config.repeats == 0 ||
+        config.threads > (1u << 20) || config.trafficPerPointMiB == 0 ||
+        config.trafficPerPointMiB > 16384) {
+        report.unsupportedReason = "invalid memory sweep bounds, traffic or grid";
+        out << "MEMSWEEP_ERROR\tmessage=" << report.unsupportedReason << '\n' << std::flush;
+        return report;
+    }
 
     @autoreleasepool {
         id<MTLDevice> device = nil;
@@ -172,7 +197,10 @@ GpuMemorySweepReport RunGpuMemorySweep(const GpuMemorySweepConfig& config,
         id<MTLComputePipelineState> psoRead =
             [device newComputePipelineStateWithFunction:
                 [library newFunctionWithName:@"particleSweepRead"] error:&error];
-        if (!psoRMW || !psoRead) {
+        id<MTLComputePipelineState> psoInit =
+            [device newComputePipelineStateWithFunction:
+                [library newFunctionWithName:@"sweepInit"] error:&error];
+        if (!psoRMW || !psoRead || !psoInit) {
             report.unsupportedReason = "pipeline creation failed";
             out << "MEMSWEEP_ERROR\tmessage=pipeline_failed\n" << std::flush;
             return report;
@@ -185,6 +213,19 @@ GpuMemorySweepReport RunGpuMemorySweep(const GpuMemorySweepConfig& config,
             [device newBufferWithLength:threads * sizeof(float)
                                 options:MTLResourceStorageModePrivate];
 
+        if (!queue || !sink) {
+            report.unsupportedReason = "queue or timing sink allocation failed";
+            return report;
+        }
+        std::uint64_t budget = device.maxBufferLength;
+        if (device.recommendedMaxWorkingSetSize > 0)
+            budget = std::min<std::uint64_t>(budget, device.recommendedMaxWorkingSetSize / 4);
+#if TARGET_OS_IPHONE
+        const auto available = os_proc_available_memory();
+        if (available > 0) budget = std::min<std::uint64_t>(budget, available / 4);
+        budget = std::min<std::uint64_t>(budget, 256ull << 20);
+#endif
+        const auto maxKiB = std::min<std::uint64_t>(config.maxKiB, budget / 1024);
         report.supported = true;
         report.threads = threads;
 
@@ -234,8 +275,13 @@ GpuMemorySweepReport RunGpuMemorySweep(const GpuMemorySweepConfig& config,
                        "       ms\n" << std::flush;
 
                 std::vector<GpuMemorySweepPoint> modePoints;
-                for (std::uint64_t kib = config.minKiB; kib <= config.maxKiB;
+                for (std::uint64_t kib = config.minKiB; kib <= maxKiB;
                      kib *= 2) {
+                    if (StopRequested()) {
+                        report.supported = false;
+                        report.unsupportedReason = "stopped";
+                        return report;
+                    }
                     const std::uint64_t bytes = kib * 1024ull;
                     const auto count =
                         std::uint32_t(double(bytes) / kBytesPerParticle);
@@ -248,6 +294,23 @@ GpuMemorySweepReport RunGpuMemorySweep(const GpuMemorySweepConfig& config,
                             << "   allocation failed; stopping this mode\n"
                             << std::flush;
                         break;
+                    }
+
+                    // Initialise every element through the GPU before measuring a load.
+                    id<MTLCommandBuffer> init = [queue commandBuffer];
+                    id<MTLComputeCommandEncoder> initEncoder = [init computeCommandEncoder];
+                    [initEncoder setComputePipelineState:psoInit];
+                    [initEncoder setBuffer:buffer offset:0 atIndex:0];
+                    [initEncoder setBytes:&count length:sizeof(count) atIndex:1];
+                    [initEncoder dispatchThreads:MTLSizeMake(count, 1, 1)
+                           threadsPerThreadgroup:MTLSizeMake(kThreadsPerGroup, 1, 1)];
+                    [initEncoder endEncoding];
+                    [init commit];
+                    [init waitUntilCompleted];
+                    if (init.status == MTLCommandBufferStatusError) {
+                        report.supported = false;
+                        report.unsupportedReason = "GPU buffer initialisation failed";
+                        return report;
                     }
 
                     // `| 1` forces an odd step; see the aliasing note above.
@@ -273,6 +336,11 @@ GpuMemorySweepReport RunGpuMemorySweep(const GpuMemorySweepConfig& config,
 
                     double bestSec = 0.0;
                     for (std::uint32_t r = 0; r < config.repeats; ++r) {
+                        if (StopRequested()) {
+                            report.supported = false;
+                            report.unsupportedReason = "stopped";
+                            return report;
+                        }
                         id<MTLCommandBuffer> cb = [queue commandBuffer];
                         id<MTLComputeCommandEncoder> enc =
                             [cb computeCommandEncoder];
@@ -285,6 +353,11 @@ GpuMemorySweepReport RunGpuMemorySweep(const GpuMemorySweepConfig& config,
                         [enc endEncoding];
                         [cb commit];
                         [cb waitUntilCompleted];
+                        if (cb.status == MTLCommandBufferStatusError) {
+                            report.supported = false;
+                            report.unsupportedReason = "GPU dispatch failed";
+                            return report;
+                        }
                         const double sec = cb.GPUEndTime - cb.GPUStartTime;
                         if (sec > 0.0 && (bestSec == 0.0 || sec < bestSec))
                             bestSec = sec;
@@ -340,6 +413,11 @@ GpuMemorySweepReport RunGpuMemorySweep(const GpuMemorySweepConfig& config,
             }
         }
 
+        if (report.points.empty()) {
+            report.supported = false;
+            report.unsupportedReason = "no valid GPU timings within the memory budget";
+            return report;
+        }
         out << "\n--- Detected tiers (device-local, read-modify-write) ---\n"
             << std::flush;
         for (const auto& tier : report.deviceLocalTiers) {
@@ -392,6 +470,45 @@ GpuMemorySweepReport RunGpuMemorySweep(const GpuMemorySweepConfig& config,
     }
 
     return report;
+}
+
+int RunGpuMemorySweepCli(const GpuMemorySweepConfig& config, bool saveResult) {
+    const auto report = RunGpuMemorySweep(config, std::cout);
+    if (!report.supported) {
+        std::cerr << "MEMSWEEP_ERROR\tmessage=" << report.unsupportedReason << '\n';
+        return report.unsupportedReason == "stopped" ? 4 : 3;
+    }
+    if (saveResult) {
+        BenchmarkResult stored;
+        stored.id = GenerateResultId() + "-metal-memsweep";
+        stored.timestamp = GenerateTimestamp();
+        stored.resultSchemaVersion = 4;
+        stored.appVersion = CurrentAppVersion();
+        stored.workload = "membw";
+        stored.workloadVersion = "metal_memory_sweep_v1_preview";
+#if TARGET_OS_IPHONE
+        stored.workloadVersion += "_ios_preview";
+#endif
+        stored.graphicsApi = "Metal";
+        stored.deviceName = report.deviceName;
+        stored.osVersion = CurrentOsVersion();
+        stored.platform = CurrentPlatform();
+        stored.osArchitecture = CurrentOsArchitecture();
+        stored.processArchitecture = CurrentProcessArchitecture();
+        stored.headless = true;
+        stored.score = report.readOnlyMemoryGbPerSec;
+        stored.scoreUnit = "GB/s";
+        std::ostringstream contract;
+        contract << "method=particle_fixed_grid;aggregation=best;grid=" << report.threads
+                 << ";repeats=" << config.repeats << ";trafficMiB=" << config.trafficPerPointMiB
+                 << ";memoryPlateauVerified=0";
+        for (const auto& point : report.points)
+            contract << ';' << StorageName(point.storage) << '_' << AccessName(point.access)
+                     << '_' << point.workingSetBytes << '=' << point.bestGbPerSec;
+        stored.workloadConfig = contract.str();
+        if (!AppendResult(stored)) return 5;
+    }
+    return 0;
 }
 
 }  // namespace gpu_bench

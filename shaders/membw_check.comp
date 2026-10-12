@@ -1,0 +1,66 @@
+#version 450
+
+// Memory-bandwidth sweep (membw_v1): check kernel. It is never timed.
+//
+// Before anything is measured the host fills a buffer with membw_write.comp
+// and runs this kernel once over all of it: every element is loaded through
+// the addressing of membw_read.comp and compared with the value the write
+// kernel stores at that index. A driver may accept a storage buffer of the
+// size it advertises and still address it wrongly (loads that return zero
+// without touching memory, stores that land somewhere else); a read rate
+// measured on such a buffer is not a memory rate, so the host then retries
+// with a smaller one.
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+layout(set = 0, binding = 0, std430) readonly buffer SourceBuffer {
+    vec4 data[];
+} src;
+
+// The sink of the read kernel, seen as words. Group 0 sets [0, 256) to show
+// that the kernel ran; a thread that met a wrong value sets its word in
+// [256, 512). The host clears the buffer first.
+layout(set = 0, binding = 2, std430) buffer SinkBuffer {
+    uint word[];
+} sink;
+
+layout(push_constant) uniform MemBwParams {
+    uint chunkCount;
+    uint stripesPerChunk;
+    uint totalGroups;
+    uint groupsX;
+    uint seed;
+    float never;
+} params;
+
+const uint kRan = 0x4D42434Bu;  // kCheckRan in vulkan_membw.cpp
+
+// Same as in membw_write.comp.
+vec4 hashValue(uint index) {
+    uint a = (index + params.seed) * 2654435761u;
+    a ^= a >> 15;
+    const uint b = a * 2246822519u;
+    const uvec4 mantissa = uvec4(a, a >> 9, b, b >> 9) & 0x007FFFFFu;
+    return uintBitsToFloat(mantissa | 0x3F800000u);
+}
+
+void main() {
+    const uint group = gl_WorkGroupID.x + gl_WorkGroupID.y * params.groupsX;
+    if (group >= params.totalGroups) return;
+
+    const uint base = (group % params.chunkCount) * params.stripesPerChunk * 256u
+                    + gl_LocalInvocationID.x;
+
+    uint wrong = 0u;
+    for (uint stripe = 0u; stripe < params.stripesPerChunk; stripe += 2u) {
+        const uint first = base + stripe * 256u;
+        const uint second = base + (stripe + 1u) * 256u;
+        if (src.data[first] != hashValue(first)) wrong += 1u;
+        if (src.data[second] != hashValue(second)) wrong += 1u;
+    }
+
+    if (group == 0u) sink.word[gl_LocalInvocationID.x] = kRan;
+    // Threads of different groups share a word; every one of them writes a
+    // number above zero, which is all the host looks at.
+    if (wrong != 0u) sink.word[256u + gl_LocalInvocationID.x] = wrong;
+}

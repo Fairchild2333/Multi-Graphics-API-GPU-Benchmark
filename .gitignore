@@ -18,6 +18,17 @@
 /android/**/.cxx/
 /android/local.properties
 
+# HarmonyOS (DevEco Studio / hvigor)
+/ohos/.hvigor/
+/ohos/.idea/
+/ohos/build/
+/ohos/**/build/
+/ohos/**/.cxx/
+/ohos/**/oh_modules/
+/ohos/local.properties
+/ohos/**/oh-package-lock.json5
+/ohos/oh-package-lock.json5
+
 # ---- WinUI / MSBuild GUI outputs (any arch + intermediates) ----
 /gui/x64/
 /gui/x86/
@@ -110,6 +121,11 @@ Desktop.ini
 stdout.txt
 stderr.txt
 
+# Copies of shaders/*_gl.* that the mobile builds put beside the SPIR-V
+android/app/src/main/assets/shaders/*_gl.*
+android/app/src/main/assets/shaders/*_es2.*
+ohos/entry/src/main/resources/rawfile/shaders/*_gl.*
+ohos/entry/src/main/resources/rawfile/shaders/*_es2.*
 results/
 macos-gui/theme_check2
 macos-gui/theme_check2.swift

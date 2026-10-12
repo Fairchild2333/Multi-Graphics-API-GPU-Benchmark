@@ -272,6 +272,15 @@ struct RunView: View {
                     advancedCard
                     progressCard
                     summaryCard
+                    GpuRunChartsCard(jobs: run.runOutput.jobs)
+                    GpuMemoryResultsCard(output: run.runOutput)
+                    GlassCard {
+                        Button(Localization.tr("Run GPU Cache & Memory Probe", "运行 GPU 缓存与内存探测", "GPU キャッシュ / メモリ測定")) {
+                            engine.run(jobs: [["gpu_benchmark", "--memory-sweep", "--memory-sweep-save"]],
+                                       needCharts: false, channel: .gpu)
+                        }
+                        .disabled(engine.isRunning)
+                    }
                     cliCard
                 }
                 .padding(28)
@@ -410,10 +419,10 @@ struct RunView: View {
                             // the cache/memory boundary: the small ones report
                             // cache bandwidth, not memory bandwidth.
                             Picker("", selection: $particlePreset) {
-                                Text("Light — 65K · 2 MB").tag("65536")
-                                Text("Medium — 1M · 32 MB").tag("1048576")
-                                Text("Heavy — 4M · 128 MB").tag("4194304")
-                                Text("Extreme — 16M · 512 MB").tag("16777216")
+                                Text(Localization.tr("Light — 65K · 2 MB", "轻量 —— 65K · 2 MB", "Light — 65K · 2 MB")).tag("65536")
+                                Text(Localization.tr("Medium — 1M · 32 MB", "中等 —— 1M · 32 MB", "Medium — 1M · 32 MB")).tag("1048576")
+                                Text(Localization.tr("Heavy — 4M · 128 MB", "重载 —— 4M · 128 MB", "Heavy — 4M · 128 MB")).tag("4194304")
+                                Text(Localization.tr("Extreme — 16M · 512 MB", "极限 —— 16M · 512 MB", "Extreme — 16M · 512 MB")).tag("16777216")
                                 Text(Localization.tr("Custom…", "自定义…", "カスタム…")).tag("custom")
                             }
                         }
@@ -423,7 +432,7 @@ struct RunView: View {
                                     "Custom count", "自定义数量", "カスタム数"),
                                 width: 150
                             ) {
-                                TextField("multiple of 256", text: $customParticles)
+                                TextField(Localization.tr("multiple of 256", "256 的倍数", "256 の倍数"), text: $customParticles)
                                     .textFieldStyle(.roundedBorder)
                             }
                         }
@@ -436,9 +445,9 @@ struct RunView: View {
                             width: 170
                         ) {
                             Picker("", selection: $burnPreset) {
-                                Text("Light — 16").tag("16")
-                                Text("Medium — 64").tag("64")
-                                Text("Heavy — 256").tag("256")
+                                Text(Localization.tr("Light — 16", "轻量 —— 16", "Light — 16")).tag("16")
+                                Text(Localization.tr("Medium — 64", "中等 —— 64", "Medium — 64")).tag("64")
+                                Text(Localization.tr("Heavy — 256", "重载 —— 256", "Heavy — 256")).tag("256")
                                 Text(Localization.tr("Custom…", "自定义…", "カスタム…")).tag("custom")
                             }
                         }
@@ -508,7 +517,10 @@ struct RunView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 18) {
                     HintedToggle(title: "Headless", hint: headlessHint, isOn: $headless)
                         .disabled(usesBurnSteps || selectedWorkload == "cinematic_liquid")
-                    HintedToggle(title: "V-Sync", hint: vsyncHint, isOn: $vsync)
+                    HintedToggle(
+                        title: Localization.tr("V-Sync", "垂直同步", "垂直同期"),
+                        hint: vsyncHint,
+                        isOn: $vsync)
                     HintedToggle(
                         title: Localization.tr("System memory", "系统内存", "システムメモリ"),
                         hint: hostMemoryHint,
@@ -691,7 +703,7 @@ struct RunView: View {
             Button(action: runBenchmark) {
                 Text(isFormalSuitePreset
                      ? Localization.tr("Run Formal Suite", "运行正式套件", "正式スイートを実行")
-                     : Localization.tr("Run GPU Test", "开始 GPU 测试", "GPU ベンチマークを実行"))
+                     : Localization.tr("Run GPU Benchmark", "开始 GPU 测试", "GPU ベンチマークを実行"))
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
@@ -811,7 +823,7 @@ struct RunView: View {
 
         switch preset {
         case .custom:
-            let backs = backendsForJob().filter(allow)
+            let backs = backendsForJob().filter { allow($0) }
             if backs == [""] { return [buildOne(backend: "", gpu: gpu >= 0 ? gpu : nil)] }
             return backs.map { buildOne(backend: $0, gpu: gpu >= 0 ? gpu : nil) }
 
@@ -819,7 +831,7 @@ struct RunView: View {
             needCharts = true
             let backs = (selectedApis.isEmpty ? supportedApis : Array(selectedApis))
                 .sorted()
-                .filter(allow)
+                .filter { allow($0) }
             return backs.map { buildOne(backend: $0, gpu: gpu >= 0 ? gpu : nil) }
 
         case .fullAll:
@@ -828,7 +840,7 @@ struct RunView: View {
                 // Cross-API suite rejected for liquid; run allowed backends only.
                 let backs = (selectedApis.isEmpty ? ["vulkan", "metal"] : Array(selectedApis))
                     .sorted()
-                    .filter(allow)
+                    .filter { allow($0) }
                 return backs.map { buildOne(backend: $0, gpu: gpu >= 0 ? gpu : nil) }
             }
             var a = ["gpu_benchmark"] + durationArgs() + ["--run-all"]

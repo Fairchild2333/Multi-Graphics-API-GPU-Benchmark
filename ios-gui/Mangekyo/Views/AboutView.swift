@@ -21,7 +21,7 @@ struct AboutView: View {
                                     "跨 API CPU 与 GPU 测试套件"))
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
-                                Text("v1.0 — iOS Edition")
+                                Text(Localization.tr("v1.0 — iOS Edition", "v1.0 —— iOS 版", "v1.0 — iOS 版"))
                                     .font(.callout)
                                     .foregroundStyle(.secondary)
                             }
@@ -57,7 +57,7 @@ struct AboutView: View {
                                 Label("GitHub", systemImage: "link")
                             }
 
-                            Text("MIT License")
+                            Text(Localization.tr("MIT License", "MIT 许可证", "MIT ライセンス"))
                                 .font(.caption)
                                 .foregroundStyle(.tertiary)
                         }

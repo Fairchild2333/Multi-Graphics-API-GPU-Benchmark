@@ -63,12 +63,15 @@ private val DarkBrandScheme = darkColorScheme(
     outlineVariant = MangekyoColors.OutlineVariantDark,
 )
 
+// Material 3 Expressive rounds containers more than the first Material 3 did.
+// Its "increased" corner sizes (20 and 32 dp) are not public in material3 1.4,
+// so they are set here: cards take `medium`, sheets and dialogs the larger ones.
 private val MangekyoShapes = Shapes(
     extraSmall = RoundedCornerShape(4.dp),
     small = RoundedCornerShape(8.dp),
-    medium = RoundedCornerShape(12.dp),
-    large = RoundedCornerShape(16.dp),
-    extraLarge = RoundedCornerShape(28.dp),
+    medium = RoundedCornerShape(16.dp),
+    large = RoundedCornerShape(20.dp),
+    extraLarge = RoundedCornerShape(32.dp),
 )
 
 /**
@@ -78,6 +81,10 @@ private val MangekyoShapes = Shapes(
  *
  * Same Compose Material 3 component set on all supported API levels; only color
  * source changes. Predictive back / edge-to-edge are handled by the activity shell.
+ *
+ * Material 3 Expressive: material3 1.4 makes only its navigation components
+ * public (used in AppRoot); its theme, motion scheme and emphasized type
+ * styles are still internal there, so this stays a plain MaterialTheme.
  */
 @Composable
 fun MangekyoTheme(

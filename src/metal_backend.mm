@@ -376,6 +376,7 @@ void MetalBackend::InitBackend() {
             impl_->metalLayer.framebufferOnly = YES;
             impl_->metalLayer.maximumDrawableCount = 3;
             impl_->metalLayer.displaySyncEnabled = config_.vsync ? YES : NO;
+            presentFollowsDisplay_ = config_.vsync;
 
             nsWindow.contentView.layer     = impl_->metalLayer;
             nsWindow.contentView.wantsLayer = YES;
@@ -383,6 +384,9 @@ void MetalBackend::InitBackend() {
 #else
         if (!config_.headless && window_ != nullptr) {
             impl_->metalLayer = (__bridge CAMetalLayer*)window_;
+            // iOS has no switch for this: a drawable is always shown in step
+            // with the display.
+            presentFollowsDisplay_ = true;
             impl_->metalLayer.device       = impl_->device;
             impl_->metalLayer.pixelFormat  = MTLPixelFormatBGRA8Unorm;
             // Adopt the size the host view already derived from its bounds

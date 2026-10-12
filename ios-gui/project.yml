@@ -50,3 +50,43 @@ targets:
           - "-framework Foundation"
         CLANG_CXX_LANGUAGE_STANDARD: "c++17"
         CLANG_ENABLE_OBJC_ARC: "YES"
+
+    postBuildScripts:
+      - name: Bundle runtime Metal sources
+        script: |
+          set -eu
+          for shader in particle.metal gpu_burn.metal cinematic_liquid_v2.metal; do
+            install -m 0644 "$PROJECT_DIR/../shaders/$shader" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/$shader"
+          done
+        inputFiles:
+          - "$(PROJECT_DIR)/../shaders/particle.metal"
+          - "$(PROJECT_DIR)/../shaders/gpu_burn.metal"
+          - "$(PROJECT_DIR)/../shaders/cinematic_liquid_v2.metal"
+        outputFiles:
+          - "$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/particle.metal"
+          - "$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/gpu_burn.metal"
+          - "$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/cinematic_liquid_v2.metal"
+
+  MangekyoTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: MangekyoTests
+    dependencies:
+      - target: Mangekyo
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_OBJC_BRIDGING_HEADER: Mangekyo/Engine/GPUBenchmark-Bridging-Header.h
+        HEADER_SEARCH_PATHS:
+          - '"$(PROJECT_DIR)/Mangekyo/Engine"'
+
+schemes:
+  Mangekyo:
+    build:
+      targets:
+        Mangekyo: all
+    test:
+      targets:
+        - MangekyoTests

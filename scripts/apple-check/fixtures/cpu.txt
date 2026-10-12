@@ -1,0 +1,149 @@
+=== Job 1 of 1: gpu_benchmark --cpu-benchmark all --cpu-time 0.2 --cpu-warmup 0.05 ===
+CPU_META	workload_version=cpu_mixed_v1_strict_group_affinity	name=AMD Ryzen 7 9800X3D 8-Core Processor	logical_count=16	physical_count=8	topology_source=WindowsCpuSet	affinity_capability=strict_group_affinity
+CPU_TOPOLOGY	core_index=0	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=2	cpu_set_id=256	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=1	group=0	logical_index=1	physical_core=0	smt_index=1	smt_width=2	cpu_set_id=257	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=2	group=0	logical_index=2	physical_core=1	smt_index=0	smt_width=2	cpu_set_id=258	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=3	group=0	logical_index=3	physical_core=1	smt_index=1	smt_width=2	cpu_set_id=259	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=4	group=0	logical_index=4	physical_core=2	smt_index=0	smt_width=2	cpu_set_id=260	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=5	group=0	logical_index=5	physical_core=2	smt_index=1	smt_width=2	cpu_set_id=261	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=6	group=0	logical_index=6	physical_core=3	smt_index=0	smt_width=2	cpu_set_id=262	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=7	group=0	logical_index=7	physical_core=3	smt_index=1	smt_width=2	cpu_set_id=263	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=8	group=0	logical_index=8	physical_core=4	smt_index=0	smt_width=2	cpu_set_id=264	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=9	group=0	logical_index=9	physical_core=4	smt_index=1	smt_width=2	cpu_set_id=265	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=10	group=0	logical_index=10	physical_core=5	smt_index=0	smt_width=2	cpu_set_id=266	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=11	group=0	logical_index=11	physical_core=5	smt_index=1	smt_width=2	cpu_set_id=267	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=12	group=0	logical_index=12	physical_core=6	smt_index=0	smt_width=2	cpu_set_id=268	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=13	group=0	logical_index=13	physical_core=6	smt_index=1	smt_width=2	cpu_set_id=269	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=14	group=0	logical_index=14	physical_core=7	smt_index=0	smt_width=2	cpu_set_id=270	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+CPU_TOPOLOGY	core_index=15	group=0	logical_index=15	physical_core=7	smt_index=1	smt_width=2	cpu_set_id=271	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	parked=0
+
+--- Native CPU mixed benchmark ---
+CPU: AMD Ryzen 7 9800X3D 8-Core Processor
+Topology: WindowsCpuSet, affinity: strict_group_affinity
+Workload: cpu_mixed_v1_strict_group_affinity, 3 rounds, median aggregation (the requested measurement time is split across rounds).
+Score contract: preview (formal = 15.0 s measurement, 0.2 s warm-up, 3 rounds).
+Each score is million mixed integer/branch/FP32/FP64 work units per second.
+The checksum is a dead-code-elimination sink, not a correctness oracle.
+
+--- CPU all-logical-processor test ---
+CPU_PROGRESS	mode=multi	phase=warmup	core_index=-1	core_count=16	core_fraction=0.000000	overall_fraction=0.000000	elapsed=0.000000	round_index=-1	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=16	core_fraction=0.333333	overall_fraction=0.019608	elapsed=0.066667	round_index=0	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=16	core_fraction=0.666667	overall_fraction=0.039216	elapsed=0.133333	round_index=1	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=16	core_fraction=1.000000	overall_fraction=0.058824	elapsed=0.200000	round_index=2	round_count=3
+CPU_PROGRESS	mode=multi	phase=complete	core_index=-1	core_count=16	core_fraction=1.000000	overall_fraction=0.058824	elapsed=0.200000	round_index=2	round_count=3
+All-core score (16 threads): 2603.90 MWork/s
+CPU_RESULT	kind=multi	mode=multi	core_index=-1	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_count=16	thread_count=16	pinned_threads=16	affinity=strict	valid=1	score=2603.895952	unit=MWork/s	seconds=0.066869	requested_seconds=0.200000	round_count=3	median_round=3	checksum=581dc8182ecb12c5	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=0	core_count=16	core_fraction=0.000000	overall_fraction=0.058824	elapsed=0.000006	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=16	core_fraction=0.006887	overall_fraction=0.059229	elapsed=0.001377	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=16	core_fraction=0.333371	overall_fraction=0.078434	elapsed=0.066674	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=16	core_fraction=0.666704	overall_fraction=0.098041	elapsed=0.133341	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=0	core_count=16	core_fraction=1.000000	overall_fraction=0.117647	elapsed=0.200000	round_index=2	round_count=3
+Logical processor 1 (physical core 1, SMT 1/2, InferredUniform) score: 171.31 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=0	core_count=16	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=171.308279	unit=MWork/s	seconds=0.066685	requested_seconds=0.200000	round_count=3	median_round=3	checksum=3b8b112beeac56b4	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=1	core_count=16	core_fraction=0.000000	overall_fraction=0.117647	elapsed=0.000006	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=16	core_fraction=0.000042	overall_fraction=0.117650	elapsed=0.000008	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=16	core_fraction=0.333369	overall_fraction=0.137257	elapsed=0.066674	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=16	core_fraction=0.666711	overall_fraction=0.156865	elapsed=0.133342	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=1	core_count=16	core_fraction=1.000000	overall_fraction=0.176471	elapsed=0.200000	round_index=0	round_count=3
+Logical processor 2 (physical core 1, SMT 2/2, InferredUniform) score: 198.70 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=1	core_count=16	group=0	logical_index=1	physical_core=0	smt_index=1	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=198.699883	unit=MWork/s	seconds=0.066686	requested_seconds=0.200000	round_count=3	median_round=1	checksum=aefb2364d97e949d	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=2	core_count=16	core_fraction=0.000000	overall_fraction=0.176471	elapsed=0.000006	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=16	core_fraction=0.000068	overall_fraction=0.176475	elapsed=0.000013	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=16	core_fraction=0.333401	overall_fraction=0.196082	elapsed=0.066680	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=16	core_fraction=0.666719	overall_fraction=0.215689	elapsed=0.133344	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=2	core_count=16	core_fraction=1.000000	overall_fraction=0.235294	elapsed=0.200000	round_index=1	round_count=3
+Logical processor 3 (physical core 2, SMT 1/2, InferredUniform) score: 197.37 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=2	core_count=16	group=0	logical_index=2	physical_core=1	smt_index=0	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=197.366951	unit=MWork/s	seconds=0.066680	requested_seconds=0.200000	round_count=3	median_round=2	checksum=d75f3b7546807fa4	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=3	core_count=16	core_fraction=0.000000	overall_fraction=0.235294	elapsed=0.000008	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=16	core_fraction=0.000084	overall_fraction=0.235299	elapsed=0.000017	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=16	core_fraction=0.333389	overall_fraction=0.254905	elapsed=0.066678	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=16	core_fraction=0.667946	overall_fraction=0.274585	elapsed=0.133589	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=3	core_count=16	core_fraction=1.000000	overall_fraction=0.294118	elapsed=0.200000	round_index=0	round_count=3
+Logical processor 4 (physical core 2, SMT 2/2, InferredUniform) score: 199.47 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=3	core_count=16	group=0	logical_index=3	physical_core=1	smt_index=1	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=199.467755	unit=MWork/s	seconds=0.066676	requested_seconds=0.200000	round_count=3	median_round=1	checksum=20f593b93c356fca	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=4	core_count=16	core_fraction=0.000000	overall_fraction=0.294118	elapsed=0.000015	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=4	core_count=16	core_fraction=0.000093	overall_fraction=0.294123	elapsed=0.000019	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=4	core_count=16	core_fraction=0.333402	overall_fraction=0.313730	elapsed=0.066680	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=4	core_count=16	core_fraction=0.666719	overall_fraction=0.333336	elapsed=0.133344	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=4	core_count=16	core_fraction=1.000000	overall_fraction=0.352941	elapsed=0.200000	round_index=2	round_count=3
+Logical processor 5 (physical core 3, SMT 1/2, InferredUniform) score: 200.75 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=4	core_count=16	group=0	logical_index=4	physical_core=2	smt_index=0	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=200.752705	unit=MWork/s	seconds=0.066698	requested_seconds=0.200000	round_count=3	median_round=3	checksum=322623929ca34438	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=5	core_count=16	core_fraction=0.000000	overall_fraction=0.352941	elapsed=0.000038	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=5	core_count=16	core_fraction=0.000190	overall_fraction=0.352952	elapsed=0.000038	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=5	core_count=16	core_fraction=0.333380	overall_fraction=0.372552	elapsed=0.066676	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=5	core_count=16	core_fraction=0.666746	overall_fraction=0.392162	elapsed=0.133349	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=5	core_count=16	core_fraction=1.000000	overall_fraction=0.411765	elapsed=0.200000	round_index=0	round_count=3
+Logical processor 6 (physical core 3, SMT 2/2, InferredUniform) score: 201.29 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=5	core_count=16	group=0	logical_index=5	physical_core=2	smt_index=1	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=201.288357	unit=MWork/s	seconds=0.066683	requested_seconds=0.200000	round_count=3	median_round=1	checksum=6f36692681b82f5b	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=6	core_count=16	core_fraction=0.000000	overall_fraction=0.411765	elapsed=0.000007	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=6	core_count=16	core_fraction=0.000044	overall_fraction=0.411767	elapsed=0.000009	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=6	core_count=16	core_fraction=0.333393	overall_fraction=0.431376	elapsed=0.066679	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=6	core_count=16	core_fraction=0.674890	overall_fraction=0.451464	elapsed=0.134978	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=6	core_count=16	core_fraction=1.000000	overall_fraction=0.470588	elapsed=0.200000	round_index=2	round_count=3
+Logical processor 7 (physical core 4, SMT 1/2, InferredUniform) score: 201.17 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=6	core_count=16	group=0	logical_index=6	physical_core=3	smt_index=0	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=201.172144	unit=MWork/s	seconds=0.066681	requested_seconds=0.200000	round_count=3	median_round=3	checksum=faaf9aa223b402f5	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=7	core_count=16	core_fraction=0.000000	overall_fraction=0.470588	elapsed=0.000016	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=7	core_count=16	core_fraction=0.000067	overall_fraction=0.470592	elapsed=0.000013	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=7	core_count=16	core_fraction=0.333416	overall_fraction=0.490201	elapsed=0.066683	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=7	core_count=16	core_fraction=0.666721	overall_fraction=0.509807	elapsed=0.133344	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=7	core_count=16	core_fraction=1.000000	overall_fraction=0.529412	elapsed=0.200000	round_index=0	round_count=3
+Logical processor 8 (physical core 4, SMT 2/2, InferredUniform) score: 157.54 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=7	core_count=16	group=0	logical_index=7	physical_core=3	smt_index=1	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=157.536336	unit=MWork/s	seconds=0.066717	requested_seconds=0.200000	round_count=3	median_round=1	checksum=64eab8703276fab1	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=8	core_count=16	core_fraction=0.000000	overall_fraction=0.529412	elapsed=0.000031	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=8	core_count=16	core_fraction=0.005554	overall_fraction=0.529738	elapsed=0.001111	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=8	core_count=16	core_fraction=0.333594	overall_fraction=0.549035	elapsed=0.066719	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=8	core_count=16	core_fraction=0.670114	overall_fraction=0.568830	elapsed=0.134023	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=8	core_count=16	core_fraction=1.000000	overall_fraction=0.588235	elapsed=0.200000	round_index=1	round_count=3
+Logical processor 9 (physical core 5, SMT 1/2, InferredUniform) score: 200.77 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=8	core_count=16	group=0	logical_index=8	physical_core=4	smt_index=0	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=200.771364	unit=MWork/s	seconds=0.066671	requested_seconds=0.200000	round_count=3	median_round=2	checksum=99ef09d150097af7	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=9	core_count=16	core_fraction=0.000000	overall_fraction=0.588235	elapsed=0.000005	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=9	core_count=16	core_fraction=0.000048	overall_fraction=0.588238	elapsed=0.000010	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=9	core_count=16	core_fraction=0.333385	overall_fraction=0.607846	elapsed=0.066677	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=9	core_count=16	core_fraction=0.666706	overall_fraction=0.627453	elapsed=0.133341	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=9	core_count=16	core_fraction=1.000000	overall_fraction=0.647059	elapsed=0.200000	round_index=0	round_count=3
+Logical processor 10 (physical core 5, SMT 2/2, InferredUniform) score: 201.32 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=9	core_count=16	group=0	logical_index=9	physical_core=4	smt_index=1	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=201.323982	unit=MWork/s	seconds=0.066672	requested_seconds=0.200000	round_count=3	median_round=1	checksum=6f36692681b82f5b	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=10	core_count=16	core_fraction=0.000000	overall_fraction=0.647059	elapsed=0.000006	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=10	core_count=16	core_fraction=0.000867	overall_fraction=0.647110	elapsed=0.000173	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=10	core_count=16	core_fraction=0.333407	overall_fraction=0.666671	elapsed=0.066681	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=10	core_count=16	core_fraction=0.666716	overall_fraction=0.686277	elapsed=0.133343	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=10	core_count=16	core_fraction=1.000000	overall_fraction=0.705882	elapsed=0.200000	round_index=2	round_count=3
+Logical processor 11 (physical core 6, SMT 1/2, InferredUniform) score: 200.99 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=10	core_count=16	group=0	logical_index=10	physical_core=5	smt_index=0	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=200.989070	unit=MWork/s	seconds=0.066681	requested_seconds=0.200000	round_count=3	median_round=3	checksum=c0ea43e2ba50e0d6	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=11	core_count=16	core_fraction=0.000000	overall_fraction=0.705882	elapsed=0.000007	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=11	core_count=16	core_fraction=0.000078	overall_fraction=0.705887	elapsed=0.000016	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=11	core_count=16	core_fraction=0.333378	overall_fraction=0.725493	elapsed=0.066676	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=11	core_count=16	core_fraction=0.666709	overall_fraction=0.745101	elapsed=0.133342	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=11	core_count=16	core_fraction=1.000000	overall_fraction=0.764706	elapsed=0.200000	round_index=0	round_count=3
+Logical processor 12 (physical core 6, SMT 2/2, InferredUniform) score: 201.41 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=11	core_count=16	group=0	logical_index=11	physical_core=5	smt_index=1	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=201.405165	unit=MWork/s	seconds=0.066685	requested_seconds=0.200000	round_count=3	median_round=1	checksum=901929211bb6dd71	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=12	core_count=16	core_fraction=0.000000	overall_fraction=0.764706	elapsed=0.000020	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=12	core_count=16	core_fraction=0.000055	overall_fraction=0.764709	elapsed=0.000011	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=12	core_count=16	core_fraction=0.333504	overall_fraction=0.784324	elapsed=0.066701	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=12	core_count=16	core_fraction=0.668600	overall_fraction=0.804035	elapsed=0.133720	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=12	core_count=16	core_fraction=1.000000	overall_fraction=0.823529	elapsed=0.200000	round_index=2	round_count=3
+Logical processor 13 (physical core 7, SMT 1/2, InferredUniform) score: 198.80 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=12	core_count=16	group=0	logical_index=12	physical_core=6	smt_index=0	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=198.804234	unit=MWork/s	seconds=0.066672	requested_seconds=0.200000	round_count=3	median_round=3	checksum=2766a3122a7bc51a	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=13	core_count=16	core_fraction=0.000000	overall_fraction=0.823529	elapsed=0.000006	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=13	core_count=16	core_fraction=0.000043	overall_fraction=0.823532	elapsed=0.000009	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=13	core_count=16	core_fraction=0.333919	overall_fraction=0.843172	elapsed=0.066784	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=13	core_count=16	core_fraction=0.666711	overall_fraction=0.862748	elapsed=0.133342	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=13	core_count=16	core_fraction=1.000000	overall_fraction=0.882353	elapsed=0.200000	round_index=0	round_count=3
+Logical processor 14 (physical core 7, SMT 2/2, InferredUniform) score: 201.45 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=13	core_count=16	group=0	logical_index=13	physical_core=6	smt_index=1	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=201.447457	unit=MWork/s	seconds=0.066671	requested_seconds=0.200000	round_count=3	median_round=1	checksum=901929211bb6dd71	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=14	core_count=16	core_fraction=0.000000	overall_fraction=0.882353	elapsed=0.000007	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=14	core_count=16	core_fraction=0.000040	overall_fraction=0.882355	elapsed=0.000008	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=14	core_count=16	core_fraction=0.333391	overall_fraction=0.901964	elapsed=0.066678	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=14	core_count=16	core_fraction=0.672942	overall_fraction=0.921938	elapsed=0.134588	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=14	core_count=16	core_fraction=1.000000	overall_fraction=0.941176	elapsed=0.200000	round_index=2	round_count=3
+Logical processor 15 (physical core 8, SMT 1/2, InferredUniform) score: 201.19 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=14	core_count=16	group=0	logical_index=14	physical_core=7	smt_index=0	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=201.190549	unit=MWork/s	seconds=0.066675	requested_seconds=0.200000	round_count=3	median_round=3	checksum=faaf9aa223b402f5	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=15	core_count=16	core_fraction=0.000000	overall_fraction=0.941176	elapsed=0.000007	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=15	core_count=16	core_fraction=0.000044	overall_fraction=0.941179	elapsed=0.000009	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=15	core_count=16	core_fraction=0.333384	overall_fraction=0.960787	elapsed=0.066677	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=15	core_count=16	core_fraction=0.666711	overall_fraction=0.980395	elapsed=0.133342	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=15	core_count=16	core_fraction=1.000000	overall_fraction=1.000000	elapsed=0.200000	round_index=2	round_count=3
+Logical processor 16 (physical core 8, SMT 2/2, InferredUniform) score: 201.45 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=median	core_index=15	core_count=16	group=0	logical_index=15	physical_core=7	smt_index=1	smt_width=2	efficiency_class=0	performance_level=0	core_class=InferredUniform	classification_source=inferred_windows_efficiency_class_rank	affinity=strict	valid=1	score=201.447759	unit=MWork/s	seconds=0.066671	requested_seconds=0.200000	round_count=3	median_round=3	checksum=901929211bb6dd71	checksum_role=dce_sink
+Average per-logical-processor score: 195.94 MWork/s
+CPU_RESULT	kind=summary	mode=per_core	workload_version=cpu_mixed_v1_strict_group_affinity	score_contract=preview	aggregation=arithmetic_mean_of_per_core_medians	core_count=16	completed=16	invalid_count=0	valid=1	average_score=195.935749	min_score=157.536336	max_score=201.447759	unit=MWork/s	round_count=3	checksum=f011602c120204f3	checksum_role=dce_sink

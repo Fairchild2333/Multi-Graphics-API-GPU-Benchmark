@@ -1,5 +1,8 @@
 #include "cpu_benchmark.h"
 
+#include "cpu_parked_cores.h"
+#include "system_info.h"
+
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -125,6 +128,8 @@ static std::string Hex64(std::uint64_t value) {
 }
 
 static std::string CpuName() {
+    // Phones name their system-on-chip through the system, not /proc/cpuinfo.
+    if (std::string soc = MobileSocName(); !soc.empty()) return soc;
 #if defined(_M_X64) || defined(_M_IX86)
     int regs[4]{};
     __cpuid(regs, static_cast<int>(0x80000000u));
@@ -340,16 +345,36 @@ static int ReadIntFile(const std::string& path, int fallback) {
     return value;
 }
 
+static std::string ReadLineFile(const std::string& path) {
+    std::ifstream file(path);
+    std::string line;
+    if (file) std::getline(file, line);
+    return line;
+}
+
 static std::vector<CpuLogicalProcessor> ProbeLinuxTopology(std::string& source) {
     // Enumerate the calling process's actual allowed set. Containers and
     // Android cpusets commonly expose sparse logical IDs, so 0..online-1 is
     // not a valid affinity target list.
+    //
+    // sched_getaffinity() leaves out the cores a phone has parked for want of
+    // work, so the configured mask is read as well: a parked core belongs to
+    // the machine and comes back when it is given work (cpu_parked_cores.h).
+    //
+    // Cores a hot-plug governor has switched off are brought back first and
+    // held for as long as this function reads their files.
+    const parked_cores::AllOnline allOnline;
     std::vector<int> logicalIds;
     cpu_set_t allowed;
+    cpu_set_t configured;
     CPU_ZERO(&allowed);
-    if (sched_getaffinity(0, sizeof(allowed), &allowed) == 0) {
+    CPU_ZERO(&configured);
+    const bool haveAllowed = sched_getaffinity(0, sizeof(allowed), &allowed) == 0;
+    parked_cores::ReadConfiguredCpus(configured);
+    if (haveAllowed) {
         for (int cpu = 0; cpu < CPU_SETSIZE; ++cpu) {
-            if (CPU_ISSET(cpu, &allowed)) logicalIds.push_back(cpu);
+            if (CPU_ISSET(cpu, &allowed) || CPU_ISSET(cpu, &configured))
+                logicalIds.push_back(cpu);
         }
         source = "LinuxAllowedCpuSet+Sysfs";
     }
@@ -364,12 +389,20 @@ static std::vector<CpuLogicalProcessor> ProbeLinuxTopology(std::string& source) 
 
     std::vector<CpuLogicalProcessor> result;
     result.reserve(logicalIds.size());
-    std::map<std::pair<int, int>, std::uint32_t> coreOrdinals;
+    std::map<std::string, std::uint32_t> coreOrdinals;
     for (const int logicalId : logicalIds) {
         const std::string base = "/sys/devices/system/cpu/cpu" + std::to_string(logicalId);
-        const int package = ReadIntFile(base + "/topology/physical_package_id", 0);
-        const int coreId = ReadIntFile(base + "/topology/core_id", logicalId);
-        auto key = std::make_pair(package, coreId);
+        // A core is known by the list of processors that share it. Package and
+        // core_id are the fallback only: HarmonyOS on its own kernel numbers
+        // core_id per processor, and a MateBook Pro (Kirin X90, ten cores of
+        // two threads each) came out as twenty cores (2026-10-08).
+        std::string key = ReadLineFile(base + "/topology/core_cpus_list");
+        if (key.empty()) key = ReadLineFile(base + "/topology/thread_siblings_list");
+        if (key.empty()) {
+            const int package = ReadIntFile(base + "/topology/physical_package_id", 0);
+            const int coreId = ReadIntFile(base + "/topology/core_id", logicalId);
+            key = "package " + std::to_string(package) + " core " + std::to_string(coreId);
+        }
         auto inserted = coreOrdinals.emplace(key, static_cast<std::uint32_t>(coreOrdinals.size()));
 
         CpuLogicalProcessor cpu;
@@ -385,6 +418,7 @@ static std::vector<CpuLogicalProcessor> ProbeLinuxTopology(std::string& source) 
         cpu.efficiencyClass = capacity;
         if (capacity >= 0)
             cpu.classificationSource = "inferred_capacity_or_max_frequency_rank";
+        cpu.parked = haveAllowed && !CPU_ISSET(logicalId, &allowed);
         result.push_back(cpu);
     }
     return result;
@@ -421,9 +455,58 @@ static std::vector<CpuLogicalProcessor> ProbeAppleTopology(std::string& source) 
 }
 #endif
 
+#if defined(__OHOS__)
+// HarmonyOS on its own kernel does not hold a thread to any one processor. On
+// a MateBook Pro (Kirin X90, 2026-10-08) a mask naming one of the eight
+// big-core processors came back as "4-19", and sched_getcpu() counted cores
+// where the masks count processors. Results from such a system are
+// scheduler_managed, as on macOS; a thread still asks for its processor, and
+// the system follows where it will. The emulators run a Linux kernel, hold
+// every thread and stay strict.
+struct OhosAffinity {
+    bool everyProcessorPins = true;      // a one-processor mask comes back as asked
+    bool getcpuNamesProcessors = true;   // and sched_getcpu() then names that processor
+};
+
+static const OhosAffinity& ProbedOhosAffinity() {
+    static const OhosAffinity probed = [] {
+        OhosAffinity result;
+        cpu_set_t before;
+        CPU_ZERO(&before);
+        if (sched_getaffinity(0, sizeof(before), &before) != 0) return result;
+        for (int cpu = 0; cpu < CPU_SETSIZE; ++cpu) {
+            if (!CPU_ISSET(cpu, &before)) continue;
+            cpu_set_t requested;
+            CPU_ZERO(&requested);
+            CPU_SET(cpu, &requested);
+            cpu_set_t actual;
+            CPU_ZERO(&actual);
+            if (sched_setaffinity(0, sizeof(requested), &requested) != 0 ||
+                sched_getaffinity(0, sizeof(actual), &actual) != 0 ||
+                std::memcmp(&requested, &actual, sizeof(cpu_set_t)) != 0) {
+                result.everyProcessorPins = false;
+                continue;
+            }
+            // Give the move a moment before asking where the thread is.
+            const auto until = std::chrono::steady_clock::now() + std::chrono::milliseconds(2);
+            while (std::chrono::steady_clock::now() < until) {}
+            if (sched_getcpu() != cpu) result.getcpuNamesProcessors = false;
+        }
+        sched_setaffinity(0, sizeof(before), &before);
+        return result;
+    }();
+    return probed;
+}
+#endif
+
 class ThreadAffinityScope {
 public:
-    explicit ThreadAffinityScope(const CpuLogicalProcessor& cpu) {
+    // `wakeParked`: when the system has parked the processor, put work on the
+    // cores until it is back (Linux family). Only a thread that has not begun
+    // its measurement may do that; an observer must not.
+    explicit ThreadAffinityScope(const CpuLogicalProcessor& cpu, bool wakeParked = true)
+        : logicalIndex_(cpu.logicalIndex) {
+        (void)wakeParked;
 #ifdef _WIN32
         GROUP_AFFINITY requested{};
         requested.Group = cpu.group;
@@ -436,15 +519,23 @@ public:
                            actual.Group == requested.Group && actual.Mask == requested.Mask;
             }
         }
-#elif defined(__ANDROID__)
-        // Bionic: sched_*affinity. glibc pthread_*affinity_np is unavailable.
+#elif defined(__ANDROID__) || defined(__OHOS__)
+        // Bionic and the HarmonyOS C library have sched_*affinity only; the
+        // pthread_*affinity_np calls of glibc are unavailable.
         CPU_ZERO(&previous_);
-        havePrevious_ = sched_getaffinity(0, sizeof(previous_), &previous_) == 0;
+        // The configured mask, not sched_getaffinity(): putting back a mask
+        // that lacks a parked core would shut this thread out of that core
+        // for good.
+        havePrevious_ = parked_cores::ReadConfiguredCpus(previous_) ||
+                        sched_getaffinity(0, sizeof(previous_), &previous_) == 0;
         cpu_set_t requested;
         CPU_ZERO(&requested);
         if (cpu.logicalIndex < CPU_SETSIZE) {
             CPU_SET(cpu.logicalIndex, &requested);
-            changed_ = sched_setaffinity(0, sizeof(requested), &requested) == 0;
+            const auto pin = [&requested] {
+                return sched_setaffinity(0, sizeof(requested), &requested) == 0 ? 0 : errno;
+            };
+            changed_ = wakeParked ? parked_cores::SetAffinityWaking(pin) : pin() == 0;
             if (changed_) {
                 cpu_set_t actual;
                 CPU_ZERO(&actual);
@@ -458,13 +549,16 @@ public:
         }
 #elif defined(__linux__)
         CPU_ZERO(&previous_);
-        havePrevious_ = pthread_getaffinity_np(pthread_self(), sizeof(previous_), &previous_) == 0;
+        havePrevious_ = parked_cores::ReadConfiguredCpus(previous_) ||
+            pthread_getaffinity_np(pthread_self(), sizeof(previous_), &previous_) == 0;
         cpu_set_t requested;
         CPU_ZERO(&requested);
         if (cpu.logicalIndex < CPU_SETSIZE) {
             CPU_SET(cpu.logicalIndex, &requested);
-            changed_ = pthread_setaffinity_np(
-                           pthread_self(), sizeof(requested), &requested) == 0;
+            const auto pin = [&requested] {
+                return pthread_setaffinity_np(pthread_self(), sizeof(requested), &requested);
+            };
+            changed_ = wakeParked ? parked_cores::SetAffinityWaking(pin) : pin() == 0;
             if (changed_) {
                 cpu_set_t actual;
                 CPU_ZERO(&actual);
@@ -484,7 +578,7 @@ public:
     ~ThreadAffinityScope() {
 #ifdef _WIN32
         if (changed_) SetThreadGroupAffinity(GetCurrentThread(), &previous_, nullptr);
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) || defined(__OHOS__)
         if (changed_ && havePrevious_)
             sched_setaffinity(0, sizeof(previous_), &previous_);
 #elif defined(__linux__)
@@ -495,7 +589,24 @@ public:
 
     bool strict() const { return applied_; }
 
+    // Call on the pinned thread once its measurement is over: true when it is
+    // still on its processor. A phone can park a core under a pinned thread
+    // and carry the thread to another one, which would put that core's speed
+    // under this core's name.
+    bool held() const {
+#if defined(__OHOS__)
+        if (!ProbedOhosAffinity().getcpuNamesProcessors) return applied_;
+#endif
+#if defined(__linux__)
+        return applied_ && sched_getcpu() == static_cast<int>(logicalIndex_);
+#else
+        (void)logicalIndex_;
+        return applied_;
+#endif
+    }
+
 private:
+    std::uint32_t logicalIndex_ = 0;
     bool applied_ = false;
     bool changed_ = false;
 #ifdef _WIN32
@@ -507,6 +618,9 @@ private:
 };
 
 static std::string PlatformAffinityCapability() {
+#if defined(__OHOS__)
+    if (!ProbedOhosAffinity().everyProcessorPins) return "scheduler_managed";
+#endif
 #if defined(_WIN32)
     return "strict_group_affinity";
 #elif defined(__linux__) || defined(__ANDROID__)
@@ -522,6 +636,9 @@ static std::string PlatformAffinityCapability() {
 }
 
 static std::string SingleAffinityMode(bool applied) {
+#if defined(__OHOS__)
+    if (!ProbedOhosAffinity().everyProcessorPins) return "scheduler_managed";
+#endif
 #if defined(_WIN32)
     return applied ? "strict" : "failed";
 #elif defined(__linux__) || defined(__ANDROID__)
@@ -536,6 +653,9 @@ static std::string SingleAffinityMode(bool applied) {
 }
 
 static bool SingleAffinityIsValid(bool applied) {
+#if defined(__OHOS__)
+    if (!ProbedOhosAffinity().everyProcessorPins) return true;
+#endif
 #if defined(_WIN32) || defined(__linux__) || defined(__ANDROID__)
     return applied;
 #else
@@ -658,6 +778,7 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
             rounds.push_back(sample);
         }
 
+        result.strictAffinity = affinity.held();
         const std::size_t median = MedianRoundIndex(rounds);
         result.workUnits = rounds[median].workUnits;
         result.checksum = rounds[median].checksum;
@@ -677,7 +798,7 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
     // topology and affinity APIs make that possible.  This is deliberately not
     // part of the result-validity contract: only the measured worker must pin.
     std::optional<ThreadAffinityScope> observerAffinity;
-    if (observerCpu) observerAffinity.emplace(*observerCpu);
+    if (observerCpu) observerAffinity.emplace(*observerCpu, false);
 
     // Keep formatting, flushing, and progress bookkeeping entirely outside the
     // measured thread.  The condition variable wakes immediately at phase
@@ -739,6 +860,9 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
 }
 
 static std::string MultiAffinityMode(std::uint32_t pinned, std::uint32_t threads) {
+#if defined(__OHOS__)
+    if (!ProbedOhosAffinity().everyProcessorPins) return "scheduler_managed";
+#endif
 #if defined(_WIN32)
     return pinned == threads ? "strict" : (pinned == 0 ? "failed" : "partial");
 #elif defined(__linux__) || defined(__ANDROID__)
@@ -751,16 +875,6 @@ static std::string MultiAffinityMode(std::uint32_t pinned, std::uint32_t threads
     (void)pinned;
     (void)threads;
     return "unsupported";
-#endif
-}
-
-static bool MultiAffinityIsValid(std::uint32_t pinned, std::uint32_t threads) {
-#if defined(_WIN32) || defined(__linux__) || defined(__ANDROID__)
-    return pinned == threads;
-#else
-    (void)pinned;
-    (void)threads;
-    return true;
 #endif
 }
 
@@ -804,7 +918,6 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
         for (std::size_t i = 0; i < cpus.size(); ++i) {
             workers.emplace_back([&, i] {
                 ThreadAffinityScope affinity(cpus[i]);
-                const bool strict = affinity.strict();
                 KernelState state = MakeKernelState(static_cast<std::uint64_t>(i) + 0x10001u);
                 {
                     std::unique_lock<std::mutex> lock(gate.mutex);
@@ -821,6 +934,7 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
                     if (Clock::now() >= gate.measureEnd) break;
                 }
                 const auto finished = Clock::now();
+                const bool strict = affinity.held();
                 const std::uint64_t checksum =
                     state.checksum ^ state.a ^ RotL(state.b, 13);
                 // One isolated publication after timing: the hot loop performs
@@ -908,8 +1022,12 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
     result.roundCount = static_cast<std::uint32_t>(rounds.size());
     result.medianRound = static_cast<std::uint32_t>(median + 1u);
     result.affinityMode = MultiAffinityMode(result.pinnedThreadCount, result.threadCount);
-    result.valid = result.workUnits > 0 &&
-        MultiAffinityIsValid(result.pinnedThreadCount, result.threadCount);
+    // As many busy threads as there are processors fill the machine wherever
+    // the system puts them, so this result does not depend on the pinning (the
+    // user's decision of 2026-10-08). How many threads were held is recorded
+    // beside it. Which processor a thread is on matters to the per-processor
+    // test, and there it stays a condition.
+    result.valid = result.workUnits > 0;
     EmitProgress(out, "multi", "complete", -1, cpus.size(), 1.0,
                  static_cast<double>(stageIndex + 1u) / static_cast<double>(totalStages),
                  config.measureSeconds, static_cast<int>(result.medianRound) - 1,
@@ -925,6 +1043,11 @@ CpuBenchmarkReport ProbeCpuTopology() {
     report.affinityCapability = PlatformAffinityCapability();
     report.workloadVersion = std::string(kCpuBenchmarkWorkloadVersion) + "_" +
                              report.affinityCapability;
+    // The test does much 64-bit integer work, which 32-bit code does in several
+    // instructions per operation: a Cortex-A15 running it as 32-bit code scored
+    // less than half of a 64-bit Cortex-A53 per GHz (2026-10-08). Such results
+    // are a group of their own and are not charted with 64-bit ones.
+    if (sizeof(void*) == 4) report.workloadVersion += "_32bit";
 #ifdef _WIN32
     report.processors = ProbeWindowsCpuSets(report.topologySource);
     if (report.processors.empty())
@@ -1017,8 +1140,12 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
         out << std::fixed << std::setprecision(2)
             << "All-core score (" << report.multiCore.threadCount << " threads): "
             << report.multiCore.scoreMWorkPerSec << " MWork/s"
-            << (report.multiCore.valid ? "" : " [INVALID: affinity contract not met]")
+            << (report.multiCore.valid ? "" : " [INVALID: nothing was measured]")
             << "\n";
+        if (report.multiCore.affinityMode == "partial" || report.multiCore.affinityMode == "failed") {
+            out << "  " << report.multiCore.pinnedThreadCount << " of " << report.multiCore.threadCount
+                << " threads were held to their processor; the all-core score does not depend on it.\n";
+        }
         out << std::fixed << std::setprecision(6)
             << "CPU_RESULT\tkind=multi\tmode=multi\tcore_index=-1"
             << "\tworkload_version=" << report.workloadVersion
@@ -1037,13 +1164,6 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
             << "\tmedian_round=" << report.multiCore.medianRound
             << "\tchecksum=" << Hex64(report.multiCore.checksum)
             << "\tchecksum_role=dce_sink" << '\n' << std::flush;
-#if defined(_WIN32) || defined(__linux__) || defined(__ANDROID__)
-        if (!report.multiCore.valid) {
-            out << "CPU_ERROR\tmessage=required_multicore_affinity_failed"
-                << "\tpinned_threads=" << report.multiCore.pinnedThreadCount
-                << "\tthread_count=" << report.multiCore.threadCount << '\n' << std::flush;
-        }
-#endif
         ++stage;
     };
 

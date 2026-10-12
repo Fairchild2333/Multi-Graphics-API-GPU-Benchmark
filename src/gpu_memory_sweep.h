@@ -101,6 +101,8 @@ struct GpuMemorySweepReport {
 
 /// Runs the sweep, writing a human-readable table plus TAB-separated MEMSWEEP_*
 /// records to `out`. Every record is flushed so a GUI can stream it.
+int RunGpuMemorySweepCli(const GpuMemorySweepConfig& config, bool saveResult = false);
+
 GpuMemorySweepReport RunGpuMemorySweep(const GpuMemorySweepConfig& config,
                                        std::ostream& out);
 

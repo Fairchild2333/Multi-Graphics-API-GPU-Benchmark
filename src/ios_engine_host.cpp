@@ -1,26 +1,22 @@
 #include "ios_engine_host.h"
 
+#include "embedded_request.h"
 #include "gpu_engine.h"
 #include "metal_backend.h"
 
+#include <algorithm>
 #include <atomic>
 #include <cstdlib>
 #include <exception>
 #include <memory>
 #include <mutex>
+#include <stdexcept>
 
 namespace gpu_bench::ios_host {
 namespace {
 
 std::atomic<bool> g_running{false};
 std::mutex g_runMutex;
-
-Workload ParseWorkload(const std::string& id) {
-    if (id == "stream" || id == "particle") return Workload::Stream;
-    if (id == "gpu_burn") return Workload::GpuBurnV1;
-    if (id == "cinematic_liquid") return Workload::CinematicLiquid;
-    throw std::invalid_argument("unsupported iOS workload id: " + id);
-}
 
 std::string EnsureTrailingSlash(std::string path) {
     if (path.empty()) return path;
@@ -37,7 +33,7 @@ bool IsRunning() {
 
 int RunWorkload(const RunRequest& request, std::string& errorOut) {
     errorOut.clear();
-    if (!request.metalLayer) {
+    if (!request.metalLayer && request.workloadId.rfind("stream_headless", 0) != 0) {
         errorOut = "CAMetalLayer is null";
         return 2;
     }
@@ -60,22 +56,13 @@ int RunWorkload(const RunRequest& request, std::string& errorOut) {
 
     try {
         BenchmarkConfig cfg;
-        cfg.workload = ParseWorkload(request.workloadId);
+        // The test and its size, as the desktop command line sets them.
+        ApplyEmbeddedTest(request.workloadId, cfg);
         cfg.maxRunTimeSec = request.maxRunTimeSec > 0.0 ? request.maxRunTimeSec : 3.0;
-        cfg.warmupTimeSec = std::min(0.5, cfg.maxRunTimeSec * 0.2);
-        cfg.particleCount = request.particleCount;
         cfg.renderDocEnabled = false;
         cfg.captureAtSec = -1.0;
         cfg.captureAtFrame = -1;
-        cfg.headless = false;
-        cfg.vsync = true;  // iOS display path; avoid offscreen ProMotion bypass
-        if (cfg.workload == Workload::GpuBurnV1) {
-            cfg.gpuBurnIter = kGpuBurnV3LightIter;
-            cfg.difficultyLabel = "Light";
-        }
-        if (cfg.workload == Workload::CinematicLiquid) {
-            cfg.difficultyLabel = "Mobile";
-        }
+        // ApplyEmbeddedTest preserves compute-only requests and V-Sync.
 
         auto app = std::make_unique<MetalBackend>(
             /*gpuIndex=*/0, EnsureTrailingSlash(request.shaderDir), cfg);

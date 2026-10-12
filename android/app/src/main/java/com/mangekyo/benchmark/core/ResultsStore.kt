@@ -2,15 +2,16 @@ package com.mangekyo.benchmark.core
 
 import android.content.Context
 import org.json.JSONArray
-import org.json.JSONObject
 import java.io.File
 
 /**
  * Results live under app-specific storage (no storage permission), matching
  * Windows %LOCALAPPDATA%/GpuComputeBenchmark semantics.
  *
- * Schema must stay identical to desktop results.json; Android only adds
- * metadata fields already allowed by the contract (ABI / OS / SoC).
+ * The engine is the only writer of results.json (src/benchmark_results.cpp);
+ * this class reads it and can empty it. It reads every member as optional, so
+ * files of older builds (members missing) and of newer builds (members it does
+ * not know) both load.
  */
 data class HistoryEntry(
     val id: String,
@@ -22,7 +23,22 @@ data class HistoryEntry(
     val scoreUnit: String?,
     val timestamp: String?,
     val abi: String?,
-)
+    /** Make and model of the device, its chip, system release and memory; empty or 0 in older results. */
+    val deviceModel: String = "",
+    val cpuName: String = "",
+    val osVersion: String = "",
+    val systemMemoryMB: Long = 0,
+) {
+    /** "Xiaomi 23049PCD8G · QTI SM8550 · Android 14 (API 34) · 11.2 GB RAM", from what the result has. */
+    val machineLine: String
+        get() = listOf(
+            deviceModel,
+            // A CPU result already shows the chip as its device name.
+            cpuName.takeIf { it != deviceName && !it.startsWith("Unknown") }.orEmpty(),
+            osVersion,
+            if (systemMemoryMB > 0) String.format("%.1f GB RAM", systemMemoryMB / 1024.0) else "",
+        ).filter { it.isNotBlank() }.joinToString(" · ")
+}
 
 class ResultsStore(private val context: Context) {
     val resultsFile: File
@@ -52,13 +68,18 @@ class ResultsStore(private val context: Context) {
                             score = o.optDouble("score").takeIf { o.has("score") && !o.isNull("score") },
                             scoreUnit = o.optString("scoreUnit").ifBlank { null },
                             timestamp = o.optString("timestamp").ifBlank { null },
+                            // The engine saves the architecture of the process, not an ABI name.
                             abi = o.optString("abi").ifBlank {
-                                o.optJSONObject("workloadConfig")?.optString("abi")
+                                o.optString("processArchitecture").takeIf { it.isNotBlank() && it != "Unknown" }
                             },
+                            deviceModel = o.optString("deviceModel"),
+                            cpuName = o.optString("cpuName"),
+                            osVersion = o.optString("osVersion"),
+                            systemMemoryMB = o.optLong("systemMemoryMB", 0),
                         ),
                     )
                 }
-            }
+            }.sortedByDescending { it.timestamp.orEmpty() }  // newest first, as on the other platforms
         } catch (_: Exception) {
             emptyList()
         }
@@ -67,21 +88,5 @@ class ResultsStore(private val context: Context) {
     fun clearAll() {
         ensureDir()
         resultsFile.writeText("[]\n")
-    }
-
-    /** Debug / future engine hook: append one JSON object (must already be contract-shaped). */
-    fun appendRawObject(obj: JSONObject) {
-        ensureDir()
-        val arr = if (resultsFile.exists() && resultsFile.length() > 0) {
-            try {
-                JSONArray(resultsFile.readText())
-            } catch (_: Exception) {
-                JSONArray()
-            }
-        } else {
-            JSONArray()
-        }
-        arr.put(obj)
-        resultsFile.writeText(arr.toString(2) + "\n")
     }
 }

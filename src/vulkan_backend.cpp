@@ -5,6 +5,7 @@
 #include "mini_mat.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <iostream>
@@ -14,12 +15,16 @@
 
 #if defined(__ANDROID__)
 #include <android/native_window.h>
+#elif defined(__OHOS__)
+#include <native_window/external_window.h>
 #endif
 
-
-#if defined(__ANDROID__)
-// NDK libvulkan is a Vulkan 1.0 stub: 1.1 device-group entry points are absent.
-// Multi-GPU AFR is desktop-only; keep single-GPU Android paths compiling.
+// Android and HarmonyOS draw into a window that the host app owns, and stay on
+// Vulkan 1.0 entry points with one GPU. The NDK libvulkan is a 1.0 stub without
+// the 1.1 device-group entry points; HarmonyOS exports them, but its app uses
+// the same single-GPU path. Multi-GPU AFR is desktop-only.
+#if defined(__ANDROID__) || defined(__OHOS__)
+#define GPU_BENCH_EMBEDDED_VULKAN 1
 #endif
 namespace gpu_bench {
 
@@ -75,6 +80,7 @@ void VulkanBackend::InitBackend() {
     }
     CreateSyncObjects();
     CreateTimestampQueryPool();
+    CheckTimestampsAgainstWallClock();
 
     SetObjectName(VK_OBJECT_TYPE_BUFFER,   reinterpret_cast<std::uint64_t>(particleBuffer_),   "Particle SSBO");
     SetObjectName(VK_OBJECT_TYPE_PIPELINE, reinterpret_cast<std::uint64_t>(computePipeline_),  "Compute Pipeline");
@@ -104,7 +110,7 @@ void VulkanBackend::CreateInstance() {
     appInfo.pEngineName        = "Mangekyo";
     appInfo.engineVersion      = VK_MAKE_VERSION(0, 1, 0);
     // Android primary floor is Vulkan 1.0 (Tegra K1). Desktop keeps 1.1.
-#if defined(__ANDROID__)
+#if defined(GPU_BENCH_EMBEDDED_VULKAN)
     appInfo.apiVersion         = VK_API_VERSION_1_0;
 #else
     appInfo.apiVersion         = VK_API_VERSION_1_1;
@@ -115,6 +121,9 @@ void VulkanBackend::CreateInstance() {
 #if defined(__ANDROID__)
         extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
         extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
+#elif defined(__OHOS__)
+        extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+        extensions.push_back(VK_OHOS_SURFACE_EXTENSION_NAME);
 #else
         std::uint32_t glfwExtCount = 0;
         const char** glfwExts = glfwGetRequiredInstanceExtensions(&glfwExtCount);
@@ -141,8 +150,21 @@ void VulkanBackend::CreateInstance() {
     ci.enabledExtensionCount   = static_cast<std::uint32_t>(extensions.size());
     ci.ppEnabledExtensionNames = extensions.data();
 
-    if (vkCreateInstance(&ci, nullptr, &instance_) != VK_SUCCESS)
-        throw std::runtime_error("vkCreateInstance failed");
+    const VkResult created = vkCreateInstance(&ci, nullptr, &instance_);
+    if (created != VK_SUCCESS) {
+        // Say why, and what the loader offers: a device without a Vulkan
+        // driver and one without the surface extension need different answers.
+        std::cout << "[Vulkan] Instance extensions offered (" << availableExtensions.size() << "):";
+        for (const auto& ext : availableExtensions) std::cout << ' ' << ext.extensionName;
+        std::cout << std::endl;
+        const char* reason = created == VK_ERROR_INCOMPATIBLE_DRIVER   ? "no Vulkan driver on this device"
+                           : created == VK_ERROR_EXTENSION_NOT_PRESENT ? "a required instance extension is missing"
+                           : created == VK_ERROR_LAYER_NOT_PRESENT     ? "a requested layer is missing"
+                           : created == VK_ERROR_INITIALIZATION_FAILED ? "initialisation failed"
+                                                                       : "unexpected error";
+        throw std::runtime_error(std::string("vkCreateInstance failed: ") + reason + " (VkResult " +
+                                 std::to_string(static_cast<int>(created)) + ")");
+    }
 
     LoadDebugUtilsFunctions();
 }
@@ -198,6 +220,15 @@ void VulkanBackend::CreateSurface() {
     ci.window = nativeWindow;
     if (vkCreateAndroidSurfaceKHR(instance_, &ci, nullptr, &surface_) != VK_SUCCESS)
         throw std::runtime_error("vkCreateAndroidSurfaceKHR failed");
+#elif defined(__OHOS__)
+    auto* nativeWindow = static_cast<OHNativeWindow*>(window_);
+    if (!nativeWindow)
+        throw std::runtime_error("HarmonyOS Vulkan surface requires OHNativeWindow");
+    VkSurfaceCreateInfoOHOS ci{};
+    ci.sType  = VK_STRUCTURE_TYPE_SURFACE_CREATE_INFO_OHOS;
+    ci.window = nativeWindow;
+    if (vkCreateSurfaceOHOS(instance_, &ci, nullptr, &surface_) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateSurfaceOHOS failed");
 #else
     if (glfwCreateWindowSurface(instance_, window_, nullptr, &surface_) != VK_SUCCESS)
         throw std::runtime_error("glfwCreateWindowSurface failed");
@@ -378,8 +409,8 @@ void VulkanBackend::PickPhysicalDevice() {
     physicalDevice_ = devices[chosen];
 
     if (config_.multiGpuMode == MultiGpuMode::Afr) {
-#if defined(__ANDROID__)
-        throw std::runtime_error("Vulkan AFR is not supported on Android");
+#if defined(GPU_BENCH_EMBEDDED_VULKAN)
+        throw std::runtime_error("Vulkan AFR is not supported on Android or HarmonyOS");
 #else
         std::uint32_t groupCount = 0;
         VkResult groupResult = vkEnumeratePhysicalDeviceGroups(instance_, &groupCount, nullptr);
@@ -444,6 +475,13 @@ void VulkanBackend::PickPhysicalDevice() {
     // Try Vulkan 1.2 driver properties for a more descriptive string (only if device supports 1.2+).
     // Use dynamic lookup to avoid linking against vkGetPhysicalDeviceProperties2,
     // which doesn't exist in Vulkan 1.0 loaders and would cause a startup crash.
+    //
+    // Not on the embedded hosts: their instance is created as Vulkan 1.0, and
+    // a 1.1 instance command must not be called on it whatever the device
+    // supports. Android's loader hands out an address for the command all the
+    // same and then jumps through an empty driver entry (seen as a crash at
+    // address 0 on the Android 17 emulator, 2026-10-07).
+#if !defined(GPU_BENCH_EMBEDDED_VULKAN)
     if (props.apiVersion >= VK_API_VERSION_1_2) {
         auto pfnGetProps2 = reinterpret_cast<PFN_vkGetPhysicalDeviceProperties2>(
             vkGetInstanceProcAddr(instance_, "vkGetPhysicalDeviceProperties2"));
@@ -460,6 +498,7 @@ void VulkanBackend::PickPhysicalDevice() {
                 driverVersion_ = std::string(driverProps.driverName) + " " + driverVersion_;
         }
     }
+#endif
 
     std::cout << "Selected GPU [" << chosen << "]: " << deviceName_
               << "  |  Driver: " << driverVersion_ << std::endl;
@@ -512,7 +551,7 @@ void VulkanBackend::CreateLogicalDevice() {
     if (supported.shaderFloat64) features.shaderFloat64 = VK_TRUE;
 
     // Query FP16 (shaderFloat16) support for the SynthPeak FP16 variant.
-#if defined(__ANDROID__)
+#if defined(GPU_BENCH_EMBEDDED_VULKAN)
     // Android NDK libvulkan stubs are 1.0; skip Features2 / FP16 for now.
     const bool fp16Supported = false;
 #else
@@ -576,7 +615,7 @@ void VulkanBackend::CreateLogicalDevice() {
                          "device-mask submissions share one VkQueue and this driver "
                          "may serialize them.\n";
         }
-#if !defined(__ANDROID__)
+#if !defined(GPU_BENCH_EMBEDDED_VULKAN)
         VkDeviceGroupPresentCapabilitiesKHR caps{};
         caps.sType = VK_STRUCTURE_TYPE_DEVICE_GROUP_PRESENT_CAPABILITIES_KHR;
         const VkResult capsResult = vkGetDeviceGroupPresentCapabilitiesKHR(device_, &caps);
@@ -760,18 +799,24 @@ VkPresentModeKHR VulkanBackend::ChooseSwapPresentMode(
 }
 
 VkExtent2D VulkanBackend::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& caps) const {
+#if defined(GPU_BENCH_EMBEDDED_VULKAN)
+    // A test always renders kWindowWidth x kWindowHeight, as on the desktop,
+    // whatever the size of the view that shows it; the system scales the
+    // picture to the view. Taking the size of the view instead made the work
+    // per frame, and so the score, depend on how large the app happened to
+    // draw its preview (found on the Android emulator, 2026-10-07).
+    int w = static_cast<int>(kWindowWidth);
+    int h = static_cast<int>(kWindowHeight);
+#if defined(__OHOS__)
+    // HarmonyOS takes the buffer size from the window, so set it there.
+    if (auto* nativeWindow = static_cast<OHNativeWindow*>(window_)) {
+        OH_NativeWindow_NativeWindowHandleOpt(nativeWindow, SET_BUFFER_GEOMETRY, w, h);
+    }
+#endif
+#else
     if (caps.currentExtent.width != std::numeric_limits<std::uint32_t>::max())
         return caps.currentExtent;
     int w = 0, h = 0;
-#if defined(__ANDROID__)
-    if (auto* nativeWindow = static_cast<ANativeWindow*>(window_)) {
-        w = ANativeWindow_getWidth(nativeWindow);
-        h = ANativeWindow_getHeight(nativeWindow);
-    } else {
-        w = static_cast<int>(kWindowWidth);
-        h = static_cast<int>(kWindowHeight);
-    }
-#else
     glfwGetFramebufferSize(window_, &w, &h);
 #endif
     return {
@@ -785,6 +830,22 @@ void VulkanBackend::CreateSwapChain() {
     auto fmt = ChooseSwapSurfaceFormat(sc.formats);
     auto pm  = ChooseSwapPresentMode(sc.presentModes);
     auto ext = ChooseSwapExtent(sc.capabilities);
+
+    // Say how frames reach the screen. With "immediate" or "mailbox" the test
+    // renders as fast as it can; with "fifo" every frame waits for the display.
+    const char* presentName = pm == VK_PRESENT_MODE_IMMEDIATE_KHR      ? "immediate"
+                            : pm == VK_PRESENT_MODE_MAILBOX_KHR        ? "mailbox"
+                            : pm == VK_PRESENT_MODE_FIFO_RELAXED_KHR   ? "fifo_relaxed"
+                                                                       : "fifo";
+    const bool followsDisplay = pm == VK_PRESENT_MODE_FIFO_KHR || pm == VK_PRESENT_MODE_FIFO_RELAXED_KHR;
+    std::cout << "[Vulkan] Present mode: " << presentName
+              << (followsDisplay ? " (frames follow the refresh rate)" : " (not tied to the refresh rate)")
+              << std::endl;
+    if (followsDisplay && !config_.vsync) {
+        std::cout << "[Vulkan] This device offers no unsynchronised presentation; "
+                     "the frame rate is limited by the display." << std::endl;
+    }
+    presentFollowsDisplay_ = followsDisplay;
 
     // Request at least framesInFlight+1 images so the GPU doesn't stall
     // waiting for the presentation engine to release an image.
@@ -813,7 +874,18 @@ void VulkanBackend::CreateSwapChain() {
         ci.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     }
 
+#if defined(GPU_BENCH_EMBEDDED_VULKAN)
+    // The frame is drawn upright whichever way the device is held; the system
+    // turns it to the screen. Passing on the current transform would promise
+    // a picture that is already rotated.
+    ci.preTransform   = (sc.capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
+                            ? VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR
+                            : sc.capabilities.currentTransform;
+    renderWidth_      = ext.width;
+    renderHeight_     = ext.height;
+#else
     ci.preTransform   = sc.capabilities.currentTransform;
+#endif
     ci.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     ci.presentMode    = pm;
     ci.clipped        = VK_TRUE;
@@ -1434,6 +1506,7 @@ void VulkanBackend::CreateTimestampQueryPool() {
 
     if (fams[idx.graphicsFamily.value()].timestampValidBits == 0) {
         std::cout << "[Profiling] Timestamps not supported -- disabled.\n";
+        EnableSynchronizedTimingFallback("the driver has none");
         return;
     }
 
@@ -1447,6 +1520,7 @@ void VulkanBackend::CreateTimestampQueryPool() {
     ci.queryCount = kTimestampsPerFrame * config_.framesInFlight;
     if (vkCreateQueryPool(device_, &ci, nullptr, &timestampQueryPool_) != VK_SUCCESS) {
         std::cerr << "[Profiling] Failed to create query pool -- disabled.\n";
+        EnableSynchronizedTimingFallback("no query pool could be made");
         return;
     }
 
@@ -1473,6 +1547,143 @@ void VulkanBackend::CollectTimestampResults(std::uint32_t slot) {
         static_cast<double>(ts[1] - ts[0]) * toMs,
         static_cast<double>(ts[3] - ts[2]) * toMs,
         static_cast<double>(ts[3] - ts[0]) * toMs);
+}
+
+// A driver without timestamp queries left every Vulkan test without a score:
+// a Mali-G52 with driver r25p1 in a TCL television (2026-10-08) reports
+// timestampValidBits 0. A frame is then timed by wall clock, as the other
+// backends do it, and the result says so.
+void VulkanBackend::EnableSynchronizedTimingFallback(const char* reason) {
+    // Each GPU of a group would need a compute submit of its own.
+    if (synchronizedTimingFallback_ || deviceGroupAfr_) return;
+    synchronizedTimingFallback_ = true;
+    timestampsSupported_ = false;   // no queries are written from here on
+    std::cout << "[Profiling] Vulkan timestamp queries cannot be used ("
+              << reason << "); using synchronized wall-clock timing."
+              << std::endl;
+}
+
+// A driver may stamp the end of the compute pass before that work is done when
+// a render pass follows in the same command buffer. A Maleoon 916 (MateBook
+// Pro, HarmonyOS 7, 2026-10-08) read 0.002 ms for a step of 4,194,304
+// particles that takes 11 ms; the rest appeared as render time, the frame's
+// total was right, and the score came out as 643 GB/s. Its headless runs,
+// which have no render pass, were right.
+//
+// So before a shown particle run the compute part is timed both ways, as the
+// OpenGL ES backend does it: by the GPU's clock in a frame as the test draws
+// it, and by wall clock in a command buffer of its own. The frames of the
+// check take enough steps that submitting and waiting do not weigh; a step of
+// zero length leaves every particle where it is. Android and HarmonyOS only:
+// the desktop is left as it was.
+void VulkanBackend::CheckTimestampsAgainstWallClock() {
+#if defined(GPU_BENCH_EMBEDDED_VULKAN)
+    if (!timestampsSupported_ || synchronizedTimingFallback_ || config_.headless ||
+        config_.workload != Workload::Stream) return;
+
+    constexpr std::uint32_t kParticleSteps = 16777216;
+    checkDispatchRepeats_ = (std::min)(256u, (std::max)(1u,
+        (kParticleSteps + config_.particleCount - 1) / config_.particleCount));
+    checkingTimestamps_ = true;
+
+    // By wall clock: the compute part submitted alone, as the fallback does it.
+    double wallMs = (std::numeric_limits<double>::max)();
+    timestampsSupported_ = false;
+    synchronizedTimingFallback_ = true;
+    for (int attempt = 0; attempt < 2; ++attempt) {
+        DrawFrame(0.0f);
+        wallMs = (std::min)(wallMs, syncComputeMs_);
+    }
+    synchronizedTimingFallback_ = false;
+    timestampsSupported_ = true;
+
+    // By the GPU's clock: the frame as a run draws it. The compute part of
+    // the frame in `slot`, or less than nothing where the stamps are no use.
+    const auto computeMsOf = [this](std::uint32_t slot) {
+        vkWaitForFences(device_, 1, &inFlightFences_[slot], VK_TRUE, UINT64_MAX);
+        std::uint64_t ts[kTimestampsPerFrame]{};
+        const VkResult read = vkGetQueryPoolResults(device_, timestampQueryPool_,
+            slot * kTimestampsPerFrame, kTimestampsPerFrame, sizeof(ts), ts, sizeof(std::uint64_t),
+            VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
+        timestampSlotReady_[slot] = false;   // not a sample of the run
+        if (read != VK_SUCCESS || ts[1] < ts[0]) return -1.0;
+        return static_cast<double>(ts[1] - ts[0]) * static_cast<double>(timestampPeriodNs_) / 1'000'000.0;
+    };
+    // First each frame waited for, the better of two.
+    double gpuMs = 0.0;
+    for (int attempt = 0; attempt < 2; ++attempt) {
+        const std::uint32_t slot = currentFrame_;
+        DrawFrame(0.0f);
+        gpuMs = (std::max)(gpuMs, computeMsOf(slot));
+    }
+    // Then one frame behind the other, as a run submits them, and the worse of
+    // the last ones: the Maleoon's stamps were right for a frame that had the
+    // GPU to itself and wrong for one that followed another.
+    for (std::uint32_t frame = 0; frame < 2 * config_.framesInFlight; ++frame) DrawFrame(0.0f);
+    double pacedGpuMs = (std::numeric_limits<double>::max)();
+    for (std::uint32_t slot = 0; slot < config_.framesInFlight; ++slot)
+        pacedGpuMs = (std::min)(pacedGpuMs, computeMsOf(slot));
+    checkingTimestamps_ = false;
+    checkDispatchRepeats_ = 1;
+
+    std::cout << "[Profiling] Timestamp check: " << gpuMs << " ms by the GPU's clock ("
+              << pacedGpuMs << " ms with one frame behind the other), "
+              << wallMs << " ms by wall clock." << std::endl;
+    if ((std::min)(gpuMs, pacedGpuMs) < 0.5 * wallMs)
+        EnableSynchronizedTimingFallback("its timestamps do not cover the compute part of a frame");
+#endif
+}
+
+// With wall-clock timing the compute part of a frame is recorded into a
+// command buffer of its own. With timestamps both calls hand back the frame's
+// command buffer and nothing else happens.
+VkCommandBuffer VulkanBackend::BeginComputePart(VkCommandBuffer frameCmd) {
+    if (!synchronizedTimingFallback_) return frameCmd;
+    if (syncComputeCmd_ == VK_NULL_HANDLE) {
+        VkCommandBufferAllocateInfo ai{};
+        ai.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        ai.commandPool        = commandPool_;
+        ai.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        ai.commandBufferCount = 1;
+        VkFenceCreateInfo fi{};
+        fi.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        if (vkAllocateCommandBuffers(device_, &ai, &syncComputeCmd_) != VK_SUCCESS ||
+            vkCreateFence(device_, &fi, nullptr, &syncComputeFence_) != VK_SUCCESS)
+            throw std::runtime_error("Failed to create the compute-part command buffer");
+    }
+    vkResetCommandBuffer(syncComputeCmd_, 0);
+    VkCommandBufferBeginInfo bi{};
+    bi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    if (vkBeginCommandBuffer(syncComputeCmd_, &bi) != VK_SUCCESS)
+        throw std::runtime_error("vkBeginCommandBuffer (compute part) failed");
+    syncFrameCmd_ = frameCmd;
+    return syncComputeCmd_;
+}
+
+// Submits the compute part, waits for it and keeps how long that took.
+VkCommandBuffer VulkanBackend::EndComputePart(VkCommandBuffer cmd) {
+    if (!synchronizedTimingFallback_) return cmd;
+    if (vkEndCommandBuffer(cmd) != VK_SUCCESS)
+        throw std::runtime_error("vkEndCommandBuffer (compute part) failed");
+
+    VkSubmitInfo si{};
+    si.sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    si.commandBufferCount = 1;
+    si.pCommandBuffers    = &cmd;
+
+    // Nothing of an earlier frame may still be under way when the clock starts.
+    vkQueueWaitIdle(graphicsQueue_);
+    const auto begin = std::chrono::steady_clock::now();
+    const VkResult res = vkQueueSubmit(graphicsQueue_, 1, &si, syncComputeFence_);
+    if (res != VK_SUCCESS)
+        throw std::runtime_error("vkQueueSubmit (compute part) failed (VkResult " +
+                                 std::to_string(static_cast<int>(res)) + ")");
+    vkWaitForFences(device_, 1, &syncComputeFence_, VK_TRUE, UINT64_MAX);
+    syncComputeMs_ = std::chrono::duration<double, std::milli>(
+        std::chrono::steady_clock::now() - begin).count();
+    vkResetFences(device_, 1, &syncComputeFence_);
+    return syncFrameCmd_;
 }
 
 // -----------------------------------------------------------------------
@@ -1533,6 +1744,7 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
             vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, timestampQueryPool_, tsBase + 1);
     } else {
     // --- Compute pass ---
+    cmd = BeginComputePart(cmd);
     BeginDebugLabel(cmd, "Particle Compute", 0.2f, 0.8f, 0.2f);
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline_);
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
@@ -1551,10 +1763,26 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
                            sizeof(ComputeParams), &params);
     }
     vkCmdDispatch(cmd, config_.particleCount / kComputeWorkGroupSize, 1, 1);
+    // More than the one step of a frame is taken by the timestamp check only.
+    for (std::uint32_t repeat = 1; repeat < checkDispatchRepeats_; ++repeat) {
+        VkBufferMemoryBarrier betweenSteps{};
+        betweenSteps.sType               = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+        betweenSteps.srcAccessMask       = VK_ACCESS_SHADER_WRITE_BIT;
+        betweenSteps.dstAccessMask       = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+        betweenSteps.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        betweenSteps.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        betweenSteps.buffer              = particleBuffer_;
+        betweenSteps.size                = VK_WHOLE_SIZE;
+        vkCmdPipelineBarrier(cmd,
+            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+            0, 0, nullptr, 1, &betweenSteps, 0, nullptr);
+        vkCmdDispatch(cmd, config_.particleCount / kComputeWorkGroupSize, 1, 1);
+    }
     EndDebugLabel(cmd);
 
     if (timestampsSupported_)
         vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, timestampQueryPool_, tsBase + 1);
+    cmd = EndComputePart(cmd);
 
     // --- SSBO barrier: compute write → vertex read ---
     BeginDebugLabel(cmd, "SSBO Barrier (Compute -> Vertex)", 0.9f, 0.9f, 0.2f);
@@ -1637,7 +1865,19 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
         VkBuffer     bufs[] = { particleBuffer_ };
         VkDeviceSize offs[] = { 0 };
         vkCmdBindVertexBuffers(cmd, 0, 1, bufs, offs);
+#if defined(GPU_BENCH_ANDROID) || defined(GPU_BENCH_OHOS)
+        // The same points in the same order, 65,536 to a draw. One draw of a
+        // million points or more loses the GPU device on a Quest 2 (Adreno
+        // 650, driver 512.819.0, 2026-10-08): vkQueueSubmit returns
+        // VK_ERROR_DEVICE_LOST at once, with 1,048,576 particles and above,
+        // while the headless test and OpenGL ES run the same counts. In
+        // pieces it runs. The desktop draw is left as it was.
+        constexpr std::uint32_t kPointsPerDraw = 65536;
+        for (std::uint32_t first = 0; first < config_.particleCount; first += kPointsPerDraw)
+            vkCmdDraw(cmd, (std::min)(kPointsPerDraw, config_.particleCount - first), 1, first, 0);
+#else
         vkCmdDraw(cmd, config_.particleCount, 1, 0, 0);
+#endif
     }
     vkCmdEndRenderPass(cmd);
     EndDebugLabel(cmd);
@@ -1655,7 +1895,7 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
 
 void VulkanBackend::DrawFrame(float deltaTime) {
     vkWaitForFences(device_, 1, &inFlightFences_[currentFrame_], VK_TRUE, UINT64_MAX);
-    CollectTimestampResults(currentFrame_);
+    if (!checkingTimestamps_) CollectTimestampResults(currentFrame_);
 
     if (config_.headless) {
         // --- Headless: compute-only path ---
@@ -1721,11 +1961,18 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         si.commandBufferCount = 1;
         si.pCommandBuffers    = &cmd;
 
+        const auto syncBegin = std::chrono::steady_clock::now();
         VkResult res = vkQueueSubmit(computeQueue_, 1, &si, inFlightFences_[currentFrame_]);
         if (res != VK_SUCCESS)
             throw std::runtime_error("vkQueueSubmit (headless) failed");
 
         timestampSlotReady_[currentFrame_] = timestampsSupported_;
+        if (synchronizedTimingFallback_) {
+            vkWaitForFences(device_, 1, &inFlightFences_[currentFrame_], VK_TRUE, UINT64_MAX);
+            const double computeMs = std::chrono::duration<double, std::milli>(
+                std::chrono::steady_clock::now() - syncBegin).count();
+            AccumulateTiming(computeMs, 0.0, computeMs);
+        }
 
         currentFrame_ = (currentFrame_ + 1) % config_.framesInFlight;
         return;
@@ -1737,7 +1984,7 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         ? (currentFrame_ % afrDeviceCount_) : 0u;
     const std::uint32_t afrDeviceMask = 1u << afrDeviceIndex;
     VkResult res = VK_SUCCESS;
-#if defined(__ANDROID__)
+#if defined(GPU_BENCH_EMBEDDED_VULKAN)
     res = vkAcquireNextImageKHR(device_, swapChain_, UINT64_MAX,
                                 imageAvailableSemaphores_[currentFrame_],
                                 VK_NULL_HANDLE, &imageIndex);
@@ -1766,6 +2013,7 @@ void VulkanBackend::DrawFrame(float deltaTime) {
     imagesInFlight_[imageIndex] = inFlightFences_[currentFrame_];
 
     vkResetFences(device_, 1, &inFlightFences_[currentFrame_]);
+    syncComputeMs_ = 0.0;
     RecordCommandBuffer(imageIndex, deltaTime, afrDeviceMask);
 
     VkSemaphore          waitSem[]   = { imageAvailableSemaphores_[currentFrame_] };
@@ -1791,6 +2039,7 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         si.pNext = &groupSubmit;
     }
 
+    const auto syncRenderBegin = std::chrono::steady_clock::now();
     res = vkQueueSubmit(graphicsQueue_, 1, &si, inFlightFences_[currentFrame_]);
     if (res != VK_SUCCESS) {
         std::string msg = "vkQueueSubmit failed (VkResult " + std::to_string(static_cast<int>(res)) + ")";
@@ -1799,6 +2048,14 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         throw std::runtime_error(msg);
     }
     timestampSlotReady_[currentFrame_] = timestampsSupported_;
+    if (synchronizedTimingFallback_) {
+        // The compute part was waited for while the frame was recorded.
+        vkWaitForFences(device_, 1, &inFlightFences_[currentFrame_], VK_TRUE, UINT64_MAX);
+        const double renderMs = std::chrono::duration<double, std::milli>(
+            std::chrono::steady_clock::now() - syncRenderBegin).count();
+        if (!checkingTimestamps_)
+            AccumulateTiming(syncComputeMs_, renderMs, syncComputeMs_ + renderMs);
+    }
 
     VkSwapchainKHR chains[] = { swapChain_ };
     VkPresentInfoKHR pi{};
@@ -1849,6 +2106,8 @@ void VulkanBackend::CleanupBackend() {
         if (sem) vkDestroySemaphore(device_, sem, nullptr);
     for (auto fen : inFlightFences_)
         if (fen) vkDestroyFence(device_, fen, nullptr);
+    if (syncComputeFence_)          { vkDestroyFence(device_, syncComputeFence_, nullptr); syncComputeFence_ = VK_NULL_HANDLE; }
+    syncComputeCmd_ = VK_NULL_HANDLE;   // freed with the command pool
     if (timestampQueryPool_)        { vkDestroyQueryPool(device_, timestampQueryPool_, nullptr); }
     // Stateful workload cleanup must run BEFORE the generic pipeline destroy
     // because their render pipelines are aliased into the generic slots.
@@ -2277,6 +2536,7 @@ void VulkanBackend::CleanupFluidResources() {
 
 void VulkanBackend::RecordFluidFrame(VkCommandBuffer cmd, float deltaTime,
                                      std::uint32_t imageIndex, std::uint32_t timestampBase) {
+    cmd = BeginComputePart(cmd);
     const std::uint32_t N = fluid_.gridSize;
     const float stepDt = std::clamp(deltaTime, 0.0f, 1.0f / 30.0f);
     fluid_.simTime += std::clamp(deltaTime, 0.0f, 0.1f);
@@ -2352,6 +2612,7 @@ void VulkanBackend::RecordFluidFrame(VkCommandBuffer cmd, float deltaTime,
         vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                             timestampQueryPool_, timestampBase + 2);
     }
+    cmd = EndComputePart(cmd);
 
     // Render pass: read the canonical stateA and present.
     if (!config_.headless) {
@@ -3678,6 +3939,7 @@ void VulkanBackend::CleanupCinematicLiquidResources() {
 void VulkanBackend::RecordCinematicLiquidV2Frame(VkCommandBuffer cmd, float deltaTime,
                                                   std::uint32_t imageIndex,
                                                   std::uint32_t timestampBase) {
+    cmd = BeginComputePart(cmd);
     auto& r = cinematicLiquid_;
     const std::uint32_t gridCellCount = r.gridX * r.gridY * r.gridZ;
     const std::uint32_t particleGroups = (r.particleCount + 255u) / 256u;
@@ -3906,6 +4168,7 @@ void VulkanBackend::RecordCinematicLiquidV2Frame(VkCommandBuffer cmd, float delt
         vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                             timestampQueryPool_, timestampBase + 2);
     }
+    cmd = EndComputePart(cmd);
 
     BeginDebugLabel(cmd, "Cinematic Liquid v2: Pool Raymarch", 0.03f, 0.36f, 0.94f);
     VkClearValue clear{};
@@ -4162,6 +4425,7 @@ void VulkanBackend::RecordCinematicLiquidSphFrame(VkCommandBuffer cmd,
                                                   float deltaTime,
                                                   std::uint32_t imageIndex,
                                                   std::uint32_t timestampBase) {
+    cmd = BeginComputePart(cmd);
     auto& r = cinematicLiquid_;
     const std::uint32_t particleGroups = (r.particleCount + 255u) / 256u;
     const std::uint32_t gridCellCount = r.gridX * r.gridY * r.gridZ;
@@ -4546,6 +4810,7 @@ void VulkanBackend::RecordCinematicLiquidSphFrame(VkCommandBuffer cmd,
         vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                             timestampQueryPool_, timestampBase + 2);
     }
+    cmd = EndComputePart(cmd);
 
     // Camera path and raymarch identical to v2 so the SPH slice can be
     // compared frame-for-frame against the MLS-MPM captures.
@@ -4590,6 +4855,7 @@ void VulkanBackend::RecordCinematicLiquidSphFrame(VkCommandBuffer cmd,
 void VulkanBackend::RecordCinematicLiquidFrame(VkCommandBuffer cmd, float deltaTime,
                                                 std::uint32_t imageIndex,
                                                 std::uint32_t timestampBase) {
+    cmd = BeginComputePart(cmd);
     auto& r = cinematicLiquid_;
     const std::uint32_t gridCellCount = r.gridX * r.gridY * r.gridZ;
     const std::uint32_t particleGroups = (r.particleCount + 255u) / 256u;
@@ -4734,6 +5000,7 @@ void VulkanBackend::RecordCinematicLiquidFrame(VkCommandBuffer cmd, float deltaT
         vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                             timestampQueryPool_, timestampBase + 2);
     }
+    cmd = EndComputePart(cmd);
 
     BeginDebugLabel(cmd, "Cinematic Liquid: Density Raymarch", 0.04f, 0.35f, 0.92f);
     VkClearValue clear{};

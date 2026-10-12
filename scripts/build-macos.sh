@@ -170,6 +170,12 @@ if [[ -n "${GPU_BENCH_GLFW_SOURCE_DIR:-}" ]]; then
 fi
 cmake "${cmake_configure_args[@]}"
 cmake --build "${build_dir}" --config "${configuration}" --parallel
+# An existing configure may point FetchContent at another verified source tree.
+# Resolve its actual license rather than assuming a fresh download in this build.
+glfw_cached_source="$(sed -n 's/^GLFW_SOURCE_DIR:STATIC=//p' "${build_dir}/CMakeCache.txt")"
+if [[ -n "${glfw_cached_source}" ]]; then
+    glfw_license="${glfw_cached_source}/LICENSE.md"
+fi
 
 cli_binary="${build_dir}/gpu_benchmark"
 engine_library="${build_dir}/libgpu_engine.a"

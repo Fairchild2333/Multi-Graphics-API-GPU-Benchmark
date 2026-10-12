@@ -2,21 +2,15 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "Mangekyo — Cross-API CPU & GPU Benchmark Suite"
+      "value": "Mangekyo: cross-API CPU and GPU benchmark suite"
     },
     {
       "name": "ability_desc",
-      "value": "Main rendering ability"
+      "value": "GPU and CPU tests, history and charts"
     },
     {
       "name": "ability_label",
       "value": "Mangekyo"
-    }
-  ],
-  "color": [
-    {
-      "name": "start_window_background",
-      "value": "#0A1424"
     }
   ]
 }

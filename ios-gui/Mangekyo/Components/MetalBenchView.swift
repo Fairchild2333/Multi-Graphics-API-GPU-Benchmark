@@ -15,23 +15,20 @@ final class MetalHostView: UIView {
         backgroundColor = .black
         metalLayer.pixelFormat = .bgra8Unorm
         metalLayer.framebufferOnly = true
-        metalLayer.contentsScale = UIScreen.main.scale
+        // The engine renders 1280 x 720 whatever the size of this view, and the
+        // system scales the picture. The view must never change that size: the
+        // score is computed from it.
+        metalLayer.drawableSize = CGSize(width: 1280, height: 720)
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        let scale = UIScreen.main.scale
-        let w = max(bounds.width * scale, 1)
-        let h = max(bounds.height * scale, 1)
-        metalLayer.drawableSize = CGSize(width: w, height: h)
-    }
 }
 
 struct MetalBenchView: UIViewRepresentable {
+    /// Called once for every view that is created, after the view exists and
+    /// outside any view update, so the receiver may start a test in the layer.
     var onLayerReady: (CAMetalLayer) -> Void
 
     func makeUIView(context: Context) -> MetalHostView {
@@ -42,7 +39,5 @@ struct MetalBenchView: UIViewRepresentable {
         return view
     }
 
-    func updateUIView(_ uiView: MetalHostView, context: Context) {
-        onLayerReady(uiView.metalLayer)
-    }
+    func updateUIView(_ uiView: MetalHostView, context: Context) {}
 }

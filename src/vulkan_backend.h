@@ -7,6 +7,8 @@
 #if defined(GPU_BENCH_NO_GLFW)
 #if defined(__ANDROID__)
 #define VK_USE_PLATFORM_ANDROID_KHR
+#elif defined(__OHOS__)
+#define VK_USE_PLATFORM_OHOS
 #endif
 #include <vulkan/vulkan.h>
 #else
@@ -44,6 +46,10 @@ public:
     std::string GetBackendName()    const override { return "Vulkan"; }
     std::string GetDeviceName()     const override { return deviceName_; }
     std::string GetDriverVersion()  const override { return driverVersion_; }
+    std::string GetTimingMode()     const override {
+        return synchronizedTimingFallback_
+            ? "synchronized_wall_clock" : "gpu_timestamp_query";
+    }
 
 protected:
     void InitBackend()            override;
@@ -271,6 +277,19 @@ private:
     float       timestampPeriodNs_  = 0.0f;
     bool        timestampsSupported_ = false;
 
+    // Without timestamp queries a frame is timed by wall clock: its compute
+    // part goes into a command buffer of its own and is waited for, then the
+    // rest of the frame is.
+    bool            synchronizedTimingFallback_ = false;
+    VkCommandBuffer syncComputeCmd_   = VK_NULL_HANDLE;
+    VkFence         syncComputeFence_ = VK_NULL_HANDLE;
+    VkCommandBuffer syncFrameCmd_     = VK_NULL_HANDLE;
+    double          syncComputeMs_    = 0.0;
+    // Set only while CheckTimestampsAgainstWallClock draws its frames: how
+    // many steps the compute pass takes, and that these frames are no samples.
+    std::uint32_t   checkDispatchRepeats_ = 1;
+    bool            checkingTimestamps_   = false;
+
     PFN_vkCmdBeginDebugUtilsLabelEXT  vkCmdBeginDebugUtilsLabel_  = nullptr;
     PFN_vkCmdEndDebugUtilsLabelEXT    vkCmdEndDebugUtilsLabel_    = nullptr;
     PFN_vkSetDebugUtilsObjectNameEXT  vkSetDebugUtilsObjectName_  = nullptr;
@@ -339,6 +358,10 @@ private:
     void CreateSyncObjects();
     void CreateTimestampQueryPool();
     void CollectTimestampResults(std::uint32_t frameSlot);
+    void EnableSynchronizedTimingFallback(const char* reason);
+    void CheckTimestampsAgainstWallClock();
+    VkCommandBuffer BeginComputePart(VkCommandBuffer frameCmd);
+    VkCommandBuffer EndComputePart(VkCommandBuffer cmd);
     void CleanupSwapChain();
 };
 

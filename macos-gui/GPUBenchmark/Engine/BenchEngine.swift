@@ -148,6 +148,7 @@ struct BenchChannelState: Sendable {
     var progressFraction: Double = 0
     var progressLabel: String = "0%"
     var isRunning: Bool = false
+    var runOutput = RunOutput()
     var runSummary = BenchRunSummary()
     /// All-core score of the current CPU run, in MWork/s.
     var cpuAllCoreScore: Double?
@@ -205,6 +206,7 @@ final class BenchEngine: ObservableObject {
     @Published var gpuState = BenchChannelState()
     @Published var cpuState = BenchChannelState()
 
+
     /// Available graphics APIs on macOS (no DX).
     static let availableAPIs = ["Auto", "Metal", "Vulkan", "OpenGL"]
 
@@ -235,6 +237,9 @@ final class BenchEngine: ObservableObject {
     private var activeProcess: Process?
     private var activeChannel: BenchChannel?
     private var cancelRequested = false
+    /// Output that does not end in a line break yet.
+    private var pendingOutput = ""
+    private var shownStage: RunOutput.Stage?
 
     init() {
         gpuState.statusText = Self.readyText
@@ -425,6 +430,7 @@ final class BenchEngine: ObservableObject {
         guard !isRunning, !jobs.isEmpty else { return }
         cancelRequested = false
         activeChannel = channel
+        resetRunOutput()
         mutate(channel) {
             $0.isRunning = true
             $0.logOutput = ""
@@ -454,9 +460,9 @@ final class BenchEngine: ObservableObject {
                     self.mutate(channel) {
                         $0.progressFraction = pct
                         $0.progressLabel = String(format: "%.0f%%", pct * 100)
-                        $0.logOutput += "=== Job \(index + 1) of \(jobs.count): "
-                            + "\(job.joined(separator: " ")) ===\n"
                     }
+                    self.flushOutput()
+                    self.appendLine("=== Job \(index + 1) of \(jobs.count): \(job.joined(separator: " ")) ===")
                 }
 
                 let outcome: BenchJobOutcome
@@ -487,6 +493,7 @@ final class BenchEngine: ObservableObject {
             }
 
             await MainActor.run {
+                self.flushOutput()
                 self.activeProcess = nil
                 self.activeChannel = nil
                 self.refreshResults()
@@ -623,12 +630,18 @@ final class BenchEngine: ObservableObject {
             self.activeChannel = channel
         }
 
+        let outputEnded = DispatchSemaphore(value: 0)
         pipe.fileHandleForReading.readabilityHandler = { handle in
             let data = handle.availableData
-            guard !data.isEmpty, let chunk = String(data: data, encoding: .utf8) else { return }
+            if data.isEmpty {
+                handle.readabilityHandler = nil
+                outputEnded.signal()
+                return
+            }
+            let chunk = String(decoding: data, as: UTF8.self)
             output.append(chunk)
-            Task { @MainActor [weak self] in
-                self?.consumeOutputChunk(chunk, channel: channel)
+            DispatchQueue.main.async {
+                self.consumeOutputChunk(chunk, channel: channel)
             }
         }
 
@@ -645,6 +658,7 @@ final class BenchEngine: ObservableObject {
             }
         }
 
+        try? pipe.fileHandleForWriting.close()
         let started = Date()
         while process.isRunning {
             if let timeout, Date().timeIntervalSince(started) >= timeout {
@@ -672,6 +686,9 @@ final class BenchEngine: ObservableObject {
             }
         }
 
+        if launchError == nil {
+            _ = await Task.detached { Self.waitForOutputEnd(outputEnded) }.value
+        }
         pipe.fileHandleForReading.readabilityHandler = nil
         let remainder = pipe.fileHandleForReading.readDataToEndOfFile()
         if !remainder.isEmpty, let chunk = String(data: remainder, encoding: .utf8) {
@@ -690,6 +707,7 @@ final class BenchEngine: ObservableObject {
             launchError: launchError)
     }
 
+    // Not on the main actor: gpb_run blocks until the run has finished.
     private nonisolated func runViaBridge(
         job: [String],
         workingDirectory: String,
@@ -736,6 +754,10 @@ final class BenchEngine: ObservableObject {
             launchError: nil)
     }
 
+    private nonisolated static func waitForOutputEnd(_ signal: DispatchSemaphore) {
+        _ = signal.wait(timeout: .now() + 2)
+    }
+
     private nonisolated func workerTimeoutSeconds(for job: [String]) -> TimeInterval? {
         if job.contains("--no-time-limit") { return nil }
         if job.contains("--complete-suite") || job.contains("--fill-missing") {
@@ -760,20 +782,16 @@ final class BenchEngine: ObservableObject {
     }
 
     private func consumeOutputChunk(_ chunk: String, channel: BenchChannel) {
-        mutate(channel) { $0.logOutput += chunk }
-        for rawLine in chunk.split(
-            omittingEmptySubsequences: true,
-            whereSeparator: { $0.isNewline }
-        ) {
-            let line = String(rawLine)
-            switch channel {
-            case .gpu: consumeGpuLine(line)
-            case .cpu: consumeCpuLine(line)
-            }
-        }
+        guard activeChannel == channel else { return }
+        appendOutput(chunk)
     }
 
     private func consumeGpuLine(_ line: String) {
+        if line.hasPrefix("MEMSWEEP_RESULT") {
+            let fields = RunOutput.fields(line)
+            gpuState.lastScore = Localization.tr("GPU memory probe: ", "GPU 内存探测：", "GPU メモリ測定: ")
+                + (fields["read_only_gbps"] ?? "—") + " GB/s"
+        }
         if line.hasPrefix("Avg FPS:") ||
             line.contains("Score:") ||
             line.contains("VRAM rate:") ||
@@ -1034,6 +1052,83 @@ final class BenchEngine: ObservableObject {
         }
         parts.append(value(after: "--workload") ?? "stream")
         return parts.joined(separator: " · ")
+    }
+
+    // MARK: - Engine output
+
+    /// Adds engine output that may end in the middle of a line.
+    private func appendOutput(_ chunk: String) {
+        pendingOutput += chunk
+        while let lineEnd = pendingOutput.firstIndex(where: { $0.isNewline }) {
+            let line = String(pendingOutput[..<lineEnd])
+            pendingOutput.removeSubrange(...lineEnd)
+            appendLine(line)
+        }
+    }
+
+    /// Adds the rest of the output once a run has ended.
+    private func flushOutput() {
+        guard !pendingOutput.isEmpty else { return }
+        let line = pendingOutput
+        pendingOutput = ""
+        appendLine(line)
+    }
+
+    /// Adds one line to the log and to the parsed results that feed the charts.
+    private func appendLine(_ line: String) {
+        guard let channel = activeChannel else { return }
+        mutate(channel) { state in
+            state.logOutput += line + "\n"
+            state.runOutput.consume(line)
+            if let fraction = state.runOutput.progress {
+                state.progressFraction = fraction
+                state.progressLabel = String(format: "%.0f%%", fraction * 100)
+            }
+            if let stage = state.runOutput.stage, stage != shownStage {
+                shownStage = stage
+                state.statusText = Self.stageText(stage)
+            }
+        }
+        switch channel {
+        case .gpu: consumeGpuLine(line)
+        case .cpu: consumeCpuLine(line)
+        }
+    }
+
+    private func resetRunOutput() {
+        if let channel = activeChannel { mutate(channel) { $0.runOutput = RunOutput() } }
+        pendingOutput = ""
+        shownStage = nil
+    }
+
+    private static func stageText(_ stage: RunOutput.Stage) -> String {
+        func phaseText(_ phase: RunOutput.Phase) -> String {
+            switch phase {
+            case .warmUp: return Localization.tr("warming up", "预热", "ウォームアップ")
+            case .measure: return Localization.tr("measuring", "测量", "測定中")
+            case .finish: return Localization.tr("finishing", "收尾", "仕上げ")
+            }
+        }
+        switch stage {
+        case .cpuCore(let label, let phase):
+            return label + " · " + phaseText(phase)
+        case .cpuAllCores(let phase):
+            return Localization.tr("All cores", "全核", "全コア") + " · " + phaseText(phase)
+        case .sweepOneThread:
+            return Localization.tr("One thread · sweeping data-set sizes", "单线程 · 扫描数据量",
+                                   "1 スレッド · データセットサイズをスイープ")
+        case .sweepAllCores:
+            return Localization.tr("All cores · sweeping data-set sizes", "全核 · 扫描数据量",
+                                   "全コア · データセットサイズをスイープ")
+        case .storage:
+            return Localization.tr("Storage · reading and writing a test file", "存储 · 读写测试文件",
+                                   "ストレージ · テストファイルの読み書き")
+        case .pageMapping:
+            return Localization.tr("Virtual memory · mapping pages", "虚拟内存 · 映射页面",
+                                   "仮想メモリ · ページの割り当て")
+        case .error(let message):
+            return message
+        }
     }
 
     func refreshResults() {

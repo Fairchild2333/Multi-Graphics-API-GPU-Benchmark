@@ -1,0 +1,11 @@
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "Mangekyo HarmonyOS app: ArkTS pages on top of the shared gpu_engine.",
+  "main": "",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "libmangekyo.so": "file:./src/main/cpp/types/libmangekyo"
+  }
+}

@@ -7,6 +7,8 @@
 #import "GpuBenchBridge.h"
 
 #include "gpu_engine.h"
+#include "cpu_cli.h"
+#include "gpu_memory_sweep.h"
 #include "benchmark_results.h"
 #include "ios_engine_host.h"
 #include "metal_probe.h"
@@ -19,6 +21,7 @@
 #include <iostream>
 #include <mutex>
 #include <sstream>
+#include <streambuf>
 #include <string>
 #include <thread>
 #include <unistd.h>
@@ -58,53 +61,7 @@ static std::string jsonEscape(const std::string& s) {
 }
 
 /// Serialize a BenchmarkResult to a JSON object string.
-static std::string resultToJson(const gpu_bench::BenchmarkResult& r) {
-    std::ostringstream o;
-    o << "{";
-    o << "\"id\":\""          << jsonEscape(r.id) << "\",";
-    o << "\"timestamp\":\""   << jsonEscape(r.timestamp) << "\",";
-    o << "\"appVersion\":\""  << jsonEscape(r.appVersion) << "\",";
-    o << "\"workload\":\""    << jsonEscape(r.workload) << "\",";
-    o << "\"workloadVersion\":\"" << jsonEscape(r.workloadVersion) << "\",";
-    o << "\"workloadConfig\":\"" << jsonEscape(r.workloadConfig) << "\",";
-    o << "\"graphicsApi\":\"" << jsonEscape(r.graphicsApi) << "\",";
-    o << "\"deviceName\":\""  << jsonEscape(r.deviceName) << "\",";
-    o << "\"driverVersion\":\"" << jsonEscape(r.driverVersion) << "\",";
-    o << "\"cpuName\":\""     << jsonEscape(r.cpuName) << "\",";
-    o << "\"osVersion\":\""   << jsonEscape(r.osVersion) << "\",";
-    o << "\"memory\":\""      << jsonEscape(r.memory) << "\",";
-    o << "\"vramMB\":"        << r.vramMB << ",";
-    o << "\"resWidth\":"      << r.resWidth << ",";
-    o << "\"resHeight\":"     << r.resHeight << ",";
-    o << "\"particleCount\":" << r.particleCount << ",";
-    o << "\"difficulty\":\""  << jsonEscape(r.difficulty) << "\",";
-    o << "\"vsync\":"         << (r.vsync ? "true" : "false") << ",";
-    o << "\"isSoftware\":"    << (r.isSoftware ? "true" : "false") << ",";
-    o << "\"headless\":"      << (r.headless ? "true" : "false") << ",";
-    o << "\"framesInFlight\":" << r.framesInFlight << ",";
-    o << "\"durationSec\":"   << r.durationSec << ",";
-    o << "\"warmupSec\":"     << r.warmupSec << ",";
-    o << "\"measuredFrames\":" << r.measuredFrames << ",";
-    o << "\"timingSamples\":" << r.timingSamples << ",";
-    o << "\"avgComputeMs\":"  << r.avgComputeMs << ",";
-    o << "\"minComputeMs\":"  << r.minComputeMs << ",";
-    o << "\"maxComputeMs\":"  << r.maxComputeMs << ",";
-    o << "\"avgRenderMs\":"   << r.avgRenderMs << ",";
-    o << "\"minRenderMs\":"   << r.minRenderMs << ",";
-    o << "\"maxRenderMs\":"   << r.maxRenderMs << ",";
-    o << "\"avgTotalGpuMs\":" << r.avgTotalGpuMs << ",";
-    o << "\"minTotalGpuMs\":" << r.minTotalGpuMs << ",";
-    o << "\"maxTotalGpuMs\":" << r.maxTotalGpuMs << ",";
-    o << "\"avgFps\":"        << r.avgFps << ",";
-    o << "\"avgFrameTimeMs\":" << r.avgFrameTimeMs << ",";
-    o << "\"gpuUtilisation\":" << r.gpuUtilisation << ",";
-    o << "\"bottleneck\":\""  << jsonEscape(r.bottleneck) << "\",";
-    o << "\"score\":"         << r.score << ",";
-    o << "\"scoreUnit\":\""   << jsonEscape(r.scoreUnit) << "\",";
-    o << "\"precision\":\""   << jsonEscape(r.precision) << "\"";
-    o << "}";
-    return o.str();
-}
+
 
 // Serialise is NOT reentrant — cliMain can't run concurrently anyway.
 static std::mutex g_runMutex;
@@ -117,6 +74,53 @@ static std::atomic<bool> g_workerAlive{false};
 static std::mutex g_workerMutex;
 static std::thread g_worker;
 static std::string g_lastError;
+
+// What an embedded run prints to std::cout lands here, split into lines that
+// the app collects with gpb_poll_output(). The engine prints from one thread
+// at a time; the lock only guards against the collecting thread.
+class LineQueueBuffer : public std::streambuf {
+public:
+    std::vector<std::string> Drain() {
+        std::lock_guard<std::mutex> lock(mutex_);
+        std::vector<std::string> lines;
+        lines.swap(lines_);
+        return lines;
+    }
+
+protected:
+    int_type overflow(int_type ch) override {
+        if (traits_type::eq_int_type(ch, traits_type::eof())) return traits_type::not_eof(ch);
+        std::lock_guard<std::mutex> lock(mutex_);
+        Append(traits_type::to_char_type(ch));
+        return ch;
+    }
+
+    std::streamsize xsputn(const char* text, std::streamsize count) override {
+        std::lock_guard<std::mutex> lock(mutex_);
+        for (std::streamsize i = 0; i < count; ++i) Append(text[i]);
+        return count;
+    }
+
+private:
+    // Nobody may be collecting; keep the newest lines only.
+    static constexpr std::size_t kMaxPendingLines = 20000;
+
+    void Append(char c) {
+        if (c == '\n') {
+            if (lines_.size() >= kMaxPendingLines) lines_.erase(lines_.begin(), lines_.begin() + 1000);
+            lines_.push_back(current_);
+            current_.clear();
+        } else if (c != '\r') {
+            current_.push_back(c);
+        }
+    }
+
+    std::mutex mutex_;
+    std::vector<std::string> lines_;
+    std::string current_;
+};
+
+static LineQueueBuffer g_embeddedOutput;
 
 static void JoinWorkerUnlocked() {
     if (g_worker.joinable())
@@ -160,7 +164,7 @@ bool gpb_start_workload(const char* workload_id, double seconds) {
         shaderDir = g_shaderDir;
         dataDir = g_dataDir;
     }
-    if (!layer) {
+    if (!layer && workload != "memory_sweep" && workload.rfind("stream_headless", 0) != 0) {
         std::lock_guard<std::mutex> lock(g_workerMutex);
         g_lastError = "CAMetalLayer not set";
         return false;
@@ -187,7 +191,35 @@ bool gpb_start_workload(const char* workload_id, double seconds) {
         req.workloadId = workload;
         req.maxRunTimeSec = seconds > 0.0 ? seconds : 3.0;
         std::string err;
-        const int rc = gpu_bench::ios_host::RunWorkload(req, err);
+        std::unique_lock<std::mutex> runLock(g_runMutex, std::try_to_lock);
+        if (!runLock.owns_lock()) {
+            std::lock_guard<std::mutex> lock(g_workerMutex);
+            g_lastError = "CPU workload already running";
+            g_workerAlive.store(false, std::memory_order_release);
+            return;
+        }
+        // Keep the lines of this run for gpb_poll_output().
+        std::cout.flush();
+        std::streambuf* const consoleOutput = std::cout.rdbuf(&g_embeddedOutput);
+        std::streambuf* const consoleError = std::cerr.rdbuf(&g_embeddedOutput);
+        gpu_bench::ClearStopRequest();
+        gpu_bench::GpuMemorySweepConfig sweep;
+        sweep.maxKiB = 256u * 1024u;
+        sweep.trafficPerPointMiB = 256;
+        int rc = 1;
+        try {
+            rc = workload == "memory_sweep"
+                ? gpu_bench::RunGpuMemorySweepCli(sweep, true)
+                : gpu_bench::ios_host::RunWorkload(req, err);
+        } catch (const std::exception& e) {
+            err = e.what();
+        } catch (...) {
+            err = "unknown native exception";
+        }
+        std::cout.flush();
+        std::cout.rdbuf(consoleOutput);
+        std::cerr.flush();
+        std::cerr.rdbuf(consoleError);
         {
             std::lock_guard<std::mutex> lock(g_workerMutex);
             if (rc != 0)
@@ -207,6 +239,15 @@ void gpb_stop_workload(void) {
 bool gpb_is_running(void) {
     return g_workerAlive.load(std::memory_order_acquire) ||
            gpu_bench::ios_host::IsRunning();
+}
+
+char* gpb_poll_output(void) {
+    std::string text;
+    for (const std::string& line : g_embeddedOutput.Drain()) {
+        text += line;
+        text += '\n';
+    }
+    return strdup_alloc(text);
 }
 
 char* gpb_last_error(void) {
@@ -240,60 +281,49 @@ char* gpb_list_gpus(void) {
 
 int gpb_run(const char* const* argv, int argc,
             gpb_line_callback onLine, void* ctx) {
-    // iOS uses the embedded host exclusively — cliMain is not available.
-    // Parse minimal args to extract workload and time, then delegate to
-    // ios_host::RunWorkload.
+    // CPU work has no Metal layer and shares desktop validation/result storage.
     std::lock_guard<std::mutex> lock(g_runMutex);
-
-    std::string workload = "stream";
-    double seconds = 3.0;
-    for (int i = 0; i < argc; ++i) {
-        std::string a = argv[i];
-        if (a == "--workload" && i + 1 < argc) { workload = argv[++i]; }
-        else if (a == "--time" && i + 1 < argc) { seconds = std::atof(argv[++i]); }
-        else if (a == "stream" || a == "gpu_burn" || a == "cinematic_liquid") { workload = a; }
-    }
-
-    std::string shaderDir, dataDir;
-    void* layer = nullptr;
-    {
-        std::lock_guard<std::mutex> lk(g_embedMutex);
-        layer = g_metalLayer;
-        shaderDir = g_shaderDir;
-        dataDir = g_dataDir;
-    }
-
-    gpu_bench::ios_host::RunRequest req;
-    req.metalLayer = layer;
-    req.shaderDir = shaderDir;
-    req.dataDir = dataDir;
-    req.workloadId = workload;
-    req.maxRunTimeSec = seconds > 0.0 ? seconds : 3.0;
-
-    if (onLine) {
-        std::string msg = "[iOS] Running " + workload + " via embedded host";
-        onLine(msg.c_str(), ctx);
-    }
-
-    std::string err;
-    int rc = gpu_bench::ios_host::RunWorkload(req, err);
-    if (rc != 0 && onLine) {
-        std::string msg = "[iOS] Error: " + (err.empty() ? "rc=" + std::to_string(rc) : err);
-        onLine(msg.c_str(), ctx);
-    }
-    return rc;
+    if (gpb_is_running()) return 3;
+    class CallbackBuffer final : public std::streambuf {
+    public:
+        CallbackBuffer(gpb_line_callback callback, void* context)
+            : callback_(callback), context_(context) {}
+        int sync() override { Flush(); return 0; }
+    protected:
+        int_type overflow(int_type ch) override {
+            if (traits_type::eq_int_type(ch, traits_type::eof())) return traits_type::not_eof(ch);
+            const char c = traits_type::to_char_type(ch);
+            if (c == '\n') Flush();
+            else if (c != '\r') line_ += c;
+            return ch;
+        }
+    private:
+        void Flush() {
+            if (!line_.empty() && callback_) callback_(line_.c_str(), context_);
+            line_.clear();
+        }
+        gpb_line_callback callback_;
+        void* context_;
+        std::string line_;
+    } buffer(onLine, ctx);
+    class Redirect final {
+    public:
+        explicit Redirect(std::streambuf* buffer)
+            : out_(std::cout.rdbuf(buffer)), err_(std::cerr.rdbuf(buffer)) {}
+        ~Redirect() {
+            std::cout.flush(); std::cerr.flush();
+            std::cout.rdbuf(out_); std::cerr.rdbuf(err_);
+        }
+    private:
+        std::streambuf* out_;
+        std::streambuf* err_;
+    } redirect(&buffer);
+    gpu_bench::ClearStopRequest();
+    return gpu_bench::CpuCliMain(argc, argv);
 }
 
 char* gpb_load_results(void) {
-    auto results = gpu_bench::LoadResults();
-    std::ostringstream json;
-    json << "[";
-    for (size_t i = 0; i < results.size(); ++i) {
-        if (i > 0) json << ",";
-        json << resultToJson(results[i]);
-    }
-    json << "]";
-    return strdup_alloc(json.str());
+    return strdup_alloc(gpu_bench::SerializeResultsJson(gpu_bench::LoadResults()));
 }
 
 bool gpb_delete_result(const char* resultId) {

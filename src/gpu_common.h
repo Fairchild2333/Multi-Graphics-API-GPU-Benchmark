@@ -20,6 +20,9 @@ constexpr std::uint32_t kMaxFramesInFlight    = 2;
 constexpr std::uint32_t kAfrMinFramesInFlight = 4;
 constexpr std::uint32_t kParticleCount        = 1048576;
 constexpr std::uint32_t kComputeWorkGroupSize = 256;
+// The work-group size every OpenGL ES 3.1 driver has to accept; the particle
+// test falls back to it where a driver takes no more (a Mali-T860 does not).
+constexpr std::uint32_t kComputeWorkGroupSizeEs31 = 128;
 constexpr double kTimingReportIntervalSec = 1.0;
 
 // ---- Workload selection -------------------------------------------------
@@ -164,6 +167,18 @@ inline bool needsDepthAttachment(Workload w) {
     return shapeOfWorkload(w) == WorkloadShape::InstancedBillboard;
 }
 
+// Returns true for CPU rasterisers: Microsoft WARP / Basic Render on Windows,
+// Mesa llvmpipe (OpenGL) and lavapipe (Vulkan, which also reports "llvmpipe")
+// on Linux. Shared by the burn step clamp, summary labels and result rows so
+// a CPU-rendered score is never recorded as a hardware GPU result.
+inline bool isSoftwareRendererName(const std::string& name) {
+    for (const char* marker : {"Basic Render", "WARP", "Software", "llvmpipe",
+                               "lavapipe", "softpipe", "swrast", "SwiftShader"}) {
+        if (name.find(marker) != std::string::npos) return true;
+    }
+    return false;
+}
+
 // Render3D default instance (billboard) count — moderate to keep overdraw sane.
 constexpr std::uint32_t kRender3DDefaultParticles = 262144;  // 256K
 
@@ -211,6 +226,10 @@ constexpr std::uint32_t kGpuBurnV1MaxFixedIter  = 64;
 constexpr std::uint32_t kGpuBurnV1DrawsPerFrame = 2;
 constexpr std::uint32_t kGpuBurnV1ShaderVersion = 3;
 constexpr double        kGpuBurnV1TargetFrameMs = 14.0;
+// GPU Burn for OpenGL ES 2.0 (shaders/gpu_burn_es2.frag): a simpler shader in
+// its own score group, gpu_burn_es2_legacy_v1. It keeps the frame of the test:
+// a fixed number of steps per pixel and kGpuBurnV1DrawsPerFrame draws.
+constexpr std::uint32_t kGpuBurnEs2LegacyShaderVersion = 1;
 // v2 was the historical fixed-256 contract. v3 keeps fixed per-frame work but
 // exposes three user-selected tiers plus a custom value; it never auto-tunes.
 constexpr std::uint32_t kGpuBurnV3LightIter     = 16;
@@ -446,6 +465,14 @@ struct BenchmarkConfig {
     // v3 selectable fixed-load contract: auto-calibration remains retired.
     bool          gpuBurnAutoTune    = false;
     bool          gpuBurnIterOverridden = false;  // explicit --iter given
+    // GPU Burn as OpenGL ES 2.0 can run it (see kGpuBurnEs2LegacyShaderVersion).
+    bool          gpuBurnEs2Legacy   = false;
+    // Invocations in a compute work group of the particle test. OpenGL ES 3.1
+    // promises kComputeWorkGroupSizeEs31 only, and some drivers allow no more;
+    // the OpenGL ES backend then runs the test that way by itself. Any size
+    // but kComputeWorkGroupSize is saved in a score group of its own
+    // ("_wg128") and announced in the log and in the summary.
+    std::uint32_t computeWorkGroupSize = kComputeWorkGroupSize;
     std::uint32_t volumetricSteps    = kVolumetricDefaultSteps; // Volumetric per-pixel ray samples
     std::uint32_t fluidGridSize      = kFluidDefaultGridSize;   // Fluid: 2D grid side length
     std::uint32_t fluidJacobiIters   = kFluidDefaultJacobiIters;// Fluid: pressure projection iterations

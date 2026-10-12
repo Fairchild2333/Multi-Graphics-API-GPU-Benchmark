@@ -246,7 +246,10 @@ if ($manifest) {
           'cinematic_liquid_sph_viscosity.comp.spv',
           'cinematic_liquid_sph_integrate.comp.spv',
           'synthpeak_fp32.comp.spv','synthpeak_fp64.comp.spv',
-          'synthpeak_int32.comp.spv','synthpeak_fp16.comp.spv','render3d.vert.spv',
+          'synthpeak_int32.comp.spv','synthpeak_fp16.comp.spv',
+          'membw_read.comp.spv','membw_write.comp.spv','membw_copy.comp.spv',
+          'membw_l1.comp.spv','membw_check.comp.spv',
+          'render3d.vert.spv',
           'render3d.frag.spv') | ForEach-Object { $shaderNames.Add($_) }
         Test-DelayLoadedVulkan $cliPath 'CLI'
         Add-PortabilityGate 'The delay-loaded Vulkan fallback still requires a clean machine with no vulkan-1.dll to confirm DirectX/WARP startup.'

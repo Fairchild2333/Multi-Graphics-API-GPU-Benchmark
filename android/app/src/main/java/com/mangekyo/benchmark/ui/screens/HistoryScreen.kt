@@ -4,13 +4,13 @@ import androidx.compose.ui.*
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material3.Card
@@ -31,6 +31,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.mangekyo.benchmark.core.ResultsStore
+import com.mangekyo.benchmark.core.tr
+import com.mangekyo.benchmark.core.workloadTitle
+import com.mangekyo.benchmark.ui.LocalWindowWidth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +45,7 @@ fun HistoryScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("History") },
+                title = { Text(tr("History", "历史")) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 ),
@@ -54,7 +57,7 @@ fun HistoryScreen() {
                         },
                         enabled = entries.isNotEmpty(),
                     ) {
-                        Icon(Icons.Filled.DeleteSweep, contentDescription = "Clear all")
+                        Icon(Icons.Filled.DeleteSweep, contentDescription = tr("Clear all", "全部清除"))
                     }
                 },
             )
@@ -65,16 +68,20 @@ fun HistoryScreen() {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(inner)
-                    .padding(16.dp),
+                    .padding(LocalWindowWidth.current.margin),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    "No results yet",
+                    tr("No results yet", "还没有成绩"),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    "Scores will appear here after the engine writes results.json under app-specific storage. " +
-                        "Group by workloadVersion / ABI — never mix Windows desktop lanes.",
+                    tr(
+                        "Scores will appear here after the engine writes results.json under app-specific storage. " +
+                            "Group by workloadVersion / ABI — never mix Windows desktop lanes.",
+                        "引擎把成绩写入 App 专属目录下的 results.json 后，会显示在这里。" +
+                            "成绩按测试版本和 ABI 分组，不要和 Windows 桌面版的成绩放在一起比较。",
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -85,14 +92,17 @@ fun HistoryScreen() {
                 )
             }
         } else {
-            LazyColumn(
+            // One column on a phone, two or three on an opened foldable or a tablet.
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 320.dp),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(inner)
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = LocalWindowWidth.current.margin),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                item { Spacer(Modifier.height(8.dp)) }
                 items(entries, key = { it.id.ifBlank { it.hashCode().toString() } }) { e ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -105,7 +115,7 @@ fun HistoryScreen() {
                             verticalArrangement = Arrangement.spacedBy(2.dp),
                         ) {
                             Text(
-                                "${e.workload} · ${e.graphicsApi}",
+                                "${workloadTitle(e.workload)} · ${e.graphicsApi}",
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Text(
@@ -124,7 +134,14 @@ fun HistoryScreen() {
                                 else -> "—"
                             }
                             Text(scoreText, style = MaterialTheme.typography.labelLarge)
-                            listOfNotNull(e.timestamp, e.abi?.let { "ABI $it" })
+                            if (e.machineLine.isNotEmpty()) {
+                                Text(
+                                    e.machineLine,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            listOfNotNull(e.timestamp, e.abi)
                                 .joinToString(" · ")
                                 .takeIf { it.isNotBlank() }
                                 ?.let {
@@ -137,7 +154,6 @@ fun HistoryScreen() {
                         }
                     }
                 }
-                item { Spacer(Modifier.height(16.dp)) }
             }
         }
     }

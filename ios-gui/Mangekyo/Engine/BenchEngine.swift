@@ -1,5 +1,5 @@
 // BenchEngine.swift — Swift wrapper around GpuBenchBridge for iOS.
-// Embedded Metal host for stream/gpu_burn preview; cliMain kept for advanced jobs.
+// Embedded Metal GPU host and a shared CPU-only entry point.
 
 import UIKit
 import Foundation
@@ -36,6 +36,7 @@ struct BenchChannelState: Sendable {
     var progressFraction: Double = 0
     var progressLabel: String = "0%"
     var isRunning: Bool = false
+    var runOutput = RunOutput()
 }
 
 /// Observable engine state for SwiftUI binding.
@@ -71,6 +72,7 @@ final class BenchEngine: ObservableObject {
         case .gpu: body(&gpuState)
         case .cpu: body(&cpuState)
         }
+        UIApplication.shared.isIdleTimerDisabled = isRunning
     }
 
     /// Re-render idle status strings after the UI language changes.
@@ -83,6 +85,10 @@ final class BenchEngine: ObservableObject {
     private var activeChannel: BenchChannel = .gpu
 
     private var cancelRequested = false
+    private var runFailed = false
+    /// Output that does not end in a line break yet.
+    private var pendingOutput = ""
+    private var shownStage: RunOutput.Stage?
     private var metalLayer: CAMetalLayer?
     private var pollTask: Task<Void, Never>?
 
@@ -111,14 +117,13 @@ final class BenchEngine: ObservableObject {
         try? FileManager.default.createDirectory(at: shaderDir, withIntermediateDirectories: true)
         for name in ["particle.metal", "gpu_burn.metal", "cinematic_liquid_v2.metal"] {
             let dest = shaderDir.appendingPathComponent(name)
-            if FileManager.default.fileExists(atPath: dest.path) { continue }
-            if let src = Bundle.main.url(forResource: name, withExtension: nil)
+            guard let src = Bundle.main.url(forResource: name, withExtension: nil)
                 ?? Bundle.main.url(forResource: (name as NSString).deletingPathExtension,
-                                   withExtension: (name as NSString).pathExtension) {
-                try? FileManager.default.copyItem(at: src, to: dest)
-            } else if let src = Bundle.main.url(forResource: "shaders/\(name)", withExtension: nil) {
-                try? FileManager.default.copyItem(at: src, to: dest)
-            }
+                                   withExtension: (name as NSString).pathExtension)
+                ?? Bundle.main.url(forResource: "shaders/\(name)", withExtension: nil) else { continue }
+            // Copied at every launch: an update of the app may bring a newer source.
+            try? FileManager.default.removeItem(at: dest)
+            try? FileManager.default.copyItem(at: src, to: dest)
         }
         gpb_init_paths(shaderDir.path, docs.path)
         setenv("GPU_BENCH_DATA_DIR", docs.path, 1)
@@ -215,10 +220,12 @@ final class BenchEngine: ObservableObject {
         }
     }
 
-    /// 3s embedded Metal preview (stream / gpu_burn). Requires CAMetalLayer.
+    /// Starts a GPU test of the embedded host in the attached CAMetalLayer.
+    /// `workload` is a test of `GpuTest.all`, with its size where it has one:
+    /// "stream?particles=4194304", "gpu_burn?steps=64".
     @discardableResult
     func startPreview(workload: String, seconds: Double = 3.0) -> Bool {
-        guard metalLayer != nil else {
+        guard metalLayer != nil || workload == "memory_sweep" || workload.hasPrefix("stream_headless") else {
             lastError = "Metal layer not ready"
             mutate(.gpu) { $0.statusIsIdle = false; $0.statusText = "Metal layer not ready" }
             return false
@@ -227,8 +234,12 @@ final class BenchEngine: ObservableObject {
         activeChannel = .gpu
         cancelRequested = false
         lastError = ""
+        resetRunOutput()
+        if let stale = gpb_poll_output() { gpb_free(stale) }
         mutate(.gpu) {
             $0.isRunning = true
+            $0.logOutput = ""
+            $0.lastScore = ""
             $0.statusIsIdle = false
             $0.statusText = Localization.tr(
                 "Running \(workload) preview (\(Int(seconds))s)…",
@@ -261,8 +272,11 @@ final class BenchEngine: ObservableObject {
                 let running = gpb_is_running()
                 await MainActor.run {
                     guard let self else { return }
+                    self.drainEmbeddedOutput()
                     self.mutate(channel) { $0.isRunning = running }
                     if !running {
+                        self.mutate(channel) { $0.progressFraction = 1; $0.progressLabel = "100%" }
+                        self.flushOutput()
                         if let err = gpb_last_error() {
                             let s = String(cString: err)
                             gpb_free(err)
@@ -298,28 +312,14 @@ final class BenchEngine: ObservableObject {
         }
     }
 
-    /// Run a sequence of benchmark jobs (legacy cliMain path).
+    /// Run CPU jobs without a Metal surface.
     func run(jobs: [[String]], needCharts: Bool, channel: BenchChannel) {
         guard !isRunning, !jobs.isEmpty else { return }
         activeChannel = channel
 
-        // Prefer embedded host for single stream/gpu_burn preview-style jobs.
-        if jobs.count == 1 {
-            let job = jobs[0]
-            let wl = job.first(where: { ["stream", "gpu_burn", "particle", "cinematic_liquid"].contains($0) })
-                ?? job.dropFirst().first { ["stream", "gpu_burn", "cinematic_liquid"].contains($0) }
-            if let wl, metalLayer != nil {
-                var seconds = 3.0
-                if let i = job.firstIndex(of: "--time"), i + 1 < job.count,
-                   let v = Double(job[i + 1]) {
-                    seconds = min(max(v, 1.0), 15.0)
-                }
-                _ = startPreview(workload: wl == "particle" ? "stream" : wl, seconds: seconds)
-                return
-            }
-        }
-
         cancelRequested = false
+        runFailed = false
+        resetRunOutput()
         mutate(channel) {
             $0.isRunning = true
             $0.logOutput = ""
@@ -352,12 +352,18 @@ final class BenchEngine: ObservableObject {
                     }
                 }
 
-                await self.runViaBridge(job: job, channel: channel)
+                let code = await self.runViaBridge(job: job, channel: channel)
+                if code != 0 {
+                    await MainActor.run { self.runFailed = true }
+                    break
+                }
             }
 
             await MainActor.run {
+                self.flushOutput()
                 self.refreshResults()
                 let cancelled = self.cancelRequested
+                let failed = self.runFailed
                 self.mutate(channel) { st in
                     st.isRunning = false
                     st.progressFraction = 1
@@ -365,6 +371,8 @@ final class BenchEngine: ObservableObject {
                     st.statusIsIdle = false
                     if cancelled {
                         st.statusText = Localization.tr("Cancelled.", "已取消。", "キャンセルしました。")
+                    } else if failed {
+                        st.statusText = Localization.tr("Run failed — see output.", "测试失败 —— 请查看输出。", "実行失敗 — 出力を確認してください。")
                     } else if st.lastScore.isEmpty {
                         st.statusText = Localization.tr(
                             "Done — see output / History.", "完成 —— 见输出/历史。",
@@ -379,7 +387,7 @@ final class BenchEngine: ObservableObject {
         }
     }
 
-    private func runViaBridge(job: [String], channel: BenchChannel) async {
+    nonisolated private func runViaBridge(job: [String], channel: BenchChannel) async -> Int32 {
         let cStrings = job.map { strdup($0) }
         let argc = Int32(cStrings.count)
         var cPtrs = cStrings.map { UnsafePointer($0) }
@@ -389,15 +397,7 @@ final class BenchEngine: ObservableObject {
             let str = String(cString: line)
             let eng = Unmanaged<BenchEngine>.fromOpaque(ctx).takeUnretainedValue()
             DispatchQueue.main.async { [eng, str] in
-                // A C function pointer cannot capture the channel, so read the
-                // running one off the engine instead.
-                eng.mutate(eng.activeChannel) {
-                    $0.logOutput += str + "\n"
-                    if str.hasPrefix("Avg FPS:") || str.contains("Score:") ||
-                        str.contains("VRAM rate:") || str.contains("RAM rate:") {
-                        $0.lastScore = str.trimmingCharacters(in: .whitespaces)
-                    }
-                }
+                eng.appendLine(str)
             }
         }
 
@@ -405,10 +405,103 @@ final class BenchEngine: ObservableObject {
             UInt(bitPattern: Unmanaged.passUnretained(self).toOpaque())
         }
         let selfRef = UnsafeMutableRawPointer(bitPattern: selfRefBits)
-        _ = cPtrs.withUnsafeMutableBufferPointer { buf in
+        let code = cPtrs.withUnsafeMutableBufferPointer { buf in
             gpb_run(buf.baseAddress, argc, callback, selfRef)
         }
         for ptr in cStrings { free(ptr) }
+        // A FIFO barrier drains every callback before a later job can change ownership.
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            DispatchQueue.main.async { continuation.resume() }
+        }
+        return code
+    }
+
+    /// Collects what the embedded run printed since the last call.
+    private func drainEmbeddedOutput() {
+        guard let text = gpb_poll_output() else { return }
+        let chunk = String(cString: text)
+        gpb_free(text)
+        if !chunk.isEmpty { appendOutput(chunk) }
+    }
+
+    // MARK: - Engine output
+
+    /// Adds engine output that may end in the middle of a line.
+    private func appendOutput(_ chunk: String) {
+        pendingOutput += chunk
+        while let lineEnd = pendingOutput.firstIndex(where: { $0.isNewline }) {
+            let line = String(pendingOutput[..<lineEnd])
+            pendingOutput.removeSubrange(...lineEnd)
+            appendLine(line)
+        }
+    }
+
+    /// Adds the rest of the output once a run has ended.
+    private func flushOutput() {
+        guard !pendingOutput.isEmpty else { return }
+        let line = pendingOutput
+        pendingOutput = ""
+        appendLine(line)
+    }
+
+    /// Adds one line to the log and to the parsed results that feed the charts.
+    private func appendLine(_ line: String) {
+        mutate(activeChannel) { state in
+            state.logOutput += line + "\n"
+            if line.hasPrefix("MEMSWEEP_RESULT") {
+                let fields = RunOutput.fields(line)
+                state.lastScore = Localization.tr("GPU memory probe: ", "GPU 内存探测：", "GPU メモリ測定: ")
+                    + (fields["read_only_gbps"] ?? "—") + " GB/s"
+            }
+            if line.hasPrefix("Avg FPS:") || line.contains("Score:") {
+                state.lastScore = Localization.scoreLine(line.trimmingCharacters(in: .whitespacesAndNewlines))
+            }
+            state.runOutput.consume(line)
+            if let fraction = state.runOutput.progress {
+                state.progressFraction = fraction
+                state.progressLabel = String(format: "%.0f%%", fraction * 100)
+            }
+            if let stage = state.runOutput.stage, stage != shownStage {
+                shownStage = stage
+                state.statusText = Self.stageText(stage)
+            }
+        }
+    }
+
+    private func resetRunOutput() {
+        mutate(activeChannel) { $0.runOutput = RunOutput() }
+        pendingOutput = ""
+        shownStage = nil
+    }
+
+    private static func stageText(_ stage: RunOutput.Stage) -> String {
+        func phaseText(_ phase: RunOutput.Phase) -> String {
+            switch phase {
+            case .warmUp: return Localization.tr("warming up", "预热", "ウォームアップ")
+            case .measure: return Localization.tr("measuring", "测量", "測定中")
+            case .finish: return Localization.tr("finishing", "收尾", "仕上げ")
+            }
+        }
+        switch stage {
+        case .cpuCore(let label, let phase):
+            return label + " · " + phaseText(phase)
+        case .cpuAllCores(let phase):
+            return Localization.tr("All cores", "全核", "全コア") + " · " + phaseText(phase)
+        case .sweepOneThread:
+            return Localization.tr("One thread · sweeping data-set sizes", "单线程 · 扫描数据量",
+                                   "1 スレッド · データセットサイズをスイープ")
+        case .sweepAllCores:
+            return Localization.tr("All cores · sweeping data-set sizes", "全核 · 扫描数据量",
+                                   "全コア · データセットサイズをスイープ")
+        case .storage:
+            return Localization.tr("Storage · reading and writing a test file", "存储 · 读写测试文件",
+                                   "ストレージ · テストファイルの読み書き")
+        case .pageMapping:
+            return Localization.tr("Virtual memory · mapping pages", "虚拟内存 · 映射页面",
+                                   "仮想メモリ · ページの割り当て")
+        case .error(let message):
+            return message
+        }
     }
 
     func refreshResults() {

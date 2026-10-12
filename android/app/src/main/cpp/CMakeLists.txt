@@ -1,5 +1,5 @@
 # Mangekyo Android JNI — links gpu_engine (Vulkan / ANativeWindow).
-# HANDOFF: no GLFW; Vulkan via NDK stub lib; 16 KB page size; four ABIs.
+# HANDOFF: no GLFW; Vulkan loaded at run time (vulkan_loader.h); 16 KB page size; four ABIs.
 cmake_minimum_required(VERSION 3.22)
 project(mangekyo_android CXX)
 
@@ -9,29 +9,49 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(MANGEKYO_REPO_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../../..")
 get_filename_component(MANGEKYO_REPO_ROOT "${MANGEKYO_REPO_ROOT}" ABSOLUTE)
 
+# A benchmark must not measure unoptimised code. The app's debug variant, the
+# one that can be started over adb, configures CMake with the Debug build
+# type, which compiles the engine without optimisation: on the same CPU that
+# halved the CPU scores (found 2026-10-07 on the first phone). The engine and
+# the bridge get the optimisation of a release build in every variant.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O2 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O2 -DNDEBUG")
+endif()
+
 # Pull in root engine as a subdirectory (ANDROID branch skips GLFW / CLI).
 add_subdirectory("${MANGEKYO_REPO_ROOT}" "${CMAKE_BINARY_DIR}/mangekyo_engine" EXCLUDE_FROM_ALL)
 
 find_library(log-lib log)
 find_library(android-lib android)
-# Link the NDK vulkan stub by name. Native build uses ANDROID_PLATFORM=24 so
-# libvulkan exists in the sysroot; Java minSdk stays 23 with CapabilityGate.
-set(VULKAN_ANDROID_LIB vulkan)
 
-add_library(mangekyo_jni SHARED mangekyo_jni.cpp)
+# libvulkan.so is not linked. Android 6.0 (API 23, the app's minSdk) has none,
+# and a library that names it among those it needs does not load there at all.
+# The engine reaches Vulkan through pointers that vulkan_loader.cpp fills in
+# when the library loads; vulkan_loader.h declares them and goes in front of
+# every source file of the engine and of the bridge. The native build targets
+# android-23 like the app (app/build.gradle.kts).
+add_library(mangekyo_jni SHARED mangekyo_jni.cpp vulkan_loader.cpp)
 target_link_libraries(mangekyo_jni
     PRIVATE
         gpu_engine
         ${android-lib}
         ${log-lib}
-        ${VULKAN_ANDROID_LIB}
+        ${CMAKE_DL_LIBS}
 )
 target_include_directories(mangekyo_jni PRIVATE "${MANGEKYO_REPO_ROOT}/src")
+foreach(VULKAN_USER gpu_engine mangekyo_jni)
+    target_compile_definitions(${VULKAN_USER} PRIVATE VK_NO_PROTOTYPES)
+    target_compile_options(${VULKAN_USER} PRIVATE
+        "SHELL:-include \"${CMAKE_CURRENT_LIST_DIR}/vulkan_loader.h\"")
+endforeach()
 
 # 16 KB page alignment: required for targetSdk 15+ uncompressed .so (HANDOFF).
 target_link_options(mangekyo_jni PRIVATE "-Wl,-z,max-page-size=16384")
 
-# ---- SPIR-V for vertical slice (stream + gpu_burn) ----
+# ---- SPIR-V of the tests the app can start ----
+# Particle and GPU Burn, the fluid (every cinematic_liquid_* and mls_mpm_*
+# stage) and the VRAM / cache bandwidth sweep (membw_*).
 set(ANDROID_SHADER_SOURCES
     "${MANGEKYO_REPO_ROOT}/shaders/particle.vert"
     "${MANGEKYO_REPO_ROOT}/shaders/particle.frag"
@@ -39,6 +59,15 @@ set(ANDROID_SHADER_SOURCES
     "${MANGEKYO_REPO_ROOT}/shaders/fractal.vert"
     "${MANGEKYO_REPO_ROOT}/shaders/gpu_burn.frag"
 )
+# CONFIGURE_DEPENDS: a shader added later is found without a clean build.
+file(GLOB ANDROID_EXTRA_SHADER_SOURCES CONFIGURE_DEPENDS
+    "${MANGEKYO_REPO_ROOT}/shaders/cinematic_liquid_*.comp"
+    "${MANGEKYO_REPO_ROOT}/shaders/cinematic_liquid_*.vert"
+    "${MANGEKYO_REPO_ROOT}/shaders/cinematic_liquid_*.frag"
+    "${MANGEKYO_REPO_ROOT}/shaders/mls_mpm_*.comp"
+    "${MANGEKYO_REPO_ROOT}/shaders/membw_*.comp"
+)
+list(APPEND ANDROID_SHADER_SOURCES ${ANDROID_EXTRA_SHADER_SOURCES})
 find_program(GLSLC_EXECUTABLE glslc
     HINTS
         "$ENV{VULKAN_SDK}/Bin"
@@ -48,6 +77,16 @@ find_program(GLSLC_EXECUTABLE glslc
 set(ANDROID_ASSETS_SHADERS
     "${CMAKE_CURRENT_LIST_DIR}/../assets/shaders")
 file(MAKE_DIRECTORY "${ANDROID_ASSETS_SHADERS}")
+
+# ---- OpenGL ES: the desktop OpenGL sources of the particle test and GPU Burn ----
+# The OpenGL ES backend compiles them on the phone and changes only their
+# version line, so they travel as text. The two gpu_burn_es2 files are the
+# GPU Burn that OpenGL ES 2.0 can run.
+foreach(GL_SHADER compute_gl.comp particle_gl.vert particle_gl.frag fractal_gl.vert gpu_burn_gl.frag
+                  gpu_burn_es2.vert gpu_burn_es2.frag)
+    configure_file("${MANGEKYO_REPO_ROOT}/shaders/${GL_SHADER}"
+                   "${ANDROID_ASSETS_SHADERS}/${GL_SHADER}" COPYONLY)
+endforeach()
 
 if(GLSLC_EXECUTABLE)
     set(ANDROID_SPV_OUTPUTS "")

@@ -1,138 +1,134 @@
-# Mangekyo — HarmonyOS（鸿蒙）Vulkan 版本
+# Mangekyo — HarmonyOS（鸿蒙）版
 
 [English](README.md)
 
-本目录包含鸿蒙应用，与 Windows/Linux 版本使用相同的 Vulkan 粒子仿真逻辑，通过鸿蒙原生 API 运行。
+鸿蒙 App：ArkTS 界面 + 与其他平台共用的 `gpu_engine`（Vulkan 画在 XComponent 的窗口里，CPU 测试直接调用引擎的命令行入口）。
+
+> 状态（2026-10-06，事实分层）：
+> - **代码已写**：四个页面（GPU、CPU、历史、图表）、NAPI 桥接、引擎的鸿蒙宿主（`src/ohos_engine_host.*`）。
+> - **可编译**：在 Windows 上用 DevEco Studio 26.0 自带的工具链从命令行编出未签名的 HAP
+>   （`arm64-v8a` 和 `x86_64`，约 6 MB）。ArkTS 编译器没有报错或警告。
+> - **没有运行过**：没有连接鸿蒙设备，没有模拟器镜像，也没有签名配置。界面显示、Vulkan 是否可用、
+>   CPU 绑核是否被系统允许、图表画得对不对，都没有实际验证。
+> - **成绩身份**：GPU 测试写出 `stream_v1_ohos_preview`、
+>   `gpu_burn_v3_fixed_steps_16_kaleidoscope_ohos_preview`；缓存 / 内存带宽测试写出
+>   `cpu_membw_v1_ohos_preview`。默认 3 秒预览，不是桌面版的 15 秒，不能和桌面成绩混排。
+> - **没有做**：抓帧、正式的移动端时长合同、签名和发布包、CPU 测试的取消。
+>
+> 2026-10-07 追加（**只编译通过，仍然没有运行过**）：
+> - **流体**（`cinematic_liquid`）：全屏运行，3 秒运行保存为
+>   `cinematic_liquid_v2_physical_scene_v8_preview_ohos_preview`。
+> - **显存 / GPU 缓存带宽**（`membw`）：保存为 `membw_v1_ohos_preview`。它只做计算，没有画面，
+>   和 CPU 测试一样走引擎的命令行入口。
+> - **粒子和 GPU Burn 的更重档位**：`stream_heavy`（100 万粒子）、`gpu_burn_medium`（64 步）、`gpu_burn_heavy`（256 步）。
+> - **GPU 测试全屏横屏运行**，渲染尺寸固定 1280 × 720。
+> - 同样的代码在 Android 模拟器上跑过。
+>
+> 2026-10-07 追加（**在 DevEco 的模拟器上实际运行**，未签名的 HAP 可以直接安装）：
+> - **跑通的**：HarmonyOS 5.1.1 手机和三折叠（界面、CPU 测试）、6.1.1 TV（界面、GPU Burn）、7.0 二合一
+>   （界面、CPU 测试、粒子、GPU Burn、悬浮页签）。GPU Burn 的成绩和 Windows、Android 模拟器上同一块显卡的数字一致。
+> - **模拟器的限制**：5.1.1 的镜像没有 Vulkan 驱动，GPU 测试跑不了；6.1.1 和 7.0 的虚拟 GPU 不支持流体需要的纹理格式，
+>   粒子和显存带宽的计时也不可信。车机模拟器（7.0 Beta1）要从登录了账号的 DevEco 里启动。
+> - **没有验证**：真机、车机、手机类型设备上的全屏画面。详见仓库根目录 `HANDOFF.md` 第 10 节。
+
+## 功能
+
+| 页面 | 内容 |
+|---|---|
+| **GPU** | 预览画面；粒子测试和 GPU Burn（固定 16 步）各 3 秒；运行后显示成绩和每帧 GPU 耗时折线图 |
+| **CPU** | 算力测试（单核、全核、单核 + 全核；1 秒或 15 秒）和缓存 / 内存带宽扫描；各级缓存表格、双对数曲线、存储读写条形图、逐处理器柱状图 |
+| **历史** | 保存过的每一条成绩，可全部清除 |
+| **图表** | 每项测试一张条形图：该测试最新版本下各设备的最好成绩 |
+
+界面文字有中文和英文，跟随系统语言。
 
 ## 架构
 
 ```text
-ArkTS 入口 (Index.ets)
-  └── XComponent (type: SURFACE)
-        └── NAPI 模块 (libgpubench.so)
-              ├── napi_init.cpp       — XComponent 生命周期回调
-              └── vulkan_renderer.cpp — Vulkan 计算 + 图形管线
-                    └── vkCreateSurfaceOHOS()（来自 OHNativeWindow）
+ArkTS（entry/src/main/ets）
+  pages/        Index（四个标签页）、GpuPage、CpuPage、HistoryPage、ChartsPage
+  components/   Card、Charts（Canvas 绘制的折线图、柱状图、条形图）
+  common/       RunController（启动测试、收集输出）、EngineOutput（解析引擎输出）、
+                ResultsStore（读 results.json）、I18n、Format
+        │  import bridge from 'libmangekyo.so'
+        ▼
+NAPI（entry/src/main/cpp/napi_init.cpp → libmangekyo.so）
+  ├── XComponent 回调：拿到 OHNativeWindow
+  ├── startWorkload / stopWorkload：GPU 测试，画在预览画面里
+  ├── startCli：CPU 测试，在原生线程上运行引擎的命令行入口
+  └── pollOutput：引擎打印的每一行（同时写入 hilog，标签 MangekyoEngine）
+        ▼
+gpu_engine（仓库根目录的 CMake 工程，OHOS 分支）
+  └── src/ohos_engine_host.cpp → VulkanBackend（vkCreateSurfaceOHOS）
 ```
 
-ArkTS 层仅做最小封装，提供一个全屏 XComponent 并将 `OHNativeWindow` 交给 C++ 层，所有 GPU 逻辑在原生代码中完成。
+SPIR-V 着色器打包在 `resources/rawfile/shaders/` 里，App 启动时复制到自己的文件目录，因为引擎按文件读取着色器。成绩写在 App 文件目录下的 `results/results.json`。
 
-## 环境依赖
+每条成绩记录这台设备的机型（品牌、市场名称和型号代码）、系统版本和内存，历史页每条成绩下面有一行显示。机型和系统版本来自系统的 deviceinfo 接口，内存来自 `/proc/meminfo`。系统没有提供芯片名的接口，所以芯片名仍然从 `/proc/cpuinfo` 读，读不到时记为 `Unknown CPU`，这时要靠型号代码去查。**这些字段只编译通过，没有在设备上核对过。**
 
-| 依赖 | 说明 |
-|------|------|
-| **CodeArts IDE** | 鸿蒙 PC 开发用（基于 VSCode），或 DevEco Studio 5.0+ |
-| **Node.js & npm** | 鸿蒙 PC 内置（`/data/app/bin/`），DevEco 使用自带工具 |
-| **HarmonyOS SDK（API 12+）** | 含 Vulkan 头文件与 `libvulkan.so` |
-| **SPIR-V 着色器** | 由项目 GLSL 源码预编译得到 |
+## 窗口宽度、设备类型和新界面
 
-## 准备着色器
+2026-10-06 加入，**只编译通过，没有在任何设备或模拟器上看过**。
 
-将 GLSL 编译为 SPIR-V 并放到 rawfile 目录。已安装 Vulkan SDK 的机器上执行：
+- **布局按窗口宽度切换：** 600 vp 以下页签在底部、单列；600 vp 起页签竖排在侧边；840 vp 起每页分成左右两栏。历史页和图表页是网格。
+- **GPU 测试全屏运行（2026-10-07）：** 开始时横屏占满屏幕，只显示画面；渲染尺寸固定为 1280 × 720，由系统缩放。页面里不再有小预览。只编译通过，没有运行过。
+- **帧率顶着屏幕刷新率时**，"最近一次运行"里会提示成绩可能偏低，请换更重的档位（粒子 100 万、GPU Burn 64 步 / 256 步）。
+- **设备类型：** phone、tablet、2in1、tv、car。
+- **两套外壳：** `pages/Index.ets` 适用于所有系统；HarmonyOS 6.1（API 23）以上的手机、平板和二合一改为加载 `pages/IndexHds.ets`，它用 UI Design Kit 的悬浮页签和系统材质。选择在 `EntryAbility.ets` 里。编译 `IndexHds.ets` 时的"接口版本高于兼容版本"警告是预期的。
+- **系统材质：** 新外壳的悬浮页签用了它；`module.json5` 里打开了应用级开关（HarmonyOS 7 起对系统控件生效）。按华为文档，普通组件上的材质只在标题栏和底部页签栏里生效，所以内容卡片没有用。
+
+## 构建
+
+需要 DevEco Studio（已在 26.0 上验证，自带 SDK、hvigor、ohpm、node）和 Vulkan SDK 的 `glslc`。
+
+```powershell
+.\scripts\build-ohos.ps1
+```
+
+脚本先把着色器编译进 rawfile，再执行 `ohpm install` 和 `hvigorw assembleHap`。产物是
+`ohos\entry\build\default\outputs\default\entry-default-unsigned.hap`。
+
+也可以用 DevEco Studio 打开 `ohos/` 目录直接构建。**第一次从 IDE 构建前请先运行一次上面的脚本**（或至少让它编译出着色器）：
+打包资源发生在原生库编译之前，全新检出的工程里还没有 `.spv` 文件，第一次打出的包会缺着色器，GPU 测试会失败。
+
+**仓库路径不能太长。** 原生库的中间文件路径很深，仓库放在一百多个字符的路径下时，CMake 会警告路径超过 250 个字符，随后构建失败（`ninja: error: loading 'build.ninja'`）。用 `subst` 映射盘符没有用，构建工具会还原成真实路径。
+
+## 安装到设备
+
+未签名的 HAP 装不到真机上。在 DevEco Studio 里登录华为账号后，
+**File → Project Structure → Signing Configs → Automatically generate signature**，再点运行即可。
+模拟器需要先在 **Device Manager** 里下载系统镜像。这两步都需要你本人操作，没有在这台机器上做过。
+
+## 用 hdc 远程测试
+
+debug 包可以不碰设备就开始一项测试（2026-10-07 在模拟器上试过，真机没有）：
 
 ```bash
-glslc shaders/compute.comp  -o ohos/entry/src/main/resources/rawfile/shaders/compute.comp.spv
-glslc shaders/particle.vert -o ohos/entry/src/main/resources/rawfile/shaders/particle.vert.spv
-glslc shaders/particle.frag -o ohos/entry/src/main/resources/rawfile/shaders/particle.frag.spv
+hdc shell aa start -a EntryAbility -b com.mangekyo.benchmark --ps run cpu_membw
+hdc hilog | grep Mangekyo
 ```
 
-若本机没有 `glslc`，可从 Windows 的 `build/Release/` 目录复制已编译的 `.spv` 文件到
-`ohos/entry/src/main/resources/rawfile/shaders/`。
+- **`--ps run <测试>`**：`cpu_membw`、`cpu_all`、`cpu_per_core`、`cpu_multi`、`stream`（粒子，默认 100 万）、
+  `gpu_burn`（默认 16 步）、`cinematic_liquid`（流体）、`membw`（显存 / GPU 缓存带宽）。
+- **Headless 粒子测试**：`--ps run "stream_headless?particles=1048576"`，只计算、不显示画面（只编译通过，没有运行过）。
+- **OpenGL ES 3.1**（2026-10-07 加入）：GPU 页的"图形 API"可以选它，hdc 请求里加 `api=gles`，例如
+  `--ps run "'stream?particles=1048576&api=gles'"`（`&` 要用引号包住）。有粒子测试（含 Headless）和 GPU Burn 两项，流体和显存带宽只有 Vulkan。
+  着色器是桌面 OpenGL 那一份，只换版本行。在 7.0 和 5.1.1 的模拟器上跑通；**5.1.1 的镜像没有 Vulkan 驱动，这两项现在可以用 OpenGL ES 跑**。
+  模拟器不提供 GPU 时间戳，数字不是成绩；真机没有试过。
+- **OpenGL ES 2.0**（2026-10-07 加入）：只有 GPU Burn，是另写的着色器，成绩单独成组（`gpu_burn_es2_legacy_v1_...`），用墙钟计时。
+  请求里加 `api=gles2`，例如 `--ps run "'gpu_burn?steps=64&api=gles2'"`。在 5.1.1 的模拟器上跑通，真机没有试过。
+- **GPU 测试可以带设置**：`--ps run "stream?particles=4194304"`、`--ps run "gpu_burn?steps=128"`
+  （粒子数向上取整到 256，步数 16–2048）。旧名字 `stream_heavy`、`gpu_burn_medium`、`gpu_burn_heavy` 仍然可用。
+  GPU 页上也可以选同样的设置，预设和默认值与 Windows 版相同。
+- **`--pi seconds <N>`**（可选）：CPU 算力测试每项的秒数，或 GPU 测试的时长。
+- **日志**：标签 `MangekyoEngine` 是引擎打印的每一行；标签 `Mangekyo` 下有
+  `AUTORUN accepted / started / refused / failed` 和结束时的 `RUN finished kind=cpu exit=0`。
+- 启动参数只在 debug 包里生效；GPU 测试需要屏幕亮着并解锁。
 
-## 使用 DevEco Studio 构建
+## 已知风险（都要在设备上确认）
 
-1. 打开 DevEco Studio
-2. **File → Open Project**，选择 `ohos/` 目录
-3. 连接鸿蒙 PC 或设备
-4. 点击 **Build → Build Hap(s)/APP(s)** 或按 **Ctrl+F9**
-5. 使用 **Run → Run 'entry'** 在设备上运行
-
-## 命令行构建（鸿蒙 PC 上使用 CodeArts IDE）
-
-在鸿蒙 PC 上使用 hvigor 工具链构建时：
-
-**1. 配置系统环境**
-
-在 `~/.zshrc` 中加入系统 bin 路径和 npm 全局 bin：
-
-```bash
-echo 'export PATH=/data/app/bin:$PATH' >> ~/.zshrc
-echo 'export PATH="$(npm prefix -g)/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
-```
-
-**2. 安装 hvigor 构建工具**
-
-```bash
-npm config set @ohos:registry=https://repo.harmonyos.com/npm/
-npm install -g @ohos/hvigor @ohos/hvigor-ohos-plugin
-```
-
-**3. 编译项目**
-
-```bash
-cd ohos
-hvigor assembleHap --mode module -p module=entry
-```
-
-> 若 hvigor 报错项目结构或版本不匹配，检查全局安装的 `@ohos/hvigor` 版本是否与项目中的
-> `oh-package.json5` 或 `hvigor/hvigor-config.json5` 一致。
-
-## 安装与运行
-
-生成的 `.hap` 文件路径为：
-
-```
-entry/build/default/outputs/default/entry-default-signed.hap
-```
-
-通过 hdc 安装到设备：
-
-```bash
-hdc install entry/build/default/outputs/default/entry-default-signed.hap
-```
-
-也可在 DevEco Studio 中直接运行。
-
-## GPU 性能输出
-
-耗时信息通过 HiLog 输出，可用以下命令查看：
-
-```bash
-hdc shell hilog | grep GpuBench
-```
-
-示例输出：
-
-```
-Compute: 0.031 ms | Render: 0.054 ms | Total: 0.112 ms | FPS: 3200
-```
-
-## 项目结构
-
-```text
-ohos/
-├── AppScope/
-│   ├── app.json5                          # 应用元数据
-│   └── resources/base/element/string.json
-├── entry/
-│   ├── build-profile.json5                # 原生构建配置（CMake 路径、ABI）
-│   ├── hvigorfile.ts
-│   └── src/main/
-│       ├── ets/
-│       │   ├── entryability/EntryAbility.ets  # UIAbility 生命周期
-│       │   └── pages/Index.ets               # 全屏 XComponent
-│       ├── cpp/
-│       │   ├── CMakeLists.txt                 # 链接 libvulkan.so 等
-│       │   ├── napi_init.cpp                  # NAPI + XComponent 回调
-│       │   ├── vulkan_renderer.h              # 渲染器接口
-│       │   └── vulkan_renderer.cpp            # 完整 Vulkan 管线
-│       ├── module.json5                       # 模块配置
-│       └── resources/
-│           ├── base/
-│           │   ├── element/string.json
-│           │   └── profile/main_pages.json
-│           └── rawfile/shaders/               # SPIR-V 文件放置目录
-├── build-profile.json5                    # 项目级构建配置
-└── hvigorfile.ts
-```
+- **CPU 绑核**：引擎用 `sched_setaffinity` 把线程绑到指定核心。如果鸿蒙的应用沙箱不允许，
+  算力测试会按"绑核失败"判为无效，缓存 / 内存扫描的结果会标记为未绑核。
+- **缓存容量**：从 `/sys/devices/system/cpu` 读取。如果沙箱里读不到，会改为从曲线上识别各级缓存。
+- **Vulkan**：引擎只请求 Vulkan 1.0 的入口；设备和模拟器是否都提供 `VK_OHOS_surface` 没有验证。
+- **存储测试**：会在 App 文件目录里写一个最大 1 GiB 的临时文件。

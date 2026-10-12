@@ -52,60 +52,7 @@ static std::string jsonEscape(const std::string& s) {
 }
 
 /// Serialize a BenchmarkResult to a JSON object string.
-static std::string resultToJson(const gpu_bench::BenchmarkResult& r) {
-    std::ostringstream o;
-    o << "{";
-    o << "\"id\":\""          << jsonEscape(r.id) << "\",";
-    o << "\"timestamp\":\""   << jsonEscape(r.timestamp) << "\",";
-    o << "\"resultSchemaVersion\":" << r.resultSchemaVersion << ",";
-    o << "\"appVersion\":\""  << jsonEscape(r.appVersion) << "\",";
-    o << "\"workload\":\""    << jsonEscape(r.workload) << "\",";
-    o << "\"workloadVersion\":\"" << jsonEscape(r.workloadVersion) << "\",";
-    o << "\"workloadConfig\":\"" << jsonEscape(r.workloadConfig) << "\",";
-    o << "\"graphicsApi\":\"" << jsonEscape(r.graphicsApi) << "\",";
-    o << "\"deviceName\":\""  << jsonEscape(r.deviceName) << "\",";
-    o << "\"driverVersion\":\"" << jsonEscape(r.driverVersion) << "\",";
-    o << "\"cpuName\":\""     << jsonEscape(r.cpuName) << "\",";
-    o << "\"osVersion\":\""   << jsonEscape(r.osVersion) << "\",";
-    o << "\"platform\":\""    << jsonEscape(r.platform) << "\",";
-    o << "\"osArchitecture\":\"" << jsonEscape(r.osArchitecture) << "\",";
-    o << "\"processArchitecture\":\"" << jsonEscape(r.processArchitecture) << "\",";
-    o << "\"memory\":\""      << jsonEscape(r.memory) << "\",";
-    o << "\"vramMB\":"        << r.vramMB << ",";
-    o << "\"resWidth\":"      << r.resWidth << ",";
-    o << "\"resHeight\":"     << r.resHeight << ",";
-    o << "\"particleCount\":" << r.particleCount << ",";
-    o << "\"difficulty\":\""  << jsonEscape(r.difficulty) << "\",";
-    o << "\"vsync\":"         << (r.vsync ? "true" : "false") << ",";
-    o << "\"isSoftware\":"    << (r.isSoftware ? "true" : "false") << ",";
-    o << "\"headless\":"      << (r.headless ? "true" : "false") << ",";
-    o << "\"framesInFlight\":" << r.framesInFlight << ",";
-    o << "\"durationSec\":"   << r.durationSec << ",";
-    o << "\"warmupSec\":"     << r.warmupSec << ",";
-    o << "\"measuredFrames\":" << r.measuredFrames << ",";
-    o << "\"timingSamples\":" << r.timingSamples << ",";
-    o << "\"avgComputeMs\":"  << r.avgComputeMs << ",";
-    o << "\"minComputeMs\":"  << r.minComputeMs << ",";
-    o << "\"maxComputeMs\":"  << r.maxComputeMs << ",";
-    o << "\"avgRenderMs\":"   << r.avgRenderMs << ",";
-    o << "\"minRenderMs\":"   << r.minRenderMs << ",";
-    o << "\"maxRenderMs\":"   << r.maxRenderMs << ",";
-    o << "\"avgTotalGpuMs\":" << r.avgTotalGpuMs << ",";
-    o << "\"minTotalGpuMs\":" << r.minTotalGpuMs << ",";
-    o << "\"maxTotalGpuMs\":" << r.maxTotalGpuMs << ",";
-    o << "\"avgFps\":"        << r.avgFps << ",";
-    o << "\"avgFrameTimeMs\":" << r.avgFrameTimeMs << ",";
-    o << "\"gpuUtilisation\":" << r.gpuUtilisation << ",";
-    o << "\"bottleneck\":\""  << jsonEscape(r.bottleneck) << "\",";
-    o << "\"score\":"         << r.score << ",";
-    o << "\"scoreUnit\":\""   << jsonEscape(r.scoreUnit) << "\",";
-    o << "\"precision\":\""   << jsonEscape(r.precision) << "\",";
-    o << "\"stableScore\":"   << r.stableScore << ",";
-    o << "\"stableVariancePct\":" << r.stableVariancePct << ",";
-    o << "\"throttlePct\":"   << r.throttlePct;
-    o << "}";
-    return o.str();
-}
+
 
 // Serialise is NOT reentrant — cliMain can't run concurrently anyway.
 static std::mutex g_runMutex;
@@ -240,15 +187,7 @@ int gpb_run(const char* const* argv, int argc,
 }
 
 char* gpb_load_results(void) {
-    auto results = gpu_bench::LoadResults();
-    std::ostringstream json;
-    json << "[";
-    for (size_t i = 0; i < results.size(); ++i) {
-        if (i > 0) json << ",";
-        json << resultToJson(results[i]);
-    }
-    json << "]";
-    return strdup_alloc(json.str());
+    return strdup_alloc(gpu_bench::SerializeResultsJson(gpu_bench::LoadResults()));
 }
 
 bool gpb_delete_result(const char* resultId) {

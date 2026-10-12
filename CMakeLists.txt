@@ -39,6 +39,24 @@ if(ANDROID)
     set(GPU_BENCH_IOS OFF)
 endif()
 
+# ---- HarmonyOS platform setup (OHNativeWindow Vulkan; no GLFW / DX / Metal / GL) ----
+if(OHOS)
+    set(ENABLE_VULKAN ON CACHE BOOL "Vulkan backend" FORCE)
+    set(ENABLE_DX12 OFF CACHE BOOL "DX12 backend" FORCE)
+    set(ENABLE_DX11 OFF CACHE BOOL "DX11 backend" FORCE)
+    set(ENABLE_OPENGL OFF CACHE BOOL "OpenGL backend" FORCE)
+    set(ENABLE_METAL OFF CACHE BOOL "Metal backend" FORCE)
+    add_compile_definitions(GPU_BENCH_NO_GLFW GPU_BENCH_OHOS)
+    set(GPU_BENCH_OHOS ON)
+endif()
+
+# Hosts that embed the engine in an app: no GLFW, no CLI executable, no packaging.
+if(GPU_BENCH_IOS OR GPU_BENCH_ANDROID OR GPU_BENCH_OHOS)
+    set(GPU_BENCH_EMBEDDED ON)
+else()
+    set(GPU_BENCH_EMBEDDED OFF)
+endif()
+
 # ---- Options ----
 # Vulkan on macOS requires a separately distributed loader/ICD (typically
 # MoltenVK). Keep the Monterey-compatible default self-contained and let
@@ -62,8 +80,8 @@ else()
 endif()
 option(ENABLE_OPENGL "Build with OpenGL 4.3 backend" ON)
 
-# ---- GLFW (required by desktop backends; skipped on iOS / Android) ----
-if(NOT GPU_BENCH_IOS AND NOT GPU_BENCH_ANDROID)
+# ---- GLFW (required by desktop backends; skipped on iOS / Android / HarmonyOS) ----
+if(NOT GPU_BENCH_EMBEDDED)
     if(APPLE)
         option(GPU_BENCH_BUILD_GLFW_FROM_SOURCE
                "Build GLFW with the configured macOS deployment target" ON)
@@ -105,7 +123,9 @@ set(COMMON_SOURCES
     src/app_base.cpp
     src/benchmark_results.cpp
     src/cpu_benchmark.cpp
+    src/cpu_cli.cpp
     src/path_service.cpp
+    src/system_info.cpp
     src/cinematic_liquid_v2_common.cpp
 )
 if(NOT GPU_BENCH_IOS)
@@ -120,6 +140,12 @@ set(BACKEND_SOURCES "")
 set(BACKEND_LIBS "")
 set(BACKEND_DEFS "")
 
+# The CPU cache / memory bandwidth sweep needs no GPU and is built everywhere,
+# so that the mobile front-ends can call it too. src/cpumem_cli.cpp is a
+# stand-alone entry point for it (see scripts/build-android-cpumem.ps1).
+list(APPEND COMMON_SOURCES src/cpu_membw.cpp)
+list(APPEND BACKEND_DEFS HAVE_CPU_MEMBW)
+
 # ---- Vulkan backend (optional) ----
 if(ENABLE_VULKAN)
     if(ANDROID)
@@ -127,16 +153,29 @@ if(ENABLE_VULKAN)
         # JNI shared library (see android/.../CMakeLists.txt). CapabilityGate
         # still dlopen-probes before Run so API 23 devices without Vulkan never
         # enter the workload path.
+        # vulkan_membw.cpp (the VRAM / cache bandwidth sweep) needs no window,
+        # so the app runs it through the command-line entry, like the CPU tests.
         list(APPEND BACKEND_SOURCES src/vulkan_backend.cpp
+                                    src/vulkan_membw.cpp
                                     src/android_engine_host.cpp)
-        list(APPEND BACKEND_DEFS    HAVE_VULKAN)
+        list(APPEND BACKEND_DEFS    HAVE_VULKAN HAVE_VULKAN_MEMBW)
         message(STATUS "Vulkan backend: ENABLED (Android NDK / ANativeWindow)")
+    elseif(OHOS)
+        # The HarmonyOS SDK ships the Vulkan headers; libvulkan.so is linked
+        # into the app's NAPI library (see ohos/entry/src/main/cpp).
+        list(APPEND BACKEND_SOURCES src/vulkan_backend.cpp
+                                    src/vulkan_membw.cpp
+                                    src/ohos_engine_host.cpp)
+        list(APPEND BACKEND_DEFS    HAVE_VULKAN HAVE_VULKAN_MEMBW)
+        message(STATUS "Vulkan backend: ENABLED (HarmonyOS / OHNativeWindow)")
     else()
         find_package(Vulkan QUIET)
         if(Vulkan_FOUND)
-            list(APPEND BACKEND_SOURCES src/vulkan_backend.cpp)
+            # vulkan_membw.cpp is the standalone compute-only memory-bandwidth
+            # sweep, started from the command line.
+            list(APPEND BACKEND_SOURCES src/vulkan_backend.cpp src/vulkan_membw.cpp)
             list(APPEND BACKEND_LIBS    Vulkan::Vulkan)
-            list(APPEND BACKEND_DEFS    HAVE_VULKAN GLFW_INCLUDE_VULKAN)
+            list(APPEND BACKEND_DEFS    HAVE_VULKAN HAVE_VULKAN_MEMBW GLFW_INCLUDE_VULKAN)
             message(STATUS "Vulkan backend: ENABLED")
         else()
             message(STATUS "Vulkan backend: DISABLED (Vulkan SDK not found)")
@@ -242,12 +281,34 @@ else()
     message(STATUS "OpenGL backend: DISABLED (by option)")
 endif()
 
+# ---- OpenGL ES 3.1 backend (Android, HarmonyOS: the particle test and GPU Burn) ----
+# A phone has OpenGL ES where the desktop has OpenGL. The backend is its own
+# file (src/gles_backend.cpp) and uses the desktop OpenGL shader sources.
+if(ANDROID)
+    list(APPEND BACKEND_SOURCES src/gles_backend.cpp)
+    list(APPEND BACKEND_LIBS    EGL GLESv3)
+    list(APPEND BACKEND_DEFS    HAVE_GLES)
+    message(STATUS "OpenGL ES backend: ENABLED (Android NDK / EGL)")
+elseif(OHOS)
+    # libEGL.so and libGLESv3.so are linked into the app's NAPI library
+    # (see ohos/entry/src/main/cpp), as libvulkan.so is.
+    list(APPEND BACKEND_SOURCES src/gles_backend.cpp)
+    list(APPEND BACKEND_DEFS    HAVE_GLES)
+    message(STATUS "OpenGL ES backend: ENABLED (HarmonyOS / EGL)")
+endif()
+
 # ---- Engine library (shared by the CLI and the WinUI3 C++/WinRT GUI) ----
 add_library(gpu_engine STATIC ${COMMON_SOURCES} ${BACKEND_SOURCES})
-if(GPU_BENCH_IOS OR GPU_BENCH_ANDROID)
+if(GPU_BENCH_EMBEDDED)
     target_link_libraries(gpu_engine PUBLIC ${BACKEND_LIBS})
 else()
     target_link_libraries(gpu_engine PUBLIC glfw ${BACKEND_LIBS})
+endif()
+# glibc < 2.34 (e.g. Ubuntu 20.04 / Jetson JetPack 5) keeps dlopen/dlsym (RenderDoc
+# loader) and pthread_setaffinity_np (CPU benchmark) outside libc proper.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND NOT ANDROID)
+    find_package(Threads REQUIRED)
+    target_link_libraries(gpu_engine PUBLIC Threads::Threads ${CMAKE_DL_LIBS})
 endif()
 target_compile_definitions(gpu_engine PUBLIC
     ${BACKEND_DEFS}
@@ -257,7 +318,8 @@ target_compile_definitions(gpu_engine PUBLIC
     GPU_BENCH_VERSION_PATCH=${PROJECT_VERSION_PATCH})
 target_include_directories(gpu_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 if(ANDROID)
-    # Headers only here; the consuming shared lib links libvulkan.
+    # Headers only here. The app's library does not link libvulkan either: it
+    # loads it at run time (android/app/src/main/cpp/vulkan_loader.h).
     find_library(ANDROID_VULKAN_LIB vulkan)
     if(ANDROID_VULKAN_LIB)
         target_include_directories(gpu_engine PUBLIC ${CMAKE_SYSROOT}/usr/include)
@@ -274,9 +336,30 @@ if(MSVC AND ENABLE_VULKAN AND Vulkan_FOUND)
 endif()
 
 # ---- CLI executable (thin entry point -> gpu_bench::cliMain) ----
-if(NOT GPU_BENCH_IOS AND NOT GPU_BENCH_ANDROID)
+if(NOT GPU_BENCH_EMBEDDED)
     add_executable(gpu_benchmark src/cli_main.cpp)
     target_link_libraries(gpu_benchmark PRIVATE gpu_engine)
+endif()
+
+# ---- Result file compatibility test ----
+# Checks that results.json of older and newer builds is read, kept and
+# rewritten correctly. Built from three sources on their own, so it needs no
+# GPU library. Run it with: ctest --test-dir <build dir> -C Release
+option(GPU_BENCH_BUILD_TESTS "Build the result file compatibility test" ON)
+if(GPU_BENCH_BUILD_TESTS AND NOT GPU_BENCH_EMBEDDED)
+    enable_testing()
+    add_executable(results_compat_test
+        tests/results_compat_test.cpp
+        src/benchmark_results.cpp
+        src/path_service.cpp
+        src/system_info.cpp)
+    target_include_directories(results_compat_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    if(MSVC)
+        target_compile_options(results_compat_test PRIVATE /W4 /permissive- /utf-8)
+    else()
+        target_compile_options(results_compat_test PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+    add_test(NAME results_compat COMMAND results_compat_test)
 endif()
 
 if(MSVC)
@@ -342,6 +425,11 @@ if(ENABLE_VULKAN AND Vulkan_FOUND)
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_fp64.comp
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_int32.comp
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/synthpeak_fp16.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/membw_read.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/membw_write.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/membw_copy.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/membw_l1.comp
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders/membw_check.comp
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/render3d.vert
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders/render3d.frag
         )
@@ -464,9 +552,9 @@ endif()
 # release payload use the same target and shader lists. The first deliverable
 # is the Windows x64 CLI core; GUI, RenderDoc and the frozen report worker are
 # optional payloads until their remaining path/runtime blockers are removed.
-# Android / iOS embed gpu_engine only — no CLI / CPack.
+# Android / iOS / HarmonyOS embed gpu_engine only — no CLI / CPack.
 option(GPU_BENCH_ENABLE_PACKAGING "Generate install and CPack release rules" ON)
-if(ANDROID OR GPU_BENCH_ANDROID OR GPU_BENCH_IOS)
+if(ANDROID OR GPU_BENCH_EMBEDDED)
     set(GPU_BENCH_ENABLE_PACKAGING OFF CACHE BOOL "Generate install and CPack release rules" FORCE)
 endif()
 if(GPU_BENCH_ENABLE_PACKAGING)

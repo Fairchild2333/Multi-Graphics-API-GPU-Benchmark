@@ -12,9 +12,10 @@ struct RunRequest {
     void* metalLayer = nullptr;  // CAMetalLayer* (__bridge void*)
     std::string shaderDir;       // trailing slash expected by ReadFileBytes callers
     std::string dataDir;         // sets GPU_BENCH_DATA_DIR for sandbox results
-    std::string workloadId;      // "stream" | "gpu_burn" | "cinematic_liquid"
+    // The test and its size, e.g. "stream?particles=4194304" or "gpu_burn?steps=64";
+    // see embedded_request.h ("stream" | "gpu_burn" | "cinematic_liquid").
+    std::string workloadId;
     double maxRunTimeSec = 3.0;
-    std::uint32_t particleCount = 262144;
 };
 
 // Blocking: constructs MetalBackend and runs AppBase::Run on the calling thread.

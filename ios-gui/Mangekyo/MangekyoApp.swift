@@ -5,6 +5,8 @@ import SwiftUI
 
 @main
 struct MangekyoApp: App {
+    // Decides the orientations of the app: landscape while a GPU test runs.
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var engine = BenchEngine()
     @AppStorage("appTheme") private var appTheme: String = "system"
     @Environment(\.scenePhase) private var scenePhase

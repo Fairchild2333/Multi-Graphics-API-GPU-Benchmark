@@ -1,0 +1,160 @@
+=== Job 1 of 2: gpu_benchmark --time 4 --backend vulkan --gpu 0 ===
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  NVIDIA GeForce RTX 5090 (Discrete)           32187 MB  YES   YES   YES    -    YES 
+  AMD Radeon(TM) Graphics (Integrated)         2021 MB  YES   YES   YES    -     -  
+  Microsoft Basic Render Driver (Software)         -    -    YES   YES    -     -  
+============================================================
+
+
+Difficulty presets:
+  [0] Light     65536 particles (  2 MB)
+  [1] Medium    1048576 particles ( 32 MB)  <- default
+  [2] Heavy     4194304 particles (128 MB)
+  [3] Extreme   16777216 particles (512 MB)
+Select difficulty [0-3] (default: 1): Backend: Vulkan  |  V-Sync: OFF  |  Memory: Device-local  |  Particles: 1048576 (Medium)  |  Auto-stop: 4s
+Available GPUs:
+  [0] NVIDIA GeForce RTX 5090 (Discrete GPU)
+  [1] AMD Radeon(TM) Graphics (Integrated GPU)
+Selected GPU [0]: NVIDIA GeForce RTX 5090  |  Driver: NVIDIA 616.92
+Created particle buffer (device-local via staging): 1048576 particles
+[Profiling] Timestamp queries enabled (period = 1 ns/tick)
+[GPU Timing] Compute: 0.024 ms | Render: 0.000 ms | Total: 0.024 ms | FPS: 19210 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.023 ms | Render: 0.000 ms | Total: 0.023 ms | FPS: 19046 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.023 ms | Render: 0.000 ms | Total: 0.024 ms | FPS: 19142 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 0.023 ms | Render: 0.000 ms | Total: 0.024 ms | FPS: 20476 | T: 1.9 s
+[GPU Timing] Compute: 0.023 ms | Render: 0.000 ms | Total: 0.023 ms | FPS: 18056 | T: 2.9 s
+[GPU Timing] Compute: 0.022 ms | Render: 0.000 ms | Total: 0.022 ms | FPS: 17816 | T: 3.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          NVIDIA GeForce RTX 5090
+Driver:       NVIDIA 616.92
+CPU:          AMD Ryzen 7 9800X3D 8-Core Processor           
+OS:           Windows 11 (NT 10.0.26300)
+System:       Windows x64
+System:       Windows x64
+Memory:       Device-local VRAM
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    1048576 (Medium)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     3.0 s (warmup: 1.0 s, measured: 56290 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.022     0.017     1.975
+Render:          0.000     0.000     0.206
+Total GPU:       0.023     0.017     1.976
+
+--- Throughput ---
+Avg FPS:      18768
+Particles:    1048576
+Working set:  32.00 MiB
+VRAM rate:   1876.32 GB/s  (0.022 ms compute)
+
+--- Analysis ---
+Avg frame time:  0.053 ms
+Avg GPU time:    0.023 ms
+GPU utilisation: 42.7%
+>> CPU-bound: GPU is idle 57% of the time.
+   -> Try a higher difficulty for more accurate GPU benchmarking.
+==========================================================
+
+=== Job 2 of 2: gpu_benchmark --time 4 --backend dx12 --gpu 0 ===
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  NVIDIA GeForce RTX 5090 (Discrete)           32187 MB  YES   YES   YES    -    YES 
+  AMD Radeon(TM) Graphics (Integrated)         2021 MB  YES   YES   YES    -     -  
+  Microsoft Basic Render Driver (Software)         -    -    YES   YES    -     -  
+============================================================
+
+
+Difficulty presets:
+  [0] Light     65536 particles (  2 MB)
+  [1] Medium    1048576 particles ( 32 MB)  <- default
+  [2] Heavy     4194304 particles (128 MB)
+  [3] Extreme   16777216 particles (512 MB)
+Select difficulty [0-3] (default: 1): Backend: DX12  |  V-Sync: OFF  |  Memory: Device-local  |  Particles: 1048576 (Medium)  |  Auto-stop: 4s
+[DX12 Init] Creating device...
+Available GPUs:
+  [0] NVIDIA GeForce RTX 5090 (Hardware)  VRAM: 32187 MB
+    -> D3D12 supported (Feature Level 12_1)
+  [1] AMD Radeon(TM) Graphics (Hardware)  VRAM: 2021 MB
+    -> D3D12 supported (Feature Level 12_1)
+  [2] NVIDIA GeForce RTX 5090 (Hardware)  VRAM: 32187 MB
+    -> D3D12 supported (Feature Level 12_1)
+  [3] NVIDIA GeForce RTX 5090 (Hardware)  VRAM: 32187 MB
+    -> D3D12 supported (Feature Level 12_1)
+  [4] Microsoft Basic Render Driver (Software)  VRAM: 0 MB
+    -> D3D12 supported (Feature Level 12_1)
+Selected GPU: NVIDIA GeForce RTX 5090 (FL 12_1)  |  Driver: 32.0.16.1692
+[DX12 Init] Creating command queue...
+[DX12 Init] Creating descriptor heaps...
+[DX12 Init] Creating command allocators...
+[DX12 Init] Creating fence...
+[DX12 Init] Creating root signatures...
+[DX12 Init] Creating pipeline states (compiling shaders)...
+[DX12 Init] Creating particle buffer...
+Created particle buffer: 1048576 particles
+[DX12 Init] Creating timestamp resources...
+[Profiling] DX12 timestamp queries enabled on 1 node(s)
+[DX12 Init] Initialisation complete.
+[GPU Timing] Compute: 0.016 ms | Render: 0.000 ms | Total: 0.017 ms | FPS: 16439 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.016 ms | Render: 0.000 ms | Total: 0.017 ms | FPS: 17495 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.017 ms | Render: 0.000 ms | Total: 0.017 ms | FPS: 17268 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 0.017 ms | Render: 0.000 ms | Total: 0.017 ms | FPS: 16542 | T: 1.9 s
+[GPU Timing] Compute: 0.017 ms | Render: 0.000 ms | Total: 0.017 ms | FPS: 15696 | T: 2.9 s
+[GPU Timing] Compute: 0.017 ms | Render: 0.000 ms | Total: 0.017 ms | FPS: 17043 | T: 3.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: DX12
+GPU:          NVIDIA GeForce RTX 5090 (FL 12_1)
+Driver:       32.0.16.1692
+CPU:          AMD Ryzen 7 9800X3D 8-Core Processor           
+OS:           Windows 11 (NT 10.0.26300)
+System:       Windows x64
+System:       Windows x64
+Memory:       Device-local VRAM
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    1048576 (Medium)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     3.0 s (warmup: 1.0 s, measured: 49420 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.017     0.015     1.774
+Render:          0.000     0.000     0.001
+Total GPU:       0.017     0.015     1.775
+
+--- Throughput ---
+Avg FPS:      16473
+Particles:    1048576
+Working set:  32.00 MiB
+VRAM rate:   2505.34 GB/s  (0.017 ms compute)
+
+--- Analysis ---
+Avg frame time:  0.061 ms
+Avg GPU time:    0.017 ms
+GPU utilisation: 28.3%
+>> CPU-bound: GPU is idle 71% of the time.
+   -> Try a higher difficulty for more accurate GPU benchmarking.
+==========================================================
+

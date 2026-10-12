@@ -36,9 +36,11 @@ def load_results(path: Path) -> list[dict]:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
     if isinstance(data, dict) and "results" in data:
-        return data["results"]
+        data = data["results"]
     if isinstance(data, list):
-        return data
+        # The GPU and CPU memory-bandwidth sweeps render no frames, so they
+        # have no place in these FPS / frame-time charts and tables.
+        return [r for r in data if r.get("workload") not in ("membw", "cpu_membw")]
     print("ERROR: unexpected JSON structure.", file=sys.stderr)
     sys.exit(1)
 

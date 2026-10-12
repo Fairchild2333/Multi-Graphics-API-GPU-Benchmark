@@ -6,6 +6,27 @@ uses Liquid Glass; macOS 12–15 use the Material/standard-control fallback.
 
 ## Build the CLI and app
 
+## Architecture
+
+Aligned with the Windows WinUI 3 GUI. Prefers launching the built
+`gpu_benchmark` CLI as a subprocess (Cancel = terminate). Falls back to the
+in-process `gpu_engine` bridge when the binary is missing. On Windows the
+matching developer flow is `scripts/build-windows.ps1` (CLI + WinUI + adjacent
+worker/shaders); see `docs/building.md`.
+
+```
+SwiftUI App
+  ↕ Process (preferred) or ObjC++ bridge
+gpu_benchmark / libgpu_engine.a  →  Metal / Vulkan / OpenGL backends
+```
+
+## Checking without a Mac
+
+`scripts/check-apple.ps1` type-checks the engine wrapper, the models, the charts
+and the CPU, GPU and Charts pages with Swift 6 in a Linux container, and runs
+tests of the code that has no UI. It is not a build with the Apple SDK; see
+`scripts/apple-check/README.md` for what it covers and what it cannot.
+
 From the repository root:
 
 ```bash
@@ -16,19 +37,19 @@ The command builds a native-architecture, Metal-only Release app and verifies
 the result. Its final output is:
 
 ```text
-out/macos/<arm64|x86_64>/Release/GPUBenchmark.app
+out/macos/<arm64|x86_64>/Release/Mangekyo.app
 ```
 
 Launch it with Finder, or during development:
 
 ```bash
-open out/macos/$(uname -m)/Release/GPUBenchmark.app
+open out/macos/$(uname -m)/Release/Mangekyo.app
 ```
 
 The staged app contains:
 
 ```text
-GPUBenchmark.app/
+Mangekyo.app/
 └── Contents/
     ├── MacOS/GPUBenchmark
     ├── Helpers/
@@ -91,6 +112,17 @@ The default signature is ad-hoc and suitable for local testing. Set
 script does **not** create a universal binary, installer, notarization ticket,
 or App Store archive.
 
+### Page Overview
+
+| Page | Features |
+|------|----------|
+| **GPU / Run** | Custom + Full Analysis; multi-select API (supported / unsupported); Duration seconds/minutes/hours/frames/Until Cancel; particle & Burn presets; capture-at-N; legacy toggle; progress; Cancel; open results/captures; charts of the run (scores of the jobs, GPU time per frame) |
+| **CPU** | per-core / multi / all; Quick 1s & Formal 15s; warm-up; summary + log; one bar per logical processor; cache & memory bandwidth sweep (`--cpu-membw`) with level tables, log-log curves and storage bars |
+| **History** | Table + sort; GPU/API/workload/time filters; `workloadVersion` column; clear all; open folders |
+| **Charts** | One bar chart per test from the saved results, drawn in SwiftUI (no Python needed); the Full Analysis presets still write PNGs with `scripts/plot_workloads.py` |
+| **Settings** | Theme; language Auto/EN/简体中文/日本語; working directory |
+| **About** | Version, description, GitHub link, system info |
+
 ## Backend contract
 
 | Backend | Default `.app` | macOS status |
@@ -138,14 +170,13 @@ Platform-specific Windows features are not presented as macOS parity:
 Developer smoke commands for a completed bundle:
 
 ```bash
-APP="out/macos/$(uname -m)/Release/GPUBenchmark.app"
+APP="out/macos/$(uname -m)/Release/Mangekyo.app"
 HELPER="$APP/Contents/Helpers/gpu_benchmark"
 
 "$HELPER" --backend metal --workload stream --particles 1048576 --time 15
 "$HELPER" --backend metal --workload gpu_burn --time 15 --iter 16
 "$HELPER" --backend metal --workload cinematic_liquid --time 6
 ```
-
 Capture validation must additionally confirm that a requested capture produces
 a real `.gputrace` under the captures directory. A score with
 `captureUnavailable` is not capture acceptance. The app declares
@@ -188,9 +219,61 @@ The normal workflow is to run `scripts/build-macos.sh` once, then open:
 open macos-gui/GPUBenchmark.xcodeproj
 ```
 
+## Project structure
+
+```text
+macos-gui/
+├── project.yml                    # XcodeGen project spec
+├── Info.plist
+├── README.md
+└── GPUBenchmark/
+    ├── GPUBenchmarkApp.swift      # @main entry point
+    ├── ContentView.swift          # NavigationSplitView shell
+    ├── Views/
+    │   ├── RunView.swift
+    │   ├── CpuView.swift
+    │   ├── HistoryView.swift
+    │   ├── ChartsView.swift
+    │   ├── SettingsView.swift
+    │   └── AboutView.swift
+    ├── Components/
+    │   ├── GlassCard.swift        # Liquid Glass card (+ fallback)
+    │   ├── BenchCharts.swift      # Line, column and bar charts (SwiftUI Canvas)
+    │   └── ResultCharts.swift     # Result tables and charts of the pages
+    ├── Engine/
+    │   ├── BenchEngine.swift      # @Observable state management
+    │   ├── GpuBenchBridge.h       # C interface
+    │   ├── GpuBenchBridge.mm      # ObjC++ bridge implementation
+    │   └── GPUBenchmark-Bridging-Header.h
+    └── Models/
+        ├── BenchResult.swift      # Codable result model
+        ├── EngineOutput.swift     # Parses engine output into chart data
+        ├── ChartGeometry.swift    # Scales, ticks and positions of the charts
+        └── Localization.swift     # i18n (EN/ZH)
+```
+
 The project defaults its native library paths to the script's CMake output for
 the active architecture/configuration. Custom build directories can be passed
 to the script; the script supplies their resolved values to `xcodebuild`.
 
 The separate iPhone/iPad application now lives under `ios-gui/`; it is not a
 future target inside this macOS project.
+
+## Apple integration verification (2026-10-12)
+
+Xcode 27 builds the arm64 and x86_64 Release apps with the macOS 12 deployment
+target. Both slices pass dependency, minimum-OS and ad-hoc signature checks;
+only arm64 was run on this host. The packaged helper completed short CPU
+compute, CPU memory, headless particle, GPU Burn, interactive pool and Metal
+memory-probe runs from outside the repository. The result compatibility test
+and the 92 shared parser/geometry/translation checks pass.
+
+CPU jobs now share their execution and persistence code with the iOS host.
+Parsed chart data belongs to each page's GPU or CPU channel, and process output
+is assembled into complete lines before parsing. Comparison charts filter the
+workload version and offer only particle sizes that match the selected mode.
+
+The GPU page exposes a native Metal cache/memory probe. Its particle-derived
+curves and `metal_memory_sweep_v1_preview` saved results are separate from
+Vulkan `membw_v1`. A final data point can still be cache-assisted. The CLI keeps
+its original no-save default; `--memory-sweep-save` explicitly saves a preview.

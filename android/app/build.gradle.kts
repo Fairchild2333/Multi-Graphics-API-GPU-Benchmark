@@ -20,10 +20,13 @@ android {
         }
         externalNativeBuild {
             cmake {
-                // API 24 stubs expose libvulkan; Java minSdk remains 23.
+                // The native code targets the same system as the app. It was
+                // built for android-24 to link libvulkan.so, and then did not
+                // load on Android 6.0 at all; Vulkan is now loaded at run time
+                // (src/main/cpp/vulkan_loader.h).
                 arguments += listOf(
                     "-DANDROID_STL=c++_static",
-                    "-DANDROID_PLATFORM=android-24",
+                    "-DANDROID_PLATFORM=android-23",
                 )
             }
         }
@@ -48,6 +51,15 @@ android {
     buildFeatures {
         compose = true
     }
+}
+
+// The shaders under src/main/assets/shaders are written by the native build:
+// CMake compiles the SPIR-V and copies the OpenGL sources there. They have to
+// be in place before the assets are packaged, or a first build ships without
+// them (found 2026-10-07: the OpenGL ES test could not open compute_gl.comp).
+tasks.matching { it.name == "mergeDebugAssets" || it.name == "mergeReleaseAssets" }.configureEach {
+    val nativeBuild = if (name == "mergeDebugAssets") "buildCMakeDebug" else "buildCMakeRelWithDebInfo"
+    dependsOn(tasks.matching { it.name.startsWith(nativeBuild) })
 }
 
 kotlin {

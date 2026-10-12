@@ -1,0 +1,68 @@
+#version 450
+
+// Memory-bandwidth sweep (membw_v1): L1 kernel.
+//
+// Unlike membw_read.comp, every workgroup re-reads its own private block many
+// times. While the block fits in the cache local to the SM/CU that runs the
+// group, every pass after the first is served by that cache. The host sweeps
+// the block size to find where this stops, and runs the kernel both with all
+// workgroups busy and with a single workgroup.
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+layout(set = 0, binding = 0, std430) readonly buffer SourceBuffer {
+    vec4 data[];
+} src;
+
+layout(set = 0, binding = 2, std430) buffer SinkBuffer {
+    vec4 value[];
+} sink;
+
+layout(push_constant) uniform MemBwParams {
+    uint chunkCount;       // distinct private blocks
+    uint stripesPerChunk;  // 256-element stripes per block (even, at least 4)
+    uint totalGroups;      // groups that do work; padding groups return early
+    uint groupsX;          // dispatch width, used to flatten the 2D group index
+    uint seed;             // write kernel only
+    float never;           // value the checksum can never reach
+    uint repeats;          // passes of each workgroup over its block
+} params;
+
+// Shared memory is local to one SM/CU, so a workgroup that uses it has to run
+// there as a whole. Without this, the NVIDIA driver spreads the warps of a
+// single workgroup over several SMs, and the single-group pass then measures
+// several L1 caches instead of one.
+shared float anchor;
+
+void main() {
+    const uint group = gl_WorkGroupID.x + gl_WorkGroupID.y * params.groupsX;
+    if (group >= params.totalGroups) return;
+
+    if (gl_LocalInvocationIndex == 0u) anchor = 0.0;
+    barrier();
+
+    const uint base = (group % params.chunkCount) * params.stripesPerChunk * 256u
+                    + gl_LocalInvocationID.x;
+    // One flat loop keeps the cost per load the same for every block size. The
+    // offset wraps at the end of the block, so the load addresses change on
+    // every iteration and cannot be hoisted out of the loop; this is why a
+    // block needs at least two stripe pairs.
+    const uint blockElements = params.stripesPerChunk * 256u;
+    const uint iterations = params.repeats * (params.stripesPerChunk / 2u);
+
+    vec4 acc0 = vec4(anchor);
+    vec4 acc1 = vec4(0.0);
+    uint offset = 0u;
+    for (uint i = 0u; i < iterations; ++i) {
+        acc0 += src.data[base + offset];
+        acc1 += src.data[base + offset + 256u];
+        offset += 512u;
+        if (offset == blockElements) offset = 0u;
+    }
+
+    // The data is positive (see membw_write.comp), so this store never happens,
+    // but the compiler cannot prove that and therefore has to keep every load.
+    const vec4 acc = acc0 + acc1;
+    if (acc.x + acc.y + acc.z + acc.w == params.never)
+        sink.value[gl_LocalInvocationID.x] = acc;
+}

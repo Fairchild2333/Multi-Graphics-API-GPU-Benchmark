@@ -141,8 +141,12 @@ struct HistoryView: View {
                     TableColumn(Localization.tr("API", "API", "API"), value: \.graphicsApi)
                         .width(min: 44, ideal: 65, max: 80)
 
-                    TableColumn(Localization.tr("Device", "设备", "デバイス"), value: \.deviceName)
-                        .width(min: 90, ideal: 180)
+                    // The table already has the ten columns one builder allows; the
+                    // machine a result came from is shown when the pointer rests here.
+                    TableColumn(Localization.tr("Device", "设备", "デバイス"), value: \.deviceName) { r in
+                        Text(r.deviceName).help(r.machineLine)
+                    }
+                    .width(min: 120, ideal: 180)
 
                     TableColumn(Localization.tr("Workload", "负载", "ワークロード"), value: \.workload)
                         .width(min: 60, ideal: 90, max: 110)
@@ -164,7 +168,7 @@ struct HistoryView: View {
                     }
                     .width(min: 44, ideal: 70, max: 90)
 
-                    TableColumn("GPU ms") { r in
+                    TableColumn(Localization.tr("GPU ms", "GPU 耗时（ms）", "GPU ms")) { r in
                         Text(r.avgTotalGpuMs > 0
                              ? String(format: "%.3f", r.avgTotalGpuMs) : "N/A")
                             .monospacedDigit()

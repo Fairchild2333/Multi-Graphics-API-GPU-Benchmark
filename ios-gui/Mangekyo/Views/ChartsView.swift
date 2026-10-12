@@ -7,8 +7,8 @@
 // comparable — a 2 MB particle buffer reports cache bandwidth and a 512 MB one
 // reports memory bandwidth.
 
-import Charts
 import SwiftUI
+import Charts
 
 private enum BenchmarkChartMetric: String, CaseIterable, Identifiable {
     case score, fps, gpuTime
@@ -75,6 +75,7 @@ struct ChartsView: View {
 
     @State private var selectedWorkload = "stream"
     @State private var selectedAPI = "All"
+    @State private var selectedVersion = ""
     @State private var selectedMode: ExecutionModeFilter = .single
     @State private var selectedMetric: BenchmarkChartMetric = .score
     @State private var particleFilter: UInt32 = 0
@@ -94,11 +95,15 @@ struct ChartsView: View {
                         chartCard
                     }
                 }
+                SavedResultCharts(results: engine.results.filter { $0.graphicsApi == "CPU" })
             }
             .padding(16)
         }
-        .onAppear { repairSelections() }
+        .onAppear { engine.refreshResults(); repairSelections() }
         .onChange(of: engine.results) { _ in repairSelections() }
+        .onChange(of: selectedVersion) { _ in particleFilter = 0; repairSelections() }
+        .onChange(of: selectedMode) { _ in particleFilter = 0; repairSelections() }
+        .onChange(of: selectedAPI) { _ in particleFilter = 0; repairSelections() }
         .onChange(of: selectedWorkload) { _ in particleFilter = 0; repairSelections() }
     }
 
@@ -110,6 +115,11 @@ struct ChartsView: View {
                 filterRow(Localization.tr("Workload", "负载", "ワークロード")) {
                     Picker("", selection: $selectedWorkload) {
                         ForEach(workloads, id: \.self) { Text(workloadLabel($0)).tag($0) }
+                    }
+                }
+                filterRow(Localization.tr("Version", "版本", "バージョン")) {
+                    Picker("", selection: $selectedVersion) {
+                        ForEach(versions, id: \.self) { Text($0.isEmpty ? "—" : $0).tag($0) }
                     }
                 }
                 filterRow("API") {
@@ -242,6 +252,9 @@ struct ChartsView: View {
     private var workloads: [String] {
         Array(Set(engine.results.map(\.workload))).sorted()
     }
+    private var versions: [String] {
+        Array(Set(engine.results.filter { $0.workload == selectedWorkload }.map { $0.workloadVersion ?? "" })).sorted()
+    }
     private var apis: [String] {
         Array(Set(engine.results
             .filter { $0.workload == selectedWorkload }
@@ -249,7 +262,9 @@ struct ChartsView: View {
     }
     private var particleCounts: [UInt32] {
         Array(Set(engine.results
-            .filter { $0.workload == selectedWorkload && $0.particleCount > 0 }
+             .filter { $0.workload == selectedWorkload && $0.particleCount > 0 &&
+                ($0.workloadVersion ?? "") == selectedVersion && selectedMode.includes($0) &&
+                (selectedAPI == "All" || $0.graphicsApi == selectedAPI) }
             .map(\.particleCount))).sorted()
     }
     private var mixesParticleSizes: Bool {
@@ -259,6 +274,7 @@ struct ChartsView: View {
     private var chartRows: [ChartRow] {
         let candidates = engine.results.filter { r in
             r.workload == selectedWorkload &&
+                (r.workloadVersion ?? "") == selectedVersion &&
                 (selectedAPI == "All" || r.graphicsApi == selectedAPI) &&
                 selectedMode.includes(r) &&
                 (particleFilter == 0 || r.particleCount == particleFilter) &&
@@ -294,7 +310,7 @@ struct ChartsView: View {
     }
 
     private func configurationKey(_ r: BenchResult) -> String {
-        [r.graphicsApi, r.deviceName, r.executionMode,
+        [r.graphicsApi, r.deviceName, r.executionMode, r.workloadVersion ?? "",
          r.particleCount > 0 ? "\(r.particleCount)" : "", r.precision]
             .joined(separator: "\u{1f}")
     }
@@ -312,6 +328,10 @@ struct ChartsView: View {
         if !workloads.contains(selectedWorkload) {
             selectedWorkload = workloads.contains("stream") ? "stream"
                                                            : workloads.first ?? ""
+        }
+        if !versions.contains(selectedVersion) {
+            selectedVersion = engine.results.filter { $0.workload == selectedWorkload }
+                .max(by: { $0.timestamp < $1.timestamp })?.workloadVersion ?? ""
         }
         if selectedAPI != "All" && !apis.contains(selectedAPI) { selectedAPI = "All" }
         if particleFilter != 0 && !particleCounts.contains(particleFilter) {

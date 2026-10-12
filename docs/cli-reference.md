@@ -44,6 +44,51 @@ architecture. This distinguishes, for example, an x64 process running through
 Windows-on-Arm emulation from a native ARM64 process. Older records remain
 loadable and are marked as legacy/unknown where those fields did not exist.
 
+Since 2026-10-06 every saved result also names the machine it was measured on:
+
+- `deviceModel`: the make and model of a phone, tablet, Mac or brand-name PC.
+  A self-built PC, whose firmware holds only a placeholder, is named by its
+  mainboard. Empty where the system gives no name, as inside a container.
+- `systemMemoryMB`: the memory of the machine in MiB. Windows reports the
+  installed amount; the other systems report what the kernel can use, which is
+  a few percent less.
+- On Android and HarmonyOS, `osVersion` is the system release with its API
+  level instead of the kernel version, and on Android `cpuName` is the
+  system-on-chip name from the system properties.
+
+Results saved before that date lack the two new fields and still load.
+
+### Compatibility of `results.json`
+
+Builds of different ages share one results file, so the format follows these
+rules (reader and writer are in `src/benchmark_results.cpp`):
+
+- The file is a JSON array of result objects with one member per line. A
+  member is never renamed, removed or given another type or meaning; new
+  information goes into a new member.
+- **Older files.** A missing member takes a default. Every file written since
+  the first build loads.
+- **Newer files.** Members a build does not know are kept and written back
+  when it rewrites the file, and `resultSchemaVersion` is written back as
+  read. Builds made before 2026-10-06 (0.2.6 and earlier) ignore unknown
+  members when reading but drop them when they rewrite the file; avoid
+  deleting results with such a build if a newer one is also in use.
+- **Saving.** The new file is written beside the old one and swapped in, so a
+  reader never sees a half-written file and a crash leaves the old file whole.
+- **Damaged files.** A file that cannot be read in full (cut off, damaged, or
+  in a layout the build does not read) gives the results that can be read.
+  Before such a file is rewritten it is copied to
+  `results.json.bak-unreadable-<time>` in the same folder.
+- **Text.** Braces, a backslash at the end of a string and control characters
+  are written as `\u` escapes. This is valid JSON; builds up to 0.2.6 show
+  the escape as written, for example `\u007b`.
+
+`results_compat_test` checks all of this without a GPU:
+
+```bash
+ctest --test-dir build -C Release
+```
+
 ## 2. Interactive menu [0]–[10] (main.cpp:1026-1041)
 
 > All menu runs are **15s time mode + Stream workload + Medium (1M) particles +
@@ -127,6 +172,19 @@ loadable and are marked as legacy/unknown where those fields did not exist.
 | `--cpu-time <seconds>` | total measurement budget per CPU test, split across three rounds; default `1`, range `0.03..3600` |
 | `--cpu-warmup <seconds>` | warm-up before each logical-processor test and before multi-core; default `0.15`, range `0..60` |
 | `--cpu-no-save` | run the CPU test without appending successful summaries to `results.json` |
+| `--cpu-membw` | run the CPU cache / memory bandwidth sweep and exit before GLFW/GPU probing (desktop builds only) |
+| `--cpu-membw-max-mib <MiB>` | largest single-thread data set of that sweep; default `1024`, range `1..65536`; a non-default value makes the result a preview |
+| `--cpu-membw-vector <auto\|128\|256\|512>` | vector width of its kernels; default `auto` picks the widest the CPU supports; a forced width makes the result a preview |
+| `--cpu-membw-no-save` | run that sweep without appending its result to `results.json` |
+| `--cpu-membw-curve-levels` | read the cache levels off the curve even where the OS reports cache sizes; makes the result a preview |
+| `--cpu-membw-no-storage` | skip the storage test, so that no file is written |
+| `--cpu-membw-storage-dir <path>` | directory for the storage test file; default is the temp directory on Windows and the results directory elsewhere |
+| `--cpu-membw-storage-mib <MiB>` | size of the storage test file; default `1024`, range `32..65536` |
+| `--cpu-membw-reread <results.json>` | reads the cache levels of every saved `cpu_membw` result in the file again, off the curves the result keeps, with the rules of this build; measures nothing and does not change the file |
+| `--cpu-membw-debug-classes <N>` / `--cpu-membw-debug-hide-llc` | diagnostics: treat the cores as `N` classes, and ignore the last cache the OS reports; both make the result a preview |
+| `--workload membw` | run the standalone memory-bandwidth sweep (Vulkan only, compute-only, no window); `--gpu` selects the device and `--backend` must be `auto` or `vulkan` |
+| `--membw-max-mib <MiB>` | largest data set of the `membw` sweep; default `2048`, range `1..65536`; a non-default value makes the result a preview |
+| `--membw-no-save` | run `membw` without appending its result to `results.json` |
 
 > `--run-all` (main.cpp:924): iterates every GPU×API, inherits command-line
 > workload/precision/iter/headless/flights/hostMemory; default 15s time mode,
@@ -148,6 +206,116 @@ directly comparable instead of silently dropping to 32.
 For `--liquid-solver sph`, every duration—including 15 seconds—is currently
 saved as `cinematic_liquid_sph_slice_v1_preview`; changing only the duration
 does not make the four open correctness contracts formal.
+
+### Memory-bandwidth sweep (`membw_v1`)
+
+```powershell
+# Full sweep on GPU 0: data sets from 1 MiB to 2048 MiB, the L1 sweep and the
+# system-memory pass; about 23 s on an RTX 5090 with a PCIe 5.0 x4 link
+.\out\build\windows-x64-release\Release\gpu_benchmark.exe --workload membw --gpu 0
+```
+
+`membw` measures real VRAM and cache bandwidth, which the particle test
+(`stream`) cannot do. It is a separate Vulkan code path in
+`src/vulkan_membw.cpp`: it creates its own device, and it opens no window,
+swapchain or RenderDoc capture.
+
+The WinUI GPU page lists it as "Memory Bandwidth — VRAM / Cache / PCIe" for
+Custom and Full Analysis runs. Selecting it limits the API list to Vulkan and
+disables Duration, Headless, V-Sync, System memory, RenderDoc and Capture,
+which do not apply. The GUI starts one worker per GPU with `--workload membw
+--backend vulkan --no-renderdoc [--gpu N]` and builds its four summary lines
+from the `MEMBW_DEVICE` / `MEMBW_SUMMARY` / `MEMBW_L1` / `MEMBW_HOST` lines.
+
+Below the summary, the GUI draws the `MEMBW_POINT` data as up to three
+log-log line charts: VRAM (or system memory) and cache, system memory over
+PCIe, and L1. They are separate charts because the sweeps differ by orders of
+magnitude and the L1 sweep has a different x quantity. Hovering a line shows
+the exact value of that point; the full table stays in the raw CLI output
+panel. When several GPUs run in one job list, the charts show the last one.
+
+- **Kernels:** `read` (16 B loads), `write` (16 B stores) and `copy` (16 B load
+  + 16 B store into a second buffer). Byte counts are the bytes the kernel
+  requests, not an estimate.
+- **Data sets:** every workgroup streams one 512 KiB chunk. The number of
+  distinct chunks sets the data-set size, which is swept from 1 MiB to
+  `--membw-max-mib` in ×1.5 / ×2 steps. The number of dispatched workgroups is
+  calibrated separately so that each dispatch lasts about 4 ms at any size.
+- **Data check:** before anything is timed, the buffer is filled by the write
+  kernel and a fifth kernel (`membw_check.comp`, never timed) loads every
+  element and compares it with the value that was stored. If any differs, the
+  buffer is replaced by one of half the size and checked again, and the sweep
+  ends at that size (`ceiling lowered by the device`). The outcome is printed
+  as a `[membw] Data check:` line. Reason: a driver may advertise a
+  storage-buffer range it cannot address. An Adreno 660 (driver 512.530)
+  reports 512 MiB, loads zeros from a buffer of that size without touching
+  memory and reported 116 GB/s for it; at 256 MiB it is correct (32.7 GB/s).
+  The system-memory buffer of the PCIe pass is checked the same way.
+- **Timing:** each dispatch is submitted on its own and bracketed by GPU
+  timestamps. Each point runs 3 warm-up and 10 measured dispatches; the median
+  is the score and the fastest run is also printed. If the timestamps do not
+  scale with the workload, the run falls back to wall-clock timing and says so.
+- **Summary:** the memory plateau is the median of the three largest data
+  sets. The cache plateau is the longest flat stretch of the curve that is
+  clearly above it.
+- **L1 sweep:** a fourth kernel makes every workgroup re-read a private block,
+  whose size is swept from 16 KiB to 1 MiB. It runs twice:
+  - `l1`: 4096 workgroups, so every SM/CU is busy. The plateau around the
+    fastest block size is the L1 read rate of the whole GPU.
+  - `l1_single`: one workgroup, which runs on one SM/CU. The block size at
+    which this curve drops brackets the L1 capacity of one SM/CU.
+
+  The L1 kernel declares a shared variable and calls `barrier()` once. Shared
+  memory is local to one SM/CU, so this keeps the whole workgroup there;
+  without it the NVIDIA driver spreads the warps of a single workgroup over
+  several SMs and the single-group curve changes from run to run.
+- **System-memory pass (discrete GPUs only):** the `read` and `write` kernels
+  run again on a buffer of up to 2 GiB that lives in host memory
+  (`host_read`, `host_write`), then `vkCmdCopyBuffer` copies that buffer to
+  VRAM and back. Every byte crosses the PCIe link, so the largest data sets
+  give the usable link rate in each direction:
+  - `host_read` and the copy to VRAM move data from system memory to the GPU;
+  - `host_write` and the copy to system memory move data the other way.
+
+  The pass is skipped on integrated and software devices, where all memory is
+  system memory. A sweep stops early once one dispatch takes more than 0.5 s.
+- **Output:** a table per kernel, a summary, and tab-separated `MEMBW_POINT` /
+  `MEMBW_SUMMARY` / `MEMBW_L1` / `MEMBW_HOST` lines for tools.
+- **Result:** workload `membw`, score = read memory plateau in GB/s. The
+  version is `membw_v1` for the default sweep when the memory plateau is
+  reached, otherwise `membw_v1_preview`. `workloadConfig` stores the write and
+  copy plateaus, the L1 figures, the system-memory figures and the full curves.
+
+Compare the system-memory figures with the PCIe link, which the tool cannot
+read through Vulkan. On Windows, `nvidia-smi
+--query-gpu=pcie.link.gen.current,pcie.link.width.current --format=csv` reports
+it for NVIDIA cards. One lane carries 0.985 GB/s (gen 3), 1.969 GB/s (gen 4) or
+3.938 GB/s (gen 5) per direction before protocol overhead, so a gen 5 x16 link
+is 63.0 GB/s, x8 is 31.5 GB/s and x4 is 15.75 GB/s.
+
+Five limits apply to the numbers:
+
+- **Small system-memory data sets:** `host_read` is faster than the link below
+  about 32 MiB on an RTX 5090, because the GPU caches data it has already
+  fetched. Only the plateau at the largest data sets is the link rate.
+
+- **L1 rate:** the L1 figure is limited by the instruction rate as well as by
+  the cache, because each 16 B load is followed by four float adds. It is the
+  rate this kernel reaches, not a hardware maximum.
+- **L1 levels:** the summary reports only the first drop of the single-group
+  curve. A GPU with several small cache levels shows further steps in the
+  table; an AMD RDNA2 iGPU shows three.
+
+- **Smallest data sets:** below a few MiB, several workgroups on one SM/CU read
+  the same chunk and share it through L1, so those points are faster than L2.
+  The summary flags this.
+- **Cache capacity:** the end of the cache plateau is not an exact capacity. A
+  large GPU runs more workgroups at once than a mid-sized data set has chunks,
+  so concurrent groups share chunks through the cache and stretch the
+  transition to memory.
+
+The run does not compare the result with a theoretical bandwidth, because
+Vulkan does not expose memory clock or bus width.
 
 ### Native CPU-only path
 
@@ -180,11 +348,169 @@ detailed logical-processor rows remain in stdout/the current GUI session.
 Windows formal results require strict group affinity. Linux/Android require
 pthread affinity to succeed and read back as the requested sole CPU under the
 separate `strict_sched_affinity` identity. A failed required bind marks the
-affected result invalid, returns exit code 3 and prevents persistence. macOS
-reports `scheduler_managed`; affinity capability, timing and `multi` sequence are
+affected per-core result invalid, returns exit code 3 and keeps the per-core
+summary from being saved. The multi-core result does not depend on the pinning
+(since 2026-10-08): it is valid whenever it was measured, records how many of its
+threads were pinned, and is saved also when a per-core result is not. macOS
+reports `scheduler_managed`, and so does a HarmonyOS device whose kernel does not
+hold a thread to every processor (found by a probe before the test; the
+emulators, on a Linux kernel, stay strict); affinity capability, timing and `multi` sequence are
 part of the stored result identity, so unlike contracts do not share a comparison
 group. Core-class names prefixed with `Inferred` are OS-metadata ranks, not
 authoritative P/E/Mid/LPE microarchitecture identification.
+
+### CPU cache and memory bandwidth sweep (`cpu_membw_v1`)
+
+```powershell
+# Full sweep: 4 KiB to 1 GiB on one thread, then 4 KiB to 256 MiB per thread on
+# every physical core; about 25 s on a Ryzen 7 9800X3D
+gpu_benchmark.exe --cpu-membw
+
+# The same with 256-bit vectors, for comparison with a CPU that lacks AVX-512
+gpu_benchmark.exe --cpu-membw --cpu-membw-vector 256 --cpu-membw-no-save
+```
+
+`--cpu-membw` measures how fast the CPU reads, writes and copies data at each
+level of its memory hierarchy, and how fast the drive behind virtual memory
+is. It is a separate code path in `src/cpu_membw.cpp` that needs no GPU and
+is built on every platform.
+
+- **Kernels:** `read` (vector loads summed into four accumulators), `write`
+  (vector stores) and `copy` (load from the first half of the block, store to
+  the second half). Copy counts the bytes read plus the bytes written. The
+  kernels use the widest vectors the CPU supports: AVX-512, AVX2 or SSE2 on
+  x86-64, NEON on ARM64, and 64-bit words elsewhere.
+- **Data sets:** the block of one thread is swept from 4 KiB upwards in ×1.5 /
+  ×2 steps. Each thread allocates and fills its own block.
+  - `single`: one thread, up to `--cpu-membw-max-mib` (1 GiB).
+  - `all`: one thread on every physical core, each with a private block of up
+    to a quarter of that (256 MiB), and at most 8 GiB in total.
+  - Both ceilings are lowered so that the sweep never touches more than half
+    of the free memory.
+- **Timing:** every point runs 2 warm-up and 7 measured samples of 10 ms. All
+  threads start together and each times its own interval; the rates are
+  summed. The median is the score. A round whose median is more than 15% below
+  its best sample was disturbed, and is measured again up to twice.
+- **Threads:** every thread is pinned to its core, except on macOS and iOS,
+  which have no such control. A single-thread sweep runs on the second core
+  of its core class.
+- **Core classes:** cores are grouped by the performance class the OS
+  reports (Windows efficiency class; `cpu_capacity` or maximum frequency on
+  Linux and Android). Every class gets its own single-thread sweep, named
+  `single`, `single_1`, `single_2` from fastest to slowest, with the caches
+  of its own reference core. On such a CPU the all-core sweep reports memory
+  only, because the classes leave their caches at different data sets.
+- **Levels:** cache sizes come from the OS (`GetLogicalProcessorInformationEx`
+  on Windows, sysfs on Linux, `sysctl` on macOS). A cache level is the median
+  of the data sets between twice the next smaller cache and half of this one
+  (for L1, between a quarter and half of it).
+  Memory is the median of the data sets from four times the last cache
+  upwards. In the all-core sweep a shared cache counts as its size divided by
+  the number of threads sharing it. A level with no data set in its range is
+  reported as not separable.
+- **Levels without cache sizes:** where the OS reports none, the levels are
+  the plateaus of the read curve. A plateau is at least three consecutive
+  data sets within 15% of each other, and a new level is at least 15% slower
+  than the one before it; the flat end of the curve is memory. Such a level
+  is marked `*` and shows the two data sets its capacity lies between. The
+  same search runs above the last reported cache when the memory range is not
+  flat, which finds a cache the OS did not report, such as a system-level
+  cache of an SoC.
+- **Other ways to write memory:** for the memory-sized data sets on x86-64 the
+  sweep also measures streaming (non-temporal) stores, and on AMD CPUs a zero
+  fill with `CLZERO`.
+- **Virtual memory:** one thread writes one byte to every page of a fresh
+  256 MiB region, nine times; the median gives the rate at which the OS maps
+  new pages, in GB/s and in nanoseconds per page.
+- **Storage behind virtual memory:** a temporary file of up to 1 GiB is
+  written once, then measured one request at a time with unbuffered I/O:
+  - sequential 1 MiB read and write, fastest whole pass over the file;
+  - random 4 KiB read and write for 2 s each, in MB/s and IOPS.
+
+  These correspond to the `SEQ1M Q1T1` and `RND4K Q1T1` rows of
+  CrystalDiskMark. Paging issues random 4 KiB requests, so the random line is
+  the closer estimate of how fast memory comes back from the drive. On
+  Windows the file goes to the temp directory and the output says whether
+  that is the drive holding the page file. On Linux and Android the output
+  names the swap target; `zram` means memory is compressed in RAM and no
+  drive is involved. One run writes up to about 4.5 GiB.
+- **Output:** a table per thread count, a level summary, and tab-separated
+  `CPUMEM_META` / `CPUMEM_CLASS` / `CPUMEM_CACHE` / `CPUMEM_POINT` /
+  `CPUMEM_PROGRESS` / `CPUMEM_LEVEL` / `CPUMEM_PAGEFAULT` / `CPUMEM_STORAGE` /
+  `CPUMEM_DONE` lines for tools.
+- **Result:** workload `cpu_membw`, score = all-core memory read in GB/s (the
+  single-thread figure on a one-core machine). The version is `cpu_membw_v1`
+  for the default sweep with a settled memory plateau, otherwise
+  `cpu_membw_v1_preview`. `workloadConfig` stores every level, the vector
+  width, the cache sizes and the full curves.
+
+The WinUI CPU page lists it as "Cache & memory bandwidth" in the test-mode
+box. Selecting it disables the duration controls, which do not apply. The
+result card shows one row per level with the single-thread and all-core
+figures side by side, and a card below it draws both sweeps as log-log charts
+with a dashed line at each cache size. The CPU tab of History lists the runs
+as "CPU — Cache & memory bandwidth".
+
+On a phone, run the stand-alone build of the same sweep over adb. It saves
+nothing and takes `--max-mib`, `--curve-levels`, `--no-storage`,
+`--storage-dir` and `--storage-mib`:
+
+```powershell
+.\scripts\build-android-cpumem.ps1                 # arm64-v8a by default
+adb push out\android-cpumem\arm64-v8a\mangekyo_cpumem /data/local/tmp/
+adb shell chmod 755 /data/local/tmp/mangekyo_cpumem
+adb shell "cd /data/local/tmp && ./mangekyo_cpumem"
+```
+
+The phone default ends the sweep at 256 MiB. `/data/local/tmp` is on the
+internal storage, so the storage test measures that storage.
+
+Compare the memory figures with the theoretical bandwidth by hand, because
+the OS does not report the number of memory channels reliably: channels ×
+transfer rate × 8 bytes, so dual-channel DDR5-6400 is 102.4 GB/s.
+
+Twelve limits apply to the numbers:
+
+- **Cache levels depend on the vector width:** inside a cache the rate is set
+  by how many loads or stores the core issues per cycle. A Ryzen 7 9800X3D
+  issues about 1.8 vector loads per cycle at any width, so its L1 read rate is
+  588 GB/s with AVX-512, 297 GB/s with AVX2 and 147 GB/s with SSE2. Compare
+  cache levels between CPUs only at the same vector width.
+- **Ordinary stores:** outside the caches every stored line is first read from
+  memory. The memory traffic is therefore 2× the write figure and 1.5× the
+  copy figure.
+- **Streaming stores:** they can be limited by the CPU and not by memory. On
+  the 9800X3D they reach 30 GB/s on one thread and on eight, which is also
+  what the C runtime's `memset` and `rep stosb` reach, while `CLZERO` reaches
+  75 GB/s into the same memory. The cause was not investigated.
+- **Cache levels are not always flat:** the 9800X3D reads 230–245 GB/s for
+  64–384 KiB blocks and 300–320 GB/s for 512–768 KiB blocks, all inside L2.
+  The summary reports the median and notes the range.
+- **Mixed core types:** the levels follow the caches of the reference core.
+  In the all-core sweep the smaller cores leave their caches at other sizes.
+- **Shared caches:** the all-core figure of a shared cache also depends on how
+  much of it the threads use, so it falls as the data set grows.
+- **Page mapping:** the figure depends on the state of the OS and ranged from
+  9 to 16 GB/s between runs on Windows 11. With Linux transparent huge pages
+  set to `always`, the kernel maps 2 MiB at a time; the output says so.
+- **Paging to disk:** page-file or swap speed is not measured. It is the speed
+  of the drive, and reaching it needs the machine to run out of memory.
+- **Idle machine:** other load lowers the figures. A build running at the same
+  time halved the cache-level results in one run.
+- **Levels read off the curve:** two caches whose speeds differ by less than
+  15% merge into one level, a cache less than about three data sets wide is
+  missed, and the capacity is a range, not a value. A sweep that ends before
+  memory is reached labels its last plateau as memory.
+- **Storage:** sequential write on an SSD with a fast write cache varies
+  between runs (4.9-9.7 GB/s, once 1.5 GB/s, on a PCIe 5.0 drive). One
+  request at a time is the slowest way to use a drive; real paging often has
+  several requests outstanding. The figures were not compared with another
+  disk benchmark.
+- **Phones:** the mixed-core and curve-level paths were exercised on a desktop
+  CPU with diagnostic switches, and the Android binary was compiled, but
+  nothing has been run on a phone or on a CPU with mixed core types. The
+  Android app does not offer the test yet, and iOS and macOS, which cannot pin
+  threads, sweep one class only.
 
 ## 4. External tools summary
 
@@ -233,9 +559,25 @@ Parity details:
   OpenGL only runs on the first GPU on Windows.
 - After a full-analysis run the GUI runs the same toolchain as the CLI
   (`renderdoccmd convert` → `rdoc_analyse.py` → `plot_results.py` →
-  `export_report.py --md/--html`), **plus** `plot_workloads.py` for the GUI's
-  Charts tab. RenderDoc steps are no-ops unless the GUI is launched under
-  RenderDoc (so `.rdc` captures exist).
+  `export_report.py --md/--html`), **plus** `plot_workloads.py`. RenderDoc
+  steps are no-ops unless the GUI is launched under RenderDoc (so `.rdc`
+  captures exist).
+- Every test has charts in the GUI, drawn by the GUI itself without Python:
+  - **GPU page, after a run:** the score of every job side by side when the
+    run had several (one bar per GPU and API), and for every job the GPU time
+    per frame over the run, as compute and render lines. The warm-up is left
+    out. The memory-bandwidth sweep shows its bandwidth curves instead, and
+    the Complete test and Fill missing presets show no run charts.
+  - **CPU page, after a run:** one bar per logical processor for the compute
+    test, and the bandwidth curves for the cache and memory sweep.
+  - **Charts tab:** one bar chart per test that has saved results, with the
+    best score of every device and API under the newest version of that
+    test. It reads the same results file as History.
+
+  The time axis of the per-frame charts comes from the `T:` field that the
+  periodic `[GPU Timing]` line of the worker now ends with, for example
+  `| FPS: 2729 | T: 6.0 s`; lines printed during the warm-up end in
+  `(warm-up)`.
 - Software/WARP runs by selecting the `… (CPU / WARP)` entry in the GPU dropdown
   (there is no separate WARP checkbox).
 - Particle count is a free-form number field (a superset of the CLI's
@@ -248,3 +590,17 @@ Parity details:
   must still exist in the capture directory. Successful retries append through
   the normal result writer, which rewrites a valid current `results.json` while
   preserving compatible legacy records.
+
+
+### Apple Metal memory diagnostic
+
+`--memory-sweep` runs the particle-derived Metal cache/memory diagnostic with
+no window. `--memory-sweep-save` additionally stores a separate
+`metal_memory_sweep_v1_preview` result; it does not change the ordinary particle
+score or the Vulkan `membw_v1` contract. The Apple GUI uses this native probe.
+
+Bounds and sampling options are `--memory-sweep-min-kib`,
+`--memory-sweep-max-kib`, `--memory-sweep-traffic-mib`,
+`--memory-sweep-repeats`, `--memory-sweep-threads`, and
+`--memory-sweep-no-host`. Allocation bounds are reduced to the device/app
+memory budget. Cancellation or failed GPU commands do not save a result.

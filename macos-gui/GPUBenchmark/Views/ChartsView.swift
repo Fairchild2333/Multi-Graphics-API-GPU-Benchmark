@@ -1,4 +1,4 @@
-// ChartsView.swift — dependency-free benchmark comparison charts.
+// ChartsView.swift — Dependency-free benchmark comparison charts drawn from saved results.
 // Swift Charts is used on macOS 13+; Monterey receives a native SwiftUI bar
 // list so the standalone app never depends on Python or matplotlib.
 
@@ -95,6 +95,7 @@ struct ChartsView: View {
 
     @State private var selectedWorkload = "stream"
     @State private var selectedAPI = "All"
+    @State private var selectedVersion = ""
     @State private var selectedMode: ExecutionModeFilter = .single
     @State private var selectedMetric: BenchmarkChartMetric = .score
     @State private var particleFilter: UInt32 = 0
@@ -113,6 +114,7 @@ struct ChartsView: View {
                         Localization.tr("Refresh", "刷新", "更新"),
                         systemImage: "arrow.clockwise")
                 }
+                .disabled(engine.workingDirectory.isEmpty)
 
                 Spacer()
 
@@ -122,7 +124,17 @@ struct ChartsView: View {
                     "結果フォルダを開く")) {
                     engine.openResultsFolder()
                 }
+                .disabled(engine.workingDirectory.isEmpty)
+
+                // The full-analysis presets still write PNG charts here.
+                Button(Localization.tr("Open PNG charts folder", "打开 PNG 图表文件夹", "PNG チャートフォルダを開く")) {
+                    let dir = URL(fileURLWithPath: engine.workingDirectory)
+                        .appendingPathComponent("docs/images").path
+                    engine.openFolder(dir)
+                }
+                .disabled(engine.workingDirectory.isEmpty)
             }
+
 
             filterCard
 
@@ -163,7 +175,10 @@ struct ChartsView: View {
             repairSelections()
         }
         .onChange(of: engine.results) { _ in repairSelections() }
-        .onChange(of: selectedWorkload) { _ in particleFilter = 0 }
+        .onChange(of: selectedVersion) { _ in particleFilter = 0; repairSelections() }
+        .onChange(of: selectedMode) { _ in particleFilter = 0; repairSelections() }
+        .onChange(of: selectedAPI) { _ in particleFilter = 0; repairSelections() }
+        .onChange(of: selectedWorkload) { _ in particleFilter = 0; repairSelections() }
     }
 
     private var filterCard: some View {
@@ -184,6 +199,11 @@ struct ChartsView: View {
                     }
                 }
 
+                FormField(title: Localization.tr("Version", "版本", "バージョン"), width: 230) {
+                    Picker("", selection: $selectedVersion) {
+                        ForEach(versions, id: \.self) { Text($0.isEmpty ? "—" : $0).tag($0) }
+                    }
+                }
                 FormField(title: "API", width: 140) {
                     Picker("", selection: $selectedAPI) {
                         Text(Localization.tr("All APIs", "所有 API", "すべての API"))
@@ -309,6 +329,9 @@ struct ChartsView: View {
         Array(Set(engine.results.map(\.workload))).sorted()
     }
 
+    private var versions: [String] {
+        Array(Set(engine.results.filter { $0.workload == selectedWorkload }.map { $0.workloadVersion ?? "" })).sorted()
+    }
     private var apis: [String] {
         Array(Set(engine.results
             .filter { selectedWorkload.isEmpty || $0.workload == selectedWorkload }
@@ -317,13 +340,16 @@ struct ChartsView: View {
 
     private var particleCounts: [UInt32] {
         Array(Set(engine.results
-            .filter { $0.workload == selectedWorkload && $0.particleCount > 0 }
+             .filter { $0.workload == selectedWorkload && $0.particleCount > 0 &&
+                ($0.workloadVersion ?? "") == selectedVersion && selectedMode.includes($0) &&
+                (selectedAPI == "All" || $0.graphicsApi == selectedAPI) }
             .map(\.particleCount))).sorted()
     }
 
     private var chartRows: [BenchmarkChartRow] {
         let candidates = engine.results.filter { result in
             result.workload == selectedWorkload &&
+                (result.workloadVersion ?? "") == selectedVersion &&
                 (selectedAPI == "All" || result.graphicsApi == selectedAPI) &&
                 selectedMode.includes(result) &&
                 (particleFilter == 0 || result.particleCount == particleFilter) &&
@@ -400,6 +426,10 @@ struct ChartsView: View {
             selectedWorkload = workloads.contains("stream")
                 ? "stream"
                 : workloads.first ?? ""
+        }
+        if !versions.contains(selectedVersion) {
+            selectedVersion = engine.results.filter { $0.workload == selectedWorkload }
+                .max(by: { $0.timestamp < $1.timestamp })?.workloadVersion ?? ""
         }
         if selectedAPI != "All" && !apis.contains(selectedAPI) {
             selectedAPI = "All"
