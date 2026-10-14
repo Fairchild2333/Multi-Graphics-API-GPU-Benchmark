@@ -2,6 +2,35 @@
 
 [简体中文](README.zh-CN.md)
 
+## 2026-10-14: in-app complete suites
+
+GPU, CPU and combined one-click buttons now queue supported API/workload pairs.
+The native probe gates API availability, particle buffer/work-group limits and
+fluid texture features. Fully capable devices have up to 29 jobs (27 GPU + 2
+CPU). Compute steps use 15 seconds; the CPU suite also includes cache/memory,
+page mapping and storage. Scores append to the existing results/results.json;
+per-suite manifests and raw logs live in suite-runs/<id>.
+
+Timing anomalies, >5% throughput decline or missing heavy-workload plateaus
+are retained for review while later jobs continue. Cancellation stops the
+current CPU/GPU and remaining queue; memory stops after the current sample,
+without saving an incomplete score. Backgrounding cancels the suite. A fixed
+30-second rest separates jobs; no usable HarmonyOS thermal telemetry is wired,
+so the pause does not certify a cool device.
+
+Debug hdc requests add gpu_suite, cpu_suite, all_suite and suite_stop. Shaders
+are staged before resource discovery, including after clean, so a fresh HAP
+includes all 39 SPIR-V shaders and 7 GLES sources. On macOS, run
+`bash scripts/build-ohos.sh` from the repository root (set `DEVECO_HOME` to a
+different installation's Contents directory if needed). DevEco builds use the
+same staging task. Both arm64-v8a and x86_64 compile with DevEco Studio 26.0.
+The HarmonyOS 5.0.4 Mac emulator completed its 3 supported GPU jobs and both
+CPU phases (compute, cache/memory/page mapping/storage). Combined queues and
+cancellation were exercised. It exposes GLES 2.0 only;
+these translated emulator measurements are workflow checks, not physical
+phone performance. Physical-device validation and signing remain pending.
+Historical status below is dated; see HANDOFF.md for later device runs.
+
 The HarmonyOS app: ArkTS pages on top of the `gpu_engine` shared with every
 other platform. Vulkan draws into the window of an XComponent; the CPU tests
 call the engine's command-line entry point.

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -65,12 +66,12 @@ fun CpuScreen() {
     val context = LocalContext.current
     remember(context) { NativeBridge.init(context) }
     var mode by rememberSaveable { mutableStateOf("all") }
-    var duration by rememberSaveable { mutableStateOf("quick") }
+    var duration by rememberSaveable { mutableStateOf("formal") }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val cores = remember { Runtime.getRuntime().availableProcessors() }
     val run = CpuRun
     // A CPU test takes minutes; the screen must not turn off in between.
-    KeepScreenOn(run.running)
+    KeepScreenOn(run.running || com.mangekyo.benchmark.core.MobileSuite.running)
 
     // Collect the engine output while this page owns the run.
     LaunchedEffect(Unit) {
@@ -87,7 +88,8 @@ fun CpuScreen() {
             delay(150)
         }
     }
-    val canRun = NativeBridge.isEngineLoaded && !run.running
+    val canRun = NativeBridge.isEngineLoaded && !run.running && !com.mangekyo.benchmark.core.MobileSuite.running &&
+        !NativeBridge.isRunning() && !NativeBridge.isCliRunning()
 
     fun start(testMode: String, seconds: Int) {
         val memory = testMode == "memory"
@@ -116,6 +118,10 @@ fun CpuScreen() {
         val wanted = request ?: return@LaunchedEffect
         val wantedMode = AutoRun.cpuModes[wanted.test] ?: return@LaunchedEffect
         AutoRun.pending = null
+        if (wantedMode == "suite") {
+            com.mangekyo.benchmark.core.MobileSuite.start(context, com.mangekyo.benchmark.core.SuiteScope.CPU)
+            return@LaunchedEffect
+        }
         if (!NativeBridge.isEngineLoaded || run.running) {
             AutoRun.log("AUTORUN refused test=${wanted.test} reason=busy_or_engine_missing")
             return@LaunchedEffect
@@ -139,11 +145,16 @@ fun CpuScreen() {
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
+                    if (com.mangekyo.benchmark.core.MobileSuite.running) {
+                        com.mangekyo.benchmark.core.MobileSuite.cancel()
+                        return@ExtendedFloatingActionButton
+                    }
+                    if (run.running) { NativeBridge.stopWorkload(); return@ExtendedFloatingActionButton }
                     if (!canRun) return@ExtendedFloatingActionButton
                     start(mode, if (duration == "formal") 15 else 1)
                 },
-                icon = { Icon(Icons.Filled.PlayArrow, contentDescription = null) },
-                text = { Text(if (run.running) tr("Running", "运行中") else tr("Run", "运行")) },
+                icon = { Icon(if (run.running) Icons.Filled.Stop else Icons.Filled.PlayArrow, contentDescription = null) },
+                text = { Text(if (run.running) tr("Stop", "停止") else tr("Run selected test", "运行所选测试")) },
                 containerColor = if (canRun) {
                     MaterialTheme.colorScheme.primaryContainer
                 } else {
@@ -160,6 +171,7 @@ fun CpuScreen() {
         AdaptivePanes(
             modifier = Modifier.padding(inner),
             primary = {
+                com.mangekyo.benchmark.ui.components.SuiteControls(gpu = false)
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
@@ -230,15 +242,15 @@ fun CpuScreen() {
                         tr(
                             "Sweeps the data-set size on one thread of every core type, then on all cores, and reads " +
                                 "L1, L2, the shared cache and memory off the curve. It ends with a storage test that " +
-                                "writes a temporary file of up to 1 GiB. A run cannot be cancelled.",
+                                "writes a temporary file of up to 1 GiB. Stopping cancels unfinished tests.",
                             "先用每类核心的一个线程、再用全部核心扫描数据量，从曲线上读出 L1、L2、共享缓存和内存各自的带宽。" +
-                                "最后是存储测试，会写一个最大 1 GiB 的临时文件。运行开始后不能取消。",
+                                "最后是存储测试，会写一个最大 1 GiB 的临时文件。停止会取消尚未完成的测试。",
                         )
                     } else {
                         tr(
                             "The single-core test runs once on every logical processor; the formal preset takes " +
-                                "15 s for each. A run cannot be cancelled.",
-                            "单核测试会在每个逻辑处理器上各跑一次；正式预设每次 15 秒。运行开始后不能取消。",
+                                "15 s for each. Stopping cancels unfinished tests.",
+                            "单核测试会在每个逻辑处理器上各跑一次；正式预设每次 15 秒。停止会取消尚未完成的测试。",
                         )
                     },
                     style = MaterialTheme.typography.bodySmall,
@@ -270,7 +282,8 @@ fun CpuScreen() {
                 }
             },
             secondary = {
-                if (run.memoryTest) MemoryResults() else ComputeResults()
+                if (run.coreScores.isNotEmpty() || run.multiSummary.isNotEmpty()) ComputeResults()
+                if (run.memoryTest) MemoryResults()
 
                 if (run.log.isNotEmpty()) {
                     ResultCard(tr("Raw output (last lines)", "原始输出（最后几行）")) {

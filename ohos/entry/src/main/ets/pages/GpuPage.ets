@@ -9,7 +9,7 @@ import { AdaptivePanes } from '../components/AdaptivePanes';
 import { Card } from '../components/Card';
 import { PresetRow } from '../components/PresetRow';
 import { ChartSeries, LineChart } from '../components/Charts';
-import { gpuRun, MemoryLevelLine } from '../common/EngineOutput';
+import { cpuRun, gpuRun, MemoryLevelLine } from '../common/EngineOutput';
 import { formatNumber } from '../common/Format';
 import {
   API_GLES, API_GLES2, API_VULKAN, DEFAULT_SECONDS, DEFAULT_STEPS, GPU_WORKLOADS, gpuRequest, gpuSavedAs,
@@ -18,6 +18,7 @@ import {
 } from '../common/GpuOptions';
 import { localizeScoreLine, tr } from '../common/I18n';
 import { appState, runController } from '../common/RunController';
+import { suiteRun } from '../common/MobileSuite';
 
 @Extend(Text)
 function caption() {
@@ -195,7 +196,20 @@ export struct GpuPage {
         .caption()
     }
 
-    Row({ space: 12 }) {
+    Column({ space: 12 }) {
+      Button(tr('Run all GPU tests', '一键测试 GPU 全套'))
+        .width('100%')
+        .enabled(appState.engineReady && !appState.gpuRunning && !cpuRun.running && !suiteRun.running)
+        .onClick(() => { runController.startSuite('gpu'); })
+      Button(tr('Test all items', '一键测试全部项目'))
+        .width('100%')
+        .enabled(appState.engineReady && !appState.gpuRunning && !cpuRun.running && !suiteRun.running)
+        .onClick(() => { runController.startSuite('all'); })
+      if (suiteRun.status.length > 0) { Text(suiteRun.status).caption() }
+      if (suiteRun.running) {
+        Text(suiteRun.currentLabel).caption()
+        Button(tr('Stop suite', '停止全套测试')).onClick(() => { runController.stopSuite(); })
+      }
       Button(appState.gpuRunning ? tr('Stop', '停止') : tr('Run', '运行'))
         .enabled(appState.engineReady &&
           (appState.gpuRunning || (this.optionsValid() && this.testOnApi(appState.gpuWorkload))))
@@ -209,9 +223,9 @@ export struct GpuPage {
         })
       Text(this.statusText())
         .caption()
-        .layoutWeight(1)
     }
     .width('100%')
+    .alignItems(HorizontalAlign.Start)
   }
 
   /** The tests to choose from. */

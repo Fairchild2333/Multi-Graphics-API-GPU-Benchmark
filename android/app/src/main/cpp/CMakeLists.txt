@@ -77,6 +77,7 @@ find_program(GLSLC_EXECUTABLE glslc
 set(ANDROID_ASSETS_SHADERS
     "${CMAKE_CURRENT_LIST_DIR}/../assets/shaders")
 file(MAKE_DIRECTORY "${ANDROID_ASSETS_SHADERS}")
+file(LOCK "${ANDROID_ASSETS_SHADERS}/.configure.lock" GUARD PROCESS TIMEOUT 120)
 
 # ---- OpenGL ES: the desktop OpenGL sources of the particle test and GPU Burn ----
 # The OpenGL ES backend compiles them on the phone and changes only their

@@ -28,7 +28,34 @@ data class HistoryEntry(
     val cpuName: String = "",
     val osVersion: String = "",
     val systemMemoryMB: Long = 0,
+    val particleCount: Int = 0, val headless: Boolean = false, val durationSec: Double = 0.0,
+    val workloadConfig: String = "", val avgComputeMs: Double = 0.0, val avgRenderMs: Double = 0.0,
+    val avgTotalGpuMs: Double = 0.0, val avgFrameTimeMs: Double = 0.0,
+    val stableScore: Double = 0.0, val throughputDropPct: Double = 0.0,
 ) {
+    val measurementReviewReasons: List<String> get() = buildList {
+        if (workload !in listOf("stream", "gpu_burn", "cinematic_liquid")) return@buildList
+        if (avgFrameTimeMs > 0 && avgTotalGpuMs > avgFrameTimeMs * 1.1) add(tr("GPU timing exceeds frame interval", "GPU 计时超过帧间隔"))
+        if (avgComputeMs + avgRenderMs > avgTotalGpuMs + 0.1) add(tr("Compute/render timing overlaps", "计算与渲染计时重叠"))
+        if (headless && graphicsApi == "Vulkan" && particleCount >= 1048576 && avgComputeMs < avgFrameTimeMs * 0.5)
+            add(tr("Compute timing needs verification", "计算计时需要核验"))
+        if (workload != "cinematic_liquid") {
+            if (throughputDropPct > 5) add(tr("Throughput dropped by over 5%", "吞吐下降超过 5%"))
+            if ((workload == "gpu_burn" || particleCount >= 1048576) && stableScore <= 0)
+                add(tr("Stable throughput not reached", "尚未达到稳定吞吐"))
+        }
+    }
+    fun matches(job: SuiteJob): Boolean {
+        if (score == null || !score.isFinite() || score <= 0) return false
+        if (job.cpu) return if (job.workload == "cpu_all") workload in listOf("cpu_single_core", "cpu_multi_core") else workload == "cpu_membw"
+        val apiMatches = when (job.api) { "gles2" -> graphicsApi == "OpenGL ES 2.0"; "gles" -> graphicsApi == "OpenGL ES"; else -> graphicsApi == "Vulkan" }
+        if (!apiMatches || workload != job.workload || headless != job.headless) return false
+        if (job.workload == "membw") return true
+        if (durationSec < 11) return false
+        if (job.particles > 0 && particleCount != job.particles) return false
+        return job.steps == 0 || workloadConfig.split(';').any { it == "steps=${job.steps}" } ||
+            workloadVersion.contains("fixed_steps_${job.steps}_")
+    }
     /** "Xiaomi 23049PCD8G · QTI SM8550 · Android 14 (API 34) · 11.2 GB RAM", from what the result has. */
     val machineLine: String
         get() = listOf(
@@ -76,6 +103,11 @@ class ResultsStore(private val context: Context) {
                             cpuName = o.optString("cpuName"),
                             osVersion = o.optString("osVersion"),
                             systemMemoryMB = o.optLong("systemMemoryMB", 0),
+                            particleCount = o.optInt("particleCount"), headless = o.optBoolean("headless"), durationSec = o.optDouble("durationSec", 0.0),
+                            workloadConfig = o.optString("workloadConfig"), avgComputeMs = o.optDouble("avgComputeMs", 0.0),
+                            avgRenderMs = o.optDouble("avgRenderMs", 0.0), avgTotalGpuMs = o.optDouble("avgTotalGpuMs", 0.0),
+                            avgFrameTimeMs = o.optDouble("avgFrameTimeMs", 0.0), stableScore = o.optDouble("stableScore", 0.0),
+                            throughputDropPct = o.optDouble("throttlePct", 0.0),
                         ),
                     )
                 }

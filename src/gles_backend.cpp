@@ -156,6 +156,44 @@ std::uint32_t EsParticleWorkGroupSize() {
 // Shader helpers
 // -----------------------------------------------------------------------
 
+EsSuiteCapabilities ProbeEsSuiteCapabilities() {
+    EsSuiteCapabilities result;
+    EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (display == EGL_NO_DISPLAY || !eglInitialize(display, nullptr, nullptr) || !eglBindAPI(EGL_OPENGL_ES_API)) return result;
+    for (const EGLint version : {2, 3}) {
+        const EGLint attributes[] = {EGL_RENDERABLE_TYPE, version == 2 ? EGL_OPENGL_ES2_BIT : EGL_OPENGL_ES3_BIT,
+            EGL_SURFACE_TYPE, EGL_PBUFFER_BIT, EGL_NONE};
+        EGLConfig config = nullptr; EGLint count = 0;
+        if (!eglChooseConfig(display, attributes, &config, 1, &count) || count == 0) continue;
+        const EGLint contextAttributes[] = {EGL_CONTEXT_CLIENT_VERSION, version, EGL_NONE};
+        EGLContext context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttributes);
+        if (context == EGL_NO_CONTEXT) continue;
+        const EGLint surfaceAttributes[] = {EGL_WIDTH, 16, EGL_HEIGHT, 16, EGL_NONE};
+        EGLSurface surface = eglCreatePbufferSurface(display, config, surfaceAttributes);
+        if (surface != EGL_NO_SURFACE && eglMakeCurrent(display, surface, surface, context)) {
+            if (version == 2) result.es2 = true;
+            else {
+                GLint major = 0, minor = 0; glGetIntegerv(GL_MAJOR_VERSION, &major); glGetIntegerv(GL_MINOR_VERSION, &minor);
+                if (major > 3 || (major == 3 && minor >= 1)) {
+                    GLint64 bytes = 0; GLint groups = 0, invocations = 0, sizeX = 0;
+                    glGetInteger64v(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &bytes);
+                    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &groups);
+                    glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &invocations);
+                    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &sizeX);
+                    const auto group = (std::min)(invocations, sizeX) >= 256 ? 256 : 128;
+                    if (bytes > 0 && groups > 0 && (std::min)(invocations, sizeX) >= 128)
+                        result.maxParticles = (std::min)(std::uint64_t(bytes) / 32, std::uint64_t(groups) * group);
+                }
+            }
+            while (glGetError() != GL_NO_ERROR) {}
+            eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        }
+        if (surface != EGL_NO_SURFACE) eglDestroySurface(display, surface);
+        eglDestroyContext(display, context);
+    }
+    return result;
+}
+
 std::uint32_t GlesBackend::CompileShader(const std::string& file, std::uint32_t type) {
     return CompileSource(ToEsSource(ReadFileBytes(shaderDir_ + file), file), file, type);
 }

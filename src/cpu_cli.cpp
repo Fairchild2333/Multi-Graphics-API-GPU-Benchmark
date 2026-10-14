@@ -1,4 +1,5 @@
 #include "cpu_cli.h"
+#include "cpu_cancel.h"
 #include "benchmark_results.h"
 #include <algorithm>
 #include <cmath>
@@ -451,6 +452,7 @@ int RunCpuMemoryBandwidthCli(gpu_bench::CpuMemBwConfig config, bool saveResult) 
     }
 #endif
     const auto report = gpu_bench::RunCpuMemoryBandwidth(config, std::cout);
+    if (gpu_bench::CpuStopRequested()) { std::cout << "CPUMEM_CANCELLED\n" << std::flush; return 130; }
     if (!report.valid) {
         std::cerr << "CPU memory bandwidth sweep failed: "
                   << (report.error.empty() ? "no valid result" : report.error) << "\n";
@@ -480,6 +482,7 @@ int RunCpuMemoryBandwidthCli(gpu_bench::CpuMemBwConfig config, bool saveResult) 
 
 int RunCpuBenchmarkCli(const CpuBenchmarkConfig& cpuCfg, bool saveCpuResults) {
         const auto report = gpu_bench::RunCpuBenchmark(cpuCfg, std::cout);
+        if (gpu_bench::CpuStopRequested()) { std::cout << "CPU_CANCELLED\n" << std::flush; return 130; }
         const bool perCoreRequested = cpuCfg.mode == gpu_bench::CpuBenchmarkMode::PerCore ||
                                       cpuCfg.mode == gpu_bench::CpuBenchmarkMode::All;
         const bool multiRequested = cpuCfg.mode == gpu_bench::CpuBenchmarkMode::MultiCore ||

@@ -1,5 +1,6 @@
 // Mangekyo Android JNI — Surface + Vulkan probe + gpu_engine host thread.
 #include "android_engine_host.h"
+#include "embedded_capabilities.h"
 #include "gpu_engine.h"
 
 #include <android/log.h>
@@ -232,6 +233,11 @@ Java_com_mangekyo_benchmark_core_NativeBridge_nativeProbeVulkan(JNIEnv*, jobject
 JNIEXPORT jint JNICALL
 Java_com_mangekyo_benchmark_core_NativeBridge_nativeEsParticleWorkGroupSize(JNIEnv*, jobject) {
     return static_cast<jint>(gpu_bench::android_host::EsParticleWorkGroupSize());
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_mangekyo_benchmark_core_NativeBridge_nativeSuiteCapabilities(JNIEnv* env, jobject) {
+    return env->NewStringUTF(gpu_bench::EmbeddedGpuCapabilitiesJson().c_str());
 }
 
 JNIEXPORT void JNICALL

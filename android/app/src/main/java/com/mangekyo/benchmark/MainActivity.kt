@@ -32,6 +32,11 @@ class MainActivity : ComponentActivity() {
         AutoRun.accept(intent, isDebuggable())
     }
 
+    override fun onStop() {
+        com.mangekyo.benchmark.core.MobileSuite.cancel()
+        super.onStop()
+    }
+
     private fun isDebuggable(): Boolean =
         (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 }

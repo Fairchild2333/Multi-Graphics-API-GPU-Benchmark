@@ -120,17 +120,19 @@ object CpuRun {
     /** Tail of the raw output. */
     val log = mutableStateListOf<String>()
 
-    fun begin(memory: Boolean) {
+    fun begin(memory: Boolean, preserveCompute: Boolean = false) {
         running = true
         memoryTest = memory
         finished = false
         failed = false
         progress = 0f
         status = tr("Starting", "正在启动")
-        coreScores.clear()
-        coreLabels.clear()
-        singleSummary = ""
-        multiSummary = ""
+        if (!preserveCompute) {
+            coreScores.clear()
+            coreLabels.clear()
+            singleSummary = ""
+            multiSummary = ""
+        }
         classes.clear()
         caches.clear()
         levels.clear()
@@ -144,9 +146,9 @@ object CpuRun {
     fun finish(exitCode: Int) {
         running = false
         finished = true
-        failed = exitCode != 0
-        if (!failed) progress = 1f
-        status = if (failed) {
+        failed = exitCode != 0 && exitCode != 130
+        if (exitCode == 0) progress = 1f
+        status = if (exitCode == 130) tr("Cancelled", "已取消") else if (failed) {
             tr("Failed (exit $exitCode); see the output below", "失败（退出码 $exitCode），详见下方的输出")
         } else {
             tr("Done", "完成")
@@ -197,6 +199,7 @@ object CpuRun {
                     (f["thread_count"]?.let { tr(" ($it threads)", "（$it 线程）") } ?: "")
             }
             "CPUMEM_META" -> {
+                memoryTest = true
                 allThreads = f.number("all_threads").toInt()
                 cpuLabel = listOfNotNull(
                     f["name"], f["logical_count"]?.let { tr("$it logical", "$it 个逻辑处理器") },

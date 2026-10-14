@@ -134,6 +134,9 @@ fun HistoryScreen() {
                                 else -> "—"
                             }
                             Text(scoreText, style = MaterialTheme.typography.labelLarge)
+                            if (e.measurementReviewReasons.isNotEmpty()) Text(
+                                tr("Review: ", "待复核：") + e.measurementReviewReasons.joinToString(" · "),
+                                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                             if (e.machineLine.isNotEmpty()) {
                                 Text(
                                     e.machineLine,

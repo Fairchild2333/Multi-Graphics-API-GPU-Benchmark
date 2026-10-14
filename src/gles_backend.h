@@ -15,6 +15,8 @@ namespace gpu_bench {
 // test card can name the score group before the run. It makes a context of
 // its own on a small off-screen surface: call it while no test is running.
 std::uint32_t EsParticleWorkGroupSize();
+struct EsSuiteCapabilities { bool es2 = false; std::uint64_t maxParticles = 0; };
+EsSuiteCapabilities ProbeEsSuiteCapabilities();
 
 // OpenGL ES on EGL, for the embedded hosts (Android, HarmonyOS).
 //

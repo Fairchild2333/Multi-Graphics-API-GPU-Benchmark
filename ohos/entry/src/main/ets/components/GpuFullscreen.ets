@@ -7,6 +7,7 @@
 import { gpuTestName } from '../common/GpuOptions';
 import { tr } from '../common/I18n';
 import { appState, runController } from '../common/RunController';
+import { suiteRun } from '../common/MobileSuite';
 
 @ComponentV2
 export struct GpuFullscreen {
@@ -24,11 +25,11 @@ export struct GpuFullscreen {
 
       Column() {
         Column({ space: 2 }) {
-          Text(gpuTestName(appState.gpuWorkload))
+          Text(suiteRun.running ? suiteRun.currentLabel : gpuTestName(appState.gpuWorkload))
             .fontSize(16)
             .fontWeight(FontWeight.Medium)
             .fontColor(Color.White)
-          Text(appState.gpuStatus)
+          Text(suiteRun.running ? suiteRun.status : appState.gpuStatus)
             .fontSize(12)
             .fontColor('#CCFFFFFF')
         }

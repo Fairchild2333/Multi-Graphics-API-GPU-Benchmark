@@ -77,6 +77,9 @@ export struct HistoryPage {
                     .fontSize(15)
                     .fontWeight(FontWeight.Medium)
                     .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                  if (entry.reviewReasons().length > 0) {
+                    Text(tr('Review: ', '待复核：') + entry.reviewReasons().join(' · ')).caption()
+                  }
                   if (entry.machineLine().length > 0) {
                     Text(entry.machineLine())
                       .caption()

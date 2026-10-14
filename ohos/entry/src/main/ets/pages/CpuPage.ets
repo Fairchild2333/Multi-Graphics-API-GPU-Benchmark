@@ -10,6 +10,7 @@ import { CoreScore, cpuRun, MemClass, MemLevel, StorageResult } from '../common/
 import { formatBytes, formatNumber } from '../common/Format';
 import { localizeEngineText, tr } from '../common/I18n';
 import { appState, runController } from '../common/RunController';
+import { suiteRun } from '../common/MobileSuite';
 
 @Extend(Text)
 function caption() {
@@ -224,14 +225,14 @@ struct SweepCard {
 
 @ComponentV2
 export struct CpuPage {
-  @Local formal: boolean = false;
+  @Local formal: boolean = true;
 
   private memoryMode(): boolean {
     return appState.cpuMode === 'memory';
   }
 
   private canRun(): boolean {
-    return appState.engineReady && !cpuRun.running && !appState.gpuRunning;
+    return appState.engineReady && !cpuRun.running && !appState.gpuRunning && !suiteRun.running;
   }
 
   private classes(): MemClass[] {
@@ -318,18 +319,26 @@ export struct CpuPage {
       Text(this.memoryMode()
         ? tr('Sweeps the data-set size on one thread of every core type, then on all cores, and reads L1, L2, ' +
           'the shared cache and memory off the curve. It ends with a storage test that writes a temporary ' +
-          'file of up to 1 GiB. A run cannot be cancelled.',
+          'file of up to 1 GiB. Stopping cancels unfinished tests.',
           '先用每类核心的一个线程、再用全部核心扫描数据量，从曲线上读出 L1、L2、共享缓存和内存各自的带宽。' +
-            '最后是存储测试，会写一个最大 1 GiB 的临时文件。运行开始后不能取消。')
+            '最后是存储测试，会写一个最大 1 GiB 的临时文件。停止会取消尚未完成的测试。')
         : tr('The single-core test runs once on every logical processor; the formal preset takes 15 s for ' +
-          'each. A run cannot be cancelled.',
-          '单核测试会在每个逻辑处理器上各跑一次；正式预设每次 15 秒。运行开始后不能取消。'))
+          'each. Stopping cancels unfinished tests.',
+          '单核测试会在每个逻辑处理器上各跑一次；正式预设每次 15 秒。停止会取消尚未完成的测试。'))
         .caption()
+      Button(tr('Run all CPU tests', '一键测试 CPU 全套'))
+        .enabled(this.canRun())
+        .onClick(() => { runController.startSuite('cpu'); })
+      if (suiteRun.status.length > 0) { Text(suiteRun.status).caption() }
+      if (suiteRun.running) { Button(tr('Stop suite', '停止全套测试')).onClick(() => { runController.stopSuite(); }) }
       Button(tr('Run', '运行'))
         .enabled(this.canRun())
         .onClick(() => {
           runController.startCpu(appState.cpuMode, this.formal ? 15 : 1);
         })
+      if (cpuRun.running && !suiteRun.running) {
+        Button(tr('Stop', '停止')).onClick(() => { runController.stopCpu(); })
+      }
     }
 
     if (cpuRun.running || cpuRun.finished) {
@@ -407,7 +416,8 @@ export struct CpuPage {
           }
         }
       }
-    } else {
+    }
+    if (cpuRun.coreScores.length > 0 || cpuRun.multiSummary.length > 0 || !cpuRun.memoryTest) {
       if (cpuRun.singleSummary.length > 0 || cpuRun.multiSummary.length > 0) {
         Card({ title: tr('Summary', '摘要') }) {
           if (cpuRun.singleSummary.length > 0) {

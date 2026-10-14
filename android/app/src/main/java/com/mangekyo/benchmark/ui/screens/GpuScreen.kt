@@ -176,7 +176,7 @@ fun GpuScreen() {
     }
     val apiReady = NativeBridge.isEngineLoaded && selectedBackend != "Unsupported" && apiAvailable(api)
     val testOnApi = selectedWorkloadId in GpuOptions.testsOf(api)
-    val runEnabled = apiReady && testOnApi && optionsValid &&
+    val runEnabled = apiReady && testOnApi && optionsValid && !com.mangekyo.benchmark.core.MobileSuite.running && !NativeBridge.isCliRunning() &&
         WorkloadRegistry.gpuWorkloads.any { it.id == selectedWorkloadId }
 
     fun start(workloadId: String, seconds: Double): Boolean {
@@ -254,6 +254,11 @@ fun GpuScreen() {
         val wanted = request ?: return@LaunchedEffect
         if (wanted.test.substringBefore('?') !in AutoRun.gpuTests) return@LaunchedEffect
         AutoRun.pending = null
+        if (wanted.test in listOf("gpu_suite", "all_suite")) {
+            com.mangekyo.benchmark.core.MobileSuite.start(context, if (wanted.test == "gpu_suite")
+                com.mangekyo.benchmark.core.SuiteScope.GPU else com.mangekyo.benchmark.core.SuiteScope.ALL)
+            return@LaunchedEffect
+        }
         val asked = GpuOptions.parse(wanted.test)
         if (!NativeBridge.isEngineLoaded || !apiAvailable(asked.api)) {
             val missing = when (asked.api) {
@@ -342,14 +347,16 @@ fun GpuScreen() {
         launch = null
     }
 
-    KeepScreenOn(commandLineRun && running)
+    KeepScreenOn((commandLineRun && running) || com.mangekyo.benchmark.core.MobileSuite.running)
 
     if (GpuRun.fullscreen) {
         FullscreenRun(
-            title = WorkloadRegistry.gpuWorkloads.firstOrNull { it.id == selectedWorkloadId }?.displayName
+            title = if (com.mangekyo.benchmark.core.MobileSuite.running) com.mangekyo.benchmark.core.MobileSuite.currentLabel
+                else WorkloadRegistry.gpuWorkloads.firstOrNull { it.id == selectedWorkloadId }?.displayName
                 ?: selectedWorkloadId,
-            status = statusText,
+            status = if (com.mangekyo.benchmark.core.MobileSuite.running) com.mangekyo.benchmark.core.MobileSuite.status else statusText,
             onStop = {
+                if (com.mangekyo.benchmark.core.MobileSuite.running) com.mangekyo.benchmark.core.MobileSuite.cancel()
                 NativeBridge.stopWorkload()
                 statusText = tr("Stop requested", "已请求停止")
                 // Nothing to stop yet: leave the full screen at once.
@@ -374,7 +381,9 @@ fun GpuScreen() {
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
-                    if (running) {
+                    if (com.mangekyo.benchmark.core.MobileSuite.running) {
+                        com.mangekyo.benchmark.core.MobileSuite.cancel()
+                    } else if (running) {
                         // A test with a picture ends at once; the sweep ends
                         // after the point it is measuring.
                         NativeBridge.stopWorkload()
@@ -413,6 +422,7 @@ fun GpuScreen() {
         AdaptivePanes(
             modifier = Modifier.padding(inner),
             primary = {
+                com.mangekyo.benchmark.ui.components.SuiteControls(gpu = true)
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(

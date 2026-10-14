@@ -16,6 +16,7 @@ import {
   ParsedRequest, PARTICLE_PRESETS, SECOND_PRESETS, STEP_PRESETS
 } from './GpuOptions';
 import { tr } from './I18n';
+import { MobileSuiteRunner, SuiteJob, suiteRun } from './MobileSuite';
 
 const LOG_DOMAIN: number = 0x0000;
 const LOG_TAG: string = 'Mangekyo';
@@ -122,6 +123,27 @@ class PendingRequest {
 }
 
 export class RunController {
+  private suite: MobileSuiteRunner = new MobileSuiteRunner();
+  private suiteFinished: number = 0;
+
+  startSuite(scope: string): void {
+    if (!appState.engineReady || suiteRun.running || bridge.isRunning() || bridge.isCliRunning() || this.pending !== undefined) return;
+    this.owner = 'suite'; this.suiteFinished = 0;
+    try {
+      this.suite.start(appState.filesDir, scope, (show: boolean, job: SuiteJob) => {
+        if (!job.cpu()) { appState.gpuWorkload = job.workload; appState.gpuApi = job.api; appState.gpuHeadless = job.headless; }
+        if (show) this.enterFullscreen(); else this.leaveFullscreen();
+      }, (on: boolean) => this.keepScreenOn(on));
+      appState.gpuRunning = suiteRun.running;
+    } catch (e) {
+      suiteRun.running = false; this.owner = ''; this.keepScreenOn(false);
+      suiteRun.status = tr('Cannot prepare suite files', '无法准备测试记录文件');
+      logLine('SUITE_ERROR reason=' + JSON.stringify(e));
+    }
+  }
+
+  stopSuite(): void { this.suite.cancel(); }
+  stopCpu(): void { if (suiteRun.running) this.stopSuite(); else bridge.stopWorkload(); }
   /** The page that started the current run: 'gpu', 'cpu' or ''. */
   private owner: string = '';
   private pending: PendingRequest | undefined = undefined;
@@ -175,6 +197,13 @@ export class RunController {
   request(test: string, seconds: number): void {
     if (!appState.debuggable) {
       logLine(`AUTORUN refused test=${test} reason=release_build`);
+      return;
+    }
+    if (test === 'suite_stop') { this.stopSuite(); return; }
+    if (suiteRun.running) { logLine(`AUTORUN refused test=${test} reason=suite_busy`); return; }
+    if (['cpu_suite', 'gpu_suite', 'all_suite'].indexOf(test) >= 0) {
+      this.pending = new PendingRequest(test, seconds, true);
+      appState.requestedTab = test === 'cpu_suite' ? 1 : 0;
       return;
     }
     if (!CPU_TEST_MODES.has(test) && GPU_TESTS.indexOf(gpuRequestId(test)) < 0) {
@@ -355,6 +384,7 @@ export class RunController {
   }
 
   stopGpu(): void {
+    if (suiteRun.running) { this.stopSuite(); return; }
     bridge.stopWorkload();
     appState.gpuStatus = tr('Stop requested', '已请求停止');
     if (this.gpuCommandLine) {
@@ -422,6 +452,26 @@ export class RunController {
     if (!appState.engineReady) {
       return;
     }
+    if (this.owner === 'suite') {
+      try { this.suite.tick(); } catch (e) {
+        this.suite.cancel(); suiteRun.running = false; this.owner = 'suite-abort';
+        suiteRun.status = tr('Cannot save suite log; queue stopped', '测试记录保存失败，队列已停止');
+        logLine('SUITE_ERROR reason=' + JSON.stringify(e));
+      }
+      appState.gpuRunning = suiteRun.running || bridge.isRunning() || bridge.isCliRunning();
+      appState.gpuStatus = suiteRun.status;
+      if (suiteRun.finished !== this.suiteFinished) { this.suiteFinished = suiteRun.finished; appState.resultsRevision++; }
+      if (!suiteRun.running && this.owner !== 'suite-abort') this.owner = '';
+      return;
+    }
+    if (this.owner === 'suite-abort') {
+      bridge.pollOutput(); bridge.stopWorkload();
+      if (!bridge.isRunning() && !bridge.isCliRunning()) {
+        this.owner = ''; cpuRun.running = false; gpuRun.active = false; appState.gpuRunning = false;
+        this.leaveFullscreen(); this.keepScreenOn(false); appState.resultsRevision++;
+      }
+      return;
+    }
     const lines: string[] = bridge.pollOutput();
     if (this.owner === 'cpu') {
       cpuRun.consumeAll(lines);
@@ -474,6 +524,11 @@ export class RunController {
   private startPending(): void {
     const wanted: PendingRequest | undefined = this.pending;
     if (wanted === undefined) {
+      return;
+    }
+    if (['cpu_suite', 'gpu_suite', 'all_suite'].indexOf(wanted.test) >= 0) {
+      this.pending = undefined;
+      this.startSuite(wanted.test === 'cpu_suite' ? 'cpu' : wanted.test === 'gpu_suite' ? 'gpu' : 'all');
       return;
     }
     const cpuMode: string | undefined = CPU_TEST_MODES.get(wanted.test);

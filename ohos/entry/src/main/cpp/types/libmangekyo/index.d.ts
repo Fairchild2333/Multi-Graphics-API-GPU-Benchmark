@@ -4,6 +4,7 @@
 export const initPaths: (shaderDir: string, dataDir: string) => void;
 
 export const engineVersion: () => string;
+export const suiteCapabilities: () => string;
 
 /**
  * The size of the compute work groups the particle test uses under OpenGL ES

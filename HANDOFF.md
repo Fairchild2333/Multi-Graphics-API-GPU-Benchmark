@@ -3683,3 +3683,105 @@ PathService 已把 results/captures/reports/logs 改到
   in prior records. Harmony MateBook/Mate60 windowed particle timestamps and
   CPU topology/affinity had earlier physical corrections; verify current-build
   fallback/metadata without calling those original failures still unresolved.
+
+## 2026-10-14: commit checkpoint and Android/HarmonyOS complete-suite UI
+
+- User explicitly requested committing existing work before further changes.
+  Local commit5d4dbc4 saves75 source/document/test files for the Apple work,
+  Windows/macOS/iOS suite buttons and timing corrections. No push; generated
+  Xcode user state and ignored raw benchmark archives were excluded. The
+  Android/OHOS changes described below remain a separate uncommitted diff.
+- Android and HarmonyOS now have GPU all-items, CPU all-items and combined
+  buttons, with application-wide sequential queues. CPU compute includes all
+  logical processors, then cache/memory/page mapping/storage. Formal compute
+  is15s. Actual API, SSBO/storage range, work-group and R32 linear-filter
+  capability gates omit unavailable GPU combinations. Maximum29 jobs; actual
+  count can be lower. GPU scope omits CPU; combined adds the two CPU phases once.
+- Android/Harmony results append to their existing results/results.json;
+  suite-runs/<id> stores plan IDs, per-attempt status/result IDs and raw logs.
+  Newly saved rows must match API/workload/spec/duration. Timing overlap,
+  GPU/frame disagreement, >5% throughput decline and missing heavy-workload
+  plateau get review status; raw scores stay and later jobs continue. History
+  shows reasons, and CPU math summaries/curves survive the memory phase.
+- A real Android emulator check found RequestStop did not reach CPU loops.
+  Shared cpu_cancel.h now cooperatively interrupts CPU warmup/rounds and wakes
+  the multi-core observer; memory exits between samples and during storage.
+  cpu_cli returns130 without saving partial results. app_base RequestStop and
+  ClearStopRequest also update the CPU cancellation state. Applies to all
+  embedded platforms; desktop process cancellation remains supported.
+- Fixed30s rest between mobile jobs. Android29+ waits for OS thermal status0
+  when the API can be read, bounded600s, with unknown=-1 logged. OHOS uses only
+  fixed rest and explicitly records unverified temperature. Neither guarantees
+  no frequency drift. Fullscreen startup waits for surface/orientation settling.
+  Stop during startup/rest cannot launch another job; background cancels suite.
+- Debug requests add cpu_suite/gpu_suite/all_suite/suite_stop. Existing adb/hdc
+  individual29-job scripts remain. OHOS native shader staging now includes
+  fluid and memory shader files, not only particle/Burn. Android shared asset
+  configuration is locked to avoid concurrent ABI configure_file races.
+- Android all4 ABI Debug APK built, JUnit4/4 pass, native7/7 pass including new
+  CPU/memory cancellation regression. Native cancellation also checked again
+  after the test assertion update. Actual Android35 arm64 emulator CPU scope
+  had2 phases/formal15s and acknowledged cancel in0.51s, no memory launch or
+  partial score. GPU native probe produced23 GPU jobs, no CPU; three software
+  renderer observations completed with review, then queue cancelled. These
+  are emulator execution checks, never physical mobile performance results.
+- OHOS production models/state-machine harness passes scope/limit/matching,
+  quality, CPU-without-GPU probe, cooldown cancel, stale-history and timeout
+  checks. This harness transpiles ordinary ETS logic with mocks; it does not
+  compile ArkUI/NAPI or prove HAP/physical operation. No complete native/ArkTS
+  DevEco SDK found on this Mac; revised HAP and real-device checks remain open.
+- Evidence and APK: out/test-results/mobile-one-click-20261014/report.md and
+  ../one-click-suite-20261014/*mobile*/*android*/*ohos* logs. Canonical Mac137
+  history hash remains b6284e581490616bb5892ff58ba3f19bdc4dd507086ff181ac2424b0083c96cf.
+  No physical Android/HarmonyOS retest or remaining4 Mac Metal retest in this
+  turn. Preserve the earlier pending retest checklist.
+
+## 2026-10-14: installed Android Studio and DevEco Studio validation
+
+- User installed both IDEs and asked to try the current mobile builds. DevEco
+  now exists at /Applications/DevEco-Studio.app; its Contents/sdk/default has
+  complete HarmonyOS API26 native/ETS toolchains. Earlier SDK-unavailable
+  statements above are superseded. No physical Android/Harmony device attached.
+- Android Studio-generated AGP9.4.1, Gradle9.6.0 and daemon JVM25 configuration
+  preserved. Current4-ABI APK builds; forced JUnit rerun passes4/4.
+- Actual ArkTS compilation found MobileSuite calling private consume methods.
+  Fixed to consumeAll batches; model harness now loads production EngineOutput
+  and checks actual CPU progress parsing and retained math summaries. Two-ABI
+  native/NAPI and ArkTS builds now pass with DevEco Studio26.0/hvigor6.26.8.
+- Real first-package check found0 SPIR-V resources. Native shader targets run
+  after resources, and native clean deletes generated SPIR-V source outputs.
+  New stageGpuShaders Hvigor task runs after clean, before default@PreBuild;
+  portable stage-ohos-shaders.cjs incrementally generates39 SPIR-V +7 GLES
+  sources. Moved old generated resources away, clean built and ZIP-verified
+  all46 shader resources in the HAP. Mac entry: bash scripts/build-ohos.sh.
+- Real OHOS phone emulator UI found controls laid out beyond the right edge.
+  GPU suite controls now use a full-width column; updated installed UI confirms
+  both suite buttons visible. SUITE_* milestones mirrored to hilog for audit.
+- Android35 software emulator: GPU plan23;2 jobs completed (1success/1review),
+  then cooldown cancellation. Combined25 plan starts, fresh first score flagged
+  for throughput decline, then cooldown cancellation. CPU cancellation tested
+  with no partial saved score. Pulled per-suite manifests/logs to evidence dir.
+- HarmonyOS5.0.4(API16) Mac emulator supports GLES2 only, not Vulkan/ES3.1.
+  Native plan3 GPU jobs, completed3/3 with0failures and2review flags. Scores
+  saved to results/results.json. Clicking the updated all-items button produces
+  plan5 (3GPU +2CPU), one job completes, cancellation stops before next.
+  System logs show SUITE_END finished1,total5,review1,failed0,cancelledtrue.
+- hdc on this retail emulator denies private filesystem export, even with
+  debug-bundle paths. OHOS raw results were NOT exported to the repo; native
+  save logs, suite milestones and actual UI states are the execution evidence.
+  Emulator score names can resemble hardware but are translated/software
+  measurements; do not merge them into physical phone/Mac comparisons.
+- Evidence: out/test-results/mobile-one-click-20261014. HAP copied there as
+  Mangekyo-ohos-debug-unsigned.hap (5685100 bytes), SHA256
+  eaf835d445d1f8abd9dcdbf638a743266f29c6ba1ab44ba6b0911d7ea432fcb5.
+  APK unchanged SHA4aa69e2cf72a0f69f629971bd2c095e7a3c7a06ffd5980efd717c08893ef7c57.
+  New mobile changes remain uncommitted; no push. Canonical Mac137 result hash
+  remains b6284e581490616bb5892ff58ba3f19bdc4dd507086ff181ac2424b0083c96cf.
+  Physical validation/signing and the earlier Mac pending retests remain open.
+- Final current-APK/HAP CPU suite runs completed naturally2/2, no cancellation,
+  no review/failures. Both ran per-LP and all-core compute then cache/memory,
+  page mapping and1GiB-file storage tests; saved results and retained compute
+  summaries alongside memory curves. OHOS actual UI confirmed2/2 and all these
+  sections. Android raw results exported as android-emulator-results.json and
+  final manifests/logs in android-studio-final-suites. Complete native logs in
+  android-cpu-complete.log/ohos-cpu-complete.log. Still emulator-only validation.

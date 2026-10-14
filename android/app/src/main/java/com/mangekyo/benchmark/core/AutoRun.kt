@@ -31,11 +31,13 @@ object AutoRun {
         "cpu_all" to "all",
         "cpu_per_core" to "per-core",
         "cpu_multi" to "multi",
+        "cpu_suite" to "suite",
     )
 
     val gpuTests = setOf(
         "stream", "stream_heavy", "stream_headless", "gpu_burn", "gpu_burn_medium", "gpu_burn_heavy",
         "cinematic_liquid", "membw",
+        "gpu_suite", "all_suite",
     )
 
     /** The request that no page has started yet. */
@@ -47,6 +49,15 @@ object AutoRun {
         intent.removeExtra("run")
         if (!debuggable) {
             log("AUTORUN refused test=$test reason=release_build")
+            return
+        }
+        if (test == "suite_stop") {
+            MobileSuite.cancel()
+            log("AUTORUN accepted test=suite_stop")
+            return
+        }
+        if (MobileSuite.running) {
+            log("AUTORUN refused test=$test reason=suite_busy")
             return
         }
         // A GPU test may carry its size: "stream?particles=4194304", "gpu_burn?steps=64".

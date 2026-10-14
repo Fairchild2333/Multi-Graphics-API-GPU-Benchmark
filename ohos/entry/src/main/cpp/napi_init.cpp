@@ -12,6 +12,7 @@
 
 #include "gpu_engine.h"
 #include "ohos_engine_host.h"
+#include "embedded_capabilities.h"
 
 #include <atomic>
 #include <cstdlib>
@@ -217,6 +218,10 @@ napi_value EsParticleWorkGroupSize(napi_env env, napi_callback_info) {
     return result;
 }
 
+napi_value SuiteCapabilities(napi_env env, napi_callback_info) {
+    return String(env, gpu_bench::EmbeddedGpuCapabilitiesJson());
+}
+
 // hasSurface(): boolean
 napi_value HasSurface(napi_env env, napi_callback_info) {
     std::lock_guard<std::mutex> lock(g_windowMutex);
@@ -379,6 +384,7 @@ napi_value Init(napi_env env, napi_value exports) {
         {"startWorkload", nullptr, StartWorkload, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"pollOutput", nullptr, PollOutput, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"startCli", nullptr, StartCli, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"suiteCapabilities", nullptr, SuiteCapabilities, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"isCliRunning", nullptr, IsCliRunning, nullptr, nullptr, nullptr, napi_default, nullptr},
         {"cliExitCode", nullptr, CliExitCode, nullptr, nullptr, nullptr, napi_default, nullptr},
     };

@@ -1,4 +1,5 @@
 #include "app_base.h"
+#include "cpu_cancel.h"
 #include "capture_naming.h"
 #include "path_service.h"
 #include "system_info.h"
@@ -55,10 +56,12 @@ static double gpuBenchGetTime() {
 namespace gpu_bench {
 
 void RequestStop() {
+    RequestCpuStop();
     g_stopRequested.store(true, std::memory_order_release);
 }
 
 void ClearStopRequest() {
+    ClearCpuStop();
     g_stopRequested.store(false, std::memory_order_release);
 }
 

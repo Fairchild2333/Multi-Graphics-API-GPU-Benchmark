@@ -17,6 +17,7 @@
 /android/**/build/
 /android/**/.cxx/
 /android/local.properties
+/android/app/src/main/assets/shaders/.configure.lock
 
 # HarmonyOS (DevEco Studio / hvigor)
 /ohos/.hvigor/

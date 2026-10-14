@@ -173,7 +173,7 @@ export class CpuRunState {
   private coreLabels: Map<number, string> = new Map<number, string>();
   private log: string[] = [];
 
-  begin(memory: boolean): void {
+  begin(memory: boolean, preserveCompute: boolean = false): void {
     this.running = true;
     this.memoryTest = memory;
     this.finished = false;
@@ -181,10 +181,9 @@ export class CpuRunState {
     this.progress = 0;
     this.status = tr('Starting', '正在启动');
     this.cpuLabel = '';
-    this.coreScores = [];
+    if (!preserveCompute) this.coreScores = [];
     this.coreLabels.clear();
-    this.singleSummary = '';
-    this.multiSummary = '';
+    if (!preserveCompute) { this.singleSummary = ''; this.multiSummary = ''; }
     this.classes = [];
     this.caches = [];
     this.levels = [];
@@ -199,8 +198,10 @@ export class CpuRunState {
   finish(exitCode: number): void {
     this.running = false;
     this.finished = true;
-    this.failed = exitCode !== 0;
-    if (this.failed) {
+    this.failed = exitCode !== 0 && exitCode !== 130;
+    if (exitCode === 130) {
+      this.status = tr('Cancelled', '已取消');
+    } else if (this.failed) {
       this.status = tr(`Failed (exit ${exitCode}); see the output below`, `失败（退出码 ${exitCode}），详见下方的输出`);
     } else {
       this.progress = 1;
@@ -306,6 +307,7 @@ export class CpuRunState {
         this.multiSummary = text;
       }
     } else if (tag === 'CPUMEM_META') {
+      this.memoryTest = true;
       this.allThreads = numberOf(f, 'all_threads');
       this.cpuLabel = this.cpuLabelOf(f, textOf(f, 'vector'));
     } else if (tag === 'CPUMEM_CLASS') {

@@ -1,4 +1,5 @@
 #include "cpu_membw.h"
+#include "cpu_cancel.h"
 
 #include "cpu_benchmark.h"
 #include "cpu_parked_cores.h"
@@ -1913,7 +1914,7 @@ CpuMemBwStorage MeasureStorage(const CpuMemBwConfig& config) {
     // do not include the cost of growing a file.
     std::uint64_t written = 0;
     auto start = Clock::now();
-    while (ok && written < target) {
+    while (ok && written < target && !CpuStopRequested()) {
         stampBlock();
         ok = file.Write(written, block, kStorageBlockBytes);
         written += kStorageBlockBytes;
@@ -1931,14 +1932,14 @@ CpuMemBwStorage MeasureStorage(const CpuMemBwConfig& config) {
     const auto sequential = [&](bool write) {
         double best = 0.0;
         const auto begin = Clock::now();
-        for (std::uint32_t pass = 0; ok && pass < (write ? 3u : 8u); ++pass) {
+        for (std::uint32_t pass = 0; ok && !CpuStopRequested() && pass < (write ? 3u : 8u); ++pass) {
             // Also for a file opened unbuffered: a file system may accept the
             // flag and buffer all the same. A TCL television (Android 11,
             // 2026-10-08) read 2222 MB/s from a drive that writes 14 MB/s,
             // every pass after the first out of the file cache.
             if (!write) file.DropCache();
             const auto passStart = Clock::now();
-            for (std::uint64_t offset = 0; ok && offset < written; offset += kStorageBlockBytes) {
+            for (std::uint64_t offset = 0; ok && !CpuStopRequested() && offset < written; offset += kStorageBlockBytes) {
                 if (write) stampBlock();
                 ok = write ? file.Write(offset, block, kStorageBlockBytes)
                            : file.Read(offset, block, kStorageBlockBytes);
@@ -1974,7 +1975,7 @@ CpuMemBwStorage MeasureStorage(const CpuMemBwConfig& config) {
             ok = write ? file.Write(offset, block, kStoragePageBytes)
                        : file.Read(offset, block, kStoragePageBytes);
             ++operations;
-        } while (ok && secondsSince(begin) < kStorageRandomSeconds);
+        } while (ok && !CpuStopRequested() && secondsSince(begin) < kStorageRandomSeconds);
         if (write) file.Flush();
         const double seconds = secondsSince(begin);
         return ok && seconds > 0.0 ? static_cast<double>(operations) / seconds : 0.0;
@@ -2231,6 +2232,7 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
     const double sampleSeconds = report.sampleMs / 1000.0;
 
     for (std::size_t p = 0; p < plans.size(); ++p) {
+        if (CpuStopRequested()) return;
         ModePlan& plan = plans[p];
         const std::uint32_t threads = static_cast<std::uint32_t>(plan.cpus.size());
         const std::uint64_t memoryFrom = MemoryBandStart(plan.caches, threads);
@@ -2249,6 +2251,7 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
                "   GB/s (median)\n";
 
         for (const std::uint64_t block : SweepBlocks(plan.maxBlockBytes)) {
+            if (CpuStopRequested()) return;
             BlockRunner runner(plan.cpus, static_cast<std::size_t>(block), kernels, plan.coreType);
             if (!runner.allocated()) {
                 out << std::setw(12) << FormatBytes(block)
@@ -2266,6 +2269,7 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
             if (report.zeroFill && block >= memoryFrom) order.push_back(Kernel::ZeroFill);
             double medians[kKernelCount] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
             for (const Kernel kernel : order) {
+                if (CpuStopRequested()) return;
                 for (std::uint32_t run = 0; run < config.warmupRuns; ++run)
                     runner.Sample(kernel, sampleSeconds);
                 // Keep the least disturbed round.
@@ -2278,6 +2282,7 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
                 for (std::uint32_t attempt = 0;; ++attempt) {
                     std::vector<double> rates;
                     for (std::uint32_t run = 0; run < config.measuredRuns; ++run) {
+                        if (CpuStopRequested()) return;
                         double rate = 0;
                         CpuResidency observed;
                         double measuredSampleSeconds = sampleSeconds;

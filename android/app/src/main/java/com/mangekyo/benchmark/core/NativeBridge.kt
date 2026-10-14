@@ -30,6 +30,7 @@ object NativeBridge {
         if (loaded) nativeEngineVersion() else "engine-not-loaded"
 
     fun probeVulkan(): Boolean = loaded && nativeProbeVulkan()
+    fun suiteCapabilities(): String = if (loaded && !isRunning() && !isCliRunning()) nativeSuiteCapabilities() else "{}"
 
     /**
      * The size of the compute work groups the particle test uses under OpenGL
@@ -119,6 +120,7 @@ object NativeBridge {
 
     private external fun nativeEngineVersion(): String
     private external fun nativeProbeVulkan(): Boolean
+    private external fun nativeSuiteCapabilities(): String
     private external fun nativeEsParticleWorkGroupSize(): Int
     private external fun nativeInitPaths(shaderDir: String, dataDir: String)
     private external fun nativeSetSurface(surface: Surface?)

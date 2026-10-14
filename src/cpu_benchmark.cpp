@@ -1,4 +1,5 @@
 #include "cpu_benchmark.h"
+#include "cpu_cancel.h"
 
 #include "cpu_parked_cores.h"
 #include "system_info.h"
@@ -747,7 +748,7 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
             progress.phaseStart = warmupStart;
         }
         progress.cv.notify_one();
-        while (Clock::now() < warmupEnd) {
+        while (Clock::now() < warmupEnd && !CpuStopRequested()) {
             RunKernelBatch(state);
         }
 
@@ -756,6 +757,7 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
         std::vector<KernelRoundResult> rounds;
         rounds.reserve(roundCount);
         for (std::uint32_t round = 0; round < roundCount; ++round) {
+            if (CpuStopRequested()) break;
             KernelRoundResult sample;
             CpuResidency residency;
             for (unsigned attempt = 0; attempt < 3; ++attempt) {
@@ -776,12 +778,12 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
                 while (true) {
                     RunKernelBatch(state);
                     sample.workUnits += kKernelBatch;
-                    if (Clock::now() >= end) break;
+                    if (Clock::now() >= end || CpuStopRequested()) break;
                 }
                 sample.seconds = std::chrono::duration<double>(Clock::now() - start).count();
                 if (config.coreType != CpuCoreType::Automatic)
                     residency = EvaluateCpuResidency(accountingStart, CaptureCpuResidency(), config.coreType);
-                if (config.coreType == CpuCoreType::Automatic || residency.verified()) break;
+                if (CpuStopRequested() || config.coreType == CpuCoreType::Automatic || residency.verified()) break;
                 if (attempt < 2) ++result.residencyRetries;
             }
             if (config.coreType != CpuCoreType::Automatic) {
@@ -794,12 +796,14 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
         }
 
         result.strictAffinity = affinity.held();
-        const std::size_t median = MedianRoundIndex(rounds);
-        result.workUnits = rounds[median].workUnits;
-        result.checksum = rounds[median].checksum;
-        result.seconds = rounds[median].seconds;
-        result.roundCount = static_cast<std::uint32_t>(rounds.size());
-        result.medianRound = static_cast<std::uint32_t>(median + 1u);
+        if (!CpuStopRequested() && !rounds.empty()) {
+            const std::size_t median = MedianRoundIndex(rounds);
+            result.workUnits = rounds[median].workUnits;
+            result.checksum = rounds[median].checksum;
+            result.seconds = rounds[median].seconds;
+            result.roundCount = static_cast<std::uint32_t>(rounds.size());
+            result.medianRound = static_cast<std::uint32_t>(median + 1u);
+        }
 
         {
             std::lock_guard<std::mutex> lock(progress.mutex);
@@ -918,6 +922,7 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
     rounds.reserve(roundCount);
 
     for (std::uint32_t round = 0; round < roundCount; ++round) {
+        if (CpuStopRequested()) return result;
         struct Gate {
             std::mutex mutex;
             std::condition_variable cv;
@@ -940,13 +945,13 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
                     gate.cv.notify_all();
                     gate.cv.wait(lock, [&] { return gate.start; });
                 }
-                while (Clock::now() < gate.warmupEnd) RunKernelBatch(state);
+                while (Clock::now() < gate.warmupEnd && !CpuStopRequested()) RunKernelBatch(state);
                 state = MakeKernelState(static_cast<std::uint64_t>(i) + 0x10001u);
                 std::uint64_t units = 0;
                 while (true) {
                     RunKernelBatch(state);
                     units += kKernelBatch;
-                    if (Clock::now() >= gate.measureEnd) break;
+                    if (Clock::now() >= gate.measureEnd || CpuStopRequested()) break;
                 }
                 const auto finished = Clock::now();
                 const bool strict = affinity.held();
@@ -989,8 +994,9 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
         // The observer does no stdout work at all while every logical CPU is
         // saturated.  Formal runs still update the GUI at each five-second
         // round boundary, after all workers have joined and timing has stopped.
-        std::this_thread::sleep_until(gate.measureEnd);
+        WaitUntilCpuStop(gate.measureEnd);
         for (auto& worker : workers) worker.join();
+        if (CpuStopRequested()) return result;
 
         MultiRoundResult sample;
         Clock::time_point lastFinish = gate.measureEnd;
@@ -1211,10 +1217,12 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& requestedConfig,
     // instead of measuring after minutes of accumulated heat and package power.
     if (runMulti && config.mode == CpuBenchmarkMode::All)
         runMultiStage();
+    if (CpuStopRequested()) return report;
 
     if (runPerCore) {
         report.perCore.reserve(singleStages.size());
         for (const auto& cpu : singleStages) {
+            if (CpuStopRequested()) return report;
             const CpuLogicalProcessor* observerCpu = nullptr;
             for (const auto& candidate : report.processors) {
                 if (candidate.physicalCore != cpu.physicalCore) {
@@ -1230,6 +1238,7 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& requestedConfig,
             const auto timed = RunSingleTimed(cpu, observerCpu, stageConfig,
                                               singleStages.size(), stage,
                                               totalStages, out);
+            if (CpuStopRequested()) return report;
             CpuCoreResult result;
             result.processor = cpu;
             result.workUnits = timed.workUnits;

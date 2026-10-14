@@ -49,6 +49,14 @@ set(OHOS_SHADER_SOURCES
     "${MANGEKYO_REPO_ROOT}/shaders/fractal.vert"
     "${MANGEKYO_REPO_ROOT}/shaders/gpu_burn.frag"
 )
+file(GLOB OHOS_EXTRA_SHADER_SOURCES CONFIGURE_DEPENDS
+    "${MANGEKYO_REPO_ROOT}/shaders/cinematic_liquid_*.comp"
+    "${MANGEKYO_REPO_ROOT}/shaders/cinematic_liquid_*.vert"
+    "${MANGEKYO_REPO_ROOT}/shaders/cinematic_liquid_*.frag"
+    "${MANGEKYO_REPO_ROOT}/shaders/mls_mpm_*.comp"
+    "${MANGEKYO_REPO_ROOT}/shaders/membw_*.comp"
+)
+list(APPEND OHOS_SHADER_SOURCES ${OHOS_EXTRA_SHADER_SOURCES})
 find_program(GLSLC_EXECUTABLE glslc
     HINTS
         "$ENV{VULKAN_SDK}/Bin"

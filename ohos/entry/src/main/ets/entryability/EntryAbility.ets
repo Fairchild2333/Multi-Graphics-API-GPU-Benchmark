@@ -31,6 +31,10 @@ export default class EntryAbility extends UIAbility {
     this.handleWant(want);
   }
 
+  onBackground(): void {
+    runController.stopSuite();
+  }
+
   onConfigurationUpdate(newConfig: Configuration): void {
     appState.dark = newConfig.colorMode === ConfigurationConstant.ColorMode.COLOR_MODE_DARK;
     resetLanguage();
