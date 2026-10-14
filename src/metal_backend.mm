@@ -537,7 +537,9 @@ void MetalBackend::InitBackend() {
             NSString* vfn = gpuBurn ? @"gpuBurnVertex"
                          : fractal ? @"fractalVertex"
                          : volumetric ? @"volumetricVertex"
-                         : render3d ? @"render3dVertex" : @"vertexMain";
+                         : render3d ? @"render3dVertex"
+                         : config_.workload == Workload::Stream && config_.particleFixedCoverage
+                             ? @"vertexMainFixedCoverage" : @"vertexMain";
             NSString* ffn = gpuBurn ? @"gpuBurnFragment"
                          : fractal ? @"fractalFragment"
                          : volumetric ? @"volumetricFragment"

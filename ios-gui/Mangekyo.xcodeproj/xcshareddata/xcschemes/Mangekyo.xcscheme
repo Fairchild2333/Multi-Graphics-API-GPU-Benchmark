@@ -50,6 +50,17 @@
                ReferencedContainer = "container:Mangekyo.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "3F975A96DF12F26BD5137B92"
+               BuildableName = "MangekyoUITests.xctest"
+               BlueprintName = "MangekyoUITests"
+               ReferencedContainer = "container:Mangekyo.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

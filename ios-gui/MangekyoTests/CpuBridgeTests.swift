@@ -89,11 +89,12 @@ final class CpuBridgeTests: XCTestCase {
         XCTAssertFalse(output.contains("CAMetalLayer"), output)
     }
 
-    private func embedded(_ request: String, translated: Bool = false, seconds: Double = 3) async throws -> String {
+    private func embedded(_ request: String, translated: Bool = false, seconds: Double = 3,
+                          timeoutSeconds: Int = 90) async throws -> String {
         if let stale = gpb_poll_output() { gpb_free(stale) }
         XCTAssertTrue(gpb_start_workload_with_options(request, seconds, translated), request)
         defer { gpb_stop_workload() }
-        for _ in 0..<900 {
+        for _ in 0..<(timeoutSeconds * 10) {
             if !gpb_is_running() { break }
             try await Task.sleep(nanoseconds: 100_000_000)
         }
@@ -111,6 +112,93 @@ final class CpuBridgeTests: XCTestCase {
         let pointer = try XCTUnwrap(gpb_load_results())
         defer { gpb_free(pointer) }
         return try XCTUnwrap(JSONSerialization.jsonObject(with: Data(String(cString: pointer).utf8)) as? [[String: Any]])
+    }
+
+    func testVulkanRuntimeParticleCapacity() throws {
+        let pointer = try XCTUnwrap(gpb_list_gpus())
+        defer { gpb_free(pointer) }
+        let text = String(cString: pointer)
+        let devices = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(text.utf8)) as? [[String: Any]])
+        let device = try XCTUnwrap(devices.first)
+        guard device["vulkan"] as? Bool == true else { throw XCTSkip("Vulkan unavailable") }
+        let maximum = try XCTUnwrap(device["vulkanMaxParticles"] as? Int)
+        XCTAssertGreaterThan(maximum, 0)
+        XCTAssertGreaterThanOrEqual(maximum, 65_536, "No standard particle preset is supported")
+        let attachment = XCTAttachment(string: text)
+        attachment.name = "Runtime Vulkan particle capacity"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
+    /// Explicit physical A15 acceptance: the complete grid plus a doubled
+    /// serial load count. Keep parallel work identical and retain both logs.
+    func testA15FullGpuCacheEvidence() async throws {
+        #if targetEnvironment(simulator)
+        throw XCTSkip("Cache attribution evidence requires the physical A15")
+        #else
+        let pointer = try XCTUnwrap(gpb_list_gpus())
+        defer { gpb_free(pointer) }
+        guard String(cString: pointer).contains("A15") else {
+            throw XCTSkip("This acceptance profile is for the physical A15")
+        }
+        gpb_set_metal_layer(nil)
+        let oldIDs = Set(try savedRows().compactMap { $0["id"] as? String })
+        for steps in [65_536, 131_072] {
+            let thermalStart = ProcessInfo.processInfo.thermalState.rawValue
+            let request = "gpu_cache?api=metal&max_mib=128&steps=\(steps)&repeats=5" +
+                (steps == 65_536 ? "" : "&parallel_steps=8192")
+            let output = try await embedded(request, timeoutSeconds: 300)
+            XCTAssertTrue(output.contains("GCACHE_DONE\tpoints=124\tchecksum_valid=1"), output)
+            XCTAssertTrue(output.contains("counter_inventory="), output)
+            let attachment = XCTAttachment(string: "thermal_start=\(thermalStart) thermal_end=\(ProcessInfo.processInfo.thermalState.rawValue)\n" + output)
+            attachment.name = "A15 cache evidence \(steps) loads"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+            if steps == 65_536 { try await Task.sleep(nanoseconds: 20_000_000_000) }
+        }
+        let added = try savedRows().filter { !oldIDs.contains($0["id"] as? String ?? "") }
+        XCTAssertEqual(added.count, 2)
+        for row in added {
+            let config = row["workloadConfig"] as? String ?? ""
+            XCTAssertTrue(config.contains("checksumValid=1;counterSets="), config)
+            XCTAssertTrue(config.contains("counterInventory="), config)
+            XCTAssertTrue(config.contains("attributionEvidence=timing_and_checksum_only"), config)
+            XCTAssertTrue(config.contains("cacheAttribution=unverified"), config)
+        }
+        #endif
+    }
+
+    func testA15FirstPassCacheIsolationControls() async throws {
+        #if targetEnvironment(simulator)
+        throw XCTSkip("Requires the physical A15")
+        #else
+        let pointer = try XCTUnwrap(gpb_list_gpus())
+        defer { gpb_free(pointer) }
+        guard String(cString: pointer).contains("A15") else { throw XCTSkip("Requires A15") }
+        gpb_set_metal_layer(nil)
+        let oldIDs = Set(try savedRows().compactMap { $0["id"] as? String })
+        let thermalStart = ProcessInfo.processInfo.thermalState.rawValue
+        let output = try await embedded("gpu_cache?api=metal&max_mib=128&repeats=7&isolation_controls=1&alu_conditioning=1",
+                                        timeoutSeconds: 300)
+        let attachment = XCTAttachment(string: "thermal_start=\(thermalStart) thermal_end=\(ProcessInfo.processInfo.thermalState.rawValue)\n" + output)
+        attachment.name = "A15 first-pass and eviction-dose controls"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        XCTAssertTrue(output.contains("GCACHE_DONE\tpoints=242\tchecksum_valid=1"), output)
+        let samples = output.components(separatedBy: "\n").filter { $0.hasPrefix("GCACHE_CONTROL_SAMPLE\t") }
+        XCTAssertEqual(samples.count, 11 * 11 * 7)
+        XCTAssertTrue(samples.allSatisfy { $0.contains("checksum_valid=1") })
+        let added = try savedRows().filter { !oldIDs.contains($0["id"] as? String ?? "") }
+        XCTAssertEqual(added.count, 1)
+        let row = try XCTUnwrap(added.first)
+        XCTAssertEqual(row["workload"] as? String, "gpu_cache_controls")
+        let config = row["workloadConfig"] as? String ?? ""
+        XCTAssertTrue(config.contains("pairedImmediateRevisit=1"), config)
+        XCTAssertTrue(config.contains("curve_eviction_pass_revisit="), config)
+        XCTAssertTrue(config.contains("cacheAttribution=unverified"), config)
+        XCTAssertTrue(config.contains("aluConditioningSteps=131072"), config)
+        XCTAssertTrue(config.contains("zeroLoadMedianMs="), config)
+        #endif
     }
 
     func testVulkanRequiresExplicitTranslationOptIn() {
@@ -145,7 +233,7 @@ final class CpuBridgeTests: XCTestCase {
         let row = try XCTUnwrap(try savedRows().last(where: {
             $0["graphicsApi"] as? String == "Vulkan" && $0["workload"] as? String == "membw"
         }))
-        XCTAssertEqual(row["workloadVersion"] as? String, "membw_v1_ios_preview_moltenvk")
+        XCTAssertEqual(row["workloadVersion"] as? String, "membw_v2_verified_ios_preview_moltenvk")
         let config = row["workloadConfig"] as? String ?? ""
         for family in ["read", "write", "copy", "l1", "l1_single"] {
             XCTAssertTrue(config.contains("curve_\(family)="), config)

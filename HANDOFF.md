@@ -3785,3 +3785,449 @@ PathService 已把 results/captures/reports/logs 改到
   sections. Android raw results exported as android-emulator-results.json and
   final manifests/logs in android-studio-final-suites. Complete native logs in
   android-cpu-complete.log/ohos-cpu-complete.log. Still emulator-only validation.
+
+## 2026-10-14: Mac remaining targeted retests
+
+- User requested testing this computer's pending candidates first. Rebuilt
+  current5c4e7df arm64 Release app + bundled worker/signature. Executed only
+  pending Metal stream render1M/16M, Burn16/64 and MoltenVK stream render1M.
+  Vulkan showed variation, so repeated once after60s+, same15s/1280x720 spec.
+  All6 runs AC, low-power mode false, thermal state0->0; per-job30s+ rest.
+- New Metal:1M189.944 GB/s,16M152.212 GB/s,Burn16 8.480 Gpix-step/s,
+  Burn64 9.401 Gpix-step/s. Serialized GPU/frame timing and stable CV pass.
+  With earlier3 Metal checks, original7 timing candidates now7/7 verified.
+- Vulkan particle stays in its original2-flight timestamp-query contract.
+  Initialization compute batch checks against synchronized submit/wait pass;
+  no GPU/frame overlap. Two means171.739/169.092 GB/s but within-run declines
+  11.74%/14.34% recur. This remains a stability/variation diagnosis, not a
+  proved thermal frequency event. stableScore182.345/182.608 refers to earlier
+  detected windows, not final sustained throughput; do not report it as such.
+  No endless repeats or score cherry-picking. Kept both observations.
+- Evidence: out/test-results/macos-targeted-retest-20261014/report.md,
+  audit.json,run-status.json,6 native logs,curves.csv(113 windows),PNG/PDF.
+  Result audit validates timing contracts/window overlap/duration/specs.
+- Canonical Mac history atomically merged137->147, retaining every existing
+  object unchanged:6 new rows plus4 previously isolated validated rows.
+  Backups/results/history-update.json record exact IDs and hashes; all raw
+  scores remain in project evidence. Comparison selected Mac groups and
+  retest-needed JSON/MD updated; iPhone/iPad unchanged(7/4 still pending).
+  No CPU/memory/other good cases repeated. New documentation is uncommitted.
+
+## 2026-10-14: continued Mac Vulkan drift controls
+
+- User said continue testing;6 additional isolated runs, same packaged worker
+  and1M/15s, all AC/low-power-off/thermal0->0,60s+ rest. Vulkan rendered
+  flight1:164.016 GB/s/drop16.54%. Headless flight2:264.140/drop-1.33%;
+  headless flight1:157.835/drop0.19%. Default rendered flight2:156.753/drop23.12%.
+- Isolated vertex-only variant wraps display XY into[-1,1) to retain on-screen
+  coverage (original Y and leftward X leave viewport over time). Identical
+  worker Mach-O, compute and fragment SPIR-V verified; variant only in out.
+  It measures181.467 GB/s/drop-0.01%, stableCV0.34%. Restore original shader
+  using standard packaged worker:167.361/drop15.57%. A-B-A controls support
+  dynamic render-load effects, not merely2-flight submission or a proven
+  thermal frequency event. No production engine/shader change was made.
+- Timestamp batch/synchronized wait checks and phase/frame checks pass all6.
+  GPU frequency unavailable because powermetrics requires administrator and
+  sudo -n has no authorization; did not prompt for/store a password. Per-run
+  stableScore can describe earlier windows, not final sustained speed.
+  Headless generic Render timestamp field is query-marker gap, not rendering.
+- Evidence out/test-results/macos-vulkan-diagnosis-20261014:report.md,audit.json,
+  curves.csv,control-curves.png/pdf,visibility-control.png/pdf,all logs,
+  original diagnostic result arrays and wrapped variant JSON + sidecar contract.
+  Import only2 default rendered2-flight rows; canonical149, all prior147
+  objects preserved. Other configurations/vertex variant remain separate to
+  avoid replacing standard scores. Checklist now records diagnosed dynamic
+  render-load effect with standard-contract/frequency investigation pending.
+  No phone/tablet/other good tests rerun; notes remain uncommitted.
+
+## 2026-10-14: durable A15/A12X retest judgments
+
+- User requested saving the prior judgments in Markdown. Added
+  [docs/apple-retest-status-20261014.md](docs/apple-retest-status-20261014.md)
+  outside ignored out/: A15 7 candidates, A12X 4, reasons, observed scores,
+  original result IDs, priority versus stability follow-up, already verified
+  exclusions and the retest method. Mac render-density diagnosis is recorded
+  as an isolated variant whose findings do not close mobile candidates.
+- No benchmarks launched or source/shader changes in this documentation step.
+
+## 2026-10-14: A15 targeted retest completed
+
+- User requested testing A15. Rebuilt current 5c4e7df iOS Release native/app,
+  signed and installed on the connected, unlocked physical iPhone 13 Pro.
+  Backed up Documents before install: 67 rows, SHA256
+  230c46905751f01d741049ca9a051eb0ef54a8e2a62e75db646496a4231d1ce4.
+- Ran the 7 documented candidates via production suite job subsets, one at
+  a time with 20s rest. Repeated the 4 review cases once each. All 11 runs
+  thermal0->0, original shaders, 1280x720,15s incl.2s warmup. No A12X, Mac,
+  CPU or other already-good cases rerun. No source/shader edits.
+- Passed Metal4M19.118 GB/s,16M17.525 GB/s,Burn16 1.408 Gpix-step/s.
+  VulkanBurn64 repeated calibration0.216ms GPU vs115.976ms synchronized wait
+  triggers fallback; synchronized result1.042/stable1.041/CV0.82 passes.
+  Preserve separate timing contract from first query-timed1.121.
+- Still review: Metal1M16.102/16.873, drop29.02/31.83%; Vulkan1M17.935/17.576,
+  drop11.47/13.69%; VulkanBurn2561.367/1.623,drop9.10/14.98%,no stable plateau.
+  1M render time falls while compute time increases near60FPS; not proven
+  thermal frequency change. Burn256 initial timestamp check passes but later
+  query windows vary; per-frame synchronized comparison remains needed.
+  Aggregate phase/frame checks do not establish every timestamp's accuracy.
+- Raw history now78, all67 prior objects unchanged; SHA256
+  dc9e706a39b4548add4cf59fd37aa0119febf7802b9885f89858490caa61ace1.
+  out/test-results/a15-targeted-retest-20261014 contains before, all11 suites,
+  final Documents, console/native logs, build-info,verification,audit,report,
+  curves.csv,a15-curves.png/pdf,7 latest rows and32-row curated suite (other
+  25 selections unchanged). Updated docs/apple-retest-status-20261014.md.
+  Stop repeating unchanged15s tests; next work is diagnosis of remaining3.
+
+## 2026-10-14: A15 P/E separation and remaining3 GPU fixes verified
+
+- User explicitly requested trying the Mac method on iOS, web research, and
+  resolving remaining3 GPU cases. iOS SDK exposes public TASK_POWER_INFO_V2;
+  Apple XNU maps task_ptime to performance CPU time. Add iOS task accounting
+  under the existing thread-clock/process-time conservative >=99% gate.
+  Runtime reports2P/4E and full accounting. No private SPI/root/numbered pinning.
+  Mac keeps libproc V6, simulators/unavailable capabilities retain auto.
+- First2 CPU attempts reject E lower bounds~97%, saving only validP+multi.
+  Buffer E progress until its worker stops and background its observer; then
+  CPU passes twice: P147.699/146.994,E29.611/26.740,all649.362/661.557 MWork/s.
+  Both class stages meet99% each round; E minimum>99.99%. E is background
+  policy throughput, not max-frequency capability. Kernel/threshold unchanged.
+- Enable defaultP/E+all in iOS buttons; compute suite expects3 distinct rows,
+  rejects duplicate/unverified types and preserves CPU cancellation. Cache
+  sweep first rejected E amidst interactive detailed log output. Buffer its
+  classified log until measurement completes: passes186 curve points>=99%.
+  System capacities P128KiB/12MiB,E64KiB/4MiB; L1 reads101.1/13.8GB/s,
+  L2 reads81.2/9.2,all-memory35.078. Page mapping/storage completed. No new
+  independent SoC/SLC attribution. Public cycles unavailable on iOS (GHz0=N/A).
+- iOS rendered stream defaults fixed vertex NDC wrapping, unchanged compute
+  kernel/count. Metal new vertex function, Vulkan specialization constant;
+  other platforms defaultlegacy. Persist fixed_coverage_v2+renderCoverage,
+  explicitly separate legacy/fixed suite requests and disallow old coverage
+  reuse. No new GUI setting; automation-only legacy launch argument for control.
+  Fixed1M first Metal21.905/Vk20.298 GB/s; legacy control drop32.94/13.69%;
+  restored fixed21.803/20.357,stable21.846/20.396,drop-0.15/-0.34%. All6 other
+  rendered sizes65K/4M/16M on both APIs pass. Dynamic draw-load effect supported.
+- iOS MoltenVK Burn always uses per-frame submit/fence elapsed timing instead
+  of startup-only GPU-query validation. Mac Burn policy unchanged. Vk256
+  first1.095,confirm1.101/stable1.102/drop-0.37%. Vk16/64 final0.844/1.036 pass.
+  Resume rejects prior GPU-query Burn rows; histories are retained. Throughput
+  summary no longer falsely diagnoses hardware throttling or early stable
+  windows as final sustained values.
+- Device rebuilt/signed/installed. iOS Release builds, Swift manifest tests
+  (31 jobs/33 records actualA15 plan, negative class/coverage tests), native5
+  relevant CTest checks pass. Final selected13 affected jobs pass. Historical
+  one-click set now33 records, other18 selections preserved. Source is dirty,
+  no commit/push requested. Leave Xcode xcuserdata untouched.
+- Evidence out/test-results/a15-cpu-pe-20261014 contains all22 attempted jobs,
+  successful/rejected native observations, console/suite manifests, original
+  shader controls, build fingerprints, implementation.patch,audit,verification,
+  report,curves.csv,gpu-fix-curves.png/pdf,selected and33-row curated set.
+  Phone history78->105 with all78 old objects unchanged; final SHA256
+  7583ffcf2d323e3775226a43c90b257860ee61b0c89fb35743a47e50a3b569c3.
+  Latest Documents snapshot policy-final. A15 original7 candidates closed;
+  A12X4 remain untested, Mac original-render diagnosis remains. Updated durable
+  docs/apple-retest-status-20261014.md,docs/apple-cpu-core-types.md,TODO and
+  ignored comparison checklist. No A12X/Android/HarmonyOS tests this turn.
+
+### 2026-10-14 A15 CPU additivity and landscape/black-screen follow-up
+
+- User questioned P~147/E~27 versus all-core~660. E is verified under
+  background QoS, not peak E performance; its policy differs from all-core.
+  Kept kernel/scoring unchanged. Added per-round worker work-unit/contribution
+  logging and selected-round workerScores in saved config; workers remain
+  unclassified, not numbered cores. Also saved worker CPU seconds for P/E.
+- Two live CPU passes: P147.029/E27.009/all642.251 and
+  P146.674/E26.706/all663.715. Both have >=99% typed residency, thermal0->0.
+  Six selected-round worker contributions sum exactly to each unrounded total.
+  E actual CPU time~4.8-5s per5s wall window; cannot mainly blame starvation.
+  iOS GHz still unavailable; do not infer a measured maximum E frequency.
+- GPU fullscreen suite wrapper caused CPU landscape/black screen. Added
+  requiresRenderSurface routing: visible ordinary progress card for CPU,
+  headless compute/cache; phone portrait during those stages, iPad follows
+  device. Surface kept attached/hidden; rendered GPU alone forces landscape.
+  CPU tap no longer cancels. Avoid placeholder-GPU rotation before suite starts.
+  P/E policy labels and non-additivity explanation added to both Apple apps'
+  shared results UI; iOS cache duration now says several minutes.
+- Full CPU memory/cache/pages/storage pass:34.834GB/s,186 classified points
+  verified>=99%. Physical screenshots show CPU1170x2532; final installed
+  build GPU->CPU transition confirms landscape2532x1170 then portrait.
+- iOS Release signed/install pass; Swift151 parser checks and manifest routing
+  tests pass; native cpu_residency/cpu_cancel/complete_suite pass. Original
+  105 rows preserved, history113, curated33. No extra devices tested.
+- Evidence out/test-results/a15-cpu-score-ui-20261014/report.md,
+  verification.json, screenshots, three manifests/native logs, latest complete
+  Documents under transition/documents. Final results SHA256
+  d5c39f3e074604c419f07622fc3031f8d518df1aad7e89fff1ffb1a22b28f18c.
+  Docs core-types and apple-retest-status updated. Changes uncommitted;
+  don't touch user's Xcode xcuserdata. No benchmark remains running.
+
+### 2026-10-14 A15 real performance-priority E compute completed
+
+- User rejected background E26 as insufficient. iOS CPU default now E
+  user-initiated QoS with two P/user-interactive helper threads. Target score
+  counts ONLY one E worker; helpers run original kernel but their work never
+  enters E or the independent all-core score. No new GUI/CLI option.
+- Resolve exported private `thread_selfcounts` SPI (flavor4,32-byte time/CPI
+  entry x verified two perflevels) to read target per-type CPU time/cycles.
+  Based on Apple resource_private.h/sys_recount.c. This is NOT public SDK or
+  App Store acceptance. Current development-signed phone works without root
+  or security changes. Public process bounds remain for P, macOS E and memory.
+- Every E round >=99% typed residency and90% busy; both helpers >=99% P.
+  Final reader sandwiches with public thread CPU clock, checks total within
+  50us, rejects missing/regressing/inconsistent counters and saves no false E.
+  Runtime failure is unsupported/invalid, never fallback to unverified score.
+- First physical P146.981/E89.658/all661.517; final confirmation
+  P147.120/E89.551/all661.962, all thermal0->0. E bounds~99.999%, busy~99.8%,
+  measured mean2.016GHz. Repeat difference0.1193%. 2P+4E estimate652.444,
+  1.4378% below all661.962; do not promise exact additivity or numbered binding.
+- Stored E version foreground_e_p_load_v1 and explicit foreground policy,
+  SPI method, per-round CPUtime/GHz/bounds, helper count/bounds. GUI labels
+  performance priority; iOS resume rejects old background E as new E record.
+  Memory curves retain previous background contract, not claimed peak E.
+- iOS Release signed/build/install and two native CPU suite runs passed;
+  153 shared parser checks, manifest compatibility tests, native residency,
+  cancellation incl helper cleanup, complete-suite checks pass. Current app
+  has final clock-conservation version. No other devices retested; no run active.
+- Evidence out/test-results/a15-efficiency-performance-20261014/report.md,
+  verification.json,first/confirm Documents+native logs,curated33. Phone history
+  113->119, all113 old objects unchanged; final SHA256
+  b11467296b2f74a3a336185f2442e87d9dcdb5028f66e4f376c01d86e7f2104f.
+  Confirmation IDs20261014-164342-791-P /803-E /812-multi full suffixes in
+  report. Updated core-types,retest-status,TODO,ios README. Dirty/uncommitted;
+  preserve user's Xcode xcuserdata. No commit/push requested this turn.
+
+### 2026-10-14 A15 foreground E memory completed; user stopped UI acceptance
+
+- Extended verified foreground E + P helper load to CPU cache/memory. Shared
+  helper lifecycle with compute; helper work excluded from all saved scores.
+  App default and resume validation require the new foreground memory contract.
+- A15 targeted CPU memory/cache/pages/storage passed. All-core read35.178GB/s;
+  E L1/L2/memory read46.4/31.0/21.9GB/s. All186 typed points verified;
+  minimum P99.0697%, E99.8922%; E frequency2.0148-2.0159GHz. Thermal0->0.
+  Record20261014-171607-442-cpu-membw. Phone history119->120, old119 unchanged.
+- Release built/signed/installed; UI test target build passed. Shared parser
+  checks154/154, manifest compatibility, native complete_suite/cpu_residency/
+  cpu_cancel including foreground memory helper cleanup passed.
+- One-click card is at top and XCTest taps its real button. Physical UI test
+  failed BEFORE entering test/tapping due automation-mode enable timeout.
+  Full31-job/33-record one-click acceptance has NOT run or passed.
+- User now explicitly said stop, phone can unplug, validate UI in simulator
+  later. Stopped watch_full_suite.py PID98599; no xcodebuild test or watcher
+  remains. Do NOT start simulator/full suite without a later continuation.
+- Evidence out/test-results/a15-complete-app-20261014/report.md,
+  memory-verification.json, memory-first-final/results/results.json,
+  targeted native logs, build/sign/install logs and failed UI xcresult.
+  A12X untouched; old13-job plan remains pending, method now implemented.
+  No commit/push requested. Preserve user's Xcode xcuserdata.
+
+### 2026-10-14 A15 GPU cache follow-up and phone-first steering
+
+- Latest user clarified retain verified Vulkan jobs and the existing opt-in;
+  cache attribution stays explicitly unverified. No global Vulkan ban made.
+  Then user said finish phone first and do not rush other changes. No more
+  platform/code work after that steering; only physical cache acquisition and
+  evidence/audit. Existing simulator attempts remain archived.
+- A15 cache follow-up ultimately5 complete scans,620 checksum-verified points:
+  173652-182 profiled default,174431-970 default,174539-439 doubled serial count
+  with unchanged8192 parallel loads,182221-741 GUI profile,183550-918 final
+  exact profile3 capture. Full IDs have20261014 prefix/-metal-cache suffix.
+  Phone history120->125, all120 rows unchanged; final Documents phone-final.
+- Public MTLCounter inventory only timestamp/GPUTimestamp. External capture
+  DID later succeed: Instruments actual Performance Limiters is profile3, not
+  the speculative unsupported profile1. Saved real configuration via opening
+  a copy of an existing .trace and saving settings (new save panel was disabled).
+  xctrace profile3 final60s launch produced643MiB a15-limiters-final.trace and
+  30 hardware counter definitions: GPU LLC limiter/utilization,MMU,external
+  read/write BW etc. Bounded1000-interval sample includes2 derived metrics;
+  it is before benchmark and only proves collection, not a performance result.
+  Huge full XML export stopped; exporter removed its incomplete output.
+- No independent named L2/L3/SLC traffic/hit counters. LLC percent is not
+  isolated cache GB/s; external GPU BW may include SLC. Keep unverified flags
+  and do NOT claim independent hardware tier speed/capacity now completed.
+- Current selected31 measured jobs/33 records compiled against production
+  Swift contract/parser PASS. CPU267 points incl186 P/E,Metal52,Vulkan77,
+  cache124, pages/storage complete. Curated file replaces only memory/cache
+  records, spans prior completed runs; no new full-phone button acceptance.
+- Before phone-first steering, simulator real button first29 jobs failed2
+  Vulkan16M allocations. Actual max buffer256MiB/8,388,608 particles. Added
+  runtime buffer limit probe, plan filter, visible explanation; revised27
+  full jobs/28 records completed and XCTest passed ui-confirm.xcresult.
+  Review flags remain; this is UI workflow, not physical score validation.
+  Added failed count/errors UI afterwards, built state may need later check.
+  No simulator/platform changes after steering. Do not reinstall/start phone
+  or new tests now; physical suite and trace finished, can unplug.
+- Evidence out/test-results/a15-gpu-cache-final-20261014/report.md,
+  phone-final-verification.json,curated-current-a15-results.json,trace,inventory,
+  counter-sample.json,verify/output.txt; simulator separate archive
+  out/test-results/ios-oneclick-simulator-20261014. No commit/push. Preserve
+  user's xcuserdata. Original unsaved GUI Run1 still in Instruments; its temp
+  snapshot is incomplete and must not be treated as the successful trace.
+
+### 2026-10-14 A15 phone-first cache isolation controls completed
+
+- Latest user was frustrated: finish the physical phone before other work.
+  Added only necessary native cache acceptance controls, no new user-facing
+  option or other-device tests. Experimental embedded args isolation_controls=1
+  and alu_conditioning=1; results are separate gpu_cache_controls contracts.
+- Physical A15 two passes:11 spans128KiB..128MiB ×11 CPU/GPU warm/eviction-dose
+  conditions ×7 repetitions. First pass min(nodes,8192), no cycle wrap; paired
+  immediate revisit of same addresses, every dispatch exact checksum.847pairs
+  /242points each; total1694pairs484points. ALU-only131072steps×4096lanes exact
+  endpoints checked, GPU6.40637ms median; zero-load baseline0.0025417ms.
+  Both XCTest PASS, thermal0->0,55.2/61.2sec. IDs185659-720/190255-965 with
+  20261014 prefix and -metal-cache-controls suffix; v1 vsALU-v2 separate.
+- Full default native Metal cache suite then PASS124points37.2sec,thermal0->0,
+  ID20261014-190645-149-metal-cache. Final phone history125->128,old125objects
+  unchanged. Test app PID40389 terminated after saving; all native test/build/
+  trace/export/console sessions ended. Phone can unplug. Do not keep repeating
+  the same curve as though doing so would establish independent hardware tiers.
+- External profile3 30sec --window2s trace46MiB retains1.134sec of96MiBtarget
+  work, rebased timestamps. Counter first50000rows (~75ms) intersects actual
+  labeled Mangekyo GPU intervals, solving former background-only sample issue.
+  GPU LLC~0.0634%, external read~0.1876GB/s in this low-occupancy slice; not
+  full-run mean/peak. Profiler time limit interrupted its separate run before
+  saving a result; subsequent independent default run above completes it.
+- Controls show 2MiB GPU-warm first170.20/revisit167.74ns,4MiB173.29/168.38,
+  8MiB194.16/168.84,16MiB245.53/172.75. Dose0/2/8/32/128MiB first at2MiB:
+  170.20/175.80/205.24/253.58/248.57ns. However128MiB control-first576.26ns
+  baseline vs327.05ALU-conditioned: working-state matters, not solely cache
+  hits. No frequency lock or private-cache flush verification. Public timestamp
+  only; external counters no named separate SLC or L2/L3 hit/traffic. Keep
+  cacheAttribution=unverified; independent GPU L2/L3/SoC-SLC speed uncompleted.
+- Evidence out/test-results/a15-cache-isolation-20261014/report.md,phone-final,
+  two xcresults/raw847pairCSVs,608newcurveCSV,PNG/PDF reviewed,active-counter
+  sample/summary/rawtrace/labels/GPUintervals. Final history SHA256
+  10beabc823de964d6d6e2d2d807fa7c90a6db576718c1b686c628319bce99eb3.
+  Curated31jobs/33records retains priorCPU267,Metal52,Vulkan77;defaultcache124
+  updated. Production Swift parser/contracts PASS. No new physical full-button
+  acceptance, no A12X/Mac/simulator tests, no change to Vulkan opt-in policy.
+- Release native/app builds and both physical controls passed; final source
+  has an additional invalid-combination guard compiled in static library only,
+  not reinstalled after allowing phone unplug. Valid paths actually tested match.
+  Source/docs remain dirty, no commit/push requested; preserve user's xcuserdata.
+
+### 2026-10-14 cache attribution methods and mobile Vulkan audit
+
+- User wants independent GPU L2/L3/SLC confirmation, Android/Harmony Vulkan
+  correctness, and future device-only scores. Async answer explicitly chose
+  methods/code first; no phone reconnect/test. No new physical phone scores.
+  Routine App scores/curves are computed and saved locally; external Instruments
+  diagnostics are not an App-only independent hardware cache measurement.
+- Researched Apple official counters/GPU cache naming, original metal-benchmarks
+  (A15 SLC32MB external reference, L2 column blank), M1 EXAM original paper
+  (CPU private eviction / GPU->CPU / mapping controls), Khronos synchronization,
+  memory model, GLSL volatile, optional KHR_performance_query. A15 applicability
+  is not established. Next protocol documented in docs/cache-attribution-methods.md;
+  no new CPU-back-probe implemented this turn. Cache attribution remains unverified.
+- Shared Vulkan memory v2_verified: fail closed when check not executed/readback
+  unavailable; explicit compute/transfer/host dependencies; atomic error marker;
+  after-measurement write and copy-destination validation for every dataset.
+  Each write/copy chunk now has ONE workgroup owner; repeats in shader. Removed
+  cross-workgroup non-atomic write races. All timed shader buffer accesses volatile
+  to retain requested accesses; actual hardware cache path remains unspecified.
+  Small write/copy footprints also change occupancy; not exact cache capacities.
+- GPU timestamps checked for scaling and against synchronized fence interval,
+  finite/positive/containment/major undercoverage. Initial failure can choose
+  wall timing globally; any mid-sweep anomaly rejects entire result, no mixing.
+  Renderer Burn startup check now includes Android/Harmony (previously MoltenVK).
+  Vulkan fallback after measured timing flags invalid; AppBase cleans backend
+  then rejects storing mixed timing via virtual IsTimingContractValid().
+- Serializer blocks invalid/unverified/anomalous reports. Saves checks/counter
+  discovery/cache-unverified metadata; non-plateau score explicitly largest
+  datasets, not verified DRAM. Optional performance-query enumeration ONLY,
+  status enumerated_not_sampled; no actual performance-counter capture enabled.
+- Android/OHOS/iOS RAM UI contract updated to membw_v2_verified prefixes and
+  requires dataVerified/writeCopyChecks/timestampAnomalies0. Legacy records
+  preserved but cannot fulfill new verified RAM job. A15 optional Vulkan RAM
+  single retest now pending; A12X original13jobs becomes14jobs/16records.
+  No Metal/CPU stable score needs rerun solely due to this change. Mac new RAM
+  contract likewise needs a new formal record. No global translated-Vulkan ban.
+- Android4ABI APK build +5JUnit PASS; Harmony2ABI/native/ArkTS HAP +production
+  model matching PASS; iOS unsigned device Release build PASS (not installed).
+  Native serializer/quality/suite CTests PASS; Swift iOS contract tests PASS.
+- Isolated actual shared Vulkan Runner linked directly to Mac libMoltenVK:
+  1MiB shortened positive29points/checks2 PASS; fake notrun checker and fake
+  no-copy shaders both rejected, no valid report. This proves software execution
+  paths, NOT Android/Harmony/A15 performance. Main build linked libvulkan loader
+  didn't expose MoltenVK devices; direct test linkage worked without reconfiguring
+  main build. No actual normal Mac score run or shared history mutation.
+- Mock AppBase lifecycle test proves mid-measurement timing change cleans up
+  then appends no row; valid mock adds a row in isolated-history-2. LoadResults
+  migrates220 legacy rows into each isolated directory. Those directories and
+  the Timing contract test row are TEST FIXTURES, never compare as hardware scores.
+- Evidence out/test-results/cache-attribution-vulkan-audit-20261014/report.md,
+  builds,contracts,runtime-check.cpp/fault shaders,packages.json,verification.json.
+  APK/HAP correction shaders verified in packages. Latest ownership/volatile
+  changes are part of same pre-release v2 contract; final Android/Harmony/iOS
+  rebuilds complete. Package hashes refreshed; volatile and unique-owner shader
+  structure verified in APK/HAP. New physical-device validation remains pending.
+- No new UI options, no commit/push requested. Preserve user's xcuserdata.
+
+### 2026-10-14: User deferred independent GPU cache attribution
+
+- User said to stop if independent attribution is too troublesome. Stop further
+  GPU L2/L3/SoC-SLC attribution probes, implementation and retests until the user
+  explicitly requests renewed work. Method proposals are archived, not active.
+- This attribution is unresolved, not completed. Preserve measured cache-access
+  curves and unverified attribution labels; no scores or code were removed.
+- Normal Metal/CPU/Vulkan tests and the existing translated-Vulkan opt-in remain.
+  Native Android/Harmony and new Vulkan contract physical validation remain
+  separate pending work; this decision does not mark those as completed.
+- This turn only records the decision in docs; no new builds or measurements.
+- Latest user clarification: keep the existing cross-platform scope consistent
+  with Android/Windows. Independent GPU L2/L3/SLC attribution is out of current
+  acceptance scope and is not a missing A15 item or blocker. Keep existing CPU
+  tier summaries, GPU cache plateaus/curves and unverified attribution metadata.
+  Do not resume that research merely to declare A15 complete. The separate new
+  Vulkan RAM retest and physical one-click acceptance remain pending.
+
+### 2026-10-14: A12X 14-job retest completed and app stopped
+
+- User requested continued iPad testing. Connected physical iPad8,7/A12X,
+  UDID 00008027-000C39923E85002E, iOS26.7.1. Backed up original43 rows.
+- Actual targeted14 jobs completed; selected16 new rows, 13 passed and Metal
+  rendered16M review (no stable window, both runs <5% drop, timing checks pass).
+  Previous4 candidates all retested with stable windows. Do not force the
+  Metal16M review closed or repeat unchanged tests merely to obtain a pass.
+- MoltenVK RAM startup calibration passed but later interval failed; first
+  attempt saved no score. MoltenVK now chooses synchronized wall-clock for
+  whole sweep, target>=50ms, metadata timingPolicy. Native Android/Harmony
+  selection unchanged. A12X RAM57.903GB/s, 77points,34write/copy checks PASS.
+- Foreground P-pressure E strategy failed A12X; utility WITH helpers also
+  failed occupancy/helpers. No invalid E score saved. Utility WITHOUT helpers
+  passed sustained compute: E60.100/60.013,1.572GHz,99.998% residency and >99%
+  busy. A15 helper strategy unchanged. P latest111.527 MWork/s.
+- Old inherited-QoS all8 threads varied due incomplete E participation.
+  A12X now explicitly requests4P user-interactive +4E utility, preserves
+  common wall time and actual work. New apple_pe_qos_workers_v1 all656.340,
+  24worker-rounds verified; min residency99.7637%, min busy96.6134%. This is
+  type/occupancy verification, NOT numbered-core binding. Nonverified requested
+  placement is a review, aggregate remains valid per user's all-core policy.
+- A12X public task/thread accounting differed by~5ms for short cache windows;
+  use direct thread counters with clock-conservation and99% checks intact.
+  Utility memory bursts failed busy requirement and saved no row. Default
+  memory uses proven BACKGROUND E profile separately from compute. CPU all
+  memory53.737GB/s,267points,P/E verified,page touch/storage measured. E cache
+  L1/L2/memory7.5/5.2/5.1 are BACKGROUND, not normal-frequency peaks.
+- Native bridge exposes compute/memory defaults separately; GUI uses them,
+  no new public options. Typed memory contract requires verified P/E curves.
+  Shared Apple result labels recognize foreground E; all-core review metadata
+  distinguishes incomplete occupancy. CLI --ios-suite-jobs keeps app awake
+  between automation jobs; normal GUI/cancel restores idle timer. CONTROLLER
+  MUST terminate targeted automation app when finished.
+- Release engine/app built,signed,installed; CPU residency/cancel and Vulkan
+  save tests PASS; real shortened Mac MoltenVK functional29point wall test PASS
+  (no normal Mac score saved). Updated Swift contract tests PASS. Production
+  model validates selected14/16 and full curated31/33 from physical records.
+- History72 rows, original43 unchanged;29new actual scores,16selected,13other
+  real attempts/policies kept. No test fixture rows imported into phone.
+  A15 archive128 SHA unchanged10beabc823de964d6d6e2d2d807fa7c90a6db576718c1b686c628319bce99eb3.
+- Artifacts out/test-results/a12x-targeted-retest-20261014/: report.md,
+  phone-final/results/results.json,curated-suite-results.json,verification.json,
+  production-contract-audit.*,all-worker-rounds.json,GPU/CPU PNG/PDF/CSV curves,
+  full per-attempt manifests/logs/builds. Latest selected, never highest-score
+  selection. FINAL actual PID2544 killed, fresh process list confirms absent;
+  PID2534 was an older app instance, not the final one. Device safe to unplug.
+- Independent GPU L2/L3/SLC attribution remains out of scope per user. No
+  A15/Mac/Android/Harmony physical measurements this turn. Full31-job physical
+  button was NOT clicked this run; do not claim physical whole-button acceptance.
+- No commit/push requested. Preserve existing dirty edits and xcuserdata.

@@ -51,4 +51,14 @@ class SuitePlanTest {
         assertTrue(record(workload = "cinematic_liquid", headless = false, stable = 0.0, drop = 8.0).measurementReviewReasons.isEmpty())
         assertTrue(record(workload = "cpu_membw", total = 20.0, stable = 0.0).measurementReviewReasons.isEmpty())
     }
+    @Test fun memorySuiteRequiresVerifiedDataAndOneTimingContract() {
+        val job = SuiteJob("vulkan-memory", "vulkan", "membw", headless = true)
+        val verified = record(workload = "membw").copy(workloadVersion = "membw_v2_verified_android_preview",
+            workloadConfig = "dataVerified=1;writeCopyChecks=2;timestampAnomalies=0")
+        assertTrue(verified.matches(job))
+        assertFalse(verified.copy(workloadVersion = "membw_v1_android_preview").matches(job))
+        assertFalse(verified.copy(workloadConfig = "dataVerified=0;writeCopyChecks=2;timestampAnomalies=0").matches(job))
+        assertFalse(verified.copy(workloadConfig = "dataVerified=1;writeCopyChecks=0;timestampAnomalies=0").matches(job))
+        assertFalse(verified.copy(workloadConfig = "dataVerified=1;writeCopyChecks=2;timestampAnomalies=1").matches(job))
+    }
 }

@@ -12,7 +12,7 @@ namespace gpu_bench {
 inline constexpr char kMemBwWorkloadId[] = "membw";
 // `MemBwReport::error` of a sweep that RequestStop() ended early.
 inline constexpr char kMemBwStopped[] = "stopped";
-inline constexpr char kMemBwWorkloadVersion[] = "membw_v1";
+inline constexpr char kMemBwWorkloadVersion[] = "membw_v2_verified";
 
 struct MemBwConfig {
     // vkEnumeratePhysicalDevices index; negative selects the first device.
@@ -95,6 +95,11 @@ struct MemBwHostSummary {
 
 struct MemBwReport {
     bool valid = false;
+    bool dataVerified = false;
+    std::uint32_t writeCopyChecks = 0;
+    bool performanceQueryAdvertised = false;
+    std::string performanceCounterInventory;
+    std::string performanceCounterStatus = "extension_not_advertised";
     std::string error;
 
     std::string deviceName;

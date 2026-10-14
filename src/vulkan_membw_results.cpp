@@ -2,6 +2,7 @@
 #include "system_info.h"
 #include <iomanip>
 #include <sstream>
+#include <stdexcept>
 #if defined(__APPLE__)
 #include <TargetConditionals.h>
 #endif
@@ -10,6 +11,8 @@ BenchmarkResult MakeStoredVulkanMemBwResult(
     const gpu_bench::MemBwReport& report,
     const gpu_bench::MemBwConfig& config,
     const std::string& deviceName, std::uint32_t vramMB, const std::string& cpuName) {
+    if (!report.valid || !report.dataVerified || report.writeCopyChecks == 0 || report.timestampAnomalies != 0)
+        throw std::invalid_argument("Cannot save an unverified Vulkan memory sweep");
     gpu_bench::BenchmarkResult stored;
     stored.id = gpu_bench::GenerateResultId() + "-membw";
     stored.timestamp = gpu_bench::GenerateTimestamp();
@@ -57,12 +60,13 @@ BenchmarkResult MakeStoredVulkanMemBwResult(
         report.points.size() * report.measuredRuns);
     stored.score = report.read.memoryGBps;
     stored.scoreUnit = "GB/s";
-    stored.bottleneck = report.isSoftware ? "Software" : "Memory bandwidth";
+    stored.bottleneck = report.isSoftware ? "Software" :
+        (report.read.memoryPlateauReached ? "Memory bandwidth" : "Memory plateau unverified");
 
     constexpr double kMiBf = 1024.0 * 1024.0;
     std::ostringstream contract;
     contract << std::fixed << std::setprecision(1)
-             << "score=read_memory_plateau"
+             << "score=" << (report.read.memoryPlateauReached ? "read_memory_plateau" : "read_largest_datasets")
              << ";readMemoryGBps=" << report.read.memoryGBps
              << ";readCacheGBps=" << report.read.cacheGBps
              << ";readCacheFromMiB=" << report.read.cacheFromBytes / kMiBf
@@ -92,7 +96,15 @@ BenchmarkResult MakeStoredVulkanMemBwResult(
              << ";measuredRuns=" << report.measuredRuns
              << ";aggregation=median"
              << ";timing=" << report.timingSource
-             << ";timestampAnomalies=" << report.timestampAnomalies;
+             << ";timestampAnomalies=" << report.timestampAnomalies
+             << ";dataVerified=" << (report.dataVerified ? 1 : 0)
+             << ";writeCopyChecks=" << report.writeCopyChecks
+             << ";resourceSynchronization=explicit_compute_transfer_host"
+             << ";writeCopyDispatch=one_owner_per_chunk;writeCopyRepeats=in_shader;memoryAccess=volatile"
+             << ";cacheAttribution=unverified;l1Attribution=workgroup_footprint_inference"
+             << ";performanceQueryAdvertised=" << (report.performanceQueryAdvertised ? 1 : 0)
+             << ";performanceCounterStatus=" << report.performanceCounterStatus
+             << ";performanceCounterInventory=" << report.performanceCounterInventory;
     // Full curves as "<data set MiB>:<median GB/s>" pairs.
     for (const char* kernel : {"read", "write", "copy", "host_read", "host_write"}) {
         contract << ";curve_" << kernel << "=";
@@ -116,7 +128,8 @@ BenchmarkResult MakeStoredVulkanMemBwResult(
         }
     }
 #ifdef GPU_BENCH_MOLTENVK
-    contract << ";apiImplementation=MoltenVK;translatedTo=Metal";
+    contract << ";apiImplementation=MoltenVK;translatedTo=Metal"
+             << ";timingPolicy=moltenvk_synchronized_sweep_v1";
 #endif
     stored.workloadConfig = contract.str();
     return stored;

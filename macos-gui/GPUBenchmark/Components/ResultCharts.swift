@@ -153,10 +153,16 @@ struct CpuComputeResultsCard: View {
 
     private func subtitle(unit: String) -> String {
         if output.coreTypeSelection != "auto" {
+            if output.efficiencyForeground {
+                return unit + Localization.tr(
+                    ", one measured thread. Efficiency cores use performance priority while helper threads occupy performance cores. Each round verifies at least 99% efficiency-core CPU time; helper work is excluded from this score.",
+                    "，一个计分线程。小核采用性能优先级，大核辅助线程提供调度压力；每轮验证至少 99% 的 CPU 时间属于小核，辅助线程工作量不计入小核成绩。",
+                    "、計測は 1 スレッド。効率コアは性能優先度で実行し、補助スレッドが性能コアに負荷をかけます。各ラウンドで効率コア CPU 時間が 99% 以上であることを検証し、補助処理はスコアに含めません。")
+            }
             return unit + Localization.tr(
-                ", one thread. Every round verifies at least 99% CPU time on the requested core type. Background-mode scores reflect the system clock under that policy.",
-                "，单线程。每轮确认至少 99% 的 CPU 时间属于所选核心类型；小核成绩反映后台策略下的实际时钟。",
-                "、1 スレッド。各ラウンドで指定コア種別の CPU 時間が 99% 以上であることを確認。バックグラウンド設定のスコアはその時のクロックを反映します。")
+                ", one thread. Every round verifies at least 99% CPU time on the requested core type. The efficiency-core score uses background priority and is not its peak performance. These scores cannot be summed to predict the all-core score.",
+                "，单线程。每轮确认至少 99% 的 CPU 时间属于所选核心类型。小核使用后台优先级，成绩不代表其峰值；不能把这些单核成绩相加预测全核成绩。",
+                "、1 スレッド。各ラウンドで指定コア種別の CPU 時間が 99% 以上であることを確認。効率コアはバックグラウンド優先度で測定し、最大性能ではありません。合計して全コアスコアを予測することはできません。")
         }
         return output.schedulerManaged
             ? unit + Localization.tr(
@@ -345,7 +351,9 @@ struct CpuMemoryResultsView: View {
         if output.coreTypeSelection != "auto" {
             let name = cpuClass.name == "Performance"
                 ? Localization.tr("Performance core", "大核", "性能コア")
-                : Localization.tr("Efficiency core", "小核", "効率コア")
+                : output.memoryEfficiencyForeground
+                    ? Localization.tr("Efficiency core (performance priority)", "小核（性能优先级）", "効率コア（性能優先度）")
+                    : Localization.tr("Efficiency core (background)", "小核（后台策略）", "効率コア（バックグラウンド）")
             return name + " — " + oneThread
         }
         guard mixed else { return oneThread }
@@ -455,6 +463,12 @@ struct CpuMemoryResultsView: View {
                      + String(format: "%.2f%%", lower * 100)
                      + Localization.tr("; all-core, page mapping and storage use system scheduling.",
                                        "；全核、页面映射和存储使用系统调度。", "。全コア、ページ割り当て、ストレージはシステムがスケジュールします。"))
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            if output.memoryEfficiencyForeground {
+                Text(Localization.tr("Efficiency-core curves use performance priority; performance-core helper work is excluded from bandwidth.",
+                                     "小核曲线使用性能优先级；大核辅助负载不计入带宽。",
+                                     "効率コアの曲線は性能優先度で測定し、性能コアの補助処理は帯域に含めません。"))
                     .font(.caption).foregroundStyle(.secondary)
             }
             ForEach(groups, id: \.rank) { cpuClass in

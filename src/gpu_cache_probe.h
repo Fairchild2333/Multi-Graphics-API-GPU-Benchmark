@@ -10,6 +10,10 @@ struct GpuCacheProbeConfig {
     // Zero preserves the existing 4096+ load parallel contract. Older iOS
     // GPUs use an explicitly versioned shorter dispatch to avoid recovery.
     std::uint32_t parallelSteps = 0;
+    // Internal acceptance experiment: first-pass / immediate-revisit pairs
+    // with an eviction-dose grid. Kept separate from the scored suite curve.
+    bool isolationControls = false;
+    bool aluConditioning = false;
 };
 // Native Metal dependent-load and CPU/GPU warming diagnostic. This measures
 // address-span curves, not hardware-named L2/L3/SLC speeds or capacities.

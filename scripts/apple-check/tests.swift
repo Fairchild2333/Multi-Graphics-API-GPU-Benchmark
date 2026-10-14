@@ -352,9 +352,20 @@ CPU_RESULT\tkind=summary\tvalid=1\taverage_score=202.5\tunit=MWork/s
 check.equal(typed.coreScores.map { $0.coreType }, ["performance", "efficiency"], "core types: reject invalid and unverified rows")
 check.near(typed.coreScores[0].residencyLowerBound ?? 0, 0.999, "core types: preserve measured lower bound")
 check.expect(typed.singleAverage == nil, "core types: never average P and E into one score")
+let foregroundTyped = RunOutput.parse("""
+CPU_SCHEDULING\tcore_type=both\tefficiency_policy=foreground_with_performance_load
+CPU_RESULT\tkind=core\tcore_index=1\tcore_type=efficiency\tvalid=1\tresidency_verified=1\trequested_lower_bound=0.99999\tscore=89.55\tunit=MWork/s
+""")
+check.expect(foregroundTyped.efficiencyForeground, "core types: parse performance-priority E policy")
+check.equal(foregroundTyped.coreScores.first?.label ?? "", Localization.tr(
+    "Efficiency core (performance priority)", "小核（性能优先级）", "効率コア（性能優先度）"),
+    "core types: foreground E is not labelled background")
 let typedMemory = RunOutput.savedMemory(workload: "cpu_membw", api: "CPU", configuration:
     "coreType=both;residencyVerified=1;residency_single=4:read:0.999:0,8:copy:0.997:1;coreClasses=2;class0Name=Performance;class0Cores=10;class1Name=Efficiency;class1Cores=4")
 check.near(typedMemory.memoryResidencyLowerBound ?? 0, 0.997, "core types: restore saved memory verification")
+let foregroundMemory = RunOutput.savedMemory(workload: "cpu_membw", api: "CPU", configuration:
+    "coreType=both;efficiencyPolicy=foreground_with_performance_load;residencyVerified=1;residency_single_1=4:read:0.999:0;coreClasses=2;class0Name=Performance;class1Name=Efficiency")
+check.expect(foregroundMemory.memoryEfficiencyForeground, "core types: restore foreground E memory policy")
 check.equal(typedMemory.classes.map { $0.name }, ["Performance", "Efficiency"], "core types: restore both class names")
 let distinctCaches = RunOutput.savedMemory(workload: "cpu_membw", api: "CPU", configuration:
     "coreType=both;coreClasses=2;class0Name=Performance;class1Name=Efficiency;class0CacheL1KiB=128;class1CacheL1KiB=64;single_L1_read=130;single_1_L1_read=30")

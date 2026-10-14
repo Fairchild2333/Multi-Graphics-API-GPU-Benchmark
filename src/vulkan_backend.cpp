@@ -83,6 +83,13 @@ void VulkanBackend::InitBackend() {
     }
     CreateSyncObjects();
     CreateTimestampQueryPool();
+#if defined(GPU_BENCH_MOLTENVK) && defined(GPU_BENCH_NO_GLFW) && defined(__APPLE__)
+    // A startup query can agree with synchronized timing, then under-report
+    // later Burn frames on A15. Always time this translated fixed-load path
+    // by submit/fence completion, rather than trusting the initial sample.
+    if (isGpuBurnWorkload(config_.workload))
+        EnableSynchronizedTimingFallback("MoltenVK GPU Burn requires per-frame completion timing");
+#endif
     CheckTimestampsAgainstWallClock();
 
     SetObjectName(VK_OBJECT_TYPE_BUFFER,   reinterpret_cast<std::uint64_t>(particleBuffer_),   "Particle SSBO");
@@ -1037,6 +1044,10 @@ void VulkanBackend::CreateGraphicsPipeline() {
     stages[0].stage  = VK_SHADER_STAGE_VERTEX_BIT;
     stages[0].module = vertMod;
     stages[0].pName  = "main";
+    VkBool32 fixedCoverage = config_.workload == Workload::Stream && config_.particleFixedCoverage;
+    VkSpecializationMapEntry coverageEntry{0, 0, sizeof(fixedCoverage)};
+    VkSpecializationInfo coverageSpecialization{1, &coverageEntry, sizeof(fixedCoverage), &fixedCoverage};
+    stages[0].pSpecializationInfo = &coverageSpecialization;
     stages[1].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     stages[1].stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
     stages[1].module = fragMod;
@@ -1591,6 +1602,9 @@ void VulkanBackend::CollectTimestampResults(std::uint32_t slot) {
 void VulkanBackend::EnableSynchronizedTimingFallback(const char* reason) {
     // Each GPU of a group would need a compute submit of its own.
     if (synchronizedTimingFallback_ || deviceGroupAfr_) return;
+    // A startup/warmup fallback defines the ensuing measurement contract.
+    // A switch after measured samples would blend incompatible intervals.
+    timingContractChanged_ = HasMeasuredTiming();
     synchronizedTimingFallback_ = true;
     timestampsSupported_ = false;   // no queries are written from here on
     std::cout << "[Profiling] Vulkan timestamp queries cannot be used ("
@@ -1614,7 +1628,6 @@ void VulkanBackend::EnableSynchronizedTimingFallback(const char* reason) {
 void VulkanBackend::CheckTimestampsAgainstWallClock() {
 #if defined(GPU_BENCH_EMBEDDED_VULKAN) || defined(GPU_BENCH_MOLTENVK)
     if (!timestampsSupported_ || synchronizedTimingFallback_) return;
-#ifdef GPU_BENCH_MOLTENVK
     if (isGpuBurnWorkload(config_.workload)) {
         checkingTimestamps_ = true;
         double wallMs = (std::numeric_limits<double>::max)();
@@ -1647,7 +1660,6 @@ void VulkanBackend::CheckTimestampsAgainstWallClock() {
             EnableSynchronizedTimingFallback("render timestamps disagree with synchronized submit/wait");
         return;
     }
-#endif
     if (config_.workload != Workload::Stream) return;
 
     constexpr std::uint32_t kParticleSteps = 16777216;

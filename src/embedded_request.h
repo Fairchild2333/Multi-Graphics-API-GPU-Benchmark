@@ -117,6 +117,15 @@ inline void ApplyEmbeddedTest(const std::string& request, BenchmarkConfig& cfg) 
                 cfg.vsync = value == "1";
             } else if (name == "api") {
                 // Read by the host, which picks the backend: see EmbeddedApi.
+            } else if (name == "coverage") {
+                if (value != "fixed" && value != "legacy")
+                    throw std::invalid_argument("coverage must be fixed or legacy");
+                if (id != "stream" && id != "particle" && id != "stream_heavy")
+                    throw std::invalid_argument("coverage is for rendered particles only");
+                const auto coverageApi = embedded_detail::OptionValue(request, "api");
+                if (value == "fixed" && (coverageApi == "gles" || coverageApi == "gles2"))
+                    throw std::invalid_argument("fixed coverage requires Metal or Vulkan");
+                cfg.particleFixedCoverage = value == "fixed";
             } else if (name == "workgroup") {
                 workGroup = embedded_detail::ParseCount(value, name);
             } else {

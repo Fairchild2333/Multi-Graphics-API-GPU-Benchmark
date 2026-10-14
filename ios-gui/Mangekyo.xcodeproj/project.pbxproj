@@ -10,6 +10,7 @@
 		03F0A157C70CDE6D0F01E58E /* ScreenOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9005DE7F2D2421584BFC74D /* ScreenOrientation.swift */; };
 		087A1FAFBB2760167AC000CF /* BenchCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E53FD497EBF87F641580F5 /* BenchCharts.swift */; };
 		43F682296E2550FDC887B747 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF6C90AAED2818E11DBC92F2 /* Localization.swift */; };
+		56FCF716157E3582320CEA15 /* CompleteSuiteUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BCF7BA691E2C7679F1EBB5D /* CompleteSuiteUITests.swift */; };
 		5BABD9E036A7CC5EE9D9AAE7 /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DECB5D16904FB6DC018CC0A /* ChartsView.swift */; };
 		5D013F045E2EAD36998B384D /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDC15072481334CBFE5FD45 /* GlassCard.swift */; };
 		6E93763792575E117AC0A674 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A8C6E577C30A5A9AD63A5F75 /* Assets.xcassets */; };
@@ -35,6 +36,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		002D918E8423874FDD425A51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7E72F24170DBF50BCA2C2592 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 17FF3C4850A3B6240519E3C0;
+			remoteInfo = Mangekyo;
+		};
 		B55972F47BE4840B02B345DB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7E72F24170DBF50BCA2C2592 /* Project object */;
@@ -50,14 +58,16 @@
 		2DECB5D16904FB6DC018CC0A /* ChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
 		353B0148E85D849588E6D3C1 /* GPUBenchmark-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GPUBenchmark-Bridging-Header.h"; sourceTree = "<group>"; };
 		4967B6C277D550471842BF84 /* MangekyoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangekyoApp.swift; sourceTree = "<group>"; };
+		4BCF7BA691E2C7679F1EBB5D /* CompleteSuiteUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompleteSuiteUITests.swift; sourceTree = "<group>"; };
 		5014A291A27FCF144B6FBF39 /* ResultCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultCharts.swift; sourceTree = "<group>"; };
 		5274CB3E41682D107BB897DB /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		55A52987CDE0BA67BFB5FED1 /* InfoHint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoHint.swift; sourceTree = "<group>"; };
 		63361444C8D5FF46CED28E1E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		6884C8DB370841C338158927 /* MetalBenchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalBenchView.swift; sourceTree = "<group>"; };
-		6DA968052D30E0E5ACE58D5A /* Mangekyo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mangekyo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6DA968052D30E0E5ACE58D5A /* Mangekyo.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Mangekyo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		71A97EBA18D7D2031363CD97 /* BenchmarkStageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkStageView.swift; sourceTree = "<group>"; };
 		9258366C7B9E8DCAD1DA826D /* CpuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CpuView.swift; sourceTree = "<group>"; };
+		92E6B926630A6FCB846098F7 /* MangekyoUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MangekyoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A0B2770EB48BCF00DE44554D /* ChartGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGeometry.swift; sourceTree = "<group>"; };
 		A6EE1FDD90B2261A38F8E256 /* KeyboardDismiss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardDismiss.swift; sourceTree = "<group>"; };
 		A8C6E577C30A5A9AD63A5F75 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -82,6 +92,7 @@
 			children = (
 				9F201CF285F9FE2932F553FE /* Mangekyo */,
 				EDE27E8DBA29A08F1AE2A70D /* MangekyoTests */,
+				280ABC373153B0F071F73FBE /* MangekyoUITests */,
 				8FC8F23FF0A7461E1C81D30B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -96,6 +107,14 @@
 				D74C87A9E05C083261AAE98B /* MobileBenchmark.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		280ABC373153B0F071F73FBE /* MangekyoUITests */ = {
+			isa = PBXGroup;
+			children = (
+				4BCF7BA691E2C7679F1EBB5D /* CompleteSuiteUITests.swift */,
+			);
+			path = MangekyoUITests;
 			sourceTree = "<group>";
 		};
 		2D8BE20E13C3FF5B1C0CDC1A /* Engine */ = {
@@ -114,6 +133,7 @@
 			children = (
 				6DA968052D30E0E5ACE58D5A /* Mangekyo.app */,
 				C9B7835C1423E6DC16A79A35 /* MangekyoTests.xctest */,
+				92E6B926630A6FCB846098F7 /* MangekyoUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -208,6 +228,24 @@
 			productReference = 6DA968052D30E0E5ACE58D5A /* Mangekyo.app */;
 			productType = "com.apple.product-type.application";
 		};
+		3F975A96DF12F26BD5137B92 /* MangekyoUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 61253D73D103B36B6DEE8317 /* Build configuration list for PBXNativeTarget "MangekyoUITests" */;
+			buildPhases = (
+				4B0C3AB490C98F5D733EAE45 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8C3D577EF9EFA7C6811B2562 /* PBXTargetDependency */,
+			);
+			name = MangekyoUITests;
+			packageProductDependencies = (
+			);
+			productName = MangekyoUITests;
+			productReference = 92E6B926630A6FCB846098F7 /* MangekyoUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -216,6 +254,11 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					3F975A96DF12F26BD5137B92 = {
+						TestTargetID = 17FF3C4850A3B6240519E3C0;
+					};
+				};
 			};
 			buildConfigurationList = D585FA24BA763027410154AD /* Build configuration list for PBXProject "Mangekyo" */;
 			developmentRegion = en;
@@ -233,6 +276,7 @@
 			targets = (
 				17FF3C4850A3B6240519E3C0 /* Mangekyo */,
 				0B4ECDC3A7518ABAA26D72D1 /* MangekyoTests */,
+				3F975A96DF12F26BD5137B92 /* MangekyoUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -251,7 +295,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		FBD85741E30D66459188907A /* Bundle runtime Metal sources */ = {
 			isa = PBXShellScriptBuildPhase;
-            alwaysOutOfDate = 1;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -315,6 +359,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4B0C3AB490C98F5D733EAE45 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56FCF716157E3582320CEA15 /* CompleteSuiteUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -323,9 +375,33 @@
 			target = 17FF3C4850A3B6240519E3C0 /* Mangekyo */;
 			targetProxy = B55972F47BE4840B02B345DB /* PBXContainerItemProxy */;
 		};
+		8C3D577EF9EFA7C6811B2562 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 17FF3C4850A3B6240519E3C0 /* Mangekyo */;
+			targetProxy = 002D918E8423874FDD425A51 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		11DCAFAA6A3945FC897904FF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.fairchild.MangekyoUITests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Mangekyo;
+			};
+			name = Release;
+		};
 		333443BB04E8B5EE3F5EC114 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -391,7 +467,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = "\"$(PROJECT_DIR)/Mangekyo/Engine\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(PROJECT_DIR)/Mangekyo/Engine\"",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -406,6 +484,25 @@
 			};
 			name = Release;
 		};
+		8C0316569CA7A4CE2BB2228F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.fairchild.MangekyoUITests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Mangekyo;
+			};
+			name = Debug;
+		};
 		B99713010D7DE4F7BA29DE67 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -413,8 +510,9 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = 2W6PXCJAM6;
-				HEADER_SEARCH_PATHS = "\"$(PROJECT_DIR)/../src\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(PROJECT_DIR)/../src\"",
+				);
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -422,30 +520,24 @@
 					"@executable_path/Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = (
-                    "\"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)-$(PLATFORM_NAME)/$(CONFIGURATION)-$(PLATFORM_NAME)\"",
-                    "\"$(PROJECT_DIR)/../build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/$(MOLTENVK_SLICE)\"",
-                );
+					"\"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)-$(PLATFORM_NAME)/$(CONFIGURATION)-$(PLATFORM_NAME)\"",
+					"\"$(PROJECT_DIR)/../build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/$(MOLTENVK_SLICE)\"",
+				);
 				"MOLTENVK_SLICE[sdk=iphoneos*]" = "ios-arm64";
 				"MOLTENVK_SLICE[sdk=iphonesimulator*]" = "ios-arm64_x86_64-simulator";
 				OTHER_LDFLAGS = (
 					"-lgpu_engine",
 					"-lMoltenVK",
 					"-framework IOSurface",
-                    "-framework OpenGLES",
+					"-framework OpenGLES",
 					"-framework CoreGraphics",
 					"-lc++",
-					"-framework",
-					Metal,
-					"-framework",
-					MetalKit,
-					"-framework",
-					QuartzCore,
-					"-framework",
-					UIKit,
-					"-framework",
-					CoreFoundation,
-					"-framework",
-					Foundation,
+					"-framework Metal",
+					"-framework MetalKit",
+					"-framework QuartzCore",
+					"-framework UIKit",
+					"-framework CoreFoundation",
+					"-framework Foundation",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.fairchild.Mangekyo;
 				SDKROOT = iphoneos;
@@ -524,8 +616,9 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = 2W6PXCJAM6;
-				HEADER_SEARCH_PATHS = "\"$(PROJECT_DIR)/../src\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(PROJECT_DIR)/../src\"",
+				);
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -533,30 +626,24 @@
 					"@executable_path/Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = (
-                    "\"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)-$(PLATFORM_NAME)/$(CONFIGURATION)-$(PLATFORM_NAME)\"",
-                    "\"$(PROJECT_DIR)/../build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/$(MOLTENVK_SLICE)\"",
-                );
+					"\"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)-$(PLATFORM_NAME)/$(CONFIGURATION)-$(PLATFORM_NAME)\"",
+					"\"$(PROJECT_DIR)/../build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/$(MOLTENVK_SLICE)\"",
+				);
 				"MOLTENVK_SLICE[sdk=iphoneos*]" = "ios-arm64";
 				"MOLTENVK_SLICE[sdk=iphonesimulator*]" = "ios-arm64_x86_64-simulator";
 				OTHER_LDFLAGS = (
 					"-lgpu_engine",
 					"-lMoltenVK",
 					"-framework IOSurface",
-                    "-framework OpenGLES",
+					"-framework OpenGLES",
 					"-framework CoreGraphics",
 					"-lc++",
-					"-framework",
-					Metal,
-					"-framework",
-					MetalKit,
-					"-framework",
-					QuartzCore,
-					"-framework",
-					UIKit,
-					"-framework",
-					CoreFoundation,
-					"-framework",
-					Foundation,
+					"-framework Metal",
+					"-framework MetalKit",
+					"-framework QuartzCore",
+					"-framework UIKit",
+					"-framework CoreFoundation",
+					"-framework Foundation",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.fairchild.Mangekyo;
 				SDKROOT = iphoneos;
@@ -570,7 +657,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = "\"$(PROJECT_DIR)/Mangekyo/Engine\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(PROJECT_DIR)/Mangekyo/Engine\"",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -602,6 +691,15 @@
 			buildConfigurations = (
 				B99713010D7DE4F7BA29DE67 /* Debug */,
 				F38A60E29AD269A1ED8BF031 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		61253D73D103B36B6DEE8317 /* Build configuration list for PBXNativeTarget "MangekyoUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8C0316569CA7A4CE2BB2228F /* Debug */,
+				11DCAFAA6A3945FC897904FF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

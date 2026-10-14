@@ -121,7 +121,8 @@
   - [ ] **遗留：**
     - **没有在任何手机或大小核 CPU 上实际运行过。** 需要接上手机后用 adb 跑一遍，核对各级缓存与芯片资料是否一致。
     - ~~Android App 的 CPU 页还是空壳，iOS / macOS App 没有这项测试的入口~~：2026-10-06 三个前端都已接入，并带表格和曲线图。Android 编译通过；iOS 和 macOS 只做过类型检查，没有用 Xcode 编译；三端都没有在设备上运行过。
-    - **iOS 和 macOS 不能绑定线程**，单线程扫描跑在系统挑选的核心上，能效核测不到。可以试的办法：用线程的 QoS 等级把线程放到能效核上（后台等级只在能效核上运行），并读取 `hw.perflevel1` 的缓存容量。还没有做。
+    - **Apple 核心类型验证（2026-10-14）**：macOS／iOS 仍不能按编号严格绑核，但现在以 QoS 请求核心类型，并用公开 CPU 时间统计和线程 CPU 时钟验证至少 99% 驻留。Mac 与 A15 已分别测出 P／E 成绩；A15 大核 147.699、小核 29.611 MWork/s。小核阶段暂存进度刷新，未通过验证的观察不保存成正式小核成绩。后台 QoS 本身不是只在小核执行的保证。详见 [Apple 分核方法](apple-cpu-core-types.md)。
+    - **A15 性能策略小核补测（2026-10-14 后续）**：上述 26–30 分只适用于后台策略。现 iOS 默认算力 E 线程使用性能优先级，配合验证通过的大核辅助负载，并以未公开 Recount 线程计数核对归属。两次 E 为 89.658／89.551 MWork/s，至少 99.999% E CPU 时间，平均约 2.016GHz；大核147.120，全核661.962。新版保存独立合同，不复用旧后台成绩；界面没有新选项。SPI 已在当前开发签名 A15 上实测，不等于 App Store 分发验收；缓存曲线仍按自己的后台合同解释。
     - **Android App 里的 CPU 测试不能取消**，开始后只能等它跑完。
     - **存储成绩没有和 CrystalDiskMark 等工具对比**（Windows 自带的 `winsat` 需要管理员权限）。GUI 里没有"跳过存储测试"的开关，每次运行都会写盘。
     - **流式写入偏慢的原因没有查：** 9800X3D 上流式写入只有 30 GB/s（单线程和 8 线程相同），C 运行库的 `memset` 和 `rep stosb` 也是这个速度，而 `CLZERO` 能到 75 GB/s。
@@ -322,3 +323,14 @@ macOS 上只有两个后端可用，其余均无法原生转译：
 - [ ] 建立 `IUpscalerPlugin` / `IDenoiserPlugin` / `IFrameGenerationPlugin`，统一提供 HDR color、depth、无 jitter motion vector、camera jitter、exposure、reactive/transparency mask 与 history reset；水体必须有真实表面运动矢量和 reactive mask，否则 DLSS/FSR/XeSS/MetalFX 会出现明显拖影。
 - [ ] 超分比较拆为三组：Native 固定输入=输出主基线；Fixed-Scale 使用完全相同输入/输出分辨率比较 DLSS/FSR/XeSS/MetalFX；Vendor Recommended 只展示厂商推荐模式，不进统一榜。分别报告 base render、upscale、total GPU time、VRAM 与 PSNR/SSIM/FLIP，不把 FPS 和画质强压成一个分数。
 - [ ] Frame Generation 与 Super Resolution 分开：只报告真实渲染 FPS、显示 FPS、生成耗时和延迟；生成帧不得计入模拟/渲染工作量。厂商 SDK 使用可选动态插件和独立 notices/版本元数据，安装包只分发许可允许的 production binary；MetalFX 使用系统框架，无需捆绑运行库。
+
+### 2026-10-14：缓存归属与 Vulkan 代码核查
+
+- [x] Android／HarmonyOS 共用 Vulkan 内存数据校验、同步、计时一致性、写入／复制目标检查；单工作组独占写入，保留重复访问；新版合同为 membw_v2_verified。
+- [x] 移动 GPU Burn 启动计时核对；正式计分后切换来源时不保存混合成绩；相关构建、合同和故障验证通过。
+- [x] App 本机查询可用性能计数器清单；仅枚举，尚未采样。正常成绩与曲线本机保存，电脑用于开发、诊断或归档。
+- [ ] 新合同的安卓／鸿蒙真机 Vulkan 验收。A15、Mac 新版可选 Vulkan 内存仍待补测；A12X 新版 Vulkan 内存已实测通过。
+- [x] A12X 14 项定向补测／16 条选用成绩，原 4 异常复测通过；正常频率小核算力和 4P＋4E 全核参与验证完成，后台小核缓存曲线、页面／存储保留明确策略标记。Metal 16M 稳定段提示未关闭，真机全套按钮未重新点击验收。见 [实测报告](../out/test-results/a12x-targeted-retest-20261014/report.md)。
+- **已移出当前验收范围（用户决定与其他平台一致）**：GPU L2／L3／SoC-SLC 独立归属不再作为 A15 漏测或阻塞项。已有曲线保留为未归属诊断；GPU→CPU、私有缓存与页面转换的新探针方案存档，不继续实现或复测。
+
+依据：[缓存测法与设备独立测试](cache-attribution-methods.md)、[代码核查与验证记录](../out/test-results/cache-attribution-vulkan-audit-20261014/report.md)。

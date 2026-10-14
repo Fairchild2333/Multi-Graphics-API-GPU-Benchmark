@@ -1,11 +1,16 @@
 #include "vulkan_membw_results.h"
+#include "vulkan_timing_validation.h"
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 
 int main() {
     using namespace gpu_bench;
     MemBwConfig config;
     MemBwReport report;
+    report.valid = true;
+    report.dataVerified = true;
+    report.writeCopyChecks = 2;
     report.deviceName = "Test GPU";
     report.unifiedMemory = true;
     report.read.memoryGBps = 35.25;
@@ -32,6 +37,26 @@ int main() {
     for (const auto* kernel : {"l1", "l1_single"})
         assert(result.workloadConfig.find(std::string("curve_") + kernel + "=1024:123.5") != std::string::npos);
     assert(result.workloadConfig.find("memoryPlateauReached=0") != std::string::npos);
+    assert(result.workloadConfig.find("score=read_largest_datasets;") == 0);
+    assert(result.workloadConfig.find("dataVerified=1;writeCopyChecks=2") != std::string::npos);
+    assert(result.workloadVersion.find("membw_v2_verified") == 0);
+    assert(VulkanTimestampIntervalVerified(4, 4.2));
+    assert(VulkanTimestampIntervalVerified(0.05, 0.25));
+    assert(!VulkanTimestampIntervalVerified(0.02, 11)); // known under-reporting pattern
+    assert(!VulkanTimestampIntervalVerified(20, 4));
+    assert(!VulkanTimestampIntervalVerified(0, 4));
+    assert(!VulkanTimestampIntervalVerified(std::nan(""), 4));
+    assert(!VulkanTimestampIntervalVerified(4, std::nan("")));
+    for (int failure = 0; failure < 3; ++failure) {
+        auto bad = report;
+        if (failure == 0) bad.valid = false;
+        if (failure == 1) bad.dataVerified = false;
+        if (failure == 2) bad.timestampAnomalies = 1;
+        bool rejected = false;
+        try { MakeStoredVulkanMemBwResult(bad, config); }
+        catch (const std::invalid_argument&) { rejected = true; }
+        assert(rejected);
+    }
     report.read.memoryPlateauReached = true;
     result = MakeStoredVulkanMemBwResult(report, config, "Named GPU", 1024);
     assert(result.deviceName == "Named GPU" && result.vramMB == 1024);

@@ -26,5 +26,25 @@ int main() {
     if (EvaluateCpuResidency(before, after, CpuCoreType::Performance).available) return 6;
     after.available = false;
     if (EvaluateCpuResidency(before, after, CpuCoreType::Performance).verified()) return 7;
+    CpuThreadCounters threadBefore, threadAfter;
+    threadBefore.available = threadAfter.available = true;
+    threadAfter.cpuNs[1] = 1000000000;
+    threadAfter.cycles[1] = 2000000000;
+    threadAfter.workerBeforeNs = threadAfter.workerAfterNs = 1000000000;
+    const auto directE = EvaluateCpuThreadCounters(threadBefore, threadAfter, CpuCoreType::Efficiency);
+    if (!directE.verified() || directE.effectiveGHz != 2.0) return 8;
+    if (EvaluateCpuThreadCounters(threadBefore, threadAfter, CpuCoreType::Performance).verified()) return 9;
+    threadAfter.cpuNs[0] = 20000000; // A >1% P migration must fail even if E throughput looks plausible.
+    threadAfter.workerBeforeNs = threadAfter.workerAfterNs = 1020000000;
+    if (EvaluateCpuThreadCounters(threadBefore, threadAfter, CpuCoreType::Efficiency).verified()) return 10;
+    threadBefore.cpuNs[0] = 30000000;
+    if (EvaluateCpuThreadCounters(threadBefore, threadAfter, CpuCoreType::Efficiency).available) return 11;
+    threadAfter.available = false;
+    if (EvaluateCpuThreadCounters(threadBefore, threadAfter, CpuCoreType::Efficiency).verified()) return 12;
+    threadBefore = {};
+    threadBefore.available = threadAfter.available = true;
+    threadAfter.cpuNs[0] = 0;
+    threadAfter.workerBeforeNs = threadAfter.workerAfterNs = 1500000000;
+    if (EvaluateCpuThreadCounters(threadBefore, threadAfter, CpuCoreType::Efficiency).verified()) return 13;
     std::cout << "CPU-type accounting rejects mixed/contaminated and unavailable observations.\n";
 }

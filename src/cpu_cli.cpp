@@ -38,11 +38,15 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
                   << "_w" << warmupMs << "ms"
                   << "_sequence_" << (beforePerCore ? "before_percore" : "standalone");
     stored.workloadVersion = storedVersion.str();
+    if (multiCore && report.multiCore.typedScheduling)
+        stored.workloadVersion += "_apple_pe_qos_workers_v1";
     const auto coreType = !multiCore && !report.perCore.empty()
         ? report.perCore.front().coreType : CpuCoreType::Automatic;
+    const bool foregroundE = !multiCore && !report.perCore.empty() && report.perCore.front().foregroundEfficiency;
     if (coreType != CpuCoreType::Automatic) {
         stored.workloadVersion += std::string("_qos_bound_v1_") + CpuCoreTypeName(coreType);
         stored.id += std::string("-") + CpuCoreTypeName(coreType);
+        if (foregroundE) stored.workloadVersion += CpuForegroundEfficiencyVersionSuffix();
     }
 #if defined(__APPLE__) && TARGET_OS_IPHONE
     stored.workloadVersion += "_ios_preview";
@@ -56,7 +60,7 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
     stored.processArchitecture = gpu_bench::CurrentProcessArchitecture();
     stored.difficulty = multiCore ? "Multi-core" : coreType == CpuCoreType::Performance
         ? "Performance single-thread" : coreType == CpuCoreType::Efficiency
-        ? "Efficiency single-thread" : "Per-core";
+        ? (foregroundE ? "Efficiency single-thread (performance priority)" : "Efficiency single-thread (background)") : "Per-core";
     stored.headless = true;
     stored.framesInFlight = 0;
     stored.scoreUnit = "MWork/s";
@@ -78,8 +82,9 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
              << ";affinityCapability=" << report.affinityCapability
              << ";logicalProcessors=" << report.processors.size()
              << ";physicalCores=" << physicalCount
-             << ";coreClassLabels=" << (coreType == CpuCoreType::Automatic
-                 ? "inferred_rank_not_architectural_identity" : "verified_type_not_numbered_core")
+             << ";coreClassLabels=" << (multiCore && report.multiCore.typedScheduling
+                 ? (report.multiCore.verifiedCoreTypes ? "verified_types_not_numbered_cores" : "requested_types_not_numbered_cores")
+                 : coreType == CpuCoreType::Automatic ? "inferred_rank_not_architectural_identity" : "verified_type_not_numbered_core")
              << ";checksumRole=dce_sink";
     contract << ";scoreContract=" << (formalContract ? "formal" : "preview")
              << ";sequence=" << (beforePerCore ? "before_percore" : "standalone");
@@ -93,6 +98,33 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
                  << ";affinityMode=" << report.multiCore.affinityMode
                  << ";threads=" << report.multiCore.threadCount
                  << ";pinnedThreads=" << report.multiCore.pinnedThreadCount;
+        contract << std::setprecision(9) << ";workerScores=";
+        for (std::size_t i = 0; i < report.multiCore.workerScores.size(); ++i) {
+            if (i) contract << ',';
+            contract << report.multiCore.workerScores[i];
+        }
+        contract << ";workerScoreScope=selected_round_common_wall_clock"
+                 << ";workerLabels=" << (report.multiCore.typedScheduling
+                    ? "requested_types_not_numbered_cores" : "unclassified_threads_not_numbered_cores")
+                 << ";processCpuSeconds=" << report.multiCore.processCpuSeconds
+                 << ";performanceCpuSeconds=" << report.multiCore.performanceCpuSeconds
+                 << ";accountingIncludesWarmup=" << (report.multiCore.medianRound == 1 ? config.warmupSeconds : 0.0);
+        if (report.multiCore.typedScheduling) {
+            contract << ";workerSchedulingPolicy=apple_pe_qos_v1"
+                     << ";allCorePlacementVerified=" << (report.multiCore.verifiedCoreTypes ? 1 : 0)
+                     << ";performanceWorkers=" << AppleCoreTypeCount(CpuCoreType::Performance)
+                     << ";efficiencyWorkers=" << AppleCoreTypeCount(CpuCoreType::Efficiency)
+                     << ";workerResidency=";
+            for (std::size_t i = 0; i < report.multiCore.workerResidencies.size(); ++i) {
+                if (i) contract << ',';
+                contract << report.multiCore.workerResidencies[i].requestedLowerBound;
+            }
+            contract << ";workerBusyFractions=";
+            for (std::size_t i = 0; i < report.multiCore.workerBusyFractions.size(); ++i) {
+                if (i) contract << ',';
+                contract << report.multiCore.workerBusyFractions[i];
+            }
+        }
     } else {
         double sum = 0.0;
         std::vector<std::string> affinityModes;
@@ -123,16 +155,33 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
     if (coreType != CpuCoreType::Automatic) {
         const auto& item = report.perCore.front();
         contract << ";coreType=" << CpuCoreTypeName(coreType)
-                 << ";scheduling=" << (coreType == CpuCoreType::Performance ? "user_interactive" : "background")
-                 << ";residencyMethod=process_accounting_thread_clock_bound"
+                 << ";scheduling=" << (coreType == CpuCoreType::Performance ? "user_interactive" : foregroundE ? CpuForegroundEfficiencySchedulingName() : "background")
+                 << ";scoreScope=wall_clock_under_requested_qos"
+                 << ";additiveWithAllCore=0"
+                 << ";residencyMethod=" << (foregroundE ? "thread_selfcounts_perf_level_spi" : CpuResidencyMethod())
                  << ";residencyThreshold=0.99;residencyVerified=1"
                  << ";residencyRetries=" << item.residencyRetries;
+        if (foregroundE) {
+            contract << ";efficiencyPolicy=" << CpuForegroundEfficiencyPolicyName()
+                     << ";placementHelperThreads=" << item.placementHelpers.size()
+                     << ";minimumWorkerBusyFraction=0.90";
+            for (std::size_t i = 0; i < item.placementHelpers.size(); ++i) {
+                const auto& helper = item.placementHelpers[i];
+                contract << std::setprecision(9)
+                         << ";helper" << i << "RequestedLowerBound=" << helper.requestedLowerBound
+                         << ";helper" << i << "EffectiveGHz=" << helper.effectiveGHz;
+            }
+        } else if (coreType == CpuCoreType::Efficiency) {
+            contract << ";efficiencyPolicy=background";
+        }
         for (std::size_t i = 0; i < item.residencyRounds.size(); ++i) {
             const auto& round = item.residencyRounds[i];
             const std::string prefix = ";round" + std::to_string(i + 1);
             contract << std::setprecision(9)
                      << prefix << "PFraction=" << round.performanceFraction
                      << prefix << "RequestedLowerBound=" << round.requestedLowerBound
+                     << prefix << "WorkerCpuSeconds=" << round.workerCpuNs / 1e9
+                     << prefix << "ProcessCpuSeconds=" << round.processCpuNs / 1e9
                      << prefix << "EffectiveGHz=" << round.effectiveGHz;
         }
     }
@@ -193,6 +242,9 @@ static gpu_bench::BenchmarkResult MakeStoredCpuMemBwResult(
     stored.processArchitecture = gpu_bench::CurrentProcessArchitecture();
     if (config.coreType != CpuCoreType::Automatic)
         stored.workloadVersion += std::string("_qos_bound_v1_") + CpuCoreTypeName(config.coreType);
+    const bool foregroundEfficiency = config.efficiencyForeground &&
+        (config.coreType == CpuCoreType::Both || config.coreType == CpuCoreType::Efficiency);
+    if (foregroundEfficiency) stored.workloadVersion += CpuForegroundEfficiencyVersionSuffix();
     stored.difficulty = "Sweep";
     stored.headless = true;
     stored.framesInFlight = 0;
@@ -274,9 +326,21 @@ static gpu_bench::BenchmarkResult MakeStoredCpuMemBwResult(
              << ";aggregation=median;timing=wall_clock";
     if (config.coreType != CpuCoreType::Automatic) {
         contract << ";coreType=" << CpuCoreTypeName(config.coreType)
-                 << ";residencyMethod=process_accounting_thread_clock_bound"
+                 << ";residencyMethod=" << CpuResidencyMethod()
                  << ";residencyThreshold=0.99;residencyVerified=1"
                  << ";schedulingScope=single_thread_curves_only";
+        if (foregroundEfficiency) {
+            contract << ";efficiencyPolicy=" << CpuForegroundEfficiencyPolicyName()
+                     << ";efficiencyScheduling=" << CpuForegroundEfficiencySchedulingName()
+                     << ";efficiencyResidencyMethod=thread_selfcounts_perf_level_spi"
+                     << ";placementHelperThreads=" << report.efficiencyHelpers.size()
+                     << ";minimumWorkerBusyFraction=0.90";
+            for (std::size_t i = 0; i < report.efficiencyHelpers.size(); ++i)
+                contract << std::setprecision(9) << ";helper" << i << "RequestedLowerBound="
+                         << report.efficiencyHelpers[i].requestedLowerBound;
+        } else if (config.coreType == CpuCoreType::Both || config.coreType == CpuCoreType::Efficiency) {
+            contract << ";efficiencyPolicy=background;efficiencyScheduling=background";
+        }
         for (const auto& entry : modes) {
             if (entry.first == "all") continue;
             contract << std::setprecision(9) << ";residency_" << entry.first << "=";
@@ -451,7 +515,14 @@ int RunCpuMemoryBandwidthCli(gpu_bench::CpuMemBwConfig config, bool saveResult) 
         if (!ec) config.storageDir = resultsDir.string();
     }
 #endif
-    const auto report = gpu_bench::RunCpuMemoryBandwidth(config, std::cout);
+    // Classified 50ms windows are sensitive to interactive GUI redraws from
+    // the detailed per-sample log. Preserve every line, but release them only
+    // after the classified sweep has completed. Cancellation remains atomic.
+    std::ostringstream measuredLog;
+    const bool deferLog = config.coreType != CpuCoreType::Automatic;
+    const auto report = gpu_bench::RunCpuMemoryBandwidth(config,
+        deferLog ? static_cast<std::ostream&>(measuredLog) : std::cout);
+    if (deferLog) std::cout << measuredLog.str() << std::flush;
     if (gpu_bench::CpuStopRequested()) { std::cout << "CPUMEM_CANCELLED\n" << std::flush; return 130; }
     if (!report.valid) {
         std::cerr << "CPU memory bandwidth sweep failed: "

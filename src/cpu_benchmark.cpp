@@ -710,6 +710,7 @@ struct TimedKernelResult {
     std::vector<CpuResidency> residencyRounds;
     std::uint32_t residencyRetries = 0;
     bool residencyValid = true;
+    std::vector<CpuResidency> placementHelpers;
 };
 
 static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
@@ -720,6 +721,17 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
                                         std::size_t totalStages,
                                         std::ostream& out) {
     TimedKernelResult result;
+    const bool foregroundE = config.coreType == CpuCoreType::Efficiency && config.efficiencyForeground;
+    const bool directAccounting = config.coreType != CpuCoreType::Automatic &&
+        (foregroundE || CpuRequiresDirectTypeAccounting());
+    const bool useHelpers = foregroundE && !CpuRequiresDirectTypeAccounting();
+    const auto helperCount = useHelpers ? AppleCoreTypeCount(CpuCoreType::Performance) : 0;
+    if ((useHelpers && (helperCount == 0 || helperCount > 64)) ||
+        (directAccounting && !CaptureCpuThreadCounters().available)) {
+        result.residencyValid = false;
+        out << "CPU_ERROR\tmessage=foreground_efficiency_thread_accounting_unavailable\n" << std::flush;
+        return result;
+    }
 
     enum class Phase { Starting, Warmup, Measure, Complete };
     struct ProgressState {
@@ -731,11 +743,21 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
         bool done = false;
     } progress;
 
+    // A high-QoS observer waiting on the worker's progress mutex can donate
+    // priority to a background worker on iOS. Keep both at background QoS for
+    // the E stage; UI callbacks remain asynchronous. Residency still gates
+    // every measured round, independently of this scheduling request.
+    CpuQosScope observerQos(config.coreType == CpuCoreType::Efficiency
+        ? CpuCoreType::Efficiency : CpuCoreType::Automatic);
     std::thread worker([&] {
         ThreadAffinityScope affinity(cpu);
-        CpuQosScope qos(config.coreType);
+        CpuQosScope qos(config.coreType, foregroundE);
         result.residencyValid = qos.applied();
         result.strictAffinity = affinity.strict();
+        // Keep the P cores busy at higher priority while the measured E
+        // thread uses normal performance priority. This is placement pressure,
+        // not binding: independently verify both target and helper CPU types.
+        CpuPerformanceLoad helpers(helperCount);
         // Every logical processor and every scored round must execute exactly
         // the same dependency chain.  Core identity is metadata, not a seed.
         KernelState state = MakeKernelState(kPerCoreKernelSeed);
@@ -770,7 +792,8 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
                 }
                 progress.cv.notify_one();
                 const auto accountingStart = config.coreType == CpuCoreType::Automatic
-                    ? CpuResidencySnapshot{} : CaptureCpuResidency();
+                    || directAccounting ? CpuResidencySnapshot{} : CaptureCpuResidency();
+                const auto threadStart = directAccounting ? CaptureCpuThreadCounters() : CpuThreadCounters{};
                 const auto start = Clock::now();
                 const auto end = start + std::chrono::duration_cast<Clock::duration>(
                     std::chrono::duration<double>(roundSeconds));
@@ -781,7 +804,11 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
                     if (Clock::now() >= end || CpuStopRequested()) break;
                 }
                 sample.seconds = std::chrono::duration<double>(Clock::now() - start).count();
-                if (config.coreType != CpuCoreType::Automatic)
+                if (directAccounting) {
+                    residency = EvaluateCpuThreadCounters(threadStart, CaptureCpuThreadCounters(), config.coreType);
+                    const double busyFraction = residency.workerCpuNs / 1e9 / sample.seconds;
+                    if (foregroundE && (busyFraction < 0.90 || busyFraction > 1.05)) residency.available = false;
+                } else if (config.coreType != CpuCoreType::Automatic)
                     residency = EvaluateCpuResidency(accountingStart, CaptureCpuResidency(), config.coreType);
                 if (CpuStopRequested() || config.coreType == CpuCoreType::Automatic || residency.verified()) break;
                 if (attempt < 2) ++result.residencyRetries;
@@ -796,6 +823,9 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
         }
 
         result.strictAffinity = affinity.held();
+        result.placementHelpers = helpers.Finish();
+        for (const auto& helper : result.placementHelpers)
+            result.residencyValid = result.residencyValid && helper.verified();
         if (!CpuStopRequested() && !rounds.empty()) {
             const std::size_t median = MedianRoundIndex(rounds);
             result.workUnits = rounds[median].workUnits;
@@ -824,6 +854,17 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
     // transitions and otherwise limits GUI updates to four per second.
     Phase lastPhase = Phase::Starting;
     std::uint32_t lastRound = std::numeric_limits<std::uint32_t>::max();
+    // Main-thread SwiftUI progress/log redraws are themselves interactive
+    // CPU work. During E measurements, retain progress in the raw log and
+    // deliver it after the worker stops, keeping that observer out of the
+    // process accounting window. Do not weaken the residency threshold.
+    std::ostringstream deferredProgress;
+    const bool deferProgress = config.coreType == CpuCoreType::Efficiency;
+    std::ostream& progressOut = deferProgress ? deferredProgress : out;
+    if (deferProgress)
+        EmitProgress(out, "per_core", "warmup", static_cast<int>(cpu.ordinal), coreCount,
+                     0.0, static_cast<double>(stageIndex) / static_cast<double>(totalStages),
+                     0.0, -1, config.roundCount);
     auto nextPeriodicUpdate = Clock::now();
     std::unique_lock<std::mutex> lock(progress.mutex);
     while (!progress.done) {
@@ -841,7 +882,7 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
             if (phase == Phase::Warmup) {
                 const double elapsed =
                     std::chrono::duration<double>(now - phaseStart).count();
-                EmitProgress(out, "per_core", "warmup", static_cast<int>(cpu.ordinal),
+                EmitProgress(progressOut, "per_core", "warmup", static_cast<int>(cpu.ordinal),
                              coreCount, 0.0,
                              static_cast<double>(stageIndex) /
                                  static_cast<double>(totalStages),
@@ -855,7 +896,7 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
                 const double fraction = (static_cast<double>(round) +
                     std::clamp(elapsed / roundSeconds, 0.0, 1.0)) /
                     static_cast<double>(roundCount);
-                EmitProgress(out, "per_core", "measure",
+                EmitProgress(progressOut, "per_core", "measure",
                              static_cast<int>(cpu.ordinal), coreCount, fraction,
                              (static_cast<double>(stageIndex) + fraction) /
                                  static_cast<double>(totalStages),
@@ -870,6 +911,16 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
     }
     lock.unlock();
     worker.join();
+    for (std::size_t i = 0; i < result.placementHelpers.size(); ++i) {
+        const auto& helper = result.placementHelpers[i];
+        out << std::fixed << std::setprecision(9) << "CPU_PLACEMENT_HELPER\tindex=" << i
+            << "\trequested_lower_bound=" << helper.requestedLowerBound
+            << "\tperformance_fraction=" << helper.performanceFraction
+            << "\tworker_cpu_seconds=" << helper.workerCpuNs / 1e9
+            << "\teffective_ghz=" << helper.effectiveGHz
+            << "\tverified=" << (helper.verified() ? 1 : 0) << '\n';
+    }
+    if (deferProgress) out << deferredProgress.str();
     EmitProgress(out, "per_core", "complete", static_cast<int>(cpu.ordinal),
                  coreCount, 1.0,
                  static_cast<double>(stageIndex + 1u) / static_cast<double>(totalStages),
@@ -904,16 +955,29 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
                                         std::ostream& out) {
     CpuMultiCoreResult result;
     if (cpus.empty()) return result;
+    const auto performanceCount = AppleCoreTypeCount(CpuCoreType::Performance);
+    const auto efficiencyCount = AppleCoreTypeCount(CpuCoreType::Efficiency);
+    const bool typedScheduling = CpuRequiresDirectTypeAccounting() && performanceCount > 0 &&
+        efficiencyCount > 0 && performanceCount + efficiencyCount == cpus.size();
 
     struct alignas(kWorkerIsolationBytes) WorkerResult {
         std::uint64_t units = 0;
         std::uint64_t checksum = 0;
         Clock::time_point finished{};
         bool strict = false;
+        bool qosApplied = false;
+        CpuResidency residency;
+        double busyFraction = 0;
     };
     struct MultiRoundResult {
         KernelRoundResult kernel;
         std::uint32_t pinned = 0;
+        std::vector<double> workerScores;
+        double processCpuSeconds = 0.0;
+        double performanceCpuSeconds = 0.0;
+        bool verifiedCoreTypes = true;
+        std::vector<CpuResidency> workerResidencies;
+        std::vector<double> workerBusyFractions;
     };
 
     const std::uint32_t roundCount = (std::max)(1u, config.roundCount);
@@ -938,6 +1002,9 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
         for (std::size_t i = 0; i < cpus.size(); ++i) {
             workers.emplace_back([&, i] {
                 ThreadAffinityScope affinity(cpus[i]);
+                const auto requestedType = !typedScheduling ? CpuCoreType::Automatic :
+                    i < performanceCount ? CpuCoreType::Performance : CpuCoreType::Efficiency;
+                CpuQosScope qos(requestedType, typedScheduling);
                 KernelState state = MakeKernelState(static_cast<std::uint64_t>(i) + 0x10001u);
                 {
                     std::unique_lock<std::mutex> lock(gate.mutex);
@@ -947,6 +1014,8 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
                 }
                 while (Clock::now() < gate.warmupEnd && !CpuStopRequested()) RunKernelBatch(state);
                 state = MakeKernelState(static_cast<std::uint64_t>(i) + 0x10001u);
+                const auto countersBefore = typedScheduling ? CaptureCpuThreadCounters() : CpuThreadCounters{};
+                const auto workerStart = Clock::now();
                 std::uint64_t units = 0;
                 while (true) {
                     RunKernelBatch(state);
@@ -954,6 +1023,8 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
                     if (Clock::now() >= gate.measureEnd || CpuStopRequested()) break;
                 }
                 const auto finished = Clock::now();
+                const auto residency = typedScheduling
+                    ? EvaluateCpuThreadCounters(countersBefore, CaptureCpuThreadCounters(), requestedType) : CpuResidency{};
                 const bool strict = affinity.held();
                 const std::uint64_t checksum =
                     state.checksum ^ state.a ^ RotL(state.b, 13);
@@ -964,11 +1035,16 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
                 published.finished = finished;
                 published.checksum = checksum;
                 published.strict = strict;
+                published.qosApplied = qos.applied();
+                published.residency = residency;
+                published.busyFraction = typedScheduling
+                    ? residency.workerCpuNs / 1e9 / std::chrono::duration<double>(finished - workerStart).count() : 0;
                 g_cpuBenchmarkSink.fetch_xor(checksum, std::memory_order_relaxed);
             });
         }
 
         Clock::time_point start;
+        CpuResidencySnapshot accountingStart;
         const double warmup = round == 0 ? config.warmupSeconds : 0.0;
         // Emit the phase boundary before starting the common timer so stdout
         // formatting is never charged to the benchmark.
@@ -987,6 +1063,7 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
                 std::chrono::duration<double>(warmup));
             gate.measureEnd = gate.warmupEnd + std::chrono::duration_cast<Clock::duration>(
                 std::chrono::duration<double>(roundSeconds));
+            accountingStart = CaptureCpuResidency();
             gate.start = true;
         }
         gate.cv.notify_all();
@@ -996,6 +1073,7 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
         // round boundary, after all workers have joined and timing has stopped.
         WaitUntilCpuStop(gate.measureEnd);
         for (auto& worker : workers) worker.join();
+        const auto accountingEnd = CaptureCpuResidency();
         if (CpuStopRequested()) return result;
 
         MultiRoundResult sample;
@@ -1007,12 +1085,42 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
             sample.kernel.checksum ^= RotL(worker.checksum,
                                            static_cast<unsigned>(i % 63u + 1u));
             if (worker.strict) ++sample.pinned;
+            sample.workerResidencies.push_back(worker.residency);
+            sample.workerBusyFractions.push_back(worker.busyFraction);
+            if (typedScheduling)
+                sample.verifiedCoreTypes = sample.verifiedCoreTypes && worker.qosApplied &&
+                    worker.residency.verified() && worker.busyFraction >= .90 && worker.busyFraction <= 1.05;
         }
         // The last batch may cross the shared deadline. Charge that overrun to
         // the common elapsed time instead of dividing by the requested time
         // and inflating short-run scores.
         sample.kernel.seconds =
             std::chrono::duration<double>(lastFinish - gate.warmupEnd).count();
+        // Process counters include the first round's warm-up and a little
+        // observer work; they diagnose scheduling, never classify workers.
+        if (accountingStart.available && accountingEnd.available &&
+            accountingEnd.processNs >= accountingStart.processNs &&
+            accountingEnd.performanceNs >= accountingStart.performanceNs) {
+            sample.processCpuSeconds = double(accountingEnd.processNs - accountingStart.processNs) / 1e9;
+            sample.performanceCpuSeconds = double(accountingEnd.performanceNs - accountingStart.performanceNs) / 1e9;
+        }
+        for (std::size_t i = 0; i < workerResults.size(); ++i) {
+            const double score = double(workerResults[i].units) / sample.kernel.seconds / 1e6;
+            sample.workerScores.push_back(score);
+            out << std::fixed << std::setprecision(9)
+                << "CPU_MULTI_WORKER\tround=" << round + 1 << "\tworker=" << i
+                << "\twork_units=" << workerResults[i].units
+                << "\tcommon_seconds=" << sample.kernel.seconds << "\tscore=" << score
+                << "\tclassification=" << (typedScheduling ?
+                    (i < performanceCount ? "requested_performance_type" : "requested_efficiency_type") : "unclassified_worker")
+                << "\trequested_lower_bound=" << workerResults[i].residency.requestedLowerBound
+                << "\tworker_cpu_seconds=" << workerResults[i].residency.workerCpuNs / 1e9
+                << "\tbusy_fraction=" << workerResults[i].busyFraction << '\n';
+        }
+        out << "CPU_MULTI_ACCOUNTING\tround=" << round + 1
+            << "\tprocess_cpu_seconds=" << sample.processCpuSeconds
+            << "\tperformance_cpu_seconds=" << sample.performanceCpuSeconds
+            << "\tincludes_warmup_seconds=" << warmup << '\n';
         rounds.push_back(sample);
 
         const double roundComplete =
@@ -1043,6 +1151,15 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
     result.roundCount = static_cast<std::uint32_t>(rounds.size());
     result.medianRound = static_cast<std::uint32_t>(median + 1u);
     result.affinityMode = MultiAffinityMode(result.pinnedThreadCount, result.threadCount);
+    result.workerScores = selected.workerScores;
+    result.processCpuSeconds = selected.processCpuSeconds;
+    result.performanceCpuSeconds = selected.performanceCpuSeconds;
+    result.typedScheduling = typedScheduling;
+    result.verifiedCoreTypes = typedScheduling;
+    for (const auto& round : rounds)
+        result.verifiedCoreTypes = result.verifiedCoreTypes && round.verifiedCoreTypes;
+    result.workerResidencies = selected.workerResidencies;
+    result.workerBusyFractions = selected.workerBusyFractions;
     // As many busy threads as there are processors fill the machine wherever
     // the system puts them, so this result does not depend on the pinning (the
     // user's decision of 2026-10-08). How many threads were held is recorded
@@ -1057,6 +1174,30 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
 }
 
 } // namespace
+
+CpuPerformanceLoad::CpuPerformanceLoad(std::uint32_t count) : residency_(count) {
+    try {
+        for (std::uint32_t i = 0; i < count; ++i) {
+            workers_.emplace_back([this, i] {
+                CpuQosScope qos(CpuCoreType::Performance);
+                auto state = MakeKernelState(kPerCoreKernelSeed);
+                const auto before = CaptureCpuThreadCounters();
+                ready_.fetch_add(1, std::memory_order_release);
+                while (!stop_.load(std::memory_order_relaxed) && !CpuStopRequested()) RunKernelBatch(state);
+                residency_[i] = EvaluateCpuThreadCounters(before, CaptureCpuThreadCounters(), CpuCoreType::Performance);
+                if (!qos.applied()) residency_[i].available = false;
+                g_cpuBenchmarkSink.fetch_xor(state.checksum, std::memory_order_relaxed);
+            });
+        }
+        while (ready_.load(std::memory_order_acquire) < count && !CpuStopRequested()) std::this_thread::yield();
+    } catch (...) { Finish(); throw; }
+}
+CpuPerformanceLoad::~CpuPerformanceLoad() { Finish(); }
+const std::vector<CpuResidency>& CpuPerformanceLoad::Finish() {
+    stop_.store(true, std::memory_order_relaxed);
+    for (auto& worker : workers_) if (worker.joinable()) worker.join();
+    return residency_;
+}
 
 CpuBenchmarkReport ProbeCpuTopology() {
     CpuBenchmarkReport report;
@@ -1125,7 +1266,12 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& requestedConfig,
     if (config.mode == CpuBenchmarkMode::MultiCore) config.coreType = CpuCoreType::Automatic;
     CpuBenchmarkReport report = ProbeCpuTopology();
     PrintCpuTopology(report, out);
+    out << "CPU_TYPE_CAPS\tverified_scheduling=" << (CpuCoreTypeSchedulingSupported() ? 1 : 0)
+        << "\tperformance_count=" << AppleCoreTypeCount(CpuCoreType::Performance)
+        << "\tefficiency_count=" << AppleCoreTypeCount(CpuCoreType::Efficiency)
+        << "\tresidency_method=" << CpuResidencyMethod() << '\n';
     out << "CPU_SCHEDULING\tcore_type=" << CpuCoreTypeName(config.coreType)
+        << "\tefficiency_policy=" << (config.efficiencyForeground ? CpuForegroundEfficiencyPolicyName() : "background")
         << "\tresidency_threshold=0.99\tscope=single_thread_stages\n" << std::flush;
     if (!std::isfinite(config.measureSeconds) || config.measureSeconds <= 0.0 ||
         !std::isfinite(config.warmupSeconds) || config.warmupSeconds < 0.0 ||
@@ -1252,15 +1398,22 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& requestedConfig,
             result.coreType = stageConfig.coreType;
             result.residencyRounds = timed.residencyRounds;
             result.residencyRetries = timed.residencyRetries;
+            result.foregroundEfficiency = stageConfig.coreType == CpuCoreType::Efficiency && stageConfig.efficiencyForeground;
+            if (result.foregroundEfficiency || CpuRequiresDirectTypeAccounting())
+                result.processor.classificationSource = "thread_perf_level_counters_spi";
+            result.placementHelpers = timed.placementHelpers;
             result.valid = timed.workUnits > 0 && SingleAffinityIsValid(timed.strictAffinity)
                            && timed.residencyValid;
             for (std::size_t round = 0; round < timed.residencyRounds.size(); ++round) {
                 const auto& residency = timed.residencyRounds[round];
                 out << std::fixed << std::setprecision(6)
                     << "CPU_RESIDENCY\tcore_type=" << CpuCoreTypeName(result.coreType)
+                    << "\tmethod=" << (result.foregroundEfficiency ? "thread_selfcounts_perf_level_spi" : CpuResidencyMethod())
                     << "\tround=" << round + 1 << "\tp_fraction=" << residency.performanceFraction
                     << "\trequested_lower_bound=" << residency.requestedLowerBound
                     << "\teffective_ghz=" << residency.effectiveGHz
+                    << "\tworker_cpu_seconds=" << residency.workerCpuNs / 1e9
+                    << "\tprocess_cpu_seconds=" << residency.processCpuNs / 1e9
                     << "\tverified=" << (residency.verified() ? 1 : 0)
                     << "\tretries=" << timed.residencyRetries << '\n' << std::flush;
             }
@@ -1289,11 +1442,12 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& requestedConfig,
                 << "\tperformance_level=" << cpu.performanceLevel
                 << "\tcore_class=" << cpu.coreClass
                 << "\tcore_type=" << CpuCoreTypeName(result.coreType)
+                << "\tefficiency_policy=" << (result.foregroundEfficiency ? "foreground_with_performance_load" : "background")
                 << "\tresidency_verified=" << (timed.residencyValid ? 1 : 0)
                 << "\trequested_lower_bound=" << (timed.residencyRounds.empty() ? 0.0 :
                     std::min_element(timed.residencyRounds.begin(), timed.residencyRounds.end(),
                         [](const auto& a, const auto& b) { return a.requestedLowerBound < b.requestedLowerBound; })->requestedLowerBound)
-                << "\tclassification_source=" << cpu.classificationSource
+                << "\tclassification_source=" << result.processor.classificationSource
                 << "\taffinity=" << result.affinityMode
                 << "\tvalid=" << (result.valid ? 1 : 0)
                 << "\tscore=" << result.scoreMWorkPerSec

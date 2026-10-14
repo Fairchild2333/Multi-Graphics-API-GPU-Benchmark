@@ -175,20 +175,49 @@ struct MobileSuiteJob: Identifiable, Sendable {
     let cpuArguments: [String]
     let seconds: Double
     let expectedRecords: Int
+    var requiresForegroundEfficiency = false
+    var requiresVerifiedCoreTypes = false
 
-    static var all: [MobileSuiteJob] { makeJobs(includeVulkan: false) }
+    private func matchesForegroundEfficiency(_ result: BenchResult, memory: Bool) -> Bool {
+        let scheduling = result.workloadConfigValue(memory ? "efficiencyScheduling" : "scheduling")
+        let method = result.workloadConfigValue(memory ? "efficiencyResidencyMethod" : "residencyMethod")
+        guard method == "thread_selfcounts_perf_level_spi" else { return false }
+        if result.workloadConfigValue("efficiencyPolicy") == "foreground_with_performance_load" {
+            return scheduling == "user_initiated"
+        }
+        return result.workloadConfigValue("efficiencyPolicy") == "foreground_utility_without_helpers" &&
+            scheduling == "utility" && result.workloadConfigValue("placementHelperThreads") == "0" &&
+            result.workloadConfigValue("minimumWorkerBusyFraction") == "0.90" &&
+            (result.workloadVersion ?? "").contains("foreground_e_utility_v1")
+    }
+
+    /// Only a rendered GPU workload needs the landscape picture. CPU,
+    /// headless compute and cache sweeps use a visible progress screen.
+    var requiresRenderSurface: Bool {
+        guard let request = gpuRequest else { return false }
+        let workload = String(request.split(separator: "?", maxSplits: 1).first ?? "")
+        return ["stream", "gpu_burn", "cinematic_liquid"].contains(workload)
+    }
+
+    static var all: [MobileSuiteJob] { makeJobs(includeVulkan: false, particleFixedCoverage: true) }
 
     static func makeJobs(includeVulkan: Bool, vulkanLiquid: Bool = true, gpuCache: Bool = true,
-                         gles2: Bool = false, gles2MaxSteps: Int = 2048, gpuCacheParallelSteps: Int = 0) -> [MobileSuiteJob] {
+                         gles2: Bool = false, gles2MaxSteps: Int = 2048, gpuCacheParallelSteps: Int = 0,
+                         cpuCoreTypes: Bool = false, particleFixedCoverage: Bool = false,
+                         cpuEfficiencyForeground: Bool = false,
+                         cpuMemoryEfficiencyForeground: Bool? = nil,
+                         vulkanMaxParticles: Int = 16_777_216) -> [MobileSuiteJob] {
         var jobs: [MobileSuiteJob] = []
         for api in includeVulkan ? ["metal", "vulkan"] : ["metal"] {
             let prefix = api == "vulkan" ? "vulkan/" : ""
             for particles in [65_536, 1_048_576, 4_194_304, 16_777_216] {
+                guard api != "vulkan" || particles <= vulkanMaxParticles else { continue }
                 for headless in [false, true] {
                     let test = headless ? "stream_headless" : "stream"
                     jobs.append(MobileSuiteJob(id: "\(prefix)\(test)-\(particles)",
                         title: "\(api == "vulkan" ? "Vulkan (MoltenVK)" : "Metal") · Particle \(particles) · \(headless ? "Compute" : "Render")",
-                        gpuRequest: "\(test)?particles=\(particles)&vsync=0&api=\(api)", cpuArguments: [],
+                        gpuRequest: "\(test)?particles=\(particles)&vsync=0&api=\(api)" +
+                            (headless ? "" : "&coverage=\(particleFixedCoverage ? "fixed" : "legacy")"), cpuArguments: [],
                         seconds: 15, expectedRecords: 1))
                 }
             }
@@ -210,12 +239,14 @@ struct MobileSuiteJob: Identifiable, Sendable {
             jobs.append(MobileSuiteJob(id: cacheID, title: "Metal · GPU Cache-state Diagnostic",
             gpuRequest: request, cpuArguments: [], seconds: 0, expectedRecords: 1))
         }
-        jobs.append(MobileSuiteJob(id: "cpu_compute", title: "CPU Compute · Single + All Cores",
+        jobs.append(MobileSuiteJob(id: "cpu_compute", title: cpuCoreTypes ? "CPU Compute · Performance + Efficiency + All Cores" : "CPU Compute · Single + All Cores",
             gpuRequest: nil, cpuArguments: ["gpu_benchmark", "--cpu-benchmark", "all",
-                "--cpu-time", "15", "--cpu-warmup", "0.2"], seconds: 0, expectedRecords: 2))
+                "--cpu-time", "15", "--cpu-warmup", "0.2"], seconds: 0, expectedRecords: cpuCoreTypes ? 3 : 2,
+            requiresForegroundEfficiency: cpuCoreTypes && cpuEfficiencyForeground))
         jobs.append(MobileSuiteJob(id: "cpu_memory", title: "CPU Cache, Memory, Virtual Memory & Storage",
             gpuRequest: nil, cpuArguments: ["gpu_benchmark", "--cpu-membw"],
-            seconds: 0, expectedRecords: 1))
+            seconds: 0, expectedRecords: 1, requiresForegroundEfficiency: cpuCoreTypes && (cpuMemoryEfficiencyForeground ?? cpuEfficiencyForeground),
+            requiresVerifiedCoreTypes: cpuCoreTypes))
         if gles2 {
             for steps in [16, 64, 256] where steps <= gles2MaxSteps {
                 jobs.append(MobileSuiteJob(id: "gles2/gpu_burn-\(steps)", title: "OpenGL ES 2.0 · GPU Burn · \(steps)",
@@ -227,11 +258,37 @@ struct MobileSuiteJob: Identifiable, Sendable {
 
     func matches(_ result: BenchResult) -> Bool {
         if id == "cpu_compute" {
-            return result.graphicsApi == "CPU" &&
-                ["cpu_single_core", "cpu_multi_core"].contains(result.workload)
+            guard result.graphicsApi == "CPU" &&
+                ["cpu_single_core", "cpu_multi_core"].contains(result.workload) else { return false }
+            if expectedRecords == 3 && result.workload == "cpu_single_core" {
+                if requiresForegroundEfficiency && result.workloadConfigValue("coreType") == "efficiency" {
+                    guard matchesForegroundEfficiency(result, memory: false) else { return false }
+                } else if result.workloadConfigValue("coreType") == "efficiency" &&
+                          (result.workloadConfigValue("efficiencyPolicy") ?? "").hasPrefix("foreground_") {
+                    return false
+                }
+                return ["performance", "efficiency"].contains(result.workloadConfigValue("coreType") ?? "") &&
+                    result.workloadConfigValue("residencyVerified") == "1"
+            }
+            return true
         }
         if id == "cpu_memory" {
-            return result.graphicsApi == "CPU" && result.workload == "cpu_membw"
+            guard result.graphicsApi == "CPU" && result.workload == "cpu_membw" else { return false }
+            if requiresForegroundEfficiency || requiresVerifiedCoreTypes {
+                guard result.workloadConfigValue("coreType") == "both",
+                      result.workloadConfigValue("residencyVerified") == "1" else { return false }
+                if requiresForegroundEfficiency {
+                    guard matchesForegroundEfficiency(result, memory: true) else { return false }
+                } else if (result.workloadConfigValue("efficiencyPolicy") ?? "").hasPrefix("foreground_") {
+                    return false
+                }
+                for mode in ["single", "single_1", "all"] {
+                    for kernel in ["read", "write", "copy"] {
+                        guard !(result.workloadConfigValue("curve_\(mode)_\(kernel)") ?? "").isEmpty else { return false }
+                    }
+                }
+            }
+            return true
         }
         if id.hasPrefix("gles2/") {
             let steps = id.split(separator: "-").last ?? ""
@@ -250,12 +307,17 @@ struct MobileSuiteJob: Identifiable, Sendable {
         }
         if testID.hasPrefix("stream") {
             let parts = testID.split(separator: "-")
+            if gpuRequest?.contains("coverage=fixed") == true &&
+               result.workloadConfigValue("renderCoverage") != "wrapped_ndc_v2" { return false }
+            if gpuRequest?.contains("coverage=legacy") == true &&
+               result.workloadConfigValue("renderCoverage") == "wrapped_ndc_v2" { return false }
             return version.hasPrefix("stream_v1") &&
                 result.particleCount == UInt32(parts.last ?? "") &&
                 result.headless == testID.hasPrefix("stream_headless")
         }
         if testID.hasPrefix("gpu_burn-") {
             let steps = testID.split(separator: "-").last ?? ""
+            if translated && result.workloadConfigValue("timingMode") != "synchronized_wall_clock" { return false }
             return version.hasPrefix("gpu_burn_v3_fixed_steps_\(steps)_")
         }
         if testID == "cinematic_liquid" { return version.hasPrefix("cinematic_liquid_v2") }
@@ -270,9 +332,27 @@ struct MobileSuiteJob: Identifiable, Sendable {
                 result.workloadConfigValue("checksumValid") == "1" &&
                 result.workloadConfigValue("cacheAttribution") == "unverified"
         }
-        return version.hasPrefix(translated ? "membw_v1" : "metal_memory_sweep_v1")
+        if translated {
+            return version.hasPrefix("membw_v2_verified") &&
+                result.workloadConfigValue("dataVerified") == "1" &&
+                (Int(result.workloadConfigValue("writeCopyChecks") ?? "0") ?? 0) > 0 &&
+                result.workloadConfigValue("timestampAnomalies") == "0"
+        }
+        return version.hasPrefix("metal_memory_sweep_v1")
     }
 
+    func matchesRecordGroup(_ records: [BenchResult]) -> Bool {
+        guard records.count == expectedRecords, records.allSatisfy(matches) else { return false }
+        guard id == "cpu_compute" else { return true }
+        guard Set(records.map(\.workload)) == Set(["cpu_single_core", "cpu_multi_core"]) else { return false }
+        if records.contains(where: { $0.workloadConfigValue("efficiencyPolicy") == "foreground_utility_without_helpers" }) {
+            guard let all = records.first(where: { $0.workload == "cpu_multi_core" }),
+                  all.workloadConfigValue("workerSchedulingPolicy") == "apple_pe_qos_v1",
+                  (all.workloadVersion ?? "").contains("apple_pe_qos_workers_v1") else { return false }
+        }
+        return expectedRecords != 3 || Set(records.filter { $0.workload == "cpu_single_core" }
+            .compactMap { $0.workloadConfigValue("coreType") }) == Set(["performance", "efficiency"])
+    }
 }
 
 struct MobileSuiteReport: Codable, Sendable {
@@ -299,6 +379,7 @@ struct MobileSuiteReport: Codable, Sendable {
 
     var passedCount: Int { jobs.filter { $0.status == "passed" }.count }
     var reviewCount: Int { jobs.filter { $0.status == "review" }.count }
+    var failedCount: Int { jobs.filter { $0.status == "failed" }.count }
     var finishedCount: Int { jobs.filter { ["passed", "review", "failed", "cancelled"].contains($0.status) }.count }
 
     /// Retry an unchanged plan, or replace only a failed cache profile, while
@@ -322,7 +403,7 @@ struct MobileSuiteReport: Codable, Sendable {
                 Set(old.resultIDs).count == next.expectedRecords &&
                 saved.allSatisfy { next.matches($0) && $0.score.isFinite && $0.score > 0 &&
                     ($0.workloadVersion ?? "").contains("ios_preview") } &&
-                (next.id != "cpu_compute" || Set(saved.map(\.workload)) == Set(["cpu_single_core", "cpu_multi_core"]))
+                next.matchesRecordGroup(saved)
             if valid && saved.allSatisfy({ $0.measurementReviewReasons.isEmpty }) { reused.append(old) }
             else if !samePlan { break }
         }

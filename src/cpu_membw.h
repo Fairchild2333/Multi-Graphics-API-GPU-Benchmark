@@ -45,6 +45,7 @@ struct CpuMemBwConfig {
     std::uint32_t debugSplitClasses = 0;  // treat the cores as this many classes
     bool debugHideLastCache = false;      // ignore the last cache the OS reports
     CpuCoreType coreType = DefaultCpuCoreType(); // single-thread sweeps only
+    bool efficiencyForeground = DefaultCpuMemoryEfficiencyForeground();
 };
 
 // One data or unified cache of the reference core.
@@ -170,6 +171,7 @@ struct CpuMemBwReport {
     std::uint32_t remeasuredPoints = 0;
     double durationSec = 0.0;
     std::vector<CpuMemBwPoint> points;
+    std::vector<CpuResidency> efficiencyHelpers;
     // One entry per core class, fastest first; `single` is the first entry.
     std::vector<CpuMemBwClass> classes;
     CpuMemBwModeSummary single;

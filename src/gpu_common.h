@@ -455,6 +455,7 @@ struct BenchmarkConfig {
     std::string   memoryLabelOverride;
     bool          particlesOverridden = false;
     bool          headless           = false;    // pure compute, no window/swapchain/present
+    bool          particleFixedCoverage = false; // rendered stream only; separate score contract
     bool          guiWorker          = false;    // internal: isolated WinUI child process
     Workload      workload           = Workload::Stream;
     float         softening          = 0.01f;     // N-body: avoids 1/0 singularity

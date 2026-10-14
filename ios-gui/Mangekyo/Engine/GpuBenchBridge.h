@@ -39,6 +39,9 @@ GPB_API char* gpb_engine_version(void); // malloc'd; caller gpb_free()
 
 // Probe operations: returns allocated JSON array of GPUs. Must call gpb_free().
 GPB_API char* gpb_list_gpus(void);
+GPB_API bool gpb_cpu_core_types_available(void);
+GPB_API bool gpb_cpu_efficiency_foreground_default(void);
+GPB_API bool gpb_cpu_memory_efficiency_foreground_default(void);
 
 // Run CPU benchmarks in-process; GPU tests use gpb_start_workload. Mutex-protected to guarantee one run at a time.
 // argv/argc are standard command-line args. The live output callback context pointer

@@ -118,6 +118,16 @@ hosted bridge tests on the iOS 18.5 simulator. Physical iPhone/iPad performance,
 iOS 16 runtime acceptance, thermal contracts and App Store distribution remain
 unverified.
 
+2026-10-14 physical follow-up: A15 CPU P/E/all-core tests passed. The iOS E
+compute stage now uses user-initiated QoS with P-load helpers and runtime-resolved
+Recount `thread_selfcounts` SPI to verify the measured thread's E CPU time.
+Two runs measured 89.658/89.551 MWork/s at about 2.016GHz, >=99.999% E residency.
+The default CPU suite uses this method, saves it separately from background E
+scores, and rejects background E results during resume. The SPI is not a public
+SDK API: this documents development-signed device validation, not App Store
+distribution acceptance. The memory sweep retains its own background E contract.
+See [core-type methodology](../docs/apple-cpu-core-types.md).
+
 The saved-curve reader was verified on 2026-10-13 with 139 shared parser/geometry
 checks and unsigned device/simulator builds. Actual CPU, Vulkan and Metal saved
 curves were inspected in the macOS GUI; the iOS UI was build-checked only for
@@ -257,3 +267,26 @@ these targeted runs wait for reported nominal thermal state, up to600s per job.
 No user-facing option was added. See
 `out/test-results/apple-targeted-retest-20261014/report.md` for selected18
 retests, all22 new records, thermal provenance and updated complete32-row sets.
+
+## 2026-10-14 A15 foreground CPU and GPU cache follow-up
+
+A15 normal-priority E compute passed two physical runs (89.658/89.551 MWork/s).
+Foreground E cache/memory then passed with 186 verified P/E points; all-core
+read35.178GB/s, E L1/L2/memory read46.4/31.0/21.9GB/s. P placement helpers are
+excluded from scores. See `docs/apple-cpu-core-types.md` for the private counter
+interface and its runtime validation limits. Old background results remain
+separate and cannot satisfy the new foreground resume contract.
+
+GPU cache-state follow-up completed three full scans, including doubled serial
+loads, and saved372 points. A15 exposes only timestamp/GPUTimestamp through
+public Metal counters in this session; external tracing collected no cache
+counter samples. GPU L2/L3/SLC attribution remains unverified. Full inventory
+and timing-only evidence are retained in new saved configurations.
+
+The complete-test button is at the top. Actual simulator button acceptance
+found two Vulkan16M allocation failures; capability probing now reports the
+minimum storage-buffer/allocation limit and excludes larger particle presets
+from its Vulkan plan, with a visible explanation. Individual Run also rejects
+above-limit particle counts. The failed attempt is preserved and full revised
+button acceptance is in progress. Failed jobs are shown with their count and
+individual errors instead of appearing only in the finished count.

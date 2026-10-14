@@ -40,8 +40,9 @@ bool IsRunning() {
     return g_running.load(std::memory_order_acquire);
 }
 
-bool VulkanAvailable(bool* liquidSupported) {
+bool VulkanAvailable(bool* liquidSupported, std::uint64_t* maxParticleBufferBytes) {
     if (liquidSupported) *liquidSupported = false;
+    if (maxParticleBufferBytes) *maxParticleBufferBytes = 0;
 #ifdef HAVE_VULKAN
     VkApplicationInfo app{};
     app.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -65,14 +66,26 @@ bool VulkanAvailable(bool* liquidSupported) {
     if (vkCreateInstance(&info, nullptr, &instance) != VK_SUCCESS) return false;
     std::uint32_t count = 0;
     const auto status = vkEnumeratePhysicalDevices(instance, &count, nullptr);
-    if (status == VK_SUCCESS && count > 0 && liquidSupported) {
+    if (status == VK_SUCCESS && count > 0 && (liquidSupported || maxParticleBufferBytes)) {
         std::vector<VkPhysicalDevice> devices(count);
         if (vkEnumeratePhysicalDevices(instance, &count, devices.data()) == VK_SUCCESS) {
             VkFormatProperties properties{};
             vkGetPhysicalDeviceFormatProperties(devices.front(), VK_FORMAT_R32_SFLOAT, &properties);
             const auto required = VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT | VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT |
                 VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
-            *liquidSupported = (properties.optimalTilingFeatures & required) == required;
+            if (liquidSupported) *liquidSupported = (properties.optimalTilingFeatures & required) == required;
+            if (maxParticleBufferBytes) {
+                VkPhysicalDeviceMaintenance3Properties allocation{};
+                allocation.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES;
+                VkPhysicalDeviceProperties2 limits{};
+                limits.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+                limits.pNext = &allocation;
+                vkGetPhysicalDeviceProperties2(devices.front(), &limits);
+                *maxParticleBufferBytes = limits.properties.limits.maxStorageBufferRange;
+                if (allocation.maxMemoryAllocationSize > 0)
+                    *maxParticleBufferBytes = std::min(*maxParticleBufferBytes,
+                        static_cast<std::uint64_t>(allocation.maxMemoryAllocationSize));
+            }
         }
     }
     vkDestroyInstance(instance, nullptr);
@@ -135,6 +148,8 @@ int RunWorkload(const RunRequest& request, std::string& errorOut) {
             if (!steps.empty()) config.steps = embedded_detail::ParseCount(steps, "steps");
             if (!repeats.empty()) config.repeats = embedded_detail::ParseCount(repeats, "repeats");
             if (!parallel.empty()) config.parallelSteps = embedded_detail::ParseCount(parallel, "parallel_steps");
+            config.isolationControls = embedded_detail::OptionValue(request.workloadId, "isolation_controls") == "1";
+            config.aluConditioning = embedded_detail::OptionValue(request.workloadId, "alu_conditioning") == "1";
             const bool save = embedded_detail::OptionValue(request.workloadId, "save") != "0";
             const int code = RunGpuCacheProbeCli(config, save);
             g_running.store(false, std::memory_order_release);
@@ -175,6 +190,9 @@ int RunWorkload(const RunRequest& request, std::string& errorOut) {
         BenchmarkConfig cfg;
         // The test and its size, as the desktop command line sets them.
         ApplyEmbeddedTest(request.workloadId, cfg);
+        if (cfg.workload == Workload::Stream && !cfg.headless &&
+            embedded_detail::OptionValue(request.workloadId, "coverage").empty())
+            cfg.particleFixedCoverage = true;
         if (api == "gles2") ApplyEs2Legacy(cfg);
         cfg.maxRunTimeSec = request.maxRunTimeSec > 0.0 ? request.maxRunTimeSec : 3.0;
         cfg.renderDocEnabled = false;

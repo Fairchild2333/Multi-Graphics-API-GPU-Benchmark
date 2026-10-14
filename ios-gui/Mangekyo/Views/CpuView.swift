@@ -93,13 +93,13 @@ struct CpuView: View {
 
                 Text(memoryMode
                      ? Localization.tr(
-                        "Takes about a minute and warms the device. The storage test writes a temporary file of up to 1 GiB in the app's documents and removes it afterwards. Close other apps first: the sweep uses a large part of the free memory.",
-                        "大约需要一分钟，设备会发热。存储测试会在 App 文档目录里写一个最大 1 GiB 的临时文件，测完即删除。请先关闭其他 App：扫描会占用大部分空闲内存。",
-                        "約 1 分かかり、端末が温かくなります。ストレージテストはアプリの書類フォルダに最大 1 GiB の一時ファイルを書き込み、終了後に削除します。空きメモリの大部分を使うため、先に他のアプリを閉じてください。")
+                        "Takes several minutes and warms the device. The storage test writes a temporary file of up to 1 GiB in the app's documents and removes it afterwards. Close other apps first: the sweep uses a large part of the free memory.",
+                        "需要几分钟，设备会发热。存储测试会在 App 文档目录里写一个最大 1 GiB 的临时文件，测完即删除。请先关闭其他 App：扫描会占用大部分空闲内存。",
+                        "数分かかり、端末が温かくなります。ストレージテストはアプリの書類フォルダに最大 1 GiB の一時ファイルを書き込み、終了後に削除します。空きメモリの大部分を使うため、先に他のアプリを閉じてください。")
                      : Localization.tr(
-                        "Single-core duration is applied once to each logical processor; the formal preset can take a long time.",
-                        "单核测试会依次测试每个逻辑处理器；正式测试可能耗时较长。",
-                        "単一コア時間は論理プロセッサごとに適用。正式プリセットは長時間かかる場合があります。"))
+                        "Tests both core types when placement can be verified. Efficiency cores use performance priority with helper load on performance cores. Only the measured thread contributes to its score; every round verifies core type. Progress pauses during verification.",
+                        "能验证归属时会分别测试大核和小核。小核采用性能优先级，大核辅助负载帮助调度；仅计分线程计入成绩，每轮验证核心类型。验证期间暂停刷新进度。",
+                        "コア種別を検証できる場合は両種別を測定。効率コアは性能優先度で実行し、性能コアに補助負荷をかけます。計測スレッドだけを採点し、各ラウンドで種別を検証します。検証中は進捗更新を停止します。"))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }

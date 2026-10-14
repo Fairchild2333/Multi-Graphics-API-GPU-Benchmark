@@ -1010,8 +1010,10 @@ void FillBlock(std::uint8_t* data, std::size_t bytes, std::uint64_t seed) {
 class BlockRunner {
 public:
     BlockRunner(const std::vector<CpuLogicalProcessor>& cpus, std::size_t blockBytes,
-                const KernelSet& kernels, CpuCoreType coreType = CpuCoreType::Automatic)
-        : blockBytes_(blockBytes), kernels_(kernels), workers_(cpus.size()), coreType_(coreType) {
+                const KernelSet& kernels, CpuCoreType coreType = CpuCoreType::Automatic,
+                bool foregroundEfficiency = false)
+        : blockBytes_(blockBytes), kernels_(kernels), workers_(cpus.size()), coreType_(coreType),
+          foregroundEfficiency_(foregroundEfficiency) {
         for (std::size_t i = 0; i < cpus.size(); ++i) {
             workers_[i].cpu = cpus[i];
             workers_[i].seed = 0x4d42u + i;
@@ -1092,7 +1094,9 @@ private:
     void WorkerMain(std::size_t index) {
         Worker& worker = workers_[index];
         worker.pinned = PinCurrentThread(worker.cpu);
-        CpuQosScope qos(coreType_);
+        CpuQosScope qos(coreType_, foregroundEfficiency_);
+        const bool directAccounting = coreType_ != CpuCoreType::Automatic &&
+            (foregroundEfficiency_ || CpuRequiresDirectTypeAccounting());
         // Allocating and filling here places the pages on this thread's node
         // and makes every page real before a read touches it.
         worker.block = static_cast<std::uint8_t*>(AllocatePages(blockBytes_));
@@ -1115,13 +1119,20 @@ private:
             }
             armed_.fetch_add(1, std::memory_order_acq_rel);
             while (!go_.load(std::memory_order_acquire)) CpuRelax();
-            const auto accountingStart = coreType_ == CpuCoreType::Automatic
+            const auto accountingStart = coreType_ == CpuCoreType::Automatic || directAccounting
                 ? CpuResidencySnapshot{} : CaptureCpuResidency();
+            const auto threadStart = directAccounting ? CaptureCpuThreadCounters() : CpuThreadCounters{};
             const auto start = Clock::now();
             RunKernel(worker, kernel);
             worker.seconds = std::chrono::duration<double>(Clock::now() - start).count();
             if (coreType_ != CpuCoreType::Automatic) {
-                worker.residency = EvaluateCpuResidency(accountingStart, CaptureCpuResidency(), coreType_);
+                worker.residency = directAccounting
+                    ? EvaluateCpuThreadCounters(threadStart, CaptureCpuThreadCounters(), coreType_)
+                    : EvaluateCpuResidency(accountingStart, CaptureCpuResidency(), coreType_);
+                if (foregroundEfficiency_) {
+                    const double busy = worker.residency.workerCpuNs / 1e9 / worker.seconds;
+                    if (busy < .90 || busy > 1.05) worker.residency.available = false;
+                }
                 if (!qos.applied()) worker.residency.available = false;
             }
             {
@@ -1180,6 +1191,7 @@ private:
     const KernelSet kernels_;
     std::vector<Worker> workers_;
     CpuCoreType coreType_;
+    bool foregroundEfficiency_;
 
     std::mutex mutex_;
     std::condition_variable wake_;
@@ -2196,6 +2208,7 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
         << "\tphysical_count=" << report.physicalCores
         << "\tlogical_count=" << report.logicalProcessors
         << "\tcore_type=" << CpuCoreTypeName(config.coreType)
+        << "\tefficiency_policy=" << (config.efficiencyForeground ? CpuForegroundEfficiencyPolicyName() : "background")
         << "\tall_threads=" << (runAll ? allThreads : 0)
         << "\treference_logical_index=" << (config.coreType == CpuCoreType::Automatic ? long(report.referenceLogicalIndex) : -1L)
         << "\tclass_count=" << report.classes.size()
@@ -2234,6 +2247,15 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
     for (std::size_t p = 0; p < plans.size(); ++p) {
         if (CpuStopRequested()) return;
         ModePlan& plan = plans[p];
+        CpuQosScope observerQos(plan.coreType == CpuCoreType::Efficiency
+            ? CpuCoreType::Efficiency : CpuCoreType::Automatic);
+        const bool foregroundE = plan.coreType == CpuCoreType::Efficiency && config.efficiencyForeground;
+        const bool useHelpers = foregroundE && !CpuRequiresDirectTypeAccounting();
+        const auto helpersCount = useHelpers ? AppleCoreTypeCount(CpuCoreType::Performance) : 0;
+        if ((useHelpers && (helpersCount == 0 || helpersCount > 64)) ||
+            (foregroundE && !CaptureCpuThreadCounters().available))
+            throw std::runtime_error("foreground_efficiency_thread_accounting_unavailable");
+        CpuPerformanceLoad helpers(helpersCount);
         const std::uint32_t threads = static_cast<std::uint32_t>(plan.cpus.size());
         const std::uint64_t memoryFrom = MemoryBandStart(plan.caches, threads);
         out << "\n[" << plan.name << "] ";
@@ -2252,7 +2274,7 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
 
         for (const std::uint64_t block : SweepBlocks(plan.maxBlockBytes)) {
             if (CpuStopRequested()) return;
-            BlockRunner runner(plan.cpus, static_cast<std::size_t>(block), kernels, plan.coreType);
+            BlockRunner runner(plan.cpus, static_cast<std::size_t>(block), kernels, plan.coreType, foregroundE);
             if (!runner.allocated()) {
                 out << std::setw(12) << FormatBytes(block)
                     << "   allocation failed; the sweep ends here\n";
@@ -2318,6 +2340,8 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
                                 << std::setprecision(6) << "\tp_fraction=" << observed.performanceFraction
                                 << "\trequested_lower_bound=" << observed.requestedLowerBound
                                 << "\teffective_ghz=" << observed.effectiveGHz
+                                << "\tworker_cpu_seconds=" << observed.workerCpuNs / 1e9
+                                << "\tmethod=" << (foregroundE ? "thread_selfcounts_perf_level_spi" : CpuResidencyMethod())
                                 << "\tsample_ms=" << measuredSampleSeconds * 1000.0 << "\tverified=1\n";
                         }
                     }
@@ -2360,6 +2384,18 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
                     << "\tmax_sample_ms=" << point.maxSampleMs << "\n";
             }
             progress(plan.name);
+        }
+        if (foregroundE) {
+            report.efficiencyHelpers = helpers.Finish();
+            for (std::size_t i = 0; i < report.efficiencyHelpers.size(); ++i) {
+                const auto& helper = report.efficiencyHelpers[i];
+                out << "CPUMEM_PLACEMENT_HELPER\tindex=" << i
+                    << "\trequested_lower_bound=" << helper.requestedLowerBound
+                    << "\teffective_ghz=" << helper.effectiveGHz
+                    << "\tverified=" << (helper.verified() ? 1 : 0) << '\n';
+                if (!CpuStopRequested() && !helper.verified())
+                    throw std::runtime_error("performance_placement_helper_not_verified");
+            }
         }
     }
 

@@ -138,6 +138,16 @@ static void JoinWorkerUnlocked() {
 
 extern "C" {
 
+bool gpb_cpu_core_types_available(void) {
+    return gpu_bench::CpuCoreTypeSchedulingSupported();
+}
+bool gpb_cpu_efficiency_foreground_default(void) {
+    return gpu_bench::DefaultCpuEfficiencyForeground();
+}
+bool gpb_cpu_memory_efficiency_foreground_default(void) {
+    return gpu_bench::DefaultCpuMemoryEfficiencyForeground();
+}
+
 void gpb_set_working_dir(const char* path) {
     if (path && *path) chdir(path);
 }
@@ -283,7 +293,8 @@ char* gpb_list_gpus(void) {
     // Use ProbeMetalDevices() directly — cliMain is not available on iOS.
     auto devices = gpu_bench::ProbeMetalDevices();
     bool vulkanLiquid = false;
-    const bool vulkan = gpu_bench::ios_host::VulkanAvailable(&vulkanLiquid);
+    std::uint64_t vulkanBufferBytes = 0;
+    const bool vulkan = gpu_bench::ios_host::VulkanAvailable(&vulkanLiquid, &vulkanBufferBytes);
     const auto gles2MaxSteps = gpu_bench::IosGlesMaxSteps();
     const bool gles2 = gles2MaxSteps > 0;
     const auto cacheParallelSteps = gpu_bench::GpuCacheDefaultParallelSteps();
@@ -299,6 +310,8 @@ char* gpb_list_gpus(void) {
              << ",\"vulkan\":" << (vulkan ? "true" : "false")
              << ",\"vulkanImplementation\":\"MoltenVK\""
              << ",\"vulkanLiquid\":" << (vulkanLiquid ? "true" : "false")
+             << ",\"vulkanMaxParticleBufferBytes\":" << vulkanBufferBytes
+             << ",\"vulkanMaxParticles\":" << (vulkanBufferBytes / sizeof(gpu_bench::Particle))
              << ",\"gpuCache\":" << (d.hasUnifiedMemory ? "true" : "false")
              << ",\"gpuCacheParallelSteps\":" << cacheParallelSteps
              << ",\"gles2\":" << (gles2 ? "true" : "false")

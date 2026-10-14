@@ -8,11 +8,11 @@
 
 layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
 
-layout(set = 0, binding = 0, std430) readonly buffer SourceBuffer {
+layout(set = 0, binding = 0, std430) readonly volatile buffer SourceBuffer {
     vec4 data[];
 } src;
 
-layout(set = 0, binding = 1, std430) writeonly buffer DestinationBuffer {
+layout(set = 0, binding = 1, std430) writeonly volatile buffer DestinationBuffer {
     vec4 data[];
 } dst;
 
@@ -23,21 +23,26 @@ layout(push_constant) uniform MemBwParams {
     uint groupsX;
     uint seed;
     float never;
+    uint repeats;
 } params;
 
 void main() {
     const uint group = gl_WorkGroupID.x + gl_WorkGroupID.y * params.groupsX;
     if (group >= params.totalGroups) return;
 
-    const uint base = (group % params.chunkCount) * params.stripesPerChunk * 256u
+    // One workgroup owns a chunk; repeat within each invocation instead of
+    // letting several workgroups race to store to the same destination.
+    const uint base = group * params.stripesPerChunk * 256u
                     + gl_LocalInvocationID.x;
 
-    for (uint stripe = 0u; stripe < params.stripesPerChunk; stripe += 2u) {
-        const uint first = base + stripe * 256u;
-        const uint second = base + (stripe + 1u) * 256u;
-        const vec4 a = src.data[first];
-        const vec4 b = src.data[second];
-        dst.data[first] = a;
-        dst.data[second] = b;
+    for (uint pass = 0u; pass < params.repeats; ++pass) {
+        for (uint stripe = 0u; stripe < params.stripesPerChunk; stripe += 2u) {
+            const uint first = base + stripe * 256u;
+            const uint second = base + (stripe + 1u) * 256u;
+            const vec4 a = src.data[first];
+            const vec4 b = src.data[second];
+            dst.data[first] = a;
+            dst.data[second] = b;
+        }
     }
 }

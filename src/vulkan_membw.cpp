@@ -2,6 +2,7 @@
 
 #include "gpu_common.h"
 #include "gpu_engine.h"
+#include "vulkan_timing_validation.h"
 
 #include <vulkan/vulkan.h>
 
@@ -52,8 +53,8 @@ constexpr std::uint32_t kCheckWords = 2 * kGroupSize;
 // The system-memory pass needs a buffer of at least this many chunks (64 MiB).
 constexpr std::uint32_t kMinHostChunks = 128;
 
-// Must match the push-constant block of the membw_*.comp kernels. `repeats` is
-// only declared by membw_l1.comp.
+// Must match the membw_*.comp push constants. Repeats drives both private-block
+// reads and uniquely-owned write/copy loops.
 struct PushParams {
     std::uint32_t chunkCount;
     std::uint32_t stripesPerChunk;
@@ -73,6 +74,7 @@ struct KernelInfo {
 
 constexpr std::size_t kReadKernel = 0;
 constexpr std::size_t kWriteKernel = 1;
+constexpr std::size_t kCopyKernel = 2;
 constexpr std::size_t kL1Kernel = 3;
 constexpr std::size_t kCheckKernel = 4;  // never timed
 // The first kSweepKernelCount entries run the data-set sweep; the L1 kernel
@@ -324,6 +326,8 @@ private:
     Sample SubmitCopy(VkBuffer source, VkBuffer destination, VkDeviceSize bytes);
     Sample SubmitClear(VkBuffer buffer);
     void CreateReadback();
+    void RecordResourceBarrier();
+    void VerifyWrittenData(std::size_t kernel, std::uint32_t chunks);
     enum class DataCheck { Good, Wrong, NotRun };
     DataCheck CheckData(std::uint32_t chunkCount, std::uint32_t& wrongThreads);
     bool FillChecked(bool hostBuffer, std::uint32_t& chunkCount, std::uint32_t minChunks);
@@ -382,6 +386,7 @@ private:
     bool useGpuTimestamps_ = false;
     double targetDispatchMs_ = 4.0;
     std::uint32_t timestampAnomalies_ = 0;
+    std::uint32_t writeCopyChecks_ = 0;
 };
 
 void Runner::CreateInstance() {
@@ -498,6 +503,40 @@ void Runner::SelectDevice(MemBwReport& report) {
     report.unifiedMemory = props_.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ||
                            props_.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU;
     report.deviceLocalHeapMB = static_cast<std::uint32_t>(deviceLocalHeapBytes_ / kMiB);
+    // Optional device-side discovery only. Advertising a counter is not
+    // evidence that it was sampled, nor that a curve belongs to that cache.
+    std::uint32_t extensionCount = 0;
+    if (vkEnumerateDeviceExtensionProperties(physical_, nullptr, &extensionCount, nullptr) == VK_SUCCESS) {
+        std::vector<VkExtensionProperties> extensions(extensionCount);
+        if (vkEnumerateDeviceExtensionProperties(physical_, nullptr, &extensionCount, extensions.data()) == VK_SUCCESS)
+            for (const auto& extension : extensions)
+                if (std::strcmp(extension.extensionName, VK_KHR_PERFORMANCE_QUERY_EXTENSION_NAME) == 0)
+                    report.performanceQueryAdvertised = true;
+    }
+    if (report.performanceQueryAdvertised) {
+        const auto enumerate = reinterpret_cast<PFN_vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR>(
+            vkGetInstanceProcAddr(instance_, "vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR"));
+        report.performanceCounterStatus = "enumeration_unavailable";
+        std::uint32_t count = 0;
+        if (enumerate && enumerate(physical_, queueFamily_, &count, nullptr, nullptr) == VK_SUCCESS && count <= 4096) {
+            std::vector<VkPerformanceCounterKHR> counters(count);
+            std::vector<VkPerformanceCounterDescriptionKHR> descriptions(count);
+            for (auto& counter : counters) counter.sType = VK_STRUCTURE_TYPE_PERFORMANCE_COUNTER_KHR;
+            for (auto& description : descriptions) description.sType = VK_STRUCTURE_TYPE_PERFORMANCE_COUNTER_DESCRIPTION_KHR;
+            if (enumerate(physical_, queueFamily_, &count, counters.data(), descriptions.data()) == VK_SUCCESS) {
+                report.performanceCounterStatus = "enumerated_not_sampled";
+                for (std::uint32_t i = 0; i < count; ++i) {
+                    std::string name = descriptions[i].name;
+                    for (char& ch : name) if (ch == ';' || ch == ',' || ch == '=' || ch == '\t' || ch == '\n') ch = '_';
+                    if (!report.performanceCounterInventory.empty()) report.performanceCounterInventory += ',';
+                    report.performanceCounterInventory += name;
+                }
+            }
+        }
+    }
+    out_ << "MEMBW_COUNTERS\textension_advertised=" << (report.performanceQueryAdvertised ? 1 : 0)
+         << "\tstatus=" << report.performanceCounterStatus
+         << "\tinventory=" << report.performanceCounterInventory << "\tcache_attribution=unverified\n";
 }
 
 void Runner::CreateDevice() {
@@ -811,8 +850,22 @@ void Runner::CreateCommandObjects() {
 }
 
 // Data-set sweep dispatch: every chunk is visited `passes` times.
+void Runner::RecordResourceBarrier() {
+    VkMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+    barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT |
+                            VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+    vkCmdPipelineBarrier(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT,
+        0, 1, &barrier, 0, nullptr, 0, nullptr);
+}
+
 Runner::Sample Runner::Dispatch(std::size_t kernel, std::uint32_t chunkCount,
                                 std::uint64_t passes) {
+    if (kernel == kWriteKernel || kernel == kCopyKernel)
+        return Submit(kernel, chunkCount, kStripesPerChunk, chunkCount,
+                      static_cast<std::uint32_t>(passes));
     return Submit(kernel, chunkCount, kStripesPerChunk,
                   static_cast<std::uint64_t>(chunkCount) * passes, 0);
 }
@@ -831,6 +884,7 @@ Runner::Sample Runner::Submit(std::size_t kernel, std::uint32_t chunkCount,
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     Check(vkBeginCommandBuffer(cmd_, &beginInfo), "vkBeginCommandBuffer");
+    RecordResourceBarrier();
     if (queryPool_) vkCmdResetQueryPool(cmd_, queryPool_, 0, 2);
     vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipelines_[kernel]);
     vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout_, 0, 1,
@@ -854,6 +908,7 @@ Runner::Sample Runner::SubmitCopy(VkBuffer source, VkBuffer destination, VkDevic
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     Check(vkBeginCommandBuffer(cmd_, &beginInfo), "vkBeginCommandBuffer");
+    RecordResourceBarrier();
     if (queryPool_) {
         vkCmdResetQueryPool(cmd_, queryPool_, 0, 2);
         vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queryPool_, 0);
@@ -862,6 +917,14 @@ Runner::Sample Runner::SubmitCopy(VkBuffer source, VkBuffer destination, VkDevic
     vkCmdCopyBuffer(cmd_, source, destination, 1, &region);
     if (queryPool_)
         vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TRANSFER_BIT, queryPool_, 1);
+    if (destination == readback_.buffer) {
+        VkMemoryBarrier barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
+        vkCmdPipelineBarrier(cmd_, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT,
+            0, 1, &barrier, 0, nullptr, 0, nullptr);
+    }
     return Execute();
 }
 
@@ -872,6 +935,7 @@ Runner::Sample Runner::SubmitClear(VkBuffer buffer) {
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     Check(vkBeginCommandBuffer(cmd_, &beginInfo), "vkBeginCommandBuffer");
+    RecordResourceBarrier();
     if (queryPool_) {
         vkCmdResetQueryPool(cmd_, queryPool_, 0, 2);
         vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queryPool_, 0);
@@ -896,7 +960,7 @@ Runner::DataCheck Runner::CheckData(std::uint32_t chunkCount, std::uint32_t& wro
     range.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
     range.memory = readback_.memory;
     range.size = VK_WHOLE_SIZE;
-    vkInvalidateMappedMemoryRanges(device_, 1, &range);
+    Check(vkInvalidateMappedMemoryRanges(device_, 1, &range), "vkInvalidateMappedMemoryRanges");
     std::uint32_t words[kCheckWords];
     std::memcpy(words, readbackMapped_, sizeof(words));
     for (std::uint32_t i = 0; i < kGroupSize; ++i)
@@ -926,9 +990,7 @@ bool Runner::FillChecked(bool hostBuffer, std::uint32_t& chunkCount, std::uint32
             return true;
         }
         if (check == DataCheck::NotRun) {
-            out_ << "[membw] Data check: could not be done on this device, so the " << what
-                 << " of " << FormatMiB(chunkCount * kChunkBytes) << " is used unchecked.\n";
-            return true;
+            throw std::runtime_error("Vulkan memory data check did not execute or cannot be read back; no unchecked score is saved");
         }
         out_ << "[membw] Data check: a " << what << " of " << FormatMiB(chunkCount * kChunkBytes)
              << " does not give back what was stored in it (" << wrongThreads << " of "
@@ -991,11 +1053,14 @@ Runner::Sample Runner::Execute() {
 }
 
 double Runner::TimeOf(const Sample& sample) {
+    if (!std::isfinite(sample.wallMs) || sample.wallMs <= 0)
+        throw std::runtime_error("Invalid synchronized Vulkan wall-clock interval");
     if (!useGpuTimestamps_) return sample.wallMs;
-    // A GPU interval cannot exceed the wall-clock interval that contains it.
-    if (sample.gpuMs <= 0.0 || sample.gpuMs > sample.wallMs * 1.1 + 0.1) {
+    if (!VulkanTimestampIntervalVerified(sample.gpuMs, sample.wallMs)) {
         ++timestampAnomalies_;
-        return sample.wallMs;
+        // Per-sample fallback used to mix two timing contracts inside one
+        // median/curve, while labeling everything gpu_timestamp.
+        throw std::runtime_error("Vulkan timestamps became unreliable during the sweep; mixed timing is rejected and no score is saved");
     }
     return sample.gpuMs;
 }
@@ -1004,6 +1069,12 @@ double Runner::TimeOf(const Sample& sample) {
 // latch both timestamps when the commands are processed rather than executed.
 void Runner::DecideTimingSource(MemBwReport& report) {
     useGpuTimestamps_ = false;
+#ifdef GPU_BENCH_MOLTENVK
+    // A12X passed startup scaling but later dispatch intervals failed the
+    // synchronized check. Select one source before measuring any curve point;
+    // long dispatches below limit submission and wake-up overhead.
+    out_ << "[membw] MoltenVK uses synchronized wall-clock timing for the entire sweep.\n";
+#else
     if (queryPool_) {
         const std::uint32_t chunks = (std::min)(maxChunks_, 512u);
         const std::uint64_t maxPasses = MaxPasses(chunks);
@@ -1020,26 +1091,18 @@ void Runner::DecideTimingSource(MemBwReport& report) {
             largeWall = (std::min)(largeWall, sample.wallMs);
         }
         const double ratio = small > 0.0 ? large / small : 0.0;
-        useGpuTimestamps_ = ratio >= 2.5 && ratio <= 6.0;
+        useGpuTimestamps_ = ratio >= 2.5 && ratio <= 6.0 &&
+                           VulkanTimestampIntervalVerified(large, largeWall);
         out_ << "[membw] Timing check: a read of " << FormatMiB(passes * 4 * chunks * kChunkBytes)
              << " took " << std::fixed << std::setprecision(3) << large << " ms by the GPU's clock, "
              << largeWall << " ms by wall clock.\n";
         if (!useGpuTimestamps_) {
-            out_ << "[membw] GPU timestamps do not scale with the workload (x4 work -> x"
+            out_ << "[membw] GPU timestamps failed scaling or synchronized interval checks (x4 work -> x"
                  << std::fixed << std::setprecision(2) << ratio
                  << " time); falling back to wall-clock timing.\n";
-        } else if (large < 0.5 * largeWall && largeWall - large > 2.0) {
-            // They can scale with the work and still leave most of it out. An
-            // Adreno 660 (driver 512.530, 2026-10-07) read 116 GB/s at every
-            // data-set size up to 512 MiB, twice what its memory can deliver.
-            // The margin of 2 ms keeps the cost of a submit and a wake-up, which
-            // only the wall clock sees, from deciding this on a fast GPU.
-            useGpuTimestamps_ = false;
-            out_ << "[membw] GPU timestamps cover " << std::fixed << std::setprecision(2) << large
-                 << " ms of a dispatch that took " << largeWall
-                 << " ms by wall clock; falling back to wall-clock timing.\n";
         }
     }
+#endif
     report.timingSource = useGpuTimestamps_ ? "gpu_timestamp" : "wall_clock";
     // Wall-clock timing includes submit and wake-up latency, so use longer
     // dispatches to keep that overhead small.
@@ -1094,7 +1157,26 @@ MemBwPoint Runner::MeasurePoint(std::size_t kernel, std::uint32_t chunkCount,
     point.passes = static_cast<std::uint32_t>(passes);
     point.bytesPerDispatch = chunkCount * passes * kKernels[kernel].bytesPerChunkVisit;
     FillStatistics(point, times);
+    VerifyWrittenData(kernel, chunkCount);
     return point;
+}
+
+void Runner::VerifyWrittenData(std::size_t kernel, std::uint32_t chunks) {
+    if (kernel != kWriteKernel && kernel != kCopyKernel) return;
+    const VkDescriptorSet saved = activeSet_;
+    // Verify the copy destination rather than only its source. The GPU is
+    // idle after each dispatch; restoring binding0 preserves the next kernel.
+    if (kernel == kCopyKernel) {
+        activeSet_ = descriptorSet_;
+        WriteDescriptorSet(descriptorSet_, destination_.buffer);
+    }
+    std::uint32_t wrong = 0;
+    const auto check = CheckData(chunks, wrong);
+    if (kernel == kCopyKernel) WriteDescriptorSet(descriptorSet_, source_.buffer);
+    activeSet_ = saved;
+    if (check != DataCheck::Good)
+        throw std::runtime_error("Vulkan measured write/copy failed data verification; no score is saved");
+    ++writeCopyChecks_;
 }
 
 // L1 sweep point. Under full load every concurrently running workgroup gets
@@ -1242,6 +1324,7 @@ void Runner::Run(MemBwReport& report) {
     // and make sure the kernels see in it what was stored.
     if (!FillChecked(false, maxChunks_, 2))
         throw std::runtime_error("The device does not give back the data stored in a 1 MiB buffer");
+    report.dataVerified = true;
     report.maxDatasetBytes = maxChunks_ * kChunkBytes;
     report.datasetLimitedByDevice = report.maxDatasetBytes < config_.maxDatasetBytes;
     // The driver copies of the system-memory pass go through the destination buffer.
@@ -1294,12 +1377,15 @@ void Runner::Run(MemBwReport& report) {
     report.copy = Summarise(report.points, "copy");
     report.l1 = SummariseL1(report.points);
     report.timestampAnomalies = timestampAnomalies_;
+    report.writeCopyChecks = writeCopyChecks_;
     report.durationSec = std::chrono::duration<double>(
         std::chrono::steady_clock::now() - runStart).count();
 
     out_ << "MEMBW_DEVICE\tname=" << report.deviceName
          << "\tmemory=" << (report.unifiedMemory ? "system" : "vram")
          << "\ttiming=" << report.timingSource
+         << "\tdata_verified=" << (report.dataVerified ? 1 : 0)
+         << "\twrite_copy_checks=" << report.writeCopyChecks
          << "\tmax_dataset_bytes=" << report.maxDatasetBytes << "\n";
     out_ << "\n--- Summary (" << memoryLabel << " plateau = median of the largest data sets) ---\n";
     const struct { const char* name; const MemBwKernelSummary* summary; } rows[] = {

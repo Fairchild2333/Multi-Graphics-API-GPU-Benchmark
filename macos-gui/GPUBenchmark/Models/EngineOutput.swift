@@ -206,12 +206,14 @@ struct RunOutput: Sendable {
     var affinityCapability = ""
     var coreTypeSelection = "auto"
     var memoryResidencyLowerBound: Double?
+    var memoryEfficiencyForeground = false
     /// Fraction of the run that is done, once the engine has reported one.
     var progress: Double?
     var stage: Stage?
 
     // CPU compute test.
     var coreScores: [CoreScore] = []
+    var efficiencyForeground = false
     var singleAverage: ScoreValue?
     var multiScore: ScoreValue?
 
@@ -365,6 +367,7 @@ struct RunOutput: Sendable {
             }
         }
         output.coreTypeSelection = f["coreType"] ?? "auto"
+        output.memoryEfficiencyForeground = f["efficiencyPolicy"] == "foreground_with_performance_load"
         if f["residencyVerified"] == "1" {
             let bounds = f.filter { $0.key.hasPrefix("residency_single") }.flatMap { item in
                 item.value.split(separator: ",").compactMap { sample -> Double? in
@@ -606,9 +609,12 @@ struct RunOutput: Sendable {
 
         case "CPU_SCHEDULING":
             coreTypeSelection = f["core_type"] ?? "auto"
+            efficiencyForeground = f["efficiency_policy"] == "foreground_with_performance_load"
             if coreTypeSelection != "auto" {
                 coreLabels[0] = Localization.tr("Performance core", "大核", "性能コア")
-                coreLabels[1] = Localization.tr("Efficiency core", "小核", "効率コア")
+                coreLabels[1] = efficiencyForeground
+                    ? Localization.tr("Efficiency core (performance priority)", "小核（性能优先级）", "効率コア（性能優先度）")
+                    : Localization.tr("Efficiency core (background)", "小核（后台策略）", "効率コア（バックグラウンド）")
             }
 
         case "CPU_TOPOLOGY":
@@ -663,6 +669,7 @@ struct RunOutput: Sendable {
 
         case "CPUMEM_META":
             coreTypeSelection = f["core_type"] ?? "auto"
+            memoryEfficiencyForeground = f["efficiency_policy"] == "foreground_with_performance_load"
             cpuName = f["name"] ?? cpuName
             logicalCount = whole("logical_count") ?? logicalCount
             physicalCount = whole("physical_count") ?? physicalCount

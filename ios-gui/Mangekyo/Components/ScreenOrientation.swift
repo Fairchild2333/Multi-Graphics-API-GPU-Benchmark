@@ -21,7 +21,18 @@ enum ScreenOrientation {
     /// Landscape for a running test, or back to the way the device is held.
     /// An iPad that shows the app beside another one ignores the request.
     static func setLandscape(_ landscape: Bool) {
-        AppDelegate.orientations = landscape ? .landscape : .allButUpsideDown
+        setAllowed(landscape ? .landscape : .allButUpsideDown)
+    }
+
+    static func setSuitePresentation(rendering: Bool) {
+        // Restore portrait on a phone when a GPU picture ends, even if its
+        // orientation lock kept the preceding landscape geometry in place.
+        setAllowed(rendering ? .landscape : UIDevice.current.userInterfaceIdiom == .phone
+            ? .portrait : .allButUpsideDown)
+    }
+
+    private static func setAllowed(_ orientations: UIInterfaceOrientationMask) {
+        AppDelegate.orientations = orientations
         for scene in UIApplication.shared.connectedScenes {
             guard let windowScene = scene as? UIWindowScene else { continue }
             windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: AppDelegate.orientations))

@@ -1,5 +1,10 @@
 # Native Metal cache-state diagnostic
 
+Latest method review: [cache attribution and device-only execution](cache-attribution-methods.md).
+Vulkan memory now uses `membw_v2_verified`, with mandatory data checks and a
+single timing source per successful run. Its inferred workgroup/cache plateaus
+remain distinct from independent hardware-level L2/L3/SLC attribution.
+
 `--gpu-cache-probe` supplements the existing Vulkan bandwidth/L1 sweep and
 particle-derived Metal memory sweep. It does not change either test or their
 historical score contracts. It is a separate `gpu_cache` workload, saved as
@@ -73,7 +78,51 @@ Saved curves are available from the Apple GUI's **Cache & memory curves** viewer
 They preserve latency and payload-bandwidth units separately from existing
 CPU/Vulkan/Metal bandwidth results.
 
-## Older iOS GPU parallel profile
+## A15 follow-up evidence (2026-10-14)
+
+The physical iPhone 13 Pro completed three full scans (124 points each),
+including a doubled serial-load control with unchanged parallel work. All
+checksums passed. The public counter inventory was only
+`timestamp/GPUTimestamp`; raw output and new saved configurations now retain
+the full inventory plus `attributionEvidence=timing_and_checksum_only`.
+The benchmark kernel and default measurement contract are unchanged.
+
+An external Metal System Trace was also recorded, but its actual counter
+profile was zero and the exported counter tables contained no samples.
+Attempts to configure Instruments timed out. This is a limitation of the
+evidence collected in this session, not proof that hardware counters can never
+be collected. L2/L3/SLC attribution remains unverified and is not a completed
+independent hardware measurement.
+
+Later in the same session, Instruments opened successfully. Saving the actual
+A15 Performance Limiters configuration established profile3; a native scan
+recorded30 hardware metrics, including GPU LLC limiter/utilization, MMU and
+external GPU bandwidth. The final trace and a bounded1000-interval sample are
+archived. These are hardware observations, not isolated L2/L3/SLC speed or
+capacity results: the available metrics do not expose separate named SLC
+traffic/hits, and GPU-external bandwidth is not necessarily DRAM-only.
+The five complete scans saved620 curve points; final phone history125 retains
+all120 original rows. No hardware-level attribution flag was changed.
+
+Evidence: [A15 follow-up report](../out/test-results/a15-gpu-cache-final-20261014/report.md),
+raw physical Documents, two native-test log attachments, trace and curves.
+
+## Additional physical A15 controls
+
+The later first-pass experiment completed two 11-span × 11-condition × 7-repeat
+physical runs, including a separately versioned ALU-only preconditioning control.
+Each timed first pass visits at most8192 distinct nodes and immediately revisits
+the same addresses, with 2/8/32/128 MiB CPU/GPU read-dose controls. Its484 points
+are stored as `gpu_cache_controls`, separate from the default suite score.
+The default124-point suite then completed again; phone history128 preserves all
+125 previous objects. A bounded external counter sample now intersects actual
+labeled GPU execution, rather than only background activity before the benchmark.
+Working-state sensitivity remains substantial; neither these controls nor LLC
+percent/external GPU bandwidth proves isolated L2/L3/SLC peak speeds.
+
+See [first-pass report and curves](../out/test-results/a15-cache-isolation-20261014/report.md).
+
+## Older iOS GPU parallel profile (device safety)
 
 Physical iPad8,7 (Apple A12X, iOS 26.7.1) twice entered GPU recovery at the
 48 MiB parallel pass with 4096 chains × 8192 dependent loads. Its three serial

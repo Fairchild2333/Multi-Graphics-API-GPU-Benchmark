@@ -10,7 +10,7 @@
 
 layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
 
-layout(set = 0, binding = 0, std430) writeonly buffer SourceBuffer {
+layout(set = 0, binding = 0, std430) writeonly volatile buffer SourceBuffer {
     vec4 data[];
 } dst;
 
@@ -21,6 +21,7 @@ layout(push_constant) uniform MemBwParams {
     uint groupsX;
     uint seed;
     float never;
+    uint repeats;
 } params;
 
 vec4 hashValue(uint index) {
@@ -36,13 +37,17 @@ void main() {
     const uint group = gl_WorkGroupID.x + gl_WorkGroupID.y * params.groupsX;
     if (group >= params.totalGroups) return;
 
-    const uint base = (group % params.chunkCount) * params.stripesPerChunk * 256u
+    // Unique chunk ownership removes cross-workgroup write races. Volatile
+    // keeps every requested repetition from collapsing to one final store.
+    const uint base = group * params.stripesPerChunk * 256u
                     + gl_LocalInvocationID.x;
 
-    for (uint stripe = 0u; stripe < params.stripesPerChunk; stripe += 2u) {
-        const uint first = base + stripe * 256u;
-        const uint second = base + (stripe + 1u) * 256u;
-        dst.data[first] = hashValue(first);
-        dst.data[second] = hashValue(second);
+    for (uint pass = 0u; pass < params.repeats; ++pass) {
+        for (uint stripe = 0u; stripe < params.stripesPerChunk; stripe += 2u) {
+            const uint first = base + stripe * 256u;
+            const uint second = base + (stripe + 1u) * 256u;
+            dst.data[first] = hashValue(first);
+            dst.data[second] = hashValue(second);
+        }
     }
 }

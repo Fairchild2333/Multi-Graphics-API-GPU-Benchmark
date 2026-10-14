@@ -90,6 +90,19 @@ targets:
         HEADER_SEARCH_PATHS:
           - '"$(PROJECT_DIR)/Mangekyo/Engine"'
 
+  MangekyoUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: MangekyoUITests
+    dependencies:
+      - target: Mangekyo
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "6.0"
+
 schemes:
   Mangekyo:
     build:
@@ -98,3 +111,4 @@ schemes:
     test:
       targets:
         - MangekyoTests
+        - MangekyoUITests

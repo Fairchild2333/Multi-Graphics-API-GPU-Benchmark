@@ -4,9 +4,27 @@
 #include <iosfwd>
 #include <string>
 #include <vector>
+#include <atomic>
+#include <thread>
 #include "cpu_scheduling.h"
 
 namespace gpu_bench {
+
+// P-only placement pressure shared by E compute and memory measurements.
+// Helper work is never scored; Finish verifies and joins every helper.
+class CpuPerformanceLoad {
+public:
+    explicit CpuPerformanceLoad(std::uint32_t count);
+    ~CpuPerformanceLoad();
+    CpuPerformanceLoad(const CpuPerformanceLoad&) = delete;
+    CpuPerformanceLoad& operator=(const CpuPerformanceLoad&) = delete;
+    const std::vector<CpuResidency>& Finish();
+private:
+    std::atomic<bool> stop_{false};
+    std::atomic<std::uint32_t> ready_{0};
+    std::vector<CpuResidency> residency_;
+    std::vector<std::thread> workers_;
+};
 
 inline constexpr const char* kCpuBenchmarkWorkloadVersion = "cpu_mixed_v1";
 
@@ -37,6 +55,7 @@ struct CpuBenchmarkConfig {
     double warmupSeconds = 0.15;
     std::uint32_t roundCount = 3;
     CpuCoreType coreType = DefaultCpuCoreType(); // single-thread stages only
+    bool efficiencyForeground = DefaultCpuEfficiencyForeground();
 };
 
 struct CpuCoreResult {
@@ -52,6 +71,8 @@ struct CpuCoreResult {
     CpuCoreType coreType = CpuCoreType::Automatic;
     std::vector<CpuResidency> residencyRounds;
     std::uint32_t residencyRetries = 0;
+    bool foregroundEfficiency = false;
+    std::vector<CpuResidency> placementHelpers;
 };
 
 struct CpuMultiCoreResult {
@@ -64,6 +85,15 @@ struct CpuMultiCoreResult {
     std::uint32_t roundCount = 0;
     std::uint32_t medianRound = 0;
     std::string affinityMode;
+    // Contributions from the same selected round and common wall-clock
+    // denominator. A scheduler-managed worker is not a numbered core.
+    std::vector<double> workerScores;
+    bool typedScheduling = false;
+    bool verifiedCoreTypes = false;
+    std::vector<CpuResidency> workerResidencies;
+    std::vector<double> workerBusyFractions;
+    double processCpuSeconds = 0.0;
+    double performanceCpuSeconds = 0.0;
     bool valid = false;
 };
 

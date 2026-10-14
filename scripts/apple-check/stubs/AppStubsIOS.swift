@@ -8,6 +8,7 @@ import Foundation
 extension ProcessInfo {
     enum ThermalState: Int { case nominal, fair, serious, critical }
     var thermalState: ThermalState { .nominal }
+    var isLowPowerModeEnabled: Bool { false }
 }
 #endif
 

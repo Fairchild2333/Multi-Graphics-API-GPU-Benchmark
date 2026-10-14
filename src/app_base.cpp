@@ -367,6 +367,9 @@ void AppBase::Run() {
     // driver fault during teardown must not leave a false-success history row.
     CleanupBackend();
 
+    if (!IsTimingContractValid())
+        throw std::runtime_error("GPU timing source changed during measurement; mixed timing is rejected and no score is saved");
+
     if (AppendResult(result)) {
         std::cout << "[Results] Saved as " << result.id
                   << " -> " << ResultsFilePath() << std::endl;
@@ -1244,29 +1247,29 @@ void AppBase::PrintSummary() const {
             case Workload::CinematicLiquid: unit = "MParticle-step/s"; break;
             case Workload::SynthPeak:     unit = (config_.peakPrecision == Precision::INT32) ? "GIOPS" : "GFLOPS"; break;
         }
-        std::cout << "\n--- Thermal Stability ---\n"
+        std::cout << "\n--- Throughput Stability ---\n"
             << "Windows:      " << windowScores_.size() << " x 1s\n";
         if (thermalStable_) {
             std::cout << std::setprecision(2)
-                      << "Stable score: " << stableScore_ << " " << unit
+                      << "Stable window: " << stableScore_ << " " << unit
                       << "  (CV " << stableVariancePct_ << "%)\n";
         } else {
-            std::cout << "Stable score: not reached — keep running to detect throttling.\n";
+            std::cout << "Stable window: not detected; this run has not reached a stable plateau.\n";
         }
-        if (throttlePct_ > 0.0) {
+        if (windowScores_.size() >= 10) {
             std::cout << std::setprecision(1)
-                      << "Throttling:   early vs late mean dropped " << throttlePct_ << "%";
+                      << "Throughput:   early vs late mean change (drop positive) " << throttlePct_ << "%";
             if (throttlePct_ > 5.0) {
-                std::cout << "  (>> sustained throttle / thermal limit)";
+                std::cout << "  (>> review workload, timing and scheduling)";
             } else if (throttlePct_ > 2.0) {
-                std::cout << "  (mild — likely normal warmup drift)";
+                std::cout << "  (small throughput change)";
             }
             std::cout << "\n";
         }
         if (thermalStable_ && throttlePct_ < 2.0) {
-            std::cout << ">> Thermally stable; stableScore is a fair comparison metric.\n";
+            std::cout << ">> Stable throughput window detected; no hardware frequency was measured.\n";
         } else if (throttlePct_ > 5.0) {
-            std::cout << ">> Throttled: report stableScore (post-throttle), not peak.\n";
+            std::cout << ">> Throughput declined; retain the full-run mean and curve. A stable window may be earlier in the run.\n";
         }
     }
 
@@ -1287,6 +1290,10 @@ BenchmarkResult AppBase::CollectResult() const {
             r.workloadVersion = "stream_v1";
             workloadConfig << "particles=" << config_.particleCount
                            << ";bytesPerParticle=40";
+            if (!config_.headless && config_.particleFixedCoverage) {
+                r.workloadVersion += "_fixed_coverage_v2";
+                workloadConfig << ";renderCoverage=wrapped_ndc_v2;computeKernel=unchanged_stream_v1";
+            }
             // The same work in smaller work groups is still another shader.
             if (config_.computeWorkGroupSize != kComputeWorkGroupSize) {
                 r.workloadVersion += "_wg" + std::to_string(config_.computeWorkGroupSize);

@@ -103,7 +103,7 @@ enum GpuOptions {
     static func request(test: String, particles: Int, steps: Int, vsync: Bool = false, api: String = "metal") -> String {
         switch test {
         case "memory_sweep", "gpu_cache": return "\(test)?api=\(api)"
-        case "stream", "stream_headless": return "\(test)?particles=\(particles)&vsync=\(vsync ? 1 : 0)&api=\(api)"
+        case "stream", "stream_headless": return "\(test)?particles=\(particles)&vsync=\(vsync ? 1 : 0)&api=\(api)" + (test == "stream" ? "&coverage=fixed" : "")
         case "gpu_burn": return "gpu_burn?steps=\(steps)&vsync=\(vsync ? 1 : 0)&api=\(api)"
         default: return "\(test)?vsync=\(vsync ? 1 : 0)&api=\(api)"
         }
@@ -114,15 +114,17 @@ enum GpuOptions {
         if api == "gles2" { return "gpu_burn_es2_legacy_v1_fixed_steps_\(steps)_ios_preview_sync_timing" }
         if api == "vulkan" {
             switch test {
-            case "stream", "stream_headless": return "stream_v1_ios_preview_moltenvk"
-            case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview_moltenvk"
+            case "stream": return "stream_v1_fixed_coverage_v2_ios_preview_moltenvk"
+            case "stream_headless": return "stream_v1_ios_preview_moltenvk"
+            case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview_sync_timing_moltenvk"
             case "cinematic_liquid": return "cinematic_liquid_v2_…_ios_preview_moltenvk"
-            case "memory_sweep": return "membw_v1_ios_preview_moltenvk"
+            case "memory_sweep": return "membw_v2_verified_ios_preview_moltenvk"
             default: return test
             }
         }
         switch test {
-        case "stream", "stream_headless": return "stream_v1_ios_preview"
+        case "stream": return "stream_v1_fixed_coverage_v2_ios_preview_serial_timing_v2"
+        case "stream_headless": return "stream_v1_ios_preview"
         case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview"
         case "cinematic_liquid": return "cinematic_liquid_v2_physical_scene_v8_metal_preview_ios_preview"
         case "memory_sweep": return "metal_memory_sweep_v1_preview_ios_preview"
@@ -176,7 +178,8 @@ struct RunView: View {
         if selectedTest == "memory_sweep" || selectedTest == "gpu_cache" { return true }
         guard seconds != nil else { return false }
         switch selectedTest {
-        case "stream", "stream_headless": return particles != nil
+        case "stream", "stream_headless":
+            return particles != nil && (selectedApi != "vulkan" || (particles ?? Int.max) <= engine.vulkanMaxParticles)
         case "gpu_burn": return steps != nil
         default: return true
         }
@@ -186,10 +189,10 @@ struct RunView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
+                    completeSuiteCard
                     fullscreenCard
                     testsCard
                     settingsCard
-                    completeSuiteCard
                     summaryCard
                     GpuRunChartsCard(jobs: run.runOutput.jobs)
                     GpuMemoryResultsCard(output: run.runOutput)
@@ -244,10 +247,23 @@ struct RunView: View {
                     "共 \(engine.supportedSuiteJobs.count) 项：原生 Metal、可用的 GPU 缓存诊断和 CPU 全套。开启转译 API 后加入设备支持的 Vulkan 项目。成绩和曲线自动保存。",
                     "対応テスト \(engine.supportedSuiteJobs.count) 項目。Metal、対応 GPU キャッシュ診断と CPU 全項目。変換 API を有効にすると対応 Vulkan 項目も含みます。"))
                     .font(.caption).foregroundStyle(.secondary)
+                if engine.allowTranslatedApis && engine.vulkanAvailable && engine.vulkanMaxParticles < 16_777_216 {
+                    Text(Localization.tr(
+                        "Vulkan supports up to \(engine.vulkanMaxParticles) particles here. Larger presets are excluded from the complete test.",
+                        "此设备的 Vulkan 最多支持 \(engine.vulkanMaxParticles) 个粒子，完整测试不包含超过此限制的规格。",
+                        "Vulkan の粒子上限は \(engine.vulkanMaxParticles) です。上限を超える設定は全テストに含まれません。"))
+                        .font(.caption).foregroundStyle(.secondary)
+                }
                 if let report = engine.completeSuiteReport {
-                    Text(Localization.tr("Finished: \(report.finishedCount)/\(report.jobs.count) · Review: \(report.reviewCount)", "已完成 \(report.finishedCount)/\(report.jobs.count) · 待复核 \(report.reviewCount)", "完了 \(report.finishedCount)/\(report.jobs.count) · 要確認 \(report.reviewCount)"))
+                    Text(Localization.tr("Finished: \(report.finishedCount)/\(report.jobs.count) · Review: \(report.reviewCount) · Failed: \(report.failedCount)", "已结束 \(report.finishedCount)/\(report.jobs.count) · 待复核 \(report.reviewCount) · 失败 \(report.failedCount)", "終了 \(report.finishedCount)/\(report.jobs.count) · 要確認 \(report.reviewCount) · 失敗 \(report.failedCount)"))
                         .font(.subheadline)
+                        .accessibilityIdentifier("complete-suite-status")
+                        .accessibilityValue(report.status)
                     ProgressView(value: Double(report.finishedCount), total: Double(report.jobs.count))
+                    ForEach(report.jobs.filter { $0.status == "failed" }, id: \.id) { job in
+                        Text(job.title + ": " + job.error)
+                            .font(.caption).foregroundStyle(.red)
+                    }
                 }
                 Button {
                     resumeSuite = false
@@ -266,6 +282,7 @@ struct RunView: View {
                     Label(Localization.tr("Test all items", "一键测试全部项目", "全項目をテスト"), systemImage: "play.fill")
                 }
                 .buttonStyle(.borderedProminent)
+                .accessibilityIdentifier("complete-suite-all")
                 .disabled(engine.isRunning || fullscreen || suiteFullscreen || engine.workingDirectory.isEmpty || engine.gpus.isEmpty)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -549,7 +566,8 @@ struct RunView: View {
     }
 }
 
-/// Keep one Metal surface alive across GPU and CPU jobs, without dismissing between tests.
+/// Keep the surface attached across jobs; show an ordinary progress screen
+/// whenever the current measurement has no rendered GPU picture.
 private struct MobileSuiteFullscreenRun: View {
     @EnvironmentObject var engine: BenchEngine
     let resume: Bool
@@ -558,12 +576,16 @@ private struct MobileSuiteFullscreenRun: View {
     @State private var started = false
 
     private var currentJob: MobileSuiteJob? {
-        engine.completeSuiteJobs.indices.contains(engine.completeSuiteIndex)
+        engine.completeSuiteRunning && engine.completeSuiteJobs.indices.contains(engine.completeSuiteIndex)
             ? engine.completeSuiteJobs[engine.completeSuiteIndex] : nil
+    }
+    private var rendering: Bool { currentJob?.requiresRenderSurface == true }
+    private var channelState: BenchChannelState {
+        engine.state(for: currentJob?.gpuRequest == nil ? .cpu : .gpu)
     }
     var body: some View {
         ZStack(alignment: .top) {
-            Color.black.ignoresSafeArea()
+            (rendering ? Color.black : Color(uiColor: .systemGroupedBackground)).ignoresSafeArea()
             MetalBenchView(showGles: currentJob?.gpuRequest?.contains("api=gles2") == true) { layer, glLayer in
                 guard !started else { return }
                 started = true
@@ -574,32 +596,51 @@ private struct MobileSuiteFullscreenRun: View {
             }
             .aspectRatio(16.0 / 9.0, contentMode: .fit)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            if currentJob?.gpuRequest == nil {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("\(engine.completeSuiteIndex + 1)/\(engine.completeSuiteJobs.count) · " +
-                         (currentJob?.title ?? ""))
-                    Text(engine.state(for: currentJob?.gpuRequest == nil ? .cpu : .gpu).statusText)
-                        .font(.caption).lineLimit(1)
+            .opacity(rendering ? 1 : 0)
+            .allowsHitTesting(false)
+            if !rendering {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        Label(Localization.tr("Testing", "正在测试", "測定中"),
+                              systemImage: currentJob?.gpuRequest == nil ? "cpu" : "memorychip")
+                            .font(.largeTitle).fontWeight(.semibold)
+                        GlassCard {
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text(currentJob?.title ?? Localization.tr("Preparing…", "正在准备…", "準備中…"))
+                                    .font(.headline)
+                                Text("\(engine.completeSuiteIndex + 1) / \(max(1, engine.completeSuiteJobs.count))")
+                                    .foregroundStyle(.secondary)
+                                ProgressView(value: channelState.progressFraction)
+                                Text(channelState.statusText).foregroundStyle(.secondary)
+                                Text(Localization.tr(
+                                    "Keep the app open. Cache and memory curves can take several minutes. Progress updates pause during core verification; results appear when it finishes.",
+                                    "请保持应用在前台。缓存和内存曲线需要几分钟；验证核心时会暂停刷新进度，完成后显示成绩。",
+                                    "アプリを開いたままにしてください。キャッシュとメモリの曲線には数分かかります。コア検証中は進捗表示を一時停止します。"))
+                                    .font(.callout).foregroundStyle(.secondary)
+                            }.frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        Button(Localization.tr("Stop testing", "停止测试", "測定を停止")) {
+                            engine.cancelCompleteSuite()
+                        }.buttonStyle(.borderedProminent)
+                    }.padding(24)
                 }
-                Spacer()
-                Button(Localization.tr("Stop", "停止", "停止")) { engine.cancelCompleteSuite() }
-                    .buttonStyle(.bordered)
-            }
-            .padding(12)
-            .foregroundStyle(.white)
-            .background(.black.opacity(0.65))
             }
         }
-        .statusBarHidden(true)
-        .persistentSystemOverlays(.hidden)
+        .statusBarHidden(rendering)
+        .persistentSystemOverlays(rendering ? .hidden : .automatic)
         .contentShape(Rectangle())
-        .onTapGesture { engine.cancelCompleteSuite() }
-        .onAppear { ScreenOrientation.setLandscape(true) }
+        .onTapGesture { if rendering { engine.cancelCompleteSuite() } }
+        .onAppear { updatePresentation() }
+        .onChange(of: rendering) { _ in updatePresentation() }
         .onDisappear { engine.cancelCompleteSuite(reason: "surface_disappeared"); ScreenOrientation.setLandscape(false) }
         .onChange(of: engine.completeSuiteRunning) { running in
             if started && !running { isPresented = false }
         }
+    }
+
+    private func updatePresentation() {
+        ScreenOrientation.setSuitePresentation(rendering: rendering)
+        print("IOS_SUITE_PRESENTATION rendering=\(rendering) job=\(currentJob?.id ?? "preparing")")
     }
 }
 

@@ -98,6 +98,10 @@ struct BenchResult: Codable, Identifiable, Hashable {
     /// Read a `key=value` item from the semicolon-delimited workload contract.
     /// A completed run may still need metrology or stability review.
     var measurementReviewReasons: [String] {
+        if workload == "cpu_multi_core" && workloadConfigValue("workerSchedulingPolicy") == "apple_pe_qos_v1" &&
+           workloadConfigValue("allCorePlacementVerified") != "1" {
+            return [Localization.tr("All-core thread placement or occupancy was not fully verified", "全核线程的驻留或占用未全部验证", "全スレッドの配置または稼働率が未検証です")]
+        }
         guard ["stream", "gpu_burn", "cinematic_liquid"].contains(workload) else { return [] }
         var reasons: [String] = []
         if avgFrameTimeMs > 0 && avgTotalGpuMs > avgFrameTimeMs * 1.1 {
@@ -144,7 +148,10 @@ struct BenchResult: Codable, Identifiable, Hashable {
         if graphicsApi == "CPU" {
             switch workloadConfigValue("coreType") {
             case "performance": return Localization.tr("Performance core", "大核", "性能コア")
-            case "efficiency": return Localization.tr("Efficiency core (background)", "小核（后台）", "効率コア（背景）")
+            case "efficiency":
+                return (workloadConfigValue("efficiencyPolicy") ?? "").hasPrefix("foreground_")
+                    ? Localization.tr("Efficiency core", "小核", "効率コア")
+                    : Localization.tr("Efficiency core (background)", "小核（后台）", "効率コア（背景）")
             case "both": return Localization.tr("P/E + All-core", "大核／小核＋全核", "性能／効率＋全コア")
             default:
                 if workload == "cpu_multi_core" { return Localization.tr("All-core", "全核", "全コア") }

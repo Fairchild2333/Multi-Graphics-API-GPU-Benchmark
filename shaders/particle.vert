@@ -12,10 +12,12 @@ layout(location = 0) in vec4 inPosition;
 layout(location = 1) in vec4 inVelocity;
 
 layout(location = 0) out vec3 outColor;
+layout(constant_id = 0) const bool fixedCoverage = false;
 
 void main() {
     // Place the particle in 2D normalised device coordinates.
-    gl_Position = vec4(inPosition.xy, 0.0, 1.0);
+    vec2 displayed = fixedCoverage ? fract((inPosition.xy + 1.0) * 0.5) * 2.0 - 1.0 : inPosition.xy;
+    gl_Position = vec4(displayed, 0.0, 1.0);
     gl_PointSize = 2.0;
 
     // Map speed to a colour gradient: slow = blue, fast = orange-red.

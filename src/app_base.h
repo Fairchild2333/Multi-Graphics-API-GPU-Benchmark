@@ -36,6 +36,7 @@ public:
     virtual std::string GetDeviceName() const  = 0;
     virtual std::string GetDriverVersion() const { return ""; }
     virtual std::string GetTimingMode() const { return "gpu_timestamp_query"; }
+    virtual bool IsTimingContractValid() const { return true; }
     virtual bool NeedsOpenGLContext() const { return false; }
     const std::string& GetLastCapturePath() const { return lastCapturePath_; }
 
@@ -71,6 +72,7 @@ protected:
     virtual bool EndNativeGpuCapture(std::string& /*outPath*/) { return false; }
 
     void AccumulateTiming(double computeMs, double renderMs, double totalGpuMs);
+    bool HasMeasuredTiming() const { return benchSampleCount_ > 0; }
 
     static std::vector<char> ReadFileBytes(const std::string& filename);
     static std::string GetCpuName();

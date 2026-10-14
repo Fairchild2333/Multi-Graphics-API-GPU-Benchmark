@@ -21,6 +21,7 @@ struct GpuDevice: Identifiable, Hashable {
     let supportsGles2: Bool
     let gles2MaxSteps: Int
     let gpuCacheParallelSteps: Int
+    let vulkanMaxParticles: Int
 }
 
 /// GPU and CPU runs own separate console output, progress, and scores so one
@@ -67,6 +68,9 @@ final class BenchEngine: ObservableObject {
     private var startingSuiteJob = false
     private var suiteCancelled = false
     private var suiteLaunchHandled = false
+    private var keepAwakeForDeviceAutomation: Bool {
+        ProcessInfo.processInfo.arguments.contains("--ios-suite-jobs") && !suiteCancelled
+    }
 
     /// Available graphics APIs on iOS (Metal only).
     var vulkanAvailable: Bool { gpus.contains { $0.supportsVulkan } }
@@ -75,13 +79,18 @@ final class BenchEngine: ObservableObject {
     var gles2Available: Bool { gpus.contains { $0.supportsGles2 } }
     var gles2MaxSteps: Int { gpus.map(\.gles2MaxSteps).max() ?? 0 }
     var gpuCacheParallelSteps: Int { gpus.map(\.gpuCacheParallelSteps).max() ?? 0 }
+    var vulkanMaxParticles: Int { gpus.map(\.vulkanMaxParticles).max() ?? 0 }
     var availableAPIs: [String] {
         ["metal"] + (allowTranslatedApis && vulkanAvailable ? ["vulkan"] : []) + (gles2Available ? ["gles2"] : [])
     }
     var supportedSuiteJobs: [MobileSuiteJob] {
         MobileSuiteJob.makeJobs(includeVulkan: allowTranslatedApis && vulkanAvailable,
             vulkanLiquid: vulkanLiquidAvailable, gpuCache: gpuCacheAvailable, gles2: gles2Available,
-            gles2MaxSteps: gles2MaxSteps, gpuCacheParallelSteps: gpuCacheParallelSteps)
+            gles2MaxSteps: gles2MaxSteps, gpuCacheParallelSteps: gpuCacheParallelSteps,
+            cpuCoreTypes: gpb_cpu_core_types_available(), particleFixedCoverage:
+                !ProcessInfo.processInfo.arguments.contains("--ios-legacy-particle-coverage"),
+            cpuEfficiencyForeground: gpb_cpu_efficiency_foreground_default(),
+            cpuMemoryEfficiencyForeground: gpb_cpu_memory_efficiency_foreground_default(), vulkanMaxParticles: vulkanMaxParticles)
     }
 
     static var readyText: String {
@@ -101,7 +110,7 @@ final class BenchEngine: ObservableObject {
         case .gpu: body(&gpuState)
         case .cpu: body(&cpuState)
         }
-        UIApplication.shared.isIdleTimerDisabled = isRunning
+        UIApplication.shared.isIdleTimerDisabled = isRunning || keepAwakeForDeviceAutomation
     }
 
     /// Re-render idle status strings after the UI language changes.
@@ -217,7 +226,8 @@ final class BenchEngine: ObservableObject {
                     supportsGpuCache: dict["gpuCache"] as? Bool ?? false,
                     supportsGles2: dict["gles2"] as? Bool ?? false,
                     gles2MaxSteps: dict["gles2MaxSteps"] as? Int ?? 0,
-                    gpuCacheParallelSteps: dict["gpuCacheParallelSteps"] as? Int ?? 0
+                    gpuCacheParallelSteps: dict["gpuCacheParallelSteps"] as? Int ?? 0,
+                    vulkanMaxParticles: dict["vulkanMaxParticles"] as? Int ?? 16_777_216
                 )
             }
             await MainActor.run {
@@ -315,7 +325,7 @@ final class BenchEngine: ObservableObject {
             jobs = jobs.filter { selected.contains($0.id) }
         }
         guard !jobs.isEmpty else { lastError = "No supported jobs in this scope"; return }
-        print("IOS_SUITE_CAPS translated=\(allowTranslatedApis) vulkan=\(vulkanAvailable) liquid=\(vulkanLiquidAvailable) cache=\(gpuCacheAvailable)")
+        print("IOS_SUITE_CAPS translated=\(allowTranslatedApis) vulkan=\(vulkanAvailable) liquid=\(vulkanLiquidAvailable) cache=\(gpuCacheAvailable) lowPowerMode=\(ProcessInfo.processInfo.isLowPowerModeEnabled)")
         completeSuiteJobs = jobs
         let now = ISO8601DateFormatter().string(from: Date())
         let id = "complete-suite-" + UUID().uuidString
@@ -415,8 +425,7 @@ final class BenchEngine: ObservableObject {
                 let valid = added.count == job.expectedRecords && added.allSatisfy {
                     job.matches($0) && $0.score.isFinite && $0.score > 0 &&
                     ($0.workloadVersion ?? $0.workload).contains("ios_preview")
-                } && (job.id != "cpu_compute" || Set(added.map(\.workload)) ==
-                    Set(["cpu_single_core", "cpu_multi_core"]))
+                } && job.matchesRecordGroup(added)
                 let failed = channel == .cpu ? runFailed : !lastError.isEmpty
                 // A late dismissal after a native job has saved its complete result
                 // must not turn that completed job into a cancelled measurement.
@@ -454,7 +463,10 @@ final class BenchEngine: ObservableObject {
             persistCompleteSuite(log: log)
             print("IOS_SUITE_DONE \(completeSuiteReport?.status ?? "failed") \(completeSuiteReport?.passedCount ?? 0)/\(jobs.count)")
             completeSuiteRunning = false
-            UIApplication.shared.isIdleTimerDisabled = false
+            // Targeted device automation may install a correction between jobs.
+            // Its controller terminates the app at the end; ordinary GUI runs
+            // and cancellation restore the normal idle timer immediately.
+            UIApplication.shared.isIdleTimerDisabled = keepAwakeForDeviceAutomation
         }
     }
 

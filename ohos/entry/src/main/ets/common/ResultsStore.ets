@@ -51,7 +51,12 @@ export class ResultEntry {
     if (job.api === 'cpu') return job.workload === 'cpu_all' ? ['cpu_single_core', 'cpu_multi_core'].indexOf(this.workload) >= 0 : this.workload === 'cpu_membw';
     const api: string = job.api === 'gles2' ? 'OpenGL ES 2.0' : job.api === 'gles' ? 'OpenGL ES' : 'Vulkan';
     if (this.graphicsApi !== api || this.workload !== job.workload || this.headless !== job.headless) return false;
-    if (job.workload === 'membw') return true;
+    if (job.workload === 'membw') {
+      const fields: string[] = this.workloadConfig.split(';');
+      const checks: string = fields.find((f: string) => f.startsWith('writeCopyChecks=')) ?? '';
+      return this.workloadVersion.startsWith('membw_v2_verified_') && fields.indexOf('dataVerified=1') >= 0 &&
+        Number(checks.substring('writeCopyChecks='.length)) > 0 && fields.indexOf('timestampAnomalies=0') >= 0;
+    }
     if (this.durationSec < 11 || (job.particles > 0 && this.particleCount !== job.particles)) return false;
     return job.steps === 0 || this.workloadConfig.split(';').indexOf('steps=' + job.steps.toString()) >= 0 ||
       this.workloadVersion.indexOf(`fixed_steps_${job.steps}_`) >= 0;

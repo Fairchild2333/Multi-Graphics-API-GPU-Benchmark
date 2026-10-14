@@ -68,10 +68,11 @@ struct VertexOut {
     float  pointSize [[point_size]];
 };
 
-vertex VertexOut vertexMain(const device Particle* particles [[buffer(0)]],
-                            uint vid [[vertex_id]]) {
+static VertexOut particleVertex(const device Particle* particles, uint vid, bool fixedCoverage) {
     VertexOut out;
-    out.position  = float4(particles[vid].position.xy, 0.0, 1.0);
+    float2 displayed = particles[vid].position.xy;
+    if (fixedCoverage) displayed = fract((displayed + 1.0) * 0.5) * 2.0 - 1.0;
+    out.position  = float4(displayed, 0.0, 1.0);
     out.pointSize = 2.0;
 
     float speed = length(particles[vid].velocity.xy);
@@ -79,6 +80,14 @@ vertex VertexOut vertexMain(const device Particle* particles [[buffer(0)]],
                     float3(1.0, 0.3, 0.1),
                     clamp(speed * 5.0, 0.0, 1.0));
     return out;
+}
+
+vertex VertexOut vertexMain(const device Particle* particles [[buffer(0)]], uint vid [[vertex_id]]) {
+    return particleVertex(particles, vid, false);
+}
+
+vertex VertexOut vertexMainFixedCoverage(const device Particle* particles [[buffer(0)]], uint vid [[vertex_id]]) {
+    return particleVertex(particles, vid, true);
 }
 
 fragment float4 fragmentMain(VertexOut in [[stage_in]]) {

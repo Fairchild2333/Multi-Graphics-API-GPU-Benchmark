@@ -50,11 +50,10 @@ public:
     std::string GetDriverVersion()  const override { return driverVersion_; }
     std::string GetTimingMode()     const override {
         if (synchronizedTimingFallback_) return "synchronized_wall_clock";
-#ifdef GPU_BENCH_MOLTENVK
         if (renderTimestampsValidated_) return "validated_single_frame_gpu_query";
-#endif
         return "gpu_timestamp_query";
     }
+    bool IsTimingContractValid() const override { return !timingContractChanged_; }
 
 protected:
     void InitBackend()            override;
@@ -287,6 +286,7 @@ private:
     // rest of the frame is.
     bool            synchronizedTimingFallback_ = false;
     bool            renderTimestampsValidated_ = false;
+    bool            timingContractChanged_ = false;
     VkCommandBuffer syncComputeCmd_   = VK_NULL_HANDLE;
     VkFence         syncComputeFence_ = VK_NULL_HANDLE;
     VkCommandBuffer syncFrameCmd_     = VK_NULL_HANDLE;

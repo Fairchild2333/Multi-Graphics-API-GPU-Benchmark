@@ -50,7 +50,14 @@ data class HistoryEntry(
         if (job.cpu) return if (job.workload == "cpu_all") workload in listOf("cpu_single_core", "cpu_multi_core") else workload == "cpu_membw"
         val apiMatches = when (job.api) { "gles2" -> graphicsApi == "OpenGL ES 2.0"; "gles" -> graphicsApi == "OpenGL ES"; else -> graphicsApi == "Vulkan" }
         if (!apiMatches || workload != job.workload || headless != job.headless) return false
-        if (job.workload == "membw") return true
+        if (job.workload == "membw") {
+            val fields = workloadConfig.split(';').mapNotNull {
+                val parts = it.split('=', limit = 2)
+                if (parts.size == 2) parts[0] to parts[1] else null
+            }.toMap()
+            return workloadVersion.startsWith("membw_v2_verified_") && fields["dataVerified"] == "1" &&
+                (fields["writeCopyChecks"]?.toIntOrNull() ?: 0) > 0 && fields["timestampAnomalies"] == "0"
+        }
         if (durationSec < 11) return false
         if (job.particles > 0 && particleCount != job.particles) return false
         return job.steps == 0 || workloadConfig.split(';').any { it == "steps=${job.steps}" } ||

@@ -40,6 +40,12 @@ kernel void eviction(device const uint4* data [[buffer(0)]],
     for (uint i = tid; i < count; i += 65536) sum += data[i];
     sink[tid] = sum.x + sum.y + sum.z + sum.w;
 }
+kernel void condition_alu(constant uint& steps [[buffer(0)]], device uint* sink [[buffer(1)]],
+                          uint tid [[thread_position_in_grid]]) {
+    uint x = tid + 1;
+    for (uint i = 0; i < steps; ++i) x = rotate(x, 5u) * 1664525u + 1013904223u;
+    sink[tid] = x;
+}
 )METAL";
 struct Params { std::uint32_t steps, lanes; };
 struct Sample { double ns = 0, gbps = 0, ms = 0; };
@@ -55,10 +61,10 @@ void Check(id<MTLCommandBuffer> cb) {
     if (cb.status != MTLCommandBufferStatusCompleted)
         throw std::runtime_error(cb.error ? cb.error.localizedDescription.UTF8String : "Metal command failed");
 }
-void CpuTouch(id<MTLBuffer> buffer) {
+void CpuTouch(id<MTLBuffer> buffer, std::uint64_t bytes = 0) {
     volatile const std::uint32_t* words = static_cast<const std::uint32_t*>(buffer.contents);
     std::uint64_t sum = 0;
-    for (std::uint64_t i = 0; i < buffer.length / 4; i += kStride / 4) sum += words[i];
+    for (std::uint64_t i = 0; i < (bytes ? bytes : buffer.length) / 4; i += kStride / 4) sum += words[i];
     cpuSink = sum;
 }
 }
@@ -89,7 +95,8 @@ bool GpuCacheProbeAvailable(std::uint32_t gpuIndex) {
 int RunGpuCacheProbeCli(const GpuCacheProbeConfig& config, bool saveResult) {
     if (config.maxMiB < 1 || config.maxMiB > 512 || config.steps < 4096 ||
         config.steps > 1048576 || config.repeats < 3 || config.repeats > 15 ||
-        (config.parallelSteps != 0 && (config.parallelSteps < 256 || config.parallelSteps > 131072))) {
+        (config.parallelSteps != 0 && (config.parallelSteps < 256 || config.parallelSteps > 131072)) ||
+        (config.aluConditioning && !config.isolationControls)) {
         std::cerr << "GCACHE_ERROR\tmessage=invalid_bounds\n";
         return 2;
     }
@@ -113,7 +120,10 @@ int RunGpuCacheProbeCli(const GpuCacheProbeConfig& config, bool saveResult) {
         if (!library) throw std::runtime_error(error.localizedDescription.UTF8String);
         id<MTLComputePipelineState> chase = [device newComputePipelineStateWithFunction:[library newFunctionWithName:@"chase"] error:&error];
         id<MTLComputePipelineState> evict = [device newComputePipelineStateWithFunction:[library newFunctionWithName:@"eviction"] error:&error];
+        id<MTLComputePipelineState> conditioning = config.aluConditioning
+            ? [device newComputePipelineStateWithFunction:[library newFunctionWithName:@"condition_alu"] error:&error] : nil;
         if (!chase || !evict) throw std::runtime_error("pipeline creation failed");
+        if (config.aluConditioning && !conditioning) throw std::runtime_error("ALU control pipeline creation failed");
         id<MTLCommandQueue> queue = [device newCommandQueue];
         const std::uint64_t evictionBytes = 256ull << 20, cpuEvictionBytes = 128ull << 20;
         const std::uint64_t maximum = std::uint64_t(config.maxMiB) << 20;
@@ -131,10 +141,36 @@ int RunGpuCacheProbeCli(const GpuCacheProbeConfig& config, bool saveResult) {
         std::memset(eviction.contents, 0x35, evictionBytes);
         std::memset(cpuEviction.contents, 0x67, cpuEvictionBytes);
         std::vector<Point> points;
-        std::string counterSets;
+        std::vector<double> conditioningMs, overheadMs;
+        constexpr std::uint32_t conditioningSteps = 131072;
+        std::array<std::uint32_t, 2> conditioningExpected{1, kLanes};
+        if (config.aluConditioning) for (auto& x : conditioningExpected)
+            for (std::uint32_t i = 0; i < conditioningSteps; ++i)
+                x = ((x << 5) | (x >> 27)) * 1664525u + 1013904223u;
+        auto conditionAlu = [&] {
+            id<MTLCommandBuffer> cb = [queue commandBuffer];
+            cb.label = @"GCACHE ALU-only preconditioning";
+            id<MTLComputeCommandEncoder> encoder = [cb computeCommandEncoder];
+            [encoder setComputePipelineState:conditioning];
+            [encoder setBytes:&conditioningSteps length:sizeof(conditioningSteps) atIndex:0];
+            [encoder setBuffer:sink offset:0 atIndex:1];
+            [encoder dispatchThreads:MTLSizeMake(kLanes, 1, 1) threadsPerThreadgroup:MTLSizeMake(256, 1, 1)];
+            [encoder endEncoding]; Check(cb);
+            const auto* result = static_cast<const std::uint32_t*>(sink.contents);
+            if (result[0] != conditioningExpected[0] || result[kLanes - 1] != conditioningExpected[1])
+                throw std::runtime_error("ALU control checksum mismatch");
+            const double ms = (cb.GPUEndTime - cb.GPUStartTime) * 1000;
+            if (!std::isfinite(ms) || ms <= 0) throw std::runtime_error("invalid ALU GPU interval");
+            conditioningMs.push_back(ms);
+        };
+        std::string counterSets, counterInventory;
         for (id<MTLCounterSet> set in device.counterSets) {
             if (!counterSets.empty()) counterSets += ',';
             counterSets += set.name.UTF8String;
+            for (id<MTLCounter> counter in set.counters) {
+                if (!counterInventory.empty()) counterInventory += ',';
+                counterInventory += std::string(set.name.UTF8String) + '/' + counter.name.UTF8String;
+            }
         }
         std::cout << "GCACHE_META\tdevice=" << device.name.UTF8String
                   << "\tmethod=random_dependent_uint32_cycle\tstride_bytes=" << kStride
@@ -142,12 +178,20 @@ int RunGpuCacheProbeCli(const GpuCacheProbeConfig& config, bool saveResult) {
                   << "\tparallel_lanes=" << kLanes << "\teviction_bytes=" << evictionBytes
                   << "\tparallel_steps=" << parallelSteps
                   << "\tcounter_sets=" << counterSets
+                  << "\tcounter_inventory=" << counterInventory
+                  << "\tattribution_evidence=timing_and_checksum_only"
                   << "\tcache_attribution=unverified\teviction_verified=0\n" << std::flush;
 
-        const std::array<std::string, 4> conditions{"gpu_warm", "eviction_pass", "cpu_warm", "parallel_gpu_warm"};
+        const std::vector<std::string> conditions = config.isolationControls
+            ? std::vector<std::string>{"gpu_warm", "gpu_warm_gpu_evict_2m", "gpu_warm_gpu_evict_8m",
+                "gpu_warm_gpu_evict_32m", "gpu_warm_gpu_evict_128m", "cpu_warm",
+                "cpu_warm_cpu_evict_2m", "cpu_warm_cpu_evict_8m", "cpu_warm_cpu_evict_32m",
+                "cpu_warm_cpu_evict_128m", "eviction_pass"}
+            : std::vector<std::string>{"gpu_warm", "eviction_pass", "cpu_warm", "parallel_gpu_warm"};
         for (std::uint64_t base = 4096; base <= maximum; base *= 2) {
           for (const auto bytes : {base, base + base / 2}) {
             if (bytes > maximum) continue;
+            if (config.isolationControls && (bytes < (128ull << 10) || bytes != base)) continue;
             if (StopRequested()) return 4;
             id<MTLBuffer> links = [device newBufferWithLength:bytes options:MTLResourceStorageModeShared];
             if (!links) throw std::runtime_error("chain allocation failed");
@@ -176,10 +220,13 @@ int RunGpuCacheProbeCli(const GpuCacheProbeConfig& config, bool saveResult) {
                     (last <= nodes ? prefix[last] - prefix[first] : prefix.back() - prefix[first] + prefix[last % nodes]);
                 return std::array<std::uint32_t, 2>{order[(position + steps) % nodes] * (kStride / 4), static_cast<std::uint32_t>(sum)};
             };
+            std::string phase = "warm";
             auto dispatch = [&](std::uint32_t steps, std::uint32_t lanes) {
                 Params params{steps, lanes};
                 id<MTLCommandBuffer> cb = [queue commandBuffer];
+                cb.label = [NSString stringWithFormat:@"GCACHE %s %llu", phase.c_str(), bytes];
                 id<MTLComputeCommandEncoder> encoder = [cb computeCommandEncoder];
+                encoder.label = cb.label;
                 [encoder setComputePipelineState:chase];
                 [encoder setBuffer:links offset:0 atIndex:0];
                 [encoder setBytes:&params length:sizeof(params) atIndex:1];
@@ -195,7 +242,7 @@ int RunGpuCacheProbeCli(const GpuCacheProbeConfig& config, bool saveResult) {
                 }
                 const double seconds = cb.GPUEndTime - cb.GPUStartTime;
                 if (!std::isfinite(seconds) || seconds <= 0) throw std::runtime_error("invalid GPU timestamp interval");
-                return Sample{seconds * 1e9 / steps, double(steps) * lanes * 4 / seconds / 1e9, seconds * 1000};
+                return Sample{steps ? seconds * 1e9 / steps : 0, double(steps) * lanes * 4 / seconds / 1e9, seconds * 1000};
             };
             auto warm = [&] {
 #if TARGET_OS_IPHONE
@@ -214,9 +261,11 @@ int RunGpuCacheProbeCli(const GpuCacheProbeConfig& config, bool saveResult) {
                 dispatch(nodes, 1);
 #endif
             };
-            auto evictionPass = [&] {
-                const auto vectors = static_cast<std::uint32_t>(evictionBytes / 16);
+            auto evictionPass = [&](std::uint64_t dose = 0) {
+                if (!dose) dose = evictionBytes;
+                const auto vectors = static_cast<std::uint32_t>(dose / 16);
                 id<MTLCommandBuffer> cb = [queue commandBuffer];
+                cb.label = [NSString stringWithFormat:@"GCACHE eviction %llu", dose];
                 id<MTLComputeCommandEncoder> encoder = [cb computeCommandEncoder];
                 [encoder setComputePipelineState:evict];
                 [encoder setBuffer:eviction offset:0 atIndex:0];
@@ -229,12 +278,41 @@ int RunGpuCacheProbeCli(const GpuCacheProbeConfig& config, bool saveResult) {
                 if (result[0] != correct || result[65535] != correct)
                     throw std::runtime_error("eviction read checksum mismatch");
             };
-            std::array<std::vector<double>, 4> measured;
+            std::vector<std::vector<double>> measured(conditions.size()), revisited(conditions.size());
             for (std::uint32_t repeat = 0; repeat < config.repeats; ++repeat) {
               for (std::uint32_t slot = 0; slot < conditions.size(); ++slot) {
                 if (StopRequested()) return 4;
                 const auto condition = (slot + repeat) % conditions.size();
                 CpuTouch(cpuEviction); evictionPass();
+                if (config.isolationControls) {
+                    phase = "warm";
+                    const std::array<std::uint64_t, 4> doses{2ull << 20, 8ull << 20, 32ull << 20, 128ull << 20};
+                    if (condition <= 4) {
+                        warm();
+                        if (condition) evictionPass(doses[condition - 1]);
+                    } else if (condition <= 9) {
+                        CpuTouch(links);
+                        if (condition >= 6) CpuTouch(cpuEviction, doses[condition - 6]);
+                    }
+                    if (config.aluConditioning) conditionAlu();
+                    // Do not wrap the cycle: the first dispatch sees each target
+                    // node at most once, instead of self-warming a small span.
+                    const auto firstSteps = std::min(nodes, 8192u);
+                    phase = conditions[condition] + " first";
+                    const auto first = dispatch(firstSteps, 1);
+                    phase = conditions[condition] + " revisit";
+                    const auto second = dispatch(firstSteps, 1);
+                    phase = "zero-load timing control";
+                    const auto overhead = dispatch(0, 1);
+                    overheadMs.push_back(overhead.ms);
+                    measured[condition].push_back(first.ns);
+                    revisited[condition].push_back(second.ns);
+                    std::cout << "GCACHE_CONTROL_SAMPLE\tcondition=" << conditions[condition]
+                              << "\tbytes=" << bytes << "\trepeat=" << repeat << "\tsteps=" << firstSteps
+                              << "\tfirst_ns=" << std::setprecision(9) << first.ns
+                              << "\trevisit_ns=" << second.ns << "\tchecksum_valid=1\n" << std::flush;
+                    continue;
+                }
                 if (condition == 2) CpuTouch(links);
                 else if (condition == 0 || condition == 3) warm();
                 const bool parallel = condition == 3;
@@ -251,7 +329,12 @@ int RunGpuCacheProbeCli(const GpuCacheProbeConfig& config, bool saveResult) {
                 points.push_back(point);
                 std::cout << "GCACHE_POINT\tcondition=" << point.condition << "\tbytes=" << point.bytes
                           << "\tmedian=" << point.value << "\tmin=" << point.minimum << "\tmax=" << point.maximum
-                          << "\tunit=" << (condition == 3 ? "GB/s_payload" : "ns/load") << '\n' << std::flush;
+                          << "\tunit=" << (!config.isolationControls && condition == 3 ? "GB/s_payload" : "ns/load") << '\n' << std::flush;
+                if (config.isolationControls) {
+                    const auto& second = revisited[condition];
+                    points.push_back(Point{conditions[condition] + "_revisit", bytes, Median(second),
+                        *std::min_element(second.begin(), second.end()), *std::max_element(second.begin(), second.end())});
+                }
             }
           }
         }
@@ -267,6 +350,12 @@ int RunGpuCacheProbeCli(const GpuCacheProbeConfig& config, bool saveResult) {
             if (config.parallelSteps)
                 stored.workloadVersion = "metal_dependent_cache_v3_parallel_" + std::to_string(parallelSteps) + "_preview_ios_preview";
 #endif
+            if (config.isolationControls) {
+                stored.workload = "gpu_cache_controls";
+                stored.workloadVersion = "metal_first_pass_eviction_doses_v1_ios_preview";
+                if (config.aluConditioning) stored.workloadVersion = "metal_first_pass_eviction_doses_alu_v2_ios_preview";
+                stored.id += "-controls";
+            }
             stored.graphicsApi = "Metal"; stored.deviceName = device.name.UTF8String;
             stored.osVersion = CurrentOsVersion(); stored.platform = CurrentPlatform();
             stored.osArchitecture = CurrentOsArchitecture(); stored.processArchitecture = CurrentProcessArchitecture();
@@ -277,12 +366,23 @@ int RunGpuCacheProbeCli(const GpuCacheProbeConfig& config, bool saveResult) {
             contract << "method=random_dependent_uint32_cycle;aggregation=median;strideBytes=" << kStride
                      << ";steps=" << config.steps << ";repeats=" << config.repeats << ";parallelLanes=" << kLanes
                      << ";evictionBytes=" << evictionBytes << ";cpuEvictionBytes=" << cpuEvictionBytes
-                     << ";evictionVerified=0;cacheAttribution=unverified;checksumValid=1;counterSets=" << counterSets;
+                     << ";evictionVerified=0;cacheAttribution=unverified;checksumValid=1;counterSets=" << counterSets
+                     << ";counterInventory=" << counterInventory
+                     << ";attributionEvidence=timing_and_checksum_only";
 #if TARGET_OS_IPHONE
             contract << ";warming=bounded_complete_cycle;warmChunkSteps=8192";
             contract << ";parallelSteps=" << parallelSteps;
 #endif
-            for (const auto& condition : conditions) {
+            if (config.isolationControls)
+                contract << ";firstPassSteps=min(nodes,8192);pairedImmediateRevisit=1;evictionDoseMiB=2,8,32,128"
+                         << ";timingIncludesDispatchOverhead=1;cpuPrivateEvictionVerified=0;gpuPrivateEvictionVerified=0";
+            if (!overheadMs.empty()) contract << ";zeroLoadMedianMs=" << Median(overheadMs);
+            if (config.aluConditioning) contract << ";aluConditioningSteps=" << conditioningSteps
+                << ";aluConditioningLanes=" << kLanes << ";aluConditioningMedianMs=" << Median(conditioningMs)
+                << ";gpuFrequencyVerified=0";
+            std::vector<std::string> savedConditions = conditions;
+            if (config.isolationControls) for (const auto& condition : conditions) savedConditions.push_back(condition + "_revisit");
+            for (const auto& condition : savedConditions) {
                 contract << ";curve_" << condition << '=';
                 bool first = true;
                 for (const auto& point : points) if (point.condition == condition) {

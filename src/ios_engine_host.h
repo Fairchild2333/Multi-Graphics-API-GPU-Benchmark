@@ -26,6 +26,6 @@ int RunWorkload(const RunRequest& request, std::string& errorOut);
 
 bool IsRunning();
 // Actual embedded runtime probe; the UI must still require an explicit opt-in.
-bool VulkanAvailable(bool* liquidSupported = nullptr);
+bool VulkanAvailable(bool* liquidSupported = nullptr, std::uint64_t* maxParticleBufferBytes = nullptr);
 
 }  // namespace gpu_bench::ios_host

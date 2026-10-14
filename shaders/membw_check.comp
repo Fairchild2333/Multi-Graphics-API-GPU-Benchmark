@@ -60,7 +60,7 @@ void main() {
     }
 
     if (group == 0u) sink.word[gl_LocalInvocationID.x] = kRan;
-    // Threads of different groups share a word; every one of them writes a
-    // number above zero, which is all the host looks at.
-    if (wrong != 0u) sink.word[256u + gl_LocalInvocationID.x] = wrong;
+    // Several workgroups can report the same lane. Use an atomic operation:
+    // concurrent non-atomic stores, even of nonzero values, are a data race.
+    if (wrong != 0u) atomicOr(sink.word[256u + gl_LocalInvocationID.x], 1u);
 }
