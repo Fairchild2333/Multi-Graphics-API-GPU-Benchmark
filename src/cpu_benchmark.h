@@ -4,6 +4,7 @@
 #include <iosfwd>
 #include <string>
 #include <vector>
+#include "cpu_scheduling.h"
 
 namespace gpu_bench {
 
@@ -35,6 +36,7 @@ struct CpuBenchmarkConfig {
     double measureSeconds = 1.0;
     double warmupSeconds = 0.15;
     std::uint32_t roundCount = 3;
+    CpuCoreType coreType = DefaultCpuCoreType(); // single-thread stages only
 };
 
 struct CpuCoreResult {
@@ -47,6 +49,9 @@ struct CpuCoreResult {
     std::uint32_t medianRound = 0;
     std::string affinityMode;
     bool valid = false;
+    CpuCoreType coreType = CpuCoreType::Automatic;
+    std::vector<CpuResidency> residencyRounds;
+    std::uint32_t residencyRetries = 0;
 };
 
 struct CpuMultiCoreResult {

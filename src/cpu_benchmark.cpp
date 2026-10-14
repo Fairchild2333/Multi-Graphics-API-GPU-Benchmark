@@ -706,6 +706,9 @@ struct TimedKernelResult {
     std::uint32_t roundCount = 0;
     std::uint32_t medianRound = 0;
     bool strictAffinity = false;
+    std::vector<CpuResidency> residencyRounds;
+    std::uint32_t residencyRetries = 0;
+    bool residencyValid = true;
 };
 
 static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
@@ -729,6 +732,8 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
 
     std::thread worker([&] {
         ThreadAffinityScope affinity(cpu);
+        CpuQosScope qos(config.coreType);
+        result.residencyValid = qos.applied();
         result.strictAffinity = affinity.strict();
         // Every logical processor and every scored round must execute exactly
         // the same dependency chain.  Core identity is metadata, not a seed.
@@ -751,28 +756,38 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
         std::vector<KernelRoundResult> rounds;
         rounds.reserve(roundCount);
         for (std::uint32_t round = 0; round < roundCount; ++round) {
-            state = MakeKernelState(kPerCoreKernelSeed);
-            {
-                std::lock_guard<std::mutex> lock(progress.mutex);
-                progress.phase = Phase::Measure;
-                progress.round = round;
-                progress.phaseStart = Clock::now();
-            }
-            progress.cv.notify_one();
-            // Start timing only after all progress-state bookkeeping.  The
-            // observer may format concurrently, but the measured worker's own
-            // instruction stream is now kernel + deadline checks only.
-            const auto start = Clock::now();
-            const auto end = start + std::chrono::duration_cast<Clock::duration>(
-                std::chrono::duration<double>(roundSeconds));
             KernelRoundResult sample;
-            while (true) {
-                RunKernelBatch(state);
-                sample.workUnits += kKernelBatch;
-                const auto now = Clock::now();
-                if (now >= end) break;
+            CpuResidency residency;
+            for (unsigned attempt = 0; attempt < 3; ++attempt) {
+                state = MakeKernelState(kPerCoreKernelSeed);
+                {
+                    std::lock_guard<std::mutex> lock(progress.mutex);
+                    progress.phase = Phase::Measure;
+                    progress.round = round;
+                    progress.phaseStart = Clock::now();
+                }
+                progress.cv.notify_one();
+                const auto accountingStart = config.coreType == CpuCoreType::Automatic
+                    ? CpuResidencySnapshot{} : CaptureCpuResidency();
+                const auto start = Clock::now();
+                const auto end = start + std::chrono::duration_cast<Clock::duration>(
+                    std::chrono::duration<double>(roundSeconds));
+                sample = {};
+                while (true) {
+                    RunKernelBatch(state);
+                    sample.workUnits += kKernelBatch;
+                    if (Clock::now() >= end) break;
+                }
+                sample.seconds = std::chrono::duration<double>(Clock::now() - start).count();
+                if (config.coreType != CpuCoreType::Automatic)
+                    residency = EvaluateCpuResidency(accountingStart, CaptureCpuResidency(), config.coreType);
+                if (config.coreType == CpuCoreType::Automatic || residency.verified()) break;
+                if (attempt < 2) ++result.residencyRetries;
             }
-            sample.seconds = std::chrono::duration<double>(Clock::now() - start).count();
+            if (config.coreType != CpuCoreType::Automatic) {
+                result.residencyRounds.push_back(residency);
+                result.residencyValid = result.residencyValid && residency.verified();
+            }
             sample.checksum = state.checksum ^ state.a ^ RotL(state.b, 13);
             g_cpuBenchmarkSink.fetch_xor(sample.checksum, std::memory_order_relaxed);
             rounds.push_back(sample);
@@ -1096,10 +1111,16 @@ void PrintCpuTopology(const CpuBenchmarkReport& report, std::ostream& out) {
     out << std::flush;
 }
 
-CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
+CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& requestedConfig,
                                    std::ostream& out) {
+    auto config = requestedConfig;
+    // The all-core stage uses every logical processor, irrespective of the
+    // single-thread P/E policy. Short multi-only runs need no residency gate.
+    if (config.mode == CpuBenchmarkMode::MultiCore) config.coreType = CpuCoreType::Automatic;
     CpuBenchmarkReport report = ProbeCpuTopology();
     PrintCpuTopology(report, out);
+    out << "CPU_SCHEDULING\tcore_type=" << CpuCoreTypeName(config.coreType)
+        << "\tresidency_threshold=0.99\tscope=single_thread_stages\n" << std::flush;
     if (!std::isfinite(config.measureSeconds) || config.measureSeconds <= 0.0 ||
         !std::isfinite(config.warmupSeconds) || config.warmupSeconds < 0.0 ||
         config.roundCount == 0) {
@@ -1108,6 +1129,11 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
     }
     if (report.processors.empty()) {
         out << "CPU_ERROR\tmessage=no_available_logical_processors\n" << std::flush;
+        return report;
+    }
+    if (config.coreType != CpuCoreType::Automatic &&
+        (!CpuCoreTypeSchedulingSupported() || config.measureSeconds / config.roundCount < 0.05)) {
+        out << "CPU_ERROR\tmessage=core_type_scheduling_unavailable_or_round_shorter_than_50ms\n" << std::flush;
         return report;
     }
     const bool formalContract = std::llround(config.measureSeconds * 1000.0) == 15000 &&
@@ -1119,7 +1145,20 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
                             config.mode == CpuBenchmarkMode::All;
     const bool runMulti = config.mode == CpuBenchmarkMode::MultiCore ||
                           config.mode == CpuBenchmarkMode::All;
-    const std::size_t totalStages = (runPerCore ? report.processors.size() : 0u) +
+    std::vector<CpuLogicalProcessor> singleStages = report.processors;
+    if (config.coreType != CpuCoreType::Automatic) {
+        singleStages.clear();
+        for (auto type : {CpuCoreType::Performance, CpuCoreType::Efficiency}) {
+            if (config.coreType != CpuCoreType::Both && config.coreType != type) continue;
+            CpuLogicalProcessor representative;
+            representative.ordinal = type == CpuCoreType::Performance ? 0 : 1;
+            representative.performanceLevel = static_cast<int>(representative.ordinal);
+            representative.coreClass = type == CpuCoreType::Performance ? "Performance" : "Efficiency";
+            representative.classificationSource = "qos_verified_cpu_time_bound";
+            singleStages.push_back(representative);
+        }
+    }
+    const std::size_t totalStages = (runPerCore ? singleStages.size() : 0u) +
                                     (runMulti ? 1u : 0u);
     std::size_t stage = 0;
 
@@ -1174,8 +1213,8 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
         runMultiStage();
 
     if (runPerCore) {
-        report.perCore.reserve(report.processors.size());
-        for (const auto& cpu : report.processors) {
+        report.perCore.reserve(singleStages.size());
+        for (const auto& cpu : singleStages) {
             const CpuLogicalProcessor* observerCpu = nullptr;
             for (const auto& candidate : report.processors) {
                 if (candidate.physicalCore != cpu.physicalCore) {
@@ -1183,8 +1222,13 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
                     break;
                 }
             }
-            const auto timed = RunSingleTimed(cpu, observerCpu, config,
-                                              report.processors.size(), stage,
+            auto stageConfig = config;
+            if (config.coreType == CpuCoreType::Both)
+                stageConfig.coreType = cpu.performanceLevel == 0
+                    ? CpuCoreType::Performance : CpuCoreType::Efficiency;
+            if (config.coreType != CpuCoreType::Automatic) observerCpu = nullptr;
+            const auto timed = RunSingleTimed(cpu, observerCpu, stageConfig,
+                                              singleStages.size(), stage,
                                               totalStages, out);
             CpuCoreResult result;
             result.processor = cpu;
@@ -1196,16 +1240,30 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
             result.roundCount = timed.roundCount;
             result.medianRound = timed.medianRound;
             result.affinityMode = SingleAffinityMode(timed.strictAffinity);
-            result.valid = timed.workUnits > 0 && SingleAffinityIsValid(timed.strictAffinity);
+            result.coreType = stageConfig.coreType;
+            result.residencyRounds = timed.residencyRounds;
+            result.residencyRetries = timed.residencyRetries;
+            result.valid = timed.workUnits > 0 && SingleAffinityIsValid(timed.strictAffinity)
+                           && timed.residencyValid;
+            for (std::size_t round = 0; round < timed.residencyRounds.size(); ++round) {
+                const auto& residency = timed.residencyRounds[round];
+                out << std::fixed << std::setprecision(6)
+                    << "CPU_RESIDENCY\tcore_type=" << CpuCoreTypeName(result.coreType)
+                    << "\tround=" << round + 1 << "\tp_fraction=" << residency.performanceFraction
+                    << "\trequested_lower_bound=" << residency.requestedLowerBound
+                    << "\teffective_ghz=" << residency.effectiveGHz
+                    << "\tverified=" << (residency.verified() ? 1 : 0)
+                    << "\tretries=" << timed.residencyRetries << '\n' << std::flush;
+            }
             report.perCore.push_back(result);
 
-            out << std::fixed << std::setprecision(2)
-                << "Logical processor " << (cpu.ordinal + 1)
-                << " (physical core " << (cpu.physicalCore + 1)
-                << ", SMT " << (cpu.smtIndex + 1) << '/' << cpu.smtWidth
-                << ", " << cpu.coreClass << ") score: "
-                << result.scoreMWorkPerSec << " MWork/s"
-                << (result.valid ? "" : " [INVALID: affinity contract not met]") << "\n";
+            if (result.coreType == CpuCoreType::Automatic) {
+                out << "Logical processor sample " << cpu.ordinal + 1;
+            } else {
+                out << cpu.coreClass << " core type (QoS, verified CPU time; no numbered-core binding)";
+            }
+            out << std::fixed << std::setprecision(2) << " score: " << result.scoreMWorkPerSec
+                << " MWork/s" << (result.valid ? "" : " [INVALID: placement contract not met]") << "\n";
             out << std::fixed << std::setprecision(6)
                 << "CPU_RESULT\tkind=core\tmode=per_core"
                 << "\tworkload_version=" << report.workloadVersion
@@ -1214,13 +1272,18 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
                 << "\tcore_index=" << cpu.ordinal
                 << "\tcore_count=" << report.processors.size()
                 << "\tgroup=" << cpu.group
-                << "\tlogical_index=" << cpu.logicalIndex
-                << "\tphysical_core=" << cpu.physicalCore
+                << "\tlogical_index=" << (result.coreType == CpuCoreType::Automatic ? long(cpu.logicalIndex) : -1L)
+                << "\tphysical_core=" << (result.coreType == CpuCoreType::Automatic ? long(cpu.physicalCore) : -1L)
                 << "\tsmt_index=" << cpu.smtIndex
                 << "\tsmt_width=" << cpu.smtWidth
                 << "\tefficiency_class=" << cpu.efficiencyClass
                 << "\tperformance_level=" << cpu.performanceLevel
                 << "\tcore_class=" << cpu.coreClass
+                << "\tcore_type=" << CpuCoreTypeName(result.coreType)
+                << "\tresidency_verified=" << (timed.residencyValid ? 1 : 0)
+                << "\trequested_lower_bound=" << (timed.residencyRounds.empty() ? 0.0 :
+                    std::min_element(timed.residencyRounds.begin(), timed.residencyRounds.end(),
+                        [](const auto& a, const auto& b) { return a.requestedLowerBound < b.requestedLowerBound; })->requestedLowerBound)
                 << "\tclassification_source=" << cpu.classificationSource
                 << "\taffinity=" << result.affinityMode
                 << "\tvalid=" << (result.valid ? 1 : 0)
@@ -1252,6 +1315,7 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
             : *std::max_element(scores.begin(), scores.end());
         const std::size_t invalidCount = report.perCore.size() - scores.size();
         const bool summaryValid = invalidCount == 0 && !scores.empty();
+        if (config.coreType == CpuCoreType::Automatic) {
         out << std::fixed << std::setprecision(2)
             << "Average per-logical-processor score: " << average << " MWork/s"
             << (summaryValid ? "" : " [INVALID/INCOMPLETE]") << "\n";
@@ -1271,6 +1335,11 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& config,
             << "\tround_count=" << config.roundCount
             << "\tchecksum=" << Hex64(summaryChecksum)
             << "\tchecksum_role=dce_sink\n" << std::flush;
+        } else {
+            out << "CPU_RESULT\tkind=class_summary\tcompleted=" << scores.size()
+                << "\tinvalid_count=" << invalidCount << "\tvalid=" << (summaryValid ? 1 : 0)
+                << "\tcore_type=" << CpuCoreTypeName(config.coreType) << '\n' << std::flush;
+        }
 #if defined(_WIN32) || defined(__linux__) || defined(__ANDROID__)
         if (!summaryValid) {
             out << "CPU_ERROR\tmessage=required_affinity_failed"

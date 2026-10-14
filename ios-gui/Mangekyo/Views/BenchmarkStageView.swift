@@ -26,7 +26,8 @@ struct BenchmarkStageView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            MetalBenchView { layer in
+            MetalBenchView { layer, glLayer in
+                engine.attachGlesLayer(glLayer)
                 engine.attachMetalLayer(layer)
             }
             .ignoresSafeArea()

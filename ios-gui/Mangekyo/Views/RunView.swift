@@ -35,6 +35,14 @@ struct GpuTest: Identifiable, Hashable {
                 en: "Fluid — Interactive Pool",
                 zh: "流体 —— 互动水池",
                 ja: "流体 — インタラクティブプール"),
+        GpuTest(id: "memory_sweep",
+                en: "Memory Bandwidth — VRAM / Cache",
+                zh: "显存带宽 —— 显存 / 缓存",
+                ja: "メモリ帯域 — VRAM / キャッシュ"),
+        GpuTest(id: "gpu_cache",
+                en: "GPU Cache-state Diagnostic",
+                zh: "GPU 缓存状态诊断",
+                ja: "GPU キャッシュ状態診断"),
     ]
 }
 
@@ -92,20 +100,35 @@ enum GpuOptions {
     }
 
     /// What the engine host is asked to run.
-    static func request(test: String, particles: Int, steps: Int, vsync: Bool = false) -> String {
+    static func request(test: String, particles: Int, steps: Int, vsync: Bool = false, api: String = "metal") -> String {
         switch test {
-        case "stream", "stream_headless": return "\(test)?particles=\(particles)&vsync=\(vsync ? 1 : 0)"
-        case "gpu_burn": return "gpu_burn?steps=\(steps)&vsync=\(vsync ? 1 : 0)"
-        default: return "\(test)?vsync=\(vsync ? 1 : 0)"
+        case "memory_sweep", "gpu_cache": return "\(test)?api=\(api)"
+        case "stream", "stream_headless": return "\(test)?particles=\(particles)&vsync=\(vsync ? 1 : 0)&api=\(api)"
+        case "gpu_burn": return "gpu_burn?steps=\(steps)&vsync=\(vsync ? 1 : 0)&api=\(api)"
+        default: return "\(test)?vsync=\(vsync ? 1 : 0)&api=\(api)"
         }
     }
 
     /// The name the engine saves a run under.
-    static func savedAs(test: String, steps: Int) -> String {
+    static func savedAs(test: String, steps: Int, api: String = "metal", cacheParallelSteps: Int = 0) -> String {
+        if api == "gles2" { return "gpu_burn_es2_legacy_v1_fixed_steps_\(steps)_ios_preview_sync_timing" }
+        if api == "vulkan" {
+            switch test {
+            case "stream", "stream_headless": return "stream_v1_ios_preview_moltenvk"
+            case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview_moltenvk"
+            case "cinematic_liquid": return "cinematic_liquid_v2_…_ios_preview_moltenvk"
+            case "memory_sweep": return "membw_v1_ios_preview_moltenvk"
+            default: return test
+            }
+        }
         switch test {
         case "stream", "stream_headless": return "stream_v1_ios_preview"
         case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview"
         case "cinematic_liquid": return "cinematic_liquid_v2_physical_scene_v8_metal_preview_ios_preview"
+        case "memory_sweep": return "metal_memory_sweep_v1_preview_ios_preview"
+        case "gpu_cache": return cacheParallelSteps > 0
+            ? "metal_dependent_cache_v3_parallel_\(cacheParallelSteps)_preview_ios_preview"
+            : "metal_dependent_cache_v2_preview_ios_preview"
         default: return test
         }
     }
@@ -116,6 +139,7 @@ struct RunView: View {
     private var run: BenchChannelState { engine.gpuState }
 
     @State private var selectedTest = "stream"
+    @State private var selectedApi = "metal"
     @State private var vsync = false
     // The size of the selected test and its duration, as in the desktop app.
     @State private var particleChoice = GpuOptions.defaultParticles
@@ -126,6 +150,9 @@ struct RunView: View {
     @State private var customSeconds = ""
     /// A test is on screen, or about to be.
     @State private var fullscreen = false
+    @State private var suiteFullscreen = false
+    @State private var resumeSuite = false
+    @State private var suiteScope: MobileSuiteScope = .all
 
     @State private var logExpanded = false
     @State private var logScrollID = 0
@@ -144,6 +171,9 @@ struct RunView: View {
         GpuOptions.resolve(choice: secondChoice, custom: customSeconds, range: GpuOptions.secondRange)
     }
     private var optionsValid: Bool {
+        guard engine.availableAPIs.contains(selectedApi), selectedApi != "vulkan" || selectedTest != "gpu_cache" else { return false }
+        if selectedApi == "gles2" && (selectedTest != "gpu_burn" || (steps ?? Int.max) > engine.gles2MaxSteps) { return false }
+        if selectedTest == "memory_sweep" || selectedTest == "gpu_cache" { return true }
         guard seconds != nil else { return false }
         switch selectedTest {
         case "stream", "stream_headless": return particles != nil
@@ -159,15 +189,10 @@ struct RunView: View {
                     fullscreenCard
                     testsCard
                     settingsCard
+                    completeSuiteCard
                     summaryCard
                     GpuRunChartsCard(jobs: run.runOutput.jobs)
                     GpuMemoryResultsCard(output: run.runOutput)
-                    GlassCard {
-                        Button(Localization.tr("Run GPU Cache & Memory Probe", "运行 GPU 缓存与内存探测", "GPU キャッシュ / メモリ測定")) {
-                            _ = engine.startPreview(workload: "memory_sweep", seconds: 0)
-                        }
-                        .disabled(engine.isRunning)
-                    }
                     cliCard
                 }
                 .padding(16)
@@ -181,31 +206,120 @@ struct RunView: View {
                 title: test.label,
                 request: GpuOptions.request(test: selectedTest,
                                             particles: particles ?? GpuOptions.defaultParticles,
-                                            steps: steps ?? GpuOptions.defaultSteps, vsync: vsync),
+                                            steps: steps ?? GpuOptions.defaultSteps, vsync: vsync, api: selectedApi),
                 seconds: seconds ?? GpuOptions.defaultSeconds,
                 isPresented: $fullscreen)
                 .environmentObject(engine)
+        }
+        .fullScreenCover(isPresented: $suiteFullscreen) {
+            MobileSuiteFullscreenRun(resume: resumeSuite, scope: suiteScope, isPresented: $suiteFullscreen).environmentObject(engine)
+        }
+        .task {
+            for _ in 0..<200 {
+                if Task.isCancelled { return }
+                if !engine.gpus.isEmpty { break }
+                try? await Task.sleep(nanoseconds: 100_000_000)
+            }
+            if engine.claimCompleteSuiteLaunch() {
+                resumeSuite = ProcessInfo.processInfo.arguments.contains("--ios-complete-suite-resume")
+                suiteFullscreen = true
+            }
+        }
+        .onChange(of: engine.allowTranslatedApis) { enabled in
+            if !enabled { selectedApi = "metal" }
+        }
+        .onChange(of: selectedApi) { api in
+            if api == "gles2" { selectedTest = "gpu_burn" }
+            if api == "vulkan" && selectedTest == "gpu_cache" { selectedTest = "memory_sweep" }
+            if api == "vulkan" && selectedTest == "cinematic_liquid" && !engine.vulkanLiquidAvailable { selectedTest = "stream" }
+        }
+    }
+
+    private var completeSuiteCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(Localization.tr("Complete test", "完整测试", "全テスト")).font(.headline)
+                Text(Localization.tr(
+                    "\(engine.supportedSuiteJobs.count) supported jobs. Includes native Metal, available GPU cache diagnostics and the complete CPU suite. Enabling translated APIs includes supported Vulkan jobs. Results and curves are saved automatically.",
+                    "共 \(engine.supportedSuiteJobs.count) 项：原生 Metal、可用的 GPU 缓存诊断和 CPU 全套。开启转译 API 后加入设备支持的 Vulkan 项目。成绩和曲线自动保存。",
+                    "対応テスト \(engine.supportedSuiteJobs.count) 項目。Metal、対応 GPU キャッシュ診断と CPU 全項目。変換 API を有効にすると対応 Vulkan 項目も含みます。"))
+                    .font(.caption).foregroundStyle(.secondary)
+                if let report = engine.completeSuiteReport {
+                    Text(Localization.tr("Finished: \(report.finishedCount)/\(report.jobs.count) · Review: \(report.reviewCount)", "已完成 \(report.finishedCount)/\(report.jobs.count) · 待复核 \(report.reviewCount)", "完了 \(report.finishedCount)/\(report.jobs.count) · 要確認 \(report.reviewCount)"))
+                        .font(.subheadline)
+                    ProgressView(value: Double(report.finishedCount), total: Double(report.jobs.count))
+                }
+                Button {
+                    resumeSuite = false
+                    suiteScope = .gpu
+                    suiteFullscreen = true
+                } label: {
+                    Label(Localization.tr("Run all GPU tests", "一键测试 GPU 全套", "GPU 全項目を実行"), systemImage: "play.fill")
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(engine.isRunning || fullscreen || suiteFullscreen || engine.workingDirectory.isEmpty || engine.gpus.isEmpty)
+                Button {
+                    resumeSuite = false
+                    suiteScope = .all
+                    suiteFullscreen = true
+                } label: {
+                    Label(Localization.tr("Test all items", "一键测试全部项目", "全項目をテスト"), systemImage: "play.fill")
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(engine.isRunning || fullscreen || suiteFullscreen || engine.workingDirectory.isEmpty || engine.gpus.isEmpty)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
     // MARK: - Cards
 
+    private func apiLabel(_ api: String) -> String {
+        switch api {
+        case "vulkan": return "Vulkan (MoltenVK → Metal)"
+        case "gles2": return "OpenGL ES 2.0"
+        default: return "Metal"
+        }
+    }
+
     private var fullscreenCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 8) {
-                Text(Localization.tr("Runs full screen", "全屏运行", "全画面で実行"))
+                Text(selectedTest == "memory_sweep"
+                     ? Localization.tr("GPU memory sweep", "GPU 显存 / 缓存扫描", "GPU メモリ測定")
+                     : Localization.tr("Runs full screen", "全屏运行", "全画面で実行"))
                     .font(.headline)
-                Text(Localization.tr(
-                    "A test takes over the screen in landscape. It always renders 1280 × 720, as the desktop "
-                        + "version does, and the system scales the picture to the screen, so a score does not "
-                        + "depend on the size or resolution of the display.",
-                    "测试开始后横屏占满屏幕。渲染尺寸固定为 1280 × 720，和桌面版相同，再由系统缩放到屏幕，"
-                        + "所以成绩不随屏幕大小和分辨率变化。",
-                    "テストは横向きで画面全体を使います。描画サイズはデスクトップ版と同じ 1280 × 720 に固定され、"
-                        + "システムが画面に合わせて拡大縮小するため、スコアは画面の大きさや解像度に左右されません。"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(Localization.tr("API: Metal", "图形 API：Metal", "API：Metal")
+                if selectedTest == "gpu_cache" {
+                    Text(Localization.tr(
+                        "Measures dependent-load latency and parallel payload throughput after CPU/GPU warming. Saves curves in ns/load and GB/s. Cache-level attribution remains unverified.",
+                        "分别在 CPU／GPU 预热及干扰读后测量依赖读取延迟和并行吞吐，保存 ns/load 与 GB/s 曲线。尚不能独立归属到 GPU L2/L3 或 SoC/SLC。",
+                        "CPU/GPU のウォームアップ後の依存読込遅延と並列スループットを測定。キャッシュ階層の帰属は未検証。"))
+                        .font(.caption).foregroundStyle(.secondary)
+                } else if selectedTest == "memory_sweep" && selectedApi == "vulkan" {
+                    Text(Localization.tr(
+                        "Vulkan via MoltenVK → Metal. Sweeps read, write, copy and workgroup-local cache behavior up to 256 MiB; keeps translation and plateau flags with the saved curves.",
+                        "Vulkan 经 MoltenVK → Metal，扫描读、写、复制和工作组局部缓存行为，最高 256 MiB。曲线同时保存转译标记和内存平台验证状态。",
+                        "MoltenVK → Metal。最大 256 MiB の読込・書込・コピーと局所キャッシュ挙動を測定。"))
+                        .font(.caption).foregroundStyle(.secondary)
+                } else if selectedTest == "memory_sweep" {
+                    Text(Localization.tr(
+                        "Native Metal cache and memory bandwidth preview. The sweep runs without rendering and finishes automatically, then saves its result in results.json. CPU and GPU share unified memory on Apple silicon; the largest point can still be cache-assisted.",
+                        "原生 Metal 缓存与内存带宽预览。扫描无需画面，会自动结束并保存到 results.json。Apple 芯片的 CPU 与 GPU 共用统一内存；最大工作集仍可能命中缓存。",
+                        "ネイティブ Metal のキャッシュ / メモリ帯域プレビュー。描画なしで自動終了し、results.json に保存します。Apple silicon はユニファイドメモリを共有し、最大サイズもキャッシュの影響を受ける場合があります。"))
+                        .font(.caption).foregroundStyle(.secondary)
+                } else {
+                    Text(Localization.tr(
+                        "A test takes over the screen in landscape. It always renders 1280 × 720, as the desktop "
+                            + "version does, and the system scales the picture to the screen, so a score does not "
+                            + "depend on the size or resolution of the display.",
+                        "测试开始后横屏占满屏幕。渲染尺寸固定为 1280 × 720，和桌面版相同，再由系统缩放到屏幕，"
+                            + "所以成绩不随屏幕大小和分辨率变化。",
+                        "テストは横向きで画面全体を使います。描画サイズはデスクトップ版と同じ 1280 × 720 に固定され、"
+                            + "システムが画面に合わせて拡大縮小するため、スコアは画面の大きさや解像度に左右されません。"))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Text("API: " + apiLabel(selectedApi)
                      + " · "
                      + Localization.tr("Engine: ", "引擎：", "エンジン：")
                      + (engine.engineVersion.isEmpty ? "…" : engine.engineVersion))
@@ -221,7 +335,12 @@ struct RunView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text(Localization.tr("Tests", "测试项目", "テスト"))
                     .font(.headline)
-                ForEach(GpuTest.all) { item in
+                ForEach(GpuTest.all.filter {
+                    if selectedApi == "gles2" { return $0.id == "gpu_burn" }
+                    if $0.id == "gpu_cache" { return selectedApi == "metal" && engine.gpuCacheAvailable }
+                    if $0.id == "cinematic_liquid" { return selectedApi == "metal" || engine.vulkanLiquidAvailable }
+                    return true
+                }) { item in
                     Button {
                         selectedTest = item.id
                     } label: {
@@ -229,9 +348,10 @@ struct RunView: View {
                             Image(systemName: item.id == selectedTest ? "largecircle.fill.circle" : "circle")
                                 .foregroundStyle(item.id == selectedTest ? Color.accentColor : Color.gray)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(item.label)
+                                Text(selectedApi == "gles2" ? "GPU Burn · ES 2.0 legacy" : item.label)
                                     .foregroundStyle(.primary)
-                                Text(GpuOptions.savedAs(test: item.id, steps: steps ?? GpuOptions.defaultSteps))
+                                Text(GpuOptions.savedAs(test: item.id, steps: steps ?? GpuOptions.defaultSteps,
+                                    api: selectedApi, cacheParallelSteps: engine.gpuCacheParallelSteps))
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                             }
@@ -251,6 +371,30 @@ struct RunView: View {
             VStack(alignment: .leading, spacing: 14) {
                 Text(Localization.tr("Settings", "测试设置", "設定"))
                     .font(.headline)
+                Toggle(Localization.tr("Allow translated APIs (MoltenVK)", "允许转译 API（MoltenVK）", "変換 API を許可（MoltenVK）"), isOn: $engine.allowTranslatedApis)
+                    .disabled(engine.isRunning)
+                Text(Localization.tr(
+                    "Off by default. Vulkan runs through Metal and its results are grouped separately.",
+                    "默认关闭。Vulkan 经 Metal 转译，成绩单独分组。",
+                    "既定は無効。Vulkan は Metal に変換され、結果は別グループです。"))
+                    .font(.caption).foregroundStyle(.secondary)
+                Picker(Localization.tr("Graphics API", "图形 API", "グラフィックス API"), selection: $selectedApi) {
+                    ForEach(engine.availableAPIs, id: \.self) { api in
+                        Text(apiLabel(api)).tag(api)
+                    }
+                }.disabled(engine.isRunning)
+                if engine.allowTranslatedApis && !engine.vulkanAvailable {
+                    Text(Localization.tr("Vulkan runtime unavailable in this build/device.", "此安装包／设备未提供可用的 Vulkan 运行库。", "Vulkan ランタイムを利用できません。"))
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                if selectedApi == "vulkan" && !engine.vulkanLiquidAvailable {
+                    Text(Localization.tr("Liquid needs R32 float linear filtering unavailable on this device; it is excluded from the suite.", "这台设备缺少流体所需的 R32 浮点线性过滤能力，清单自动排除该项。", "必要な R32 浮動小数点フィルタがないため流体を除外します。"))
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                if selectedApi == "gles2" {
+                    Text(Localization.tr("ES 2.0 uses the existing legacy GPU Burn shader and synchronized wall-clock timing, with display-paced presentation. iOS has no ES 3.1 compute API.", "ES 2.0 使用原有旧版 GPU Burn 着色器与同步计时，显示提交受屏幕刷新约束。iOS 没有 ES 3.1 计算接口，旧版成绩单独分组。", "ES 2.0 は従来の GPU Burn と同期計時。iOS には ES 3.1 演算 API がありません。"))
+                        .font(.caption).foregroundStyle(.secondary)
+                }
                 if selectedTest == "stream" || selectedTest == "stream_headless" {
                     presetRow(title: Localization.tr("Particles", "粒子数", "パーティクル数"),
                               presets: GpuOptions.particlePresets,
@@ -264,16 +408,18 @@ struct RunView: View {
                               presets: GpuOptions.stepPresets,
                               choice: $stepChoice,
                               custom: $customSteps,
-                              hint: "16–2048",
+                              hint: "16–\(selectedApi == "gles2" ? engine.gles2MaxSteps : 2048)",
                               valid: steps != nil)
                 }
-                presetRow(title: Localization.tr("Duration", "运行时长", "実行時間"),
-                          presets: GpuOptions.secondPresets,
-                          choice: $secondChoice,
-                          custom: $customSeconds,
-                          hint: Localization.tr("seconds, 1–3600", "秒，1–3600", "秒、1–3600"),
-                          valid: seconds != nil)
-                if selectedTest != "stream_headless" {
+                if selectedTest != "memory_sweep" && selectedTest != "gpu_cache" {
+                    presetRow(title: Localization.tr("Duration", "运行时长", "実行時間"),
+                              presets: GpuOptions.secondPresets,
+                              choice: $secondChoice,
+                              custom: $customSeconds,
+                              hint: Localization.tr("seconds, 1–3600", "秒，1–3600", "秒、1–3600"),
+                              valid: seconds != nil)
+                }
+                if selectedTest != "stream_headless" && selectedTest != "memory_sweep" && selectedTest != "gpu_cache" {
                     Toggle(Localization.tr("V-Sync", "垂直同步", "垂直同期"), isOn: $vsync)
                         .disabled(engine.isRunning)
                 }
@@ -381,10 +527,13 @@ struct RunView: View {
                 Button(Localization.tr("Stop", "停止", "停止")) { engine.cancel(channel: .gpu) }
             }
             Button {
-                if selectedTest == "stream_headless" {
+                if selectedTest == "memory_sweep" || selectedTest == "gpu_cache" {
+                    _ = engine.startPreview(workload: GpuOptions.request(test: selectedTest,
+                        particles: 0, steps: 0, api: selectedApi), seconds: 0)
+                } else if selectedTest == "stream_headless" {
                     _ = engine.startPreview(workload: GpuOptions.request(test: selectedTest,
                         particles: particles ?? GpuOptions.defaultParticles,
-                        steps: steps ?? GpuOptions.defaultSteps), seconds: Double(seconds ?? GpuOptions.defaultSeconds))
+                        steps: steps ?? GpuOptions.defaultSteps, api: selectedApi), seconds: Double(seconds ?? GpuOptions.defaultSeconds))
                 } else {
                     fullscreen = true
                 }
@@ -397,6 +546,60 @@ struct RunView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(.ultraThinMaterial)
+    }
+}
+
+/// Keep one Metal surface alive across GPU and CPU jobs, without dismissing between tests.
+private struct MobileSuiteFullscreenRun: View {
+    @EnvironmentObject var engine: BenchEngine
+    let resume: Bool
+    var scope: MobileSuiteScope = .all
+    @Binding var isPresented: Bool
+    @State private var started = false
+
+    private var currentJob: MobileSuiteJob? {
+        engine.completeSuiteJobs.indices.contains(engine.completeSuiteIndex)
+            ? engine.completeSuiteJobs[engine.completeSuiteIndex] : nil
+    }
+    var body: some View {
+        ZStack(alignment: .top) {
+            Color.black.ignoresSafeArea()
+            MetalBenchView(showGles: currentJob?.gpuRequest?.contains("api=gles2") == true) { layer, glLayer in
+                guard !started else { return }
+                started = true
+                engine.attachGlesLayer(glLayer)
+                engine.attachMetalLayer(layer)
+                engine.startCompleteSuite(resume: resume, scope: scope)
+                if !engine.completeSuiteRunning { isPresented = false }
+            }
+            .aspectRatio(16.0 / 9.0, contentMode: .fit)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if currentJob?.gpuRequest == nil {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("\(engine.completeSuiteIndex + 1)/\(engine.completeSuiteJobs.count) · " +
+                         (currentJob?.title ?? ""))
+                    Text(engine.state(for: currentJob?.gpuRequest == nil ? .cpu : .gpu).statusText)
+                        .font(.caption).lineLimit(1)
+                }
+                Spacer()
+                Button(Localization.tr("Stop", "停止", "停止")) { engine.cancelCompleteSuite() }
+                    .buttonStyle(.bordered)
+            }
+            .padding(12)
+            .foregroundStyle(.white)
+            .background(.black.opacity(0.65))
+            }
+        }
+        .statusBarHidden(true)
+        .persistentSystemOverlays(.hidden)
+        .contentShape(Rectangle())
+        .onTapGesture { engine.cancelCompleteSuite() }
+        .onAppear { ScreenOrientation.setLandscape(true) }
+        .onDisappear { engine.cancelCompleteSuite(reason: "surface_disappeared"); ScreenOrientation.setLandscape(false) }
+        .onChange(of: engine.completeSuiteRunning) { running in
+            if started && !running { isPresented = false }
+        }
     }
 }
 
@@ -424,7 +627,8 @@ private struct GpuFullscreenRun: View {
             Color.black.ignoresSafeArea()
 
             // MetalBenchView reports its layer once, outside any view update.
-            MetalBenchView { layer in
+            MetalBenchView(showGles: request.contains("api=gles2")) { layer, glLayer in
+                engine.attachGlesLayer(glLayer)
                 start(in: layer)
             }
             .aspectRatio(16.0 / 9.0, contentMode: .fit)

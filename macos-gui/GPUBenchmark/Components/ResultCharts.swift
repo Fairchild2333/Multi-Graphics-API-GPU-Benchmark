@@ -4,6 +4,10 @@
 // and shows the same figures as the Windows and Android apps.
 
 import SwiftUI
+import UniformTypeIdentifiers
+#if os(macOS)
+import AppKit
+#endif
 
 // MARK: - GPU page
 
@@ -130,18 +134,31 @@ struct CpuComputeResultsCard: View {
 
     private func rowText(_ score: CoreScore) -> String {
         let value = "\(EngineFormat.number(score.score)) \(score.unit)"
+        if score.coreType != "auto" {
+            let bound = String(format: "%.2f%%", (score.residencyLowerBound ?? 0) * 100)
+            return score.label + "  ·  " + value + Localization.tr("  ·  verified ≥", "  ·  归属 ≥", "  ·  確認 ≥") + bound
+        }
         if score.label.isEmpty { return "#\(score.core + 1)  ·  \(value)" }
         return "#\(score.core + 1)  \(score.label)  ·  \(value)"
     }
 
     private var title: String {
-        output.schedulerManaged
+        if output.coreTypeSelection != "auto" {
+            return Localization.tr("Verified core-type scores", "已核对归属的大核／小核成绩", "確認済みコア種別スコア")
+        }
+        return output.schedulerManaged
             ? Localization.tr("One-thread runs", "单线程各次运行的成绩", "1 スレッド実行ごとのスコア")
             : Localization.tr("Score of every logical processor", "各逻辑处理器的成绩", "論理プロセッサ別スコア")
     }
 
     private func subtitle(unit: String) -> String {
-        output.schedulerManaged
+        if output.coreTypeSelection != "auto" {
+            return unit + Localization.tr(
+                ", one thread. Every round verifies at least 99% CPU time on the requested core type. Background-mode scores reflect the system clock under that policy.",
+                "，单线程。每轮确认至少 99% 的 CPU 时间属于所选核心类型；小核成绩反映后台策略下的实际时钟。",
+                "、1 スレッド。各ラウンドで指定コア種別の CPU 時間が 99% 以上であることを確認。バックグラウンド設定のスコアはその時のクロックを反映します。")
+        }
+        return output.schedulerManaged
             ? unit + Localization.tr(
                 ", one run per logical processor, higher is better. The system chooses the core for each run, so a bar is not the score of one particular core.",
                 "，每个逻辑处理器对应一次运行，越高越好。每次运行跑在哪个核心由系统决定，所以一根柱子不代表某一个特定核心的成绩。",
@@ -153,7 +170,7 @@ struct CpuComputeResultsCard: View {
 
     var body: some View {
         let scores = output.coreScores.sorted { $0.core < $1.core }
-        if scores.count >= 2 {
+        if !scores.isEmpty {
             GlassCard(padding: 16) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(title).fontWeight(.semibold)
@@ -226,8 +243,10 @@ private struct LevelTable: View {
                 } else {
                     name = "\(level.level)  > \(EngineFormat.bytes(level.capacityLow)) *"
                 }
-            } else {
+            } else if level.cacheBytes > 0 {
                 name = "\(level.level)  \(EngineFormat.bytes(level.cacheBytes))"
+            } else {
+                name = level.level
             }
             if level.measured {
                 add(name, rate(level.read), rate(level.write), rate(level.copy))
@@ -323,6 +342,12 @@ struct CpuMemoryResultsView: View {
 
     private func classTitle(_ cpuClass: MemClass, mixed: Bool) -> String {
         let oneThread = Localization.tr("One thread, GB/s", "单线程，GB/s", "1 スレッド、GB/s")
+        if output.coreTypeSelection != "auto" {
+            let name = cpuClass.name == "Performance"
+                ? Localization.tr("Performance core", "大核", "性能コア")
+                : Localization.tr("Efficiency core", "小核", "効率コア")
+            return name + " — " + oneThread
+        }
         guard mixed else { return oneThread }
         return Localization.tr("Core class ", "核心类别 ", "コアクラス ") + "\(cpuClass.rank) · \(cpuClass.name) · "
             + "\(cpuClass.cores)" + Localization.tr(" cores", " 个核心", " コア") + " — " + oneThread
@@ -407,10 +432,12 @@ struct CpuMemoryResultsView: View {
                 BarItem(id: 0, label: Localization.tr("Read", "读", "読み取り"), value: storage.randRead),
                 BarItem(id: 1, label: Localization.tr("Write", "写", "書き込み"), value: storage.randWrite),
             ], unit: "MB/s")
-            Text(requestsText(storage))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            if storage.randReadIops > 0 || storage.randWriteIops > 0 {
+                Text(requestsText(storage))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         } else {
             Text(Localization.tr("Storage not measured", "存储未测量", "ストレージは未測定")
                 + (storage.skipped.isEmpty ? "" : Localization.tr(": ", "：", ": ") + Localization.engineText(storage.skipped)))
@@ -423,13 +450,22 @@ struct CpuMemoryResultsView: View {
         let groups = classes
         let mixed = groups.count > 1
         VStack(alignment: .leading, spacing: 14) {
+            if let lower = output.memoryResidencyLowerBound {
+                Text(Localization.tr("Single-thread core-type verification ≥", "单线程核心类型归属校验 ≥", "1 スレッドのコア種別確認 ≥")
+                     + String(format: "%.2f%%", lower * 100)
+                     + Localization.tr("; all-core, page mapping and storage use system scheduling.",
+                                       "；全核、页面映射和存储使用系统调度。", "。全コア、ページ割り当て、ストレージはシステムがスケジュールします。"))
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             ForEach(groups, id: \.rank) { cpuClass in
                 sweepCard(title: classTitle(cpuClass, mixed: mixed), mode: cpuClass.mode,
                           marks: markers(cpuClass: cpuClass.rank, threads: 1))
             }
             // With mixed cores the threads of the all-core run see different caches.
-            sweepCard(title: allTitle, mode: "all",
-                      marks: mixed ? [] : markers(cpuClass: groups[0].rank, threads: max(1, output.allThreads)))
+            if output.allThreads > 0 {
+                sweepCard(title: allTitle, mode: "all",
+                          marks: mixed ? [] : markers(cpuClass: groups[0].rank, threads: max(1, output.allThreads)))
+            }
             if output.pageMapping != nil || output.storage != nil {
                 GlassCard(padding: 16) {
                     VStack(alignment: .leading, spacing: 8) {
@@ -480,8 +516,14 @@ struct SavedResultCharts: View {
             return Localization.tr("Legacy Cinematic Liquid v1", "旧版电影化液体 v1", "旧版シネマティック液体 v1")
         case "membw":
             return Localization.tr("Memory Bandwidth — VRAM / Cache", "显存带宽 —— 显存 / 缓存", "メモリ帯域 — VRAM / キャッシュ")
+        case "gpu_cache":
+            return Localization.tr("GPU — Cache latency probe", "GPU —— 缓存延迟探测", "GPU — キャッシュ遅延測定")
         case "cpu_single_core":
             return Localization.tr("CPU — Single-core", "CPU —— 单核", "CPU — コア別")
+        case "cpu_single_core_performance":
+            return Localization.tr("CPU — Performance core", "CPU —— 大核", "CPU — 性能コア")
+        case "cpu_single_core_efficiency":
+            return Localization.tr("CPU — Efficiency core", "CPU —— 小核", "CPU — 効率コア")
         case "cpu_multi_core":
             return Localization.tr("CPU — All-core", "CPU —— 全核", "CPU — 全コア")
         case "cpu_membw":
@@ -495,6 +537,10 @@ struct SavedResultCharts: View {
         // Liquid v1 and v2 rows share one workload id and differ in the version.
         if result.workload == "cinematic_liquid", result.workloadVersion == "cinematic_liquid_v1" {
             return "cinematic_liquid_v1"
+        }
+        if result.workload == "cpu_single_core",
+           let type = result.workloadConfigValue("coreType"), ["performance", "efficiency"].contains(type) {
+            return "cpu_single_core_" + type
         }
         return result.workload
     }
@@ -580,11 +626,14 @@ struct SavedResultCharts: View {
 }
 
 
-/// Native Metal diagnostic; its preview contract is separate from Vulkan membw_v1.
+/// Keep the native Metal preview and Vulkan memory curves separate.
 struct GpuMemoryResultsCard: View {
     let output: RunOutput
 
     var body: some View {
+        if !output.gpuMemorySummaries.isEmpty || output.gpuLocalCache != nil {
+            vulkanSummary
+        }
         if !output.gpuMemoryPoints.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(["device_local", "host_visible"], id: \.self) { storage in
@@ -604,6 +653,17 @@ struct GpuMemoryResultsCard: View {
                                     : Localization.tr("CPU visible allocation", "CPU 可见内存", "CPU 可視メモリ"))
                                     .font(.headline)
                                 LinePlotView(series: curves)
+                                ForEach(["read_only", "read_modify_write"], id: \.self) { access in
+                                    let points = output.gpuMemoryPoints.filter { $0.series == storage + "/" + access }
+                                    if let last = points.max(by: { $0.blockBytes < $1.blockBytes }),
+                                       let peak = points.max(by: { $0.gbps < $1.gbps }) {
+                                        Text(memoryKernelLabel(access) + ": "
+                                            + Localization.tr("largest set ", "最大工作集 ", "最大サイズ ")
+                                            + EngineFormat.bytes(last.blockBytes) + " · " + rate(last.gbps)
+                                            + Localization.tr("; peak ", "；峰值 ", "、ピーク ") + rate(peak.gbps))
+                                            .font(.caption).foregroundStyle(.secondary)
+                                    }
+                                }
                                 Text(Localization.tr(
                                     "GB/s by working-set size. This particle-derived probe is a preview; the final point may still be served by cache. On Apple silicon both allocation modes use unified memory.",
                                     "工作集大小与 GB/s 的关系。这是基于粒子的预览探测，最后一个点仍可能命中缓存。Apple 芯片的两种内存分配都使用统一内存。",
@@ -615,5 +675,283 @@ struct GpuMemoryResultsCard: View {
                 }
             }
         }
+        if !output.vulkanMemoryPoints.isEmpty {
+            vulkanCard(title: Localization.tr("Vulkan — Memory / Cache", "Vulkan —— 内存 / 缓存", "Vulkan — メモリ / キャッシュ"),
+                       kernels: ["read", "write", "copy"])
+            vulkanCard(title: Localization.tr("Vulkan — Local cache", "Vulkan —— 核心内缓存", "Vulkan — ローカルキャッシュ"),
+                       kernels: ["l1", "l1_single"])
+            vulkanCard(title: Localization.tr("Vulkan — Host memory", "Vulkan —— 主机内存", "Vulkan — ホストメモリ"),
+                       kernels: ["host_read", "host_write"])
+        }
+    }
+
+    private func rate(_ value: Double) -> String {
+        value > 0 ? String(format: "%.1f GB/s", value) : "—"
+    }
+
+    private var vulkanSummary: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(Localization.tr("Vulkan — Cache and memory summary", "Vulkan —— 缓存与内存汇总", "Vulkan — キャッシュ / メモリ概要"))
+                    .font(.headline)
+                HStack {
+                    Text(Localization.tr("Kernel", "访问", "アクセス")).frame(maxWidth: .infinity, alignment: .leading)
+                    Text(Localization.tr("Cache hit", "缓存命中段", "キャッシュヒット")).frame(maxWidth: .infinity, alignment: .trailing)
+                    Text(Localization.tr("Largest sets", "大工作集", "大サイズ")).frame(maxWidth: .infinity, alignment: .trailing)
+                }.font(.caption).foregroundStyle(.secondary)
+                ForEach(output.gpuMemorySummaries, id: \.kernel) { item in
+                    HStack {
+                        Text(memoryKernelLabel(item.kernel)).frame(maxWidth: .infinity, alignment: .leading)
+                        Text(rate(item.cache)).frame(maxWidth: .infinity, alignment: .trailing)
+                        Text(rate(item.memory)).frame(maxWidth: .infinity, alignment: .trailing)
+                    }.font(.caption).monospacedDigit()
+                    if item.kernel == "read", item.settled != true {
+                        Text(Localization.tr("Memory plateau unverified.", "内存平台尚未验证。", "メモリ帯域は未検証です。"))
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                if let local = output.gpuLocalCache {
+                    Divider()
+                    Text(Localization.tr("Local cache probe (L1-style), full GPU: ", "局部缓存探测（L1 型），全 GPU 合计：", "ローカルキャッシュ測定（L1 型）、GPU 全体: ") + rate(local.fullLoad))
+                        .font(.callout)
+                    Text(Localization.tr("Single workgroup: ", "单工作组：", "単一ワークグループ: ") + rate(local.singleGroup))
+                        .font(.caption)
+                    if local.capacityHigh > local.capacityLow, local.capacityLow > 0 {
+                        Text(Localization.tr("Working-set transition: ", "工作集转折范围：", "サイズの遷移範囲: ")
+                            + EngineFormat.bytes(local.capacityLow) + "–" + EngineFormat.bytes(local.capacityHigh))
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                Text(Localization.tr(
+                    "Effective kernel rates. The local probe and cache-hit range do not independently identify hardware L1/L2/L3 or the SoC/SLC. The transition range is not a verified cache capacity.",
+                    "以上是测试内核的有效吞吐。局部探测和缓存命中段尚未独立确认硬件 L1/L2/L3 或 SoC/SLC；转折范围也不是已验证的缓存容量。",
+                    "カーネルの実効速度です。ハードウェアの L1/L2/L3、SoC/SLC と容量は独立に確認されていません。"))
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    @ViewBuilder private func vulkanCard(title: String, kernels: [String]) -> some View {
+        let curves = kernels.enumerated().map { slot, kernel in
+            PlotSeries(label: memoryKernelLabel(kernel), slot: slot,
+                       points: output.vulkanMemoryPoints.filter { $0.series == kernel }
+                        .map { PlotPoint(x: $0.blockBytes, y: $0.gbps) })
+        }
+        if curves.contains(where: { !$0.points.isEmpty }) {
+            GlassCard {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(title).font(.headline)
+                    LinePlotView(series: curves)
+                    Text(Localization.tr(
+                        "Median GB/s by working-set size. Small working sets can be cache-assisted. macOS Vulkan uses MoltenVK over Metal; its results are saved separately from native Metal previews.",
+                        "工作集大小与 GB/s 中位数的关系。小工作集可能命中缓存。macOS 的 Vulkan 经 MoltenVK 转译到 Metal，成绩与原生 Metal 预览分组保存。",
+                        "サイズ別の中央値 GB/s。小さいサイズはキャッシュの影響を受けます。macOS の Vulkan は MoltenVK で Metal に変換され、ネイティブ Metal プレビューとは別に保存します。"))
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    private func memoryKernelLabel(_ kernel: String) -> String {
+        switch kernel {
+        case "read", "host_read", "read_only": return Localization.tr("Read", "读取", "読み取り")
+        case "read_modify_write": return Localization.tr("Particle update", "粒子更新", "パーティクル更新")
+        case "write", "host_write": return Localization.tr("Write", "写入", "書き込み")
+        case "copy": return Localization.tr("Copy", "复制", "コピー")
+        case "l1": return Localization.tr("Full load", "全 GPU 负载", "全負荷")
+        default: return Localization.tr("Single workgroup", "单工作组", "単一ワークグループ")
+        }
+    }
+}
+
+struct GpuCacheResultsCard: View {
+    let output: RunOutput
+    private func label(_ condition: String) -> String {
+        switch condition {
+        case "gpu_warm": return Localization.tr("GPU warmed", "GPU 预热", "GPU ウォーム")
+        case "cpu_warm": return Localization.tr("CPU warmed", "CPU 预热", "CPU ウォーム")
+        case "eviction_pass": return Localization.tr("After eviction pass", "清扫后", "退避処理後")
+        default: return Localization.tr("Parallel reads", "并发读取", "並列読み取り")
+        }
+    }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            GlassCard {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(Localization.tr("GPU dependent-read latency — ns/load", "GPU 随机依赖读取延迟 —— ns/读取", "GPU 依存読み取り — ns/回")).font(.headline)
+                    let curves = ["gpu_warm", "eviction_pass", "cpu_warm"].enumerated().map { slot, condition in
+                        PlotSeries(label: label(condition), slot: slot, points: output.gpuCachePoints
+                            .filter { $0.condition == condition }.map { PlotPoint(x: $0.addressBytes, y: $0.value) })
+                    }
+                    LinePlotView(series: curves)
+                    Text(Localization.tr(
+                        "Lower is faster. Each load chooses the next address. The x-axis is address span with one node every 128 bytes. Warming controls show cache-state effects; eviction is not guaranteed and these curves do not identify hardware L2/L3/SLC.",
+                        "越低越快。每次读取决定下一地址，横轴是地址跨度（每 128 字节一个节点）。预热对照反映缓存状态影响；清扫不保证完全排空缓存，曲线尚不能独立确认硬件 L2/L3/SLC。",
+                        "低いほど高速です。128 バイト間隔の依存読み取りです。退避の完了やハードウェア L2/L3/SLC の識別は未検証です。")).font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            let parallel = output.gpuCachePoints.filter { $0.condition == "parallel_gpu_warm" }
+            if !parallel.isEmpty {
+                GlassCard {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(Localization.tr("GPU parallel random reads — payload GB/s", "GPU 并发随机读取 —— 逻辑负载 GB/s", "GPU 並列ランダム読み取り — GB/s")).font(.headline)
+                        LinePlotView(series: [PlotSeries(label: label("parallel_gpu_warm"), slot: 0,
+                            points: parallel.map { PlotPoint(x: $0.addressBytes, y: $0.value) })])
+                        Text(Localization.tr(
+                            "4096 dependent chains. Traffic counts 4 bytes per load, excluding fetched cache lines; compare only with the same probe. Every result passed the chain checksum check.",
+                            "4096 条依赖链。每次读取只计 4 字节逻辑负载，不计额外取回的缓存行；请与相同探测比较。每个结果都通过了读取链校验。",
+                            "4096 本の依存チェーンです。読み取り当たり 4 バイトを計上し、全結果をチェックサムで検証します。")).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// A read-only browser of curves stored in current or older results files.
+/// Opening a file changes only this sheet, never the app's result store.
+struct SavedMemoryCurvesView: View {
+    let results: [BenchResult]
+    var initialSelection: String? = nil
+    @Environment(\.dismiss) private var dismiss
+    @State private var selectedID = ""
+    @State private var openedResults: [BenchResult]?
+    @State private var openedFileName = ""
+    @State private var showFile = false
+    @State private var fileError = ""
+
+    private var source: [BenchResult] { openedResults ?? results }
+    private var records: [BenchResult] {
+        source.filter { ["membw", "cpu_membw", "gpu_cache"].contains($0.workload) }.sorted { $0.id > $1.id }
+    }
+    private var selected: BenchResult? {
+        records.first { $0.id == selectedID } ?? records.first
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text(Localization.tr("Cache & memory curves", "缓存与内存曲线", "キャッシュ / メモリ曲線"))
+                    .font(.title2).fontWeight(.semibold)
+                Spacer()
+                Button(Localization.tr("Open results file…", "打开成绩文件…", "結果ファイルを開く…"), action: openFile)
+                Button(Localization.tr("Close", "关闭", "閉じる")) { dismiss() }
+            }
+            if openedResults != nil {
+                HStack {
+                    Text(openedFileName + Localization.tr(" · read only", " · 只读查看", " · 読み取り専用"))
+                        .font(.caption).foregroundStyle(.secondary)
+                    Spacer()
+                    Button(Localization.tr("Current history", "返回当前历史", "現在の履歴")) {
+                        openedResults = nil; openedFileName = ""; selectedID = records.first?.id ?? ""; fileError = ""
+                    }
+                }
+            }
+            if !fileError.isEmpty { Text(fileError).font(.caption).foregroundStyle(.red) }
+            if records.isEmpty {
+                Spacer()
+                Text(Localization.tr("No cache or memory sweep is stored in this file.", "这份成绩没有保存缓存或内存扫描。", "このファイルにはキャッシュ / メモリ測定がありません。"))
+                    .font(.headline)
+                Text(Localization.tr(
+                    "Particle scores are individual throughput samples; they cannot reconstruct a working-set sweep. Open a result that contains saved memory curves.",
+                    "粒子成绩只有单次吞吐数据，不能还原工作集扫描曲线。请打开包含内存扫描数据的成绩文件。",
+                    "パーティクルの個別スコアからサイズ別曲線は復元できません。保存済みのメモリ測定を開いてください。"))
+                    .font(.caption).foregroundStyle(.secondary)
+                Text("\(source.count) " + Localization.tr("saved results", "条已保存成绩", "件の保存済み結果"))
+                    .font(.caption).foregroundStyle(.secondary)
+                Spacer()
+            } else {
+                Picker(Localization.tr("Saved run", "历史运行", "保存済み実行"), selection: $selectedID) {
+                    ForEach(records) { row in
+                        Text(row.timestamp + " · " + row.graphicsApi + " · " + row.deviceName).tag(row.id)
+                    }
+                }.pickerStyle(.menu)
+                if let result = selected {
+                    Text(result.workloadVersion ?? "—").font(.caption).foregroundStyle(.secondary)
+                    if result.workload == "gpu_cache" {
+                        Text(Localization.tr("Dependent loads: ", "依赖读取次数：", "依存読み取り回数: ")
+                            + (result.workloadConfigValue("steps") ?? "—")
+                            + Localization.tr(" · median samples: ", " · 中位数样本：", " · 中央値サンプル: ")
+                            + (result.workloadConfigValue("repeats") ?? "—"))
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    ScrollView {
+                        let output = RunOutput.savedMemory(workload: result.workload, api: result.graphicsApi,
+                                                           configuration: result.workloadConfig)
+                        VStack(alignment: .leading, spacing: 14) {
+                            if result.hidesImplausibleLegacyScore {
+                                Text(Localization.tr("This legacy score is invalid; no curve is shown.", "这条旧版成绩异常，不显示曲线。", "この旧スコアは無効のため曲線を表示しません。"))
+                            } else if output.hasMemoryCurves {
+                                if result.workload == "cpu_membw" { CpuMemoryResultsView(output: output) }
+                                else if result.workload == "gpu_cache" { GpuCacheResultsCard(output: output) }
+                                else { GpuMemoryResultsCard(output: output) }
+                            } else {
+                                Text(Localization.tr("This run has no saved curve points.", "这次运行没有保存曲线点。", "この実行には保存済みの曲線がありません。"))
+                                if output.hasGpuMemoryResults { GpuMemoryResultsCard(output: output) }
+                            }
+                            Text(Localization.tr("Loaded from the saved result. No test is running and the file is unchanged.",
+                                "曲线读取自已保存成绩，未启动测试，也未修改文件。",
+                                "保存済み結果から読み取り、測定やファイル変更は行いません。"))
+                                .font(.caption).foregroundStyle(.secondary)
+                        }.frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 8)
+                    }
+                }
+            }
+        }
+        .padding(20)
+#if os(macOS)
+        .frame(minWidth: 760, minHeight: 560)
+#endif
+        .onAppear { selectedID = records.first { $0.id == initialSelection }?.id ?? records.first?.id ?? "" }
+#if !os(macOS)
+        .fileImporter(isPresented: $showFile, allowedContentTypes: [.json], allowsMultipleSelection: false) { selection in
+            do {
+                guard let url = try selection.get().first else { return }
+                try loadFile(url)
+            } catch {
+                showError(error)
+            }
+        }
+#endif
+    }
+
+    private func openFile() {
+#if os(macOS)
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = [.json, .data]
+        let parent = NSApp.keyWindow ?? NSApp.mainWindow
+        let completion: (NSApplication.ModalResponse) -> Void = { response in
+            DispatchQueue.main.async {
+                parent?.makeKeyAndOrderFront(nil)
+                NSApp.activate(ignoringOtherApps: true)
+            }
+            guard response == .OK, let url = panel.url else { return }
+            do { try loadFile(url) } catch { showError(error) }
+        }
+        if let parent { panel.beginSheetModal(for: parent, completionHandler: completion) }
+        else { panel.begin(completionHandler: completion) }
+#else
+        showFile = true
+#endif
+    }
+
+    private func loadFile(_ url: URL) throws {
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        let data = try Data(contentsOf: url)
+        let decoder = JSONDecoder()
+        struct Envelope: Decodable { let results: [BenchResult] }
+        let rows: [BenchResult]
+        if let array = try? decoder.decode([BenchResult].self, from: data) { rows = array }
+        else { rows = try decoder.decode(Envelope.self, from: data).results }
+        openedResults = rows; openedFileName = url.lastPathComponent
+        selectedID = records.first?.id ?? ""; fileError = ""
+    }
+
+    private func showError(_ error: Error) {
+        fileError = Localization.tr("Could not open the results file: ", "无法打开成绩文件：", "結果ファイルを開けません: ") + error.localizedDescription
     }
 }

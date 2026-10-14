@@ -58,6 +58,8 @@ fi
 # --------------------------------------------------------------------------
 # Step 1: Build libgpu_engine.a for each SDK
 # --------------------------------------------------------------------------
+"${REPO_ROOT}/scripts/prepare-ios-vulkan.sh"
+command -v glslc >/dev/null || { echo "iOS Vulkan shaders require glslc (Vulkan SDK or shaderc)" >&2; exit 2; }
 for sdk in "${SDKS[@]}"; do
     echo ""
     echo "================================================================="
@@ -83,7 +85,8 @@ for sdk in "${SDKS[@]}"; do
         -DCMAKE_OSX_SYSROOT="$sdk" \
         -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 \
         -DCMAKE_BUILD_TYPE="$CONFIGURATION" \
-        -DENABLE_METAL=ON
+        -DENABLE_METAL=ON \
+        -DENABLE_IOS_VULKAN=ON
 
     # Build static library
     cmake --build "$cmake_build" \
@@ -147,7 +150,7 @@ for sdk in "${SDKS[@]}"; do
         -configuration "$CONFIGURATION" \
         -destination "$DESTINATION" \
         -derivedDataPath "$DERIVED_DATA" \
-        LIBRARY_SEARCH_PATHS="\"${BUILD_DIR}/${CONFIGURATION}-${sdk}\" \"${BUILD_DIR}/${CONFIGURATION}-${sdk}/${CONFIGURATION}-${sdk}\"" \
+        LIBRARY_SEARCH_PATHS="\"${BUILD_DIR}/${CONFIGURATION}-${sdk}\" \"${BUILD_DIR}/${CONFIGURATION}-${sdk}/${CONFIGURATION}-${sdk}\" \"${BUILD_DIR}/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/\$(MOLTENVK_SLICE)\"" \
         CODE_SIGN_IDENTITY="-" \
         CODE_SIGNING_REQUIRED=NO \
         CODE_SIGNING_ALLOWED=NO \

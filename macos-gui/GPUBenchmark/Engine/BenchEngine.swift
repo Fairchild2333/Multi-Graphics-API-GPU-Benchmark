@@ -515,7 +515,7 @@ final class BenchEngine: ObservableObject {
             $0.lastScore = ""
             $0.progressFraction = 0
             $0.progressLabel = "0%"
-            $0.isSuiteRun = jobs.contains { $0.contains("--complete-suite") || $0.contains("--fill-missing") }
+            $0.isSuiteRun = jobs.contains { $0.contains("--complete-suite") || $0.contains("--gpu-suite") || $0.contains("--cpu-suite") || $0.contains("--fill-missing") }
             $0.runSummary = BenchRunSummary(planned: jobs.count)
             $0.cpuAllCoreScore = nil
             $0.cpuSingleCoreScore = nil
@@ -694,7 +694,7 @@ final class BenchEngine: ObservableObject {
         let requestsCapture = arguments.contains("--capture") ||
             arguments.contains("--capture-frame") ||
             arguments.contains("--renderdoc") ||
-            arguments.contains("--complete-suite") ||
+            arguments.contains("--complete-suite") || arguments.contains("--gpu-suite") ||
             arguments.contains("--fill-missing") ||
             arguments.contains("--full-analysis")
         if requestsCapture {
@@ -847,7 +847,7 @@ final class BenchEngine: ObservableObject {
 
     private nonisolated func workerTimeoutSeconds(for job: [String]) -> TimeInterval? {
         if job.contains("--no-time-limit") { return nil }
-        if job.contains("--complete-suite") || job.contains("--fill-missing") {
+        if job.contains("--complete-suite") || job.contains("--gpu-suite") || job.contains("--cpu-suite") || job.contains("--fill-missing") {
             return 24 * 60 * 60
         }
         // A per-core CPU sweep applies the requested time to every logical
@@ -874,11 +874,7 @@ final class BenchEngine: ObservableObject {
     }
 
     private func consumeGpuLine(_ line: String) {
-        if line.hasPrefix("MEMSWEEP_RESULT") {
-            let fields = RunOutput.fields(line)
-            gpuState.lastScore = Localization.tr("GPU memory probe: ", "GPU 内存探测：", "GPU メモリ測定: ")
-                + (fields["read_only_gbps"] ?? "—") + " GB/s"
-        }
+        if let score = RunOutput.gpuMemoryScoreLine(line) { gpuState.lastScore = score }
         if line.hasPrefix("Avg FPS:") ||
             line.contains("Score:") ||
             line.contains("VRAM rate:") ||
@@ -898,6 +894,13 @@ final class BenchEngine: ObservableObject {
     /// The CPU worker reports its own TAB-separated records; the GPU FPS and
     /// suite formats never appear in a CPU run.
     private func consumeCpuLine(_ line: String) {
+        if line.hasPrefix("SUITE_RUN"),
+           let index = Self.recordInteger(line, key: "index"),
+           let total = Self.recordInteger(line, key: "total"), total > 0 {
+            cpuState.runSummary.planned = total
+            cpuState.progressFraction = Double(index - 1) / Double(total)
+            cpuState.progressLabel = "\(index)/\(total)"
+        }
         if line.hasPrefix("CPU_PROGRESS\t") {
             guard let fraction = Self.recordDouble(line, key: "overall_fraction")
             else { return }
@@ -906,12 +909,16 @@ final class BenchEngine: ObservableObject {
             cpuState.progressLabel = String(format: "%.0f%%", clamped * 100)
             return
         }
-        guard line.hasPrefix("CPU_RESULT\t") else { return }
+        guard line.hasPrefix("CPU_RESULT\t"), Self.recordField(line, key: "valid") != "0" else { return }
         switch Self.recordField(line, key: "kind") {
         case "multi":
             cpuState.cpuAllCoreScore = Self.recordDouble(line, key: "score")
+        case "core":
+            guard cpuState.runOutput.coreTypeSelection != "auto" else { return }
         case "summary":
-            cpuState.cpuSingleCoreScore = Self.recordDouble(line, key: "average_score")
+            if cpuState.runOutput.coreTypeSelection == "auto" {
+                cpuState.cpuSingleCoreScore = Self.recordDouble(line, key: "average_score")
+            }
         default:
             return
         }
@@ -924,8 +931,11 @@ final class BenchEngine: ObservableObject {
             parts.append(Localization.tr("All-core", "全核", "全コア")
                 + String(format: ": %.1f MWork/s", allCore))
         }
-        if let singleCore = state.cpuSingleCoreScore {
-            parts.append(Localization.tr("Single-core avg", "单核均值", "単一コア平均")
+        for score in state.runOutput.coreScores where score.coreType != "auto" {
+            parts.append(score.label + String(format: ": %.1f MWork/s", score.score))
+        }
+        if state.runOutput.coreTypeSelection == "auto", let singleCore = state.cpuSingleCoreScore {
+            parts.append(Localization.tr("Single-thread avg", "单线程采样均值", "1 スレッド平均")
                 + String(format: ": %.1f MWork/s", singleCore))
         }
         return parts.joined(separator: "   ·   ")
@@ -939,6 +949,8 @@ final class BenchEngine: ObservableObject {
         let isSuite = !suiteResults.isEmpty ||
             !suiteSkips.isEmpty ||
             job.contains("--complete-suite") ||
+            job.contains("--gpu-suite") ||
+            job.contains("--cpu-suite") ||
             job.contains("--fill-missing")
 
         if outcome.cancelled && !isSuite { return }
@@ -965,6 +977,9 @@ final class BenchEngine: ObservableObject {
                 switch status {
                 case "success":
                     summary.succeeded += 1
+                case "review":
+                    summary.succeeded += 1
+                    summary.addIssue(BenchRunIssue(kind: .suspectResult, target: target))
                 case "capture_unsupported":
                     summary.succeeded += 1
                     summary.addIssue(BenchRunIssue(kind: .captureUnavailable, target: target))
@@ -1126,6 +1141,12 @@ final class BenchEngine: ObservableObject {
         }
         if job.contains("--complete-suite") {
             return Localization.tr("Complete suite", "完整测试", "完全テスト")
+        }
+        if job.contains("--gpu-suite") {
+            return Localization.tr("GPU suite", "GPU 全套", "GPU 全項目")
+        }
+        if job.contains("--cpu-suite") {
+            return Localization.tr("CPU suite", "CPU 全套", "CPU 全項目")
         }
         if job.contains("--fill-missing") {
             return Localization.tr("Fill missing", "补齐缺失", "不足分を補完")

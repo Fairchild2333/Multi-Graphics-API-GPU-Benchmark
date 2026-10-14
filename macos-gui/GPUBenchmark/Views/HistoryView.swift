@@ -13,6 +13,7 @@ struct HistoryView: View {
     @State private var workloadFilter: String = "All"
     @State private var timeRange: TimeRange = .all
     @State private var confirmClear = false
+    @State private var showMemoryCurves = false
 
     enum SortOption: String, CaseIterable {
         case timeNewest, scoreHigh, api, device, workload, mode
@@ -51,6 +52,9 @@ struct HistoryView: View {
                 HStack(spacing: 12) {
                     Button(action: refresh) {
                         Label(Localization.tr("Refresh", "刷新", "更新"), systemImage: "arrow.clockwise")
+                    }
+                    Button(Localization.tr("Cache & memory curves", "缓存与内存曲线", "キャッシュ / メモリ曲線")) {
+                        showMemoryCurves = true
                     }
                     Button(role: .destructive, action: deleteSelected) {
                         Label(Localization.tr("Delete selected", "删除选中", "選択を削除"), systemImage: "trash")
@@ -192,6 +196,9 @@ struct HistoryView: View {
         .padding(24)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .onAppear { refresh() }
+        .sheet(isPresented: $showMemoryCurves) {
+            SavedMemoryCurvesView(results: engine.results, initialSelection: selection.first)
+        }
         .confirmationDialog(
             Localization.tr("Clear all results?", "清空全部结果？", "すべての結果を消去しますか？"),
             isPresented: $confirmClear

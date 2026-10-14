@@ -16,6 +16,11 @@ struct GpuDevice: Identifiable, Hashable {
     let supportsMetal: Bool
     let supportsVulkan: Bool
     let supportsOpenGL: Bool
+    let supportsVulkanLiquid: Bool
+    let supportsGpuCache: Bool
+    let supportsGles2: Bool
+    let gles2MaxSteps: Int
+    let gpuCacheParallelSteps: Int
 }
 
 /// GPU and CPU runs own separate console output, progress, and scores so one
@@ -52,16 +57,40 @@ final class BenchEngine: ObservableObject {
     /// progress, scores, or status.
     @Published var gpuState = BenchChannelState()
     @Published var cpuState = BenchChannelState()
+    @Published private(set) var completeSuiteRunning = false
+    @Published private(set) var completeSuiteReport: MobileSuiteReport?
+    @Published private(set) var completeSuiteIndex = 0
+    @Published private(set) var completeSuiteJobs: [MobileSuiteJob] = MobileSuiteJob.all
+    @Published var allowTranslatedApis = UserDefaults.standard.bool(forKey: "allowTranslatedApis") {
+        didSet { UserDefaults.standard.set(allowTranslatedApis, forKey: "allowTranslatedApis") }
+    }
+    private var startingSuiteJob = false
+    private var suiteCancelled = false
+    private var suiteLaunchHandled = false
 
     /// Available graphics APIs on iOS (Metal only).
-    static let availableAPIs = ["Metal"]
+    var vulkanAvailable: Bool { gpus.contains { $0.supportsVulkan } }
+    var vulkanLiquidAvailable: Bool { gpus.contains { $0.supportsVulkanLiquid } }
+    var gpuCacheAvailable: Bool { gpus.contains { $0.supportsGpuCache } }
+    var gles2Available: Bool { gpus.contains { $0.supportsGles2 } }
+    var gles2MaxSteps: Int { gpus.map(\.gles2MaxSteps).max() ?? 0 }
+    var gpuCacheParallelSteps: Int { gpus.map(\.gpuCacheParallelSteps).max() ?? 0 }
+    var availableAPIs: [String] {
+        ["metal"] + (allowTranslatedApis && vulkanAvailable ? ["vulkan"] : []) + (gles2Available ? ["gles2"] : [])
+    }
+    var supportedSuiteJobs: [MobileSuiteJob] {
+        MobileSuiteJob.makeJobs(includeVulkan: allowTranslatedApis && vulkanAvailable,
+            vulkanLiquid: vulkanLiquidAvailable, gpuCache: gpuCacheAvailable, gles2: gles2Available,
+            gles2MaxSteps: gles2MaxSteps, gpuCacheParallelSteps: gpuCacheParallelSteps)
+    }
 
     static var readyText: String {
         Localization.tr("Ready", "就绪", "準備完了")
     }
 
     /// True while any channel is running; only one workload runs at a time.
-    var isRunning: Bool { gpuState.isRunning || cpuState.isRunning }
+    var isRunning: Bool { workloadRunning || completeSuiteRunning }
+    private var workloadRunning: Bool { gpuState.isRunning || cpuState.isRunning }
 
     func state(for channel: BenchChannel) -> BenchChannelState {
         channel == .gpu ? gpuState : cpuState
@@ -90,9 +119,13 @@ final class BenchEngine: ObservableObject {
     private var pendingOutput = ""
     private var shownStage: RunOutput.Stage?
     private var metalLayer: CAMetalLayer?
+    private var glesLayer: CAEAGLLayer?
     private var pollTask: Task<Void, Never>?
 
     init() {
+        if ProcessInfo.processInfo.arguments.contains("--ios-allow-translated-api") {
+            allowTranslatedApis = true
+        }
         gpuState.statusText = Self.readyText
         cpuState.statusText = Self.readyText
         prepareSandboxAndShaders()
@@ -103,6 +136,12 @@ final class BenchEngine: ObservableObject {
         if !workingDirectory.isEmpty {
             refreshGpus()
             refreshResults()
+            let latest = URL(fileURLWithPath: workingDirectory).appendingPathComponent("suite-runs/latest.json")
+            if let data = try? Data(contentsOf: latest),
+               let report = try? JSONDecoder().decode(MobileSuiteReport.self, from: data),
+               report.status != "running" {
+                completeSuiteReport = report
+            }
         }
     }
 
@@ -115,7 +154,9 @@ final class BenchEngine: ObservableObject {
 
         let shaderDir = docs.appendingPathComponent("shaders", isDirectory: true)
         try? FileManager.default.createDirectory(at: shaderDir, withIntermediateDirectories: true)
-        for name in ["particle.metal", "gpu_burn.metal", "cinematic_liquid_v2.metal"] {
+        let resources = ["particle.metal", "gpu_burn.metal", "cinematic_liquid_v2.metal", "gpu_burn_es2.vert", "gpu_burn_es2.frag"] +
+            (Bundle.main.urls(forResourcesWithExtension: "spv", subdirectory: nil) ?? []).map { $0.lastPathComponent }
+        for name in resources {
             let dest = shaderDir.appendingPathComponent(name)
             guard let src = Bundle.main.url(forResource: name, withExtension: nil)
                 ?? Bundle.main.url(forResource: (name as NSString).deletingPathExtension,
@@ -134,6 +175,11 @@ final class BenchEngine: ObservableObject {
         gpb_set_metal_layer(Unmanaged.passUnretained(layer).toOpaque())
     }
 
+    func attachGlesLayer(_ layer: CAEAGLLayer) {
+        glesLayer = layer
+        gpb_set_gles_layer(Unmanaged.passUnretained(layer).toOpaque())
+    }
+
     func setWorkingDirectory(_ path: String) {
         workingDirectory = path
         gpb_set_working_dir(path)
@@ -150,6 +196,7 @@ final class BenchEngine: ObservableObject {
             guard let json = gpb_list_gpus() else { return }
             let jsonStr = String(cString: json)
             gpb_free(json)
+            print("IOS_GPU_CAPS \(jsonStr)")
 
             guard let data = jsonStr.data(using: .utf8),
                   let arr = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]]
@@ -165,7 +212,12 @@ final class BenchEngine: ObservableObject {
                     vramMB: dict["vramMB"] as? Int ?? dict["vram"] as? Int ?? 0,
                     supportsMetal: dict["metal"] as? Bool ?? true,
                     supportsVulkan: dict["vulkan"] as? Bool ?? false,
-                    supportsOpenGL: dict["opengl"] as? Bool ?? false
+                    supportsOpenGL: dict["opengl"] as? Bool ?? false,
+                    supportsVulkanLiquid: dict["vulkanLiquid"] as? Bool ?? false,
+                    supportsGpuCache: dict["gpuCache"] as? Bool ?? false,
+                    supportsGles2: dict["gles2"] as? Bool ?? false,
+                    gles2MaxSteps: dict["gles2MaxSteps"] as? Int ?? 0,
+                    gpuCacheParallelSteps: dict["gpuCacheParallelSteps"] as? Int ?? 0
                 )
             }
             await MainActor.run {
@@ -205,6 +257,10 @@ final class BenchEngine: ObservableObject {
 
     func cancel(channel: BenchChannel) {
         guard state(for: channel).isRunning else { return }
+        if completeSuiteRunning {
+            suiteCancelled = true
+            completeSuiteReport?.cancellationReason = "stop_\(channel.rawValue)"
+        }
         cancelRequested = true
         gpb_stop_workload()
         mutate(channel) {
@@ -215,8 +271,207 @@ final class BenchEngine: ObservableObject {
     }
 
     func cancelIfRunning() {
+        if completeSuiteRunning {
+            cancelCompleteSuite(reason: "background")
+            return
+        }
         if isRunning || gpb_is_running() {
             cancel(channel: activeChannel)
+        }
+    }
+
+    /// An explicit device launch argument starts the same flow as the GUI button, once per launch.
+    func claimCompleteSuiteLaunch() -> Bool {
+        guard !suiteLaunchHandled,
+              ProcessInfo.processInfo.arguments.contains(where: {
+                  ["--ios-complete-suite", "--ios-complete-suite-resume"].contains($0)
+              }) else { return false }
+        suiteLaunchHandled = true
+        return true
+    }
+
+    func cancelCompleteSuite(reason: String = "user") {
+        guard completeSuiteRunning else { return }
+        suiteCancelled = true
+        cancel(channel: activeChannel)
+        completeSuiteReport?.cancellationReason = reason
+        print("IOS_SUITE_CANCEL \(reason) job=\(completeSuiteIndex + 1) workloadRunning=\(workloadRunning)")
+    }
+
+    func startCompleteSuite(resume: Bool = false, scope: MobileSuiteScope = .all) {
+        guard !isRunning, !workingDirectory.isEmpty, scope == .cpu || metalLayer != nil else { return }
+        var jobs = supportedSuiteJobs.filter { scope.includes($0) }
+        // Device automation can target an explicit subset without changing the
+        // GUI's complete-suite button or touching unrelated saved measurements.
+        let launchArguments = ProcessInfo.processInfo.arguments
+        if let index = launchArguments.firstIndex(of: "--ios-suite-jobs") {
+            guard index + 1 < launchArguments.count else {
+                lastError = "Missing targeted suite job IDs"; return
+            }
+            let selected = Set(launchArguments[index + 1].split(separator: ",").map(String.init))
+            guard !selected.isEmpty, selected.isSubset(of: Set(jobs.map(\.id))) else {
+                lastError = "Unsupported targeted suite job IDs"; return
+            }
+            jobs = jobs.filter { selected.contains($0.id) }
+        }
+        guard !jobs.isEmpty else { lastError = "No supported jobs in this scope"; return }
+        print("IOS_SUITE_CAPS translated=\(allowTranslatedApis) vulkan=\(vulkanAvailable) liquid=\(vulkanLiquidAvailable) cache=\(gpuCacheAvailable)")
+        completeSuiteJobs = jobs
+        let now = ISO8601DateFormatter().string(from: Date())
+        let id = "complete-suite-" + UUID().uuidString
+        completeSuiteReport = MobileSuiteReport(id: id, startedAt: now, jobs: jobs.map {
+            MobileSuiteReport.Job(id: $0.id, title: $0.title,
+                request: $0.gpuRequest ?? $0.cpuArguments.joined(separator: " "),
+                expectedRecords: $0.expectedRecords)
+        })
+        var priorLog = ""
+        if resume {
+            let directory = URL(fileURLWithPath: workingDirectory).appendingPathComponent("suite-runs")
+            if let data = try? Data(contentsOf: directory.appendingPathComponent("latest.json")),
+               let prior = try? JSONDecoder().decode(MobileSuiteReport.self, from: data) {
+                refreshResults()
+                completeSuiteReport?.resumedFrom = prior.id
+                for old in prior.reusableJobs(for: jobs, results: results) {
+                    if let index = jobs.firstIndex(where: { $0.id == old.id }) {
+                        completeSuiteReport?.jobs[index] = old
+                    }
+                }
+                if prior.id.hasPrefix("complete-suite-"), !prior.id.contains("/"), !prior.id.contains("..") {
+                    priorLog = (try? String(contentsOf: directory.appendingPathComponent(prior.id + ".log"), encoding: .utf8)) ?? ""
+                }
+            }
+        }
+        completeSuiteRunning = true
+        completeSuiteIndex = 0
+        suiteCancelled = false
+        UIApplication.shared.isIdleTimerDisabled = true
+
+        Task { [self] in
+            var combinedCPUOutput = RunOutput()
+            var log = "iOS complete suite \(id)\nStarted: \(now)\n" + priorLog
+            persistCompleteSuite(log: log)
+            for (index, job) in jobs.enumerated() {
+                if suiteCancelled { break }
+                if completeSuiteReport?.jobs[index].status == "passed" { continue }
+                completeSuiteIndex = index
+                do {
+                    // All one-click suites start each measurement from the
+                    // same reported thermal state, including ordinary GUI runs.
+                    var coolingSeconds = 0
+                    if ProcessInfo.processInfo.thermalState != .nominal {
+                        mutate(job.gpuRequest == nil ? .cpu : .gpu) {
+                            $0.statusText = Localization.tr("Cooling before the next test…", "正在等待设备降温…", "次のテストの前に冷却を待っています…")
+                        }
+                    }
+                    while ProcessInfo.processInfo.thermalState != .nominal &&
+                          !suiteCancelled && coolingSeconds < 600 {
+                        if coolingSeconds % 30 == 0 {
+                            print("IOS_SUITE_COOLING \(job.id) thermal=\(ProcessInfo.processInfo.thermalState.rawValue) waited=\(coolingSeconds)s")
+                        }
+                        try? await Task.sleep(nanoseconds: 5_000_000_000)
+                        coolingSeconds += 5
+                    }
+                    if suiteCancelled { break }
+                    if ProcessInfo.processInfo.thermalState != .nominal {
+                        completeSuiteReport?.jobs[index].status = "failed"
+                        completeSuiteReport?.jobs[index].error = "Device did not cool to nominal within 600 seconds; measurement not run"
+                        log += "\nThermal cooldown timed out for \(job.id); no measurement saved.\n"
+                        persistCompleteSuite(log: log)
+                        continue
+                    }
+                    log += "\nThermal precheck \(job.id): nominal after \(coolingSeconds)s cooling.\n"
+                }
+                if job.gpuRequest?.contains("api=gles2") == true {
+                    try? await Task.sleep(nanoseconds: 100_000_000)
+                }
+                refreshResults()
+                let before = Set(results.map(\.id))
+                completeSuiteReport?.jobs[index].status = "running"
+                completeSuiteReport?.jobs[index].startedAt = ISO8601DateFormatter().string(from: Date())
+                completeSuiteReport?.jobs[index].thermalStateStart = ProcessInfo.processInfo.thermalState.rawValue
+                persistCompleteSuite(log: log)
+                print("IOS_SUITE_START \(index + 1)/\(jobs.count) \(job.id)")
+                startingSuiteJob = true
+                let channel: BenchChannel = job.gpuRequest == nil ? .cpu : .gpu
+                let started: Bool
+                if let request = job.gpuRequest {
+                    started = startPreview(workload: request, seconds: job.seconds)
+                } else {
+                    run(jobs: [job.cpuArguments], needCharts: false, channel: .cpu)
+                    started = cpuState.isRunning
+                }
+                startingSuiteJob = false
+                while workloadRunning {
+                    try? await Task.sleep(nanoseconds: 250_000_000)
+                }
+                if channel == .cpu {
+                    for line in cpuState.logOutput.split(whereSeparator: \.isNewline) {
+                        combinedCPUOutput.consume(String(line))
+                    }
+                    cpuState.runOutput = combinedCPUOutput
+                }
+                refreshResults()
+                let added = results.filter { !before.contains($0.id) }
+                let valid = added.count == job.expectedRecords && added.allSatisfy {
+                    job.matches($0) && $0.score.isFinite && $0.score > 0 &&
+                    ($0.workloadVersion ?? $0.workload).contains("ios_preview")
+                } && (job.id != "cpu_compute" || Set(added.map(\.workload)) ==
+                    Set(["cpu_single_core", "cpu_multi_core"]))
+                let failed = channel == .cpu ? runFailed : !lastError.isEmpty
+                // A late dismissal after a native job has saved its complete result
+                // must not turn that completed job into a cancelled measurement.
+                let reviewReasons = added.flatMap(\.measurementReviewReasons)
+                let status = started && !failed && valid && !cancelRequested ?
+                    (reviewReasons.isEmpty ? "passed" : "review") :
+                    suiteCancelled ? "cancelled" : "failed"
+                completeSuiteReport?.jobs[index].status = status
+                completeSuiteReport?.jobs[index].resultIDs = added.map(\.id)
+                completeSuiteReport?.jobs[index].finishedAt = ISO8601DateFormatter().string(from: Date())
+                completeSuiteReport?.jobs[index].thermalStateEnd = ProcessInfo.processInfo.thermalState.rawValue
+                if status == "review" {
+                    completeSuiteReport?.jobs[index].error = Array(Set(reviewReasons)).sorted().joined(separator: "; ")
+                }
+                if status == "failed" {
+                    completeSuiteReport?.jobs[index].error = !lastError.isEmpty ? lastError :
+                        "Expected \(job.expectedRecords) matching saved results; found \(added.count). See log."
+                }
+                log += "\n=== \(index + 1)/\(jobs.count) \(job.id): \(status) ===\n" + state(for: channel).logOutput
+                persistCompleteSuite(log: log)
+                print("IOS_SUITE_END \(index + 1)/\(jobs.count) \(job.id) \(status)")
+                // Let the previous native host and drawable pool finish releasing resources.
+                if !suiteCancelled { try? await Task.sleep(nanoseconds: 500_000_000) }
+            }
+            completeSuiteReport?.finishedAt = ISO8601DateFormatter().string(from: Date())
+            let savedCount = (completeSuiteReport?.passedCount ?? 0) + (completeSuiteReport?.reviewCount ?? 0)
+            completeSuiteReport?.status = savedCount == jobs.count ?
+                ((completeSuiteReport?.reviewCount ?? 0) > 0 ? "review" : "passed") :
+                suiteCancelled ? "cancelled" : "failed"
+            if suiteCancelled {
+                for index in jobs.indices where completeSuiteReport?.jobs[index].status == "pending" {
+                    completeSuiteReport?.jobs[index].status = "not_run"
+                }
+            }
+            persistCompleteSuite(log: log)
+            print("IOS_SUITE_DONE \(completeSuiteReport?.status ?? "failed") \(completeSuiteReport?.passedCount ?? 0)/\(jobs.count)")
+            completeSuiteRunning = false
+            UIApplication.shared.isIdleTimerDisabled = false
+        }
+    }
+
+    private func persistCompleteSuite(log: String) {
+        guard let report = completeSuiteReport else { return }
+        let directory = URL(fileURLWithPath: workingDirectory).appendingPathComponent("suite-runs", isDirectory: true)
+        do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+            try encoder.encode(report).write(to: directory.appendingPathComponent(report.id + ".json"), options: .atomic)
+            try log.write(to: directory.appendingPathComponent(report.id + ".log"), atomically: true, encoding: .utf8)
+            // A stable pointer makes retrieval possible without guessing a UUID.
+            try encoder.encode(report).write(to: directory.appendingPathComponent("latest.json"), options: .atomic)
+        } catch {
+            lastError = "Cannot save suite log: \(error.localizedDescription)"
+            suiteCancelled = true
         }
     }
 
@@ -225,12 +480,13 @@ final class BenchEngine: ObservableObject {
     /// "stream?particles=4194304", "gpu_burn?steps=64".
     @discardableResult
     func startPreview(workload: String, seconds: Double = 3.0) -> Bool {
-        guard metalLayer != nil || workload == "memory_sweep" || workload.hasPrefix("stream_headless") else {
+        let test = workload.components(separatedBy: "?").first ?? workload
+        guard metalLayer != nil || ["memory_sweep", "stream_headless", "gpu_cache"].contains(test) else {
             lastError = "Metal layer not ready"
             mutate(.gpu) { $0.statusIsIdle = false; $0.statusText = "Metal layer not ready" }
             return false
         }
-        guard !isRunning else { return false }
+        guard !isRunning || startingSuiteJob else { return false }
         activeChannel = .gpu
         cancelRequested = false
         lastError = ""
@@ -248,7 +504,7 @@ final class BenchEngine: ObservableObject {
             $0.logOutput += "=== Preview \(workload) \(seconds)s ===\n"
         }
 
-        let ok = gpb_start_workload(workload, seconds)
+        let ok = gpb_start_workload_with_options(workload, seconds, allowTranslatedApis)
         if !ok {
             if let err = gpb_last_error() {
                 lastError = String(cString: err)
@@ -314,7 +570,7 @@ final class BenchEngine: ObservableObject {
 
     /// Run CPU jobs without a Metal surface.
     func run(jobs: [[String]], needCharts: Bool, channel: BenchChannel) {
-        guard !isRunning, !jobs.isEmpty else { return }
+        guard (!isRunning || startingSuiteJob), !jobs.isEmpty else { return }
         activeChannel = channel
 
         cancelRequested = false
@@ -448,11 +704,7 @@ final class BenchEngine: ObservableObject {
     private func appendLine(_ line: String) {
         mutate(activeChannel) { state in
             state.logOutput += line + "\n"
-            if line.hasPrefix("MEMSWEEP_RESULT") {
-                let fields = RunOutput.fields(line)
-                state.lastScore = Localization.tr("GPU memory probe: ", "GPU 内存探测：", "GPU メモリ測定: ")
-                    + (fields["read_only_gbps"] ?? "—") + " GB/s"
-            }
+            if let score = RunOutput.gpuMemoryScoreLine(line) { state.lastScore = score }
             if line.hasPrefix("Avg FPS:") || line.contains("Score:") {
                 state.lastScore = Localization.scoreLine(line.trimmingCharacters(in: .whitespacesAndNewlines))
             }

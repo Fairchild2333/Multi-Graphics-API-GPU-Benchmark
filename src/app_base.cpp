@@ -376,6 +376,12 @@ void AppBase::InitWindow() {
         throw std::runtime_error("glfwInit failed");
     }
 
+#ifdef __APPLE__
+    // GLFW also applies this hint to Vulkan's CAMetalLayer. Without it a
+    // 1280x720 window becomes a 2560x1440 MoltenVK render target on Retina,
+    // while the native Metal benchmark still renders its fixed 1280x720 image.
+    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
+#endif
     if (NeedsOpenGLContext()) {
         glfwWindowHint(GLFW_CLIENT_API,            GLFW_OPENGL_API);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,  4);
@@ -387,8 +393,6 @@ void AppBase::InitWindow() {
         glfwWindowHint(GLFW_OPENGL_PROFILE,         GLFW_OPENGL_CORE_PROFILE);
 #ifdef __APPLE__
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT,  GL_TRUE);
-        // Keep the scored 1280x720 viewport equal to the drawable on Retina displays.
-        glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 #endif
     } else {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -1540,10 +1544,21 @@ BenchmarkResult AppBase::CollectResult() const {
     workloadConfig << ";timingMode=" << timingMode;
     if (timingMode == "synchronized_wall_clock")
         r.workloadVersion += "_sync_timing";
+    else if (timingMode == "serialized_command_buffer_gpu_time")
+        r.workloadVersion += "_serial_timing_v2";
+    else if (timingMode == "validated_single_frame_gpu_query")
+        r.workloadVersion += "_single_frame_timing_v2";
 #ifdef GPU_BENCH_MOLTENVK
     if (GetBackendName() == "Vulkan") {
         r.workloadVersion += "_moltenvk";
         workloadConfig << ";apiImplementation=MoltenVK;translatedTo=Metal";
+        if (!config_.headless) {
+            // Earlier MoltenVK GUI runs silently rendered four times as many
+            // pixels on Retina. Preserve them in their historical score group.
+            r.workloadVersion += "_viewport" + std::to_string(renderWidth_) + "x"
+                               + std::to_string(renderHeight_) + "_v1";
+            workloadConfig << ";renderViewport=" << renderWidth_ << 'x' << renderHeight_;
+        }
     }
 #endif
     r.workloadConfig = workloadConfig.str();

@@ -9,6 +9,8 @@
 #define VK_USE_PLATFORM_ANDROID_KHR
 #elif defined(__OHOS__)
 #define VK_USE_PLATFORM_OHOS
+#elif defined(__APPLE__)
+#define VK_USE_PLATFORM_METAL_EXT
 #endif
 #include <vulkan/vulkan.h>
 #else
@@ -47,8 +49,11 @@ public:
     std::string GetDeviceName()     const override { return deviceName_; }
     std::string GetDriverVersion()  const override { return driverVersion_; }
     std::string GetTimingMode()     const override {
-        return synchronizedTimingFallback_
-            ? "synchronized_wall_clock" : "gpu_timestamp_query";
+        if (synchronizedTimingFallback_) return "synchronized_wall_clock";
+#ifdef GPU_BENCH_MOLTENVK
+        if (renderTimestampsValidated_) return "validated_single_frame_gpu_query";
+#endif
+        return "gpu_timestamp_query";
     }
 
 protected:
@@ -281,10 +286,12 @@ private:
     // part goes into a command buffer of its own and is waited for, then the
     // rest of the frame is.
     bool            synchronizedTimingFallback_ = false;
+    bool            renderTimestampsValidated_ = false;
     VkCommandBuffer syncComputeCmd_   = VK_NULL_HANDLE;
     VkFence         syncComputeFence_ = VK_NULL_HANDLE;
     VkCommandBuffer syncFrameCmd_     = VK_NULL_HANDLE;
     double          syncComputeMs_    = 0.0;
+    double          syncRenderMs_     = 0.0;
     // Set only while CheckTimestampsAgainstWallClock draws its frames: how
     // many steps the compute pass takes, and that these frames are no samples.
     std::uint32_t   checkDispatchRepeats_ = 1;

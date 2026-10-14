@@ -387,6 +387,9 @@ void OlderBuildsReadWhatThisBuildWrites() {
     results[0].memory = "score";                        // a value that is the name of a member
     results[0].cpuName = "He said \"hi\"\n\x01";        // quote, line break, control character
     results[0].score = 12.345;
+    // Explicit zero denotes a non-frame CPU/cache measurement. Repeated
+    // append operations must not replace it with the legacy default of two.
+    results[0].framesInFlight = 0;
     results[0].unknownFields.emplace_back("futureCount", "7");
     results[1].id = "second";
     results[1].deviceName = "\xE4\xB8\xAD\xE6\x96\x87 GPU";   // UTF-8 passes through
@@ -409,6 +412,7 @@ void OlderBuildsReadWhatThisBuildWrites() {
         CHECK(read[0].workloadConfig == results[0].workloadConfig);
         CHECK(read[0].memory == "score");
         CHECK(read[0].cpuName == results[0].cpuName);
+        CHECK(read[0].framesInFlight == 0);
         CHECK(read[0].unknownFields.size() == 1);
         CHECK(read[1].deviceName == results[1].deviceName);
         CHECK(read[1].score == 0.0);

@@ -1,6 +1,10 @@
 #include "suite_process.h"
 #include <cstdlib>
 #include <sstream>
+#ifdef _WIN32
+#define NOMINMAX
+#include <windows.h>
+#endif
 #ifdef __APPLE__
 #include <csignal>
 #include <spawn.h>
@@ -11,17 +15,11 @@
 #endif
 
 namespace gpu_bench {
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(_WIN32)
 static std::string QuoteSuiteProcessArg(const std::string& value) {
-#ifdef _WIN32
-    std::string escaped = "\"";
-    for (char c : value) { if (c == '\"') escaped += '\\'; escaped += c; }
-    return escaped + "\"";
-#else
     std::string escaped = "'";
     for (char c : value) escaped += c == '\'' ? "'\\''" : std::string(1, c);
     return escaped + "'";
-#endif
 }
 #endif
 #ifdef __APPLE__
@@ -72,6 +70,65 @@ int RunSuiteChild(const std::vector<std::string>& arguments) {
     do { waited = waitpid(child, &status, 0); } while (waited < 0 && errno == EINTR);
     suiteChildGroup = 0;
     return waited < 0 ? 1 : status;
+#elif defined(_WIN32)
+    if (arguments.empty()) return ERROR_INVALID_PARAMETER;
+    auto wide = [](const std::string& value) {
+        const int length = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, value.data(), static_cast<int>(value.size()), nullptr, 0);
+        std::wstring result(length, L'\0');
+        if (length) MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, value.data(), static_cast<int>(value.size()), result.data(), length);
+        return result;
+    };
+    // Use CreateProcess quoting, never cmd.exe; paths with spaces and trailing
+    // slashes must arrive unchanged. A killed parent closes the job handle and
+    // terminates every outstanding worker, including its descendants.
+    auto quote = [](const std::wstring& value) {
+        std::wstring result = L"\"";
+        std::size_t slashes = 0;
+        for (wchar_t c : value) {
+            if (c == L'\\') { ++slashes; continue; }
+            result.append(c == L'"' ? 2 * slashes + 1 : slashes, L'\\');
+            result += c; slashes = 0;
+        }
+        result.append(2 * slashes, L'\\');
+        return result + L"\"";
+    };
+    std::wstring command;
+    for (const auto& arg : arguments) {
+        if (!command.empty()) command += L' ';
+        command += quote(wide(arg));
+    }
+    HANDLE job = CreateJobObjectW(nullptr, nullptr);
+    if (!job) return static_cast<int>(GetLastError());
+    JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};
+    limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+    if (!SetInformationJobObject(job, JobObjectExtendedLimitInformation, &limits, sizeof(limits))) {
+        const auto error = GetLastError(); CloseHandle(job); return static_cast<int>(error);
+    }
+    STARTUPINFOW startup{}; startup.cb = sizeof(startup);
+    startup.dwFlags = STARTF_USESTDHANDLES;
+    startup.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+    startup.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+    startup.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+    PROCESS_INFORMATION process{};
+    if (!CreateProcessW(nullptr, command.data(), nullptr, nullptr, TRUE,
+                        CREATE_SUSPENDED, nullptr, nullptr, &startup, &process)) {
+        const auto error = GetLastError(); CloseHandle(job); return static_cast<int>(error);
+    }
+    if (!AssignProcessToJobObject(job, process.hProcess)) {
+        const auto error = GetLastError(); TerminateProcess(process.hProcess, error);
+        CloseHandle(process.hThread); CloseHandle(process.hProcess); CloseHandle(job);
+        return static_cast<int>(error);
+    }
+    if (ResumeThread(process.hThread) == static_cast<DWORD>(-1)) {
+        const auto error = GetLastError(); TerminateJobObject(job, error);
+        CloseHandle(process.hThread); CloseHandle(process.hProcess); CloseHandle(job);
+        return static_cast<int>(error);
+    }
+    CloseHandle(process.hThread);
+    WaitForSingleObject(process.hProcess, INFINITE);
+    DWORD code = 1; GetExitCodeProcess(process.hProcess, &code);
+    CloseHandle(process.hProcess); CloseHandle(job);
+    return static_cast<int>(code);
 #else
     std::ostringstream command;
     for (std::size_t i = 0; i < arguments.size(); ++i) {

@@ -25,6 +25,8 @@ targets:
       - path: Mangekyo
     settings:
       base:
+        MOLTENVK_SLICE[sdk=iphoneos*]: ios-arm64
+        MOLTENVK_SLICE[sdk=iphonesimulator*]: ios-arm64_x86_64-simulator
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         PRODUCT_BUNDLE_IDENTIFIER: com.fairchild.Mangekyo
         INFOPLIST_FILE: Info.plist
@@ -32,15 +34,14 @@ targets:
         HEADER_SEARCH_PATHS:
           - '"$(PROJECT_DIR)/../src"'
         LIBRARY_SEARCH_PATHS:
-          - '"$(PROJECT_DIR)/../build-ios/Release-iphoneos"'
-          - '"$(PROJECT_DIR)/../build-ios/Release-iphoneos/Release-iphoneos"'
-          - '"$(PROJECT_DIR)/../build-ios/Release-iphonesimulator"'
-          - '"$(PROJECT_DIR)/../build-ios/Release-iphonesimulator/Release-iphonesimulator"'
-          - '"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)"'
-          - '"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)"'
-          - '"$(PROJECT_DIR)/../build"'
+          - '"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)-$(PLATFORM_NAME)/$(CONFIGURATION)-$(PLATFORM_NAME)"'
+          - '"$(PROJECT_DIR)/../build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/$(MOLTENVK_SLICE)"'
         OTHER_LDFLAGS:
           - "-lgpu_engine"
+          - "-lMoltenVK"
+          - "-framework IOSurface"
+          - "-framework OpenGLES"
+          - "-framework CoreGraphics"
           - "-lc++"
           - "-framework Metal"
           - "-framework MetalKit"
@@ -53,11 +54,18 @@ targets:
 
     postBuildScripts:
       - name: Bundle runtime Metal sources
+        basedOnDependencyAnalysis: false
         script: |
           set -eu
-          for shader in particle.metal gpu_burn.metal cinematic_liquid_v2.metal; do
+          for shader in particle.metal gpu_burn.metal cinematic_liquid_v2.metal gpu_burn_es2.vert gpu_burn_es2.frag; do
             install -m 0644 "$PROJECT_DIR/../shaders/$shader" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/$shader"
           done
+          spv_dir="$PROJECT_DIR/../build-ios/$CONFIGURATION-$PLATFORM_NAME"
+          for shader in "$spv_dir"/*.spv; do
+            [ -f "$shader" ] || continue
+            install -m 0644 "$shader" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/$(basename "$shader")"
+          done
+          install -m 0644 "$PROJECT_DIR/../build-ios/dependencies/MoltenVK/LICENSE" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/MoltenVK-LICENSE"
         inputFiles:
           - "$(PROJECT_DIR)/../shaders/particle.metal"
           - "$(PROJECT_DIR)/../shaders/gpu_burn.metal"

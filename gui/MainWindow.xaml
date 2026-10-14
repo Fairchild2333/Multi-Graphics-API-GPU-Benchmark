@@ -409,8 +409,10 @@
                                       Visibility="Collapsed"/>
                         <Button x:Name="GpuCancelButton" Content="Cancel" Click="OnGpuCancel"
                                 IsEnabled="False"/>
-                        <Button x:Name="RunButton" Content="Run GPU Benchmark" Click="OnRun"
+                        <Button x:Name="GpuAllButton" Content="Run all GPU tests" Click="OnGpuAll"
                                 Style="{StaticResource AccentButtonStyle}"/>
+                        <Button x:Name="MachineAllButton" Content="Test all items" Click="OnMachineAll"/>
+                        <Button x:Name="RunButton" Content="Run GPU Benchmark" Click="OnRun"/>
                     </StackPanel>
                 </Grid>
 
@@ -459,7 +461,7 @@
                                             <ComboBoxItem x:Name="CpuModeMemory" Tag="memory">Cache &amp; memory bandwidth</ComboBoxItem>
                                         </ComboBox>
                                         <ComboBox x:Name="CpuDurationPresetBox" Grid.Column="1" Header="Duration preset"
-                                                  SelectedIndex="0" HorizontalAlignment="Stretch"
+                                                  SelectedIndex="1" HorizontalAlignment="Stretch"
                                                   SelectionChanged="OnCpuDurationPresetChanged">
                                             <ComboBoxItem x:Name="CpuDurationQuick" Tag="1">Quick (1 s)</ComboBoxItem>
                                             <ComboBoxItem x:Name="CpuDurationFormal" Tag="15">Formal (15 s)</ComboBoxItem>
@@ -467,7 +469,7 @@
                                         <!-- Compact spin buttons match the GPU duration controls.
                                              Warm-up keeps one decimal — the formal contract is 15.0 s + 0.2 s. -->
                                         <NumberBox x:Name="CpuTimeBox" Grid.Column="2" Header="Seconds per test"
-                                                   Value="1" Minimum="1" Maximum="3600" SmallChange="1"
+                                                   Value="15" Minimum="1" Maximum="3600" SmallChange="1"
                                                    SpinButtonPlacementMode="Compact"
                                                    ValidationMode="InvalidInputOverwritten"
                                                    ValueChanged="OnCpuTimeChanged"/>
@@ -585,8 +587,9 @@
                                        Margin="0,-1,0,1"/>
                         </StackPanel>
                         <Button x:Name="CpuCancelButton" Content="Cancel" Click="OnCpuCancel" IsEnabled="False"/>
-                        <Button x:Name="CpuRunButton" Content="Run CPU Benchmark" Click="OnCpuRun"
+                        <Button x:Name="CpuAllButton" Content="Run all CPU tests" Click="OnCpuAll"
                                 Style="{StaticResource AccentButtonStyle}"/>
+                        <Button x:Name="CpuRunButton" Content="Run CPU Benchmark" Click="OnCpuRun"/>
                     </StackPanel>
                 </Grid>
 

@@ -9,8 +9,11 @@
 #include "gpu_engine.h"
 #include "cpu_cli.h"
 #include "gpu_memory_sweep.h"
+#include "gpu_cache_probe.h"
 #include "benchmark_results.h"
 #include "ios_engine_host.h"
+#include "embedded_request.h"
+#include "ios_gles_backend.h"
 #include "metal_probe.h"
 #include "path_service.h"
 
@@ -69,6 +72,7 @@ static std::mutex g_runMutex;
 static std::string g_shaderDir;
 static std::string g_dataDir;
 static void* g_metalLayer = nullptr;
+static void* g_glesLayer = nullptr;
 static std::mutex g_embedMutex;
 static std::atomic<bool> g_workerAlive{false};
 static std::mutex g_workerMutex;
@@ -154,17 +158,36 @@ void gpb_set_metal_layer(void* ca_metal_layer) {
 }
 
 bool gpb_start_workload(const char* workload_id, double seconds) {
+    return gpb_start_workload_with_options(workload_id, seconds, false);
+}
+
+void gpb_set_gles_layer(void* layer) {
+    std::lock_guard<std::mutex> lock(g_embedMutex);
+    if (gpu_bench::ios_host::IsRunning() || g_workerAlive.load()) return;
+    g_glesLayer = layer;
+}
+
+bool gpb_start_workload_with_options(const char* workload_id, double seconds, bool allow_translated_apis) {
     std::string workload = workload_id ? workload_id : "stream";
+    const auto id = workload.substr(0, workload.find('?'));
+    const auto api = gpu_bench::embedded_detail::OptionValue(workload, "api");
+    if (api == "vulkan" && !allow_translated_apis) {
+        std::lock_guard<std::mutex> lock(g_workerMutex);
+        g_lastError = "Vulkan uses MoltenVK translation; enable translated APIs first";
+        return false;
+    }
     void* layer = nullptr;
+    void* glesLayer = nullptr;
     std::string shaderDir;
     std::string dataDir;
     {
         std::lock_guard<std::mutex> lock(g_embedMutex);
         layer = g_metalLayer;
+        glesLayer = g_glesLayer;
         shaderDir = g_shaderDir;
         dataDir = g_dataDir;
     }
-    if (!layer && workload != "memory_sweep" && workload.rfind("stream_headless", 0) != 0) {
+    if ((api == "gles2" && !glesLayer) || (api != "gles2" && !layer && id != "memory_sweep" && id != "gpu_cache" && id != "stream_headless")) {
         std::lock_guard<std::mutex> lock(g_workerMutex);
         g_lastError = "CAMetalLayer not set";
         return false;
@@ -183,13 +206,15 @@ bool gpb_start_workload(const char* workload_id, double seconds) {
     JoinWorkerUnlocked();
     g_lastError.clear();
     g_workerAlive.store(true, std::memory_order_release);
-    g_worker = std::thread([layer, shaderDir, dataDir, workload, seconds]() {
+    g_worker = std::thread([layer, glesLayer, shaderDir, dataDir, workload, seconds, allow_translated_apis]() {
         gpu_bench::ios_host::RunRequest req;
         req.metalLayer = layer;
+        req.glesLayer = glesLayer;
         req.shaderDir = shaderDir;
         req.dataDir = dataDir;
         req.workloadId = workload;
         req.maxRunTimeSec = seconds > 0.0 ? seconds : 3.0;
+        req.allowTranslatedApis = allow_translated_apis;
         std::string err;
         std::unique_lock<std::mutex> runLock(g_runMutex, std::try_to_lock);
         if (!runLock.owns_lock()) {
@@ -203,14 +228,9 @@ bool gpb_start_workload(const char* workload_id, double seconds) {
         std::streambuf* const consoleOutput = std::cout.rdbuf(&g_embeddedOutput);
         std::streambuf* const consoleError = std::cerr.rdbuf(&g_embeddedOutput);
         gpu_bench::ClearStopRequest();
-        gpu_bench::GpuMemorySweepConfig sweep;
-        sweep.maxKiB = 256u * 1024u;
-        sweep.trafficPerPointMiB = 256;
         int rc = 1;
         try {
-            rc = workload == "memory_sweep"
-                ? gpu_bench::RunGpuMemorySweepCli(sweep, true)
-                : gpu_bench::ios_host::RunWorkload(req, err);
+            rc = gpu_bench::ios_host::RunWorkload(req, err);
         } catch (const std::exception& e) {
             err = e.what();
         } catch (...) {
@@ -262,6 +282,11 @@ char* gpb_engine_version(void) {
 char* gpb_list_gpus(void) {
     // Use ProbeMetalDevices() directly — cliMain is not available on iOS.
     auto devices = gpu_bench::ProbeMetalDevices();
+    bool vulkanLiquid = false;
+    const bool vulkan = gpu_bench::ios_host::VulkanAvailable(&vulkanLiquid);
+    const auto gles2MaxSteps = gpu_bench::IosGlesMaxSteps();
+    const bool gles2 = gles2MaxSteps > 0;
+    const auto cacheParallelSteps = gpu_bench::GpuCacheDefaultParallelSteps();
     std::ostringstream json;
     json << "[";
     for (size_t i = 0; i < devices.size(); ++i) {
@@ -271,7 +296,13 @@ char* gpb_list_gpus(void) {
              << ",\"name\":\"" << jsonEscape(d.name) << "\""
              << ",\"vramMB\":" << (d.vramBytes / (1024 * 1024))
              << ",\"metal\":true"
-             << ",\"vulkan\":false"
+             << ",\"vulkan\":" << (vulkan ? "true" : "false")
+             << ",\"vulkanImplementation\":\"MoltenVK\""
+             << ",\"vulkanLiquid\":" << (vulkanLiquid ? "true" : "false")
+             << ",\"gpuCache\":" << (d.hasUnifiedMemory ? "true" : "false")
+             << ",\"gpuCacheParallelSteps\":" << cacheParallelSteps
+             << ",\"gles2\":" << (gles2 ? "true" : "false")
+             << ",\"gles2MaxSteps\":" << gles2MaxSteps
              << ",\"opengl\":false"
              << "}";
     }

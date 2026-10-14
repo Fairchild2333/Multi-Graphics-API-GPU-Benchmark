@@ -185,6 +185,9 @@ ctest --test-dir build -C Release
 | `--workload membw` | run the standalone memory-bandwidth sweep (Vulkan only, compute-only, no window); `--gpu` selects the device and `--backend` must be `auto` or `vulkan` |
 | `--membw-max-mib <MiB>` | largest data set of the `membw` sweep; default `2048`, range `1..65536`; a non-default value makes the result a preview |
 | `--membw-no-save` | run `membw` without appending its result to `results.json` |
+| `--gpu-cache-probe` | native Metal dependent-load / CPU-GPU warming diagnostic; saves a separate `gpu_cache` preview; see [method and limits](gpu-cache-probe.md) |
+| `--gpu-cache-max-mib <MiB>` / `--gpu-cache-steps <N>` / `--gpu-cache-repeats <N>` | diagnostic address span, serial load count and interleaved samples; defaults 128 / 65536 / 5 |
+| `--gpu-cache-no-save` | do not append the cache diagnostic to `results.json` |
 
 > `--run-all` (main.cpp:924): iterates every GPU×API, inherits command-line
 > workload/precision/iter/headless/flights/hostMemory; default 15s time mode,
@@ -613,8 +616,31 @@ memory budget. Cancellation or failed GPU commands do not save a result.
 uses that available-job list: four rendered and four compute-only particle
 sizes, GPU Burn 16/64/256, fluid and GPU memory where supported, then CPU compute
 and CPU cache/memory once per machine. Native macOS OpenGL 4.1 runs GPU Burn
-only, with no capture request. The current Metal + OpenGL Mac has 18 jobs;
+only, with no capture request. Unified-memory Metal devices also include the
+independent GPU cache-state diagnostic. The current Metal + OpenGL Mac has 19 jobs;
 Android adb's 29 jobs include additional OpenGL ES API variants.
+
+The desktop and mobile apps expose **Run all GPU tests**, **Run all CPU tests**,
+and **Test all items**. Desktop suites enumerate all available GPU/API pairs
+and run them sequentially; CPU compute and CPU memory run once per machine.
+The score buttons use 15-second GPU and CPU compute steps without automatic
+capture. Memory/cache/storage sweeps use their own measurement schedules.
+The existing capture-oriented complete-series preset remains available.
+
+- `--gpu-suite`: the available GPU matrix, including memory and applicable
+  cache diagnostics, without CPU or capture.
+- `--cpu-suite`: all CPU compute modes followed by the cache/memory,
+  page-mapping and storage sweep; requires no graphics device.
+- `--complete-suite --no-renderdoc`: both GPU and CPU score suites.
+- Add `--suite-list` to inspect any of these queues without running tests.
+
+All scores append to the same `results/results.json`. `SUITE_RUN` records carry
+the actual stage and count. Saved measurements with timing anomalies, more
+than 5% throughput decline, or no stable plateau on a heavy fixed workload are
+reported as `review`; later jobs continue. A review is distinct from a worker
+failure, and raw results remain available. Liquid has a changing scene and is
+excluded from the fixed-workload plateau check. iOS suites wait for nominal
+thermal state before each job, with a 600-second timeout.
 
 
 ### macOS translated API opt-in

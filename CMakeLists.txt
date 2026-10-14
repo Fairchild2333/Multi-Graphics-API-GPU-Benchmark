@@ -18,7 +18,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # ---- iOS platform setup ----
 if(IOS OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
-    set(ENABLE_VULKAN OFF CACHE BOOL "Vulkan backend" FORCE)
+    option(ENABLE_IOS_VULKAN "Bundle optional Vulkan-to-Metal runtime for iOS" OFF)
+    set(ENABLE_VULKAN ${ENABLE_IOS_VULKAN} CACHE BOOL "Vulkan backend" FORCE)
     set(ENABLE_DX12 OFF CACHE BOOL "DX12 backend" FORCE)
     set(ENABLE_DX11 OFF CACHE BOOL "DX11 backend" FORCE)
     set(ENABLE_OPENGL OFF CACHE BOOL "OpenGL backend" FORCE)
@@ -143,12 +144,30 @@ set(BACKEND_DEFS "")
 # The CPU cache / memory bandwidth sweep needs no GPU and is built everywhere,
 # so that the mobile front-ends can call it too. src/cpumem_cli.cpp is a
 # stand-alone entry point for it (see scripts/build-android-cpumem.ps1).
-list(APPEND COMMON_SOURCES src/cpu_membw.cpp)
+list(APPEND COMMON_SOURCES src/cpu_membw.cpp src/vulkan_membw_results.cpp)
 list(APPEND BACKEND_DEFS HAVE_CPU_MEMBW)
 
 # ---- Vulkan backend (optional) ----
 if(ENABLE_VULKAN)
-    if(ANDROID)
+    if(GPU_BENCH_IOS)
+        set(MOLTENVK_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/build-ios/dependencies/MoltenVK" CACHE PATH "Extracted official MoltenVK package")
+        set(MOLTENVK_XCF "${MOLTENVK_ROOT}/MoltenVK/static/MoltenVK.xcframework")
+        if(CMAKE_OSX_SYSROOT MATCHES "iphonesimulator")
+            set(MOLTENVK_SLICE "ios-arm64_x86_64-simulator")
+        else()
+            set(MOLTENVK_SLICE "ios-arm64")
+        endif()
+        set(MOLTENVK_LIBRARY "${MOLTENVK_XCF}/${MOLTENVK_SLICE}/libMoltenVK.a")
+        if(NOT EXISTS "${MOLTENVK_LIBRARY}")
+            message(FATAL_ERROR "Run scripts/prepare-ios-vulkan.sh first; missing ${MOLTENVK_LIBRARY}")
+        endif()
+        list(APPEND BACKEND_SOURCES src/vulkan_backend.cpp src/vulkan_membw.cpp)
+        list(APPEND BACKEND_LIBS "${MOLTENVK_LIBRARY}")
+        list(APPEND BACKEND_DEFS HAVE_VULKAN HAVE_VULKAN_MEMBW GPU_BENCH_MOLTENVK)
+        include_directories("${MOLTENVK_ROOT}/MoltenVK/include")
+        set(Vulkan_FOUND TRUE)
+        message(STATUS "iOS Vulkan: MoltenVK (runtime selection requires explicit opt-in)")
+    elseif(ANDROID)
         # NDK ships vulkan headers; link the system stub only into the Android
         # JNI shared library (see android/.../CMakeLists.txt). CapabilityGate
         # still dlopen-probes before Run so API 23 devices without Vulkan never
@@ -233,9 +252,13 @@ if(ENABLE_METAL AND APPLE)
             src/metal_backend.mm
             src/metal_probe.mm
             src/metal_cinematic_liquid.mm
+            src/gpu_cache_probe.mm
             src/gpu_memory_sweep.mm)
         if(GPU_BENCH_IOS)
-            list(APPEND BACKEND_SOURCES src/ios_engine_host.cpp)
+            list(APPEND BACKEND_SOURCES src/ios_engine_host.cpp src/ios_gles_backend.mm)
+            find_library(OPENGLES_FRAMEWORK OpenGLES REQUIRED)
+            list(APPEND BACKEND_LIBS ${OPENGLES_FRAMEWORK})
+            set_source_files_properties(src/ios_gles_backend.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc -Wno-deprecated-declarations")
         endif()
         list(APPEND BACKEND_LIBS ${APPLE_LIBS})
         list(APPEND BACKEND_DEFS HAVE_METAL)
@@ -244,6 +267,7 @@ if(ENABLE_METAL AND APPLE)
             src/metal_backend.mm
             src/metal_probe.mm
             src/metal_cinematic_liquid.mm
+            src/gpu_cache_probe.mm
             src/gpu_memory_sweep.mm
             PROPERTIES COMPILE_FLAGS "-fobjc-arc"
         )
@@ -366,9 +390,19 @@ if(GPU_BENCH_BUILD_TESTS AND NOT GPU_BENCH_EMBEDDED)
         target_compile_options(results_compat_test PRIVATE -Wall -Wextra -Wpedantic)
     endif()
     add_test(NAME results_compat COMMAND results_compat_test)
+    add_executable(result_quality_test tests/result_quality_test.cpp)
+    target_include_directories(result_quality_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    add_test(NAME result_quality COMMAND result_quality_test)
     add_executable(complete_suite_test tests/complete_suite_test.cpp)
     target_include_directories(complete_suite_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
     add_test(NAME complete_suite COMMAND complete_suite_test)
+    add_executable(vulkan_membw_results_test tests/vulkan_membw_results_test.cpp
+        src/vulkan_membw_results.cpp src/benchmark_results.cpp src/path_service.cpp src/system_info.cpp)
+    target_include_directories(vulkan_membw_results_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    add_test(NAME vulkan_membw_results COMMAND vulkan_membw_results_test)
+    add_executable(cpu_residency_test tests/cpu_residency_test.cpp)
+    target_include_directories(cpu_residency_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    add_test(NAME cpu_residency COMMAND cpu_residency_test)
     if(APPLE)
         add_executable(suite_process_test tests/suite_process_test.cpp src/suite_process.cpp)
         target_include_directories(suite_process_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -461,12 +495,14 @@ if(ENABLE_VULKAN AND Vulkan_FOUND)
         endforeach()
 
         add_custom_target(compile_glsl ALL DEPENDS ${SPV_OUTPUTS})
-        add_dependencies(gpu_benchmark compile_glsl)
-
-        add_custom_command(TARGET gpu_benchmark POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SPV_OUTPUTS} $<TARGET_FILE_DIR:gpu_benchmark>
-            COMMENT "Copying SPIR-V files next to executable"
-        )
+        if(GPU_BENCH_IOS)
+            add_dependencies(gpu_engine compile_glsl)
+        else()
+            add_dependencies(gpu_benchmark compile_glsl)
+            add_custom_command(TARGET gpu_benchmark POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SPV_OUTPUTS} $<TARGET_FILE_DIR:gpu_benchmark>
+                COMMENT "Copying SPIR-V files next to executable")
+        endif()
     else()
         message(WARNING "glslc not found – Vulkan shader compilation disabled.")
     endif()

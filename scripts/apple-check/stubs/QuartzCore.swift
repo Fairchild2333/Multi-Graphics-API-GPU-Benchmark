@@ -3,3 +3,5 @@
 
 open class CALayer { public init() {} }
 open class CAMetalLayer: CALayer {}
+
+open class CAEAGLLayer: CALayer {}

@@ -621,14 +621,14 @@ BenchmarkResult BlankResult() {
 }
 
 // What members that older builds did not write are taken to be.
-void ApplyLegacyDefaults(BenchmarkResult& r) {
+void ApplyLegacyDefaults(BenchmarkResult& r, bool hasFramesInFlight) {
     if (r.resultSchemaVersion == 0) r.resultSchemaVersion = 1;
     if (r.appVersion.empty()) r.appVersion = "Unknown (legacy)";
     if (r.workload.empty()) r.workload = "stream";
     if (r.platform.empty()) r.platform = "Unknown (legacy)";
     if (r.osArchitecture.empty()) r.osArchitecture = "Unknown";
     if (r.processArchitecture.empty()) r.processArchitecture = "Unknown";
-    if (r.framesInFlight == 0) r.framesInFlight = 2;
+    if (!hasFramesInFlight) r.framesInFlight = 2;
 }
 
 // Reads the object that starts with the brace at s[i] and leaves i after its
@@ -636,6 +636,7 @@ void ApplyLegacyDefaults(BenchmarkResult& r) {
 bool ReadResult(const std::string& s, std::size_t& i, BenchmarkResult& r) {
     r = BlankResult();
     bool seen[kFieldCount] = {};
+    bool hasFramesInFlight = false;
     std::size_t expected = 0;   // members usually come in the order of kFields
 
     ++i;
@@ -677,6 +678,7 @@ bool ReadResult(const std::string& s, std::size_t& i, BenchmarkResult& r) {
         expected = index + 1;
         if (seen[index]) continue;   // the first one counts, as in older builds
         seen[index] = true;
+        if (key == "framesInFlight") hasFramesInFlight = true;
 
         MemberValue value;
         if (s[valueStart] == '"') {
@@ -694,7 +696,7 @@ bool ReadResult(const std::string& s, std::size_t& i, BenchmarkResult& r) {
         else if (field.flag) r.*field.flag = AsFlag(value);
         else r.*field.real = AsNumber(value);
     }
-    ApplyLegacyDefaults(r);
+    ApplyLegacyDefaults(r, hasFramesInFlight);
     return true;
 }
 

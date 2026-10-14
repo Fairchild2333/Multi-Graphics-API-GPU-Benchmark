@@ -20,6 +20,7 @@ public:
     std::string GetBackendName()    const override { return "Metal"; }
     std::string GetDeviceName()     const override;
     std::string GetDriverVersion()  const override;
+    std::string GetTimingMode()     const override;
 
 protected:
     void InitBackend()              override;

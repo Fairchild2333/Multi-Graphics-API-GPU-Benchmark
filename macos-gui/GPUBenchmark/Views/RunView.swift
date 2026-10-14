@@ -97,6 +97,7 @@ struct RunView: View {
         .init(id: "stream", en: "Particle — Memory Throughput", zh: "粒子 —— 内存吞吐", ja: "パーティクル — メモリ帯域", primary: true),
         .init(id: "gpu_burn", en: "Plasma x Kaleidoscope — GPU Burn", zh: "等离子晶核 × 万花镜 —— GPU Burn", ja: "プラズマ核 × カレイドスコープ — GPU Burn", primary: true),
         .init(id: "cinematic_liquid", en: "Fluid — Interactive Pool", zh: "流体 —— 互动水池", ja: "流体 — インタラクティブプール", primary: true),
+        .init(id: "membw", en: "Memory Bandwidth — VRAM / Cache", zh: "显存带宽 —— 显存 / 缓存", ja: "メモリ帯域 — VRAM / キャッシュ", primary: true),
     ]
     private let advancedWorkloads: [WorkloadChoice] = [
         .init(id: "gpu_stress", en: "GraphicsBurn v1 / Component (Advanced)", zh: "GraphicsBurn v1 / 组件（高级）", ja: "GraphicsBurn v1 / コンポーネント（上級）", primary: false),
@@ -115,9 +116,10 @@ struct RunView: View {
 
     private var supportedApis: [String] {
         var s: [String] = []
-        if engine.gpus.contains(where: { $0.supportsMetal }) { s.append("metal") }
-        if engine.allowTranslatedApis && engine.gpus.contains(where: { $0.supportsVulkan }) { s.append("vulkan") }
-        if engine.gpus.contains(where: { $0.supportsOpenGL && ($0.supportsOpenGLCompute || selectedWorkload == "gpu_burn") }) { s.append("opengl") }
+        let gpus = preset == .fullAll || selectedGpuIndex < 0 ? engine.gpus : engine.gpus.filter { $0.index == selectedGpuIndex }
+        if gpus.contains(where: { $0.supportsMetal }) { s.append("metal") }
+        if engine.allowTranslatedApis && gpus.contains(where: { $0.supportsVulkan }) { s.append("vulkan") }
+        if !isMemoryTest && gpus.contains(where: { $0.supportsOpenGL && ($0.supportsOpenGLCompute || selectedWorkload == "gpu_burn") }) { s.append("opengl") }
         return s
     }
 
@@ -141,6 +143,7 @@ struct RunView: View {
         ["stream", "nbody", "render3d"].contains(selectedWorkload)
     }
     private var usesBurnSteps: Bool { selectedWorkload == "gpu_burn" }
+    private var isMemoryTest: Bool { selectedWorkload == "membw" }
 
     /// Particle buffer size in MB for the current selection, or nil when the
     /// count is not a number we can read.
@@ -199,6 +202,7 @@ struct RunView: View {
     }
 
     private var captureSupportedForSelection: Bool {
+        if isMemoryTest && !isFormalSuitePreset { return false }
         if isFormalSuitePreset || selectedApis.isEmpty { return engine.gpus.contains { $0.supportsMetal } }
         return selectedApis.contains("metal")
     }
@@ -213,8 +217,8 @@ struct RunView: View {
     private var infoBanner: String {
         if preset == .completeSuite {
             return engine.availableSuiteSummary + "\n" + Localization.tr(
-                "Runs only available APIs: four Particle sizes with rendering and compute only, GPU Burn at 16/64/256 steps, fluid and GPU memory; CPU compute and CPU memory once per machine. GPU runs and each CPU compute step use 15 seconds. Native capture is requested only on Metal.",
-                "按实际可用 API 生成清单：四档粒子有画面/纯计算、GPU Burn 16/64/256 步、流体与 GPU 内存；每台机器再测一次 CPU 算力和 CPU 内存。GPU 与每个 CPU 算力步骤为 15 秒；仅 Metal 请求原生抓帧。OpenGL 4.1 只加入 GPU Burn 三档。",
+                "Runs only available APIs: four Particle sizes with rendering and compute only, GPU Burn at 16/64/256 steps, fluid and GPU memory; CPU compute and CPU memory once per machine. GPU runs and each CPU compute step use 15 seconds. GPU cache diagnostics are included where supported; results are saved automatically.",
+                "按实际可用 API 生成清单：四档粒子有画面/纯计算、GPU Burn 16/64/256 步、流体与 GPU 内存；每台机器再测一次 CPU 算力和 CPU 内存。GPU 与每个 CPU 算力步骤为 15 秒；支持的设备还会测 GPU 缓存，成绩自动保存。OpenGL 4.1 只加入 GPU Burn 三档。",
                 "対応する API の Particle 4 段階、GPU Burn 16/64/256、流体、GPU メモリ、CPU 計算と CPU メモリを実行します。Metal のみネイティブキャプチャを要求します。")
         }
         if preset == .fillMissing {
@@ -224,6 +228,11 @@ struct RunView: View {
                 "保存済み結果と実キャプチャフォルダを確認し、不足する正式パスだけを実行します。既知の非対応/失敗済み組み合わせは再試行せず報告します。")
         }
         switch selectedWorkload {
+        case "membw":
+            return Localization.tr(
+                "Sweeps GPU cache and memory bandwidth without rendering. Metal uses the native particle-derived preview probe; Vulkan uses its read/write/copy sweep and requires the translated API switch on macOS. Each uses its own saved result version. On Apple silicon GPU and CPU share unified memory. The sweep finishes automatically; duration, V-Sync and capture do not apply.",
+                "逐档扫描 GPU 缓存与内存带宽，无需画面。Metal 使用原生的粒子衍生预览探测；Vulkan 使用读 / 写 / 复制扫描，在 macOS 上需开启转译 API。两种结果按各自版本保存。Apple 芯片的 CPU 与 GPU 共用统一内存。扫描自动结束，不使用时长、垂直同步或抓帧设置。",
+                "GPU キャッシュとメモリ帯域を描画なしで測定します。Metal はネイティブのプレビュー測定、Vulkan は読込・書込・コピー測定で、macOS では変換 API の許可が必要です。結果は別バージョンで保存します。Apple silicon はユニファイドメモリを共有し、時間・垂直同期・キャプチャ設定は使いません。")
         case "stream":
             return Localization.tr(
                 """
@@ -284,13 +293,6 @@ struct RunView: View {
                     if run.isSuiteRun && run.runOutput.hasMemoryResults {
                         CpuMemoryResultsView(output: run.runOutput)
                     }
-                    GlassCard {
-                        Button(Localization.tr("Run GPU Cache & Memory Probe", "运行 GPU 缓存与内存探测", "GPU キャッシュ / メモリ測定")) {
-                            engine.run(jobs: [["gpu_benchmark", "--memory-sweep", "--memory-sweep-save"]],
-                                       needCharts: false, channel: .gpu)
-                        }
-                        .disabled(engine.isRunning)
-                    }
                     cliCard
                 }
                 .padding(28)
@@ -307,6 +309,9 @@ struct RunView: View {
             if !enabled { selectedApis.remove("vulkan") }
         }
         .onChange(of: selectedWorkload) { _ in
+            selectedApis.formIntersection(supportedApis)
+        }
+        .onChange(of: selectedGpuIndex) { _ in
             selectedApis.formIntersection(supportedApis)
         }
         .confirmationDialog(
@@ -395,97 +400,99 @@ struct RunView: View {
                     .foregroundStyle(.secondary)
                 }
 
-                FormRow {
-                    FormField(
-                        title: Localization.tr("Duration", "时长", "時間"),
-                        width: 150
-                    ) {
-                        Picker("", selection: $durationUnit) {
-                            ForEach(DurationUnit.allCases) { u in
-                                Text(u.label).tag(u)
+                if !isMemoryTest || isFormalSuitePreset {
+                    FormRow {
+                        FormField(
+                            title: Localization.tr("Duration", "时长", "時間"),
+                            width: 150
+                        ) {
+                            Picker("", selection: $durationUnit) {
+                                ForEach(DurationUnit.allCases) { u in
+                                    Text(u.label).tag(u)
+                                }
                             }
                         }
-                    }
 
-                    if durationUnit != .unlimited {
-                        FormField(
-                            title: Localization.tr("Value", "数值", "値"),
-                            width: 110
-                        ) {
-                            TextField(durationUnit == .frames ? "600" : "15", text: $durationValue)
-                                .textFieldStyle(.roundedBorder)
-                        }
-                    }
-
-                    if selectedWorkload == "synthpeak" {
-                        FormField(
-                            title: Localization.tr("Precision", "精度", "精度"),
-                            width: 110
-                        ) {
-                            Picker("", selection: $selectedPrecision) {
-                                Text("fp32").tag("fp32")
-                                Text("fp16").tag("fp16")
-                                Text("int32").tag("int32")
-                                // fp64 hidden for Apple — still listed under legacy when showLegacy
-                                if showLegacy { Text("fp64").tag("fp64") }
-                            }
-                        }
-                    }
-
-                    if usesParticles {
-                        FormField(
-                            title: Localization.tr("Particles", "粒子数", "パーティクル数"),
-                            width: 180
-                        ) {
-                            // Buffer size is shown because the presets straddle
-                            // the cache/memory boundary: the small ones report
-                            // cache bandwidth, not memory bandwidth.
-                            Picker("", selection: $particlePreset) {
-                                Text(Localization.tr("Light — 65K · 2 MB", "轻量 —— 65K · 2 MB", "Light — 65K · 2 MB")).tag("65536")
-                                Text(Localization.tr("Medium — 1M · 32 MB", "中等 —— 1M · 32 MB", "Medium — 1M · 32 MB")).tag("1048576")
-                                Text(Localization.tr("Heavy — 4M · 128 MB", "重载 —— 4M · 128 MB", "Heavy — 4M · 128 MB")).tag("4194304")
-                                Text(Localization.tr("Extreme — 16M · 512 MB", "极限 —— 16M · 512 MB", "Extreme — 16M · 512 MB")).tag("16777216")
-                                Text(Localization.tr("Custom…", "自定义…", "カスタム…")).tag("custom")
-                            }
-                        }
-                        if particlePreset == "custom" {
+                        if durationUnit != .unlimited {
                             FormField(
-                                title: Localization.tr(
-                                    "Custom count", "自定义数量", "カスタム数"),
-                                width: 150
+                                title: Localization.tr("Value", "数值", "値"),
+                                width: 110
                             ) {
-                                TextField(Localization.tr("multiple of 256", "256 的倍数", "256 の倍数"), text: $customParticles)
+                                TextField(durationUnit == .frames ? "600" : "15", text: $durationValue)
                                     .textFieldStyle(.roundedBorder)
                             }
                         }
-                    }
 
-                    if usesBurnSteps {
-                        FormField(
-                            title: Localization.tr(
-                                "GPU Burn steps", "GPU Burn 步数", "GPU Burn ステップ"),
-                            width: 170
-                        ) {
-                            Picker("", selection: $burnPreset) {
-                                Text(Localization.tr("Light — 16", "轻量 —— 16", "Light — 16")).tag("16")
-                                Text(Localization.tr("Medium — 64", "中等 —— 64", "Medium — 64")).tag("64")
-                                Text(Localization.tr("Heavy — 256", "重载 —— 256", "Heavy — 256")).tag("256")
-                                Text(Localization.tr("Custom…", "自定义…", "カスタム…")).tag("custom")
+                        if selectedWorkload == "synthpeak" {
+                            FormField(
+                                title: Localization.tr("Precision", "精度", "精度"),
+                                width: 110
+                            ) {
+                                Picker("", selection: $selectedPrecision) {
+                                    Text("fp32").tag("fp32")
+                                    Text("fp16").tag("fp16")
+                                    Text("int32").tag("int32")
+                                    // fp64 hidden for Apple — still listed under legacy when showLegacy
+                                    if showLegacy { Text("fp64").tag("fp64") }
+                                }
                             }
                         }
-                        if burnPreset == "custom" {
+
+                        if usesParticles {
+                            FormField(
+                                title: Localization.tr("Particles", "粒子数", "パーティクル数"),
+                                width: 180
+                            ) {
+                                // Buffer size is shown because the presets straddle
+                                // the cache/memory boundary: the small ones report
+                                // cache bandwidth, not memory bandwidth.
+                                Picker("", selection: $particlePreset) {
+                                    Text(Localization.tr("Light — 65K · 2 MB", "轻量 —— 65K · 2 MB", "Light — 65K · 2 MB")).tag("65536")
+                                    Text(Localization.tr("Medium — 1M · 32 MB", "中等 —— 1M · 32 MB", "Medium — 1M · 32 MB")).tag("1048576")
+                                    Text(Localization.tr("Heavy — 4M · 128 MB", "重载 —— 4M · 128 MB", "Heavy — 4M · 128 MB")).tag("4194304")
+                                    Text(Localization.tr("Extreme — 16M · 512 MB", "极限 —— 16M · 512 MB", "Extreme — 16M · 512 MB")).tag("16777216")
+                                    Text(Localization.tr("Custom…", "自定义…", "カスタム…")).tag("custom")
+                                }
+                            }
+                            if particlePreset == "custom" {
+                                FormField(
+                                    title: Localization.tr(
+                                        "Custom count", "自定义数量", "カスタム数"),
+                                    width: 150
+                                ) {
+                                    TextField(Localization.tr("multiple of 256", "256 的倍数", "256 の倍数"), text: $customParticles)
+                                        .textFieldStyle(.roundedBorder)
+                                }
+                            }
+                        }
+
+                        if usesBurnSteps {
                             FormField(
                                 title: Localization.tr(
-                                    "Custom steps", "自定义步数", "カスタムステップ"),
-                                width: 130
+                                    "GPU Burn steps", "GPU Burn 步数", "GPU Burn ステップ"),
+                                width: 170
                             ) {
-                                TextField("16–2048", text: $customBurnSteps)
-                                    .textFieldStyle(.roundedBorder)
+                                Picker("", selection: $burnPreset) {
+                                    Text(Localization.tr("Light — 16", "轻量 —— 16", "Light — 16")).tag("16")
+                                    Text(Localization.tr("Medium — 64", "中等 —— 64", "Medium — 64")).tag("64")
+                                    Text(Localization.tr("Heavy — 256", "重载 —— 256", "Heavy — 256")).tag("256")
+                                    Text(Localization.tr("Custom…", "自定义…", "カスタム…")).tag("custom")
+                                }
+                            }
+                            if burnPreset == "custom" {
+                                FormField(
+                                    title: Localization.tr(
+                                        "Custom steps", "自定义步数", "カスタムステップ"),
+                                    width: 130
+                                ) {
+                                    TextField("16–2048", text: $customBurnSteps)
+                                        .textFieldStyle(.roundedBorder)
+                                }
                             }
                         }
                     }
+                    .disabled(isFormalSuitePreset)
                 }
-                .disabled(isFormalSuitePreset)
             }
         }
     }
@@ -540,15 +547,17 @@ struct RunView: View {
                     .font(.headline)
                 HStack(alignment: .firstTextBaseline, spacing: 18) {
                     HintedToggle(title: "Headless", hint: headlessHint, isOn: $headless)
-                        .disabled(usesBurnSteps || selectedWorkload == "cinematic_liquid")
+                        .disabled(isMemoryTest || usesBurnSteps || selectedWorkload == "cinematic_liquid")
                     HintedToggle(
                         title: Localization.tr("V-Sync", "垂直同步", "垂直同期"),
                         hint: vsyncHint,
                         isOn: $vsync)
+                        .disabled(isMemoryTest)
                     HintedToggle(
                         title: Localization.tr("System memory", "系统内存", "システムメモリ"),
                         hint: hostMemoryHint,
                         isOn: $hostMemory)
+                        .disabled(isMemoryTest)
                     HintedToggle(
                         title: Localization.tr("Show legacy & advanced tests",
                                                "显示旧版与高级测试",
@@ -579,18 +588,20 @@ struct RunView: View {
                 }
                 .disabled(isFormalSuitePreset)
 
-                Text(headless
-                     ? Localization.tr(
-                        "Headless runs have no swapchain or render pass, so GPU capture is unavailable. Clear Headless to capture a frame.",
-                        "Headless 没有交换链和渲染流程，因此无法抓帧。需要抓帧请取消勾选 Headless。",
-                        "ヘッドレスにはスワップチェーンも描画パスもないため、キャプチャできません。")
-                     : Localization.tr(
-                        "Metal capture uses MTLCaptureManager and writes a .gputrace file to Captures. If a requested capture backend is unavailable, the run records captureUnavailable; capture time is excluded from the score.",
-                        "Metal 抓帧已使用 MTLCaptureManager，并将 .gputrace 写入 Captures。若所请求的抓帧后端不可用，运行会记录 captureUnavailable；抓帧时间不计入成绩。",
-                        "Metal キャプチャは MTLCaptureManager を使い、.gputrace を Captures に保存します。要求したキャプチャ手段が使えない場合は captureUnavailable を記録し、キャプチャ時間はスコアから除外します。"))
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                if !isMemoryTest || isFormalSuitePreset {
+                    Text(headless
+                         ? Localization.tr(
+                            "Headless runs have no swapchain or render pass, so GPU capture is unavailable. Clear Headless to capture a frame.",
+                            "Headless 没有交换链和渲染流程，因此无法抓帧。需要抓帧请取消勾选 Headless。",
+                            "ヘッドレスにはスワップチェーンも描画パスもないため、キャプチャできません。")
+                         : Localization.tr(
+                            "Metal capture uses MTLCaptureManager and writes a .gputrace file to Captures. If a requested capture backend is unavailable, the run records captureUnavailable; capture time is excluded from the score.",
+                            "Metal 抓帧已使用 MTLCaptureManager，并将 .gputrace 写入 Captures。若所请求的抓帧后端不可用，运行会记录 captureUnavailable；抓帧时间不计入成绩。",
+                            "Metal キャプチャは MTLCaptureManager を使い、.gputrace を Captures に保存します。要求したキャプチャ手段が使えない場合は captureUnavailable を記録し、キャプチャ時間はスコアから除外します。"))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
     }
@@ -732,6 +743,13 @@ struct RunView: View {
                 engine.cancel(channel: .gpu)
             }
             .disabled(!run.isRunning)
+            Button {
+                engine.run(jobs: [["gpu_benchmark", "--gui-worker", "--gpu-suite"]], needCharts: true, channel: .gpu)
+            } label: {
+                Text(Localization.tr("Run all GPU tests", "一键测试 GPU 全套", "GPU 全項目を実行"))
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(engine.isRunning || engine.availableSuiteApiCounts.isEmpty)
             Button(action: runAllTests) {
                 Text(Localization.tr("Test all projects", "一键测试全部项目", "全項目を一括実行"))
             }
@@ -744,9 +762,9 @@ struct RunView: View {
                      ? Localization.tr("Run Complete Series", "运行完整测试", "完全テストを実行")
                      : Localization.tr("Run GPU Benchmark", "开始 GPU 测试", "GPU ベンチマークを実行"))
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.bordered)
             .controlSize(.large)
-            .disabled(engine.isRunning || (isFormalSuitePreset && engine.availableSuiteApiCounts.isEmpty))
+            .disabled(engine.isRunning || (isFormalSuitePreset ? engine.availableSuiteApiCounts.isEmpty : supportedApis.isEmpty))
         }
         .padding(.horizontal, 28)
         .padding(.vertical, 12)
@@ -803,11 +821,18 @@ struct RunView: View {
     }
 
     private func backendsForJob() -> [String] {
+        if isMemoryTest && selectedApis.isEmpty { return Array(supportedApis.prefix(1)) }
         if selectedApis.isEmpty { return [""] } // Auto
         return selectedApis.sorted()
     }
 
     private func buildOne(backend: String, gpu: Int?, extra: [String] = []) -> [String] {
+        if isMemoryTest {
+            var a = ["gpu_benchmark", "--backend", backend]
+            if let g = gpu, g >= 0 { a += ["--gpu", "\(g)"] }
+            a += backend == "metal" ? ["--memory-sweep", "--memory-sweep-save"] : ["--workload", "membw"]
+            return a
+        }
         var a = ["gpu_benchmark"] + durationArgs()
         if !backend.isEmpty { a += ["--backend", backend] }
         if let g = gpu, g >= 0 { a += ["--gpu", "\(g)"] }
@@ -856,6 +881,7 @@ struct RunView: View {
 
         // Skip known-hopeless liquid×non-vulkan / stress×metal when Auto expands.
         func allow(_ backend: String) -> Bool {
+            if isMemoryTest { return supportedApis.contains(backend) }
             if backend.isEmpty { return true }
             if backend == "opengl" && selectedWorkload != "gpu_burn" &&
                 !engine.gpus.contains(where: { $0.supportsOpenGLCompute }) { return false }
@@ -875,13 +901,23 @@ struct RunView: View {
             return backs.map { buildOne(backend: $0, gpu: gpu >= 0 ? gpu : nil) }
 
         case .fullOne:
-            needCharts = true
+            needCharts = !isMemoryTest
             let backs = (selectedApis.isEmpty ? supportedApis : Array(selectedApis))
                 .sorted()
                 .filter { allow($0) }
             return backs.map { buildOne(backend: $0, gpu: gpu >= 0 ? gpu : nil) }
 
         case .fullAll:
+            if isMemoryTest {
+                needCharts = false
+                let backs = selectedApis.isEmpty ? supportedApis : selectedApis.sorted()
+                return engine.gpus.flatMap { device in
+                    backs.filter {
+                        ($0 == "metal" && device.supportsMetal) ||
+                        ($0 == "vulkan" && engine.allowTranslatedApis && device.supportsVulkan)
+                    }.map { buildOne(backend: $0, gpu: device.index) }
+                }
+            }
             needCharts = true
             if selectedWorkload.hasPrefix("cinematic_liquid") || selectedWorkload == "fluid" {
                 // Cross-API suite rejected for liquid; run allowed backends only.
@@ -899,7 +935,7 @@ struct RunView: View {
             return [a]
 
         case .completeSuite:
-            return [["gpu_benchmark", "--gui-worker", "--complete-suite"]]
+            return [["gpu_benchmark", "--gui-worker", "--complete-suite", "--no-renderdoc"]]
 
         case .fillMissing:
             return [["gpu_benchmark", "--gui-worker", "--fill-missing", "--yes"]]

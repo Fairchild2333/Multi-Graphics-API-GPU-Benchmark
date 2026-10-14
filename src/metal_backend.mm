@@ -297,6 +297,12 @@ bool MetalBackend::EndNativeGpuCapture(std::string& outPath) {
 // -----------------------------------------------------------------------
 
 void MetalBackend::InitBackend() {
+    // GPUStartTime/GPUEndTime are command-buffer spans. Keep score phases
+    // ordered and non-overlapping on desktop and mobile Metal hosts.
+    if (!config_.headless) {
+        config_.framesInFlight = 1;
+        std::cout << "[Profiling] Metal serialized command-buffer timing v2 (one frame).\n";
+    }
     if (config_.workload == Workload::Fluid) {
         throw std::runtime_error(
             "Fluid is an unverified Vulkan-only Developer Preview; Metal fallback is disabled");
@@ -679,8 +685,6 @@ void MetalBackend::DrawFrame(float deltaTime) {
             dispatch_semaphore_t sem = impl_->frameSemaphore;
 
             [computeCB addCompletedHandler:^(id<MTLCommandBuffer> cb) {
-                dispatch_semaphore_signal(sem);
-
                 const double cs = cb.GPUStartTime;
                 const double ce = cb.GPUEndTime;
 
@@ -690,6 +694,7 @@ void MetalBackend::DrawFrame(float deltaTime) {
                     std::lock_guard<std::mutex> lock(implPtr->timingMutex);
                     implPtr->pendingTimings.push_back({computeMs, 0.0, computeMs});
                 }
+                dispatch_semaphore_signal(sem);
             }];
 
             [computeCB commit];
@@ -781,12 +786,13 @@ void MetalBackend::DrawFrame(float deltaTime) {
             __block int publishSlot = presentSlot;
             id<MTLCommandBuffer> timingCB = renderCB ? renderCB : capturedComputeCB;
             [timingCB addCompletedHandler:^(id<MTLCommandBuffer> cb) {
-                dispatch_semaphore_signal(sem);
                 implPtr->publishRenderSlot(publishSlot);
                 const double rs = cb.GPUStartTime;
                 const double re = cb.GPUEndTime;
-                if (!(re > rs))
+                if (!(re > rs)) {
+                    dispatch_semaphore_signal(sem);
                     return;
+                }
                 double computeMs = 0.0;
                 double renderMs = (re - rs) * 1000.0;
                 double totalMs = renderMs;
@@ -805,11 +811,14 @@ void MetalBackend::DrawFrame(float deltaTime) {
                 }
                 std::lock_guard<std::mutex> lock(implPtr->timingMutex);
                 implPtr->pendingTimings.push_back({computeMs, renderMs, totalMs});
+                dispatch_semaphore_signal(sem);
             }];
 
             [capturedComputeCB commit];
+            [capturedComputeCB waitUntilCompleted];
             if (renderCB)
                 [renderCB commit];
+            [timingCB waitUntilCompleted];
 
             ++impl_->totalFrames;
             impl_->currentFrame = (frameSlot + 1) % impl_->framesInFlight;
@@ -847,6 +856,7 @@ void MetalBackend::DrawFrame(float deltaTime) {
                        threadsPerThreadgroup:tgSize];
             [computeEnc endEncoding];
             [computeCB commit];
+            [computeCB waitUntilCompleted];
         }
 
         // --- Render command buffer ----------------------------------------------
@@ -926,13 +936,14 @@ void MetalBackend::DrawFrame(float deltaTime) {
         dispatch_semaphore_t sem = impl_->frameSemaphore;
 
         [renderCB addCompletedHandler:^(id<MTLCommandBuffer> cb) {
-            dispatch_semaphore_signal(sem);
             implPtr->publishRenderSlot(publishSlot);
 
             const double rs = cb.GPUStartTime;
             const double re = cb.GPUEndTime;
-            if (!(re > rs))
+            if (!(re > rs)) {
+                dispatch_semaphore_signal(sem);
                 return;
+            }
 
             const double renderMs = (re - rs) * 1000.0;
             double computeMs = 0.0;
@@ -948,9 +959,11 @@ void MetalBackend::DrawFrame(float deltaTime) {
 
             std::lock_guard<std::mutex> lock(implPtr->timingMutex);
             implPtr->pendingTimings.push_back({computeMs, renderMs, totalMs});
+            dispatch_semaphore_signal(sem);
         }];
 
         [renderCB commit];
+        [renderCB waitUntilCompleted];
 
         ++impl_->totalFrames;
         impl_->currentFrame =
@@ -961,6 +974,11 @@ void MetalBackend::DrawFrame(float deltaTime) {
 // -----------------------------------------------------------------------
 // Synchronisation & cleanup
 // -----------------------------------------------------------------------
+
+std::string MetalBackend::GetTimingMode() const {
+    if (!config_.headless) return "serialized_command_buffer_gpu_time";
+    return "gpu_timestamp_query";
+}
 
 void MetalBackend::WaitIdle() {
     if (!impl_ || !impl_->commandQueue) return;

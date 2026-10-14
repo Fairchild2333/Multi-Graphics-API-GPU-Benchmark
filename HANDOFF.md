@@ -1,5 +1,333 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
+## 2026-10-13 Core-type selector removed; default covers all cores
+
+User explicitly requested no additional selection option: automatically run
+all core types / all cores, and asked whether cache, memory and virtual memory
+were tested. Removed the Mac core-type picker/state and the newly introduced
+--cpu-core-type flag from both CLI parsers, help and current method docs.
+CpuBenchmarkConfig and CpuMemBwConfig now share DefaultCpuCoreType(): supported
+native Apple Silicon macOS defaults to Both, other hosts keep Automatic.
+GUI and suite jobs require no extra arguments. A multi-only compute run uses
+Automatic internally so all14 threads run and short multi previews are not
+rejected by the single-thread residency minimum. Existing test mode/duration
+controls remain, and the CPU page defaults to single-thread + all-core.
+
+No-flag compute all and short multi-only smokes passed. A cache-only smoke
+(max1MiB, no-save, no storage) exposed background preemption: actual worker CPU
+time within50ms could be only4-16ms, too little to meet the conservative99%
+bound despite almost entirely E execution. Memory retries now automatically
+double ONLY rejected samples (50,100,200,400,800ms with defaults), keeping the
+99% threshold. Protocol and stored residency point encoding now include the
+actual/max requested sample duration. No new user option. The repeated cache
+smoke completed123 points with both classes and all-core and exit0. This is
+an intentionally unsettled cached preview, NOT a DRAM score; no result saved.
+The initial diagnostic harness wrongly expected exit1 for an entirely cached
+sweep, but the existing summarizer can label an unsettled last point memory;
+corrected the harness's expectation without changing that older summarizer.
+
+Final macOS arm64/Intel and iOS device/simulator builds pass, CTest4/4. GUI was
+restarted and inspected: no core-type dropdown, default single-thread+all-core,
+footer says both types/all cores automatically. App left idle on CPU page.
+Main137 records SHA256 b6284e581490616bb5892ff58ba3f19bdc4dd507086ff181ac2424b0083c96cf
+unchanged. Evidence out/test-results/cpu-default-all-20261013/; no new formal
+benchmarks, commits or pushes.
+
+VM coverage clarified to user and report: the formal full sweep already tested
+P/E L1/L2 R/W/C, P/E and all-core memory R/W/C, first-touch page mapping
+739ns per16KiB page (22.16GB/s logical mapped-region rate), and paging-drive
+sequential/random4KiB file I/O. It did NOT measure actual OS swap-out/in,
+memory compression, TLB reach or VM remapping. Do not say all virtual-memory
+operations were measured. Existing report updated to automatic/no-selector
+wording and this precise VM coverage. Phone comparison remains deferred.
+
+## 2026-10-13 Verified Mac P/E compute and cache/memory integration complete
+
+User authorized continuing the core-type workaround. Added public-SDK QoS /
+process-accounting / thread-CPU-clock verification in src/cpu_scheduling.h,
+shared by the existing CPU compute and memory kernels. Mach process time is
+converted to ns before comparison; independent conversions tolerate only a
+2 ns overshoot. Attribute all possible other-thread CPU against the requested
+class, plus 50 us accounting margin. Require a >=99% worker-type lower bound
+for EVERY measured round/sample; retry compute twice, memory four times, and
+never save an affected invalid result. Keep affinity=scheduler_managed and
+never report a numbered-core binding. Capability is native arm64 macOS with
+verified two named P/E levels and V6 accounting; iOS/Intel retain auto mode.
+No private SPI, root, process-wide policy changes or security changes.
+
+New --cpu-core-type auto|performance|efficiency|both selects single-thread
+stages. Mac CPU UI defaults to both; complete-suite CPU jobs use both when
+supported. Compute all = original all-core stage, then one P and one E stage.
+Each type saves a distinct cpu_single_core version/configuration; no combined
+P/E average in GUI/status. Full-suite job count is unchanged (CPU 2 jobs), but
+CPU compute produces 3 records. Memory both uses P/E-specific sysctl capacities,
+>=50 ms samples, both single-thread curves plus all-core/page/storage. Typed
+memory version suffix qos_bound_v1_both; saved config keeps per-class capacities,
+per-point lower bound/retries and last-sample effective GHz/P share. Full
+per-sample observations are in the raw CLI log. P/E modes in History and
+comparison plots are distinct. Shared iOS parser/charts display imported
+verified data, but iOS exposes no unverified core-type run selection.
+
+Formal GUI compute 15 s / .2 warmup / r3 passed at 21:35:45 Sydney:
+P 312.254 MWork/s, lower bound >=99.8796%, observed 4.127-4.170 GHz;
+E background 80.762 MWork/s, >=99.9743%, observed 1.574-1.616 GHz;
+14-thread all 3581.602 MWork/s. E policy values are NOT maximum-clock E capability.
+New IDs 20261013-213545-108-cpu-single-performance,
+20261013-213545-114-cpu-single-efficiency, 20261013-213545-118-cpu-multi.
+Full memory both passed in 182.84 s, ID 20261013-214534-490-cpu-membw:
+303 curve points, 1764 accepted classified sample records, 2 rejected samples
+retried. P/E curve bounds >=99.2594% /99.5465%. System cache capacities P L1
+128 KiB/L2 16 MiB shared5; E L1 64 KiB/L2 4 MiB shared4. P L1 read132.7/L2
+112.1/memory80.4 GB/s; E 35.0/21.1/12.7; all memory R/W/C240.6/218.1/222.4,
+settled. No new independent GPU L2/L3/SLC attribution.
+
+Found/fixed ApplyLegacyDefaults changing explicit framesInFlight=0 to2 during
+append. Default2 now applies ONLY when the field is absent. Repaired the one
+pre-existing row changed by these appends from the exact before snapshot and
+normalized the 4 newly generated non-frame CPU rows to their original intended
+zero. All original 133 records now compare equal field by field; main history
+137 =133+4. Isolated append compatibility test seeded all137 and verified each
+field survives another append. Negative live P-under-taskpolicy-b control exits
+3 and appends zero; isolated positive saves one P/oneE/onemulti. The first
+isolated-data test imported220 legacy rows before saving3; those are duplicate
+IDs of the repo history, not new device records. control-data starts with [];
+append-compat-data is a duplicate137-row snapshot plus one short test. Never
+count reference/backup copies twice.
+
+Final builds macOS arm64/Intel, iOS device/simulator pass; CTest4/4, parser151/151.
+Mac GUI formal scores, History P/E modes, and restored303-point memory curves
+with distinct cache sizes and >=99.26% verification were inspected. Native
+screenshot layout is correct. App left idle in saved curves sheet on latest
+CPU memory run; no benchmark process active. Relevant method docs:
+docs/apple-cpu-core-types.md; evidence out/test-results/cpu-core-types-20261013/
+(new-results, before/after snapshots, logs, negative-control ledger, validation,
+CSV, PNG/PDF). User report/artifacts copied to shared reports/
+cpu-core-types-2026-10-13/report.md. All older phone comparison remains deferred.
+No commit/push. Older all-results-2026-10-13 exports remain an earlier snapshot.
+
+## 2026-10-13 Online research: verified core-type scheduling workaround
+
+User asked to search for a workaround for Mac core binding. Apple QoS/taskpolicy
+sources and XNU accounting reveal a usable way to request P/E scheduling and
+verify actual CPU-type residency, while numbered-core pinning remains unavailable.
+A disposable single-threaded CLI probe uses public SDK proc_pid_rusage / V6
+P-time counters around three 0.5 s rounds per policy, with no root. High QoS
+P shares: 98.412%, 99.997%, 100%; background QoS and taskpolicy -b both yield
+100% E time in all three rounds. The process-background probe still reports
+user_interactive QoS, so requested/reported QoS alone cannot establish placement.
+For a future integration, measure every round's actual P/E shares, retry or flag
+mixed runs, keep scheduler_managed rather than claim pinned CPU IDs, and use a
+new workload/configuration identity. Process accounting needs an isolated worker;
+GUI and observer activity cannot be attributed to that worker. Background-mode
+scores must record policy/frequency context and cannot be advertised as E-core
+maximum frequency. No formal CPU benchmark rerun, engine change, or iOS runtime
+verification in this research turn. Result-store SHA unchanged. Detailed sources,
+code and raw observations: out/test-results/mac-core-affinity-20261013/research.md
+and residency-verification.json. Debug/development binding sysctls are absent on
+this release-kernel host; root alone cannot enable an uncompiled interface.
+
+## 2026-10-13 Phone comparison deferred; current-host affinity API checked
+
+User requested phone/Mac comparison and asked whether Mac can pin cores, then
+explicitly deferred phone lookup when asked where the phone archives reside.
+Do not continue the phone comparison under that request. This Mac lacks the
+out/adb and out/hdc JSON archives referred to in earlier handoff records.
+
+A disposable current-thread API probe reports 10P+4E and returns 46 / service
+not supported for THREAD_AFFINITY_POLICY. user_interactive/background QoS calls
+succeed, but are scheduling hints, not CPU-ID binding or verified P/E residency.
+The affinity tag API is itself a shared-L2 placement hint, not a core number.
+Evidence: out/test-results/mac-core-affinity-20261013/. No new performance run
+or stored-score change. Differentiating P/E by QoS requires residency validation;
+the existing fourteen single-thread samples still have no P/E identities.
+
+## 2026-10-13 Final inventory and CPU core-identity clarification
+
+User questioned why big/small-core scores were similar and requested all
+results summarized. Source and logs confirm no Apple per-core bind: all 14
+single-thread samples have scheduler_managed / Unclassified / performance_level
+-1. They are sampling ordinals, not P/E-core identities; do not claim that P/E
+cores were separately measured or have equal performance. No benchmark was
+started for this read-only inventory.
+
+Five independent result files contain 367 unique IDs: current Mac main 133,
+repository legacy 220, and three isolated validation files with 7+4+3 records.
+The two main histories total 353; the 14 isolated short tests are listed
+separately. Nine backup/selected/before/after snapshots have no new IDs and are
+excluded from duplicate counts. All five source SHA256 hashes are unchanged.
+Exports (Markdown summary with all rows, complete CSV, 367-row JSON, 353-row
+main-history JSON, manifest and optional offline filterable HTML) are under
+~/Library/Application Support/GpuComputeBenchmark/reports/all-results-2026-10-13/.
+The local HTML browser preview was blocked by its URL-protocol policy; source,
+JSON/CSV counts and Markdown were validated without bypassing that policy.
+
+## 2026-10-13 Complete CPU tests and native GPU cache-state diagnostic
+
+User requested further GPU cache measurement and all CPU tests, then explicitly
+authorized continuing the new diagnostic after asking why it was necessary.
+Existing CPU/Vulkan/particle-derived Metal kernels and score contracts were not
+changed. CPU formal `all` (15 s, 0.2 s warmup), full cache/memory/page/storage
+sweep, and the existing curve-level diagnostic all passed. CPU mixed single-
+thread sampling averaged 322.3 MWork/s, 14-thread multi 3726.7 MWork/s. macOS
+is scheduler-managed: these are 14 single-thread samples, not verified pins of
+each physical P/E core. CPU memory read/write/copy is 247.4/223.5/231.1 GB/s;
+the curve-level diagnostic did not independently find a SoC tier.
+
+A separate native Metal `--gpu-cache-probe` now measures dependent random uint32
+cycles at 128-byte spacing, with GPU-warmed / after-eviction / CPU-warmed
+conditions and 4096 concurrent chains. Every timed/warm dispatch checks the
+exact final index and index sum; the eviction read checks its output too.
+Three full 4 KiB–128 MiB sweeps passed: default, doubled loads, default repeat;
+each has 124 points / 620 measured samples. It saves a new `gpu_cache` preview
+with separate latency/payload-throughput curves, visible in Apple history.
+Method and limits: docs/gpu-cache-probe.md. This is a diagnostic CLI path,
+not a new formal complete-suite job or an iOS GPU API execution path.
+
+Large-span GPU-warmed latency is repeatable near 319 ns at 16–32 MiB and 341 ns
+at 128 MiB. Small spans show startup/iteration-count effects; CPU warming did
+not consistently reproduce a distinct shared-cache benefit. Public Metal
+counter-set enumeration on this host exposes only timestamp, not per-level
+cache counters. Eviction is not a validated hardware flush, warm commands
+do not pin a GPU core, and TLB/clock/coherence effects remain. **Do not claim
+independent GPU L2/L3/SLC peak speeds or capacities from this diagnostic.**
+
+The original Vulkan memory/L1 sweep was also repeated successfully: memory
+read/write/copy 252.4/244.6/243.4 GB/s, all plateau flags true; cache-hit read
+1668.9 GB/s and local probe 1439.3/125.1 GB/s aggregate/single-workgroup. This
+is a different method from native dependent latency/payload throughput.
+
+Seven runs saved eight new records (CPU all saves two), shared count 125→133.
+Every pre-existing field of the original 125 records remains unchanged; the
+repository's 220-row legacy JSON is untouched. Evidence and PNG/PDF curves:
+out/test-results/cache-cpu-20261013/, with report also under the shared reports
+directory as cache-cpu-complete-2026-10-13.md. Parser checks 144/144 and CTest
+3/3 passed; macOS arm64/Intel and iOS device/simulator builds passed. No iOS
+performance test was run. All requested measurements are finished.
+
+## 2026-10-13 Saved cache and memory curves in Apple GUI
+
+User asked to complete the curve display and inspect previous scores. Both
+Apple GUIs now offer **Cache & memory curves** from History and Charts. The
+viewer reconstructs saved CPU read/write/copy curves, native Metal allocation
+curves and Vulkan memory/local-cache curves from workloadConfig. It also shows
+Vulkan cache/memory summaries and the local/L1-style probe in current-run and
+history views. This resolves the display gap described in the audit below;
+independent GPU L2/L3/SLC measurement and attribution are still unverified.
+Metal retains its particle-derived preview label and unverified plateau.
+
+The viewer can open a JSON result array or results envelope read-only; this
+changes only its local selection and never imports into the shared score store.
+CPU points are KiB per thread, GPU memory points MiB, GPU local-cache points
+KiB per workgroup, and Metal allocation sizes already bytes. Unknown P/E
+classification, cache capacity or plateau status must remain unknown.
+
+The current shared file has 125 records, including three memory sweeps with
+198 CPU, 95 Vulkan and 56 Metal curve points. The repository's older
+results/results.json has 220 particle records (62 DX11, 59 DX12, 46 Vulkan,
+45 OpenGL, 8 Metal) and no memory sweeps; cache curves cannot be reconstructed
+from those individual particle scores. Both files retain their original bytes:
+shared SHA256 a9478417d06615402f95c34d293ce9d9d5c29731b4a3477b973536db919cb6bb;
+repository SHA256 5f01464406c9dfd9927061beeccdbc2b4c2f03cc4613c0f41e1e1fd8cc1b3c35.
+No new benchmark was requested or run for this display change.
+
+Shared parser/geometry checks pass 139/139. macOS arm64/Intel and iOS device/
+simulator builds pass. The native macOS GUI was inspected with actual saved
+CPU, Vulkan and Metal results; the curves and summary rates agree with the JSON.
+The old 220-record JSON opened in the GUI with a read-only/no-sweep message,
+and returning to the current history restored its saved memory data. The macOS
+file panel attaches to the current window and restores focus after dismissal.
+Local evidence belongs under out/test-results/history-curves/.
+
+## 2026-10-13 Cache coverage and unified-memory audit
+
+User asked why GPU L1/L2/L3 and SoC cache speeds were absent, and whether the
+memory speed is credible. This turn audited saved results/source and Apple
+primary documentation; no new benchmark or GUI implementation was performed.
+Apple's MacBook Pro M4 Pro specification lists 273 GB/s. This host is Mac16,8,
+14 CPU cores (10P+4E), 20 GPU cores and 48 GiB RAM. Saved large-set read rates
+are Vulkan 238.796, Metal preview 244.776 and CPU 245.834 GB/s (87.5-90.0% of
+the specification). Vulkan's 1/1.5/2 GiB tail is flat, with zero timestamp
+anomalies; CPU's large all-thread tail is also flat. The native Metal value
+retains its unverified-plateau preview status.
+
+Cache results do exist in workloadConfig: GPU local/L1-style probe 1393.8 GB/s
+aggregate and 123.3 GB/s single workgroup; GPU cache-hit range 1521.5 GB/s read;
+CPU one-thread L1/L2 read 129.9/111.3 GB/s, all-thread 1444.0/1125.9 GB/s.
+These are kernel effective rates. Do not claim hardware L2/L3/SLC attribution
+or a validated M4 GPU L1 capacity from those numbers. GPU distinct L2/L3 and
+SoC/SLC speed isolation remain unimplemented/unverified. The GUI currently
+plots MEMBW_POINT but omits MEMBW_L1/MEMBW_SUMMARY cache summary tables;
+History shows only the primary score. This is a display gap in addition to
+the missing independent cache-level methods. The 31-job pass does not certify
+all cache levels. CPU saved-curve reread preserves OS-selected levels and does
+not reveal a new independently measured SoC tier.
+
+Audit evidence: `out/test-results/macos-complete-20261013/cache-audit.{json,md}`
+and `cache-audit-reread.txt`; user report in
+`~/Library/Application Support/GpuComputeBenchmark/reports/m4-pro-cache-memory-audit-2026-10-13.md`.
+Sources: https://support.apple.com/en-au/121553 and
+https://developer.apple.com/videos/play/wwdc2020/10603/.
+
+## 2026-10-13 Full macOS run with Vulkan / Metal comparison
+
+The user explicitly requested the full series including Vulkan today, revoking
+the earlier stopped-run restriction for this test. The GUI opt-in was enabled
+and its one-click 31-job series completed **31/31 success**, no failed/skipped
+jobs and all 8 required native Metal captures present. CPU all-core/per-core
+execution saves two records, so the initial series produced 32 new records.
+
+Runtime verification found a real MoltenVK Retina mismatch: GLFW's 1280x720
+logical window produced a **2560x1440 Vulkan surface**, while native Metal
+rendered 1280x720. A surface-capabilities probe reproduced this and confirmed
+the corrected surface as 1280x720. The macOS framebuffer-scaling hint now
+applies to Vulkan too; MoltenVK records/logs the actual render extent. Corrected
+rendered scores add `_viewport1280x720_v1`, preserving the old result group.
+Headless/native score contracts and stored historical records remain intact.
+
+After rebuilding arm64 and Intel and passing CTest 3/3, Vulkan rendered jobs
+passed 8/8 again. Metal rendered jobs also passed 8/8 without capture, giving
+the comparison matching 1280x720, 15-second, no-capture settings. All 48 new
+records are retained in the shared results.json; the report selects 32 records
+for the 31 projects. Initial rendered scores are kept as evidence and excluded
+from the final comparison. No old scores were changed or deleted.
+
+On this M4 Pro single run: Vulkan GPU Burn is 33-57% above Metal; 16M
+headless particle is Vulkan 133.438 vs Metal 143.277 GB/s. Memory results are
+Vulkan 238.796 GB/s (2 GiB, median, plateau reached) and native Metal preview
+244.776 GB/s (512 MiB, best, plateau unverified), so do not claim the difference
+is translation overhead. Particle rates are derived kernel metrics and liquid
+retains its distinct native preview contract. Ordering/thermal repeats remain
+outside this run's evidence.
+
+Evidence: `out/test-results/macos-complete-20261013/` contains the before/after
+data, plan, 31-job ledger, viewport probe, per-run logs/IDs, selected-results.json,
+comparison.csv and summary.json. The user report is also saved to
+`~/Library/Application Support/GpuComputeBenchmark/reports/metal-vulkan-complete-2026-10-13.md`.
+The test is finished, translated APIs remain enabled for the user's requested
+comparison, and no new full series should start without a new request.
+
+## 2026-10-12 GPU memory entry in Apple GUI
+
+The GPU memory test was missing from the main workload selector: only a
+standalone probe button below the results was present. macOS now lists
+**Memory Bandwidth — VRAM / Cache** as a normal workload; Auto selects native
+Metal first, explicit Metal saves its preview through `--memory-sweep-save`,
+and explicit Vulkan uses `--workload membw` only with the translated API
+switch enabled. OpenGL is unavailable for this workload. Full analysis can
+queue each supported memory implementation/device; memory runs do not request
+duration, presentation or capture settings. The complete series already
+contained memory and retains its 18 native / 31 opt-in jobs.
+
+iOS lists the same entry and runs its native `memory_sweep` without a rendering
+surface or fullscreen cover. Both GUIs retain automatic result persistence.
+Native Metal preview curves and Vulkan median read/write/copy/local-cache
+curves are parsed separately; an unsettled Vulkan memory plateau is explicit
+in the score label. Shared parser/geometry checks pass 104/104. macOS arm64
+and Intel plus iOS device/simulator builds passed. The native macOS workload
+menu and disabled irrelevant settings were inspected in the running GUI.
+No complete suite or translated benchmark was started; the app remains idle
+with translated APIs off.
+
 ## 2026-10-12 Translated API opt-in (latest user preference)
 
 The user's final instruction supersedes outright removal: retain Vulkan behind
@@ -3065,3 +3393,293 @@ PathService 已把 results/captures/reports/logs 改到
   - `SettingsView.swift` hides working directory selector and displays read-only sandboxed path.
   - `AboutView.swift` queries model details using `utsname` to avoid macOS sysctl calls.
   - `ChartsView.swift` rebuilds chart graphics natively in SwiftUI using the `Charts` framework, removing python3/matplotlib dependencies.
+
+## 2026-10-14: complete physical iPhone suite
+
+- Connected iPhone 13 Pro (iPhone14,2), iOS 27.0.1; installed normal signed Release
+  build after the user logged into Xcode and trusted their developer certificate.
+  Device Apple ID does not need to match Xcode's signing account.
+- iOS `RunView` now has a one-tap full suite: 13 native Metal jobs plus CPU compute
+  and cache/memory/page-mapping/storage. Full-screen Metal layer persists between
+  jobs; channels remain serialized. Each job verifies its newly saved IDs and
+  workload contract. The app saves a manifest, raw log and thermal states in
+  Documents/suite-runs, and keeps the screen awake through the whole suite.
+- Real run completed 15/15, selecting 16 results. First attempt received a late
+  cancellation during completion of CPU memory; all its original 16 records and
+  log were preserved. Added cancellation-reason logging and a verified resume
+  launch path; reran only the final CPU memory job, completing the suite. Raw
+  phone history has 17 rows; selected suite-results.json has 16. No source test
+  kernels were replaced and Mac canonical results hash remained unchanged.
+- Native score examples: CPU single-thread sample mean 147.355 MWork/s; all 6
+  cores 585.369 MWork/s; CPU memory all-core read 34.474 GB/s. GPU fixed-grid
+  memory diagnostic 31.041 GB/s; do not call it verified DRAM bandwidth. CPU
+  memory repeat includes page mapping (21.78 GB/s, 752 ns per 16 KiB page) and
+  direct-I/O 1 GiB storage measurements. Temporary file was cleaned up.
+- Saved curves restored with the production Swift parser: CPU 174 points, GPU
+  52 points. No independently attributed GPU L1/L2/L3/SoC/SLC measurement. iOS
+  single-thread samples are scheduler managed, not pinned physical cores.
+- GPU Burn/liquid heated the phone to serious thermal state (2), affecting later
+  compute observations; CPU memory repeat was nominal (0). Manifest retains
+  per-job thermal states and links the prior attempt through resumedFrom.
+- Device build succeeded; iOS 18.5 simulator bridge tests 5/5, shared Swift
+  parser checks 151/151, complete-suite record/curve audit passed. Local output:
+  out/test-results/iphone13pro-20261014/{report.md,suite-results.json,final,
+  attempt-1,memory-curves.png,memory-curves.pdf,memory-curve-points.csv,
+  verification.json,verification.txt,bridge-tests.xcresult}.
+
+## 2026-10-14: expanded iOS APIs and complete iPhone suite
+
+- User requested continued completion after identifying missing Vulkan/cache/ES.
+  Added pinned SHA-verified official MoltenVK 1.4.2 device and simulator runtime
+  preparation (`scripts/prepare-ios-vulkan.sh`), CMake optional iOS Vulkan,
+  SPIR-V compilation/bundling, isolated SDK library paths and runtime license.
+- Vulkan uses the existing backend through VK_EXT_metal_surface, fixed 1280x720,
+  no GLFW. The iOS UI has a persisted translated-API toggle (default off), Vulkan
+  picker and full-suite inclusion. Native bridge also requires explicit opt-in.
+  Vulkan result serialization was extracted into a shared desktop/iOS helper;
+  all bandwidth/L1 curve families and existing desktop contracts are retained.
+- Probing accounts for direct MoltenVK lacking the loader-only portability
+  enumeration extension. Vulkan liquid is excluded on iPhone 13 Pro because
+  the GPU reports no R32_SFLOAT linear filtering. Empty timestamps trigger the
+  existing synchronized fallback with a distinct score version.
+- Added original ES 2.0 legacy GPU Burn via EAGL. It runs the existing ES2 shaders,
+  additive two draws, fixed 1280x720, glFinish timing and display-paced present.
+  Drawable allocation is main-thread-only; exclusive rendering context then
+  moves to the worker. The software cap is applied before shader compilation;
+  GUI/matrix respect its limit. iOS lacks ES3.1 compute and does not queue it.
+- Added native GPU cache-state diagnostic to individual runs and suite. First
+  full v1 cache run passed; a later 128 MiB warm traversal hit the iOS watchdog.
+  Preserved failure log, bounded complete-cycle warmups into 8192-load commands,
+  checked every sink, and versioned iOS warming as v2. Timed loops unchanged;
+  hardware L1/L2/L3/SoC attribution remains unverified. Subsequent full v2 passed.
+- Physical iPhone 13 Pro expanded suite passed 31/31, selecting 32 positive
+  scores: Metal 14 including cache v2, Vulkan 12, ES2 3, CPU 3 records. By jobs:
+  Metal variants 13 + cache 1 + Vulkan 12 + CPU groups 2 + ES2 3. Default switch
+  off: 19 jobs; on:31. Passed prefix reuse preserves prior raw measurements.
+- Production-parser audit: CPU curves 174, Metal curves52, Vulkan curves77,
+  cache-state curves124; page mapping and storage restored. All prior17 phone
+  history rows preserved field-for-field; raw history56 across all attempts.
+  Mac history SHA remains b6284e581490616bb5892ff58ba3f19bdc4dd507086ff181ac2424b0083c96cf.
+- Device/simulator SDK builds and signing succeeded; simulator bridge regression
+  10 passed, 1 cache test skipped for virtual non-unified GPU. Three ES2 tiers
+  and cache v2 passed on phone. Desktop tests5/5 including shared serialization.
+- Documents exposed through Files/Finder sharing. Outputs and report:
+  out/test-results/ios-api-completion-20261014/{report.md,suite-results.json,
+  final-phone,verification.json,verification.txt,memory-cache-curves.png,
+  memory-cache-curves.pdf,curve-points.csv,native-attempt,vulkan-attempt}.
+  Complete manifest spans resumed runs, not controlled isothermal A/B data.
+
+## 2026-10-14: second Apple device (iPad8,7)
+
+- User swapped devices and requested continued complete testing. New device is
+  iPad Pro 12.9-inch third generation, iPad8,7 / Apple A12X, iOS 26.7.1, 8 CPU cores,
+  system RAM 3752 MiB. Nickname was Xiaomi Pad7 Ultra; hardware attribution uses
+  iPad8,7. Registered normal development signing and installed Release after
+  the user trusted the certificate on this iPad. Prior phone stays untouched.
+- Supported matrix 31 jobs /32 selected records passed: Metal 13 + Vulkan 12
+  (MoltenVK) + cache diagnostic 1 + CPU groups 2 + ES2 legacy 3. Vulkan liquid is
+  excluded for the reported R32_SFLOAT linear-filter feature gap.
+- First run passed 30 jobs; cache v2 twice recovered the GPU at 48 MiB parallel
+  phase. Archived both errors. Older-than-Apple-family 6 GPU profile now uses512
+  dependent loads per each of 4096 parallel chains, with the same128 MiB span,
+  serial 65536 loads, checksum validation and bounded complete-cycle warmup.
+  Version v3_parallel_512 keeps it distinct from phone v2/8192 and desktop v1.
+  This passed all 124 curve points on A12X; GPU cache-level/SLC attribution stays
+  unverified. Native timestamps remain the measurement; no failed data saved.
+- Updated pure Swift resume validation to retain later passed jobs for an
+  identical matrix or replacing only a failed cache profile; other plan changes
+  reuse a verified prefix. Verified roles, positive scores and unique IDs.
+  Retried only cache; all 31 original records remain byte-value equivalent in
+  final history 32. Source regression checks against prior phone data cover
+  failed-profile replacement and rejecting incompatible/zero-score records.
+- Production parser audit: CPU 174, Metal 52, Vulkan 77, cache 124; all cache curves
+  reach 128 MiB; VM/page mapping and storage measured. CPU single 109.415,
+  all8 cores 491.864 MWork/s; CPU all-memory 51.204 GB/s; Metal memory 59.904,
+  Vulkan memory 56.760 GB/s (distinct methods). Tests and app builds succeeded.
+- Artifacts: out/test-results/ipadpro3-20261014/{report.md,suite-results.json,
+  final-phone,first-run,attempt-1,retry-1,verification.json,verification.txt,
+  memory-cache-curves.png,memory-cache-curves.pdf,curve-points.csv,
+  iphone-comparison.json,resume-check,manifest-check,native-tests.xcresult}.
+  Comparison contains 30 compatible records; cache version and65K Vulkan render
+  timing differ and are not ratio-compared. Mac and prior iPhone hashes match.
+
+## 2026-10-14: score validity audit supersedes completion claims
+
+- Comparing iPad A12X with iPhone A15 exposed three invalid iPad Vulkan headless
+  particle metrics: 1701.091 / 1290.151 / 619.881 GB/s for 1M / 4M / 16M.
+  Sustained frame-derived crosschecks are 28.5–28.9 GB/s, matching Metal scale.
+  Exclude these reported scores; crosschecks are not replacement official scores.
+- Existing embedded Vulkan wall-clock validation skips headless. Exact driver
+  cause remains unconfirmed. No engine timing change or device rerun this audit.
+- 13 selected Metal rendered/liquid records have provisional timing flags;
+  greater-than-100% command-interval utilization is not hardware utilization.
+  ES2 light workloads show presentation pacing. CPU samples are scheduler-managed,
+  not pinned per physical core. Cache v2/v3 configurations differ.
+- Completion (31 tasks /32 records per device) is distinct from score validity.
+  Prior raw JSON, logs and canonical Mac history remain untouched. Old derived
+  reports now carry correction notices; invalid comparison ratios are excluded.
+- Artifacts: out/test-results/apple-score-audit-20261014/{comparison-audit.md,
+  score-audit.json,comparison-summary.json,comparison.png,source-hashes.json}.
+  CPU compute about0.74–0.75x iPhone; CPU read1.48x; independent Vulkan memory
+  scan1.94x; Metal16M headless1.55x. Single-run, non-isothermal observations.
+
+## 2026-10-14: targeted timing corrections and physical retests completed
+
+- User authorized only necessary retests; final scope iPad11 + iPhone7 jobs,
+  plus four iPhone repeats after its first late jobs reached thermal state2.
+  Final selected18 records all start nominal; iPad ends0 throughout, iPhone
+ 16-step Metal and heavy Vulkan end1, others0. No CPU, memory sweep, GPU cache
+  state, ES2 or Mac reruns. No changes to original archived result JSON.
+- Embedded Vulkan particle validation now includes headless, scales repeated
+  dispatches with dependencies, excludes calibration samples, and stores its
+  synchronized compute time. Invalid partial query spans are rejected. A12X
+  consecutive-submission queries remain near zero despite24ms real work, so
+  fallback now correctly runs. iPad1M/4M/16M=22.618/27.317/28.935 GB/s.
+- iOS Metal rendered tests use one frame and wait for compute completion before
+  render submission, then render completion before the next frame. Separate
+  serial_timing_v2 contract prevents comparison with overlapping old timings.
+  MoltenVK GPU Burn now single-frame with startup render-query/wall checks and
+  single_frame_timing_v2 contract. Desktop Metal scheduling is unchanged.
+- Device launch --ios-suite-jobs filters explicit supported IDs; no GUI option
+  added, standard complete button stays full matrix. Targeted runs wait for
+  reported nominal thermal state with600s bounded cooldown (no score on timeout).
+- Heavy GPU Burn256: iPad Metal1.527 /Vulkan0.894; iPhone Metal1.586 /Vulkan0.967
+  Gpix-step/s. FPS agrees in direction, unlike old iPhone2.098 Vulkan claim.
+  Liquid: iPad6.903 /iPhone12.931 MParticle-step/s, no compute/render overlap.
+- Old iPad32 and iPhone56 raw records preserved field-for-field; histories now
+  43 and67. New selected results and curated full32-row mixed-run manifests are
+  in out/test-results/apple-targeted-retest-20261014/. Raw logs and all thermal
+  attempts are kept. Latest phone device ledger has only4 cooldown jobs; the
+  derived full selected set combines original unaffected records and new retests.
+- Device Release SDK and signed builds passed; result compatibility tests2/2,
+  pure Swift production-model suite checks against both curated32-row sets pass;
+  verification checks append-only history, explicit scope, timing intervals and
+  thermal starts. Both apps returned to ordinary UI after data retrieval.
+  Main report: out/test-results/apple-targeted-retest-20261014/report.md.
+
+## 2026-10-14: all available device comparison (no new measurement)
+
+- User asked to compare current computer and all previous scores. Read canonical
+  Mac137, iPhone67, iPad43 and repository220 historical particle records; export
+  467 source rows with versions, original IDs, source and timing flags. Extract
+  all18 earlier Android/HarmonyOS device summaries from this file separately;
+  raw Windows adb/hdc archives are unavailable on this Mac. Do not claim those
+  documented summaries were reverified raw data. Original JSON hashes unchanged.
+- Found the same command-span metrology issue in current selected Mac Metal
+  1M/4M/16M rendered stream, all3 Burn tiers and liquid overlap (7 rows). Flag
+  these provisional; earlier macOS complete-suite percentage claims superseded
+  by notice. No Mac retest or engine scheduling changes in this comparison turn.
+- Apple table selects latest original complete phone sets after targeted fixes;
+  Mac uses corrected1280x720/no-capture selection, latest fullCPU3581.602 and
+  CPUmem240.615, auto-single322.300, Vulkan independent read252.395. CPU QoS
+  P/E312.254/80.762 separately noted; not conflated with phone unbound samples.
+- Repository220 records are all legacy stream, most score0/unit empty/version
+  missing; comparison uses raw1M headless compute milliseconds, never invents
+  official scores or Burn/CPU/memory from old stream rows. Software/virtual
+  devices kept distinct; full API/device inventory retained.
+- Main output: out/test-results/all-device-comparison-20261014/report.md;
+  apple-metrics.csv/json, selected-apple-results.json, all-raw-history.csv/json,
+  historical-mobile-summary.csv/json, historical-mobile-excerpts.md, hashes.
+
+## 2026-10-14: pending retest summary and iPhone thermal review
+
+- User requested a complete retest-needed summary and asked whether iPhone
+  thermal results still need repeats. No benchmarks launched in this audit.
+- Read stableScore/stableVariancePct/throttlePct on all selected Apple records,
+  plus per-job original thermal logs. List19 candidates: Mac8, iPhone7, iPad4.
+  P0 timing7 Mac records; P1 throughput drift7 (Mac1/iPhone3/iPad3);
+  P2 stability/old-contract followup5 (iPhone4/iPad1). These are not19 invalid
+  scores: P2 is a qualification check, drift alone is not frequency telemetry.
+- iPhone Metal4M drop8.82%, Burn16 drop9.73% remain after initial targeted run.
+  Vulkan1M rendered old drop5.32%. Metal16M rises8.71% but lacks plateau,
+  old Metal1M mean12.886/stable19.325 differ; neither proves thermal throttle.
+  Vulkan Burn64 and cooled256 still lack stable plateau.
+- Cooled iPhone Metal64/256 are stable (CV0.18/0.60%, 1.555/1.586 score), liquid
+  cooled nominal and no timing overlap; no extra repeats for those. Liquid
+  intentionally never detects stable plateau; stableScore0 is not a failure.
+- iPad Metal1M drift9.09%, Vulkan rendered1M14.24%,4M6.87%; VkBurn64 lacks
+  plateau. Previously fixed Vk headless large3 remain stable/validated.
+  Mac Vk rendered1M old drops54.6%, unclear source; add independent cold check.
+- Checklist: out/test-results/all-device-comparison-20261014/retest-needed.md
+  and .json, preserving all source IDs. Use equal15s trials, cooling per job,
+  validation first. If decline reproducible, report real sustained/curve values,
+  do not chase maximum or silently mix changed duration. Existing CPU/memory
+  and stable compute are outside this new retest list.
+
+## 2026-10-14: one-click GPU, CPU and complete-machine suites
+
+- User selected computer-local multi-GPU queues and each device's own buttons.
+  Windows/macOS/iOS now expose GPU all-items, CPU all-items and combined suites.
+  Desktop GPUs/APIs run sequentially; CPU runs once per machine. CPU all-items
+  includes compute, cache/memory, page mapping and storage. Formal compute is
+  15 seconds; memory/cache sweeps keep their own schedules. Score buttons use
+  no automatic capture; the existing capture-oriented preset is retained.
+- CLI adds --gpu-suite and GPU-independent --cpu-suite, both inspectable with
+  --suite-list. Mac cache-state diagnostics are gated by unified-memory Metal
+  availability. M4 Pro has GPU17/native or30/translated; CPU2; combined19/32.
+  Native results.json remains137 records, phone67 and iPad43, hash-identical
+  after builds/installations/cancel verification. New validations are isolated.
+- Metal serialized rendered timing now covers desktop too, with
+  serial_timing_v2 and one in-flight frame. MoltenVK desktop timing gets the
+  synchronized wall-clock checks and labels validation only after a real pass.
+  This supersedes the earlier note that desktop Metal scheduling was unchanged.
+  Four isolated formal Mac retests passed interval checks: Metal rendered4M,
+  Burn256 and liquid, plus Vulkan Burn256. Other earlier retest candidates were
+  not rerun; no claim that all prior scores have been corrected.
+- Completed but questionable GPU observations produce review status, preserving
+  raw data and continuing the queue. Detect timing overlap, GPU span/frame
+  mismatch, missing heavy-workload plateau and >5% throughput decline. Liquid
+  does not require a plateau. iOS GUI suites now use bounded nominal-state
+  cooldown before every job, and resume rejects flagged old observations.
+- Windows tracks live SUITE_RUN stages/counts; cancellation kills the suite
+  process tree using nested job objects. The Windows source/XAML were checked,
+  but no Windows SDK/build/runtime exists on this host: Windows verification
+  remains required on Windows. Do not claim a tested Windows binary.
+- Mac arm64 app, signed iOS device app and simulator app build successfully;
+  final signed app installed on both iPhone13Pro and iPad12.9thirdgen. Native
+  regression tests6/6 pass, plus Swift production-model scope/resume checks.
+  Actual Mac CPU all-items launch/cancel was verified in the GUI before any
+  score completed. Report/logs: out/test-results/one-click-suite-20261014/.
+
+## 2026-10-14: user reminder for the next macOS retest
+
+- Keep the original seven Mac Metal timing issues open as a group until each
+  item has been verified. The macOS timing fix is already merged locally;
+  representative retests verified three of those seven: rendered4M, Burn256
+  and liquid. Remaining four: rendered1M/16M, Burn16/64. Do not repeat the stale
+  claim that no macOS fix/retest has occurred, or claim all seven are resolved.
+- Next authorized retest must record per-item logs/curves, timing contract,
+  GPU interval/frame crosscheck and saved-result ID. The three new records
+  are isolated validation data; canonical Mac history remains unchanged and
+  old seven scores retain their timing warnings. Mac Vulkan rendered1M drift
+  remains a separate pending cold retest. Updated checklist/status/evidence:
+  out/test-results/all-device-comparison-20261014/retest-needed.md and .json.
+- This reminder turn only updates records; no benchmark started.
+
+## 2026-10-14: Android/HarmonyOS follow-up audit
+
+- User asked about Android and HarmonyOS after the Mac retest reminder.
+  Their adb-suite.ps1 / hdc-suite.ps1 already define29 jobs: Vulkan13,
+  ES3.1 eleven, ES2 three, CPU compute and CPU cache/memory two. Missing APIs,
+  feature limitations and allocation limits must be distinguished from failed
+  measurements. Their apps currently still have individual-test entries;
+  GPU/CPU/combined in-app suite buttons have not been added by the Apple/Windows
+  one-click work. An optional scope question is pending.
+- Neither platform uses Metal or the MoltenVK-only Burn render validation.
+  Embedded Vulkan particle timestamp/wall-clock validation is shared with
+  Android/OHOS, including the later headless check, but current sources have
+  not been rebuilt or physically retested on those platforms this session.
+- Android SDK/Android Studio exist on this Mac; adb currently lists no devices.
+  The available Huawei SDK folder has system images only, not a native/ArkTS
+  build toolchain. No current Android/OHOS physical validation can be claimed.
+- Historical evidence exists for18 devices, but original out/adb and out/hdc
+  raw archives remain unavailable here. A precise per-result pending ledger
+  requires those archives or new device measurements. Do not transfer the
+  seven Metal issues to Android/OHOS or mark all29 old jobs invalid.
+- For the next archive/device audit, check previously documented candidates:
+  unstable Vulkan Burn256 on MIX2S / MiPad5; old16M validation/allocation limits
+  on TVs; cache-test swap metadata on MIXFold3 / Quest3 / BlackShark5Pro.
+  BlackShark's first thermal run and limited4-core CPU run were already replaced
+  in prior records. Harmony MateBook/Mate60 windowed particle timestamps and
+  CPU topology/affinity had earlier physical corrections; verify current-build
+  fallback/metadata without calling those original failures still unresolved.

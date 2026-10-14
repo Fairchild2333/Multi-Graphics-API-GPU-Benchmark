@@ -6,7 +6,7 @@
 #include <stdint.h>
 
 // Keep the C embedding API visible to the hosted regression-test bundle.
-#define GPB_API __attribute__((visibility("default")))
+#define GPB_API __attribute__((visibility("default"), used))
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,9 +23,12 @@ GPB_API void gpb_set_working_dir(const char* dir);
 // particle.metal, gpu_burn.metal and cinematic_liquid_v2.metal (copied from the app bundle).
 GPB_API void gpb_init_paths(const char* shader_dir, const char* data_dir);
 GPB_API void gpb_set_metal_layer(void* ca_metal_layer);  // CAMetalLayer* as __bridge void*
+GPB_API void gpb_set_gles_layer(void* ca_eagl_layer);
 // workload_id: stream, stream_headless, gpu_burn, cinematic_liquid or memory_sweep, with its size where it has one:
 // "stream?particles=4194304", "gpu_burn?steps=64" (src/embedded_request.h).
 GPB_API bool gpb_start_workload(const char* workload_id, double seconds);
+// Translated API requests are rejected unless this call explicitly opts in.
+GPB_API bool gpb_start_workload_with_options(const char* workload_id, double seconds, bool allow_translated_apis);
 GPB_API void gpb_stop_workload(void);   // -> gpu_bench::RequestStop()
 GPB_API bool gpb_is_running(void);
 // Lines an embedded run printed since the last call, each ending in a line feed.

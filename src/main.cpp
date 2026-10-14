@@ -3,9 +3,12 @@
 #include "cpu_benchmark.h"
 #include "cpu_cli.h"
 #include "complete_suite.h"
+#include "result_quality.h"
 #include "capture_naming.h"
 #include "suite_process.h"
 #include "gpu_memory_sweep.h"
+#include "gpu_cache_probe.h"
+#include "vulkan_membw_results.h"
 #include "cpu_membw.h"
 #include "gpu_engine.h"
 #include "path_service.h"
@@ -375,7 +378,7 @@ static bool SuiteResultMatches(const gpu_bench::BenchmarkResult& result,
     if (result.graphicsApi != job.apiName || !workloadMatches || result.headless != job.headless ||
         !std::isfinite(result.score) || result.score <= 0) return false;
     if (cpuAll && result.workloadVersion.find("_t15000ms_w200ms") == std::string::npos) return false;
-    if (job.backend != "cpu" && job.workload != "membw" &&
+    if (job.backend != "cpu" && job.workload != "membw" && job.workload != "gpu_cache" &&
         (result.warmupSec < 1.9 || result.durationSec < 11.0)) return false;
 
     if (job.software) {
@@ -1049,122 +1052,6 @@ static void PrintGpuTable(const std::vector<GpuInfo>& gpus) {
 
 // ---------------------------------------------------------------------------
 
-#ifdef HAVE_VULKAN_MEMBW
-static gpu_bench::BenchmarkResult MakeStoredMemBwResult(
-    const gpu_bench::MemBwReport& report,
-    const gpu_bench::MemBwConfig& config,
-    const GpuInfo& gpu) {
-    gpu_bench::BenchmarkResult stored;
-    stored.id = gpu_bench::GenerateResultId() + "-membw";
-    stored.timestamp = gpu_bench::GenerateTimestamp();
-    stored.resultSchemaVersion = 4;
-    stored.appVersion = gpu_bench::CurrentAppVersion();
-    stored.workload = gpu_bench::kMemBwWorkloadId;
-    // The formal contract is the default sweep reaching the memory plateau.
-    // A shortened or cache-bound sweep is kept in a separate preview group.
-    const gpu_bench::MemBwConfig defaults;
-    const bool formal = report.read.memoryPlateauReached &&
-                        config.maxDatasetBytes == defaults.maxDatasetBytes &&
-                        config.warmupRuns == defaults.warmupRuns &&
-                        config.measuredRuns == defaults.measuredRuns;
-    stored.workloadVersion = std::string(gpu_bench::kMemBwWorkloadVersion) +
-                             (formal ? "" : "_preview");
-    // A phone result never shares a group with a desktop one, as with the
-    // other mobile tests.
-#if defined(__ANDROID__)
-    stored.workloadVersion = std::string(gpu_bench::kMemBwWorkloadVersion) + "_android_preview";
-#elif defined(__OHOS__)
-    stored.workloadVersion = std::string(gpu_bench::kMemBwWorkloadVersion) + "_ohos_preview";
-#endif
-#ifdef GPU_BENCH_MOLTENVK
-    stored.workloadVersion += "_moltenvk";
-#endif
-    stored.graphicsApi = "Vulkan";
-    stored.deviceName = gpu.name.empty() ? report.deviceName : gpu.name;
-    stored.driverVersion = report.driverVersion;
-    stored.cpuName = gpu_bench::AppBase::HostCpuName();
-    stored.osVersion = gpu_bench::CurrentOsVersion();
-    stored.platform = gpu_bench::CurrentPlatform();
-    stored.osArchitecture = gpu_bench::CurrentOsArchitecture();
-    stored.processArchitecture = gpu_bench::CurrentProcessArchitecture();
-    stored.memory = report.unifiedMemory ? "Unified-memory" : "Device-local";
-    stored.vramMB = gpu.vramMB > 0 ? static_cast<std::uint32_t>(gpu.vramMB)
-                                   : report.deviceLocalHeapMB;
-    stored.difficulty = "Sweep";
-    stored.isSoftware = report.isSoftware;
-    stored.headless = true;
-    stored.framesInFlight = 0;
-    stored.durationSec = report.durationSec;
-    stored.timingSamples = static_cast<std::uint32_t>(
-        report.points.size() * report.measuredRuns);
-    stored.score = report.read.memoryGBps;
-    stored.scoreUnit = "GB/s";
-    stored.bottleneck = report.isSoftware ? "Software" : "Memory bandwidth";
-
-    constexpr double kMiBf = 1024.0 * 1024.0;
-    std::ostringstream contract;
-    contract << std::fixed << std::setprecision(1)
-             << "score=read_memory_plateau"
-             << ";readMemoryGBps=" << report.read.memoryGBps
-             << ";readCacheGBps=" << report.read.cacheGBps
-             << ";readCacheFromMiB=" << report.read.cacheFromBytes / kMiBf
-             << ";readCacheToMiB=" << report.read.cacheToBytes / kMiBf
-             << ";readCacheKneeMiB=" << report.read.cacheKneeBytes / kMiBf
-             << ";writeMemoryGBps=" << report.write.memoryGBps
-             << ";writeCacheGBps=" << report.write.cacheGBps
-             << ";copyMemoryGBps=" << report.copy.memoryGBps
-             << ";copyCacheGBps=" << report.copy.cacheGBps
-             << ";l1FullLoadGBps=" << report.l1.fullLoadGBps
-             << ";l1FullLoadBlockKiB=" << report.l1.fullLoadBlockBytes / 1024
-             << ";l1SingleGroupGBps=" << report.l1.singleGroupGBps
-             << ";l1CapacityLowKiB=" << report.l1.capacityLowBytes / 1024
-             << ";l1CapacityHighKiB=" << report.l1.capacityHighBytes / 1024
-             << ";hostMeasured=" << (report.host.measured ? 1 : 0)
-             << ";hostReadGBps=" << report.host.read.memoryGBps
-             << ";hostWriteGBps=" << report.host.write.memoryGBps
-             << ";hostCopyToDeviceGBps=" << report.host.copyToDeviceGBps
-             << ";hostCopyToHostGBps=" << report.host.copyToHostGBps
-             << ";memoryKind=" << (report.unifiedMemory ? "unified" : "device_local")
-             << ";chunkKiB=" << report.chunkBytes / 1024
-             << ";elementBytes=16"
-             << ";maxDatasetMiB=" << report.maxDatasetBytes / (1024 * 1024)
-             << ";datasetLimitedByDevice=" << (report.datasetLimitedByDevice ? 1 : 0)
-             << ";memoryPlateauReached=" << (report.read.memoryPlateauReached ? 1 : 0)
-             << ";warmupRuns=" << report.warmupRuns
-             << ";measuredRuns=" << report.measuredRuns
-             << ";aggregation=median"
-             << ";timing=" << report.timingSource
-             << ";timestampAnomalies=" << report.timestampAnomalies;
-    // Full curves as "<data set MiB>:<median GB/s>" pairs.
-    for (const char* kernel : {"read", "write", "copy", "host_read", "host_write"}) {
-        contract << ";curve_" << kernel << "=";
-        bool first = true;
-        for (const auto& point : report.points) {
-            if (point.kernel != kernel) continue;
-            if (!first) contract << ',';
-            first = false;
-            contract << point.datasetBytes / kMiBf << ':' << point.medianGBps;
-        }
-    }
-    // L1 curves as "<private block KiB>:<median GB/s>" pairs.
-    for (const char* kernel : {"l1", "l1_single"}) {
-        contract << ";curve_" << kernel << "=";
-        bool first = true;
-        for (const auto& point : report.points) {
-            if (point.kernel != kernel) continue;
-            if (!first) contract << ',';
-            first = false;
-            contract << point.datasetBytes / 1024 << ':' << point.medianGBps;
-        }
-    }
-#ifdef GPU_BENCH_MOLTENVK
-    contract << ";apiImplementation=MoltenVK;translatedTo=Metal";
-#endif
-    stored.workloadConfig = contract.str();
-    return stored;
-}
-#endif
-
 // Runs `--workload membw`. Returns the process exit code.
 static int RunMemoryBandwidthCli(const std::vector<GpuInfo>& gpus,
                                  std::int32_t gpuIndex,
@@ -1228,7 +1115,9 @@ static int RunMemoryBandwidthCli(const std::vector<GpuInfo>& gpus,
     }
     if (saveResult) {
         try {
-            const auto stored = MakeStoredMemBwResult(report, config, gpu);
+            const auto stored = gpu_bench::MakeStoredVulkanMemBwResult(report, config,
+                gpu.name, gpu.vramMB,
+                gpu_bench::AppBase::HostCpuName());
             if (gpu_bench::AppendResult(stored)) {
                 std::cout << "[Results] Saved as " << stored.id << " -> "
                           << gpu_bench::ResultsFilePath() << '\n';
@@ -1275,6 +1164,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     bool runAll = false;
     bool fullAnalysis = false;
     bool completeSuite = false;
+    bool gpuOnlySuite = false;
+    bool cpuOnlySuite = false;
     bool fillMissingSuite = false;
     bool listCompleteSuite = false;
     bool allowTranslatedApis = false;
@@ -1287,6 +1178,9 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     bool cpuBenchmarkRequested = false;
     bool memorySweepRequested = false;
     bool saveMemorySweep = false;
+    bool gpuCacheProbeRequested = false;
+    bool saveGpuCacheProbe = true;
+    gpu_bench::GpuCacheProbeConfig gpuCacheCfg;
     gpu_bench::GpuMemorySweepConfig sweepCfg{};
     bool saveCpuResults = true;
     bool membwRequested = false;
@@ -1300,6 +1194,28 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     gpu_bench::BenchmarkConfig benchCfg;
 
     for (int i = 1; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--gpu-cache-probe") == 0) {
+            gpuCacheProbeRequested = true;
+            continue;
+        }
+        if (std::strcmp(argv[i], "--gpu-cache-no-save") == 0) {
+            saveGpuCacheProbe = false;
+            continue;
+        }
+        if ((std::strcmp(argv[i], "--gpu-cache-max-mib") == 0 ||
+             std::strcmp(argv[i], "--gpu-cache-steps") == 0 ||
+             std::strcmp(argv[i], "--gpu-cache-repeats") == 0) && i + 1 < argc) {
+            const auto* flag = argv[i];
+            char* end = nullptr;
+            const auto value = std::strtoul(argv[++i], &end, 10);
+            if (!end || *end != '\0' || value > 1048576 || argv[i][0] == '-') {
+                std::cerr << "Invalid GPU cache probe value.\n"; return 2;
+            }
+            if (std::strcmp(flag, "--gpu-cache-max-mib") == 0) gpuCacheCfg.maxMiB = static_cast<std::uint32_t>(value);
+            else if (std::strcmp(flag, "--gpu-cache-steps") == 0) gpuCacheCfg.steps = static_cast<std::uint32_t>(value);
+            else gpuCacheCfg.repeats = static_cast<std::uint32_t>(value);
+            continue;
+        }
         if (std::strcmp(argv[i], "--memory-sweep-save") == 0) {
             memorySweepRequested = true;
             saveMemorySweep = true;
@@ -1658,6 +1574,12 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         } else if (std::strcmp(argv[i], "--suite-list") == 0) {
             completeSuite = true;
             listCompleteSuite = true;
+        } else if (std::strcmp(argv[i], "--gpu-suite") == 0) {
+            completeSuite = true;
+            gpuOnlySuite = true;
+            benchCfg.renderDocEnabled = false;
+        } else if (std::strcmp(argv[i], "--cpu-suite") == 0) {
+            cpuOnlySuite = true;
         } else if (std::strcmp(argv[i], "--complete-suite") == 0) {
             completeSuite = true;
             benchCfg.renderDocEnabled = true;
@@ -1684,6 +1606,11 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --sfr                               Shorthand for --multi-gpu sfr\n"
                       << "  --headless                           Pure compute mode (no window/rendering/present)\n"
                       << "  --memory-sweep                       Sweep the GPU memory hierarchy and exit (Metal only)\n"
+                      << "  --gpu-cache-probe                    Native Metal dependent-load / CPU-GPU warming diagnostic (saved preview)\n"
+                      << "  --gpu-cache-max-mib N                Largest address span (default 128, range 1..512)\n"
+                      << "  --gpu-cache-steps N                  Serial dependent loads (default 65536, range 4096..1048576)\n"
+                      << "  --gpu-cache-repeats N                Interleaved samples (default 5, range 3..15)\n"
+                      << "  --gpu-cache-no-save                  Do not save the cache diagnostic\n"
                       << "  --memory-sweep-min-kib N             Smallest working set, KiB (default 64)\n"
                       << "  --memory-sweep-max-kib N             Largest working set, KiB (default 524288)\n"
                       << "  --memory-sweep-traffic-mib N         Bytes moved per point, MiB (default 2048)\n"
@@ -1728,6 +1655,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                       << "  --run-all                            Benchmark every GPU x API combination, then exit\n"
                       << "  --allow-translated-api              Opt into optional macOS Vulkan-to-Metal translation\n"
                       << "  --suite-list                         List available suite jobs without running them\n"
+                      << "  --gpu-suite                          Run all GPUs and supported API tests, without CPU or capture\n"
+                      << "  --cpu-suite                          Run complete CPU compute, cache, memory, page mapping and storage\n"
                       << "  --complete-suite                     Run the available GPU/CPU series (unavailable APIs/workloads are omitted)\n"
                       << "  --fill-missing                       Run only missing formal-suite scores/captures; keep prior failures unsupported\n"
                       << "  --yes                                Confirm a non-interactive --fill-missing run\n"
@@ -1763,6 +1692,14 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         return 2;
     }
 
+    if (gpuCacheProbeRequested) {
+        gpuCacheCfg.gpuIndex = gpuIndex < 0 ? 0u : static_cast<std::uint32_t>(gpuIndex);
+#ifdef HAVE_METAL
+        return gpu_bench::RunGpuCacheProbeCli(gpuCacheCfg, saveGpuCacheProbe);
+#else
+        std::cerr << "The cache diagnostic requires the Metal backend.\n"; return 3;
+#endif
+    }
     // The memory sweep is a side path like the CPU benchmark: it allocates its
     // own buffers, writes MEMSWEEP_* records rather than a BenchmarkResult, and
     // never touches the particle workload or its score.
@@ -1778,6 +1715,33 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     // Reading saved results again needs neither a GPU nor a measurement.
     if (!cpuMembwRereadPath.empty())
         return gpu_bench::RereadCpuMemoryBandwidthCli(cpuMembwRereadPath);
+
+    if (cpuOnlySuite && gpuOnlySuite) {
+        std::cerr << "--cpu-suite and --gpu-suite are mutually exclusive.\n";
+        return 2;
+    }
+    // CPU all-items runs before GPU probing and needs no graphics device.
+    if (cpuOnlySuite) {
+        if (listCompleteSuite) {
+            std::cout << "SUITE_PLAN\ttotal=2\n"
+                      << "SUITE_JOB\tindex=1\tbackend=cpu\tworkload=cpu_all\n"
+                      << "SUITE_JOB\tindex=2\tbackend=cpu\tworkload=cpu_membw\n";
+            return 0;
+        }
+        auto fullCpu = cpuCfg;
+        fullCpu.mode = gpu_bench::CpuBenchmarkMode::All;
+        fullCpu.measureSeconds = 15.0;
+        fullCpu.warmupSeconds = 0.2;
+        fullCpu.roundCount = 3;
+        std::cout << "SUITE_PLAN\ttotal=2\nSUITE_RUN\tindex=1\ttotal=2\tbackend=cpu\tworkload=cpu_all\n";
+        const int computeCode = gpu_bench::RunCpuBenchmarkCli(fullCpu, true);
+        std::cout << "SUITE_RESULT\tstatus=" << (computeCode == 0 ? "success" : "failed") << "\tkey=cpu_all\n";
+        if (gpu_bench::StopRequested()) return computeCode ? computeCode : 130;
+        std::cout << "SUITE_RUN\tindex=2\ttotal=2\tbackend=cpu\tworkload=cpu_membw\n";
+        const int memoryCode = gpu_bench::RunCpuMemoryBandwidthCli(cpuMembwCfg, true);
+        std::cout << "SUITE_RESULT\tstatus=" << (memoryCode == 0 ? "success" : "failed") << "\tkey=cpu_membw\n";
+        return computeCode || memoryCode ? 1 : 0;
+    }
 
     // The CPU memory sweep, like the CPU benchmark below, needs no GPU.
     if (cpuMembwRequested)
@@ -2282,6 +2246,9 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                     : backend == "dx11" ? gpu.supportsDX11Compute : true;
                 caps.liquid = backend == "vulkan" || backend == "metal";
                 caps.memory = backend == "vulkan" || backend == "metal";
+#ifdef HAVE_METAL
+                caps.cacheState = backend == "metal" && gpu_bench::GpuCacheProbeAvailable(static_cast<std::uint32_t>(gi));
+#endif
                 for (const auto& variant : gpu_bench::SupportedSuiteVariants(caps)) {
                     CompleteSuiteJob job;
                     job.gpuIndex = static_cast<std::int32_t>(gi);
@@ -2295,9 +2262,9 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                     job.headless = variant.headless;
 #ifdef __APPLE__
                     // macOS has native Metal captures but no RenderDoc OpenGL capture.
-                    job.captureRequired = !variant.headless && backend == "metal";
+                    job.captureRequired = !gpuOnlySuite && benchCfg.renderDocEnabled && !variant.headless && backend == "metal";
 #else
-                    job.captureRequired = !variant.headless;
+                    job.captureRequired = !gpuOnlySuite && benchCfg.renderDocEnabled && !variant.headless;
 #endif
                     job.knownSupported = true;
                     allJobs.push_back(std::move(job));
@@ -2305,7 +2272,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             }
         }
         const auto cpu = gpu_bench::ProbeCpuTopology();
-        for (const auto& variant : gpu_bench::CpuSuiteVariants()) {
+        for (const auto& variant : gpuOnlySuite ? std::vector<gpu_bench::SuiteVariant>{} : gpu_bench::CpuSuiteVariants()) {
             CompleteSuiteJob job;
             job.gpuName = cpu.cpuName;
             job.backend = "cpu";
@@ -2359,6 +2326,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             }
             bool hasResult = false;
             bool hasCpuSingle = false, hasCpuMulti = false;
+            bool hasCpuPerformance = false, hasCpuEfficiency = false;
             // Old result schemas did not record captureCount.  The actual
             // capture directory is authoritative for both old and new scores;
             // this also detects captures that were deleted after a run.
@@ -2368,8 +2336,19 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                 hasResult = true;
                 hasCpuSingle = hasCpuSingle || result.workload == "cpu_single_core";
                 hasCpuMulti = hasCpuMulti || result.workload == "cpu_multi_core";
+                hasCpuPerformance = hasCpuPerformance || (result.workload == "cpu_single_core" &&
+                    result.workloadConfig.find(";coreType=performance;") != std::string::npos);
+                hasCpuEfficiency = hasCpuEfficiency || (result.workload == "cpu_single_core" &&
+                    result.workloadConfig.find(";coreType=efficiency;") != std::string::npos);
             }
-            if (job.workload == "cpu_all") hasResult = hasCpuSingle && hasCpuMulti;
+            if (job.workload == "cpu_all") hasResult = hasCpuMulti &&
+                (gpu_bench::CpuCoreTypeSchedulingSupported() ? hasCpuPerformance && hasCpuEfficiency : hasCpuSingle);
+            if (job.workload == "cpu_membw" && gpu_bench::CpuCoreTypeSchedulingSupported()) {
+                hasResult = std::any_of(savedResults.begin(), savedResults.end(), [&](const auto& result) {
+                    return SuiteResultMatches(result, job) &&
+                           result.workloadConfig.find(";coreType=both;") != std::string::npos;
+                });
+            }
             if (hasResult && hasCapture) {
                 ++alreadyComplete;
                 continue;
@@ -2378,13 +2357,15 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         }
 
         std::cout << "\n========== "
-                  << (fillMissingSuite ? "Fill Missing" : "Complete Suite")
+                  << (fillMissingSuite ? "Fill Missing" : gpuOnlySuite ? "GPU Suite" : "Complete Suite")
                   << " v2 ==========\n"
-                  << "Duration: GPU passes 15 s, CPU compute 15 s per step; memory sweeps use their own schedule. "
-                     "Capture at 5 s only where supported (native .gputrace on Metal); "
-                     "headless and macOS OpenGL passes do not request capture.\n"
+                  << "Duration: GPU passes 15 s, CPU compute 15 s per step; memory/cache sweeps use their own schedule.\n"
+                  << (benchCfg.renderDocEnabled && !gpuOnlySuite
+                      ? "Capture at 5 s where supported; headless and macOS OpenGL do not request capture.\n"
+                      : "Automatic score suite: capture disabled.\n")
                   << "Matrix: 65K/1M/4M/16M Particle windowed + headless, "
-                     "GPU Burn 16/64/256 steps, Cinematic Liquid, GPU memory; CPU compute and CPU memory once per machine.\n"
+                     "GPU Burn 16/64/256 steps, Cinematic Liquid, GPU memory/cache where supported"
+                  << (gpuOnlySuite ? ".\n" : "; CPU compute and CPU memory once per machine.\n")
                   << "Planned now: " << jobs.size() << " / " << allJobs.size() << "\n";
         if (fillMissingSuite) {
             std::cout << "Already complete: " << alreadyComplete
@@ -2427,7 +2408,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         std::error_code exeError;
         auto suiteExecutable = std::filesystem::absolute(argv[0], exeError);
         if (exeError) suiteExecutable = argv[0];
-        std::size_t passed = 0, failed = 0, unsupported = 0, captureMissing = 0;
+        std::size_t passed = 0, failed = 0, unsupported = 0, captureMissing = 0, review = 0;
         std::size_t captureUnsupported = 0;
 #ifdef __APPLE__
         gpu_bench::SuiteProcessScope processScope;
@@ -2440,6 +2421,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                 childArgs.insert(childArgs.end(), {"--cpu-benchmark", "all", "--cpu-time", "15", "--cpu-warmup", "0.2"});
             } else if (job.workload == "cpu_membw") {
                 childArgs.push_back("--cpu-membw");
+            } else if (job.workload == "gpu_cache") {
+                childArgs.insert(childArgs.end(), {"--gpu-cache-probe", "--gpu", std::to_string(job.gpuIndex)});
             } else if (job.workload == "membw" && job.backend == "metal") {
                 childArgs.insert(childArgs.end(), {"--memory-sweep", "--memory-sweep-save", "--gpu", std::to_string(job.gpuIndex)});
             } else {
@@ -2510,6 +2493,11 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                     : job.unsupportedReason;
                 if (job.knownSupported) ++failed;
                 else ++unsupported;
+            } else if (!gpu_bench::MeasurementReviewReasons(*newMatch).empty()) {
+                status = "review";
+                reason = "Measurement completed and saved; review: ";
+                for (const auto& issue : gpu_bench::MeasurementReviewReasons(*newMatch)) reason += issue + "; ";
+                ++review;
             } else if (retriedWithoutCapture) {
                 status = "capture_unsupported";
                 reason = "DX12 score completed after automatic no-RenderDoc retry; "
@@ -2534,7 +2522,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
         }
         std::cout << "\n========== Suite Complete ==========\n"
                   << "Passed: " << passed << " / " << jobs.size() << "\n"
-                  << "Failed: " << failed << "; unsupported: " << unsupported << "\n"
+                  << "Failed: " << failed << "; unsupported: " << unsupported << "; measurement review: " << review << "\n"
                   << "Missing captures: " << captureMissing
                   << "; capture-incompatible fallbacks: " << captureUnsupported << "\n"
                   << "====================================\n";

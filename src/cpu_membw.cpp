@@ -880,7 +880,6 @@ std::vector<CpuCacheLevel> ProbeCaches(const CpuLogicalProcessor& reference,
     }
     if (!caches.empty()) source = "sysfs";
 #elif defined(__APPLE__)
-    (void)reference;
     (void)processors;
     const struct {
         std::uint32_t level;
@@ -894,14 +893,20 @@ std::vector<CpuCacheLevel> ProbeCaches(const CpuLogicalProcessor& reference,
     };
     const std::uint32_t line = static_cast<std::uint32_t>(SysctlU64("hw.cachelinesize"));
     for (const auto& key : keys) {
-        std::uint64_t size = SysctlU64(key.perfLevelSize);
-        if (size == 0) size = SysctlU64(key.size);
+        std::string sizeKey = key.perfLevelSize;
+        std::string shareKey = key.perfLevelShare ? key.perfLevelShare : "";
+        if (reference.classificationSource == "qos_verified_cpu_time_bound" && reference.performanceLevel == 1) {
+            sizeKey.replace(sizeKey.find("perflevel0"), 10, "perflevel1");
+            if (!shareKey.empty()) shareKey.replace(shareKey.find("perflevel0"), 10, "perflevel1");
+        }
+        std::uint64_t size = SysctlU64(sizeKey.c_str());
+        if (size == 0 && reference.classificationSource != "qos_verified_cpu_time_bound") size = SysctlU64(key.size);
         if (size == 0) continue;
         CpuCacheLevel level;
         level.level = key.level;
         level.sizeBytes = size;
         level.lineBytes = line;
-        const std::uint64_t share = key.perfLevelShare ? SysctlU64(key.perfLevelShare) : 0;
+        const std::uint64_t share = !shareKey.empty() ? SysctlU64(shareKey.c_str()) : 0;
         level.sharedByCores = share > 0 ? static_cast<std::uint32_t>(share) : 1u;
         level.sharedByThreads = level.sharedByCores;
         caches.push_back(level);
@@ -1004,8 +1009,8 @@ void FillBlock(std::uint8_t* data, std::size_t bytes, std::uint64_t seed) {
 class BlockRunner {
 public:
     BlockRunner(const std::vector<CpuLogicalProcessor>& cpus, std::size_t blockBytes,
-                const KernelSet& kernels)
-        : blockBytes_(blockBytes), kernels_(kernels), workers_(cpus.size()) {
+                const KernelSet& kernels, CpuCoreType coreType = CpuCoreType::Automatic)
+        : blockBytes_(blockBytes), kernels_(kernels), workers_(cpus.size()), coreType_(coreType) {
         for (std::size_t i = 0; i < cpus.size(); ++i) {
             workers_[i].cpu = cpus[i];
             workers_[i].seed = 0x4d42u + i;
@@ -1037,6 +1042,8 @@ public:
         return static_cast<std::uint32_t>(std::count_if(
             workers_.begin(), workers_.end(), [](const Worker& worker) { return worker.pinned; }));
     }
+
+    CpuResidency residency() const { return workers_.front().residency; }
 
     // Bytes per second, summed over the threads.
     double Sample(Kernel kernel, double seconds) {
@@ -1078,11 +1085,13 @@ private:
         std::size_t cursor = 0;
         std::uint64_t bytes = 0;
         double seconds = 0.0;
+        CpuResidency residency;
     };
 
     void WorkerMain(std::size_t index) {
         Worker& worker = workers_[index];
         worker.pinned = PinCurrentThread(worker.cpu);
+        CpuQosScope qos(coreType_);
         // Allocating and filling here places the pages on this thread's node
         // and makes every page real before a read touches it.
         worker.block = static_cast<std::uint8_t*>(AllocatePages(blockBytes_));
@@ -1105,9 +1114,15 @@ private:
             }
             armed_.fetch_add(1, std::memory_order_acq_rel);
             while (!go_.load(std::memory_order_acquire)) CpuRelax();
+            const auto accountingStart = coreType_ == CpuCoreType::Automatic
+                ? CpuResidencySnapshot{} : CaptureCpuResidency();
             const auto start = Clock::now();
             RunKernel(worker, kernel);
             worker.seconds = std::chrono::duration<double>(Clock::now() - start).count();
+            if (coreType_ != CpuCoreType::Automatic) {
+                worker.residency = EvaluateCpuResidency(accountingStart, CaptureCpuResidency(), coreType_);
+                if (!qos.applied()) worker.residency.available = false;
+            }
             {
                 std::lock_guard<std::mutex> lock(mutex_);
                 ++finished_;
@@ -1163,6 +1178,7 @@ private:
     const std::size_t blockBytes_;
     const KernelSet kernels_;
     std::vector<Worker> workers_;
+    CpuCoreType coreType_;
 
     std::mutex mutex_;
     std::condition_variable wake_;
@@ -1992,6 +2008,7 @@ struct ModePlan {
     // Decides which data sets also get the streaming-store kernels.
     std::vector<CpuCacheLevel> caches;
     std::uint32_t pinned = 0;
+    CpuCoreType coreType = CpuCoreType::Automatic;
 };
 
 // Rounds down to a size every kernel accepts and the sweep can end on.
@@ -2021,12 +2038,14 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
     const auto runStart = Clock::now();
     report.warmupRuns = config.warmupRuns;
     report.measuredRuns = config.measuredRuns;
-    report.sampleMs = config.sampleMs;
+    report.sampleMs = config.coreType == CpuCoreType::Automatic ? config.sampleMs : std::max(50.0, config.sampleMs);
     if (config.measuredRuns == 0 || config.sampleMs <= 0.0 ||
         config.maxDatasetBytes < kMinBlockBytes) {
         throw std::runtime_error("invalid CPU memory-bandwidth configuration");
     }
 
+    if (config.coreType != CpuCoreType::Automatic && !CpuCoreTypeSchedulingSupported())
+        throw std::runtime_error("core_type_scheduling_unavailable");
     const CpuBenchmarkReport topology = ProbeCpuTopology();
     if (topology.processors.empty()) throw std::runtime_error("no logical processors available");
     report.cpuName = topology.cpuName;
@@ -2060,6 +2079,19 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
     for (const auto& cpu : cores) {
         byLevel[cpu.performanceLevel < 0 ? (std::numeric_limits<int>::max)() : cpu.performanceLevel]
             .push_back(cpu);
+    }
+    if (config.coreType != CpuCoreType::Automatic) {
+        byLevel.clear();
+        for (auto type : {CpuCoreType::Performance, CpuCoreType::Efficiency}) {
+            if (config.coreType != CpuCoreType::Both && config.coreType != type) continue;
+            CpuLogicalProcessor representative;
+            representative.performanceLevel = type == CpuCoreType::Performance ? 0 : 1;
+            representative.coreClass = type == CpuCoreType::Performance ? "Performance" : "Efficiency";
+            representative.classificationSource = "qos_verified_cpu_time_bound";
+            representative.logicalIndex = std::numeric_limits<std::uint32_t>::max();
+            byLevel[representative.performanceLevel] = std::vector<CpuLogicalProcessor>(
+                AppleCoreTypeCount(type), representative);
+        }
     }
     std::vector<CpuLogicalProcessor> references;
     for (const auto& entry : byLevel) {
@@ -2099,11 +2131,13 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
         ModePlan plan;
         plan.name = c == 0 ? "single" : "single_" + std::to_string(c);
         plan.cpus = {references[c]};
+        if (config.coreType != CpuCoreType::Automatic)
+            plan.coreType = references[c].performanceLevel == 0 ? CpuCoreType::Performance : CpuCoreType::Efficiency;
         plan.maxBlockBytes = singleMax;
         plan.caches = report.classes[c].caches;
         plans.push_back(std::move(plan));
     }
-    const bool runAll = allThreads > 1;
+    const bool runAll = allThreads > 1 && (config.coreType == CpuCoreType::Automatic || config.coreType == CpuCoreType::Both);
     if (runAll) {
         ModePlan plan;
         plan.name = "all";
@@ -2154,14 +2188,15 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
     }
     out << (report.datasetLimitedByMemory ? " (ceiling lowered to fit free memory)" : "") << "\n"
         << "Timing:    wall clock, " << config.warmupRuns << " warm-up + " << config.measuredRuns
-        << " measured samples of " << std::setprecision(0) << config.sampleMs
+        << " measured samples of " << std::setprecision(0) << report.sampleMs
         << " ms per point, median reported\n"
         << "CPUMEM_META\tname=" << SanitizeField(report.cpuName)
         << "\tvector=" << kernels.name << "\tvector_bytes=" << kernels.vectorBytes
         << "\tphysical_count=" << report.physicalCores
         << "\tlogical_count=" << report.logicalProcessors
-        << "\tall_threads=" << allThreads
-        << "\treference_logical_index=" << report.referenceLogicalIndex
+        << "\tcore_type=" << CpuCoreTypeName(config.coreType)
+        << "\tall_threads=" << (runAll ? allThreads : 0)
+        << "\treference_logical_index=" << (config.coreType == CpuCoreType::Automatic ? long(report.referenceLogicalIndex) : -1L)
         << "\tclass_count=" << report.classes.size()
         << "\tcache_source=" << report.cacheSource << "\n";
     for (const auto& cpuClass : report.classes) {
@@ -2169,7 +2204,7 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
             << "\tmode=" << (cpuClass.rank == 0 ? std::string("single")
                                                 : "single_" + std::to_string(cpuClass.rank))
             << "\tname=" << SanitizeField(cpuClass.name) << "\tcores=" << cpuClass.coreCount
-            << "\treference_logical_index=" << cpuClass.referenceLogicalIndex
+            << "\treference_logical_index=" << (config.coreType == CpuCoreType::Automatic ? long(cpuClass.referenceLogicalIndex) : -1L)
             << "\tcache_source=" << cpuClass.cacheSource << "\n";
         for (const auto& cache : cpuClass.caches) {
             out << "CPUMEM_CACHE\tclass=" << cpuClass.rank << "\tlevel=" << cache.level
@@ -2191,7 +2226,9 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
             << "\tfraction=" << static_cast<double>(doneSteps) / static_cast<double>(totalSteps)
             << "\n" << std::flush;
     };
-    const double sampleSeconds = config.sampleMs / 1000.0;
+    // Longer classified windows make public accounting overhead negligible.
+    if (config.coreType != CpuCoreType::Automatic) report.sampleMs = std::max(50.0, config.sampleMs);
+    const double sampleSeconds = report.sampleMs / 1000.0;
 
     for (std::size_t p = 0; p < plans.size(); ++p) {
         ModePlan& plan = plans[p];
@@ -2199,7 +2236,9 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
         const std::uint64_t memoryFrom = MemoryBandStart(plan.caches, threads);
         out << "\n[" << plan.name << "] ";
         if (threads == 1) {
-            out << "one thread on logical processor " << plan.cpus.front().logicalIndex;
+            if (plan.coreType == CpuCoreType::Automatic)
+                out << "one thread on logical processor " << plan.cpus.front().logicalIndex;
+            else out << "one thread, " << CpuCoreTypeName(plan.coreType) << " core-type scheduling";
             if (report.mixedCoreTypes) {
                 out << " (class " << p << ", " << report.classes[p].name << ")";
             }
@@ -2210,7 +2249,7 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
                "   GB/s (median)\n";
 
         for (const std::uint64_t block : SweepBlocks(plan.maxBlockBytes)) {
-            BlockRunner runner(plan.cpus, static_cast<std::size_t>(block), kernels);
+            BlockRunner runner(plan.cpus, static_cast<std::size_t>(block), kernels, plan.coreType);
             if (!runner.allocated()) {
                 out << std::setw(12) << FormatBytes(block)
                     << "   allocation failed; the sweep ends here\n";
@@ -2232,10 +2271,51 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
                 // Keep the least disturbed round.
                 double median = 0.0;
                 double best = 0.0;
+                CpuResidency residency;
+                residency.requestedLowerBound = 1.0;
+                std::uint32_t residencyRetries = 0;
+                double maxSampleMs = 0.0;
                 for (std::uint32_t attempt = 0;; ++attempt) {
                     std::vector<double> rates;
-                    for (std::uint32_t run = 0; run < config.measuredRuns; ++run)
-                        rates.push_back(runner.Sample(kernel, sampleSeconds));
+                    for (std::uint32_t run = 0; run < config.measuredRuns; ++run) {
+                        double rate = 0;
+                        CpuResidency observed;
+                        double measuredSampleSeconds = sampleSeconds;
+                        for (unsigned retry = 0; retry < 5; ++retry) {
+                            // Background work can be descheduled for most of
+                            // a short wall-clock window. Extend only rejected
+                            // samples so the unchanged 99% CPU-time bound can
+                            // be verified despite that scheduling delay.
+                            measuredSampleSeconds = sampleSeconds * (1u << retry);
+                            maxSampleMs = std::max(maxSampleMs, measuredSampleSeconds * 1000.0);
+                            rate = runner.Sample(kernel, measuredSampleSeconds);
+                            observed = runner.residency();
+                            if (plan.coreType == CpuCoreType::Automatic || observed.verified()) break;
+                            out << "CPUMEM_RETRY\tmode=" << plan.name << "\tkernel=" << KernelName(kernel)
+                                << "\tblock_bytes=" << block << "\tavailable=" << observed.available
+                                << "\tp_fraction=" << observed.performanceFraction
+                                << "\trequested_lower_bound=" << observed.requestedLowerBound
+                                << "\tprocess_cpu_ns=" << observed.processCpuNs
+                                << "\tworker_cpu_ns=" << observed.workerCpuNs
+                                << "\tsample_ms=" << measuredSampleSeconds * 1000.0 << '\n' << std::flush;
+                            if (retry == 4) throw std::runtime_error("core_type_residency_not_verified");
+                            ++residencyRetries;
+                        }
+                        rates.push_back(rate);
+                        if (plan.coreType != CpuCoreType::Automatic) {
+                            residency.available = true;
+                            residency.requestedLowerBound = std::min(residency.requestedLowerBound, observed.requestedLowerBound);
+                            residency.performanceFraction = observed.performanceFraction;
+                            residency.effectiveGHz = observed.effectiveGHz;
+                            out << "CPUMEM_RESIDENCY\tmode=" << plan.name
+                                << "\tkernel=" << KernelName(kernel) << "\tblock_bytes=" << block
+                                << "\tsample=" << run + 1 << "\tcore_type=" << CpuCoreTypeName(plan.coreType)
+                                << std::setprecision(6) << "\tp_fraction=" << observed.performanceFraction
+                                << "\trequested_lower_bound=" << observed.requestedLowerBound
+                                << "\teffective_ghz=" << observed.effectiveGHz
+                                << "\tsample_ms=" << measuredSampleSeconds * 1000.0 << "\tverified=1\n";
+                        }
+                    }
                     median = (std::max)(median, Median(rates));
                     best = (std::max)(best, *std::max_element(rates.begin(), rates.end()));
                     if (median >= kDisturbedRatio * best || attempt == kMaxRemeasure) break;
@@ -2249,6 +2329,9 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
                 point.threads = threads;
                 point.medianGBps = median / 1.0e9;
                 point.bestGBps = best / 1.0e9;
+                point.residency = residency;
+                point.residencyRetries = residencyRetries;
+                point.maxSampleMs = maxSampleMs;
                 medians[static_cast<std::size_t>(kernel)] = point.medianGBps;
                 report.points.push_back(point);
             }
@@ -2265,7 +2348,11 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
                     << "\tblock_bytes=" << point.blockBytes << "\tthreads=" << point.threads
                     << std::setprecision(3)
                     << "\tmedian_gbps=" << point.medianGBps << "\tbest_gbps=" << point.bestGBps
-                    << "\n";
+                    << "\tcore_type=" << CpuCoreTypeName(plan.coreType)
+                    << "\tresidency_verified=" << (point.residency.verified() ? 1 : 0)
+                    << std::setprecision(6) << "\trequested_lower_bound=" << point.residency.requestedLowerBound
+                    << "\tresidency_retries=" << point.residencyRetries
+                    << "\tmax_sample_ms=" << point.maxSampleMs << "\n";
             }
             progress(plan.name);
         }

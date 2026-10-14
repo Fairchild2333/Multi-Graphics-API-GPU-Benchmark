@@ -407,6 +407,7 @@ extension View {
     public func labelsHidden() -> some View { EmptyView() }
     public func tag<V: Hashable>(_ tag: V) -> some View { EmptyView() }
     public func id<ID: Hashable>(_ id: ID) -> some View { EmptyView() }
+    public func task(priority: TaskPriority = .userInitiated, _ action: @escaping @MainActor @Sendable () async -> Void) -> some View { EmptyView() }
     public func onAppear(perform action: (() -> Void)? = nil) -> some View { EmptyView() }
     public func onChange<V: Equatable>(of value: V, perform action: @escaping (_ newValue: V) -> Void) -> some View { EmptyView() }
     public func textFieldStyle<S: TextFieldStyle>(_ style: S) -> some View { EmptyView() }

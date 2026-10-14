@@ -516,10 +516,10 @@ cmake --build build --config Release
 **macOS:**
 ```bash
 ./scripts/build-macos.sh
-open out/macos/$(uname -m)/Release/GPUBenchmark.app
+open out/macos/$(uname -m)/Release/Mangekyo.app
 ```
 
-The script builds checksum-pinned GLFW 3.4 from source and stages a Metal-only,
+The script builds checksum-pinned GLFW 3.4 from source and stages a Metal/OpenGL,
 self-contained App; Homebrew is not required. See `macos-gui/README.md` for
 offline source overrides, signing, bundle layout, and validation details.
 Toggle individual developer backends with `-DENABLE_VULKAN=ON`,
@@ -535,6 +535,17 @@ runs, including the fixed 15-second + fifth-second capture flow. Use CPU for the
 sequential per-logical-processor sweep, the all-core run, or both; it opens no
 3D window and never invokes RenderDoc. History and Charts remain separate
 navigation destinations, and CPU/GPU/chart jobs are mutually exclusive.
+
+Windows, macOS and iOS/iPadOS have **Run all GPU tests**, **Run all CPU tests**,
+and **Test all items** buttons. Desktop GPU suites queue every available GPU/API
+pair sequentially; the combined suite runs CPU tests once per computer. CPU
+all-items includes compute, cache/memory curves, page mapping and storage.
+Formal compute steps use 15 seconds, and score suites do not request automatic
+capture. Unsupported APIs are omitted. Apple Vulkan remains gated by the
+translated-API switch. Scores append to `results/results.json`; desktop apps
+can open its folder, and iOS exposes Documents in Files/Finder file sharing.
+Questionable timing or sustained throughput is shown for review while the
+remaining jobs continue. iOS waits for nominal thermal state between jobs.
 
 ### GPU benchmark CLI
 

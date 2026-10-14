@@ -7,8 +7,8 @@ struct CpuView: View {
     private var run: BenchChannelState { engine.cpuState }
 
     @State private var mode: String = "all"          // per-core | multi | all | memory
-    @State private var durationPreset: String = "1"  // 1 | 15
-    @State private var secondsPerTest: String = "1"
+    @State private var durationPreset: String = "15"  // 1 | 15
+    @State private var secondsPerTest: String = "15"
     @State private var warmupSec: String = "0.2"
     @State private var logScrollID = 0
 
@@ -37,15 +37,22 @@ struct CpuView: View {
             HStack {
                 Spacer()
                 Button(Localization.tr("Cancel", "取消", "キャンセル")) {
-                    engine.cancel(channel: .cpu)
+                    if engine.completeSuiteRunning { engine.cancelCompleteSuite() } else { engine.cancel(channel: .cpu) }
                 }
                 .disabled(!engine.isRunning)
+                Button {
+                    engine.startCompleteSuite(scope: .cpu)
+                } label: {
+                    Text(Localization.tr("Run all CPU tests", "一键测试 CPU 全套", "CPU 全項目を実行"))
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(engine.isRunning || engine.workingDirectory.isEmpty)
                 Button(action: runCpu) {
                     Text(memoryMode
                          ? Localization.tr("Run Cache & Memory Test", "开始缓存与内存测试", "キャッシュ / メモリテストを実行")
                          : Localization.tr("Run CPU Benchmark", "开始 CPU 测试", "CPU ベンチマークを実行"))
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.bordered)
                 .disabled(engine.isRunning || engine.workingDirectory.isEmpty)
             }
             .padding(.horizontal, 16)
@@ -167,11 +174,12 @@ struct CpuView: View {
                          memoryHeadline(mode: output.classes.first?.mode ?? "single", threads: 1))
             summaryValue(Localization.tr("Memory read, all cores", "内存读取，全核", "メモリ読込、全コア"),
                          memoryHeadline(mode: "all", threads: output.allThreads))
-        } else if output.hasComputeResults {
+        }
+        if output.hasComputeResults {
             summaryValue(Localization.tr("Single-core average", "单核平均", "コア別平均"),
                          scoreText(output.singleAverage))
             summaryValue(Localization.tr("All-core", "全核", "全コア"), scoreText(output.multiScore))
-        } else {
+        } else if !output.hasMemoryResults {
             Text(run.lastScore.isEmpty ? "—" : run.lastScore)
                 .font(.title2).fontWeight(.semibold)
         }
@@ -191,7 +199,8 @@ struct CpuView: View {
     private var resultsSection: some View {
         if run.runOutput.hasMemoryResults {
             CpuMemoryResultsView(output: run.runOutput)
-        } else {
+        }
+        if run.runOutput.hasComputeResults {
             CpuComputeResultsCard(output: run.runOutput)
         }
     }

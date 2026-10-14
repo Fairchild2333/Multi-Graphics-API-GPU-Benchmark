@@ -16,6 +16,13 @@ int main() {
     for (std::size_t i = 0; i < 8; ++i)
         if (std::string(metal[i].workload) != "stream" || metal[i].headless != (i >= 4)) return 3;
     if (metal.size() + gl41.size() + CpuSuiteVariants().size() != 18) return 4;
+    const auto unifiedMetal = SupportedSuiteVariants({true, true, true, true, true});
+    if (unifiedMetal.size() != 14 || std::string(unifiedMetal.back().workload) != "gpu_cache" ||
+        !unifiedMetal.back().headless) return 7;
+    // Device-local cache state stays unavailable on non-unified/other APIs.
+    if (SupportedSuiteVariants({true, true, true, true, false}).size() != 13) return 8;
+    // Two independently enumerated devices each get their GPU matrix; CPU once.
+    if (2 * metal.size() + CpuSuiteVariants().size() != 28) return 9;
     BenchmarkConfig capture;
     capture.workload = Workload::GpuBurnV1;
     capture.gpuBurnIter = 16;

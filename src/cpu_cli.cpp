@@ -37,6 +37,12 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
                   << "_w" << warmupMs << "ms"
                   << "_sequence_" << (beforePerCore ? "before_percore" : "standalone");
     stored.workloadVersion = storedVersion.str();
+    const auto coreType = !multiCore && !report.perCore.empty()
+        ? report.perCore.front().coreType : CpuCoreType::Automatic;
+    if (coreType != CpuCoreType::Automatic) {
+        stored.workloadVersion += std::string("_qos_bound_v1_") + CpuCoreTypeName(coreType);
+        stored.id += std::string("-") + CpuCoreTypeName(coreType);
+    }
 #if defined(__APPLE__) && TARGET_OS_IPHONE
     stored.workloadVersion += "_ios_preview";
 #endif
@@ -47,7 +53,9 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
     stored.platform = gpu_bench::CurrentPlatform();
     stored.osArchitecture = gpu_bench::CurrentOsArchitecture();
     stored.processArchitecture = gpu_bench::CurrentProcessArchitecture();
-    stored.difficulty = multiCore ? "Multi-core" : "Per-core";
+    stored.difficulty = multiCore ? "Multi-core" : coreType == CpuCoreType::Performance
+        ? "Performance single-thread" : coreType == CpuCoreType::Efficiency
+        ? "Efficiency single-thread" : "Per-core";
     stored.headless = true;
     stored.framesInFlight = 0;
     stored.scoreUnit = "MWork/s";
@@ -69,7 +77,8 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
              << ";affinityCapability=" << report.affinityCapability
              << ";logicalProcessors=" << report.processors.size()
              << ";physicalCores=" << physicalCount
-             << ";coreClassLabels=inferred_rank_not_architectural_identity"
+             << ";coreClassLabels=" << (coreType == CpuCoreType::Automatic
+                 ? "inferred_rank_not_architectural_identity" : "verified_type_not_numbered_core")
              << ";checksumRole=dce_sink";
     contract << ";scoreContract=" << (formalContract ? "formal" : "preview")
              << ";sequence=" << (beforePerCore ? "before_percore" : "standalone");
@@ -108,6 +117,22 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
                 if (i != 0) contract << ',';
                 contract << affinityModes[i];
             }
+        }
+    }
+    if (coreType != CpuCoreType::Automatic) {
+        const auto& item = report.perCore.front();
+        contract << ";coreType=" << CpuCoreTypeName(coreType)
+                 << ";scheduling=" << (coreType == CpuCoreType::Performance ? "user_interactive" : "background")
+                 << ";residencyMethod=process_accounting_thread_clock_bound"
+                 << ";residencyThreshold=0.99;residencyVerified=1"
+                 << ";residencyRetries=" << item.residencyRetries;
+        for (std::size_t i = 0; i < item.residencyRounds.size(); ++i) {
+            const auto& round = item.residencyRounds[i];
+            const std::string prefix = ";round" + std::to_string(i + 1);
+            contract << std::setprecision(9)
+                     << prefix << "PFraction=" << round.performanceFraction
+                     << prefix << "RequestedLowerBound=" << round.requestedLowerBound
+                     << prefix << "EffectiveGHz=" << round.effectiveGHz;
         }
     }
     stored.workloadConfig = contract.str();
@@ -165,6 +190,8 @@ static gpu_bench::BenchmarkResult MakeStoredCpuMemBwResult(
     stored.platform = gpu_bench::CurrentPlatform();
     stored.osArchitecture = gpu_bench::CurrentOsArchitecture();
     stored.processArchitecture = gpu_bench::CurrentProcessArchitecture();
+    if (config.coreType != CpuCoreType::Automatic)
+        stored.workloadVersion += std::string("_qos_bound_v1_") + CpuCoreTypeName(config.coreType);
     stored.difficulty = "Sweep";
     stored.headless = true;
     stored.framesInFlight = 0;
@@ -198,6 +225,10 @@ static gpu_bench::BenchmarkResult MakeStoredCpuMemBwResult(
         contract << ";class" << cpuClass.rank << "Name=" << cpuClass.name
                  << ";class" << cpuClass.rank << "Cores=" << cpuClass.coreCount
                  << ";class" << cpuClass.rank << "CacheSource=" << cpuClass.cacheSource;
+        for (const auto& cache : cpuClass.caches) {
+            contract << ";class" << cpuClass.rank << "CacheL" << cache.level << "KiB=" << cache.sizeBytes / 1024
+                     << ";class" << cpuClass.rank << "CacheL" << cache.level << "SharedCores=" << cache.sharedByCores;
+        }
     }
     modes.emplace_back("all", &report.all);
     for (const auto& entry : modes) {
@@ -240,6 +271,26 @@ static gpu_bench::BenchmarkResult MakeStoredCpuMemBwResult(
              << ";sampleMs=" << report.sampleMs
              << ";remeasuredPoints=" << report.remeasuredPoints
              << ";aggregation=median;timing=wall_clock";
+    if (config.coreType != CpuCoreType::Automatic) {
+        contract << ";coreType=" << CpuCoreTypeName(config.coreType)
+                 << ";residencyMethod=process_accounting_thread_clock_bound"
+                 << ";residencyThreshold=0.99;residencyVerified=1"
+                 << ";schedulingScope=single_thread_curves_only";
+        for (const auto& entry : modes) {
+            if (entry.first == "all") continue;
+            contract << std::setprecision(9) << ";residency_" << entry.first << "=";
+            bool first = true;
+            for (const auto& point : report.points) {
+                if (point.mode != entry.first) continue;
+                if (!first) contract << ',';
+                first = false;
+                contract << point.blockBytes / 1024 << ':' << point.kernel << ':'
+                         << point.residency.requestedLowerBound << ':' << point.residencyRetries << ':'
+                         << point.residency.effectiveGHz << ':' << point.residency.performanceFraction
+                         << ':' << point.maxSampleMs;
+            }
+        }
+    }
     // Full curves as "<data set KiB per thread>:<median GB/s>" pairs.
     contract << std::setprecision(1);
     for (const auto& entry : modes) {
@@ -434,7 +485,8 @@ int RunCpuBenchmarkCli(const CpuBenchmarkConfig& cpuCfg, bool saveCpuResults) {
         const bool multiRequested = cpuCfg.mode == gpu_bench::CpuBenchmarkMode::MultiCore ||
                                     cpuCfg.mode == gpu_bench::CpuBenchmarkMode::All;
         const bool perCoreValid = !perCoreRequested ||
-            (report.perCore.size() == report.processors.size() &&
+            (report.perCore.size() == (cpuCfg.coreType == CpuCoreType::Automatic ? report.processors.size()
+                : cpuCfg.coreType == CpuCoreType::Both ? 2u : 1u) &&
              !report.perCore.empty() &&
              std::all_of(report.perCore.begin(), report.perCore.end(),
                          [](const gpu_bench::CpuCoreResult& item) { return item.valid; }));
@@ -449,13 +501,25 @@ int RunCpuBenchmarkCli(const CpuBenchmarkConfig& cpuCfg, bool saveCpuResults) {
             bool saved = true;
             bool storageExceptionReported = false;
             try {
-                if (perCoreRequested && perCoreValid) {
-                    const auto stored = MakeStoredCpuResult(report, cpuCfg, false);
-                    const bool thisSaved = gpu_bench::AppendResult(stored);
-                    saved = thisSaved && saved;
-                    if (thisSaved)
-                        std::cout << "[Results] Saved CPU per-core summary as " << stored.id
-                                  << " -> " << gpu_bench::ResultsFilePath() << '\n';
+                if (perCoreRequested) {
+                    std::vector<CpuBenchmarkReport> summaries;
+                    if (cpuCfg.coreType == CpuCoreType::Automatic && perCoreValid) summaries.push_back(report);
+                    else if (cpuCfg.coreType != CpuCoreType::Automatic) {
+                        for (const auto& item : report.perCore) {
+                            if (!item.valid) continue;
+                            auto singleReport = report;
+                            singleReport.perCore = {item};
+                            summaries.push_back(std::move(singleReport));
+                        }
+                    }
+                    for (const auto& summary : summaries) {
+                        const auto stored = MakeStoredCpuResult(summary, cpuCfg, false);
+                        const bool thisSaved = gpu_bench::AppendResult(stored);
+                        saved = thisSaved && saved;
+                        if (thisSaved)
+                            std::cout << "[Results] Saved CPU single-thread summary as " << stored.id
+                                      << " -> " << gpu_bench::ResultsFilePath() << '\n';
+                    }
                 }
                 if (multiRequested && multiValid) {
                     const auto stored = MakeStoredCpuResult(report, cpuCfg, true);

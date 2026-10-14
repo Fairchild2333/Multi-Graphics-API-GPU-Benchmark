@@ -99,6 +99,7 @@ struct ChartsView: View {
     @State private var selectedMode: ExecutionModeFilter = .single
     @State private var selectedMetric: BenchmarkChartMetric = .score
     @State private var particleFilter: UInt32 = 0
+    @State private var showMemoryCurves = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -116,6 +117,9 @@ struct ChartsView: View {
                 }
                 .disabled(engine.workingDirectory.isEmpty)
 
+                Button(Localization.tr("Cache & memory curves", "缓存与内存曲线", "キャッシュ / メモリ曲線")) {
+                    showMemoryCurves = true
+                }
                 Spacer()
 
                 Button(Localization.tr(
@@ -179,6 +183,7 @@ struct ChartsView: View {
         .onChange(of: selectedMode) { _ in particleFilter = 0; repairSelections() }
         .onChange(of: selectedAPI) { _ in particleFilter = 0; repairSelections() }
         .onChange(of: selectedWorkload) { _ in particleFilter = 0; repairSelections() }
+        .sheet(isPresented: $showMemoryCurves) { SavedMemoryCurvesView(results: engine.results) }
     }
 
     private var filterCard: some View {

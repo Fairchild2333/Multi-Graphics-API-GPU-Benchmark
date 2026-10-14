@@ -165,6 +165,96 @@ check.equal(nativeSuite.jobs.map { $0.samples.count }, [1, 1], "native suite: in
 check.equal(nativeSuite.jobs.last?.score?.unit ?? "", "Gpix-step/s", "native suite: Burn score unit")
 Localization.current = previousLanguage
 
+// The two GPU memory protocols use different kernels and rate statistics.
+let memoryOutput = RunOutput.parse("""
+MEMSWEEP_POINT\tstorage=device_local\taccess=read_only\tbytes=65536\tgbps=900
+MEMBW_POINT\tkernel=read\tdataset_bytes=268435456\tmedian_gbps=100\tbest_gbps=120
+MEMBW_POINT\tkernel=write\tdataset_bytes=268435456\tmedian_gbps=80\tbest_gbps=90
+MEMBW_POINT\tkernel=l1_single\tdataset_bytes=16384\tmedian_gbps=200\tbest_gbps=210
+MEMBW_POINT\tkernel=read\tdataset_bytes=0\tmedian_gbps=100
+MEMBW_POINT\tkernel=read\tdataset_bytes=65536\tmedian_gbps=nan
+MEMSWEEP_POINT\tstorage=host_visible\taccess=read_only\tbytes=65536\tgbps=-1
+""")
+check.equal(memoryOutput.gpuMemoryPoints.count, 1, "GPU memory: native curve stays separate")
+check.equal(memoryOutput.vulkanMemoryPoints.map { $0.series }, ["read", "write", "l1_single"], "GPU memory: Vulkan kernels and invalid points")
+check.equal(memoryOutput.vulkanMemoryPoints.map { $0.gbps }, [100, 80, 200], "GPU memory: median rate, not best")
+check.equal(memoryOutput.points.count, 0, "GPU memory: CPU curves stay separate")
+Localization.current = .en
+check.equal(RunOutput.gpuMemoryScoreLine("MEMBW_SUMMARY\tkernel=read\tmemory_gbps=100\tmemory_plateau_reached=0"),
+            "Largest working sets (plateau not reached): 100 GB/s", "GPU memory: cache-assisted result is explicit")
+check.equal(RunOutput.gpuMemoryScoreLine("MEMBW_SUMMARY\tkernel=read\tmemory_gbps=100\tmemory_plateau_reached=1"),
+            "GPU memory read: 100 GB/s", "GPU memory: settled summary")
+check.equal(RunOutput.gpuMemoryScoreLine("MEMBW_SUMMARY\tkernel=write\tmemory_gbps=80\tmemory_plateau_reached=1"),
+            nil, "GPU memory: write does not replace read score")
+check.equal(RunOutput.gpuMemoryScoreLine("MEMSWEEP_RESULT\tread_only_gbps=900"),
+            "GPU memory probe: 900 GB/s", "GPU memory: native preview summary")
+Localization.current = previousLanguage
+
+// Saved GPU/CPU curves retain different byte units and measurement contracts.
+let historyRows = try! JSONSerialization.jsonObject(with: Data(fixture("memory-history.json").utf8)) as! [[String: Any]]
+@MainActor func saved(_ api: String) -> RunOutput {
+    let row = historyRows.first { $0["graphicsApi"] as? String == api }!
+    return RunOutput.savedMemory(workload: row["workload"] as! String, api: api,
+                                 configuration: row["workloadConfig"] as? String)
+}
+let oldVulkan = saved("Vulkan")
+check.equal(oldVulkan.vulkanMemoryPoints.count, 95, "saved Vulkan: all five nonempty curves")
+check.near(oldVulkan.vulkanMemoryPoints.first { $0.series == "read" }!.blockBytes, 1048576, "saved Vulkan: data-set MiB -> bytes")
+check.near(oldVulkan.vulkanMemoryPoints.first { $0.series == "l1" }!.blockBytes, 16384, "saved Vulkan: workgroup KiB -> bytes")
+check.near(oldVulkan.gpuMemorySummaries.first!.memory, 238.8, "saved Vulkan: persisted summary precision")
+check.equal(oldVulkan.gpuMemorySummaries.first!.settled, true, "saved Vulkan: read plateau status")
+check.equal(oldVulkan.gpuMemorySummaries.last!.settled, nil, "saved Vulkan: absent copy plateau status is unknown")
+check.near(oldVulkan.gpuLocalCache?.fullLoad ?? 0, 1393.8, "saved Vulkan: local probe summary")
+check.near(oldVulkan.gpuLocalCache?.capacityHigh ?? 0, 262144, "saved Vulkan: transition unit")
+check.equal(oldVulkan.points.count, 0, "saved Vulkan: not CPU curves")
+let oldMetal = saved("Metal")
+check.equal(oldMetal.gpuMemoryPoints.count, 56, "saved Metal: four allocation/access curves")
+check.near(oldMetal.gpuMemoryPoints.first!.blockBytes, 65536, "saved Metal: sizes already bytes")
+check.near(oldMetal.gpuMemoryPoints.first { $0.series == "device_local/read_only" && $0.blockBytes == 536870912 }!.gbps,
+           244.776, "saved Metal: historical read point")
+check.equal(oldMetal.vulkanMemoryPoints.count, 0, "saved Metal: separate contract")
+let oldCpu = saved("CPU")
+check.equal(oldCpu.points.count, 198, "saved CPU: six read/write/copy curves")
+check.equal(oldCpu.levels.count, 6, "saved CPU: saved L1/L2/memory levels")
+check.near(oldCpu.points.first!.blockBytes, 4096, "saved CPU: KiB per thread -> bytes")
+check.equal(oldCpu.allThreads, 14, "saved CPU: all-thread size interpretation")
+check.equal(oldCpu.classes.first?.name, "Unclassified", "saved CPU: no invented P/E classification")
+check.expect(oldCpu.schedulerManaged, "saved CPU: scheduler-managed affinity")
+check.near(oldCpu.levels.first { $0.mode == "all" && $0.level == "memory" }!.read, 245.8, "saved CPU: memory summary")
+check.near(oldCpu.caches.first { $0.level == 2 }!.sizeBytes, 16777216, "saved CPU: cache metadata")
+check.equal(oldCpu.caches.first { $0.level == 2 }!.sharedCores, 5, "saved CPU: shared cache count")
+check.expect(oldCpu.pageMapping != nil && oldCpu.storage?.measured == true, "saved CPU: page mapping/storage summaries")
+check.equal(oldCpu.levels.filter { ["L3", "SoC"].contains($0.level) }.count, 0, "saved CPU: missing levels stay missing")
+let legacyParticle = RunOutput.savedMemory(workload: "stream", api: "Vulkan", configuration: nil)
+check.expect(!legacyParticle.hasMemoryCurves && !legacyParticle.hasGpuMemoryResults, "legacy particle: no fabricated memory sweep")
+let corruptCurve = RunOutput.savedMemory(workload: "membw", api: "Vulkan", configuration:
+    "curve_read=-1:3,0:4,1:nan,2:inf,inf:20,3:50,3:100;curve_l1=16:90;l1FullLoadGBps=nan")
+check.equal(corruptCurve.vulkanMemoryPoints.count, 2, "saved curves: invalid/duplicate points excluded")
+check.near(corruptCurve.vulkanMemoryPoints.first!.gbps, 50, "saved curves: duplicate does not invent an average")
+check.near(corruptCurve.gpuLocalCache!.fullLoad, 0, "saved summary: invalid rate rejected")
+let soc = RunOutput.savedMemory(workload: "cpu_membw", api: "CPU", configuration:
+    "coreClasses=2;cacheL1KiB=128;class1Name=Efficiency;curve_single_1_read=4:70,8:65;single_1_L1_read=65;single_SoC_read=400;single_SoC_capacityLowKiB=8192;single_SoC_capacityHighKiB=12288")
+check.equal(soc.classes.count, 2, "saved CPU: multiple core classes")
+check.equal(soc.points.first!.series, "single_1/read", "saved CPU: class-specific curve")
+check.equal(soc.levels.first { $0.mode == "single_1" }!.cacheBytes, 0, "saved CPU: no invented other-class capacity")
+check.expect(soc.levels.first { $0.level == "SoC" }!.fromCurve, "saved CPU: recorded SoC range retained")
+check.near(soc.levels.first { $0.level == "SoC" }!.capacityHigh, 12582912, "saved CPU: SoC range unit")
+let liveCache = RunOutput.parse("""
+MEMBW_SUMMARY\tkernel=read\tmemory_gbps=240\tcache_gbps=1500\tmemory_plateau_reached=1
+MEMBW_L1\tfull_load_gbps=1400\tsingle_group_gbps=120\tcapacity_low_bytes=196608\tcapacity_high_bytes=262144
+""")
+check.near(liveCache.gpuLocalCache?.singleGroup ?? 0, 120, "live GPU: local summary protocol")
+check.equal(liveCache.gpuMemorySummaries.first?.settled, true, "live GPU: plateau protocol")
+
+let cacheProbe = RunOutput.savedMemory(workload: "gpu_cache", api: "Metal", configuration:
+    "curve_gpu_warm=4:70,6:80;curve_eviction_pass=4:90,6:95;curve_cpu_warm=4:75;curve_parallel_gpu_warm=4:150,6:140")
+check.equal(cacheProbe.gpuCachePoints.count, 7, "cache probe: all warming controls and parallel throughput")
+check.near(cacheProbe.gpuCachePoints.first!.addressBytes, 4096, "cache probe: saved address span KiB -> bytes")
+check.near(cacheProbe.gpuCachePoints.first!.value, 70, "cache probe: latency remains ns, not bandwidth")
+check.expect(cacheProbe.hasMemoryCurves && cacheProbe.gpuMemoryPoints.isEmpty, "cache probe: separate from particle bandwidth")
+let liveProbe = RunOutput.parse("GCACHE_POINT\tcondition=gpu_warm\tbytes=4096\tmedian=70\tunit=ns/load")
+check.near(liveProbe.gpuCachePoints.first!.value, 70, "cache probe: live median protocol")
+
 // MARK: - Chart geometry
 
 @MainActor func curves(_ output: RunOutput, _ mode: String) -> [PlotSeries] {
@@ -248,6 +338,29 @@ check.equal(Localization.scoreLine("VRAM rate:   1755.45 GB/s  (0.024 ms compute
             "VRAM レート: 1755.45 GB/s  (0.024 ms コンピュート)", "ja: VRAM score line")
 check.equal(Localization.engineText("page file on C:"), "C: のページファイル", "ja: page file")
 check.equal(Localization.engineText("unknown"), "不明", "ja: unknown")
+
+// Verified Apple core-type results reject invalid or unverified rows.
+let typed = RunOutput.parse("""
+CPU_META\tname=Apple M4 Pro\tlogical_count=14\tphysical_count=14\taffinity_capability=scheduler_managed
+CPU_SCHEDULING\tcore_type=both
+CPU_RESULT\tkind=core\tcore_index=0\tcore_type=performance\tvalid=1\tresidency_verified=1\trequested_lower_bound=0.999\tscore=330\tunit=MWork/s
+CPU_RESULT\tkind=core\tcore_index=1\tcore_type=efficiency\tvalid=1\tresidency_verified=1\trequested_lower_bound=0.997\tscore=75\tunit=MWork/s
+CPU_RESULT\tkind=core\tcore_index=2\tcore_type=performance\tvalid=0\tresidency_verified=0\tscore=999\tunit=MWork/s
+CPU_RESULT\tkind=core\tcore_index=3\tcore_type=efficiency\tvalid=1\tresidency_verified=0\tscore=999\tunit=MWork/s
+CPU_RESULT\tkind=summary\tvalid=1\taverage_score=202.5\tunit=MWork/s
+""")
+check.equal(typed.coreScores.map { $0.coreType }, ["performance", "efficiency"], "core types: reject invalid and unverified rows")
+check.near(typed.coreScores[0].residencyLowerBound ?? 0, 0.999, "core types: preserve measured lower bound")
+check.expect(typed.singleAverage == nil, "core types: never average P and E into one score")
+let typedMemory = RunOutput.savedMemory(workload: "cpu_membw", api: "CPU", configuration:
+    "coreType=both;residencyVerified=1;residency_single=4:read:0.999:0,8:copy:0.997:1;coreClasses=2;class0Name=Performance;class0Cores=10;class1Name=Efficiency;class1Cores=4")
+check.near(typedMemory.memoryResidencyLowerBound ?? 0, 0.997, "core types: restore saved memory verification")
+check.equal(typedMemory.classes.map { $0.name }, ["Performance", "Efficiency"], "core types: restore both class names")
+let distinctCaches = RunOutput.savedMemory(workload: "cpu_membw", api: "CPU", configuration:
+    "coreType=both;coreClasses=2;class0Name=Performance;class1Name=Efficiency;class0CacheL1KiB=128;class1CacheL1KiB=64;single_L1_read=130;single_1_L1_read=30")
+check.equal(distinctCaches.caches.map { Int($0.sizeBytes) }, [131072, 65536], "core types: restore different P/E cache capacities")
+check.equal(distinctCaches.levels.map { Int($0.cacheBytes) }, [131072, 65536], "core types: saved level table uses each type's cache capacity")
+
 
 print("\(check.count - check.failures) of \(check.count) checks passed")
 exit(check.failures == 0 ? 0 : 1)

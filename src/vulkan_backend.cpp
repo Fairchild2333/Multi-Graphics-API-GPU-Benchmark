@@ -23,12 +23,15 @@
 // Vulkan 1.0 entry points with one GPU. The NDK libvulkan is a 1.0 stub without
 // the 1.1 device-group entry points; HarmonyOS exports them, but its app uses
 // the same single-GPU path. Multi-GPU AFR is desktop-only.
-#if defined(__ANDROID__) || defined(__OHOS__)
+#if defined(__ANDROID__) || defined(__OHOS__) || (defined(__APPLE__) && defined(GPU_BENCH_NO_GLFW))
 #define GPU_BENCH_EMBEDDED_VULKAN 1
 #endif
 namespace gpu_bench {
 
 void VulkanBackend::InitBackend() {
+#ifdef GPU_BENCH_MOLTENVK
+    if (isGpuBurnWorkload(config_.workload)) config_.framesInFlight = 1;
+#endif
     if (config_.workload == Workload::Fluid ||
         isCinematicLiquidWorkload(config_.workload)) {
         if (config_.headless)
@@ -124,6 +127,9 @@ void VulkanBackend::CreateInstance() {
 #elif defined(__OHOS__)
         extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
         extensions.push_back(VK_OHOS_SURFACE_EXTENSION_NAME);
+#elif defined(__APPLE__) && defined(GPU_BENCH_NO_GLFW)
+        extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+        extensions.push_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME);
 #else
         std::uint32_t glfwExtCount = 0;
         const char** glfwExts = glfwGetRequiredInstanceExtensions(&glfwExtCount);
@@ -144,11 +150,18 @@ void VulkanBackend::CreateInstance() {
     if (hasDebugUtils)
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
+    bool portability = std::any_of(availableExtensions.begin(), availableExtensions.end(),
+        [](const VkExtensionProperties& ext) {
+            return std::strcmp(ext.extensionName, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME) == 0;
+        });
+    if (portability) extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+
     VkInstanceCreateInfo ci{};
     ci.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     ci.pApplicationInfo        = &appInfo;
     ci.enabledExtensionCount   = static_cast<std::uint32_t>(extensions.size());
     ci.ppEnabledExtensionNames = extensions.data();
+    if (portability) ci.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 
     const VkResult created = vkCreateInstance(&ci, nullptr, &instance_);
     if (created != VK_SUCCESS) {
@@ -229,6 +242,13 @@ void VulkanBackend::CreateSurface() {
     ci.window = nativeWindow;
     if (vkCreateSurfaceOHOS(instance_, &ci, nullptr, &surface_) != VK_SUCCESS)
         throw std::runtime_error("vkCreateSurfaceOHOS failed");
+#elif defined(__APPLE__) && defined(GPU_BENCH_NO_GLFW)
+    if (!window_) throw std::runtime_error("iOS Vulkan surface requires CAMetalLayer");
+    VkMetalSurfaceCreateInfoEXT ci{};
+    ci.sType = VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT;
+    ci.pLayer = static_cast<const CAMetalLayer*>(window_);
+    if (vkCreateMetalSurfaceEXT(instance_, &ci, nullptr, &surface_) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateMetalSurfaceEXT failed");
 #else
     if (glfwCreateWindowSurface(instance_, window_, nullptr, &surface_) != VK_SUCCESS)
         throw std::runtime_error("glfwCreateWindowSurface failed");
@@ -884,10 +904,15 @@ void VulkanBackend::CreateSwapChain() {
     ci.preTransform   = (sc.capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
                             ? VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR
                             : sc.capabilities.currentTransform;
-    renderWidth_      = ext.width;
-    renderHeight_     = ext.height;
 #else
     ci.preTransform   = sc.capabilities.currentTransform;
+#endif
+#if defined(GPU_BENCH_EMBEDDED_VULKAN) || defined(GPU_BENCH_MOLTENVK)
+    renderWidth_      = ext.width;
+    renderHeight_     = ext.height;
+#endif
+#ifdef GPU_BENCH_MOLTENVK
+    std::cout << "[Vulkan] Render extent: " << ext.width << 'x' << ext.height << std::endl;
 #endif
     ci.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     ci.presentMode    = pm;
@@ -1507,7 +1532,8 @@ void VulkanBackend::CreateTimestampQueryPool() {
     std::vector<VkQueueFamilyProperties> fams(cnt);
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice_, &cnt, fams.data());
 
-    if (fams[idx.graphicsFamily.value()].timestampValidBits == 0) {
+    const auto timingFamily = config_.headless ? idx.computeFamily.value() : idx.graphicsFamily.value();
+    if (fams[timingFamily].timestampValidBits == 0) {
         std::cout << "[Profiling] Timestamps not supported -- disabled.\n";
         EnableSynchronizedTimingFallback("the driver has none");
         return;
@@ -1545,6 +1571,12 @@ void VulkanBackend::CollectTimestampResults(std::uint32_t slot) {
 
     timestampSlotReady_[slot] = false;
 
+    if (ts[3] <= ts[0] || ts[1] < ts[0] || ts[3] < ts[2] ||
+        !std::isfinite(timestampPeriodNs_) || timestampPeriodNs_ <= 0) {
+        EnableSynchronizedTimingFallback("the driver returned an empty or invalid interval");
+        return;
+    }
+
     const double toMs = static_cast<double>(timestampPeriodNs_) / 1'000'000.0;
     AccumulateTiming(
         static_cast<double>(ts[1] - ts[0]) * toMs,
@@ -1577,12 +1609,46 @@ void VulkanBackend::EnableSynchronizedTimingFallback(const char* reason) {
 // OpenGL ES backend does it: by the GPU's clock in a frame as the test draws
 // it, and by wall clock in a command buffer of its own. The frames of the
 // check take enough steps that submitting and waiting do not weigh; a step of
-// zero length leaves every particle where it is. Android and HarmonyOS only:
-// the desktop is left as it was.
+// zero length leaves every particle where it is. Embedded hosts, including iOS:
+// MoltenVK desktop uses the same validation as the embedded hosts.
 void VulkanBackend::CheckTimestampsAgainstWallClock() {
-#if defined(GPU_BENCH_EMBEDDED_VULKAN)
-    if (!timestampsSupported_ || synchronizedTimingFallback_ || config_.headless ||
-        config_.workload != Workload::Stream) return;
+#if defined(GPU_BENCH_EMBEDDED_VULKAN) || defined(GPU_BENCH_MOLTENVK)
+    if (!timestampsSupported_ || synchronizedTimingFallback_) return;
+#ifdef GPU_BENCH_MOLTENVK
+    if (isGpuBurnWorkload(config_.workload)) {
+        checkingTimestamps_ = true;
+        double wallMs = (std::numeric_limits<double>::max)();
+        timestampsSupported_ = false;
+        synchronizedTimingFallback_ = true;
+        for (int attempt = 0; attempt < 2; ++attempt) {
+            DrawFrame(0.0f);
+            wallMs = (std::min)(wallMs, syncRenderMs_);
+        }
+        synchronizedTimingFallback_ = false;
+        timestampsSupported_ = true;
+        double gpuMs = 0.0;
+        for (int attempt = 0; attempt < 2; ++attempt) {
+            const auto slot = currentFrame_;
+            DrawFrame(0.0f);
+            vkWaitForFences(device_, 1, &inFlightFences_[slot], VK_TRUE, UINT64_MAX);
+            std::uint64_t ts[kTimestampsPerFrame]{};
+            const auto read = vkGetQueryPoolResults(device_, timestampQueryPool_,
+                slot * kTimestampsPerFrame, kTimestampsPerFrame, sizeof(ts), ts,
+                sizeof(std::uint64_t), VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
+            timestampSlotReady_[slot] = false;
+            if (read == VK_SUCCESS && ts[3] >= ts[2])
+                gpuMs = (std::max)(gpuMs, double(ts[3] - ts[2]) * timestampPeriodNs_ / 1'000'000.0);
+        }
+        checkingTimestamps_ = false;
+        std::cout << "[Profiling] Render timestamp check: " << gpuMs
+                  << " ms GPU, " << wallMs << " ms synchronized submit/wait." << std::endl;
+        renderTimestampsValidated_ = std::isfinite(gpuMs) && gpuMs > 0 && gpuMs >= 0.5 * wallMs && gpuMs <= 2.0 * wallMs;
+        if (!renderTimestampsValidated_)
+            EnableSynchronizedTimingFallback("render timestamps disagree with synchronized submit/wait");
+        return;
+    }
+#endif
+    if (config_.workload != Workload::Stream) return;
 
     constexpr std::uint32_t kParticleSteps = 16777216;
     checkDispatchRepeats_ = (std::min)(256u, (std::max)(1u,
@@ -1780,6 +1846,8 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
             0, 0, nullptr, 1, &betweenSteps, 0, nullptr);
         vkCmdDispatch(cmd, config_.particleCount / kComputeWorkGroupSize, 1, 1);
+
+
     }
     EndDebugLabel(cmd);
 
@@ -1948,6 +2016,21 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         }
         vkCmdDispatch(cmd, config_.particleCount / kComputeWorkGroupSize, 1, 1);
 
+        // The validation workload must scale in the compute-only path too.
+        for (std::uint32_t repeat = 1; repeat < checkDispatchRepeats_; ++repeat) {
+            VkBufferMemoryBarrier betweenSteps{};
+            betweenSteps.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+            betweenSteps.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+            betweenSteps.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+            betweenSteps.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            betweenSteps.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            betweenSteps.buffer = particleBuffer_;
+            betweenSteps.size = VK_WHOLE_SIZE;
+            vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 1, &betweenSteps, 0, nullptr);
+            vkCmdDispatch(cmd, config_.particleCount / kComputeWorkGroupSize, 1, 1);
+        }
+
         if (timestampsSupported_)
             vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, timestampQueryPool_, tsBase + 1);
 
@@ -1972,9 +2055,9 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         timestampSlotReady_[currentFrame_] = timestampsSupported_;
         if (synchronizedTimingFallback_) {
             vkWaitForFences(device_, 1, &inFlightFences_[currentFrame_], VK_TRUE, UINT64_MAX);
-            const double computeMs = std::chrono::duration<double, std::milli>(
+            syncComputeMs_ = std::chrono::duration<double, std::milli>(
                 std::chrono::steady_clock::now() - syncBegin).count();
-            AccumulateTiming(computeMs, 0.0, computeMs);
+            if (!checkingTimestamps_) AccumulateTiming(syncComputeMs_, 0.0, syncComputeMs_);
         }
 
         currentFrame_ = (currentFrame_ + 1) % config_.framesInFlight;
@@ -2056,6 +2139,7 @@ void VulkanBackend::DrawFrame(float deltaTime) {
         vkWaitForFences(device_, 1, &inFlightFences_[currentFrame_], VK_TRUE, UINT64_MAX);
         const double renderMs = std::chrono::duration<double, std::milli>(
             std::chrono::steady_clock::now() - syncRenderBegin).count();
+        syncRenderMs_ = renderMs;
         if (!checkingTimestamps_)
             AccumulateTiming(syncComputeMs_, renderMs, syncComputeMs_ + renderMs);
     }

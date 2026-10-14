@@ -170,6 +170,9 @@ namespace winrt::gpu_bench_gui::implementation
             winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
 
         // CPU page
+        void OnGpuAll(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
+        void OnMachineAll(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
+        void OnCpuAll(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
         void OnCpuRun(winrt::Windows::Foundation::IInspectable const& sender,
                       winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void OnCpuCancel(winrt::Windows::Foundation::IInspectable const& sender,

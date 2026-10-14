@@ -55,7 +55,7 @@
 		55A52987CDE0BA67BFB5FED1 /* InfoHint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoHint.swift; sourceTree = "<group>"; };
 		63361444C8D5FF46CED28E1E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		6884C8DB370841C338158927 /* MetalBenchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalBenchView.swift; sourceTree = "<group>"; };
-		6DA968052D30E0E5ACE58D5A /* Mangekyo.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Mangekyo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6DA968052D30E0E5ACE58D5A /* Mangekyo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mangekyo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		71A97EBA18D7D2031363CD97 /* BenchmarkStageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkStageView.swift; sourceTree = "<group>"; };
 		9258366C7B9E8DCAD1DA826D /* CpuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CpuView.swift; sourceTree = "<group>"; };
 		A0B2770EB48BCF00DE44554D /* ChartGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartGeometry.swift; sourceTree = "<group>"; };
@@ -216,8 +216,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 2600;
-				TargetAttributes = {
-				};
 			};
 			buildConfigurationList = D585FA24BA763027410154AD /* Build configuration list for PBXProject "Mangekyo" */;
 			developmentRegion = en;
@@ -253,6 +251,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		FBD85741E30D66459188907A /* Bundle runtime Metal sources */ = {
 			isa = PBXShellScriptBuildPhase;
+            alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -273,7 +272,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -eu\nfor shader in particle.metal gpu_burn.metal cinematic_liquid_v2.metal; do\n  install -m 0644 \"$PROJECT_DIR/../shaders/$shader\" \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/$shader\"\ndone\n";
+			shellScript = "set -eu\nfor shader in particle.metal gpu_burn.metal cinematic_liquid_v2.metal gpu_burn_es2.vert gpu_burn_es2.frag; do\n  install -m 0644 \"$PROJECT_DIR/../shaders/$shader\" \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/$shader\"\ndone\nspv_dir=\"$PROJECT_DIR/../build-ios/$CONFIGURATION-$PLATFORM_NAME\"\nfor shader in \"$spv_dir\"/*.spv; do\n  [ -f \"$shader\" ] || continue\n  install -m 0644 \"$shader\" \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/$(basename \"$shader\")\"\ndone\ninstall -m 0644 \"$PROJECT_DIR/../build-ios/dependencies/MoltenVK/LICENSE\" \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/MoltenVK-LICENSE\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -392,9 +391,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = (
-					"\"$(PROJECT_DIR)/Mangekyo/Engine\"",
-				);
+				HEADER_SEARCH_PATHS = "\"$(PROJECT_DIR)/Mangekyo/Engine\"";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -416,9 +413,8 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				HEADER_SEARCH_PATHS = (
-					"\"$(PROJECT_DIR)/../src\"",
-				);
+				DEVELOPMENT_TEAM = 2W6PXCJAM6;
+				HEADER_SEARCH_PATHS = "\"$(PROJECT_DIR)/../src\"";
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -426,23 +422,30 @@
 					"@executable_path/Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					"\"$(PROJECT_DIR)/../build-ios/Release-iphoneos\"",
-					"\"$(PROJECT_DIR)/../build-ios/Release-iphoneos/Release-iphoneos\"",
-					"\"$(PROJECT_DIR)/../build-ios/Release-iphonesimulator\"",
-					"\"$(PROJECT_DIR)/../build-ios/Release-iphonesimulator/Release-iphonesimulator\"",
-					"\"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"",
-					"\"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"",
-					"\"$(PROJECT_DIR)/../build\"",
-				);
+                    "\"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)-$(PLATFORM_NAME)/$(CONFIGURATION)-$(PLATFORM_NAME)\"",
+                    "\"$(PROJECT_DIR)/../build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/$(MOLTENVK_SLICE)\"",
+                );
+				"MOLTENVK_SLICE[sdk=iphoneos*]" = "ios-arm64";
+				"MOLTENVK_SLICE[sdk=iphonesimulator*]" = "ios-arm64_x86_64-simulator";
 				OTHER_LDFLAGS = (
 					"-lgpu_engine",
+					"-lMoltenVK",
+					"-framework IOSurface",
+                    "-framework OpenGLES",
+					"-framework CoreGraphics",
 					"-lc++",
-					"-framework Metal",
-					"-framework MetalKit",
-					"-framework QuartzCore",
-					"-framework UIKit",
-					"-framework CoreFoundation",
-					"-framework Foundation",
+					"-framework",
+					Metal,
+					"-framework",
+					MetalKit,
+					"-framework",
+					QuartzCore,
+					"-framework",
+					UIKit,
+					"-framework",
+					CoreFoundation,
+					"-framework",
+					Foundation,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.fairchild.Mangekyo;
 				SDKROOT = iphoneos;
@@ -521,9 +524,8 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				HEADER_SEARCH_PATHS = (
-					"\"$(PROJECT_DIR)/../src\"",
-				);
+				DEVELOPMENT_TEAM = 2W6PXCJAM6;
+				HEADER_SEARCH_PATHS = "\"$(PROJECT_DIR)/../src\"";
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -531,23 +533,30 @@
 					"@executable_path/Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = (
-					"\"$(PROJECT_DIR)/../build-ios/Release-iphoneos\"",
-					"\"$(PROJECT_DIR)/../build-ios/Release-iphoneos/Release-iphoneos\"",
-					"\"$(PROJECT_DIR)/../build-ios/Release-iphonesimulator\"",
-					"\"$(PROJECT_DIR)/../build-ios/Release-iphonesimulator/Release-iphonesimulator\"",
-					"\"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"",
-					"\"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"",
-					"\"$(PROJECT_DIR)/../build\"",
-				);
+                    "\"$(PROJECT_DIR)/../build-ios/$(CONFIGURATION)-$(PLATFORM_NAME)/$(CONFIGURATION)-$(PLATFORM_NAME)\"",
+                    "\"$(PROJECT_DIR)/../build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/$(MOLTENVK_SLICE)\"",
+                );
+				"MOLTENVK_SLICE[sdk=iphoneos*]" = "ios-arm64";
+				"MOLTENVK_SLICE[sdk=iphonesimulator*]" = "ios-arm64_x86_64-simulator";
 				OTHER_LDFLAGS = (
 					"-lgpu_engine",
+					"-lMoltenVK",
+					"-framework IOSurface",
+                    "-framework OpenGLES",
+					"-framework CoreGraphics",
 					"-lc++",
-					"-framework Metal",
-					"-framework MetalKit",
-					"-framework QuartzCore",
-					"-framework UIKit",
-					"-framework CoreFoundation",
-					"-framework Foundation",
+					"-framework",
+					Metal,
+					"-framework",
+					MetalKit,
+					"-framework",
+					QuartzCore,
+					"-framework",
+					UIKit,
+					"-framework",
+					CoreFoundation,
+					"-framework",
+					Foundation,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.fairchild.Mangekyo;
 				SDKROOT = iphoneos;
@@ -561,9 +570,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = (
-					"\"$(PROJECT_DIR)/Mangekyo/Engine\"",
-				);
+				HEADER_SEARCH_PATHS = "\"$(PROJECT_DIR)/Mangekyo/Engine\"";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

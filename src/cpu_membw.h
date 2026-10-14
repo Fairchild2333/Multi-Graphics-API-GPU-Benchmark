@@ -7,6 +7,7 @@
 #endif
 #include <string>
 #include <vector>
+#include "cpu_scheduling.h"
 
 namespace gpu_bench {
 
@@ -43,6 +44,7 @@ struct CpuMemBwConfig {
     // a CPU with one core type. Both make a stored result a preview.
     std::uint32_t debugSplitClasses = 0;  // treat the cores as this many classes
     bool debugHideLastCache = false;      // ignore the last cache the OS reports
+    CpuCoreType coreType = DefaultCpuCoreType(); // single-thread sweeps only
 };
 
 // One data or unified cache of the reference core.
@@ -61,6 +63,9 @@ struct CpuMemBwPoint {
     std::uint32_t threads = 1;
     double medianGBps = 0.0;
     double bestGBps = 0.0;
+    CpuResidency residency;
+    std::uint32_t residencyRetries = 0;
+    double maxSampleMs = 0.0;
 };
 
 // Bandwidth of one level of the hierarchy: the median over the data sets that

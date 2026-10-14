@@ -116,12 +116,20 @@ or App Store archive.
 
 | Page | Features |
 |------|----------|
-| **GPU / Run** | Custom + Full Analysis; multi-select API (supported / unsupported); Duration seconds/minutes/hours/frames/Until Cancel; particle & Burn presets; capture-at-N; legacy toggle; progress; Cancel; open results/captures; charts of the run (scores of the jobs, GPU time per frame) |
-| **CPU** | per-core / multi / all; Quick 1s & Formal 15s; warm-up; summary + log; one bar per logical processor; cache & memory bandwidth sweep (`--cpu-membw`) with level tables, log-log curves and storage bars |
-| **History** | Table + sort; GPU/API/workload/time filters; `workloadVersion` column; clear all; open folders |
-| **Charts** | One bar chart per test from the saved results, drawn in SwiftUI (no Python needed); the Full Analysis presets still write PNGs with `scripts/plot_workloads.py` |
+| **GPU / Run** | One-click GPU suite and complete-machine suite across all available GPUs/APIs; Custom + Full Analysis; duration controls; particle & Burn presets; capture-at-N; progress; Cancel; open results/captures; current-run charts |
+| **CPU** | One-click compute + cache/memory/page-mapping/storage suite; per-core / multi / all; Formal 15s default; summary + log; level tables, log-log curves and storage bars |
+| **History** | Table + sort; GPU/API/workload/time filters; `workloadVersion` column; saved cache/memory curves; clear all; open folders |
+| **Charts** | Saved result comparison bars and cache/memory curves, drawn in SwiftUI (no Python needed); the Full Analysis presets still write PNGs with `scripts/plot_workloads.py` |
 | **Settings** | Theme; language Auto/EN/简体中文/日本語; working directory |
 | **About** | Version, description, GitHub link, system info |
+
+The score-suite buttons run GPUs sequentially and CPU once per computer, save
+to the shared `results/results.json`, and do not request automatic capture.
+Unified-memory Metal devices include the independent GPU cache diagnostic.
+On the current M4 Pro, the GPU suite has 17 native jobs, or 30 with translated
+Vulkan enabled; adding the two CPU phases gives 19 or 32 jobs. These are job
+counts: CPU compute can save more than one score record. Invalid timing or
+changing throughput is marked for review and retained in history.
 
 ## Backend contract
 
@@ -273,12 +281,48 @@ Parsed chart data belongs to each page's GPU or CPU channel, and process output
 is assembled into complete lines before parsing. Comparison charts filter the
 workload version and offer only particle sizes that match the selected mode.
 
-The GPU page exposes a native Metal cache/memory probe. Its particle-derived
+The GPU page's Workload menu includes **Memory Bandwidth — VRAM / Cache**.
+Auto uses native Metal; selecting Vulkan requires the translated API switch.
+OpenGL does not support this test. The sweep finishes automatically and saves
+its result, so duration, V-Sync and capture settings do not apply.
+The native Metal cache/memory probe's particle-derived
 curves and `metal_memory_sweep_v1_preview` saved results are separate from
 Vulkan `membw_v1`. A final data point can still be cache-assisted. The CLI keeps
 its original no-save default; `--memory-sweep-save` explicitly saves a preview.
 
+## Saved cache and memory curves
+
+History and Charts have a **Cache & memory curves** button. Choose a saved CPU,
+Vulkan or Metal memory run to see the working-set curves without running another
+test. CPU tables retain the recorded cache levels, scheduler-managed status,
+and per-thread sizes. Vulkan displays read/write/copy summaries and local-cache
+probes; Metal remains a particle-derived preview with separate private/shared
+allocation curves. Generic cache-hit rates do not verify distinct GPU L2/L3
+or SoC/SLC speeds.
+
+**Open results file…** reads an older JSON array or results envelope into this
+viewer only. It does not merge, rewrite or change the current history. A file
+containing only particle scores cannot supply cache/memory sweep curves.
+On 2026-10-13, 139 shared parser/geometry checks and Apple builds passed; actual
+saved CPU, Vulkan and Metal curves were inspected in the macOS GUI.
+
+The native Metal diagnostic `--gpu-cache-probe` adds dependent-read latency
+and CPU/GPU warming controls as a separate saved `gpu_cache` preview. Its
+history view separates ns/load from parallel uint32 payload GB/s and shows
+the load/sample counts. It does not modify or replace existing memory tests.
+See [method and attribution limits](../docs/gpu-cache-probe.md). On 2026-10-13,
+the complete CPU types and three full cache diagnostics passed, along with
+the original Vulkan sweep, 144 shared parser checks and CTest 3/3.
+
 ## Complete series and API availability
+
+The 2026-10-13 M4 Pro GUI series with translated APIs enabled passed all 31
+jobs and produced all 8 native captures. Runtime probing also found and fixed
+a MoltenVK Retina surface mismatch (2560x1440 instead of 1280x720). Corrected
+rendered results use `_viewport1280x720_v1` and the actual extent metadata;
+old records remain in their previous group. The 8 corrected Vulkan jobs and
+8 native Metal no-capture controls passed. Local evidence and comparisons are
+in `out/test-results/macos-complete-20261013/`.
 
 The mobile adb runner contains 29 jobs across Vulkan, OpenGL ES 3.1, OpenGL
 ES 2.0 and CPU. The desktop complete series uses the same particle sizes and
@@ -345,3 +389,5 @@ Verified: build/signature checks, default policy (18 jobs, no Vulkan), explicit
 opt-in policy (31 jobs, Vulkan available), and rejection without opt-in. These
 are capability/policy checks; no translated performance run or full series was
 started during this change.
+
+CPU 页面在 Apple Silicon 自动测试大核＋小核，无核心类型选项；每轮核对至少 99% 的实际核心类型 CPU 时间。大核／小核成绩分别保存，缓存曲线使用各自容量，完整测试也使用该模式。小核后台策略成绩不代表最高频率。方法见 docs/apple-cpu-core-types.md。

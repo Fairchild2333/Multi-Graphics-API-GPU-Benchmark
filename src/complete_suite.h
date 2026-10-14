@@ -10,6 +10,7 @@ struct SuiteCapabilities {
     bool burn = false;
     bool liquid = false;
     bool memory = false;
+    bool cacheState = false;
 };
 
 struct SuiteVariant {
@@ -32,6 +33,7 @@ inline std::vector<SuiteVariant> SupportedSuiteVariants(SuiteCapabilities caps) 
             result.push_back({"gpu_burn", 0, steps, false});
     if (caps.liquid) result.push_back({"cinematic_liquid"});
     if (caps.memory) result.push_back({"membw", 0, 0, true});
+    if (caps.cacheState) result.push_back({"gpu_cache", 0, 0, true});
     return result;
 }
 

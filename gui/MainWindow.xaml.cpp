@@ -343,7 +343,8 @@ namespace
                              std::wstring command,
                              std::wstring const& cwd,
                              DWORD timeoutMs,
-                             HANDLE cancelEvent = nullptr)
+                             HANDLE cancelEvent = nullptr,
+                             std::function<void(std::string const&)> onLine = {})
     {
         SECURITY_ATTRIBUTES security{};
         security.nLength = sizeof(security);
@@ -581,10 +582,25 @@ namespace
             constexpr ULONGLONG kStopDrainMs = 1000;
             std::array<char, 8192> buffer{};
             ULONGLONG stopDeadline = 0;
+            std::string pendingLine;
 
             auto appendOutput = [&](DWORD bytesRead)
             {
                 output.append(buffer.data(), bytesRead);
+                if (onLine)
+                {
+                    pendingLine.append(buffer.data(), bytesRead);
+                    size_t newline = 0;
+                    while ((newline = pendingLine.find('\n')) != std::string::npos)
+                    {
+                        auto line = pendingLine.substr(0, newline);
+                        pendingLine.erase(0, newline + 1);
+                        if (!line.empty() && line.back() == '\r') line.pop_back();
+                        onLine(line);
+                    }
+                    // Protocol records are short; bound an unterminated driver log.
+                    if (pendingLine.size() > 64u * 1024u) pendingLine.clear();
+                }
                 if (output.size() > kMaxOutputBytes)
                 {
                     output.erase(0, output.size() - kMaxOutputBytes);
@@ -764,7 +780,8 @@ namespace
 
     CliResult captureCliProcess(std::vector<std::string> const& args,
                                 DWORD timeoutMs = 60u * 60u * 1000u,
-                                HANDLE cancelEvent = nullptr)
+                                HANDLE cancelEvent = nullptr,
+                                std::function<void(std::string const&)> onLine = {})
     {
         if (args.empty()) return { "[GUI worker] Empty command.\n", -1 };
 
@@ -777,7 +794,7 @@ namespace
         }
         return captureProcess(&executable, std::move(command),
                               executable.parent_path().wstring(), timeoutMs,
-                              cancelEvent);
+                              cancelEvent, std::move(onLine));
     }
 
     // Every GUI benchmark carries either --time or --benchmark. Give timed
@@ -4063,7 +4080,10 @@ void MainWindow::applyLanguage()
     }
     CpuOutputExpander().Header(locContent("Raw CLI output (live tail)", "原始 CLI 输出（实时尾部）", "生 CLI 出力（ライブ末尾）"));
     CpuCancelButton().Content(locContent("Cancel", "取消", "キャンセル"));
-    CpuRunButton().Content(locContent("Run CPU Benchmark", "开始 CPU 测试", "CPU ベンチマークを実行"));
+    CpuRunButton().Content(locContent("Run selected CPU test", "运行所选 CPU 项目", "選択した CPU テストを実行"));
+    CpuAllButton().Content(locContent("Run all CPU tests", "一键测试 CPU 全套", "CPU 全項目を実行"));
+    GpuAllButton().Content(locContent("Run all GPU tests", "一键测试 GPU 全套", "GPU 全項目を実行"));
+    MachineAllButton().Content(locContent("Test all items", "一键测试全部项目", "全項目を実行"));
     // The progress label keeps the wording of the run that last wrote it; only
     // its idle text follows the language.
     auto isIdleLabel = [](hstring const& text)
@@ -4493,6 +4513,9 @@ void MainWindow::syncActionButtonsEnabled()
         // ProbeGpus + benchmark has crashed hosts via driver resets before.
         RunButton().IsEnabled(!busy && m_gpuEnumerationComplete);
         CpuRunButton().IsEnabled(!busy && !m_enginePath.empty());
+        CpuAllButton().IsEnabled(!busy && !m_enginePath.empty());
+        GpuAllButton().IsEnabled(!busy && m_gpuEnumerationComplete && !m_enginePath.empty());
+        MachineAllButton().IsEnabled(!busy && m_gpuEnumerationComplete && !m_enginePath.empty());
         GenChartsButton().IsEnabled(!busy && !m_enginePath.empty());
     }
     catch (...) {}
@@ -4555,6 +4578,24 @@ void MainWindow::OnCpuTimeChanged(NumberBox const& sender,
     m_suppressCombo = true;
     CpuDurationPresetBox().SelectedIndex(preset);
     m_suppressCombo = false;
+}
+
+void MainWindow::OnGpuAll(IInspectable const&, RoutedEventArgs const&)
+{
+    if (m_enginePath.empty() || !m_gpuEnumerationComplete) return;
+    launchJobs({{m_enginePath, "--gui-worker", "--gpu-suite"}}, true);
+}
+
+void MainWindow::OnMachineAll(IInspectable const&, RoutedEventArgs const&)
+{
+    if (m_enginePath.empty() || !m_gpuEnumerationComplete) return;
+    launchJobs({{m_enginePath, "--gui-worker", "--complete-suite", "--no-renderdoc"}}, true);
+}
+
+void MainWindow::OnCpuAll(IInspectable const&, RoutedEventArgs const&)
+{
+    if (m_enginePath.empty()) return;
+    launchCpuBenchmark("suite", 15.0, 0.2);
 }
 
 void MainWindow::OnCpuRun(IInspectable const&, RoutedEventArgs const&)
@@ -4738,6 +4779,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
     m_cpuHadProtocolError = false;
     m_cpuCoreLabels.clear();
     const bool memoryMode = mode == "memory";
+    const bool suiteMode = mode == "suite";
     m_cpuMemView = memoryMode;
     clearCpuResults();
     updateCpuModeControls();
@@ -4763,7 +4805,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
     auto dispatcher = m_dispatcher;
 
     std::thread([this, strong, dispatcher, engine, workingDirectory,
-                 mode = std::move(mode), seconds, warmupSeconds, memoryMode]()
+                 mode = std::move(mode), seconds, warmupSeconds, memoryMode, suiteMode]()
     {
       try
       {
@@ -4831,7 +4873,11 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
 
         std::wostringstream command;
         command.imbue(std::locale::classic());
-        if (memoryMode)
+        if (suiteMode)
+        {
+            command << L'"' << engine.wstring() << L"\" --cpu-suite";
+        }
+        else if (memoryMode)
         {
             command << L'"' << engine.wstring() << L"\" --cpu-membw";
             // Diagnostic: extra worker arguments, such as
@@ -4897,10 +4943,10 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                 ::TerminateProcess(process.hProcess, ERROR_CANCELLED);
         }
 
-        auto dispatchLines = [this, strong, dispatcher, memoryMode](std::vector<std::string> lines)
+        auto dispatchLines = [this, strong, dispatcher, memoryMode, suiteMode](std::vector<std::string> lines)
         {
             if (lines.empty()) return;
-            dispatcher.TryEnqueue([this, strong, memoryMode, lines = std::move(lines)]()
+            dispatcher.TryEnqueue([this, strong, memoryMode, suiteMode, lines = std::move(lines)]()
             {
                 auto raw = std::wstring(CpuOutputBox().Text().c_str());
                 for (auto const& line : lines)
@@ -4920,6 +4966,15 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
                 }
                 CpuOutputBox().Text(raw);
 
+                if (suiteMode) {
+                    for (auto const& line : lines) {
+                        if (line.rfind("CPUMEM_META\t", 0) == 0) {
+                            m_cpuMemView = true;
+                            updateCpuModeControls();
+                        }
+                        handleCpuMemLine(line);
+                    }
+                }
                 if (memoryMode)
                 {
                     for (auto const& line : lines) handleCpuMemLine(line);
@@ -5094,7 +5149,7 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
             if (!line.empty() && line.back() == '\r') line.pop_back();
             const auto parsed = parseCpuProtocolLine(line);
             if (!memoryMode) protocolAudit.observe(parsed);
-            const bool memoryDone = memoryMode && line.rfind("CPUMEM_DONE\t", 0) == 0;
+            const bool memoryDone = (memoryMode || suiteMode) && line.rfind("CPUMEM_DONE\t", 0) == 0;
             sawMemoryDone = sawMemoryDone || memoryDone;
             uiBatch.push_back(std::move(line));
             const auto now = std::chrono::steady_clock::now();
@@ -5141,8 +5196,8 @@ void MainWindow::launchCpuBenchmark(std::string mode, double seconds,
         // completeness checks.
         if (exitCode == 0 && pipeError.empty())
         {
-            if (!memoryMode) pipeError = protocolAudit.validate(mode);
-            else if (!sawMemoryDone) pipeError = "the cache / memory sweep ended without its summary";
+            if (!memoryMode) pipeError = protocolAudit.validate(suiteMode ? "all" : mode);
+            if ((memoryMode || suiteMode) && pipeError.empty() && !sawMemoryDone) pipeError = "the cache / memory sweep ended without its summary";
         }
         finish(exitCode, std::move(pipeError));
       }
@@ -6941,8 +6996,8 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
     renderGpuRunCharts();
     OutputBox().Text({});
 
-    // Progress: workers report no live protocol, so estimate per-job duration
-    // from the configured run length and advance a timer between job starts.
+    // Suite records supply the actual stage/count. Estimate only the time
+    // within each stage; ordinary workers use the configured run length.
     {
         const auto unit = durationUnitTag();
         const double amount = durationAmountValue();
@@ -7095,7 +7150,51 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                 });
             }
 
-            auto res = captureCliProcess(job, gpuWorkerTimeoutMs(job), cancelHandle);
+            auto suiteProgress = [this, strong, disp](std::string const& line)
+            {
+                if (!disp || line.rfind("SUITE_RUN\t", 0) != 0) return;
+                std::map<std::string, std::string> fields;
+                std::istringstream record(line);
+                std::string field;
+                while (std::getline(record, field, '\t'))
+                {
+                    const auto equal = field.find('=');
+                    if (equal != std::string::npos)
+                        fields[field.substr(0, equal)] = field.substr(equal + 1);
+                }
+                size_t index = 0, total = 0;
+                try
+                {
+                    index = std::stoull(fields["index"]);
+                    total = std::stoull(fields["total"]);
+                }
+                catch (...) { return; }
+                if (index == 0 || index > total || total > 100000) return;
+                std::string label = fields["backend"];
+                for (auto const& api : kRunApis)
+                    if (label == api.token) { label = api.label; break; }
+                if (!fields["key"].empty()) label += " · " + fields["key"];
+                else label += " · " + fields["workload"];
+                const double expected = fields["backend"] == "cpu" ? 300.0
+                    : fields["workload"] == "membw" ? 60.0 : 21.0;
+                disp.TryEnqueue([this, strong, index, total, label, expected]()
+                {
+                    if (!uiAlive() || m_gpuProgressJobs == 0) return;
+                    m_gpuProgressJobs = total;
+                    m_gpuProgressJobIndex = index - 1;
+                    m_gpuProgressApiLabel = label;
+                    m_gpuProgressJobExpectedSec = expected;
+                    m_gpuProgressIndeterminate = false;
+                    m_gpuProgressJobStart = std::chrono::steady_clock::now();
+                    GpuProgressBar().IsIndeterminate(false);
+                    const auto text = gpuRunningStatusText();
+                    setGpuStatus(StatusLight::Running, text);
+                    GpuStageText().Text(text);
+                    updateGpuProgressTick();
+                });
+            };
+            auto res = captureCliProcess(job, gpuWorkerTimeoutMs(job), cancelHandle,
+                                         std::move(suiteProgress));
             bool dx12RenderDocFallback = false;
             const bool requestedRenderDoc =
                 std::find(job.begin(), job.end(), "--renderdoc") != job.end() ||
@@ -7180,6 +7279,13 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                                    existing.target == issue.target;
                         });
                     if (!duplicate) gpuRunIssues.push_back(std::move(issue));
+                    continue;
+                }
+                if (suiteLine.rfind("SUITE_RESULT\tstatus=review", 0) == 0) {
+                    const auto reasonPos = suiteLine.find("\treason=");
+                    GpuRunIssue issue{GpuRunIssueKind::SuspectResult,
+                        reasonPos == std::string::npos ? suiteLine : suiteLine.substr(reasonPos + 8)};
+                    gpuRunIssues.push_back(std::move(issue));
                     continue;
                 }
                 const bool unsupportedLine =
@@ -7505,6 +7611,7 @@ void MainWindow::launchJobs(std::vector<std::vector<std::string>> jobs, bool nee
                     // samples do not belong to one job.
                     const bool suiteJob =
                         std::find(job.begin(), job.end(), "--complete-suite") != job.end() ||
+                        std::find(job.begin(), job.end(), "--gpu-suite") != job.end() ||
                         std::find(job.begin(), job.end(), "--fill-missing") != job.end();
                     if (!memBwScore && !suiteJob)
                     {

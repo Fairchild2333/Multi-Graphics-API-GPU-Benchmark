@@ -40,7 +40,7 @@ check() {  # label, app directory, extra files
     [ $rc -ne 0 ] && status=1
 }
 check macOS /repo/macos-gui/GPUBenchmark
-check iOS /repo/ios-gui/Mangekyo "$here/stubs/AppStubsIOS.swift"
+check iOS /repo/ios-gui/Mangekyo "$here/stubs/AppStubsIOS.swift /repo/ios-gui/Mangekyo/Models/MobileBenchmark.swift"
 
 echo "== files shared by both apps =="
 for file in Models/EngineOutput.swift Models/ChartGeometry.swift Models/Localization.swift \

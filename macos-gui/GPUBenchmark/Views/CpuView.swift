@@ -6,8 +6,8 @@ struct CpuView: View {
     @EnvironmentObject var engine: BenchEngine
 
     @State private var mode: String = "all"          // per-core | multi | all | memory
-    @State private var durationPreset: String = "1"  // 1 | 15
-    @State private var secondsPerTest: String = "1"
+    @State private var durationPreset: String = "15"  // 1 | 15
+    @State private var secondsPerTest: String = "15"
     @State private var warmupSec: String = "0.2"
     @State private var logScrollID = 0
 
@@ -56,12 +56,19 @@ struct CpuView: View {
                     engine.cancel(channel: .cpu)
                 }
                 .disabled(!run.isRunning)
+                Button {
+                    engine.run(jobs: [["gpu_benchmark", "--cpu-suite"]], needCharts: false, channel: .cpu)
+                } label: {
+                    Text(Localization.tr("Run all CPU tests", "一键测试 CPU 全套", "CPU 全項目を実行"))
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(engine.isRunning || engine.workingDirectory.isEmpty)
                 Button(action: runCpu) {
                     Text(memoryMode
                          ? Localization.tr("Run Cache & Memory Test", "开始缓存与内存测试", "キャッシュ / メモリテストを実行")
                          : Localization.tr("Run CPU Benchmark", "开始 CPU 测试", "CPU ベンチマークを実行"))
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.bordered)
                 .controlSize(.large)
                 .disabled(engine.isRunning || engine.workingDirectory.isEmpty)
             }
@@ -87,29 +94,27 @@ struct CpuView: View {
                         Text(Localization.tr("Test mode", "测试模式", "テストモード"))
                             .font(.subheadline).foregroundStyle(.secondary)
                         Picker("", selection: $mode) {
-                            Text(Localization.tr("Single-core", "单核", "コア別")).tag("per-core")
+                            Text(Localization.tr("Single thread", "单线程", "1 スレッド")).tag("per-core")
                             Text(Localization.tr("All-core", "全核", "全コア")).tag("multi")
-                            Text(Localization.tr("Single-core + All-core", "单核 + 全核", "コア別 + 全コア")).tag("all")
+                            Text(Localization.tr("Single thread + All-core", "单线程 + 全核", "1 スレッド + 全コア")).tag("all")
                             Text(Localization.tr("Cache & memory bandwidth", "缓存与内存带宽", "キャッシュ / メモリ帯域")).tag("memory")
                         }
                         .labelsHidden()
                         .frame(minWidth: 200)
                     }
 
-                    if !memoryMode {
-                        durationFields
-                    }
+                    if !memoryMode { durationFields }
                 }
 
                 Text(memoryMode
                      ? Localization.tr(
                         "Takes about a minute. The storage test writes a temporary file of up to 1 GiB in the results folder and removes it afterwards.",
-                        "大约需要一分钟。存储测试会在结果文件夹里写一个最大 1 GiB 的临时文件，测完即删除。",
+                        "大核与小核完整扫描需要几分钟。存储测试会写一个最大 1 GiB 的临时文件，测完即删除。",
                         "約 1 分かかります。ストレージテストは結果フォルダに最大 1 GiB の一時ファイルを書き込み、終了後に削除します。")
                      : Localization.tr(
-                        "Single-core duration is applied once to each logical processor; the formal preset can take a long time.",
-                        "单核测试会依次测试每个逻辑处理器；正式测试可能耗时较长。",
-                        "単一コア時間は論理プロセッサごとに適用。正式プリセットは長時間かかる場合があります。"))
+                        "Single-thread tests automatically cover performance and efficiency cores where supported. All-core always uses every core.",
+                        "单线程默认分别测大核和小核；全核始终使用全部核心，无需选择核心类型。",
+                        "対応環境では性能・効率コアを自動測定します。全コアでは全てのコアを使用します。"))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -188,11 +193,15 @@ struct CpuView: View {
                          memoryHeadline(mode: output.classes.first?.mode ?? "single", threads: 1))
             summaryValue(Localization.tr("Memory read, all cores", "内存读取，全核", "メモリ読込、全コア"),
                          memoryHeadline(mode: "all", threads: output.allThreads))
-        } else if output.hasComputeResults {
-            summaryValue(Localization.tr("Single-core average", "单核平均", "コア別平均"),
-                         scoreText(output.singleAverage))
+        }
+        if output.hasComputeResults {
+            ForEach(output.coreScores.filter { $0.coreType != "auto" }) { score in
+                summaryValue(score.label, EngineFormat.number(score.score) + " " + score.unit)
+            }
+            if output.coreTypeSelection == "auto" { summaryValue(Localization.tr("Single-thread sample average", "单线程采样平均", "1 スレッド実行の平均"),
+                         scoreText(output.singleAverage)) }
             summaryValue(Localization.tr("All-core", "全核", "全コア"), scoreText(output.multiScore))
-        } else {
+        } else if !output.hasMemoryResults {
             Text(run.lastScore.isEmpty ? "—" : run.lastScore)
                 .font(.title2).fontWeight(.semibold)
         }
@@ -212,7 +221,8 @@ struct CpuView: View {
     private var resultsSection: some View {
         if run.runOutput.hasMemoryResults {
             CpuMemoryResultsView(output: run.runOutput)
-        } else {
+        }
+        if run.runOutput.hasComputeResults {
             CpuComputeResultsCard(output: run.runOutput)
         }
     }
@@ -249,12 +259,12 @@ struct CpuView: View {
     private var infoText: String {
         memoryMode
             ? Localization.tr(
-                "Sweeps read, write and copy over data sets from 4 KiB to 1 GiB, on one thread and on all cores, then measures page mapping and the storage behind virtual memory. macOS does not let an app bind a thread to a core, so the one-thread sweep runs on the core the system picks. Result: cpu_membw_v1.",
-                "在 4 KiB 到 1 GiB 的数据量上扫描读、写、复制，分别用单线程和全部核心，然后测量页面映射和虚拟内存背后的存储。macOS 不允许 App 把线程绑定到某个核心，所以单线程扫描跑在系统挑选的核心上。结果：cpu_membw_v1。",
+                "Automatically sweeps both core types and all-core memory, then measures page mapping and storage. Every classified sample verifies actual core-type CPU time.",
+                "默认扫描大核、小核缓存与内存，以及全核内存，再测页面首次映射和换页磁盘速度。每轮核对核心类型归属，未通过就重试。",
                 "4 KiB〜1 GiB のデータセットで読込・書込・コピーをスイープ（1 スレッドと全コア）、続いてページ割り当てと仮想メモリのストレージを測定します。macOS ではスレッドをコアに固定できないため、1 スレッドのスイープはシステムが選んだコアで実行されます。結果: cpu_membw_v1。")
             : Localization.tr(
-                "Native mixed CPU kernel (per-core and/or all-core). Results use graphicsApi=CPU.",
-                "原生混合 CPU 内核（单核和/或全核）。结果使用 graphicsApi=CPU。",
+                "Uses the same mixed compute workload for single-thread and all-core scores. Selected core types are saved separately with verified CPU time and observed clock.",
+                "使用相同的混合计算负载测量单线程和全核速度。大核／小核成绩分别保存，并记录实际归属与时钟。",
                 "ネイティブ混合 CPU カーネル。結果は graphicsApi=CPU。")
     }
 
