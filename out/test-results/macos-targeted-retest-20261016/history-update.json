@@ -1,0 +1,18 @@
+{
+  "beforeCount": 149,
+  "afterCount": 155,
+  "beforeSha256": "62302b228db50009882fe386b65f32a258e3391519ba53f8f341c366367f67aa",
+  "afterSha256": "cbc3e5e7b3fde78e2b543fd68bf4e20fa42e9e220ff34dce52d471a7372f1499",
+  "oldRowsUnchanged": true,
+  "addedIDs": [
+    "20261016-233709-781-cpu-single-performance",
+    "20261016-233709-784-cpu-single-efficiency",
+    "20261016-233709-785-cpu-multi",
+    "20261016-233831-839",
+    "20261016-234007-683-membw",
+    "20261016-234053-033"
+  ],
+  "source": "data/results/results.json",
+  "livePath": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/results/results.json",
+  "notes": "CPU branch-preserving version remains separate. Vulkan v2 memory is explicitly preview; no old row relabeled."
+}

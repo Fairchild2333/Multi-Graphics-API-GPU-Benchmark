@@ -1,0 +1,241 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Apple M4 Pro (Integrated)                    38338 MB  YES    -     -    YES   YES 
+============================================================
+
+MEMBW_COUNTERS	extension_advertised=0	status=extension_not_advertised	inventory=	cache_attribution=unverified
+[membw] Data check: the kernels load from the buffer of 2048 MiB what was stored in it.
+[membw] MoltenVK uses synchronized wall-clock timing for the entire sweep.
+
+========== Memory Bandwidth Sweep (membw_v2_verified) ==========
+Device:    Apple M4 Pro (Integrated GPU)
+Driver:    0.2.2210
+Memory:    49152 MiB device-local heap, measured as system memory
+Sweep:     1 MiB - 2048 MiB in 0.5 MiB chunks
+Timing:    wall clock, 3 warm-up + 10 measured dispatches per point, median reported
+
+[read] 16 B loads
+    Data set   Passes   Dispatch MiB   Median ms     Min ms   Median GB/s   Best GB/s
+       1 MiB    65536          65536      31.214     30.424        2201.6      2258.8
+MEMBW_POINT	kernel=read	dataset_bytes=1048576	passes=65536	dispatch_bytes=68719476736	median_ms=31.213749	min_ms=30.423500	median_gbps=2201.577	best_gbps=2258.763
+     1.5 MiB    43690          65535      39.368     38.210        1745.5      1798.4
+MEMBW_POINT	kernel=read	dataset_bytes=1572864	passes=43690	dispatch_bytes=68718428160	median_ms=39.368042	min_ms=38.210375	median_gbps=1745.538	best_gbps=1798.423
+       2 MiB    32768          65536      40.092     39.522        1714.1      1738.8
+MEMBW_POINT	kernel=read	dataset_bytes=2097152	passes=32768	dispatch_bytes=68719476736	median_ms=40.091542	min_ms=39.521917	median_gbps=1714.064	best_gbps=1738.769
+       3 MiB    21845          65535      43.782     43.180        1569.5      1591.4
+MEMBW_POINT	kernel=read	dataset_bytes=3145728	passes=21845	dispatch_bytes=68718428160	median_ms=43.782353	min_ms=43.180292	median_gbps=1569.546	best_gbps=1591.430
+       4 MiB    16384          65536      47.206     46.647        1455.7      1473.2
+MEMBW_POINT	kernel=read	dataset_bytes=4194304	passes=16384	dispatch_bytes=68719476736	median_ms=47.205958	min_ms=46.647042	median_gbps=1455.737	best_gbps=1473.180
+       6 MiB    10922          65532      48.686     48.438        1411.4      1418.6
+MEMBW_POINT	kernel=read	dataset_bytes=6291456	passes=10922	dispatch_bytes=68715282432	median_ms=48.686416	min_ms=48.437708	median_gbps=1411.385	best_gbps=1418.632
+       8 MiB     6454          51632      41.883     41.632        1292.6      1300.5
+MEMBW_POINT	kernel=read	dataset_bytes=8388608	passes=6454	dispatch_bytes=54140076032	median_ms=41.883397	min_ms=41.631750	median_gbps=1292.638	best_gbps=1300.452
+      12 MiB     3023          36276      48.979     48.789         776.6       779.6
+MEMBW_POINT	kernel=read	dataset_bytes=12582912	passes=3023	dispatch_bytes=38038142976	median_ms=48.978979	min_ms=48.789250	median_gbps=776.622	best_gbps=779.642
+      16 MiB     2044          32704      31.780     31.094        1079.1      1102.9
+MEMBW_POINT	kernel=read	dataset_bytes=16777216	passes=2044	dispatch_bytes=34292629504	median_ms=31.780062	min_ms=31.093708	median_gbps=1079.061	best_gbps=1102.880
+      24 MiB      640          15360      36.448     36.015         441.9       447.2
+MEMBW_POINT	kernel=read	dataset_bytes=25165824	passes=640	dispatch_bytes=16106127360	median_ms=36.447854	min_ms=36.014667	median_gbps=441.895	best_gbps=447.210
+      32 MiB      408          13056      34.006     33.023         402.6       414.6
+MEMBW_POINT	kernel=read	dataset_bytes=33554432	passes=408	dispatch_bytes=13690208256	median_ms=34.005980	min_ms=33.022959	median_gbps=402.582	best_gbps=414.566
+      48 MiB      234          11232      41.117     40.727         286.4       289.2
+MEMBW_POINT	kernel=read	dataset_bytes=50331648	passes=234	dispatch_bytes=11777605632	median_ms=41.117333	min_ms=40.727000	median_gbps=286.439	best_gbps=289.184
+      64 MiB      170          10880      38.250     36.982         298.3       308.5
+MEMBW_POINT	kernel=read	dataset_bytes=67108864	passes=170	dispatch_bytes=11408506880	median_ms=38.249625	min_ms=36.982417	median_gbps=298.265	best_gbps=308.485
+      96 MiB      102           9792      40.347     40.082         254.5       256.2
+MEMBW_POINT	kernel=read	dataset_bytes=100663296	passes=102	dispatch_bytes=10267656192	median_ms=40.347417	min_ms=40.081542	median_gbps=254.481	best_gbps=256.169
+     128 MiB       83          10624      39.607     38.982         281.3       285.8
+MEMBW_POINT	kernel=read	dataset_bytes=134217728	passes=83	dispatch_bytes=11140071424	median_ms=39.606959	min_ms=38.982000	median_gbps=281.266	best_gbps=285.775
+     192 MiB       52           9984      42.167     41.871         248.3       250.0
+MEMBW_POINT	kernel=read	dataset_bytes=201326592	passes=52	dispatch_bytes=10468982784	median_ms=42.167147	min_ms=41.870791	median_gbps=248.273	best_gbps=250.031
+     256 MiB       42          10752      39.514     38.897         285.3       289.8
+MEMBW_POINT	kernel=read	dataset_bytes=268435456	passes=42	dispatch_bytes=11274289152	median_ms=39.514271	min_ms=38.897250	median_gbps=285.322	best_gbps=289.848
+     384 MiB       29          11136      46.691     46.541         250.1       250.9
+MEMBW_POINT	kernel=read	dataset_bytes=402653184	passes=29	dispatch_bytes=11676942336	median_ms=46.691021	min_ms=46.541416	median_gbps=250.090	best_gbps=250.894
+     512 MiB       22          11264      40.420     40.072         292.2       294.7
+MEMBW_POINT	kernel=read	dataset_bytes=536870912	passes=22	dispatch_bytes=11811160064	median_ms=40.420000	min_ms=40.072500	median_gbps=292.211	best_gbps=294.745
+     768 MiB       15          11520      49.215     48.081         245.4       251.2
+MEMBW_POINT	kernel=read	dataset_bytes=805306368	passes=15	dispatch_bytes=12079595520	median_ms=49.214584	min_ms=48.080834	median_gbps=245.447	best_gbps=251.235
+    1024 MiB       12          12288      42.823     42.023         300.9       306.6
+MEMBW_POINT	kernel=read	dataset_bytes=1073741824	passes=12	dispatch_bytes=12884901888	median_ms=42.823292	min_ms=42.023333	median_gbps=300.885	best_gbps=306.613
+    1536 MiB        8          12288      52.024     51.537         247.7       250.0
+MEMBW_POINT	kernel=read	dataset_bytes=1610612736	passes=8	dispatch_bytes=12884901888	median_ms=52.024146	min_ms=51.536584	median_gbps=247.672	best_gbps=250.015
+    2048 MiB        6          12288      42.610     42.058         302.4       306.4
+MEMBW_POINT	kernel=read	dataset_bytes=2147483648	passes=6	dispatch_bytes=12884901888	median_ms=42.610292	min_ms=42.057583	median_gbps=302.389	best_gbps=306.363
+
+[write] 16 B stores
+    Data set   Passes   Dispatch MiB   Median ms     Min ms   Median GB/s   Best GB/s
+       1 MiB     6834           6834      46.610     46.231         153.7       155.0
+MEMBW_POINT	kernel=write	dataset_bytes=1048576	passes=6834	dispatch_bytes=7165968384	median_ms=46.610000	min_ms=46.231292	median_gbps=153.743	best_gbps=155.003
+     1.5 MiB     6536           9804      44.536     44.375         230.8       231.7
+MEMBW_POINT	kernel=write	dataset_bytes=1572864	passes=6536	dispatch_bytes=10280239104	median_ms=44.536458	min_ms=44.374875	median_gbps=230.827	best_gbps=231.668
+       2 MiB     6418          12836      43.681     43.538         308.1       309.1
+MEMBW_POINT	kernel=write	dataset_bytes=2097152	passes=6418	dispatch_bytes=13459521536	median_ms=43.681313	min_ms=43.538250	median_gbps=308.130	best_gbps=309.142
+       3 MiB     5440          16320      38.203     37.947         447.9       451.0
+MEMBW_POINT	kernel=write	dataset_bytes=3145728	passes=5440	dispatch_bytes=17112760320	median_ms=38.202875	min_ms=37.947333	median_gbps=447.944	best_gbps=450.961
+       4 MiB     7130          28520      50.191     49.628         595.8       602.6
+MEMBW_POINT	kernel=write	dataset_bytes=4194304	passes=7130	dispatch_bytes=29905387520	median_ms=50.190854	min_ms=49.627708	median_gbps=595.833	best_gbps=602.595
+       6 MiB     7111          42666      49.686     49.640         900.4       901.3
+MEMBW_POINT	kernel=write	dataset_bytes=6291456	passes=7111	dispatch_bytes=44738543616	median_ms=49.686334	min_ms=49.640375	median_gbps=900.420	best_gbps=901.253
+       8 MiB     4621          36968      50.198     49.872         772.2       777.3
+MEMBW_POINT	kernel=write	dataset_bytes=8388608	passes=4621	dispatch_bytes=38763757568	median_ms=50.198104	min_ms=49.872208	median_gbps=772.216	best_gbps=777.262
+      12 MiB     2299          27588      49.980     49.261         578.8       587.2
+MEMBW_POINT	kernel=write	dataset_bytes=12582912	passes=2299	dispatch_bytes=28928114688	median_ms=49.979646	min_ms=49.260875	median_gbps=578.798	best_gbps=587.243
+      16 MiB     1899          30384      51.608     51.328         617.3       620.7
+MEMBW_POINT	kernel=write	dataset_bytes=16777216	passes=1899	dispatch_bytes=31859933184	median_ms=51.608146	min_ms=51.327708	median_gbps=617.343	best_gbps=620.716
+      24 MiB     1187          28488      50.162     49.545         595.5       602.9
+MEMBW_POINT	kernel=write	dataset_bytes=25165824	passes=1187	dispatch_bytes=29871833088	median_ms=50.161979	min_ms=49.544875	median_gbps=595.507	best_gbps=602.925
+      32 MiB      512          16384      31.363     31.117         547.8       552.1
+MEMBW_POINT	kernel=write	dataset_bytes=33554432	passes=512	dispatch_bytes=17179869184	median_ms=31.362750	min_ms=31.116916	median_gbps=547.779	best_gbps=552.107
+      48 MiB      579          27792      49.880     49.535         584.2       588.3
+MEMBW_POINT	kernel=write	dataset_bytes=50331648	passes=579	dispatch_bytes=29142024192	median_ms=49.879833	min_ms=49.535083	median_gbps=584.245	best_gbps=588.311
+      64 MiB      256          16384      30.646     30.353         560.6       566.0
+MEMBW_POINT	kernel=write	dataset_bytes=67108864	passes=256	dispatch_bytes=17179869184	median_ms=30.646083	min_ms=30.352708	median_gbps=560.589	best_gbps=566.008
+      96 MiB      284          27264      50.797     50.414         562.8       567.1
+MEMBW_POINT	kernel=write	dataset_bytes=100663296	passes=284	dispatch_bytes=28588376064	median_ms=50.797480	min_ms=50.413709	median_gbps=562.791	best_gbps=567.075
+     128 MiB      208          26624      49.482     48.926         564.2       570.6
+MEMBW_POINT	kernel=write	dataset_bytes=134217728	passes=208	dispatch_bytes=27917287424	median_ms=49.482395	min_ms=48.925709	median_gbps=564.186	best_gbps=570.606
+     192 MiB      140          26880      49.952     49.513         564.3       569.3
+MEMBW_POINT	kernel=write	dataset_bytes=201326592	passes=140	dispatch_bytes=28185722880	median_ms=49.952146	min_ms=49.513083	median_gbps=564.254	best_gbps=569.258
+     256 MiB      103          26368      48.998     48.880         564.3       565.6
+MEMBW_POINT	kernel=write	dataset_bytes=268435456	passes=103	dispatch_bytes=27648851968	median_ms=48.997813	min_ms=48.880375	median_gbps=564.287	best_gbps=565.643
+     384 MiB       70          26880      50.109     49.856         562.5       565.3
+MEMBW_POINT	kernel=write	dataset_bytes=402653184	passes=70	dispatch_bytes=28185722880	median_ms=50.108563	min_ms=49.856208	median_gbps=562.493	best_gbps=565.340
+     512 MiB       52          26624      50.411     49.736         553.8       561.3
+MEMBW_POINT	kernel=write	dataset_bytes=536870912	passes=52	dispatch_bytes=27917287424	median_ms=50.410521	min_ms=49.735875	median_gbps=553.799	best_gbps=561.311
+     768 MiB       34          26112      49.501     48.843         553.1       560.6
+MEMBW_POINT	kernel=write	dataset_bytes=805306368	passes=34	dispatch_bytes=27380416512	median_ms=49.500667	min_ms=48.842541	median_gbps=553.132	best_gbps=560.585
+    1024 MiB       26          26624      49.894     49.760         559.5       561.0
+MEMBW_POINT	kernel=write	dataset_bytes=1073741824	passes=26	dispatch_bytes=27917287424	median_ms=49.893521	min_ms=49.760208	median_gbps=559.537	best_gbps=561.036
+    1536 MiB       17          26112      49.349     48.985         554.8       559.0
+MEMBW_POINT	kernel=write	dataset_bytes=1610612736	passes=17	dispatch_bytes=27380416512	median_ms=49.349417	min_ms=48.984875	median_gbps=554.828	best_gbps=558.957
+    2048 MiB       13          26624      50.460     50.233         553.3       555.8
+MEMBW_POINT	kernel=write	dataset_bytes=2147483648	passes=13	dispatch_bytes=27917287424	median_ms=50.460104	min_ms=50.232541	median_gbps=553.255	best_gbps=555.761
+
+[copy] 16 B load + 16 B store
+    Data set   Passes   Dispatch MiB   Median ms     Min ms   Median GB/s   Best GB/s
+       1 MiB     4020           8040      48.070     47.973         175.4       175.7
+MEMBW_POINT	kernel=copy	dataset_bytes=1048576	passes=4020	dispatch_bytes=8430551040	median_ms=48.069958	min_ms=47.973417	median_gbps=175.381	best_gbps=175.734
+     1.5 MiB     3646          10938      46.264     46.160         247.9       248.5
+MEMBW_POINT	kernel=copy	dataset_bytes=1572864	passes=3646	dispatch_bytes=11469324288	median_ms=46.264187	min_ms=46.159542	median_gbps=247.909	best_gbps=248.471
+       2 MiB     3446          13784      46.430     46.355         311.3       311.8
+MEMBW_POINT	kernel=copy	dataset_bytes=2097152	passes=3446	dispatch_bytes=14453571584	median_ms=46.429875	min_ms=46.354791	median_gbps=311.299	best_gbps=311.803
+       3 MiB     2783          16698      45.423     45.305         385.5       386.5
+MEMBW_POINT	kernel=copy	dataset_bytes=3145728	passes=2783	dispatch_bytes=17509122048	median_ms=45.422604	min_ms=45.305167	median_gbps=385.472	best_gbps=386.471
+       4 MiB     2642          21136      44.873     44.800         493.9       494.7
+MEMBW_POINT	kernel=copy	dataset_bytes=4194304	passes=2642	dispatch_bytes=22162702336	median_ms=44.872604	min_ms=44.800000	median_gbps=493.903	best_gbps=494.703
+       6 MiB     1850          22200      42.131     42.037         552.5       553.8
+MEMBW_POINT	kernel=copy	dataset_bytes=6291456	passes=1850	dispatch_bytes=23278387200	median_ms=42.130917	min_ms=42.037209	median_gbps=552.525	best_gbps=553.757
+       8 MiB     1446          23136      43.856     43.779         553.2       554.1
+MEMBW_POINT	kernel=copy	dataset_bytes=8388608	passes=1446	dispatch_bytes=24259854336	median_ms=43.856021	min_ms=43.779125	median_gbps=553.170	best_gbps=554.142
+      12 MiB      773          18552      46.068     45.140         422.3       430.9
+MEMBW_POINT	kernel=copy	dataset_bytes=12582912	passes=773	dispatch_bytes=19453181952	median_ms=46.068271	min_ms=45.140375	median_gbps=422.269	best_gbps=430.949
+      16 MiB      427          13664      46.190     45.407         310.2       315.5
+MEMBW_POINT	kernel=copy	dataset_bytes=16777216	passes=427	dispatch_bytes=14327742464	median_ms=46.189834	min_ms=45.407500	median_gbps=310.193	best_gbps=315.537
+      24 MiB      246          11808      47.291     47.096         261.8       262.9
+MEMBW_POINT	kernel=copy	dataset_bytes=25165824	passes=246	dispatch_bytes=12381585408	median_ms=47.291291	min_ms=47.096208	median_gbps=261.815	best_gbps=262.900
+      32 MiB      173          11072      47.301     46.942         245.4       247.3
+MEMBW_POINT	kernel=copy	dataset_bytes=33554432	passes=173	dispatch_bytes=11609833472	median_ms=47.300667	min_ms=46.941583	median_gbps=245.448	best_gbps=247.325
+      48 MiB      112          10752      46.052     45.883         244.8       245.7
+MEMBW_POINT	kernel=copy	dataset_bytes=50331648	passes=112	dispatch_bytes=11274289152	median_ms=46.052042	min_ms=45.882625	median_gbps=244.816	best_gbps=245.720
+      64 MiB       86          11008      46.511     45.572         248.2       253.3
+MEMBW_POINT	kernel=copy	dataset_bytes=67108864	passes=86	dispatch_bytes=11542724608	median_ms=46.511146	min_ms=45.571667	median_gbps=248.171	best_gbps=253.287
+      96 MiB       57          10944      47.979     47.538         239.2       241.4
+MEMBW_POINT	kernel=copy	dataset_bytes=100663296	passes=57	dispatch_bytes=11475615744	median_ms=47.978625	min_ms=47.538291	median_gbps=239.182	best_gbps=241.397
+     128 MiB       43          11008      48.179     47.601         239.6       242.5
+MEMBW_POINT	kernel=copy	dataset_bytes=134217728	passes=43	dispatch_bytes=11542724608	median_ms=48.178958	min_ms=47.601083	median_gbps=239.580	best_gbps=242.489
+     192 MiB       28          10752      46.841     46.430         240.7       242.8
+MEMBW_POINT	kernel=copy	dataset_bytes=201326592	passes=28	dispatch_bytes=11274289152	median_ms=46.841229	min_ms=46.430333	median_gbps=240.692	best_gbps=242.822
+     256 MiB       22          11264      49.138     48.804         240.4       242.0
+MEMBW_POINT	kernel=copy	dataset_bytes=268435456	passes=22	dispatch_bytes=11811160064	median_ms=49.137937	min_ms=48.803917	median_gbps=240.367	best_gbps=242.013
+     384 MiB       15          11520      50.271     49.841         240.3       242.4
+MEMBW_POINT	kernel=copy	dataset_bytes=402653184	passes=15	dispatch_bytes=12079595520	median_ms=50.271209	min_ms=49.841417	median_gbps=240.289	best_gbps=242.361
+     512 MiB       11          11264      50.131     49.545         235.6       238.4
+MEMBW_POINT	kernel=copy	dataset_bytes=536870912	passes=11	dispatch_bytes=11811160064	median_ms=50.131208	min_ms=49.545042	median_gbps=235.605	best_gbps=238.392
+     768 MiB        8          12288      53.833     53.346         239.4       241.5
+MEMBW_POINT	kernel=copy	dataset_bytes=805306368	passes=8	dispatch_bytes=12884901888	median_ms=53.832813	min_ms=53.346375	median_gbps=239.350	best_gbps=241.533
+    1024 MiB        6          12288      53.747     53.379         239.7       241.4
+MEMBW_POINT	kernel=copy	dataset_bytes=1073741824	passes=6	dispatch_bytes=12884901888	median_ms=53.747250	min_ms=53.379291	median_gbps=239.731	best_gbps=241.384
+    1536 MiB        4          12288      53.976     53.407         238.7       241.3
+MEMBW_POINT	kernel=copy	dataset_bytes=1610612736	passes=4	dispatch_bytes=12884901888	median_ms=53.976083	min_ms=53.407125	median_gbps=238.715	best_gbps=241.258
+    2048 MiB        3          12288      53.956     53.468         238.8       241.0
+MEMBW_POINT	kernel=copy	dataset_bytes=2147483648	passes=3	dispatch_bytes=12884901888	median_ms=53.956458	min_ms=53.468500	median_gbps=238.802	best_gbps=240.981
+
+[l1] every workgroup re-reads a private block (all SMs/CUs busy)
+       Block  Repeats   Dispatch MiB   Median ms     Min ms   Median GB/s   Best GB/s
+      16 KiB      912          58368      44.588     43.831        1372.7      1396.3
+MEMBW_POINT	kernel=l1	dataset_bytes=16384	passes=912	dispatch_bytes=61203283968	median_ms=44.587500	min_ms=43.831041	median_gbps=1372.656	best_gbps=1396.346
+      24 KiB      616          59136      41.307     41.016        1501.2      1511.8
+MEMBW_POINT	kernel=l1	dataset_bytes=24576	passes=616	dispatch_bytes=62008590336	median_ms=41.306959	min_ms=41.016333	median_gbps=1501.166	best_gbps=1511.802
+      32 KiB      504          64512      47.617     43.859        1420.6      1542.3
+MEMBW_POINT	kernel=l1	dataset_bytes=32768	passes=504	dispatch_bytes=67645734912	median_ms=47.616999	min_ms=43.859083	median_gbps=1420.622	best_gbps=1542.343
+      48 KiB      341          65472      41.615     40.799        1649.7      1682.7
+MEMBW_POINT	kernel=l1	dataset_bytes=49152	passes=341	dispatch_bytes=68652367872	median_ms=41.615313	min_ms=40.798792	median_gbps=1649.690	best_gbps=1682.706
+      64 KiB      256          65536      32.254     30.088        2130.6      2284.0
+MEMBW_POINT	kernel=l1	dataset_bytes=65536	passes=256	dispatch_bytes=68719476736	median_ms=32.253938	min_ms=30.087792	median_gbps=2130.576	best_gbps=2283.965
+      96 KiB       95          36480      46.808     45.850         817.2       834.3
+MEMBW_POINT	kernel=l1	dataset_bytes=98304	passes=95	dispatch_bytes=38252052480	median_ms=46.808375	min_ms=45.849709	median_gbps=817.205	best_gbps=834.292
+     128 KiB       47          24064      48.428     46.576         521.0       541.8
+MEMBW_POINT	kernel=l1	dataset_bytes=131072	passes=47	dispatch_bytes=25232932864	median_ms=48.428125	min_ms=46.576167	median_gbps=521.039	best_gbps=541.756
+     192 KiB       16          12288      33.640     30.886         383.0       417.2
+MEMBW_POINT	kernel=l1	dataset_bytes=196608	passes=16	dispatch_bytes=12884901888	median_ms=33.640230	min_ms=30.886417	median_gbps=383.021	best_gbps=417.170
+     256 KiB       12          12288      43.050     41.617         299.3       309.6
+MEMBW_POINT	kernel=l1	dataset_bytes=262144	passes=12	dispatch_bytes=12884901888	median_ms=43.049937	min_ms=41.617083	median_gbps=299.301	best_gbps=309.606
+     384 KiB        8          12288      49.278     48.828         261.5       263.9
+MEMBW_POINT	kernel=l1	dataset_bytes=393216	passes=8	dispatch_bytes=12884901888	median_ms=49.278000	min_ms=48.827542	median_gbps=261.474	best_gbps=263.886
+     512 KiB        6          12288      50.566     50.074         254.8       257.3
+MEMBW_POINT	kernel=l1	dataset_bytes=524288	passes=6	dispatch_bytes=12884901888	median_ms=50.566333	min_ms=50.074083	median_gbps=254.812	best_gbps=257.317
+     768 KiB        6          12285      51.542     50.172         249.9       256.7
+MEMBW_POINT	kernel=l1	dataset_bytes=786432	passes=6	dispatch_bytes=12881756160	median_ms=51.542104	min_ms=50.172500	median_gbps=249.927	best_gbps=256.749
+       1 MiB        6          12288      52.212     50.948         246.8       252.9
+MEMBW_POINT	kernel=l1	dataset_bytes=1048576	passes=6	dispatch_bytes=12884901888	median_ms=52.211646	min_ms=50.947708	median_gbps=246.782	best_gbps=252.904
+
+[l1_single] one workgroup re-reads one block (one SM/CU)
+       Block  Repeats   Dispatch MiB   Median ms     Min ms   Median GB/s   Best GB/s
+      16 KiB   262144           4096      34.372     34.108         125.0       125.9
+MEMBW_POINT	kernel=l1_single	dataset_bytes=16384	passes=262144	dispatch_bytes=4294967296	median_ms=34.372333	min_ms=34.107917	median_gbps=124.954	best_gbps=125.923
+      24 KiB   174720           4095      34.334     34.163         125.1       125.7
+MEMBW_POINT	kernel=l1_single	dataset_bytes=24576	passes=174720	dispatch_bytes=4293918720	median_ms=34.334396	min_ms=34.163084	median_gbps=125.062	best_gbps=125.689
+      32 KiB   131072           4096      34.418     34.065         124.8       126.1
+MEMBW_POINT	kernel=l1_single	dataset_bytes=32768	passes=131072	dispatch_bytes=4294967296	median_ms=34.418229	min_ms=34.064750	median_gbps=124.788	best_gbps=126.082
+      48 KiB    87360           4095      34.435     34.067         124.7       126.0
+MEMBW_POINT	kernel=l1_single	dataset_bytes=49152	passes=87360	dispatch_bytes=4293918720	median_ms=34.434584	min_ms=34.066958	median_gbps=124.698	best_gbps=126.044
+      64 KiB    65536           4096      34.572     34.281         124.2       125.3
+MEMBW_POINT	kernel=l1_single	dataset_bytes=65536	passes=65536	dispatch_bytes=4294967296	median_ms=34.572187	min_ms=34.281292	median_gbps=124.232	best_gbps=125.286
+      96 KiB    43648           4092      34.447     34.088         124.6       125.9
+MEMBW_POINT	kernel=l1_single	dataset_bytes=98304	passes=43648	dispatch_bytes=4290772992	median_ms=34.446937	min_ms=34.088125	median_gbps=124.562	best_gbps=125.873
+     128 KiB    32768           4096      34.482     34.216         124.6       125.5
+MEMBW_POINT	kernel=l1_single	dataset_bytes=131072	passes=32768	dispatch_bytes=4294967296	median_ms=34.481583	min_ms=34.216042	median_gbps=124.558	best_gbps=125.525
+     192 KiB    21824           4092      36.722     36.383         116.8       117.9
+MEMBW_POINT	kernel=l1_single	dataset_bytes=196608	passes=21824	dispatch_bytes=4290772992	median_ms=36.721979	min_ms=36.383125	median_gbps=116.845	best_gbps=117.933
+     256 KiB    10869           2717      43.424     43.369          65.6        65.7
+MEMBW_POINT	kernel=l1_single	dataset_bytes=262144	passes=10869	dispatch_bytes=2849243136	median_ms=43.424042	min_ms=43.369458	median_gbps=65.614	best_gbps=65.697
+     384 KiB     6948           2605      43.441     43.304          62.9        63.1
+MEMBW_POINT	kernel=l1_single	dataset_bytes=393216	passes=6948	dispatch_bytes=2732064768	median_ms=43.440876	min_ms=43.303916	median_gbps=62.892	best_gbps=63.090
+     512 KiB     5120           2560      42.994     42.828          62.4        62.7
+MEMBW_POINT	kernel=l1_single	dataset_bytes=524288	passes=5120	dispatch_bytes=2684354560	median_ms=42.994333	min_ms=42.828083	median_gbps=62.435	best_gbps=62.677
+     768 KiB     3486           2614      43.622     43.452          62.8        63.1
+MEMBW_POINT	kernel=l1_single	dataset_bytes=786432	passes=3486	dispatch_bytes=2741501952	median_ms=43.621938	min_ms=43.451583	median_gbps=62.847	best_gbps=63.093
+       1 MiB     2627           2627      43.622     43.422          63.1        63.4
+MEMBW_POINT	kernel=l1_single	dataset_bytes=1048576	passes=2627	dispatch_bytes=2754609152	median_ms=43.622229	min_ms=43.421709	median_gbps=63.147	best_gbps=63.439
+MEMBW_DEVICE	name=Apple M4 Pro	memory=system	timing=wall_clock	data_verified=1	write_copy_checks=46	max_dataset_bytes=2147483648
+
+--- Summary (system memory plateau = median of the largest data sets) ---
+read      300.9 GB/s at the largest data sets; system memory plateau not reached (sweep ends below 256 MiB or is still descending)
+MEMBW_SUMMARY	kernel=read	memory_gbps=300.885	cache_gbps=0.000	cache_from_bytes=0	cache_to_bytes=0	cache_knee_bytes=0	memory_plateau_reached=0
+write     554.8 GB/s system memory | no distinct cache plateau
+MEMBW_SUMMARY	kernel=write	memory_gbps=554.828	cache_gbps=0.000	cache_from_bytes=0	cache_to_bytes=0	cache_knee_bytes=0	memory_plateau_reached=1
+copy      238.8 GB/s system memory | no distinct cache plateau
+MEMBW_SUMMARY	kernel=copy	memory_gbps=238.802	cache_gbps=0.000	cache_from_bytes=0	cache_to_bytes=0	cache_knee_bytes=0	memory_plateau_reached=1
+L1       1501.2 GB/s with all SMs/CUs busy, for private blocks up to 64 KiB per workgroup
+L1        124.6 GB/s on one SM/CU | L1 capacity between 192 KiB and 256 KiB
+MEMBW_L1	full_load_gbps=1501.166	full_load_block_bytes=65536	single_group_gbps=124.630	capacity_low_bytes=196608	capacity_high_bytes=262144
+host    skipped: integrated or software device: all of its memory is system memory
+MEMBW_HOST	measured=0	read_gbps=0.000	write_gbps=0.000	copy_to_device_gbps=0.000	copy_to_host_gbps=0.000	copy_bytes=0
+Duration:  65.7 s
+==========================================================
+[Results] Saved as 20261016-234007-683-membw -> /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-targeted-retest-20261016/data/results/results.json

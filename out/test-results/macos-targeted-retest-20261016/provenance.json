@@ -1,0 +1,16 @@
+{
+  "commit": "b637637f57210c4fdaac177c35ca0e80df44af13",
+  "worker": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+  "workerSha256": "908c09af0c54cf2d9c67f131d65b5450393ce7574a1bea2fef4d62c73e3340e2",
+  "historyBeforeSha256": "62302b228db50009882fe386b65f32a258e3391519ba53f8f341c366367f67aa",
+  "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin\n",
+  "power": "Battery Power:\n Sleep On Power Button 1\n powermode            0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         30\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n powermode            2\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         180\n womp                 1\n networkoversleep     0\n sleep                1\n tcpkeepalive         1\n disksleep            10\n",
+  "thermalBefore": {
+    "activeProcessorCount": 14,
+    "lowPowerMode": false,
+    "thermalState": 0,
+    "thermalStateName": "nominal",
+    "timestamp": "2026-10-16T12:35:56Z"
+  },
+  "cpuInvocation": "Same packaged CLI helper and automatic P/E/all-core production path; no GUI-button acceptance in this run."
+}

@@ -1,0 +1,7 @@
+core_type,method,round,p_fraction,requested_lower_bound,effective_ghz,worker_cpu_seconds,process_cpu_seconds,verified,retries
+performance,process_accounting_thread_clock_bound,1,0.999934,0.999911,4.018293,4.996642,4.997503,1,0
+performance,process_accounting_thread_clock_bound,2,0.999414,0.999392,4.034418,4.993424,4.994195,1,0
+performance,process_accounting_thread_clock_bound,3,0.999963,0.999941,4.053827,4.996814,4.997607,1,0
+efficiency,process_accounting_thread_clock_bound,1,0.000000,0.999970,1.551754,4.782820,4.783436,1,0
+efficiency,process_accounting_thread_clock_bound,2,0.000000,0.999975,1.416185,4.825980,4.826673,1,0
+efficiency,process_accounting_thread_clock_bound,3,0.000000,0.999973,1.514347,4.764047,4.764645,1,0

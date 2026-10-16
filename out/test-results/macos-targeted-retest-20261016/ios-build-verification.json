@@ -1,0 +1,52 @@
+{
+  "status": "passed",
+  "script": "bash scripts/build-ios.sh",
+  "buildSuccessCount": 4,
+  "artifacts": [
+    {
+      "sdk": "iphoneos",
+      "configuration": "Release",
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app",
+      "architecture": "arm64",
+      "libraryArchitecture": "arm64",
+      "bundleId": "com.fairchild.Mangekyo",
+      "version": "0.2.6",
+      "binarySha256": "77143f2595f6ca9d7016ecca6fe93a7b70c9b6e4bcf45c6fb5c2c7c04b122977",
+      "engineLibrarySha256": "f70ef5f73dc70e188df8379f5f1425966f662ef304c09052818cc70e9bdeff11",
+      "shaderSourceSha256": {
+        "particle.metal": "ae287afb8bb609bc0e72e124ea1581b28570f39ca4a9c997035925b58ec407d2",
+        "gpu_burn.metal": "f7f376d2ca7e43eb3606a055bba2b9bb43fd2b5bfd523e6f002d5c6cf62622aa",
+        "cinematic_liquid_v2.metal": "30713551ea438f8dcdd1990013e399e63350590c39aa358bdb7136b477f188cb",
+        "gpu_burn_es2.vert": "54a1773867067a9e34bbac70375b03421f1e535995db7b756a3df0d565da4038",
+        "gpu_burn_es2.frag": "9602eee0bf25cc56e2caed7e75a0c80e1f01c3a403660745c2da69cc2ee6794b"
+      },
+      "spirvCount": 56,
+      "macKeptBranchIdentityAbsent": true,
+      "codeSigningAllowed": false,
+      "deviceInstalled": false
+    },
+    {
+      "sdk": "iphonesimulator",
+      "configuration": "Release",
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Products/Release-iphonesimulator/Mangekyo.app",
+      "architecture": "x86_64 arm64",
+      "libraryArchitecture": "x86_64 arm64",
+      "bundleId": "com.fairchild.Mangekyo",
+      "version": "0.2.6",
+      "binarySha256": "870623d275430fa0990bc3070d54ac7f957802e1578b84f189b587854437e49c",
+      "engineLibrarySha256": "692e9c72554299b2664d2054d8904251502bf66d6f1c74fc269211777636ed3b",
+      "shaderSourceSha256": {
+        "particle.metal": "ae287afb8bb609bc0e72e124ea1581b28570f39ca4a9c997035925b58ec407d2",
+        "gpu_burn.metal": "f7f376d2ca7e43eb3606a055bba2b9bb43fd2b5bfd523e6f002d5c6cf62622aa",
+        "cinematic_liquid_v2.metal": "30713551ea438f8dcdd1990013e399e63350590c39aa358bdb7136b477f188cb",
+        "gpu_burn_es2.vert": "54a1773867067a9e34bbac70375b03421f1e535995db7b756a3df0d565da4038",
+        "gpu_burn_es2.frag": "9602eee0bf25cc56e2caed7e75a0c80e1f01c3a403660745c2da69cc2ee6794b"
+      },
+      "spirvCount": 56,
+      "macKeptBranchIdentityAbsent": true,
+      "codeSigningAllowed": false,
+      "deviceInstalled": false
+    }
+  ],
+  "scope": "Compilation and resource verification only; no iOS physical measurements or simulator UI run."
+}

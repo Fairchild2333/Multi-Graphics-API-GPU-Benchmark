@@ -1,6 +1,58 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
-> **2026-10-16：苹果设备的下一步测试任务和有问题的成绩，先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** 在 Mac 上：确认 CPU 内核保留了分支，重跑 M4 Pro 的 CPU 算力；运行 `scripts/metal-math-probe`。
+> **2026-10-16：苹果设备的最新任务与状态，先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** Mac M1/M2/M4 指定核查已执行，M3 已补测但正式内存平台/历史波动原因未关闭；iOS 真机与模拟器已重编译。
+
+## 2026-10-16 Mac targeted follow-ups completed; iOS Release rebuilt
+
+- User requested this Mac's pending measurements and rebuilding iOS. Based on
+  b637637, rebuilt the packaged Release arm64 app and used its production CLI
+  helper, without changing kernels, shaders, score constants, timing, defaults
+  or quality thresholds. No GUI-button acceptance or new iOS performance run.
+- M1 Apple clang assembly: all five kernel loops retain bit-0 `tbz`, with no
+  in-loop `fcsel`. The old fixed 40-line scan included two post-loop clamps;
+  updated the documented check to stop at loop back edges. Full assembly and
+  per-loop evidence archived. New `_kept_branch` formal CPU P207.532,
+  background E69.902, all14 threads2436.328 MWork/s. Every P/E residency round
+  passed, min99.9392%/99.9970%. P selected round4.034GHz, about19.44cycles/unit.
+  All42 worker contributions match the three round totals and their median.
+  Old Mac CPU rows remain unchanged in their old version group.
+- M2 original Metal maths probe compiled and ran unchanged in fast/precise
+  modes. Fast FMA6.964TFLOPS, sin/FMA.122, atan2/FMA.067, exp/FMA.288,
+  pow/FMA.140, copied Burn step14.644Gpix-step/s; precise FMA7.054TFLOPS.
+  Do not treat the earlier8–10 estimate as an acceptance threshold, or claim
+  cross-vendor causality without a same-implementation vendor control.
+- M4 Metal headless1M162.761GB/s, stable162.807, CV.34%, change-.01%;
+  GPUcompute=total=.258ms, frame interval=.258ms. Only compute in the command
+  buffer; no excess timing span observed. Old Vulkan219.681 uses an inner
+  compute interval(.191ms) versus total GPU.267/frame.305ms, unlike the Metal
+  compute-buffer span. API difference not independently attributed; timing
+  implementation unchanged. The specified source audit plus short run is done.
+- M3 default Vulkan v2 memory1–2048MiB completed95 points,46 write/copy checks,
+  dataVerified1, no timestamp anomalies, uniform synchronized wall clock.
+  Read300.885/write554.828/copy238.802GB/s are diagnostic logical throughput;
+  read alternates roughly247/301 at large data sets, memoryPlateauReached0,
+  version membw_v2_verified_preview_moltenvk. MUST retain preview, not claim a
+  formal DRAM peak or completed formal-memory acceptance. Cache attribution
+  remains unverified. Do not modify defaults or rerun to select a high score.
+- M3 Vulkan rendered1M177.361GB/s, stable183.293, drop4.66%, GPU1.715ms versus
+  frame2.114ms, startup timestamp check passed. Below5% in THIS run; old
+  12–23% drift cause still open, tail still changes, no hardware GPU frequency.
+  Five executions all thermal0->0,30s cooldowns, ACpower mode2, low power off.
+- After all measurements, bash scripts/build-ios.sh rebuilt device arm64 and
+  simulator arm64+x86_64 native libraries and Release apps. Source shaders
+  match,56 SPIR-V resources each, Mac-only kept-branch identity absent from
+  both iOS libraries. Script uses CODE_SIGNING_ALLOWED=NO; actual device
+  installation still needs development signing. No simulator UI or physical
+  iOS tests this turn. Native CTest7/7 passed, all benchmark processes exited.
+- Evidence out/test-results/macos-targeted-retest-20261016/ contains six raw
+  results, logs, assembly, audits, CSV and PNG/PDF curves, build verification.
+  Standalone maths output in metal-math-probe-20261016-233740/. Main Mac
+  history149->155, all149 old rows object-identical, live file and results-after
+  byte-identical. archive-index.json now points to this latest Mac snapshot.
+  All four iOS primary snapshot hashes unchanged. Preserve xcuserdata.
+- Summary docs/macos-targeted-retest-20261016.md; APPLE-NEXT-TESTS M1/M2/M4
+  marked executed, M3 formal-platform and historical-cause caveats retained.
+  A16 nine jobs, iPad8,1 Metal16M and A15 optional jobs still require devices.
 
 ## 2026-10-16 Test results now belong in Git
 

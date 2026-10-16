@@ -1,0 +1,15 @@
+Running cpu-kept-branch
+Finished cpu-kept-branch exit 0 new rows 3
+Cooling down for 30 seconds
+Running metal-math-probe
+Finished metal-math-probe exit 0 new rows 0
+Cooling down for 30 seconds
+Running metal-headless-1m
+Finished metal-headless-1m exit 0 new rows 1
+Cooling down for 30 seconds
+Running vulkan-membw-v2
+Finished vulkan-membw-v2 exit 0 new rows 1
+Cooling down for 30 seconds
+Running vulkan-render-1m
+Finished vulkan-render-1m exit 0 new rows 1
+Authorized Mac follow-ups ended

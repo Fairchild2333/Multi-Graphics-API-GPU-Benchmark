@@ -37,5 +37,12 @@ fraction of the FMA rate, Apple's special-function throughput explains the
 GPU Burn gap. To compare with another vendor, the same kernels would have to run
 on that GPU as a Vulkan or D3D compute shader; that version does not exist yet.
 
-Not compiled or run yet: it was written on Windows on 2026-10-16. The
-`mathFloatingPointFunctions` setting needs the macOS 15 SDK or newer.
+First compiled and run unchanged on the M4 Pro on 2026-10-16. Fast mode measured
+6.964 TFLOPS for this FMA loop, sin/FMA 0.122, atan2/FMA 0.067 and GPU Burn step
+14.644 Gpix-step/s. The earlier 8–10 TFLOPS estimate is not an acceptance gate:
+this probe has not been validated as a peak-hardware-throughput measurement.
+There is still no same-kernel cross-vendor probe, so this supports the role of
+special-function cost without proving the cause of the entire vendor gap.
+See the [raw output](../../out/test-results/metal-math-probe-20261016-233740/output.txt)
+and [run report](../../out/test-results/macos-targeted-retest-20261016/report.md).
+The `mathFloatingPointFunctions` setting needs the macOS 15 SDK or newer.

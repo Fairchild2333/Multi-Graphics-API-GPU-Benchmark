@@ -5,11 +5,11 @@
     {
       "device": "Mac M4 Pro",
       "deviceModel": "Mac16,8",
-      "rows": 149,
-      "path": "macos-history-20261016/results/results.json",
-      "bytes": 286698,
-      "sha256": "62302b228db50009882fe386b65f32a258e3391519ba53f8f341c366367f67aa",
-      "notes": "Mac 主历史，包含旧格式和诊断轮次；保留原标签。"
+      "rows": 155,
+      "path": "macos-targeted-retest-20261016/results-after.json",
+      "bytes": 300786,
+      "sha256": "cbc3e5e7b3fde78e2b543fd68bf4e20fa42e9e220ff34dce52d471a7372f1499",
+      "notes": "Mac 主历史 155 条；新增分支保留版 CPU 3 条、粒子复核 2 条、Vulkan v2 内存 preview 1 条。旧 149 条不变。"
     },
     {
       "device": "iPhone 13 Pro / A15",

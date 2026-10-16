@@ -1,0 +1,103 @@
+	eor	x10, x28, x10, ror #47
+	mul	x28, x10, x21
+	add	x23, x11, x27
+	eor	w11, w28, w23
+	tbz	w11, #0, LBB60_19
+; %bb.21:                               ;   in Loop: Header=BB60_20 Depth=2
+	; InlineAsm Start
+
+	; InlineAsm End
+	eor	x28, x28, x23, ror #35
+	add	x8, x8, #1
+	subs	x9, x9, #1
+	b.ne	LBB60_20
+
+	eor	x10, x23, x10, ror #47
+	mul	x23, x10, x21
+	add	x22, x11, x27
+	eor	w11, w23, w22
+	ubfx	x12, x22, #40, #8
+	ucvtf	s0, x12
+	fmul	s1, s0, s10
+	ubfx	x12, x23, #39, #9
+	ucvtf	d0, x12
+	fmul	d0, d0, d11
+	tbz	w11, #0, LBB60_27
+; %bb.29:                               ;   in Loop: Header=BB60_28 Depth=2
+	; InlineAsm Start
+
+	; InlineAsm End
+	fmul	s1, s1, s12
+	fmadd	s8, s8, s13, s1
+	fmul	d0, d0, d14
+	fmadd	d9, d9, d15, d0
+	eor	x23, x23, x22, ror #35
+	add	x8, x8, #1
+	subs	x9, x9, #1
+	b.ne	LBB60_28
+
+	eor	x10, x20, x10, ror #47
+	mul	x20, x10, x22
+	add	x21, x11, x27
+	eor	w11, w20, w21
+	tbz	w11, #0, LBB80_13
+; %bb.15:                               ;   in Loop: Header=BB80_14 Depth=2
+	; InlineAsm Start
+
+	; InlineAsm End
+	eor	x20, x20, x21, ror #35
+	add	x8, x8, #1
+	subs	x9, x9, #1
+	b.ne	LBB80_14
+
+	eor	x11, x19, x11, ror #47
+	mul	x19, x11, x22
+	add	x20, x12, x27
+	eor	w12, w19, w20
+	ubfx	x13, x20, #40, #8
+	ucvtf	s0, x13
+	fmul	s1, s0, s9
+	ubfx	x13, x19, #39, #9
+	ucvtf	d0, x13
+	fmul	d0, d0, d10
+	tbz	w12, #0, LBB80_30
+; %bb.32:                               ;   in Loop: Header=BB80_31 Depth=4
+	; InlineAsm Start
+
+	; InlineAsm End
+	fmov	s2, w23
+	fmul	s1, s1, s2
+	fmov	s2, w24
+	fmadd	s15, s15, s2, s1
+	fmov	d1, x28
+	fmul	d0, d0, d1
+	fmov	d1, x21
+	fmadd	d8, d8, d1, d0
+	eor	x19, x19, x20, ror #35
+	add	x9, x9, #1
+	subs	x10, x10, #1
+	b.ne	LBB80_31
+
+	eor	x17, x8, x17, ror #47
+	mul	x8, x17, x13
+	add	x10, x10, x9
+	eor	w0, w8, w10
+	ubfx	x1, x10, #40, #8
+	ucvtf	s20, x1
+	fmul	s21, s20, s2
+	ubfx	x1, x8, #39, #9
+	ucvtf	d20, x1
+	fmul	d20, d20, d3
+	tbz	w0, #0, LBB102_32
+; %bb.34:                               ;   in Loop: Header=BB102_33 Depth=2
+	; InlineAsm Start
+
+	; InlineAsm End
+	fmul	s21, s21, s16
+	fmadd	s1, s1, s17, s21
+	fmul	d20, d20, d18
+	fmadd	d0, d0, d19, d20
+	eor	x8, x8, x10, ror #35
+	add	x15, x15, #1
+	subs	x16, x16, #1
+	b.ne	LBB102_33

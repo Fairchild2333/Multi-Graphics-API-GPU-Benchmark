@@ -1,0 +1,41 @@
+{
+  "status": "passed",
+  "method": "Each ror #47 kernel through its first counted-loop back edge. Fixed 40-line windows also include post-loop clamps in one function.",
+  "blocks": [
+    {
+      "line": 17423,
+      "endLine": 17435,
+      "fcsel": 0,
+      "bit0Branch": 1,
+      "assembly": "\teor\tx10, x28, x10, ror #47\n\tmul\tx28, x10, x21\n\tadd\tx23, x11, x27\n\teor\tw11, w28, w23\n\ttbz\tw11, #0, LBB60_19\n; %bb.21:                               ;   in Loop: Header=BB60_20 Depth=2\n\t; InlineAsm Start\n\n\t; InlineAsm End\n\teor\tx28, x28, x23, ror #35\n\tadd\tx8, x8, #1\n\tsubs\tx9, x9, #1\n\tb.ne\tLBB60_20"
+    },
+    {
+      "line": 17546,
+      "endLine": 17568,
+      "fcsel": 0,
+      "bit0Branch": 1,
+      "assembly": "\teor\tx10, x23, x10, ror #47\n\tmul\tx23, x10, x21\n\tadd\tx22, x11, x27\n\teor\tw11, w23, w22\n\tubfx\tx12, x22, #40, #8\n\tucvtf\ts0, x12\n\tfmul\ts1, s0, s10\n\tubfx\tx12, x23, #39, #9\n\tucvtf\td0, x12\n\tfmul\td0, d0, d11\n\ttbz\tw11, #0, LBB60_27\n; %bb.29:                               ;   in Loop: Header=BB60_28 Depth=2\n\t; InlineAsm Start\n\n\t; InlineAsm End\n\tfmul\ts1, s1, s12\n\tfmadd\ts8, s8, s13, s1\n\tfmul\td0, d0, d14\n\tfmadd\td9, d9, d15, d0\n\teor\tx23, x23, x22, ror #35\n\tadd\tx8, x8, #1\n\tsubs\tx9, x9, #1\n\tb.ne\tLBB60_28"
+    },
+    {
+      "line": 20857,
+      "endLine": 20869,
+      "fcsel": 0,
+      "bit0Branch": 1,
+      "assembly": "\teor\tx10, x20, x10, ror #47\n\tmul\tx20, x10, x22\n\tadd\tx21, x11, x27\n\teor\tw11, w20, w21\n\ttbz\tw11, #0, LBB80_13\n; %bb.15:                               ;   in Loop: Header=BB80_14 Depth=2\n\t; InlineAsm Start\n\n\t; InlineAsm End\n\teor\tx20, x20, x21, ror #35\n\tadd\tx8, x8, #1\n\tsubs\tx9, x9, #1\n\tb.ne\tLBB80_14"
+    },
+    {
+      "line": 21086,
+      "endLine": 21112,
+      "fcsel": 0,
+      "bit0Branch": 1,
+      "assembly": "\teor\tx11, x19, x11, ror #47\n\tmul\tx19, x11, x22\n\tadd\tx20, x12, x27\n\teor\tw12, w19, w20\n\tubfx\tx13, x20, #40, #8\n\tucvtf\ts0, x13\n\tfmul\ts1, s0, s9\n\tubfx\tx13, x19, #39, #9\n\tucvtf\td0, x13\n\tfmul\td0, d0, d10\n\ttbz\tw12, #0, LBB80_30\n; %bb.32:                               ;   in Loop: Header=BB80_31 Depth=4\n\t; InlineAsm Start\n\n\t; InlineAsm End\n\tfmov\ts2, w23\n\tfmul\ts1, s1, s2\n\tfmov\ts2, w24\n\tfmadd\ts15, s15, s2, s1\n\tfmov\td1, x28\n\tfmul\td0, d0, d1\n\tfmov\td1, x21\n\tfmadd\td8, d8, d1, d0\n\teor\tx19, x19, x20, ror #35\n\tadd\tx9, x9, #1\n\tsubs\tx10, x10, #1\n\tb.ne\tLBB80_31"
+    },
+    {
+      "line": 24281,
+      "endLine": 24303,
+      "fcsel": 0,
+      "bit0Branch": 1,
+      "assembly": "\teor\tx17, x8, x17, ror #47\n\tmul\tx8, x17, x13\n\tadd\tx10, x10, x9\n\teor\tw0, w8, w10\n\tubfx\tx1, x10, #40, #8\n\tucvtf\ts20, x1\n\tfmul\ts21, s20, s2\n\tubfx\tx1, x8, #39, #9\n\tucvtf\td20, x1\n\tfmul\td20, d20, d3\n\ttbz\tw0, #0, LBB102_32\n; %bb.34:                               ;   in Loop: Header=BB102_33 Depth=2\n\t; InlineAsm Start\n\n\t; InlineAsm End\n\tfmul\ts21, s21, s16\n\tfmadd\ts1, s1, s17, s21\n\tfmul\td20, d20, d18\n\tfmadd\td0, d0, d19, d20\n\teor\tx8, x8, x10, ror #35\n\tadd\tx15, x15, #1\n\tsubs\tx16, x16, #1\n\tb.ne\tLBB102_33"
+    }
+  ]
+}
