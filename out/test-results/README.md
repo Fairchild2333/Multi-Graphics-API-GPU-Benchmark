@@ -8,7 +8,7 @@
 
 | 设备 | 型号 | 历史条数 | 原始文件 | 说明 |
 | --- | --- | ---: | --- | --- |
-| Mac M4 Pro | Mac16,8 | 169 | [最新主历史](macos-measurement-fixes-20261016/results-after.json) | 最新 V3 内存与固定覆盖/完成计时复核，含 3 条旧查询对照和 1 条预期 preview；旧 155 条不变，按版本分组。 |
+| Mac M4 Pro | Mac16,8 | 171 | [最新主历史](m4-single-core-check-20261017/results-after.json) | 最新单核确认大核216.737、后台小核76.322；原169条不变，V3内存与粒子修复和诊断对照均保留。 |
 | iPhone 13 Pro / A15 | iPhone14,2 | 128 | [results.json](a15-cache-isolation-20261014/phone-final/results/results.json) | 历史与缓存专项轮次；当前验收范围见 Apple 状态文档。 |
 | 12.9-inch iPad Pro / A12X | iPad8,7 | 72 | [results.json](a12x-targeted-retest-20261014/phone-final/results/results.json) | 原 43 条保留；补测后 72 条，Metal 16M 稳定性提示仍保留。 |
 | 11-inch iPad Pro / A12X | iPad8,1 | 51 | [results.json](ipad81-design-review-20261016/phone-final/results/results.json) | 51 条历史；当前完整选用 31 项/33 条来自不同真实轮次。 |
@@ -17,6 +17,7 @@
 精确字节数及 SHA256 见 [archive-index.json](archive-index.json)。
 Mac 的现有导出报告一并备份在 [macos-history-20261016/reports](macos-history-20261016/reports)。
 Mac 最新修复见 [报告、曲线、原生日志及跨平台构建验证](macos-measurement-fixes-20261016/report.md)；
+[最新单核确认](m4-single-core-check-20261017/report.md) 保留了原207.532与本次216.737的条件差异；
 [上一轮定向补测](macos-targeted-retest-20261016/report.md) 保留为历史。
 原 149 条快照仍保留在 [macos-history-20261016/results/results.json](macos-history-20261016/results/results.json)。
 仓库根目录的 [旧多设备历史](../../results/results.json) 也保留原样；其中包含更早的测试合同。

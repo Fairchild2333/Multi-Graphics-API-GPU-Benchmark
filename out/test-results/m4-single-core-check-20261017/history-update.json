@@ -1,0 +1,12 @@
+{
+  "beforeRows": 169,
+  "afterRows": 171,
+  "allOldRowsUnchanged": true,
+  "addedIDs": [
+    "20261017-011441-244-cpu-single-performance",
+    "20261017-011441-246-cpu-single-efficiency"
+  ],
+  "afterSha256": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f",
+  "fourIosHistoriesUnchanged": true,
+  "selection": "latest single-core confirmation, not maximum; full-core not repeated"
+}

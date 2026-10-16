@@ -1,0 +1,13 @@
+{
+  "commit": "35018ec5124ee6897ffc4c30a9b483669dfbb7b7",
+  "workerSha256": "6bf03a7b6efcf55d9a79cad4e37ea7a34f40e2ec47fc685ae2f99943126548db",
+  "thermalBefore": {
+    "activeProcessorCount": 14,
+    "lowPowerMode": false,
+    "thermalState": 0,
+    "thermalStateName": "nominal",
+    "timestamp": "2026-10-16T14:14:10Z"
+  },
+  "purpose": "One unchanged standard per-core confirmation after a low-score concern. Default verified P/E types; not a peak-score search.",
+  "mainHistoryBeforeSha256": "003ae4d4398e7dca2066ae7491dbc1bab9d78fa6ad1a587482522ee4dc6bb7ce"
+}

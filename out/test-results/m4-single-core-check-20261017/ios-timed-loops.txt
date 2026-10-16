@@ -1,0 +1,143 @@
+warmup_integer_only_dce 0xaaa8
+aa98: mul	x10, x23, x25
+aa9c: add	x11, x10, x27
+aaa0: add	x12, x8, x28
+aaa4: add	x10, x12, x10
+aaa8: eor	x10, x28, x10, ror #47
+aaac: mul	x12, x10, x22
+aab0: eor	w13, w12, w11
+aab4: mul	x10, x10, x26
+aab8: orr	x10, x10, x12, lsr #53
+aabc: eor	x10, x10, x11
+aac0: eor	x14, x12, x11, ror #35
+aac4: tst	w13, #0x1
+aac8: csel	x28, x12, x14, eq
+aacc: csel	x23, x10, x11, eq
+aad0: add	x8, x8, #0x1
+aad4: subs	x9, x9, #0x1
+aad8: b.ne	0xaa98
+
+timed_mixed_kernel 0xac34
+abfc: fmul	s1, s1, s2
+ac00: fmadd	s8, s8, s3, s1
+ac04: fmul	d0, d0, d4
+ac08: fmadd	d9, d9, d5, d0
+ac0c: mul	x10, x10, x26
+ac10: orr	x10, x10, x23, lsr #53
+ac14: eor	x21, x10, x21
+ac18: add	x8, x8, #0x1
+ac1c: subs	x9, x9, #0x1
+ac20: b.eq	0xac7c
+ac24: mul	x10, x21, x25
+ac28: add	x21, x10, x27
+ac2c: add	x11, x8, x23
+ac30: add	x10, x11, x10
+ac34: eor	x10, x23, x10, ror #47
+ac38: mul	x23, x10, x22
+ac3c: ubfx	x11, x21, #40, #8
+ac40: ucvtf	s0, x11
+ac44: fmul	s1, s0, s10
+ac48: ubfx	x11, x23, #39, #9
+ac4c: ucvtf	d0, x11
+ac50: fmul	d0, d0, d11
+ac54: eor	w11, w23, w21
+ac58: tbz	w11, #0x0, 0xabfc
+ac5c: fmul	s1, s1, s12
+ac60: fmadd	s8, s8, s15, s1
+ac64: fmul	d0, d0, d13
+ac68: fmadd	d9, d9, d14, d0
+ac6c: eor	x23, x23, x21, ror #35
+ac70: add	x8, x8, #0x1
+ac74: subs	x9, x9, #0x1
+ac78: b.ne	0xac24
+
+warmup_integer_only_dce 0xd010
+d000: mul	x10, x21, x25
+d004: add	x11, x10, x27
+d008: add	x12, x8, x20
+d00c: add	x10, x12, x10
+d010: eor	x10, x20, x10, ror #47
+d014: mul	x12, x10, x22
+d018: eor	w13, w12, w11
+d01c: mul	x10, x10, x15
+d020: orr	x10, x10, x12, lsr #53
+d024: eor	x10, x10, x11
+d028: eor	x14, x12, x11, ror #35
+d02c: tst	w13, #0x1
+d030: csel	x20, x12, x14, eq
+d034: csel	x21, x10, x11, eq
+d038: add	x8, x8, #0x1
+d03c: subs	x9, x9, #0x1
+d040: b.ne	0xd000
+
+timed_mixed_kernel 0xd2c8
+d290: fmul	s1, s1, s10
+d294: fmadd	s14, s14, s11, s1
+d298: fmul	d0, d0, d13
+d29c: fmadd	d8, d8, d15, d0
+d2a0: mul	x11, x11, x13
+d2a4: orr	x11, x11, x19, lsr #53
+d2a8: eor	x20, x11, x20
+d2ac: add	x9, x9, #0x1
+d2b0: subs	x10, x10, #0x1
+d2b4: b.eq	0xd320
+d2b8: mul	x11, x20, x25
+d2bc: add	x20, x11, x27
+d2c0: add	x12, x9, x19
+d2c4: add	x11, x12, x11
+d2c8: eor	x11, x19, x11, ror #47
+d2cc: mul	x19, x11, x22
+d2d0: ubfx	x12, x20, #40, #8
+d2d4: ucvtf	s0, x12
+d2d8: fmul	s1, s0, s9
+d2dc: ubfx	x12, x19, #39, #9
+d2e0: ucvtf	d0, x12
+d2e4: fmul	d0, d0, d12
+d2e8: eor	w12, w19, w20
+d2ec: tbz	w12, #0x0, 0xd290
+d2f0: fmov	s2, w28
+d2f4: fmul	s1, s1, s2
+d2f8: fmov	s2, w23
+d2fc: fmadd	s14, s14, s2, s1
+d300: ldr	d1, [x24, lCPI81_1@PAGEOFF]
+d304: fmul	d0, d0, d1
+d308: ldr	d1, [x21, lCPI81_2@PAGEOFF]
+d30c: fmadd	d8, d8, d1, d0
+d310: eor	x19, x19, x20, ror #35
+d314: add	x9, x9, #0x1
+d318: subs	x10, x10, #0x1
+d31c: b.ne	0xd2b8
+
+timed_mixed_kernel 0xeb14
+eadc: fmul	s21, s21, s4
+eae0: fmadd	s1, s1, s5, s21
+eae4: fmul	d20, d20, d6
+eae8: fmadd	d0, d0, d7, d20
+eaec: mul	x17, x17, x14
+eaf0: bfxil	x17, x8, #53, #11
+eaf4: eor	x9, x17, x9
+eaf8: add	x15, x15, #0x1
+eafc: subs	x16, x16, #0x1
+eb00: b.eq	0xeaa8
+eb04: mul	x17, x9, x12
+eb08: add	x9, x17, x10
+eb0c: add	x0, x15, x8
+eb10: add	x17, x0, x17
+eb14: eor	x17, x8, x17, ror #47
+eb18: mul	x8, x17, x13
+eb1c: ubfx	x0, x9, #40, #8
+eb20: ucvtf	s20, x0
+eb24: fmul	s21, s20, s2
+eb28: ubfx	x0, x8, #39, #9
+eb2c: ucvtf	d20, x0
+eb30: fmul	d20, d20, d3
+eb34: eor	w0, w8, w9
+eb38: tbz	w0, #0x0, 0xeadc
+eb3c: fmul	s21, s21, s16
+eb40: fmadd	s1, s1, s19, s21
+eb44: fmul	d20, d20, d17
+eb48: fmadd	d0, d0, d18, d20
+eb4c: eor	x8, x8, x9, ror #35
+eb50: add	x15, x15, #0x1
+eb54: subs	x16, x16, #0x1
+eb58: b.ne	0xeb04

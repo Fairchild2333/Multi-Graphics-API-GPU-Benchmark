@@ -1,0 +1,14 @@
+{
+  "object": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/cpu_benchmark.o",
+  "objectSha256": "4edf6d587cfd298f954131f214ccc10a44bd1b05c86f655aa88e1bfa69f9c800",
+  "command": [
+    "xcrun",
+    "llvm-objdump",
+    "--macho",
+    "--disassemble",
+    "--no-show-raw-insn",
+    "build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/cpu_benchmark.o"
+  ],
+  "currentIosNativeObjectOnly": true,
+  "phoneExecuted": false
+}

@@ -1,0 +1,9 @@
+[
+  "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+  "--cpu-benchmark",
+  "per-core",
+  "--cpu-time",
+  "15",
+  "--cpu-warmup",
+  "0.2"
+]

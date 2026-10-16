@@ -2,6 +2,26 @@
 
 > **2026-10-17：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** Mac M1–M4 软件问题及定向验证已完成；Vulkan 内存 V3 三轮正式平台通过，小容量边界正确保留 preview，固定覆盖/完成计时两轮稳定。iOS/Android/HarmonyOS 已重编译，手机真机补测等连接设备。
 
+## 2026-10-17 M4 Pro single-core low-score confirmation
+
+- User questioned207.532 as low. Ran exactly one unchanged packaged standard
+  per-core confirmation,15s/.2s warmup/3 rounds; default verified P/E both.
+  New P216.737, background E76.322 MWork/s. Full-core was not repeated.
+- P selected round effective4.223561GHz vs prior4.034418GHz; score+4.44%,
+  frequency+4.69%, cycles/work19.487 vs19.440. MinP residency99.9694%, selected
+  worker busy99.8677%, thermal0->0. No wrong-core/time-unit/work-count error
+  found; neither run establishes maximum single-core frequency/performance.
+- Current iOS arm64 object inspected:3 timed mixed loops preserve actual bit0
+  branch and FP32/FP64 FMA, zero csel/fcsel in those loops.2 integer-only warmup
+  loops use selects and do not contribute measured work. This is source/binary
+  inspection, not a new A15 physical run or proof of every historical binary.
+- CPU MWork/s characterizes this serial mixed kernel; do not market as generic
+  CPU ranking. Empty Mac inline asm emits no extra arithmetic. Keep old207.532
+  and312/3582 old-version rows; do not rescale them or rerun to pick a maximum.
+- Evidence/report in out/test-results/m4-single-core-check-20261017/. No
+  production code change.2 formal records appended:Mac169->171, all169 old rows
+  and four iOS histories unchanged; main archive index points to new snapshot.
+
 ## 2026-10-17 latest iOS simulator one-button flow passed
 
 - User asked whether simulator validation was needed. Ran the existing real-UI

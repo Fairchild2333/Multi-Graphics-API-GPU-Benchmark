@@ -5,11 +5,11 @@
     {
       "device": "Mac M4 Pro",
       "deviceModel": "Mac16,8",
-      "rows": 169,
-      "path": "macos-measurement-fixes-20261016/results-after.json",
-      "bytes": 331556,
-      "sha256": "003ae4d4398e7dca2066ae7491dbc1bab9d78fa6ad1a587482522ee4dc6bb7ce",
-      "notes": "Mac 主历史 169 条；新增 14 条修复/边界复核，含 3 条旧查询对照及 1 条预期的小容量 preview。旧 155 条不变，按新版本分组。"
+      "rows": 171,
+      "path": "m4-single-core-check-20261017/results-after.json",
+      "bytes": 336781,
+      "sha256": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f",
+      "notes": "Mac 主历史 171 条；单核原方法确认大核216.737、后台小核76.322，原169条不变。V3内存和粒子修复结果及诊断对照继续保留。"
     },
     {
       "device": "iPhone 13 Pro / A15",
