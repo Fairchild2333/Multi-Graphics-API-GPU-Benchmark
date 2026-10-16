@@ -1520,6 +1520,16 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-10-17 显存测试 V3：完整遍历的起点随设备上限变化，上限低的手机也能到平台
+
+- **问题：** V3 从 256 MiB 起才按完整数据集遍历，而"到平台"要求最大的三个点都是完整遍历，所以上限低于 512 MiB 的设备永远到不了平台。已测的 15 台安卓和鸿蒙设备里有 9 台是这样：128 MiB 的 MIX Fold 3、Quest 3、黑鲨 5 Pro、Quest 2；256 MiB 的 MIX 4、黑鲨 3 Pro、Mate 40 Pro、TCL 电视；342 MiB 的小米电视。
+- **修法：** `MemBwStreamingMinBytes`（`src/vulkan_membw.h`）。
+  - 上限 ≥ 512 MiB：仍从 256 MiB 起，电脑、Mac、iOS 默认设置的测法完全不变。
+  - 上限更小：从上限的四分之一起（取整 MiB），至少 32 MiB。128 MiB 从 32 MiB 起，平台看 64/96/128；256 MiB 从 64 MiB 起，看 128/192/256；342 MiB 从 85 MiB 起，看 192/256/342。
+  - 起点按数据校验之后的实际上限算（校验失败会把缓冲减半，例如 Adreno 660 从 512 退到 256）。分派方式、`dispatches_per_sample`、平台判定和保存的 `streamingMinMiB` 都用同一个值；系统内存那一段也一样。
+  - 版本号不变（`membw_v3_streaming`）：上限 ≥ 512 MiB 的结果和以前完全一样，上限更小的设备以前 V3 只会得到"未到平台"。安卓、鸿蒙、苹果前端都不读 `streamingMinMiB`，不用改。
+- **验证：** Windows 编译和 `ctest` 6/6（`vulkan_membw_results_test` 加了各档上限的起点和尾部用例），安卓 APK、鸿蒙 HAP 和 `check-mobile-suite.cjs` 通过。电脑和手机上的实测还没跑：电脑等用户安排完整测试，手机等接上后各跑一次显存测试（至少 128 MiB 和 256 MiB 各一台）。
+
 ### 2026-10-17 Windows 上显存测试随机作废（已修）；V1 与 V3 可比，非苹果设备不用重测；两个数学小测试的结论
 
 - **显存测试随机作废：** 拉取 Mac 那边的 8 个提交（到 `2832f08`）后，在 RTX 5090 上跑 `--workload membw`，连续三次都中途作废，位置都不同：12 MiB 读取、256 MiB 读取、192 MiB 复制。报错是 "Vulkan timestamps became unreliable during the sweep"。

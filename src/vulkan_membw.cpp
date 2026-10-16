@@ -34,9 +34,8 @@ constexpr std::uint64_t kChunkBytes =
 constexpr std::uint32_t kMaxGroupsX = 16384;
 constexpr std::uint32_t kHashSeed = 0x4d42u;
 constexpr std::uint64_t kMiB = 1ull << 20;
-// The memory plateau needs a sweep of at least this size whose three largest
-// data sets agree within kMemoryTailSpread.
-constexpr std::uint64_t kMemoryPlateauBytes = kMemBwStreamingMinBytes;
+// The memory plateau needs three largest data sets that all streamed and agree
+// within kMemoryTailSpread.
 constexpr double kMemoryTailSpread = 1.2;
 constexpr double kPlateauSpread = 1.3;
 // Upper bound on the traffic of a single dispatch.
@@ -184,7 +183,8 @@ std::vector<std::uint32_t> SweepChunkCounts(std::uint32_t maxChunks) {
     return counts;
 }
 
-MemBwKernelSummary Summarise(const std::vector<MemBwPoint>& points, const char* kernel) {
+MemBwKernelSummary Summarise(const std::vector<MemBwPoint>& points, const char* kernel,
+                             std::uint64_t streamingMin) {
     std::vector<const MemBwPoint*> curve;
     for (const auto& point : points)
         if (point.kernel == kernel) curve.push_back(&point);
@@ -204,7 +204,7 @@ MemBwKernelSummary Summarise(const std::vector<MemBwPoint>& points, const char* 
     const double tailHigh = *std::max_element(tail.begin(), tail.end());
     summary.memoryPlateauReached =
         tail.size() == 3 && MemBwStreamingTailEligible(curve[count - 3]->datasetBytes,
-            curve[count - 2]->datasetBytes, curve[count - 1]->datasetBytes) &&
+            curve[count - 2]->datasetBytes, curve[count - 1]->datasetBytes, streamingMin) &&
         tailLow > 0.0 && tailHigh / tailLow <= kMemoryTailSpread;
     if (!summary.memoryPlateauReached) return summary;
 
@@ -380,6 +380,8 @@ private:
     void* readbackMapped_ = nullptr;
     std::uint32_t maxChunks_ = 0;
     std::uint32_t hostChunks_ = 0;
+    // Set from the checked sweep size before any point is measured.
+    std::uint64_t streamingMinBytes_ = kMemBwStreamingMinBytes;
 
     VkDescriptorSetLayout setLayout_ = VK_NULL_HANDLE;
     VkDescriptorPool descriptorPool_ = VK_NULL_HANDLE;
@@ -886,7 +888,7 @@ void Runner::RecordResourceBarrier() {
 
 Runner::Sample Runner::Dispatch(std::size_t kernel, std::uint32_t chunkCount,
                                 std::uint64_t passes) {
-    if (chunkCount * kChunkBytes >= kMemBwStreamingMinBytes) {
+    if (chunkCount * kChunkBytes >= streamingMinBytes_) {
         // Each dispatch visits every chunk once. A compute execution/memory
         // dependency orders the next complete pass, preventing private-chunk
         // write/copy loops from recycling the same cache-resident block.
@@ -1217,7 +1219,7 @@ MemBwPoint Runner::MeasurePoint(std::size_t kernel, std::uint32_t chunkCount,
     point.datasetBytes = chunkCount * kChunkBytes;
     point.passes = static_cast<std::uint32_t>(passes);
     point.bytesPerDispatch = chunkCount * passes * kKernels[kernel].bytesPerChunkVisit;
-    point.dispatchesPerSample = point.datasetBytes >= kMemBwStreamingMinBytes
+    point.dispatchesPerSample = point.datasetBytes >= streamingMinBytes_
         ? static_cast<std::uint32_t>(passes) : 1;
     FillStatistics(point, times);
     VerifyWrittenData(kernel, chunkCount);
@@ -1325,8 +1327,8 @@ void Runner::MeasureHostMemory(MemBwReport& report) {
         }
     }
     activeSet_ = descriptorSet_;
-    report.host.read = Summarise(report.points, "host_read");
-    report.host.write = Summarise(report.points, "host_write");
+    report.host.read = Summarise(report.points, "host_read", streamingMinBytes_);
+    report.host.write = Summarise(report.points, "host_write", streamingMinBytes_);
 
     // Driver copies in each direction. Size them from the measured read rate
     // so that one copy takes about a quarter of a second at most.
@@ -1395,6 +1397,7 @@ void Runner::Run(MemBwReport& report) {
     report.dataVerified = true;
     report.maxDatasetBytes = maxChunks_ * kChunkBytes;
     report.datasetLimitedByDevice = report.maxDatasetBytes < config_.maxDatasetBytes;
+    streamingMinBytes_ = MemBwStreamingMinBytes(report.maxDatasetBytes);
     // The driver copies of the system-memory pass go through the destination buffer.
     hostChunks_ = (std::min)(hostChunks_, maxChunks_);
     DecideTimingSource(report);
@@ -1412,7 +1415,7 @@ void Runner::Run(MemBwReport& report) {
          << config_.warmupRuns << " warm-up + " << config_.measuredRuns
          << " measured samples per point, median reported\n";
     out_ << "Traversal: complete ordered data-set passes from "
-         << FormatMiB(kMemBwStreamingMinBytes)
+         << FormatMiB(streamingMinBytes_)
          << "; smaller points retain cache-workgroup repetition.\n";
     if (!report.memoryBudgetPolicy.empty()) {
         out_ << "MEMBW_BUDGET\tpolicy=" << report.memoryBudgetPolicy
@@ -1450,9 +1453,9 @@ void Runner::Run(MemBwReport& report) {
 
     MeasureHostMemory(report);
 
-    report.read = Summarise(report.points, "read");
-    report.write = Summarise(report.points, "write");
-    report.copy = Summarise(report.points, "copy");
+    report.read = Summarise(report.points, "read", streamingMinBytes_);
+    report.write = Summarise(report.points, "write", streamingMinBytes_);
+    report.copy = Summarise(report.points, "copy", streamingMinBytes_);
     report.l1 = SummariseL1(report.points);
     report.timestampAnomalies = timestampAnomalies_;
     report.writeCopyChecks = writeCopyChecks_;
@@ -1475,7 +1478,7 @@ void Runner::Run(MemBwReport& report) {
         if (!row.summary->memoryPlateauReached) {
             // Do not label a cache-assisted figure as memory bandwidth.
             out_ << "at the largest data sets; " << memoryLabel
-                 << " plateau not reached (sweep ends below 256 MiB or is still descending)";
+                 << " plateau not reached (the largest data sets did not all stream, or the curve is still descending)";
         } else if (row.summary->cacheGBps > 0.0) {
             out_ << memoryLabel << " | cache plateau " << row.summary->cacheGBps << " GB/s ("
                  << FormatMiB(row.summary->cacheFromBytes) << " - "

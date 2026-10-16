@@ -16,8 +16,30 @@ int main() {
     assert(IosMemBwBufferBudget(kIosMemBwDefaultMaxBytes, 1024ull << 20) == 256ull << 20);
     assert(IosMemBwBufferBudget(kIosMemBwDefaultMaxBytes, 0) == 256ull << 20);
     assert(IosMemBwBufferBudget(64ull << 20, 2048ull << 20) == 64ull << 20);
-    assert(!MemBwStreamingTailEligible(128ull << 20, 192ull << 20, 256ull << 20));
-    assert(MemBwStreamingTailEligible(256ull << 20, 384ull << 20, 512ull << 20));
+    // Sweeps that reach 512 MiB keep streaming from 256 MiB.
+    for (const std::uint64_t maxMiB : {512ull, 580ull, 1024ull, 1713ull, 2048ull})
+        assert(MemBwStreamingMinBytes(maxMiB << 20) == kMemBwStreamingMinBytes);
+    const auto desktopMin = MemBwStreamingMinBytes(2048ull << 20);
+    assert(!MemBwStreamingTailEligible(128ull << 20, 192ull << 20, 256ull << 20, desktopMin));
+    assert(MemBwStreamingTailEligible(256ull << 20, 384ull << 20, 512ull << 20, desktopMin));
+    // Shorter sweeps stream from a quarter of their largest data set, so the
+    // three largest points of every phone cap stream (2026-10 caps).
+    assert(MemBwStreamingMinBytes(128ull << 20) == 32ull << 20);
+    assert(MemBwStreamingMinBytes(256ull << 20) == 64ull << 20);
+    assert(MemBwStreamingMinBytes(342ull << 20) == 85ull << 20);
+    assert(MemBwStreamingMinBytes(511ull << 20) == 127ull << 20);
+    assert(MemBwStreamingMinBytes(64ull << 20) == kMemBwStreamingFloorBytes);
+    assert(MemBwStreamingMinBytes(16ull << 20) == kMemBwStreamingFloorBytes);
+    assert(MemBwStreamingTailEligible(64ull << 20, 96ull << 20, 128ull << 20,
+                                      MemBwStreamingMinBytes(128ull << 20)));
+    assert(MemBwStreamingTailEligible(128ull << 20, 192ull << 20, 256ull << 20,
+                                      MemBwStreamingMinBytes(256ull << 20)));
+    assert(MemBwStreamingTailEligible(192ull << 20, 256ull << 20, 342ull << 20,
+                                      MemBwStreamingMinBytes(342ull << 20)));
+    assert(MemBwStreamingTailEligible(32ull << 20, 48ull << 20, 64ull << 20,
+                                      MemBwStreamingMinBytes(64ull << 20)));
+    assert(!MemBwStreamingTailEligible(16ull << 20, 24ull << 20, 32ull << 20,
+                                       MemBwStreamingMinBytes(32ull << 20)));
     MemBwReport report;
     report.valid = true;
     report.dataVerified = true;
@@ -88,6 +110,10 @@ int main() {
     translated.workloadVersion = "membw_v1_moltenvk";
     assert(!LegacyV1VulkanMemoryComparable(translated));
     assert(result.workloadConfig.find("largeDatasetTraversal=ordered_full_dataset_passes") != std::string::npos);
+    assert(ResultConfigValue(result, "streamingMinMiB") == "64");  // 256 MiB sweep
+    auto desktopReport = report;
+    desktopReport.maxDatasetBytes = 2048ull << 20;
+    assert(ResultConfigValue(MakeStoredVulkanMemBwResult(desktopReport, config), "streamingMinMiB") == "256");
     assert(VulkanTimestampIntervalVerified(4, 4.2));
     assert(VulkanTimestampIntervalVerified(0.05, 0.25));
     assert(!VulkanTimestampIntervalVerified(0.02, 11)); // known under-reporting pattern

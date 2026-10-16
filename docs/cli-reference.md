@@ -243,24 +243,31 @@ panel. When several GPUs run in one job list, the charts show the last one.
   requests, not an estimate.
 - **Data sets:** every workgroup streams one 512 KiB chunk. The number of
   distinct chunks sets the data-set size, which is swept from 1 MiB to
-  `--membw-max-mib` in ×1.5 / ×2 steps. Below 256 MiB, repetitions retain the
-  cache-probe layout. From 256 MiB, each dispatch visits the complete data set
-  once; compute execution/memory barriers order subsequent complete passes.
+  `--membw-max-mib` in ×1.5 / ×2 steps. From the streaming start on, each
+  dispatch visits the complete data set once; compute execution/memory barriers
+  order subsequent complete passes. Smaller points retain the cache-probe
+  layout. The start is 256 MiB when the sweep reaches 512 MiB; a shorter sweep
+  starts at a quarter of its largest data set (whole MiB), at least 32 MiB
+  (`MemBwStreamingMinBytes`, saved as `streamingMinMiB`).
   The timed batch is calibrated to about 4 ms, or at least 50 ms with wall-clock
   timing. `dispatches_per_sample` reports the complete-pass count; the legacy
   `dispatch_bytes` field counts bytes of the whole timed sample.
 
   The memory plateau requires all three largest points to use this complete-pass
-  method and agree within the existing 20% spread. A 256 MiB ceiling leaves a
-  mixed-method 128/192/256 MiB tail, so it remains preview; the normal sweep
-  needs at least 512 MiB to have three eligible points. A flat small-set curve
-  alone does not prove a memory plateau.
+  method and agree within the existing 20% spread. Because the start follows the
+  ceiling, every sweep of at least 64 MiB has three such points: a 128 MiB phone
+  streams from 32 MiB and judges 64/96/128 MiB, a 256 MiB ceiling streams from
+  64 MiB and judges 128/192/256 MiB. Until 2026-10-17 the start was fixed at
+  256 MiB, so a ceiling below 512 MiB (9 of the 15 Android and HarmonyOS devices
+  measured: 128 - 342 MiB) could never reach the plateau. Sweeps that reach
+  512 MiB (desktop, Mac, the iOS default) measure exactly as before. A flat
+  small-set curve alone does not prove a memory plateau.
 
   iOS targets 512 MiB by default using the `ios_preview_app_budget_v1` profile.
   Each of its two sweep buffers is bounded by a quarter of the app's current
   allocation allowance (`os_proc_available_memory()`), as well as Vulkan
-  limits. Unknown app headroom falls back to 256 MiB; insufficient headroom or
-  a non-flat tail still remains review. Requested/actual size, budget policy
+  limits. Unknown app headroom falls back to 256 MiB, which now streams from
+  64 MiB; a non-flat tail still remains review. Requested/actual size, budget policy
   and allowance snapshot are persisted. `ios_preview` keeps mobile score groups
   separate; an actual `memoryPlateauReached=1` is still a verified kernel-access
   platform. See [iPad and fallback validation](../out/test-results/ios-vulkan-memory-platform-fix-20261017/report.md).
@@ -294,7 +301,10 @@ panel. When several GPUs run in one job list, the charts show the last one.
   Pro, MIX 4, Black Shark 3 Pro, Pad 5, MIX 2S, Mate 40 Pro, Mate 60 Pro, MateBook
   Pro, Xiaomi TV and TCL TV. The MIX Fold 3, Quest 3, Black Shark 5 Pro and
   Quest 2 never reached the plateau, and the Switch result predates the check.
-  These five need the memory test once more if their figure is to count.
+  These five need the memory test once more if their figure is to count. The
+  four 128 MiB devices could not reach it under V3 either until the streaming
+  start followed the ceiling (2026-10-17); one run of the current build each is
+  enough. The Switch (580 MiB) streams from 256 MiB as before.
 - **Data check:** before anything is timed, the buffer is filled by the write
   kernel and a fifth kernel (`membw_check.comp`, never timed) loads every
   element and compares it with the value that was stored. If any differs, the

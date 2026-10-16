@@ -17,6 +17,16 @@ inline constexpr char kMemBwWorkloadVersion[] = "membw_v3_streaming";
 // Repeating a private 512 KiB chunk in a workgroup measures cache traffic even
 // when the allocation is much larger than the cache.
 inline constexpr std::uint64_t kMemBwStreamingMinBytes = 256ull << 20;
+// Most phones cap the sweep at 128 - 342 MiB (2026-10), so a fixed 256 MiB
+// start left their three largest points outside it and no plateau could form.
+// A sweep that reaches 512 MiB streams from 256 MiB as before; a shorter one
+// streams from a quarter of its largest data set, at least 32 MiB.
+inline constexpr std::uint64_t kMemBwStreamingFloorBytes = 32ull << 20;
+inline std::uint64_t MemBwStreamingMinBytes(std::uint64_t maxDatasetBytes) {
+    if (maxDatasetBytes >= 2 * kMemBwStreamingMinBytes) return kMemBwStreamingMinBytes;
+    const std::uint64_t quarter = (maxDatasetBytes / 4) & ~((1ull << 20) - 1);  // whole MiB
+    return quarter > kMemBwStreamingFloorBytes ? quarter : kMemBwStreamingFloorBytes;
+}
 // The smallest regular sweep whose final three points (256/384/512 MiB)
 // all use the streaming method. iOS keeps half the app's available headroom
 // for the OS/driver/UI: each of the two large buffers may use at most 1/4.
@@ -28,9 +38,8 @@ inline std::uint64_t IosMemBwBufferBudget(std::uint64_t requested,
     return requested < budget ? requested : budget;
 }
 inline bool MemBwStreamingTailEligible(std::uint64_t first, std::uint64_t second,
-                                      std::uint64_t third) {
-    return first >= kMemBwStreamingMinBytes && second >= kMemBwStreamingMinBytes &&
-           third >= kMemBwStreamingMinBytes;
+                                      std::uint64_t third, std::uint64_t streamingMin) {
+    return first >= streamingMin && second >= streamingMin && third >= streamingMin;
 }
 
 struct MemBwConfig {
@@ -74,8 +83,9 @@ struct MemBwKernelSummary {
     // the data set has chunks, concurrent groups share chunks through the
     // cache and the transition to memory is stretched.
     std::uint64_t cacheKneeBytes = 0;
-    // False when the sweep is shorter than 256 MiB or its three largest data
-    // sets are not flat yet, so `memoryGBps` may still be cache-assisted.
+    // False when the three largest data sets did not all stream (the sweep is
+    // shorter than 64 MiB) or are not flat yet, so `memoryGBps` may still be
+    // cache-assisted.
     bool memoryPlateauReached = false;
     // True when the smallest data sets ran faster than the cache plateau:
     // several workgroups on one SM/CU then share a chunk through L1, so those
