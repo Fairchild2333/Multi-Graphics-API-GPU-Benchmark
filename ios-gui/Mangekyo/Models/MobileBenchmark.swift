@@ -307,6 +307,8 @@ struct MobileSuiteJob: Identifiable, Sendable {
         }
         if testID.hasPrefix("stream") {
             let parts = testID.split(separator: "-")
+            if translated &&
+                result.workloadConfigValue("timingMode") != "synchronized_wall_clock" { return false }
             if gpuRequest?.contains("coverage=fixed") == true &&
                result.workloadConfigValue("renderCoverage") != "wrapped_ndc_v2" { return false }
             if gpuRequest?.contains("coverage=legacy") == true &&

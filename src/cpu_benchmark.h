@@ -90,6 +90,7 @@ struct CpuMultiCoreResult {
     std::vector<double> workerScores;
     bool typedScheduling = false;
     bool verifiedCoreTypes = false;
+    std::vector<CpuParticipation> participationRounds;
     std::vector<CpuResidency> workerResidencies;
     std::vector<double> workerBusyFractions;
     double processCpuSeconds = 0.0;

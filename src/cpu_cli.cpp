@@ -39,7 +39,7 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
                   << "_sequence_" << (beforePerCore ? "before_percore" : "standalone");
     stored.workloadVersion = storedVersion.str();
     if (multiCore && report.multiCore.typedScheduling)
-        stored.workloadVersion += "_apple_pe_qos_workers_v1";
+        stored.workloadVersion += "_apple_pe_qos_workers_v1_aggregate_occupancy_v1";
     const auto coreType = !multiCore && !report.perCore.empty()
         ? report.perCore.front().coreType : CpuCoreType::Automatic;
     const bool foregroundE = !multiCore && !report.perCore.empty() && report.perCore.front().foregroundEfficiency;
@@ -110,8 +110,21 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
                  << ";performanceCpuSeconds=" << report.multiCore.performanceCpuSeconds
                  << ";accountingIncludesWarmup=" << (report.multiCore.medianRound == 1 ? config.warmupSeconds : 0.0);
         if (report.multiCore.typedScheduling) {
+            bool participationVerified = report.multiCore.participationRounds.size() == report.multiCore.roundCount;
+            double minimumP = 1.05, minimumE = 1.05, minimumWorker = 1.05;
+            for (const auto& round : report.multiCore.participationRounds) {
+                participationVerified = participationVerified && round.verified();
+                minimumP = (std::min)(minimumP, round.performanceOccupancy);
+                minimumE = (std::min)(minimumE, round.efficiencyOccupancy);
+                minimumWorker = (std::min)(minimumWorker, round.minimumWorkerOccupancy);
+            }
             contract << ";workerSchedulingPolicy=apple_pe_qos_v1"
                      << ";allCorePlacementVerified=" << (report.multiCore.verifiedCoreTypes ? 1 : 0)
+                     << ";allCoreValidation=aggregate_cpu_time_v1"
+                     << ";allCoreParticipationVerified=" << (participationVerified ? 1 : 0)
+                     << ";minimumRoundPerformanceOccupancy=" << minimumP
+                     << ";minimumRoundEfficiencyOccupancy=" << minimumE
+                     << ";minimumRoundWorkerOccupancy=" << minimumWorker
                      << ";performanceWorkers=" << AppleCoreTypeCount(CpuCoreType::Performance)
                      << ";efficiencyWorkers=" << AppleCoreTypeCount(CpuCoreType::Efficiency)
                      << ";workerResidency=";

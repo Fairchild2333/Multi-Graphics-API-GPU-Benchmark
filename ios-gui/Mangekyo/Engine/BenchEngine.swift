@@ -132,6 +132,8 @@ final class BenchEngine: ObservableObject {
     private var pollTask: Task<Void, Never>?
 
     init() {
+        Localization.current = AppLanguage(rawValue: UserDefaults.standard.string(forKey: "appLanguage") ?? "auto") ?? .auto_
+        print("IOS_LANGUAGE setting=\(Localization.current.rawValue) preferred=\(Locale.preferredLanguages.joined(separator: ",")) locale=\(Locale.current.identifier) effective=\(Localization.effectiveLang.rawValue)")
         if ProcessInfo.processInfo.arguments.contains("--ios-allow-translated-api") {
             allowTranslatedApis = true
         }

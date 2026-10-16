@@ -76,6 +76,22 @@ shader copies from the bundle. Results live under the app's Documents directory.
   GPU/CPU results.json and per-suite manifests/logs.
 - Separate GPU/CPU logs, progress, scores and current-run charts.
 - History preserving result schema, device model, memory and platform metadata.
+- Auto language follows the device's preferred language list, independently of
+  its region. English, Simplified Chinese and Japanese are declared in the
+  bundle; a saved manual language is restored before the initial status text.
+- Translated Vulkan particles use synchronized compute/render completion timing
+  throughout the run. Old query-timed particle records are kept in history and
+  do not fulfill the current suite's translated-particle jobs.
+- A12X all-core verification checks measured CPU participation of both core
+  groups in every round, while retaining per-worker core-type purity as detail.
+  Single-core P/E scores still require 99% verified residency.
+- Large iPhones keep tab navigation when rotating to landscape, so the
+  full-screen benchmark is not dismissed by a size-class navigation change.
+  A simulator UI regression covers starting, retaining and cancelling the run.
+- Throughput variability is retained as a review flag with the full-run mean
+  and curves. A greater-than-5% early/late drop is not direct frequency
+  telemetry; comparisons needing stable performance may use a separate
+  control run. Do not repeat tests merely to clear warnings.
 - Filtered comparison charts by version, API, execution mode and particle size,
   plus CPU comparison charts.
 - Saved cache/memory curves accessible from History and Charts. Choose an older

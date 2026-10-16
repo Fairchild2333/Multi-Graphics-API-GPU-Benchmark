@@ -13,7 +13,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .auto_: return "Auto"
+        case .auto_: return Localization.tr("Auto", "跟随系统", "システムに合わせる")
         case .en:    return "English"
         case .zh:    return "简体中文"
         case .ja:    return "日本語"
@@ -27,7 +27,9 @@ final class Localization {
     /// Resolve the effective language (handles "auto").
     static var effectiveLang: AppLanguage {
         if current != .auto_ { return current }
-        let lang = Locale.current.language.languageCode?.identifier ?? "en"
+        // UI language follows the BCP-47 preference list, independently of
+        // the device's region; this also supports macOS Monterey.
+        let lang = Locale.preferredLanguages.first ?? Locale.current.identifier
         if lang.hasPrefix("zh") { return .zh }
         if lang.hasPrefix("ja") { return .ja }
         return .en

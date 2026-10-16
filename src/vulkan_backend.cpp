@@ -89,6 +89,11 @@ void VulkanBackend::InitBackend() {
     // by submit/fence completion, rather than trusting the initial sample.
     if (isGpuBurnWorkload(config_.workload))
         EnableSynchronizedTimingFallback("MoltenVK GPU Burn requires per-frame completion timing");
+    // A12X can pass the repeated-dispatch startup check yet under-report
+    // ordinary frames. Use the same synchronized compute/render boundaries
+    // for the entire translated particle run, including rendered presets.
+    if (config_.workload == Workload::Stream)
+        EnableSynchronizedTimingFallback("MoltenVK particles require per-frame completion timing");
 #endif
     CheckTimestampsAgainstWallClock();
 

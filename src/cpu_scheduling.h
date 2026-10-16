@@ -1,7 +1,9 @@
 #pragma once
 #include <algorithm>
 #include <cstdint>
+#include <cmath>
 #include <string>
+#include <vector>
 #if defined(__APPLE__)
 #include <TargetConditionals.h>
 #if defined(__aarch64__)
@@ -195,6 +197,43 @@ struct CpuResidency {
     double processCpuNs = 0, workerCpuNs = 0;
     bool verified() const { return available && requestedLowerBound >= 0.99; }
 };
+
+// All-core work does not require each worker to remain on one core type.
+// Verify actual participation of both core groups, independently of the
+// stricter 99% purity contract used for single-core P/E measurements.
+struct CpuParticipation {
+    bool available = false;
+    double performanceOccupancy = 0, efficiencyOccupancy = 0, minimumWorkerOccupancy = 0;
+    bool verified() const {
+        return available && performanceOccupancy >= .90 && performanceOccupancy <= 1.05 &&
+            efficiencyOccupancy >= .90 && efficiencyOccupancy <= 1.05 &&
+            minimumWorkerOccupancy >= .90 && minimumWorkerOccupancy <= 1.05;
+    }
+};
+inline CpuParticipation EvaluateCpuParticipation(const std::vector<CpuResidency>& workers,
+                                                 const std::vector<double>& busy,
+                                                 std::uint32_t performanceCount,
+                                                 std::uint32_t efficiencyCount,
+                                                 double wallSeconds) {
+    CpuParticipation result;
+    if (!std::isfinite(wallSeconds) || wallSeconds <= 0 || !performanceCount || !efficiencyCount ||
+        workers.size() != std::size_t(performanceCount) + efficiencyCount || busy.size() != workers.size()) return result;
+    double performanceNs = 0, efficiencyNs = 0, minimumBusy = 1.05;
+    for (std::size_t i = 0; i < workers.size(); ++i) {
+        const auto& worker = workers[i];
+        if (!worker.available || !std::isfinite(worker.workerCpuNs) || worker.workerCpuNs <= 0 ||
+            !std::isfinite(worker.performanceFraction) || worker.performanceFraction < 0 || worker.performanceFraction > 1 ||
+            !std::isfinite(busy[i]) || busy[i] < 0 || busy[i] > 1.05) return result;
+        performanceNs += worker.workerCpuNs * worker.performanceFraction;
+        efficiencyNs += worker.workerCpuNs * (1 - worker.performanceFraction);
+        minimumBusy = std::min(minimumBusy, busy[i]);
+    }
+    result.available = true;
+    result.performanceOccupancy = performanceNs / 1e9 / wallSeconds / performanceCount;
+    result.efficiencyOccupancy = efficiencyNs / 1e9 / wallSeconds / efficiencyCount;
+    result.minimumWorkerOccupancy = minimumBusy;
+    return result;
+}
 
 // Recount's exported SPI is absent from the public SDK headers. Its layout
 // and perf-level ordering are specified by Apple's resource_private.h and

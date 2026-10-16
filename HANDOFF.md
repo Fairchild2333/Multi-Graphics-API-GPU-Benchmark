@@ -4231,3 +4231,176 @@ PathService 已把 results/captures/reports/logs 改到
   A15/Mac/Android/Harmony physical measurements this turn. Full31-job physical
   button was NOT clicked this run; do not claim physical whole-button acceptance.
 - No commit/push requested. Preserve existing dirty edits and xcuserdata.
+
+### 2026-10-16: New iPad8,1 actual one-button suite and timing correction
+
+- User switched to a new device, UDID 00008027-001969920A87002E, CoreDevice
+  9A44542D-75A2-58C6-B79C-18BEAED61843. Physical iPad Pro11 first gen/A12X,
+  iPadOS26.7.1, named Van的 iPad. Distinct from prior iPad8,7.
+- User enabled Developer Mode and trusted developer signature. Signed team
+  2W6PXCJAM6; fresh device had no app/history. Final signed app is in
+  build-ios/DerivedData-ipad81-fix/Build/Products/Release-iphoneos/Mangekyo.app.
+- Fixed iOS Auto language: preferredLanguages instead of Locale.current,
+  declared en/zh-Hans/ja, restore saved appLanguage before initial status.
+  Actual UI button Chinese; native log setting=auto preferred=zh-Hans-AU.
+- Actual XCTest tapped complete-suite-all, no suite-autorun arguments, ran
+  all31 jobs /33 records. Initial22 passed/9 review,0 execution failures.
+  Strict physical test asserted review==passed and FAILED as designed.
+  Afterwards Xcode stalled during log finalization. Only that completed host
+  PID12431 was INT/TERM stopped; xcresult is incomplete, screenshots cannot
+  be exported. Do not call the XCTest passed or cite incomplete result bundle
+  as successful acceptance. Actual click log and native full manifests saved.
+- Found wrong formal MoltenVK headless1M/4M timestamps despite startup check
+  passing: 0.067/0.343ms vs1.539/5.842ms wall, scores624.626/488.988GB/s.
+  iOS-only headless particles now whole-run synchronized timing, same existing
+  fallback as Burn; native Android/OHOS and macOS desktop path unchanged.
+  iOS result matching rejects query-timed headless resume. Updated Swift
+  acceptance/rejection tests PASS, Release engine and signed app builds PASS.
+- Actual corrected headless1M/4M/16M all PASS18.481/26.642/28.754GB/s, stable
+  18.206/26.632/28.757, timing matches wall and thermal0->0. Original33 rows
+  unchanged; final36. Current selection31 jobs/33 records =24 passed/7 review,
+  production model PASS. This is original full UI run plus3 actual retests,
+  NOT a second complete button run after the fix. GPU attribution out of scope.
+- CPU P110.384,E60.661,all655.509MWork/s; single P/E verified, all8 worker
+  aggregate valid but round2 P lower bound minimum98.372% fails full99% gate;
+  do not replace all-round quality with selected-round stats. CPU mem51.790
+  GB/s, cache curves/pages/storage complete, E memory remains background.
+  Vulkan RAM58.051GB/s verified whole wall-clock sweep. Remaining reviews:
+  Metal rendered1M/4M/16M, Vulkan rendered1M/4M/16M, CPU all-core residency.
+- All measurements ended. Final actual appPID873 killed; fresh process list
+  confirms absent. Safe unplug. No bench or test watcher active. No commit/push
+  this turn; previous committed baseline13aeafd. Preserve user's xcuserdata.
+- Evidence out/test-results/ipad8-1-full-suite-20261016/: report, phone-final,
+  curated-suite-results, selected-run-sources, original UI and corrected native
+  manifests/logs, verification and production-contract-audit,4 PNG/PDF/CSV
+  curve groups. SHA finala44e14deb4ccde5acbd256e46e8d61960fb96bae8031058c1c3155205080bdb0.
+  New concise tracked record docs/ipad8-1-one-click-20261016.md. Other devices
+  NOT retested. Old query-based iOS headless rows cannot fulfill new policy
+  automatically; do not silently relabel old measurements as synchronized.
+
+### 2026-10-16: Remaining iPad8,1 seven reviews closed; app design fixes
+
+- User explicitly requested further review and fixing genuine test-design issues.
+  New root out/test-results/ipad81-design-review-20261016/. Do NOT rerun tests
+  merely because the earlier report still has7 reviews; latest7 actual PASS.
+- Uninstrumented original-app baseline4 jobs: Metal1M35.209 passed,4M29.369
+  review(no stable window, drop-2.44%),16M28.340 passed; CPU111.097/60.795/
+  656.464 passed. Preserve6 baseline rows. Different thermal/order conditions
+  prevent quantifying UI-automation overhead; do not assert sole causation.
+- iOS-only MoltenVK synchronized completion now covers ALL particles, rendered
+  and headless. Startup-only query checking is insufficient. iOS model rejects
+  old query-timed rendered particle rows as well. Native Android/OHOS and
+  macOS desktop selection untouched; API toggle retained.
+- A12X all-core score algorithm unchanged(common wall time,8 workers,3 rounds
+  median). New aggregate_cpu_time_v1 validates actual work-thread P/E CPU time
+  versus each group's physical capacity, and minimum worker occupancy, in
+  EVERY round. Each group/worker >=90%, rejects missing/invalid/excess counters.
+  Individual P/E type purity still saved; single-core99% requirement intact.
+  Core-group participation is independent of individual-worker type purity.
+  New workload version aggregate_occupancy_v1 and fields; do not relabel old
+  failed-purity records retroactively. Apple Swift readers remain identical.
+- Corrected actual7 jobs allPASS,0review/fail,selected9 new rows:
+  Metal render1M35.076/4M30.661/16M28.470GB/s; Vulkan render1M21.318/4M26.999/
+  16M28.952GB/s all synchronized; CPU P111.076,E60.791,all657.976MWork/s.
+  Metal kernel/coverage and2% stability threshold UNCHANGED. Lowest all-round
+  P occupancy99.6631745%,E96.9217504%,worker96.503048%;24 worker samples
+  and3 participation rounds archived. New run individual purity also passes.
+- Real current selection31 jobs/33rows production contract AND quality PASS,
+  built from prior passed records plus corrected7. NOT a new31-job full-button
+  execution. Old failed full-button XCTest remains failed; no false acceptance.
+- Final history51; original36 records unchanged. SHA43d43fb16d87ade98bdb80c7c319d8b8e04434eb69cf1c8f8f777e2284b6531b.
+  phone-final,curated-suite-results,selected-run-sources,production-contract-
+  audit,verification,baseline and corrected7 raw logs/manifests,4 PNG/PDF/CSV
+  plot groups saved. CPU memory267,Metal memory52,Vulkan memory77,cache124
+  curve points unchanged(from prior passing jobs); no attribution research.
+- Native CPU residency/cancel2/2 PASS; Swift contract tests include balanced
+  migration, starved group and legacy query rejection PASS. Release native
+  engine and signed app PASS; installed on iPad8,1. No tests of other devices.
+- Device actual appPID914 killed; fresh process list confirms absent. All
+  benchmarks/controllers complete, safe unplug. New tracked summary
+  docs/ipad81-design-review-20261016.md; earlier docs link to latest status.
+- Still uncommitted since baseline13aeafd; no commit/push requested this turn.
+  Preserve user's Xcode xcuserdata. Normal subsequent noise still gets review;
+  do not promise every future run reaches a stable plateau.
+
+### 2026-10-16 Latest iOS simulator real-button full-flow acceptance
+
+- User authorized an optional simulator full flow if useful; no new physical
+  measurements needed. Built current Release engine/app and used the actual
+  complete-suite-all button via XCTest, with only the existing translated API
+  gate enabled. No autorun/target subset/resume; all27 supported jobs completed.
+- iPhone18Pro/iOS27.0 arm64 simulator573DDAD2-9B49-4C01-AC4E-1FA12BE6D06B:
+  XCTest1/1 Passed, xcodebuild exit0, complete readable ui-full.xcresult and
+  before/after screenshots exported. Native status review:19pass,8review,
+  0fail,28 unique records. Preserve variability reviews; physical gate unchanged.
+- Production Swift audit PASS for all requests/result groups/versions/quality
+  status/unique IDs and saved curves:CPU174,Metal52,Vulkan77; VM page mapping
+  and storage present. CPU screens show normal portrait progress, not black.
+  All6 Vulkan particle jobs use synchronized_wall_clock. Shared checks154/154.
+- No new execution/saving defect found. Synced macOS Auto display localization
+  to iOS (Chinese follows-system label), keeping all6 shared Apple files equal.
+  No workload/timing/quality-threshold change this turn.
+- Simulator capabilities exclude Vulkan16M2jobs, Vulkan liquid, GPU cache
+  diagnostic, GLES2 256. CPU sweeps host14 logical processors, not iPad P/E.
+  These are simulator workflow artifacts only, not physical performance.
+- Native final Documents and all evidence under
+  out/test-results/ios-simulator-full-suite-20261016; report.md/verification.json/
+  production-contract-audit.json. Results SHA256
+  a0cc55c8350074c31ae387761a8a74c2fb258d6a8b25f31678135e9d9e73c3af.
+- Simulator app terminated and simulator shut down, matching initial state.
+  All3 physical history hashes unchanged(A15 128,old iPad72,new iPad51).
+  Tracked summary docs/ios-simulator-flow-20261016.md. No commit/push requested;
+  preserve user's Xcode xcuserdata and all earlier uncommitted changes.
+
+### 2026-10-16 A16 iPhone14 Pro Max partial run; USER UNPLUGGED
+
+- New physical device iPhone15,3 / iPhone14 Pro Max / Apple A16 / iOS27.0.1,
+  UDID00008120-000E2D3E0CEBC01E, CoreDevice256C41DC-AC03-5FF9-9D3F-8FDFFC83CDBE.
+  User enabled Developer Mode and trusted the developer signature. Installed
+  Release build build-ios/DerivedData-a16-full; team2W6PXCJAM6.
+- Initial full-01 cancelled first render on surface_disappeared: large phones
+  become regular-width in landscape, and ContentView replaced TabView with
+  NavigationSplitView, tearing down fullscreen. Fixed by restricting regular
+  sidebar branch to iPad. Added simulator short landscape real-button regression;
+  XCTest1/1 Passed, readable xcresult/screenshot. Simulator shut down.
+- Corrected native full-02 ran22 completed jobs:19pass,3review,0fail. Job23
+  vulkan/gpu_burn-64 cancelled(reason user);8 later jobs not_run. Total plan31
+  jobs/33records. Native auto full-suite launch, not a physical XCTest tap.
+- Reviews:Metal gpu_burn-256 drop>5%;Vulkan stream-1048576 notstable;
+  Vulkan gpu_burn-16 drop>5%. Still unmeasured:VkBurn256,VkMemory,GPUcache,
+  CPUcompute,CPUmemory/cache/VM/storage,GLES2Burn16/64/256. CPU NOT TESTED.
+- User asked progress because they need phone, then explicitly said unplugged.
+  STOPPED; DO NOT restart tests. Actual appPID722 terminated before unplug;
+  fresh process query absent. Controller complete, no active benchmark.
+- out/test-results/a16-full-suite-20261016 preserves all originals, phone-final,
+  completed-results22,verification/report, full-01/full-02 manifests/logs,
+  max-navigation-regression simulator evidence. Raw24rows=22complete+2cancelled
+  diagnostics; SHAda2a2612d9dfbb8381792987ea2b98f6a47e947f108cd7c39298498930dd7df1.
+  Other3 physical and prior full simulator history hashes unchanged.
+- Default same-plan resume retains19passed and runs12 jobs(3review+1cancelled+
+  8notrun). Latest clarification:review is a variability warning, not mandatory
+  retesting. On a later explicit continuation prioritize9 unfinished jobs;
+  use a separate control for3reviews only if needed for stable comparisons.
+  No full31pass claim. Prepared production
+  full31 audit executable has NOT run because the suite remains incomplete.
+  Tracked docs/a16-partial-run-20261016.md. All source edits uncommitted; no
+  commit/push requested. Preserve user's Xcode xcuserdata.
+
+### 2026-10-16 Documentation consolidated for the requested Git commit
+
+- User asked to update Markdown and commit the accumulated changes. A16 doc
+  now includes all22 completed scores/IDs and precise warnings:MetalBurn256
+  early/late throughput drop16.69%,VulkanBurn16 drop19.08%,Vulkan1M no5-window
+  CV<2% stable segment. Drops are not measured hardware frequency; keep mean,
+  windows and curves. No repeated tests just to eliminate warnings.
+- TODO,Apple status,iOS README,simulator report and A16 local report synchronized.
+  Priority is9unfinished jobs after a future request;3quality controls optional.
+  A16 CPU remains untested, phone unplugged; do not restart any device tests.
+- This commit collects iOS synchronized Vulkan particles, versioned all-core
+  group participation checks, retained99%single-core gate, Auto localization,
+  stable navigation on large iPhones, regression tests and all4new device/flow
+  Markdown reports. Raw results remain in ignored local out; personal Xcode
+  xcuserdata is excluded. Native2/2,Swift contracts/shared154/154,27-job simulator
+  full workflow and Max navigation regression passed as recorded previously.
+- Earlier uncommitted-at-the-time statements above describe historical stages;
+  source/tests/docs are consolidated in this requested local commit. No push.

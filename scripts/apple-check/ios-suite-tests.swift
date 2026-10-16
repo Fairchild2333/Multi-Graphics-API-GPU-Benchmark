@@ -55,6 +55,12 @@ var utilityAll = allCPU
 utilityAll.workloadVersion = "cpu_mixed_v1_apple_pe_qos_workers_v1_ios_preview"
 utilityAll.workloadConfig = (utilityAll.workloadConfig ?? "") + ";workerSchedulingPolicy=apple_pe_qos_v1;allCorePlacementVerified=1"
 precondition(performanceCPU.matchesRecordGroup([p, utilityE, utilityAll]))
+var migratedAll = utilityAll
+migratedAll.workloadConfig = "workerSchedulingPolicy=apple_pe_qos_v1;allCorePlacementVerified=0;allCoreValidation=aggregate_cpu_time_v1;allCoreParticipationVerified=1;minimumRoundPerformanceOccupancy=0.97;minimumRoundEfficiencyOccupancy=0.94;minimumRoundWorkerOccupancy=0.92"
+precondition(migratedAll.measurementReviewReasons.isEmpty, "Balanced all-core migration is not a failed single-core purity measurement")
+var starvedAll = migratedAll
+starvedAll.workloadConfig = starvedAll.workloadConfig?.replacingOccurrences(of: "minimumRoundEfficiencyOccupancy=0.94", with: "minimumRoundEfficiencyOccupancy=0.74")
+precondition(!starvedAll.measurementReviewReasons.isEmpty, "An idle core group must remain review even with a claimed verified flag")
 precondition(!performanceCPU.matchesRecordGroup([p, utilityE, allCPU]), "Inherited-QoS all-core score reused for typed workers")
 var invalidUtility = utilityE
 invalidUtility.workloadConfig = invalidUtility.workloadConfig?.replacingOccurrences(of: "residencyVerified=1", with: "residencyVerified=0")
@@ -129,11 +135,16 @@ for job in native where job.id != "gpu_cache-v2" {
             other.workloadVersion = job.id == "memory_sweep" ? "membw_v2_verified_ios_preview_moltenvk" : (row.workloadVersion ?? "") + "_moltenvk"
             other.workloadConfig = (row.workloadConfig ?? "") + ";apiImplementation=MoltenVK;translatedTo=Metal"
             if job.id == "memory_sweep" { other.workloadConfig = (other.workloadConfig ?? "") + ";dataVerified=1;writeCopyChecks=2;timestampAnomalies=0" }
-            if job.id.hasPrefix("gpu_burn-") {
+            if job.id.hasPrefix("gpu_burn-") || job.id.hasPrefix("stream") {
                 other.workloadConfig = (other.workloadConfig ?? "").split(separator: ";")
                     .filter { !$0.hasPrefix("timingMode=") }.joined(separator: ";") + ";timingMode=synchronized_wall_clock"
             }
             precondition(vk.matches(other), "Valid translated contract rejected")
+            if job.id.hasPrefix("stream") {
+                var unchecked = other
+                unchecked.workloadConfig = unchecked.workloadConfig?.replacingOccurrences(of: "timingMode=synchronized_wall_clock", with: "timingMode=gpu_timestamp_query")
+                precondition(!vk.matches(unchecked), "Startup-only MoltenVK compute timestamps reused")
+            }
             if job.id == "memory_sweep" {
                 var unchecked = other
                 unchecked.workloadVersion = "membw_v1_ios_preview_moltenvk"

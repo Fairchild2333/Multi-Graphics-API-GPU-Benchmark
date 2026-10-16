@@ -3,6 +3,7 @@
 // iOS 26+: Liquid Glass selection highlights (via shared GlassCard/SidebarButton).
 
 import SwiftUI
+import UIKit
 
 enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
     case run      = "Run"
@@ -43,7 +44,10 @@ struct ContentView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
-        if sizeClass == .regular {
+        // Large iPhones also become regular-width in landscape. Keep their
+        // navigation tree stable so rotating a benchmark does not dismiss
+        // its full-screen presentation and cancel the complete suite.
+        if UIDevice.current.userInterfaceIdiom == .pad && sizeClass == .regular {
             // iPad: sidebar + detail (split view)
             NavigationSplitView {
                 sidebar

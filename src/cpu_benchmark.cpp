@@ -978,6 +978,7 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
         bool verifiedCoreTypes = true;
         std::vector<CpuResidency> workerResidencies;
         std::vector<double> workerBusyFractions;
+        CpuParticipation participation;
     };
 
     const std::uint32_t roundCount = (std::max)(1u, config.roundCount);
@@ -1096,6 +1097,9 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
         // and inflating short-run scores.
         sample.kernel.seconds =
             std::chrono::duration<double>(lastFinish - gate.warmupEnd).count();
+        if (typedScheduling)
+            sample.participation = EvaluateCpuParticipation(sample.workerResidencies,
+                sample.workerBusyFractions, performanceCount, efficiencyCount, sample.kernel.seconds);
         // Process counters include the first round's warm-up and a little
         // observer work; they diagnose scheduling, never classify workers.
         if (accountingStart.available && accountingEnd.available &&
@@ -1121,6 +1125,13 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
             << "\tprocess_cpu_seconds=" << sample.processCpuSeconds
             << "\tperformance_cpu_seconds=" << sample.performanceCpuSeconds
             << "\tincludes_warmup_seconds=" << warmup << '\n';
+        if (typedScheduling)
+            out << "CPU_MULTI_PARTICIPATION\tround=" << round + 1
+                << "\tperformance_occupancy=" << sample.participation.performanceOccupancy
+                << "\tefficiency_occupancy=" << sample.participation.efficiencyOccupancy
+                << "\tminimum_worker_occupancy=" << sample.participation.minimumWorkerOccupancy
+                << "\tverified=" << sample.participation.verified()
+                << "\tindividual_type_purity_verified=" << sample.verifiedCoreTypes << '\n';
         rounds.push_back(sample);
 
         const double roundComplete =
@@ -1156,8 +1167,10 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>& 
     result.performanceCpuSeconds = selected.performanceCpuSeconds;
     result.typedScheduling = typedScheduling;
     result.verifiedCoreTypes = typedScheduling;
-    for (const auto& round : rounds)
+    for (const auto& round : rounds) {
         result.verifiedCoreTypes = result.verifiedCoreTypes && round.verifiedCoreTypes;
+        if (typedScheduling) result.participationRounds.push_back(round.participation);
+    }
     result.workerResidencies = selected.workerResidencies;
     result.workerBusyFractions = selected.workerBusyFractions;
     // As many busy threads as there are processors fill the machine wherever

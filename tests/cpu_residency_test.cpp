@@ -46,5 +46,22 @@ int main() {
     threadAfter.cpuNs[0] = 0;
     threadAfter.workerBeforeNs = threadAfter.workerAfterNs = 1500000000;
     if (EvaluateCpuThreadCounters(threadBefore, threadAfter, CpuCoreType::Efficiency).verified()) return 13;
+    // Four workers can exchange core types while both groups remain busy.
+    // Their aggregate throughput must not acquire the single-core purity gate.
+    std::vector<CpuResidency> workers(4);
+    for (auto& worker : workers) {
+        worker.available = true; worker.workerCpuNs = 5000000000.0;
+    }
+    workers[0].performanceFraction = .98; workers[1].performanceFraction = .97;
+    workers[2].performanceFraction = .03; workers[3].performanceFraction = .02;
+    std::vector<double> busy(4,1.0);
+    if (!EvaluateCpuParticipation(workers,busy,2,2,5).verified()) return 14;
+    workers[2].workerCpuNs = workers[3].workerCpuNs = 2500000000.0;
+    if (EvaluateCpuParticipation(workers,busy,2,2,5).verified()) return 15;
+    workers[2].workerCpuNs = workers[3].workerCpuNs = 5000000000.0;
+    busy[3] = .70;
+    if (EvaluateCpuParticipation(workers,busy,2,2,5).verified()) return 16;
+    busy[3] = 1.0; workers[0].available = false;
+    if (EvaluateCpuParticipation(workers,busy,2,2,5).verified()) return 17;
     std::cout << "CPU-type accounting rejects mixed/contaminated and unavailable observations.\n";
 }

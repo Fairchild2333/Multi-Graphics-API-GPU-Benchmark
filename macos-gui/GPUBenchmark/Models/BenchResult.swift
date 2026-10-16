@@ -98,6 +98,13 @@ struct BenchResult: Codable, Identifiable, Hashable {
     /// Read a `key=value` item from the semicolon-delimited workload contract.
     /// A completed run may still need metrology or stability review.
     var measurementReviewReasons: [String] {
+        if workload == "cpu_multi_core" && workloadConfigValue("allCoreValidation") == "aggregate_cpu_time_v1" {
+            let occupancy = ["minimumRoundPerformanceOccupancy", "minimumRoundEfficiencyOccupancy", "minimumRoundWorkerOccupancy"]
+                .compactMap { Double(workloadConfigValue($0) ?? "") }
+            return workloadConfigValue("allCoreParticipationVerified") == "1" && occupancy.count == 3 &&
+                occupancy.allSatisfy { $0.isFinite && $0 >= 0.90 && $0 <= 1.05 } ? [] :
+                [Localization.tr("All-core CPU participation was not fully verified", "全核 CPU 的实际参与未全部验证", "全コアの実稼働が未検証です")]
+        }
         if workload == "cpu_multi_core" && workloadConfigValue("workerSchedulingPolicy") == "apple_pe_qos_v1" &&
            workloadConfigValue("allCorePlacementVerified") != "1" {
             return [Localization.tr("All-core thread placement or occupancy was not fully verified", "全核线程的驻留或占用未全部验证", "全スレッドの配置または稼働率が未検証です")]
