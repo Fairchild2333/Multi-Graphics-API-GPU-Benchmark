@@ -1,0 +1,14 @@
+[
+  "xcrun",
+  "devicectl",
+  "device",
+  "install",
+  "app",
+  "--device",
+  "00008027-000C39923E85002E",
+  "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-ios-memory-platform-fix/Build/Products/Release-iphoneos/Mangekyo.app",
+  "--timeout",
+  "45",
+  "--json-output",
+  "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ios-vulkan-memory-platform-fix-20261017/install-device.json"
+]

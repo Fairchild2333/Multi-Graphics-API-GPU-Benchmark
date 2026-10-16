@@ -335,7 +335,8 @@ struct MobileSuiteJob: Identifiable, Sendable {
                 result.workloadConfigValue("cacheAttribution") == "unverified"
         }
         if translated {
-            return version.hasPrefix("membw_v3_streaming") &&
+            return version.hasPrefix("membw_v3_streaming_ios_preview_app_budget_v1") &&
+                result.workloadConfigValue("memoryBudgetPolicy") == "ios_app_headroom_quarter_v1" &&
                 result.workloadConfigValue("largeDatasetTraversal") == "ordered_full_dataset_passes" &&
                 result.workloadConfigValue("dataVerified") == "1" &&
                 (Int(result.workloadConfigValue("writeCopyChecks") ?? "0") ?? 0) > 0 &&

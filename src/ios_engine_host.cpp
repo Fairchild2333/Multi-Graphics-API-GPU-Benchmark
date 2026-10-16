@@ -162,11 +162,11 @@ int RunWorkload(const RunRequest& request, std::string& errorOut) {
 #ifdef HAVE_VULKAN_MEMBW
                 MemBwConfig config;
                 config.shaderDir = EnsureTrailingSlash(request.shaderDir);
-                config.maxDatasetBytes = 256ull << 20;
+                config.maxDatasetBytes = kIosMemBwDefaultMaxBytes;
                 const auto maximum = embedded_detail::OptionValue(request.workloadId, "max_mib");
                 if (!maximum.empty()) {
                     const auto count = embedded_detail::ParseCount(maximum, "max_mib");
-                    if (count > 256) throw std::invalid_argument("iOS memory sweep max_mib must be 1–256");
+                    if (count > 512) throw std::invalid_argument("iOS memory sweep max_mib must be 1–512");
                     config.maxDatasetBytes = std::uint64_t(count) << 20;
                 }
                 const auto report = RunVulkanMemoryBandwidth(config, std::cout);

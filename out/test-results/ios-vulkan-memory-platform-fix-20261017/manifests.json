@@ -1,0 +1,25 @@
+[
+  {
+    "finishedAt": "2026-10-16T15:08:07Z",
+    "id": "complete-suite-4913BE56-AE17-4B7A-B41B-6A8B8262F32B",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-16T15:08:07Z",
+        "id": "vulkan/memory_sweep",
+        "request": "memory_sweep?api=vulkan",
+        "resultIDs": [
+          "20261017-020806-775-membw"
+        ],
+        "startedAt": "2026-10-16T15:07:04Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Vulkan \u00b7 GPU Cache & Memory"
+      }
+    ],
+    "startedAt": "2026-10-16T15:07:04Z",
+    "status": "passed"
+  }
+]

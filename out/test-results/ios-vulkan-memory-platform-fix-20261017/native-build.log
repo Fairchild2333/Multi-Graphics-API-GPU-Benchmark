@@ -1,0 +1,37 @@
+[  2%] Built target glad_gl43
+[ 46%] Built target compile_glsl
+[ 51%] Building CXX object CMakeFiles/result_quality_test.dir/tests/result_quality_test.cpp.o
+[ 52%] Built target cpu_residency_test
+[ 52%] Built target complete_suite_test
+[ 54%] Built target results_compat_test
+[ 56%] Built target suite_process_test
+[ 57%] Building CXX object CMakeFiles/vulkan_membw_results_test.dir/tests/vulkan_membw_results_test.cpp.o
+[ 57%] Building CXX object CMakeFiles/vulkan_membw_results_test.dir/src/vulkan_membw_results.cpp.o
+[ 74%] Built target glfw
+[ 75%] Building CXX object CMakeFiles/gpu_engine.dir/src/main.cpp.o
+[ 75%] Building CXX object CMakeFiles/gpu_engine.dir/src/vulkan_membw.cpp.o
+[ 76%] Building CXX object CMakeFiles/gpu_engine.dir/src/vulkan_membw_results.cpp.o
+[ 77%] Linking CXX executable result_quality_test
+[ 77%] Built target result_quality_test
+[ 78%] Linking CXX executable vulkan_membw_results_test
+[ 81%] Built target vulkan_membw_results_test
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw.cpp:39:25: warning: unused variable 'kMemoryPlateauBytes' [-Wunused-const-variable]
+   39 | constexpr std::uint64_t kMemoryPlateauBytes = kMemBwStreamingMinBytes;
+      |                         ^~~~~~~~~~~~~~~~~~~
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:450:20: warning: unused function 'QuoteSuiteProcessArg' [-Wunused-function]
+  450 | static std::string QuoteSuiteProcessArg(const std::string& value) {
+      |                    ^~~~~~~~~~~~~~~~~~~~
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:470:13: warning: unused function 'NameLooksIntegrated' [-Wunused-function]
+  470 | static bool NameLooksIntegrated(const std::string& name) {
+      |             ^~~~~~~~~~~~~~~~~~~
+1 warning generated.
+2 warnings generated.
+[ 82%] Linking CXX static library libgpu_engine.a
+[ 95%] Built target gpu_engine
+[ 96%] Linking CXX executable gpu_benchmark
+[ 97%] Linking CXX executable cpu_cancel_test
+Copying SPIR-V files next to executable
+[ 98%] Built target cpu_cancel_test
+Copying Metal shader files next to executable
+Copying OpenGL GLSL shader files next to executable
+[100%] Built target gpu_benchmark

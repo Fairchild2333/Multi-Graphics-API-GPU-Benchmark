@@ -16,6 +16,12 @@
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
+#if defined(__APPLE__)
+#include <TargetConditionals.h>
+#if TARGET_OS_IPHONE
+#include <os/proc.h>
+#endif
+#endif
 
 namespace gpu_bench {
 namespace {
@@ -90,7 +96,7 @@ const KernelInfo kKernels[] = {
 constexpr std::size_t kKernelCount = sizeof(kKernels) / sizeof(kKernels[0]);
 
 // Memory the system can still give out, in bytes; 0 where that is not known
-// (only the Linux family is asked: Linux, Android, HarmonyOS).
+// On iOS this is the app's remaining allowance, not the device's free RAM.
 std::uint64_t AvailableSystemMemoryBytes() {
 #if defined(__linux__)
     std::ifstream file("/proc/meminfo");
@@ -101,6 +107,8 @@ std::uint64_t AvailableSystemMemoryBytes() {
         std::getline(file, rest);
         if (key == "MemAvailable:") return value * 1024;
     }
+#elif defined(__APPLE__) && TARGET_OS_IPHONE
+    return os_proc_available_memory();
 #endif
     return 0;
 }
@@ -636,7 +644,14 @@ void Runner::CreateBuffers(MemBwReport& report) {
     // for minutes. Half of what is available may go to the two buffers.
     if (report.unifiedMemory) {
         const std::uint64_t available = AvailableSystemMemoryBytes();
+        report.availableMemoryBytes = available;
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+        report.memoryBudgetPolicy = kIosMemBwBudgetPolicy;
+        report.perBufferBudgetBytes = IosMemBwBufferBudget(config_.maxDatasetBytes, available);
+        limit = (std::min)(limit, report.perBufferBudgetBytes);
+#else
         if (available > 0) limit = (std::min)(limit, available / 4);
+#endif
     }
 
     std::uint64_t chunks = limit / kChunkBytes;
@@ -1362,6 +1377,13 @@ void Runner::Run(MemBwReport& report) {
     out_ << "Traversal: complete ordered data-set passes from "
          << FormatMiB(kMemBwStreamingMinBytes)
          << "; smaller points retain cache-workgroup repetition.\n";
+    if (!report.memoryBudgetPolicy.empty()) {
+        out_ << "MEMBW_BUDGET\tpolicy=" << report.memoryBudgetPolicy
+             << "\trequested_dataset_bytes=" << config_.maxDatasetBytes
+             << "\tavailable_app_bytes=" << report.availableMemoryBytes
+             << "\tper_buffer_budget_bytes=" << report.perBufferBudgetBytes
+             << "\tactual_dataset_bytes=" << report.maxDatasetBytes << "\n";
+    }
 
     const auto chunkCounts = SweepChunkCounts(maxChunks_);
     for (std::size_t k = 0; k < kSweepKernelCount; ++k) {

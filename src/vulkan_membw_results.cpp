@@ -35,7 +35,7 @@ BenchmarkResult MakeStoredVulkanMemBwResult(
 #elif defined(__OHOS__)
     stored.workloadVersion = std::string(gpu_bench::kMemBwWorkloadVersion) + "_ohos_preview";
 #elif defined(__APPLE__) && TARGET_OS_IPHONE
-    stored.workloadVersion = std::string(gpu_bench::kMemBwWorkloadVersion) + "_ios_preview";
+    stored.workloadVersion = std::string(gpu_bench::kMemBwWorkloadVersion) + "_ios_preview_app_budget_v1";
 #endif
 #ifdef GPU_BENCH_MOLTENVK
     stored.workloadVersion += "_moltenvk";
@@ -108,6 +108,12 @@ BenchmarkResult MakeStoredVulkanMemBwResult(
              << ";performanceQueryAdvertised=" << (report.performanceQueryAdvertised ? 1 : 0)
              << ";performanceCounterStatus=" << report.performanceCounterStatus
              << ";performanceCounterInventory=" << report.performanceCounterInventory;
+    if (!report.memoryBudgetPolicy.empty()) {
+        contract << ";memoryBudgetPolicy=" << report.memoryBudgetPolicy
+                 << ";requestedMaxDatasetMiB=" << config.maxDatasetBytes / (1024 * 1024)
+                 << ";availableAppMemoryBytes=" << report.availableMemoryBytes
+                 << ";perBufferBudgetBytes=" << report.perBufferBudgetBytes;
+    }
     // Full curves as "<data set MiB>:<median GB/s>" pairs.
     for (const char* kernel : {"read", "write", "copy", "host_read", "host_write"}) {
         contract << ";curve_" << kernel << "=";

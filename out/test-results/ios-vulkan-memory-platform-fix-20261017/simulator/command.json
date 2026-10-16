@@ -1,0 +1,13 @@
+[
+  "xcrun",
+  "simctl",
+  "launch",
+  "--terminate-running-process",
+  "--console",
+  "46753076-75AF-49C0-90A2-3A30ECC498AC",
+  "com.fairchild.Mangekyo",
+  "--ios-allow-translated-api",
+  "--ios-complete-suite",
+  "--ios-suite-jobs",
+  "vulkan/memory_sweep"
+]

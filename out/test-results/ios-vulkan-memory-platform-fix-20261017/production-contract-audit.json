@@ -1,0 +1,16 @@
+[
+  {
+    "contractPassed" : true,
+    "job" : "vulkan\/memory_sweep",
+    "resultIDs" : [
+      "20261017-020806-775-membw"
+    ],
+    "reviewReasons" : [
+
+    ],
+    "status" : "passed",
+    "thermalEnd" : 0,
+    "thermalStart" : 0,
+    "vulkanMemoryPoints" : 83
+  }
+]

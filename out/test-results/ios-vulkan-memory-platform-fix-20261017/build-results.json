@@ -1,0 +1,14 @@
+[
+  {
+    "name": "native-build",
+    "returnCode": 0
+  },
+  {
+    "name": "native-ctest",
+    "returnCode": 0
+  },
+  {
+    "name": "ios-build",
+    "returnCode": 0
+  }
+]

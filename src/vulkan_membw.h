@@ -17,6 +17,16 @@ inline constexpr char kMemBwWorkloadVersion[] = "membw_v3_streaming";
 // Repeating a private 512 KiB chunk in a workgroup measures cache traffic even
 // when the allocation is much larger than the cache.
 inline constexpr std::uint64_t kMemBwStreamingMinBytes = 256ull << 20;
+// The smallest regular sweep whose final three points (256/384/512 MiB)
+// all use the streaming method. iOS keeps half the app's available headroom
+// for the OS/driver/UI: each of the two large buffers may use at most 1/4.
+inline constexpr std::uint64_t kIosMemBwDefaultMaxBytes = 512ull << 20;
+inline constexpr char kIosMemBwBudgetPolicy[] = "ios_app_headroom_quarter_v1";
+inline std::uint64_t IosMemBwBufferBudget(std::uint64_t requested,
+                                        std::uint64_t availableAppBytes) {
+    const auto budget = availableAppBytes > 0 ? availableAppBytes / 4 : 256ull << 20;
+    return requested < budget ? requested : budget;
+}
 inline bool MemBwStreamingTailEligible(std::uint64_t first, std::uint64_t second,
                                       std::uint64_t third) {
     return first >= kMemBwStreamingMinBytes && second >= kMemBwStreamingMinBytes &&
@@ -124,6 +134,11 @@ struct MemBwReport {
     std::uint64_t chunkBytes = 0;
     std::uint64_t maxDatasetBytes = 0;
     bool datasetLimitedByDevice = false;
+    // Snapshot immediately before allocating the two sweep buffers. On iOS,
+    // available bytes are this app's remaining allocation allowance, not RAM.
+    std::uint64_t availableMemoryBytes = 0;
+    std::uint64_t perBufferBudgetBytes = 0;
+    std::string memoryBudgetPolicy;
     std::uint32_t warmupRuns = 0;
     std::uint32_t measuredRuns = 0;
     double durationSec = 0.0;

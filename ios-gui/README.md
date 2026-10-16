@@ -116,6 +116,16 @@ is also separate from Vulkan `membw_v1` and is not a validated cache-capacity or
 memory-plateau measurement. Its allocation ceiling is limited to the app's
 available memory and at most 256 MiB.
 
+Optional Vulkan memory uses a separate `membw_v3_streaming` sweep. Its iOS
+default now targets 512 MiB so the last 256/384/512 MiB points all stream the
+entire data set. Each of its two buffers is limited to a quarter of the app's
+current `os_proc_available_memory()` allowance, alongside Vulkan allocation
+limits. An unavailable allowance falls back to 256 MiB; a restricted or
+unsettled curve remains review. The `ios_preview_app_budget_v1` identity and
+saved budget metadata prevent old fixed-cap records from filling this job.
+The existing all-items/GPU buttons use this policy without extra options.
+See [physical platform and fallback validation](../out/test-results/ios-vulkan-memory-platform-fix-20261017/report.md).
+
 ## Native verification
 
 Build the simulator app first, then run the hosted bridge regression tests on

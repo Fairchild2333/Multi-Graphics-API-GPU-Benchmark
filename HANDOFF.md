@@ -1,6 +1,33 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
-> **2026-10-17：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** Mac软件问题已修复；A15已补测V3内存和CPU，历史132条。内存受现有iOS 256 MiB软件预览上限影响，仍保留review；其他设备待办见主文档。
+> **2026-10-17：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** iOS Vulkan固定256 MiB限制已修复，iPad8,7新预算版本确认56.657 GB/s平台，历史74条。A15/另一台iPad仍需接回补这一新版本；旧记录保留。
+
+## 2026-10-17 iOS Vulkan platform fixed and physically verified
+
+- Root cause:ios_host hard-coded256MiB, so V3's three tail sets could never
+  all reach streamingMin256MiB. Shared Vulkan allocator lacked iOS app headroom.
+- Default target512MiB; each source/destination buffer <=1/4 of current
+  os_proc_available_memory(), plus existing Vulkan/heap/allocation bounds.
+  API unknown -> old256MiB fallback; OOM still shrinks. No GUI options, kernel
+  math, timing, data checks or20% platform threshold changes.
+- Version ios_preview_app_budget_v1 and budget metadata saved. Mobile jobs
+  reject old fixed-cap profile/missing policy, preventing stale score reuse.
+- On wired/unlocked iPad8,7:read platform56.657,write53.5,copy50.1GB/s,
+  83 points/38 checks,timestamp anomalies0,thermal0->0. App allowance2.98GB,
+  buffers512MiB each, actual tail256/384/512 all streamed/flat; status passed.
+  ios_preview suffix remains the mobile comparison-group scope, not review.
+- Native Release/CTest7/7, device/simulator Release and signing pass. Swift
+  complete-plan regression passes with selected16 true legacy records; first
+  two fixture-input assertion failures retained, not suppressed. Current
+  production Swift accepts real new record and restores all83 points.
+- Simulator allowance0 -> actual256MiB,77points/34checks,plateau0/review;
+  confirms conservative fallback, not a physical memory-pressure test.
+- iPad73->74 old rows intact; other4 histories/live Mac unchanged. RawDocs,
+  commands,patch/package hashes,CSV,report and tests archived under
+  out/test-results/ios-vulkan-memory-platform-fix-20261017/.
+- Physical App PID3380 stopped, simulator stopped/shut down. A15 and11-inch
+  iPad8,1 need this new memory profile once connected; other stable projects
+  need no rerun. A16 pending memory will automatically use new default.
 
 ## 2026-10-17 wired iPad8,7 Vulkan V3 follow-up completed
 

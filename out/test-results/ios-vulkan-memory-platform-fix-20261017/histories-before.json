@@ -1,0 +1,51 @@
+{
+  "snapshotDate": "2026-10-17",
+  "purpose": "Verbatim benchmark-history backup; histories are not all accepted current-version scores. Simulator and control runs are separate.",
+  "devices": [
+    {
+      "device": "Mac M4 Pro",
+      "deviceModel": "Mac16,8",
+      "rows": 171,
+      "path": "m4-single-core-check-20261017/results-after.json",
+      "bytes": 336781,
+      "sha256": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f",
+      "notes": "Mac 主历史 171 条；单核原方法确认大核216.737、后台小核76.322，原169条不变。V3内存和粒子修复结果及诊断对照继续保留。"
+    },
+    {
+      "device": "iPhone 13 Pro / A15",
+      "deviceModel": "iPhone14,2",
+      "rows": 132,
+      "path": "a15-v3-cpu-confirm-20261017/phone-final/results/results.json",
+      "bytes": 360257,
+      "sha256": "8f3a379f29ad0fd3b3b7607f0ff5ff96610cdcf0090f50ec75543afdf6e3a2a6",
+      "notes": "A15主历史132条；原128条不变。V3内存28.842仅参考，256MiB软件预览上限未建立平台；CPU147.000/89.287/634.868通过。"
+    },
+    {
+      "device": "12.9-inch iPad Pro / A12X",
+      "deviceModel": "iPad8,7",
+      "rows": 73,
+      "path": "ipad87-v3-memory-20261017/phone-final/results/results.json",
+      "bytes": 172584,
+      "sha256": "010cc42fbcc97e9f61d63ecd58dd2ec8ad071ba14e1dc20b5283b3e90a11b024",
+      "notes": "iPad8,7主历史73条；原72条保留。V3内存读取参考53.932，77点/34次校验通过，256MiB预览上限未建立平台；旧Metal16M稳定性提示保留。"
+    },
+    {
+      "device": "11-inch iPad Pro / A12X",
+      "deviceModel": "iPad8,1",
+      "rows": 51,
+      "path": "ipad81-design-review-20261016/phone-final/results/results.json",
+      "bytes": 123915,
+      "sha256": "43d43fb16d87ade98bdb80c7c319d8b8e04434eb69cf1c8f8f777e2284b6531b",
+      "notes": "51 条历史；当前完整选用 31 项/33 条来自不同真实轮次。"
+    },
+    {
+      "device": "iPhone 14 Pro Max / A16",
+      "deviceModel": "iPhone15,3",
+      "rows": 24,
+      "path": "a16-full-suite-20261016/phone-final/results/results.json",
+      "bytes": 46368,
+      "sha256": "da2a2612d9dfbb8381792987ea2b98f6a47e947f108cd7c39298498930dd7df1",
+      "notes": "24 条历史=22 条完整成绩+2 条中断诊断。19 passed、3 review；CPU 尚未测。"
+    }
+  ]
+}

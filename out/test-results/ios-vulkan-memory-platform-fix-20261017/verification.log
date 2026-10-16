@@ -1,0 +1,81 @@
+{
+  "auditPassed": true,
+  "physicalDevice": "iPad8,7 / A12X",
+  "historyRows": 74,
+  "oldRowsUnchanged": 73,
+  "resultID": "20261017-020806-775-membw",
+  "status": "passed",
+  "readMemoryGBps": 56.657,
+  "writeMemoryGBps": 53.5,
+  "copyMemoryGBps": 50.1,
+  "curvePoints": 83,
+  "dataChecks": 38,
+  "requestedMaxDatasetMiB": 512,
+  "actualMaxDatasetMiB": 512,
+  "availableAppMemoryBytes": 2980510480,
+  "perBufferBudgetBytes": 536870912,
+  "tails": {
+    "read": [
+      {
+        "datasetMiB": 256,
+        "GBps": 56.645,
+        "completePassesPerSample": 10
+      },
+      {
+        "datasetMiB": 384,
+        "GBps": 56.665,
+        "completePassesPerSample": 7
+      },
+      {
+        "datasetMiB": 512,
+        "GBps": 56.657,
+        "completePassesPerSample": 5
+      }
+    ],
+    "write": [
+      {
+        "datasetMiB": 256,
+        "GBps": 53.278,
+        "completePassesPerSample": 9
+      },
+      {
+        "datasetMiB": 384,
+        "GBps": 53.545,
+        "completePassesPerSample": 7
+      },
+      {
+        "datasetMiB": 512,
+        "GBps": 53.55,
+        "completePassesPerSample": 5
+      }
+    ],
+    "copy": [
+      {
+        "datasetMiB": 256,
+        "GBps": 50.157,
+        "completePassesPerSample": 5
+      },
+      {
+        "datasetMiB": 384,
+        "GBps": 50.088,
+        "completePassesPerSample": 4
+      },
+      {
+        "datasetMiB": 512,
+        "GBps": 49.836,
+        "completePassesPerSample": 3
+      }
+    ]
+  },
+  "thermal": "nominal -> nominal",
+  "simulatorFallback": "unknown app headroom -> 256 MiB; preview/review retained",
+  "nativeCTest": "7/7 passed",
+  "iOSDeviceAndSimulatorReleaseBuilds": "passed",
+  "swiftManifestRegression": "passed; old fixed-cap version and missing budget policy rejected",
+  "beforeSha256": "010cc42fbcc97e9f61d63ecd58dd2ec8ad071ba14e1dc20b5283b3e90a11b024",
+  "afterSha256": "89a175ace875c15cf336a479e7a67df96988206f89e5bb95d0bad710ec5dc6d0",
+  "allEarlierCanonicalSnapshotsUnchanged": true,
+  "liveMacHistoryUnchanged": true,
+  "A15NewProfileRetested": false,
+  "otherIPadNewProfileRetested": false
+}

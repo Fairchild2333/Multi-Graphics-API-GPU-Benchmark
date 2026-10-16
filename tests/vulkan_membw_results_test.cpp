@@ -11,6 +11,11 @@
 int main() {
     using namespace gpu_bench;
     MemBwConfig config;
+    assert(kIosMemBwDefaultMaxBytes == 512ull << 20);
+    assert(IosMemBwBufferBudget(kIosMemBwDefaultMaxBytes, 2048ull << 20) == 512ull << 20);
+    assert(IosMemBwBufferBudget(kIosMemBwDefaultMaxBytes, 1024ull << 20) == 256ull << 20);
+    assert(IosMemBwBufferBudget(kIosMemBwDefaultMaxBytes, 0) == 256ull << 20);
+    assert(IosMemBwBufferBudget(64ull << 20, 2048ull << 20) == 64ull << 20);
     assert(!MemBwStreamingTailEligible(128ull << 20, 192ull << 20, 256ull << 20));
     assert(MemBwStreamingTailEligible(256ull << 20, 384ull << 20, 512ull << 20));
     MemBwReport report;
@@ -38,6 +43,14 @@ int main() {
     assert(result.score == 35.25 && result.scoreUnit == "GB/s");
     assert(result.headless && result.framesInFlight == 0 && result.timingSamples == 70);
     assert(result.workloadVersion.find("preview") != std::string::npos);
+    auto budgetReport = report;
+    budgetReport.memoryBudgetPolicy = kIosMemBwBudgetPolicy;
+    budgetReport.availableMemoryBytes = 2048ull << 20;
+    budgetReport.perBufferBudgetBytes = 512ull << 20;
+    const auto budgetResult = MakeStoredVulkanMemBwResult(budgetReport, config);
+    assert(ResultConfigValue(budgetResult, "memoryBudgetPolicy") == kIosMemBwBudgetPolicy);
+    assert(ResultConfigValue(budgetResult, "availableAppMemoryBytes") == "2147483648");
+    assert(ResultConfigValue(budgetResult, "perBufferBudgetBytes") == "536870912");
     for (const auto* kernel : {"read", "write", "copy", "host_read", "host_write"})
         assert(result.workloadConfig.find(std::string("curve_") + kernel + "=1.0:123.5") != std::string::npos);
     for (const auto* kernel : {"l1", "l1_single"})

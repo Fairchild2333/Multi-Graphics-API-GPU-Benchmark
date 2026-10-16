@@ -256,6 +256,15 @@ panel. When several GPUs run in one job list, the charts show the last one.
   needs at least 512 MiB to have three eligible points. A flat small-set curve
   alone does not prove a memory plateau.
 
+  iOS targets 512 MiB by default using the `ios_preview_app_budget_v1` profile.
+  Each of its two sweep buffers is bounded by a quarter of the app's current
+  allocation allowance (`os_proc_available_memory()`), as well as Vulkan
+  limits. Unknown app headroom falls back to 256 MiB; insufficient headroom or
+  a non-flat tail still remains review. Requested/actual size, budget policy
+  and allowance snapshot are persisted. `ios_preview` keeps mobile score groups
+  separate; an actual `memoryPlateauReached=1` is still a verified kernel-access
+  platform. See [iPad and fallback validation](../out/test-results/ios-vulkan-memory-platform-fix-20261017/report.md).
+
   V2 repeated write/copy visits inside one workgroup's private 512 KiB chunk.
   That can recycle cached data even with a 2 GiB allocation. V3 orders complete
   large-set passes and removes modulo indexing from that path. It has a new

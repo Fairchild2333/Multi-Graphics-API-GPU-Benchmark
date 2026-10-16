@@ -1,0 +1,19 @@
+[
+  [
+    "cmake",
+    "--build",
+    "out/build/macos-arm64-release",
+    "--parallel",
+    "8"
+  ],
+  [
+    "ctest",
+    "--test-dir",
+    "out/build/macos-arm64-release",
+    "--output-on-failure"
+  ],
+  [
+    "bash",
+    "scripts/build-ios.sh"
+  ]
+]
