@@ -59,15 +59,38 @@ The maths probes split the gap in two (2026-10-17):
   5090 and 0.24 on the iGPU, while `exp`, square root, division, `pow` and
   `atan2` are relatively as fast or faster on the M4 Pro. Special functions
   explain only part of the gap.
-- **The larger part is outside the loop.** The real GPU Burn reaches 66 % of the
-  speed of its own compute loop on the M4 Pro, against 97 - 109 % on the
-  RTX 5090 and 69 - 86 % on the iGPU. Why is not known. Candidates, none tested:
-  fragment-shader occupancy or register pressure (after the loop `plasmaNormal`
-  evaluates the field six more times), Apple's tile passes, two passes a frame.
+- **The larger part is the same loop run as a fragment shader.** The real GPU
+  Burn reaches 66 % of the speed of its own compute loop on the M4 Pro, against
+  97 - 109 % on the RTX 5090 and 69 - 86 % on the iGPU.
+
+The 16, 64 and 256-step results split a frame into a fixed cost per pixel (the
+shading after the loop) and a cost per step. Two of the three results give both
+numbers, and the third checks them: the M4 Pro is predicted at 9.40 for 64 steps
+and measured at 9.40, the iGPU's Vulkan 1.039 against 1.042.
+
+| GPU | API | per step in GPU Burn (G pixel-steps/s) | compute loop (probe) | ratio | fixed cost after the loop |
+|---|---|---|---|---|---|
+| M4 Pro | Metal | 9.75 | 14.64 | 67 % | about 2.4 steps |
+| RTX 5090 | Vulkan | 204.4 | 206.0 | 99 % | about 7 steps |
+| RTX 5090 | DX12 | 230.8 | 206.0 | 112 % | about 8 steps |
+| Radeon iGPU | Vulkan | 1.14 | 1.62 | 70 % | about 6 steps |
+| Radeon iGPU | DX11 | 1.43 | 1.62 | 88 % | about 7 steps |
+
+So the shading after the loop costs the M4 Pro under 1 % at 256 steps, and the
+second pass of a frame repeats the same work. What is slower is each step of the
+loop in the fragment shader. The iGPU loses a similar share under Vulkan but
+much less under DX11, so the path a shader is compiled through matters.
+
+Why the M4 Pro's fragment shader runs the loop slower is not known. Candidates,
+none tested, all only measurable on a Mac: occupancy limited by register use,
+the scheduling of tile-based rendering, different code from the Metal compiler
+for the fragment stage. `scripts/metal-math-probe` now also draws the step as a
+full-screen fragment shader (`Burn fragment`), which shows whether the fragment
+stage alone accounts for the 67 %.
 
 Still open: whether 6.96 TFLOPS is the M4 Pro's FMA peak. On the RTX 5090 the
-same FMA kernel ran 25 % below a version with literal constants; the M4 Pro has
-not been measured that way. Reports:
+same FMA kernel ran 25 % below a version with literal constants. The Metal probe
+now has the literal version too (`fma (literal)`), not yet run. Reports:
 [M4 Pro probe](../out/test-results/metal-math-probe-20261016-233740/output.txt),
 [Windows probe and comparison](../out/test-results/gpu-math-probe-windows-20261017-031454/report.md).
 

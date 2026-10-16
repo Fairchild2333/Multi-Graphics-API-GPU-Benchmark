@@ -31,14 +31,17 @@ inline bool CurrentVulkanMemoryContractVerified(const BenchmarkResult& r) {
 // A V1 result that reached its plateau measured the same large-set bandwidth
 // as V3: on an RTX 5090, M4 Pro, A12X and A15 the two agree within 0.2 - 3 %
 // (2026-10-17). V2 does not (its repeats inside one chunk read 300.9 GB/s on an
-// M4 Pro specified at 273), and V1 results saved before the data check
-// (commit 266a197, 2026-10-08 04:50) may come from a buffer the driver could
-// not address. Translated MoltenVK V1 rows carry their own suffix and stay out.
+// M4 Pro specified at 273), and V1 results saved before the data check may
+// come from a buffer the driver could not address. The first saved result
+// whose log shows the check is the MIX 4 rerun 20261008-042956; the checking
+// build ran on four phones before it was committed (266a197, 04:50).
+// Translated MoltenVK V1 rows carry their own suffix and stay out.
+inline constexpr char kFirstDataCheckedMemBwId[] = "20261008-042956";
 inline bool LegacyV1VulkanMemoryComparable(const BenchmarkResult& r) {
     if (r.workload != "membw" || r.graphicsApi != "Vulkan") return false;
     const std::string& v = r.workloadVersion;
     return (v == "membw_v1" || v == "membw_v1_android_preview" || v == "membw_v1_ohos_preview") &&
-        r.id >= "20261008-045054" &&
+        r.id >= kFirstDataCheckedMemBwId &&
         ResultConfigValue(r, "memoryPlateauReached") == "1" &&
         ResultConfigValue(r, "timestampAnomalies") == "0";
 }

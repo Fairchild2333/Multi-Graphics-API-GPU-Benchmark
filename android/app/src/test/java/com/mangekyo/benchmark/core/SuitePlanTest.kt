@@ -65,6 +65,8 @@ class SuitePlanTest {
             workloadVersion = "membw_v1_android_preview", workloadConfig = "memoryPlateauReached=1;timestampAnomalies=0")
         assertTrue(legacy.matches(job))
         assertFalse(legacy.copy(id = "20261007-231700-000-membw").matches(job))
+        assertFalse(legacy.copy(id = "20261008-034335-000-membw").matches(job))   // before the check existed
+        assertTrue(legacy.copy(id = "20261008-044302-872-membw").matches(job))    // checked, before its commit
         assertFalse(legacy.copy(workloadConfig = "memoryPlateauReached=0;timestampAnomalies=0").matches(job))
         assertFalse(legacy.copy(workloadVersion = "membw_v2_verified_android_preview").matches(job))
         assertFalse(verified.copy(workloadConfig = verified.workloadConfig.replace("dataVerified=1", "dataVerified=0")).matches(job))

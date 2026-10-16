@@ -1534,13 +1534,20 @@ PathService 已把 results/captures/reports/logs 改到
   | M4 Pro | 252.4 | 300.9 | 245.9–250.4 |
   | A12X（iPad8,7） | 56.76 | 57.90 | 56.66 |
 
-  出问题的是 V2（10-14 引入，只在苹果设备上跑过）。新增 `LegacyV1VulkanMemoryComparable`（`src/result_quality.h`）：V1 已到平台、`timestampAnomalies=0`、编号不早于 `20261008-045054`（数据校验 `266a197` 的提交时间），就当作和 V3 可比。桌面版补缺（`src/main.cpp`）、安卓和鸿蒙的一键测试（两个 `ResultsStore`）都接受这样的 V1，所以 19 台设备和电脑的显存成绩不用重测。转译的 MoltenVK V1 和 V2 不接受；苹果前端没有改。
+  出问题的是 V2（10-14 引入，只在苹果设备上跑过）。新增 `LegacyV1VulkanMemoryComparable`（`src/result_quality.h`）：V1 已到平台、`timestampAnomalies=0`、编号不早于 `20261008-042956`，就当作和 V3 可比。
+  - 门槛最初定在数据校验的提交时间 `20261008-045054`（`266a197`）。但带校验的版本在提交前就已经在四台手机上跑过（MIX 4、黑鲨 3 Pro、MIX 2S、小米平板 5，04:29–04:48，日志里都有 "Data check"），所以门槛改成最早有校验的那次运行。
+  - 按 PC 上的成绩副本核对：10 台被接受。MIX Fold 3、Quest 3、黑鲨 5 Pro、Quest 2 没到平台，Switch 早于校验，这 5 台想让显存成绩算数要补测这一项。桌面版补缺（`src/main.cpp`）、安卓和鸿蒙的一键测试（两个 `ResultsStore`）都接受这样的 V1，所以 19 台设备和电脑的显存成绩不用重测。转译的 MoltenVK V1 和 V2 不接受；苹果前端没有改。
   - 测试：`tests/vulkan_membw_results_test.cpp` 和 `SuitePlanTest.kt` 各加了 V1 的接受/拒绝用例；`scripts/check-mobile-suite.cjs` 原来还停在 V2 规则（按现有代码会失败），已改为 V3 加 V1。
 - **两个数学小测试：** `scripts/gpu-math-probe-windows`（D3D11，另一个会话写的）在 5090 和核显上跑了，见 `out/test-results/gpu-math-probe-windows-20261017-031454/report.md`。
   - 按实测算力，M4 Pro 每 TFLOPS 的 Burn 分数是其他 GPU 的 0.46–0.83 倍，不是"一半"。
   - 只看计算循环，每步相当于 180–240 次 FMA 的时间，各 GPU 相近。
-  - 差距大头在循环之外：真实 Burn 跑到自己纯计算循环速度的比例，M4 Pro 是 66%，5090 是 97–109%，核显是 69–86%，原因未查。
-  - 已更新 `docs/interpreting-gpu-burn.md`；Mac 上的后续任务记为 `APPLE-NEXT-TESTS.md` 的 M5。
+  - 真实 Burn 跑到自己纯计算循环速度的比例，M4 Pro 是 66%，5090 是 97–109%，核显是 69–86%。
+  - 用 Burn 16/64/256 三档成绩把一帧拆成"循环后的固定开销"和"每步时间"（两档解出来，第三档验证，误差在 0.3% 以内）：
+    - M4 Pro 在 Burn 里每步只有计算内核速度的 67%，收尾只相当于 2.4 步；
+    - 5090（Vulkan）是 99%；核显 Vulkan 70%、DX11 88%。
+    - 所以损失在片元着色器里跑循环这一步，不在收尾，也不在每帧两遍。
+  - 为什么苹果的片元着色器更慢，只能在 Mac 上查。`scripts/metal-math-probe` 加了 `fma (literal)` 和 `Burn fragment` 两行（在 Windows 上写的，没有编译过），交给 Mac 跑，记为 `APPLE-NEXT-TESTS.md` 的 M5。
+  - 已更新 `docs/interpreting-gpu-burn.md`。
 - 验证：Windows 编译和 `ctest` 6/6，安卓单元测试 5/5 和 APK，鸿蒙 HAP 和 `check-mobile-suite.cjs` 均通过。
 
 ### 2026-10-16 苹果设备在 GPU Burn 和粒子测试里偏弱的原因（只读分析，写进文档；Mac 小测试代码已写，未编译）

@@ -113,9 +113,9 @@ HarmonyOS: Vulkan):
 | A12X, iPad Pro 11" 1st gen (MoltenVK) | 28.8 | 58.1 | 0.50 |
 | XRing O1, Xiaomi 15S Pro | 27.8 | 44.6 | 0.62 |
 | A16, iPhone 14 Pro Max | 27.5 | 41.0 | 0.67 |
-| Snapdragon 8 Gen 2, MIX Fold 3 | 26.1 | 53.0 | 0.49 |
+| Snapdragon 8 Gen 2, MIX Fold 3 | 26.1 | 53.0 (no plateau) | 0.49 |
 | Snapdragon 888+, MIX 4 | 20.9 | 32.7 | 0.64 |
-| Snapdragon 8 Gen 1, Black Shark 5 Pro | 19.2 | 44.2 | 0.43 |
+| Snapdragon 8 Gen 1, Black Shark 5 Pro | 19.2 | 44.2 (no plateau) | 0.43 |
 | A15, iPhone 13 Pro | 19.0 | 30.9 | 0.61 |
 | Kirin 9000, Mate 40 Pro | 17.2 | 30.2 | 0.57 |
 | Snapdragon 865, Black Shark 3 Pro | 13.5 | 23.2 | 0.58 |
@@ -124,8 +124,10 @@ The GPU memory column mixes versions of the memory test: V1 on Android and
 HarmonyOS, the native Metal sweep on the A15, A16 and the 12.9" iPad, V2 on the
 11" iPad. V1 and the current V3 agree within 0.2 - 3 % (RTX 5090, M4 Pro, A12X,
 A15; table in [cli-reference.md](cli-reference.md), memory-bandwidth sweep).
-V2 read too high only on the M4 Pro and is 2 % above V3 on the A12X. The ratios
-above stand.
+V2 read too high only on the M4 Pro and is 2 % above V3 on the A12X. The MIX
+Fold 3 and Black Shark 5 Pro values did not reach the memory plateau and were
+measured before the data check existed (2026-10-07), so their ratios are less
+certain; the others stand.
 
 Apple's GPUs turn their bandwidth into particle throughput as well as the
 others do (0.49 - 0.67 against 0.43 - 0.64). Where an Apple device ranks low

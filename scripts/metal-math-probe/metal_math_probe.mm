@@ -7,6 +7,16 @@
 // functions and one GPU Burn step in compute kernels, so their cost can be read
 // against the FMA rate of the same GPU.
 //
+// Added 2026-10-17, after the Windows probe (scripts/gpu-math-probe-windows):
+// - `fma (literal)`: the FMA kernel with literal constants. On an RTX 5090 the
+//   kernel reading `a` and `b` from the parameter buffer ran 25 % slower, so
+//   6.96 TFLOPS may not be the M4 Pro's FMA peak.
+// - `Burn fragment`: the same GPU Burn step drawn as a full-screen fragment
+//   shader, as GPU Burn runs it. From the 16/64/256-step results, GPU Burn on
+//   the M4 Pro runs each step at 67 % of the compute kernel's rate, with almost
+//   no fixed cost after the loop; this row shows whether the fragment stage
+//   alone accounts for that.
+//
 // Build and run on a Mac: bash scripts/metal-math-probe/run.sh [fast|precise]
 
 #import <Foundation/Foundation.h>
@@ -64,6 +74,9 @@ PROBE_KERNEL(k_exp,   exp(-abs(v)) + b)
 PROBE_KERNEL(k_pow,   pow(abs(v) + 0.5, float4(1.65)) * 0.5)
 PROBE_KERNEL(k_sqrt,  sqrt(abs(v) + b))
 PROBE_KERNEL(k_div,   b / (abs(v) + 1.0))
+// The same values as prm.a and prm.b, written as literals.
+PROBE_KERNEL(k_fma_literal, fma(v, float4(0.999, 0.998, 0.997, 0.996),
+                                float4(0.25, 0.26, 0.27, 0.28)))
 
 // --- One GPU Burn step, copied from shaders/gpu_burn.metal -----------------
 
@@ -122,19 +135,42 @@ float plasmaField(float3 p, float phase, thread float& structureOut) {
     return radiusFromCentre - crystalRadius;
 }
 
-// One thread per pixel of a 1280 x 720 pass; prm.iterations is maxIter. The
-// loop body is GPU Burn's, without the shading after the loop.
+// `iterations` raymarch steps for one pixel of a 1280 x 720 pass. The loop body
+// is GPU Burn's, without the shading after the loop. Defined below.
+float4 BurnSteps(uint px, uint py, float phase, uint iterations);
+
+// One thread per pixel; prm.iterations is maxIter.
 kernel void k_burn_step(device float4* out [[buffer(0)]],
                         constant ProbeParams& prm [[buffer(1)]],
                         uint gid [[thread_position_in_grid]]) {
-    const uint px = gid % 1280u;
-    const uint py = (gid / 1280u) % 720u;
+    out[gid] = BurnSteps(gid % 1280u, (gid / 1280u) % 720u, prm.a.x, prm.iterations);
+}
+
+// The same steps as a full-screen fragment shader, one fragment per pixel of a
+// 1280 x 720 target, as GPU Burn draws each of its passes.
+struct FullscreenOut {
+    float4 position [[position]];
+};
+
+vertex FullscreenOut v_fullscreen(uint vid [[vertex_id]]) {
+    FullscreenOut out;
+    float2 uv = float2((vid << 1) & 2, vid & 2);
+    out.position = float4(uv * 2.0 - 1.0, 0.0, 1.0);
+    return out;
+}
+
+fragment float4 f_burn_step(FullscreenOut in [[stage_in]],
+                            constant ProbeParams& prm [[buffer(0)]]) {
+    const uint2 pixel = uint2(in.position.xy);
+    return BurnSteps(pixel.x, pixel.y, prm.a.x, prm.iterations);
+}
+
+float4 BurnSteps(uint px, uint py, float phase, uint iterations) {
     float2 uv = (float2(float(px), float(py)) + 0.5) / float2(1280.0, 720.0) * 2.0 - 1.0;
     uv.x *= 16.0 / 9.0;
 
     float3 rayOrigin = float3(0.0, 0.0, 2.35);
     float3 rayDir = normalize(float3(uv, -1.75));
-    float phase = prm.a.x;
 
     uint y = min(py, 719u - py);
     uint checksum = 0xB5297A4Du ^ (px * 0x9E3779B9u) ^ (y * 0x85EBCA6Bu)
@@ -154,7 +190,7 @@ kernel void k_burn_step(device float4* out [[buffer(0)]],
     float nearestSurface = 10.0;
     float glowAccum = 0.0;
 
-    for (uint i = 0u; i < prm.iterations; ++i) {
+    for (uint i = 0u; i < iterations; ++i) {
         float3 p = rayOrigin + rayDir * t;
         float structure;
         float d = plasmaField(p, phase, structure);
@@ -185,8 +221,8 @@ kernel void k_burn_step(device float4* out [[buffer(0)]],
         float stepLength = clamp(ad * (0.58 + coreStep * 0.055), 0.004, 0.28);
         t += marchWeight * stepLength;
     }
-    out[gid] = float4(t, glowAccum, coreEnergy,
-                      hitT + nearestSurface + float(checksum & 255u));
+    return float4(t, glowAccum, coreEnergy,
+                  hitT + nearestSurface + float(checksum & 255u));
 }
 )MSL";
 
@@ -205,7 +241,8 @@ struct Probe {
 };
 
 const Probe kProbes[] = {
-    {"k_fma", "fma", 16},       {"k_sin", "sin", 16},   {"k_cos", "cos", 16},
+    {"k_fma", "fma", 16},       {"k_fma_literal", "fma (literal)", 16},
+    {"k_sin", "sin", 16},       {"k_cos", "cos", 16},
     {"k_atan2", "atan2", 16},   {"k_exp", "exp", 16},   {"k_pow", "pow", 16},
     {"k_sqrt", "sqrt", 16},     {"k_div", "division", 16},
     {"k_burn_step", "GPU Burn step", 1},
@@ -245,6 +282,46 @@ double RunOnce(id<MTLCommandQueue> queue, id<MTLComputePipelineState> pipeline,
     return commands.GPUEndTime - commands.GPUStartTime;
 }
 
+// GPU time of one full-screen draw in seconds, or a negative value on failure.
+double DrawOnce(id<MTLCommandQueue> queue, id<MTLRenderPipelineState> pipeline,
+                id<MTLTexture> target, const ProbeParams& params) {
+    MTLRenderPassDescriptor* pass = [MTLRenderPassDescriptor renderPassDescriptor];
+    pass.colorAttachments[0].texture = target;
+    pass.colorAttachments[0].loadAction = MTLLoadActionDontCare;
+    pass.colorAttachments[0].storeAction = MTLStoreActionStore;
+    id<MTLCommandBuffer> commands = [queue commandBuffer];
+    id<MTLRenderCommandEncoder> encoder = [commands renderCommandEncoderWithDescriptor:pass];
+    [encoder setRenderPipelineState:pipeline];
+    [encoder setFragmentBytes:&params length:sizeof(params) atIndex:0];
+    [encoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
+    [encoder endEncoding];
+    [commands commit];
+    [commands waitUntilCompleted];
+    if (commands.status != MTLCommandBufferStatusCompleted) return -1.0;
+    return commands.GPUEndTime - commands.GPUStartTime;
+}
+
+// Grows the loop until one run takes 20 ms, then aims at 50 ms, and returns the
+// shortest GPU time of five runs; negative when a run fails.
+template <class Run>
+double TimeBest(ProbeParams& params, Run run) {
+    params.iterations = 8;
+    double seconds = run(params);
+    while (seconds >= 0.0 && seconds < 0.020 && params.iterations < (1u << 22)) {
+        params.iterations *= 2;
+        seconds = run(params);
+    }
+    if (seconds <= 0.0) return -1.0;
+    params.iterations = std::max<uint32_t>(
+        1u, static_cast<uint32_t>(params.iterations * 0.050 / seconds));
+    double best = 1e30;
+    for (int i = 0; i < 5; ++i) {
+        const double t = run(params);
+        if (t > 0.0) best = std::min(best, t);
+    }
+    return best;
+}
+
 bool RunMode(id<MTLDevice> device, bool fast) {
     NSError* error = nil;
     MTLCompileOptions* options = [MTLCompileOptions new];
@@ -267,6 +344,7 @@ bool RunMode(id<MTLDevice> device, bool fast) {
     std::printf("%-14s %10s %9s %14s %10s\n", "function", "iterations", "GPU ms", "G results/s", "vs fma");
 
     double fmaRate = 0.0;
+    double computeStepRate = 0.0;
     for (const Probe& probe : kProbes) {
         id<MTLFunction> function = [library newFunctionWithName:@(probe.function)];
         id<MTLComputePipelineState> pipeline =
@@ -279,32 +357,21 @@ bool RunMode(id<MTLDevice> device, bool fast) {
         NSUInteger group = 256;
         while (group > pipeline.maxTotalThreadsPerThreadgroup) group /= 2;
 
-        // Grow the loop until one dispatch takes 20 ms, then aim at 50 ms.
-        params.iterations = 8;
-        double seconds = RunOnce(queue, pipeline, out, params, group);
-        while (seconds >= 0.0 && seconds < 0.020 && params.iterations < (1u << 22)) {
-            params.iterations *= 2;
-            seconds = RunOnce(queue, pipeline, out, params, group);
-        }
-        if (seconds <= 0.0) {
+        const double best = TimeBest(params, [&](const ProbeParams& p) {
+            return RunOnce(queue, pipeline, out, p, group);
+        });
+        if (best <= 0.0) {
             std::fprintf(stderr, "%s: dispatch failed\n", probe.function);
             return false;
         }
-        params.iterations = std::max<uint32_t>(
-            1u, static_cast<uint32_t>(params.iterations * 0.050 / seconds));
-
-        double best = 1e30;
-        for (int run = 0; run < 5; ++run) {
-            const double t = RunOnce(queue, pipeline, out, params, group);
-            if (t > 0.0) best = std::min(best, t);
-        }
         const double rate = double(kThreads) * probe.lanesPerIteration * params.iterations / best;
         if (std::strcmp(probe.function, "k_fma") == 0) fmaRate = rate;
+        if (std::strcmp(probe.function, "k_burn_step") == 0) computeStepRate = rate;
 
         if (probe.lanesPerIteration > 1) {
             std::printf("%-14s %10u %9.3f %14.2f %10.3f", probe.label, params.iterations,
                         best * 1e3, rate / 1e9, fmaRate > 0 ? rate / fmaRate : 0.0);
-            if (std::strcmp(probe.function, "k_fma") == 0)
+            if (std::strncmp(probe.function, "k_fma", 5) == 0)
                 std::printf("   (%.2f FP32 TFLOPS)", 2.0 * rate / 1e12);
             std::printf("\n");
         } else {
@@ -317,6 +384,39 @@ bool RunMode(id<MTLDevice> device, bool fast) {
                     fast ? "fast" : "precise", probe.function, params.iterations,
                     static_cast<unsigned long>(group), best, rate);
     }
+
+    // The same step drawn as a full-screen fragment shader into a 1280 x 720
+    // target of the format GPU Burn presents (BGRA8).
+    MTLRenderPipelineDescriptor* descriptor = [MTLRenderPipelineDescriptor new];
+    descriptor.vertexFunction = [library newFunctionWithName:@"v_fullscreen"];
+    descriptor.fragmentFunction = [library newFunctionWithName:@"f_burn_step"];
+    descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    id<MTLRenderPipelineState> render =
+        [device newRenderPipelineStateWithDescriptor:descriptor error:&error];
+    if (!render) {
+        std::fprintf(stderr, "f_burn_step: no pipeline (%s)\n",
+                     error ? error.localizedDescription.UTF8String : "function missing");
+        return false;
+    }
+    MTLTextureDescriptor* targetDescriptor =
+        [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
+                                                           width:1280 height:720 mipmapped:NO];
+    targetDescriptor.usage = MTLTextureUsageRenderTarget;
+    targetDescriptor.storageMode = MTLStorageModePrivate;
+    id<MTLTexture> target = [device newTextureWithDescriptor:targetDescriptor];
+    const double drawBest = TimeBest(params, [&](const ProbeParams& p) {
+        return DrawOnce(queue, render, target, p);
+    });
+    if (drawBest <= 0.0) {
+        std::fprintf(stderr, "f_burn_step: draw failed\n");
+        return false;
+    }
+    const double drawRate = double(kThreads) * params.iterations / drawBest;
+    std::printf("%-14s %10u %9.3f %14.3f %10s   (G pixel-steps/s; %.3f of the compute step)\n",
+                "Burn fragment", params.iterations, drawBest * 1e3, drawRate / 1e9, "-",
+                computeStepRate > 0 ? drawRate / computeStepRate : 0.0);
+    std::printf("MATHPROBE\tmaths=%s\tfunction=f_burn_step\titerations=%u\tgroup=0\tseconds=%.6f\trate=%.6e\n",
+                fast ? "fast" : "precise", params.iterations, drawBest, drawRate);
     return true;
 }
 

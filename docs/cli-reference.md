@@ -283,10 +283,18 @@ panel. When several GPUs run in one job list, the charts show the last one.
   V2 ran on Apple devices only (2026-10-14 to 2026-10-16). Android, HarmonyOS and
   Windows results are V1 and stay comparable. The complete-suite fill and the
   Android and HarmonyOS one-click suites therefore accept a V1 result as done
-  when it reached its plateau, had no timestamp anomaly and was saved after the
-  data check existed (id from `20261008-045054`, commit 266a197); see
-  `LegacyV1VulkanMemoryComparable` in `src/result_quality.h`. Translated
-  MoltenVK V1 rows and V2 rows are not accepted.
+  when it reached its plateau, had no timestamp anomaly and was saved since the
+  data check ran. The first saved result whose log shows the check is the MIX 4
+  rerun `20261008-042956`; the checking build ran on four phones before it was
+  committed (266a197, 04:50). See `LegacyV1VulkanMemoryComparable` in
+  `src/result_quality.h`. Translated MoltenVK V1 rows and V2 rows are not
+  accepted.
+
+  On the devices measured so far this accepts the V1 results of the Xiaomi 15S
+  Pro, MIX 4, Black Shark 3 Pro, Pad 5, MIX 2S, Mate 40 Pro, Mate 60 Pro, MateBook
+  Pro, Xiaomi TV and TCL TV. The MIX Fold 3, Quest 3, Black Shark 5 Pro and
+  Quest 2 never reached the plateau, and the Switch result predates the check.
+  These five need the memory test once more if their figure is to count.
 - **Data check:** before anything is timed, the buffer is filled by the write
   kernel and a fifth kernel (`membw_check.comp`, never timed) loads every
   element and compares it with the value that was stored. If any differs, the

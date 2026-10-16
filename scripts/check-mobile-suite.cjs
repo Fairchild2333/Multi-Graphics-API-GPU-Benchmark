@@ -76,11 +76,13 @@ for (const config of ['dataVerified=0;writeCopyChecks=2;timestampAnomalies=0;lar
   'dataVerified=1;writeCopyChecks=2;timestampAnomalies=0'])
   assert(!record({...memoryRecord,workloadConfig:config}).matches(memoryJob));
 assert(!record({...memoryRecord,workloadVersion:'membw_v2_verified_ohos_preview'}).matches(memoryJob));
-// V1 with a plateau, saved after the data check (2026-10-08 04:50), compares with V3.
+// V1 with a plateau, saved since the data check ran (20261008-042956), compares with V3.
 const legacyMemory = {workload:'membw',workloadVersion:'membw_v1_ohos_preview',id:'20261008-191936-000-membw',
   workloadConfig:'memoryPlateauReached=1;timestampAnomalies=0'};
 assert(record(legacyMemory).matches(memoryJob));
 assert(!record({...legacyMemory,id:'20261007-231700-000-membw'}).matches(memoryJob));
+assert(!record({...legacyMemory,id:'20261008-034335-000-membw'}).matches(memoryJob));
+assert(record({...legacyMemory,id:'20261008-044302-872-membw'}).matches(memoryJob));
 assert(!record({...legacyMemory,workloadConfig:'memoryPlateauReached=0;timestampAnomalies=0'}).matches(memoryJob));
 assert.equal(record().reviewReasons().length,0);
 for (const overrides of [{avgComputeMs:0.002},{avgTotalGpuMs:20},{avgComputeMs:8,avgRenderMs:8},{stableScore:0},{throughputDropPct:8}])

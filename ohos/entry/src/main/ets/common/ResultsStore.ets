@@ -61,10 +61,10 @@ export class ResultEntry {
       const v3: boolean = this.workloadVersion.startsWith('membw_v3_streaming_') && fields.indexOf('dataVerified=1') >= 0 &&
         fields.indexOf('largeDatasetTraversal=ordered_full_dataset_passes') >= 0 &&
         Number(checks.substring('writeCopyChecks='.length)) > 0 && fields.indexOf('timestampAnomalies=0') >= 0;
-      // A V1 result with a plateau, saved after the data check (2026-10-08 04:50),
-      // measured the same as V3 (within 0.2 - 3 %); see LegacyV1VulkanMemoryComparable
-      // in src/result_quality.h.
-      const v1: boolean = this.workloadVersion === 'membw_v1_ohos_preview' && this.id >= '20261008-045054' &&
+      // A V1 result with a plateau, saved since the data check ran (first on the MIX 4,
+      // 20261008-042956), measured the same as V3 (within 0.2 - 3 %); see
+      // LegacyV1VulkanMemoryComparable in src/result_quality.h.
+      const v1: boolean = this.workloadVersion === 'membw_v1_ohos_preview' && this.id >= '20261008-042956' &&
         fields.indexOf('memoryPlateauReached=1') >= 0 && fields.indexOf('timestampAnomalies=0') >= 0;
       return v3 || v1;
     }

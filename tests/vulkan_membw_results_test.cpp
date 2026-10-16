@@ -76,6 +76,11 @@ int main() {
     auto beforeCheck = legacy;
     beforeCheck.id = "20261007-231700-000-membw";
     assert(!LegacyV1VulkanMemoryComparable(beforeCheck));
+    beforeCheck.id = "20261008-034335-000-membw";  // Switch, before the check existed
+    assert(!LegacyV1VulkanMemoryComparable(beforeCheck));
+    auto checkedBeforeCommit = legacy;
+    checkedBeforeCommit.id = "20261008-044302-872-membw";  // Black Shark 3 Pro, checked
+    assert(LegacyV1VulkanMemoryComparable(checkedBeforeCommit));
     auto noPlateau = legacy;
     noPlateau.workloadConfig = "memoryPlateauReached=0;timestampAnomalies=0";
     assert(!LegacyV1VulkanMemoryComparable(noPlateau));
