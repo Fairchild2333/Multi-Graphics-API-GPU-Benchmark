@@ -1,0 +1,264 @@
+[
+  {
+    "index": 1,
+    "job": {
+      "index": "14",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "65536",
+      "steps": "0",
+      "headless": "0",
+      "capture": "1"
+    },
+    "exitCode": 0,
+    "passed": true,
+    "resultIds": [
+      "20261013-183713-285"
+    ],
+    "log": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-complete-20261013/metal-control-01-stream-65536-0.log",
+    "args": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--backend",
+      "metal",
+      "--gpu",
+      "0",
+      "--workload",
+      "stream",
+      "--time",
+      "15",
+      "--gui-worker",
+      "--no-renderdoc",
+      "--particles",
+      "65536"
+    ]
+  },
+  {
+    "index": 2,
+    "job": {
+      "index": "15",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "1048576",
+      "steps": "0",
+      "headless": "0",
+      "capture": "1"
+    },
+    "exitCode": 0,
+    "passed": true,
+    "resultIds": [
+      "20261013-183538-229"
+    ],
+    "log": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-complete-20261013/metal-no-capture-1m.log",
+    "args": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--backend",
+      "metal",
+      "--gpu",
+      "0",
+      "--workload",
+      "stream",
+      "--time",
+      "15",
+      "--gui-worker",
+      "--no-renderdoc",
+      "--particles",
+      "1048576"
+    ]
+  },
+  {
+    "index": 3,
+    "job": {
+      "index": "16",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "4194304",
+      "steps": "0",
+      "headless": "0",
+      "capture": "1"
+    },
+    "exitCode": 0,
+    "passed": true,
+    "resultIds": [
+      "20261013-183728-568"
+    ],
+    "log": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-complete-20261013/metal-control-03-stream-4194304-0.log",
+    "args": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--backend",
+      "metal",
+      "--gpu",
+      "0",
+      "--workload",
+      "stream",
+      "--time",
+      "15",
+      "--gui-worker",
+      "--no-renderdoc",
+      "--particles",
+      "4194304"
+    ]
+  },
+  {
+    "index": 4,
+    "job": {
+      "index": "17",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "16777216",
+      "steps": "0",
+      "headless": "0",
+      "capture": "1"
+    },
+    "exitCode": 0,
+    "passed": true,
+    "resultIds": [
+      "20261013-183743-995"
+    ],
+    "log": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-complete-20261013/metal-control-04-stream-16777216-0.log",
+    "args": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--backend",
+      "metal",
+      "--gpu",
+      "0",
+      "--workload",
+      "stream",
+      "--time",
+      "15",
+      "--gui-worker",
+      "--no-renderdoc",
+      "--particles",
+      "16777216"
+    ]
+  },
+  {
+    "index": 5,
+    "job": {
+      "index": "22",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "16",
+      "headless": "0",
+      "capture": "1"
+    },
+    "exitCode": 0,
+    "passed": true,
+    "resultIds": [
+      "20261013-183759-245"
+    ],
+    "log": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-complete-20261013/metal-control-05-gpu_burn-0-16.log",
+    "args": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--backend",
+      "metal",
+      "--gpu",
+      "0",
+      "--workload",
+      "gpu_burn",
+      "--time",
+      "15",
+      "--gui-worker",
+      "--no-renderdoc",
+      "--iter",
+      "16"
+    ]
+  },
+  {
+    "index": 6,
+    "job": {
+      "index": "23",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "64",
+      "headless": "0",
+      "capture": "1"
+    },
+    "exitCode": 0,
+    "passed": true,
+    "resultIds": [
+      "20261013-183814-515"
+    ],
+    "log": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-complete-20261013/metal-control-06-gpu_burn-0-64.log",
+    "args": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--backend",
+      "metal",
+      "--gpu",
+      "0",
+      "--workload",
+      "gpu_burn",
+      "--time",
+      "15",
+      "--gui-worker",
+      "--no-renderdoc",
+      "--iter",
+      "64"
+    ]
+  },
+  {
+    "index": 7,
+    "job": {
+      "index": "24",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "256",
+      "headless": "0",
+      "capture": "1"
+    },
+    "exitCode": 0,
+    "passed": true,
+    "resultIds": [
+      "20261013-183829-896"
+    ],
+    "log": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-complete-20261013/metal-control-07-gpu_burn-0-256.log",
+    "args": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--backend",
+      "metal",
+      "--gpu",
+      "0",
+      "--workload",
+      "gpu_burn",
+      "--time",
+      "15",
+      "--gui-worker",
+      "--no-renderdoc",
+      "--iter",
+      "256"
+    ]
+  },
+  {
+    "index": 8,
+    "job": {
+      "index": "25",
+      "backend": "metal",
+      "workload": "cinematic_liquid",
+      "particles": "0",
+      "steps": "0",
+      "headless": "0",
+      "capture": "1"
+    },
+    "exitCode": 0,
+    "passed": true,
+    "resultIds": [
+      "20261013-183845-275"
+    ],
+    "log": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-complete-20261013/metal-control-08-cinematic_liquid-0-0.log",
+    "args": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--backend",
+      "metal",
+      "--gpu",
+      "0",
+      "--workload",
+      "cinematic_liquid",
+      "--time",
+      "15",
+      "--gui-worker",
+      "--no-renderdoc"
+    ]
+  }
+]

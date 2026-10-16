@@ -1,0 +1,266 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "details",
+      "--device",
+      "00008027-001969920A87002E",
+      "--json-output",
+      "out/test-results/ipad8-1-full-suite-20261016/device-details.json",
+      "--timeout",
+      "30"
+    ],
+    "commandType" : "devicectl.device.info.details",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "_deprecationNotice" : {
+      "deprecatedFields" : [
+        "hardwareProperties",
+        "deviceProperties",
+        "connectionProperties"
+      ],
+      "message" : "The 'hardwareProperties', 'deviceProperties', 'connectionProperties' fields are deprecated and will be removed in a future release. Use the 'properties' dictionary instead.",
+      "replacement" : "properties"
+    },
+    "capabilities" : [
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.acquireusageassertion",
+        "name" : "Acquire Usage Assertion"
+      },
+      {
+        "featureIdentifier" : "com.apple.dt.serviceconnection.create",
+        "name" : "Create Service Connection"
+      },
+      {
+        "featureIdentifier" : "com.apple.dt.servicesocket.create",
+        "name" : "Create Service Socket"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.disconnectdevice",
+        "name" : "Disconnect from Device"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.enableddiservices",
+        "name" : "Enable Developer Disk Image Services"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.fetchdyldsharecache",
+        "name" : "Fetch dyld Shared Cache Files"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.getlockstate",
+        "name" : "Get Lock State"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.installapp",
+        "name" : "Install Application"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.default.user.credentials",
+        "name" : "Modify Credentials for Default Users for a Device"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.tags",
+        "name" : "Modify Tags"
+      },
+      {
+        "featureIdentifier" : "com.apple.dt.customer.postdarwinnotification",
+        "name" : "Post Darwin Notification"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.provisioningprofiles",
+        "name" : "Provisioning Profile Management"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.servicexpcpeerconnection",
+        "name" : "Service XPC Peer Connection"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.unpairdevice",
+        "name" : "Unpair Device"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.viewdevicescreen",
+        "name" : "View Device Screen"
+      }
+    ],
+    "connectionProperties" : {
+      "authenticationType" : "manualPairing",
+      "isMobileDeviceOnly" : false,
+      "lastConnectionDate" : "2026-10-16T08:08:00.000Z",
+      "localHostnames" : [
+        "Vande-iPad.coredevice.local",
+        "9A44542D-75A2-58C6-B79C-18BEAED61843.coredevice.local",
+        "00008027-001969920A87002E.coredevice.local"
+      ],
+      "pairingState" : "paired",
+      "potentialHostnames" : [
+        "Vande-iPad.coredevice.local",
+        "9A44542D-75A2-58C6-B79C-18BEAED61843.coredevice.local",
+        "00008027-001969920A87002E.coredevice.local"
+      ],
+      "transportType" : "wired",
+      "tunnelIPAddress" : "fd88:5a4c:87e9::1",
+      "tunnelState" : "connected",
+      "tunnelTransportProtocol" : "tcp"
+    },
+    "deviceProperties" : {
+      "bootState" : "booted",
+      "ddiServicesAvailable" : false,
+      "developerModeStatus" : "disabled",
+      "hasInternalOSBuild" : false,
+      "name" : "Van的 iPad",
+      "osBuildUpdate" : "23H30",
+      "osVersionNumber" : "26.7.1",
+      "screenViewingURL" : "devices://device/open?id=9A44542D-75A2-58C6-B79C-18BEAED61843"
+    },
+    "hardwareProperties" : {
+      "cpuType" : {
+        "name" : "arm64e",
+        "subType" : -2147483646,
+        "type" : 16777228
+      },
+      "deviceType" : "iPad",
+      "ecid" : 7152950380527662,
+      "hardwareModel" : "J317AP",
+      "isProductionFused" : true,
+      "marketingName" : "iPad Pro (11-inch)",
+      "platform" : "iOS",
+      "productType" : "iPad8,1",
+      "reality" : "physical",
+      "serialNumber" : "DMPZ7HE2KD6L",
+      "supportedCPUTypes" : [
+        {
+          "name" : "arm64e",
+          "subType" : -2147483646,
+          "type" : 16777228
+        },
+        {
+          "name" : "arm64",
+          "subType" : 0,
+          "type" : 16777228
+        }
+      ],
+      "supportedDeviceFamilies" : [
+        1,
+        2
+      ],
+      "thinningProductType" : "iPad8,1",
+      "udid" : "00008027-001969920A87002E"
+    },
+    "identifier" : "9A44542D-75A2-58C6-B79C-18BEAED61843",
+    "properties" : {
+      "connection" : {
+        "authenticationType" : "manualPairing",
+        "lastConnectionDate" : 813830880,
+        "pairingState" : "paired",
+        "screenViewingURL" : {
+          "relative" : "devices://device/open?id=9A44542D-75A2-58C6-B79C-18BEAED61843"
+        },
+        "state" : "connected",
+        "transportType" : "wired",
+        "tunnelIPAddressString" : "fd88:5a4c:87e9::1",
+        "tunnelTransportProtocol" : "tcp"
+      },
+      "hardware" : {
+        "cpuType" : {
+          "subtype" : 18446744071562067970,
+          "type" : 16777228
+        },
+        "deviceType" : "iPad",
+        "ecid" : 7152950380527662,
+        "marketingName" : "iPad Pro (11-inch)",
+        "platform" : "iOS",
+        "productType" : "iPad8,1",
+        "reality" : "physical",
+        "serialNumber" : "DMPZ7HE2KD6L",
+        "supportedCPUTypes" : [
+          {
+            "subtype" : 18446744071562067970,
+            "type" : 16777228
+          },
+          {
+            "subtype" : 0,
+            "type" : 16777228
+          }
+        ],
+        "supportedDeviceFamilies" : [
+          1,
+          2
+        ],
+        "thinningProductType" : "iPad8,1",
+        "udid" : "00008027-001969920A87002E"
+      },
+      "software" : {
+        "osBuildVersions" : {
+          "buildVersion" : {
+            "majorLetterComponent" : "H",
+            "majorNumberComponent" : 23,
+            "name" : "23H30",
+            "revisionVersion" : {
+              "components" : [
+                23,
+                8,
+                30,
+                0,
+                0
+              ],
+              "originalComponentsCount" : 5,
+              "stringValue" : "23.8.30.0.0"
+            },
+            "trainProgram" : "iOS",
+            "updateNumberComponent" : 30
+          },
+          "supplementalBuildVersion" : {
+            "majorLetterComponent" : "H",
+            "majorNumberComponent" : 23,
+            "name" : "23H30",
+            "revisionVersion" : {
+              "components" : [
+                23,
+                8,
+                30,
+                0,
+                0
+              ],
+              "originalComponentsCount" : 5,
+              "stringValue" : "23.8.30.0.0"
+            },
+            "trainProgram" : "iOS",
+            "updateNumberComponent" : 30
+          }
+        },
+        "osVersionNumber" : {
+          "components" : [
+            26,
+            7,
+            1,
+            0,
+            0
+          ],
+          "originalComponentsCount" : 3,
+          "stringValue" : "26.7.1"
+        }
+      },
+      "state" : {
+        "bootState" : "booted",
+        "developerModeStatus" : {
+          "disabled" : {
+
+          }
+        },
+        "name" : "Van的 iPad"
+      }
+    },
+    "propertyDisplayNames" : null,
+    "visibilityClass" : "default"
+  }
+}

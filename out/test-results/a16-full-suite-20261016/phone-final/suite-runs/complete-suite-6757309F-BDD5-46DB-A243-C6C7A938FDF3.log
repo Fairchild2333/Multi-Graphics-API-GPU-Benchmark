@@ -1,0 +1,1781 @@
+iOS complete suite complete-suite-6757309F-BDD5-46DB-A243-C6C7A938FDF3
+Started: 2026-10-16T10:21:09Z
+
+Thermal precheck stream-65536: nominal after 0s cooling.
+
+=== 1/31 stream-65536: passed ===
+=== Preview stream?particles=65536&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A16 GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 65536 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 0.476 ms | Render: 1.646 ms | Total: 3.145 ms | FPS: 72 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.267 ms | Render: 2.641 ms | Total: 3.785 ms | FPS: 46 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.309 ms | Render: 4.973 ms | Total: 6.743 ms | FPS: 59 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 0.383 ms | Render: 4.442 ms | Total: 5.601 ms | FPS: 60 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 0.367 ms | Render: 3.888 ms | Total: 4.965 ms | FPS: 51 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 0.387 ms | Render: 4.552 ms | Total: 5.616 ms | FPS: 59 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 0.379 ms | Render: 4.377 ms | Total: 5.426 ms | FPS: 56 | T: 2.9 s
+[GPU Timing] Compute: 0.396 ms | Render: 4.666 ms | Total: 5.710 ms | FPS: 59 | T: 3.9 s
+[GPU Timing] Compute: 0.382 ms | Render: 4.707 ms | Total: 5.747 ms | FPS: 59 | T: 4.9 s
+[GPU Timing] Compute: 0.378 ms | Render: 4.835 ms | Total: 5.870 ms | FPS: 59 | T: 5.9 s
+[GPU Timing] Compute: 0.374 ms | Render: 4.741 ms | Total: 5.761 ms | FPS: 59 | T: 6.9 s
+[GPU Timing] Compute: 0.373 ms | Render: 4.741 ms | Total: 5.762 ms | FPS: 59 | T: 7.9 s
+[GPU Timing] Compute: 0.384 ms | Render: 4.709 ms | Total: 5.734 ms | FPS: 59 | T: 8.9 s
+[GPU Timing] Compute: 0.393 ms | Render: 4.672 ms | Total: 5.740 ms | FPS: 59 | T: 9.9 s
+[GPU Timing] Compute: 0.380 ms | Render: 4.726 ms | Total: 5.784 ms | FPS: 59 | T: 10.9 s
+[GPU Timing] Compute: 0.355 ms | Render: 4.447 ms | Total: 5.533 ms | FPS: 59 | T: 11.9 s
+[GPU Timing] Compute: 0.350 ms | Render: 4.442 ms | Total: 5.582 ms | FPS: 59 | T: 12.9 s
+[GPU Timing] Compute: 0.350 ms | Render: 4.742 ms | Total: 5.849 ms | FPS: 59 | T: 13.9 s
+[GPU Timing] Compute: 0.347 ms | Render: 4.338 ms | Total: 5.453 ms | FPS: 60 | T: 14.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A16 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    65536 (Light)
+Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 777 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.372     0.158     1.147
+Render:          4.625     1.486     5.471
+Total GPU:       5.687     2.524     6.617
+
+--- Throughput ---
+Avg FPS:      59
+Particles:    65536
+Working set:  2.00 MiB
+VRAM rate:   7.05 GB/s  (0.372 ms compute)
+
+--- Analysis ---
+Avg frame time:  16.750 ms
+Avg GPU time:    5.687 ms
+GPU utilisation: 34.0%
+>> Display-bound: every frame waits for the display, so the GPU is idle 66% of the time.
+   -> The score may be too low. Use a heavier test.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 6.89 GB/s  (CV 1.86%)
+Throughput:   early vs late mean change (drop positive) -7.2%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212124-848 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck stream_headless-65536: nominal after 0s cooling.
+
+=== 2/31 stream_headless-65536: passed ===
+=== Preview stream_headless?particles=65536&vsync=0&api=metal 15.0s ===
+Selected GPU: Apple A16 GPU
+Created particle buffer: 65536 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[Metal] Headless mode: pure compute, no rendering
+[GPU Timing] Compute: 0.118 ms | Render: 0.000 ms | Total: 0.118 ms | FPS: 3939 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.054 ms | Render: 0.000 ms | Total: 0.054 ms | FPS: 3994 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.068 ms | Render: 0.000 ms | Total: 0.068 ms | FPS: 3191 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 0.071 ms | Render: 0.000 ms | Total: 0.071 ms | FPS: 2828 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 0.071 ms | Render: 0.000 ms | Total: 0.071 ms | FPS: 3233 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 0.069 ms | Render: 0.000 ms | Total: 0.069 ms | FPS: 2826 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 0.068 ms | Render: 0.000 ms | Total: 0.068 ms | FPS: 2972 | T: 2.8 s
+[GPU Timing] Compute: 0.068 ms | Render: 0.000 ms | Total: 0.068 ms | FPS: 3187 | T: 3.8 s
+[GPU Timing] Compute: 0.069 ms | Render: 0.000 ms | Total: 0.069 ms | FPS: 3291 | T: 4.8 s
+[GPU Timing] Compute: 0.066 ms | Render: 0.000 ms | Total: 0.066 ms | FPS: 2950 | T: 5.8 s
+[GPU Timing] Compute: 0.066 ms | Render: 0.000 ms | Total: 0.066 ms | FPS: 3511 | T: 6.8 s
+[GPU Timing] Compute: 0.064 ms | Render: 0.000 ms | Total: 0.064 ms | FPS: 3325 | T: 7.8 s
+[GPU Timing] Compute: 0.063 ms | Render: 0.000 ms | Total: 0.063 ms | FPS: 4511 | T: 8.8 s
+[GPU Timing] Compute: 0.038 ms | Render: 0.000 ms | Total: 0.038 ms | FPS: 9461 | T: 9.8 s
+[GPU Timing] Compute: 0.030 ms | Render: 0.000 ms | Total: 0.030 ms | FPS: 12363 | T: 10.8 s
+[GPU Timing] Compute: 0.032 ms | Render: 0.000 ms | Total: 0.032 ms | FPS: 11668 | T: 11.8 s
+[GPU Timing] Compute: 0.034 ms | Render: 0.000 ms | Total: 0.034 ms | FPS: 11166 | T: 12.8 s
+[GPU Timing] Compute: 0.034 ms | Render: 0.000 ms | Total: 0.034 ms | FPS: 10970 | T: 13.8 s
+[GPU Timing] Compute: 0.030 ms | Render: 0.000 ms | Total: 0.030 ms | FPS: 13378 | T: 14.8 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A16 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    65536 (Light)
+Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 94922 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.041     0.022     0.975
+Render:          0.000     0.000     0.000
+Total GPU:       0.041     0.022     0.975
+
+--- Throughput ---
+Avg FPS:      7301
+Particles:    65536
+Working set:  2.00 MiB
+VRAM rate:   64.56 GB/s  (0.041 ms compute)
+
+--- Analysis ---
+Avg frame time:  0.137 ms
+Avg GPU time:    0.041 ms
+GPU utilisation: 29.7%
+>> CPU-bound: GPU is idle 70% of the time.
+   -> Try a higher difficulty for more accurate GPU benchmarking.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 38.92 GB/s  (CV 1.87%)
+Throughput:   early vs late mean change (drop positive) -112.1%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212140-771 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck stream-1048576: nominal after 0s cooling.
+
+=== 3/31 stream-1048576: passed ===
+=== Preview stream?particles=1048576&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A16 GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 1048576 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 4.174 ms | Render: 18.684 ms | Total: 24.522 ms | FPS: 42 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 2.799 ms | Render: 16.157 ms | Total: 19.987 ms | FPS: 46 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 1.879 ms | Render: 16.164 ms | Total: 19.047 ms | FPS: 47 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 1.760 ms | Render: 16.318 ms | Total: 19.100 ms | FPS: 48 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 1.661 ms | Render: 16.644 ms | Total: 19.246 ms | FPS: 49 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 1.607 ms | Render: 16.369 ms | Total: 18.919 ms | FPS: 50 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 1.639 ms | Render: 16.665 ms | Total: 19.221 ms | FPS: 49 | T: 2.9 s
+[GPU Timing] Compute: 1.601 ms | Render: 16.815 ms | Total: 19.299 ms | FPS: 49 | T: 3.9 s
+[GPU Timing] Compute: 1.612 ms | Render: 16.732 ms | Total: 19.237 ms | FPS: 49 | T: 4.9 s
+[GPU Timing] Compute: 1.649 ms | Render: 16.864 ms | Total: 19.351 ms | FPS: 49 | T: 5.9 s
+[GPU Timing] Compute: 1.579 ms | Render: 16.808 ms | Total: 19.257 ms | FPS: 50 | T: 6.9 s
+[GPU Timing] Compute: 1.608 ms | Render: 16.978 ms | Total: 19.407 ms | FPS: 49 | T: 7.9 s
+[GPU Timing] Compute: 1.638 ms | Render: 16.850 ms | Total: 19.314 ms | FPS: 49 | T: 8.9 s
+[GPU Timing] Compute: 1.690 ms | Render: 16.834 ms | Total: 19.386 ms | FPS: 49 | T: 9.9 s
+[GPU Timing] Compute: 1.656 ms | Render: 16.749 ms | Total: 19.262 ms | FPS: 50 | T: 11.0 s
+[GPU Timing] Compute: 1.679 ms | Render: 16.729 ms | Total: 19.287 ms | FPS: 49 | T: 12.0 s
+[GPU Timing] Compute: 1.667 ms | Render: 16.693 ms | Total: 19.230 ms | FPS: 50 | T: 13.0 s
+[GPU Timing] Compute: 1.717 ms | Render: 16.797 ms | Total: 19.393 ms | FPS: 49 | T: 14.0 s
+[GPU Timing] Compute: 1.682 ms | Render: 16.950 ms | Total: 19.526 ms | FPS: 49 | T: 15.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A16 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    1048576 (Medium)
+Buffer:       32.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 650 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         1.647     1.339     2.951
+Render:         16.808    15.943    17.942
+Total GPU:      19.323    18.429    21.041
+
+--- Throughput ---
+Avg FPS:      49
+Particles:    1048576
+Working set:  32.00 MiB
+VRAM rate:   25.47 GB/s  (1.647 ms compute)
+
+--- Analysis ---
+Avg frame time:  20.044 ms
+Avg GPU time:    19.323 ms
+GPU utilisation: 96.4%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 24.97 GB/s  (CV 1.22%)
+Throughput:   early vs late mean change (drop positive) 3.8%  (small throughput change)
+==========================================================
+
+[Results] Saved as 20261016-212156-664 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck stream_headless-1048576: nominal after 0s cooling.
+
+=== 4/31 stream_headless-1048576: passed ===
+=== Preview stream_headless?particles=1048576&vsync=0&api=metal 15.0s ===
+Selected GPU: Apple A16 GPU
+Created particle buffer: 1048576 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[Metal] Headless mode: pure compute, no rendering
+[GPU Timing] Compute: 2.780 ms | Render: 0.000 ms | Total: 2.780 ms | FPS: 363 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 1.910 ms | Render: 0.000 ms | Total: 1.910 ms | FPS: 514 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 1.587 ms | Render: 0.000 ms | Total: 1.587 ms | FPS: 616 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 1.535 ms | Render: 0.000 ms | Total: 1.535 ms | FPS: 637 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 1.555 ms | Render: 0.000 ms | Total: 1.555 ms | FPS: 628 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 1.576 ms | Render: 0.000 ms | Total: 1.576 ms | FPS: 621 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 1.549 ms | Render: 0.000 ms | Total: 1.549 ms | FPS: 631 | T: 2.8 s
+[GPU Timing] Compute: 1.503 ms | Render: 0.000 ms | Total: 1.503 ms | FPS: 650 | T: 3.8 s
+[GPU Timing] Compute: 1.541 ms | Render: 0.000 ms | Total: 1.541 ms | FPS: 634 | T: 4.8 s
+[GPU Timing] Compute: 1.525 ms | Render: 0.000 ms | Total: 1.525 ms | FPS: 641 | T: 5.8 s
+[GPU Timing] Compute: 1.519 ms | Render: 0.000 ms | Total: 1.519 ms | FPS: 643 | T: 6.8 s
+[GPU Timing] Compute: 1.555 ms | Render: 0.000 ms | Total: 1.555 ms | FPS: 629 | T: 7.8 s
+[GPU Timing] Compute: 1.549 ms | Render: 0.000 ms | Total: 1.549 ms | FPS: 631 | T: 8.8 s
+[GPU Timing] Compute: 1.553 ms | Render: 0.000 ms | Total: 1.553 ms | FPS: 629 | T: 9.8 s
+[GPU Timing] Compute: 1.547 ms | Render: 0.000 ms | Total: 1.547 ms | FPS: 621 | T: 10.8 s
+[GPU Timing] Compute: 1.573 ms | Render: 0.000 ms | Total: 1.573 ms | FPS: 616 | T: 11.8 s
+[GPU Timing] Compute: 1.530 ms | Render: 0.000 ms | Total: 1.530 ms | FPS: 638 | T: 12.8 s
+[GPU Timing] Compute: 1.560 ms | Render: 0.000 ms | Total: 1.560 ms | FPS: 627 | T: 13.8 s
+[GPU Timing] Compute: 1.532 ms | Render: 0.000 ms | Total: 1.532 ms | FPS: 638 | T: 14.8 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A16 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    1048576 (Medium)
+Buffer:       32.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 8241 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         1.540     1.437     2.657
+Render:          0.000     0.000     0.000
+Total GPU:       1.540     1.437     2.657
+
+--- Throughput ---
+Avg FPS:      633
+Particles:    1048576
+Working set:  32.00 MiB
+VRAM rate:   27.23 GB/s  (1.540 ms compute)
+
+--- Analysis ---
+Avg frame time:  1.578 ms
+Avg GPU time:    1.540 ms
+GPU utilisation: 97.6%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 27.10 GB/s  (CV 1.05%)
+Throughput:   early vs late mean change (drop positive) 1.3%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212212-694 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck stream-4194304: nominal after 0s cooling.
+
+=== 5/31 stream-4194304: passed ===
+=== Preview stream?particles=4194304&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A16 GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 4194304 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 9.584 ms | Render: 67.946 ms | Total: 101.919 ms | FPS: 12 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 8.020 ms | Render: 70.276 ms | Total: 79.372 ms | FPS: 12 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 7.378 ms | Render: 70.269 ms | Total: 78.560 ms | FPS: 12 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 6.579 ms | Render: 70.295 ms | Total: 78.532 ms | FPS: 12 | T: 1.4 s (warm-up)
+[GPU Timing] Compute: 6.400 ms | Render: 71.266 ms | Total: 78.500 ms | FPS: 12 | T: 1.7 s (warm-up)
+[GPU Timing] Compute: 6.776 ms | Render: 71.632 ms | Total: 79.522 ms | FPS: 12 | T: 2.0 s (warm-up)
+[GPU Timing] Compute: 6.491 ms | Render: 71.823 ms | Total: 79.220 ms | FPS: 12 | T: 3.0 s
+[GPU Timing] Compute: 6.681 ms | Render: 74.218 ms | Total: 81.786 ms | FPS: 12 | T: 4.1 s
+[GPU Timing] Compute: 6.476 ms | Render: 74.738 ms | Total: 81.967 ms | FPS: 12 | T: 5.2 s
+[GPU Timing] Compute: 6.542 ms | Render: 75.324 ms | Total: 82.714 ms | FPS: 11 | T: 6.2 s
+[GPU Timing] Compute: 6.682 ms | Render: 75.021 ms | Total: 82.585 ms | FPS: 11 | T: 7.2 s
+[GPU Timing] Compute: 6.418 ms | Render: 74.275 ms | Total: 81.659 ms | FPS: 12 | T: 8.3 s
+[GPU Timing] Compute: 6.388 ms | Render: 72.433 ms | Total: 79.774 ms | FPS: 12 | T: 9.3 s
+[GPU Timing] Compute: 6.391 ms | Render: 70.922 ms | Total: 78.216 ms | FPS: 12 | T: 10.3 s
+[GPU Timing] Compute: 6.470 ms | Render: 70.037 ms | Total: 77.570 ms | FPS: 12 | T: 11.4 s
+[GPU Timing] Compute: 6.440 ms | Render: 69.770 ms | Total: 77.160 ms | FPS: 12 | T: 12.4 s
+[GPU Timing] Compute: 6.830 ms | Render: 72.523 ms | Total: 80.007 ms | FPS: 12 | T: 13.4 s
+[GPU Timing] Compute: 6.679 ms | Render: 72.372 ms | Total: 79.974 ms | FPS: 12 | T: 14.5 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A16 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    4194304 (Heavy)
+Buffer:       128.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 161 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         6.535     5.765     8.748
+Render:         72.731    68.505    76.977
+Total GPU:      80.157    75.553    84.144
+
+--- Throughput ---
+Avg FPS:      12
+Particles:    4194304
+Working set:  128.00 MiB
+VRAM rate:   25.67 GB/s  (6.535 ms compute)
+
+--- Analysis ---
+Avg frame time:  80.959 ms
+Avg GPU time:    80.157 ms
+GPU utilisation: 99.0%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 26.13 GB/s  (CV 0.48%)
+Throughput:   early vs late mean change (drop positive) -0.2%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212228-711 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck stream_headless-4194304: nominal after 0s cooling.
+
+=== 6/31 stream_headless-4194304: passed ===
+=== Preview stream_headless?particles=4194304&vsync=0&api=metal 15.0s ===
+Selected GPU: Apple A16 GPU
+Created particle buffer: 4194304 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[Metal] Headless mode: pure compute, no rendering
+[GPU Timing] Compute: 12.535 ms | Render: 0.000 ms | Total: 12.535 ms | FPS: 88 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 7.060 ms | Render: 0.000 ms | Total: 7.060 ms | FPS: 140 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 6.214 ms | Render: 0.000 ms | Total: 6.214 ms | FPS: 159 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 6.154 ms | Render: 0.000 ms | Total: 6.154 ms | FPS: 161 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 6.084 ms | Render: 0.000 ms | Total: 6.084 ms | FPS: 163 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 6.203 ms | Render: 0.000 ms | Total: 6.203 ms | FPS: 160 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 6.206 ms | Render: 0.000 ms | Total: 6.206 ms | FPS: 160 | T: 2.8 s
+[GPU Timing] Compute: 6.131 ms | Render: 0.000 ms | Total: 6.131 ms | FPS: 162 | T: 3.8 s
+[GPU Timing] Compute: 6.088 ms | Render: 0.000 ms | Total: 6.088 ms | FPS: 163 | T: 4.9 s
+[GPU Timing] Compute: 6.252 ms | Render: 0.000 ms | Total: 6.252 ms | FPS: 159 | T: 5.9 s
+[GPU Timing] Compute: 6.123 ms | Render: 0.000 ms | Total: 6.123 ms | FPS: 162 | T: 6.9 s
+[GPU Timing] Compute: 6.035 ms | Render: 0.000 ms | Total: 6.035 ms | FPS: 164 | T: 7.9 s
+[GPU Timing] Compute: 6.089 ms | Render: 0.000 ms | Total: 6.089 ms | FPS: 163 | T: 8.9 s
+[GPU Timing] Compute: 6.069 ms | Render: 0.000 ms | Total: 6.069 ms | FPS: 163 | T: 9.9 s
+[GPU Timing] Compute: 6.228 ms | Render: 0.000 ms | Total: 6.228 ms | FPS: 159 | T: 10.9 s
+[GPU Timing] Compute: 6.186 ms | Render: 0.000 ms | Total: 6.186 ms | FPS: 160 | T: 11.9 s
+[GPU Timing] Compute: 5.995 ms | Render: 0.000 ms | Total: 5.995 ms | FPS: 165 | T: 12.9 s
+[GPU Timing] Compute: 6.043 ms | Render: 0.000 ms | Total: 6.043 ms | FPS: 164 | T: 13.9 s
+[GPU Timing] Compute: 6.100 ms | Render: 0.000 ms | Total: 6.100 ms | FPS: 163 | T: 14.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A16 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    4194304 (Heavy)
+Buffer:       128.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 2113 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         6.118     5.775     8.063
+Render:          0.000     0.000     0.000
+Total GPU:       6.118     5.775     8.063
+
+--- Throughput ---
+Avg FPS:      162
+Particles:    4194304
+Working set:  128.00 MiB
+VRAM rate:   27.42 GB/s  (6.118 ms compute)
+
+--- Analysis ---
+Avg frame time:  6.153 ms
+Avg GPU time:    6.118 ms
+GPU utilisation: 99.4%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 27.46 GB/s  (CV 1.42%)
+Throughput:   early vs late mean change (drop positive) -0.8%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212244-710 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck stream-16777216: nominal after 0s cooling.
+
+=== 7/31 stream-16777216: passed ===
+=== Preview stream?particles=16777216&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A16 GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 16777216 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 44.329 ms | Render: 215.523 ms | Total: 268.392 ms | FPS: 5 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 30.247 ms | Render: 284.388 ms | Total: 329.227 ms | FPS: 3 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 29.085 ms | Render: 284.751 ms | Total: 314.433 ms | FPS: 3 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 26.448 ms | Render: 280.447 ms | Total: 307.713 ms | FPS: 3 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 29.772 ms | Render: 283.178 ms | Total: 314.069 ms | FPS: 3 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 26.783 ms | Render: 287.722 ms | Total: 315.565 ms | FPS: 3 | T: 2.3 s (warm-up)
+[GPU Timing] Compute: 27.830 ms | Render: 284.603 ms | Total: 313.219 ms | FPS: 3 | T: 3.5 s
+[GPU Timing] Compute: 26.103 ms | Render: 289.164 ms | Total: 316.314 ms | FPS: 3 | T: 4.8 s
+[GPU Timing] Compute: 26.980 ms | Render: 292.050 ms | Total: 319.971 ms | FPS: 3 | T: 6.1 s
+[GPU Timing] Compute: 25.913 ms | Render: 292.613 ms | Total: 319.824 ms | FPS: 3 | T: 7.4 s
+[GPU Timing] Compute: 26.533 ms | Render: 293.133 ms | Total: 320.637 ms | FPS: 3 | T: 8.6 s
+[GPU Timing] Compute: 26.833 ms | Render: 290.775 ms | Total: 318.435 ms | FPS: 3 | T: 9.9 s
+[GPU Timing] Compute: 27.026 ms | Render: 283.348 ms | Total: 311.308 ms | FPS: 3 | T: 11.2 s
+[GPU Timing] Compute: 25.890 ms | Render: 274.100 ms | Total: 301.004 ms | FPS: 3 | T: 12.4 s
+[GPU Timing] Compute: 26.360 ms | Render: 280.872 ms | Total: 308.090 ms | FPS: 3 | T: 13.6 s
+[GPU Timing] Compute: 26.637 ms | Render: 283.792 ms | Total: 311.781 ms | FPS: 3 | T: 14.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A16 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    16777216 (Extreme)
+Buffer:       512.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.2 s (warmup: 2.0 s, measured: 42 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        26.559    25.185    29.681
+Render:        286.438   272.599   295.261
+Total GPU:     314.009   299.289   323.421
+
+--- Throughput ---
+Avg FPS:      3
+Particles:    16777216
+Working set:  512.00 MiB
+VRAM rate:   25.27 GB/s  (26.559 ms compute)
+
+--- Analysis ---
+Avg frame time:  315.165 ms
+Avg GPU time:    314.009 ms
+GPU utilisation: 99.6%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      10 x 1s
+Stable window: 25.28 GB/s  (CV 1.50%)
+Throughput:   early vs late mean change (drop positive) -0.4%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212301-414 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck stream_headless-16777216: nominal after 0s cooling.
+
+=== 8/31 stream_headless-16777216: passed ===
+=== Preview stream_headless?particles=16777216&vsync=0&api=metal 15.0s ===
+Selected GPU: Apple A16 GPU
+Created particle buffer: 16777216 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[Metal] Headless mode: pure compute, no rendering
+[GPU Timing] Compute: 37.628 ms | Render: 0.000 ms | Total: 37.628 ms | FPS: 34 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 25.858 ms | Render: 0.000 ms | Total: 25.858 ms | FPS: 38 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 25.445 ms | Render: 0.000 ms | Total: 25.445 ms | FPS: 39 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 24.788 ms | Render: 0.000 ms | Total: 24.788 ms | FPS: 40 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 25.393 ms | Render: 0.000 ms | Total: 25.393 ms | FPS: 39 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 25.099 ms | Render: 0.000 ms | Total: 25.099 ms | FPS: 39 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 24.984 ms | Render: 0.000 ms | Total: 24.984 ms | FPS: 39 | T: 2.9 s
+[GPU Timing] Compute: 24.161 ms | Render: 0.000 ms | Total: 24.161 ms | FPS: 41 | T: 3.9 s
+[GPU Timing] Compute: 24.032 ms | Render: 0.000 ms | Total: 24.032 ms | FPS: 41 | T: 4.9 s
+[GPU Timing] Compute: 24.247 ms | Render: 0.000 ms | Total: 24.247 ms | FPS: 41 | T: 5.9 s
+[GPU Timing] Compute: 24.436 ms | Render: 0.000 ms | Total: 24.436 ms | FPS: 40 | T: 6.9 s
+[GPU Timing] Compute: 24.213 ms | Render: 0.000 ms | Total: 24.213 ms | FPS: 41 | T: 8.0 s
+[GPU Timing] Compute: 24.213 ms | Render: 0.000 ms | Total: 24.213 ms | FPS: 41 | T: 9.0 s
+[GPU Timing] Compute: 24.267 ms | Render: 0.000 ms | Total: 24.267 ms | FPS: 41 | T: 10.0 s
+[GPU Timing] Compute: 25.013 ms | Render: 0.000 ms | Total: 25.013 ms | FPS: 39 | T: 11.0 s
+[GPU Timing] Compute: 24.907 ms | Render: 0.000 ms | Total: 24.907 ms | FPS: 40 | T: 12.0 s
+[GPU Timing] Compute: 24.057 ms | Render: 0.000 ms | Total: 24.057 ms | FPS: 41 | T: 13.0 s
+[GPU Timing] Compute: 23.960 ms | Render: 0.000 ms | Total: 23.960 ms | FPS: 41 | T: 14.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A16 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    16777216 (Extreme)
+Buffer:       512.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 533 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        24.381    23.228    26.811
+Render:          0.000     0.000     0.000
+Total GPU:      24.381    23.228    26.811
+
+--- Throughput ---
+Avg FPS:      40
+Particles:    16777216
+Working set:  512.00 MiB
+VRAM rate:   27.52 GB/s  (24.381 ms compute)
+
+--- Analysis ---
+Avg frame time:  24.420 ms
+Avg GPU time:    24.381 ms
+GPU utilisation: 99.8%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 27.47 GB/s  (CV 1.78%)
+Throughput:   early vs late mean change (drop positive) 0.3%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212317-744 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck gpu_burn-16: nominal after 0s cooling.
+
+=== 9/31 gpu_burn-16: passed ===
+=== Preview gpu_burn?steps=16&vsync=0&api=metal 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A16 GPU
+[Metal] Render target follows host layer: 1280x720
+[Metal] GPU Burn: fullscreen raymarch (2 draws/frame, steps=16)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 0.000 ms | Render: 22.136 ms | Total: 22.136 ms | FPS: 43 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 21.632 ms | Total: 21.632 ms | FPS: 43 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 21.497 ms | Total: 21.497 ms | FPS: 43 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 21.576 ms | Total: 21.576 ms | FPS: 43 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 21.454 ms | Total: 21.454 ms | FPS: 44 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 21.661 ms | Total: 21.661 ms | FPS: 43 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 21.611 ms | Total: 21.611 ms | FPS: 44 | T: 3.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 21.570 ms | Total: 21.570 ms | FPS: 44 | T: 4.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 21.692 ms | Total: 21.692 ms | FPS: 43 | T: 5.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 21.651 ms | Total: 21.651 ms | FPS: 44 | T: 6.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 21.663 ms | Total: 21.663 ms | FPS: 43 | T: 7.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 21.599 ms | Total: 21.599 ms | FPS: 43 | T: 8.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 21.549 ms | Total: 21.549 ms | FPS: 44 | T: 9.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 21.579 ms | Total: 21.579 ms | FPS: 43 | T: 10.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 21.663 ms | Total: 21.663 ms | FPS: 43 | T: 11.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 21.606 ms | Total: 21.606 ms | FPS: 44 | T: 12.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 21.549 ms | Total: 21.549 ms | FPS: 44 | T: 13.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 21.592 ms | Total: 21.592 ms | FPS: 43 | T: 14.1 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A16 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 574 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:         21.610    20.927    22.592
+Total GPU:      21.610    20.927    22.592
+
+--- Throughput ---
+Avg FPS:      44
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 16 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    1.36 Gpix-step/s  (21.610 ms render)
+
+--- Analysis ---
+Avg frame time:  22.711 ms
+Avg GPU time:    21.610 ms
+GPU utilisation: 95.2%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 1.37 Gpix-step/s  (CV 0.17%)
+Throughput:   early vs late mean change (drop positive) -0.2%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212334-016 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck gpu_burn-64: nominal after 0s cooling.
+
+=== 10/31 gpu_burn-64: passed ===
+=== Preview gpu_burn?steps=64&vsync=0&api=metal 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A16 GPU
+[Metal] Render target follows host layer: 1280x720
+[Metal] GPU Burn: fullscreen raymarch (2 draws/frame, steps=64)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 0.000 ms | Render: 78.685 ms | Total: 78.685 ms | FPS: 15 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 76.944 ms | Total: 76.944 ms | FPS: 12 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 77.071 ms | Total: 77.071 ms | FPS: 12 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 76.365 ms | Total: 76.365 ms | FPS: 12 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 76.818 ms | Total: 76.818 ms | FPS: 12 | T: 1.7 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 77.352 ms | Total: 77.352 ms | FPS: 12 | T: 2.0 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 77.219 ms | Total: 77.219 ms | FPS: 12 | T: 3.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 76.830 ms | Total: 76.830 ms | FPS: 12 | T: 4.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 77.065 ms | Total: 77.065 ms | FPS: 12 | T: 5.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 76.630 ms | Total: 76.630 ms | FPS: 12 | T: 6.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 77.240 ms | Total: 77.240 ms | FPS: 12 | T: 7.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 76.966 ms | Total: 76.966 ms | FPS: 12 | T: 8.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 77.060 ms | Total: 77.060 ms | FPS: 12 | T: 9.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 76.861 ms | Total: 76.861 ms | FPS: 12 | T: 10.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 77.436 ms | Total: 77.436 ms | FPS: 12 | T: 11.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 76.990 ms | Total: 76.990 ms | FPS: 12 | T: 12.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 76.925 ms | Total: 76.925 ms | FPS: 12 | T: 13.2 s
+[GPU Timing] Compute: 0.000 ms | Render: 77.473 ms | Total: 77.473 ms | FPS: 12 | T: 14.2 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A16 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.1 s (warmup: 2.0 s, measured: 167 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:         77.031    75.836    79.804
+Total GPU:      77.031    75.836    79.804
+
+--- Throughput ---
+Avg FPS:      12
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 64 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    1.53 Gpix-step/s  (77.031 ms render)
+
+--- Analysis ---
+Avg frame time:  78.310 ms
+Avg GPU time:    77.031 ms
+GPU utilisation: 98.4%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 1.53 Gpix-step/s  (CV 0.34%)
+Throughput:   early vs late mean change (drop positive) 0.2%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212350-099 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck gpu_burn-256: nominal after 0s cooling.
+
+=== 11/31 gpu_burn-256: review ===
+=== Preview gpu_burn?steps=256&vsync=0&api=metal 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A16 GPU
+[Metal] Render target follows host layer: 1280x720
+[Metal] GPU Burn: fullscreen raymarch (2 draws/frame, steps=256)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 0.000 ms | Render: 303.135 ms | Total: 303.135 ms | FPS: 6 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 296.047 ms | Total: 296.047 ms | FPS: 3 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 296.004 ms | Total: 296.004 ms | FPS: 3 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 297.031 ms | Total: 297.031 ms | FPS: 3 | T: 3.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 315.515 ms | Total: 315.515 ms | FPS: 3 | T: 4.3 s
+[GPU Timing] Compute: 0.000 ms | Render: 335.270 ms | Total: 335.270 ms | FPS: 2 | T: 5.3 s
+[GPU Timing] Compute: 0.000 ms | Render: 344.887 ms | Total: 344.887 ms | FPS: 2 | T: 6.4 s
+[GPU Timing] Compute: 0.000 ms | Render: 371.496 ms | Total: 371.496 ms | FPS: 2 | T: 7.5 s
+[GPU Timing] Compute: 0.000 ms | Render: 387.479 ms | Total: 387.479 ms | FPS: 2 | T: 8.7 s
+[GPU Timing] Compute: 0.000 ms | Render: 398.507 ms | Total: 398.507 ms | FPS: 2 | T: 9.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 405.574 ms | Total: 405.574 ms | FPS: 2 | T: 11.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 396.840 ms | Total: 396.840 ms | FPS: 2 | T: 12.3 s
+[GPU Timing] Compute: 0.000 ms | Render: 393.663 ms | Total: 393.663 ms | FPS: 2 | T: 13.5 s
+[GPU Timing] Compute: 0.000 ms | Render: 391.693 ms | Total: 391.693 ms | FPS: 2 | T: 14.7 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A16 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.4 s (warmup: 2.0 s, measured: 36 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:        371.836   296.776   439.900
+Total GPU:     371.836   296.776   439.900
+
+--- Throughput ---
+Avg FPS:      2
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 256 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    1.27 Gpix-step/s  (371.836 ms render)
+
+--- Analysis ---
+Avg frame time:  373.219 ms
+Avg GPU time:    371.836 ms
+GPU utilisation: 99.6%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      11 x 1s
+Stable window: 1.19 Gpix-step/s  (CV 1.20%)
+Throughput:   early vs late mean change (drop positive) 16.7%  (>> review workload, timing and scheduling)
+>> Throughput declined; retain the full-run mean and curve. A stable window may be earlier in the run.
+==========================================================
+
+[Results] Saved as 20261016-212406-668 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck cinematic_liquid: nominal after 0s cooling.
+
+=== 12/31 cinematic_liquid: passed ===
+=== Preview cinematic_liquid?vsync=0&api=metal 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A16 GPU
+[Metal] Render target follows host layer: 1280x720
+[Metal] Cinematic Liquid v2 MLS-MPM preview host: 320920 particles, grid 128x64x96, 10 substeps/frame, 352-step raymarch present (metal_preview scores)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 150.562 ms | Render: 75.975 ms | Total: 227.445 ms | FPS: 6 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 156.401 ms | Render: 82.412 ms | Total: 239.653 ms | FPS: 4 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 163.237 ms | Render: 81.394 ms | Total: 245.386 ms | FPS: 4 | T: 1.7 s (warm-up)
+[GPU Timing] Compute: 171.833 ms | Render: 92.408 ms | Total: 265.167 ms | FPS: 3 | T: 2.2 s (warm-up)
+[GPU Timing] Compute: 203.386 ms | Render: 122.087 ms | Total: 327.931 ms | FPS: 3 | T: 3.9 s
+[GPU Timing] Compute: 241.771 ms | Render: 155.142 ms | Total: 449.609 ms | FPS: 1 | T: 5.1 s
+[GPU Timing] Compute: 201.933 ms | Render: 144.818 ms | Total: 386.742 ms | FPS: 1 | T: 6.0 s
+[GPU Timing] Compute: 199.888 ms | Render: 122.840 ms | Total: 361.453 ms | FPS: 2 | T: 7.5 s
+[GPU Timing] Compute: 177.984 ms | Render: 106.531 ms | Total: 304.473 ms | FPS: 2 | T: 8.5 s
+[GPU Timing] Compute: 191.440 ms | Render: 120.538 ms | Total: 327.308 ms | FPS: 2 | T: 9.5 s
+[GPU Timing] Compute: 191.918 ms | Render: 120.183 ms | Total: 337.190 ms | FPS: 2 | T: 10.7 s
+[GPU Timing] Compute: 206.100 ms | Render: 125.872 ms | Total: 358.646 ms | FPS: 2 | T: 11.8 s
+[GPU Timing] Compute: 229.492 ms | Render: 146.640 ms | Total: 383.046 ms | FPS: 2 | T: 13.0 s
+[GPU Timing] Compute: 245.961 ms | Render: 162.229 ms | Total: 409.115 ms | FPS: 2 | T: 14.3 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A16 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    320920 (Cinematic Liquid v2)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.3 s (warmup: 2.0 s, measured: 32 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:       214.508   172.859   255.051
+Render:        136.541   103.601   171.880
+Total GPU:     369.917   286.395   464.904
+
+--- Throughput ---
+Avg FPS:      2
+Liquid:       320920 particles, 128x64x96 grid, 10 substeps
+Surface:      R32F density volume, 352-step raymarch, particle Spiky^2 splat 128x64x96 + adaptive 5x5x5 filter, 4-interface optics, finite pool overflow + clear PVC environment, 7 coupled rigid bodies
+Fluid rate:   9.14 MParticle-step/s  (214.508 ms compute + 136.541 ms render)
+
+--- Analysis ---
+Avg frame time:  415.282 ms
+Avg GPU time:    369.917 ms
+GPU utilisation: 89.1%
+>> GPU-bound: GPU is the bottleneck.
+==========================================================
+
+[Results] Saved as 20261016-212424-771 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck memory_sweep: nominal after 0s cooling.
+
+=== 13/31 memory_sweep: passed ===
+=== Preview memory_sweep?api=metal 0.0s ===
+
+--- GPU memory hierarchy sweep ---
+Device: Apple A16 GPU
+Method: the shipped particle update body, run by a fixed grid of 262144 threads over a working set swept from 64 KiB to 256 MiB.
+Every point moves the same 0 GiB, so the only variable is where the data is served from.
+A plateau is one level of the hierarchy; the last one is memory.
+MEMSWEEP_META	device=Apple A16 GPU	grid_threads=262144	bytes_per_particle=48	repeats=5
+
+[device_local / read_modify_write]
+  working set     particles       GB/s   stream-equiv       ms
+       64 KiB        2048       153.1         127.6     1.725
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=2048	bytes=65536	gbps=153.143	stream_equiv_gbps=127.619	ms=1.725
+      128 KiB        4096       123.1         102.6     2.146
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=4096	bytes=131072	gbps=123.125	stream_equiv_gbps=102.604	ms=2.146
+      256 KiB        8192       116.3          96.9     2.271
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=8192	bytes=262144	gbps=116.335	stream_equiv_gbps=96.946	ms=2.271
+      512 KiB       16384       149.8         124.8     1.764
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=16384	bytes=524288	gbps=149.818	stream_equiv_gbps=124.848	ms=1.764
+        1 MiB       32768       132.4         110.3     1.996
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=32768	bytes=1048576	gbps=132.358	stream_equiv_gbps=110.298	ms=1.996
+        2 MiB       65536       211.2         176.0     1.251
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=65536	bytes=2097152	gbps=211.196	stream_equiv_gbps=175.997	ms=1.251
+        4 MiB      131072        73.9          61.6     3.575
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=131072	bytes=4194304	gbps=73.916	stream_equiv_gbps=61.597	ms=3.575
+        8 MiB      262144        90.5          75.4     2.919
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=262144	bytes=8388608	gbps=90.521	stream_equiv_gbps=75.434	ms=2.919
+       16 MiB      524288       139.0         115.8     1.901
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=524288	bytes=16777216	gbps=138.974	stream_equiv_gbps=115.811	ms=1.901
+       32 MiB     1048576       102.1          85.1     2.588
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=1048576	bytes=33554432	gbps=102.093	stream_equiv_gbps=85.077	ms=2.588
+       64 MiB     2097152        54.2          45.2     4.876
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=2097152	bytes=67108864	gbps=54.191	stream_equiv_gbps=45.159	ms=4.876
+      128 MiB     4194304        34.0          28.3     7.781
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=4194304	bytes=134217728	gbps=33.962	stream_equiv_gbps=28.301	ms=7.781
+      256 MiB     8388608        28.3          23.6     9.350
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=8388608	bytes=268435456	gbps=28.262	stream_equiv_gbps=23.552	ms=9.350
+
+[device_local / read_only]
+  working set     particles       GB/s   stream-equiv       ms
+       64 KiB        2048       303.0         378.8     0.886
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=2048	bytes=65536	gbps=303.032	stream_equiv_gbps=378.789	ms=0.886
+      128 KiB        4096       293.2         366.5     0.916
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=4096	bytes=131072	gbps=293.172	stream_equiv_gbps=366.465	ms=0.916
+      256 KiB        8192       286.1         357.7     0.938
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=8192	bytes=262144	gbps=286.140	stream_equiv_gbps=357.675	ms=0.938
+      512 KiB       16384       285.6         357.0     0.940
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=16384	bytes=524288	gbps=285.633	stream_equiv_gbps=357.041	ms=0.940
+        1 MiB       32768       284.1         355.2     0.945
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=32768	bytes=1048576	gbps=284.134	stream_equiv_gbps=355.167	ms=0.945
+        2 MiB       65536       285.3         356.6     0.941
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=65536	bytes=2097152	gbps=285.266	stream_equiv_gbps=356.583	ms=0.941
+        4 MiB      131072       282.7         353.4     0.949
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=131072	bytes=4194304	gbps=282.712	stream_equiv_gbps=353.391	ms=0.949
+        8 MiB      262144       284.0         355.0     0.945
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=262144	bytes=8388608	gbps=284.021	stream_equiv_gbps=355.026	ms=0.945
+       16 MiB      524288       263.8         329.8     1.017
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=524288	bytes=16777216	gbps=263.840	stream_equiv_gbps=329.800	ms=1.017
+       32 MiB     1048576       122.8         153.4     2.187
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=1048576	bytes=33554432	gbps=122.753	stream_equiv_gbps=153.441	ms=2.187
+       64 MiB     2097152       111.7         139.7     2.402
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=2097152	bytes=67108864	gbps=111.749	stream_equiv_gbps=139.686	ms=2.402
+      128 MiB     4194304        70.4          88.0     3.812
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=4194304	bytes=134217728	gbps=70.422	stream_equiv_gbps=88.027	ms=3.812
+      256 MiB     8388608        41.0          51.2     6.554
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=8388608	bytes=268435456	gbps=40.957	stream_equiv_gbps=51.196	ms=6.554
+
+[host_visible / read_modify_write]
+  working set     particles       GB/s   stream-equiv       ms
+       64 KiB        2048       221.1         184.2     1.195
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=2048	bytes=65536	gbps=221.099	stream_equiv_gbps=184.249	ms=1.195
+      128 KiB        4096       217.9         181.6     1.212
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=4096	bytes=131072	gbps=217.938	stream_equiv_gbps=181.615	ms=1.212
+      256 KiB        8192       211.5         176.2     1.250
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=8192	bytes=262144	gbps=211.478	stream_equiv_gbps=176.231	ms=1.250
+      512 KiB       16384       211.3         176.1     1.251
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=16384	bytes=524288	gbps=211.287	stream_equiv_gbps=176.073	ms=1.251
+        1 MiB       32768       214.4         178.7     1.232
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=32768	bytes=1048576	gbps=214.423	stream_equiv_gbps=178.686	ms=1.232
+        2 MiB       65536       214.7         178.9     1.231
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=65536	bytes=2097152	gbps=214.685	stream_equiv_gbps=178.904	ms=1.231
+        4 MiB      131072       213.3         177.8     1.239
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=131072	bytes=4194304	gbps=213.320	stream_equiv_gbps=177.767	ms=1.239
+        8 MiB      262144       210.2         175.1     1.257
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=262144	bytes=8388608	gbps=210.174	stream_equiv_gbps=175.145	ms=1.257
+       16 MiB      524288       206.4         172.0     1.281
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=524288	bytes=16777216	gbps=206.351	stream_equiv_gbps=171.959	ms=1.281
+       32 MiB     1048576       116.2          96.9     2.273
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=1048576	bytes=33554432	gbps=116.237	stream_equiv_gbps=96.864	ms=2.273
+       64 MiB     2097152        67.4          56.1     3.922
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=2097152	bytes=67108864	gbps=67.376	stream_equiv_gbps=56.147	ms=3.922
+      128 MiB     4194304        37.9          31.6     6.967
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=4194304	bytes=134217728	gbps=37.928	stream_equiv_gbps=31.607	ms=6.967
+      256 MiB     8388608        29.3          24.4     9.012
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=8388608	bytes=268435456	gbps=29.322	stream_equiv_gbps=24.435	ms=9.012
+
+[host_visible / read_only]
+  working set     particles       GB/s   stream-equiv       ms
+       64 KiB        2048       335.8         419.7     0.799
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=2048	bytes=65536	gbps=335.754	stream_equiv_gbps=419.693	ms=0.799
+      128 KiB        4096       326.0         407.5     0.824
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=4096	bytes=131072	gbps=325.969	stream_equiv_gbps=407.461	ms=0.824
+      256 KiB        8192       305.7         382.2     0.878
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=8192	bytes=262144	gbps=305.735	stream_equiv_gbps=382.169	ms=0.878
+      512 KiB       16384       318.7         398.4     0.842
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=16384	bytes=524288	gbps=318.728	stream_equiv_gbps=398.410	ms=0.842
+        1 MiB       32768       317.9         397.3     0.845
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=32768	bytes=1048576	gbps=317.863	stream_equiv_gbps=397.329	ms=0.845
+        2 MiB       65536       316.9         396.2     0.847
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=65536	bytes=2097152	gbps=316.925	stream_equiv_gbps=396.156	ms=0.847
+        4 MiB      131072       315.2         394.0     0.852
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=131072	bytes=4194304	gbps=315.219	stream_equiv_gbps=394.024	ms=0.852
+        8 MiB      262144       298.2         372.8     0.900
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=262144	bytes=8388608	gbps=298.220	stream_equiv_gbps=372.775	ms=0.900
+       16 MiB      524288       276.0         345.0     0.973
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=524288	bytes=16777216	gbps=275.991	stream_equiv_gbps=344.988	ms=0.973
+       32 MiB     1048576       126.2         157.8     2.127
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=1048576	bytes=33554432	gbps=126.219	stream_equiv_gbps=157.773	ms=2.127
+       64 MiB     2097152       100.8         126.0     2.664
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=2097152	bytes=67108864	gbps=100.764	stream_equiv_gbps=125.955	ms=2.664
+      128 MiB     4194304        69.4          86.8     3.866
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=4194304	bytes=134217728	gbps=69.427	stream_equiv_gbps=86.783	ms=3.866
+      256 MiB     8388608        43.5          54.4     6.170
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=8388608	bytes=268435456	gbps=43.503	stream_equiv_gbps=54.379	ms=6.170
+
+--- Detected tiers (device-local, read-modify-write) ---
+      128 KiB -     256 KiB   119.7 GB/s
+MEMSWEEP_TIER	from_bytes=131072	to_bytes=262144	gbps=119.730
+      512 KiB -       1 MiB   141.1 GB/s
+MEMSWEEP_TIER	from_bytes=524288	to_bytes=1048576	gbps=141.088
+
+Peak on-chip read: 211.2 GB/s at 2 MiB
+Device-local memory: 28.3 GB/s read-modify-write, 41.0 GB/s read-only
+Host-visible memory: 29.3 GB/s
+  The two storage modes match, which is what unified memory looks like: there is no separate VRAM here.
+MEMSWEEP_RESULT	peak_cache_gbps=211.196	peak_cache_bytes=2097152	device_local_gbps=28.262	read_only_gbps=40.957	host_visible_gbps=29.322	tiers=2
+
+Thermal precheck vulkan/stream-65536: nominal after 0s cooling.
+
+=== 14/31 vulkan/stream-65536: passed ===
+=== Preview stream?particles=65536&vsync=0&api=vulkan&coverage=fixed 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple A16 GPU (Integrated GPU)
+Selected GPU [0]: Apple A16 GPU  |  Driver: 0.2.2210
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 65536 particles
+[Profiling] Timestamp queries enabled (period = 1.000 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK particles require per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 1.293 ms | Render: 14.372 ms | Total: 15.665 ms | FPS: 62 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 1.159 ms | Render: 14.729 ms | Total: 15.888 ms | FPS: 58 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.964 ms | Render: 15.167 ms | Total: 16.132 ms | FPS: 63 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 1.251 ms | Render: 15.231 ms | Total: 16.482 ms | FPS: 59 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 0.999 ms | Render: 15.224 ms | Total: 16.223 ms | FPS: 59 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 1.567 ms | Render: 14.659 ms | Total: 16.226 ms | FPS: 60 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 1.916 ms | Render: 17.433 ms | Total: 19.349 ms | FPS: 46 | T: 2.9 s
+[GPU Timing] Compute: 1.450 ms | Render: 18.520 ms | Total: 19.970 ms | FPS: 49 | T: 3.9 s
+[GPU Timing] Compute: 1.529 ms | Render: 15.245 ms | Total: 16.774 ms | FPS: 56 | T: 4.9 s
+[GPU Timing] Compute: 1.485 ms | Render: 14.887 ms | Total: 16.372 ms | FPS: 59 | T: 5.9 s
+[GPU Timing] Compute: 1.080 ms | Render: 15.233 ms | Total: 16.312 ms | FPS: 59 | T: 6.9 s
+[GPU Timing] Compute: 1.068 ms | Render: 15.223 ms | Total: 16.291 ms | FPS: 59 | T: 7.9 s
+[GPU Timing] Compute: 1.027 ms | Render: 15.255 ms | Total: 16.282 ms | FPS: 59 | T: 8.9 s
+[GPU Timing] Compute: 1.072 ms | Render: 15.236 ms | Total: 16.308 ms | FPS: 59 | T: 9.9 s
+[GPU Timing] Compute: 1.125 ms | Render: 15.190 ms | Total: 16.315 ms | FPS: 59 | T: 10.9 s
+[GPU Timing] Compute: 1.160 ms | Render: 15.169 ms | Total: 16.329 ms | FPS: 59 | T: 11.9 s
+[GPU Timing] Compute: 1.060 ms | Render: 15.209 ms | Total: 16.269 ms | FPS: 59 | T: 12.9 s
+[GPU Timing] Compute: 1.096 ms | Render: 15.222 ms | Total: 16.318 ms | FPS: 59 | T: 13.9 s
+[GPU Timing] Compute: 1.147 ms | Render: 15.159 ms | Total: 16.306 ms | FPS: 59 | T: 14.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A16 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    65536 (Light)
+Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 753 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         1.235     0.418    12.001
+Render:         15.547     1.453    61.548
+Total GPU:      16.782     2.120    62.620
+
+--- Throughput ---
+Avg FPS:      57
+Particles:    65536
+Working set:  2.00 MiB
+VRAM rate:   2.12 GB/s  (1.235 ms compute)
+
+--- Analysis ---
+Avg frame time:  17.265 ms
+Avg GPU time:    16.782 ms
+GPU utilisation: 97.2%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: not detected; this run has not reached a stable plateau.
+Throughput:   early vs late mean change (drop positive) -29.2%
+==========================================================
+
+[Results] Saved as 20261016-212445-219 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck vulkan/stream_headless-65536: nominal after 0s cooling.
+
+=== 15/31 vulkan/stream_headless-65536: passed ===
+=== Preview stream_headless?particles=65536&vsync=0&api=vulkan 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+Available GPUs:
+  [0] Apple A16 GPU (Integrated GPU)
+Selected GPU [0]: Apple A16 GPU  |  Driver: 0.2.2210
+Created particle buffer (device-local via staging): 65536 particles
+[Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK particles require per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 0.644 ms | Render: 0.000 ms | Total: 0.644 ms | FPS: 1548 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.755 ms | Render: 0.000 ms | Total: 0.755 ms | FPS: 1318 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.671 ms | Render: 0.000 ms | Total: 0.671 ms | FPS: 1482 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 0.641 ms | Render: 0.000 ms | Total: 0.641 ms | FPS: 1553 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 0.623 ms | Render: 0.000 ms | Total: 0.623 ms | FPS: 1594 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 0.631 ms | Render: 0.000 ms | Total: 0.631 ms | FPS: 1576 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 0.669 ms | Render: 0.000 ms | Total: 0.669 ms | FPS: 1484 | T: 2.8 s
+[GPU Timing] Compute: 0.702 ms | Render: 0.000 ms | Total: 0.702 ms | FPS: 1414 | T: 3.8 s
+[GPU Timing] Compute: 0.690 ms | Render: 0.000 ms | Total: 0.690 ms | FPS: 1440 | T: 4.8 s
+[GPU Timing] Compute: 0.715 ms | Render: 0.000 ms | Total: 0.715 ms | FPS: 1390 | T: 5.8 s
+[GPU Timing] Compute: 0.728 ms | Render: 0.000 ms | Total: 0.728 ms | FPS: 1365 | T: 6.8 s
+[GPU Timing] Compute: 0.693 ms | Render: 0.000 ms | Total: 0.693 ms | FPS: 1434 | T: 7.8 s
+[GPU Timing] Compute: 0.675 ms | Render: 0.000 ms | Total: 0.675 ms | FPS: 1472 | T: 8.8 s
+[GPU Timing] Compute: 0.672 ms | Render: 0.000 ms | Total: 0.672 ms | FPS: 1480 | T: 9.8 s
+[GPU Timing] Compute: 0.697 ms | Render: 0.000 ms | Total: 0.697 ms | FPS: 1427 | T: 10.8 s
+[GPU Timing] Compute: 0.707 ms | Render: 0.000 ms | Total: 0.707 ms | FPS: 1407 | T: 11.8 s
+[GPU Timing] Compute: 0.724 ms | Render: 0.000 ms | Total: 0.724 ms | FPS: 1374 | T: 12.8 s
+[GPU Timing] Compute: 0.697 ms | Render: 0.000 ms | Total: 0.697 ms | FPS: 1425 | T: 13.8 s
+[GPU Timing] Compute: 0.687 ms | Render: 0.000 ms | Total: 0.687 ms | FPS: 1449 | T: 14.8 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A16 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    65536 (Light)
+Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 18562 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.696     0.299     3.168
+Render:          0.000     0.000     0.000
+Total GPU:       0.696     0.299     3.168
+
+--- Throughput ---
+Avg FPS:      1427
+Particles:    65536
+Working set:  2.00 MiB
+VRAM rate:   3.76 GB/s  (0.696 ms compute)
+
+--- Analysis ---
+Avg frame time:  0.700 ms
+Avg GPU time:    0.696 ms
+GPU utilisation: 99.4%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 3.73 GB/s  (CV 1.76%)
+Throughput:   early vs late mean change (drop positive) 0.2%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212501-194 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck vulkan/stream-1048576: nominal after 0s cooling.
+
+=== 16/31 vulkan/stream-1048576: review ===
+=== Preview stream?particles=1048576&vsync=0&api=vulkan&coverage=fixed 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple A16 GPU (Integrated GPU)
+Selected GPU [0]: Apple A16 GPU  |  Driver: 0.2.2210
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 1048576 particles
+[Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK particles require per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 4.754 ms | Render: 20.418 ms | Total: 25.172 ms | FPS: 42 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 2.618 ms | Render: 19.558 ms | Total: 22.177 ms | FPS: 44 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 2.686 ms | Render: 17.801 ms | Total: 20.487 ms | FPS: 47 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 2.658 ms | Render: 19.689 ms | Total: 22.347 ms | FPS: 44 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 2.764 ms | Render: 21.476 ms | Total: 24.240 ms | FPS: 40 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 2.540 ms | Render: 20.021 ms | Total: 22.561 ms | FPS: 43 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 2.709 ms | Render: 21.647 ms | Total: 24.355 ms | FPS: 40 | T: 2.9 s
+[GPU Timing] Compute: 2.801 ms | Render: 21.952 ms | Total: 24.753 ms | FPS: 39 | T: 3.9 s
+[GPU Timing] Compute: 2.809 ms | Render: 21.828 ms | Total: 24.637 ms | FPS: 39 | T: 4.9 s
+[GPU Timing] Compute: 2.756 ms | Render: 21.942 ms | Total: 24.698 ms | FPS: 39 | T: 5.9 s
+[GPU Timing] Compute: 2.885 ms | Render: 21.740 ms | Total: 24.625 ms | FPS: 39 | T: 6.9 s
+[GPU Timing] Compute: 2.701 ms | Render: 21.925 ms | Total: 24.626 ms | FPS: 39 | T: 7.9 s
+[GPU Timing] Compute: 2.705 ms | Render: 21.944 ms | Total: 24.649 ms | FPS: 39 | T: 8.9 s
+[GPU Timing] Compute: 2.961 ms | Render: 21.688 ms | Total: 24.650 ms | FPS: 39 | T: 9.9 s
+[GPU Timing] Compute: 2.920 ms | Render: 21.775 ms | Total: 24.695 ms | FPS: 39 | T: 10.9 s
+[GPU Timing] Compute: 2.949 ms | Render: 21.761 ms | Total: 24.710 ms | FPS: 39 | T: 11.9 s
+[GPU Timing] Compute: 2.508 ms | Render: 22.507 ms | Total: 25.016 ms | FPS: 39 | T: 13.0 s
+[GPU Timing] Compute: 2.578 ms | Render: 22.023 ms | Total: 24.600 ms | FPS: 39 | T: 14.0 s
+[GPU Timing] Compute: 2.499 ms | Render: 22.180 ms | Total: 24.679 ms | FPS: 39 | T: 15.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A16 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    1048576 (Medium)
+Buffer:       32.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 520 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         2.756     1.718     4.276
+Render:         21.934    16.718    29.698
+Total GPU:      24.691    19.178    31.677
+
+--- Throughput ---
+Avg FPS:      39
+Particles:    1048576
+Working set:  32.00 MiB
+VRAM rate:   15.22 GB/s  (2.756 ms compute)
+
+--- Analysis ---
+Avg frame time:  25.043 ms
+Avg GPU time:    24.691 ms
+GPU utilisation: 98.6%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: not detected; this run has not reached a stable plateau.
+Throughput:   early vs late mean change (drop positive) -4.3%
+==========================================================
+
+[Results] Saved as 20261016-212517-195 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck vulkan/stream_headless-1048576: nominal after 0s cooling.
+
+=== 17/31 vulkan/stream_headless-1048576: passed ===
+=== Preview stream_headless?particles=1048576&vsync=0&api=vulkan 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+Available GPUs:
+  [0] Apple A16 GPU (Integrated GPU)
+Selected GPU [0]: Apple A16 GPU  |  Driver: 0.2.2210
+Created particle buffer (device-local via staging): 1048576 particles
+[Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK particles require per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 3.667 ms | Render: 0.000 ms | Total: 3.667 ms | FPS: 276 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 2.709 ms | Render: 0.000 ms | Total: 2.709 ms | FPS: 365 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 2.335 ms | Render: 0.000 ms | Total: 2.335 ms | FPS: 427 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 2.350 ms | Render: 0.000 ms | Total: 2.350 ms | FPS: 424 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 2.401 ms | Render: 0.000 ms | Total: 2.401 ms | FPS: 414 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 2.535 ms | Render: 0.000 ms | Total: 2.535 ms | FPS: 393 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 2.486 ms | Render: 0.000 ms | Total: 2.486 ms | FPS: 400 | T: 2.8 s
+[GPU Timing] Compute: 2.493 ms | Render: 0.000 ms | Total: 2.493 ms | FPS: 399 | T: 3.8 s
+[GPU Timing] Compute: 2.391 ms | Render: 0.000 ms | Total: 2.391 ms | FPS: 416 | T: 4.8 s
+[GPU Timing] Compute: 2.447 ms | Render: 0.000 ms | Total: 2.447 ms | FPS: 407 | T: 5.8 s
+[GPU Timing] Compute: 2.451 ms | Render: 0.000 ms | Total: 2.451 ms | FPS: 406 | T: 6.8 s
+[GPU Timing] Compute: 2.464 ms | Render: 0.000 ms | Total: 2.464 ms | FPS: 404 | T: 7.8 s
+[GPU Timing] Compute: 2.439 ms | Render: 0.000 ms | Total: 2.439 ms | FPS: 408 | T: 8.8 s
+[GPU Timing] Compute: 2.466 ms | Render: 0.000 ms | Total: 2.466 ms | FPS: 404 | T: 9.8 s
+[GPU Timing] Compute: 2.433 ms | Render: 0.000 ms | Total: 2.433 ms | FPS: 409 | T: 10.8 s
+[GPU Timing] Compute: 2.449 ms | Render: 0.000 ms | Total: 2.449 ms | FPS: 406 | T: 11.8 s
+[GPU Timing] Compute: 2.476 ms | Render: 0.000 ms | Total: 2.476 ms | FPS: 402 | T: 12.8 s
+[GPU Timing] Compute: 2.476 ms | Render: 0.000 ms | Total: 2.476 ms | FPS: 402 | T: 13.8 s
+[GPU Timing] Compute: 2.439 ms | Render: 0.000 ms | Total: 2.439 ms | FPS: 408 | T: 14.8 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A16 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    1048576 (Medium)
+Buffer:       32.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 5284 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         2.453     1.924     7.139
+Render:          0.000     0.000     0.000
+Total GPU:       2.453     1.924     7.139
+
+--- Throughput ---
+Avg FPS:      406
+Particles:    1048576
+Working set:  32.00 MiB
+VRAM rate:   17.10 GB/s  (2.453 ms compute)
+
+--- Analysis ---
+Avg frame time:  2.461 ms
+Avg GPU time:    2.453 ms
+GPU utilisation: 99.7%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 17.09 GB/s  (CV 0.73%)
+Throughput:   early vs late mean change (drop positive) 0.0%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212533-203 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck vulkan/stream-4194304: nominal after 0s cooling.
+
+=== 18/31 vulkan/stream-4194304: passed ===
+=== Preview stream?particles=4194304&vsync=0&api=vulkan&coverage=fixed 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple A16 GPU (Integrated GPU)
+Selected GPU [0]: Apple A16 GPU  |  Driver: 0.2.2210
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 4194304 particles
+[Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK particles require per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 14.086 ms | Render: 83.053 ms | Total: 97.139 ms | FPS: 13 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 7.840 ms | Render: 74.010 ms | Total: 81.850 ms | FPS: 12 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 8.368 ms | Render: 72.829 ms | Total: 81.197 ms | FPS: 12 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 7.804 ms | Render: 72.564 ms | Total: 80.368 ms | FPS: 12 | T: 1.4 s (warm-up)
+[GPU Timing] Compute: 7.165 ms | Render: 72.808 ms | Total: 79.973 ms | FPS: 12 | T: 1.7 s (warm-up)
+[GPU Timing] Compute: 7.850 ms | Render: 72.744 ms | Total: 80.594 ms | FPS: 12 | T: 2.0 s (warm-up)
+[GPU Timing] Compute: 7.377 ms | Render: 73.149 ms | Total: 80.526 ms | FPS: 12 | T: 3.1 s
+[GPU Timing] Compute: 7.509 ms | Render: 75.045 ms | Total: 82.554 ms | FPS: 12 | T: 4.1 s
+[GPU Timing] Compute: 7.241 ms | Render: 74.263 ms | Total: 81.504 ms | FPS: 12 | T: 5.2 s
+[GPU Timing] Compute: 7.150 ms | Render: 75.435 ms | Total: 82.585 ms | FPS: 12 | T: 6.3 s
+[GPU Timing] Compute: 7.501 ms | Render: 75.868 ms | Total: 83.369 ms | FPS: 11 | T: 7.3 s
+[GPU Timing] Compute: 7.316 ms | Render: 75.524 ms | Total: 82.841 ms | FPS: 11 | T: 8.3 s
+[GPU Timing] Compute: 7.518 ms | Render: 73.711 ms | Total: 81.229 ms | FPS: 12 | T: 9.3 s
+[GPU Timing] Compute: 7.128 ms | Render: 70.932 ms | Total: 78.060 ms | FPS: 12 | T: 10.4 s
+[GPU Timing] Compute: 7.255 ms | Render: 70.612 ms | Total: 77.868 ms | FPS: 12 | T: 11.4 s
+[GPU Timing] Compute: 7.449 ms | Render: 71.599 ms | Total: 79.048 ms | FPS: 12 | T: 12.4 s
+[GPU Timing] Compute: 7.550 ms | Render: 72.614 ms | Total: 80.164 ms | FPS: 12 | T: 13.5 s
+[GPU Timing] Compute: 7.245 ms | Render: 73.814 ms | Total: 81.059 ms | FPS: 12 | T: 14.5 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A16 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    4194304 (Heavy)
+Buffer:       128.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.1 s (warmup: 2.0 s, measured: 161 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         7.348     6.767     9.072
+Render:         73.508    69.311    78.082
+Total GPU:      80.856    76.118    86.644
+
+--- Throughput ---
+Avg FPS:      12
+Particles:    4194304
+Working set:  128.00 MiB
+VRAM rate:   22.83 GB/s  (7.348 ms compute)
+
+--- Analysis ---
+Avg frame time:  81.223 ms
+Avg GPU time:    80.856 ms
+GPU utilisation: 99.5%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 22.89 GB/s  (CV 1.89%)
+Throughput:   early vs late mean change (drop positive) -0.4%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212549-272 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck vulkan/stream_headless-4194304: nominal after 0s cooling.
+
+=== 19/31 vulkan/stream_headless-4194304: passed ===
+=== Preview stream_headless?particles=4194304&vsync=0&api=vulkan 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+Available GPUs:
+  [0] Apple A16 GPU (Integrated GPU)
+Selected GPU [0]: Apple A16 GPU  |  Driver: 0.2.2210
+Created particle buffer (device-local via staging): 4194304 particles
+[Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK particles require per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 12.419 ms | Render: 0.000 ms | Total: 12.419 ms | FPS: 82 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 7.350 ms | Render: 0.000 ms | Total: 7.350 ms | FPS: 135 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 6.971 ms | Render: 0.000 ms | Total: 6.971 ms | FPS: 143 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 7.069 ms | Render: 0.000 ms | Total: 7.069 ms | FPS: 141 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 7.020 ms | Render: 0.000 ms | Total: 7.020 ms | FPS: 141 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 6.915 ms | Render: 0.000 ms | Total: 6.915 ms | FPS: 144 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 6.893 ms | Render: 0.000 ms | Total: 6.893 ms | FPS: 144 | T: 2.8 s
+[GPU Timing] Compute: 7.199 ms | Render: 0.000 ms | Total: 7.199 ms | FPS: 138 | T: 3.8 s
+[GPU Timing] Compute: 7.020 ms | Render: 0.000 ms | Total: 7.020 ms | FPS: 142 | T: 4.8 s
+[GPU Timing] Compute: 7.174 ms | Render: 0.000 ms | Total: 7.174 ms | FPS: 139 | T: 5.8 s
+[GPU Timing] Compute: 7.007 ms | Render: 0.000 ms | Total: 7.007 ms | FPS: 142 | T: 6.8 s
+[GPU Timing] Compute: 6.976 ms | Render: 0.000 ms | Total: 6.976 ms | FPS: 143 | T: 7.8 s
+[GPU Timing] Compute: 6.909 ms | Render: 0.000 ms | Total: 6.909 ms | FPS: 144 | T: 8.9 s
+[GPU Timing] Compute: 7.036 ms | Render: 0.000 ms | Total: 7.036 ms | FPS: 141 | T: 9.9 s
+[GPU Timing] Compute: 7.040 ms | Render: 0.000 ms | Total: 7.040 ms | FPS: 141 | T: 10.9 s
+[GPU Timing] Compute: 7.006 ms | Render: 0.000 ms | Total: 7.006 ms | FPS: 142 | T: 11.9 s
+[GPU Timing] Compute: 6.952 ms | Render: 0.000 ms | Total: 6.952 ms | FPS: 143 | T: 12.9 s
+[GPU Timing] Compute: 7.054 ms | Render: 0.000 ms | Total: 7.054 ms | FPS: 141 | T: 13.9 s
+[GPU Timing] Compute: 6.879 ms | Render: 0.000 ms | Total: 6.879 ms | FPS: 145 | T: 14.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A16 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    4194304 (Heavy)
+Buffer:       128.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 1852 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         7.012     6.359     9.133
+Render:          0.000     0.000     0.000
+Total GPU:       7.012     6.359     9.133
+
+--- Throughput ---
+Avg FPS:      142
+Particles:    4194304
+Working set:  128.00 MiB
+VRAM rate:   23.93 GB/s  (7.012 ms compute)
+
+--- Analysis ---
+Avg frame time:  7.022 ms
+Avg GPU time:    7.012 ms
+GPU utilisation: 99.9%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 24.02 GB/s  (CV 0.92%)
+Throughput:   early vs late mean change (drop positive) -1.0%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212605-300 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck vulkan/stream-16777216: nominal after 0s cooling.
+
+=== 20/31 vulkan/stream-16777216: passed ===
+=== Preview stream?particles=16777216&vsync=0&api=vulkan&coverage=fixed 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple A16 GPU (Integrated GPU)
+Selected GPU [0]: Apple A16 GPU  |  Driver: 0.2.2210
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 16777216 particles
+[Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK particles require per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 28.016 ms | Render: 272.363 ms | Total: 300.379 ms | FPS: 5 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 26.747 ms | Render: 283.340 ms | Total: 310.086 ms | FPS: 3 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 27.230 ms | Render: 293.129 ms | Total: 320.359 ms | FPS: 3 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 27.375 ms | Render: 289.974 ms | Total: 317.349 ms | FPS: 3 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 27.280 ms | Render: 285.364 ms | Total: 312.644 ms | FPS: 3 | T: 2.2 s (warm-up)
+[GPU Timing] Compute: 26.703 ms | Render: 289.691 ms | Total: 316.394 ms | FPS: 3 | T: 3.4 s
+[GPU Timing] Compute: 26.839 ms | Render: 294.813 ms | Total: 321.652 ms | FPS: 3 | T: 4.7 s
+[GPU Timing] Compute: 26.982 ms | Render: 296.235 ms | Total: 323.217 ms | FPS: 3 | T: 6.0 s
+[GPU Timing] Compute: 26.922 ms | Render: 297.247 ms | Total: 324.169 ms | FPS: 3 | T: 7.3 s
+[GPU Timing] Compute: 27.265 ms | Render: 298.199 ms | Total: 325.464 ms | FPS: 3 | T: 8.6 s
+[GPU Timing] Compute: 27.156 ms | Render: 292.182 ms | Total: 319.338 ms | FPS: 3 | T: 9.9 s
+[GPU Timing] Compute: 26.573 ms | Render: 283.630 ms | Total: 310.203 ms | FPS: 3 | T: 11.1 s
+[GPU Timing] Compute: 26.736 ms | Render: 279.307 ms | Total: 306.043 ms | FPS: 3 | T: 12.4 s
+[GPU Timing] Compute: 26.496 ms | Render: 284.721 ms | Total: 311.217 ms | FPS: 3 | T: 13.6 s
+[GPU Timing] Compute: 27.300 ms | Render: 291.915 ms | Total: 319.216 ms | FPS: 3 | T: 14.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A16 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    16777216 (Extreme)
+Buffer:       512.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.4 s (warmup: 2.0 s, measured: 42 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        26.911    26.012    28.418
+Render:        290.953   276.772   299.772
+Total GPU:     317.864   303.235   327.854
+
+--- Throughput ---
+Avg FPS:      3
+Particles:    16777216
+Working set:  512.00 MiB
+VRAM rate:   24.94 GB/s  (26.911 ms compute)
+
+--- Analysis ---
+Avg frame time:  318.178 ms
+Avg GPU time:    317.864 ms
+GPU utilisation: 99.9%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      10 x 1s
+Stable window: 25.00 GB/s  (CV 1.19%)
+Throughput:   early vs late mean change (drop positive) -0.3%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212622-347 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck vulkan/stream_headless-16777216: nominal after 0s cooling.
+
+=== 21/31 vulkan/stream_headless-16777216: passed ===
+=== Preview stream_headless?particles=16777216&vsync=0&api=vulkan 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+Available GPUs:
+  [0] Apple A16 GPU (Integrated GPU)
+Selected GPU [0]: Apple A16 GPU  |  Driver: 0.2.2210
+Created particle buffer (device-local via staging): 16777216 particles
+[Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK particles require per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 26.559 ms | Render: 0.000 ms | Total: 26.559 ms | FPS: 40 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 25.925 ms | Render: 0.000 ms | Total: 25.925 ms | FPS: 38 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 25.639 ms | Render: 0.000 ms | Total: 25.639 ms | FPS: 38 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 25.279 ms | Render: 0.000 ms | Total: 25.279 ms | FPS: 39 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 25.553 ms | Render: 0.000 ms | Total: 25.553 ms | FPS: 39 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 25.309 ms | Render: 0.000 ms | Total: 25.309 ms | FPS: 39 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 25.257 ms | Render: 0.000 ms | Total: 25.257 ms | FPS: 39 | T: 2.9 s
+[GPU Timing] Compute: 25.556 ms | Render: 0.000 ms | Total: 25.556 ms | FPS: 39 | T: 3.9 s
+[GPU Timing] Compute: 25.125 ms | Render: 0.000 ms | Total: 25.125 ms | FPS: 39 | T: 4.9 s
+[GPU Timing] Compute: 25.628 ms | Render: 0.000 ms | Total: 25.628 ms | FPS: 39 | T: 5.9 s
+[GPU Timing] Compute: 25.306 ms | Render: 0.000 ms | Total: 25.306 ms | FPS: 39 | T: 7.0 s
+[GPU Timing] Compute: 25.335 ms | Render: 0.000 ms | Total: 25.335 ms | FPS: 39 | T: 8.0 s
+[GPU Timing] Compute: 25.602 ms | Render: 0.000 ms | Total: 25.602 ms | FPS: 39 | T: 9.0 s
+[GPU Timing] Compute: 25.677 ms | Render: 0.000 ms | Total: 25.677 ms | FPS: 38 | T: 10.0 s
+[GPU Timing] Compute: 25.370 ms | Render: 0.000 ms | Total: 25.370 ms | FPS: 39 | T: 11.0 s
+[GPU Timing] Compute: 25.136 ms | Render: 0.000 ms | Total: 25.136 ms | FPS: 39 | T: 12.0 s
+[GPU Timing] Compute: 25.363 ms | Render: 0.000 ms | Total: 25.363 ms | FPS: 39 | T: 13.0 s
+[GPU Timing] Compute: 25.441 ms | Render: 0.000 ms | Total: 25.441 ms | FPS: 39 | T: 14.1 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A16 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    16777216 (Extreme)
+Buffer:       512.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 513 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        25.389    24.153    28.670
+Render:          0.000     0.000     0.000
+Total GPU:      25.389    24.153    28.670
+
+--- Throughput ---
+Avg FPS:      39
+Particles:    16777216
+Working set:  512.00 MiB
+VRAM rate:   26.43 GB/s  (25.389 ms compute)
+
+--- Analysis ---
+Avg frame time:  25.401 ms
+Avg GPU time:    25.389 ms
+GPU utilisation: 100.0%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 26.42 GB/s  (CV 0.68%)
+Throughput:   early vs late mean change (drop positive) 0.1%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-212638-688 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck vulkan/gpu_burn-16: nominal after 0s cooling.
+
+=== 22/31 vulkan/gpu_burn-16: review ===
+=== Preview gpu_burn?steps=16&vsync=0&api=vulkan 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple A16 GPU (Integrated GPU)
+Selected GPU [0]: Apple A16 GPU  |  Driver: 0.2.2210
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 256 particles
+[Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK GPU Burn requires per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 0.000 ms | Render: 40.550 ms | Total: 40.550 ms | FPS: 27 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 36.418 ms | Total: 36.418 ms | FPS: 27 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 37.110 ms | Total: 37.110 ms | FPS: 26 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 38.770 ms | Total: 38.770 ms | FPS: 26 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 37.746 ms | Total: 37.746 ms | FPS: 25 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 35.276 ms | Total: 35.276 ms | FPS: 27 | T: 2.0 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 35.503 ms | Total: 35.503 ms | FPS: 28 | T: 3.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 35.383 ms | Total: 35.383 ms | FPS: 28 | T: 4.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 35.663 ms | Total: 35.663 ms | FPS: 27 | T: 5.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 35.054 ms | Total: 35.054 ms | FPS: 28 | T: 6.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 35.218 ms | Total: 35.218 ms | FPS: 28 | T: 7.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 35.162 ms | Total: 35.162 ms | FPS: 28 | T: 8.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 38.918 ms | Total: 38.918 ms | FPS: 25 | T: 9.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 39.804 ms | Total: 39.804 ms | FPS: 25 | T: 10.2 s
+[GPU Timing] Compute: 0.000 ms | Render: 42.194 ms | Total: 42.194 ms | FPS: 23 | T: 11.2 s
+[GPU Timing] Compute: 0.000 ms | Render: 44.439 ms | Total: 44.439 ms | FPS: 22 | T: 12.2 s
+[GPU Timing] Compute: 0.000 ms | Render: 45.610 ms | Total: 45.610 ms | FPS: 21 | T: 13.2 s
+[GPU Timing] Compute: 0.000 ms | Render: 47.252 ms | Total: 47.252 ms | FPS: 21 | T: 14.3 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A16 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.1 s (warmup: 2.0 s, measured: 333 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:         39.038    33.216    60.932
+Total GPU:      39.038    33.216    60.932
+
+--- Throughput ---
+Avg FPS:      25
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 16 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    0.76 Gpix-step/s  (39.038 ms render)
+
+--- Analysis ---
+Avg frame time:  39.226 ms
+Avg GPU time:    39.038 ms
+GPU utilisation: 99.5%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 0.84 Gpix-step/s  (CV 0.60%)
+Throughput:   early vs late mean change (drop positive) 19.1%  (>> review workload, timing and scheduling)
+>> Throughput declined; retain the full-run mean and curve. A stable window may be earlier in the run.
+==========================================================
+
+[Results] Saved as 20261016-212654-894 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json
+
+Thermal precheck vulkan/gpu_burn-64: nominal after 0s cooling.
+
+=== 23/31 vulkan/gpu_burn-64: cancelled ===
+=== Preview gpu_burn?steps=64&vsync=0&api=vulkan 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple A16 GPU (Integrated GPU)
+Selected GPU [0]: Apple A16 GPU  |  Driver: 0.2.2210
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 256 particles
+[Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK GPU Burn requires per-frame completion timing); using synchronized wall-clock timing.
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A16 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     649.8 s (warmup: 2.0 s, measured: 0 frames)
+
+--- Throughput ---
+Avg FPS:      0
+
+(No timestamp data available for analysis.)
+==========================================================
+
+[Results] Saved as 20261016-212655-580 -> /var/mobile/Containers/Data/Application/3F988BFE-E30E-4CC5-B5F8-2DFBD00D0FE2/Documents/results/results.json

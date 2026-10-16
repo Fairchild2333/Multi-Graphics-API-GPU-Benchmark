@@ -1,0 +1,14 @@
+[  0%] Building CXX object CMakeFiles/result_quality_test.dir/tests/result_quality_test.cpp.o
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/tests/result_quality_test.cpp:1:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/result_quality.h:2:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/benchmark_results.h:3:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+  204 | #  warning "The selected platform is no longer supported by libc++."
+      |    ^
+1 warning generated.
+[100%] Linking CXX executable result_quality_test
+[100%] Built target result_quality_test
+[100%] Built target complete_suite_test
+[100%] Built target results_compat_test

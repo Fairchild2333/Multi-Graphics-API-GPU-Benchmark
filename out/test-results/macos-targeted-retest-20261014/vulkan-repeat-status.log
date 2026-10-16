@@ -1,0 +1,42 @@
+{
+  "job": "vulkan-stream1m-render-repeat",
+  "command": [
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+    "--gui-worker",
+    "--gpu",
+    "0",
+    "--time",
+    "15",
+    "--no-renderdoc",
+    "--backend",
+    "vulkan",
+    "--allow-translated-api",
+    "--workload",
+    "stream",
+    "--particles",
+    "1048576"
+  ],
+  "thermalBefore": {
+    "activeProcessorCount": 14,
+    "lowPowerMode": false,
+    "thermalState": 0,
+    "thermalStateName": "nominal",
+    "timestamp": "2026-10-14T03:31:54Z"
+  },
+  "repeatOf": "20261014-143028-422",
+  "restPolicy": "at least60s since first Vulkan run",
+  "returnCode": 0,
+  "thermalAfter": {
+    "activeProcessorCount": 14,
+    "lowPowerMode": false,
+    "thermalState": 0,
+    "thermalStateName": "nominal",
+    "timestamp": "2026-10-14T03:32:09Z"
+  },
+  "resultID": "20261014-143209-593",
+  "score": 169.092,
+  "unit": "GB/s",
+  "reviewReasons": [
+    "throughput fell by more than 5 percent"
+  ]
+}

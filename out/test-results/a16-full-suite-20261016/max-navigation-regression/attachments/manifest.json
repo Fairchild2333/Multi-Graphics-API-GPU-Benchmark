@@ -1,0 +1,17 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "A7474361-2948-4E66-AB00-ADA87A403527",
+        "deviceName" : "iPhone 18 Pro Max",
+        "exportedFileName" : "F21B0E24-231A-4079-A5AE-8647323D3A97.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Complete suite survives phone landscape transition_0_EFE2975D-695A-41CE-BDC0-8B422785C3FD.png",
+        "timestamp" : 1792146241.15
+      }
+    ],
+    "testIdentifier" : "CompleteSuiteUITests/testCompleteSuiteSurvivesLandscapeTransition()",
+    "testIdentifierURL" : "test://com.apple.xcode/Mangekyo/MangekyoUITests/CompleteSuiteUITests/testCompleteSuiteSurvivesLandscapeTransition"
+  }
+]

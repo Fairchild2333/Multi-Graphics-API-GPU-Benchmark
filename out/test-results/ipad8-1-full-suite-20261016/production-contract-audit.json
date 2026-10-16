@@ -1,0 +1,796 @@
+{
+  "completeSupportedMatrix" : true,
+  "historyRecords" : 36,
+  "jobs" : [
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "stream-65536",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-191715-506"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        13.255000000000001
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "stream_headless-65536",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-191731-483"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        36.786999999999999
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "尚未达到稳定平台",
+      "gpuCachePoints" : 0,
+      "job" : "stream-1048576",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "review",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-191747-576"
+      ],
+      "reviewReasons" : [
+        [
+          "Stable throughput was not reached"
+        ]
+      ],
+      "scores" : [
+        19.061
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "review",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "stream_headless-1048576",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-191803-475"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        29.126000000000001
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "尚未达到稳定平台; 运行中吞吐下降超过 5%",
+      "gpuCachePoints" : 0,
+      "job" : "stream-4194304",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "review",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-191820-261"
+      ],
+      "reviewReasons" : [
+        [
+          "Throughput fell by more than 5%",
+          "Stable throughput was not reached"
+        ]
+      ],
+      "scores" : [
+        25.943000000000001
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "review",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "stream_headless-4194304",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-191836-084"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        29.190000000000001
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "尚未达到稳定平台",
+      "gpuCachePoints" : 0,
+      "job" : "stream-16777216",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "review",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-191854-269"
+      ],
+      "reviewReasons" : [
+        [
+          "Stable throughput was not reached"
+        ]
+      ],
+      "scores" : [
+        26.914999999999999
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "review",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "stream_headless-16777216",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-191910-680"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        20.085999999999999
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "gpu_burn-16",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-191926-855"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        1.1759999999999999
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "gpu_burn-64",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-191942-864"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        1.409
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "gpu_burn-256",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-191959-297"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        1.504
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "cinematic_liquid",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-192017-608"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        6.0599999999999996
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "memory_sweep",
+      "metalMemoryPoints" : 52,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-192020-490-metal-memsweep"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        49.820999999999998
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "vulkan\/stream-65536",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-192037-301"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        2.1349999999999998
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 1,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "vulkan\/stream_headless-65536",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-192226-325"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        5.4749999999999996
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "尚未达到稳定平台",
+      "gpuCachePoints" : 0,
+      "job" : "vulkan\/stream-1048576",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "review",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-192242-958"
+      ],
+      "reviewReasons" : [
+        [
+          "Stable throughput was not reached"
+        ]
+      ],
+      "scores" : [
+        32.031999999999996
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "review",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "vulkan\/stream_headless-1048576",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "review",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-193924-796"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        18.481000000000002
+      ],
+      "sourceManifestID" : "complete-suite-386BCA95-36DA-40BC-BE98-479C64BE6361",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "尚未达到稳定平台",
+      "gpuCachePoints" : 0,
+      "job" : "vulkan\/stream-4194304",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "review",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-192317-964"
+      ],
+      "reviewReasons" : [
+        [
+          "Stable throughput was not reached"
+        ]
+      ],
+      "scores" : [
+        25.132999999999999
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "review",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "vulkan\/stream_headless-4194304",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "review",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-193940-826"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        26.641999999999999
+      ],
+      "sourceManifestID" : "complete-suite-386BCA95-36DA-40BC-BE98-479C64BE6361",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "尚未达到稳定平台",
+      "gpuCachePoints" : 0,
+      "job" : "vulkan\/stream-16777216",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "review",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-192401-552"
+      ],
+      "reviewReasons" : [
+        [
+          "Stable throughput was not reached"
+        ]
+      ],
+      "scores" : [
+        25.661999999999999
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "review",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "vulkan\/stream_headless-16777216",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-193957-335"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        28.754000000000001
+      ],
+      "sourceManifestID" : "complete-suite-386BCA95-36DA-40BC-BE98-479C64BE6361",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "vulkan\/gpu_burn-16",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-192435-030"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        0.54900000000000004
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "vulkan\/gpu_burn-64",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-192451-160"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        0.752
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "vulkan\/gpu_burn-256",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-192507-871"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        0.83399999999999996
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 1,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "vulkan\/memory_sweep",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-192800-011-membw"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        58.051000000000002
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 77
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 124,
+      "job" : "gpu_cache-v3-parallel512",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-192858-788-metal-cache"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        379.416
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "全核线程的驻留或占用未全部验证",
+      "gpuCachePoints" : 0,
+      "job" : "cpu_compute",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "review",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-192945-416-cpu-single-performance",
+        "20261016-192945-425-cpu-single-efficiency",
+        "20261016-192945-429-cpu-multi"
+      ],
+      "reviewReasons" : [
+        [
+
+        ],
+        [
+
+        ],
+        [
+          "All-core thread placement or occupancy was not fully verified"
+        ]
+      ],
+      "scores" : [
+        110.384,
+        60.661000000000001,
+        655.50900000000001
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "review",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 267,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "cpu_memory",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-193221-142-cpu-membw"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        51.789999999999999
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 1,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "gles2\/gpu_burn-16",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-193520-452"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        3.5430000000000001
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "gles2\/gpu_burn-64",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-193536-651"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        10.367000000000001
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "cpuCurvePoints" : 0,
+      "error" : "",
+      "gpuCachePoints" : 0,
+      "job" : "gles2\/gpu_burn-256",
+      "metalMemoryPoints" : 0,
+      "originalUIStatus" : "passed",
+      "productionContractPassed" : true,
+      "resultIDs" : [
+        "20261016-193552-679"
+      ],
+      "reviewReasons" : [
+        [
+
+        ]
+      ],
+      "scores" : [
+        15.342000000000001
+      ],
+      "sourceManifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+      "status" : "passed",
+      "thermalEnd" : 0,
+      "thermalStart" : 0,
+      "vulkanMemoryPoints" : 0
+    }
+  ],
+  "manifestID" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+  "manifestStatus" : "review",
+  "productionContractsPassed" : true,
+  "selection" : "Original UI suite plus actual targeted headless retests; not a second full-button run"
+}

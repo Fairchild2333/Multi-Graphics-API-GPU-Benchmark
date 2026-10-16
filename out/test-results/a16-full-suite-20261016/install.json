@@ -1,0 +1,37 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "install",
+      "app",
+      "--device",
+      "00008120-000E2D3E0CEBC01E",
+      "build-ios/DerivedData-a16-full/Build/Products/Release-iphoneos/Mangekyo.app",
+      "--json-output",
+      "out/test-results/a16-full-suite-20261016/install.json"
+    ],
+    "commandType" : "devicectl.device.install.app",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "256C41DC-AC03-5FF9-9D3F-8FDFFC83CDBE",
+    "installedApplications" : [
+      {
+        "bundleID" : "com.fairchild.Mangekyo",
+        "databaseSequenceNumber" : 2096,
+        "databaseUUID" : "4978D0AA-931B-4AD6-9C45-B2DB1C125FCB",
+        "installationURL" : "file:///private/var/containers/Bundle/Application/960E0A5B-C36B-4AF7-8FFB-DF7EC4A7AF0B/Mangekyo.app/",
+        "launchServicesIdentifier" : "unknown",
+        "options" : {
+
+        }
+      }
+    ]
+  }
+}

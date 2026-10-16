@@ -1,0 +1,50 @@
+[
+  {
+    "finishedAt": "2026-10-14T10:44:59Z",
+    "id": "complete-suite-14361E9C-587F-4553-BCDB-91B79A851020",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 3,
+        "finishedAt": "2026-10-14T10:44:59Z",
+        "id": "cpu_compute",
+        "request": "gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2",
+        "resultIDs": [
+          "20261014-214458-868-cpu-single-performance",
+          "20261014-214458-904-cpu-single-efficiency",
+          "20261014-214458-918-cpu-multi"
+        ],
+        "startedAt": "2026-10-14T10:44:13Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "CPU Compute \u00b7 Performance + Efficiency + All Cores"
+      }
+    ],
+    "startedAt": "2026-10-14T10:44:13Z",
+    "status": "passed"
+  },
+  {
+    "finishedAt": "2026-10-14T10:48:20Z",
+    "id": "complete-suite-075999BA-DA88-41D8-81C4-3D9183EEF9FB",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:48:19Z",
+        "id": "cpu_memory",
+        "request": "gpu_benchmark --cpu-membw",
+        "resultIDs": [
+          "20261014-214819-212-cpu-membw"
+        ],
+        "startedAt": "2026-10-14T10:45:25Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "CPU Cache, Memory, Virtual Memory & Storage"
+      }
+    ],
+    "startedAt": "2026-10-14T10:45:25Z",
+    "status": "passed"
+  }
+]

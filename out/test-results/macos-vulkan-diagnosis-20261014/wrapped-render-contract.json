@@ -1,0 +1,14 @@
+{
+  "classification": "diagnostic_shader_variant_not_standard_score",
+  "renderChange": "wrap projected XY positions into [-1,1) to retain screen coverage",
+  "originalVertexShader": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/shaders/particle.vert",
+  "modifiedVertexShader": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-vulkan-diagnosis-20261014/wrapped-render-shaders/particle.vert",
+  "shaderCompilation": "glslc --target-env=vulkan1.0 succeeded; runtime shader creation validates usage",
+  "computeShader": "unchanged copied SPIR-V from packaged app",
+  "particles": 1048576,
+  "flights": 2,
+  "runSeconds": 15,
+  "viewport": "1280x720",
+  "results": "wrapped-render-data/results/results.json",
+  "worker": "same Mach-O copied beside isolated diagnostic SPIR-V"
+}

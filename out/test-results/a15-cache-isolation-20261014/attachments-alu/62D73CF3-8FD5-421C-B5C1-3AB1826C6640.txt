@@ -1,0 +1,972 @@
+thermal_start=0 thermal_end=0
+GCACHE_META	device=Apple A15 GPU	method=random_dependent_uint32_cycle	stride_bytes=128	steps=65536	repeats=7	parallel_lanes=4096	eviction_bytes=268435456	parallel_steps=8192	counter_sets=timestamp	counter_inventory=timestamp/GPUTimestamp	attribution_evidence=timing_and_checksum_only	cache_attribution=unverified	eviction_verified=0
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=131072	repeat=0	steps=1024	first_ns=179.565404	revisit_ns=178.141249	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=131072	repeat=0	steps=1024	first_ns=183.75647	revisit_ns=145.874083	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=131072	repeat=0	steps=1024	first_ns=176.879894	revisit_ns=145.751983	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=131072	repeat=0	steps=1024	first_ns=232.706725	revisit_ns=167.805979	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=131072	repeat=0	steps=1024	first_ns=233.886681	revisit_ns=167.968665	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=131072	repeat=0	steps=1024	first_ns=233.27641	revisit_ns=239.379915	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=131072	repeat=0	steps=1024	first_ns=241.78064	revisit_ns=193.400069	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=131072	repeat=0	steps=1024	first_ns=312.825478	revisit_ns=193.440769	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=131072	repeat=0	steps=1024	first_ns=261.637297	revisit_ns=187.174464	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=131072	repeat=0	steps=1024	first_ns=327.067028	revisit_ns=190.063474	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=131072	repeat=0	steps=1024	first_ns=356.689497	revisit_ns=187.784849	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=131072	repeat=1	steps=1024	first_ns=192.749098	revisit_ns=190.185574	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=131072	repeat=1	steps=1024	first_ns=253.25528	revisit_ns=179.687504	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=131072	repeat=1	steps=1024	first_ns=291.626066	revisit_ns=177.97845	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=131072	repeat=1	steps=1024	first_ns=368.326823	revisit_ns=190.063474	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=131072	repeat=1	steps=1024	first_ns=219.604544	revisit_ns=193.644155	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=131072	repeat=1	steps=1024	first_ns=241.048156	revisit_ns=183.634484	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=131072	repeat=1	steps=1024	first_ns=255.98149	revisit_ns=194.580139	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=131072	repeat=1	steps=1024	first_ns=230.102501	revisit_ns=181.518544	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=131072	repeat=1	steps=1024	first_ns=233.764581	revisit_ns=168.090764	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=131072	repeat=1	steps=1024	first_ns=232.625325	revisit_ns=167.765279	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=131072	repeat=1	steps=1024	first_ns=168.619749	revisit_ns=167.846679	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=131072	repeat=2	steps=1024	first_ns=200.92773	revisit_ns=167.805979	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=131072	repeat=2	steps=1024	first_ns=236.775691	revisit_ns=167.887379	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=131072	repeat=2	steps=1024	first_ns=300.984652	revisit_ns=174.682555	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=131072	repeat=2	steps=1024	first_ns=250.732455	revisit_ns=229.573629	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=131072	repeat=2	steps=1024	first_ns=220.7031	revisit_ns=200.276645	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=131072	repeat=2	steps=1024	first_ns=223.144525	revisit_ns=189.778689	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=131072	repeat=2	steps=1024	first_ns=247.599246	revisit_ns=186.889679	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=131072	repeat=2	steps=1024	first_ns=275.756861	revisit_ns=174.641968	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=131072	repeat=2	steps=1024	first_ns=260.945626	revisit_ns=187.825435	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=131072	repeat=2	steps=1024	first_ns=193.684969	revisit_ns=188.842819	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=131072	repeat=2	steps=1024	first_ns=191.406343	revisit_ns=189.941375	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=131072	repeat=3	steps=1024	first_ns=355.306042	revisit_ns=184.936539	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=131072	repeat=3	steps=1024	first_ns=349.975608	revisit_ns=189.819389	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=131072	repeat=3	steps=1024	first_ns=257.568331	revisit_ns=222.330641	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=131072	repeat=3	steps=1024	first_ns=274.251306	revisit_ns=231.485956	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=131072	repeat=3	steps=1024	first_ns=286.824616	revisit_ns=182.128929	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=131072	repeat=3	steps=1024	first_ns=363.281288	revisit_ns=199.869874	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=131072	repeat=3	steps=1024	first_ns=372.233103	revisit_ns=187.377964	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=131072	repeat=3	steps=1024	first_ns=230.672185	revisit_ns=167.846679	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=131072	repeat=3	steps=1024	first_ns=176.269509	revisit_ns=190.144874	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=131072	repeat=3	steps=1024	first_ns=192.871084	revisit_ns=186.40128	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=131072	repeat=3	steps=1024	first_ns=247.802745	revisit_ns=180.541974	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=131072	repeat=4	steps=1024	first_ns=344.604473	revisit_ns=172.688829	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=131072	repeat=4	steps=1024	first_ns=248.820015	revisit_ns=218.627974	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=131072	repeat=4	steps=1024	first_ns=280.476911	revisit_ns=178.710934	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=131072	repeat=4	steps=1024	first_ns=184.082069	revisit_ns=150.756819	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=131072	repeat=4	steps=1024	first_ns=202.270485	revisit_ns=147.989908	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=131072	repeat=4	steps=1024	first_ns=207.397534	revisit_ns=141.357418	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=131072	repeat=4	steps=1024	first_ns=215.08788	revisit_ns=141.601618	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=131072	repeat=4	steps=1024	first_ns=146.647039	revisit_ns=141.398118	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=131072	repeat=4	steps=1024	first_ns=147.664423	revisit_ns=141.601504	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=131072	repeat=4	steps=1024	first_ns=173.950184	revisit_ns=141.479518	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=131072	repeat=4	steps=1024	first_ns=208.780875	revisit_ns=141.357418	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=131072	repeat=5	steps=1024	first_ns=174.723368	revisit_ns=150.187134	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=131072	repeat=5	steps=1024	first_ns=175.577838	revisit_ns=154.296799	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=131072	repeat=5	steps=1024	first_ns=189.737989	revisit_ns=152.058874	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=131072	repeat=5	steps=1024	first_ns=209.716745	revisit_ns=158.691478	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=131072	repeat=5	steps=1024	first_ns=210.32713	revisit_ns=146.769253	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=131072	repeat=5	steps=1024	first_ns=272.623652	revisit_ns=145.996182	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=131072	repeat=5	steps=1024	first_ns=169.759119	revisit_ns=167.927965	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=131072	repeat=5	steps=1024	first_ns=175.577838	revisit_ns=168.212978	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=131072	repeat=5	steps=1024	first_ns=264.64852	revisit_ns=179.93159	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=131072	repeat=5	steps=1024	first_ns=271.240197	revisit_ns=190.104174	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=131072	repeat=5	steps=1024	first_ns=341.796863	revisit_ns=174.682668	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=131072	repeat=6	steps=1024	first_ns=298.746727	revisit_ns=209.798145	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=131072	repeat=6	steps=1024	first_ns=302.368221	revisit_ns=196.289079	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=131072	repeat=6	steps=1024	first_ns=364.990228	revisit_ns=193.400069	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=131072	repeat=6	steps=1024	first_ns=350.056894	revisit_ns=182.495114	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=131072	repeat=6	steps=1024	first_ns=367.919824	revisit_ns=190.185574	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=131072	repeat=6	steps=1024	first_ns=182.617214	revisit_ns=172.648129	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=131072	repeat=6	steps=1024	first_ns=176.513709	revisit_ns=189.900675	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=131072	repeat=6	steps=1024	first_ns=265.014705	revisit_ns=178.95502	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=131072	repeat=6	steps=1024	first_ns=331.298793	revisit_ns=189.860089	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=131072	repeat=6	steps=1024	first_ns=351.521862	revisit_ns=189.127604	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=131072	repeat=6	steps=1024	first_ns=246.826175	revisit_ns=231.44537	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=131072	median=176.269509	min=146.647039	max=193.684969	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_2m	bytes=131072	median=183.75647	min=147.664423	max=192.871084	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_8m	bytes=131072	median=247.802745	min=173.950184	max=265.014705	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_32m	bytes=131072	median=271.240197	min=208.780875	max=355.306042	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_128m	bytes=131072	median=344.604473	min=233.886681	max=368.326823	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=131072	median=246.826175	min=174.723368	max=257.568331	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_2m	bytes=131072	median=241.78064	min=175.577838	max=298.746727	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_8m	bytes=131072	median=255.98149	min=184.082069	max=312.825478	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_32m	bytes=131072	median=247.599246	min=202.270485	max=364.990228	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_128m	bytes=131072	median=275.756861	min=207.397534	max=372.233103	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=131072	median=260.945626	min=215.08788	max=367.919824	unit=ns/load
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=262144	repeat=0	steps=2048	first_ns=176.350909	revisit_ns=178.344692	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=262144	repeat=0	steps=2048	first_ns=172.709122	revisit_ns=173.258456	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=262144	repeat=0	steps=2048	first_ns=213.561975	revisit_ns=171.407066	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=262144	repeat=0	steps=2048	first_ns=329.162617	revisit_ns=177.632671	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=262144	repeat=0	steps=2048	first_ns=287.577336	revisit_ns=172.770172	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=262144	repeat=0	steps=2048	first_ns=276.733431	revisit_ns=242.065425	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=262144	repeat=0	steps=2048	first_ns=277.201366	revisit_ns=216.1255	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=262144	repeat=0	steps=2048	first_ns=297.871907	revisit_ns=233.13396	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=262144	repeat=0	steps=2048	first_ns=319.946309	revisit_ns=204.040532	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=262144	repeat=0	steps=2048	first_ns=298.482234	revisit_ns=183.349584	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=262144	repeat=0	steps=2048	first_ns=283.996599	revisit_ns=180.297832	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=262144	repeat=1	steps=2048	first_ns=178.527841	revisit_ns=174.702961	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=262144	repeat=1	steps=2048	first_ns=212.15817	revisit_ns=177.164736	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=262144	repeat=1	steps=2048	first_ns=293.884284	revisit_ns=180.908216	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=262144	repeat=1	steps=2048	first_ns=293.782534	revisit_ns=178.080256	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=262144	repeat=1	steps=2048	first_ns=249.145501	revisit_ns=220.458958	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=262144	repeat=1	steps=2048	first_ns=283.406564	revisit_ns=215.08788	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=262144	repeat=1	steps=2048	first_ns=312.927227	revisit_ns=204.589867	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=262144	repeat=1	steps=2048	first_ns=331.054707	revisit_ns=198.710097	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=262144	repeat=1	steps=2048	first_ns=281.433074	revisit_ns=177.327479	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=262144	repeat=1	steps=2048	first_ns=306.823722	revisit_ns=171.569809	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=262144	repeat=1	steps=2048	first_ns=176.208516	revisit_ns=173.767091	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=262144	repeat=2	steps=2048	first_ns=212.727912	revisit_ns=177.062986	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=262144	repeat=2	steps=2048	first_ns=299.194312	revisit_ns=179.097526	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=262144	repeat=2	steps=2048	first_ns=294.860854	revisit_ns=179.443362	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=262144	repeat=2	steps=2048	first_ns=233.215303	revisit_ns=214.070667	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=262144	repeat=2	steps=2048	first_ns=291.178424	revisit_ns=219.84863	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=262144	repeat=2	steps=2048	first_ns=302.612307	revisit_ns=183.75647	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=262144	repeat=2	steps=2048	first_ns=257.385295	revisit_ns=205.56638	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=262144	repeat=2	steps=2048	first_ns=285.400404	revisit_ns=180.053689	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=262144	repeat=2	steps=2048	first_ns=294.881204	revisit_ns=172.485329	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=262144	repeat=2	steps=2048	first_ns=172.607429	revisit_ns=171.325723	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=262144	repeat=2	steps=2048	first_ns=181.905136	revisit_ns=180.053746	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=262144	repeat=3	steps=2048	first_ns=234.761558	revisit_ns=166.870166	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=262144	repeat=3	steps=2048	first_ns=233.276353	revisit_ns=166.829409	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=262144	repeat=3	steps=2048	first_ns=218.078583	revisit_ns=212.463419	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=262144	repeat=3	steps=2048	first_ns=254.211443	revisit_ns=204.58981	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=262144	repeat=3	steps=2048	first_ns=271.789531	revisit_ns=206.237814	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=262144	repeat=3	steps=2048	first_ns=335.10338	revisit_ns=212.076827	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=262144	repeat=3	steps=2048	first_ns=293.029814	revisit_ns=175.944024	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=262144	repeat=3	steps=2048	first_ns=254.150393	revisit_ns=173.787441	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=262144	repeat=3	steps=2048	first_ns=176.025367	revisit_ns=172.607429	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=262144	repeat=3	steps=2048	first_ns=182.434121	revisit_ns=181.152302	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=262144	repeat=3	steps=2048	first_ns=231.38432	revisit_ns=175.048797	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=262144	repeat=4	steps=2048	first_ns=233.03221	revisit_ns=166.829409	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=262144	repeat=4	steps=2048	first_ns=235.1685	revisit_ns=223.307268	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=262144	repeat=4	steps=2048	first_ns=261.800096	revisit_ns=203.247055	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=262144	repeat=4	steps=2048	first_ns=264.383971	revisit_ns=197.937027	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=262144	repeat=4	steps=2048	first_ns=313.273119	revisit_ns=214.19271	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=262144	repeat=4	steps=2048	first_ns=309.509289	revisit_ns=172.790521	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=262144	repeat=4	steps=2048	first_ns=296.834287	revisit_ns=183.980319	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=262144	repeat=4	steps=2048	first_ns=177.246079	revisit_ns=176.330559	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=262144	repeat=4	steps=2048	first_ns=185.546867	revisit_ns=179.036476	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=262144	repeat=4	steps=2048	first_ns=226.074235	revisit_ns=176.167816	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=262144	repeat=4	steps=2048	first_ns=317.138699	revisit_ns=175.231946	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=262144	repeat=5	steps=2048	first_ns=250.671405	revisit_ns=222.351048	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=262144	repeat=5	steps=2048	first_ns=258.870443	revisit_ns=197.794634	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=262144	repeat=5	steps=2048	first_ns=287.740079	revisit_ns=178.710934	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=262144	repeat=5	steps=2048	first_ns=305.419917	revisit_ns=182.189922	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=262144	repeat=5	steps=2048	first_ns=300.598174	revisit_ns=180.460631	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=262144	repeat=5	steps=2048	first_ns=329.549152	revisit_ns=176.513652	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=262144	repeat=5	steps=2048	first_ns=166.748066	revisit_ns=166.626023	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=262144	repeat=5	steps=2048	first_ns=172.302236	revisit_ns=166.707366	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=262144	repeat=5	steps=2048	first_ns=182.006829	revisit_ns=167.134601	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=262144	repeat=5	steps=2048	first_ns=266.092911	revisit_ns=176.879894	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=262144	repeat=5	steps=2048	first_ns=268.066401	revisit_ns=171.488466	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=262144	repeat=6	steps=2048	first_ns=313.537612	revisit_ns=204.284675	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=262144	repeat=6	steps=2048	first_ns=312.072757	revisit_ns=201.212572	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=262144	repeat=6	steps=2048	first_ns=306.986522	revisit_ns=221.191385	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=262144	repeat=6	steps=2048	first_ns=304.443347	revisit_ns=169.799819	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=262144	repeat=6	steps=2048	first_ns=331.746435	revisit_ns=175.903324	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=262144	repeat=6	steps=2048	first_ns=180.440281	revisit_ns=179.260269	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=262144	repeat=6	steps=2048	first_ns=182.250972	revisit_ns=172.973671	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=262144	repeat=6	steps=2048	first_ns=207.377127	revisit_ns=180.643724	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=262144	repeat=6	steps=2048	first_ns=266.337054	revisit_ns=172.953321	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=262144	repeat=6	steps=2048	first_ns=282.124802	revisit_ns=177.185029	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=262144	repeat=6	steps=2048	first_ns=237.670918	revisit_ns=237.304675	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=262144	median=176.208516	min=166.748066	max=180.440281	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_2m	bytes=262144	median=181.905136	min=172.302236	max=185.546867	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_8m	bytes=262144	median=212.727912	min=182.006829	max=231.38432	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_32m	bytes=262144	median=293.884284	min=234.761558	max=329.162617	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_128m	bytes=262144	median=282.124802	min=233.03221	max=294.860854	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=262144	median=237.670918	min=218.078583	max=276.733431	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_2m	bytes=262144	median=277.201366	min=254.211443	max=313.537612	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_8m	bytes=262144	median=297.871907	min=264.383971	max=312.927227	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_32m	bytes=262144	median=313.273119	min=257.385295	max=335.10338	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_128m	bytes=262144	median=298.482234	min=281.433074	max=309.509289	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=262144	median=296.834287	min=254.150393	max=331.746435	unit=ns/load
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=524288	repeat=0	steps=4096	first_ns=172.495533	revisit_ns=173.095685	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=524288	repeat=0	steps=4096	first_ns=172.821046	revisit_ns=169.555648	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=524288	repeat=0	steps=4096	first_ns=209.777824	revisit_ns=170.715339	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=524288	repeat=0	steps=4096	first_ns=267.832434	revisit_ns=168.172221	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=524288	repeat=0	steps=4096	first_ns=264.516189	revisit_ns=170.166032	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=524288	repeat=0	steps=4096	first_ns=260.83373	revisit_ns=224.243166	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=524288	repeat=0	steps=4096	first_ns=271.901456	revisit_ns=218.139661	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=524288	repeat=0	steps=4096	first_ns=279.235849	revisit_ns=217.508926	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=524288	repeat=0	steps=4096	first_ns=286.84488	revisit_ns=209.808348	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=524288	repeat=0	steps=4096	first_ns=238.677984	revisit_ns=168.111171	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=524288	repeat=0	steps=4096	first_ns=261.535632	revisit_ns=173.18726	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=524288	repeat=1	steps=4096	first_ns=179.931646	revisit_ns=172.587079	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=524288	repeat=1	steps=4096	first_ns=209.960916	revisit_ns=167.317722	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=524288	repeat=1	steps=4096	first_ns=269.43971	revisit_ns=170.288075	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=524288	repeat=1	steps=4096	first_ns=257.232671	revisit_ns=172.912621	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=524288	repeat=1	steps=4096	first_ns=252.838134	revisit_ns=250.122071	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=524288	repeat=1	steps=4096	first_ns=258.00577	revisit_ns=222.585044	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=524288	repeat=1	steps=4096	first_ns=281.158435	revisit_ns=223.785406	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=524288	repeat=1	steps=4096	first_ns=305.60301	revisit_ns=220.926921	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=524288	repeat=1	steps=4096	first_ns=249.308272	revisit_ns=172.292062	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=524288	repeat=1	steps=4096	first_ns=264.322921	revisit_ns=172.831193	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=524288	repeat=1	steps=4096	first_ns=173.64502	revisit_ns=167.999275	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=524288	repeat=2	steps=4096	first_ns=216.857899	revisit_ns=173.156735	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=524288	repeat=2	steps=4096	first_ns=275.380444	revisit_ns=168.42651	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=524288	repeat=2	steps=4096	first_ns=270.945236	revisit_ns=169.525123	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=524288	repeat=2	steps=4096	first_ns=253.987622	revisit_ns=228.149389	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=524288	repeat=2	steps=4096	first_ns=268.198647	revisit_ns=223.907449	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=524288	repeat=2	steps=4096	first_ns=274.169935	revisit_ns=203.033437	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=524288	repeat=2	steps=4096	first_ns=306.528733	revisit_ns=210.876465	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=524288	repeat=2	steps=4096	first_ns=284.922294	revisit_ns=174.56054	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=524288	repeat=2	steps=4096	first_ns=278.411875	revisit_ns=170.878081	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=524288	repeat=2	steps=4096	first_ns=169.952386	revisit_ns=171.203595	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=524288	repeat=2	steps=4096	first_ns=176.157641	revisit_ns=171.407066	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=524288	repeat=3	steps=4096	first_ns=268.341068	revisit_ns=170.83741	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=524288	repeat=3	steps=4096	first_ns=277.852365	revisit_ns=168.284089	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=524288	repeat=3	steps=4096	first_ns=266.235361	revisit_ns=259.826663	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=524288	repeat=3	steps=4096	first_ns=283.091225	revisit_ns=256.642636	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=524288	repeat=3	steps=4096	first_ns=288.83872	revisit_ns=226.247153	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=524288	repeat=3	steps=4096	first_ns=310.455306	revisit_ns=219.970701	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=524288	repeat=3	steps=4096	first_ns=270.436601	revisit_ns=169.738769	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=524288	repeat=3	steps=4096	first_ns=285.644546	revisit_ns=174.499519	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=524288	repeat=3	steps=4096	first_ns=171.27482	revisit_ns=173.990884	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=524288	repeat=3	steps=4096	first_ns=175.842274	revisit_ns=170.247404	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=524288	repeat=3	steps=4096	first_ns=205.454512	revisit_ns=168.263767	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=524288	repeat=4	steps=4096	first_ns=272.094724	revisit_ns=169.484451	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=524288	repeat=4	steps=4096	first_ns=254.6997	revisit_ns=254.567482	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=524288	repeat=4	steps=4096	first_ns=264.556888	revisit_ns=223.052979	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=524288	repeat=4	steps=4096	first_ns=272.725401	revisit_ns=221.801741	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=524288	repeat=4	steps=4096	first_ns=301.605212	revisit_ns=217.285162	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=524288	repeat=4	steps=4096	first_ns=257.324217	revisit_ns=172.047947	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=524288	repeat=4	steps=4096	first_ns=279.622384	revisit_ns=168.589281	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=524288	repeat=4	steps=4096	first_ns=171.356191	revisit_ns=170.379622	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=524288	repeat=4	steps=4096	first_ns=176.177991	revisit_ns=174.58089	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=524288	repeat=4	steps=4096	first_ns=219.90968	revisit_ns=169.128413	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=524288	repeat=4	steps=4096	first_ns=268.371593	revisit_ns=171.335842	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=524288	repeat=5	steps=4096	first_ns=244.781489	revisit_ns=252.685538	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=524288	repeat=5	steps=4096	first_ns=265.899644	revisit_ns=233.927409	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=524288	repeat=5	steps=4096	first_ns=282.216405	revisit_ns=217.559801	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=524288	repeat=5	steps=4096	first_ns=329.071042	revisit_ns=218.363454	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=524288	repeat=5	steps=4096	first_ns=272.481287	revisit_ns=173.024517	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=524288	repeat=5	steps=4096	first_ns=286.651613	revisit_ns=171.152749	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=524288	repeat=5	steps=4096	first_ns=173.431403	revisit_ns=168.680828	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=524288	repeat=5	steps=4096	first_ns=173.777266	revisit_ns=168.782549	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=524288	repeat=5	steps=4096	first_ns=203.501401	revisit_ns=168.212893	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=524288	repeat=5	steps=4096	first_ns=280.21239	revisit_ns=172.922768	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=524288	repeat=5	steps=4096	first_ns=273.142518	revisit_ns=170.420321	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=524288	repeat=6	steps=4096	first_ns=259.46045	revisit_ns=229.736315	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=524288	repeat=6	steps=4096	first_ns=293.97583	revisit_ns=230.102529	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=524288	repeat=6	steps=4096	first_ns=322.906487	revisit_ns=228.057871	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=524288	repeat=6	steps=4096	first_ns=269.276939	revisit_ns=168.233242	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=524288	repeat=6	steps=4096	first_ns=265.350366	revisit_ns=169.057216	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=524288	repeat=6	steps=4096	first_ns=170.471196	revisit_ns=169.474276	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=524288	repeat=6	steps=4096	first_ns=178.965252	revisit_ns=168.558756	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=524288	repeat=6	steps=4096	first_ns=205.932622	revisit_ns=170.847585	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=524288	repeat=6	steps=4096	first_ns=278.81876	revisit_ns=170.379622	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=524288	repeat=6	steps=4096	first_ns=272.552512	revisit_ns=168.477357	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=524288	repeat=6	steps=4096	first_ns=245.320649	revisit_ns=252.817784	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=524288	median=171.356191	min=169.952386	max=173.64502	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_2m	bytes=524288	median=176.157641	min=172.821046	max=179.931646	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_8m	bytes=524288	median=209.777824	min=203.501401	max=219.90968	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_32m	bytes=524288	median=269.43971	min=267.832434	max=280.21239	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_128m	bytes=524288	median=272.094724	min=257.232671	max=277.852365	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=524288	median=253.987622	min=244.781489	max=266.235361	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_2m	bytes=524288	median=265.899644	min=258.00577	max=283.091225	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_8m	bytes=524288	median=281.158435	min=272.725401	max=293.97583	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_32m	bytes=524288	median=306.528733	min=286.84488	max=329.071042	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_128m	bytes=524288	median=269.276939	min=238.677984	max=284.922294	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=524288	median=278.411875	min=261.535632	max=286.651613	unit=ns/load
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=1048576	repeat=0	steps=8192	first_ns=174.407958	revisit_ns=168.33495	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=1048576	repeat=0	steps=8192	first_ns=175.689692	revisit_ns=167.28211	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=1048576	repeat=0	steps=8192	first_ns=193.145752	revisit_ns=183.771775	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=1048576	repeat=0	steps=8192	first_ns=255.645745	revisit_ns=168.991079	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=1048576	repeat=0	steps=8192	first_ns=261.611945	revisit_ns=171.106976	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=1048576	repeat=0	steps=8192	first_ns=253.748581	revisit_ns=243.891407	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=1048576	repeat=0	steps=8192	first_ns=273.84948	revisit_ns=235.702515	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=1048576	repeat=0	steps=8192	first_ns=273.773196	revisit_ns=220.860798	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=1048576	repeat=0	steps=8192	first_ns=294.987998	revisit_ns=215.632127	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=1048576	repeat=0	steps=8192	first_ns=237.76245	revisit_ns=168.558756	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=1048576	repeat=0	steps=8192	first_ns=248.341877	revisit_ns=169.230148	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=1048576	repeat=1	steps=8192	first_ns=177.536009	revisit_ns=168.762199	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=1048576	repeat=1	steps=8192	first_ns=211.410523	revisit_ns=166.275015	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=1048576	repeat=1	steps=8192	first_ns=250.208529	revisit_ns=170.883183	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=1048576	repeat=1	steps=8192	first_ns=258.021032	revisit_ns=168.899533	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=1048576	repeat=1	steps=8192	first_ns=243.097944	revisit_ns=244.979859	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=1048576	repeat=1	steps=8192	first_ns=252.985643	revisit_ns=229.187009	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=1048576	repeat=1	steps=8192	first_ns=272.262568	revisit_ns=214.680995	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=1048576	repeat=1	steps=8192	first_ns=264.973963	revisit_ns=186.808265	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=1048576	repeat=1	steps=8192	first_ns=268.295281	revisit_ns=183.273315	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=1048576	repeat=1	steps=8192	first_ns=263.336176	revisit_ns=185.45532	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=1048576	repeat=1	steps=8192	first_ns=178.344735	revisit_ns=183.013924	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=1048576	repeat=2	steps=8192	first_ns=230.361934	revisit_ns=182.647696	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=1048576	repeat=2	steps=8192	first_ns=263.646456	revisit_ns=185.867307	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=1048576	repeat=2	steps=8192	first_ns=272.872924	revisit_ns=186.309819	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=1048576	repeat=2	steps=8192	first_ns=257.558185	revisit_ns=182.662959	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=1048576	repeat=2	steps=8192	first_ns=261.520384	revisit_ns=184.417729	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=1048576	repeat=2	steps=8192	first_ns=264.058428	revisit_ns=181.681315	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=1048576	repeat=2	steps=8192	first_ns=267.959592	revisit_ns=183.430984	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=1048576	repeat=2	steps=8192	first_ns=274.734504	revisit_ns=193.415318	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=1048576	repeat=2	steps=8192	first_ns=258.641549	revisit_ns=181.605017	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=1048576	repeat=2	steps=8192	first_ns=186.559049	revisit_ns=184.514363	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=1048576	repeat=2	steps=8192	first_ns=192.047111	revisit_ns=185.47567	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=1048576	repeat=3	steps=8192	first_ns=262.466429	revisit_ns=187.021882	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=1048576	repeat=3	steps=8192	first_ns=263.305665	revisit_ns=186.065677	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=1048576	repeat=3	steps=8192	first_ns=255.70678	revisit_ns=184.463502	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=1048576	repeat=3	steps=8192	first_ns=253.250136	revisit_ns=179.885859	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=1048576	repeat=3	steps=8192	first_ns=258.529653	revisit_ns=180.923465	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=1048576	repeat=3	steps=8192	first_ns=260.772708	revisit_ns=182.708746	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=1048576	repeat=3	steps=8192	first_ns=255.711868	revisit_ns=184.916175	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=1048576	repeat=3	steps=8192	first_ns=257.553111	revisit_ns=181.335452	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=1048576	repeat=3	steps=8192	first_ns=185.572304	revisit_ns=180.343633	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=1048576	repeat=3	steps=8192	first_ns=189.208976	revisit_ns=176.554366	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=1048576	repeat=3	steps=8192	first_ns=206.954951	revisit_ns=180.297846	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=1048576	repeat=4	steps=8192	first_ns=260.553989	revisit_ns=185.180667	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=1048576	repeat=4	steps=8192	first_ns=260.955815	revisit_ns=183.456422	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=1048576	repeat=4	steps=8192	first_ns=264.643361	revisit_ns=184.5398	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=1048576	repeat=4	steps=8192	first_ns=263.977043	revisit_ns=182.41883	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=1048576	repeat=4	steps=8192	first_ns=256.546016	revisit_ns=183.10547	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=1048576	repeat=4	steps=8192	first_ns=265.991204	revisit_ns=180.73527	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=1048576	repeat=4	steps=8192	first_ns=265.141793	revisit_ns=182.734183	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=1048576	repeat=4	steps=8192	first_ns=186.375928	revisit_ns=182.052602	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=1048576	repeat=4	steps=8192	first_ns=199.676506	revisit_ns=178.604125	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=1048576	repeat=4	steps=8192	first_ns=220.331827	revisit_ns=180.353794	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=1048576	repeat=4	steps=8192	first_ns=266.769405	revisit_ns=181.864408	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=1048576	repeat=5	steps=8192	first_ns=260.401407	revisit_ns=183.069872	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=1048576	repeat=5	steps=8192	first_ns=258.702599	revisit_ns=179.626468	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=1048576	repeat=5	steps=8192	first_ns=259.190884	revisit_ns=184.67712	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=1048576	repeat=5	steps=8192	first_ns=261.703491	revisit_ns=179.05171	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=1048576	repeat=5	steps=8192	first_ns=260.253913	revisit_ns=182.245884	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=1048576	repeat=5	steps=8192	first_ns=263.01575	revisit_ns=181.518544	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=1048576	repeat=5	steps=8192	first_ns=180.343619	revisit_ns=181.823737	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=1048576	repeat=5	steps=8192	first_ns=187.291462	revisit_ns=183.7616	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=1048576	repeat=5	steps=8192	first_ns=219.61975	revisit_ns=180.653899	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=1048576	repeat=5	steps=8192	first_ns=268.875127	revisit_ns=183.288577	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=1048576	repeat=5	steps=8192	first_ns=266.469314	revisit_ns=182.60701	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=1048576	repeat=6	steps=8192	first_ns=257.79724	revisit_ns=180.745445	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=1048576	repeat=6	steps=8192	first_ns=264.694222	revisit_ns=178.558352	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=1048576	repeat=6	steps=8192	first_ns=267.623903	revisit_ns=186.904913	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=1048576	repeat=6	steps=8192	first_ns=266.098013	revisit_ns=183.685302	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=1048576	repeat=6	steps=8192	first_ns=275.253299	revisit_ns=181.981406	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=1048576	repeat=6	steps=8192	first_ns=184.951787	revisit_ns=184.48894	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=1048576	repeat=6	steps=8192	first_ns=185.97413	revisit_ns=182.312007	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=1048576	repeat=6	steps=8192	first_ns=216.949459	revisit_ns=182.601923	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=1048576	repeat=6	steps=8192	first_ns=258.682249	revisit_ns=180.369071	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=1048576	repeat=6	steps=8192	first_ns=266.957599	revisit_ns=179.280605	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=1048576	repeat=6	steps=8192	first_ns=257.898975	revisit_ns=181.727088	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=1048576	median=184.951787	min=174.407958	max=186.559049	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_2m	bytes=1048576	median=187.291462	min=175.689692	max=199.676506	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_8m	bytes=1048576	median=216.949459	min=193.145752	max=230.361934	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_32m	bytes=1048576	median=262.466429	min=250.208529	max=268.875127	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_128m	bytes=1048576	median=263.305665	min=258.021032	max=272.872924	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=1048576	median=257.558185	min=243.097944	max=260.955815	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_2m	bytes=1048576	median=258.702599	min=252.985643	max=273.84948	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_8m	bytes=1048576	median=264.058428	min=258.529653	max=273.773196	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_32m	bytes=1048576	median=264.973963	min=256.546016	max=294.987998	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_128m	bytes=1048576	median=265.991204	min=237.76245	max=274.734504	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=1048576	median=263.01575	min=248.341877	max=275.253299	unit=ns/load
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=2097152	repeat=0	steps=8192	first_ns=171.29517	revisit_ns=166.859948	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=2097152	repeat=0	steps=8192	first_ns=180.007945	revisit_ns=167.770381	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=2097152	repeat=0	steps=8192	first_ns=208.730057	revisit_ns=167.205812	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=2097152	repeat=0	steps=8192	first_ns=246.475224	revisit_ns=167.724608	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=2097152	repeat=0	steps=8192	first_ns=247.497553	revisit_ns=167.114266	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=2097152	repeat=0	steps=8192	first_ns=236.053481	revisit_ns=168.67574	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=2097152	repeat=0	steps=8192	first_ns=240.493762	revisit_ns=170.028684	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=2097152	repeat=0	steps=8192	first_ns=239.364624	revisit_ns=167.526238	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=2097152	repeat=0	steps=8192	first_ns=247.787483	revisit_ns=167.500815	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=2097152	repeat=0	steps=8192	first_ns=252.349849	revisit_ns=168.640128	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=2097152	repeat=0	steps=8192	first_ns=242.513025	revisit_ns=168.843584	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=2097152	repeat=1	steps=8192	first_ns=176.956178	revisit_ns=168.752038	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=2097152	repeat=1	steps=8192	first_ns=203.018189	revisit_ns=168.095909	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=2097152	repeat=1	steps=8192	first_ns=248.036699	revisit_ns=168.574005	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=2097152	repeat=1	steps=8192	first_ns=242.406216	revisit_ns=168.71644	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=2097152	repeat=1	steps=8192	first_ns=238.9679	revisit_ns=170.115143	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=2097152	repeat=1	steps=8192	first_ns=238.296508	revisit_ns=166.946407	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=2097152	repeat=1	steps=8192	first_ns=241.053257	revisit_ns=168.039961	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=2097152	repeat=1	steps=8192	first_ns=252.548219	revisit_ns=166.524245	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=2097152	repeat=1	steps=8192	first_ns=249.893191	revisit_ns=167.556763	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=2097152	repeat=1	steps=8192	first_ns=257.715868	revisit_ns=169.474291	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=2097152	repeat=1	steps=8192	first_ns=172.19034	revisit_ns=169.387818	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=2097152	repeat=2	steps=8192	first_ns=205.449425	revisit_ns=169.479378	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=2097152	repeat=2	steps=8192	first_ns=254.511519	revisit_ns=168.080646	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=2097152	repeat=2	steps=8192	first_ns=248.570757	revisit_ns=168.212893	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=2097152	repeat=2	steps=8192	first_ns=237.767537	revisit_ns=168.568931	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=2097152	repeat=2	steps=8192	first_ns=242.126461	revisit_ns=169.021604	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=2097152	repeat=2	steps=8192	first_ns=241.195679	revisit_ns=169.001268	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=2097152	repeat=2	steps=8192	first_ns=250.295003	revisit_ns=166.59547	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=2097152	repeat=2	steps=8192	first_ns=250.162756	revisit_ns=166.834525	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=2097152	repeat=2	steps=8192	first_ns=243.545543	revisit_ns=168.823249	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=2097152	repeat=2	steps=8192	first_ns=170.043933	revisit_ns=169.047027	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=2097152	repeat=2	steps=8192	first_ns=175.603219	revisit_ns=167.963663	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=2097152	repeat=3	steps=8192	first_ns=253.580737	revisit_ns=167.180389	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=2097152	repeat=3	steps=8192	first_ns=247.833256	revisit_ns=170.211791	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=2097152	repeat=3	steps=8192	first_ns=244.476311	revisit_ns=167.348219	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=2097152	repeat=3	steps=8192	first_ns=242.457077	revisit_ns=167.724608	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=2097152	repeat=3	steps=8192	first_ns=237.538657	revisit_ns=167.266847	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=2097152	repeat=3	steps=8192	first_ns=245.473217	revisit_ns=167.236323	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=2097152	repeat=3	steps=8192	first_ns=255.711868	revisit_ns=173.594159	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=2097152	repeat=3	steps=8192	first_ns=251.927688	revisit_ns=168.512983	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=2097152	repeat=3	steps=8192	first_ns=169.662471	revisit_ns=167.394006	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=2097152	repeat=3	steps=8192	first_ns=175.796515	revisit_ns=167.002369	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=2097152	repeat=3	steps=8192	first_ns=204.48303	revisit_ns=168.502794	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=2097152	repeat=4	steps=8192	first_ns=255.233772	revisit_ns=169.113164	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=2097152	repeat=4	steps=8192	first_ns=245.127353	revisit_ns=167.404167	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=2097152	repeat=4	steps=8192	first_ns=244.074499	revisit_ns=167.144776	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=2097152	repeat=4	steps=8192	first_ns=244.283044	revisit_ns=168.991079	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=2097152	repeat=4	steps=8192	first_ns=251.408892	revisit_ns=169.164025	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=2097152	repeat=4	steps=8192	first_ns=248.814914	revisit_ns=169.459028	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=2097152	repeat=4	steps=8192	first_ns=249.252324	revisit_ns=166.671754	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=2097152	repeat=4	steps=8192	first_ns=173.243208	revisit_ns=167.73987	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=2097152	repeat=4	steps=8192	first_ns=177.688591	revisit_ns=166.483559	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=2097152	repeat=4	steps=8192	first_ns=213.399261	revisit_ns=168.533319	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=2097152	repeat=4	steps=8192	first_ns=265.263878	revisit_ns=167.96875	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=2097152	repeat=5	steps=8192	first_ns=254.404711	revisit_ns=167.587288	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=2097152	repeat=5	steps=8192	first_ns=242.736817	revisit_ns=169.850679	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=2097152	repeat=5	steps=8192	first_ns=246.144623	revisit_ns=169.387818	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=2097152	repeat=5	steps=8192	first_ns=251.266485	revisit_ns=167.236337	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=2097152	repeat=5	steps=8192	first_ns=242.701205	revisit_ns=167.002355	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=2097152	repeat=5	steps=8192	first_ns=255.208334	revisit_ns=166.620893	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=2097152	repeat=5	steps=8192	first_ns=168.970743	revisit_ns=167.785643	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=2097152	repeat=5	steps=8192	first_ns=175.476075	revisit_ns=167.160024	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=2097152	repeat=5	steps=8192	first_ns=201.431277	revisit_ns=167.658484	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=2097152	repeat=5	steps=8192	first_ns=247.634887	revisit_ns=169.372569	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=2097152	repeat=5	steps=8192	first_ns=248.672478	revisit_ns=167.083741	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=2097152	repeat=6	steps=8192	first_ns=243.98804	revisit_ns=169.448853	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=2097152	repeat=6	steps=8192	first_ns=241.780612	revisit_ns=166.478472	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=2097152	repeat=6	steps=8192	first_ns=247.751871	revisit_ns=168.045048	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=2097152	repeat=6	steps=8192	first_ns=243.91683	revisit_ns=168.685915	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=2097152	repeat=6	steps=8192	first_ns=252.578729	revisit_ns=170.074472	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=2097152	repeat=6	steps=8192	first_ns=170.201631	revisit_ns=167.068492	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=2097152	repeat=6	steps=8192	first_ns=173.39579	revisit_ns=166.829423	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=2097152	repeat=6	steps=8192	first_ns=205.235807	revisit_ns=167.770381	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=2097152	repeat=6	steps=8192	first_ns=259.653731	revisit_ns=168.950393	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=2097152	repeat=6	steps=8192	first_ns=262.832643	revisit_ns=168.833409	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=2097152	repeat=6	steps=8192	first_ns=242.858874	revisit_ns=169.087727	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=2097152	median=170.201631	min=168.970743	max=173.243208	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_2m	bytes=2097152	median=175.796515	min=173.39579	max=180.007945	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_8m	bytes=2097152	median=205.235807	min=201.431277	max=213.399261	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_32m	bytes=2097152	median=253.580737	min=246.475224	max=265.263878	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_128m	bytes=2097152	median=248.570757	min=242.406216	max=262.832643	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=2097152	median=242.858874	min=236.053481	max=254.404711	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_2m	bytes=2097152	median=242.457077	min=238.296508	max=244.074499	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_8m	bytes=2097152	median=241.195679	min=237.538657	max=246.144623	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_32m	bytes=2097152	median=250.295003	min=245.473217	max=252.548219	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_128m	bytes=2097152	median=249.893191	min=242.701205	max=255.711868	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=2097152	median=251.927688	min=242.513025	max=257.715868	unit=ns/load
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=4194304	repeat=0	steps=8192	first_ns=175.877886	revisit_ns=169.281009	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=4194304	repeat=0	steps=8192	first_ns=181.62028	revisit_ns=168.451948	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=4194304	repeat=0	steps=8192	first_ns=202.438358	revisit_ns=166.961669	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=4194304	repeat=0	steps=8192	first_ns=245.559704	revisit_ns=169.087727	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=4194304	repeat=0	steps=8192	first_ns=233.108523	revisit_ns=169.90154	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=4194304	repeat=0	steps=8192	first_ns=238.403317	revisit_ns=168.187455	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=4194304	repeat=0	steps=8192	first_ns=238.352456	revisit_ns=170.013422	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=4194304	repeat=0	steps=8192	first_ns=242.034915	revisit_ns=170.023597	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=4194304	repeat=0	steps=8192	first_ns=258.336385	revisit_ns=166.737877	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=4194304	repeat=0	steps=8192	first_ns=245.452881	revisit_ns=173.889163	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=4194304	repeat=0	steps=8192	first_ns=249.348972	revisit_ns=166.931159	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=4194304	repeat=1	steps=8192	first_ns=173.787441	revisit_ns=168.421423	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=4194304	repeat=1	steps=8192	first_ns=218.495686	revisit_ns=168.792724	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=4194304	repeat=1	steps=8192	first_ns=258.331298	revisit_ns=170.277914	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=4194304	repeat=1	steps=8192	first_ns=263.987218	revisit_ns=168.319701	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=4194304	repeat=1	steps=8192	first_ns=243.326824	revisit_ns=168.014537	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=4194304	repeat=1	steps=8192	first_ns=255.4779	revisit_ns=171.574911	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=4194304	repeat=1	steps=8192	first_ns=252.461746	revisit_ns=168.594369	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=4194304	repeat=1	steps=8192	first_ns=252.517708	revisit_ns=166.839598	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=4194304	repeat=1	steps=8192	first_ns=266.347257	revisit_ns=169.214886	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=4194304	repeat=1	steps=8192	first_ns=263.061523	revisit_ns=170.54748	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=4194304	repeat=1	steps=8192	first_ns=173.110962	revisit_ns=167.22106	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=4194304	repeat=2	steps=8192	first_ns=213.653564	revisit_ns=166.804	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=4194304	repeat=2	steps=8192	first_ns=257.863363	revisit_ns=167.160024	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=4194304	repeat=2	steps=8192	first_ns=259.979245	revisit_ns=170.644128	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=4194304	repeat=2	steps=8192	first_ns=249.669384	revisit_ns=171.061188	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=4194304	repeat=2	steps=8192	first_ns=249.491364	revisit_ns=168.375649	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=4194304	repeat=2	steps=8192	first_ns=242.935172	revisit_ns=169.540399	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=4194304	repeat=2	steps=8192	first_ns=245.590215	revisit_ns=168.797811	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=4194304	repeat=2	steps=8192	first_ns=257.39034	revisit_ns=174.138393	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=4194304	repeat=2	steps=8192	first_ns=261.820475	revisit_ns=167.353321	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=4194304	repeat=2	steps=8192	first_ns=173.548372	revisit_ns=168.792724	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=4194304	repeat=2	steps=8192	first_ns=182.09839	revisit_ns=167.582201	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=4194304	repeat=3	steps=8192	first_ns=247.914642	revisit_ns=169.525137	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=4194304	repeat=3	steps=8192	first_ns=244.232183	revisit_ns=168.487546	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=4194304	repeat=3	steps=8192	first_ns=248.077384	revisit_ns=169.225061	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=4194304	repeat=3	steps=8192	first_ns=248.413073	revisit_ns=167.872116	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=4194304	repeat=3	steps=8192	first_ns=242.828378	revisit_ns=166.809087	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=4194304	repeat=3	steps=8192	first_ns=249.537138	revisit_ns=166.742964	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=4194304	repeat=3	steps=8192	first_ns=260.6252	revisit_ns=172.164917	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=4194304	repeat=3	steps=8192	first_ns=245.025632	revisit_ns=168.004348	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=4194304	repeat=3	steps=8192	first_ns=173.294069	revisit_ns=167.973838	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=4194304	repeat=3	steps=8192	first_ns=178.309136	revisit_ns=169.570924	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=4194304	repeat=3	steps=8192	first_ns=215.627026	revisit_ns=167.078653	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=4194304	repeat=4	steps=8192	first_ns=243.525179	revisit_ns=168.807986	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=4194304	repeat=4	steps=8192	first_ns=250.859571	revisit_ns=168.136594	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=4194304	repeat=4	steps=8192	first_ns=251.800543	revisit_ns=170.410146	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=4194304	repeat=4	steps=8192	first_ns=238.642372	revisit_ns=170.099895	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=4194304	repeat=4	steps=8192	first_ns=257.904048	revisit_ns=169.113164	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=4194304	repeat=4	steps=8192	first_ns=247.350059	revisit_ns=167.037953	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=4194304	repeat=4	steps=8192	first_ns=252.548219	revisit_ns=168.975831	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=4194304	repeat=4	steps=8192	first_ns=172.84647	revisit_ns=167.073566	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=4194304	repeat=4	steps=8192	first_ns=184.005742	revisit_ns=166.742964	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=4194304	repeat=4	steps=8192	first_ns=206.817631	revisit_ns=169.489553	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=4194304	repeat=4	steps=8192	first_ns=241.984054	revisit_ns=168.757111	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=4194304	repeat=5	steps=8192	first_ns=240.768429	revisit_ns=169.937138	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=4194304	repeat=5	steps=8192	first_ns=252.182005	revisit_ns=169.738769	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=4194304	repeat=5	steps=8192	first_ns=250.493372	revisit_ns=170.939117	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=4194304	repeat=5	steps=8192	first_ns=252.105721	revisit_ns=168.792724	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=4194304	repeat=5	steps=8192	first_ns=271.255487	revisit_ns=173.451738	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=4194304	repeat=5	steps=8192	first_ns=256.871544	revisit_ns=167.221074	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=4194304	repeat=5	steps=8192	first_ns=172.363272	revisit_ns=168.380737	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=4194304	repeat=5	steps=8192	first_ns=180.496215	revisit_ns=167.582186	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=4194304	repeat=5	steps=8192	first_ns=212.34132	revisit_ns=167.892452	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=4194304	repeat=5	steps=8192	first_ns=261.764526	revisit_ns=167.358394	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=4194304	repeat=5	steps=8192	first_ns=244.089762	revisit_ns=170.08972	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=4194304	repeat=6	steps=8192	first_ns=252.716063	revisit_ns=168.039961	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=4194304	repeat=6	steps=8192	first_ns=248.901372	revisit_ns=168.441773	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=4194304	repeat=6	steps=8192	first_ns=256.668088	revisit_ns=169.647208	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=4194304	repeat=6	steps=8192	first_ns=256.530768	revisit_ns=171.783441	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=4194304	repeat=6	steps=8192	first_ns=252.894083	revisit_ns=169.845578	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=4194304	repeat=6	steps=8192	first_ns=173.461913	revisit_ns=168.518056	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=4194304	repeat=6	steps=8192	first_ns=180.592863	revisit_ns=168.350212	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=4194304	repeat=6	steps=8192	first_ns=212.768555	revisit_ns=169.433605	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=4194304	repeat=6	steps=8192	first_ns=251.327506	revisit_ns=169.86084	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=4194304	repeat=6	steps=8192	first_ns=248.443598	revisit_ns=168.243417	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=4194304	repeat=6	steps=8192	first_ns=239.807122	revisit_ns=167.627974	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=4194304	median=173.294069	min=172.363272	max=175.877886	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_2m	bytes=4194304	median=180.592863	min=173.787441	max=184.005742	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_8m	bytes=4194304	median=212.768555	min=202.438358	max=218.495686	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_32m	bytes=4194304	median=251.327506	min=241.984054	max=261.764526	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_128m	bytes=4194304	median=244.232183	min=233.108523	max=263.987218	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=4194304	median=243.326824	min=238.403317	max=250.859571	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_2m	bytes=4194304	median=251.800543	min=238.352456	max=255.4779	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_8m	bytes=4194304	median=242.935172	min=238.642372	max=252.461746	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_32m	bytes=4194304	median=252.517708	min=245.590215	max=258.336385	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_128m	bytes=4194304	median=257.39034	min=245.452881	max=271.255487	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=4194304	median=252.894083	min=245.025632	max=263.061523	unit=ns/load
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=8388608	repeat=0	steps=8192	first_ns=196.533207	revisit_ns=167.495728	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=8388608	repeat=0	steps=8192	first_ns=202.504481	revisit_ns=168.512983	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=8388608	repeat=0	steps=8192	first_ns=230.814621	revisit_ns=170.328775	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=8388608	repeat=0	steps=8192	first_ns=265.065509	revisit_ns=171.813966	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=8388608	repeat=0	steps=8192	first_ns=260.798146	revisit_ns=171.132399	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=8388608	repeat=0	steps=8192	first_ns=270.04495	revisit_ns=170.384723	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=8388608	repeat=0	steps=8192	first_ns=283.340455	revisit_ns=186.843863	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=8388608	repeat=0	steps=8192	first_ns=254.043584	revisit_ns=170.58818	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=8388608	repeat=0	steps=8192	first_ns=252.675378	revisit_ns=170.323688	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=8388608	repeat=0	steps=8192	first_ns=281.72812	revisit_ns=179.687504	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=8388608	repeat=0	steps=8192	first_ns=253.99271	revisit_ns=168.986006	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=8388608	repeat=1	steps=8192	first_ns=195.287072	revisit_ns=168.568931	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=8388608	repeat=1	steps=8192	first_ns=230.102543	revisit_ns=167.414342	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=8388608	repeat=1	steps=8192	first_ns=256.89188	revisit_ns=168.319701	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=8388608	repeat=1	steps=8192	first_ns=267.379747	revisit_ns=169.265746	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=8388608	repeat=1	steps=8192	first_ns=250.610341	revisit_ns=181.747438	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=8388608	repeat=1	steps=8192	first_ns=247.970576	revisit_ns=172.246303	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=8388608	repeat=1	steps=8192	first_ns=260.330197	revisit_ns=174.524942	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=8388608	repeat=1	steps=8192	first_ns=259.791065	revisit_ns=172.643013	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=8388608	repeat=1	steps=8192	first_ns=248.443598	revisit_ns=168.19763	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=8388608	repeat=1	steps=8192	first_ns=242.701205	revisit_ns=170.425409	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=8388608	repeat=1	steps=8192	first_ns=195.465091	revisit_ns=167.444867	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=8388608	repeat=2	steps=8192	first_ns=238.093051	revisit_ns=168.935131	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=8388608	repeat=2	steps=8192	first_ns=266.469328	revisit_ns=169.021604	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=8388608	repeat=2	steps=8192	first_ns=259.221395	revisit_ns=168.497721	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=8388608	repeat=2	steps=8192	first_ns=269.027709	revisit_ns=172.86682	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=8388608	repeat=2	steps=8192	first_ns=251.510627	revisit_ns=172.012335	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=8388608	repeat=2	steps=8192	first_ns=262.55799	revisit_ns=170.150756	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=8388608	repeat=2	steps=8192	first_ns=255.772903	revisit_ns=168.685915	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=8388608	repeat=2	steps=8192	first_ns=260.528566	revisit_ns=168.955481	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=8388608	repeat=2	steps=8192	first_ns=255.854289	revisit_ns=169.11315	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=8388608	repeat=2	steps=8192	first_ns=190.892536	revisit_ns=170.028699	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=8388608	repeat=2	steps=8192	first_ns=197.626761	revisit_ns=170.196543	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=8388608	repeat=3	steps=8192	first_ns=260.498041	revisit_ns=169.433591	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=8388608	repeat=3	steps=8192	first_ns=246.627806	revisit_ns=169.128427	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=8388608	repeat=3	steps=8192	first_ns=255.172736	revisit_ns=191.930141	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=8388608	repeat=3	steps=8192	first_ns=262.725834	revisit_ns=171.534225	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=8388608	repeat=3	steps=8192	first_ns=253.036504	revisit_ns=171.513875	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=8388608	repeat=3	steps=8192	first_ns=251.536051	revisit_ns=167.770395	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=8388608	repeat=3	steps=8192	first_ns=261.627193	revisit_ns=170.176179	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=8388608	repeat=3	steps=8192	first_ns=267.044058	revisit_ns=170.110056	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=8388608	repeat=3	steps=8192	first_ns=194.162993	revisit_ns=168.340051	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=8388608	repeat=3	steps=8192	first_ns=199.691769	revisit_ns=167.353321	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=8388608	repeat=3	steps=8192	first_ns=228.724161	revisit_ns=167.256673	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=8388608	repeat=4	steps=8192	first_ns=245.905568	revisit_ns=168.848672	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=8388608	repeat=4	steps=8192	first_ns=247.395832	revisit_ns=178.395581	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=8388608	repeat=4	steps=8192	first_ns=248.65723	revisit_ns=168.518056	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=8388608	repeat=4	steps=8192	first_ns=246.816001	revisit_ns=169.021604	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=8388608	repeat=4	steps=8192	first_ns=257.675168	revisit_ns=169.392905	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=8388608	repeat=4	steps=8192	first_ns=255.467725	revisit_ns=170.150756	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=8388608	repeat=4	steps=8192	first_ns=259.353641	revisit_ns=170.181281	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=8388608	repeat=4	steps=8192	first_ns=200.759885	revisit_ns=170.064297	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=8388608	repeat=4	steps=8192	first_ns=203.84725	revisit_ns=167.129514	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=8388608	repeat=4	steps=8192	first_ns=243.484493	revisit_ns=169.581099	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=8388608	repeat=4	steps=8192	first_ns=264.816293	revisit_ns=168.899533	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=8388608	repeat=5	steps=8192	first_ns=255.111701	revisit_ns=169.647208	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=8388608	repeat=5	steps=8192	first_ns=267.862958	revisit_ns=173.848477	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=8388608	repeat=5	steps=8192	first_ns=256.408683	revisit_ns=171.610509	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=8388608	repeat=5	steps=8192	first_ns=245.885204	revisit_ns=170.593253	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=8388608	repeat=5	steps=8192	first_ns=252.471921	revisit_ns=169.011429	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=8388608	repeat=5	steps=8192	first_ns=254.196166	revisit_ns=168.212893	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=8388608	repeat=5	steps=8192	first_ns=186.538699	revisit_ns=168.843599	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=8388608	repeat=5	steps=8192	first_ns=202.423095	revisit_ns=166.610718	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=8388608	repeat=5	steps=8192	first_ns=243.515004	revisit_ns=168.100982	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=8388608	repeat=5	steps=8192	first_ns=261.184695	revisit_ns=169.403066	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=8388608	repeat=5	steps=8192	first_ns=262.771607	revisit_ns=169.601435	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=8388608	repeat=6	steps=8192	first_ns=253.896076	revisit_ns=168.212893	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=8388608	repeat=6	steps=8192	first_ns=257.731116	revisit_ns=172.882068	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=8388608	repeat=6	steps=8192	first_ns=263.122558	revisit_ns=169.357307	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=8388608	repeat=6	steps=8192	first_ns=261.744177	revisit_ns=171.386716	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=8388608	repeat=6	steps=8192	first_ns=261.17452	revisit_ns=169.418328	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=8388608	repeat=6	steps=8192	first_ns=190.81115	revisit_ns=169.82014	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=8388608	repeat=6	steps=8192	first_ns=213.50607	revisit_ns=168.034873	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=8388608	repeat=6	steps=8192	first_ns=237.442009	revisit_ns=169.601435	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=8388608	repeat=6	steps=8192	first_ns=267.069495	revisit_ns=169.092814	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=8388608	repeat=6	steps=8192	first_ns=251.581824	revisit_ns=170.293177	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=8388608	repeat=6	steps=8192	first_ns=258.371983	revisit_ns=170.969642	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=8388608	median=194.162993	min=186.538699	max=200.759885	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_2m	bytes=8388608	median=202.423095	min=195.287072	max=213.50607	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_8m	bytes=8388608	median=237.442009	min=228.724161	max=243.515004	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_32m	bytes=8388608	median=264.816293	min=256.89188	max=267.069495	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_128m	bytes=8388608	median=259.221395	min=245.905568	max=267.379747	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=8388608	median=255.172736	min=247.395832	max=270.04495	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_2m	bytes=8388608	median=253.896076	min=247.970576	max=283.340455	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_8m	bytes=8388608	median=256.408683	min=246.816001	max=262.55799	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_32m	bytes=8388608	median=255.772903	min=245.885204	max=263.122558	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_128m	bytes=8388608	median=260.528566	min=248.443598	max=281.72812	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=8388608	median=255.854289	min=242.701205	max=267.044058	unit=ns/load
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=16777216	repeat=0	steps=8192	first_ns=230.204265	revisit_ns=172.292076	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=16777216	repeat=0	steps=8192	first_ns=234.959913	revisit_ns=171.666457	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=16777216	repeat=0	steps=8192	first_ns=257.354742	revisit_ns=173.589072	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=16777216	repeat=0	steps=8192	first_ns=243.362422	revisit_ns=173.736566	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=16777216	repeat=0	steps=8192	first_ns=256.189978	revisit_ns=173.492424	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=16777216	repeat=0	steps=8192	first_ns=263.687127	revisit_ns=175.979622	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=16777216	repeat=0	steps=8192	first_ns=248.672478	revisit_ns=174.977615	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=16777216	repeat=0	steps=8192	first_ns=251.032503	revisit_ns=172.861732	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=16777216	repeat=0	steps=8192	first_ns=267.669677	revisit_ns=170.791623	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=16777216	repeat=0	steps=8192	first_ns=260.142016	revisit_ns=178.400668	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=16777216	repeat=0	steps=8192	first_ns=244.14571	revisit_ns=171.325695	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=16777216	repeat=1	steps=8192	first_ns=253.463739	revisit_ns=172.332761	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=16777216	repeat=1	steps=8192	first_ns=271.865844	revisit_ns=173.385629	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=16777216	repeat=1	steps=8192	first_ns=249.832155	revisit_ns=173.121123	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=16777216	repeat=1	steps=8192	first_ns=271.596264	revisit_ns=173.660283	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=16777216	repeat=1	steps=8192	first_ns=317.281078	revisit_ns=223.434455	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=16777216	repeat=1	steps=8192	first_ns=314.498891	revisit_ns=222.71729	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=16777216	repeat=1	steps=8192	first_ns=296.737682	revisit_ns=200.286877	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=16777216	repeat=1	steps=8192	first_ns=265.462234	revisit_ns=175.659181	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=16777216	repeat=1	steps=8192	first_ns=260.818481	revisit_ns=171.966548	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=16777216	repeat=1	steps=8192	first_ns=274.485274	revisit_ns=171.635946	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=16777216	repeat=1	steps=8192	first_ns=245.06123	revisit_ns=170.918796	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=16777216	repeat=2	steps=8192	first_ns=254.425046	revisit_ns=173.324594	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=16777216	repeat=2	steps=8192	first_ns=270.182284	revisit_ns=176.213575	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=16777216	repeat=2	steps=8192	first_ns=271.545403	revisit_ns=175.323478	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=16777216	repeat=2	steps=8192	first_ns=248.214718	revisit_ns=215.240476	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=16777216	repeat=2	steps=8192	first_ns=276.702877	revisit_ns=194.351202	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=16777216	repeat=2	steps=8192	first_ns=266.291295	revisit_ns=176.676437	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=16777216	repeat=2	steps=8192	first_ns=272.537235	revisit_ns=180.9845	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=16777216	repeat=2	steps=8192	first_ns=290.802006	revisit_ns=190.210983	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=16777216	repeat=2	steps=8192	first_ns=266.484577	revisit_ns=175.125123	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=16777216	repeat=2	steps=8192	first_ns=245.534267	revisit_ns=172.754923	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=16777216	repeat=2	steps=8192	first_ns=252.395623	revisit_ns=175.659181	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=16777216	repeat=3	steps=8192	first_ns=262.634273	revisit_ns=176.483155	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=16777216	repeat=3	steps=8192	first_ns=257.715868	revisit_ns=174.423221	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=16777216	repeat=3	steps=8192	first_ns=285.45125	revisit_ns=206.049606	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=16777216	repeat=3	steps=8192	first_ns=306.793211	revisit_ns=235.015875	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=16777216	repeat=3	steps=8192	first_ns=308.319102	revisit_ns=208.562213	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=16777216	repeat=3	steps=8192	first_ns=266.764317	revisit_ns=176.605226	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=16777216	repeat=3	steps=8192	first_ns=254.216516	revisit_ns=178.421018	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=16777216	repeat=3	steps=8192	first_ns=271.967579	revisit_ns=175.476075	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=16777216	repeat=3	steps=8192	first_ns=255.920412	revisit_ns=172.332761	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=16777216	repeat=3	steps=8192	first_ns=264.465328	revisit_ns=173.583985	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=16777216	repeat=3	steps=8192	first_ns=270.12635	revisit_ns=172.526029	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=16777216	repeat=4	steps=8192	first_ns=261.647543	revisit_ns=171.778368	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=16777216	repeat=4	steps=8192	first_ns=284.790033	revisit_ns=205.4596	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=16777216	repeat=4	steps=8192	first_ns=322.46399	revisit_ns=223.953251	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=16777216	repeat=4	steps=8192	first_ns=269.20064	revisit_ns=183.56323	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=16777216	repeat=4	steps=8192	first_ns=270.370492	revisit_ns=174.982716	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=16777216	repeat=4	steps=8192	first_ns=275.57374	revisit_ns=190.653481	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=16777216	repeat=4	steps=8192	first_ns=278.320314	revisit_ns=192.0166	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=16777216	repeat=4	steps=8192	first_ns=255.193072	revisit_ns=178.15654	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=16777216	repeat=4	steps=8192	first_ns=262.074792	revisit_ns=178.532929	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=16777216	repeat=4	steps=8192	first_ns=264.475503	revisit_ns=175.984695	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=16777216	repeat=4	steps=8192	first_ns=254.114795	revisit_ns=176.391595	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=16777216	repeat=5	steps=8192	first_ns=240.905749	revisit_ns=171.325695	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=16777216	repeat=5	steps=8192	first_ns=268.915812	revisit_ns=182.718907	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=16777216	repeat=5	steps=8192	first_ns=275.543215	revisit_ns=179.931646	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=16777216	repeat=5	steps=8192	first_ns=268.157962	revisit_ns=179.463711	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=16777216	repeat=5	steps=8192	first_ns=285.868325	revisit_ns=190.872186	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=16777216	repeat=5	steps=8192	first_ns=250.951132	revisit_ns=173.065189	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=16777216	repeat=5	steps=8192	first_ns=246.180221	revisit_ns=173.39579	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=16777216	repeat=5	steps=8192	first_ns=255.376179	revisit_ns=171.371468	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=16777216	repeat=5	steps=8192	first_ns=268.259683	revisit_ns=173.538197	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=16777216	repeat=5	steps=8192	first_ns=265.89457	revisit_ns=176.651	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=16777216	repeat=5	steps=8192	first_ns=259.368889	revisit_ns=174.01122	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=16777216	repeat=6	steps=8192	first_ns=262.797045	revisit_ns=174.702961	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=16777216	repeat=6	steps=8192	first_ns=262.969976	revisit_ns=173.477176	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=16777216	repeat=6	steps=8192	first_ns=279.617311	revisit_ns=181.950881	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=16777216	repeat=6	steps=8192	first_ns=355.677287	revisit_ns=195.002244	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=16777216	repeat=6	steps=8192	first_ns=283.243807	revisit_ns=191.721597	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=16777216	repeat=6	steps=8192	first_ns=236.251822	revisit_ns=178.985587	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=16777216	repeat=6	steps=8192	first_ns=253.331507	revisit_ns=174.484256	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=16777216	repeat=6	steps=8192	first_ns=277.160652	revisit_ns=177.062986	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=16777216	repeat=6	steps=8192	first_ns=265.477496	revisit_ns=172.643013	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=16777216	repeat=6	steps=8192	first_ns=268.961585	revisit_ns=170.104983	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=16777216	repeat=6	steps=8192	first_ns=251.251222	revisit_ns=186.386117	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=16777216	median=245.534267	min=230.204265	max=255.920412	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_2m	bytes=16777216	median=253.463739	min=234.959913	max=264.465328	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_8m	bytes=16777216	median=268.259683	min=254.425046	max=277.160652	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_32m	bytes=16777216	median=262.634273	min=243.362422	max=270.182284	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_128m	bytes=16777216	median=261.647543	min=256.189978	max=271.596264	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=16777216	median=263.687127	min=240.905749	max=317.281078	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_2m	bytes=16777216	median=276.702877	min=248.672478	max=322.46399	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_8m	bytes=16777216	median=269.20064	min=251.032503	max=308.319102	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_32m	bytes=16777216	median=268.157962	min=265.462234	max=279.617311	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_128m	bytes=16777216	median=275.57374	min=254.216516	max=355.677287	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=16777216	median=271.967579	min=244.14571	max=283.243807	unit=ns/load
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=33554432	repeat=0	steps=8192	first_ns=277.969363	revisit_ns=187.77466	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=33554432	repeat=0	steps=8192	first_ns=283.604933	revisit_ns=191.243487	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=33554432	repeat=0	steps=8192	first_ns=276.550281	revisit_ns=190.81115	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=33554432	repeat=0	steps=8192	first_ns=280.090333	revisit_ns=190.719604	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=33554432	repeat=0	steps=8192	first_ns=284.622189	revisit_ns=187.647501	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=33554432	repeat=0	steps=8192	first_ns=320.902501	revisit_ns=234.593713	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=33554432	repeat=0	steps=8192	first_ns=345.255529	revisit_ns=233.846038	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=33554432	repeat=0	steps=8192	first_ns=295.018523	revisit_ns=204.864492	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=33554432	repeat=0	steps=8192	first_ns=287.745152	revisit_ns=206.726085	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=33554432	repeat=0	steps=8192	first_ns=436.345417	revisit_ns=209.442135	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=33554432	repeat=0	steps=8192	first_ns=304.229744	revisit_ns=197.077426	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=33554432	repeat=1	steps=8192	first_ns=281.723018	revisit_ns=187.891644	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=33554432	repeat=1	steps=8192	first_ns=257.476799	revisit_ns=185.022984	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=33554432	repeat=1	steps=8192	first_ns=285.669969	revisit_ns=187.896731	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=33554432	repeat=1	steps=8192	first_ns=285.827639	revisit_ns=184.336344	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=33554432	repeat=1	steps=8192	first_ns=282.226566	revisit_ns=190.989184	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=33554432	repeat=1	steps=8192	first_ns=345.952358	revisit_ns=236.053467	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=33554432	repeat=1	steps=8192	first_ns=267.898557	revisit_ns=183.10547	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=33554432	repeat=1	steps=8192	first_ns=282.577517	revisit_ns=208.175663	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=33554432	repeat=1	steps=8192	first_ns=386.906947	revisit_ns=234.349571	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=33554432	repeat=1	steps=8192	first_ns=266.296382	revisit_ns=192.291253	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=33554432	repeat=1	steps=8192	first_ns=278.97643	revisit_ns=187.683113	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=33554432	repeat=2	steps=8192	first_ns=270.675656	revisit_ns=185.043334	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=33554432	repeat=2	steps=8192	first_ns=284.19494	revisit_ns=187.942518	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=33554432	repeat=2	steps=8192	first_ns=274.744664	revisit_ns=183.268241	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=33554432	repeat=2	steps=8192	first_ns=265.024823	revisit_ns=185.470583	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=33554432	repeat=2	steps=8192	first_ns=274.403888	revisit_ns=185.526531	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=33554432	repeat=2	steps=8192	first_ns=277.92359	revisit_ns=185.999554	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=33554432	repeat=2	steps=8192	first_ns=290.639235	revisit_ns=203.659056	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=33554432	repeat=2	steps=8192	first_ns=293.71644	revisit_ns=206.639612	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=33554432	repeat=2	steps=8192	first_ns=287.902836	revisit_ns=186.019903	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=33554432	repeat=2	steps=8192	first_ns=266.255697	revisit_ns=187.179552	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=33554432	repeat=2	steps=8192	first_ns=285.4309	revisit_ns=187.271112	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=33554432	repeat=3	steps=8192	first_ns=257.186883	revisit_ns=187.179566	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=33554432	repeat=3	steps=8192	first_ns=264.826454	revisit_ns=182.652798	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=33554432	repeat=3	steps=8192	first_ns=254.211429	revisit_ns=181.823737	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=33554432	repeat=3	steps=8192	first_ns=274.353027	revisit_ns=189.636225	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=33554432	repeat=3	steps=8192	first_ns=272.028601	revisit_ns=188.064575	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=33554432	repeat=3	steps=8192	first_ns=256.011958	revisit_ns=185.119632	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=33554432	repeat=3	steps=8192	first_ns=269.943243	revisit_ns=184.300745	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=33554432	repeat=3	steps=8192	first_ns=266.113275	revisit_ns=184.412627	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=33554432	repeat=3	steps=8192	first_ns=262.954714	revisit_ns=182.540887	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=33554432	repeat=3	steps=8192	first_ns=280.568443	revisit_ns=186.899825	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=33554432	repeat=3	steps=8192	first_ns=289.393114	revisit_ns=184.076939	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=33554432	repeat=4	steps=8192	first_ns=272.506711	revisit_ns=186.401365	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=33554432	repeat=4	steps=8192	first_ns=262.415568	revisit_ns=187.784835	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=33554432	repeat=4	steps=8192	first_ns=265.192668	revisit_ns=184.783943	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=33554432	repeat=4	steps=8192	first_ns=256.210328	revisit_ns=182.769767	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=33554432	repeat=4	steps=8192	first_ns=258.143103	revisit_ns=186.935424	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=33554432	repeat=4	steps=8192	first_ns=274.91761	revisit_ns=184.967035	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=33554432	repeat=4	steps=8192	first_ns=276.596069	revisit_ns=184.99756	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=33554432	repeat=4	steps=8192	first_ns=286.778771	revisit_ns=187.576305	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=33554432	repeat=4	steps=8192	first_ns=275.588988	revisit_ns=186.375942	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=33554432	repeat=4	steps=8192	first_ns=283.665969	revisit_ns=188.55286	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=33554432	repeat=4	steps=8192	first_ns=263.234455	revisit_ns=182.515464	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=33554432	repeat=5	steps=8192	first_ns=320.312495	revisit_ns=218.917847	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=33554432	repeat=5	steps=8192	first_ns=340.484618	revisit_ns=198.60839	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=33554432	repeat=5	steps=8192	first_ns=308.008822	revisit_ns=201.858512	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=33554432	repeat=5	steps=8192	first_ns=302.719116	revisit_ns=207.244867	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=33554432	repeat=5	steps=8192	first_ns=459.335325	revisit_ns=207.555132	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=33554432	repeat=5	steps=8192	first_ns=300.618495	revisit_ns=194.671642	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=33554432	repeat=5	steps=8192	first_ns=275.451654	revisit_ns=180.618287	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=33554432	repeat=5	steps=8192	first_ns=279.693609	revisit_ns=187.77466	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=33554432	repeat=5	steps=8192	first_ns=269.790647	revisit_ns=185.577392	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=33554432	repeat=5	steps=8192	first_ns=287.714641	revisit_ns=187.759397	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=33554432	repeat=5	steps=8192	first_ns=287.0636	revisit_ns=188.486737	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=33554432	repeat=6	steps=8192	first_ns=345.214843	revisit_ns=233.0017	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=33554432	repeat=6	steps=8192	first_ns=297.520955	revisit_ns=192.306516	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=33554432	repeat=6	steps=8192	first_ns=299.301149	revisit_ns=186.508188	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=33554432	repeat=6	steps=8192	first_ns=289.754226	revisit_ns=191.070555	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=33554432	repeat=6	steps=8192	first_ns=281.595874	revisit_ns=182.317095	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=33554432	repeat=6	steps=8192	first_ns=271.352135	revisit_ns=182.454428	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=33554432	repeat=6	steps=8192	first_ns=253.102627	revisit_ns=183.975217	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=33554432	repeat=6	steps=8192	first_ns=284.006759	revisit_ns=186.965949	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=33554432	repeat=6	steps=8192	first_ns=280.680339	revisit_ns=187.133793	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=33554432	repeat=6	steps=8192	first_ns=290.608725	revisit_ns=183.003749	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=33554432	repeat=6	steps=8192	first_ns=287.501024	revisit_ns=205.510446	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=33554432	median=275.451654	min=262.954714	max=286.778771	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_2m	bytes=33554432	median=280.568443	min=253.102627	max=285.4309	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_8m	bytes=33554432	median=276.550281	min=257.476799	max=289.393114	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_32m	bytes=33554432	median=280.680339	min=257.186883	max=287.714641	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_128m	bytes=33554432	median=284.622189	min=264.826454	max=290.608725	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=33554432	median=282.226566	min=254.211429	max=320.902501	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_2m	bytes=33554432	median=340.484618	min=265.192668	max=345.952358	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_8m	bytes=33554432	median=277.92359	min=256.210328	max=308.008822	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_32m	bytes=33554432	median=287.745152	min=256.011958	max=302.719116	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_128m	bytes=33554432	median=293.71644	min=269.943243	max=459.335325	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=33554432	median=281.595874	min=266.113275	max=304.229744	unit=ns/load
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=67108864	repeat=0	steps=8192	first_ns=400.100717	revisit_ns=286.875405	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=67108864	repeat=0	steps=8192	first_ns=407.821659	revisit_ns=286.727911	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=67108864	repeat=0	steps=8192	first_ns=411.682123	revisit_ns=287.414551	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=67108864	repeat=0	steps=8192	first_ns=409.439096	revisit_ns=290.390005	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=67108864	repeat=0	steps=8192	first_ns=404.205323	revisit_ns=286.575329	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=67108864	repeat=0	steps=8192	first_ns=473.464965	revisit_ns=342.483531	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=67108864	repeat=0	steps=8192	first_ns=409.759508	revisit_ns=293.980904	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=67108864	repeat=0	steps=8192	first_ns=443.252574	revisit_ns=318.954463	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=67108864	repeat=0	steps=8192	first_ns=522.460937	revisit_ns=312.637326	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=67108864	repeat=0	steps=8192	first_ns=378.936775	revisit_ns=315.826426	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=67108864	repeat=0	steps=8192	first_ns=409.200041	revisit_ns=294.586187	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=67108864	repeat=1	steps=8192	first_ns=383.443194	revisit_ns=282.05362	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=67108864	repeat=1	steps=8192	first_ns=402.130127	revisit_ns=273.208613	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=67108864	repeat=1	steps=8192	first_ns=397.313443	revisit_ns=288.996375	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=67108864	repeat=1	steps=8192	first_ns=393.4733	revisit_ns=284.622189	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=67108864	repeat=1	steps=8192	first_ns=375.223792	revisit_ns=286.290486	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=67108864	repeat=1	steps=8192	first_ns=407.913205	revisit_ns=277.786256	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=67108864	repeat=1	steps=8192	first_ns=486.612947	revisit_ns=357.452393	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=67108864	repeat=1	steps=8192	first_ns=455.897009	revisit_ns=323.059083	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=67108864	repeat=1	steps=8192	first_ns=397.323603	revisit_ns=285.807289	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=67108864	repeat=1	steps=8192	first_ns=311.991371	revisit_ns=231.24187	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=67108864	repeat=1	steps=8192	first_ns=293.99618	revisit_ns=211.59363	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=67108864	repeat=2	steps=8192	first_ns=282.958979	revisit_ns=220.809937	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=67108864	repeat=2	steps=8192	first_ns=311.559049	revisit_ns=212.25992	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=67108864	repeat=2	steps=8192	first_ns=312.52543	revisit_ns=213.500982	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=67108864	repeat=2	steps=8192	first_ns=324.996947	revisit_ns=222.910558	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=67108864	repeat=2	steps=8192	first_ns=298.767091	revisit_ns=225.677496	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=67108864	repeat=2	steps=8192	first_ns=509.760525	revisit_ns=296.78344	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=67108864	repeat=2	steps=8192	first_ns=527.542113	revisit_ns=286.544804	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=67108864	repeat=2	steps=8192	first_ns=523.218787	revisit_ns=285.415652	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=67108864	repeat=2	steps=8192	first_ns=321.945194	revisit_ns=232.762659	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=67108864	repeat=2	steps=8192	first_ns=292.755118	revisit_ns=213.272088	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=67108864	repeat=2	steps=8192	first_ns=303.400682	revisit_ns=213.526405	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=67108864	repeat=3	steps=8192	first_ns=307.846079	revisit_ns=211.954742	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=67108864	repeat=3	steps=8192	first_ns=319.285078	revisit_ns=214.833577	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=67108864	repeat=3	steps=8192	first_ns=305.394494	revisit_ns=215.499881	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=67108864	repeat=3	steps=8192	first_ns=338.912955	revisit_ns=251.368206	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=67108864	repeat=3	steps=8192	first_ns=323.862707	revisit_ns=223.052979	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=67108864	repeat=3	steps=8192	first_ns=337.14295	revisit_ns=232.701623	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=67108864	repeat=3	steps=8192	first_ns=560.150141	revisit_ns=302.825924	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=67108864	repeat=3	steps=8192	first_ns=321.3501	revisit_ns=231.882723	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=67108864	repeat=3	steps=8192	first_ns=311.935423	revisit_ns=213.74511	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=67108864	repeat=3	steps=8192	first_ns=307.495114	revisit_ns=213.668827	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=67108864	repeat=3	steps=8192	first_ns=305.699672	revisit_ns=216.944372	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=67108864	repeat=4	steps=8192	first_ns=289.850874	revisit_ns=215.260826	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=67108864	repeat=4	steps=8192	first_ns=350.199386	revisit_ns=256.13403	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=67108864	repeat=4	steps=8192	first_ns=351.226802	revisit_ns=240.707394	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=67108864	repeat=4	steps=8192	first_ns=319.376625	revisit_ns=225.814816	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=67108864	repeat=4	steps=8192	first_ns=322.865816	revisit_ns=228.749599	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=67108864	repeat=4	steps=8192	first_ns=448.13028	revisit_ns=243.03182	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=67108864	repeat=4	steps=8192	first_ns=310.104369	revisit_ns=232.757557	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=67108864	repeat=4	steps=8192	first_ns=308.532719	revisit_ns=212.341305	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=67108864	repeat=4	steps=8192	first_ns=312.688201	revisit_ns=215.744024	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=67108864	repeat=4	steps=8192	first_ns=312.337249	revisit_ns=213.373809	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=67108864	repeat=4	steps=8192	first_ns=304.768875	revisit_ns=216.740929	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=67108864	repeat=5	steps=8192	first_ns=314.585378	revisit_ns=217.646274	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=67108864	repeat=5	steps=8192	first_ns=312.306724	revisit_ns=285.730991	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=67108864	repeat=5	steps=8192	first_ns=570.449828	revisit_ns=304.346727	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=67108864	repeat=5	steps=8192	first_ns=536.488841	revisit_ns=295.41016	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=67108864	repeat=5	steps=8192	first_ns=560.872394	revisit_ns=318.649299	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=67108864	repeat=5	steps=8192	first_ns=510.04028	revisit_ns=244.674695	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=67108864	repeat=5	steps=8192	first_ns=309.326168	revisit_ns=213.373809	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=67108864	repeat=5	steps=8192	first_ns=292.755118	revisit_ns=214.314781	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=67108864	repeat=5	steps=8192	first_ns=302.215582	revisit_ns=214.497888	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=67108864	repeat=5	steps=8192	first_ns=313.0951	revisit_ns=214.24357	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=67108864	repeat=5	steps=8192	first_ns=312.820447	revisit_ns=216.257732	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=67108864	repeat=6	steps=8192	first_ns=345.932008	revisit_ns=249.293009	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=67108864	repeat=6	steps=8192	first_ns=336.471558	revisit_ns=230.656937	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=67108864	repeat=6	steps=8192	first_ns=393.646232	revisit_ns=251.358031	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=67108864	repeat=6	steps=8192	first_ns=521.138503	revisit_ns=234.329221	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=67108864	repeat=6	steps=8192	first_ns=354.339591	revisit_ns=232.014969	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=67108864	repeat=6	steps=8192	first_ns=300.659181	revisit_ns=213.973991	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=67108864	repeat=6	steps=8192	first_ns=288.462317	revisit_ns=212.692271	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=67108864	repeat=6	steps=8192	first_ns=311.208083	revisit_ns=212.448114	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=67108864	repeat=6	steps=8192	first_ns=306.803372	revisit_ns=215.454094	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=67108864	repeat=6	steps=8192	first_ns=313.720705	revisit_ns=216.186521	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=67108864	repeat=6	steps=8192	first_ns=355.433144	revisit_ns=254.247027	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=67108864	median=308.532719	min=292.755118	max=400.100717	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_2m	bytes=67108864	median=307.495114	min=288.462317	max=407.821659	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_8m	bytes=67108864	median=311.208083	min=282.958979	max=411.682123	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_32m	bytes=67108864	median=311.559049	min=304.768875	max=409.439096	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_128m	bytes=67108864	median=313.720705	min=289.850874	max=404.205323	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=67108864	median=350.199386	min=305.394494	max=473.464965	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_2m	bytes=67108864	median=345.932008	min=298.767091	max=409.759508	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_8m	bytes=67108864	median=443.252574	min=319.376625	max=570.449828	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_32m	bytes=67108864	median=455.897009	min=322.865816	max=536.488841	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_128m	bytes=67108864	median=521.138503	min=378.936775	max=560.872394	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=67108864	median=321.945194	min=310.104369	max=510.04028	unit=ns/load
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=134217728	repeat=0	steps=8192	first_ns=441.706348	revisit_ns=314.015708	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=134217728	repeat=0	steps=8192	first_ns=422.719324	revisit_ns=312.383008	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=134217728	repeat=0	steps=8192	first_ns=436.742155	revisit_ns=310.409547	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=134217728	repeat=0	steps=8192	first_ns=445.602424	revisit_ns=316.370645	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=134217728	repeat=0	steps=8192	first_ns=426.422119	revisit_ns=320.358282	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=134217728	repeat=0	steps=8192	first_ns=426.752734	revisit_ns=319.15792	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=134217728	repeat=0	steps=8192	first_ns=438.735967	revisit_ns=323.832197	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=134217728	repeat=0	steps=8192	first_ns=468.673704	revisit_ns=336.547856	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=134217728	repeat=0	steps=8192	first_ns=435.97413	revisit_ns=315.67383	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=134217728	repeat=0	steps=8192	first_ns=344.782507	revisit_ns=238.566088	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=134217728	repeat=0	steps=8192	first_ns=326.390591	revisit_ns=237.10632	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=134217728	repeat=1	steps=8192	first_ns=327.407847	revisit_ns=234.553013	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=134217728	repeat=1	steps=8192	first_ns=330.881747	revisit_ns=235.544832	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=134217728	repeat=1	steps=8192	first_ns=324.132287	revisit_ns=236.958826	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=134217728	repeat=1	steps=8192	first_ns=332.417798	revisit_ns=235.107422	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=134217728	repeat=1	steps=8192	first_ns=364.491783	revisit_ns=265.340176	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=134217728	repeat=1	steps=8192	first_ns=366.266889	revisit_ns=255.182911	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=134217728	repeat=1	steps=8192	first_ns=333.328245	revisit_ns=241.200766	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=134217728	repeat=1	steps=8192	first_ns=402.297985	revisit_ns=301.51368	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=134217728	repeat=1	steps=8192	first_ns=347.137458	revisit_ns=245.681761	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=134217728	repeat=1	steps=8192	first_ns=327.051794	revisit_ns=241.836545	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=134217728	repeat=1	steps=8192	first_ns=325.729374	revisit_ns=234.725945	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=134217728	repeat=2	steps=8192	first_ns=334.813436	revisit_ns=235.804251	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=134217728	repeat=2	steps=8192	first_ns=324.213659	revisit_ns=234.2682	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=134217728	repeat=2	steps=8192	first_ns=331.390382	revisit_ns=234.690347	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=134217728	repeat=2	steps=8192	first_ns=317.749013	revisit_ns=236.714669	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=134217728	repeat=2	steps=8192	first_ns=367.523185	revisit_ns=264.968875	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=134217728	repeat=2	steps=8192	first_ns=356.246943	revisit_ns=243.764234	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=134217728	repeat=2	steps=8192	first_ns=329.711909	revisit_ns=242.436727	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=134217728	repeat=2	steps=8192	first_ns=352.249145	revisit_ns=262.324022	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=134217728	repeat=2	steps=8192	first_ns=351.430259	revisit_ns=255.523673	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=134217728	repeat=2	steps=8192	first_ns=327.48413	revisit_ns=234.832768	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=134217728	repeat=2	steps=8192	first_ns=308.329263	revisit_ns=232.986451	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=134217728	repeat=3	steps=8192	first_ns=312.062582	revisit_ns=236.740121	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=134217728	repeat=3	steps=8192	first_ns=323.684688	revisit_ns=232.838957	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=134217728	repeat=3	steps=8192	first_ns=331.242873	revisit_ns=236.09924	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=134217728	repeat=3	steps=8192	first_ns=315.399163	revisit_ns=254.938755	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=134217728	repeat=3	steps=8192	first_ns=498.748776	revisit_ns=266.906738	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=134217728	repeat=3	steps=8192	first_ns=587.692256	revisit_ns=374.694821	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=134217728	repeat=3	steps=8192	first_ns=455.94787	revisit_ns=256.01706	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=134217728	repeat=3	steps=8192	first_ns=339.848839	revisit_ns=256.332399	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=134217728	repeat=3	steps=8192	first_ns=337.305707	revisit_ns=236.735019	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=134217728	repeat=3	steps=8192	first_ns=331.431067	revisit_ns=234.725945	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=134217728	repeat=3	steps=8192	first_ns=334.96093	revisit_ns=235.96192	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=134217728	repeat=4	steps=8192	first_ns=319.117234	revisit_ns=232.737221	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=134217728	repeat=4	steps=8192	first_ns=257.685343	revisit_ns=184.616098	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=134217728	repeat=4	steps=8192	first_ns=301.773071	revisit_ns=185.180667	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=134217728	repeat=4	steps=8192	first_ns=262.115478	revisit_ns=184.616084	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=134217728	repeat=4	steps=8192	first_ns=258.397421	revisit_ns=189.839682	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=134217728	repeat=4	steps=8192	first_ns=270.512899	revisit_ns=190.429688	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=134217728	repeat=4	steps=8192	first_ns=262.97505	revisit_ns=184.692382	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=134217728	repeat=4	steps=8192	first_ns=325.663237	revisit_ns=232.803345	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=134217728	repeat=4	steps=8192	first_ns=309.463502	revisit_ns=234.217325	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=134217728	repeat=4	steps=8192	first_ns=325.398773	revisit_ns=232.498166	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=134217728	repeat=4	steps=8192	first_ns=330.184946	revisit_ns=234.390271	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=134217728	repeat=5	steps=8192	first_ns=321.960457	revisit_ns=234.013868	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=134217728	repeat=5	steps=8192	first_ns=336.151132	revisit_ns=242.604571	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=134217728	repeat=5	steps=8192	first_ns=325.286862	revisit_ns=233.952846	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=134217728	repeat=5	steps=8192	first_ns=322.219847	revisit_ns=232.961028	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=134217728	repeat=5	steps=8192	first_ns=360.061648	revisit_ns=258.946741	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=134217728	repeat=5	steps=8192	first_ns=336.232503	revisit_ns=235.351564	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=134217728	repeat=5	steps=8192	first_ns=330.088298	revisit_ns=237.76245	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=134217728	repeat=5	steps=8192	first_ns=333.577475	revisit_ns=235.997518	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=134217728	repeat=5	steps=8192	first_ns=323.47107	revisit_ns=233.281455	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=134217728	repeat=5	steps=8192	first_ns=324.707031	revisit_ns=234.420781	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=134217728	repeat=5	steps=8192	first_ns=328.613282	revisit_ns=235.351564	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_2m	bytes=134217728	repeat=6	steps=8192	first_ns=334.314976	revisit_ns=246.831263	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_8m	bytes=134217728	repeat=6	steps=8192	first_ns=347.005212	revisit_ns=245.254512	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_32m	bytes=134217728	repeat=6	steps=8192	first_ns=336.568192	revisit_ns=237.970994	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm_cpu_evict_128m	bytes=134217728	repeat=6	steps=8192	first_ns=347.96652	revisit_ns=270.451864	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=eviction_pass	bytes=134217728	repeat=6	steps=8192	first_ns=320.241284	revisit_ns=256.159467	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm	bytes=134217728	repeat=6	steps=8192	first_ns=333.740232	revisit_ns=235.25493	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_2m	bytes=134217728	repeat=6	steps=8192	first_ns=323.582967	revisit_ns=233.698529	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_8m	bytes=134217728	repeat=6	steps=8192	first_ns=328.567509	revisit_ns=233.139033	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_32m	bytes=134217728	repeat=6	steps=8192	first_ns=328.694668	revisit_ns=233.444212	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=gpu_warm_gpu_evict_128m	bytes=134217728	repeat=6	steps=8192	first_ns=329.74242	revisit_ns=235.478709	checksum_valid=1
+GCACHE_CONTROL_SAMPLE	condition=cpu_warm	bytes=134217728	repeat=6	steps=8192	first_ns=319.402062	revisit_ns=233.047473	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=134217728	median=330.088298	min=325.663237	max=441.706348	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_2m	bytes=134217728	median=327.407847	min=308.329263	max=422.719324	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_8m	bytes=134217728	median=330.881747	min=323.47107	max=436.742155	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_32m	bytes=134217728	median=324.707031	min=312.062582	max=445.602424	unit=ns/load
+GCACHE_POINT	condition=gpu_warm_gpu_evict_128m	bytes=134217728	median=329.74242	min=319.117234	max=426.422119	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=134217728	median=321.960457	min=257.685343	max=426.752734	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_2m	bytes=134217728	median=336.151132	min=301.773071	max=438.735967	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_8m	bytes=134217728	median=347.005212	min=262.115478	max=498.748776	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_32m	bytes=134217728	median=336.568192	min=258.397421	max=587.692256	unit=ns/load
+GCACHE_POINT	condition=cpu_warm_cpu_evict_128m	bytes=134217728	median=347.96652	min=270.512899	max=455.94787	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=134217728	median=327.051794	min=262.97505	max=351.430259	unit=ns/load
+GCACHE_SAVED	id=20261014-190255-965-metal-cache-controls
+GCACHE_DONE	points=242	checksum_valid=1	duration=61.1724073	cache_attribution=unverified

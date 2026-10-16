@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "2026-10-14T04:14:39Z",
+  "id" : "complete-suite-7BB710D6-5820-4613-85CD-AE7A2A77133E",
+  "jobs" : [
+    {
+      "error" : "Stable throughput was not reached; Throughput fell by more than 5%",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-14T04:14:38Z",
+      "id" : "vulkan\/gpu_burn-256",
+      "request" : "gpu_burn?steps=256&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261014-151438-374"
+      ],
+      "startedAt" : "2026-10-14T04:14:20Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan · GPU Burn · 256"
+    }
+  ],
+  "startedAt" : "2026-10-14T04:14:20Z",
+  "status" : "review"
+}

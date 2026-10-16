@@ -1,0 +1,276 @@
+[
+  {
+    "finishedAt": "2026-10-14T10:08:25Z",
+    "id": "complete-suite-FD6589C3-ADD6-4A53-99AC-41F55004CE53",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:08:25Z",
+        "id": "stream-65536",
+        "request": "stream?particles=65536&vsync=0&api=metal&coverage=fixed",
+        "resultIDs": [
+          "20261014-210824-830"
+        ],
+        "startedAt": "2026-10-14T10:08:09Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Metal \u00b7 Particle 65536 \u00b7 Render"
+      }
+    ],
+    "startedAt": "2026-10-14T10:08:09Z",
+    "status": "passed"
+  },
+  {
+    "finishedAt": "2026-10-14T10:09:19Z",
+    "id": "complete-suite-B89D58F4-967B-4481-8E6D-29CFD0A46EA4",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:09:19Z",
+        "id": "stream-1048576",
+        "request": "stream?particles=1048576&vsync=0&api=metal&coverage=fixed",
+        "resultIDs": [
+          "20261014-210918-754"
+        ],
+        "startedAt": "2026-10-14T10:09:03Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Metal \u00b7 Particle 1048576 \u00b7 Render"
+      }
+    ],
+    "startedAt": "2026-10-14T10:09:03Z",
+    "status": "passed"
+  },
+  {
+    "finishedAt": "2026-10-14T10:10:00Z",
+    "id": "complete-suite-AEFFD033-D111-45B1-9C2B-5B33B12E46B7",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:09:59Z",
+        "id": "stream-4194304",
+        "request": "stream?particles=4194304&vsync=0&api=metal&coverage=fixed",
+        "resultIDs": [
+          "20261014-210959-613"
+        ],
+        "startedAt": "2026-10-14T10:09:43Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Metal \u00b7 Particle 4194304 \u00b7 Render"
+      }
+    ],
+    "startedAt": "2026-10-14T10:09:43Z",
+    "status": "passed"
+  },
+  {
+    "finishedAt": "2026-10-14T10:10:44Z",
+    "id": "complete-suite-8231C513-12AE-4F24-B9F0-01A6E35E46D3",
+    "jobs": [
+      {
+        "error": "Stable throughput was not reached",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:10:43Z",
+        "id": "stream-16777216",
+        "request": "stream?particles=16777216&vsync=0&api=metal&coverage=fixed",
+        "resultIDs": [
+          "20261014-211043-370"
+        ],
+        "startedAt": "2026-10-14T10:10:25Z",
+        "status": "review",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Metal \u00b7 Particle 16777216 \u00b7 Render"
+      }
+    ],
+    "startedAt": "2026-10-14T10:10:25Z",
+    "status": "review"
+  },
+  {
+    "finishedAt": "2026-10-14T10:11:24Z",
+    "id": "complete-suite-03D451B0-E22A-4EBB-A7DF-C76D8EF39279",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:11:24Z",
+        "id": "vulkan/stream-65536",
+        "request": "stream?particles=65536&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [
+          "20261014-211124-330"
+        ],
+        "startedAt": "2026-10-14T10:11:08Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Vulkan (MoltenVK) \u00b7 Particle 65536 \u00b7 Render"
+      }
+    ],
+    "startedAt": "2026-10-14T10:11:08Z",
+    "status": "passed"
+  },
+  {
+    "finishedAt": "2026-10-14T10:12:06Z",
+    "id": "complete-suite-309B0CD4-CEB3-4576-99B0-EDEA331E7BC3",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:12:06Z",
+        "id": "vulkan/stream-1048576",
+        "request": "stream?particles=1048576&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [
+          "20261014-211205-966"
+        ],
+        "startedAt": "2026-10-14T10:11:50Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Vulkan (MoltenVK) \u00b7 Particle 1048576 \u00b7 Render"
+      }
+    ],
+    "startedAt": "2026-10-14T10:11:50Z",
+    "status": "passed"
+  },
+  {
+    "finishedAt": "2026-10-14T10:12:51Z",
+    "id": "complete-suite-97B4D4B0-1AB0-49B8-AF6C-2D172C51669D",
+    "jobs": [
+      {
+        "error": "Stable throughput was not reached",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:12:50Z",
+        "id": "vulkan/stream-4194304",
+        "request": "stream?particles=4194304&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [
+          "20261014-211250-495"
+        ],
+        "startedAt": "2026-10-14T10:12:32Z",
+        "status": "review",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Vulkan (MoltenVK) \u00b7 Particle 4194304 \u00b7 Render"
+      }
+    ],
+    "startedAt": "2026-10-14T10:12:32Z",
+    "status": "review"
+  },
+  {
+    "finishedAt": "2026-10-14T10:13:41Z",
+    "id": "complete-suite-54D4DD74-985E-4C47-BC41-1CF0F4CAB1DB",
+    "jobs": [
+      {
+        "error": "Stable throughput was not reached; Throughput fell by more than 5%",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:13:41Z",
+        "id": "vulkan/stream-16777216",
+        "request": "stream?particles=16777216&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [
+          "20261014-211340-944"
+        ],
+        "startedAt": "2026-10-14T10:13:14Z",
+        "status": "review",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Vulkan (MoltenVK) \u00b7 Particle 16777216 \u00b7 Render"
+      }
+    ],
+    "startedAt": "2026-10-14T10:13:14Z",
+    "status": "review"
+  },
+  {
+    "finishedAt": "2026-10-14T10:14:25Z",
+    "id": "complete-suite-5B43011D-0EA0-4556-A116-B6045A5F9A6C",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:14:24Z",
+        "id": "vulkan/gpu_burn-16",
+        "request": "gpu_burn?steps=16&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261014-211424-270"
+        ],
+        "startedAt": "2026-10-14T10:14:09Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Vulkan \u00b7 GPU Burn \u00b7 16"
+      }
+    ],
+    "startedAt": "2026-10-14T10:14:09Z",
+    "status": "passed"
+  },
+  {
+    "finishedAt": "2026-10-14T10:15:08Z",
+    "id": "complete-suite-0F96013A-A2E9-43FF-B1D4-4610BDF5D358",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:15:07Z",
+        "id": "vulkan/gpu_burn-64",
+        "request": "gpu_burn?steps=64&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261014-211507-642"
+        ],
+        "startedAt": "2026-10-14T10:14:52Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Vulkan \u00b7 GPU Burn \u00b7 64"
+      }
+    ],
+    "startedAt": "2026-10-14T10:14:52Z",
+    "status": "passed"
+  },
+  {
+    "finishedAt": "2026-10-14T10:15:53Z",
+    "id": "complete-suite-D8B1FCB6-7BB4-4761-A33A-3ED38BFED311",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:15:53Z",
+        "id": "vulkan/gpu_burn-256",
+        "request": "gpu_burn?steps=256&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261014-211552-893"
+        ],
+        "startedAt": "2026-10-14T10:15:36Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Vulkan \u00b7 GPU Burn \u00b7 256"
+      }
+    ],
+    "startedAt": "2026-10-14T10:15:36Z",
+    "status": "passed"
+  },
+  {
+    "finishedAt": "2026-10-14T10:16:22Z",
+    "id": "complete-suite-8F18D05E-68A2-49C9-B994-EF0EC39A9114",
+    "jobs": [
+      {
+        "error": "Vulkan timestamps became unreliable during the sweep; mixed timing is rejected and no score is saved",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:16:22Z",
+        "id": "vulkan/memory_sweep",
+        "request": "memory_sweep?api=vulkan",
+        "resultIDs": [],
+        "startedAt": "2026-10-14T10:16:20Z",
+        "status": "failed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Vulkan \u00b7 GPU Cache & Memory"
+      }
+    ],
+    "startedAt": "2026-10-14T10:16:20Z",
+    "status": "failed"
+  }
+]

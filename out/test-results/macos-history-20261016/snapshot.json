@@ -1,0 +1,7 @@
+{
+  "source": "Mac app Application Support/GpuComputeBenchmark",
+  "snapshotDate": "2026-10-16",
+  "rows": 149,
+  "sha256": "62302b228db50009882fe386b65f32a258e3391519ba53f8f341c366367f67aa",
+  "notes": "Unmodified Mac main history and existing report exports. Includes old-schema rows without deviceModel. Diagnostic/preview contracts are retained; not every row is a current accepted score."
+}

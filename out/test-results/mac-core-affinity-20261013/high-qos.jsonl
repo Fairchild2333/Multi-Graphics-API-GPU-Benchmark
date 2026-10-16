@@ -1,0 +1,3 @@
+{"qos":"user_interactive","reported_qos":33,"round":1,"wall_seconds":0.500001708,"cpu_time_raw":11996387,"p_time_raw":11805866,"p_cpu_percent":98.411847,"e_cpu_percent":1.588153,"iterations":341229568,"sink":1276090518070937948}
+{"qos":"user_interactive","reported_qos":33,"round":2,"wall_seconds":0.500005416,"cpu_time_raw":11975918,"p_time_raw":11975558,"p_cpu_percent":99.996994,"e_cpu_percent":0.003006,"iterations":360722432,"sink":8030292307314328669}
+{"qos":"user_interactive","reported_qos":33,"round":3,"wall_seconds":0.500004125,"cpu_time_raw":12000332,"p_time_raw":12000332,"p_cpu_percent":100.000000,"e_cpu_percent":0.000000,"iterations":366813184,"sink":13425892742917539766}

@@ -1,0 +1,31 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "processes",
+      "--device",
+      "00008027-001969920A87002E",
+      "--search",
+      "Mangekyo",
+      "--json-output",
+      "out/test-results/ipad8-1-full-suite-20261016/processes-after-stop.json",
+      "--timeout",
+      "20"
+    ],
+    "commandType" : "devicectl.device.info.processes",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "9A44542D-75A2-58C6-B79C-18BEAED61843",
+    "runningProcesses" : [
+
+    ]
+  }
+}

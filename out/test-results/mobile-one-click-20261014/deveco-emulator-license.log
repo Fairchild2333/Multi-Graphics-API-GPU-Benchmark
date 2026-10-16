@@ -1,0 +1,662 @@
+1/3:
+---------------------------------------
+HarmonyOS Software License and Service Agreement
+
+Last updated: June 28, 2026
+
+The HarmonyOS Software License and Service Agreement (hereinafter referred to as this "Agreement") is entered into and concluded by and between you (an individual, a company, or any other entity) and Huawei Device Co., Ltd. (hereinafter referred to as "Huawei", "we", "us", or "our") regarding the use of this Software (as defined in Section 2 herein) and its services. Before you use your Huawei device or download any updates to this Software contemplated under this Agreement, please read this Agreement carefully, especially any clauses about exclusion or limitation of liability, governing laws, dispute resolution, and other important terms written in bold to draw your attention.
+
+1 Acceptance of Our Terms
+
+By using the Huawei device or downloading updates to this Software, you indicate that you agree and accept to be bound by the terms of this Agreement.
+
+If you do not agree to this Agreement, please do not use this Huawei device or download any updates to this Software. You can request a refund by returning the Huawei device to the franchise store, authorized distributor, or retail store where you purchased the device, subject to the applicable return policy. However, you should be aware that, if you request a refund from a retail store, the store's own return policy may also apply. The return policy shall be governed by the relevant laws and regulations of the country/region where the goods are purchased.
+
+If you are a minor (under the age of 18), please read this Agreement with your parents or legal guardians to ensure that they clearly understand the content of this Agreement before you decide on whether to use this device or download updates to the Software. Please do not use this device or download updates to the Software before you have obtained consent from your parents or legal guardians.
+
+You may visit the Huawei website (consumer.huawei.com) to view a copy of this Agreement at any time and retain a copy of this Agreement for future reference. If you have any questions regarding this Agreement, please contact us using the contact information provided in Section 14 "Contacting Huawei".
+
+2 About This Software
+
+Software under this Agreement refers to:
+
+(1) Software components provided to you along with the Huawei device, including but not limited to the code and other embedded software, documents, interfaces, content, and fonts that are stored on the Huawei device, as well as any data protected by the copyright of Huawei or its licensors;
+
+(2) Updates or upgrades to the software specified in (1).
+
+You agree that this Agreement will apply to any Huawei software (including but not limited to operating systems, apps, and atomic services) that may be installed on your device, unless such software is accompanied by a separate software license agreement, in which case, you agree that the separate software license agreement will apply to your use of such software.
+
+This Software may also contain software components that are protected by copyright of third parties and granted open source software licenses by such third parties ("Open Source Software Components"). Such Open Source Software Components are identified as such through license information provided within the device, which also indicates the open source software licenses applicable to such components. For this reason, the terms and conditions of the open source software licenses shall apply when you are using such Open Source Software Components. This Agreement does not alter any rights or obligations you may have under such open source software licenses. If there are any conflicts between the license conditions set forth in this Agreement and anything about any Open Source Software Components in their open source software licenses, such open source software licenses shall prevail.
+
+Unless otherwise agreed upon, this Software shall be bound by this Agreement, regardless of whether this Software is stored in a read-only memory or any other media or form, or is from any online download location authorized by Huawei.
+
+3 Software License Grant
+
+You are granted a limited and non-exclusive license to use this Software on one Huawei device, subject to and in accordance with this Agreement, and may not sell, transfer, or use it for any other commercial purposes.
+
+Huawei licenses this Software to you for use, rather than sells or transfers it to you. You shall only use this Software in conformity with the terms and conditions of this Agreement. Huawei and its licensors own and retain all rights and titles to the Software and reserve any other rights not expressly granted to you by this Agreement.
+
+4 Limitations of Use
+
+4.1 You may not use Huawei's technologies or intellectual properties to develop software or design, develop, manufacture, sell, or license third-party devices/accessories associated with the Huawei device without prior permission from Huawei.
+
+4.2 You may make a copy of this Software and save it on a computer hard drive or other storage media for the purpose of archiving. However, you may not distribute or make available this Software over a network where it could be used by multiple devices at the same time.
+
+4.3 You may not sell, rent, lease, lend, sublicense, or distribute the entirety or part of the Software (including but not limited to apps, services, code, and source code operated under this Software) to any third party without prior written permission from Huawei. You may make a one-off permanent transfer of the entire license to the Software to another party along with the transfer of ownership of your Huawei device, provided that: (1) the transfer includes your Huawei device and all the Huawei Software; (2) you do not retain copies of all or part of this Software; and (3) the party that receives the Huawei device and this Software has read and accepted all the terms and conditions of this Agreement.
+
+4.4 You shall not allow any third party to copy, decompose, reverse engineer, decompile, disassemble, or create derivatives of this Software without prior written permission from Huawei. In addition, you shall not allow any third party to or attempt to export the source code of this Software, or decode or alter this Software or any part of this Software or any service that it provides.
+
+4.5 You acknowledge and agree that you shall not use this Software to carry out the following activities:
+
+  Copy or use this Software beyond the authorized scope under this Agreement;
+
+  Use this Software in a deceptive manner or for a deceptive purpose;
+
+  Delete any copyright statement or notice contained in this Software;
+
+  Attempt to damage, bypass, change, invalidate, or evade any digital rights management (DRM) system that is related to this Software and/or is intrinsic to this Software;
+
+  Engage in any other improper or illegal acts.
+
+4.6 While using this Software for storage or copying, you need to be authorized by relevant right holders in particular countries or regions. Huawei Software may only be used to reproduce non-copyrighted materials, materials for which you own the copyright, or materials you are authorized or legally permitted to reproduce. You understand that ownership and intellectual property rights of any material displayed, stored, or accessed via your device belong to the owner of the material. Such materials may be protected by copyright law or other intellectual property laws and treaties, and you may need to comply with the agreement or terms of use stipulated by the third party that provides such materials. Unless otherwise agreed upon, this Agreement does not grant you any right to use such materials, nor does it guarantee that you can continue to use them.
+
+4.7 You agree that you shall only use the Software in compliance with all applicable laws and regulations of your country or region of residence or use, including but not limited to the local laws of the country or region where you reside or download or use the Software and services.
+
+4.8 During your use of this Software, the system font libraries will be called. You must use such system font libraries in accordance with their license scope and terms. Some of the font libraries (including but not limited to those below accompanied by licensing policies of the original vendors) are copyrighted by the original vendors, licensed for use exclusively within this Software, and only intended for use by individuals for non-commercial or non-profit purposes such as display, output, and printing. You may not use such font libraries we provide to you for commercial purposes, including but not limited to, using the font libraries or fonts for direct or indirect profit-making purposes, such as for trademarks, logos, promotional materials, packaging, decoration, websites, audio/video content, and demonstrations/exhibitions. If you want to use such font libraries for commercial purposes, you must obtain separate authorization from the original vendors of such font libraries. If such font libraries are accompanied by any licensing policies of the original vendors, you must also read such licensing policies of the original vendors and comply with such licensing policies when using such font libraries.
+
+(1) Founder font libraries: Your use of Founder font libraries must comply with Founder's licensing policies for commercial use (https://www.foundertype.com/index.php/About/powerbus.html).
+
+(2) Hanyi font libraries: Your use of Hanyi font libraries must comply with Hanyi's licensing and pricing policies (https://hanyi.com.cn/license).
+
+5 Software Updates
+
+5.1 To provide you with a better user experience, Huawei may provide you with software update services, including but not limited to system software updates and app updates. We provide update services for this Software to improve the performance, safety, and reliability of products or devices, or to meet functional customization requirements from carriers. Updates to this Software can be installed in different ways, and include bug fixes, system software updates, app updates, updates to any previously installed software (including all-new versions), and performance enhancements.
+
+5.2 Your Huawei device will automatically search for and download update packages over the Internet to provide you with timely update services. These updates are designed to fix cyber security loopholes and prevent new security threats. You acknowledge the necessity of receiving and installing system security update patches in a timely manner. Due to the importance of these updates, your device may automatically install some downloaded updates. Your device will provide timely update notifications to help you understand the related information. We strongly recommend that you keep the default configurations of your device to avoid software issues resulting from delayed updates. If you want to change the default settings for system software updates, you can turn off the related switches by going to Settings , touching the device name to access the About screen, touching the system version card to access the Software update screen, touching : : in the upper right corner, and selecting Update options . You also understand that some apps are provided with an automatic update feature and can automatically download and install updates to your device. Huawei apps will only be automatically updated over WLAN. You can disable this feature on the settings screen in the app concerned.
+
+5.3 Updates that Huawei provides to replace or supplement this Software shall be governed by this Agreement, unless such updates are accompanied by a separate software license agreement, in which case you will be governed by that separate software license agreement.
+
+5.4 You understand and acknowledge that if you decide not to install the software updates provided by Huawei, this may put your device and Software at security risks and may cause the Software to be unavailable or unstable. Some features of the Software may be subject to version restrictions, and you need to update to the latest version to experience them.
+
+6 Services of this Software
+
+6.1 This Software allows you to access such relevant apps and services of Huawei and its affiliates as well as third parties that come with this Software (collectively the "services" and individually a "service"), including but not limited to HarmonyOS and system-related services, Huawei Mobile Services, VMALL, and third-party services and websites. The specific contents of the services are provided by the respective service providers according to the actual situation. Each of the service providers may change the services they provide at any time, and the provided service contents may vary from time to time.
+
+(1) HarmonyOS and system-related services : HarmonyOS is a next-generation operating system for smart devices, providing a unified language for enabling intelligence, interconnection, and collaboration across different devices. It gives a neat, smooth, seamless, secure, and reliable interaction experience in all scenarios. Based on HarmonyOS, Huawei and its affiliates will provide you with system-related services such as system settings, file management, security management, device communication, software update, message pushing, and Find Device.
+
+(2) Huawei Mobile Services : This Software enables you to access and use such products, apps, and services provided by Huawei and its affiliates that are pre-installed by us or available for you to download and install, such as HUAWEI ID, HUAWEI Mobile Cloud, AppGallery, HUAWEI Browser, HUAWEI Music, HUAWEI Video, HUAWEI Assistant, and Huawei Health. To use such services, you may be required to create and log in to your HUAWEI ID and agree to additional service agreements, and some services may also require you to pay additional fees. By creating your HUAWEI ID and using these services, you indicate that you agree to and accept the applicable terms & conditions.
+
+(3) VMALL : VMALL is an official e-commerce platform operated by Huawei. By using the VMALL services, you indicate that you agree to and accept the VMALL Service Agreement.
+
+(4) Huawei Wallet Pay services : Such services are provided and operated by Petalpay (Shenzhen) Co., Ltd. You must agree to and accept the terms and conditions such as Huawei Wallet Pay Service Agreement before you can activate and use the Huawei Wallet Pay services.
+
+6.2 You understand and acknowledge that some of the aforementioned services are regional and therefore are not necessarily available in all languages or in all areas. Some features may vary by area, and some may be restricted or may not be provided by your service provider. Certain features of this Software may require Internet access. Unless your device is connected to the Internet through WLAN, this Software will access the Internet using your mobile data and may incur additional costs as a result. For details, please contact your carrier. Some of the services may provide you with various kinds of information (including but not limited to stock information and location information). Huawei and its affiliates and licensors do not guarantee the availability, accuracy, integrity, reliability, or timeliness of such information. In addition, you understand and acknowledge that certain features of this Software may be affected or restricted by device hardware and data access and are not necessarily available on all devices.
+
+7 Data Use and Privacy Protection
+
+7.1 We will provide you with relevant system services based on HarmonyOS. We will process information required for providing the features/services when you use them. If you do not provide the related information, your use of the features/services may be affected. For example, for the purpose of enabling us and third-party app developers to push messages to your device, we need to collect your device information, network information, and app information to establish a secure and reliable messaging channel between your device and the push server. For details about how HarmonyOS and related basic system services process your personal information, please refer to the Statement About HarmonyOS and Privacy.
+
+7.2 If you use Huawei Mobile Services, VMALL, Huawei Pay services, or other services or features provided by Huawei or its affiliates, you are likely to be presented with a special privacy statement or supplemental notice (hereinafter referred to as "Product-specific Privacy Notice") made available by the service provider in respect of the product or service. Please carefully read such Product-specific Privacy Notice, which will provide basic information such as how the service or feature processes your personal information, how you can exercise your data subject rights, who is the data controller, and how to contact the data controller.
+
+7.3 Huawei fully respects your privacy rights. In addition to each Product-specific Privacy Notice, we have specially formulated the Huawei Consumer Business Privacy Statement (https://legal.cloud.huawei.com/legal/privacy/statement.htm?code=CN&language=en_US) to help you get information such as that about the overall situation of our personal information collection and use, as well as our measures for protecting personal information security. We will collect, use, disclose, protect, store, and transmit your personal information always in strict accordance with the Huawei Consumer Business Privacy Statement.
+
+8 Security Risk Notice for On-Device AI Features
+
+8.1 This Software contains generative AI capabilities. You should adopt a scientific and rational approach to generative AI technologies and use them in compliance with applicable laws. AI and machine learning are rapidly evolving fields of study. Given the probabilistic nature of machine learning, use of the generative AI capabilities may in some situations result in incorrect generated content that does not accurately reflect real people, places, or facts. You should evaluate the accuracy of any generated content as appropriate for your use case, including by using human review of the generated content. All outputs provided by the generative AI capabilities are replies from the AI model and may contain errors or omissions. Such outputs are for your reference only and you should not treat them as professional advice.
+
+8.2 Intelligent agent services included in this Software are built on large language models. Due to technical limitations, their outputs and execution plans cannot be guaranteed to be completely accurate, reliable, or harmless. For high-risk operations such as file deletion or modification, external communication, internet access, shutdown/restart, and code execution, you should conduct sufficient human review and verification. Intelligent agent services are provided solely as technical services for AI-assisted user operations. Any and all operations performed based on your instructions shall be deemed an extension of your own actions. You shall retain control over and assume responsibilities for any and all actions (including but not limited to order transactions, communication records, email transmissions, and file processing) and the results of use arising therefrom.
+
+9 Third-Party Software Statement
+
+9.1 Your Huawei device may include certain third-party apps or services ("third-party software"). Such third-party software may display, contain, or provide content, data, information, apps, or materials from third parties, or provide links to certain third-party websites. Huawei does not own such third-party software or its related intellectual property rights. Therefore, you understand and acknowledge that Huawei does not assume obligations to provide support for such third-party software, does not guarantee that such third-party software's content or services will stay available at any time, and is not liable for any content, ads, products, services, and other materials provided in such third-party software.
+
+9.2 You understand and acknowledge that names, logos, and content of third-party software will be loaded and displayed on your device for your convenience, and such display does not constitute any endorsement, warranty, or recommendation by us of the third-party software. You further understand and acknowledge that when using third-party software, you may be subject to the terms of use and license agreement related to the third-party software. Therefore, your use of third-party software is at your own risk.
+
+9.3 Except as agreed between you and the provider of the third-party software, you agree not to modify, rent, lease, sub-license, distribute, or create derivative works based on the third-party software, and may not use the third-party software in any unauthorized manner, including but not limited to, using such software to transmit any type of computer virus, worm, Trojan, or other malicious software, invade a network, and overburden a network. You further agree not to use the third-party software in any manner that harasses, abuses, threatens, defames, or otherwise infringes upon the rights of any third party, and warrant that Huawei does not assume any liability for your such actions, or any harassing, threatening, defamatory, offensive, infringing, or illegal information or transmission that is incurred due to your use of the third-party software.
+
+10 Termination and Survival
+
+10.1 This Agreement is effective from the first date you install this Software. If you want to terminate this Agreement, you shall permanently delete, destroy, and return, at your own cost, this Software, all backup copies, and all related materials provided by Huawei. If you fail to comply with any of the terms or conditions of this Agreement, Huawei or its licensors have the right to terminate this Agreement at any time without prior notice. Upon the termination, you must immediately stop using this Software and delete all the Software and related materials that have been copied to and/or installed on your Huawei device.
+
+10.2 Sections 4.8, 7, 10, 11, 12, 13, 14, 15, 16, and 17 herein shall survive the termination of this Agreement.
+
+10.3 If a court of competent jurisdiction finds on any grounds that any provision or any part of this Agreement shall be invalid, other provisions of this Agreement shall remain in force.
+
+11 Disclaimers
+
+11.1 YOU ACKNOWLEDGE THAT THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, AND TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, NEITHER HUAWEI OR ITS AFFILIATES OR LICENSORS NOR THE COPYRIGHT HOLDERS MAKE ANY REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, RIGHT TO CONFIDENTIALITY, AND NON-INFRINGEMENT OF THIRD PARTY RIGHTS. THERE IS NO WARRANTY BY HUAWEI OR BY ANY OTHER PARTY THAT THE FEATURES CONTAINED IN THE SOFTWARE WILL MEET YOUR REQUIREMENTS OR THAT THE OPERATION OF THE SOFTWARE WILL BE UNINTERRUPTED OR ERROR-FREE. YOU SHALL BEAR ALL RESPONSIBILITIES AND RISKS ARISING FROM YOU SELECTING THIS SOFTWARE TO ACHIEVE YOUR EXPECTED RESULTS, INSTALLING AND USING THIS SOFTWARE, AND OBTAINING RESULTS FROM IT.
+
+11.2 INSTALLING THIS SOFTWARE MAY AFFECT THE AVAILABILITY OF THIRD-PARTY SOFTWARE, APPS, OR SERVICES. THERE IS NO WARRANTY BY HUAWEI THAT THE FEATURES OR SERVICES CONTAINED IN THIS SOFTWARE WILL MEET YOUR REQUIREMENTS, THAT THIS SOFTWARE AND ITS SERVICES WILL BE FREE FROM ERRORS/BUGS, OR THAT THIS SOFTWARE WILL PROVIDE CONTINUOUS, PERMANENT SERVICES. IN ADDITION, HUAWEI MAKES NO WARRANTY THAT THIS SOFTWARE WILL BE COMPATIBLE WITH ANY THIRD-PARTY SOFTWARE OR SERVICES.
+
+11.3 YOU FURTHER ACKNOWLEDGE THAT HUAWEI SOFTWARE AND SERVICES ARE NOT INTENDED OR SUITABLE FOR USE IN SITUATIONS OR ENVIRONMENTS WHERE THE FAILURE OR TIME DELAYS OF, OR ERRORS OR INACCURACIES IN, THE CONTENT, DATA, OR INFORMATION PROVIDED BY THE HUAWEI SOFTWARE OR SERVICES COULD LEAD TO DEATH, PERSONAL INJURY, OR SEVERE PHYSICAL OR ENVIRONMENTAL DAMAGE, INCLUDING BUT NOT LIMITED TO THE OPERATION OF NUCLEAR FACILITIES, AIRCRAFT NAVIGATION OR COMMUNICATIONS SYSTEMS, AIR TRAFFIC CONTROL SYSTEMS, OR LIFE SUPPORT OR WEAPONS SYSTEMS.
+
+12 Limitation of Liability
+
+12.1 HUAWEI WILL NOT TAKE ANY RESPONSIBILITY FOR SOFTWARE USE PROBLEMS CAUSED BY ABUSE, MISUSE, OR UNAUTHORIZED MODIFICATION.
+
+12.2 TO THE EXTENT NOT EXPRESSLY PROHIBITED BY APPLICABLE LAW, IN NO EVENT SHALL HUAWEI OR ITS EMPLOYEES, LICENSORS, OR AFFILIATES BE LIABLE FOR ANY LOSS OF PROFITS, REVENUE, SALES, OR DATA, COSTS OF PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, PROPERTY DAMAGE, PERSONAL INJURY, BUSINESS INTERRUPTION, OR LOSS OF BUSINESS INFORMATION, OR FOR ANY SPECIAL, DIRECT, INDIRECT, INCIDENTAL, ECONOMIC, PUNITIVE, OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR RELATED TO YOUR USE OF OR INABILITY TO USE THIS SOFTWARE, HOWEVER CAUSED, REGARDLESS OF THE THEORY OF LIABILITY (CONTRACT, TORT, NEGLIGENCE, OR OTHERWISE) AND EVEN IF SUCH PARTIES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. SOME JURISDICTIONS DO NOT ALLOW THE LIMITATION OF LIABILITY FOR PERSONAL INJURY, OR OF INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THIS LIMITATION MAY NOT APPLY TO YOU.
+
+12.3 IN NO EVENT SHALL HUAWEI'S TOTAL LIABILITY TO YOU FOR ALL DAMAGES (OTHER THAN AS MAY BE REQUIRED BY APPLICABLE LAW IN CASES INVOLVING DEATH OR PERSONAL INJURY RESULTING FROM HUAWEI'S NEGLIGENCE) EXCEED THE AMOUNT YOU PAID FOR YOUR HUAWEI DEVICE.
+
+12.4 The laws of some countries/regions do not allow certain warranties, guarantees, or liabilities to be excluded or limited by an agreement. If these laws apply to you, some or all of the exclusions or limitations mentioned herein may not be applicable and you may have additional rights. Nothing in this Agreement affects the rights that you are legally entitled to as a consumer, or which you cannot contractually agree to alter or waive.
+
+13 Technical Support
+
+Huawei is not obligated to provide you with any technical support for the Software under this Agreement except as required by law. No oral or written information or opinion given by Huawei or its authorized representatives constitutes any warranty. If you discover that the Software or its services are defective, you must bear all necessary maintenance or correction costs.
+
+14 Export Controls
+
+You may not use or otherwise export or re-export Huawei Software except as authorized by applicable laws and the laws of the jurisdictions in which the Huawei Software was obtained.
+
+15 Contacting Huawei
+
+If you have any questions, comments, or suggestions, please contact us via the customer service hotline 950800, via the online customer service, or at our global offices. For a complete list of our offices, please visit the Contact Huawei page (https://consumer.huawei.com/en/support/contact-us/).
+
+16 Dispute Resolution and Governing Laws
+
+The validation, interpretation, modification, performance, and dispute resolution of this Agreement shall be governed by the laws of the People's Republic of China, without regard to its conflict of laws rules. You agree that this Agreement is signed in Longgang District, Shenzhen. Any dispute arising in relation to the content or performance of this Agreement shall be settled through negotiation made in good faith. If such negotiation fails, either party may submit the dispute for resolution by litigation at the people's court with proper jurisdiction in the place where this Agreement is signed. You will also benefit from any and all mandatory provisions of the laws of your country/region of residence. Nothing in this Agreement affects any rights you have as a consumer under mandatory provisions of local law.
+
+17 Entire Agreement
+
+This Agreement constitutes the entire agreement between you and Huawei in respect of the use of this Software and supersedes any prior agreements between you and Huawei relating to the use of this Software. You may also be subject to additional terms and conditions that may apply when you use or purchase open-source software, third-party content, or other Huawei services.
+
+Copyright (c) Huawei Device Co., Ltd. 2024. All rights reserved.
+
+
+2/3:
+---------------------------------------
+HarmonyOS Software License and Service Agreement
+
+Last updated: June 28, 2026
+
+The HarmonyOS Software License and Service Agreement (hereinafter referred to as this "Agreement") is entered into and concluded by and between you (an individual, a company, or any other entity) and Huawei Device Co., Ltd. (hereinafter referred to as "Huawei", "we", "us", or "our") regarding the use of this Software (as defined in Section 2 herein) and its services. Before you use your Huawei device or download any updates to this Software contemplated under this Agreement, please read this Agreement carefully, especially any clauses about exclusion or limitation of liability, governing laws, dispute resolution, and other important terms written in bold to draw your attention.
+
+1 Acceptance of Our Terms
+
+By using the Huawei device or downloading updates to this Software, you indicate that you agree and accept to be bound by the terms of this Agreement.
+
+If you do not agree to this Agreement, please do not use this Huawei device or download any updates to this Software. You can request a refund by returning the Huawei device to the franchise store, authorized distributor, or retail store where you purchased the device, subject to the applicable return policy. However, you should be aware that, if you request a refund from a retail store, the store's own return policy may also apply. The return policy shall be governed by the relevant laws and regulations of the country/region where the goods are purchased.
+
+If you are a minor (under the age of 18), please read this Agreement with your parents or legal guardians to ensure that they clearly understand the content of this Agreement before you decide on whether to use this device or download updates to the Software. Please do not use this device or download updates to the Software before you have obtained consent from your parents or legal guardians.
+
+You may visit the Huawei website (consumer.huawei.com) to view a copy of this Agreement at any time and retain a copy of this Agreement for future reference. If you have any questions regarding this Agreement, please contact us using the contact information provided in Section 14 "Contacting Huawei".
+
+2 About This Software
+
+Software under this Agreement refers to:
+
+(1) Software components provided to you along with the Huawei device, including but not limited to the code and other embedded software, documents, interfaces, content, and fonts that are stored on the Huawei device, as well as any data protected by the copyright of Huawei or its licensors;
+
+(2) Updates or upgrades to the software specified in (1).
+
+You agree that this Agreement will apply to any Huawei software (including but not limited to operating systems, apps, and atomic services) that may be installed on your device, unless such software is accompanied by a separate software license agreement, in which case, you agree that the separate software license agreement will apply to your use of such software.
+
+This Software may also contain software components that are protected by copyright of third parties and granted open source software licenses by such third parties ("Open Source Software Components"). Such Open Source Software Components are identified as such through license information provided within the device, which also indicates the open source software licenses applicable to such components. For this reason, the terms and conditions of the open source software licenses shall apply when you are using such Open Source Software Components. This Agreement does not alter any rights or obligations you may have under such open source software licenses. If there are any conflicts between the license conditions set forth in this Agreement and anything about any Open Source Software Components in their open source software licenses, such open source software licenses shall prevail.
+
+Unless otherwise agreed upon, this Software shall be bound by this Agreement, regardless of whether this Software is stored in a read-only memory or any other media or form, or is from any online download location authorized by Huawei.
+
+3 Software License Grant
+
+You are granted a limited and non-exclusive license to use this Software on one Huawei device, subject to and in accordance with this Agreement, and may not sell, transfer, or use it for any other commercial purposes.
+
+Huawei licenses this Software to you for use, rather than sells or transfers it to you. You shall only use this Software in conformity with the terms and conditions of this Agreement. Huawei and its licensors own and retain all rights and titles to the Software and reserve any other rights not expressly granted to you by this Agreement.
+
+4 Limitations of Use
+
+4.1 You may not use Huawei's technologies or intellectual properties to develop software or design, develop, manufacture, sell, or license third-party devices/accessories associated with the Huawei device without prior permission from Huawei.
+
+4.2 You may make a copy of this Software and save it on a computer hard drive or other storage media for the purpose of archiving. However, you may not distribute or make available this Software over a network where it could be used by multiple devices at the same time.
+
+4.3 You may not sell, rent, lease, lend, sublicense, or distribute the entirety or part of the Software (including but not limited to apps, services, code, and source code operated under this Software) to any third party without prior written permission from Huawei. You may make a one-off permanent transfer of the entire license to the Software to another party along with the transfer of ownership of your Huawei device, provided that: (1) the transfer includes your Huawei device and all the Huawei Software; (2) you do not retain copies of all or part of this Software; and (3) the party that receives the Huawei device and this Software has read and accepted all the terms and conditions of this Agreement.
+
+4.4 You shall not allow any third party to copy, decompose, reverse engineer, decompile, disassemble, or create derivatives of this Software without prior written permission from Huawei. In addition, you shall not allow any third party to or attempt to export the source code of this Software, or decode or alter this Software or any part of this Software or any service that it provides.
+
+4.5 You acknowledge and agree that you shall not use this Software to carry out the following activities:
+
+  Copy or use this Software beyond the authorized scope under this Agreement;
+
+  Use this Software in a deceptive manner or for a deceptive purpose;
+
+  Delete any copyright statement or notice contained in this Software;
+
+  Attempt to damage, bypass, change, invalidate, or evade any digital rights management (DRM) system that is related to this Software and/or is intrinsic to this Software;
+
+  Engage in any other improper or illegal acts.
+
+4.6 While using this Software for storage or copying, you need to be authorized by relevant right holders in particular countries or regions. Huawei Software may only be used to reproduce non-copyrighted materials, materials for which you own the copyright, or materials you are authorized or legally permitted to reproduce. You understand that ownership and intellectual property rights of any material displayed, stored, or accessed via your device belong to the owner of the material. Such materials may be protected by copyright law or other intellectual property laws and treaties, and you may need to comply with the agreement or terms of use stipulated by the third party that provides such materials. Unless otherwise agreed upon, this Agreement does not grant you any right to use such materials, nor does it guarantee that you can continue to use them.
+
+4.7 You agree that you shall only use the Software in compliance with all applicable laws and regulations of your country or region of residence or use, including but not limited to the local laws of the country or region where you reside or download or use the Software and services.
+
+4.8 During your use of this Software, the system font libraries will be called. You must use such system font libraries in accordance with their license scope and terms. Some of the font libraries (including but not limited to those below accompanied by licensing policies of the original vendors) are copyrighted by the original vendors, licensed for use exclusively within this Software, and only intended for use by individuals for non-commercial or non-profit purposes such as display, output, and printing. You may not use such font libraries we provide to you for commercial purposes, including but not limited to, using the font libraries or fonts for direct or indirect profit-making purposes, such as for trademarks, logos, promotional materials, packaging, decoration, websites, audio/video content, and demonstrations/exhibitions. If you want to use such font libraries for commercial purposes, you must obtain separate authorization from the original vendors of such font libraries. If such font libraries are accompanied by any licensing policies of the original vendors, you must also read such licensing policies of the original vendors and comply with such licensing policies when using such font libraries.
+
+(1) Founder font libraries: Your use of Founder font libraries must comply with Founder's licensing policies for commercial use (https://www.foundertype.com/index.php/About/powerbus.html).
+
+(2) Hanyi font libraries: Your use of Hanyi font libraries must comply with Hanyi's licensing and pricing policies (https://hanyi.com.cn/license).
+
+5 Software Updates
+
+5.1 To provide you with a better user experience, Huawei may provide you with software update services, including but not limited to system software updates and app updates. We provide update services for this Software to improve the performance, safety, and reliability of products or devices, or to meet functional customization requirements from carriers. Updates to this Software can be installed in different ways, and include bug fixes, system software updates, app updates, updates to any previously installed software (including all-new versions), and performance enhancements.
+
+5.2 Your Huawei device will automatically search for and download update packages over the Internet to provide you with timely update services. These updates are designed to fix cyber security loopholes and prevent new security threats. You acknowledge the necessity of receiving and installing system security update patches in a timely manner. Due to the importance of these updates, your device may automatically install some downloaded updates. Your device will provide timely update notifications to help you understand the related information. We strongly recommend that you keep the default configurations of your device to avoid software issues resulting from delayed updates. If you want to change the default settings for system software updates, you can turn off the related switches by going to Settings , touching the device name to access the About screen, touching the system version card to access the Software update screen, touching : : in the upper right corner, and selecting Update options . You also understand that some apps are provided with an automatic update feature and can automatically download and install updates to your device. Huawei apps will only be automatically updated over WLAN. You can disable this feature on the settings screen in the app concerned.
+
+5.3 Updates that Huawei provides to replace or supplement this Software shall be governed by this Agreement, unless such updates are accompanied by a separate software license agreement, in which case you will be governed by that separate software license agreement.
+
+5.4 You understand and acknowledge that if you decide not to install the software updates provided by Huawei, this may put your device and Software at security risks and may cause the Software to be unavailable or unstable. Some features of the Software may be subject to version restrictions, and you need to update to the latest version to experience them.
+
+6 Services of this Software
+
+6.1 This Software allows you to access such relevant apps and services of Huawei and its affiliates as well as third parties that come with this Software (collectively the "services" and individually a "service"), including but not limited to HarmonyOS and system-related services, Huawei Mobile Services, VMALL, and third-party services and websites. The specific contents of the services are provided by the respective service providers according to the actual situation. Each of the service providers may change the services they provide at any time, and the provided service contents may vary from time to time.
+
+(1) HarmonyOS and system-related services : HarmonyOS is a next-generation operating system for smart devices, providing a unified language for enabling intelligence, interconnection, and collaboration across different devices. It gives a neat, smooth, seamless, secure, and reliable interaction experience in all scenarios. Based on HarmonyOS, Huawei and its affiliates will provide you with system-related services such as system settings, file management, security management, device communication, software update, message pushing, and Find Device.
+
+(2) Huawei Mobile Services : This Software enables you to access and use such products, apps, and services provided by Huawei and its affiliates that are pre-installed by us or available for you to download and install, such as HUAWEI ID, HUAWEI Mobile Cloud, AppGallery, HUAWEI Browser, HUAWEI Music, HUAWEI Video, HUAWEI Assistant, and Huawei Health. To use such services, you may be required to create and log in to your HUAWEI ID and agree to additional service agreements, and some services may also require you to pay additional fees. By creating your HUAWEI ID and using these services, you indicate that you agree to and accept the applicable terms & conditions.
+
+(3) VMALL : VMALL is an official e-commerce platform operated by Huawei. By using the VMALL services, you indicate that you agree to and accept the VMALL Service Agreement.
+
+(4) Huawei Wallet Pay services : Such services are provided and operated by Petalpay (Shenzhen) Co., Ltd. You must agree to and accept the terms and conditions such as Huawei Wallet Pay Service Agreement before you can activate and use the Huawei Wallet Pay services.
+
+6.2 You understand and acknowledge that some of the aforementioned services are regional and therefore are not necessarily available in all languages or in all areas. Some features may vary by area, and some may be restricted or may not be provided by your service provider. Certain features of this Software may require Internet access. Unless your device is connected to the Internet through WLAN, this Software will access the Internet using your mobile data and may incur additional costs as a result. For details, please contact your carrier. Some of the services may provide you with various kinds of information (including but not limited to stock information and location information). Huawei and its affiliates and licensors do not guarantee the availability, accuracy, integrity, reliability, or timeliness of such information. In addition, you understand and acknowledge that certain features of this Software may be affected or restricted by device hardware and data access and are not necessarily available on all devices.
+
+7 Data Use and Privacy Protection
+
+7.1 We will provide you with relevant system services based on HarmonyOS. We will process information required for providing the features/services when you use them. If you do not provide the related information, your use of the features/services may be affected. For example, for the purpose of enabling us and third-party app developers to push messages to your device, we need to collect your device information, network information, and app information to establish a secure and reliable messaging channel between your device and the push server. For details about how HarmonyOS and related basic system services process your personal information, please refer to the Statement About HarmonyOS and Privacy.
+
+7.2 If you use Huawei Mobile Services, VMALL, Huawei Pay services, or other services or features provided by Huawei or its affiliates, you are likely to be presented with a special privacy statement or supplemental notice (hereinafter referred to as "Product-specific Privacy Notice") made available by the service provider in respect of the product or service. Please carefully read such Product-specific Privacy Notice, which will provide basic information such as how the service or feature processes your personal information, how you can exercise your data subject rights, who is the data controller, and how to contact the data controller.
+
+7.3 Huawei fully respects your privacy rights. In addition to each Product-specific Privacy Notice, we have specially formulated the Huawei Consumer Business Privacy Statement (https://legal.cloud.huawei.com/legal/privacy/statement.htm?code=CN&language=en_US) to help you get information such as that about the overall situation of our personal information collection and use, as well as our measures for protecting personal information security. We will collect, use, disclose, protect, store, and transmit your personal information always in strict accordance with the Huawei Consumer Business Privacy Statement.
+
+8 Security Risk Notice for On-Device AI Features
+
+8.1 This Software contains generative AI capabilities. You should adopt a scientific and rational approach to generative AI technologies and use them in compliance with applicable laws. AI and machine learning are rapidly evolving fields of study. Given the probabilistic nature of machine learning, use of the generative AI capabilities may in some situations result in incorrect generated content that does not accurately reflect real people, places, or facts. You should evaluate the accuracy of any generated content as appropriate for your use case, including by using human review of the generated content. All outputs provided by the generative AI capabilities are replies from the AI model and may contain errors or omissions. Such outputs are for your reference only and you should not treat them as professional advice.
+
+8.2 Intelligent agent services included in this Software are built on large language models. Due to technical limitations, their outputs and execution plans cannot be guaranteed to be completely accurate, reliable, or harmless. For high-risk operations such as file deletion or modification, external communication, internet access, shutdown/restart, and code execution, you should conduct sufficient human review and verification. Intelligent agent services are provided solely as technical services for AI-assisted user operations. Any and all operations performed based on your instructions shall be deemed an extension of your own actions. You shall retain control over and assume responsibilities for any and all actions (including but not limited to order transactions, communication records, email transmissions, and file processing) and the results of use arising therefrom.
+
+9 Third-Party Software Statement
+
+9.1 Your Huawei device may include certain third-party apps or services ("third-party software"). Such third-party software may display, contain, or provide content, data, information, apps, or materials from third parties, or provide links to certain third-party websites. Huawei does not own such third-party software or its related intellectual property rights. Therefore, you understand and acknowledge that Huawei does not assume obligations to provide support for such third-party software, does not guarantee that such third-party software's content or services will stay available at any time, and is not liable for any content, ads, products, services, and other materials provided in such third-party software.
+
+9.2 You understand and acknowledge that names, logos, and content of third-party software will be loaded and displayed on your device for your convenience, and such display does not constitute any endorsement, warranty, or recommendation by us of the third-party software. You further understand and acknowledge that when using third-party software, you may be subject to the terms of use and license agreement related to the third-party software. Therefore, your use of third-party software is at your own risk.
+
+9.3 Except as agreed between you and the provider of the third-party software, you agree not to modify, rent, lease, sub-license, distribute, or create derivative works based on the third-party software, and may not use the third-party software in any unauthorized manner, including but not limited to, using such software to transmit any type of computer virus, worm, Trojan, or other malicious software, invade a network, and overburden a network. You further agree not to use the third-party software in any manner that harasses, abuses, threatens, defames, or otherwise infringes upon the rights of any third party, and warrant that Huawei does not assume any liability for your such actions, or any harassing, threatening, defamatory, offensive, infringing, or illegal information or transmission that is incurred due to your use of the third-party software.
+
+10 Termination and Survival
+
+10.1 This Agreement is effective from the first date you install this Software. If you want to terminate this Agreement, you shall permanently delete, destroy, and return, at your own cost, this Software, all backup copies, and all related materials provided by Huawei. If you fail to comply with any of the terms or conditions of this Agreement, Huawei or its licensors have the right to terminate this Agreement at any time without prior notice. Upon the termination, you must immediately stop using this Software and delete all the Software and related materials that have been copied to and/or installed on your Huawei device.
+
+10.2 Sections 4.8, 7, 10, 11, 12, 13, 14, 15, 16, and 17 herein shall survive the termination of this Agreement.
+
+10.3 If a court of competent jurisdiction finds on any grounds that any provision or any part of this Agreement shall be invalid, other provisions of this Agreement shall remain in force.
+
+11 Disclaimers
+
+11.1 YOU ACKNOWLEDGE THAT THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, AND TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, NEITHER HUAWEI OR ITS AFFILIATES OR LICENSORS NOR THE COPYRIGHT HOLDERS MAKE ANY REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, RIGHT TO CONFIDENTIALITY, AND NON-INFRINGEMENT OF THIRD PARTY RIGHTS. THERE IS NO WARRANTY BY HUAWEI OR BY ANY OTHER PARTY THAT THE FEATURES CONTAINED IN THE SOFTWARE WILL MEET YOUR REQUIREMENTS OR THAT THE OPERATION OF THE SOFTWARE WILL BE UNINTERRUPTED OR ERROR-FREE. YOU SHALL BEAR ALL RESPONSIBILITIES AND RISKS ARISING FROM YOU SELECTING THIS SOFTWARE TO ACHIEVE YOUR EXPECTED RESULTS, INSTALLING AND USING THIS SOFTWARE, AND OBTAINING RESULTS FROM IT.
+
+11.2 INSTALLING THIS SOFTWARE MAY AFFECT THE AVAILABILITY OF THIRD-PARTY SOFTWARE, APPS, OR SERVICES. THERE IS NO WARRANTY BY HUAWEI THAT THE FEATURES OR SERVICES CONTAINED IN THIS SOFTWARE WILL MEET YOUR REQUIREMENTS, THAT THIS SOFTWARE AND ITS SERVICES WILL BE FREE FROM ERRORS/BUGS, OR THAT THIS SOFTWARE WILL PROVIDE CONTINUOUS, PERMANENT SERVICES. IN ADDITION, HUAWEI MAKES NO WARRANTY THAT THIS SOFTWARE WILL BE COMPATIBLE WITH ANY THIRD-PARTY SOFTWARE OR SERVICES.
+
+11.3 YOU FURTHER ACKNOWLEDGE THAT HUAWEI SOFTWARE AND SERVICES ARE NOT INTENDED OR SUITABLE FOR USE IN SITUATIONS OR ENVIRONMENTS WHERE THE FAILURE OR TIME DELAYS OF, OR ERRORS OR INACCURACIES IN, THE CONTENT, DATA, OR INFORMATION PROVIDED BY THE HUAWEI SOFTWARE OR SERVICES COULD LEAD TO DEATH, PERSONAL INJURY, OR SEVERE PHYSICAL OR ENVIRONMENTAL DAMAGE, INCLUDING BUT NOT LIMITED TO THE OPERATION OF NUCLEAR FACILITIES, AIRCRAFT NAVIGATION OR COMMUNICATIONS SYSTEMS, AIR TRAFFIC CONTROL SYSTEMS, OR LIFE SUPPORT OR WEAPONS SYSTEMS.
+
+12 Limitation of Liability
+
+12.1 HUAWEI WILL NOT TAKE ANY RESPONSIBILITY FOR SOFTWARE USE PROBLEMS CAUSED BY ABUSE, MISUSE, OR UNAUTHORIZED MODIFICATION.
+
+12.2 TO THE EXTENT NOT EXPRESSLY PROHIBITED BY APPLICABLE LAW, IN NO EVENT SHALL HUAWEI OR ITS EMPLOYEES, LICENSORS, OR AFFILIATES BE LIABLE FOR ANY LOSS OF PROFITS, REVENUE, SALES, OR DATA, COSTS OF PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, PROPERTY DAMAGE, PERSONAL INJURY, BUSINESS INTERRUPTION, OR LOSS OF BUSINESS INFORMATION, OR FOR ANY SPECIAL, DIRECT, INDIRECT, INCIDENTAL, ECONOMIC, PUNITIVE, OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR RELATED TO YOUR USE OF OR INABILITY TO USE THIS SOFTWARE, HOWEVER CAUSED, REGARDLESS OF THE THEORY OF LIABILITY (CONTRACT, TORT, NEGLIGENCE, OR OTHERWISE) AND EVEN IF SUCH PARTIES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. SOME JURISDICTIONS DO NOT ALLOW THE LIMITATION OF LIABILITY FOR PERSONAL INJURY, OR OF INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THIS LIMITATION MAY NOT APPLY TO YOU.
+
+12.3 IN NO EVENT SHALL HUAWEI'S TOTAL LIABILITY TO YOU FOR ALL DAMAGES (OTHER THAN AS MAY BE REQUIRED BY APPLICABLE LAW IN CASES INVOLVING DEATH OR PERSONAL INJURY RESULTING FROM HUAWEI'S NEGLIGENCE) EXCEED THE AMOUNT YOU PAID FOR YOUR HUAWEI DEVICE.
+
+12.4 The laws of some countries/regions do not allow certain warranties, guarantees, or liabilities to be excluded or limited by an agreement. If these laws apply to you, some or all of the exclusions or limitations mentioned herein may not be applicable and you may have additional rights. Nothing in this Agreement affects the rights that you are legally entitled to as a consumer, or which you cannot contractually agree to alter or waive.
+
+13 Technical Support
+
+Huawei is not obligated to provide you with any technical support for the Software under this Agreement except as required by law. No oral or written information or opinion given by Huawei or its authorized representatives constitutes any warranty. If you discover that the Software or its services are defective, you must bear all necessary maintenance or correction costs.
+
+14 Export Controls
+
+You may not use or otherwise export or re-export Huawei Software except as authorized by applicable laws and the laws of the jurisdictions in which the Huawei Software was obtained.
+
+15 Contacting Huawei
+
+If you have any questions, comments, or suggestions, please contact us via the customer service hotline 950800, via the online customer service, or at our global offices. For a complete list of our offices, please visit the Contact Huawei page (https://consumer.huawei.com/en/support/contact-us/).
+
+16 Dispute Resolution and Governing Laws
+
+The validation, interpretation, modification, performance, and dispute resolution of this Agreement shall be governed by the laws of the People's Republic of China, without regard to its conflict of laws rules. You agree that this Agreement is signed in Longgang District, Shenzhen. Any dispute arising in relation to the content or performance of this Agreement shall be settled through negotiation made in good faith. If such negotiation fails, either party may submit the dispute for resolution by litigation at the people's court with proper jurisdiction in the place where this Agreement is signed. You will also benefit from any and all mandatory provisions of the laws of your country/region of residence. Nothing in this Agreement affects any rights you have as a consumer under mandatory provisions of local law.
+
+17 Entire Agreement
+
+This Agreement constitutes the entire agreement between you and Huawei in respect of the use of this Software and supersedes any prior agreements between you and Huawei relating to the use of this Software. You may also be subject to additional terms and conditions that may apply when you use or purchase open-source software, third-party content, or other Huawei services.
+
+Copyright (c) Huawei Device Co., Ltd. 2024. All rights reserved.
+                        
+
+3/3:
+---------------------------------------
+HarmonyOS Software License and Service Agreement
+
+Last updated: July 7, 2026
+
+The HarmonyOS Software License and Service Agreement (hereinafter referred to as this "Agreement") is entered into and concluded by and between you (an individual, a company, or any other entity) and Huawei Device Co., Ltd. (hereinafter referred to as "Huawei", "we", "us", or "our") regarding the use of this Software (as defined in Section 2 herein) and its services. Before you use your Huawei wearable device or download any updates to this Software contemplated under this Agreement, please read this Agreement carefully, especially any clauses about exclusion or limitation of liability, governing laws, dispute resolution, and other important terms written in bold to draw your attention. This Agreement is applicable only to Huawei wearable devices (HUAWEI WATCH Series smart watches), including the corresponding industry edition devices. An industry edition device refers to a Huawei wearable device that can be paired with non-Huawei apps (hereinafter referred to as an "industry edition smart watch").
+
+1 Acceptance of Our Terms
+
+By using the Huawei wearable device or downloading updates to this Software, you indicate that you agree and accept to be bound by the terms of this Agreement.
+
+If you do not agree to this Agreement, please do not use this Huawei wearable device or download any updates to this Software. You can request a refund by returning the Huawei wearable device to the franchise store, authorized distributor, or retail store where you purchased the device, subject to the applicable return policy. However, you should be aware that, if you request a refund from a retail store, the store's own return policy may also apply. The return policy shall be governed by the relevant laws and regulations of the country/region where the goods are purchased.
+
+If you are a minor, please read this Agreement with your parents or legal guardians to ensure that they clearly understand the content of this Agreement before you decide on whether to use this device or download updates to the Software. Children are allowed to use this device or its related services only with the consent of their parents or legal guardians. Please do not use this device or download updates to the Software before you have obtained consent from your parents or legal guardians. Some apps may not be available for use by minors, depending on the circumstances.
+
+You may visit the Huawei website (consumer.huawei.com) to view a copy of this Agreement at any time and retain a copy of this Agreement for future reference. If you have any questions regarding this Agreement, please contact us using the contact information provided in Section 14 "Contacting Huawei".
+
+2 About This Software
+
+Software under this Agreement refers to:
+
+(1) Software components provided to you along with the Huawei wearable device, including but not limited to the code and other embedded software, documents, interfaces, content, and fonts that are stored on the Huawei wearable device, as well as any data protected by the copyright of Huawei or its licensors;
+
+(2) Updates or upgrades to the software specified in (1).
+
+You agree that this Agreement will apply to any Huawei software (including but not limited to operating systems, apps, and Feature Abilities) that may be installed on your wearable device, unless such software is accompanied by a separate software license agreement, in which case, you agree that the separate software license agreement will apply to your use of such software.
+
+This Software may also contain software components that are protected by copyright of third parties and granted open source software licenses by such third parties ("Open Source Software Components"). Such Open Source Software Components are identified as such through license information provided within the wearable device, which also indicates the open source software licenses applicable to such components. For this reason, the terms and conditions of the open source software licenses shall apply when you are using such Open Source Software Components. This Agreement does not alter any rights or obligations you may have under such open source software licenses. If there are any conflicts between the license conditions set forth in this Agreement and anything about any Open Source Software Components in their open source software licenses, such open source software licenses shall prevail.
+
+Unless otherwise agreed upon, this Software shall be bound by this Agreement, regardless of whether this Software is stored in a read-only memory or any other media or form, or is from any online download location authorized by Huawei.
+
+3 Software License Grant
+
+You are granted a limited and non-exclusive license to use this Software on one Huawei wearable device, subject to and in accordance with this Agreement, and may not sell, transfer, or use it for any other commercial purposes.
+
+Huawei licenses this Software to you for use, rather than sells or transfers it to you. You shall only use this Software in conformity with the terms and conditions of this Agreement. Huawei and its licensors own and retain all rights and titles to the Software and reserve any other rights not expressly granted to you by this Agreement.
+
+4 Limitations of Use
+
+4.1 You may not use Huawei's technologies or intellectual properties to develop software or design, develop, manufacture, sell, or license third-party devices/accessories associated with the Huawei wearable device without prior permission from Huawei.
+
+4.2 You may make a copy of this Software and save it on a computer hard drive or other storage media for the purpose of archiving. However, you may not distribute or make available this Software over a network where it could be used by multiple devices at the same time.
+
+4.3 You may not sell, rent, lease, lend, sublicense, or distribute the entirety or part of the Software (including but not limited to apps, services, code, and source code operated under this Software) to any third party without prior written permission from Huawei. You may make a one-off permanent transfer of the entire license to the Software to another party along with the transfer of ownership of your Huawei wearable device, provided that: (1) the transfer includes your Huawei wearable device and all the Huawei Software; (2) you do not retain copies of all or part of this Software; and (3) the party that receives the Huawei wearable device and this Software has read and accepted all the terms and conditions of this Agreement.
+
+4.4 You shall not allow any third party to copy, decompose, reverse engineer, decompile, disassemble, or create derivatives of this Software without prior written permission from Huawei. In addition, you shall not allow any third party to or attempt to export the source code of this Software, or decode or alter this Software or any part of this Software or any service that it provides.
+
+4.5 You acknowledge and agree that you shall not use this Software to carry out the following activities:
+
+  Copy or use this Software beyond the authorized scope under this Agreement;
+  Use this Software in a deceptive manner or for a deceptive purpose;
+  Delete any copyright statement or notice contained in this Software;
+  Attempt to damage, bypass, change, invalidate, or evade any digital rights management (DRM) system that is related to this Software and/or is intrinsic to this Software;
+  Engage in any other improper or illegal acts.
+
+4.6 While using this Software for storage or copying, you need to be authorized by relevant right holders in particular countries or regions. Huawei Software may only be used to reproduce non-copyrighted materials, materials for which you own the copyright, or materials you are authorized or legally permitted to reproduce. You understand that ownership and intellectual property rights of any material displayed, stored, or accessed via your device belong to the owner of the material. Such materials may be protected by copyright law or other intellectual property laws and treaties, and you may need to comply with the agreement or terms of use stipulated by the third party that provides such materials. Unless otherwise agreed upon, this Agreement does not grant you any right to use such materials, nor does it guarantee that you can continue to use them.
+
+4.7 You agree that you shall only use the Software in compliance with all applicable laws and regulations of your country or region of residence or use, including but not limited to the local laws of the country or region where you reside or download or use the Software and services.
+
+5 Software Updates
+
+5.1 To provide you with a better user experience, Huawei may provide you with software update services, including but not limited to system software updates and app updates. We provide update services for this Software to improve the performance, safety, and reliability of products or wearable devices, or to meet functional customization requirements from carriers. Updates to this Software can be installed in different ways, and include bug fixes, system software updates, app updates, updates to any previously installed software (including all-new versions), and performance enhancements.
+
+5.2 Your Huawei wearable device will automatically search for and download update packages over the Internet to provide you with timely update services. These updates are designed to fix cyber security loopholes and prevent new security threats. You acknowledge the necessity of receiving and installing system security update patches in a timely manner. Due to the importance of these updates, your wearable device may automatically install some downloaded updates, and provide timely update notifications to help you understand the related information. We strongly recommend that you keep the default configurations of your wearable device to avoid software issues resulting from delayed updates. If you want to change the default settings for system software updates, you can go to Settings , touch the device name to enter the About screen, touch the system card to enter the Software update screen, touch Settings , and turn off the switches concerned. You also understand that some apps are provided with an automatic update feature and can automatically download and install updates to your device. Huawei apps will only be automatically updated over WLAN. You can disable this feature on the settings screen in the app concerned.
+
+5.3 Updates that Huawei provides to replace or supplement this Software shall be governed by this Agreement, unless such updates are accompanied by a separate software license agreement, in which case you will be governed by that separate software license agreement.
+
+5.4 You understand and acknowledge that if you decide not to install the software updates provided by Huawei, this may put your wearable device and Software at security risks and may cause the Software to be unavailable or unstable. Some features of the Software may be subject to version restrictions, and you need to update to the latest version to experience them.
+
+6 Services of This Software
+
+6.1 This Software allows you to access such relevant apps and services of Huawei and its affiliates as well as third parties that come with this Software (collectively the "services" and individually a "service"), including but not limited to HarmonyOS and system-related services, Huawei Mobile Services, and third-party services and websites. The specific contents of the services are provided by the respective service providers according to the actual situation. Each of the service providers may change the services they provide at any time, and the provided service contents may vary from time to time.
+
+(1) HarmonyOS and system-related services : HarmonyOS is a next-generation operating system for smart devices, providing a unified language for enabling intelligence, interconnection, and collaboration across different devices. It gives a neat, smooth, seamless, secure, and reliable interaction experience in all scenarios. Based on HarmonyOS, Huawei and its affiliates will provide you with system-related services such as system settings, file management, security management, device communication, software updates, message pushing, wearable system services, and wearable collaboration services. After your device is paired with the (Huawei) Health app or another companion app on your phone, the wearable system services allow the app to display the device information and app information.
+
+(2) Huawei Mobile Services : This Software enables you to access and use such products, apps, and services provided by Huawei and its affiliates that are pre-installed by us or available for you to download and install, such as HUAWEI ID, AppGallery, HUAWEI Music, and HUAWEI Assistant. To use such services, you may be required to create and log in to your HUAWEI ID and agree to additional service agreements, and some services may also require you to pay additional fees. By creating your HUAWEI ID and using these services, you indicate that you agree to and accept the applicable terms & conditions.
+
+(3) Huawei Pay services : Such services are provided and operated by Petalpay (Shenzhen) Co., Ltd. You must agree to and accept the terms and conditions such as Huawei Pay Service Agreement before you can activate and use the Huawei Pay services.
+
+(4) Fitness and health apps and services : These services include a range of apps and services provided by Huawei for consumers that are primarily focused on fitness and health.
+
+  The fitness apps include Workout, Workout status, Activity records, Workout records, RouteDraw, Expedition, Barometer, and Stay Fit.
+  The health apps include Heart rate, Sleep, Breathing exercises, SpO2, Cycle Calendar, Healthy Living, Body temperature, High altitude adaptation, Sleep apnea, Pulse wave arrhythmia analysis, and Blood glucose.
+  Fitness services provide you with features for measuring, storing, and syncing fitness data. During your use of the wearable device, the services will access the sensors, collect your informationfrom the accelerometer, gyroscope, magnetometer, depth sensor (supported only by some products), and certain other sensors, as well asprecise location informationand SSID, and combine them with the basic personal information (such as gender, height and weight, and age) you have set in the companion app.Based on the foregoing, your following data will be processed and stored on your wearable device: workout type, fitness information (workout duration,workout route, workout heart rate, distance, speed, step count, step cadence, stride length, calories, altitude, slope, running form data, workout status, swimming data, jump roping data, golf activity data, diving data, workout achievements, climbed height, stand count, and other fitness data),blood oxygen,precise location information, system settings, and sensor information.The aforementioned data will be displayed in the fitness apps on the wearable device, andwill be synced to the companion appwhile your wearable device is paired. Your wearable device will not upload the data to the cloud. However, the companion app will upload the data to the cloud.
+  Health services provide you with features for measuring (including automatically measuring in the background), storing, and syncing health data. During your use of the wearable device, the services will access the sensors and collect yourinformation from the photoplethysmography (PPG) sensor, accelerometer, gyroscope, negative temperature coefficient (NTC) sensor, ECG sensor, and certain other sensors.Based on the foregoing, your following data will be processed and stored on your wearable device: breathing data, menstrual cycle data, heart rate, heart rate variability data, sleep data, heart health data, stress data, emotion data, blood oxygen, skin temperature data, body temperature, blood sugar, blood pressure, high altitude adaptation data, ECG, health risk assessment data, and fitness information (step count, calories, and other fitness data).The aforementioned data will be displayed in the health apps on the wearable device, andwill be synced to the companion appwhile your wearable device is paired. Your wearable device will not upload the data to the cloud. However, the companion app will upload the data to the cloud.
+  In addition, your fitness and health data will be synced to the health and fitness services on your watch. You can choose whether to authorize the data to be uploaded to the Huawei server by going toSettings>Privacy & security>Health & fitness services.
+  Some apps (such as Healthy Living and High altitude adaptation) depend on device capabilities or are region-specific, so support for them may vary across different devices.
+
+6.2 You understand and acknowledge that some of the aforementioned services are regional and therefore are not necessarily available in all languages or in all areas. Some features may vary by area, and some may be restricted or may not be provided by your service provider. Certain features of this Software may require Internet access. Unless your wearable device is connected to the Internet through WLAN, this Software will access the Internet using your mobile data and may incur additional costs as a result. For details, please contact your carrier. Some of the services may provide you with various kinds of information (including but not limited to stock information and location information). Huawei and its affiliates and licensors do not guarantee the availability, accuracy, integrity, reliability, or timeliness of such information. In addition, you understand and acknowledge that certain features of this Software may be affected or restricted by device hardware and data access and are not necessarily available on all devices.
+
+7 Data Use and Privacy Protection
+
+7.1 We will provide you with relevant system services based on HarmonyOS. We will process information required for providing the features/services when you use them. If you do not provide the related information, your use of the features/services may be affected. For example, for the purpose of enabling us and third-party app developers to push messages to your wearable device, we need to collect your device information, network information, and app information to establish a secure and reliable messaging channel between your device and the push server. For details about how HarmonyOS and related basic system services process your personal information, please refer to the Statement About HarmonyOS and Privacy.
+
+7.2 If you use Huawei Mobile Services, Huawei Pay services, or other services or features provided by Huawei or its affiliates, you are likely to be presented with a special privacy statement or supplemental notice (hereinafter referred to as "Product-specific Privacy Notice") made available by the service provider in respect of the product or service. Please carefully read such Product-specific Privacy Notice, which will provide basic information such as how the service or feature processes your personal information, how you can exercise your data subject rights, who is the data controller, and how to contact the data controller.
+
+7.3 Huawei fully respects your privacy rights. In addition to each Product-specific Privacy Notice, we have specially formulated the Huawei Consumer Business Privacy Statement to help you get information such as that about the overall situation of our personal information collection and use, as well as our measures for protecting personal information security. We will collect, use, disclose, protect, store, and transmit your personal information always in strict accordance with the Huawei Consumer Business Privacy Statement.
+
+8 Third-Party Software Statement
+
+8.1 Your Huawei wearable device may include certain third-party apps or services ("third-party software"). Such third-party software may display, contain, or provide content, data, information, apps, or materials from third parties, or provide links to certain third-party websites. Huawei does not own such third-party software or its related intellectual property rights. Therefore, you understand and acknowledge that Huawei does not assume obligations to provide support for such third-party software, does not guarantee that such third-party software's content or services will stay available at any time, and is not liable for any content, ads, products, services, and other materials provided in such third-party software.
+
+8.2 You understand and acknowledge that names, logos, and content of third-party software will be loaded and displayed on your wearable device for your convenience, and such display does not constitute any endorsement, warranty, or recommendation by us of the third-party software. You further understand and acknowledge that when using third-party software, you may be subject to the terms of use and license agreement related to the third-party software. Therefore, your use of third-party software is at your own risk.
+
+8.3 Except as agreed between you and the provider of the third-party software, you agree not to modify, rent, lease, sub-license, distribute, or create derivative works based on the third-party software, and may not use the third-party software in any unauthorized manner, including but not limited to, using such software to transmit any type of computer virus, worm, Trojan, or other malicious software, invade a network, and overburden a network. You further agree not to use the third-party software in any manner that harasses, abuses, threatens, defames, or otherwise infringes upon the rights of any third party, and warrant that Huawei does not assume any liability for your such actions, or any harassing, threatening, defamatory, offensive, infringing, or illegal information or transmission that is incurred due to your use of the third-party software.
+
+9 Termination and Survival
+
+9.1 This Agreement is effective from the first date you install this Software. If you want to terminate this Agreement, you shall permanently delete, destroy, and return, at your own cost, this Software, all backup copies, and all related materials provided by Huawei. If you fail to comply with any of the terms or conditions of this Agreement, Huawei or its licensors have the right to terminate this Agreement at any time without prior notice. Upon the termination, you must immediately stop using this Software and delete all the Software and related materials that have been copied to and/or installed on your Huawei wearable device.
+
+9.2 Sections 7, 9, 10, 11, 12, 13, 14, 15, and 16 herein shall survive the termination of this Agreement.
+
+9.3 If a court of competent jurisdiction finds on any ground that any provision or any part of this Agreement shall be invalid, other provisions of this Agreement shall remain in force.
+
+10 Disclaimers
+
+10.1 YOU ACKNOWLEDGE THAT THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, AND TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, NEITHER HUAWEI OR ITS AFFILIATES OR LICENSORS NOR THE COPYRIGHT HOLDERS MAKE ANY REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, RIGHT TO CONFIDENTIALITY, AND NON-INFRINGEMENT OF THIRD PARTY RIGHTS. THERE IS NO WARRANTY BY HUAWEI OR BY ANY OTHER PARTY THAT THE FEATURES CONTAINED IN THE SOFTWARE WILL MEET YOUR REQUIREMENTS OR THAT THE OPERATION OF THE SOFTWARE WILL BE UNINTERRUPTED OR ERROR-FREE. YOU SHALL BEAR ALL RESPONSIBILITIES AND RISKS ARISING FROM YOU SELECTING THIS SOFTWARE TO ACHIEVE YOUR EXPECTED RESULTS, INSTALLING AND USING THIS SOFTWARE, AND OBTAINING RESULTS FROM IT.
+
+10.2 INSTALLING THIS SOFTWARE MAY AFFECT THE AVAILABILITY OF THIRD-PARTY SOFTWARE, APPS, OR SERVICES. THERE IS NO WARRANTY BY HUAWEI THAT THE FEATURES OR SERVICES CONTAINED IN THIS SOFTWARE WILL MEET YOUR REQUIREMENTS, THAT THIS SOFTWARE AND ITS SERVICES WILL BE FREE FROM ERRORS/BUGS, OR THAT THIS SOFTWARE WILL PROVIDE CONTINUOUS, PERMANENT SERVICES. IN ADDITION, HUAWEI MAKES NO WARRANTY THAT THIS SOFTWARE WILL BE COMPATIBLE WITH ANY THIRD-PARTY SOFTWARE OR SERVICES.
+
+10.3 YOU FURTHER ACKNOWLEDGE THAT HUAWEI SOFTWARE AND SERVICES ARE NOT INTENDED OR SUITABLE FOR USE IN SITUATIONS OR ENVIRONMENTS WHERE THE FAILURE OR TIME DELAYS OF, OR ERRORS OR INACCURACIES IN, THE CONTENT, DATA, OR INFORMATION PROVIDED BY THE HUAWEI SOFTWARE OR SERVICES COULD LEAD TO DEATH, PERSONAL INJURY, OR SEVERE PHYSICAL OR ENVIRONMENTAL DAMAGE, INCLUDING BUT NOT LIMITED TO THE OPERATION OF NUCLEAR FACILITIES, AIRCRAFT NAVIGATION OR COMMUNICATIONS SYSTEMS, AIR TRAFFIC CONTROL SYSTEMS, OR LIFE SUPPORT OR WEAPONS SYSTEMS.
+
+11 Limitation of Liability
+
+11.1 HUAWEI WILL NOT TAKE ANY RESPONSIBILITY FOR SOFTWARE USE PROBLEMS CAUSED BY ABUSE, MISUSE, OR UNAUTHORIZED MODIFICATION.
+
+11.2 TO THE EXTENT NOT EXPRESSLY PROHIBITED BY APPLICABLE LAW, IN NO EVENT SHALL HUAWEI OR ITS EMPLOYEES, LICENSORS, OR AFFILIATES BE LIABLE FOR ANY LOSS OF PROFITS, REVENUE, SALES, OR DATA, COSTS OF PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, PROPERTY DAMAGE, PERSONAL INJURY, BUSINESS INTERRUPTION, OR LOSS OF BUSINESS INFORMATION, OR FOR ANY SPECIAL, DIRECT, INDIRECT, INCIDENTAL, ECONOMIC, PUNITIVE, OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR RELATED TO YOUR USE OF OR INABILITY TO USE THIS SOFTWARE, HOWEVER CAUSED, REGARDLESS OF THE THEORY OF LIABILITY (CONTRACT, TORT, NEGLIGENCE, OR OTHERWISE) AND EVEN IF SUCH PARTIES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. SOME JURISDICTIONS DO NOT ALLOW THE LIMITATION OF LIABILITY FOR PERSONAL INJURY, OR OF INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THIS LIMITATION MAY NOT APPLY TO YOU.
+
+11.3 IN NO EVENT SHALL HUAWEI'S TOTAL LIABILITY TO YOU FOR ALL DAMAGES (OTHER THAN AS MAY BE REQUIRED BY APPLICABLE LAW IN CASES INVOLVING DEATH OR PERSONAL INJURY RESULTING FROM HUAWEI'S NEGLIGENCE) EXCEED THE AMOUNT YOU PAID FOR YOUR HUAWEI WEARABLE DEVICE.
+
+11.4 The laws of some countries/regions do not allow certain warranties, guarantees, or liabilities to be excluded or limited by an agreement. If these laws apply to you, some or all of the exclusions or limitations mentioned herein may not be applicable and you may have additional rights. Nothing in this Agreement affects the rights that you are legally entitled to as a consumer, or which you cannot contractually agree to alter or waive.
+
+12 Technical Support
+
+Huawei is not obligated to provide you with any technical support for the Software under this Agreement except as required by law. No oral or written information or opinion given by Huawei or its authorized representatives constitutes any warranty. If you discover that the Software or its services are defective, you must bear all necessary maintenance or correction costs.
+
+13 Export Controls
+
+You may not use or otherwise export or re-export Huawei Software except as authorized by applicable laws and the laws of the jurisdictions in which the Huawei Software was obtained.
+
+14 Contacting Huawei
+
+If you have any questions, comments, or suggestions, please contact us via the customer service hotline 950800, via the online customer service, or at our global offices. For a complete list of our offices, please visit the Contact Huawei page.
+
+15 Dispute Resolution and Governing Laws
+
+The validation, interpretation, modification, performance, and dispute resolution of this Agreement shall be governed by the laws of the People's Republic of China, without regard to its conflict of laws rules. You agree that this Agreement is signed in Longgang District, Shenzhen. Any dispute arising in relation to the content or performance of this Agreement shall be settled through negotiation made in good faith. If such negotiation fails, either party may submit the dispute for resolution by litigation at the people's court with proper jurisdiction in the place where this Agreement is signed. You will also benefit from any and all mandatory provisions of the laws of your country/region of residence. Nothing in this Agreement affects any rights you have as a consumer under mandatory provisions of local law.
+
+16 Entire Agreement
+
+This Agreement constitutes the entire agreement between you and Huawei in respect of the use of this Software and supersedes any prior agreements between you and Huawei relating to the use of this Software. You may also be subject to additional terms and conditions that may apply when you use or purchase open-source software, third-party content, or other Huawei services.
+
+Copyright (c) Huawei Device Co., Ltd. 2026. All rights reserved.
+
+---------------------------------------
+HarmonyOS SDK License Agreement
+
+1. Definition
+
+1.1 Huawei refers to the signing entity, in accordance with Clause 11 herein, which provides you with the HarmonyOS SDKs.
+
+1.2 HarmonyOS SDKs refers to the software development kits provided by Huawei that contains system files, integrated APIs, toolchains, previewer, technical documents, and subsequent updates.
+
+1.3 HarmonyOS refers to a brand-new distributed operating system that is oriented to a wide range of scenarios.
+
+1.4 Compatible device refers to a device that complies with the Product Compatibility Specifications, which can be obtained by going to Design  Compatibility on https://device.harmonyos.com and may be updated in the future.
+
+2. About This Agreement
+
+2.1 The HarmonyOS SDK License Agreement (hereinafter referred to as this Agreement) is a legally binding agreement made and entered into between you and Huawei. Huawei will license you to use the HarmonyOS SDKs in accordance with this Agreement. By reading this Agreement, you will understand the rules for using the HarmonyOS SDKs and other important information. Please read this Agreement carefully. By clicking the Accept button below this Agreement or by using the HarmonyOS SDKs, you shall be deemed as having fully understood and accepted the terms contained herein. If you do not agree to the terms of this Agreement, you shall not use the HarmonyOS SDKs.
+
+2.2 You must meet the following criteria You have reached the legal age of majority so that you are competent to enter into a legally binding agreement with Huawei; you possess full legal capacity to conclude, understand, and perform this Agreement with Huawei and are able to assume the legal liability for any and all breaches thereof; you are not otherwise forbidden to use HarmonyOS SDKs in accordance with applicable laws. If you enter into this Agreement on behalf of an entity, you undertake that you have the qualification and ability to enter into this Agreement on behalf of the entity and that the entity possesses the qualification, authorization, or license(s) required to enter into this Agreement with Huawei.
+
+3. License
+
+3.1 Huawei grants you a limited, non-exclusive, free, non-transferable, non-sublicensable, and revocable license worldwide for you to download, install, copy, integrate, and run the HarmonyOS SDKs to develop applications that run on compatible devices.
+
+3.2 You shall not use HarmonyOS SDKs to develop applications or other SDKs for incompatible devices. If you do not use HarmonyOS SDKs, you can develop applications for other platforms, including incompatible devices.
+
+3.3 All rights and interests related to HarmonyOS SDKs are owned by Huawei, including any intellectual property rights. Huawei reserves all rights that are not explicitly granted to you.
+
+3.4 This Agreement does not contain any terms that grant you the right to use any of Huawei's trademarks, logos, domain names, company names, product names, or other brands.
+
+3.5 Huawei agrees not to obtain any rights or interests, including any intellectual property rights, of the applications that you have developed using HarmonyOS SDKs from you (or your licensor) in accordance with this Agreement.
+
+4. Usage Rules
+
+You agree that you will not perform the following activities, or allow or encourage any third party to perform the following activities
+
+(a) Use HarmonyOS SDKs for any purposes that are not explicitly allowed by this Agreement or that are not allowed by applicable laws and regulations;
+
+(b) Use HarmonyOS SDKs to implement functions that are prohibited by applicable laws and regulations during application development;
+
+(c) Use HarmonyOS SDKs to interfere with, damage, disrupt, or access without authorization the server, network, or other services of any subject;
+
+(d) Modify, adapt, redistribute, decompile, reverse-engineer, or disassemble HarmonyOS SDKs or any part of HarmonyOS SDKs, or create derivatives of HarmonyOS SDKs or any part of HarmonyOS SDKs;
+
+(e) Delete, cover, or modify any proprietary right statements (including copyright statements and trademark statements) that may be attached to or contained in HarmonyOS SDKs.
+
+5. Privacy and Data
+
+5.1 HarmonyOS SDKs will not collect any personal information from you or end users of your applications.
+
+5.2 To understand developers' requirements and improve the quality and experience of HarmonyOS SDKs, Huawei will collect information about your usage of HarmonyOS SDKs, such as the usage frequency of each function and operation logs.
+
+6. Cyber Security and Personal Information Protection
+
+6.1 During application development, you shall comply with the following network security requirements
+
+(a) Comply with local laws and regulations and ensure that there are no securitysafety risks or issues;
+
+(b) Do not attack or damage Huawei networks. Do not steal any data or information from Huawei or user devices. Do not crack accounts or passwords of Huawei users;
+
+(c) Do not implant unwanted code, malware, or backdoors in Huawei networks or user devices. Do not reserve any undisclosed interfaces or accounts;
+
+(d) Do not introduce any form of Trojan horse, backdoor, worm, virus, malicious code, unknown function, or unknown permission into your applications.
+
+6.2 If the applications you develop using HarmonyOS SDKs will collect and process user data, you shall inform users of the type of data that will be collected, the purpose of the collection, and the data processing methods, and you shall also obtain users' consent and provide users with privacy statements and protection measures that comply with applicable laws. You shall be responsible for resolving any privacy and security issues arising between you and your users related to your applications, and Huawei shall not be responsible for such issues.
+
+7. Disclaimer
+
+7.1 Huawei, its affiliates, principals, directors, employees, contractors, agents, third-party payment service providers, partners, licensors, and resellers (hereinafter collectively referred to as the Huawei Parties) do not take any responsibility, under any responsibility theory, for any direct, indirect, incidental, special, secondary, or punitive damage (including any loss of data, reputation, or profit) that you may suffer, irrespective of whether the Huawei Parties or their representatives have been informed, or whether the Huawei Parties or their representatives are aware of the possibility of any of the above-mentioned losses.
+
+7.2 HarmonyOS SDKs are provided on an as-is and as available basis without any representation or endorsement of any kind. To the maximum extent permitted by applicable laws, the Huawei Parties do not make any explicit or implicit guarantee, undertaking, representation, or warranty for the following
+
+(a) HarmonyOS SDK marketability, applicability for specific purposes, and non-infringement of any other's rights;
+
+(b) Integrity, accuracy, reliability, and timeliness of any content obtained through HarmonyOS SDKs;
+
+(c) HarmonyOS SDKs or the servers that accommodate HarmonyOS SDKs are free from defects, errors, viruses, bugs, or other harmful elements;
+
+(d) HarmonyOS SDK function defects will be fixed;
+
+(e) Future HarmonyOS SDK versions are fully compatible with applications developed based on previous HarmonyOS SDK versions.
+
+The Huawei Parties are not liable for any loss or damage caused by your full or partial reliance on HarmonyOS SDKs, your use of HarmonyOS SDKs, or any information obtained by your (or anyone else's) use of HarmonyOS SDKs.
+
+7.3 You shall bear full responsibility for any failure to fulfill obligations under this Agreement or any applicable third-party agreements, laws, and regulations, and for any consequences arising thereof, and Huawei does not assume any responsibility for you or any third party.
+
+7.4 The laws of some countries do not allow certain warranties, guarantees, or liabilities to be excluded or limited by a contract. If these laws apply to you, all or part of the above-mentioned exclusions or restrictions may not apply to you, but other content in this Agreement is not affected.
+
+7.5 You agree to select your country or region in the operating system where you use HarmonyOS SDKs according to the actual situation. You shall be solely responsible for the failure to select the factual country/region, and for any consequence arising thereof, such as data leakage. Huawei shall bear no liability.
+
+8. Indemnity
+
+8.1 To the maximum extent permitted by applicable laws, you shall defend, hold harmless, and indemnify the Huawei Parties against and from any and all claims, suits, and actions arising out of or in relation to any of the following events
+
+(a) Your use of HarmonyOS SDKs;
+
+(b) Your breach of any provision of this Agreement;
+
+(c) Your breach of any applicable laws and regulations;
+
+(d) Disputes between you and end users;
+
+(e) Your commitments and warranties to any third party regarding HarmonyOS SDKs under this Agreement;
+
+(f) Any claim that your application infringes upon or embezzles any third party's intellectual property rights or other rights.
+
+8.2 You acknowledge and agree to provide full assistance and cooperation in defending against the aforesaid claims, suits, and actions immediately upon reasonable request of the Huawei Parties.
+
+9. Termination
+
+9.1 This Agreement shall remain in effect unless you or Huawei terminates this Agreement in accordance with the provisions of this Agreement.
+
+9.2 You can terminate this Agreement by stopping using HarmonyOS SDKs.
+
+9.3 Huawei reserves the right to temporarily or permanently suspend, cancel, or restrict your use of part or all HarmonyOS SDKs, and suspend or terminate this Agreement without assuming any responsibility for you or any third party in any of the following circumstances
+
+(a) You violate, or Huawei believes you are about to violate this Agreement, including any agreements, policies, or guidelines incorporated herein;
+
+(b) You, or anyone acting on your behalf, acts illegally, or provides Huawei with any false or misleading information;
+
+(c) In response to requests by law enforcement or other government agencies under a valid legal process;
+
+(d) Unexpected technical, security, or business reasons.
+
+The expiry or termination of this Agreement does not affect the provisions of this Agreement that are expressed or by their nature to operate or have effect after deactivation or termination and is without prejudice to any accrued rights or obligations or any rights or obligations which are intended to survive such deactivation or termination.
+
+10. Amendments
+
+10.1 Huawei has been and will be updating and optimizing HarmonyOS SDKs. Huawei may add or delete functions, set new restrictions, or temporarily or permanently suspend or stop certain functions of HarmonyOS SDKs without any prior notice to you. Huawei may also amend this Agreement at any time based on the changes to the HarmonyOS SDKs.
+
+10.2 If changes to HarmonyOS SDKs or this Agreement severely affect users or restrict the use of HarmonyOS SDKs, Huawei will release a new version notice within a reasonable period after the changes. For the changes to HarmonyOS SDKs that Huawei needs to make to meet security, legal, or regulatory requirements, Huawei may not be able to meet the aforementioned timescales and Huawei will notify you of these changes as soon as possible.
+
+11. Signing Huawei Entities
+11.1. Your signing entity will be determined by the country or region ("Use Area") set in the operating system where you use HarmonyOS SDKs.
+
+11.2 If your Use Area is the Chinese mainland specified in Part I of Exhibit A hereto, you are entering into and concluding this Agreement with Huawei Software Technologies Co., Ltd. which is legally established and incorporated in the People's Republic of China, and you designate Huawei Software Technologies Co., Ltd. as your agent in the Chinese mainland.
+
+11.3 If your Use Area is the country(ies) and/or region(s) listed in Part II of Exhibit A hereto, you are entering into and concluding this Agreement with Aspiegel SE (formerly known as Aspiegel Limited) which is legally established and incorporated in Ireland, and you designate Aspiegel SE as your agent in such countries and regions.
+
+11.4 If your Use Area is the country((ies) and/or region(s) listed in Part III of Exhibit A hereto, you are entering into and concluding this Agreement with Huawei Services (Hong Kong) Co., Limited which is legally established and incorporated in Hong Kong (China), and you designate Huawei Services (Hong Kong) Co., Limited as your agent in such countries and regions.
+
+12. Governing Laws and Dispute Resolution
+
+12.1 If you are concluding this Agreement with Huawei Software Technologies Co., Ltd., you agree that the establishment, jurisdiction, and interpretation of this Agreement shall be governed by the laws of the People's Republic of China. You agree that this Agreement is signed in Longgang District, Shenzhen, P.R. China. Any and all disputes, compensation claims, and causes of action arising out of or in relation to performing this Agreement or receiving HarmonyOS SDKs under this Agreement shall be resolved in the court with jurisdiction over the place where this Agreement is signed.
+
+12.2 If you are concluding this Agreement with Aspiegel SE, you agree that the establishment, jurisdiction, and interpretation of this Agreement shall be governed by the laws of Ireland. You agree that any and all disputes, compensation claims, and causes of action arising out of or in relation to performing this Agreement or receiving HarmonyOS SDKs under this Agreement shall be submitted to the Irish Courts with jurisdiction in Dublin, Ireland, for litigation in the English language, without applying the United Nations Convention on Contracts for the International Sale of Goods.
+
+12.3 If you are concluding this Agreement with Huawei Services (Hong Kong) Co., Limited, you agree that the establishment, jurisdiction, and interpretation of this Agreement shall be governed by the laws of Hong Kong (China), you agree that any and all disputes, compensation claims, and causes of action arising out of or in relation to performing of this Agreement or receiving HarmonyOS SDKs under this Agreement shall be submitted to the courts in Hong Kong (China) for litigation in the English language, without applying the United Nations Convention on contracts for the International Sale of Goods.
+
+13. Miscellaneous
+
+13.1 This Agreement constitutes the entire legal agreement between you and Huawei and governs your use of HarmonyOS SDKs. This Agreement completely replaces any prior agreements between you and Huawei in relation to HarmonyOS SDKs.
+
+13.2 HarmonyOS SDKs may provide links to other websites or resources. You acknowledge and agree that Huawei is not responsible for the availability of such websites or resources, and does not endorse or take responsibility for any content, advertisements, products, or other information on or available from such websites or resources. Huawei is not responsible for any damage or loss caused or alleged to be caused by or in connection with the use of or reliance on any such content, goods, or services available on or through any such websites or resources.
+
+13.3 Nothing in this Agreement shall be construed to create a partnership or agency relationship between you and Huawei, and neither party shall have the right or authority to incur any liability debt or cost or enter into any contracts or other arrangements in the name of or on behalf of the other party.
+
+13.4 Huawei is not liable for any failure or delay in performance of its obligations under this Agreement that is caused or contributed to by matters beyond Huawei's reasonable control.
+
+13.5 If any provision of this Agreement is found by a court of competent jurisdiction or any other competent authority to be void, invalid, or unenforceable, it shall be deemed to be deleted from this Agreement, and all other provisions of this Agreement shall remain in full force and effect.
+
+13.6 Even if Huawei does not exercise any of the rights or remedies mentioned in this Agreement, it shall not be deemed that Huawei waives these rights or remedies. Huawei can still exercise these rights or take these remedies.
+
+13.7 The headings in this Agreement are for reading convenience only and have no legal effect.
+
+13.8 Huawei may assign or sub-contract any of Huawei's rights and obligations under this Agreement.
+
+13.9 You shall not distribute obligations under this Agreement or transfer or sublicense rights under this Agreement.
+
+Exhibit A - List of Countries/Regions
+
+Part I: Chinese mainland.
+
+Part II: Aland Islands, Albania, Andorra, Australia, Austria, Belgium, Bonaire, Bosnia and Herzegovina, Bulgaria, Canada, Croatia, Curacao, Cyprus, Czech Republic, Denmark, Dutch Caribbean, Estonia, Faroe Islands, Finland, France, Germany, Gibraltar, Greece, Greenland, Guernsey, Hungary, Iceland, Israel, Italy, Jersey, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta, Moldova, Monaco, Montenegro, Netherlands, New Zealand, North Macedonia, Norway, Poland, Portugal, Ireland, Romania, Saba, Saint Vincent and the Grenadines, San Marino, Serbia, Sint Eustatius, Sint Maarten, Slovakia, Slovenia, Spain, St. Martin, St. Pierre and Miquelon (France), Sweden, Switzerland, Turkey, Ukraine, United Kingdom, United States, Vatican City.
+
+Part III: Other countries and regions.
+---------------------------------------
+All licenses have been automatically accepted.

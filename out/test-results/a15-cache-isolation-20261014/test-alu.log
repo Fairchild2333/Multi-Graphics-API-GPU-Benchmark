@@ -1,0 +1,1239 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test -project ios-gui/Mangekyo.xcodeproj -scheme Mangekyo -configuration Release -destination id=00008110-00164D591485401E -derivedDataPath build-ios/DerivedData-iphoneos -allowProvisioningUpdates DEVELOPMENT_TEAM=2W6PXCJAM6 CODE_SIGN_STYLE=Automatic "LIBRARY_SEARCH_PATHS=\"$(SRCROOT)/../build-ios/Release-iphoneos\" \"$(SRCROOT)/../build-ios/Release-iphoneos/Release-iphoneos\" \"$(SRCROOT)/../build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/$(MOLTENVK_SLICE)\"" "-only-testing:MangekyoTests/CpuBridgeTests/testA15FirstPassCacheIsolationControls" -resultBundlePath out/test-results/a15-cache-isolation-20261014/controls-alu.xcresult
+
+Build settings from command line:
+    CODE_SIGN_STYLE = Automatic
+    DEVELOPMENT_TEAM = 2W6PXCJAM6
+    LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../build-ios/Release-iphoneos" "$(SRCROOT)/../build-ios/Release-iphoneos/Release-iphoneos" "$(SRCROOT)/../build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/$(MOLTENVK_SLICE)"
+
+Writing result bundle at path:
+	/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-cache-isolation-20261014/controls-alu.xcresult
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (3 targets)
+    Target 'MangekyoUITests' in project 'Mangekyo'
+        ➜ Explicit dependency on target 'Mangekyo' in project 'Mangekyo'
+    Target 'MangekyoTests' in project 'Mangekyo'
+        ➜ Explicit dependency on target 'Mangekyo' in project 'Mangekyo'
+    Target 'Mangekyo' in project 'Mangekyo' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKStatCaches.noindex/iphoneos27.0-24A430-6c78b3cbc238196c85e1bf6c792c5915.sdkstatcache
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Mangekyo.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKStatCaches.noindex/iphoneos27.0-24A430-6c78b3cbc238196c85e1bf6c792c5915.sdkstatcache
+
+MkDir /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    /bin/mkdir -p /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest
+
+WriteAuxiliaryFile /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/DerivedSources/Entitlements.plist (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    write-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/DerivedSources/Entitlements.plist
+
+MkDir /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    /bin/mkdir -p /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns
+
+ProcessProductPackaging /Users/fairchild/Library/Developer/Xcode/UserData/Provisioning\ Profiles/ac4eb893-18f2-4c9b-ab45-0920876acc5d.mobileprovision /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/embedded.mobileprovision (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-productPackagingUtility /Users/fairchild/Library/Developer/Xcode/UserData/Provisioning\ Profiles/ac4eb893-18f2-4c9b-ab45-0920876acc5d.mobileprovision -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/embedded.mobileprovision
+
+ProcessProductPackaging "" /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Mangekyo.app.xcent (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    
+    Entitlements:
+    
+    {
+    "application-identifier" = "2W6PXCJAM6.com.fairchild.Mangekyo";
+    "com.apple.developer.team-identifier" = 2W6PXCJAM6;
+    "get-task-allow" = 1;
+}
+    
+    builtin-productPackagingUtility -entitlements -format xml -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Mangekyo.app.xcent
+
+ProcessProductPackagingDER /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Mangekyo.app.xcent /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Mangekyo.app.xcent.der (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    /usr/bin/derq query -f xml -i /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Mangekyo.app.xcent -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Mangekyo.app.xcent.der --raw
+
+CompileAssetCatalogVariant thinned /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Mangekyo/Assets.xcassets (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Mangekyo/Assets.xcassets --compile /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_generated_info.plist_thinned --app-icon AppIcon --compress-pngs --enable-on-demand-resources YES --filter-for-thinning-device-configuration iPhone14,2 --filter-for-device-os-version 27.0.1 --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 16.0 --platform iphoneos
+/* com.apple.actool.compilation-results */
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_generated_info.plist_thinned
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_output/thinned/AppIcon60x60@2x.png
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_output/thinned/AppIcon76x76@2x~ipad.png
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_output/thinned/Assets.car
+
+
+Ld /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/Mangekyo normal (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ -Xlinker -reproducible -target arm64-apple-ios16.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -Os -Xlinker -no_warn_duplicate_libraries -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/EagerLinkingTBDs/Release-iphoneos -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/Release-iphoneos -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/ios-arm64 -F/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/EagerLinkingTBDs/Release-iphoneos -F/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos -filelist /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/Mangekyo.LinkFileList -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -dead_strip -Xlinker -object_path_lto -Xlinker /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/Mangekyo_lto.o -Xlinker -dependency_info -Xlinker /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/Mangekyo_dependency_info.dat -stdlib\=libc++ -fobjc-arc -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/Mangekyo.swiftmodule -lgpu_engine -lMoltenVK -framework IOSurface -framework OpenGLES -framework CoreGraphics -lc++ -framework Metal -framework MetalKit -framework QuartzCore -framework UIKit -framework CoreFoundation -framework Foundation -Xlinker -no_adhoc_codesign -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/Mangekyo
+
+LinkAssetCatalog /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Mangekyo/Assets.xcassets (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-linkAssetCatalog --thinned /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_output/thinned --thinned-dependencies /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_dependencies_thinned --thinned-info-plist-content /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_generated_info.plist_thinned --unthinned /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_output/unthinned --unthinned-dependencies /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_dependencies_unthinned --unthinned-info-plist-content /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_generated_info.plist_unthinned --output /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app --plist-output /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_generated_info.plist
+note: Emplaced /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/AppIcon76x76@2x~ipad.png (in target 'Mangekyo' from project 'Mangekyo')
+note: Emplaced /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/Assets.car (in target 'Mangekyo' from project 'Mangekyo')
+note: Emplaced /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/AppIcon60x60@2x.png (in target 'Mangekyo' from project 'Mangekyo')
+
+ProcessInfoPlistFile /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/Info.plist /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Info.plist (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-infoPlistUtility /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Info.plist -producttype com.apple.product-type.application -genpkginfo /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PkgInfo -expandbuildsettings -format binary -platform iphoneos -additionalcontentfile /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/assetcatalog_generated_info.plist -requiredArchitecture arm64 -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/Info.plist
+
+PhaseScriptExecution Bundle\ runtime\ Metal\ sources /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Script-FBD85741E30D66459188907A.sh (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    export ACTION\=build
+    export AD_HOC_CODE_SIGNING_ALLOWED\=NO
+    export AGGREGATE_TRACKED_DOMAINS\=YES
+    export ALLOW_BUILD_REQUEST_OVERRIDES\=NO
+    export ALLOW_TARGET_PLATFORM_SPECIALIZATION\=NO
+    export ALTERNATE_GROUP\=staff
+    export ALTERNATE_MODE\=u+w,go-w,a+rX
+    export ALTERNATE_OWNER\=fairchild
+    export ALTERNATIVE_DISTRIBUTION_WEB\=NO
+    export ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES\=NO
+    export ALWAYS_SEARCH_USER_PATHS\=NO
+    export ALWAYS_USE_SEPARATE_HEADERMAPS\=NO
+    export ANDROID_DEPLOYMENT_TARGET\=21.0
+    export APPLICATION_EXTENSION_API_ONLY\=NO
+    export APPLY_RULES_IN_COPY_FILES\=NO
+    export APPLY_RULES_IN_COPY_HEADERS\=NO
+    export APP_SHORTCUTS_ENABLE_FLEXIBLE_MATCHING\=YES
+    export ARCHS\=arm64
+    export ARCHS_BASE\=arm64
+    export ARCHS_STANDARD\=arm64
+    export ARCHS_STANDARD_32_64_BIT\=armv7\ arm64
+    export ARCHS_STANDARD_32_BIT\=armv7
+    export ARCHS_STANDARD_64_BIT\=arm64
+    export ARCHS_STANDARD_INCLUDING_64_BIT\=arm64
+    export ARCHS_UNIVERSAL_IPHONE_OS\=armv7\ arm64
+    export ARCH_COHORT_arm64e\=arm64e\ arm64e.x1
+    export ASSETCATALOG_COMPILER_APPICON_NAME\=AppIcon
+    export ASSETCATALOG_FILTER_FOR_DEVICE_MODEL\=iPhone14,2
+    export ASSETCATALOG_FILTER_FOR_DEVICE_OS_VERSION\=27.0.1
+    export ASSETCATALOG_FILTER_FOR_THINNING_DEVICE_CONFIGURATION\=iPhone14,2
+    export AUTOMATICALLY_MERGE_DEPENDENCIES\=NO
+    export AUTOMATION_APPLE_EVENTS\=NO
+    export AVAILABLE_PLATFORMS\=android\ appletvos\ appletvsimulator\ driverkit\ freebsd\ iphoneos\ iphonesimulator\ linux\ macosx\ none\ openbsd\ qnx\ staticlinux\ watchos\ watchsimulator\ webassembly\ xros\ xrsimulator
+    export AppIdentifierPrefix\=2W6PXCJAM6.
+    export BUILD_ACTIVE_RESOURCES_ONLY\=YES
+    export BUILD_COMPONENTS\=headers\ build
+    export BUILD_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products
+    export BUILD_LIBRARY_FOR_DISTRIBUTION\=NO
+    export BUILD_ONLY_KNOWN_LOCALIZATIONS\=NO
+    export BUILD_ROOT\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products
+    export BUILD_STYLE\=
+    export BUILD_VARIANTS\=normal
+    export BUILT_PRODUCTS_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos
+    export BUNDLE_CONTENTS_FOLDER_PATH_deep\=Contents/
+    export BUNDLE_EXECUTABLE_FOLDER_NAME_deep\=MacOS
+    export BUNDLE_EXTENSIONS_FOLDER_PATH\=Extensions
+    export BUNDLE_FORMAT\=shallow
+    export BUNDLE_FRAMEWORKS_FOLDER_PATH\=Frameworks
+    export BUNDLE_PLUGINS_FOLDER_PATH\=PlugIns
+    export BUNDLE_PRIVATE_HEADERS_FOLDER_PATH\=PrivateHeaders
+    export BUNDLE_PUBLIC_HEADERS_FOLDER_PATH\=Headers
+    export CACHE_ROOT\=/var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode
+    export CCHROOT\=/var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode
+    export CHMOD\=/bin/chmod
+    export CHOWN\=chown
+    export CLANG_ANALYZER_NONNULL\=YES
+    export CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION\=YES_AGGRESSIVE
+    export CLANG_CACHE_FINE_GRAINED_OUTPUTS\=YES
+    export CLANG_CXX_LANGUAGE_STANDARD\=c++17
+    export CLANG_CXX_LIBRARY\=libc++
+    export CLANG_ENABLE_EXPLICIT_MODULES\=YES
+    export CLANG_ENABLE_MODULES\=YES
+    export CLANG_ENABLE_OBJC_ARC\=YES
+    export CLANG_ENABLE_OBJC_WEAK\=YES
+    export CLANG_MODULES_BUILD_SESSION_FILE\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/ModuleCache.noindex/Session.modulevalidation
+    export CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING\=YES
+    export CLANG_WARN_BOOL_CONVERSION\=YES
+    export CLANG_WARN_COMMA\=YES
+    export CLANG_WARN_CONSTANT_CONVERSION\=YES
+    export CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS\=YES
+    export CLANG_WARN_DIRECT_OBJC_ISA_USAGE\=YES_ERROR
+    export CLANG_WARN_DOCUMENTATION_COMMENTS\=YES
+    export CLANG_WARN_EMPTY_BODY\=YES
+    export CLANG_WARN_ENUM_CONVERSION\=YES
+    export CLANG_WARN_INFINITE_RECURSION\=YES
+    export CLANG_WARN_INT_CONVERSION\=YES
+    export CLANG_WARN_NON_LITERAL_NULL_CONVERSION\=YES
+    export CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF\=YES
+    export CLANG_WARN_OBJC_LITERAL_CONVERSION\=YES
+    export CLANG_WARN_OBJC_ROOT_CLASS\=YES_ERROR
+    export CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER\=YES
+    export CLANG_WARN_RANGE_LOOP_ANALYSIS\=YES
+    export CLANG_WARN_STRICT_PROTOTYPES\=YES
+    export CLANG_WARN_SUSPICIOUS_MOVE\=YES
+    export CLANG_WARN_UNGUARDED_AVAILABILITY\=YES_AGGRESSIVE
+    export CLANG_WARN_UNREACHABLE_CODE\=YES
+    export CLANG_WARN__DUPLICATE_METHOD_MATCH\=YES
+    export CLASS_FILE_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/JavaClasses
+    export CLEAN_PRECOMPS\=YES
+    export CLONE_HEADERS\=NO
+    export CODESIGNING_FOLDER_PATH\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app
+    export CODE_SIGNING_ALLOWED\=YES
+    export CODE_SIGNING_REQUIRED\=YES
+    export CODE_SIGN_CONTEXT_CLASS\=XCiPhoneOSCodeSignContext
+    export CODE_SIGN_IDENTITY\=iPhone\ Developer
+    export CODE_SIGN_INJECT_BASE_ENTITLEMENTS\=YES
+    export CODE_SIGN_STYLE\=Automatic
+    export COLOR_DIAGNOSTICS\=NO
+    export COMBINE_HIDPI_IMAGES\=NO
+    export COMPILATION_CACHE_CAS_PATH\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/CompilationCache.noindex
+    export COMPILATION_CACHE_KEEP_CAS_DIRECTORY\=YES
+    export COMPILER_INDEX_STORE_ENABLE\=Default
+    export COMPOSITE_SDK_DIRS\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/CompositeSDKs
+    export COMPRESS_PNG_FILES\=YES
+    export CONFIGURATION\=Release
+    export CONFIGURATION_BUILD_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos
+    export CONFIGURATION_TEMP_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos
+    export CONTENTS_FOLDER_PATH\=Mangekyo.app
+    export CONTENTS_FOLDER_PATH_SHALLOW_BUNDLE_NO\=Mangekyo.app/Contents
+    export CONTENTS_FOLDER_PATH_SHALLOW_BUNDLE_YES\=Mangekyo.app
+    export COPYING_PRESERVES_HFS_DATA\=NO
+    export COPY_HEADERS_RUN_UNIFDEF\=NO
+    export COPY_PHASE_STRIP\=NO
+    export CORRESPONDING_SIMULATOR_PLATFORM_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform
+    export CORRESPONDING_SIMULATOR_PLATFORM_NAME\=iphonesimulator
+    export CORRESPONDING_SIMULATOR_SDK_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk
+    export CORRESPONDING_SIMULATOR_SDK_NAME\=iphonesimulator27.0
+    export CP\=/bin/cp
+    export CREATE_INFOPLIST_SECTION_IN_BINARY\=NO
+    export CURRENT_ARCH\=undefined_arch
+    export CURRENT_VARIANT\=normal
+    export DEAD_CODE_STRIPPING\=YES
+    export DEBUGGING_SYMBOLS\=YES
+    export DEBUG_INFORMATION_FORMAT\=dwarf-with-dsym
+    export DEBUG_INFORMATION_VERSION\=compiler-default
+    export DEFAULT_COMPILER\=com.apple.compilers.llvm.clang.1_0
+    export DEFAULT_DEXT_INSTALL_PATH\=/System/Library/DriverExtensions
+    export DEFAULT_KEXT_INSTALL_PATH\=/System/Library/Extensions
+    export DEFINES_MODULE\=NO
+    export DEPLOYMENT_LOCATION\=NO
+    export DEPLOYMENT_POSTPROCESSING\=NO
+    export DEPLOYMENT_TARGET_SETTING_NAME\=IPHONEOS_DEPLOYMENT_TARGET
+    export DEPLOYMENT_TARGET_SUGGESTED_VALUES\=15.0\ 15.1\ 15.2\ 15.3\ 15.4\ 15.5\ 15.6\ 16.0\ 16.1\ 16.2\ 16.3\ 16.4\ 16.5\ 16.6\ 17.0\ 17.1\ 17.2\ 17.3\ 17.4\ 17.5\ 17.6\ 18.0\ 18.1\ 18.2\ 18.3\ 18.4\ 18.5\ 18.6\ 26.0\ 26.2\ 26.3\ 26.4\ 26.5\ 26.6\ 27.0
+    export DERIVED_FILES_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/DerivedSources
+    export DERIVED_FILE_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/DerivedSources
+    export DERIVED_SOURCES_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/DerivedSources
+    export DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER\=NO
+    export DEVELOPER_APPLICATIONS_DIR\=/Applications/Xcode.app/Contents/Developer/Applications
+    export DEVELOPER_BIN_DIR\=/Applications/Xcode.app/Contents/Developer/usr/bin
+    export DEVELOPER_DIR\=/Applications/Xcode.app/Contents/Developer
+    export DEVELOPER_FRAMEWORKS_DIR\=/Applications/Xcode.app/Contents/Developer/Library/Frameworks
+    export DEVELOPER_FRAMEWORKS_DIR_QUOTED\=/Applications/Xcode.app/Contents/Developer/Library/Frameworks
+    export DEVELOPER_LIBRARY_DIR\=/Applications/Xcode.app/Contents/Developer/Library
+    export DEVELOPER_SDK_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
+    export DEVELOPER_TOOLS_DIR\=/Applications/Xcode.app/Contents/Developer/Tools
+    export DEVELOPER_USR_DIR\=/Applications/Xcode.app/Contents/Developer/usr
+    export DEVELOPMENT_LANGUAGE\=en
+    export DEVELOPMENT_TEAM\=2W6PXCJAM6
+    export DIAGNOSE_MISSING_TARGET_DEPENDENCIES\=YES
+    export DIFF\=/usr/bin/diff
+    export DOCUMENTATION_FOLDER_PATH\=Mangekyo.app/en.lproj/Documentation
+    export DONT_GENERATE_INFOPLIST_FILE\=NO
+    export DSTROOT\=/tmp/Mangekyo.dst
+    export DT_TOOLCHAIN_DIR\=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain
+    export DWARF_DSYM_FILE_NAME\=Mangekyo.app.dSYM
+    export DWARF_DSYM_FILE_SHOULD_ACCOMPANY_PRODUCT\=NO
+    export DWARF_DSYM_FOLDER_PATH\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos
+    export DYNAMIC_LIBRARY_EXTENSION\=dylib
+    export EAGER_COMPILATION_ALLOW_SCRIPTS\=NO
+    export EAGER_LINKING\=NO
+    export EFFECTIVE_PLATFORM_NAME\=-iphoneos
+    export EFFECTIVE_SWIFT_VERSION\=6
+    export EMBEDDED_CONTENT_CONTAINS_SWIFT\=NO
+    export EMBEDDED_PROFILE_NAME\=embedded.mobileprovision
+    export EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE\=NO
+    export ENABLE_APP_SANDBOX\=NO
+    export ENABLE_CODE_COVERAGE\=YES
+    export ENABLE_COHORT_ARCHS\=YES
+    export ENABLE_CPLUSPLUS_BOUNDS_SAFE_BUFFERS\=NO
+    export ENABLE_C_BOUNDS_SAFETY\=NO
+    export ENABLE_DEBUG_DYLIB\=NO
+    export ENABLE_DEFAULT_HEADER_SEARCH_PATHS\=YES
+    export ENABLE_DEFAULT_SEARCH_PATHS\=YES
+    export ENABLE_ENHANCED_SECURITY\=NO
+    export ENABLE_HARDENED_RUNTIME\=NO
+    export ENABLE_HARDWARE_CHECKED_POINTER_ARITHMETIC_SLICE\=NO
+    export ENABLE_HEADER_DEPENDENCIES\=YES
+    export ENABLE_INCOMING_NETWORK_CONNECTIONS\=NO
+    export ENABLE_NS_ASSERTIONS\=NO
+    export ENABLE_ON_DEMAND_RESOURCES\=YES
+    export ENABLE_OUTGOING_NETWORK_CONNECTIONS\=NO
+    export ENABLE_POINTER_AUTHENTICATION\=NO
+    export ENABLE_PREVIEWS\=NO
+    export ENABLE_RESOURCE_ACCESS_AUDIO_INPUT\=NO
+    export ENABLE_RESOURCE_ACCESS_BLUETOOTH\=NO
+    export ENABLE_RESOURCE_ACCESS_CALENDARS\=NO
+    export ENABLE_RESOURCE_ACCESS_CAMERA\=NO
+    export ENABLE_RESOURCE_ACCESS_CONTACTS\=NO
+    export ENABLE_RESOURCE_ACCESS_LOCATION\=NO
+    export ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY\=NO
+    export ENABLE_RESOURCE_ACCESS_PRINTING\=NO
+    export ENABLE_RESOURCE_ACCESS_USB\=NO
+    export ENABLE_SDK_IMPORTS\=NO
+    export ENABLE_SECURITY_COMPILER_WARNINGS\=NO
+    export ENABLE_STRICT_OBJC_MSGSEND\=YES
+    export ENABLE_TESTABILITY\=NO
+    export ENABLE_TESTING_SEARCH_PATHS\=NO
+    export ENABLE_USER_SCRIPT_SANDBOXING\=NO
+    export ENABLE_XOJIT_PREVIEWS\=NO
+    export ENFORCE_VALID_ARCHS\=YES
+    export ENTITLEMENTS_ALLOWED\=YES
+    export ENTITLEMENTS_DESTINATION\=Signature
+    export ENTITLEMENTS_REQUIRED\=NO
+    export EXCLUDED_INSTALLSRC_SUBDIRECTORY_PATTERNS\=.DS_Store\ .svn\ .git\ .hg\ CVS
+    export EXCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES\=\*.nib\ \*.lproj\ \*.framework\ \*.gch\ \*.xcode\*\ \*.xcassets\ \*.icon\ \(\*\)\ .DS_Store\ CVS\ .svn\ .git\ .hg\ \*.pbproj\ \*.pbxproj
+    export EXECUTABLES_FOLDER_PATH\=Mangekyo.app/Executables
+    export EXECUTABLE_FOLDER_PATH\=Mangekyo.app
+    export EXECUTABLE_FOLDER_PATH_SHALLOW_BUNDLE_NO\=Mangekyo.app/MacOS
+    export EXECUTABLE_FOLDER_PATH_SHALLOW_BUNDLE_YES\=Mangekyo.app
+    export EXECUTABLE_NAME\=Mangekyo
+    export EXECUTABLE_PATH\=Mangekyo.app/Mangekyo
+    export EXPANDED_CODE_SIGN_IDENTITY\=A52C1C37D7819FCC2948BFD4DAA0E2C49C1F4C6C
+    export EXPANDED_CODE_SIGN_IDENTITY_NAME\=Apple\ Development:\ lzz288898@126.com\ \(5R4X379M4R\)
+    export EXPANDED_PROVISIONING_PROFILE\=ac4eb893-18f2-4c9b-ab45-0920876acc5d
+    export EXTENSIONS_FOLDER_PATH\=Mangekyo.app/Extensions
+    export FILE_LIST\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects/LinkFileList
+    export FIXED_FILES_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/FixedFiles
+    export FRAMEWORKS_FOLDER_PATH\=Mangekyo.app/Frameworks
+    export FRAMEWORK_FLAG_PREFIX\=-framework
+    export FRAMEWORK_SEARCH_PATHS\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos\ 
+    export FRAMEWORK_VERSION\=A
+    export FULL_PRODUCT_NAME\=Mangekyo.app
+    export FUSE_BUILD_PHASES\=YES
+    export FUSE_BUILD_SCRIPT_PHASES\=NO
+    export GCC3_VERSION\=3.3
+    export GCC_C_LANGUAGE_STANDARD\=gnu11
+    export GCC_DYNAMIC_NO_PIC\=NO
+    export GCC_INLINES_ARE_PRIVATE_EXTERN\=YES
+    export GCC_NO_COMMON_BLOCKS\=YES
+    export GCC_PFE_FILE_C_DIALECTS\=c\ objective-c\ c++\ objective-c++
+    export GCC_PREPROCESSOR_DEFINITIONS\=HAVE_METAL\=1\ GPU_BENCH_NO_GLFW\=1
+    export GCC_SYMBOLS_PRIVATE_EXTERN\=YES
+    export GCC_THUMB_SUPPORT\=YES
+    export GCC_TREAT_WARNINGS_AS_ERRORS\=NO
+    export GCC_VERSION\=com.apple.compilers.llvm.clang.1_0
+    export GCC_VERSION_IDENTIFIER\=com_apple_compilers_llvm_clang_1_0
+    export GCC_WARN_64_TO_32_BIT_CONVERSION\=YES
+    export GCC_WARN_ABOUT_RETURN_TYPE\=YES_ERROR
+    export GCC_WARN_UNDECLARED_SELECTOR\=YES
+    export GCC_WARN_UNINITIALIZED_AUTOS\=YES_AGGRESSIVE
+    export GCC_WARN_UNUSED_FUNCTION\=YES
+    export GCC_WARN_UNUSED_VARIABLE\=YES
+    export GENERATED_MODULEMAP_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/GeneratedModuleMaps-iphoneos
+    export GENERATE_INFOPLIST_FILE\=NO
+    export GENERATE_INTERMEDIATE_TEXT_BASED_STUBS\=YES
+    export GENERATE_PKGINFO_FILE\=YES
+    export GENERATE_PRELINK_OBJECT_FILE\=NO
+    export GENERATE_PROFILING_CODE\=NO
+    export GENERATE_TEXT_BASED_STUBS\=NO
+    export GID\=20
+    export GROUP\=staff
+    export HEADERMAP_INCLUDES_FLAT_ENTRIES_FOR_TARGET_BEING_BUILT\=YES
+    export HEADERMAP_INCLUDES_FRAMEWORK_ENTRIES_FOR_ALL_PRODUCT_TYPES\=YES
+    export HEADERMAP_INCLUDES_FRAMEWORK_ENTRIES_FOR_TARGETS_NOT_BEING_BUILT\=YES
+    export HEADERMAP_INCLUDES_NONPUBLIC_NONPRIVATE_HEADERS\=YES
+    export HEADERMAP_INCLUDES_PROJECT_HEADERS\=YES
+    export HEADERMAP_USES_FRAMEWORK_PREFIX_ENTRIES\=YES
+    export HEADERMAP_USES_VFS\=NO
+    export HEADER_SEARCH_PATHS\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/include\ \"/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/../src\"
+    export HOME\=/Users/fairchild
+    export HOST_ARCH\=arm64
+    export HOST_PLATFORM\=macosx
+    export ICONV\=/usr/bin/iconv
+    export IMPLICIT_DEPENDENCY_DOMAIN\=default
+    export INDEX_ENABLE_OPTIMIZATION_LEVEL_OVERRIDE\=YES
+    export INDEX_STORE_COMPRESS\=NO
+    export INDEX_STORE_ONLY_PROJECT_FILES\=NO
+    export INFOPLIST_ENABLE_CFBUNDLEICONS_MERGE\=YES
+    export INFOPLIST_EXPAND_BUILD_SETTINGS\=YES
+    export INFOPLIST_FILE\=Info.plist
+    export INFOPLIST_OUTPUT_FORMAT\=binary
+    export INFOPLIST_PATH\=Mangekyo.app/Info.plist
+    export INFOPLIST_PREPROCESS\=NO
+    export INFOSTRINGS_PATH\=Mangekyo.app/en.lproj/InfoPlist.strings
+    export INLINE_PRIVATE_FRAMEWORKS\=NO
+    export INSTALLAPI_IGNORE_SKIP_INSTALL\=YES
+    export INSTALLHDRS_COPY_PHASE\=NO
+    export INSTALLHDRS_SCRIPT_PHASE\=NO
+    export INSTALL_DIR\=/tmp/Mangekyo.dst/Applications
+    export INSTALL_GROUP\=staff
+    export INSTALL_MODE_FLAG\=u+w,go-w,a+rX
+    export INSTALL_OWNER\=fairchild
+    export INSTALL_PATH\=/Applications
+    export INSTALL_ROOT\=/tmp/Mangekyo.dst
+    export IPHONEOS_DEPLOYMENT_TARGET\=16.0
+    export IS_UNOPTIMIZED_BUILD\=NO
+    export JAVAC_DEFAULT_FLAGS\=-J-Xms64m\ -J-XX:NewSize\=4M\ -J-Dfile.encoding\=UTF8
+    export JAVA_APP_STUB\=/System/Library/Frameworks/JavaVM.framework/Resources/MacOS/JavaApplicationStub
+    export JAVA_ARCHIVE_CLASSES\=YES
+    export JAVA_ARCHIVE_TYPE\=JAR
+    export JAVA_COMPILER\=/usr/bin/javac
+    export JAVA_FOLDER_PATH\=Mangekyo.app/Java
+    export JAVA_FRAMEWORK_RESOURCES_DIRS\=Resources
+    export JAVA_JAR_FLAGS\=cv
+    export JAVA_SOURCE_SUBDIR\=.
+    export JAVA_USE_DEPENDENCIES\=YES
+    export JAVA_ZIP_FLAGS\=-urg
+    export JIKES_DEFAULT_FLAGS\=+E\ +OLDCSO
+    export KASAN_CFLAGS_CLASSIC\=-DKASAN\=1\ -DKASAN_CLASSIC\=1\ -fsanitize\=address\ -mllvm\ -asan-globals-live-support\ -mllvm\ -asan-force-dynamic-shadow
+    export KASAN_CFLAGS_TBI\=-DKASAN\=1\ -DKASAN_TBI\=1\ -fsanitize\=kernel-hwaddress\ -mllvm\ -hwasan-recover\=0\ -mllvm\ -hwasan-instrument-atomics\=0\ -mllvm\ -hwasan-instrument-stack\=1\ -mllvm\ -hwasan-generate-tags-with-calls\=1\ -mllvm\ -hwasan-instrument-with-calls\=1\ -mllvm\ -hwasan-use-short-granules\=0\ -mllvm\ -hwasan-memory-access-callback-prefix\=__asan_
+    export KASAN_DEFAULT_CFLAGS\=-DKASAN\=1\ -DKASAN_CLASSIC\=1\ -fsanitize\=address\ -mllvm\ -asan-globals-live-support\ -mllvm\ -asan-force-dynamic-shadow
+    export KEEP_PRIVATE_EXTERNS\=NO
+    export LD_DEPENDENCY_INFO_FILE\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/undefined_arch/Mangekyo_dependency_info.dat
+    export LD_EXPORT_SYMBOLS\=YES
+    export LD_GENERATE_MAP_FILE\=NO
+    export LD_MAP_FILE_PATH\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Mangekyo-LinkMap-normal-undefined_arch.txt
+    export LD_NO_PIE\=NO
+    export LD_QUOTE_LINKER_ARGUMENTS_FOR_COMPILER_DRIVER\=YES
+    export LD_RUNPATH_SEARCH_PATHS\=\ @executable_path/Frameworks
+    export LD_RUNPATH_SEARCH_PATHS_YES\=@loader_path/../Frameworks
+    export LD_SHARED_CACHE_ELIGIBLE\=Automatic
+    export LD_WARN_DUPLICATE_LIBRARIES\=NO
+    export LD_WARN_UNUSED_DYLIBS\=NO
+    export LEGACY_DEVELOPER_DIR\=/Applications/Xcode.app/Contents/PlugIns/Xcode3Core.ideplugin/Contents/SharedSupport/Developer
+    export LEX\=lex
+    export LIBRARY_DEXT_INSTALL_PATH\=/Library/DriverExtensions
+    export LIBRARY_FLAG_NOSPACE\=YES
+    export LIBRARY_FLAG_PREFIX\=-l
+    export LIBRARY_KEXT_INSTALL_PATH\=/Library/Extensions
+    export LIBRARY_SEARCH_PATHS\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos\ \"/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/../build-ios/Release-iphoneos\"\ \"/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/../build-ios/Release-iphoneos/Release-iphoneos\"\ \"/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/../build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/ios-arm64\"
+    export LINKER_DISPLAYS_MANGLED_NAMES\=NO
+    export LINK_FILE_LIST_normal_arm64\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/Mangekyo.LinkFileList
+    export LINK_OBJC_RUNTIME\=YES
+    export LINK_WITH_STANDARD_LIBRARIES\=YES
+    export LLVM_TARGET_TRIPLE_OS_VERSION\=ios16.0
+    export LLVM_TARGET_TRIPLE_VENDOR\=apple
+    export LM_AUX_CONST_METADATA_LIST_PATH_normal_arm64\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/Mangekyo.SwiftConstValuesFileList
+    export LOCALIZATION_EXPORT_SUPPORTED\=YES
+    export LOCALIZATION_PREFERS_STRING_CATALOGS\=NO
+    export LOCALIZED_RESOURCES_FOLDER_PATH\=Mangekyo.app/en.lproj
+    export LOCALIZED_STRING_CODE_COMMENTS\=NO
+    export LOCALIZED_STRING_MACRO_NAMES\=NSLocalizedString\ CFCopyLocalizedString
+    export LOCALIZED_STRING_SWIFTUI_SUPPORT\=YES
+    export LOCAL_ADMIN_APPS_DIR\=/Applications/Utilities
+    export LOCAL_APPS_DIR\=/Applications
+    export LOCAL_DEVELOPER_DIR\=/Library/Developer
+    export LOCAL_LIBRARY_DIR\=/Library
+    export LOCROOT\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    export LOCSYMROOT\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    export MACH_O_TYPE\=mh_execute
+    export MAC_OS_X_PRODUCT_BUILD_VERSION\=26A434
+    export MAC_OS_X_VERSION_ACTUAL\=270001
+    export MAC_OS_X_VERSION_MAJOR\=270000
+    export MAC_OS_X_VERSION_MINOR\=270000
+    export MAKE_MERGEABLE\=NO
+    export MERGEABLE_LIBRARY\=NO
+    export MERGED_BINARY_TYPE\=none
+    export MERGE_LINKED_LIBRARIES\=NO
+    export METAL_LIBRARY_FILE_BASE\=default
+    export METAL_LIBRARY_OUTPUT_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app
+    export MODULES_FOLDER_PATH\=Mangekyo.app/Modules
+    export MODULE_CACHE_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/ModuleCache.noindex
+    export MOLTENVK_SLICE\=ios-arm64
+    export MTL_ENABLE_DEBUG_INFO\=NO
+    export MTL_FAST_MATH\=YES
+    export NATIVE_ARCH\=arm64
+    export NATIVE_ARCH_32_BIT\=arm
+    export NATIVE_ARCH_64_BIT\=arm64
+    export NATIVE_ARCH_ACTUAL\=arm64
+    export NO_COMMON\=YES
+    export OBJECT_FILE_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects
+    export OBJECT_FILE_DIR_normal\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal
+    export OBJROOT\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex
+    export ONLY_ACTIVE_ARCH\=NO
+    export ONLY_ARCH\=arm64
+    export OS\=MACOS
+    export OSAC\=/usr/bin/osacompile
+    export OTHER_LDFLAGS\=-lgpu_engine\ -lMoltenVK\ -framework\ IOSurface\ -framework\ OpenGLES\ -framework\ CoreGraphics\ -lc++\ -framework\ Metal\ -framework\ MetalKit\ -framework\ QuartzCore\ -framework\ UIKit\ -framework\ CoreFoundation\ -framework\ Foundation
+    export PACKAGE_TYPE\=com.apple.package-type.wrapper.application
+    export PASCAL_STRINGS\=YES
+    export PATH\=/Applications/Xcode.app/Contents/SharedFrameworks/SwiftBuild.framework/Versions/A/PlugIns/SWBBuildService.bundle/Contents/PlugIns/SWBUniversalPlatformPlugin.bundle/Contents/Frameworks/SWBUniversalPlatform.framework/Resources:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/local/bin:/Applications/Xcode.app/Contents/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/usr/local/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/fairchild/.grok/bin:/Users/fairchild/.antigravity-ide/antigravity-ide/bin:/opt/homebrew/opt/postgresql@18/bin:/Users/fairchild/.antigravity/antigravity/bin:/Users/fairchild/.local/bin:/opt/homebrew/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Library/Apple/usr/bin:/Library/TeX/texbin:/Users/fairchild/.codex/tmp/arg0/codex-arg0Fb387F:/Users/fairchild/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/opt/anaconda3/condabin:/Users/fairchild/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS
+    export PATH_PREFIXES_EXCLUDED_FROM_HEADER_DEPENDENCIES\=/usr/include\ /usr/local/include\ /System/Library/Frameworks\ /System/Library/PrivateFrameworks\ /Applications/Xcode.app/Contents/Developer/Headers\ /Applications/Xcode.app/Contents/Developer/SDKs\ /Applications/Xcode.app/Contents/Developer/Platforms
+    export PBDEVELOPMENTPLIST_PATH\=Mangekyo.app/pbdevelopment.plist
+    export PER_ARCH_MODULE_FILE_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/undefined_arch
+    export PER_ARCH_OBJECT_FILE_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/undefined_arch
+    export PER_VARIANT_OBJECT_FILE_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal
+    export PKGINFO_FILE_PATH\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/PkgInfo
+    export PKGINFO_PATH\=Mangekyo.app/PkgInfo
+    export PLATFORM_DEVELOPER_APPLICATIONS_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Applications
+    export PLATFORM_DEVELOPER_BIN_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin
+    export PLATFORM_DEVELOPER_LIBRARY_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library
+    export PLATFORM_DEVELOPER_SDK_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs
+    export PLATFORM_DEVELOPER_TOOLS_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Tools
+    export PLATFORM_DEVELOPER_USR_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr
+    export PLATFORM_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform
+    export PLATFORM_DISPLAY_NAME\=iOS
+    export PLATFORM_FAMILY_NAME\=iOS
+    export PLATFORM_NAME\=iphoneos
+    export PLATFORM_PREFERRED_ARCH\=arm64
+    export PLATFORM_PRODUCT_BUILD_VERSION\=24A430
+    export PLATFORM_REQUIRES_SWIFT_AUTOLINK_EXTRACT\=NO
+    export PLATFORM_REQUIRES_SWIFT_MODULEWRAP\=NO
+    export PLATFORM_USES_DSYMS\=YES
+    export PLIST_FILE_OUTPUT_FORMAT\=binary
+    export PLUGINS_FOLDER_PATH\=Mangekyo.app/PlugIns
+    export PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR\=YES
+    export PRECOMP_DESTINATION_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/PrefixHeaders
+    export PRELINK_DEPENDENCY_INFO_FILE\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/undefined_arch/Mangekyo_prelink_dependency_info.dat
+    export PRIVATE_HEADERS_FOLDER_PATH\=Mangekyo.app/PrivateHeaders
+    export PROCESSED_INFOPLIST_PATH\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/undefined_arch/Processed-Info.plist
+    export PRODUCT_BUNDLE_IDENTIFIER\=com.fairchild.Mangekyo
+    export PRODUCT_BUNDLE_PACKAGE_TYPE\=APPL
+    export PRODUCT_MODULE_NAME\=Mangekyo
+    export PRODUCT_NAME\=Mangekyo
+    export PRODUCT_SETTINGS_PATH\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Info.plist
+    export PRODUCT_TYPE\=com.apple.product-type.application
+    export PROFILING_CODE\=NO
+    export PROJECT\=Mangekyo
+    export PROJECT_DERIVED_FILE_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/DerivedSources
+    export PROJECT_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    export PROJECT_FILE_PATH\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Mangekyo.xcodeproj
+    export PROJECT_GUID\=8b5587ccd418267aaad398f95535998f
+    export PROJECT_NAME\=Mangekyo
+    export PROJECT_TEMP_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build
+    export PROJECT_TEMP_ROOT\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex
+    export PROVISIONING_PROFILE_REQUIRED\=YES
+    export PROVISIONING_PROFILE_REQUIRED_YES_YES\=YES
+    export PROVISIONING_PROFILE_SUPPORTED\=YES
+    export PUBLIC_HEADERS_FOLDER_PATH\=Mangekyo.app/Headers
+    export RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET\=17.0
+    export RECURSIVE_SEARCH_PATHS_FOLLOW_SYMLINKS\=YES
+    export REMOVE_CVS_FROM_RESOURCES\=YES
+    export REMOVE_GIT_FROM_RESOURCES\=YES
+    export REMOVE_HEADERS_FROM_EMBEDDED_BUNDLES\=YES
+    export REMOVE_HG_FROM_RESOURCES\=YES
+    export REMOVE_STATIC_EXECUTABLES_FROM_EMBEDDED_BUNDLES\=YES
+    export REMOVE_SVN_FROM_RESOURCES\=YES
+    export RESCHEDULE_INDEPENDENT_HEADERS_PHASES\=YES
+    export REZ_COLLECTOR_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/ResourceManagerResources
+    export REZ_OBJECTS_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/ResourceManagerResources/Objects
+    export REZ_SEARCH_PATHS\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos\ 
+    export RPATH_ORIGIN\=@loader_path
+    export RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES\=NO
+    export RUNTIME_EXCEPTION_ALLOW_JIT\=NO
+    export RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY\=NO
+    export RUNTIME_EXCEPTION_DEBUGGING_TOOL\=NO
+    export RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION\=NO
+    export RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION\=NO
+    export SCANNING_PCM_KEEP_CACHE_DIRECTORY\=YES
+    export SCAN_ALL_SOURCE_FILES_FOR_INCLUDES\=NO
+    export SCRIPTS_FOLDER_PATH\=Mangekyo.app/Scripts
+    export SCRIPT_INPUT_FILE_0\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/shaders/particle.metal
+    export SCRIPT_INPUT_FILE_1\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/shaders/gpu_burn.metal
+    export SCRIPT_INPUT_FILE_2\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/shaders/cinematic_liquid_v2.metal
+    export SCRIPT_INPUT_FILE_COUNT\=3
+    export SCRIPT_INPUT_FILE_LIST_COUNT\=0
+    export SCRIPT_OUTPUT_FILE_0\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/particle.metal
+    export SCRIPT_OUTPUT_FILE_1\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/gpu_burn.metal
+    export SCRIPT_OUTPUT_FILE_2\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/cinematic_liquid_v2.metal
+    export SCRIPT_OUTPUT_FILE_COUNT\=3
+    export SCRIPT_OUTPUT_FILE_LIST_COUNT\=0
+    export SDKROOT\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk
+    export SDK_DIR\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk
+    export SDK_DIR_iphoneos\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk
+    export SDK_DIR_iphoneos27_0\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk
+    export SDK_NAME\=iphoneos27.0
+    export SDK_NAMES\=iphoneos27.0
+    export SDK_PRODUCT_BUILD_VERSION\=24A430
+    export SDK_STAT_CACHE_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos
+    export SDK_STAT_CACHE_ENABLE\=YES
+    export SDK_STAT_CACHE_PATH\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKStatCaches.noindex/iphoneos27.0-24A430-6c78b3cbc238196c85e1bf6c792c5915.sdkstatcache
+    export SDK_VERSION\=27.0
+    export SDK_VERSION_ACTUAL\=270000
+    export SDK_VERSION_MAJOR\=270000
+    export SDK_VERSION_MINOR\=270000
+    export SED\=/usr/bin/sed
+    export SEPARATE_STRIP\=NO
+    export SEPARATE_SYMBOL_EDIT\=NO
+    export SET_DIR_MODE_OWNER_GROUP\=YES
+    export SET_FILE_MODE_OWNER_GROUP\=NO
+    export SHALLOW_BUNDLE\=YES
+    export SHALLOW_BUNDLE_TRIPLE\=ios
+    export SHALLOW_BUNDLE_ios_macabi\=NO
+    export SHALLOW_BUNDLE_macos\=NO
+    export SHARED_DERIVED_FILE_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/DerivedSources
+    export SHARED_FRAMEWORKS_FOLDER_PATH\=Mangekyo.app/SharedFrameworks
+    export SHARED_PRECOMPS_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/PrecompiledHeaders
+    export SHARED_SUPPORT_FOLDER_PATH\=Mangekyo.app/SharedSupport
+    export SKIP_COPYING_TEST_FRAMEWORKS\=YES
+    export SKIP_INSTALL\=NO
+    export SKIP_MERGEABLE_LIBRARY_BUNDLE_HOOK\=NO
+    export SOURCE_ROOT\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    export SRCROOT\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    export STRINGSDATA_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/undefined_arch
+    export STRINGSDATA_ROOT\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build
+    export STRINGS_FILE_INFOPLIST_RENAME\=YES
+    export STRINGS_FILE_OUTPUT_ENCODING\=binary
+    export STRING_CATALOG_GENERATE_SYMBOLS\=NO
+    export STRIP_BITCODE_FROM_COPIED_FILES\=YES
+    export STRIP_INSTALLED_PRODUCT\=YES
+    export STRIP_STYLE\=all
+    export STRIP_SWIFT_SYMBOLS\=YES
+    export SUPPORTED_DEVICE_FAMILIES\=1,2
+    export SUPPORTED_PLATFORMS\=iphoneos\ iphonesimulator
+    export SUPPORTS_MACCATALYST\=NO
+    export SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD\=YES
+    export SUPPORTS_ON_DEMAND_RESOURCES\=YES
+    export SUPPORTS_TEXT_BASED_API\=NO
+    export SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD\=YES
+    export SUPPRESS_WARNINGS\=NO
+    export SWIFTC_PASS_SDKROOT\=YES
+    export SWIFTC_PASS_SYSROOT\=NO
+    export SWIFT_COLOR_DIAGNOSTICS\=NO
+    export SWIFT_COMPILATION_MODE\=wholemodule
+    export SWIFT_EMIT_CONST_VALUE_PROTOCOLS\=AnyResolverProviding\ AppEntity\ AppEnum\ AppExtension\ AppIntent\ AppIntentsPackage\ AppShortcutProviding\ AppShortcutsProvider\ AppUnionValue\ AppUnionValueCasesProviding\ DynamicOptionsProvider\ EntityQuery\ ExtensionPointDefining\ IntentValueQuery\ Resolver\ TransientEntity\ _AssistantIntentsProvider\ _GenerativeFunctionExtractable\ _IntentValueRepresentable
+    export SWIFT_EMIT_LOC_STRINGS\=NO
+    export SWIFT_ENABLE_EXPLICIT_MODULES\=YES
+    export SWIFT_OBJC_BRIDGING_HEADER\=Mangekyo/Engine/GPUBenchmark-Bridging-Header.h
+    export SWIFT_OPTIMIZATION_LEVEL\=-O
+    export SWIFT_PLATFORM_TARGET_PREFIX\=ios
+    export SWIFT_RESPONSE_FILE_PATH_normal_arm64\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/Mangekyo.SwiftFileList
+    export SWIFT_VERSION\=6.0
+    export SYMROOT\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products
+    export SYSROOT\=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk
+    export SYSTEM_ADMIN_APPS_DIR\=/Applications/Utilities
+    export SYSTEM_APPS_DIR\=/Applications
+    export SYSTEM_CORE_SERVICES_DIR\=/System/Library/CoreServices
+    export SYSTEM_DEMOS_DIR\=/Applications/Extras
+    export SYSTEM_DEVELOPER_APPS_DIR\=/Applications/Xcode.app/Contents/Developer/Applications
+    export SYSTEM_DEVELOPER_BIN_DIR\=/Applications/Xcode.app/Contents/Developer/usr/bin
+    export SYSTEM_DEVELOPER_DEMOS_DIR\=/Applications/Xcode.app/Contents/Developer/Applications/Utilities/Built\ Examples
+    export SYSTEM_DEVELOPER_DIR\=/Applications/Xcode.app/Contents/Developer
+    export SYSTEM_DEVELOPER_DOC_DIR\=/Applications/Xcode.app/Contents/Developer/ADC\ Reference\ Library
+    export SYSTEM_DEVELOPER_GRAPHICS_TOOLS_DIR\=/Applications/Xcode.app/Contents/Developer/Applications/Graphics\ Tools
+    export SYSTEM_DEVELOPER_JAVA_TOOLS_DIR\=/Applications/Xcode.app/Contents/Developer/Applications/Java\ Tools
+    export SYSTEM_DEVELOPER_PERFORMANCE_TOOLS_DIR\=/Applications/Xcode.app/Contents/Developer/Applications/Performance\ Tools
+    export SYSTEM_DEVELOPER_RELEASENOTES_DIR\=/Applications/Xcode.app/Contents/Developer/ADC\ Reference\ Library/releasenotes
+    export SYSTEM_DEVELOPER_TOOLS\=/Applications/Xcode.app/Contents/Developer/Tools
+    export SYSTEM_DEVELOPER_TOOLS_DOC_DIR\=/Applications/Xcode.app/Contents/Developer/ADC\ Reference\ Library/documentation/DeveloperTools
+    export SYSTEM_DEVELOPER_TOOLS_RELEASENOTES_DIR\=/Applications/Xcode.app/Contents/Developer/ADC\ Reference\ Library/releasenotes/DeveloperTools
+    export SYSTEM_DEVELOPER_USR_DIR\=/Applications/Xcode.app/Contents/Developer/usr
+    export SYSTEM_DEVELOPER_UTILITIES_DIR\=/Applications/Xcode.app/Contents/Developer/Applications/Utilities
+    export SYSTEM_DEXT_INSTALL_PATH\=/System/Library/DriverExtensions
+    export SYSTEM_DOCUMENTATION_DIR\=/Library/Documentation
+    export SYSTEM_EXTENSIONS_FOLDER_PATH\=Mangekyo.app/SystemExtensions
+    export SYSTEM_EXTENSIONS_FOLDER_PATH_SHALLOW_BUNDLE_NO\=Mangekyo.app/Library/SystemExtensions
+    export SYSTEM_EXTENSIONS_FOLDER_PATH_SHALLOW_BUNDLE_YES\=Mangekyo.app/SystemExtensions
+    export SYSTEM_KEXT_INSTALL_PATH\=/System/Library/Extensions
+    export SYSTEM_LIBRARY_DIR\=/System/Library
+    export TAPI_DEMANGLE\=YES
+    export TAPI_ENABLE_PROJECT_HEADERS\=NO
+    export TAPI_LANGUAGE\=objective-c
+    export TAPI_LANGUAGE_STANDARD\=compiler-default
+    export TAPI_USE_SRCROOT\=YES
+    export TAPI_VERIFY_MODE\=Pedantic
+    export TARGETED_DEVICE_FAMILY\=1,2
+    export TARGETNAME\=Mangekyo
+    export TARGET_BUILD_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos
+    export TARGET_DEVICE_IDENTIFIER\=00008110-00164D591485401E
+    export TARGET_DEVICE_MODEL\=iPhone14,2
+    export TARGET_DEVICE_OS_VERSION\=27.0.1
+    export TARGET_DEVICE_PLATFORM_NAME\=iphoneos
+    export TARGET_NAME\=Mangekyo
+    export TARGET_TEMP_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build
+    export TEMP_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build
+    export TEMP_FILES_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build
+    export TEMP_FILE_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build
+    export TEMP_ROOT\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex
+    export TEMP_SANDBOX_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/TemporaryTaskSandboxes
+    export TEST_FRAMEWORK_SEARCH_PATHS\=\ /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks\ /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk/Developer/Library/Frameworks
+    export TEST_LIBRARY_SEARCH_PATHS\=\ /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib
+    export TOOLCHAINS\=com.apple.dt.toolchain.XcodeDefault
+    export TOOLCHAIN_DIR\=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain
+    export TREAT_MISSING_BASELINES_AS_TEST_FAILURES\=NO
+    export TREAT_MISSING_SCRIPT_PHASE_OUTPUTS_AS_ERRORS\=NO
+    export TeamIdentifierPrefix\=2W6PXCJAM6.
+    export UID\=501
+    export UNINSTALLED_PRODUCTS_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/UninstalledProducts
+    export UNLOCALIZED_RESOURCES_FOLDER_PATH\=Mangekyo.app
+    export UNLOCALIZED_RESOURCES_FOLDER_PATH_SHALLOW_BUNDLE_NO\=Mangekyo.app/Resources
+    export UNLOCALIZED_RESOURCES_FOLDER_PATH_SHALLOW_BUNDLE_YES\=Mangekyo.app
+    export UNSTRIPPED_PRODUCT\=NO
+    export USER\=fairchild
+    export USER_APPS_DIR\=/Users/fairchild/Applications
+    export USER_LIBRARY_DIR\=/Users/fairchild/Library
+    export USE_DYNAMIC_NO_PIC\=YES
+    export USE_HEADERMAP\=YES
+    export USE_HEADER_SYMLINKS\=NO
+    export VALIDATE_DEVELOPMENT_ASSET_PATHS\=YES_ERROR
+    export VALIDATE_PRODUCT\=NO
+    export VALID_ARCHS\=arm64\ arm64e\ arm64e.x1\ armv7\ armv7s
+    export VERBOSE_PBXCP\=NO
+    export VERSIONPLIST_PATH\=Mangekyo.app/version.plist
+    export VERSION_INFO_BUILDER\=fairchild
+    export VERSION_INFO_FILE\=Mangekyo_vers.c
+    export VERSION_INFO_STRING\=\"@\(\#\)PROGRAM:Mangekyo\ \ PROJECT:Mangekyo-\"
+    export WORKSPACE_DIR\=/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Mangekyo.xcodeproj
+    export WRAPPER_EXTENSION\=app
+    export WRAPPER_NAME\=Mangekyo.app
+    export WRAPPER_SUFFIX\=.app
+    export WRAP_ASSET_PACKS_IN_SEPARATE_DIRECTORIES\=NO
+    export XCODE_APP_SUPPORT_DIR\=/Applications/Xcode.app/Contents/Developer/Library/Xcode
+    export XCODE_PRODUCT_BUILD_VERSION\=27A266a
+    export XCODE_VERSION_ACTUAL\=2700
+    export XCODE_VERSION_MAJOR\=2700
+    export XCODE_VERSION_MINOR\=2700
+    export XPCSERVICES_FOLDER_PATH\=Mangekyo.app/XPCServices
+    export YACC\=yacc
+    export _DISCOVER_COMMAND_LINE_LINKER_INPUTS\=YES
+    export _DISCOVER_COMMAND_LINE_LINKER_INPUTS_INCLUDE_WL\=YES
+    export _LD_MULTIARCH\=YES
+    export _SWIFT_EXPLICIT_MODULES_ALLOW_CXX_INTEROP\=YES
+    export _WRAPPER_CONTENTS_DIR_SHALLOW_BUNDLE_NO\=/Contents
+    export _WRAPPER_PARENT_PATH_SHALLOW_BUNDLE_NO\=/..
+    export _WRAPPER_RESOURCES_DIR_SHALLOW_BUNDLE_NO\=/Resources
+    export __ARCHS__\=arm64
+    export __DIAGNOSE_DEPRECATED_ARCHS\=YES
+    export __DIAGNOSE_INVALID_DEPLOYMENT_TARGET_AS_ERROR\=YES
+    export __IS_NOT_MACOS\=YES
+    export __IS_NOT_MACOS_macosx\=NO
+    export __IS_NOT_SIMULATOR\=YES
+    export __IS_NOT_SIMULATOR_simulator\=NO
+    export __ORIGINAL_SDK_DEFINED_LLVM_TARGET_TRIPLE_SYS\=ios
+    export arch\=undefined_arch
+    export variant\=normal
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Script-FBD85741E30D66459188907A.sh
+
+GenerateDSYMFile /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app.dSYM /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/Mangekyo (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    export PATH\=/Applications/Xcode.app/Contents/SharedFrameworks/SwiftBuild.framework/Versions/A/PlugIns/SWBBuildService.bundle/Contents/PlugIns/SWBUniversalPlatformPlugin.bundle/Contents/Frameworks/SWBUniversalPlatform.framework/Resources:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/local/bin:/Applications/Xcode.app/Contents/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/usr/local/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/fairchild/.grok/bin:/Users/fairchild/.antigravity-ide/antigravity-ide/bin:/opt/homebrew/opt/postgresql@18/bin:/Users/fairchild/.antigravity/antigravity/bin:/Users/fairchild/.local/bin:/opt/homebrew/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Library/Apple/usr/bin:/Library/TeX/texbin:/Users/fairchild/.codex/tmp/arg0/codex-arg0Fb387F:/Users/fairchild/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/opt/anaconda3/condabin:/Users/fairchild/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/dsymutil /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/Mangekyo -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app.dSYM
+
+CopySwiftLibs /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-swiftStdLibTool --copy --verbose --sign A52C1C37D7819FCC2948BFD4DAA0E2C49C1F4C6C --scan-executable /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/Mangekyo --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/Frameworks --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/SystemExtensions --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/Extensions --platform iphoneos --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+
+ExtractAppIntentsMetadata (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name Mangekyo --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk --xcode-version 27A266a --platform-family iOS --deployment-target 16.0 --bundle-identifier com.fairchild.Mangekyo --output /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app --target-triple arm64-apple-ios16.0 --binary-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/Mangekyo --dependency-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/Mangekyo_dependency_info.dat --stringsdata-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/Mangekyo.SwiftFileList --metadata-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Mangekyo.DependencyMetadataFileList --static-metadata-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Mangekyo.DependencyStaticMetadataFileList --swift-const-vals-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/Mangekyo.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-10-14 19:01:49.518 appintentsmetadataprocessor[25400:2330953] Starting appintentsmetadataprocessor export
+2026-10-14 19:01:49.519 appintentsmetadataprocessor[25400:2330953] warning: Metadata extraction skipped, no AppIntents.framework dependency found
+
+SwiftDriver MangekyoTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name MangekyoTests -O -whole-module-optimization @/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests.SwiftFileList -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -target arm64-apple-ios18.0 -g -module-cache-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/ModuleCache.noindex -Xfrontend -serialize-debugging-options -swift-version 6 -I /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib -F /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk/Developer/Library/Frameworks -parse-as-library -c -num-threads 14 -Xcc -ivfsstatcache -Xcc /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKStatCaches.noindex/iphoneos27.0-24A430-6c78b3cbc238196c85e1bf6c792c5915.sdkstatcache -output-file-map /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/ModuleCache.noindex -sdk-module-cache-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests_const_extract_protocols.json -Xcc -iquote -Xcc /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests-generated-files.hmap -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests-own-target-headers.hmap -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests-all-target-headers.hmap -Xcc -iquote -Xcc /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests-project-headers.hmap -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/include -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Mangekyo/Engine -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/DerivedSources-normal/arm64 -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/DerivedSources/arm64 -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/DerivedSources -Xcc -DHAVE_METAL\=1 -Xcc -DGPU_BENCH_NO_GLFW\=1 -emit-objc-header -emit-objc-header-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests-Swift.h -import-objc-header /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Mangekyo/Engine/GPUBenchmark-Bridging-Header.h -working-directory /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui -no-emit-module-separately-wmo
+
+ProcessInfoPlistFile /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/Info.plist /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/empty-MangekyoTests.plist (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-infoPlistUtility /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/empty-MangekyoTests.plist -producttype com.apple.product-type.bundle.unit-test -expandbuildsettings -format binary -platform iphoneos -requiredArchitecture arm64 -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/Info.plist
+
+SwiftDriver\ Compilation MangekyoTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name MangekyoTests -O -whole-module-optimization @/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests.SwiftFileList -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -target arm64-apple-ios18.0 -g -module-cache-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/ModuleCache.noindex -Xfrontend -serialize-debugging-options -swift-version 6 -I /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib -F /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk/Developer/Library/Frameworks -parse-as-library -c -num-threads 14 -Xcc -ivfsstatcache -Xcc /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKStatCaches.noindex/iphoneos27.0-24A430-6c78b3cbc238196c85e1bf6c792c5915.sdkstatcache -output-file-map /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/ModuleCache.noindex -sdk-module-cache-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests_const_extract_protocols.json -Xcc -iquote -Xcc /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests-generated-files.hmap -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests-own-target-headers.hmap -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests-all-target-headers.hmap -Xcc -iquote -Xcc /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests-project-headers.hmap -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/include -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Mangekyo/Engine -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/DerivedSources-normal/arm64 -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/DerivedSources/arm64 -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/DerivedSources -Xcc -DHAVE_METAL\=1 -Xcc -DGPU_BENCH_NO_GLFW\=1 -emit-objc-header -emit-objc-header-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests-Swift.h -import-objc-header /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Mangekyo/Engine/GPUBenchmark-Bridging-Header.h -working-directory /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui -no-emit-module-separately-wmo
+
+SwiftGeneratePch normal arm64 Compiling\ bridging\ header (in target 'MangekyoTests' from project 'Mangekyo')
+
+SwiftDriverJobDiscovery normal arm64 Compiling bridging header (in target 'MangekyoTests' from project 'Mangekyo')
+
+SwiftCompile normal arm64 Compiling\ CpuBridgeTests.swift /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/MangekyoTests/CpuBridgeTests.swift /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/OSLog.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/Darwin.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/CoreVideo.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/_Concurrency.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/CoreFoundation.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/DeveloperToolsSupport.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/Combine.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/Foundation.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/Metal.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/Observation.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/XPC.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/SwiftUICore.swiftmodule/arm64e-apple-ios.swiftmodule /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/XCUIAutomation-MXHEQKYS5QZ7.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/FileProvider.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/ImageIO.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/QuartzCore.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/CoreImage.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/simd.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/ObjectiveC.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/_StringProcessing.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/UniformTypeIdentifiers.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/UIKit.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/CoreMotion.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/_DarwinFoundation2.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/Swift.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/Accessibility.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/DataDetection.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/CoreLocation.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/CoreGraphics.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/CoreTransferable.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/_DarwinFoundation3.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/Symbols.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/CoreText.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/Spatial.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/os.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/System.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/_Builtin_float.swiftmodule/arm64e-apple-ios.swiftmodule /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/XCTest-2ZH14NPBMT59M.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/_DarwinFoundation1.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/27.0/Dispatch.swiftmodule/arm64e-apple-ios.swiftmodule /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_Builtin_float-227PHZI5EET3JNRLK6NPR9FSZ.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/CoreImage-1GJA0JF3DQKJO2UL5F3ID8TOO.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/CoreGraphics-EQSNUBO5JVMO7BOMHKBP5Y8N2.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/sys_types-9NPHF8V5VNZRTOHY92R2GBL33.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_Builtin_inttypes-BZA6V74280Q2E167O0UEC8WQF.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/IOSurface-8W2FUZCB8OURUHZYIWO874EK5.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/SwiftShims-Q4O01F16YZ8SOXZKY1YP9ZJ4.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_SwiftConcurrencyShims-CMBBE6H8QZBDMWHXM3WSTHA1V.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/ptrcheck-2PXJB18JN4EH8MKEQYF5R5XH1.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/Foundation-61C1YD9MOTZX9T1F1H4RJ0PMD.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/FileProvider-1K804PFGGELW1ZM809MP7UCCT.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_AvailabilityInternal-1E3QB9HD4MITATN5OER7Q96J1.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_DarwinFoundation2-DV0MI4AA3M1YBLSMELDXHC71V.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_Builtin_stdatomic-HCEIH24F2KFZGLUI74X3RLF0.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_Builtin_stdint-7H6S8XQQRJ77OJN4OG54MNL41.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/UIKit-335XP0RPZGICBQDV3IZFOXAGY.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_DarwinFoundation3-794OSBHTKVTQY3ANLFU074Y0J.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/UniformTypeIdentifiers-8UUCGBK1K5AT4WHOUMIVWBGQE.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/ObjectiveC-AXJ3HDWKSMKCSTZTV5R5LSX24.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/Darwin-7JLT1674XVOB3DPMX9X6A7S5.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/os_object-A672QU5XPU4XIHJW7NZGTQIAO.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_Builtin_intrinsics-EUAXLX63QT64LZTIQ8133GYBN.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_Builtin_tgmath-8V4MWZKS53GYYKEN83PLTPX6V.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/simd-LM02VRS224EME3CXJWI3AZG.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/Metal-PE6UFPWSZ5XIYDD3MKMGL6KC.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/CoreMotion-5YIJK2G73VW7HBB76FX70QTYW.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_Builtin_stdarg-79MKWQBSO07PEHNU6Z3O4Y0SO.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/CoreLocation-DVQBETXYNYTWCTVSL7M26LO1Z.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/DataDetection-9IEWKVUPV2Q4MEMHGPG4XS6DH.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/ptrauth-DKO06UI6G8WEU2OS6SY3R1XU.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/DeveloperToolsSupport-3VE4OZ0TZDA00LVXMDWSW7CCQ.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/os_workgroup-9HQX3723QXIUM5OU4WWOEDAW2.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/Security-36KUBMNRS76UYBLFT8QTKHCJR.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_Builtin_stdbool-EGEANUELZZXYRKYUSKPZECYC1.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/ImageIO-ARAP5PI38FY65VHGAQW19SS7K.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_Builtin_stddef-AML5UALJR99KZKKZBOZ74PF30.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/CoreTransferable-67H2POPAEPTRLJVC5KPGGDCGS.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/Symbols-9HQ1ORKV22H51YLG69D0O6SOB.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/Accessibility-1K0KIBDNDMU5LOODCJXGA9P3S.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/CoreVideo-A205H5JCX1BCS24AVGHY5HJZX.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/Spatial-A9JHRYC36PW1KU4FE1NLH2QJD.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_LocationEssentials-UCLPJR64QHRY1HDB3OQ3JEHN.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/SwiftUICore-AOEIIHF25Q5Z0OM9JD5HSF921.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/Dispatch-B55TPNS015OIJ8YRB13UZ3SXR.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/XPC-5GVMGJHJKVFFEGPVR9XMGTAR8.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/UserNotifications-ETLIQXNWQN3X4O2FOJOVGWSRM.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/QuartzCore-EABP39HEA7PTBLPRL3E6RNF7Y.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/MachO-1UHZUHRIQZFL9SVU5FISM26ZM.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/UIUtilities-99XHGAVDFC6ALP9V1323NG90W.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/XCUIAutomation-1KMQM0W6VSKDKXGDJYLBJNZIU.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/string_h-DFQP8QWZP7I4GB4BWODGQ53HZ.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/OpenGLES-ACHYMFTI93O30U8YBO1U1RN4M.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/CoreText-8TD4POG55F04L4WW3CI9ZRTLE.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/os-CRS9521EAISEISAV2VN5OUAXD.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/CoreFoundation-8POPJ5SOTYSQFCKOCJXHME6Y4.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/OSLog-9IL8EAH2JTMJ9GVWK8FJQ4FQB.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/XCTest-6CXJS2LKNZHJVUJ88DFQLQF4.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_DarwinFoundation1-75C4O81369IOU7NTY4OSF7781.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/_Builtin_limits-2P9LDIFVJEC457W17BYX0AFCY.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules/CFNetwork-2PKBEDE8G0FX0WFGJE6IT6VUR.pcm /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests-dependencies-1.json /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests-primary-Bridging-header.pch (in target 'MangekyoTests' from project 'Mangekyo')
+
+SwiftCompile normal arm64 (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    
+
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/MangekyoTests/CpuBridgeTests.swift:8:47: warning: 'CAEAGLLayer' was deprecated in iOS 12.0: OpenGLES is deprecated. (Define GLES_SILENCE_DEPRECATION to silence these warnings) [#DeprecatedDeclaration]
+  6 | 
+  7 | private final class TestEaglView: UIView {
+  8 |     override class var layerClass: AnyClass { CAEAGLLayer.self }
+    |                                               `- warning: 'CAEAGLLayer' was deprecated in iOS 12.0: OpenGLES is deprecated. (Define GLES_SILENCE_DEPRECATION to silence these warnings) [#DeprecatedDeclaration]
+  9 | }
+ 10 | 
+
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/MangekyoTests/CpuBridgeTests.swift:304:36: warning: 'CAEAGLLayer' was deprecated in iOS 12.0: OpenGLES is deprecated. (Define GLES_SILENCE_DEPRECATION to silence these warnings) [#DeprecatedDeclaration]
+302 |         let view = TestEaglView(frame: CGRect(x: 0, y: 0, width: 1280, height: 720))
+303 |         view.contentScaleFactor = 1
+304 |         let layer = view.layer as! CAEAGLLayer
+    |                                    `- warning: 'CAEAGLLayer' was deprecated in iOS 12.0: OpenGLES is deprecated. (Define GLES_SILENCE_DEPRECATION to silence these warnings) [#DeprecatedDeclaration]
+305 |         layer.contentsScale = 1
+306 |         layer.isOpaque = true
+
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/MangekyoTests/CpuBridgeTests.swift:307:37: warning: 'kEAGLDrawablePropertyRetainedBacking' was deprecated in iOS 12.0: OpenGLES API deprecated. (Define GLES_SILENCE_DEPRECATION to silence these warnings) [#DeprecatedDeclaration]
+305 |         layer.contentsScale = 1
+306 |         layer.isOpaque = true
+307 |         layer.drawableProperties = [kEAGLDrawablePropertyRetainedBacking: false,
+    |                                     `- warning: 'kEAGLDrawablePropertyRetainedBacking' was deprecated in iOS 12.0: OpenGLES API deprecated. (Define GLES_SILENCE_DEPRECATION to silence these warnings) [#DeprecatedDeclaration]
+308 |                                     kEAGLDrawablePropertyColorFormat: kEAGLColorFormatRGBA8]
+309 |         window.addSubview(view)
+
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/MangekyoTests/CpuBridgeTests.swift:308:37: warning: 'kEAGLDrawablePropertyColorFormat' was deprecated in iOS 12.0: OpenGLES API deprecated. (Define GLES_SILENCE_DEPRECATION to silence these warnings) [#DeprecatedDeclaration]
+306 |         layer.isOpaque = true
+307 |         layer.drawableProperties = [kEAGLDrawablePropertyRetainedBacking: false,
+308 |                                     kEAGLDrawablePropertyColorFormat: kEAGLColorFormatRGBA8]
+    |                                     `- warning: 'kEAGLDrawablePropertyColorFormat' was deprecated in iOS 12.0: OpenGLES API deprecated. (Define GLES_SILENCE_DEPRECATION to silence these warnings) [#DeprecatedDeclaration]
+309 |         window.addSubview(view)
+310 |         defer { gpb_set_gles_layer(nil); view.removeFromSuperview() }
+
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/MangekyoTests/CpuBridgeTests.swift:308:71: warning: 'kEAGLColorFormatRGBA8' was deprecated in iOS 12.0: OpenGLES API deprecated. (Define GLES_SILENCE_DEPRECATION to silence these warnings) [#DeprecatedDeclaration]
+306 |         layer.isOpaque = true
+307 |         layer.drawableProperties = [kEAGLDrawablePropertyRetainedBacking: false,
+308 |                                     kEAGLDrawablePropertyColorFormat: kEAGLColorFormatRGBA8]
+    |                                                                       `- warning: 'kEAGLColorFormatRGBA8' was deprecated in iOS 12.0: OpenGLES API deprecated. (Define GLES_SILENCE_DEPRECATION to silence these warnings) [#DeprecatedDeclaration]
+309 |         window.addSubview(view)
+310 |         defer { gpb_set_gles_layer(nil); view.removeFromSuperview() }
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+SwiftDriverJobDiscovery normal arm64 Compiling CpuBridgeTests.swift (in target 'MangekyoTests' from project 'Mangekyo')
+
+SwiftDriver\ Compilation\ Requirements MangekyoTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name MangekyoTests -O -whole-module-optimization @/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests.SwiftFileList -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -target arm64-apple-ios18.0 -g -module-cache-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/ModuleCache.noindex -Xfrontend -serialize-debugging-options -swift-version 6 -I /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib -F /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk/Developer/Library/Frameworks -parse-as-library -c -num-threads 14 -Xcc -ivfsstatcache -Xcc /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKStatCaches.noindex/iphoneos27.0-24A430-6c78b3cbc238196c85e1bf6c792c5915.sdkstatcache -output-file-map /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/ModuleCache.noindex -sdk-module-cache-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests_const_extract_protocols.json -Xcc -iquote -Xcc /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests-generated-files.hmap -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests-own-target-headers.hmap -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests-all-target-headers.hmap -Xcc -iquote -Xcc /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests-project-headers.hmap -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/include -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Mangekyo/Engine -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/DerivedSources-normal/arm64 -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/DerivedSources/arm64 -Xcc -I/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/DerivedSources -Xcc -DHAVE_METAL\=1 -Xcc -DGPU_BENCH_NO_GLFW\=1 -emit-objc-header -emit-objc-header-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests-Swift.h -import-objc-header /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Mangekyo/Engine/GPUBenchmark-Bridging-Header.h -working-directory /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui -no-emit-module-separately-wmo
+
+Copy /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/MangekyoTests.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests.swiftsourceinfo (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests.swiftsourceinfo /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/MangekyoTests.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo
+
+Ld /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/MangekyoTests normal (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios18.0 -bundle -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -Os -Xlinker -no_warn_duplicate_libraries -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/EagerLinkingTBDs/Release-iphoneos -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/Release-iphoneos -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework -L/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib -F/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/EagerLinkingTBDs/Release-iphoneos -F/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos -iframework /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks -iframework /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk/Developer/Library/Frameworks -filelist /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests.LinkFileList -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @loader_path/Frameworks -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -dead_strip -bundle_loader /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/Mangekyo -Xlinker -object_path_lto -Xlinker /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests_lto.o -Xlinker -dependency_info -Xlinker /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests.swiftmodule -Xlinker -needed_framework -Xlinker XCTest -framework XCTest -Xlinker -needed-lXCTestSwiftSupport -lXCTestSwiftSupport -Xlinker -no_adhoc_codesign -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/MangekyoTests
+
+Copy /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/MangekyoTests.swiftmodule/arm64-apple-ios.abi.json /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests.abi.json (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests.abi.json /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/MangekyoTests.swiftmodule/arm64-apple-ios.abi.json
+
+ExtractAppIntentsMetadata (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name MangekyoTests --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk --xcode-version 27A266a --platform-family iOS --deployment-target 18.0 --bundle-identifier com.fairchild.MangekyoTests --output /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest --target-triple arm64-apple-ios18.0 --binary-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/MangekyoTests --dependency-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests_dependency_info.dat --stringsdata-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests.SwiftFileList --metadata-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests.DependencyMetadataFileList --static-metadata-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests.DependencyStaticMetadataFileList --swift-const-vals-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/Objects-normal/arm64/MangekyoTests.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-10-14 19:01:50.984 appintentsmetadataprocessor[25405:2331010] Starting appintentsmetadataprocessor export
+2026-10-14 19:01:50.985 appintentsmetadataprocessor[25405:2331010] warning: Metadata extraction skipped, no AppIntents.framework dependency found
+
+CopySwiftLibs /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-swiftStdLibTool --copy --verbose --sign A52C1C37D7819FCC2948BFD4DAA0E2C49C1F4C6C --scan-executable /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/MangekyoTests --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/Frameworks --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/PlugIns --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/SystemExtensions --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/Extensions --platform iphoneos --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/Frameworks --strip-bitcode --scan-executable /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+
+AppIntentsSSUTraining (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsnltrainingprocessor --infoplist-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/Info.plist --temp-dir-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/ssu --bundle-id com.fairchild.MangekyoTests --product-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest --extracted-metadata-path /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/Metadata.appintents --metadata-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/MangekyoTests.build/MangekyoTests.DependencyMetadataFileList --source-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/Info.plist --archive-ssu-assets
+2026-10-14 19:01:51.003 appintentsnltrainingprocessor[25406:2331011] Parsing options for appintentsnltrainingprocessor
+2026-10-14 19:01:51.003 appintentsnltrainingprocessor[25406:2331011] Starting AppIntents SSU YAML Generation
+2026-10-14 19:01:51.003 appintentsnltrainingprocessor[25406:2331011] No AppShortcuts found - Skipping.
+
+GenerateDSYMFile /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest.dSYM /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/MangekyoTests (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    export PATH\=/Applications/Xcode.app/Contents/SharedFrameworks/SwiftBuild.framework/Versions/A/PlugIns/SWBBuildService.bundle/Contents/PlugIns/SWBUniversalPlatformPlugin.bundle/Contents/Frameworks/SWBUniversalPlatform.framework/Resources:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/local/bin:/Applications/Xcode.app/Contents/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/usr/local/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/fairchild/.grok/bin:/Users/fairchild/.antigravity-ide/antigravity-ide/bin:/opt/homebrew/opt/postgresql@18/bin:/Users/fairchild/.antigravity/antigravity/bin:/Users/fairchild/.local/bin:/opt/homebrew/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Library/Apple/usr/bin:/Library/TeX/texbin:/Users/fairchild/.codex/tmp/arg0/codex-arg0Fb387F:/Users/fairchild/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/opt/anaconda3/condabin:/Users/fairchild/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/dsymutil /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest/MangekyoTests -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest.dSYM
+
+CodeSign /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    
+    Signing Identity:     "Apple Development: lzz288898@126.com (5R4X379M4R)"
+    
+    /usr/bin/codesign --force --sign A52C1C37D7819FCC2948BFD4DAA0E2C49C1F4C6C --timestamp\=none --generate-entitlement-der /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest
+
+RegisterExecutionPolicyException /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-RegisterExecutionPolicyException /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest
+
+Touch /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest (in target 'MangekyoTests' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    /usr/bin/touch -c /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/PlugIns/MangekyoTests.xctest
+
+CodeSign /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    
+    Signing Identity:     "Apple Development: lzz288898@126.com (5R4X379M4R)"
+    Provisioning Profile: "iOS Team Provisioning Profile: com.fairchild.Mangekyo"
+                          (ac4eb893-18f2-4c9b-ab45-0920876acc5d)
+    
+    /usr/bin/codesign --force --sign A52C1C37D7819FCC2948BFD4DAA0E2C49C1F4C6C --entitlements /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Mangekyo.app.xcent --timestamp\=none --generate-entitlement-der /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app
+
+Validate /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-validationUtility /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app -shallow-bundle -infoplist-subpath Info.plist
+warning: All interface orientations must be supported unless the app requires full screen. (in target 'Mangekyo' from project 'Mangekyo')
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules
+
+note: Run script build phase 'Bundle runtime Metal sources' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Mangekyo' from project 'Mangekyo')
+[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.
+	The following 153 Vulkan extensions are supported:
+	VK_KHR_16bit_storage v1
+	VK_KHR_8bit_storage v1
+	VK_KHR_bind_memory2 v1
+	VK_KHR_buffer_device_address v1
+	VK_KHR_calibrated_timestamps v1
+	VK_KHR_copy_commands2 v1
+	VK_KHR_create_renderpass2 v1
+	VK_KHR_dedicated_allocation v3
+	VK_KHR_deferred_host_operations v4
+	VK_KHR_depth_stencil_resolve v1
+	VK_KHR_descriptor_update_template v1
+	VK_KHR_device_group v4
+	VK_KHR_device_group_creation v1
+	VK_KHR_driver_properties v1
+	VK_KHR_dynamic_rendering v1
+	VK_KHR_dynamic_rendering_local_read v1
+	VK_KHR_external_fence v1
+	VK_KHR_external_fence_capabilities v1
+	VK_KHR_external_memory v1
+	VK_KHR_external_memory_capabilities v1
+	VK_KHR_external_semaphore v1
+	VK_KHR_external_semaphore_capabilities v1
+	VK_KHR_format_feature_flags2 v2
+	VK_KHR_fragment_shader_barycentric v1
+	VK_KHR_get_memory_requirements2 v1
+	VK_KHR_get_physical_device_properties2 v2
+	VK_KHR_get_surface_capabilities2 v1
+	VK_KHR_global_priority v1
+	VK_KHR_image_format_list v1
+	VK_KHR_imageless_framebuffer v1
+	VK_KHR_incremental_present v2
+	VK_KHR_index_type_uint8 v1
+	VK_KHR_line_rasterization v1
+	VK_KHR_load_store_op_none v1
+	VK_KHR_maintenance1 v2
+	VK_KHR_maintenance2 v1
+	VK_KHR_maintenance3 v1
+	VK_KHR_maintenance4 v2
+	VK_KHR_maintenance5 v1
+	VK_KHR_maintenance6 v1
+	VK_KHR_maintenance7 v1
+	VK_KHR_maintenance8 v1
+	VK_KHR_maintenance9 v1
+	VK_KHR_map_memory2 v1
+	VK_KHR_multiview v1
+	VK_KHR_portability_subset v1
+	VK_KHR_present_id v1
+	VK_KHR_present_id2 v1
+	VK_KHR_present_wait v1
+	VK_KHR_present_wait2 v1
+	VK_KHR_push_descriptor v2
+	VK_KHR_relaxed_block_layout v1
+	VK_KHR_robustness2 v1
+	VK_KHR_sampler_mirror_clamp_to_edge v3
+	VK_KHR_sampler_ycbcr_conversion v14
+	VK_KHR_separate_depth_stencil_layouts v1
+	VK_KHR_shader_draw_parameters v1
+	VK_KHR_shader_expect_assume v1
+	VK_KHR_shader_float_controls v4
+	VK_KHR_shader_float_controls2 v1
+	VK_KHR_shader_float16_int8 v1
+	VK_KHR_shader_fma v1
+	VK_KHR_shader_integer_dot_product v1
+	VK_KHR_shader_maximal_reconvergence v1
+	VK_KHR_shader_non_semantic_info v1
+	VK_KHR_shader_quad_control v1
+	VK_KHR_shader_relaxed_extended_instruction v1
+	VK_KHR_shader_subgroup_extended_types v1
+	VK_KHR_shader_subgroup_rotate v2
+	VK_KHR_shader_subgroup_uniform_control_flow v1
+	VK_KHR_shader_terminate_invocation v1
+	VK_KHR_spirv_1_4 v1
+	VK_KHR_storage_buffer_storage_class v1
+	VK_KHR_surface v25
+	VK_KHR_surface_maintenance1 v1
+	VK_KHR_surface_protected_capabilities v1
+	VK_KHR_swapchain v70
+	VK_KHR_swapchain_maintenance1 v1
+	VK_KHR_swapchain_mutable_format v1
+	VK_KHR_synchronization2 v1
+	VK_KHR_timeline_semaphore v2
+	VK_KHR_uniform_buffer_standard_layout v1
+	VK_KHR_variable_pointers v1
+	VK_KHR_vertex_attribute_divisor v1
+	VK_KHR_vulkan_memory_model v3
+	VK_KHR_zero_initialize_workgroup_memory v1
+	VK_EXT_4444_formats v1
+	VK_EXT_buffer_device_address v2
+	VK_EXT_calibrated_timestamps v2
+	VK_EXT_debug_marker v4
+	VK_EXT_debug_report v10
+	VK_EXT_debug_utils v2
+	VK_EXT_depth_clip_control v1
+	VK_EXT_descriptor_indexing v2
+	VK_EXT_extended_dynamic_state v1
+	VK_EXT_extended_dynamic_state2 v1
+	VK_EXT_extended_dynamic_state3 v2
+	VK_EXT_external_memory_host v1
+	VK_EXT_external_memory_metal v1
+	VK_EXT_fragment_shader_interlock v1
+	VK_EXT_global_priority v2
+	VK_EXT_global_priority_query v1
+	VK_EXT_headless_surface v1
+	VK_EXT_host_image_copy v1
+	VK_EXT_host_query_reset v1
+	VK_EXT_image_2d_view_of_3d v1
+	VK_EXT_image_robustness v1
+	VK_EXT_index_type_uint8 v1
+	VK_EXT_inline_uniform_block v1
+	VK_EXT_layer_settings v2
+	VK_EXT_legacy_dithering v2
+	VK_EXT_line_rasterization v1
+	VK_EXT_load_store_op_none v1
+	VK_EXT_memory_budget v1
+	VK_EXT_metal_objects v2
+	VK_EXT_metal_surface v1
+	VK_EXT_non_seamless_cube_map v1
+	VK_EXT_pipeline_creation_cache_control v3
+	VK_EXT_pipeline_creation_feedback v1
+	VK_EXT_pipeline_robustness v1
+	VK_EXT_post_depth_coverage v1
+	VK_EXT_primitive_topology_list_restart v1
+	VK_EXT_private_data v1
+	VK_EXT_provoking_vertex v1
+	VK_EXT_robustness2 v1
+	VK_EXT_sample_locations v1
+	VK_EXT_sampler_filter_minmax v2
+	VK_EXT_scalar_block_layout v1
+	VK_EXT_separate_stencil_usage v1
+	VK_EXT_shader_atomic_float v1
+	VK_EXT_shader_demote_to_helper_invocation v1
+	VK_EXT_shader_stencil_export v1
+	VK_EXT_shader_subgroup_ballot v1
+	VK_EXT_shader_subgroup_vote v1
+	VK_EXT_shader_viewport_index_layer v1
+	VK_EXT_subgroup_size_control v2
+	VK_EXT_surface_maintenance1 v1
+	VK_EXT_swapchain_colorspace v5
+	VK_EXT_swapchain_maintenance1 v1
+	VK_EXT_texel_buffer_alignment v1
+	VK_EXT_texture_compression_astc_hdr v1
+	VK_EXT_tooling_info v1
+	VK_EXT_vertex_attribute_divisor v3
+	VK_AMD_gpu_shader_half_float v2
+	VK_AMD_negative_viewport_height v1
+	VK_AMD_shader_image_load_store_lod v1
+	VK_AMD_shader_trinary_minmax v1
+	VK_GOOGLE_display_timing v1
+	VK_IMG_format_pvrtc v1
+	VK_INTEL_shader_integer_functions2 v1
+	VK_MVK_ios_surface v3
+	VK_MVK_moltenvk v37
+	VK_NV_fragment_shader_barycentric v1
+[mvk-info] GPU device:
+	model: Apple A15 GPU
+	type: Integrated
+	vendorID: 0x106b
+	deviceID: 0x1b000008
+	pipelineCacheUUID: DB660224-1B00-0008-0000-000100000000
+	GPU memory available: 4096 MB
+	GPU memory used: 0 MB
+	Metal Shading Language 4.0
+	supports the following GPU Features:
+		GPU Family Metal 4
+		GPU Family Apple 8
+		Read-Write Texture Tier 2
+[mvk-info] Created VkInstance for Vulkan version 1.1.357, as requested by app, with the following 0 Vulkan extensions enabled:
+[mvk-info] Destroyed VkPhysicalDevice for GPU Apple A15 GPU with 0 MB of GPU memory still allocated.
+[mvk-info] Destroying VkInstance for Vulkan version 1.1.357 with 0 Vulkan extensions enabled.
+IOS_GPU_CAPS [{"index":0,"name":"Apple A15 GPU","vramMB":4096,"metal":true,"vulkan":true,"vulkanImplementation":"MoltenVK","vulkanLiquid":false,"vulkanMaxParticleBufferBytes":3221225472,"vulkanMaxParticles":100663296,"gpuCache":true,"gpuCacheParallelSteps":0,"gles2":true,"gles2MaxSteps":2048,"opengl":false}]
+2026-10-14 19:01:54.631777+1100 Mangekyo[40377:7456396] [XPCErrors] non-launching port is incompatible with service identifier "com.apple.PointerUI.pointeruid.default-service"
+2026-10-14 19:01:54.639649+1100 Mangekyo[40377:7456396] [API] cannot add handler to 0 from 0 - dropping
+2026-10-14 19:01:54.639756+1100 Mangekyo[40377:7456396] [API] cannot add handler to 0 from 0 - dropping
+2026-10-14 19:01:54.642505+1100 Mangekyo[40377:7456396] [API] cannot add handler to 0 from 0 - dropping
+2026-10-14 19:01:54.642518+1100 Mangekyo[40377:7456396] [API] cannot add handler to 0 from 0 - dropping
+Test Suite 'Selected tests' started at 2026-10-14 19:01:54.779.
+Test Suite 'MangekyoTests.xctest' started at 2026-10-14 19:01:54.779.
+Test Suite 'CpuBridgeTests' started at 2026-10-14 19:01:54.779.
+Test Case '-[MangekyoTests.CpuBridgeTests testA15FirstPassCacheIsolationControls]' started.
+[mvk-info] MoltenVK version 1.4.2, supporting Vulkan version 1.4.357.
+	The following 153 Vulkan extensions are supported:
+	VK_KHR_16bit_storage v1
+	VK_KHR_8bit_storage v1
+	VK_KHR_bind_memory2 v1
+	VK_KHR_buffer_device_address v1
+	VK_KHR_calibrated_timestamps v1
+	VK_KHR_copy_commands2 v1
+	VK_KHR_create_renderpass2 v1
+	VK_KHR_dedicated_allocation v3
+	VK_KHR_deferred_host_operations v4
+	VK_KHR_depth_stencil_resolve v1
+	VK_KHR_descriptor_update_template v1
+	VK_KHR_device_group v4
+	VK_KHR_device_group_creation v1
+	VK_KHR_driver_properties v1
+	VK_KHR_dynamic_rendering v1
+	VK_KHR_dynamic_rendering_local_read v1
+	VK_KHR_external_fence v1
+	VK_KHR_external_fence_capabilities v1
+	VK_KHR_external_memory v1
+	VK_KHR_external_memory_capabilities v1
+	VK_KHR_external_semaphore v1
+	VK_KHR_external_semaphore_capabilities v1
+	VK_KHR_format_feature_flags2 v2
+	VK_KHR_fragment_shader_barycentric v1
+	VK_KHR_get_memory_requirements2 v1
+	VK_KHR_get_physical_device_properties2 v2
+	VK_KHR_get_surface_capabilities2 v1
+	VK_KHR_global_priority v1
+	VK_KHR_image_format_list v1
+	VK_KHR_imageless_framebuffer v1
+	VK_KHR_incremental_present v2
+	VK_KHR_index_type_uint8 v1
+	VK_KHR_line_rasterization v1
+	VK_KHR_load_store_op_none v1
+	VK_KHR_maintenance1 v2
+	VK_KHR_maintenance2 v1
+	VK_KHR_maintenance3 v1
+	VK_KHR_maintenance4 v2
+	VK_KHR_maintenance5 v1
+	VK_KHR_maintenance6 v1
+	VK_KHR_maintenance7 v1
+	VK_KHR_maintenance8 v1
+	VK_KHR_maintenance9 v1
+	VK_KHR_map_memory2 v1
+	VK_KHR_multiview v1
+	VK_KHR_portability_subset v1
+	VK_KHR_present_id v1
+	VK_KHR_present_id2 v1
+	VK_KHR_present_wait v1
+	VK_KHR_present_wait2 v1
+	VK_KHR_push_descriptor v2
+	VK_KHR_relaxed_block_layout v1
+	VK_KHR_robustness2 v1
+	VK_KHR_sampler_mirror_clamp_to_edge v3
+	VK_KHR_sampler_ycbcr_conversion v14
+	VK_KHR_separate_depth_stencil_layouts v1
+	VK_KHR_shader_draw_parameters v1
+	VK_KHR_shader_expect_assume v1
+	VK_KHR_shader_float_controls v4
+	VK_KHR_shader_float_controls2 v1
+	VK_KHR_shader_float16_int8 v1
+	VK_KHR_shader_fma v1
+	VK_KHR_shader_integer_dot_product v1
+	VK_KHR_shader_maximal_reconvergence v1
+	VK_KHR_shader_non_semantic_info v1
+	VK_KHR_shader_quad_control v1
+	VK_KHR_shader_relaxed_extended_instruction v1
+	VK_KHR_shader_subgroup_extended_types v1
+	VK_KHR_shader_subgroup_rotate v2
+	VK_KHR_shader_subgroup_uniform_control_flow v1
+	VK_KHR_shader_terminate_invocation v1
+	VK_KHR_spirv_1_4 v1
+	VK_KHR_storage_buffer_storage_class v1
+	VK_KHR_surface v25
+	VK_KHR_surface_maintenance1 v1
+	VK_KHR_surface_protected_capabilities v1
+	VK_KHR_swapchain v70
+	VK_KHR_swapchain_maintenance1 v1
+	VK_KHR_swapchain_mutable_format v1
+	VK_KHR_synchronization2 v1
+	VK_KHR_timeline_semaphore v2
+	VK_KHR_uniform_buffer_standard_layout v1
+	VK_KHR_variable_pointers v1
+	VK_KHR_vertex_attribute_divisor v1
+	VK_KHR_vulkan_memory_model v3
+	VK_KHR_zero_initialize_workgroup_memory v1
+	VK_EXT_4444_formats v1
+	VK_EXT_buffer_device_address v2
+	VK_EXT_calibrated_timestamps v2
+	VK_EXT_debug_marker v4
+	VK_EXT_debug_report v10
+	VK_EXT_debug_utils v2
+	VK_EXT_depth_clip_control v1
+	VK_EXT_descriptor_indexing v2
+	VK_EXT_extended_dynamic_state v1
+	VK_EXT_extended_dynamic_state2 v1
+	VK_EXT_extended_dynamic_state3 v2
+	VK_EXT_external_memory_host v1
+	VK_EXT_external_memory_metal v1
+	VK_EXT_fragment_shader_interlock v1
+	VK_EXT_global_priority v2
+	VK_EXT_global_priority_query v1
+	VK_EXT_headless_surface v1
+	VK_EXT_host_image_copy v1
+	VK_EXT_host_query_reset v1
+	VK_EXT_image_2d_view_of_3d v1
+	VK_EXT_image_robustness v1
+	VK_EXT_index_type_uint8 v1
+	VK_EXT_inline_uniform_block v1
+	VK_EXT_layer_settings v2
+	VK_EXT_legacy_dithering v2
+	VK_EXT_line_rasterization v1
+	VK_EXT_load_store_op_none v1
+	VK_EXT_memory_budget v1
+	VK_EXT_metal_objects v2
+	VK_EXT_metal_surface v1
+	VK_EXT_non_seamless_cube_map v1
+	VK_EXT_pipeline_creation_cache_control v3
+	VK_EXT_pipeline_creation_feedback v1
+	VK_EXT_pipeline_robustness v1
+	VK_EXT_post_depth_coverage v1
+	VK_EXT_primitive_topology_list_restart v1
+	VK_EXT_private_data v1
+	VK_EXT_provoking_vertex v1
+	VK_EXT_robustness2 v1
+	VK_EXT_sample_locations v1
+	VK_EXT_sampler_filter_minmax v2
+	VK_EXT_scalar_block_layout v1
+	VK_EXT_separate_stencil_usage v1
+	VK_EXT_shader_atomic_float v1
+	VK_EXT_shader_demote_to_helper_invocation v1
+	VK_EXT_shader_stencil_export v1
+	VK_EXT_shader_subgroup_ballot v1
+	VK_EXT_shader_subgroup_vote v1
+	VK_EXT_shader_viewport_index_layer v1
+	VK_EXT_subgroup_size_control v2
+	VK_EXT_surface_maintenance1 v1
+	VK_EXT_swapchain_colorspace v5
+	VK_EXT_swapchain_maintenance1 v1
+	VK_EXT_texel_buffer_alignment v1
+	VK_EXT_texture_compression_astc_hdr v1
+	VK_EXT_tooling_info v1
+	VK_EXT_vertex_attribute_divisor v3
+	VK_AMD_gpu_shader_half_float v2
+	VK_AMD_negative_viewport_height v1
+	VK_AMD_shader_image_load_store_lod v1
+	VK_AMD_shader_trinary_minmax v1
+	VK_GOOGLE_display_timing v1
+	VK_IMG_format_pvrtc v1
+	VK_INTEL_shader_integer_functions2 v1
+	VK_MVK_ios_surface v3
+	VK_MVK_moltenvk v37
+	VK_NV_fragment_shader_barycentric v1
+[mvk-info] GPU device:
+	model: Apple A15 GPU
+	type: Integrated
+	vendorID: 0x106b
+	deviceID: 0x1b000008
+	pipelineCacheUUID: DB660224-1B00-0008-0000-000100000000
+	GPU memory available: 4096 MB
+	GPU memory used: 0 MB
+	Metal Shading Language 4.0
+	supports the following GPU Features:
+		GPU Family Metal 4
+		GPU Family Apple 8
+		Read-Write Texture Tier 2
+[mvk-info] Created VkInstance for Vulkan version 1.1.357, as requested by app, with the following 0 Vulkan extensions enabled:
+[mvk-info] Destroyed VkPhysicalDevice for GPU Apple A15 GPU with 0 MB of GPU memory still allocated.
+[mvk-info] Destroying VkInstance for Vulkan version 1.1.357 with 0 Vulkan extensions enabled.
+Test Case '-[MangekyoTests.CpuBridgeTests testA15FirstPassCacheIsolationControls]' passed (61.282 seconds).
+Test Suite 'CpuBridgeTests' passed at 2026-10-14 19:02:56.063.
+	 Executed 1 test, with 0 failures (0 unexpected) in 61.282 (61.284) seconds
+Test Suite 'MangekyoTests.xctest' passed at 2026-10-14 19:02:56.064.
+	 Executed 1 test, with 0 failures (0 unexpected) in 61.282 (61.285) seconds
+Test Suite 'Selected tests' passed at 2026-10-14 19:02:56.064.
+	 Executed 1 test, with 0 failures (0 unexpected) in 61.282 (61.285) seconds
+libc++abi: terminating
+2026-10-14 19:02:56.367 xcodebuild[25269:2330488] [MT] IDETestOperationsObserverDebug: 65.189 elapsed -- Testing started completed.
+2026-10-14 19:02:56.367 xcodebuild[25269:2330488] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-14 19:02:56.367 xcodebuild[25269:2330488] [MT] IDETestOperationsObserverDebug: 65.189 sec, +65.189 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-cache-isolation-20261014/controls-alu.xcresult
+
+** TEST SUCCEEDED **
+
+Testing started

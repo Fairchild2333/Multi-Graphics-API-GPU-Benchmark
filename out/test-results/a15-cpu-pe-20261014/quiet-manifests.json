@@ -1,0 +1,96 @@
+[
+  {
+    "finishedAt": "2026-10-14T04:39:20Z",
+    "id": "complete-suite-B1D52415-16C6-470E-AAEB-9C4906366AE7",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 3,
+        "finishedAt": "2026-10-14T04:39:19Z",
+        "id": "cpu_compute",
+        "request": "gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2",
+        "resultIDs": [
+          "20261014-153919-341-cpu-single-performance",
+          "20261014-153919-369-cpu-single-efficiency",
+          "20261014-153919-384-cpu-multi"
+        ],
+        "startedAt": "2026-10-14T04:38:33Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "CPU Compute \u00b7 Performance + Efficiency + All Cores"
+      }
+    ],
+    "startedAt": "2026-10-14T04:38:33Z",
+    "status": "passed"
+  },
+  {
+    "finishedAt": "2026-10-14T04:39:58Z",
+    "id": "complete-suite-A00B3B94-05A1-4BB3-8994-4978BDD7165F",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T04:39:58Z",
+        "id": "stream-1048576",
+        "request": "stream?particles=1048576&vsync=0&api=metal&coverage=fixed",
+        "resultIDs": [
+          "20261014-153957-756"
+        ],
+        "startedAt": "2026-10-14T04:39:42Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Metal \u00b7 Particle 1048576 \u00b7 Render"
+      }
+    ],
+    "startedAt": "2026-10-14T04:39:42Z",
+    "status": "passed"
+  },
+  {
+    "finishedAt": "2026-10-14T04:40:41Z",
+    "id": "complete-suite-E0F8F75D-6EBF-42A2-B68F-E05DB65E0DE6",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T04:40:40Z",
+        "id": "vulkan/stream-1048576",
+        "request": "stream?particles=1048576&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [
+          "20261014-154040-188"
+        ],
+        "startedAt": "2026-10-14T04:40:24Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Vulkan (MoltenVK) \u00b7 Particle 1048576 \u00b7 Render"
+      }
+    ],
+    "startedAt": "2026-10-14T04:40:24Z",
+    "status": "passed"
+  },
+  {
+    "finishedAt": "2026-10-14T04:41:23Z",
+    "id": "complete-suite-886BF808-E291-4F40-826D-F0D9D0BA3B7C",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T04:41:22Z",
+        "id": "vulkan/gpu_burn-256",
+        "request": "gpu_burn?steps=256&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261014-154122-003"
+        ],
+        "startedAt": "2026-10-14T04:41:06Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Vulkan \u00b7 GPU Burn \u00b7 256"
+      }
+    ],
+    "startedAt": "2026-10-14T04:41:06Z",
+    "status": "passed"
+  }
+]

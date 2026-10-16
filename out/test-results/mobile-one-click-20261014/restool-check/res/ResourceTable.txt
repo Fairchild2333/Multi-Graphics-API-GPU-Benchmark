@@ -1,0 +1,9 @@
+string ability_desc 0x01000002
+string ability_label 0x01000003
+string app_name 0x01000000
+string module_desc 0x01000004
+color start_window_background 0x01000005
+media app_icon 0x01000001
+media ic_chip 0x01000006
+media ic_cube 0x01000007
+profile main_pages 0x01000008

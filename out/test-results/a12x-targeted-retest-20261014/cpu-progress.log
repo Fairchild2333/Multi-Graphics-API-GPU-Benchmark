@@ -1,0 +1,11 @@
+START 1/2 cpu_compute
+STATE cpu_compute ('running', 'running')
+STATE cpu_compute ('failed', 'failed')
+END cpu_compute failed ['20261014-211849-327-cpu-single-performance', '20261014-211849-338-cpu-multi'] thermal=0->0 Expected 3 matching saved results; found 2. See log.
+Traceback (most recent call last):
+  File "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a12x-targeted-retest-20261014/run_targeted.py", line 86, in <module>
+    main()
+    ~~~~^^
+  File "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a12x-targeted-retest-20261014/run_targeted.py", line 75, in main
+    raise RuntimeError(f"Measurement failed: {job}")
+RuntimeError: Measurement failed: cpu_compute

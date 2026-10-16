@@ -1,0 +1,33 @@
+[
+  {
+    "name": "cpu-compute-all",
+    "args": [
+      "--cpu-benchmark",
+      "all",
+      "--cpu-time",
+      "15",
+      "--cpu-warmup",
+      "0.2"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 228.03
+  },
+  {
+    "name": "cpu-memory-all",
+    "args": [
+      "--cpu-membw"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 43.67
+  },
+  {
+    "name": "cpu-cache-curve-diagnostic",
+    "args": [
+      "--cpu-membw",
+      "--cpu-membw-curve-levels",
+      "--cpu-membw-no-storage"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 37.32
+  }
+]

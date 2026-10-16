@@ -1,0 +1,117 @@
+{
+  "error" : {
+    "code" : 12040,
+    "domain" : "com.apple.dt.CoreDeviceError",
+    "userInfo" : {
+      "DeviceIdentifier" : {
+        "string" : "9A44542D-75A2-58C6-B79C-18BEAED61843"
+      },
+      "NSLocalizedDescription" : {
+        "string" : "The developer disk image could not be mounted on this device."
+      },
+      "NSUnderlyingError" : {
+        "error" : {
+          "code" : 12040,
+          "domain" : "com.apple.dt.CoreDeviceError",
+          "userInfo" : {
+            "DDIBuildUpdate" : {
+              "string" : "27A9275 (developerTools)"
+            },
+            "DDIPath" : {
+              "string" : "/Library/Developer/DeveloperDiskImages/iOS_DDI"
+            },
+            "DeviceBoardID" : {
+              "int" : 12
+            },
+            "DeviceChipID" : {
+              "int" : 32807
+            },
+            "DeviceFusing" : {
+              "string" : "prod"
+            },
+            "DeviceIdentifier" : {
+              "string" : "9A44542D-75A2-58C6-B79C-18BEAED61843"
+            },
+            "NSLocalizedDescription" : {
+              "string" : "The developer disk image could not be mounted on this device."
+            },
+            "NSLocalizedRecoverySuggestion" : {
+              "string" : "Ensure the device is running a supported version of the operating system and that Xcode is up to date."
+            },
+            "NSURL" : {
+              "url" : "file:///Library/Developer/DeveloperDiskImages/iOS_DDI/"
+            },
+            "NSUnderlyingError" : {
+              "error" : {
+                "code" : -402652900,
+                "domain" : "com.apple.mobiledevice",
+                "userInfo" : {
+                  "FunctionName" : {
+                    "string" : "AMDeviceRemoteMountPersonalizedBundle"
+                  },
+                  "LineNumber" : {
+                    "int" : 2127
+                  },
+                  "NSLocalizedDescription" : {
+                    "string" : "Error mounting image: 0xe800011c (kAMDMobileImageMounterDiskImageRestricted: The disk image is not allowed to be mounted.)"
+                  },
+                  "NSUnderlyingError" : {
+                    "error" : {
+                      "code" : -402652900,
+                      "domain" : "com.apple.mobiledevice",
+                      "userInfo" : {
+                        "FunctionName" : {
+                          "string" : "-[PersonalizedImage mountImage:]"
+                        },
+                        "LineNumber" : {
+                          "int" : 1809
+                        },
+                        "NSLocalizedDescription" : {
+                          "string" : "Developer mode is not enabled on device: 0xe800011c (kAMDMobileImageMounterDiskImageRestricted: (null))"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "Options" : {
+              "dictionary" : {
+                "MountedBundlePath" : {
+                  "url" : "file:///Library/Developer/DeveloperDiskImages/iOS_DDI/"
+                },
+                "UseCredentials" : {
+                  "bool" : false
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "errorSignature" : "(com.apple.dt.CoreDeviceError 12040 (com.apple.dt.CoreDeviceError 12040 (com.apple.mobiledevice -402652900 (com.apple.mobiledevice -402652900))))",
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "apps",
+      "--device",
+      "00008027-001969920A87002E",
+      "--bundle-id",
+      "com.fairchild.Mangekyo",
+      "--json-output",
+      "out/test-results/ipad8-1-full-suite-20261016/installed-before.json",
+      "--timeout",
+      "25"
+    ],
+    "commandType" : "devicectl.device.info.apps",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "failed",
+    "version" : "651.13.5"
+  }
+}

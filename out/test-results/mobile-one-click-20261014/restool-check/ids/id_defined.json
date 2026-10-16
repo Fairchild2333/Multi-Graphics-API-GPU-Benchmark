@@ -1,0 +1,39 @@
+{
+	"record":	[{
+			"type":	"string",
+			"name":	"app_name",
+			"id":	"0x01000000"
+		}, {
+			"type":	"media",
+			"name":	"app_icon",
+			"id":	"0x01000001"
+		}, {
+			"type":	"string",
+			"name":	"ability_desc",
+			"id":	"0x01000002"
+		}, {
+			"type":	"string",
+			"name":	"ability_label",
+			"id":	"0x01000003"
+		}, {
+			"type":	"string",
+			"name":	"module_desc",
+			"id":	"0x01000004"
+		}, {
+			"type":	"color",
+			"name":	"start_window_background",
+			"id":	"0x01000005"
+		}, {
+			"type":	"media",
+			"name":	"ic_chip",
+			"id":	"0x01000006"
+		}, {
+			"type":	"media",
+			"name":	"ic_cube",
+			"id":	"0x01000007"
+		}, {
+			"type":	"profile",
+			"name":	"main_pages",
+			"id":	"0x01000008"
+		}]
+}

@@ -1,0 +1,83 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Apple M4 Pro (Integrated)                    38338 MB   -     -     -    YES   YES 
+============================================================
+
+Backend: Metal  |  V-Sync: OFF  |  Memory: Device-local  |  Particles: 4194304 (Medium)  |  Auto-stop: 15s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Available GPUs:
+  [0] Apple M4 Pro — 38338 MB
+Selected GPU [0]: Apple M4 Pro
+Created particle buffer: 4194304 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[Metal] Decoupled presenter: benchmark renders offscreen uncapped, preview presents at display refresh
+[GPU Timing] Compute: 1.357 ms | Render: 15.808 ms | Total: 18.539 ms | FPS: 44 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 1.429 ms | Render: 16.744 ms | Total: 18.388 ms | FPS: 51 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 1.336 ms | Render: 17.589 ms | Total: 19.135 ms | FPS: 51 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 1.278 ms | Render: 17.379 ms | Total: 18.857 ms | FPS: 52 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 1.296 ms | Render: 17.333 ms | Total: 18.819 ms | FPS: 52 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 1.326 ms | Render: 16.618 ms | Total: 18.150 ms | FPS: 54 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 1.116 ms | Render: 13.741 ms | Total: 15.056 ms | FPS: 65 | T: 2.9 s
+[GPU Timing] Compute: 1.105 ms | Render: 11.901 ms | Total: 13.207 ms | FPS: 74 | T: 3.9 s
+[GPU Timing] Compute: 1.092 ms | Render: 10.613 ms | Total: 11.904 ms | FPS: 82 | T: 4.9 s
+[GPU Timing] Compute: 1.097 ms | Render: 9.662 ms | Total: 10.964 ms | FPS: 89 | T: 5.9 s
+[GPU Timing] Compute: 1.093 ms | Render: 7.900 ms | Total: 9.207 ms | FPS: 106 | T: 6.9 s
+[GPU Timing] Compute: 1.089 ms | Render: 6.737 ms | Total: 8.043 ms | FPS: 121 | T: 7.9 s
+[GPU Timing] Compute: 1.108 ms | Render: 5.868 ms | Total: 7.182 ms | FPS: 135 | T: 8.9 s
+[GPU Timing] Compute: 1.093 ms | Render: 5.024 ms | Total: 6.319 ms | FPS: 154 | T: 9.9 s
+[GPU Timing] Compute: 1.092 ms | Render: 4.391 ms | Total: 5.689 ms | FPS: 170 | T: 10.9 s
+[GPU Timing] Compute: 1.088 ms | Render: 3.937 ms | Total: 5.230 ms | FPS: 185 | T: 11.9 s
+[GPU Timing] Compute: 1.089 ms | Render: 3.546 ms | Total: 4.833 ms | FPS: 200 | T: 12.9 s
+[GPU Timing] Compute: 1.103 ms | Render: 3.225 ms | Total: 4.519 ms | FPS: 213 | T: 13.9 s
+[GPU Timing] Compute: 1.093 ms | Render: 2.951 ms | Total: 4.243 ms | FPS: 227 | T: 14.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple M4 Pro
+Driver:       macOS 27.0.1
+CPU:          Apple M4 Pro
+OS:           macOS 27.0.1
+System:       macOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    4194304 (Medium)
+Buffer:       128.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 1849 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         1.095     1.039     1.583
+Render:          5.564     2.730    17.189
+Total GPU:       6.861     3.992    18.469
+
+--- Throughput ---
+Avg FPS:      142
+Particles:    4194304
+Working set:  128.00 MiB
+VRAM rate:   153.28 GB/s  (1.095 ms compute)
+
+--- Analysis ---
+Avg frame time:  7.030 ms
+Avg GPU time:    6.861 ms
+GPU utilisation: 97.6%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Thermal Stability ---
+Windows:      13 x 1s
+Stable score: 153.54 GB/s  (CV 0.48%)
+>> Thermally stable; stableScore is a fair comparison metric.
+==========================================================
+
+[Results] Saved as 20261014-035333-232 -> /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/one-click-suite-20261014/mac-validation/results/results.json

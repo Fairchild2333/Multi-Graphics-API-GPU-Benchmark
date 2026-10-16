@@ -1,0 +1,26 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "00008110-00164D591485401E",
+        "deviceName" : "iPhone 13 Pro",
+        "exportedFileName" : "72356A25-F287-465E-8984-BA8E29F6B768.txt",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "A15 cache evidence 131072 loads_0_ABA1C930-3816-4B04-9D7C-FDA8CCD22A60.txt",
+        "timestamp" : 1791960339.556
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "00008110-00164D591485401E",
+        "deviceName" : "iPhone 13 Pro",
+        "exportedFileName" : "CAE09505-9AE1-49A2-A66F-13ACA31BFED6.txt",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "A15 cache evidence 65536 loads_0_3FB539E9-219C-4268-BF96-88133DABDCBC.txt",
+        "timestamp" : 1791960272.142
+      }
+    ],
+    "testIdentifier" : "CpuBridgeTests/testA15FullGpuCacheEvidence()",
+    "testIdentifierURL" : "test://com.apple.xcode/Mangekyo/MangekyoTests/CpuBridgeTests/testA15FullGpuCacheEvidence"
+  }
+]

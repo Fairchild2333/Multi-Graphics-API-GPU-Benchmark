@@ -1,0 +1,1 @@
+[{"index":0,"name":"Apple iOS simulator GPU","vramMB":0,"metal":true,"vulkan":true,"vulkanImplementation":"MoltenVK","vulkanLiquid":false,"vulkanMaxParticleBufferBytes":268435456,"vulkanMaxParticles":8388608,"gpuCache":false,"gpuCacheParallelSteps":0,"gles2":true,"gles2MaxSteps":64,"opengl":false}]

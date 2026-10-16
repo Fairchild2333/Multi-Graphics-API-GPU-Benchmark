@@ -1,0 +1,4 @@
+P cores=10; E cores=4
+THREAD_AFFINITY_POLICY tag=1: return=46 ((os/kern) service not supported)
+QoS user_interactive: return=0
+QoS background: return=0

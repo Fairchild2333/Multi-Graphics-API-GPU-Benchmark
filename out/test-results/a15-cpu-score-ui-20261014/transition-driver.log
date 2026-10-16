@@ -1,0 +1,7 @@
+Screenshot saved to: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-cpu-score-ui-20261014/transition/stream-65536.png
+Dimensions: 2532x1170 pixels
+CAPTURED stream-65536
+Screenshot saved to: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-cpu-score-ui-20261014/transition/cpu_compute.png
+Dimensions: 1170x2532 pixels
+CAPTURED cpu_compute
+DONE [('stream-65536', ['20261014-161825-548']), ('cpu_compute', ['20261014-161911-989-cpu-single-performance', '20261014-161912-021-cpu-single-efficiency', '20261014-161912-040-cpu-multi'])]

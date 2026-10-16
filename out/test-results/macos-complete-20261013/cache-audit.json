@@ -1,0 +1,47 @@
+{
+  "checkedUtc": "2026-10-13T07:52:07.409898+00:00",
+  "device": {
+    "model": "Mac16,8",
+    "chip": "M4 Pro",
+    "cpuCores": 14,
+    "performanceCores": 10,
+    "efficiencyCores": 4,
+    "gpuCores": 20,
+    "memoryGiB": 48
+  },
+  "officialPeakGBps": 273,
+  "measuredReadGBps": {
+    "Vulkan": 238.796,
+    "Metal": 244.776,
+    "CPU": 245.834
+  },
+  "percentOfOfficialPeak": {
+    "Vulkan": 87.47106227106227,
+    "Metal": 89.66153846153847,
+    "CPU": 90.04908424908426
+  },
+  "vulkanMemoryPlateauReached": true,
+  "vulkanTimestampAnomalies": 0,
+  "vulkanL1ProbeAllGpuGBps": 1393.8,
+  "vulkanL1ProbeSingleWorkgroupGBps": 123.3,
+  "vulkanCacheHitReadGBps": 1521.5,
+  "gpuL2L3SlcIndependentlyAttributed": false,
+  "cpuSingleReadGBps": {
+    "L1": 129.9,
+    "L2": 111.3
+  },
+  "cpuAllReadGBps": {
+    "L1": 1444.0,
+    "L2": 1125.9
+  },
+  "socSlcIndependentlyMeasured": false,
+  "sources": [
+    "https://support.apple.com/en-au/121553",
+    "https://developer.apple.com/videos/play/wwdc2020/10603/"
+  ],
+  "resultIds": {
+    "Vulkan": "20261013-182141-555-membw",
+    "Metal": "20261013-182446-724-metal-memsweep",
+    "CPU": "20261013-183008-002-cpu-membw"
+  }
+}

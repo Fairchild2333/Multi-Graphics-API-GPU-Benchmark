@@ -1,0 +1,146 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -project ios-gui/Mangekyo.xcodeproj -scheme Mangekyo -configuration Release -destination id=53987196-51C0-4920-B6E9-3620653551F9 -derivedDataPath build-ios/DerivedData-iphonesimulator "-only-testing:MangekyoUITests/CompleteSuiteUITests/testOneButtonRunsCompleteSuite" -parallel-testing-enabled NO -resultBundlePath out/test-results/ios-oneclick-simulator-20261014/ui-confirm.xcresult CODE_SIGNING_ALLOWED=NO
+
+Build settings from command line:
+    CODE_SIGNING_ALLOWED = NO
+
+Writing result bundle at path:
+	/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ios-oneclick-simulator-20261014/ui-confirm.xcresult
+
+2026-10-14 18:00:36.379160+1100 MangekyoUITests-Runner[15269:2241529] [Default] Running tests...
+    t =      nans Interface orientation changed to Portrait
+Test Suite 'Selected tests' started at 2026-10-14 18:00:36.722.
+Test Suite 'MangekyoUITests.xctest' started at 2026-10-14 18:00:36.722.
+Test Suite 'CompleteSuiteUITests' started at 2026-10-14 18:00:36.722.
+Test Case '-[MangekyoUITests.CompleteSuiteUITests testOneButtonRunsCompleteSuite]' started.
+    t =     0.00s Start Test at 2026-10-14 18:00:36.723
+    t =     0.02s Set Up
+    t =     0.02s Open com.fairchild.Mangekyo
+    t =     0.03s     Launch com.fairchild.Mangekyo
+2026-10-14 18:00:36.809 xcodebuild[15262:2241275] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-10-14 18:00:36.809 xcodebuild[15262:2241275] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     0.49s         Setting up automation session
+    t =     0.93s         Wait for com.fairchild.Mangekyo to idle
+    t =     2.22s Waiting 30.0s for "complete-suite-all" Button to exist
+    t =     3.29s     Checking `Expect predicate `existsNoRetry == 1` for object "complete-suite-all" Button`
+    t =     3.29s         Checking existence of `"complete-suite-all" Button`
+    t =     4.43s Checking `Expect predicate `enabled == 1` for object "complete-suite-all" Button`
+    t =     4.43s     Find the "complete-suite-all" Button
+    t =     4.46s Tap "complete-suite-all" Button
+    t =     4.46s     Wait for com.fairchild.Mangekyo to idle
+    t =     4.47s     Find the "complete-suite-all" Button
+    t =     4.48s     Check for interrupting elements affecting "complete-suite-all" Button
+    t =     4.50s     Synthesize event
+    t =     4.80s     Wait for com.fairchild.Mangekyo to idle
+    t =    25.13s Checking existence of `"complete-suite-status" StaticText`
+    t =    25.13s     Interface orientation changed to Landscape Right
+    t =    25.13s     Interface orientation changed to Portrait
+    t =    25.16s Find the "complete-suite-status" StaticText
+    t =    45.19s Interface orientation changed to Landscape Right
+    t =    45.20s Checking existence of `"complete-suite-status" StaticText`
+    t =    45.24s Find the "complete-suite-status" StaticText
+    t =    65.27s Interface orientation changed to Portrait
+    t =    65.27s Checking existence of `"complete-suite-status" StaticText`
+    t =    65.30s Find the "complete-suite-status" StaticText
+    t =    85.34s Interface orientation changed to Landscape Right
+    t =    85.34s Interface orientation changed to Portrait
+    t =    85.35s Checking existence of `"complete-suite-status" StaticText`
+    t =    85.38s Find the "complete-suite-status" StaticText
+    t =   105.41s Interface orientation changed to Landscape Right
+    t =   105.41s Checking existence of `"complete-suite-status" StaticText`
+    t =   105.44s Find the "complete-suite-status" StaticText
+    t =   125.47s Interface orientation changed to Portrait
+    t =   125.47s Checking existence of `"complete-suite-status" StaticText`
+    t =   125.50s Find the "complete-suite-status" StaticText
+    t =   145.54s Interface orientation changed to Landscape Right
+    t =   145.54s Checking existence of `"complete-suite-status" StaticText`
+    t =   145.58s Find the "complete-suite-status" StaticText
+    t =   165.61s Checking existence of `"complete-suite-status" StaticText`
+    t =   165.65s Find the "complete-suite-status" StaticText
+    t =   185.68s Checking existence of `"complete-suite-status" StaticText`
+    t =   185.71s Find the "complete-suite-status" StaticText
+    t =   205.76s Interface orientation changed to Portrait
+    t =   205.76s Interface orientation changed to Landscape Right
+    t =   205.76s Checking existence of `"complete-suite-status" StaticText`
+    t =   205.80s Find the "complete-suite-status" StaticText
+    t =   225.83s Interface orientation changed to Portrait
+    t =   225.83s Checking existence of `"complete-suite-status" StaticText`
+    t =   225.85s Find the "complete-suite-status" StaticText
+    t =   245.88s Interface orientation changed to Landscape Right
+    t =   245.89s Checking existence of `"complete-suite-status" StaticText`
+    t =   245.93s Find the "complete-suite-status" StaticText
+    t =   265.96s Interface orientation changed to Portrait
+    t =   265.96s Interface orientation changed to Landscape Right
+    t =   265.97s Checking existence of `"complete-suite-status" StaticText`
+    t =   266.00s Find the "complete-suite-status" StaticText
+    t =   286.02s Interface orientation changed to Portrait
+    t =   286.03s Checking existence of `"complete-suite-status" StaticText`
+    t =   286.05s Find the "complete-suite-status" StaticText
+    t =   306.09s Interface orientation changed to Landscape Right
+    t =   306.09s Checking existence of `"complete-suite-status" StaticText`
+    t =   306.12s Find the "complete-suite-status" StaticText
+    t =   326.15s Checking existence of `"complete-suite-status" StaticText`
+    t =   326.18s Find the "complete-suite-status" StaticText
+    t =   346.21s Interface orientation changed to Portrait
+    t =   346.21s Checking existence of `"complete-suite-status" StaticText`
+    t =   346.25s Find the "complete-suite-status" StaticText
+    t =   366.29s Checking existence of `"complete-suite-status" StaticText`
+    t =   366.33s Find the "complete-suite-status" StaticText
+    t =   386.37s Checking existence of `"complete-suite-status" StaticText`
+    t =   386.40s Find the "complete-suite-status" StaticText
+    t =   406.44s Checking existence of `"complete-suite-status" StaticText`
+    t =   406.48s Find the "complete-suite-status" StaticText
+    t =   426.51s Checking existence of `"complete-suite-status" StaticText`
+    t =   426.53s Find the "complete-suite-status" StaticText
+    t =   446.57s Checking existence of `"complete-suite-status" StaticText`
+    t =   446.59s Find the "complete-suite-status" StaticText
+    t =   466.62s Checking existence of `"complete-suite-status" StaticText`
+    t =   466.65s Find the "complete-suite-status" StaticText
+    t =   486.68s Checking existence of `"complete-suite-status" StaticText`
+    t =   486.71s Find the "complete-suite-status" StaticText
+    t =   506.75s Checking existence of `"complete-suite-status" StaticText`
+    t =   506.77s Find the "complete-suite-status" StaticText
+    t =   526.80s Checking existence of `"complete-suite-status" StaticText`
+    t =   526.83s Find the "complete-suite-status" StaticText
+    t =   546.86s Checking existence of `"complete-suite-status" StaticText`
+    t =   546.88s Find the "complete-suite-status" StaticText
+    t =   566.91s Checking existence of `"complete-suite-status" StaticText`
+    t =   566.94s Find the "complete-suite-status" StaticText
+    t =   586.98s Checking existence of `"complete-suite-status" StaticText`
+    t =   587.00s Find the "complete-suite-status" StaticText
+    t =   607.04s Checking existence of `"complete-suite-status" StaticText`
+    t =   607.06s Find the "complete-suite-status" StaticText
+    t =   627.10s Checking existence of `"complete-suite-status" StaticText`
+    t =   627.12s Find the "complete-suite-status" StaticText
+    t =   647.17s Checking existence of `"complete-suite-status" StaticText`
+    t =   647.22s Find the "complete-suite-status" StaticText
+    t =   667.26s Checking existence of `"complete-suite-status" StaticText`
+    t =   667.28s Find the "complete-suite-status" StaticText
+    t =   687.31s Interface orientation changed to Landscape Right
+    t =   687.31s Checking existence of `"complete-suite-status" StaticText`
+    t =   687.34s Find the "complete-suite-status" StaticText
+    t =   707.37s Interface orientation changed to Portrait
+    t =   707.37s Interface orientation changed to Landscape Right
+    t =   707.37s Interface orientation changed to Portrait
+    t =   707.37s Checking existence of `"complete-suite-status" StaticText`
+    t =   707.41s Find the "complete-suite-status" StaticText
+    t =   707.43s Find the Target Application 'com.fairchild.Mangekyo'
+    t =   707.52s Added attachment named 'One-button complete suite'
+    t =   707.52s Tear Down
+Test Case '-[MangekyoUITests.CompleteSuiteUITests testOneButtonRunsCompleteSuite]' passed (707.782 seconds).
+Test Suite 'CompleteSuiteUITests' passed at 2026-10-14 18:12:24.506.
+	 Executed 1 test, with 0 failures (0 unexpected) in 707.782 (707.783) seconds
+Test Suite 'MangekyoUITests.xctest' passed at 2026-10-14 18:12:24.506.
+	 Executed 1 test, with 0 failures (0 unexpected) in 707.782 (707.784) seconds
+Test Suite 'Selected tests' passed at 2026-10-14 18:12:24.507.
+	 Executed 1 test, with 0 failures (0 unexpected) in 707.782 (707.785) seconds
+2026-10-14 18:12:24.804 xcodebuild[15262:2241275] [MT] IDETestOperationsObserverDebug: 708.932 elapsed -- Testing started completed.
+2026-10-14 18:12:24.804 xcodebuild[15262:2241275] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-14 18:12:24.804 xcodebuild[15262:2241275] [MT] IDETestOperationsObserverDebug: 708.932 sec, +708.932 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ios-oneclick-simulator-20261014/ui-confirm.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started

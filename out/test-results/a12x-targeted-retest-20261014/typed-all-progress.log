@@ -1,0 +1,20 @@
+START 1/4 cpu_compute
+STATE cpu_compute ('running', 'running')
+STATE cpu_compute ('passed', 'passed')
+END cpu_compute passed ['20261014-221600-131-cpu-single-performance', '20261014-221600-146-cpu-single-efficiency', '20261014-221600-154-cpu-multi'] thermal=0->0 
+REST 20s
+START 2/4 stream-16777216
+STATE stream-16777216 ('running', 'running')
+STATE stream-16777216 ('review', 'review')
+END stream-16777216 review ['20261014-221641-866'] thermal=0->0 Stable throughput was not reached
+REST 20s
+START 3/4 vulkan/stream-4194304
+STATE vulkan/stream-4194304 ('running', 'running')
+STATE vulkan/stream-4194304 ('passed', 'passed')
+END vulkan/stream-4194304 passed ['20261014-221725-977'] thermal=0->0 
+REST 20s
+START 4/4 vulkan/stream-16777216
+STATE vulkan/stream-16777216 ('running', 'running')
+STATE vulkan/stream-16777216 ('passed', 'passed')
+END vulkan/stream-16777216 passed ['20261014-221816-884'] thermal=0->0 
+DONE 4 jobs; archived /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a12x-targeted-retest-20261014/typed-all-final

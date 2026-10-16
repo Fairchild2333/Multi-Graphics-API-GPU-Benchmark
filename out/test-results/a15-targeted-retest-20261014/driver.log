@@ -1,0 +1,35 @@
+START 1/7 stream-1048576
+STATE stream-1048576 ('running', 'running')
+STATE stream-1048576 ('review', 'review')
+END stream-1048576 review ['20261014-151024-717'] thermal=0->0 Throughput fell by more than 5%
+REST 20s
+START 2/7 stream-4194304
+STATE stream-4194304 ('running', 'running')
+STATE stream-4194304 ('passed', 'passed')
+END stream-4194304 passed ['20261014-151106-433'] thermal=0->0 
+REST 20s
+START 3/7 stream-16777216
+STATE stream-16777216 ('running', 'running')
+STATE stream-16777216 ('passed', 'passed')
+END stream-16777216 passed ['20261014-151148-681'] thermal=0->0 
+REST 20s
+START 4/7 gpu_burn-16
+STATE gpu_burn-16 ('running', 'running')
+STATE gpu_burn-16 ('passed', 'passed')
+END gpu_burn-16 passed ['20261014-151230-376'] thermal=0->0 
+REST 20s
+START 5/7 vulkan/stream-1048576
+STATE vulkan/stream-1048576 ('running', 'running')
+STATE vulkan/stream-1048576 ('review', 'review')
+END vulkan/stream-1048576 review ['20261014-151312-744'] thermal=0->0 Throughput fell by more than 5%
+REST 20s
+START 6/7 vulkan/gpu_burn-64
+STATE vulkan/gpu_burn-64 ('running', 'running')
+STATE vulkan/gpu_burn-64 ('review', 'review')
+END vulkan/gpu_burn-64 review ['20261014-151354-657'] thermal=0->0 Stable throughput was not reached
+REST 20s
+START 7/7 vulkan/gpu_burn-256
+STATE vulkan/gpu_burn-256 ('running', 'running')
+STATE vulkan/gpu_burn-256 ('review', 'review')
+END vulkan/gpu_burn-256 review ['20261014-151438-374'] thermal=0->0 Stable throughput was not reached; Throughput fell by more than 5%
+DONE 7 jobs; archived /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-targeted-retest-20261014/first-final

@@ -1,0 +1,10 @@
+{
+  "scope": "CPU",
+  "total": 2,
+  "finished": 0,
+  "review": 0,
+  "failed": 0,
+  "cooldownPolicy": "30s_pause_and_android29_thermal_when_available",
+  "cancelled": true,
+  "jobs": []
+}

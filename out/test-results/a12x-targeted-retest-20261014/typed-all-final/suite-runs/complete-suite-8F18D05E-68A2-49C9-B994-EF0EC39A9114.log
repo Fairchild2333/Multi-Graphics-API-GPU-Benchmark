@@ -1,0 +1,25 @@
+iOS complete suite complete-suite-8F18D05E-68A2-49C9-B994-EF0EC39A9114
+Started: 2026-10-14T10:16:20Z
+
+Thermal precheck vulkan/memory_sweep: nominal after 0s cooling.
+
+=== 1/1 vulkan/memory_sweep: failed ===
+=== Preview memory_sweep?api=vulkan 0.0s ===
+MEMBW_COUNTERS	extension_advertised=0	status=extension_not_advertised	inventory=	cache_attribution=unverified
+[membw] Data check: the kernels load from the buffer of 256 MiB what was stored in it.
+[membw] Timing check: a read of 4096 MiB took 75.181 ms by the GPU's clock, 75.700 ms by wall clock.
+
+========== Memory Bandwidth Sweep (membw_v2_verified) ==========
+Device:    Apple A12X GPU (Integrated GPU)
+Driver:    0.2.2210
+Memory:    3752 MiB device-local heap, measured as system memory
+Sweep:     1 MiB - 256 MiB in 0.5 MiB chunks
+Timing:    GPU timestamps, 3 warm-up + 10 measured dispatches per point, median reported
+
+[read] 16 B loads
+    Data set   Passes   Dispatch MiB   Median ms     Min ms   Median GB/s   Best GB/s
+       1 MiB      771            771       3.941      3.887         205.2       208.0
+MEMBW_POINT	kernel=read	dataset_bytes=1048576	passes=771	dispatch_bytes=808452096	median_ms=3.940688	min_ms=3.887334	median_gbps=205.155	best_gbps=207.971
+     1.5 MiB      440            660       4.137      3.939         167.3       175.7
+MEMBW_POINT	kernel=read	dataset_bytes=1572864	passes=440	dispatch_bytes=692060160	median_ms=4.137354	min_ms=3.939375	median_gbps=167.271	best_gbps=175.678
+ERROR: Vulkan timestamps became unreliable during the sweep; mixed timing is rejected and no score is saved

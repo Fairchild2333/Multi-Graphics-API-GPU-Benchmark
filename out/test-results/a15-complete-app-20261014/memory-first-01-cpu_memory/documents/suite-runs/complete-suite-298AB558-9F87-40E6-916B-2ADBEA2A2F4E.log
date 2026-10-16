@@ -1,0 +1,83 @@
+iOS complete suite complete-suite-298AB558-9F87-40E6-916B-2ADBEA2A2F4E
+Started: 2026-10-14T04:52:26Z
+
+Thermal precheck vulkan/stream-4194304: nominal after 0s cooling.
+
+=== 1/1 vulkan/stream-4194304: passed ===
+=== Preview stream?particles=4194304&vsync=0&api=vulkan&coverage=fixed 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple A15 GPU (Integrated GPU)
+Selected GPU [0]: Apple A15 GPU  |  Driver: 0.2.2210
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 4194304 particles
+[Profiling] Timestamp queries enabled (period = 1 ns/tick)
+[Profiling] Timestamp check: 45.5791 ms by the GPU's clock (38.4322 ms with one frame behind the other), 41.9415 ms by wall clock.
+[GPU Timing] Compute: 8.997 ms | Render: 87.772 ms | Total: 96.788 ms | FPS: 15 | T: 0.5 s (warm-up)
+[GPU Timing] Compute: 8.806 ms | Render: 91.754 ms | Total: 100.577 ms | FPS: 9 | T: 0.8 s (warm-up)
+[GPU Timing] Compute: 8.766 ms | Render: 95.518 ms | Total: 104.302 ms | FPS: 9 | T: 1.1 s (warm-up)
+[GPU Timing] Compute: 9.206 ms | Render: 95.761 ms | Total: 104.984 ms | FPS: 9 | T: 1.4 s (warm-up)
+[GPU Timing] Compute: 8.976 ms | Render: 96.108 ms | Total: 105.100 ms | FPS: 9 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 8.843 ms | Render: 94.220 ms | Total: 103.080 ms | FPS: 9 | T: 2.1 s (warm-up)
+[GPU Timing] Compute: 8.935 ms | Render: 94.310 ms | Total: 103.262 ms | FPS: 9 | T: 3.1 s
+[GPU Timing] Compute: 9.025 ms | Render: 97.965 ms | Total: 107.006 ms | FPS: 9 | T: 4.2 s
+[GPU Timing] Compute: 8.986 ms | Render: 97.009 ms | Total: 106.011 ms | FPS: 9 | T: 5.3 s
+[GPU Timing] Compute: 8.896 ms | Render: 98.330 ms | Total: 107.243 ms | FPS: 9 | T: 6.4 s
+[GPU Timing] Compute: 8.923 ms | Render: 99.409 ms | Total: 108.349 ms | FPS: 9 | T: 7.5 s
+[GPU Timing] Compute: 8.898 ms | Render: 98.752 ms | Total: 107.668 ms | FPS: 9 | T: 8.6 s
+[GPU Timing] Compute: 8.788 ms | Render: 96.810 ms | Total: 105.616 ms | FPS: 9 | T: 9.6 s
+[GPU Timing] Compute: 8.979 ms | Render: 90.647 ms | Total: 99.643 ms | FPS: 9 | T: 10.7 s
+[GPU Timing] Compute: 8.750 ms | Render: 88.457 ms | Total: 97.223 ms | FPS: 10 | T: 11.7 s
+[GPU Timing] Compute: 8.887 ms | Render: 91.114 ms | Total: 100.018 ms | FPS: 9 | T: 12.8 s
+[GPU Timing] Compute: 8.837 ms | Render: 94.636 ms | Total: 103.491 ms | FPS: 9 | T: 13.8 s
+[GPU Timing] Compute: 9.247 ms | Render: 97.769 ms | Total: 107.033 ms | FPS: 9 | T: 14.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A15 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    4194304 (Heavy)
+Buffer:       128.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 123 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         8.926     8.451    10.163
+Render:         95.440    87.250   103.134
+Total GPU:     104.384    95.972   112.373
+
+--- Throughput ---
+Avg FPS:      9
+Particles:    4194304
+Working set:  128.00 MiB
+VRAM rate:   18.79 GB/s  (8.926 ms compute)
+
+--- Analysis ---
+Avg frame time:  106.073 ms
+Avg GPU time:    104.384 ms
+GPU utilisation: 98.4%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 18.77 GB/s  (CV 1.88%)
+Throughput:   early vs late mean change (drop positive) -0.2%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261014-155243-106 -> /var/mobile/Containers/Data/Application/7287B165-FAB5-43E7-8289-6876AF2CD830/Documents/results/results.json

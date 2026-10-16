@@ -1,0 +1,21 @@
+{
+  "suiteStatus": "passed",
+  "jobs": 15,
+  "passedJobs": 15,
+  "selectedRecords": 16,
+  "rawHistoryRecords": 17,
+  "resumedFrom": "complete-suite-91AD664B-0319-40A4-BDD8-577B551E1774",
+  "deviceModels": [
+    "iPhone14,2"
+  ],
+  "platforms": [
+    "iOS"
+  ],
+  "gpuCurvePoints": 52,
+  "cpuCurvePoints": 174,
+  "pageMappingMeasured": true,
+  "storageMeasured": true,
+  "maxThermalState": 2,
+  "rawResultsSha256": "cb29e2c7cbd906352a84bde33664a232ff3711ad225757a19a04f355acdaba2b",
+  "selectedResultsSha256": "ba4d7387aafbd991500a8170127637c4782991605bb212ae2cd4e283081da156"
+}

@@ -1,0 +1,42 @@
+{
+  "historical_rows_preserved": 105,
+  "history_rows": 113,
+  "new_rows": 8,
+  "curated_rows": 33,
+  "jobs_passed": 4,
+  "all_worker_sums_verified": [
+    {
+      "id": "20261014-161310-989-cpu-multi",
+      "score": 642.251,
+      "worker_scores": [
+        108.168876,
+        106.896667,
+        106.650089,
+        106.769692,
+        107.699477,
+        106.066004
+      ],
+      "sum": 642.250805,
+      "process_cpu_seconds": 28.108122,
+      "performance_cpu_seconds": 9.70706646
+    },
+    {
+      "id": "20261014-161912-040-cpu-multi",
+      "score": 663.715,
+      "worker_scores": [
+        110.951801,
+        110.518447,
+        110.079358,
+        110.724884,
+        110.901011,
+        110.539746
+      ],
+      "sum": 663.715247,
+      "process_cpu_seconds": 29.8151054,
+      "performance_cpu_seconds": 10.195905
+    }
+  ],
+  "classified_memory_points_verified": 186,
+  "before_sha256": "7583ffcf2d323e3775226a43c90b257860ee61b0c89fb35743a47e50a3b569c3",
+  "after_sha256": "d5c39f3e074604c419f07622fc3031f8d518df1aad7e89fff1ffb1a22b28f18c"
+}

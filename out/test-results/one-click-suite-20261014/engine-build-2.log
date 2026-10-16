@@ -1,0 +1,25 @@
+[  5%] Built target glad_gl43
+[ 48%] Built target compile_glsl
+[ 52%] Built target results_compat_test
+[ 53%] Built target complete_suite_test
+[ 55%] Built target cpu_residency_test
+[ 60%] Built target vulkan_membw_results_test
+[ 63%] Built target suite_process_test
+[ 81%] Built target glfw
+[ 81%] Building CXX object CMakeFiles/gpu_engine.dir/src/main.cpp.o
+[ 81%] Building CXX object CMakeFiles/gpu_engine.dir/src/vulkan_backend.cpp.o
+[ 82%] Building OBJCXX object CMakeFiles/gpu_engine.dir/src/metal_backend.mm.o
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:434:20: warning: unused function 'QuoteSuiteProcessArg' [-Wunused-function]
+  434 | static std::string QuoteSuiteProcessArg(const std::string& value) {
+      |                    ^~~~~~~~~~~~~~~~~~~~
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:454:13: warning: unused function 'NameLooksIntegrated' [-Wunused-function]
+  454 | static bool NameLooksIntegrated(const std::string& name) {
+      |             ^~~~~~~~~~~~~~~~~~~
+2 warnings generated.
+[ 83%] Linking CXX static library libgpu_engine.a
+[ 97%] Built target gpu_engine
+[ 98%] Linking CXX executable gpu_benchmark
+Copying SPIR-V files next to executable
+Copying Metal shader files next to executable
+Copying OpenGL GLSL shader files next to executable
+[100%] Built target gpu_benchmark

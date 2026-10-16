@@ -1,0 +1,187 @@
+SUITE_PLAN	total=23	scope=GPU
+SUITE_RUN	index=1	total=23	job=vulkan-stream-65536-false
+SUITE_THERMAL	start=0	unknown=-1
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] SwiftShader Device (LLVM 10.0.0) (CPU)
+Selected GPU [0]: SwiftShader Device (LLVM 10.0.0)  |  Driver: 5.0.0
+[Vulkan] Present mode: mailbox (not tied to the refresh rate)
+Created particle buffer (device-local via staging): 65536 particles
+[Profiling] Timestamp queries enabled (period = 1.000000 ns/tick)
+[Profiling] Timestamp check: 49.199375 ms by the GPU's clock (35.535084 ms with one frame behind the other), 31.441084 ms by wall clock.
+[GPU Timing] Compute: 0.115 ms | Render: 14.977 ms | Total: 15.093 ms | FPS: 67 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.115 ms | Render: 13.078 ms | Total: 13.194 ms | FPS: 60 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.117 ms | Render: 14.636 ms | Total: 14.753 ms | FPS: 58 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 0.113 ms | Render: 14.737 ms | Total: 14.851 ms | FPS: 63 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 0.115 ms | Render: 15.108 ms | Total: 15.223 ms | FPS: 60 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 0.111 ms | Render: 15.168 ms | Total: 15.279 ms | FPS: 60 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 0.117 ms | Render: 14.201 ms | Total: 14.319 ms | FPS: 60 | T: 2.9 s
+[GPU Timing] Compute: 0.117 ms | Render: 14.235 ms | Total: 14.352 ms | FPS: 60 | T: 3.9 s
+[GPU Timing] Compute: 0.138 ms | Render: 14.263 ms | Total: 14.401 ms | FPS: 61 | T: 4.9 s
+[GPU Timing] Compute: 0.117 ms | Render: 13.972 ms | Total: 14.089 ms | FPS: 61 | T: 5.9 s
+[GPU Timing] Compute: 0.232 ms | Render: 13.674 ms | Total: 13.906 ms | FPS: 61 | T: 6.9 s
+[GPU Timing] Compute: 0.117 ms | Render: 13.580 ms | Total: 13.697 ms | FPS: 62 | T: 7.9 s
+[GPU Timing] Compute: 0.119 ms | Render: 13.644 ms | Total: 13.764 ms | FPS: 66 | T: 8.9 s
+[GPU Timing] Compute: 0.129 ms | Render: 13.974 ms | Total: 14.103 ms | FPS: 60 | T: 9.9 s
+[GPU Timing] Compute: 0.117 ms | Render: 13.653 ms | Total: 13.770 ms | FPS: 61 | T: 11.0 s
+[GPU Timing] Compute: 0.118 ms | Render: 12.944 ms | Total: 13.062 ms | FPS: 60 | T: 12.0 s
+[GPU Timing] Compute: 0.139 ms | Render: 14.292 ms | Total: 14.431 ms | FPS: 64 | T: 13.0 s
+[GPU Timing] Compute: 0.124 ms | Render: 14.365 ms | Total: 14.489 ms | FPS: 60 | T: 14.0 s
+[GPU Timing] Compute: 0.116 ms | Render: 12.739 ms | Total: 12.855 ms | FPS: 62 | T: 15.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+CPU Renderer: SwiftShader Device (LLVM 10.0.0)
+Driver:       5.0.0
+CPU:          AOSP ranchu
+OS:           Android 15 (API 35)
+System:       Android ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    65536 (Light)
+Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 807 frames)
+
+--- Device Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.131     0.080     7.267
+Render:         13.836     4.799    28.407
+Total:          13.967     4.911    28.509
+
+--- Throughput ---
+Avg FPS:      62
+Particles:    65536
+Working set:  2.00 MiB
+VRAM rate:   20.07 GB/s  (0.131 ms compute)
+
+--- Analysis ---
+Avg frame time:  16.127 ms
+Avg device time:  13.967 ms
+Device utilisation: 86.6%
+>> Software renderer -- all work runs on CPU.
+
+--- Thermal Stability ---
+Windows:      13 x 1s
+Stable score: not reached — keep running to detect throttling.
+==========================================================
+
+[Results] Saved as 20261014-140304-388 -> /storage/emulated/0/Android/data/com.mangekyo.benchmark/files/results/results.json
+SUITE_RESULT	status=success	job=vulkan-stream-65536-false	reason= 
+SUITE_RUN	index=2	total=23	job=vulkan-stream-1048576-false
+SUITE_THERMAL	start=0	unknown=-1
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] SwiftShader Device (LLVM 10.0.0) (CPU)
+Selected GPU [0]: SwiftShader Device (LLVM 10.0.0)  |  Driver: 5.0.0
+[Vulkan] Present mode: mailbox (not tied to the refresh rate)
+Created particle buffer (device-local via staging): 1048576 particles
+[Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+[Profiling] Timestamp check: 29.8 ms by the GPU's clock (25.9 ms with one frame behind the other), 19.6 ms by wall clock.
+[GPU Timing] Compute: 3.337 ms | Render: 89.062 ms | Total: 92.400 ms | FPS: 16 | T: 0.5 s (warm-up)
+[GPU Timing] Compute: 2.481 ms | Render: 94.860 ms | Total: 97.342 ms | FPS: 10 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 2.495 ms | Render: 87.747 ms | Total: 90.243 ms | FPS: 10 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 1.962 ms | Render: 89.660 ms | Total: 91.623 ms | FPS: 10 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 2.396 ms | Render: 89.622 ms | Total: 92.019 ms | FPS: 10 | T: 2.0 s (warm-up)
+[GPU Timing] Compute: 2.721 ms | Render: 94.948 ms | Total: 97.669 ms | FPS: 10 | T: 3.1 s
+[GPU Timing] Compute: 3.037 ms | Render: 88.446 ms | Total: 91.484 ms | FPS: 10 | T: 4.1 s
+[GPU Timing] Compute: 2.114 ms | Render: 91.628 ms | Total: 93.743 ms | FPS: 10 | T: 5.1 s
+[GPU Timing] Compute: 2.865 ms | Render: 89.508 ms | Total: 92.374 ms | FPS: 10 | T: 6.1 s
+[GPU Timing] Compute: 2.756 ms | Render: 90.252 ms | Total: 93.009 ms | FPS: 10 | T: 7.2 s
+[GPU Timing] Compute: 2.642 ms | Render: 90.048 ms | Total: 92.690 ms | FPS: 10 | T: 8.2 s
+[GPU Timing] Compute: 2.518 ms | Render: 89.503 ms | Total: 92.022 ms | FPS: 10 | T: 9.2 s
+[GPU Timing] Compute: 2.560 ms | Render: 90.845 ms | Total: 93.406 ms | FPS: 10 | T: 10.3 s
+[GPU Timing] Compute: 2.694 ms | Render: 90.563 ms | Total: 93.258 ms | FPS: 10 | T: 11.3 s
+[GPU Timing] Compute: 2.444 ms | Render: 90.011 ms | Total: 92.455 ms | FPS: 10 | T: 12.3 s
+[GPU Timing] Compute: 1.929 ms | Render: 92.076 ms | Total: 94.006 ms | FPS: 10 | T: 13.4 s
+[GPU Timing] Compute: 1.838 ms | Render: 91.653 ms | Total: 93.492 ms | FPS: 10 | T: 14.4 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+CPU Renderer: SwiftShader Device (LLVM 10.0.0)
+Driver:       5.0.0
+CPU:          AOSP ranchu
+OS:           Android 15 (API 35)
+System:       Android ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    1048576 (Medium)
+Buffer:       32.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.1 s (warmup: 2.0 s, measured: 139 frames)
+
+--- Device Timing (ms) ---
+                     Avg       Min       Max
+Compute:         2.520     1.084    11.326
+Render:         90.751    84.432   107.767
+Total:          93.272    87.179   112.463
+
+--- Throughput ---
+Avg FPS:      10
+Particles:    1048576
+Working set:  32.00 MiB
+VRAM rate:   16.64 GB/s  (2.520 ms compute)
+
+--- Analysis ---
+Avg frame time:  94.082 ms
+Avg device time:  93.272 ms
+Device utilisation: 99.1%
+>> Software renderer -- all work runs on CPU.
+
+--- Thermal Stability ---
+Windows:      12 x 1s
+Stable score: not reached — keep running to detect throttling.
+==========================================================
+
+[Results] Saved as 20261014-140351-557 -> /storage/emulated/0/Android/data/com.mangekyo.benchmark/files/results/results.json
+SUITE_RESULT	status=review	job=vulkan-stream-1048576-false	reason= Stable throughput not reached
+SUITE_RUN	index=3	total=23	job=vulkan-stream-4194304-false
+SUITE_THERMAL	start=0	unknown=-1
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] SwiftShader Device (LLVM 10.0.0) (CPU)
+Selected GPU [0]: SwiftShader Device (LLVM 10.0.0)  |  Driver: 5.0.0
+[Vulkan] Present mode: mailbox (not tied to the refresh rate)
+Created particle buffer (device-local via staging): 4194304 particles
+[Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+[Profiling] Timestamp check: 24.7 ms by the GPU's clock (25.3 ms with one frame behind the other), 21.5 ms by wall clock.
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+CPU Renderer: SwiftShader Device (LLVM 10.0.0)
+Driver:       5.0.0
+CPU:          AOSP ranchu
+OS:           Android 15 (API 35)
+System:       Android ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    4194304 (Heavy)
+Buffer:       128.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     312.1 s (warmup: 2.0 s, measured: 0 frames)
+
+--- Throughput ---
+Avg FPS:      0
+
+(No timestamp data available for analysis.)
+==========================================================
+
+[Results] Saved as 20261014-140425-510 -> /storage/emulated/0/Android/data/com.mangekyo.benchmark/files/results/results.json

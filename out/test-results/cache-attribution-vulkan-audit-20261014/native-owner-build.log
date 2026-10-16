@@ -1,0 +1,16 @@
+[  4%] Compiling membw_write.comp -> SPIR-V
+[  4%] Compiling membw_copy.comp -> SPIR-V
+[100%] Built target compile_glsl
+[  5%] Built target glad_gl43
+[ 54%] Built target glfw
+[ 54%] Building CXX object CMakeFiles/gpu_engine.dir/src/vulkan_membw.cpp.o
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw.cpp:1:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw.h:3:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+  204 | #  warning "The selected platform is no longer supported by libc++."
+      |    ^
+1 warning generated.
+[ 57%] Linking CXX static library libgpu_engine.a
+[100%] Built target gpu_engine

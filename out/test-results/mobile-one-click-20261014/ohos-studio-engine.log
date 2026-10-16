@@ -1,0 +1,162 @@
+10-14 11:07:39.770  1164  1164 I A01b01/HOME: AppName --> observerCallback appName: Mangekyo, LayoutId: AppName_text_com.mangekyo.benchmark_Mangekyo_mv7iu0xyyvjx090ydin, nameOpacity: 1
+10-14 11:08:42.756  1164  1164 W A01b01/HOME: PageDesktopModel --> searchInCurrentDeskTopPage 16777217, {"bundleName":"com.mangekyo.benchmark","oldBundleNames":[],"abilityName":"EntryAbility","isSelect":false,"isTransparent":false,"downloadProgress":0,"appStatus":0,"shortcutId":"","appIndex":0,"intent":"","size":0,"themeId":"","themeFormId":"","typeId":0,"moduleName":"entry","keyName":"com.mangekyo.benchmarkEntryAbilityentry0","badgeNumber":0,"area":[1,1],"appName":"Mangekyo","appIconId":16777217,"appLabelId":16777219,"kindId":-1,"bundleType":0,"installTime":"Wed Oct 14 2026 10:59:19 GMT+0800","page":1,"column":0,"row":0,"isUninstallAble":true,"isSystemApp":false,"applicationIconId":16777217,"applicationLabelId":16777219,"infoId":"ea74acd9-9ffd-4161-95fb-1820008a41a8","infoName":"Mangekyo","areaType":0,"x":0}, true, null
+10-14 11:08:42.835  1164  1164 I A01b01/HOME: ResourceManager --> getAppNameSync resMgrName: Mangekyo bundleName:com.mangekyo.benchmark, labelId:16777219
+10-14 11:08:42.835  1164  1164 I A01b01/HOME: ResourceManager --> setAppResourceCache cacheKey:16777219com.mangekyo.benchmarkentry, value: Mangekyo
+10-14 11:08:42.835  1164  1164 I A01b00/SCB: LauncherAbilityManager --> getLauncherAbility updateAppNameSync:Mangekyo
+10-14 11:08:42.835  1164  1164 I A01b00/SCB: LauncherAbilityManager --> getLauncherAbility appName:Mangekyo bundleName:com.mangekyo.benchmark
+10-14 11:08:42.835  1164  1164 I A01b01/HOME: AppModel --> launcher abilityInfos: [{"appName":"Mangekyo","bundleName":"com.mangekyo.benchmark","appIconId":16777217,"abilityName":"EntryAbility","downloadProgress":0,"appStatus":0,"appIndex":0,"intent":"","appDistributionType":"none","isSystemApp":false,"isUninstallAble":true,"applicationIconId":16777217,"appLabelId":16777219,"applicationLabelId":16777219,"codePath":"/data/app/el1/bundle/public/com.mangekyo.benchmark","kindId":-1,"moduleName":"entry","shortcutId":"","installTime":"Wed Oct 14 2026 10:59:19 GMT+0800","areaType":2,"bundleType":0,"keyName":"com.mangekyo.benchmarkEntryAbilityentry0"}]
+10-14 11:08:42.868  1164  1164 I A01b01/HOME: PageDesktopViewModel --> newApp: {"appName":"Mangekyo","bundleName":"com.mangekyo.benchmark","appIconId":16777217,"abilityName":"EntryAbility","downloadProgress":0,"appStatus":0,"appIndex":0,"intent":"","appDistributionType":"none","isSystemApp":false,"isUninstallAble":true,"applicationIconId":16777217,"appLabelId":16777219,"applicationLabelId":16777219,"codePath":"/data/app/el1/bundle/public/com.mangekyo.benchmark","kindId":-1,"moduleName":"entry","shortcutId":"","installTime":"Wed Oct 14 2026 10:59:19 GMT+0800","areaType":2,"bundleType":0,"keyName":"com.mangekyo.benchmarkEntryAbilityentry0"}
+10-14 11:08:42.868  1164  1164 I A01b01/HOME: AppName --> updateShadowColor, Mangekyo color:#00050505
+10-14 11:08:42.888  1164  1164 I A01a01/NC: SysUI_NtfListVm --> Update config for 20020051, label: Mangekyo.
+10-14 11:08:43.043  9880  9880 I A00000/Mangekyo: shaders copied: 46
+10-14 11:08:43.043  9880  9880 I A00000/Mangekyo: paths set
+10-14 11:08:43.102  9880  9880 I A00000/Mangekyo: shell=plain api=16 device=phone hds=true
+10-14 11:09:19.673  9880  9880 I A00000/Mangekyo: SUITE_PLAN	total=5	scope=all	folder=/data/storage/el2/base/haps/entry/files/suite-runs/1791947359672
+10-14 11:09:19.675  9880  9880 I A00000/Mangekyo: SUITE_RUN	index=1	total=5	job=gles2-burn-16
+10-14 11:09:19.723  9880  9880 I A00000/Mangekyo: XComponent callbacks registered
+10-14 11:09:19.723  9880  9880 I A00000/Mangekyo: surface created
+10-14 11:09:19.767  9880  9880 I A00000/Mangekyo: surface changed
+10-14 11:09:19.777  9880  9880 I A00000/Mangekyo: surface changed
+10-14 11:09:20.277  9880 10693 I A00000/MangekyoEngine: [RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+10-14 11:09:20.277  9880 10693 I A00000/MangekyoEngine: [OpenGL ES Init] Creating the context...
+10-14 11:09:20.288  9880 10693 I A00000/MangekyoEngine: [OpenGL ES] Present mode: unsynchronised (swap interval 0, not tied to the refresh rate)
+10-14 11:09:20.288  9880 10693 I A00000/MangekyoEngine: [OpenGL ES] Every frame is drawn in full; the picture on screen is renewed about 30 times a second.
+10-14 11:09:20.288  9880 10693 I A00000/MangekyoEngine: [OpenGL ES Init] Mali-G77  |  OpenGL ES 3.0 (4.1 Metal - 91.7)
+10-14 11:09:20.288  9880 10693 I A00000/MangekyoEngine: [OpenGL ES Init] Compiling the OpenGL ES 2.0 GPU Burn (16 steps)...
+10-14 11:09:20.294  9880 10693 I A00000/MangekyoEngine: [Profiling] OpenGL ES 2.0: frames are timed by wall clock.
+10-14 11:09:20.294  9880 10693 I A00000/MangekyoEngine: [OpenGL ES Init] Initialisation complete.
+10-14 11:09:20.600  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.547 ms | Total: 3.547 ms | FPS: 232 | T: 0.3 s (warm-up)
+10-14 11:09:20.901  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 5.015 ms | Total: 5.015 ms | FPS: 166 | T: 0.6 s (warm-up)
+10-14 11:09:21.210  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.919 ms | Total: 4.919 ms | FPS: 170 | T: 0.9 s (warm-up)
+10-14 11:09:21.510  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.687 ms | Total: 3.687 ms | FPS: 165 | T: 1.2 s (warm-up)
+10-14 11:09:21.828  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 5.046 ms | Total: 5.046 ms | FPS: 167 | T: 1.5 s (warm-up)
+10-14 11:09:22.128  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.714 ms | Total: 3.714 ms | FPS: 207 | T: 1.8 s (warm-up)
+10-14 11:09:23.142  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.381 ms | Total: 3.381 ms | FPS: 231 | T: 2.8 s
+10-14 11:09:24.140  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.827 ms | Total: 3.827 ms | FPS: 197 | T: 3.8 s
+10-14 11:09:25.144  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.973 ms | Total: 4.973 ms | FPS: 170 | T: 4.9 s
+10-14 11:09:26.144  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.788 ms | Total: 4.788 ms | FPS: 166 | T: 5.9 s
+10-14 11:09:27.158  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.745 ms | Total: 3.745 ms | FPS: 194 | T: 6.9 s
+10-14 11:09:28.160  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.605 ms | Total: 4.605 ms | FPS: 174 | T: 7.9 s
+10-14 11:09:29.162  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.821 ms | Total: 4.821 ms | FPS: 163 | T: 8.9 s
+10-14 11:09:30.163  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.532 ms | Total: 4.532 ms | FPS: 177 | T: 9.9 s
+10-14 11:09:31.167  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.971 ms | Total: 3.971 ms | FPS: 209 | T: 10.9 s
+10-14 11:09:32.165  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.965 ms | Total: 3.965 ms | FPS: 202 | T: 11.9 s
+10-14 11:09:33.183  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.831 ms | Total: 3.831 ms | FPS: 225 | T: 12.9 s
+10-14 11:09:34.183  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.665 ms | Total: 3.665 ms | FPS: 225 | T: 13.9 s
+10-14 11:09:35.174  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.528 ms | Total: 3.528 ms | FPS: 237 | T: 14.9 s
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: ==========================================================
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine:                    Benchmark Summary
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: ==========================================================
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Graphics API: OpenGL ES 2.0
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: GPU:          Mali-G77
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Driver:       OpenGL ES 3.0 (4.1 Metal - 91.7)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: CPU:          Unknown
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: OS:           HarmonyOS 5.0.1 (API 16)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: System:       HarmonyOS ARM64
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Memory:       Device-local VRAM
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Mode:         Windowed
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Resolution:   1280x720
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Workload:     GPU Burn ES 2.0 legacy v1 / Quasicrystal plasma (no particle data)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Flights:      2
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Multi-GPU:    Off
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: V-Sync:       OFF
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Duration:     13.0 s (warmup: 2.0 s, measured: 2577 frames)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: --- GPU Timing (ms) ---
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine:                      Avg       Min       Max
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Compute:         0.000     0.000     0.000
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Render:          4.081     0.074    59.345
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Total GPU:       4.081     0.074    59.345
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: --- Throughput ---
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Avg FPS:      198
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: GPU Burn:     ES 2.0 legacy v1 quasicrystal plasma, 2 draws x 16 fixed steps/pixel  (1280x720 px)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Visual:       waves in seven directions, two draws added together, mediump
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Burn rate:    7.23 Gpix-step/s  (4.081 ms render)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: --- Analysis ---
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Avg frame time:  5.050 ms
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Avg GPU time:    4.081 ms
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: GPU utilisation: 80.8%
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: >> GPU-bound: GPU is the bottleneck.
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: --- Thermal Stability ---
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Windows:      13 x 1s
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Stable score: not reached — keep running to detect throttling.
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: ==========================================================
+10-14 11:09:35.330  9880 10693 I A00000/MangekyoEngine: [Results] Saved as 20261014-110935-308 -> /data/storage/el2/base/haps/entry/files/results/results.json
+10-14 11:09:35.383  9880  9880 I A00000/Mangekyo: SUITE_RESULT	status=review	job=gles2-burn-16	reason= 尚未达到稳定吞吐
+10-14 11:09:35.399  9880  9880 I A00000/Mangekyo: surface destroyed
+10-14 11:09:35.632  1164  1164 I A01b01/HOME: AppName --> observerCallback appName: Mangekyo, LayoutId: AppName_text_com.mangekyo.benchmark_Mangekyo_mv7iu0xyyvjx090ydin, nameOpacity: 1
+10-14 11:09:50.268  9880  9880 I A00000/Mangekyo: SUITE_END	finished=1	total=5	review=1	failed=0	cancelled=true
+10-14 11:10:34.014  9880  9880 I A00000/Mangekyo: SUITE_PLAN	total=2	scope=cpu	folder=/data/storage/el2/base/haps/entry/files/suite-runs/1791947434014
+10-14 11:10:34.215  9880  9880 I A00000/Mangekyo: SUITE_RUN	index=1	total=2	job=cpu-compute
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: CPU_META	workload_version=cpu_mixed_v1_strict_sched_affinity	name=Unknown CPU	logical_count=4	physical_count=4	topology_source=LinuxAllowedCpuSet+Sysfs	affinity_capability=strict_sched_affinity
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: CPU_TOPOLOGY	core_index=0	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: CPU_TOPOLOGY	core_index=1	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: CPU_TOPOLOGY	core_index=2	group=0	logical_index=2	physical_core=2	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: CPU_TOPOLOGY	core_index=3	group=0	logical_index=3	physical_core=3	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: CPU_SCHEDULING	core_type=auto	residency_threshold=0.99	scope=single_thread_stages
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: --- Native CPU mixed benchmark ---
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: CPU: Unknown CPU
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: Topology: LinuxAllowedCpuSet+Sysfs, affinity: strict_sched_affinity
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: Workload: cpu_mixed_v1_strict_sched_affinity, 3 rounds, median aggregation (the requested measurement time is split across rounds).
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: Score contract: formal (formal = 15.0 s measurement, 0.2 s warm-up, 3 rounds).
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: Each score is million mixed integer/branch/FP32/FP64 work units per second.
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: The checksum is a dead-code-elimination sink, not a correctness oracle.
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: --- CPU all-logical-processor test ---
+10-14 11:10:34.226  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=multi	phase=warmup	core_index=-1	core_count=4	core_fraction=0.000000	overall_fraction=0.000000	elapsed=0.000000	round_index=-1	round_count=3
+10-14 11:10:39.442  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=0.333333	overall_fraction=0.066667	elapsed=5.000000	round_index=0	round_count=3
+10-14 11:10:44.443  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=0.666667	overall_fraction=0.133333	elapsed=10.000000	round_index=1	round_count=3
+10-14 11:10:49.444  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=1.000000	overall_fraction=0.200000	elapsed=15.000000	round_index=2	round_count=3
+10-14 11:10:49.444  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=multi	phase=complete	core_index=-1	core_count=4	core_fraction=1.000000	overall_fraction=0.200000	elapsed=15.000000	round_index=1	round_count=3
+10-14 11:10:49.444  9880 11782 I A00000/MangekyoEngine: All-core score (4 threads): 547.74 MWork/s
+10-14 11:10:49.444  9880 11782 I A00000/MangekyoEngine: CPU_RESULT	kind=multi	mode=multi	core_index=-1	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_count=4	thread_count=4	pinned_threads=4	affinity=strict	valid=1	score=547.736520	unit=MWork/s	seconds=5.000174	requested_seconds=15.000000	round_count=3	median_round=2	checksum=9fb6fa2fb27badb9	checksum_role=dce_sink
+10-14 11:10:49.444  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=warmup	core_index=0	core_count=4	core_fraction=0.000000	overall_fraction=0.200000	elapsed=0.000025	round_index=-1	round_count=3
+10-14 11:10:49.644  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.000002	overall_fraction=0.200000	elapsed=0.000023	round_index=0	round_count=3
+10-14 11:10:49.897  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.016849	overall_fraction=0.203370	elapsed=0.252736	round_index=0	round_count=3
+10-14 11:10:50.175  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.035379	overall_fraction=0.207076	elapsed=0.530678	round_index=0	round_count=3
+10-14 11:10:50.437  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.052879	overall_fraction=0.210576	elapsed=0.793189	round_index=0	round_count=3
+10-14 11:10:50.687  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.069551	overall_fraction=0.213910	elapsed=1.043260	round_index=0	round_count=3
+10-14 11:10:50.938  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.086281	overall_fraction=0.217256	elapsed=1.294217	round_index=0	round_count=3
+10-14 11:10:51.217  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.104856	overall_fraction=0.220971	elapsed=1.572834	round_index=0	round_count=3
+10-14 11:10:51.467  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.121554	overall_fraction=0.224311	elapsed=1.823305	round_index=0	round_count=3
+10-14 11:10:51.717  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.138225	overall_fraction=0.227645	elapsed=2.073374	round_index=0	round_count=3
+10-14 11:10:51.970  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.155067	overall_fraction=0.231013	elapsed=2.326012	round_index=0	round_count=3
+10-14 11:10:52.222  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.171890	overall_fraction=0.234378	elapsed=2.578344	round_index=0	round_count=3
+10-14 11:10:52.472  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.188561	overall_fraction=0.237712	elapsed=2.828413	round_index=0	round_count=3
+10-14 11:10:52.736  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.206117	overall_fraction=0.241223	elapsed=3.091749	round_index=0	round_count=3
+10-14 11:10:52.989  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.223033	overall_fraction=0.244607	elapsed=3.345501	round_index=0	round_count=3
+10-14 11:10:53.240  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.239705	overall_fraction=0.247941	elapsed=3.595569	round_index=0	round_count=3
+10-14 11:10:53.511  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.257797	overall_fraction=0.251559	elapsed=3.866955	round_index=0	round_count=3
+10-14 11:10:53.761  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.274468	overall_fraction=0.254894	elapsed=4.117026	round_index=0	round_count=3
+10-14 11:10:54.011  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.291140	overall_fraction=0.258228	elapsed=4.367104	round_index=0	round_count=3
+10-14 11:10:54.267  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.308194	overall_fraction=0.261639	elapsed=4.622914	round_index=0	round_count=3
+10-14 11:10:54.520  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.325097	overall_fraction=0.265019	elapsed=4.876449	round_index=0	round_count=3
+10-14 11:10:54.644  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.333337	overall_fraction=0.266667	elapsed=5.000050	round_index=1	round_count=3
+10-14 11:10:54.901  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.350447	overall_fraction=0.270089	elapsed=5.256698	round_index=1	round_count=3
+10-14 11:10:55.153  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.367255	overall_fraction=0.273451	elapsed=5.508818	round_index=1	round_count=3
+10-14 11:10:55.403  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.383926	overall_fraction=0.276785	elapsed=5.758894	round_index=1	round_count=3
+10-14 11:10:55.657  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.400864	overall_fraction=0.280173	elapsed=6.012955	round_index=1	round_count=3
+10-14 11:10:55.907  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.417536	overall_fraction=0.283507	elapsed=6.263042	round_index=1	round_count=3
+10-14 11:10:56.157  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.434207	overall_fraction=0.286841	elapsed=6.513108	round_index=1	round_count=3
+10-14 11:10:56.414  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.451361	overall_fraction=0.290272	elapsed=6.770408	round_index=1	round_count=3
+10-14 11:10:56.667  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.468188	overall_fraction=0.293638	elapsed=7.022814	round_index=1	round_count=3
+10-14 11:10:56.917  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.484882	overall_fraction=0.296976	elapsed=7.273224	round_index=1	round_count=3
+10-14 11:10:57.168  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.501574	overall_fraction=0.300315	elapsed=7.523610	round_index=1	round_count=3
+10-14 11:10:57.418  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.518245	overall_fraction=0.303649	elapsed=7.773679	round_index=1	round_count=3
+10-14 11:10:57.668  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.534916	overall_fraction=0.306983	elapsed=8.023747	round_index=1	round_count=3
+10-14 11:10:57.920  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.551749	overall_fraction=0.310350	elapsed=8.276238	round_index=1	round_count=3
+10-14 11:10:58.175  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.568758	overall_fraction=0.313752	elapsed=8.531373	round_index=1	round_count=3
+10-14 11:10:58.432  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.585890	overall_fraction=0.317178	elapsed=8.788353	round_index=1	round_count=3
+10-14 11:10:58.697  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.603523	overall_fraction=0.320705	elapsed=9.052852	round_index=1	round_count=3
+10-14 11:10:58.947  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.620195	overall_fraction=0.324039	elapsed=9.302923	round_index=1	round_count=3
+10-14 11:10:59.197  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.636866	overall_fraction=0.327373	elapsed=9.552992	round_index=1	round_count=3
+10-14 11:10:59.454  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.653973	overall_fraction=0.330795	elapsed=9.809597	round_index=1	round_count=3
+10-14 11:10:59.644  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.666668	overall_fraction=0.333334	elapsed=10.000027	round_index=2	round_count=3
+10-14 11:10:59.894  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.683340	overall_fraction=0.336668	elapsed=10.250093	round_index=2	round_count=3
+10-14 11:11:00.145  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.700051	overall_fraction=0.340010	elapsed=10.500758	round_index=2	round_count=3
+10-14 11:11:00.395  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.716721	overall_fraction=0.343344	elapsed=10.750822	round_index=2	round_count=3
+10-14 11:11:00.645  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.733433	overall_fraction=0.346687	elapsed=11.001499	round_index=2	round_count=3
+10-14 11:11:00.924  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.752009	overall_fraction=0.350402	elapsed=11.280139	round_index=2	round_count=3
+10-14 11:11:01.180  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.769057	overall_fraction=0.353811	elapsed=11.535849	round_index=2	round_count=3
+10-14 11:11:01.430  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.785728	overall_fraction=0.357146	elapsed=11.785921	round_index=2	round_count=3
+10-14 11:11:01.688  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.802963	overall_fraction=0.360593	elapsed=12.044450	round_index=2	round_count=3
+10-14 11:11:01.938  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.819635	overall_fraction=0.363927	elapsed=12.294522	round_index=2	round_count=3
+10-14 11:11:02.189  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.836319	overall_fraction=0.367264	elapsed=12.544780	round_index=2	round_count=3

@@ -1,0 +1,72 @@
+diff --git a/ios-gui/Info.plist b/ios-gui/Info.plist
+index ee3d134..73ed986 100644
+--- a/ios-gui/Info.plist
++++ b/ios-gui/Info.plist
+@@ -4,6 +4,12 @@
+ <dict>
+ 	<key>CFBundleDevelopmentRegion</key>
+ 	<string>$(DEVELOPMENT_LANGUAGE)</string>
++	<key>CFBundleLocalizations</key>
++	<array>
++		<string>en</string>
++		<string>zh-Hans</string>
++		<string>ja</string>
++	</array>
+ 	<key>CFBundleDisplayName</key>
+ 	<string>Mangekyo</string>
+ 	<key>CFBundleExecutable</key>
+diff --git a/ios-gui/Mangekyo/Engine/BenchEngine.swift b/ios-gui/Mangekyo/Engine/BenchEngine.swift
+index a94c337..e826e64 100644
+--- a/ios-gui/Mangekyo/Engine/BenchEngine.swift
++++ b/ios-gui/Mangekyo/Engine/BenchEngine.swift
+@@ -132,6 +132,8 @@ final class BenchEngine: ObservableObject {
+     private var pollTask: Task<Void, Never>?
+ 
+     init() {
++        Localization.current = AppLanguage(rawValue: UserDefaults.standard.string(forKey: "appLanguage") ?? "auto") ?? .auto_
++        print("IOS_LANGUAGE setting=\(Localization.current.rawValue) preferred=\(Locale.preferredLanguages.joined(separator: ",")) locale=\(Locale.current.identifier) effective=\(Localization.effectiveLang.rawValue)")
+         if ProcessInfo.processInfo.arguments.contains("--ios-allow-translated-api") {
+             allowTranslatedApis = true
+         }
+diff --git a/ios-gui/Mangekyo/Models/Localization.swift b/ios-gui/Mangekyo/Models/Localization.swift
+index 8189882..ce6b88f 100644
+--- a/ios-gui/Mangekyo/Models/Localization.swift
++++ b/ios-gui/Mangekyo/Models/Localization.swift
+@@ -13,7 +13,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
+ 
+     var displayName: String {
+         switch self {
+-        case .auto_: return "Auto"
++        case .auto_: return Localization.tr("Auto", "跟随系统", "システムに合わせる")
+         case .en:    return "English"
+         case .zh:    return "简体中文"
+         case .ja:    return "日本語"
+@@ -27,7 +27,9 @@ final class Localization {
+     /// Resolve the effective language (handles "auto").
+     static var effectiveLang: AppLanguage {
+         if current != .auto_ { return current }
+-        let lang = Locale.current.language.languageCode?.identifier ?? "en"
++        // Language preference is independent of the device's region. Match
++        // the macOS app instead of inferring UI language from Locale.current.
++        let lang = Locale.preferredLanguages.first ?? Locale.current.identifier
+         if lang.hasPrefix("zh") { return .zh }
+         if lang.hasPrefix("ja") { return .ja }
+         return .en
+diff --git a/ios-gui/MangekyoUITests/CompleteSuiteUITests.swift b/ios-gui/MangekyoUITests/CompleteSuiteUITests.swift
+index d8d0999..5ca2575 100644
+--- a/ios-gui/MangekyoUITests/CompleteSuiteUITests.swift
++++ b/ios-gui/MangekyoUITests/CompleteSuiteUITests.swift
+@@ -14,7 +14,13 @@ final class CompleteSuiteUITests: XCTestCase {
+         let ready = NSPredicate(format: "enabled == true")
+         let readyExpectation = XCTNSPredicateExpectation(predicate: ready, object: button)
+         XCTAssertEqual(XCTWaiter.wait(for: [readyExpectation], timeout: 30), .completed)
++        print("ONE_BUTTON_READY label=\(button.label)")
++        let before = XCTAttachment(screenshot: app.screenshot())
++        before.name = "Before tapping the complete-suite button"
++        before.lifetime = .keepAlways
++        add(before)
+         button.tap()
++        print("ONE_BUTTON_TAPPED")
+ 
+         // Leave the benchmark foreground and avoid repeatedly querying
+         // accessibility during measured CPU windows. The host also archives

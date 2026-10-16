@@ -1,0 +1,75 @@
+{
+  "old_rows_unchanged": 113,
+  "history_rows": 119,
+  "new_rows": 6,
+  "curated_rows": 33,
+  "runs": [
+    {
+      "prefix": "foreground-first",
+      "result_ids": [
+        "20261014-163612-715-cpu-single-performance",
+        "20261014-163612-726-cpu-single-efficiency",
+        "20261014-163612-735-cpu-multi"
+      ],
+      "performance": 146.981,
+      "efficiency": 89.658,
+      "all_core": 661.517,
+      "efficiency_lower_bounds": [
+        0.999989979,
+        0.99998999,
+        0.999989987
+      ],
+      "efficiency_ghz": [
+        2.01565907,
+        2.01576963,
+        2.01574469
+      ],
+      "efficiency_busy_fractions": [
+        0.997898374,
+        0.9989599659999999,
+        0.998669716
+      ],
+      "helper_performance_lower_bounds": [
+        0.999606193,
+        0.999433069
+      ],
+      "weighted_estimate": 652.594,
+      "estimate_difference_percent": 1.3488693412263026
+    },
+    {
+      "prefix": "foreground-confirm",
+      "result_ids": [
+        "20261014-164342-791-cpu-single-performance",
+        "20261014-164342-803-cpu-single-efficiency",
+        "20261014-164342-812-cpu-multi"
+      ],
+      "performance": 147.12,
+      "efficiency": 89.551,
+      "all_core": 661.962,
+      "efficiency_lower_bounds": [
+        0.999989972,
+        0.999989981,
+        0.999989984
+      ],
+      "efficiency_ghz": [
+        2.01562139,
+        2.01571467,
+        2.01568222
+      ],
+      "efficiency_busy_fractions": [
+        0.9971858920000001,
+        0.998067284,
+        0.998389916
+      ],
+      "helper_performance_lower_bounds": [
+        0.998518235,
+        0.997205241
+      ],
+      "weighted_estimate": 652.444,
+      "estimate_difference_percent": 1.4378468854707716
+    }
+  ],
+  "efficiency_repeat_difference_percent": 0.11934238997077709,
+  "before_sha256": "d5c39f3e074604c419f07622fc3031f8d518df1aad7e89fff1ffb1a22b28f18c",
+  "after_sha256": "b11467296b2f74a3a336185f2442e87d9dcdb5028f66e4f376c01d86e7f2104f"
+}

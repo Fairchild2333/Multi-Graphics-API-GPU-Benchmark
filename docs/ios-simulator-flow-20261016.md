@@ -33,3 +33,6 @@ CPU 遍历宿主机 14 个逻辑处理器，并非 iPad 的核心拓扑。
 `final-documents/`、`ui-full.xcresult` 和 `attachments/`。
 
 新 iPad8,1 真机复核仍以 [真机设计复核记录](ipad81-design-review-20261016.md) 为准。
+
+原始 JSON、曲线、独立文字日志和导出截图已按 [归档策略](test-result-archives.md)
+纳入 Git；完整 `.xcresult` bundle 仍在本地，可读摘要和附件另行保存。

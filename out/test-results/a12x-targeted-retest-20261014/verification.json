@@ -1,0 +1,66 @@
+{
+  "complete": true,
+  "jobs": 14,
+  "selectedNewRecords": 16,
+  "newRecords": 29,
+  "otherAttemptRecords": 13,
+  "historyBefore": 43,
+  "historyAfter": 72,
+  "oldRecordsUnchanged": true,
+  "cpu": {
+    "performance": 111.527,
+    "performanceMinimumResidency": 0.99999,
+    "performanceGHz": [
+      2.48442518,
+      2.48398967,
+      2.48505124
+    ],
+    "efficiency": 60.013,
+    "efficiencyMinimumResidency": 0.999989814,
+    "efficiencyGHz": [
+      1.57199206,
+      1.57199067,
+      1.5719886
+    ],
+    "efficiencyPolicy": "foreground_utility_without_helpers",
+    "all": 656.34,
+    "allCorePlacementVerified": true,
+    "allWorkerMinimumResidency": 0.997636904,
+    "allWorkerMinimumBusyFraction": 0.968382393
+  },
+  "memory": {
+    "vulkan": {
+      "score": 57.903,
+      "timing": "wall_clock",
+      "scoreKind": "read_memory_plateau",
+      "checks": 34,
+      "curvePoints": 77
+    },
+    "cpu": {
+      "score": 53.737,
+      "minimumResidency": {
+        "single": 0.998992872,
+        "single_1": 0.997140958
+      },
+      "efficiencyPolicy": "background",
+      "curvePoints": 267,
+      "pageFaultMeasured": true,
+      "storageMeasured": true,
+      "levelReadGBps": {
+        "single_L1_read": 79.2,
+        "single_L2_read": 52.6,
+        "single_memory_read": 34.8,
+        "single_1_L1_read": 7.5,
+        "single_1_L2_read": 5.2,
+        "single_1_memory_read": 5.1,
+        "all_memory_read": 53.7
+      }
+    }
+  },
+  "reviewJobs": [
+    "stream-16777216"
+  ],
+  "independentGpuCacheAttribution": "out_of_scope_per_user",
+  "beforeSha256": "d51ff3173cef53022a902ecf9d76a7a0e9828ee89c285f17077edaae67ec1633",
+  "afterSha256": "55497d1ffc1b66be576d01c426d482a93534875cfec9bd46e26598473edf7603"
+}

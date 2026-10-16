@@ -1,0 +1,59 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "process",
+      "launch",
+      "--device",
+      "00008027-001969920A87002E",
+      "--terminate-existing",
+      "--json-output",
+      "out/test-results/ipad8-1-full-suite-20261016/idle-launch.json",
+      "com.fairchild.Mangekyo",
+      "--timeout",
+      "20"
+    ],
+    "commandType" : "devicectl.device.process.launch",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "9A44542D-75A2-58C6-B79C-18BEAED61843",
+    "launchOptions" : {
+      "activatedWhenStarted" : true,
+      "arguments" : [
+
+      ],
+      "environmentVariables" : {
+        "TERM" : "dumb"
+      },
+      "platformSpecificOptions" : {
+
+      },
+      "startStopped" : false,
+      "terminateExistingInstances" : true,
+      "user" : {
+        "active" : true
+      }
+    },
+    "process" : {
+      "auditToken" : [
+        4294967295,
+        501,
+        501,
+        501,
+        501,
+        547,
+        0,
+        1512
+      ],
+      "executable" : "file:///private/var/containers/Bundle/Application/E47FFC2E-B83F-4998-A11E-FF3945254BBB/Mangekyo.app/Mangekyo",
+      "processIdentifier" : 547
+    }
+  }
+}

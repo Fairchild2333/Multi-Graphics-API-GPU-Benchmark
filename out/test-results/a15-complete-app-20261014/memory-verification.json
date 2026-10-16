@@ -1,0 +1,15 @@
+{
+  "old_rows_unchanged": 119,
+  "history_rows": 120,
+  "result_id": "20261014-171607-442-cpu-membw",
+  "all_core_read": 35.178,
+  "efficiency_L1_read": 46.4,
+  "efficiency_L2_read": 31.0,
+  "efficiency_memory_read": 21.9,
+  "verified_classified_points": 186,
+  "minimum_P_residency": 0.990696903,
+  "minimum_E_residency": 0.998922203,
+  "E_min_GHz": 2.014781157,
+  "E_max_GHz": 2.01589933,
+  "full_UI_acceptance": "pending actual button tap; XCTest automation timed out"
+}

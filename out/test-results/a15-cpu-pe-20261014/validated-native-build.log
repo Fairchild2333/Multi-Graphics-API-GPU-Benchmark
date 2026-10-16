@@ -1,0 +1,11 @@
+[100%] Built target cpu_residency_test
+[100%] Built target result_quality_test
+[100%] Built target results_compat_test
+[  5%] Built target glad_gl43
+[ 51%] Built target glfw
+[ 54%] Building CXX object CMakeFiles/gpu_engine.dir/src/cpu_cli.cpp.o
+[ 56%] Linking CXX static library libgpu_engine.a
+[ 94%] Built target gpu_engine
+[ 97%] Linking CXX executable cpu_cancel_test
+[100%] Built target cpu_cancel_test
+[100%] Built target complete_suite_test

@@ -1,0 +1,58 @@
+{
+  "device": "iPhone13Pro/A15",
+  "history_rows": 128,
+  "old_rows_unchanged": 125,
+  "new_results": [
+    {
+      "id": "20261014-185659-720-metal-cache-controls",
+      "workload": "gpu_cache_controls",
+      "version": "metal_first_pass_eviction_doses_v1_ios_preview",
+      "duration_sec": 55.2
+    },
+    {
+      "id": "20261014-190255-965-metal-cache-controls",
+      "workload": "gpu_cache_controls",
+      "version": "metal_first_pass_eviction_doses_alu_v2_ios_preview",
+      "duration_sec": 61.2
+    },
+    {
+      "id": "20261014-190645-149-metal-cache",
+      "workload": "gpu_cache",
+      "version": "metal_dependent_cache_v2_preview_ios_preview",
+      "duration_sec": 37.2
+    }
+  ],
+  "new_curve_points": 608,
+  "control_pairs": 1694,
+  "checksums": "all_passed",
+  "thermal_state": "0->0 on both controls and final default run",
+  "final_native_suite": {
+    "finishedAt": "2026-10-14T08:06:45Z",
+    "id": "complete-suite-0CE19A79-BC40-4663-83FF-E8DCA7D70085",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T08:06:45Z",
+        "id": "gpu_cache-v2",
+        "request": "gpu_cache?api=metal",
+        "resultIDs": [
+          "20261014-190645-149-metal-cache"
+        ],
+        "startedAt": "2026-10-14T08:06:07Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Metal · GPU Cache-state Diagnostic"
+      }
+    ],
+    "startedAt": "2026-10-14T08:06:07Z",
+    "status": "passed"
+  },
+  "results_sha256": "10beabc823de964d6d6e2d2d807fa7c90a6db576718c1b686c628319bce99eb3",
+  "independent_gpu_l2_l3_slc_attribution": "unverified",
+  "hardware_activity_proof": "active-counter-summary.json: timestamp intersection with labeled real GPU work",
+  "phone_benchmark_ended": true,
+  "full_physical_oneclick_acceptance": "not_run",
+  "other_devices": "not_tested"
+}

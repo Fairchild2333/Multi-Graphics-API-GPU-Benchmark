@@ -1,0 +1,15 @@
+START 1/3 cpu_compute
+STATE cpu_compute ('running', 'running')
+STATE cpu_compute ('failed', 'failed')
+END cpu_compute failed ['20261014-213037-335-cpu-single-performance', '20261014-213037-344-cpu-multi'] thermal=0->0 Expected 3 matching saved results; found 2. See log.
+REST 20s
+START 2/3 vulkan/memory_sweep
+STATE vulkan/memory_sweep ('running', 'running')
+STATE vulkan/memory_sweep ('passed', 'passed')
+END vulkan/memory_sweep passed ['20261014-213154-372-membw'] thermal=0->0 
+REST 20s
+START 3/3 cpu_memory
+STATE cpu_memory ('running', 'failed')
+STATE cpu_memory ('failed', 'failed')
+END cpu_memory failed [] thermal=0->0 Expected 1 matching saved results; found 0. See log.
+DONE 3 jobs; archived /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a12x-targeted-retest-20261014/recovery-final

@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "2026-10-14T04:47:53Z",
+  "id" : "complete-suite-174A86E2-1D7A-47EA-9B6B-65651A86F1A2",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-14T04:47:53Z",
+      "id" : "vulkan\/gpu_burn-256",
+      "request" : "gpu_burn?steps=256&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261014-154752-681"
+      ],
+      "startedAt" : "2026-10-14T04:47:37Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan · GPU Burn · 256"
+    }
+  ],
+  "startedAt" : "2026-10-14T04:47:37Z",
+  "status" : "passed"
+}

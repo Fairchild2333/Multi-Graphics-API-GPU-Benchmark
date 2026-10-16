@@ -1,0 +1,11 @@
+ERROR: The application failed to launch. (com.apple.dt.CoreDeviceError error 10002 (0x2712))
+       BundleIdentifier = com.fairchild.Mangekyo
+       ----------------------------------------
+           The request to open "com.fairchild.Mangekyo" failed. (FBSOpenApplicationServiceErrorDomain error 1 (0x01))
+           NSLocalizedFailureReason = The request was denied by service delegate (SBMainWorkspace) for reason: Security ("Unable to launch com.fairchild.Mangekyo because it has an invalid code signature, inadequate entitlements or its profile has not been explicitly trusted by the user").
+           FBSOpenApplicationRequestID = 0xe52f
+           BSErrorCodeDescription = RequestDenied
+       ----------------------------------------
+               The operation couldn’t be completed. Unable to launch com.fairchild.Mangekyo because it has an invalid code signature, inadequate entitlements or its profile has not been explicitly trusted by the user. (FBSOpenApplicationErrorDomain error 3 (0x03))
+               NSLocalizedFailureReason = Unable to launch com.fairchild.Mangekyo because it has an invalid code signature, inadequate entitlements or its profile has not been explicitly trusted by the user.
+               BSErrorCodeDescription = Security

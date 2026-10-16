@@ -1,0 +1,16 @@
+{
+  "status": "complete_measurements",
+  "targetedJobs": 14,
+  "passed": 13,
+  "review": [
+    "Metal 16M stable window not detected"
+  ],
+  "selectedRecords": 16,
+  "historyRows": 72,
+  "oldRowsUnchanged": 43,
+  "appStopped": true,
+  "cpuComputePolicy": "foreground_utility_without_helpers; verified 4P+4E all-core workers",
+  "cpuMemoryEfficiencyPolicy": "background; verified P/E curves",
+  "independentGpuCacheAttribution": "out_of_scope_per_user",
+  "physicalFull31JobButtonAcceptance": "not_executed_this_run"
+}

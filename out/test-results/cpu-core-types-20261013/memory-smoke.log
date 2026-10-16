@@ -1,0 +1,381 @@
+
+========== CPU Memory Bandwidth Sweep (cpu_membw_v1) ==========
+CPU:       Apple M4 Pro (14 cores / 14 threads)
+Vectors:   NEON, 16-byte loads and stores
+Class 0:   Performance, 10 cores, reference logical processor 4294967295
+           L1d 128 KiB per core | L2 16 MiB shared by 5 cores | L4 not present
+Class 1:   Efficiency, 4 cores, reference logical processor 4294967295
+           L1d 64 KiB per core | L2 4 MiB shared by 4 cores | L4 not present
+Memory:    48.0 GiB installed, 17.4 GiB free
+Sweep:     4 KiB - 1 MiB on one thread of each core class; 4 KiB - 256 KiB per thread on 14 threads
+Timing:    wall clock, 2 warm-up + 7 measured samples of 50 ms per point, median reported
+CPUMEM_META	name=Apple M4 Pro	vector=NEON	vector_bytes=16	physical_count=14	logical_count=14	core_type=both	all_threads=14	reference_logical_index=4294967295	class_count=2	cache_source=sysctl
+CPUMEM_CLASS	rank=0	mode=single	name=Performance	cores=10	reference_logical_index=4294967295	cache_source=sysctl
+CPUMEM_CACHE	class=0	level=1	size_bytes=131072	shared_cores=1	shared_threads=1	line_bytes=128
+CPUMEM_CACHE	class=0	level=2	size_bytes=16777216	shared_cores=5	shared_threads=5	line_bytes=128
+CPUMEM_CLASS	rank=1	mode=single_1	name=Efficiency	cores=4	reference_logical_index=4294967295	cache_source=sysctl
+CPUMEM_CACHE	class=1	level=1	size_bytes=65536	shared_cores=1	shared_threads=1	line_bytes=128
+CPUMEM_CACHE	class=1	level=2	size_bytes=4194304	shared_cores=4	shared_threads=4	line_bytes=128
+
+[single] one thread on logical processor 4294967295 (class 0, Performance)
+    Data set       Read      Write       Copy   Write NT    Copy NT  Zero fill   GB/s (median)
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=4096	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998003	effective_ghz=4.368005	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=4096	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998084	effective_ghz=4.386954	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=4096	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998026	effective_ghz=4.278476	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=4096	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998069	effective_ghz=4.333223	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=4096	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998134	effective_ghz=4.275398	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=4096	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997999	effective_ghz=4.382842	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=4096	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997919	effective_ghz=4.285924	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=4096	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998041	effective_ghz=4.455087	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=4096	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998060	effective_ghz=4.450379	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=4096	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998121	effective_ghz=4.446902	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=4096	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997870	effective_ghz=4.413049	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=4096	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998054	effective_ghz=4.348535	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=4096	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998050	effective_ghz=4.455367	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=4096	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998048	effective_ghz=4.440422	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=4096	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997988	effective_ghz=4.230076	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=4096	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998098	effective_ghz=4.271542	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=4096	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998049	effective_ghz=4.235376	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=4096	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998062	effective_ghz=4.259156	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=4096	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998030	effective_ghz=4.262900	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=4096	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997975	effective_ghz=4.269719	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=4096	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997902	effective_ghz=4.243969	verified=1
+       4 KiB      138.9      138.5      248.8          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=4096	threads=1	median_gbps=138.873	best_gbps=140.516	core_type=performance	residency_verified=1	requested_lower_bound=0.997919	residency_retries=0
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=4096	threads=1	median_gbps=138.458	best_gbps=140.792	core_type=performance	residency_verified=1	requested_lower_bound=0.997870	residency_retries=0
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=4096	threads=1	median_gbps=248.829	best_gbps=249.669	core_type=performance	residency_verified=1	requested_lower_bound=0.997902	residency_retries=0
+CPUMEM_PROGRESS	mode=single	fraction=0.0238
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=8192	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998042	effective_ghz=4.305737	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=8192	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998103	effective_ghz=4.330974	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=8192	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998109	effective_ghz=4.305399	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=8192	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998137	effective_ghz=4.250668	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=8192	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997906	effective_ghz=4.288494	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=8192	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998130	effective_ghz=4.285221	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=8192	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998073	effective_ghz=4.249661	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=8192	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997997	effective_ghz=4.482049	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=8192	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998106	effective_ghz=4.434776	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=8192	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998098	effective_ghz=4.480773	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=8192	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998053	effective_ghz=4.473173	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=8192	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998108	effective_ghz=4.442214	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=8192	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998116	effective_ghz=4.485540	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=8192	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998128	effective_ghz=4.486189	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=8192	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998069	effective_ghz=4.174108	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=8192	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998119	effective_ghz=4.257245	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=8192	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998119	effective_ghz=4.246616	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=8192	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998120	effective_ghz=4.280285	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=8192	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998005	effective_ghz=4.220564	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=8192	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998086	effective_ghz=4.205703	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=8192	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998044	effective_ghz=4.098402	verified=1
+       8 KiB      137.3      131.7      247.7          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=8192	threads=1	median_gbps=137.332	best_gbps=138.723	core_type=performance	residency_verified=1	requested_lower_bound=0.997906	residency_retries=0
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=8192	threads=1	median_gbps=131.724	best_gbps=135.719	core_type=performance	residency_verified=1	requested_lower_bound=0.997997	residency_retries=0
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=8192	threads=1	median_gbps=247.731	best_gbps=249.982	core_type=performance	residency_verified=1	requested_lower_bound=0.998005	residency_retries=0
+CPUMEM_PROGRESS	mode=single	fraction=0.0476
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=16384	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998104	effective_ghz=4.286200	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=16384	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998116	effective_ghz=4.288989	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=16384	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998129	effective_ghz=4.304802	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=16384	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998072	effective_ghz=4.292982	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=16384	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998019	effective_ghz=4.240706	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=16384	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998046	effective_ghz=4.199978	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=16384	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998116	effective_ghz=4.269576	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=16384	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998054	effective_ghz=4.412971	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=16384	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998022	effective_ghz=4.392923	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=16384	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998120	effective_ghz=4.391370	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=16384	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998124	effective_ghz=4.428749	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=16384	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997995	effective_ghz=4.483265	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=16384	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998057	effective_ghz=3.961483	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=16384	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997911	effective_ghz=4.455719	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=16384	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998111	effective_ghz=4.224490	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=16384	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998001	effective_ghz=4.251358	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=16384	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998108	effective_ghz=4.246684	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=16384	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998116	effective_ghz=4.279632	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=16384	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998123	effective_ghz=4.350121	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=16384	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998114	effective_ghz=4.306643	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=16384	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997868	effective_ghz=4.360030	verified=1
+      16 KiB      137.3      104.4      227.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=16384	threads=1	median_gbps=137.284	best_gbps=137.891	core_type=performance	residency_verified=1	requested_lower_bound=0.998019	residency_retries=0
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=16384	threads=1	median_gbps=104.362	best_gbps=115.002	core_type=performance	residency_verified=1	requested_lower_bound=0.997911	residency_retries=0
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=16384	threads=1	median_gbps=227.530	best_gbps=239.175	core_type=performance	residency_verified=1	requested_lower_bound=0.997868	residency_retries=0
+CPUMEM_PROGRESS	mode=single	fraction=0.0714
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=24576	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998090	effective_ghz=4.310670	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=24576	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998114	effective_ghz=4.208559	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=24576	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998065	effective_ghz=4.328180	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=24576	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997853	effective_ghz=4.297076	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=24576	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998033	effective_ghz=4.291428	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=24576	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998133	effective_ghz=4.207321	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=24576	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998047	effective_ghz=4.244761	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=24576	sample=1	core_type=performance	p_fraction=0.999794	requested_lower_bound=0.997831	effective_ghz=4.458734	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=24576	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998053	effective_ghz=4.352545	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=24576	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998037	effective_ghz=4.383564	verified=1
+CPUMEM_RETRY	mode=single	kernel=write	block_bytes=24576	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=50996166.000000	worker_cpu_ns=50988750.000000
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=24576	sample=4	core_type=performance	p_fraction=0.999663	requested_lower_bound=0.997726	effective_ghz=4.345693	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=24576	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998074	effective_ghz=4.357606	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=24576	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998111	effective_ghz=4.443860	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=24576	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997970	effective_ghz=4.433605	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=24576	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998132	effective_ghz=4.278439	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=24576	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998040	effective_ghz=4.326266	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=24576	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998124	effective_ghz=4.287065	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=24576	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998081	effective_ghz=4.336209	verified=1
+CPUMEM_RETRY	mode=single	kernel=copy	block_bytes=24576	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=54995541.000000	worker_cpu_ns=54986917.000000
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=24576	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998075	effective_ghz=4.285154	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=24576	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998101	effective_ghz=4.334735	verified=1
+CPUMEM_RETRY	mode=single	kernel=copy	block_bytes=24576	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=55014291.000000	worker_cpu_ns=55005375.000000
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=24576	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998014	effective_ghz=4.320966	verified=1
+      24 KiB      137.3      104.9      204.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=24576	threads=1	median_gbps=137.324	best_gbps=138.522	core_type=performance	residency_verified=1	requested_lower_bound=0.997853	residency_retries=0
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=24576	threads=1	median_gbps=104.923	best_gbps=117.174	core_type=performance	residency_verified=1	requested_lower_bound=0.997726	residency_retries=1
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=24576	threads=1	median_gbps=204.481	best_gbps=218.501	core_type=performance	residency_verified=1	requested_lower_bound=0.998014	residency_retries=2
+CPUMEM_PROGRESS	mode=single	fraction=0.0952
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=32768	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997944	effective_ghz=4.303143	verified=1
+CPUMEM_RETRY	mode=single	kernel=read	block_bytes=32768	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=50436416.000000	worker_cpu_ns=50430792.000000
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=32768	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998105	effective_ghz=4.389958	verified=1
+CPUMEM_RETRY	mode=single	kernel=read	block_bytes=32768	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=51120166.000000	worker_cpu_ns=51114292.000000
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=32768	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998127	effective_ghz=4.240692	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=32768	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998050	effective_ghz=4.274697	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=32768	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998053	effective_ghz=4.314251	verified=1
+CPUMEM_RETRY	mode=single	kernel=read	block_bytes=32768	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=55015166.000000	worker_cpu_ns=55004000.000000
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=32768	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998099	effective_ghz=4.331210	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=32768	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998072	effective_ghz=4.262026	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998134	effective_ghz=4.482398	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998063	effective_ghz=4.367300	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998086	effective_ghz=4.485114	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=4	core_type=performance	p_fraction=0.999593	requested_lower_bound=0.997562	effective_ghz=4.464264	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998035	effective_ghz=4.421740	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998103	effective_ghz=4.310315	verified=1
+CPUMEM_RETRY	mode=single	kernel=write	block_bytes=32768	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=51015458.000000	worker_cpu_ns=51009500.000000
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998106	effective_ghz=4.449658	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998106	effective_ghz=4.472337	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998127	effective_ghz=4.486830	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998086	effective_ghz=4.485707	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998102	effective_ghz=4.483088	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998100	effective_ghz=4.484295	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998043	effective_ghz=4.487832	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997758	effective_ghz=4.475351	verified=1
+CPUMEM_RETRY	mode=single	kernel=write	block_bytes=32768	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=55023666.000000	worker_cpu_ns=55011666.000000
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997961	effective_ghz=4.477965	verified=1
+CPUMEM_RETRY	mode=single	kernel=write	block_bytes=32768	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=51029291.000000	worker_cpu_ns=51021083.000000
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998128	effective_ghz=4.457658	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997970	effective_ghz=4.400126	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998040	effective_ghz=4.431808	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998036	effective_ghz=4.482862	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=6	core_type=performance	p_fraction=0.999768	requested_lower_bound=0.997793	effective_ghz=4.463309	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=32768	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998014	effective_ghz=4.457191	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998112	effective_ghz=4.378704	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998028	effective_ghz=4.399065	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998136	effective_ghz=4.463002	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998057	effective_ghz=4.215912	verified=1
+CPUMEM_RETRY	mode=single	kernel=copy	block_bytes=32768	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=54320541.000000	worker_cpu_ns=54311708.000000
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998009	effective_ghz=4.416799	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998093	effective_ghz=4.446662	verified=1
+CPUMEM_RETRY	mode=single	kernel=copy	block_bytes=32768	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=55013791.000000	worker_cpu_ns=55003291.000000
+CPUMEM_RETRY	mode=single	kernel=copy	block_bytes=32768	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=55016916.000000	worker_cpu_ns=55007750.000000
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998015	effective_ghz=4.352657	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997944	effective_ghz=4.350448	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998043	effective_ghz=4.447070	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998064	effective_ghz=3.961484	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=4	core_type=performance	p_fraction=0.999137	requested_lower_bound=0.996974	effective_ghz=4.130539	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997973	effective_ghz=4.338602	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997939	effective_ghz=4.343649	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997995	effective_ghz=4.308451	verified=1
+CPUMEM_RETRY	mode=single	kernel=copy	block_bytes=32768	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=53258208.000000	worker_cpu_ns=53250417.000000
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998056	effective_ghz=4.415298	verified=1
+CPUMEM_RETRY	mode=single	kernel=copy	block_bytes=32768	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=52300958.000000	worker_cpu_ns=52291750.000000
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998056	effective_ghz=4.296459	verified=1
+CPUMEM_RETRY	mode=single	kernel=copy	block_bytes=32768	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=55007708.000000	worker_cpu_ns=54995417.000000
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998126	effective_ghz=4.321218	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998106	effective_ghz=4.309757	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998058	effective_ghz=4.472738	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998101	effective_ghz=4.384673	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=32768	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998024	effective_ghz=4.239501	verified=1
+      32 KiB      137.5       98.5      176.6          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=32768	threads=1	median_gbps=137.470	best_gbps=140.413	core_type=performance	residency_verified=1	requested_lower_bound=0.997944	residency_retries=3
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=32768	threads=1	median_gbps=98.489	best_gbps=129.298	core_type=performance	residency_verified=1	requested_lower_bound=0.997562	residency_retries=3
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=32768	threads=1	median_gbps=176.626	best_gbps=220.506	core_type=performance	residency_verified=1	requested_lower_bound=0.996974	residency_retries=6
+CPUMEM_PROGRESS	mode=single	fraction=0.1190
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=49152	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998094	effective_ghz=4.342700	verified=1
+CPUMEM_RETRY	mode=single	kernel=read	block_bytes=49152	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=51447166.000000	worker_cpu_ns=51437625.000000
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=49152	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998113	effective_ghz=4.337812	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=49152	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998124	effective_ghz=4.297886	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=49152	sample=4	core_type=performance	p_fraction=0.999758	requested_lower_bound=0.997770	effective_ghz=4.283282	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=49152	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997986	effective_ghz=4.207776	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=49152	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998107	effective_ghz=4.281676	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=49152	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998061	effective_ghz=4.175802	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998064	effective_ghz=3.976196	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998048	effective_ghz=4.247413	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998096	effective_ghz=4.338113	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998060	effective_ghz=4.434760	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998098	effective_ghz=4.441971	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998144	effective_ghz=4.481713	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998125	effective_ghz=4.485773	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998104	effective_ghz=4.440611	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997974	effective_ghz=4.426183	verified=1
+CPUMEM_RETRY	mode=single	kernel=write	block_bytes=49152	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=55015708.000000	worker_cpu_ns=55008417.000000
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997990	effective_ghz=4.418805	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998087	effective_ghz=4.485915	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=5	core_type=performance	p_fraction=0.999583	requested_lower_bound=0.997655	effective_ghz=4.458296	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998110	effective_ghz=4.468310	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998001	effective_ghz=4.466571	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998045	effective_ghz=4.399432	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998092	effective_ghz=4.298786	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998127	effective_ghz=4.412581	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997950	effective_ghz=4.372066	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998086	effective_ghz=4.385231	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998103	effective_ghz=4.398487	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=49152	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997929	effective_ghz=4.386391	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998127	effective_ghz=4.484250	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998074	effective_ghz=4.478594	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998114	effective_ghz=4.440109	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998038	effective_ghz=4.462419	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998069	effective_ghz=4.336431	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998102	effective_ghz=4.453388	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998069	effective_ghz=4.421077	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998005	effective_ghz=4.435926	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998079	effective_ghz=4.423011	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998108	effective_ghz=4.406918	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998109	effective_ghz=4.485498	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998002	effective_ghz=4.476315	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998114	effective_ghz=4.390336	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998052	effective_ghz=4.395956	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998117	effective_ghz=4.427362	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998044	effective_ghz=4.401876	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998134	effective_ghz=4.421486	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998103	effective_ghz=4.464404	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997965	effective_ghz=4.355574	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998088	effective_ghz=4.386839	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=49152	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998054	effective_ghz=4.426617	verified=1
+      48 KiB      137.1      101.5      177.9          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=49152	threads=1	median_gbps=137.073	best_gbps=138.773	core_type=performance	residency_verified=1	requested_lower_bound=0.997770	residency_retries=1
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=49152	threads=1	median_gbps=101.520	best_gbps=127.333	core_type=performance	residency_verified=1	requested_lower_bound=0.997655	residency_retries=1
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=49152	threads=1	median_gbps=177.950	best_gbps=211.779	core_type=performance	residency_verified=1	requested_lower_bound=0.997965	residency_retries=0
+CPUMEM_PROGRESS	mode=single	fraction=0.1429
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=65536	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997994	effective_ghz=4.197201	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=65536	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997874	effective_ghz=4.202023	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=65536	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998037	effective_ghz=4.197823	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=65536	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997931	effective_ghz=4.270465	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=65536	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998028	effective_ghz=4.323240	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=65536	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998046	effective_ghz=4.191818	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=65536	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998054	effective_ghz=4.277885	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998060	effective_ghz=4.398762	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998131	effective_ghz=4.425275	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997911	effective_ghz=4.377974	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997935	effective_ghz=4.446304	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998087	effective_ghz=4.479651	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998076	effective_ghz=4.479660	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998100	effective_ghz=4.486112	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998033	effective_ghz=4.478107	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998135	effective_ghz=4.484720	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997901	effective_ghz=4.379307	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998025	effective_ghz=4.035697	verified=1
+CPUMEM_RETRY	mode=single	kernel=write	block_bytes=65536	available=1	p_fraction=0.989469	requested_lower_bound=0.987454	process_cpu_ns=54317834.000000	worker_cpu_ns=54307000.000000
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998108	effective_ghz=4.435167	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998104	effective_ghz=4.463265	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998091	effective_ghz=4.478955	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998139	effective_ghz=4.480263	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998087	effective_ghz=4.481964	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998140	effective_ghz=4.484886	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998116	effective_ghz=4.479330	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997966	effective_ghz=4.482726	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998135	effective_ghz=4.485775	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=65536	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997953	effective_ghz=4.475434	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=65536	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998089	effective_ghz=4.304191	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=65536	sample=2	core_type=performance	p_fraction=0.998980	requested_lower_bound=0.997054	effective_ghz=4.084971	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=65536	sample=3	core_type=performance	p_fraction=0.999880	requested_lower_bound=0.997931	effective_ghz=4.039158	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=65536	sample=4	core_type=performance	p_fraction=0.998909	requested_lower_bound=0.996927	effective_ghz=4.179267	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=65536	sample=5	core_type=performance	p_fraction=0.999735	requested_lower_bound=0.997761	effective_ghz=4.113700	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=65536	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998077	effective_ghz=4.016226	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=65536	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998034	effective_ghz=4.125373	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=65536	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998093	effective_ghz=4.181652	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=65536	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997957	effective_ghz=4.140056	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=65536	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997991	effective_ghz=4.233144	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=65536	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998058	effective_ghz=4.275445	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=65536	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998084	effective_ghz=4.227128	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=65536	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998004	effective_ghz=4.226413	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=65536	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998060	effective_ghz=4.208989	verified=1
+      64 KiB      134.7       98.0      194.2          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=65536	threads=1	median_gbps=134.667	best_gbps=138.632	core_type=performance	residency_verified=1	requested_lower_bound=0.997874	residency_retries=0
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=65536	threads=1	median_gbps=98.020	best_gbps=122.200	core_type=performance	residency_verified=1	requested_lower_bound=0.997901	residency_retries=1
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=65536	threads=1	median_gbps=194.225	best_gbps=217.144	core_type=performance	residency_verified=1	requested_lower_bound=0.996927	residency_retries=0
+CPUMEM_PROGRESS	mode=single	fraction=0.1667
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=98304	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998019	effective_ghz=4.110691	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=98304	sample=2	core_type=performance	p_fraction=0.999769	requested_lower_bound=0.997700	effective_ghz=4.067383	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=98304	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998037	effective_ghz=4.050199	verified=1
+CPUMEM_RETRY	mode=single	kernel=read	block_bytes=98304	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=53234041.000000	worker_cpu_ns=53217417.000000
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=98304	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997982	effective_ghz=4.155196	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=98304	sample=5	core_type=performance	p_fraction=0.999679	requested_lower_bound=0.997606	effective_ghz=4.105269	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=98304	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997996	effective_ghz=4.071841	verified=1
+CPUMEM_RETRY	mode=single	kernel=read	block_bytes=98304	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=53858166.000000	worker_cpu_ns=53844125.000000
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=98304	sample=7	core_type=performance	p_fraction=0.999662	requested_lower_bound=0.997649	effective_ghz=4.131663	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=98304	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997970	effective_ghz=4.308194	verified=1
+CPUMEM_RETRY	mode=single	kernel=write	block_bytes=98304	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=54986833.000000	worker_cpu_ns=54972875.000000
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=98304	sample=2	core_type=performance	p_fraction=0.999779	requested_lower_bound=0.997595	effective_ghz=3.911963	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=98304	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998014	effective_ghz=4.073367	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=98304	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997907	effective_ghz=4.252986	verified=1
+CPUMEM_RETRY	mode=single	kernel=write	block_bytes=98304	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=55024166.000000	worker_cpu_ns=55010000.000000
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=98304	sample=5	core_type=performance	p_fraction=0.999669	requested_lower_bound=0.997643	effective_ghz=4.159815	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=98304	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998035	effective_ghz=4.262939	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=98304	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997988	effective_ghz=4.137783	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=98304	sample=1	core_type=performance	p_fraction=0.999663	requested_lower_bound=0.997727	effective_ghz=4.124843	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=98304	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997999	effective_ghz=4.212419	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=98304	sample=3	core_type=performance	p_fraction=0.998871	requested_lower_bound=0.996886	effective_ghz=4.157598	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=98304	sample=4	core_type=performance	p_fraction=0.999415	requested_lower_bound=0.997410	effective_ghz=4.200017	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=98304	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997946	effective_ghz=4.160096	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=98304	sample=6	core_type=performance	p_fraction=0.999656	requested_lower_bound=0.997624	effective_ghz=4.163905	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=98304	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997754	effective_ghz=4.191990	verified=1
+      96 KiB      131.0      122.1      203.4          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=98304	threads=1	median_gbps=130.995	best_gbps=132.539	core_type=performance	residency_verified=1	requested_lower_bound=0.997606	residency_retries=2
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=98304	threads=1	median_gbps=122.092	best_gbps=125.213	core_type=performance	residency_verified=1	requested_lower_bound=0.997595	residency_retries=2
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=98304	threads=1	median_gbps=203.406	best_gbps=218.081	core_type=performance	residency_verified=1	requested_lower_bound=0.996886	residency_retries=0
+CPUMEM_PROGRESS	mode=single	fraction=0.1905
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=131072	sample=1	core_type=performance	p_fraction=0.999820	requested_lower_bound=0.997718	effective_ghz=4.146829	verified=1
+CPUMEM_RETRY	mode=single	kernel=read	block_bytes=131072	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=55026458.000000	worker_cpu_ns=55014709.000000
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=131072	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997949	effective_ghz=4.163457	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=131072	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998048	effective_ghz=4.147554	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=131072	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998034	effective_ghz=4.122159	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=131072	sample=5	core_type=performance	p_fraction=0.999718	requested_lower_bound=0.997710	effective_ghz=4.179383	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=131072	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997933	effective_ghz=4.126337	verified=1
+CPUMEM_RETRY	mode=single	kernel=read	block_bytes=131072	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=55013166.000000	worker_cpu_ns=55001042.000000
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=131072	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997930	effective_ghz=4.114810	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=131072	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998046	effective_ghz=4.270172	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=131072	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997914	effective_ghz=4.190207	verified=1
+CPUMEM_RETRY	mode=single	kernel=write	block_bytes=131072	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=55002416.000000	worker_cpu_ns=54993458.000000
+CPUMEM_RETRY	mode=single	kernel=write	block_bytes=131072	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=53225458.000000	worker_cpu_ns=53212583.000000
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=131072	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998088	effective_ghz=4.201267	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=131072	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997985	effective_ghz=4.169461	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=131072	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998012	effective_ghz=4.207142	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=131072	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997966	effective_ghz=4.144894	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=131072	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997889	effective_ghz=4.237293	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=131072	sample=1	core_type=performance	p_fraction=0.999554	requested_lower_bound=0.997479	effective_ghz=4.115642	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=131072	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998099	effective_ghz=4.069022	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=131072	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998027	effective_ghz=4.168607	verified=1
+CPUMEM_RETRY	mode=single	kernel=copy	block_bytes=131072	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=54992583.000000	worker_cpu_ns=54983583.000000
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=131072	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998087	effective_ghz=4.140643	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=131072	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998058	effective_ghz=4.185083	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=131072	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997990	effective_ghz=4.084212	verified=1
+CPUMEM_RETRY	mode=single	kernel=copy	block_bytes=131072	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=55014166.000000	worker_cpu_ns=55002417.000000
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=131072	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997924	effective_ghz=4.172222	verified=1
+     128 KiB      132.8      120.8      207.2          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=131072	threads=1	median_gbps=132.753	best_gbps=133.546	core_type=performance	residency_verified=1	requested_lower_bound=0.997710	residency_retries=2
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=131072	threads=1	median_gbps=120.804	best_gbps=132.250	core_type=performance	residency_verified=1	requested_lower_bound=0.997889	residency_retries=2
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=131072	threads=1	median_gbps=207.217	best_gbps=223.023	core_type=performance	residency_verified=1	requested_lower_bound=0.997479	residency_retries=2
+CPUMEM_PROGRESS	mode=single	fraction=0.2143
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=196608	sample=1	core_type=performance	p_fraction=0.999524	requested_lower_bound=0.997455	effective_ghz=3.972137	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=196608	sample=2	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997857	effective_ghz=4.123354	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=196608	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997935	effective_ghz=4.054643	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=196608	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997951	effective_ghz=4.033763	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=196608	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997992	effective_ghz=4.084065	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=196608	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997947	effective_ghz=4.074464	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=read	block_bytes=196608	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997974	effective_ghz=4.107365	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=196608	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998036	effective_ghz=4.170143	verified=1
+CPUMEM_RETRY	mode=single	kernel=write	block_bytes=196608	available=1	p_fraction=0.988804	requested_lower_bound=0.986812	process_cpu_ns=54400291.000000	worker_cpu_ns=54384291.000000
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=196608	sample=2	core_type=performance	p_fraction=0.999157	requested_lower_bound=0.997042	effective_ghz=4.248304	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=196608	sample=3	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997833	effective_ghz=4.194408	verified=1
+CPUMEM_RETRY	mode=single	kernel=write	block_bytes=196608	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=51924541.000000	worker_cpu_ns=51899416.000000
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=196608	sample=4	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998013	effective_ghz=4.216967	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=196608	sample=5	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998012	effective_ghz=4.173542	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=196608	sample=6	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.997882	effective_ghz=4.213912	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=write	block_bytes=196608	sample=7	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998064	effective_ghz=4.080187	verified=1
+CPUMEM_RESIDENCY	mode=single	kernel=copy	block_bytes=196608	sample=1	core_type=performance	p_fraction=1.000000	requested_lower_bound=0.998055	effective_ghz=4.077546	verified=1
+CPUMEM_RETRY	mode=single	kernel=copy	block_bytes=196608	available=1	p_fraction=0.966194	requested_lower_bound=0.964130	process_cpu_ns=54369167.000000	worker_cpu_ns=54354750.000000
+CPUMEM_RETRY	mode=single	kernel=copy	block_bytes=196608	available=1	p_fraction=0.984722	requested_lower_bound=0.982587	process_cpu_ns=54467000.000000	worker_cpu_ns=54450083.000000
+CPUMEM_RETRY	mode=single	kernel=copy	block_bytes=196608	available=0	p_fraction=1.000000	requested_lower_bound=0.000000	process_cpu_ns=54928791.000000	worker_cpu_ns=54913875.000000
+CPU memory bandwidth sweep failed: core_type_residency_not_verified

@@ -1,0 +1,107 @@
+{
+  "beforeCount": 125,
+  "afterCount": 133,
+  "newCount": 8,
+  "oldRecordsUnchanged": true,
+  "newIDs": [
+    "20261013-195532-528-cpu-single",
+    "20261013-195532-533-cpu-multi",
+    "20261013-195616-200-cpu-membw",
+    "20261013-195653-520-cpu-membw",
+    "20261013-201229-094-metal-cache",
+    "20261013-201256-131-metal-cache",
+    "20261013-201303-924-membw",
+    "20261013-201629-128-metal-cache"
+  ],
+  "newDiagnosticSamples": 1860,
+  "oldRepositorySHA256": "5f01464406c9dfd9927061beeccdbc2b4c2f03cc4613c0f41e1e1fd8cc1b3c35",
+  "cpuLedger": [
+    {
+      "name": "cpu-compute-all",
+      "args": [
+        "--cpu-benchmark",
+        "all",
+        "--cpu-time",
+        "15",
+        "--cpu-warmup",
+        "0.2"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 228.03
+    },
+    {
+      "name": "cpu-memory-all",
+      "args": [
+        "--cpu-membw"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 43.67
+    },
+    {
+      "name": "cpu-cache-curve-diagnostic",
+      "args": [
+        "--cpu-membw",
+        "--cpu-membw-curve-levels",
+        "--cpu-membw-no-storage"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 37.32
+    }
+  ],
+  "gpuLedger": [
+    {
+      "name": "gpu-cache-full",
+      "args": [
+        "--gpu-cache-probe"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 22.9
+    },
+    {
+      "name": "gpu-cache-double-loads",
+      "args": [
+        "--gpu-cache-probe",
+        "--gpu-cache-steps",
+        "131072"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 27.04
+    },
+    {
+      "name": "vulkan-existing-memory-sweep",
+      "args": [
+        "--backend",
+        "vulkan",
+        "--allow-translated-api",
+        "--workload",
+        "membw",
+        "--gpu",
+        "0"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 7.78
+    },
+    {
+      "name": "gpu-cache-repeat",
+      "args": [
+        "--gpu-cache-probe"
+      ],
+      "exitCode": 0,
+      "durationSeconds": 22.5881238
+    }
+  ],
+  "sharedParserChecks": 144,
+  "ctestPassed": 3,
+  "ctestTotal": 3,
+  "builds": [
+    "macOS arm64",
+    "macOS x86_64",
+    "iOS device",
+    "iOS simulator"
+  ],
+  "nativeGUIVerified": [
+    "latest GPU cache diagnostics (65536 loads, 5 samples)",
+    "latest complete CPU memory/cache/storage curves"
+  ],
+  "iOSPerformanceTested": false
+}

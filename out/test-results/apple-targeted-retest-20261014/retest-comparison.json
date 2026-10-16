@@ -1,0 +1,86 @@
+[
+  {
+    "job": "cinematic_liquid",
+    "ipadScore": 6.903,
+    "iphoneScore": 12.931,
+    "unit": "MParticle-step/s",
+    "ipadToIphone": 0.5338334235557961,
+    "ipadFPS": 2.139669035993512,
+    "iphoneFPS": 3.9840637450199203,
+    "version": "cinematic_liquid_v2_physical_scene_v8_metal_preview_ios_preview_serial_timing_v2",
+    "ipadID": "20261014-030224-234",
+    "iphoneID": "20261014-030925-485"
+  },
+  {
+    "job": "gpu_burn-16",
+    "ipadScore": 1.306,
+    "iphoneScore": 1.203,
+    "unit": "Gpix-step/s",
+    "ipadToIphone": 1.085619285120532,
+    "ipadFPS": 41.30865829477859,
+    "iphoneFPS": 39.6557877622239,
+    "version": "gpu_burn_v3_fixed_steps_16_kaleidoscope_ios_preview_serial_timing_v2",
+    "ipadID": "20261014-030134-714",
+    "iphoneID": "20261014-030344-824"
+  },
+  {
+    "job": "gpu_burn-256",
+    "ipadScore": 1.527,
+    "iphoneScore": 1.586,
+    "unit": "Gpix-step/s",
+    "ipadToIphone": 0.9627994955863808,
+    "ipadFPS": 3.2231759241651172,
+    "iphoneFPS": 3.3458803847762444,
+    "version": "gpu_burn_v3_fixed_steps_256_kaleidoscope_ios_preview_serial_timing_v2",
+    "ipadID": "20261014-030207-428",
+    "iphoneID": "20261014-030909-147"
+  },
+  {
+    "job": "gpu_burn-64",
+    "ipadScore": 1.485,
+    "iphoneScore": 1.555,
+    "unit": "Gpix-step/s",
+    "ipadToIphone": 0.9549839228295821,
+    "ipadFPS": 12.401408800039686,
+    "iphoneFPS": 12.971009793112394,
+    "version": "gpu_burn_v3_fixed_steps_64_kaleidoscope_ios_preview_serial_timing_v2",
+    "ipadID": "20261014-030150-757",
+    "iphoneID": "20261014-030852-637"
+  },
+  {
+    "job": "stream-16777216",
+    "ipadScore": 27.198,
+    "iphoneScore": 15.884,
+    "unit": "GB/s",
+    "ipadToIphone": 1.7122890959456056,
+    "ipadFPS": 1.9917700063338286,
+    "iphoneFPS": 4.287153544404193,
+    "version": "stream_v1_ios_preview_serial_timing_v2",
+    "ipadID": "20261014-030118-624",
+    "iphoneID": "20261014-030328-879"
+  },
+  {
+    "job": "stream-4194304",
+    "ipadScore": 30.004,
+    "iphoneScore": 16.318,
+    "unit": "GB/s",
+    "ipadToIphone": 1.8387057237406543,
+    "ipadFPS": 10.8064882155246,
+    "iphoneFPS": 17.339136164236297,
+    "version": "stream_v1_ios_preview_serial_timing_v2",
+    "ipadID": "20261014-030101-780",
+    "iphoneID": "20261014-030312-355"
+  },
+  {
+    "job": "vulkan/gpu_burn-256",
+    "ipadScore": 0.894,
+    "iphoneScore": 0.967,
+    "unit": "Gpix-step/s",
+    "ipadToIphone": 0.9245087900723888,
+    "ipadFPS": 1.8293709159294302,
+    "iphoneFPS": 1.6880856602187424,
+    "version": "gpu_burn_v3_fixed_steps_256_kaleidoscope_ios_preview_single_frame_timing_v2_moltenvk_viewport1280x720_v1",
+    "ipadID": "20261014-030332-855",
+    "iphoneID": "20261014-030946-556"
+  }
+]

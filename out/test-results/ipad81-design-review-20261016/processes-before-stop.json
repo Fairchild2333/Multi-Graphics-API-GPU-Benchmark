@@ -1,0 +1,34 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "processes",
+      "--device",
+      "00008027-001969920A87002E",
+      "--search",
+      "Mangekyo",
+      "--json-output",
+      "out/test-results/ipad81-design-review-20261016/processes-before-stop.json",
+      "--timeout",
+      "20"
+    ],
+    "commandType" : "devicectl.device.info.processes",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "9A44542D-75A2-58C6-B79C-18BEAED61843",
+    "runningProcesses" : [
+      {
+        "executable" : "file:///private/var/containers/Bundle/Application/96AC2E53-B9F3-4F05-92FA-30D978539A90/Mangekyo.app/Mangekyo",
+        "processIdentifier" : 914
+      }
+    ]
+  }
+}

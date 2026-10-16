@@ -1,0 +1,79 @@
+iOS complete suite complete-suite-3F50C46E-3C73-49B9-B6D5-93C7EA03AEC0
+Started: 2026-10-14T04:14:59Z
+
+Thermal precheck stream-1048576: nominal after 0s cooling.
+
+=== 1/1 stream-1048576: review ===
+=== Preview stream?particles=1048576&vsync=0&api=metal 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A15 GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 1048576 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 5.054 ms | Render: 23.375 ms | Total: 29.932 ms | FPS: 34 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 2.335 ms | Render: 23.290 ms | Total: 26.559 ms | FPS: 36 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 2.731 ms | Render: 22.464 ms | Total: 25.867 ms | FPS: 37 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 1.942 ms | Render: 21.548 ms | Total: 24.347 ms | FPS: 39 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 2.059 ms | Render: 21.895 ms | Total: 24.835 ms | FPS: 38 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 1.923 ms | Render: 21.220 ms | Total: 24.080 ms | FPS: 40 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 1.933 ms | Render: 19.839 ms | Total: 22.667 ms | FPS: 42 | T: 2.9 s
+[GPU Timing] Compute: 1.891 ms | Render: 18.313 ms | Total: 21.100 ms | FPS: 45 | T: 3.9 s
+[GPU Timing] Compute: 1.934 ms | Render: 16.653 ms | Total: 19.478 ms | FPS: 49 | T: 4.9 s
+[GPU Timing] Compute: 1.962 ms | Render: 14.839 ms | Total: 17.708 ms | FPS: 53 | T: 5.9 s
+[GPU Timing] Compute: 2.085 ms | Render: 13.093 ms | Total: 16.058 ms | FPS: 58 | T: 6.9 s
+[GPU Timing] Compute: 2.458 ms | Render: 11.168 ms | Total: 14.504 ms | FPS: 60 | T: 8.0 s
+[GPU Timing] Compute: 2.510 ms | Render: 10.354 ms | Total: 13.745 ms | FPS: 59 | T: 9.0 s
+[GPU Timing] Compute: 2.575 ms | Render: 10.183 ms | Total: 13.571 ms | FPS: 60 | T: 10.0 s
+[GPU Timing] Compute: 2.590 ms | Render: 10.022 ms | Total: 13.511 ms | FPS: 59 | T: 11.0 s
+[GPU Timing] Compute: 2.822 ms | Render: 10.143 ms | Total: 13.829 ms | FPS: 59 | T: 12.0 s
+[GPU Timing] Compute: 3.013 ms | Render: 10.166 ms | Total: 14.052 ms | FPS: 59 | T: 13.0 s
+[GPU Timing] Compute: 3.008 ms | Render: 9.561 ms | Total: 13.453 ms | FPS: 60 | T: 14.0 s
+[GPU Timing] Compute: 2.984 ms | Render: 9.569 ms | Total: 13.375 ms | FPS: 59 | T: 15.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    1048576 (Medium)
+Buffer:       32.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 732 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         2.486     1.757     3.607
+Render:         12.170     6.234    20.559
+Total GPU:      15.530     9.305    23.806
+
+--- Throughput ---
+Avg FPS:      56
+Particles:    1048576
+Working set:  32.00 MiB
+VRAM rate:   16.87 GB/s  (2.486 ms compute)
+
+--- Analysis ---
+Avg frame time:  17.769 ms
+Avg GPU time:    15.530 ms
+GPU utilisation: 87.4%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Thermal Stability ---
+Windows:      13 x 1s
+Stable score: not reached — keep running to detect throttling.
+Throttling:   early vs late mean dropped 31.8%  (>> sustained throttle / thermal limit)
+>> Throttled: report stableScore (post-throttle), not peak.
+==========================================================
+
+[Results] Saved as 20261014-151514-853 -> /var/mobile/Containers/Data/Application/86D506A5-E982-49BF-978A-F8E11D2B7927/Documents/results/results.json

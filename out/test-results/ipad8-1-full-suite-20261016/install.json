@@ -1,0 +1,39 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "install",
+      "app",
+      "--device",
+      "00008027-001969920A87002E",
+      "build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app",
+      "--json-output",
+      "out/test-results/ipad8-1-full-suite-20261016/install.json",
+      "--timeout",
+      "60"
+    ],
+    "commandType" : "devicectl.device.install.app",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "9A44542D-75A2-58C6-B79C-18BEAED61843",
+    "installedApplications" : [
+      {
+        "bundleID" : "com.fairchild.Mangekyo",
+        "databaseSequenceNumber" : 1632,
+        "databaseUUID" : "7AA7B9B6-B8AF-43AC-9E28-E5778C0F4DDC",
+        "installationURL" : "file:///private/var/containers/Bundle/Application/E47FFC2E-B83F-4998-A11E-FF3945254BBB/Mangekyo.app/",
+        "launchServicesIdentifier" : "unknown",
+        "options" : {
+
+        }
+      }
+    ]
+  }
+}

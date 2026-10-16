@@ -1,0 +1,7 @@
+Test project /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build
+    Start 6: cpu_cancel
+1/1 Test #6: cpu_cancel .......................   Passed    1.60 sec
+
+100% tests passed out of 1
+
+Total Test time (real) =   1.60 sec

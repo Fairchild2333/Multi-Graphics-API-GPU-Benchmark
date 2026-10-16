@@ -1,0 +1,18 @@
+[100%] Built target cpu_residency_test
+[100%] Built target result_quality_test
+[100%] Built target results_compat_test
+[  5%] Built target glad_gl43
+[ 51%] Built target glfw
+[ 51%] Building CXX object CMakeFiles/gpu_engine.dir/src/app_base.cpp.o
+[ 54%] Building CXX object CMakeFiles/gpu_engine.dir/src/cpu_benchmark.cpp.o
+[ 59%] Building CXX object CMakeFiles/gpu_engine.dir/src/cpu_membw.cpp.o
+[ 59%] Building CXX object CMakeFiles/gpu_engine.dir/src/vulkan_backend.cpp.o
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/cpu_benchmark.cpp:612:10: warning: private field 'changed_' is not used [-Wunused-private-field]
+  612 |     bool changed_ = false;
+      |          ^
+1 warning generated.
+[ 62%] Linking CXX static library libgpu_engine.a
+[ 94%] Built target gpu_engine
+[ 97%] Linking CXX executable cpu_cancel_test
+[100%] Built target cpu_cancel_test
+[100%] Built target complete_suite_test

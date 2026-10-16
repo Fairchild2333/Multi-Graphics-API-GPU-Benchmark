@@ -1,0 +1,25 @@
+device,test,unit,metal,vulkan,metalFPS,vulkanFPS,metalSource,vulkanSource,metalTiming,vulkanTiming,metalID,vulkanID
+ipad,"粒子 65,536 · 绘制",GB/s,23.338,2.287,119.93283761093788,79.78935609989628,原有,原有,gpu_timestamp_query,synchronized_wall_clock,20261014-015918-763,20261014-020239-348
+ipad,"粒子 65,536 · 纯计算",GB/s,32.845,23.373,5405.405405405406,3773.584905660377,原有,原有,gpu_timestamp_query,gpu_timestamp_query,20261014-015934-552,20261014-020255-391
+ipad,"粒子 1,048,576 · 绘制",GB/s,28.269,22.833,68.8041832943443,57.660151069595805,复测,原有,serialized_command_buffer_gpu_time,gpu_timestamp_query,20261014-030045-526,20261014-020311-965
+ipad,"粒子 1,048,576 · 纯计算",GB/s,30.186,22.618,700.280112044818,537.0569280343716,原有,复测,gpu_timestamp_query,synchronized_wall_clock,20261014-020006-305,20261014-030240-428
+ipad,"粒子 4,194,304 · 绘制",GB/s,30.004,27.392,10.8064882155246,9.55073349633252,复测,原有,serialized_command_buffer_gpu_time,gpu_timestamp_query,20261014-030101-780,20261014-020345-941
+ipad,"粒子 4,194,304 · 纯计算",GB/s,29.678,27.317,175.71604287471447,162.49593760155997,原有,复测,gpu_timestamp_query,synchronized_wall_clock,20261014-020038-536,20261014-030256-629
+ipad,"粒子 16,777,216 · 绘制",GB/s,27.198,27.497,1.9917700063338286,1.9391494890341094,复测,原有,serialized_command_buffer_gpu_time,gpu_timestamp_query,20261014-030118-624,20261014-020426-815
+ipad,"粒子 16,777,216 · 纯计算",GB/s,29.502,28.935,43.88852315119596,43.08116491469929,原有,复测,gpu_timestamp_query,synchronized_wall_clock,20261014-020112-167,20261014-030313-400
+ipad,GPU Burn 16步,Gpix-step/s,1.306,0.668,41.30865829477859,20.478374836173,复测,原有,serialized_command_buffer_gpu_time,gpu_timestamp_query,20261014-030134-714,20261014-020500-233
+ipad,GPU Burn 64步,Gpix-step/s,1.485,0.847,12.401408800039686,6.580202801850353,复测,原有,serialized_command_buffer_gpu_time,gpu_timestamp_query,20261014-030150-757,20261014-020516-691
+ipad,GPU Burn 256步,Gpix-step/s,1.527,0.894,3.2231759241651172,1.8293709159294302,复测,复测,serialized_command_buffer_gpu_time,validated_single_frame_gpu_query,20261014-030207-428,20261014-030332-855
+ipad,内存扫描（方法不同）,GB/s,59.904,56.76,,,原有,原有,dedicated_sweep,dedicated_sweep,20261014-020222-543-metal-memsweep,20261014-020547-634-membw
+iphone,"粒子 65,536 · 绘制",GB/s,26.313,16.767,48.749573441232386,48.8114414018646,原有,原有,gpu_timestamp_query,gpu_timestamp_query,20261014-012038-664,20261014-012836-442
+iphone,"粒子 65,536 · 纯计算",GB/s,52.955,38.168,7407.407407407407,5882.35294117647,原有,原有,gpu_timestamp_query,gpu_timestamp_query,20261014-012054-761,20261014-012852-327
+iphone,"粒子 1,048,576 · 绘制",GB/s,12.886,19.614,48.673643222195174,47.96853264258646,原有,原有,gpu_timestamp_query,gpu_timestamp_query,20261014-012110-696,20261014-012908-798
+iphone,"粒子 1,048,576 · 纯计算",GB/s,20.555,21.188,480.5382027871216,461.68051708217916,原有,原有,gpu_timestamp_query,gpu_timestamp_query,20261014-012126-584,20261014-012924-907
+iphone,"粒子 4,194,304 · 绘制",GB/s,16.318,19.085,17.339136164236297,19.317698875709926,复测,原有,serialized_command_buffer_gpu_time,gpu_timestamp_query,20261014-030312-355,20261014-012942-021
+iphone,"粒子 4,194,304 · 纯计算",GB/s,18.951,19.149,112.46063877642825,111.83180496533214,原有,原有,gpu_timestamp_query,gpu_timestamp_query,20261014-012158-698,20261014-012958-193
+iphone,"粒子 16,777,216 · 绘制",GB/s,15.884,18.733,4.287153544404193,4.713379398761324,复测,原有,serialized_command_buffer_gpu_time,gpu_timestamp_query,20261014-030328-879,20261014-013018-297
+iphone,"粒子 16,777,216 · 纯计算",GB/s,18.983,19.027,28.25736810873435,28.19124943617501,原有,原有,gpu_timestamp_query,gpu_timestamp_query,20261014-012231-875,20261014-013034-838
+iphone,GPU Burn 16步,Gpix-step/s,1.203,0.936,39.6557877622239,29.42647794485478,复测,原有,serialized_command_buffer_gpu_time,gpu_timestamp_query,20261014-030344-824,20261014-013051-238
+iphone,GPU Burn 64步,Gpix-step/s,1.555,1.074,12.971009793112394,8.719688183950542,复测,原有,serialized_command_buffer_gpu_time,gpu_timestamp_query,20261014-030852-637,20261014-013107-618
+iphone,GPU Burn 256步,Gpix-step/s,1.586,0.967,3.3458803847762444,1.6880856602187424,复测,复测,serialized_command_buffer_gpu_time,validated_single_frame_gpu_query,20261014-030909-147,20261014-030946-556
+iphone,内存扫描（方法不同）,GB/s,30.917,29.298,,,原有,原有,dedicated_sweep,dedicated_sweep,20261014-012339-753-metal-memsweep,20261014-013135-958-membw

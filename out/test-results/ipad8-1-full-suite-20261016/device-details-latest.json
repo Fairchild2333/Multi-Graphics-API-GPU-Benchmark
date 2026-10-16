@@ -1,0 +1,32 @@
+{
+  "error" : {
+    "code" : 2,
+    "domain" : "ArgumentParserInternal.ExitCode",
+    "userInfo" : {
+
+    }
+  },
+  "errorSignature" : "(ArgumentParserInternal.ExitCode 2)",
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "details",
+      "--device",
+      "00008027-001969920A87002E",
+      "--json-output",
+      "out/test-results/ipad8-1-full-suite-20261016/device-details-latest.json",
+      "--timeout",
+      "20"
+    ],
+    "commandType" : "devicectl.device.info.details",
+    "details" : "Exceeded command timeout",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "timeout",
+    "version" : "651.13.5"
+  }
+}

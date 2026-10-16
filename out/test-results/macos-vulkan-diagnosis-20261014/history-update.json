@@ -1,0 +1,16 @@
+{
+  "beforeCount": 147,
+  "afterCount": 149,
+  "addedIDs": [
+    "20261014-144341-734",
+    "20261014-144948-095"
+  ],
+  "oldRowsPreserved": true,
+  "isolatedControls": [
+    "20261014-143955-826",
+    "20261014-144111-116",
+    "20261014-144226-349"
+  ],
+  "isolatedShaderVariant": "20261014-144732-256",
+  "afterSha256": "62302b228db50009882fe386b65f32a258e3391519ba53f8f341c366367f67aa"
+}

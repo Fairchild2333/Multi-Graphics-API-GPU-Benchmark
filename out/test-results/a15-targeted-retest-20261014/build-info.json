@@ -1,0 +1,12 @@
+{
+  "appSha256": "66b47b0caa753e206c98f52352e006af7aafcb8a433f6a576b73a9c2c9f64e42",
+  "nativeSha256": "bd22266f84d8b56bf20b33d84d151741fb4bbb3884245e997b45a09de399fe82",
+  "configuration": "Release",
+  "sourceCommit": "5c4e7df718728e498080b9d154abd8275ffeaace",
+  "deviceModel": "iPhone14,2",
+  "deviceName": "iPhone 13 Pro",
+  "osVersion": "iOS 27.0.1",
+  "jobs": 7,
+  "restBetweenJobsSeconds": 20,
+  "workload": "original shaders; no fixed-density diagnostic changes"
+}

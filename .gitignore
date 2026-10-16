@@ -1,7 +1,8 @@
 # ---- CMake / native engine builds ----
 /build/
 /build-*/
-/out/
+/out/*
+!/out/test-results/
 /bin/
 /CMakeFiles/
 /CMakeCache.txt
@@ -127,7 +128,62 @@ android/app/src/main/assets/shaders/*_gl.*
 android/app/src/main/assets/shaders/*_es2.*
 ohos/entry/src/main/resources/rawfile/shaders/*_gl.*
 ohos/entry/src/main/resources/rawfile/shaders/*_es2.*
-results/
 macos-gui/theme_check2
 macos-gui/theme_check2.swift
 scripts/__pycache__/
+
+# ---- Small benchmark evidence is versioned, including native run logs ----
+# Keep existing out/test-results links valid without adding build products.
+/out/test-results/**/*
+!/out/test-results/**/
+!/out/test-results/**/*.json
+!/out/test-results/**/*.jsonl
+!/out/test-results/**/*.ndjson
+!/out/test-results/**/*.csv
+!/out/test-results/**/*.tsv
+!/out/test-results/**/*.log
+!/out/test-results/**/*.txt
+!/out/test-results/**/*.md
+!/out/test-results/**/*.png
+!/out/test-results/**/*.jpg
+!/out/test-results/**/*.jpeg
+!/out/test-results/**/*.svg
+!/out/test-results/**/*.pdf
+!/out/test-results/**/*.html
+!/out/test-results/**/*.htm
+!/out/test-results/**/*.xml
+!/out/test-results/**/*.plist
+!/out/test-results/**/*.patch
+!/out/test-results/**/*.py
+!/out/test-results/**/*.swift
+!/out/test-results/**/*.sh
+!/out/test-results/**/*.ps1
+
+# Large diagnostic bundles and copied dependencies remain local. Export their
+# small summaries, curve data and screenshots beside them for version control.
+/out/test-results/**/*.xcresult/
+/out/test-results/**/*.trace/
+/out/test-results/**/*.gputrace/
+/out/test-results/**/*.tracetemplate/
+/out/test-results/**/*.app/
+/out/test-results/**/*.dSYM/
+/out/test-results/**/*.framework/
+/out/test-results/**/*.xcframework/
+/out/test-results/**/plot-deps/
+/out/test-results/**/site-packages/
+/out/test-results/**/__pycache__/
+/out/test-results/**/.venv/
+/out/test-results/**/venv/
+/out/test-results/**/node_modules/
+/out/test-results/**/build/
+/out/test-results/**/CMakeFiles/
+
+# The default CLI history is small and should be backed up too.
+/results/*
+!/results/*.json
+!/results/*.jsonl
+!/results/*.csv
+!/results/*.tsv
+!/results/*.log
+!/results/*.txt
+!/results/*.md

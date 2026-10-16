@@ -1,0 +1,17 @@
+{
+  "mac": {
+    "records": 137,
+    "sha256": "b6284e581490616bb5892ff58ba3f19bdc4dd507086ff181ac2424b0083c96cf",
+    "file": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/results/results.json"
+  },
+  "iphone": {
+    "records": 67,
+    "sha256": "230c46905751f01d741049ca9a051eb0ef54a8e2a62e75db646496a4231d1ce4",
+    "file": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/one-click-suite-20261014/iphone-preserved-results.json"
+  },
+  "ipad": {
+    "records": 43,
+    "sha256": "d51ff3173cef53022a902ecf9d76a7a0e9828ee89c285f17077edaae67ec1633",
+    "file": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/one-click-suite-20261014/ipad-preserved-results.json"
+  }
+}

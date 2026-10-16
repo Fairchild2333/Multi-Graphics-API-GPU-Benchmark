@@ -1,0 +1,87 @@
+10-14 11:07:39.770  1164  1164 I A01b01/HOME: AppName --> observerCallback appName: Mangekyo, LayoutId: AppName_text_com.mangekyo.benchmark_Mangekyo_mv7iu0xyyvjx090ydin, nameOpacity: 1
+10-14 11:08:42.756  1164  1164 W A01b01/HOME: PageDesktopModel --> searchInCurrentDeskTopPage 16777217, {"bundleName":"com.mangekyo.benchmark","oldBundleNames":[],"abilityName":"EntryAbility","isSelect":false,"isTransparent":false,"downloadProgress":0,"appStatus":0,"shortcutId":"","appIndex":0,"intent":"","size":0,"themeId":"","themeFormId":"","typeId":0,"moduleName":"entry","keyName":"com.mangekyo.benchmarkEntryAbilityentry0","badgeNumber":0,"area":[1,1],"appName":"Mangekyo","appIconId":16777217,"appLabelId":16777219,"kindId":-1,"bundleType":0,"installTime":"Wed Oct 14 2026 10:59:19 GMT+0800","page":1,"column":0,"row":0,"isUninstallAble":true,"isSystemApp":false,"applicationIconId":16777217,"applicationLabelId":16777219,"infoId":"ea74acd9-9ffd-4161-95fb-1820008a41a8","infoName":"Mangekyo","areaType":0,"x":0}, true, null
+10-14 11:08:42.835  1164  1164 I A01b01/HOME: ResourceManager --> getAppNameSync resMgrName: Mangekyo bundleName:com.mangekyo.benchmark, labelId:16777219
+10-14 11:08:42.835  1164  1164 I A01b01/HOME: ResourceManager --> setAppResourceCache cacheKey:16777219com.mangekyo.benchmarkentry, value: Mangekyo
+10-14 11:08:42.835  1164  1164 I A01b00/SCB: LauncherAbilityManager --> getLauncherAbility updateAppNameSync:Mangekyo
+10-14 11:08:42.835  1164  1164 I A01b00/SCB: LauncherAbilityManager --> getLauncherAbility appName:Mangekyo bundleName:com.mangekyo.benchmark
+10-14 11:08:42.835  1164  1164 I A01b01/HOME: AppModel --> launcher abilityInfos: [{"appName":"Mangekyo","bundleName":"com.mangekyo.benchmark","appIconId":16777217,"abilityName":"EntryAbility","downloadProgress":0,"appStatus":0,"appIndex":0,"intent":"","appDistributionType":"none","isSystemApp":false,"isUninstallAble":true,"applicationIconId":16777217,"appLabelId":16777219,"applicationLabelId":16777219,"codePath":"/data/app/el1/bundle/public/com.mangekyo.benchmark","kindId":-1,"moduleName":"entry","shortcutId":"","installTime":"Wed Oct 14 2026 10:59:19 GMT+0800","areaType":2,"bundleType":0,"keyName":"com.mangekyo.benchmarkEntryAbilityentry0"}]
+10-14 11:08:42.868  1164  1164 I A01b01/HOME: PageDesktopViewModel --> newApp: {"appName":"Mangekyo","bundleName":"com.mangekyo.benchmark","appIconId":16777217,"abilityName":"EntryAbility","downloadProgress":0,"appStatus":0,"appIndex":0,"intent":"","appDistributionType":"none","isSystemApp":false,"isUninstallAble":true,"applicationIconId":16777217,"appLabelId":16777219,"applicationLabelId":16777219,"codePath":"/data/app/el1/bundle/public/com.mangekyo.benchmark","kindId":-1,"moduleName":"entry","shortcutId":"","installTime":"Wed Oct 14 2026 10:59:19 GMT+0800","areaType":2,"bundleType":0,"keyName":"com.mangekyo.benchmarkEntryAbilityentry0"}
+10-14 11:08:42.868  1164  1164 I A01b01/HOME: AppName --> updateShadowColor, Mangekyo color:#00050505
+10-14 11:08:42.888  1164  1164 I A01a01/NC: SysUI_NtfListVm --> Update config for 20020051, label: Mangekyo.
+10-14 11:08:43.043  9880  9880 I A00000/Mangekyo: shaders copied: 46
+10-14 11:08:43.043  9880  9880 I A00000/Mangekyo: paths set
+10-14 11:08:43.102  9880  9880 I A00000/Mangekyo: shell=plain api=16 device=phone hds=true
+10-14 11:09:19.673  9880  9880 I A00000/Mangekyo: SUITE_PLAN	total=5	scope=all	folder=/data/storage/el2/base/haps/entry/files/suite-runs/1791947359672
+10-14 11:09:19.675  9880  9880 I A00000/Mangekyo: SUITE_RUN	index=1	total=5	job=gles2-burn-16
+10-14 11:09:19.723  9880  9880 I A00000/Mangekyo: XComponent callbacks registered
+10-14 11:09:19.723  9880  9880 I A00000/Mangekyo: surface created
+10-14 11:09:19.767  9880  9880 I A00000/Mangekyo: surface changed
+10-14 11:09:19.777  9880  9880 I A00000/Mangekyo: surface changed
+10-14 11:09:20.277  9880 10693 I A00000/MangekyoEngine: [RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+10-14 11:09:20.277  9880 10693 I A00000/MangekyoEngine: [OpenGL ES Init] Creating the context...
+10-14 11:09:20.288  9880 10693 I A00000/MangekyoEngine: [OpenGL ES] Present mode: unsynchronised (swap interval 0, not tied to the refresh rate)
+10-14 11:09:20.288  9880 10693 I A00000/MangekyoEngine: [OpenGL ES] Every frame is drawn in full; the picture on screen is renewed about 30 times a second.
+10-14 11:09:20.288  9880 10693 I A00000/MangekyoEngine: [OpenGL ES Init] Mali-G77  |  OpenGL ES 3.0 (4.1 Metal - 91.7)
+10-14 11:09:20.288  9880 10693 I A00000/MangekyoEngine: [OpenGL ES Init] Compiling the OpenGL ES 2.0 GPU Burn (16 steps)...
+10-14 11:09:20.294  9880 10693 I A00000/MangekyoEngine: [Profiling] OpenGL ES 2.0: frames are timed by wall clock.
+10-14 11:09:20.294  9880 10693 I A00000/MangekyoEngine: [OpenGL ES Init] Initialisation complete.
+10-14 11:09:20.600  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.547 ms | Total: 3.547 ms | FPS: 232 | T: 0.3 s (warm-up)
+10-14 11:09:20.901  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 5.015 ms | Total: 5.015 ms | FPS: 166 | T: 0.6 s (warm-up)
+10-14 11:09:21.210  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.919 ms | Total: 4.919 ms | FPS: 170 | T: 0.9 s (warm-up)
+10-14 11:09:21.510  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.687 ms | Total: 3.687 ms | FPS: 165 | T: 1.2 s (warm-up)
+10-14 11:09:21.828  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 5.046 ms | Total: 5.046 ms | FPS: 167 | T: 1.5 s (warm-up)
+10-14 11:09:22.128  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.714 ms | Total: 3.714 ms | FPS: 207 | T: 1.8 s (warm-up)
+10-14 11:09:23.142  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.381 ms | Total: 3.381 ms | FPS: 231 | T: 2.8 s
+10-14 11:09:24.140  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.827 ms | Total: 3.827 ms | FPS: 197 | T: 3.8 s
+10-14 11:09:25.144  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.973 ms | Total: 4.973 ms | FPS: 170 | T: 4.9 s
+10-14 11:09:26.144  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.788 ms | Total: 4.788 ms | FPS: 166 | T: 5.9 s
+10-14 11:09:27.158  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.745 ms | Total: 3.745 ms | FPS: 194 | T: 6.9 s
+10-14 11:09:28.160  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.605 ms | Total: 4.605 ms | FPS: 174 | T: 7.9 s
+10-14 11:09:29.162  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.821 ms | Total: 4.821 ms | FPS: 163 | T: 8.9 s
+10-14 11:09:30.163  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.532 ms | Total: 4.532 ms | FPS: 177 | T: 9.9 s
+10-14 11:09:31.167  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.971 ms | Total: 3.971 ms | FPS: 209 | T: 10.9 s
+10-14 11:09:32.165  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.965 ms | Total: 3.965 ms | FPS: 202 | T: 11.9 s
+10-14 11:09:33.183  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.831 ms | Total: 3.831 ms | FPS: 225 | T: 12.9 s
+10-14 11:09:34.183  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.665 ms | Total: 3.665 ms | FPS: 225 | T: 13.9 s
+10-14 11:09:35.174  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.528 ms | Total: 3.528 ms | FPS: 237 | T: 14.9 s
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: ==========================================================
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine:                    Benchmark Summary
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: ==========================================================
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Graphics API: OpenGL ES 2.0
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: GPU:          Mali-G77
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Driver:       OpenGL ES 3.0 (4.1 Metal - 91.7)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: CPU:          Unknown
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: OS:           HarmonyOS 5.0.1 (API 16)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: System:       HarmonyOS ARM64
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Memory:       Device-local VRAM
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Mode:         Windowed
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Resolution:   1280x720
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Workload:     GPU Burn ES 2.0 legacy v1 / Quasicrystal plasma (no particle data)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Flights:      2
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Multi-GPU:    Off
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: V-Sync:       OFF
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Duration:     13.0 s (warmup: 2.0 s, measured: 2577 frames)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: --- GPU Timing (ms) ---
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine:                      Avg       Min       Max
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Compute:         0.000     0.000     0.000
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Render:          4.081     0.074    59.345
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Total GPU:       4.081     0.074    59.345
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: --- Throughput ---
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Avg FPS:      198
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: GPU Burn:     ES 2.0 legacy v1 quasicrystal plasma, 2 draws x 16 fixed steps/pixel  (1280x720 px)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Visual:       waves in seven directions, two draws added together, mediump
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Burn rate:    7.23 Gpix-step/s  (4.081 ms render)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: --- Analysis ---
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Avg frame time:  5.050 ms
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Avg GPU time:    4.081 ms
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: GPU utilisation: 80.8%
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: >> GPU-bound: GPU is the bottleneck.
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: --- Thermal Stability ---
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Windows:      13 x 1s
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Stable score: not reached — keep running to detect throttling.
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: ==========================================================
+10-14 11:09:35.330  9880 10693 I A00000/MangekyoEngine: [Results] Saved as 20261014-110935-308 -> /data/storage/el2/base/haps/entry/files/results/results.json
+10-14 11:09:35.383  9880  9880 I A00000/Mangekyo: SUITE_RESULT	status=review	job=gles2-burn-16	reason= 尚未达到稳定吞吐
+10-14 11:09:35.399  9880  9880 I A00000/Mangekyo: surface destroyed
+10-14 11:09:35.632  1164  1164 I A01b01/HOME: AppName --> observerCallback appName: Mangekyo, LayoutId: AppName_text_com.mangekyo.benchmark_Mangekyo_mv7iu0xyyvjx090ydin, nameOpacity: 1
+10-14 11:09:50.268  9880  9880 I A00000/Mangekyo: SUITE_END	finished=1	total=5	review=1	failed=0	cancelled=true

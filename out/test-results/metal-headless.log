@@ -1,0 +1,59 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Apple M4 Pro (Discrete)                      38338 MB   -     -     -    YES    -  
+============================================================
+
+Backend: Metal  |  V-Sync: OFF  |  Memory: Device-local  |  Particles: 65536 (Medium)  |  Auto-stop: 1s
+Available GPUs:
+  [0] Apple M4 Pro — 38338 MB
+Selected GPU [0]: Apple M4 Pro
+Created particle buffer: 65536 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[Metal] Headless mode: pure compute, no rendering
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple M4 Pro
+Driver:       macOS 27.0.1
+CPU:          Apple M4 Pro
+OS:           macOS 27.0.1
+System:       macOS ARM64
+Memory:       Unified-memory
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    65536 (Medium)
+Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     0.8 s (warmup: 0.2 s, measured: 15770 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.008     0.008     0.121
+Render:          0.000     0.000     0.000
+Total GPU:       0.008     0.008     0.121
+
+--- Throughput ---
+Avg FPS:      21026
+Particles:    65536
+Working set:  2.00 MiB
+VRAM rate:   312.74 GB/s  (0.008 ms compute)
+
+--- Analysis ---
+Avg frame time:  0.048 ms
+Avg GPU time:    0.008 ms
+GPU utilisation: 17.6%
+>> CPU-bound: GPU is idle 82% of the time.
+   -> Try a higher difficulty for more accurate GPU benchmarking.
+==========================================================
+
+[Results] Saved as 20261012-141829-318 -> /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/native-smoke-data/results/results.json
+[warn] Short timed run: reducing warmup from 2s to 0.25s so measured frames and GPU timestamps are available.

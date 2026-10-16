@@ -1,0 +1,72 @@
+iOS complete suite complete-suite-8231C513-12AE-4F24-B9F0-01A6E35E46D3
+Started: 2026-10-14T10:10:25Z
+
+Thermal precheck stream-16777216: nominal after 0s cooling.
+
+=== 1/1 stream-16777216: review ===
+=== Preview stream?particles=16777216&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A12X GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 16777216 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 25.250 ms | Render: 527.588 ms | Total: 559.069 ms | FPS: 2 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 24.474 ms | Render: 1047.982 ms | Total: 1095.453 ms | FPS: 0 | T: 3.0 s (warm-up)
+[GPU Timing] Compute: 24.333 ms | Render: 1120.406 ms | Total: 1145.755 ms | FPS: 0 | T: 4.1 s
+[GPU Timing] Compute: 24.156 ms | Render: 1153.262 ms | Total: 1178.632 ms | FPS: 0 | T: 5.3 s
+[GPU Timing] Compute: 25.520 ms | Render: 1168.793 ms | Total: 1195.598 ms | FPS: 0 | T: 6.5 s
+[GPU Timing] Compute: 24.488 ms | Render: 1172.277 ms | Total: 1197.655 ms | FPS: 0 | T: 7.7 s
+[GPU Timing] Compute: 23.049 ms | Render: 1142.868 ms | Total: 1166.806 ms | FPS: 0 | T: 8.9 s
+[GPU Timing] Compute: 25.435 ms | Render: 1167.389 ms | Total: 1193.367 ms | FPS: 0 | T: 10.1 s
+[GPU Timing] Compute: 24.271 ms | Render: 1180.714 ms | Total: 1206.374 ms | FPS: 0 | T: 11.3 s
+[GPU Timing] Compute: 26.113 ms | Render: 1179.950 ms | Total: 1206.546 ms | FPS: 0 | T: 12.5 s
+[GPU Timing] Compute: 24.524 ms | Render: 1173.036 ms | Total: 1199.307 ms | FPS: 0 | T: 13.7 s
+[GPU Timing] Compute: 24.077 ms | Render: 1183.245 ms | Total: 1208.558 ms | FPS: 0 | T: 14.9 s
+[GPU Timing] Compute: 24.435 ms | Render: 1177.898 ms | Total: 1203.002 ms | FPS: 0 | T: 16.1 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A12X GPU
+Driver:       iOS 26.7.1
+CPU:          Apple Silicon (iPad8,7)
+OS:           iOS 26.7.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    16777216 (Extreme)
+Buffer:       512.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     14.4 s (warmup: 2.0 s, measured: 12 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        24.494    23.049    26.113
+Render:       1170.995  1142.868  1183.245
+Total GPU:    1196.626  1166.806  1208.558
+
+--- Throughput ---
+Avg FPS:      0
+Particles:    16777216
+Working set:  512.00 MiB
+VRAM rate:   27.40 GB/s  (24.494 ms compute)
+
+--- Analysis ---
+Avg frame time:  1198.840 ms
+Avg GPU time:    1196.626 ms
+GPU utilisation: 99.8%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      11 x 1s
+Stable window: not detected; this run has not reached a stable plateau.
+Throughput:   early vs late mean change (drop positive) 1.5%
+==========================================================
+
+[Results] Saved as 20261014-211043-370 -> /var/mobile/Containers/Data/Application/87DB33B2-E9CE-4192-863D-1EFF27EDE1B4/Documents/results/results.json

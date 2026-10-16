@@ -1,0 +1,16 @@
+[
+  "xcrun",
+  "devicectl",
+  "device",
+  "process",
+  "launch",
+  "--device",
+  "00008027-001969920A87002E",
+  "--terminate-existing",
+  "--console",
+  "--json-output",
+  "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad8-1-full-suite-20261016/ui-watch-01/launch.json",
+  "com.fairchild.Mangekyo",
+  "--ios-allow-translated-api",
+  "--ios-complete-suite"
+]

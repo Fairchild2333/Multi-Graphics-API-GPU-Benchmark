@@ -1,0 +1,23 @@
+{
+  "deviceModel": "iPad8,1",
+  "actualRetestJobs": 7,
+  "actualRetestStatus": "passed",
+  "curatedJobs": 31,
+  "curatedRecords": 33,
+  "historyBefore": 36,
+  "historyAfter": 51,
+  "oldRecordsUnchanged": true,
+  "baselineJobs": 4,
+  "baselineStatus": "review",
+  "metalKernelChanged": false,
+  "stabilityCVThresholdChanged": false,
+  "cpuScore": 657.976,
+  "allCoreParticipationVerified": true,
+  "minimumRoundPerformanceOccupancy": 0.996631745,
+  "minimumRoundEfficiencyOccupancy": 0.969217504,
+  "minimumRoundWorkerOccupancy": 0.96503048,
+  "finalSHA256": "43d43fb16d87ade98bdb80c7c319d8b8e04434eb69cf1c8f8f777e2284b6531b",
+  "appStopped": true,
+  "stoppedPID": 914,
+  "newFullButtonRun": false
+}

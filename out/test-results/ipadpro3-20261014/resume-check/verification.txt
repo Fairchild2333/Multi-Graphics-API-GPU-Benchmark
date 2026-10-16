@@ -1,0 +1,1 @@
+Verified identical-plan retries retain later passed jobs; changed contracts retain only a valid prefix; zero scores rejected

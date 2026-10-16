@@ -1,0 +1,5 @@
+START 1/1 cpu_memory
+STATE cpu_memory ('running', 'running')
+STATE cpu_memory ('passed', 'passed')
+END cpu_memory passed ['20261014-155726-670-cpu-membw'] thermal=0->0 
+DONE 1 jobs; archived /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-cpu-pe-20261014/repaired-final

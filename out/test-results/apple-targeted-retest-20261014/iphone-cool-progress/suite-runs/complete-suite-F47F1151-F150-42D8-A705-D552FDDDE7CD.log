@@ -1,0 +1,216 @@
+iOS complete suite complete-suite-F47F1151-F150-42D8-A705-D552FDDDE7CD
+Started: 2026-10-13T16:08:37Z
+
+Thermal precheck gpu_burn-64: nominal after 0s cooling.
+
+=== 1/4 gpu_burn-64: passed ===
+=== Preview gpu_burn?steps=64&vsync=0&api=metal 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A15 GPU
+[Metal] Render target follows host layer: 1280x720
+[Metal] GPU Burn: fullscreen raymarch (2 draws/frame, steps=64)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 0.000 ms | Render: 77.897 ms | Total: 77.897 ms | FPS: 15 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 76.281 ms | Total: 76.281 ms | FPS: 12 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 76.136 ms | Total: 76.136 ms | FPS: 12 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 76.418 ms | Total: 76.418 ms | FPS: 12 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 75.622 ms | Total: 75.622 ms | FPS: 12 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 75.737 ms | Total: 75.737 ms | FPS: 12 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 75.892 ms | Total: 75.892 ms | FPS: 12 | T: 3.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.889 ms | Total: 75.889 ms | FPS: 12 | T: 4.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 76.062 ms | Total: 76.062 ms | FPS: 12 | T: 5.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.913 ms | Total: 75.913 ms | FPS: 12 | T: 6.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.827 ms | Total: 75.827 ms | FPS: 13 | T: 7.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.744 ms | Total: 75.744 ms | FPS: 12 | T: 8.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.747 ms | Total: 75.747 ms | FPS: 12 | T: 9.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.711 ms | Total: 75.711 ms | FPS: 12 | T: 10.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 76.103 ms | Total: 76.103 ms | FPS: 12 | T: 11.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.770 ms | Total: 75.770 ms | FPS: 12 | T: 12.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.746 ms | Total: 75.746 ms | FPS: 12 | T: 13.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.916 ms | Total: 75.916 ms | FPS: 12 | T: 14.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.758 ms | Total: 75.758 ms | FPS: 12 | T: 15.1 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.1 s (warmup: 2.0 s, measured: 170 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:         75.840    75.561    78.710
+Total GPU:      75.840    75.561    78.710
+
+--- Throughput ---
+Avg FPS:      12
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 64 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    1.56 Gpix-step/s  (75.840 ms render)
+
+--- Analysis ---
+Avg frame time:  77.095 ms
+Avg GPU time:    75.840 ms
+GPU utilisation: 98.4%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Thermal Stability ---
+Windows:      13 x 1s
+Stable score: 1.56 Gpix-step/s  (CV 0.18%)
+>> Thermally stable; stableScore is a fair comparison metric.
+==========================================================
+
+[Results] Saved as 20261014-030852-637 -> /var/mobile/Containers/Data/Application/D5C81B2C-E78E-4E06-9E5C-133C401DFFB3/Documents/results/results.json
+
+Thermal precheck gpu_burn-256: nominal after 0s cooling.
+
+=== 2/4 gpu_burn-256: passed ===
+=== Preview gpu_burn?steps=256&vsync=0&api=metal 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A15 GPU
+[Metal] Render target follows host layer: 1280x720
+[Metal] GPU Burn: fullscreen raymarch (2 draws/frame, steps=256)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 0.000 ms | Render: 313.005 ms | Total: 313.005 ms | FPS: 6 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 299.154 ms | Total: 299.154 ms | FPS: 3 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 296.605 ms | Total: 296.605 ms | FPS: 3 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 300.266 ms | Total: 300.266 ms | FPS: 3 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 300.357 ms | Total: 300.357 ms | FPS: 3 | T: 2.1 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 296.036 ms | Total: 296.036 ms | FPS: 3 | T: 3.3 s
+[GPU Timing] Compute: 0.000 ms | Render: 296.929 ms | Total: 296.929 ms | FPS: 3 | T: 4.5 s
+[GPU Timing] Compute: 0.000 ms | Render: 296.301 ms | Total: 296.301 ms | FPS: 3 | T: 5.7 s
+[GPU Timing] Compute: 0.000 ms | Render: 295.331 ms | Total: 295.331 ms | FPS: 3 | T: 6.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 300.368 ms | Total: 300.368 ms | FPS: 3 | T: 8.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 295.327 ms | Total: 295.327 ms | FPS: 3 | T: 9.3 s
+[GPU Timing] Compute: 0.000 ms | Render: 297.519 ms | Total: 297.519 ms | FPS: 3 | T: 10.5 s
+[GPU Timing] Compute: 0.000 ms | Render: 299.594 ms | Total: 299.594 ms | FPS: 3 | T: 11.7 s
+[GPU Timing] Compute: 0.000 ms | Render: 298.584 ms | Total: 298.584 ms | FPS: 3 | T: 12.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 295.697 ms | Total: 295.697 ms | FPS: 3 | T: 14.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 300.957 ms | Total: 300.957 ms | FPS: 3 | T: 15.3 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.4 s (warmup: 2.0 s, measured: 45 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:        297.432   294.309   305.275
+Total GPU:     297.432   294.309   305.275
+
+--- Throughput ---
+Avg FPS:      3
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 256 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    1.59 Gpix-step/s  (297.432 ms render)
+
+--- Analysis ---
+Avg frame time:  298.875 ms
+Avg GPU time:    297.432 ms
+GPU utilisation: 99.5%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Thermal Stability ---
+Windows:      11 x 1s
+Stable score: 1.58 Gpix-step/s  (CV 0.60%)
+Throttling:   early vs late mean dropped 0.5%
+>> Thermally stable; stableScore is a fair comparison metric.
+==========================================================
+
+[Results] Saved as 20261014-030909-147 -> /var/mobile/Containers/Data/Application/D5C81B2C-E78E-4E06-9E5C-133C401DFFB3/Documents/results/results.json
+
+Thermal precheck cinematic_liquid: nominal after 0s cooling.
+
+=== 3/4 cinematic_liquid: passed ===
+=== Preview cinematic_liquid?vsync=0&api=metal 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A15 GPU
+[Metal] Render target follows host layer: 1280x720
+[Metal] Cinematic Liquid v2 MLS-MPM preview host: 320920 particles, grid 128x64x96, 10 substeps/frame, 352-step raymarch present (metal_preview scores)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 134.270 ms | Render: 62.089 ms | Total: 198.864 ms | FPS: 7 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 129.734 ms | Render: 64.075 ms | Total: 194.866 ms | FPS: 5 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 131.285 ms | Render: 57.343 ms | Total: 189.614 ms | FPS: 5 | T: 1.4 s (warm-up)
+[GPU Timing] Compute: 130.976 ms | Render: 63.578 ms | Total: 195.748 ms | FPS: 4 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 136.394 ms | Render: 77.347 ms | Total: 214.811 ms | FPS: 4 | T: 2.9 s
+[GPU Timing] Compute: 145.988 ms | Render: 86.962 ms | Total: 233.927 ms | FPS: 4 | T: 4.1 s
+[GPU Timing] Compute: 133.932 ms | Render: 86.004 ms | Total: 220.947 ms | FPS: 4 | T: 5.2 s
+[GPU Timing] Compute: 132.200 ms | Render: 83.491 ms | Total: 216.698 ms | FPS: 4 | T: 6.3 s
+[GPU Timing] Compute: 140.475 ms | Render: 100.228 ms | Total: 241.645 ms | FPS: 4 | T: 7.5 s
+[GPU Timing] Compute: 148.125 ms | Render: 104.882 ms | Total: 253.802 ms | FPS: 3 | T: 8.6 s
+[GPU Timing] Compute: 156.730 ms | Render: 109.727 ms | Total: 267.290 ms | FPS: 3 | T: 9.7 s
+[GPU Timing] Compute: 162.211 ms | Render: 109.979 ms | Total: 273.026 ms | FPS: 3 | T: 10.8 s
+[GPU Timing] Compute: 167.129 ms | Render: 107.813 ms | Total: 275.961 ms | FPS: 3 | T: 11.9 s
+[GPU Timing] Compute: 171.298 ms | Render: 99.856 ms | Total: 272.300 ms | FPS: 3 | T: 13.0 s
+[GPU Timing] Compute: 174.355 ms | Render: 84.560 ms | Total: 259.990 ms | FPS: 3 | T: 14.0 s
+[GPU Timing] Compute: 178.102 ms | Render: 79.265 ms | Total: 258.603 ms | FPS: 3 | T: 15.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    320920 (Cinematic Liquid v2)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.3 s (warmup: 2.0 s, measured: 53 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:       154.141   127.654   180.870
+Render:         94.045    76.188   112.024
+Total GPU:     249.198   207.463   277.256
+
+--- Throughput ---
+Avg FPS:      3
+Liquid:       320920 particles, 128x64x96 grid, 10 substeps
+Surface:      R32F density volume, 352-step raymarch, particle Spiky^2 splat 128x64x96 + adaptive 5x5x5 filter, 4-interface optics, finite pool overflow + clear PVC environment, 7 coupled rigid bodies
+Fluid rate:   12.93 MParticle-step/s  (154.141 ms compute + 94.045 ms render)
+
+--- Analysis ---
+Avg frame time:  251.000 ms
+Avg GPU time:    249.198 ms
+GPU utilisation: 99.3%
+>> GPU-bound: GPU is the bottleneck.
+==========================================================
+
+[Results] Saved as 20261014-030925-485 -> /var/mobile/Containers/Data/Application/D5C81B2C-E78E-4E06-9E5C-133C401DFFB3/Documents/results/results.json
+
+Thermal precheck vulkan/gpu_burn-256: nominal after 0s cooling.

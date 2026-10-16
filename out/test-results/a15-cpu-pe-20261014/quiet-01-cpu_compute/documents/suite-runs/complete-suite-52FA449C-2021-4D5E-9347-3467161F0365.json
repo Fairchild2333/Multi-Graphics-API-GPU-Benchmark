@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "2026-10-14T04:12:31Z",
+  "id" : "complete-suite-52FA449C-2021-4D5E-9347-3467161F0365",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-14T04:12:30Z",
+      "id" : "gpu_burn-16",
+      "request" : "gpu_burn?steps=16&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261014-151230-376"
+      ],
+      "startedAt" : "2026-10-14T04:12:15Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · GPU Burn · 16"
+    }
+  ],
+  "startedAt" : "2026-10-14T04:12:15Z",
+  "status" : "passed"
+}

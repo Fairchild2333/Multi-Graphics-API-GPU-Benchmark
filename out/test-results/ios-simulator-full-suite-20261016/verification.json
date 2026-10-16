@@ -1,0 +1,18 @@
+{
+  "purpose": "SIMULATOR UI FLOW ONLY; NOT PHYSICAL PERFORMANCE",
+  "uiTestPassed": true,
+  "xcodebuildExitCode": 0,
+  "freshRealButtonRun": true,
+  "jobs": 27,
+  "records": 28,
+  "passed": 19,
+  "review": 8,
+  "failed": 0,
+  "allProductionContractsPassed": true,
+  "cpuCurvePoints": 174,
+  "metalMemoryPoints": 52,
+  "vulkanMemoryPoints": 77,
+  "hardwareHistoriesUnchanged": true,
+  "simulatorShutdown": true,
+  "savedResultSHA256": "a0cc55c8350074c31ae387761a8a74c2fb258d6a8b25f31678135e9d9e73c3af"
+}

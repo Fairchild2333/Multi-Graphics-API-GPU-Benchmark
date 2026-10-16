@@ -74,6 +74,10 @@ shader copies from the bundle. Results live under the app's Documents directory.
   capped before ES 2.0 shader compilation so executed/reported steps agree.
 - App Documents are visible in Files and Finder device file sharing, including
   GPU/CPU results.json and per-suite manifests/logs.
+- Small archived result histories, complete curve exports and native text logs
+  are versioned under `out/test-results`; see the
+  [archive index](../out/test-results/README.md). Large diagnostic bundles and
+  build products remain local. Archive files preserve their original bytes.
 - Separate GPU/CPU logs, progress, scores and current-run charts.
 - History preserving result schema, device model, memory and platform metadata.
 - Auto language follows the device's preferred language list, independently of

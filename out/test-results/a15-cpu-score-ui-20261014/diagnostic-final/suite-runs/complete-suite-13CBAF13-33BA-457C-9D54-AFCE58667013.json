@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "2026-10-14T05:16:47Z",
+  "id" : "complete-suite-13CBAF13-33BA-457C-9D54-AFCE58667013",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-14T05:16:47Z",
+      "id" : "cpu_memory",
+      "request" : "gpu_benchmark --cpu-membw",
+      "resultIDs" : [
+        "20261014-161646-987-cpu-membw"
+      ],
+      "startedAt" : "2026-10-14T05:13:38Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "CPU Cache, Memory, Virtual Memory & Storage"
+    }
+  ],
+  "startedAt" : "2026-10-14T05:13:38Z",
+  "status" : "passed"
+}

@@ -1,0 +1,2 @@
+KhronosGroup/SPIRV-Headers/main/include/spirv/unified1/spirv.hpp
+OpAtomicOr = 241

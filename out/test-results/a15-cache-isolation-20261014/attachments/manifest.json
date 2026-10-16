@@ -1,0 +1,17 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "00008110-00164D591485401E",
+        "deviceName" : "iPhone 13 Pro",
+        "exportedFileName" : "4DD461E2-66E4-483D-8893-1D56C0780F2D.txt",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "A15 first-pass and eviction-dose controls_0_F1219A35-C1BB-44A2-B5BF-82B81D34B649.txt",
+        "timestamp" : 1791964619.855
+      }
+    ],
+    "testIdentifier" : "CpuBridgeTests/testA15FirstPassCacheIsolationControls()",
+    "testIdentifierURL" : "test://com.apple.xcode/Mangekyo/MangekyoTests/CpuBridgeTests/testA15FirstPassCacheIsolationControls"
+  }
+]

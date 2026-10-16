@@ -1,0 +1,26 @@
+[  0%] Building CXX object CMakeFiles/cpu_residency_test.dir/tests/cpu_residency_test.cpp.o
+[100%] Linking CXX executable cpu_residency_test
+[100%] Built target cpu_residency_test
+[  5%] Built target glad_gl43
+[ 51%] Built target glfw
+[ 59%] Building CXX object CMakeFiles/gpu_engine.dir/src/cpu_cli.cpp.o
+[ 59%] Building CXX object CMakeFiles/gpu_engine.dir/src/main.cpp.o
+[ 59%] Building CXX object CMakeFiles/gpu_engine.dir/src/cpu_benchmark.cpp.o
+[ 62%] Building CXX object CMakeFiles/gpu_engine.dir/src/cpu_membw.cpp.o
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/cpu_benchmark.cpp:612:10: warning: private field 'changed_' is not used [-Wunused-private-field]
+  612 |     bool changed_ = false;
+      |          ^
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:434:20: warning: unused function 'QuoteSuiteProcessArg' [-Wunused-function]
+  434 | static std::string QuoteSuiteProcessArg(const std::string& value) {
+      |                    ^~~~~~~~~~~~~~~~~~~~
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:454:13: warning: unused function 'NameLooksIntegrated' [-Wunused-function]
+  454 | static bool NameLooksIntegrated(const std::string& name) {
+      |             ^~~~~~~~~~~~~~~~~~~
+1 warning generated.
+2 warnings generated.
+[ 64%] Linking CXX static library libgpu_engine.a
+[ 94%] Built target gpu_engine
+[ 97%] Building CXX object CMakeFiles/cpu_cancel_test.dir/tests/cpu_cancel_test.cpp.o
+[100%] Linking CXX executable cpu_cancel_test
+[100%] Built target cpu_cancel_test
+[100%] Built target complete_suite_test

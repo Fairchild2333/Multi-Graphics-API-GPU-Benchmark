@@ -1,0 +1,27 @@
+{
+  "canonicalFile": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/results/results.json",
+  "beforeCount": 137,
+  "afterCount": 147,
+  "addedCount": 10,
+  "addedIDs": [
+    "20261014-035333-232",
+    "20261014-035348-639",
+    "20261014-035403-949",
+    "20261014-035419-736",
+    "20261014-142727-066",
+    "20261014-142812-535",
+    "20261014-142857-806",
+    "20261014-142943-066",
+    "20261014-143028-422",
+    "20261014-143209-593"
+  ],
+  "priorValidatedAdded": [
+    "20261014-035333-232",
+    "20261014-035348-639",
+    "20261014-035403-949",
+    "20261014-035419-736"
+  ],
+  "oldRowsPreserved": true,
+  "beforeSha256": "b6284e581490616bb5892ff58ba3f19bdc4dd507086ff181ac2424b0083c96cf",
+  "afterSha256": "6b9ff820784e7ac861ce631191515e0ba9c62e9bf2da2f9798c824946a12b3bf"
+}

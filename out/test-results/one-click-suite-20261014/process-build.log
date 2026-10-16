@@ -1,0 +1,13 @@
+[ 33%] Building CXX object CMakeFiles/suite_process_test.dir/src/suite_process.cpp.o
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/suite_process.cpp:1:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/suite_process.h:2:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/string:594:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/max.h:12:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/comp.h:12:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+  204 | #  warning "The selected platform is no longer supported by libc++."
+      |    ^
+1 warning generated.
+[ 66%] Linking CXX executable suite_process_test
+[100%] Built target suite_process_test

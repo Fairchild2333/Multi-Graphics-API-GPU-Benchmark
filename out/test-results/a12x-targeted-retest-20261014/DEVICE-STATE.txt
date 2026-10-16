@@ -1,0 +1,2 @@
+A12X iPad app stopped. Final PID 2544 absent after termination.
+Phone Documents and all 72 scores archived. Safe to disconnect.

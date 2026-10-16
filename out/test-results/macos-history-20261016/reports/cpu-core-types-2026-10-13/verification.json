@@ -1,0 +1,46 @@
+{
+  "before_records": 133,
+  "after_records": 137,
+  "all_original_fields_preserved": true,
+  "new_ids": [
+    "20261013-213545-108-cpu-single-performance",
+    "20261013-213545-114-cpu-single-efficiency",
+    "20261013-213545-118-cpu-multi",
+    "20261013-214534-490-cpu-membw"
+  ],
+  "parser_checks": "151/151",
+  "ctest": "4/4",
+  "builds": [
+    "macOS arm64",
+    "macOS x86_64",
+    "iOS device arm64",
+    "iOS simulator arm64"
+  ],
+  "formal_compute_gui_verified": true,
+  "history_modes_gui_verified": true,
+  "saved_curves_gui_verified": true,
+  "memory_points": 303,
+  "classified_sample_records": 1764,
+  "rejected_sample_records": 2,
+  "memory_exit": 0,
+  "negative_control": [
+    {
+      "name": "classified-save",
+      "exit": 0,
+      "before": 0,
+      "after": 3
+    },
+    {
+      "name": "reject-p-under-background",
+      "exit": 3,
+      "before": 3,
+      "after": 3
+    }
+  ],
+  "append_compatibility": {
+    "exit": 0,
+    "original_rows": 137,
+    "all_original_fields_preserved": true
+  },
+  "canonical_sha256": "b6284e581490616bb5892ff58ba3f19bdc4dd507086ff181ac2424b0083c96cf"
+}

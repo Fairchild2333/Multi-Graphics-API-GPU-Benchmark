@@ -1,5 +1,16 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
+## 2026-10-16 Test results now belong in Git
+
+User explicitly requested that small raw scores, full curves and logs no longer
+be ignored. out/test-results data/logs/reports/exports and the root CLI history
+are now versioned; the old blanket out/results/log rules no longer hide them.
+See docs/test-result-archives.md and out/test-results/README.md. Preserve bytes
+and original statuses; do not treat simulator/control/cancelled rows as accepted
+physical scores. Large trace/xcresult bundles, dependencies and build products
+remain local. Earlier notes saying all raw out data is untracked are historical.
+A16 remains unplugged and CPU untested; no device test is authorized by archiving.
+
 ## 2026-10-13 Core-type selector removed; default covers all cores
 
 User explicitly requested no additional selection option: automatically run

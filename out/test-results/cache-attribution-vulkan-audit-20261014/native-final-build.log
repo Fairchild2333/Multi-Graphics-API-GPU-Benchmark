@@ -1,0 +1,64 @@
+[  5%] Built target glad_gl43
+[ 54%] Built target glfw
+[ 54%] Building CXX object CMakeFiles/gpu_engine.dir/src/app_base.cpp.o
+[ 57%] Building CXX object CMakeFiles/gpu_engine.dir/src/main.cpp.o
+[ 60%] Building CXX object CMakeFiles/gpu_engine.dir/src/vulkan_backend.cpp.o
+[ 65%] Building OBJCXX object CMakeFiles/gpu_engine.dir/src/metal_backend.mm.o
+[ 65%] Building CXX object CMakeFiles/gpu_engine.dir/src/opengl_backend.cpp.o
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_backend.cpp:3:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:1:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/app_base.h:In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_backend.h:5:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/app_base.h:3In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/app_base.cpp:1:
+:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/gpu_common.h:3In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/app_base.h:3:
+3:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/gpu_common.hIn file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/gpu_common.h:3:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: :3:
+"The selected platform is no longer supported by libc++." [-W#warnings]
+:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204  204 | #  warning "The:4:  204 | #  warning "Th selected p warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+e selected platform i  204 | #  wlatform arninis s no longerno longer supported by sug "The libc++."
+      |    ^
+pported by libc++."
+      |    ^
+ selected platform is no longer supported by libc++."
+      |    ^
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/opengl_backend.cpp:3:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/opengl_backend.h:5:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/app_base.h:3:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/gpu_common.h:3:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/metal_backend.mm:3:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/metal_backend.h:5:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/app_base.h:3:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/gpu_common.h:3:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config  204 | #  warni:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+ng "The sel  204ected platform is no longer sup | # ported by libc++."
+      |    ^
+ warning "The selected platform is no longer supported by libc++."
+      |    ^
+1 warning generated.
+1 warning generated.
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:434:20: warning: unused function 'QuoteSuiteProcessArg' [-Wunused-function]
+  434 | static std::string QuoteSuiteProcessArg(const std::string& value) {
+      |                    ^~~~~~~~~~~~~~~~~~~~
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:454:13: warning: unused function 'NameLooksIntegrated' [-Wunused-function]
+  454 | static bool NameLooksIntegrated(const std::string& name) {
+      |             ^~~~~~~~~~~~~~~~~~~
+1 warning generated.
+3 warnings generated.
+1 warning generated.
+[ 68%] Linking CXX static library libgpu_engine.a
+[100%] Built target gpu_engine
+[100%] Built target vulkan_membw_results_test

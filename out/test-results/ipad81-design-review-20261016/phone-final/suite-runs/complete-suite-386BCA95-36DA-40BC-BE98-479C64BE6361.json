@@ -1,0 +1,53 @@
+{
+  "finishedAt" : "2026-10-16T08:39:58Z",
+  "id" : "complete-suite-386BCA95-36DA-40BC-BE98-479C64BE6361",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:39:25Z",
+      "id" : "vulkan\/stream_headless-1048576",
+      "request" : "stream_headless?particles=1048576&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261016-193924-796"
+      ],
+      "startedAt" : "2026-10-16T08:39:09Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan (MoltenVK) · Particle 1048576 · Compute"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:39:41Z",
+      "id" : "vulkan\/stream_headless-4194304",
+      "request" : "stream_headless?particles=4194304&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261016-193940-826"
+      ],
+      "startedAt" : "2026-10-16T08:39:25Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan (MoltenVK) · Particle 4194304 · Compute"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:39:57Z",
+      "id" : "vulkan\/stream_headless-16777216",
+      "request" : "stream_headless?particles=16777216&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261016-193957-335"
+      ],
+      "startedAt" : "2026-10-16T08:39:41Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan (MoltenVK) · Particle 16777216 · Compute"
+    }
+  ],
+  "startedAt" : "2026-10-16T08:39:09Z",
+  "status" : "passed"
+}

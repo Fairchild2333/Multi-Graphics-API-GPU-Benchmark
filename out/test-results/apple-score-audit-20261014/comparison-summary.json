@@ -1,0 +1,37 @@
+[
+  {
+    "title": "CPU 单线程采样平均",
+    "iphone": 147.268,
+    "ipad": 109.415,
+    "unit": "MWork/s",
+    "ratio": 0.7429652062905723
+  },
+  {
+    "title": "CPU 全核",
+    "iphone": 654.417,
+    "ipad": 491.864,
+    "unit": "MWork/s",
+    "ratio": 0.7516063916432488
+  },
+  {
+    "title": "CPU 内存全核读取",
+    "iphone": 34.518,
+    "ipad": 51.204,
+    "unit": "GB/s",
+    "ratio": 1.4833999652355292
+  },
+  {
+    "title": "GPU 顺序内存扫描",
+    "iphone": 29.298,
+    "ipad": 56.76,
+    "unit": "GB/s",
+    "ratio": 1.9373336063895148
+  },
+  {
+    "title": "Metal 粒子 16M 纯计算",
+    "iphone": 18.983,
+    "ipad": 29.502,
+    "unit": "GB/s",
+    "ratio": 1.5541273771269029
+  }
+]

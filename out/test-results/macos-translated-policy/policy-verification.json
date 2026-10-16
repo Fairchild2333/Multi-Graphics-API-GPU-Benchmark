@@ -1,0 +1,11 @@
+{
+  "off": {
+    "total": 18,
+    "vulkan": 0
+  },
+  "on": {
+    "total": 31,
+    "vulkan": 13
+  },
+  "blockedWithoutOptIn": true
+}

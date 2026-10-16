@@ -44,6 +44,10 @@ TabView 替换为 NavigationSplitView，拆除测试页面并取消流程。现�
 `verification.json`、`completed-results.json`、`phone-final/`、两个真实运行
 清单和 `max-navigation-regression/`。其他设备的历史哈希均未改变。
 
+以上小体积原始 JSON、完整文字日志、导出截图和曲线资料现已纳入 Git；原路径和
+字节保持不变。大型 Xcode bundle 仍在本地，已上传其导出摘要与截图。见
+[归档策略](test-result-archives.md) 和 [五台 Apple 设备历史索引](../out/test-results/README.md)。
+
 ## 已完成项目的成绩
 
 下表仅列本轮完整保存的 22 项；中断诊断记录不在其中，CPU 没有成绩。

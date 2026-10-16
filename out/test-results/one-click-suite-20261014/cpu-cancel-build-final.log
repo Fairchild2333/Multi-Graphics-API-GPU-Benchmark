@@ -1,0 +1,15 @@
+[  5%] Built target glad_gl43
+[ 51%] Built target glfw
+[ 94%] Built target gpu_engine
+[ 97%] Building CXX object CMakeFiles/cpu_cancel_test.dir/tests/cpu_cancel_test.cpp.o
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/tests/cpu_cancel_test.cpp:1:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/cpu_cancel.h:2:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/atomic:593:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+  204 | #  warning "The selected platform is no longer supported by libc++."
+      |    ^
+1 warning generated.
+[100%] Linking CXX executable cpu_cancel_test
+ld: warning: building for macOS-11.0, but linking with dylib '/opt/homebrew/opt/vulkan-loader/lib/libvulkan.1.dylib' which was built for newer version 27.0
+[100%] Built target cpu_cancel_test

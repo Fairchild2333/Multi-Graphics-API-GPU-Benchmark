@@ -1,0 +1,55 @@
+START 1/11 cpu_compute
+STATE cpu_compute ('running', 'running')
+STATE cpu_compute ('passed', 'passed')
+END cpu_compute passed ['20261014-154547-670-cpu-single-performance', '20261014-154547-697-cpu-single-efficiency', '20261014-154547-713-cpu-multi'] thermal=0->0 
+REST 20s
+START 2/11 stream-1048576
+STATE stream-1048576 ('running', 'running')
+STATE stream-1048576 ('passed', 'passed')
+END stream-1048576 passed ['20261014-154627-847'] thermal=0->0 
+REST 20s
+START 3/11 vulkan/stream-1048576
+STATE vulkan/stream-1048576 ('running', 'running')
+STATE vulkan/stream-1048576 ('passed', 'passed')
+END vulkan/stream-1048576 passed ['20261014-154710-652'] thermal=0->0 
+REST 20s
+START 4/11 vulkan/gpu_burn-256
+STATE vulkan/gpu_burn-256 ('running', 'running')
+STATE vulkan/gpu_burn-256 ('passed', 'passed')
+END vulkan/gpu_burn-256 passed ['20261014-154752-681'] thermal=0->0 
+REST 20s
+START 5/11 cpu_memory
+STATE cpu_memory ('running', 'running')
+STATE cpu_memory ('failed', 'failed')
+END cpu_memory failed [] thermal=0->0 Expected 1 matching saved results; found 0. See log.
+REST 20s
+START 6/11 stream-65536
+STATE stream-65536 ('running', 'running')
+STATE stream-65536 ('passed', 'passed')
+END stream-65536 passed ['20261014-154953-060'] thermal=0->0 
+REST 20s
+START 7/11 stream-4194304
+STATE stream-4194304 ('running', 'running')
+STATE stream-4194304 ('passed', 'passed')
+END stream-4194304 passed ['20261014-155035-549'] thermal=0->0 
+REST 20s
+START 8/11 stream-16777216
+STATE stream-16777216 ('running', 'running')
+STATE stream-16777216 ('passed', 'passed')
+END stream-16777216 passed ['20261014-155118-544'] thermal=0->0 
+REST 20s
+START 9/11 vulkan/stream-65536
+STATE vulkan/stream-65536 ('running', 'running')
+STATE vulkan/stream-65536 ('passed', 'passed')
+END vulkan/stream-65536 passed ['20261014-155159-937'] thermal=0->0 
+REST 20s
+START 10/11 vulkan/stream-4194304
+STATE vulkan/stream-4194304 ('running', 'running')
+STATE vulkan/stream-4194304 ('passed', 'passed')
+END vulkan/stream-4194304 passed ['20261014-155243-106'] thermal=0->0 
+REST 20s
+START 11/11 vulkan/stream-16777216
+STATE vulkan/stream-16777216 ('running', 'running')
+STATE vulkan/stream-16777216 ('passed', 'passed')
+END vulkan/stream-16777216 passed ['20261014-155328-727'] thermal=0->0 
+DONE 11 jobs; archived /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-cpu-pe-20261014/final-final

@@ -1,0 +1,11 @@
+
+========== 20261013-183008-002-cpu-membw  2026-10-13 18:30:08  Mac16,8 / Apple M4 Pro ==========
+
+--- class 0, Unclassified, one thread ---
+Its levels come from the cache sizes the system reported; nothing to read again.
+
+--- all cores (14 threads, data set sizes are per thread) ---
+Its levels come from the cache sizes the system reported; nothing to read again.
+
+Read from the saved curves, which keep one decimal: a figure may differ from the
+saved summary in its last digit. The file was not changed.

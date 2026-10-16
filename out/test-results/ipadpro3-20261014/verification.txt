@@ -1,0 +1,5 @@
+Metal saved memory points: 52
+Vulkan saved memory points: 77
+GPU cache saved curve points: 124
+CPU saved curve points: 174
+Verified 31/31 jobs, 32 records. Failures: []

@@ -1,0 +1,76 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Apple M4 Pro (Integrated)                    38338 MB  YES    -     -    YES   YES 
+============================================================
+
+Backend: Vulkan  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: Cinematic Liquid v2 (fixed pool quality)  |  Auto-stop: 15s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple M4 Pro (Integrated GPU)
+Selected GPU [0]: Apple M4 Pro  |  Driver: 0.2.2210
+[Vulkan] Present mode: immediate (not tied to the refresh rate)
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 256 particles
+[Cinematic Liquid v2] MLS-MPM 320920 particles, grid 128x64x96, particle-splat surface 128x64x96, 7 coupled bodies, whitewater raymarch linear filtering
+[Profiling] Timestamp queries enabled (period = 1 ns/tick)
+[GPU Timing] Compute: 31.419 ms | Render: 7.420 ms | Total: 39.162 ms | FPS: 27 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 30.556 ms | Render: 8.387 ms | Total: 38.946 ms | FPS: 25 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 33.591 ms | Render: 9.212 ms | Total: 43.082 ms | FPS: 23 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 34.993 ms | Render: 9.713 ms | Total: 44.709 ms | FPS: 22 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 36.349 ms | Render: 10.027 ms | Total: 46.379 ms | FPS: 21 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 36.902 ms | Render: 8.907 ms | Total: 45.812 ms | FPS: 21 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 37.746 ms | Render: 9.831 ms | Total: 47.655 ms | FPS: 20 | T: 3.0 s
+[GPU Timing] Compute: 38.200 ms | Render: 9.698 ms | Total: 47.900 ms | FPS: 20 | T: 4.0 s
+[GPU Timing] Compute: 30.702 ms | Render: 10.629 ms | Total: 41.333 ms | FPS: 23 | T: 5.0 s
+[GPU Timing] Compute: 35.990 ms | Render: 11.891 ms | Total: 47.884 ms | FPS: 20 | T: 6.0 s
+[GPU Timing] Compute: 37.669 ms | Render: 11.768 ms | Total: 49.440 ms | FPS: 20 | T: 7.0 s
+[GPU Timing] Compute: 38.208 ms | Render: 10.951 ms | Total: 49.205 ms | FPS: 20 | T: 8.1 s
+[GPU Timing] Compute: 38.679 ms | Render: 10.138 ms | Total: 49.132 ms | FPS: 20 | T: 9.1 s
+[GPU Timing] Compute: 39.557 ms | Render: 9.151 ms | Total: 49.437 ms | FPS: 20 | T: 10.2 s
+[GPU Timing] Compute: 40.053 ms | Render: 8.402 ms | Total: 49.226 ms | FPS: 20 | T: 11.2 s
+[GPU Timing] Compute: 40.039 ms | Render: 8.069 ms | Total: 48.862 ms | FPS: 20 | T: 12.2 s
+[GPU Timing] Compute: 40.270 ms | Render: 7.179 ms | Total: 48.222 ms | FPS: 20 | T: 13.3 s
+[GPU Timing] Compute: 40.332 ms | Render: 7.225 ms | Total: 48.090 ms | FPS: 20 | T: 14.3 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple M4 Pro
+Driver:       0.2.2210
+CPU:          Apple M4 Pro
+OS:           macOS 27.0.1
+System:       macOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    320920 (Cinematic Liquid v2)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 269 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        38.182    27.399    41.113
+Render:          9.459     6.499    13.002
+Total GPU:      47.999    36.681    50.067
+
+--- Throughput ---
+Avg FPS:      20
+Liquid:       320920 particles, 128x64x96 grid, 10 substeps
+Surface:      R32F density volume, 352-step raymarch, particle Spiky^2 splat 128x64x96 + adaptive 5x5x5 filter, 4-interface optics, finite pool overflow + clear PVC environment, 7 coupled rigid bodies
+Fluid rate:   67.36 MParticle-step/s  (38.182 ms compute + 9.459 ms render)
+
+--- Analysis ---
+Avg frame time:  48.421 ms
+Avg GPU time:    47.999 ms
+GPU utilisation: 99.1%
+>> GPU-bound: GPU is the bottleneck.
+==========================================================
+
+[Results] Saved as 20261013-183413-702 -> /Users/fairchild/Library/Application Support/GpuComputeBenchmark/results/results.json

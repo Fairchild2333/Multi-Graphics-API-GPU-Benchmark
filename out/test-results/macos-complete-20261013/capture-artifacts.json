@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Metal_Apple_M4_Pro_gpu_burn_v1_shader3_steps64_5025.gputrace",
+    "path": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/captures/Metal_Apple_M4_Pro_gpu_burn_v1_shader3_steps64_5025.gputrace",
+    "kind": "directory"
+  },
+  {
+    "name": "Metal_Apple_M4_Pro_stream_particles4194304_5059.gputrace",
+    "path": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/captures/Metal_Apple_M4_Pro_stream_particles4194304_5059.gputrace",
+    "kind": "directory"
+  },
+  {
+    "name": "Metal_Apple_M4_Pro_stream_particles16777216_5182.gputrace",
+    "path": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/captures/Metal_Apple_M4_Pro_stream_particles16777216_5182.gputrace",
+    "kind": "directory"
+  },
+  {
+    "name": "Metal_Apple_M4_Pro_stream_particles1048576_5028.gputrace",
+    "path": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/captures/Metal_Apple_M4_Pro_stream_particles1048576_5028.gputrace",
+    "kind": "directory"
+  },
+  {
+    "name": "Metal_Apple_M4_Pro_gpu_burn_v1_shader3_steps256_5050.gputrace",
+    "path": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/captures/Metal_Apple_M4_Pro_gpu_burn_v1_shader3_steps256_5050.gputrace",
+    "kind": "directory"
+  },
+  {
+    "name": "Metal_Apple_M4_Pro_gpu_burn_v1_shader3_steps16_5162.gputrace",
+    "path": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/captures/Metal_Apple_M4_Pro_gpu_burn_v1_shader3_steps16_5162.gputrace",
+    "kind": "directory"
+  },
+  {
+    "name": "Metal_Apple_M4_Pro_stream_particles65536_5020.gputrace",
+    "path": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/captures/Metal_Apple_M4_Pro_stream_particles65536_5020.gputrace",
+    "kind": "directory"
+  },
+  {
+    "name": "Metal_Apple_M4_Pro_cinematic_liquid_v2_shader9_flights1_6161.gputrace",
+    "path": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/captures/Metal_Apple_M4_Pro_cinematic_liquid_v2_shader9_flights1_6161.gputrace",
+    "kind": "directory"
+  }
+]

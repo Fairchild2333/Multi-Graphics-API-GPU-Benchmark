@@ -1,0 +1,24 @@
+{
+  "scope": "Code/method review only; user deferred reconnecting phones",
+  "builds": [
+    "Android four ABI APK",
+    "HarmonyOS native/ArkTS HAP",
+    "iOS device Release build"
+  ],
+  "android_junit_tests": 5,
+  "ohos_production_model_checks": "passed",
+  "ios_suite_contract_checks": "passed",
+  "native_unit_checks": "passed",
+  "runtime_positive": "29 curve points, data verified, write+copy checked",
+  "runtime_fault_notrun": "rejected, no valid report",
+  "runtime_fault_wrongcopy": "rejected, no valid report",
+  "timing_contract_save_guard": "mock backend: changed source rejected after cleanup without new row; valid fixture adds one row in isolated history",
+  "runtime_driver": "Mac MoltenVK; correctness smoke only, not Android/Harmony/iPhone performance validation",
+  "package_shader_verification": "atomic error marker, volatile reads/writes and no chunk-modulo alias in write/copy shader",
+  "cache_attribution": "unverified; methods and next physical protocol documented",
+  "new_physical_phone_scores": 0,
+  "android_harmony_physical_validation": "pending; no connected physical devices",
+  "new_memory_contract": "membw_v2_verified; old scores retained, not reused for new verified job",
+  "private_cache_slc_probe": "protocol researched; not implemented or measured this turn",
+  "write_copy_ownership": "one workgroup per chunk; repeats in shader"
+}

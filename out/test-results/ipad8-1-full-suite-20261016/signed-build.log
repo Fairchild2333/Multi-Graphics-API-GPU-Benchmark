@@ -1,0 +1,163 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild build -project "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Mangekyo.xcodeproj" -scheme Mangekyo -configuration Release -destination id=00008027-001969920A87002E -derivedDataPath "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos" -allowProvisioningUpdates DEVELOPMENT_TEAM=2W6PXCJAM6 CODE_SIGN_STYLE=Automatic "CODE_SIGN_IDENTITY=Apple Development" CODE_SIGNING_ALLOWED=YES CODE_SIGNING_REQUIRED=YES ONLY_ACTIVE_ARCH=YES "LIBRARY_SEARCH_PATHS=\"/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos\" \"/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/Release-iphoneos\" \"/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/$(MOLTENVK_SLICE)\"" -allowProvisioningDeviceRegistration -destination-timeout 30
+
+Build settings from command line:
+    CODE_SIGN_IDENTITY = Apple Development
+    CODE_SIGN_STYLE = Automatic
+    CODE_SIGNING_ALLOWED = YES
+    CODE_SIGNING_REQUIRED = YES
+    DEVELOPMENT_TEAM = 2W6PXCJAM6
+    LIBRARY_SEARCH_PATHS = "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos" "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/Release-iphoneos" "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/$(MOLTENVK_SLICE)"
+    ONLY_ACTIVE_ARCH = YES
+
+2026-10-16 19:09:44.312 xcodebuild[10027:4697278] Writing error result bundle to /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/T/ResultBundle_2026-16-10_19-09-0044.xcresult
+xcodebuild: error: Unable to find a destination matching the provided destination specifier:
+		{ id:00008027-001969920A87002E }
+
+	Destinations compatible with the "Mangekyo" scheme:
+		{ platform:macOS, arch:arm64, variant:Designed for [iPad,iPhone], id:00006040-000221C03628801C, name:My Mac }
+		{ platform:iOS, arch:arm64, id:00008110-00164D591485401E, name:iPhone 13 Pro }
+		{ platform:iOS, arch:arm64, id:00008027-000C39923E85002E, name:Xiaomi Pad 7 Ultra  }
+		{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device }
+		{ platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device }
+		{ platform:visionOS Simulator, arch:arm64, variant:Designed for [iPad,iPhone], id:F1CDA38C-8544-4091-915C-C2F2D32C6601, OS:2.3, name:Apple Vision Pro }
+		{ platform:visionOS Simulator, arch:arm64, variant:Designed for [iPad,iPhone], id:F35EAEE1-AAEB-4019-993E-30319AC71A93, OS:2.4, name:Apple Vision Pro }
+		{ platform:visionOS Simulator, arch:arm64, variant:Designed for [iPad,iPhone], id:5CFCF617-A956-4CE7-84F8-783C2DF0FC11, OS:2.5, name:Apple Vision Pro }
+		{ platform:visionOS Simulator, arch:arm64, variant:Designed for [iPad,iPhone], id:E59B79F3-50FE-4C45-BFB6-57EE71FEA994, OS:26.0, name:Apple Vision Pro }
+		{ platform:visionOS Simulator, arch:arm64, variant:Designed for [iPad,iPhone], id:E1682644-9B3C-4B52-85C3-79A1C6FC6114, OS:26.4, name:Apple Vision Pro }
+		{ platform:visionOS Simulator, arch:arm64, variant:Designed for [iPad,iPhone], id:DE659AB8-2368-493B-9E15-E411D7195FB9, OS:27.0, name:Apple Vision Pro }
+		{ platform:iOS Simulator, arch:arm64, id:683D3C77-B350-4C3B-9A9E-71FFE57C9F20, OS:18.2, name:iPad (10th generation) }
+		{ platform:iOS Simulator, arch:arm64, id:66CB4B9E-0174-485E-8855-A27453A1861D, OS:18.4, name:iPad (A16) }
+		{ platform:iOS Simulator, arch:arm64, id:78B99318-F294-4972-ABD8-CBA0AAA66BDE, OS:18.5, name:iPad (A16) }
+		{ platform:iOS Simulator, arch:arm64, id:CD469B17-6747-4BB3-B1F9-66525B8C15D2, OS:26.0.1, name:iPad (A16) }
+		{ platform:iOS Simulator, arch:arm64, id:51EB1A9D-3020-4E9E-B011-E59BC9761DE4, OS:26.4, name:iPad (A16) }
+		{ platform:iOS Simulator, arch:arm64, id:570E6032-E5A5-4742-9985-F2CA5683C66E, OS:26.5, name:iPad (A16) }
+		{ platform:iOS Simulator, arch:arm64, id:398C40ED-40F7-4924-A37C-81ED484DBAFB, OS:27.0, name:iPad (A16) }
+		{ platform:iOS Simulator, arch:arm64, id:D877FBB4-BD34-4454-A619-32B7E6293B00, OS:18.2, name:iPad Air 11-inch (M2) }
+		{ platform:iOS Simulator, arch:arm64, id:F01A6BE1-E25D-4469-B541-8AF73AE7DCAB, OS:18.4, name:iPad Air 11-inch (M3) }
+		{ platform:iOS Simulator, arch:arm64, id:9D718213-9206-4377-A238-6A47B84544D2, OS:18.5, name:iPad Air 11-inch (M3) }
+		{ platform:iOS Simulator, arch:arm64, id:0F19A13C-807C-4539-97B5-884852575D86, OS:26.0.1, name:iPad Air 11-inch (M3) }
+		{ platform:iOS Simulator, arch:arm64, id:E1E303DC-608E-4B47-B548-23B3349999CE, OS:26.4, name:iPad Air 11-inch (M4) }
+		{ platform:iOS Simulator, arch:arm64, id:50E5E8F3-01B2-4820-9BCA-9122431521B5, OS:26.5, name:iPad Air 11-inch (M4) }
+		{ platform:iOS Simulator, arch:arm64, id:39E6A221-4474-481E-88FD-BE47164967C1, OS:27.0, name:iPad Air 11-inch (M4) }
+		{ platform:iOS Simulator, arch:arm64, id:235F650F-D5AD-406F-819C-F314F5B9C02F, OS:18.2, name:iPad Air 13-inch (M2) }
+		{ platform:iOS Simulator, arch:arm64, id:EF9FCE23-B0EE-4A8D-B3C6-7D77AE10C3FC, OS:18.4, name:iPad Air 13-inch (M3) }
+		{ platform:iOS Simulator, arch:arm64, id:2366DD74-4B44-4C17-B7D1-0C4B3394EE78, OS:18.5, name:iPad Air 13-inch (M3) }
+		{ platform:iOS Simulator, arch:arm64, id:C0AC270C-A9F2-4A2A-A855-4E58818A2472, OS:26.0.1, name:iPad Air 13-inch (M3) }
+		{ platform:iOS Simulator, arch:arm64, id:C0F4F69C-D2BF-4AC2-BABF-ECEAF843AD78, OS:26.4, name:iPad Air 13-inch (M4) }
+		{ platform:iOS Simulator, arch:arm64, id:42D32B2B-E282-45FA-BA26-B7F365B61175, OS:26.5, name:iPad Air 13-inch (M4) }
+		{ platform:iOS Simulator, arch:arm64, id:8BD166C5-3774-404F-8934-B176B75D6247, OS:27.0, name:iPad Air 13-inch (M4) }
+		{ platform:iOS Simulator, arch:arm64, id:A0769CD6-FD28-4FCD-99F4-34D5761217B7, OS:18.2, name:iPad Pro 11-inch (M4) }
+		{ platform:iOS Simulator, arch:arm64, id:CF86746E-3760-498B-AE9F-33D4D6226C7B, OS:18.4, name:iPad Pro 11-inch (M4) }
+		{ platform:iOS Simulator, arch:arm64, id:81AAC1A6-24AE-452A-8667-508AAC0C39AF, OS:18.5, name:iPad Pro 11-inch (M4) }
+		{ platform:iOS Simulator, arch:arm64, id:B5818993-82F3-4068-8F67-D1E5729FBBEC, OS:26.0.1, name:iPad Pro 11-inch (M4) }
+		{ platform:iOS Simulator, arch:arm64, id:E904F2A2-0087-4835-B6A8-E4E00DBE4BBE, OS:26.0.1, name:iPad Pro 11-inch (M5) }
+		{ platform:iOS Simulator, arch:arm64, id:A39E6A94-6610-4EF5-8510-006466C2D72A, OS:26.4, name:iPad Pro 11-inch (M5) }
+		{ platform:iOS Simulator, arch:arm64, id:C9FDEB30-FB72-44F5-951F-AFCCBFDB5CCF, OS:26.5, name:iPad Pro 11-inch (M5) }
+		{ platform:iOS Simulator, arch:arm64, id:1D38CA61-B758-4820-B79A-53F6B90769D7, OS:27.0, name:iPad Pro 11-inch (M5) }
+		{ platform:iOS Simulator, arch:arm64, id:3C97613E-A569-4691-9BB2-F736224E7EA5, OS:18.2, name:iPad Pro 13-inch (M4) }
+		{ platform:iOS Simulator, arch:arm64, id:AECF626B-6D0A-455E-ACE5-D3A7CB37206A, OS:18.4, name:iPad Pro 13-inch (M4) }
+		{ platform:iOS Simulator, arch:arm64, id:6C6562AD-7F36-4B73-BF5C-EAD8CB253E8B, OS:18.5, name:iPad Pro 13-inch (M4) }
+		{ platform:iOS Simulator, arch:arm64, id:F6D90AE1-88C5-4002-9F6F-C67CA72489FB, OS:26.0.1, name:iPad Pro 13-inch (M4) }
+		{ platform:iOS Simulator, arch:arm64, id:FADEA38D-3DB3-44B1-8DC6-6ACBA3189A23, OS:26.0.1, name:iPad Pro 13-inch (M5) }
+		{ platform:iOS Simulator, arch:arm64, id:9A7300EF-1106-4741-BAC2-03C108F58910, OS:26.4, name:iPad Pro 13-inch (M5) }
+		{ platform:iOS Simulator, arch:arm64, id:108DC0F6-C095-4BB3-99C3-8150B48EAA87, OS:26.5, name:iPad Pro 13-inch (M5) }
+		{ platform:iOS Simulator, arch:arm64, id:9B46AF5B-D83E-487B-ACB3-5D4DE722636E, OS:27.0, name:iPad Pro 13-inch (M5) }
+		{ platform:iOS Simulator, arch:arm64, id:C97CE7B2-D2F2-4AEA-9140-5970144B959A, OS:18.2, name:iPad mini (A17 Pro) }
+		{ platform:iOS Simulator, arch:arm64, id:81F0548B-D473-46EB-852A-16E71EC187C7, OS:18.4, name:iPad mini (A17 Pro) }
+		{ platform:iOS Simulator, arch:arm64, id:9C9F61A5-511C-4F53-B75C-90484F69C659, OS:18.5, name:iPad mini (A17 Pro) }
+		{ platform:iOS Simulator, arch:arm64, id:7FB82AC4-5D51-4128-B458-97BDA5730EDE, OS:26.0.1, name:iPad mini (A17 Pro) }
+		{ platform:iOS Simulator, arch:arm64, id:E298F7B3-D5A0-466B-91CF-C0FB060D6113, OS:26.4, name:iPad mini (A17 Pro) }
+		{ platform:iOS Simulator, arch:arm64, id:8170CF8E-9153-4E35-AE4D-86C25C49214E, OS:26.5, name:iPad mini (A17 Pro) }
+		{ platform:iOS Simulator, arch:arm64, id:73A013A2-0ACF-45AE-8CA0-5D9C7E8399E7, OS:27.0, name:iPad mini (A17 Pro) }
+		{ platform:iOS Simulator, arch:arm64, id:F91DCAE8-348E-4CFA-AAC2-FCB8DDB4C057, OS:18.2, name:iPhone 16 }
+		{ platform:iOS Simulator, arch:arm64, id:2440B1DA-41EA-454C-822C-5EAF0D38CD30, OS:18.4, name:iPhone 16 }
+		{ platform:iOS Simulator, arch:arm64, id:07549087-FA3B-47A5-945E-E6951298FA3C, OS:18.5, name:iPhone 16 }
+		{ platform:iOS Simulator, arch:arm64, id:CACB83AA-90EE-49C3-8BF1-271AA9A35BA8, OS:18.2, name:iPhone 16 Plus }
+		{ platform:iOS Simulator, arch:arm64, id:C2F4E066-44B8-4311-BC04-FC87F0D2DE3F, OS:18.4, name:iPhone 16 Plus }
+		{ platform:iOS Simulator, arch:arm64, id:B277B877-8BC2-4619-9C10-4702A3A9AA50, OS:18.5, name:iPhone 16 Plus }
+		{ platform:iOS Simulator, arch:arm64, id:B09520E1-0777-4481-B5BF-C190D3034503, OS:18.2, name:iPhone 16 Pro }
+		{ platform:iOS Simulator, arch:arm64, id:7CA878AD-4494-47BA-ADF4-29C892AD74B9, OS:18.4, name:iPhone 16 Pro }
+		{ platform:iOS Simulator, arch:arm64, id:53987196-51C0-4920-B6E9-3620653551F9, OS:18.5, name:iPhone 16 Pro }
+		{ platform:iOS Simulator, arch:arm64, id:70030B75-DA5A-4AB4-8A9F-927BFCDF48B6, OS:18.2, name:iPhone 16 Pro Max }
+		{ platform:iOS Simulator, arch:arm64, id:3D3F4147-C624-463B-9AAA-36E34A57B424, OS:18.4, name:iPhone 16 Pro Max }
+		{ platform:iOS Simulator, arch:arm64, id:A0945C32-77D5-4E57-9D82-B7651A9A1B6B, OS:18.5, name:iPhone 16 Pro Max }
+		{ platform:iOS Simulator, arch:arm64, id:220EA64A-AA17-4271-A087-1215CB14B7D3, OS:18.4, name:iPhone 16e }
+		{ platform:iOS Simulator, arch:arm64, id:51A3CB9F-CB27-4BE4-B5BF-89A199B28255, OS:18.5, name:iPhone 16e }
+		{ platform:iOS Simulator, arch:arm64, id:CDC1579E-08B8-4B4E-A255-881BB919C96C, OS:26.0.1, name:iPhone 16e }
+		{ platform:iOS Simulator, arch:arm64, id:3ACEB780-EAFB-4F24-8F4C-69007AEF4266, OS:26.0.1, name:iPhone 17 }
+		{ platform:iOS Simulator, arch:arm64, id:6AE40979-ED92-432F-A496-27F8F376F486, OS:26.4, name:iPhone 17 }
+		{ platform:iOS Simulator, arch:arm64, id:65839CC6-D53A-4D41-A1A0-394D54E71728, OS:26.5, name:iPhone 17 }
+		{ platform:iOS Simulator, arch:arm64, id:94572FDF-0E64-4C95-8BA9-BF2741E17050, OS:27.0, name:iPhone 17 }
+		{ platform:iOS Simulator, arch:arm64, id:1561E508-7ED9-4446-8A0D-BE463BB0EBD1, OS:26.0.1, name:iPhone 17 Pro }
+		{ platform:iOS Simulator, arch:arm64, id:7A3C67AE-6C85-4550-BD17-AF3F2A5A974E, OS:26.4, name:iPhone 17 Pro }
+		{ platform:iOS Simulator, arch:arm64, id:48E3F01E-B5B7-4DE2-B4F1-C4C21EE089D3, OS:26.5, name:iPhone 17 Pro }
+		{ platform:iOS Simulator, arch:arm64, id:2D34789A-2237-4469-81C3-CCB5DBDACF13, OS:26.0.1, name:iPhone 17 Pro Max }
+		{ platform:iOS Simulator, arch:arm64, id:B6CE9982-1093-4FF2-9CCE-F5588319198F, OS:26.4, name:iPhone 17 Pro Max }
+		{ platform:iOS Simulator, arch:arm64, id:FF7813B3-967A-415A-AFC1-4B115810985D, OS:26.5, name:iPhone 17 Pro Max }
+		{ platform:iOS Simulator, arch:arm64, id:9DA87582-ABED-403A-97D2-381BA2BF2434, OS:26.4, name:iPhone 17e }
+		{ platform:iOS Simulator, arch:arm64, id:6BE34863-E4AC-480D-B102-99E11E6C9894, OS:26.5, name:iPhone 17e }
+		{ platform:iOS Simulator, arch:arm64, id:4EE31184-A601-44F0-A23B-BBF92A2802C8, OS:27.0, name:iPhone 17e }
+		{ platform:iOS Simulator, arch:arm64, id:573DDAD2-9B49-4C01-AC4E-1FA12BE6D06B, OS:27.0, name:iPhone 18 Pro }
+		{ platform:iOS Simulator, arch:arm64, id:A7474361-2948-4E66-AB00-ADA87A403527, OS:27.0, name:iPhone 18 Pro Max }
+		{ platform:iOS Simulator, arch:arm64, id:4D34C4A7-9397-42EC-8D0E-DC91B7EA3C70, OS:26.0.1, name:iPhone Air }
+		{ platform:iOS Simulator, arch:arm64, id:CA38F4DA-0371-4ECF-A3B2-616F86F29C75, OS:26.4, name:iPhone Air }
+		{ platform:iOS Simulator, arch:arm64, id:BCD4BA9B-3EBC-40A1-8DF1-670E0E3E07CE, OS:26.5, name:iPhone Air }
+		{ platform:iOS Simulator, arch:arm64, id:1073D0A1-68E9-41DD-BDA7-F5D6E4462DBE, OS:27.0, name:iPhone Air }
+		{ platform:iOS Simulator, arch:arm64, id:0472D228-CD78-4035-A46F-5957233733DB, OS:18.2, name:iPhone SE (3rd generation) }
+
+	Destinations incompatible with the "Mangekyo" scheme:
+		{ platform:macOS, arch:arm64e, id:00006040-000221C03628801C, name:My Mac, error:My Mac’s macOS platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support My Mac. }
+		{ platform:tvOS Simulator, arch:arm64, id:EBA5C06E-32B9-40B1-AB77-27B9AB3F73C1, OS:18.2, name:Apple TV, error:Apple TV’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV. }
+		{ platform:tvOS Simulator, arch:arm64, id:FC59304E-D89A-4375-9753-F304FD32AC44, OS:18.4, name:Apple TV, error:Apple TV’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV. }
+		{ platform:tvOS Simulator, arch:arm64, id:4E0000C8-3A75-4F88-AB63-EB255C09068C, OS:18.5, name:Apple TV, error:Apple TV’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV. }
+		{ platform:tvOS Simulator, arch:arm64, id:F5B25ED3-0574-4477-BFAC-7FF6C40A69B2, OS:26.0, name:Apple TV, error:Apple TV’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV. }
+		{ platform:tvOS Simulator, arch:arm64, id:EF6F566A-9B4A-4313-B776-480FCB9BD9FF, OS:26.4, name:Apple TV, error:Apple TV’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV. }
+		{ platform:tvOS Simulator, arch:arm64, id:7007445C-A886-4EB2-BE9A-F3871D238D44, OS:18.2, name:Apple TV 4K (3rd generation), error:Apple TV 4K (3rd generation)’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV 4K (3rd generation). }
+		{ platform:tvOS Simulator, arch:arm64, id:5F8664F2-57AF-4739-B0F6-75E622F64A0E, OS:18.4, name:Apple TV 4K (3rd generation), error:Apple TV 4K (3rd generation)’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV 4K (3rd generation). }
+		{ platform:tvOS Simulator, arch:arm64, id:A9B44B2C-EE1E-4F66-AB57-6B803469AC8B, OS:18.5, name:Apple TV 4K (3rd generation), error:Apple TV 4K (3rd generation)’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV 4K (3rd generation). }
+		{ platform:tvOS Simulator, arch:arm64, id:6157A97F-186B-47E3-A565-939E7D682425, OS:26.0, name:Apple TV 4K (3rd generation), error:Apple TV 4K (3rd generation)’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV 4K (3rd generation). }
+		{ platform:tvOS Simulator, arch:arm64, id:9557DDE4-4B5C-45BB-B57F-5ED469501190, OS:26.4, name:Apple TV 4K (3rd generation), error:Apple TV 4K (3rd generation)’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV 4K (3rd generation). }
+		{ platform:tvOS Simulator, arch:arm64, id:7E299B6C-2421-4D0D-BFC3-8C3C864E8334, OS:27.0, name:Apple TV 4K (3rd generation), error:Apple TV 4K (3rd generation)’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV 4K (3rd generation). }
+		{ platform:tvOS Simulator, arch:arm64, id:15FC478D-4960-4661-86A2-BED51ABA544E, OS:18.2, name:Apple TV 4K (3rd generation) (at 1080p), error:Apple TV 4K (3rd generation) (at 1080p)’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV 4K (3rd generation) (at 1080p). }
+		{ platform:tvOS Simulator, arch:arm64, id:13E5067B-8871-4594-B8F3-7C86A2FA516E, OS:18.4, name:Apple TV 4K (3rd generation) (at 1080p), error:Apple TV 4K (3rd generation) (at 1080p)’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV 4K (3rd generation) (at 1080p). }
+		{ platform:tvOS Simulator, arch:arm64, id:115ECFC8-38DD-4410-B5F9-F97ACBEBA0F5, OS:18.5, name:Apple TV 4K (3rd generation) (at 1080p), error:Apple TV 4K (3rd generation) (at 1080p)’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV 4K (3rd generation) (at 1080p). }
+		{ platform:tvOS Simulator, arch:arm64, id:106F2577-14F4-4A76-8DCC-63E05209C018, OS:26.0, name:Apple TV 4K (3rd generation) (at 1080p), error:Apple TV 4K (3rd generation) (at 1080p)’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV 4K (3rd generation) (at 1080p). }
+		{ platform:tvOS Simulator, arch:arm64, id:CB8DE8D5-52E2-472B-8039-B763416A6FD1, OS:26.4, name:Apple TV 4K (3rd generation) (at 1080p), error:Apple TV 4K (3rd generation) (at 1080p)’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV 4K (3rd generation) (at 1080p). }
+		{ platform:tvOS Simulator, arch:arm64, id:25CDA270-2696-42AE-921E-EC05068DAC61, OS:27.0, name:Apple TV 4K (3rd generation) (at 1080p), error:Apple TV 4K (3rd generation) (at 1080p)’s tvOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple TV 4K (3rd generation) (at 1080p). }
+		{ platform:visionOS Simulator, arch:arm64, id:F1CDA38C-8544-4091-915C-C2F2D32C6601, OS:2.3, name:Apple Vision Pro, error:Apple Vision Pro’s visionOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Vision Pro. }
+		{ platform:visionOS Simulator, arch:arm64, id:F35EAEE1-AAEB-4019-993E-30319AC71A93, OS:2.4, name:Apple Vision Pro, error:Apple Vision Pro’s visionOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Vision Pro. }
+		{ platform:visionOS Simulator, arch:arm64, id:5CFCF617-A956-4CE7-84F8-783C2DF0FC11, OS:2.5, name:Apple Vision Pro, error:Apple Vision Pro’s visionOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Vision Pro. }
+		{ platform:visionOS Simulator, arch:arm64, id:E59B79F3-50FE-4C45-BFB6-57EE71FEA994, OS:26.0, name:Apple Vision Pro, error:Apple Vision Pro’s visionOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Vision Pro. }
+		{ platform:visionOS Simulator, arch:arm64, id:E1682644-9B3C-4B52-85C3-79A1C6FC6114, OS:26.4, name:Apple Vision Pro, error:Apple Vision Pro’s visionOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Vision Pro. }
+		{ platform:visionOS Simulator, arch:arm64, id:DE659AB8-2368-493B-9E15-E411D7195FB9, OS:27.0, name:Apple Vision Pro, error:Apple Vision Pro’s visionOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Vision Pro. }
+		{ platform:watchOS Simulator, arch:arm64, id:F288DB8F-2F4F-4228-A24F-6478A0B9A666, OS:11.2, name:Apple Watch SE (40mm) (2nd generation), error:Apple Watch SE (40mm) (2nd generation)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch SE (40mm) (2nd generation). }
+		{ platform:watchOS Simulator, arch:arm64, id:8FF44C9D-C33B-4DE4-9A88-39E00968C7FB, OS:11.4, name:Apple Watch SE (40mm) (2nd generation), error:Apple Watch SE (40mm) (2nd generation)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch SE (40mm) (2nd generation). }
+		{ platform:watchOS Simulator, arch:arm64, id:81C9AFA6-D2B5-464D-807B-541D3A80E4C0, OS:11.5, name:Apple Watch SE (40mm) (2nd generation), error:Apple Watch SE (40mm) (2nd generation)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch SE (40mm) (2nd generation). }
+		{ platform:watchOS Simulator, arch:arm64, id:5906AA28-7F05-44C3-A353-091FCD3BE31A, OS:11.2, name:Apple Watch SE (44mm) (2nd generation), error:Apple Watch SE (44mm) (2nd generation)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch SE (44mm) (2nd generation). }
+		{ platform:watchOS Simulator, arch:arm64, id:3685FB4D-D519-49DF-9662-3073E75B27CF, OS:11.4, name:Apple Watch SE (44mm) (2nd generation), error:Apple Watch SE (44mm) (2nd generation)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch SE (44mm) (2nd generation). }
+		{ platform:watchOS Simulator, arch:arm64, id:511CCEB2-7B39-4173-A2C2-E3AAB4FAA61E, OS:11.5, name:Apple Watch SE (44mm) (2nd generation), error:Apple Watch SE (44mm) (2nd generation)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch SE (44mm) (2nd generation). }
+		{ platform:watchOS Simulator, arch:arm64, id:1CD2A158-CC04-4963-9C4E-AC6518D60A1C, OS:26.0, name:Apple Watch SE 3 (40mm), error:Apple Watch SE 3 (40mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch SE 3 (40mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:9420C3FE-559B-43B8-A150-A6BB21A967B0, OS:26.4, name:Apple Watch SE 3 (40mm), error:Apple Watch SE 3 (40mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch SE 3 (40mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:9477AD24-A751-4A3F-80E2-8F4A27D2D273, OS:27.0, name:Apple Watch SE 3 (40mm), error:Apple Watch SE 3 (40mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch SE 3 (40mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:62DCE837-A634-4A14-A01F-1D927774185C, OS:26.0, name:Apple Watch SE 3 (44mm), error:Apple Watch SE 3 (44mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch SE 3 (44mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:07BBB65A-E6FA-4D6F-8132-822827B0FA0D, OS:26.4, name:Apple Watch SE 3 (44mm), error:Apple Watch SE 3 (44mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch SE 3 (44mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:ECF43470-C9C0-4879-918D-E69BE284B64B, OS:27.0, name:Apple Watch SE 3 (44mm), error:Apple Watch SE 3 (44mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch SE 3 (44mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:61DC760F-398A-46DB-B4BE-F2E04C855A2D, OS:11.2, name:Apple Watch Series 10 (42mm), error:Apple Watch Series 10 (42mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Series 10 (42mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:4E499999-383A-4A62-8711-2E4D51551899, OS:11.4, name:Apple Watch Series 10 (42mm), error:Apple Watch Series 10 (42mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Series 10 (42mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:E287CDB9-8CA5-4583-8D9E-E2DD3B89BB96, OS:11.5, name:Apple Watch Series 10 (42mm), error:Apple Watch Series 10 (42mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Series 10 (42mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:7A98560C-F404-4496-BC90-F15F1B84F68D, OS:11.2, name:Apple Watch Series 10 (46mm), error:Apple Watch Series 10 (46mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Series 10 (46mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:7694460A-348E-44BF-851E-624A143978AE, OS:11.4, name:Apple Watch Series 10 (46mm), error:Apple Watch Series 10 (46mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Series 10 (46mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:169FB7B3-E185-4B1F-B8B3-05752E62E742, OS:11.5, name:Apple Watch Series 10 (46mm), error:Apple Watch Series 10 (46mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Series 10 (46mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:9AFA7A85-DA68-4336-B220-96E315E64E2F, OS:26.0, name:Apple Watch Series 11 (42mm), error:Apple Watch Series 11 (42mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Series 11 (42mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:77B1DA20-F53B-459F-8AF7-65312D0E6643, OS:26.4, name:Apple Watch Series 11 (42mm), error:Apple Watch Series 11 (42mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Series 11 (42mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:33FA9A00-A9E6-4081-B2EF-417CB5F4A35E, OS:26.0, name:Apple Watch Series 11 (46mm), error:Apple Watch Series 11 (46mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Series 11 (46mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:3A95FAE0-90A5-4A71-9193-A4267B12DEA1, OS:26.4, name:Apple Watch Series 11 (46mm), error:Apple Watch Series 11 (46mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Series 11 (46mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:0347A2AA-1902-4D31-B8BD-38BF905F572F, OS:27.0, name:Apple Watch Series 12 (42mm), error:Apple Watch Series 12 (42mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Series 12 (42mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:A1A67797-0017-4094-B2FD-EA7885EEF095, OS:27.0, name:Apple Watch Series 12 (46mm), error:Apple Watch Series 12 (46mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Series 12 (46mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:99222FCC-B3A5-4736-91BB-E854CA39B89A, OS:11.2, name:Apple Watch Ultra 2 (49mm), error:Apple Watch Ultra 2 (49mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Ultra 2 (49mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:30081CCA-F6E6-4AF5-910F-60AA9C9B6C86, OS:11.4, name:Apple Watch Ultra 2 (49mm), error:Apple Watch Ultra 2 (49mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Ultra 2 (49mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:6509FC14-2563-4A6E-A236-50235CDB08F2, OS:11.5, name:Apple Watch Ultra 2 (49mm), error:Apple Watch Ultra 2 (49mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Ultra 2 (49mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:CC280791-001D-46E3-AEAC-3E476790FB8E, OS:26.0, name:Apple Watch Ultra 3 (49mm), error:Apple Watch Ultra 3 (49mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Ultra 3 (49mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:7BE5DE0F-6ED6-4467-BA6E-051516266F42, OS:26.4, name:Apple Watch Ultra 3 (49mm), error:Apple Watch Ultra 3 (49mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Ultra 3 (49mm). }
+		{ platform:watchOS Simulator, arch:arm64, id:EF314380-6DA8-42B2-A968-3AACF321E915, OS:27.0, name:Apple Watch Ultra 4 (49mm), error:Apple Watch Ultra 4 (49mm)’s watchOS Simulator platform doesn’t match Mangekyo.app’s supported platforms. You can change Mangekyo.app’s Base SDK or Supported Platforms to support Apple Watch Ultra 4 (49mm). }

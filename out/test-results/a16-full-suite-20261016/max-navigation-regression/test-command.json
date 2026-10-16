@@ -1,0 +1,22 @@
+[
+  "xcodebuild",
+  "test",
+  "-project",
+  "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/Mangekyo.xcodeproj",
+  "-scheme",
+  "Mangekyo",
+  "-configuration",
+  "Release",
+  "-destination",
+  "id=A7474361-2948-4E66-AB00-ADA87A403527",
+  "-derivedDataPath",
+  "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator",
+  "-only-testing:MangekyoUITests/CompleteSuiteUITests/testCompleteSuiteSurvivesLandscapeTransition",
+  "-parallel-testing-enabled",
+  "NO",
+  "-resultBundlePath",
+  "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a16-full-suite-20261016/max-navigation-regression/ui-navigation.xcresult",
+  "LIBRARY_SEARCH_PATHS=\"/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator\" \"/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/Release-iphonesimulator\" \"/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/dependencies/MoltenVK/MoltenVK/static/MoltenVK.xcframework/$(MOLTENVK_SLICE)\"",
+  "CODE_SIGNING_ALLOWED=NO",
+  "ONLY_ACTIVE_ARCH=YES"
+]

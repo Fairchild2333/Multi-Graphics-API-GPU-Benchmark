@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+    "--cpu-membw",
+    "--cpu-core-type",
+    "both"
+  ],
+  "exit": 0,
+  "wall_seconds": 182.83997766699758
+}

@@ -1,0 +1,22 @@
+{
+  "device": "iPhone 13 Pro / A15",
+  "sourceCommit": "5c4e7df718728e498080b9d154abd8275ffeaace",
+  "uniqueJobs": 7,
+  "newRecords": 11,
+  "historyBefore": 67,
+  "historyAfter": 78,
+  "oldRecordsUnchanged": true,
+  "aggregateTimingChecksPassed": true,
+  "validationScope": "Saved average phase sums and GPU/frame interval; startup timestamp calibration and fallback. No per-frame hardware frequency telemetry.",
+  "synchronizedFallbackRuns": [
+    "repeat-03-vulkan-gpu_burn-64"
+  ],
+  "timestampReviewJob": "vulkan/gpu_burn-256",
+  "beforeSha256": "230c46905751f01d741049ca9a051eb0ef54a8e2a62e75db646496a4231d1ce4",
+  "afterSha256": "dc9e706a39b4548add4cf59fd37aa0119febf7802b9885f89858490caa61ace1",
+  "remainingReviewJobs": [
+    "stream-1048576",
+    "vulkan/stream-1048576",
+    "vulkan/gpu_burn-256"
+  ]
+}

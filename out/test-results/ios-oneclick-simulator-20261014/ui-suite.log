@@ -1,0 +1,152 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -project ios-gui/Mangekyo.xcodeproj -scheme Mangekyo -configuration Release -destination id=53987196-51C0-4920-B6E9-3620653551F9 -derivedDataPath build-ios/DerivedData-iphonesimulator "-only-testing:MangekyoUITests/CompleteSuiteUITests/testOneButtonRunsCompleteSuite" -parallel-testing-enabled NO -resultBundlePath out/test-results/ios-oneclick-simulator-20261014/ui-suite.xcresult CODE_SIGNING_ALLOWED=NO
+
+Build settings from command line:
+    CODE_SIGNING_ALLOWED = NO
+
+Writing result bundle at path:
+	/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ios-oneclick-simulator-20261014/ui-suite.xcresult
+
+2026-10-14 17:47:00.172048+1100 MangekyoUITests-Runner[10021:2214372] [Default] Running tests...
+    t =      nans Interface orientation changed to Portrait
+Test Suite 'Selected tests' started at 2026-10-14 17:47:01.452.
+Test Suite 'MangekyoUITests.xctest' started at 2026-10-14 17:47:01.452.
+Test Suite 'CompleteSuiteUITests' started at 2026-10-14 17:47:01.452.
+Test Case '-[MangekyoUITests.CompleteSuiteUITests testOneButtonRunsCompleteSuite]' started.
+    t =     0.00s Start Test at 2026-10-14 17:47:01.452
+    t =     0.14s Set Up
+    t =     0.14s Open com.fairchild.Mangekyo
+    t =     0.14s     Launch com.fairchild.Mangekyo
+2026-10-14 17:47:01.806 xcodebuild[10003:2214007] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-10-14 17:47:01.806 xcodebuild[10003:2214007] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     2.85s         Setting up automation session
+    t =     3.27s         Wait for com.fairchild.Mangekyo to idle
+    t =     4.79s Waiting 30.0s for "complete-suite-all" Button to exist
+    t =     5.87s     Checking `Expect predicate `existsNoRetry == 1` for object "complete-suite-all" Button`
+    t =     5.87s         Checking existence of `"complete-suite-all" Button`
+    t =     7.04s Checking `Expect predicate `enabled == 1` for object "complete-suite-all" Button`
+    t =     7.04s     Find the "complete-suite-all" Button
+    t =     7.08s Tap "complete-suite-all" Button
+    t =     7.08s     Wait for com.fairchild.Mangekyo to idle
+    t =     7.08s     Find the "complete-suite-all" Button
+    t =     7.10s     Check for interrupting elements affecting "complete-suite-all" Button
+    t =     7.13s     Synthesize event
+    t =     7.54s     Wait for com.fairchild.Mangekyo to idle
+    t =    27.91s Checking existence of `"complete-suite-status" StaticText`
+    t =    27.91s     Interface orientation changed to Landscape Right
+    t =    27.91s     Interface orientation changed to Portrait
+    t =    27.94s Find the "complete-suite-status" StaticText
+    t =    47.97s Interface orientation changed to Landscape Right
+    t =    47.97s Checking existence of `"complete-suite-status" StaticText`
+    t =    48.00s Find the "complete-suite-status" StaticText
+    t =    68.04s Interface orientation changed to Portrait
+    t =    68.04s Checking existence of `"complete-suite-status" StaticText`
+    t =    68.06s Find the "complete-suite-status" StaticText
+    t =    88.10s Interface orientation changed to Landscape Right
+    t =    88.10s Interface orientation changed to Portrait
+    t =    88.10s Checking existence of `"complete-suite-status" StaticText`
+    t =    88.13s Find the "complete-suite-status" StaticText
+    t =   108.16s Interface orientation changed to Landscape Right
+    t =   108.17s Checking existence of `"complete-suite-status" StaticText`
+    t =   108.21s Find the "complete-suite-status" StaticText
+    t =   128.23s Interface orientation changed to Portrait
+    t =   128.23s Checking existence of `"complete-suite-status" StaticText`
+    t =   128.27s Find the "complete-suite-status" StaticText
+    t =   148.29s Interface orientation changed to Landscape Right
+    t =   148.29s Checking existence of `"complete-suite-status" StaticText`
+    t =   148.32s Find the "complete-suite-status" StaticText
+    t =   168.36s Checking existence of `"complete-suite-status" StaticText`
+    t =   168.39s Find the "complete-suite-status" StaticText
+    t =   188.42s Checking existence of `"complete-suite-status" StaticText`
+    t =   188.46s Find the "complete-suite-status" StaticText
+    t =   208.49s Interface orientation changed to Portrait
+    t =   208.49s Interface orientation changed to Landscape Right
+    t =   208.49s Checking existence of `"complete-suite-status" StaticText`
+    t =   208.53s Find the "complete-suite-status" StaticText
+    t =   228.55s Interface orientation changed to Portrait
+    t =   228.55s Checking existence of `"complete-suite-status" StaticText`
+    t =   228.58s Find the "complete-suite-status" StaticText
+    t =   248.61s Interface orientation changed to Landscape Right
+    t =   248.61s Checking existence of `"complete-suite-status" StaticText`
+    t =   248.63s Find the "complete-suite-status" StaticText
+    t =   268.66s Interface orientation changed to Portrait
+    t =   268.66s Interface orientation changed to Landscape Right
+    t =   268.66s Checking existence of `"complete-suite-status" StaticText`
+    t =   268.70s Find the "complete-suite-status" StaticText
+    t =   288.73s Interface orientation changed to Portrait
+    t =   288.73s Checking existence of `"complete-suite-status" StaticText`
+    t =   288.78s Find the "complete-suite-status" StaticText
+    t =   308.81s Interface orientation changed to Landscape Right
+    t =   308.81s Interface orientation changed to Portrait
+    t =   308.81s Interface orientation changed to Landscape Right
+    t =   308.81s Checking existence of `"complete-suite-status" StaticText`
+    t =   308.84s Find the "complete-suite-status" StaticText
+    t =   328.87s Checking existence of `"complete-suite-status" StaticText`
+    t =   328.90s Find the "complete-suite-status" StaticText
+    t =   348.93s Interface orientation changed to Portrait
+    t =   348.93s Checking existence of `"complete-suite-status" StaticText`
+    t =   348.96s Find the "complete-suite-status" StaticText
+    t =   368.99s Checking existence of `"complete-suite-status" StaticText`
+    t =   369.03s Find the "complete-suite-status" StaticText
+    t =   389.07s Checking existence of `"complete-suite-status" StaticText`
+    t =   389.11s Find the "complete-suite-status" StaticText
+    t =   409.17s Checking existence of `"complete-suite-status" StaticText`
+    t =   409.20s Find the "complete-suite-status" StaticText
+    t =   429.24s Checking existence of `"complete-suite-status" StaticText`
+    t =   429.26s Find the "complete-suite-status" StaticText
+    t =   449.29s Checking existence of `"complete-suite-status" StaticText`
+    t =   449.32s Find the "complete-suite-status" StaticText
+    t =   469.35s Checking existence of `"complete-suite-status" StaticText`
+    t =   469.38s Find the "complete-suite-status" StaticText
+    t =   489.42s Checking existence of `"complete-suite-status" StaticText`
+    t =   489.44s Find the "complete-suite-status" StaticText
+    t =   509.48s Checking existence of `"complete-suite-status" StaticText`
+    t =   509.51s Find the "complete-suite-status" StaticText
+    t =   529.54s Checking existence of `"complete-suite-status" StaticText`
+    t =   529.57s Find the "complete-suite-status" StaticText
+    t =   549.60s Checking existence of `"complete-suite-status" StaticText`
+    t =   549.63s Find the "complete-suite-status" StaticText
+    t =   569.66s Checking existence of `"complete-suite-status" StaticText`
+    t =   569.69s Find the "complete-suite-status" StaticText
+    t =   589.72s Checking existence of `"complete-suite-status" StaticText`
+    t =   589.75s Find the "complete-suite-status" StaticText
+    t =   609.78s Checking existence of `"complete-suite-status" StaticText`
+    t =   609.81s Find the "complete-suite-status" StaticText
+    t =   629.84s Checking existence of `"complete-suite-status" StaticText`
+    t =   629.86s Find the "complete-suite-status" StaticText
+    t =   649.90s Checking existence of `"complete-suite-status" StaticText`
+    t =   649.95s Find the "complete-suite-status" StaticText
+    t =   669.98s Checking existence of `"complete-suite-status" StaticText`
+    t =   670.01s Find the "complete-suite-status" StaticText
+    t =   690.04s Interface orientation changed to Landscape Right
+    t =   690.04s Checking existence of `"complete-suite-status" StaticText`
+    t =   690.06s Find the "complete-suite-status" StaticText
+    t =   710.09s Checking existence of `"complete-suite-status" StaticText`
+    t =   710.11s Find the "complete-suite-status" StaticText
+    t =   730.14s Interface orientation changed to Portrait
+    t =   730.14s Interface orientation changed to Landscape Right
+    t =   730.14s Interface orientation changed to Portrait
+    t =   730.14s Checking existence of `"complete-suite-status" StaticText`
+    t =   730.18s Find the "complete-suite-status" StaticText
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui/MangekyoUITests/CompleteSuiteUITests.swift:32: error: -[MangekyoUITests.CompleteSuiteUITests testOneButtonRunsCompleteSuite] : XCTAssertTrue failed - Complete suite failed or was cancelled
+    t =   730.21s Tear Down
+Test Case '-[MangekyoUITests.CompleteSuiteUITests testOneButtonRunsCompleteSuite]' failed (730.489 seconds).
+Test Suite 'CompleteSuiteUITests' failed at 2026-10-14 17:59:11.942.
+	 Executed 1 test, with 1 failure (0 unexpected) in 730.489 (730.490) seconds
+Test Suite 'MangekyoUITests.xctest' failed at 2026-10-14 17:59:11.942.
+	 Executed 1 test, with 1 failure (0 unexpected) in 730.489 (730.491) seconds
+Test Suite 'Selected tests' failed at 2026-10-14 17:59:11.943.
+	 Executed 1 test, with 1 failure (0 unexpected) in 730.489 (730.491) seconds
+2026-10-14 17:59:22.676 xcodebuild[10003:2214007] [MT] IDETestOperationsObserverDebug: 745.261 elapsed -- Testing started completed.
+2026-10-14 17:59:22.676 xcodebuild[10003:2214007] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-14 17:59:22.676 xcodebuild[10003:2214007] [MT] IDETestOperationsObserverDebug: 745.261 sec, +745.261 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ios-oneclick-simulator-20261014/ui-suite.xcresult
+
+Failing tests:
+	CompleteSuiteUITests.testOneButtonRunsCompleteSuite()
+
+** TEST EXECUTE FAILED **
+
+Testing started

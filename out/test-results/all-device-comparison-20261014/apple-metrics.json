@@ -1,0 +1,149 @@
+[
+  {
+    "metric": "CPU 单线程自动采样",
+    "unit": "MWork/s",
+    "mac": 322.3,
+    "iphone": 147.268,
+    "ipad": 109.415
+  },
+  {
+    "metric": "CPU 全核",
+    "unit": "MWork/s",
+    "mac": 3581.602,
+    "iphone": 654.417,
+    "ipad": 491.864
+  },
+  {
+    "metric": "CPU 全核内存读取",
+    "unit": "GB/s",
+    "mac": 240.615,
+    "iphone": 34.518,
+    "ipad": 51.204
+  },
+  {
+    "metric": "Metal 粒子65,536纯计算",
+    "unit": "GB/s",
+    "mac": 310.199,
+    "iphone": 52.955,
+    "ipad": 32.845
+  },
+  {
+    "metric": "Vulkan 粒子65,536纯计算",
+    "unit": "GB/s",
+    "mac": 239.127,
+    "iphone": 38.168,
+    "ipad": 23.373
+  },
+  {
+    "metric": "Metal 粒子1,048,576纯计算",
+    "unit": "GB/s",
+    "mac": 146.696,
+    "iphone": 20.555,
+    "ipad": 30.186
+  },
+  {
+    "metric": "Vulkan 粒子1,048,576纯计算",
+    "unit": "GB/s",
+    "mac": 219.681,
+    "iphone": 21.188,
+    "ipad": 22.618
+  },
+  {
+    "metric": "Metal 粒子4,194,304纯计算",
+    "unit": "GB/s",
+    "mac": 142.22,
+    "iphone": 18.951,
+    "ipad": 29.678
+  },
+  {
+    "metric": "Vulkan 粒子4,194,304纯计算",
+    "unit": "GB/s",
+    "mac": 145.311,
+    "iphone": 19.149,
+    "ipad": 27.317
+  },
+  {
+    "metric": "Metal 粒子16,777,216纯计算",
+    "unit": "GB/s",
+    "mac": 143.277,
+    "iphone": 18.983,
+    "ipad": 29.502
+  },
+  {
+    "metric": "Vulkan 粒子16,777,216纯计算",
+    "unit": "GB/s",
+    "mac": 133.438,
+    "iphone": 19.027,
+    "ipad": 28.935
+  },
+  {
+    "metric": "GPU Vulkan 顺序读取",
+    "unit": "GB/s",
+    "mac": 252.395,
+    "iphone": 29.298,
+    "ipad": 56.76
+  },
+  {
+    "metric": "GPU Metal 固定网格诊断",
+    "unit": "GB/s",
+    "mac": 244.776,
+    "iphone": 30.917,
+    "ipad": 59.904
+  },
+  {
+    "metric": "CPU 单线程内存读取",
+    "unit": "GB/s",
+    "mac": 80.4,
+    "iphone": 35.1,
+    "ipad": 42.1
+  },
+  {
+    "metric": "CPU 单线程L1读取",
+    "unit": "GB/s",
+    "mac": 132.7,
+    "iphone": 96.1,
+    "ipad": 78.9
+  },
+  {
+    "metric": "CPU 单线程L2读取",
+    "unit": "GB/s",
+    "mac": 112.1,
+    "iphone": 79.2,
+    "ipad": 52.3
+  },
+  {
+    "metric": "页面首次映射",
+    "unit": "GB/s",
+    "mac": 22.16,
+    "iphone": 21.12,
+    "ipad": 13.74
+  },
+  {
+    "metric": "存储顺序读",
+    "unit": "MB/s",
+    "mac": 3412.0,
+    "iphone": 1382.0,
+    "ipad": 1253.0
+  },
+  {
+    "metric": "存储顺序写",
+    "unit": "MB/s",
+    "mac": 6914.0,
+    "iphone": 1655.0,
+    "ipad": 1541.0
+  },
+  {
+    "metric": "存储随机4K读",
+    "unit": "MB/s",
+    "mac": 63.0,
+    "iphone": 59.0,
+    "ipad": 29.0
+  },
+  {
+    "metric": "存储随机4K写",
+    "unit": "MB/s",
+    "mac": 37.0,
+    "iphone": 30.0,
+    "ipad": 21.0
+  }
+]

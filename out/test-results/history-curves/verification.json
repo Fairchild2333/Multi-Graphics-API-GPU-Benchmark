@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-13",
+  "parserChecks": {
+    "passed": 139,
+    "total": 139
+  },
+  "buildLogs": [
+    "/tmp/mangekyo-history-curves-complete-arm64.log",
+    "/tmp/mangekyo-history-curves-complete-intel.log",
+    "/tmp/mangekyo-history-curves-complete-ios.log"
+  ],
+  "files": [
+    {
+      "path": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/results/results.json",
+      "count": 125,
+      "sha256": "a9478417d06615402f95c34d293ce9d9d5c29731b4a3477b973536db919cb6bb",
+      "unchanged": true,
+      "memoryRunIDs": [
+        "20261013-182141-555-membw",
+        "20261013-182446-724-metal-memsweep",
+        "20261013-183008-002-cpu-membw"
+      ]
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/results/results.json",
+      "count": 220,
+      "sha256": "5f01464406c9dfd9927061beeccdbc2b4c2f03cc4613c0f41e1e1fd8cc1b3c35",
+      "unchanged": true,
+      "memoryRunIDs": []
+    }
+  ],
+  "macosGUI": [
+    "CPU table and actual curves",
+    "Vulkan summary and actual curves",
+    "Metal private/shared preview curves",
+    "Repository 220-row JSON read-only no-sweep message",
+    "Return to current history"
+  ],
+  "iosGUI": "Build only for this change",
+  "newBenchmarksRun": 0,
+  "unverified": [
+    "Independent GPU L2/L3 and SoC/SLC attribution",
+    "Metal memory plateau"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "sourceCommit": "13aeafd1db08daff508f041686f9299bfd41e664",
+  "newDeviceIncluded": true,
+  "profileExpiry": "2026-10-23T08:11:53",
+  "initialAppInstalled": false,
+  "initialHistoryRecords": 0,
+  "testState": "running_via_real_ui_button",
+  "launchMethod": "XCTest tapped complete-suite-all; no complete-suite autorun arguments",
+  "automaticLanguageObserved": "zh: 一键测试全部项目",
+  "plannedJobs": 31
+}

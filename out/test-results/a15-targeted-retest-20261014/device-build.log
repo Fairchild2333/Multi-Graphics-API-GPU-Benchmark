@@ -1,0 +1,389 @@
+MoltenVK 1.4.2 ready (SHA-256 verified; public-API build).
+
+=================================================================
+  Building libgpu_engine.a for iphoneos (Release)
+=================================================================
+-- iOS Vulkan: MoltenVK (runtime selection requires explicit opt-in)
+-- DX12 backend:   DISABLED (by option)
+-- DX11 backend:   DISABLED (by option)
+-- Metal backend:  ENABLED
+-- iOS engine host: ENABLED (CAMetalLayer embed)
+-- OpenGL backend: DISABLED (by option)
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project Mangekyo.xcodeproj build -configuration Release -parallelizeTargets -hideShellScriptEnvironment -sdk iphoneos -target gpu_engine
+
+Build settings from command line:
+    SDKROOT = iphoneos27.0
+
+ComputePackagePrebuildTargetDependencyGraph
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (3 targets)
+    Target 'gpu_engine' in project 'Mangekyo'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'Mangekyo'
+        ➜ Explicit dependency on target 'compile_glsl' in project 'Mangekyo'
+    Target 'compile_glsl' in project 'Mangekyo'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'Mangekyo'
+    Target 'ZERO_CHECK' in project 'Mangekyo' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -x c++ -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -x objective-c++ -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool -V
+
+Build description signature: 4ceeec7226f0440eb320ecc3360a48e3
+Build description path: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/XCBuildData/4ceeec7226f0440eb320ecc3360a48e3.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/SDKStatCaches.noindex/iphoneos27.0-24A430-6c78b3cbc238196c85e1bf6c792c5915.sdkstatcache
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/Mangekyo.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -o /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/SDKStatCaches.noindex/iphoneos27.0-24A430-6c78b3cbc238196c85e1bf6c792c5915.sdkstatcache
+
+note: Run script build phase 'Generate CMakeFiles/ZERO_CHECK' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ZERO_CHECK' from project 'Mangekyo')
+PhaseScriptExecution Generate\ CMakeFiles/ZERO_CHECK /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/ZERO_CHECK.build/Script-C21B715C39756A9F9F347F5F.sh (in target 'ZERO_CHECK' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/ZERO_CHECK.build/Script-C21B715C39756A9F9F347F5F.sh
+make: `/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/CMakeFiles/cmake.check_cache' is up to date.
+
+note: Run script build phase 'Generate CMakeFiles/compile_glsl' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'compile_glsl' from project 'Mangekyo')
+PhaseScriptExecution Generate\ cinematic_liquid_render.frag.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-E6C337D1DFC64B802328A6C7.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-E6C337D1DFC64B802328A6C7.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_render.vert.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-3FD2A01404DEAB9355F5E43F.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-3FD2A01404DEAB9355F5E43F.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_render_v2.frag.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-4EB0FD90709AC8F7CBCD68F8.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-4EB0FD90709AC8F7CBCD68F8.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_render_v2.vert.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-FA477DD8839D90D0CF068AC9.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-FA477DD8839D90D0CF068AC9.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_resolve.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-1DEE2E55EBFF595A33973A38.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-1DEE2E55EBFF595A33973A38.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_resolve_v2.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-4CF7E1EDC922E59A349F4EC5.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-4CF7E1EDC922E59A349F4EC5.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_rigid_integrate_v2.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-5598464D60B45C1321AE4F47.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-5598464D60B45C1321AE4F47.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_sph_density.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-A60BFAFF0DD1974898CA7D95.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-A60BFAFF0DD1974898CA7D95.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_sph_external.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-FB1B3EF7B4FF35CB575CD423.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-FB1B3EF7B4FF35CB575CD423.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_sph_hash_count.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-3F22B0DFDD122A41928143A0.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-3F22B0DFDD122A41928143A0.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_sph_integrate.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-C419692819322141B0827820.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-C419692819322141B0827820.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_sph_pressure.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-625B958C8EB0FCE794D71DA2.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-625B958C8EB0FCE794D71DA2.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_sph_scan_add.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-06BAD7BE641558528DDDA703.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-06BAD7BE641558528DDDA703.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_sph_scan_block.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-344A9B7F82743C505AAC44BB.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-344A9B7F82743C505AAC44BB.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_sph_scatter.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-4D9A24E599F6803C24861B86.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-4D9A24E599F6803C24861B86.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_sph_viscosity.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-F61AF33F196CBEF5EC453EC0.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-F61AF33F196CBEF5EC453EC0.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_surface_clear_v2.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-A2626BBB4BC01DECA4054618.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-A2626BBB4BC01DECA4054618.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_surface_resolve_v2.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-D7FCAFBD138ADAE624BC99D5.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-D7FCAFBD138ADAE624BC99D5.sh
+
+PhaseScriptExecution Generate\ cinematic_liquid_surface_splat_v2.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-D689D831DC1A9E3EBBCA3A31.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-D689D831DC1A9E3EBBCA3A31.sh
+
+PhaseScriptExecution Generate\ compute.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-416A800A955865BEEFCA2AE7.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-416A800A955865BEEFCA2AE7.sh
+
+PhaseScriptExecution Generate\ fluid_advect.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-440BC69C311F6DABA15D8FC9.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-440BC69C311F6DABA15D8FC9.sh
+
+PhaseScriptExecution Generate\ fluid_divergence.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-7B18E92E949C108EAE14DB6D.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-7B18E92E949C108EAE14DB6D.sh
+
+PhaseScriptExecution Generate\ fluid_jacobi.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-9AF6F8C80995CA983590662D.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-9AF6F8C80995CA983590662D.sh
+
+PhaseScriptExecution Generate\ fluid_render.frag.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-0B374329B4266181CA5F1944.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-0B374329B4266181CA5F1944.sh
+
+PhaseScriptExecution Generate\ fluid_render.vert.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-2D516CAE23C28A6D52D1B9C1.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-2D516CAE23C28A6D52D1B9C1.sh
+
+PhaseScriptExecution Generate\ fluid_subtract.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-C20B43AE84E4874FA918F289.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-C20B43AE84E4874FA918F289.sh
+
+PhaseScriptExecution Generate\ fractal.frag.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-305728E22AB40AF05087FDC6.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-305728E22AB40AF05087FDC6.sh
+
+PhaseScriptExecution Generate\ fractal.vert.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-41C128BFE845B23F1B8ED5EB.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-41C128BFE845B23F1B8ED5EB.sh
+
+PhaseScriptExecution Generate\ gpu_burn.frag.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-AD197E52DC6D08C18759FB85.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-AD197E52DC6D08C18759FB85.sh
+
+PhaseScriptExecution Generate\ gpu_stress.frag.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-E5F3CBCEA3375A0AAE59AEC8.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-E5F3CBCEA3375A0AAE59AEC8.sh
+
+PhaseScriptExecution Generate\ membw_check.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-EEE1DC9852866B148C542E70.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-EEE1DC9852866B148C542E70.sh
+
+PhaseScriptExecution Generate\ membw_copy.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-411B9695913F8DA4AD43DED9.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-411B9695913F8DA4AD43DED9.sh
+
+PhaseScriptExecution Generate\ membw_l1.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-0FF0B6180E6516D339846B20.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-0FF0B6180E6516D339846B20.sh
+
+PhaseScriptExecution Generate\ membw_read.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-2EA1F7FE017F446B35E9413D.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-2EA1F7FE017F446B35E9413D.sh
+
+PhaseScriptExecution Generate\ membw_write.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-181968C0E5B12567D3A9C493.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-181968C0E5B12567D3A9C493.sh
+
+PhaseScriptExecution Generate\ mls_mpm_clear_grid.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-5FE1C84BA997A76D8BE94961.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-5FE1C84BA997A76D8BE94961.sh
+
+PhaseScriptExecution Generate\ mls_mpm_clear_grid_v2.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-516076FA9DEA4D63C7A98DF1.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-516076FA9DEA4D63C7A98DF1.sh
+
+PhaseScriptExecution Generate\ mls_mpm_g2p.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-594FF5B091BCC3267448F365.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-594FF5B091BCC3267448F365.sh
+
+PhaseScriptExecution Generate\ mls_mpm_g2p_v2.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-4203B5C48622338FA8D222C4.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-4203B5C48622338FA8D222C4.sh
+
+PhaseScriptExecution Generate\ mls_mpm_grid_update.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-9DA9C2F7B8BA82DECA57B62D.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-9DA9C2F7B8BA82DECA57B62D.sh
+
+PhaseScriptExecution Generate\ mls_mpm_grid_update_v2.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-9C632D2B1B608C5C84E8B488.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-9C632D2B1B608C5C84E8B488.sh
+
+PhaseScriptExecution Generate\ mls_mpm_p2g_density_stress.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-B82953A25278A94B5DDECC42.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-B82953A25278A94B5DDECC42.sh
+
+PhaseScriptExecution Generate\ mls_mpm_p2g_density_stress_v2.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-2F707899F595D1DBFF43BABA.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-2F707899F595D1DBFF43BABA.sh
+
+PhaseScriptExecution Generate\ mls_mpm_p2g_mass_momentum.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-469BEA9FFFD348E85B336808.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-469BEA9FFFD348E85B336808.sh
+
+PhaseScriptExecution Generate\ mls_mpm_p2g_mass_momentum_v2.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-4E3E1E89B96D26879BA12704.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-4E3E1E89B96D26879BA12704.sh
+
+PhaseScriptExecution Generate\ nbody.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-206B9A89AB0FE4E59259B008.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-206B9A89AB0FE4E59259B008.sh
+
+PhaseScriptExecution Generate\ particle.frag.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-8D1FF6B9FE9CE492A21537F0.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-8D1FF6B9FE9CE492A21537F0.sh
+
+PhaseScriptExecution Generate\ particle.vert.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-BF32E3AEF128098E18A002F4.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-BF32E3AEF128098E18A002F4.sh
+
+PhaseScriptExecution Generate\ render3d.frag.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-66224A97D25FFB163DE5FE1E.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-66224A97D25FFB163DE5FE1E.sh
+
+PhaseScriptExecution Generate\ render3d.vert.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-190CD90A83B160105E70D8CA.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-190CD90A83B160105E70D8CA.sh
+
+PhaseScriptExecution Generate\ synthpeak_fp16.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-1181F7326FFC412EB3233C1F.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-1181F7326FFC412EB3233C1F.sh
+
+PhaseScriptExecution Generate\ synthpeak_fp32.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-5217CD462BC4B279266797A5.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-5217CD462BC4B279266797A5.sh
+
+PhaseScriptExecution Generate\ synthpeak_fp64.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-D7A3FDBCFE4DED103D636970.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-D7A3FDBCFE4DED103D636970.sh
+
+PhaseScriptExecution Generate\ synthpeak_int32.comp.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-1C70201FF12B575A83B65134.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-1C70201FF12B575A83B65134.sh
+
+PhaseScriptExecution Generate\ volumetric.frag.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-86D325D07441B2218F953230.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-86D325D07441B2218F953230.sh
+
+PhaseScriptExecution Generate\ volumetric.vert.spv /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-52B3515633E97229E6F6E9A2.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-52B3515633E97229E6F6E9A2.sh
+
+PhaseScriptExecution Generate\ CMakeFiles/compile_glsl /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-69B0350D9079E529471E1602.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/Mangekyo.build/Release-iphoneos/compile_glsl.build/Script-69B0350D9079E529471E1602.sh
+
+CompileC /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/app_base.o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/src/app_base.cpp normal arm64 c++ com.apple.compilers.llvm.clang.1_0.compiler (in target 'gpu_engine' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    
+    Using response file: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/82b82416624d2658e5098eb0a28c15c5-common-args.resp
+    
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x c++ -ivfsstatcache /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/SDKStatCaches.noindex/iphoneos27.0-24A430-6c78b3cbc238196c85e1bf6c792c5915.sdkstatcache -target arm64-apple-ios16.0 -fmessage-length\=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit\=0 -fno-color-diagnostics -Wno-trigraphs -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-float-conversion -Wno-non-literal-null-conversion -Wno-objc-literal-conversion -Wshorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions -Wno-implicit-fallthrough -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -Wno-sign-conversion -Wno-infinite-recursion -Wno-move -Wno-comma -Wno-block-capture-autoreleasing -Wno-strict-prototypes -Wno-range-loop-analysis -Wno-semicolon-before-method-body -Wall -Wextra -Wpedantic @/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/82b82416624d2658e5098eb0a28c15c5-common-args.resp -MMD -MT dependencies -MF /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/app_base.d --serialize-diagnostics /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/app_base.dia -c /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/src/app_base.cpp -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/app_base.o
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/app_base.cpp:459:10: warning: unused variable 'f12WasPressed' [-Wunused-variable]
+  459 |     bool f12WasPressed = false;
+      |          ^~~~~~~~~~~~~
+1 warning generated.
+
+CompileC /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/cpu_membw.o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/src/cpu_membw.cpp normal arm64 c++ com.apple.compilers.llvm.clang.1_0.compiler (in target 'gpu_engine' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    
+    Using response file: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/82b82416624d2658e5098eb0a28c15c5-common-args.resp
+    
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x c++ -ivfsstatcache /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/SDKStatCaches.noindex/iphoneos27.0-24A430-6c78b3cbc238196c85e1bf6c792c5915.sdkstatcache -target arm64-apple-ios16.0 -fmessage-length\=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit\=0 -fno-color-diagnostics -Wno-trigraphs -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-float-conversion -Wno-non-literal-null-conversion -Wno-objc-literal-conversion -Wshorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions -Wno-implicit-fallthrough -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -Wno-sign-conversion -Wno-infinite-recursion -Wno-move -Wno-comma -Wno-block-capture-autoreleasing -Wno-strict-prototypes -Wno-range-loop-analysis -Wno-semicolon-before-method-body -Wall -Wextra -Wpedantic @/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/82b82416624d2658e5098eb0a28c15c5-common-args.resp -MMD -MT dependencies -MF /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/cpu_membw.d --serialize-diagnostics /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/cpu_membw.dia -c /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/src/cpu_membw.cpp -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/cpu_membw.o
+
+CompileC /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/cpu_cli.o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/src/cpu_cli.cpp normal arm64 c++ com.apple.compilers.llvm.clang.1_0.compiler (in target 'gpu_engine' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    
+    Using response file: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/82b82416624d2658e5098eb0a28c15c5-common-args.resp
+    
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x c++ -ivfsstatcache /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/SDKStatCaches.noindex/iphoneos27.0-24A430-6c78b3cbc238196c85e1bf6c792c5915.sdkstatcache -target arm64-apple-ios16.0 -fmessage-length\=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit\=0 -fno-color-diagnostics -Wno-trigraphs -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-float-conversion -Wno-non-literal-null-conversion -Wno-objc-literal-conversion -Wshorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions -Wno-implicit-fallthrough -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -Wno-sign-conversion -Wno-infinite-recursion -Wno-move -Wno-comma -Wno-block-capture-autoreleasing -Wno-strict-prototypes -Wno-range-loop-analysis -Wno-semicolon-before-method-body -Wall -Wextra -Wpedantic @/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/82b82416624d2658e5098eb0a28c15c5-common-args.resp -MMD -MT dependencies -MF /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/cpu_cli.d --serialize-diagnostics /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/cpu_cli.dia -c /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/src/cpu_cli.cpp -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/cpu_cli.o
+
+CompileC /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/cpu_benchmark.o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/src/cpu_benchmark.cpp normal arm64 c++ com.apple.compilers.llvm.clang.1_0.compiler (in target 'gpu_engine' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    
+    Using response file: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/82b82416624d2658e5098eb0a28c15c5-common-args.resp
+    
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x c++ -ivfsstatcache /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/SDKStatCaches.noindex/iphoneos27.0-24A430-6c78b3cbc238196c85e1bf6c792c5915.sdkstatcache -target arm64-apple-ios16.0 -fmessage-length\=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit\=0 -fno-color-diagnostics -Wno-trigraphs -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-float-conversion -Wno-non-literal-null-conversion -Wno-objc-literal-conversion -Wshorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions -Wno-implicit-fallthrough -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -Wno-sign-conversion -Wno-infinite-recursion -Wno-move -Wno-comma -Wno-block-capture-autoreleasing -Wno-strict-prototypes -Wno-range-loop-analysis -Wno-semicolon-before-method-body -Wall -Wextra -Wpedantic @/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/82b82416624d2658e5098eb0a28c15c5-common-args.resp -MMD -MT dependencies -MF /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/cpu_benchmark.d --serialize-diagnostics /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/cpu_benchmark.dia -c /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/src/cpu_benchmark.cpp -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/cpu_benchmark.o
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/cpu_benchmark.cpp:612:10: warning: private field 'changed_' is not used [-Wunused-private-field]
+  612 |     bool changed_ = false;
+      |          ^
+1 warning generated.
+
+Libtool /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/Release-iphoneos/libgpu_engine.a normal (in target 'gpu_engine' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool -static -arch_only arm64 -D -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/Release-iphoneos -filelist /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/gpu_engine.LinkFileList -dependency_info /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/gpu_engine.build/Release-iphoneos/Objects-normal/arm64/gpu_engine_libtool_dependency_info.dat -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/Release-iphoneos/libgpu_engine.a
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/ExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/build/SwiftExplicitPrecompiledModules
+
+** BUILD SUCCEEDED **
+
+  Static library: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/Release-iphoneos/libgpu_engine.a
+  Size: 1.2M
+
+=================================================================
+  Generating iOS Xcode project (XcodeGen)
+=================================================================
+
+=================================================================
+  Building Mangekyo.app for iphoneos (Release)
+=================================================================
+ExtractAppIntentsMetadata (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name Mangekyo --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.0.sdk --xcode-version 27A266a --platform-family iOS --deployment-target 16.0 --bundle-identifier com.fairchild.Mangekyo --output /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app --target-triple arm64-apple-ios16.0 --binary-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/Mangekyo --dependency-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/Mangekyo_dependency_info.dat --stringsdata-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/Mangekyo.SwiftFileList --metadata-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Mangekyo.DependencyMetadataFileList --static-metadata-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Mangekyo.DependencyStaticMetadataFileList --swift-const-vals-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Objects-normal/arm64/Mangekyo.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-10-14 15:08:34.218 appintentsmetadataprocessor[50211:1895545] Starting appintentsmetadataprocessor export
+2026-10-14 15:08:34.220 appintentsmetadataprocessor[50211:1895545] warning: Metadata extraction skipped, no AppIntents.framework dependency found
+
+Validate /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-validationUtility /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app -shallow-bundle -infoplist-subpath Info.plist
+warning: All interface orientations must be supported unless the app requires full screen. (in target 'Mangekyo' from project 'Mangekyo')
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/SDKExplicitPrecompiledModules
+
+note: Removed stale file '/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/DerivedSources/Entitlements.plist'
+
+note: Removed stale file '/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Mangekyo.app.xcent'
+
+note: Removed stale file '/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Intermediates.noindex/Mangekyo.build/Release-iphoneos/Mangekyo.build/Mangekyo.app.xcent.der'
+
+note: Removed stale file '/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/_CodeSignature'
+
+note: Removed stale file '/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app/embedded.mobileprovision'
+
+note: Run script build phase 'Bundle runtime Metal sources' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Mangekyo' from project 'Mangekyo')
+** BUILD SUCCEEDED **
+
+  Staged 3 Metal shader sources
+
+  iOS app: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app
+  SDK: iphoneos
+  Architecture: arm64
+  Configuration: Release
+
+=================================================================
+  iOS build complete.
+=================================================================

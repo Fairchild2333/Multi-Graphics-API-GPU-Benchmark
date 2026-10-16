@@ -1,0 +1,81 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Apple M4 Pro (Integrated)                    38338 MB  YES    -     -    YES   YES 
+============================================================
+
+Backend: Vulkan  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: GPU Burn v1 r2 / Plasma x Kaleidoscope  |  Auto-stop: 15s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple M4 Pro (Integrated GPU)
+Selected GPU [0]: Apple M4 Pro  |  Driver: 0.2.2210
+[Vulkan] Present mode: immediate (not tied to the refresh rate)
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 256 particles
+[Profiling] Timestamp queries enabled (period = 1 ns/tick)
+[Profiling] Render timestamp check: 76.9124 ms GPU, 72.2056 ms synchronized submit/wait.
+[GPU Timing] Compute: 2.027 ms | Render: 67.623 ms | Total: 72.066 ms | FPS: 17 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 0.096 ms | Render: 73.642 ms | Total: 73.764 ms | FPS: 13 | T: 0.8 s (warm-up)
+[GPU Timing] Compute: 0.081 ms | Render: 72.994 ms | Total: 73.088 ms | FPS: 13 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 2.459 ms | Render: 67.822 ms | Total: 70.297 ms | FPS: 13 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 0.003 ms | Render: 66.588 ms | Total: 66.593 ms | FPS: 14 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 0.002 ms | Render: 66.756 ms | Total: 66.761 ms | FPS: 14 | T: 2.8 s
+[GPU Timing] Compute: 0.002 ms | Render: 66.475 ms | Total: 66.480 ms | FPS: 14 | T: 3.8 s
+[GPU Timing] Compute: 0.002 ms | Render: 66.761 ms | Total: 66.765 ms | FPS: 14 | T: 4.9 s
+[GPU Timing] Compute: 0.002 ms | Render: 66.399 ms | Total: 66.404 ms | FPS: 14 | T: 5.9 s
+[GPU Timing] Compute: 0.002 ms | Render: 66.136 ms | Total: 66.141 ms | FPS: 15 | T: 6.9 s
+[GPU Timing] Compute: 0.002 ms | Render: 66.329 ms | Total: 66.334 ms | FPS: 15 | T: 8.0 s
+[GPU Timing] Compute: 0.002 ms | Render: 66.468 ms | Total: 66.473 ms | FPS: 14 | T: 9.0 s
+[GPU Timing] Compute: 0.002 ms | Render: 66.341 ms | Total: 66.345 ms | FPS: 15 | T: 10.1 s
+[GPU Timing] Compute: 0.002 ms | Render: 66.528 ms | Total: 66.533 ms | FPS: 14 | T: 11.1 s
+[GPU Timing] Compute: 0.002 ms | Render: 66.880 ms | Total: 66.885 ms | FPS: 14 | T: 12.1 s
+[GPU Timing] Compute: 0.002 ms | Render: 66.682 ms | Total: 66.686 ms | FPS: 14 | T: 13.1 s
+[GPU Timing] Compute: 0.002 ms | Render: 66.382 ms | Total: 66.386 ms | FPS: 14 | T: 14.1 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple M4 Pro
+Driver:       0.2.2210
+CPU:          Apple M4 Pro
+OS:           macOS 27.0.1
+System:       macOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.1 s (warmup: 2.0 s, measured: 196 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.002     0.002     0.004
+Render:         66.442    65.673    68.453
+Total GPU:      66.446    65.678    68.458
+
+--- Throughput ---
+Avg FPS:      14
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 256 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    7.10 Gpix-step/s  (66.442 ms render)
+
+--- Analysis ---
+Avg frame time:  66.753 ms
+Avg GPU time:    66.446 ms
+GPU utilisation: 99.5%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Thermal Stability ---
+Windows:      12 x 1s
+Stable score: 7.09 Gpix-step/s  (CV 0.30%)
+Throttling:   early vs late mean dropped 0.1%
+>> Thermally stable; stableScore is a fair comparison metric.
+==========================================================
+
+[Results] Saved as 20261014-035419-736 -> /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/one-click-suite-20261014/mac-validation/results/results.json

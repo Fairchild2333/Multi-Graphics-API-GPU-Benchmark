@@ -1,0 +1,29 @@
+{
+  "devices": {
+    "com.apple.CoreSimulator.SimRuntime.watchOS-27-0": [],
+    "com.apple.CoreSimulator.SimRuntime.iOS-26-5": [],
+    "com.apple.CoreSimulator.SimRuntime.iOS-26-4": [],
+    "com.apple.CoreSimulator.SimRuntime.iOS-26-0": [],
+    "com.apple.CoreSimulator.SimRuntime.iOS-27-0": [],
+    "com.apple.CoreSimulator.SimRuntime.tvOS-26-0": [],
+    "com.apple.CoreSimulator.SimRuntime.watchOS-11-4": [],
+    "com.apple.CoreSimulator.SimRuntime.tvOS-27-0": [],
+    "com.apple.CoreSimulator.SimRuntime.watchOS-26-4": [],
+    "com.apple.CoreSimulator.SimRuntime.watchOS-26-0": [],
+    "com.apple.CoreSimulator.SimRuntime.watchOS-11-5": [],
+    "com.apple.CoreSimulator.SimRuntime.tvOS-18-5": [],
+    "com.apple.CoreSimulator.SimRuntime.xrOS-26-4": [],
+    "com.apple.CoreSimulator.SimRuntime.iOS-18-5": [],
+    "com.apple.CoreSimulator.SimRuntime.iOS-18-4": [],
+    "com.apple.CoreSimulator.SimRuntime.tvOS-18-4": [],
+    "com.apple.CoreSimulator.SimRuntime.iOS-18-2": [],
+    "com.apple.CoreSimulator.SimRuntime.tvOS-18-2": [],
+    "com.apple.CoreSimulator.SimRuntime.watchOS-11-2": [],
+    "com.apple.CoreSimulator.SimRuntime.xrOS-2-4": [],
+    "com.apple.CoreSimulator.SimRuntime.xrOS-2-3": [],
+    "com.apple.CoreSimulator.SimRuntime.xrOS-2-5": [],
+    "com.apple.CoreSimulator.SimRuntime.xrOS-26-0": [],
+    "com.apple.CoreSimulator.SimRuntime.tvOS-26-4": [],
+    "com.apple.CoreSimulator.SimRuntime.xrOS-27-0": []
+  }
+}

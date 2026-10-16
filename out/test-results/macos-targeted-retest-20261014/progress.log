@@ -1,0 +1,15 @@
+running metal-stream1m-render
+finished metal-stream1m-render 189.944 GB/s review []
+cooldown 30s
+running metal-stream16m-render
+finished metal-stream16m-render 152.212 GB/s review []
+cooldown 30s
+running metal-burn16
+finished metal-burn16 8.48 Gpix-step/s review []
+cooldown 30s
+running metal-burn64
+finished metal-burn64 9.401 Gpix-step/s review []
+cooldown 30s
+running vulkan-stream1m-render
+finished vulkan-stream1m-render 171.739 GB/s review ['throughput fell by more than 5 percent']
+all pending Mac jobs completed

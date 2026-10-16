@@ -1,0 +1,8 @@
+START 1/14 stream-65536
+Traceback (most recent call last):
+  File "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a12x-targeted-retest-20261014/run_targeted.py", line 86, in <module>
+    main()
+    ~~~~^^
+  File "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a12x-targeted-retest-20261014/run_targeted.py", line 56, in main
+    raise RuntimeError(f"App launch/console ended ({proc.returncode}): {folder / 'console.log'}")
+RuntimeError: App launch/console ended (1): /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a12x-targeted-retest-20261014/first-01-stream-65536/console.log

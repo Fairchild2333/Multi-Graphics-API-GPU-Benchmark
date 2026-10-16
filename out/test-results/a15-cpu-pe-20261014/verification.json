@@ -1,0 +1,22 @@
+{
+  "historyBefore": 78,
+  "historyAfter": 105,
+  "newRecords": 27,
+  "oldRecordsUnchanged": true,
+  "finalJobsPassed": 13,
+  "finalCPURecords": 3,
+  "cpuResidencyThreshold": 0.99,
+  "rejectedCoreObservations": [
+    {
+      "run": "cpu-first-01-cpu_compute",
+      "logLine": "CPU_RESULT\tkind=core\tmode=per_core\tworkload_version=cpu_mixed_v1_scheduler_managed\tscore_contract=formal\taggregation=median\tcore_index=1\tcore_count=6\tgroup=0\tlogical_index=-1\tphysical_core=-1\tsmt_index=0\tsmt_width=1\tefficiency_class=-1\tperformance_level=1\tcore_class=Efficiency\tcore_type=efficiency\tresidency_verified=0\trequested_lower_bound=0.969141\tclassification_source=qos_verified_cpu_time_bound\taffinity=scheduler_managed\tvalid=0\tscore=30.986164\tunit=MWork/s\tseconds=5.000012\trequested_seconds=15.000000\tround_count=3\tmedian_round=2\tchecksum=48d3eb6a8316db65\tchecksum_role=dce_sink"
+    },
+    {
+      "run": "verified-01-cpu_compute",
+      "logLine": "CPU_RESULT\tkind=core\tmode=per_core\tworkload_version=cpu_mixed_v1_scheduler_managed\tscore_contract=formal\taggregation=median\tcore_index=1\tcore_count=6\tgroup=0\tlogical_index=-1\tphysical_core=-1\tsmt_index=0\tsmt_width=1\tefficiency_class=-1\tperformance_level=1\tcore_class=Efficiency\tcore_type=efficiency\tresidency_verified=0\trequested_lower_bound=0.968523\tclassification_source=qos_verified_cpu_time_bound\taffinity=scheduler_managed\tvalid=0\tscore=30.588052\tunit=MWork/s\tseconds=5.000143\trequested_seconds=15.000000\tround_count=3\tmedian_round=3\tchecksum=d70e36b5fa4a1f22\tchecksum_role=dce_sink"
+    }
+  ],
+  "memoryCoreTypesVerified": true,
+  "finalTimingChecksPassed": true,
+  "afterSha256": "7583ffcf2d323e3775226a43c90b257860ee61b0c89fb35743a47e50a3b569c3"
+}

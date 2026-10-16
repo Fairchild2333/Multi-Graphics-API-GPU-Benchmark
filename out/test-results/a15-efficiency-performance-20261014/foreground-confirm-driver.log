@@ -1,0 +1,5 @@
+START 1/1 cpu_compute
+STATE cpu_compute ('running', 'running')
+STATE cpu_compute ('passed', 'passed')
+END cpu_compute passed ['20261014-164342-791-cpu-single-performance', '20261014-164342-803-cpu-single-efficiency', '20261014-164342-812-cpu-multi'] thermal=0->0 
+DONE 1 jobs; archived /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-efficiency-performance-20261014/foreground-confirm-final

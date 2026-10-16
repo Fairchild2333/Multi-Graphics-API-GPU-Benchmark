@@ -1,0 +1,7005 @@
+{
+  "scope": "First1000 intervals; collection proof only, includes background GPU activity before benchmark and is not a bandwidth result",
+  "rows": [
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 0.004
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 0.004
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.0036
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 0.0096
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 0.0096
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.0072
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.0072
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 0.118
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 0.118
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0075125
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 0.060532019
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 0.034049261
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 0.0375
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 0.0375
+    },
+    {
+      "start_ns": 94202083,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 0.523189536
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 0.509589808
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.003199936
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 0.17599648
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 0.310793784
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 0.310793784
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 0.31099378
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 0.109347813
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 0.699186016
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 0.698386032
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.014399712
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.014399712
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.078398432
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.078398432
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 0.355592888
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 0.23199536
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 0.366792664
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 0.078398432
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 0.50898982
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 0.50898982
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 1.195030266
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 0.269429508
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 0.185075409
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 0.18049639
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 0.18049639
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 0.699186016
+    },
+    {
+      "start_ns": 94252875,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 1.202542766
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 0.0104
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 0.0104
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.0084
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 0.0048
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 0.0048
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.0134
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.0134
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 5.6375
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 5.6375
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.020770833
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 0.09576374
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 0.036541427
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 0.0525
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 0.0525
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 5.6375
+    },
+    {
+      "start_ns": 94303666,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 0.020770833
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 13.053911374
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 12.171652535
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.325147976
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 6.264197728
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 7.807550791
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 7.807550791
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 7.493151095
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 2.159504479
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 4.516477363
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 4.516477363
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.047992321
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.047992321
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 1.580147176
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 1.247800351
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 2.356023036
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 1.893297072
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 0.960646296
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 0.71668533
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 6.937390017
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 6.888397856
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.009690116
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 19.468901642
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 1.442832786
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 0.776813114
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 0.889857622
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 0.889857622
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 13.053911374
+    },
+    {
+      "start_ns": 94354458,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 19.478591758
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 49.038476921
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 46.366690664
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.947924166
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 23.409727221
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 29.111671066
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 28.892888568
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 28.826043916
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 7.857671386
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 27.85337173
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 27.85337173
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.043796496
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.043796496
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 7.880169586
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 5.343172546
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 11.765458763
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 8.8224942
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 3.801295896
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 3.484521238
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 9.237760979
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 9.237760979
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.033868123
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 93.515214616
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 7.271154791
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 8.332894348
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 6.658467322
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 6.193504519
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 49.038476921
+    },
+    {
+      "start_ns": 94405291,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 93.549082739
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 45.696455716
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 43.379470357
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.823265861
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 21.958156652
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 27.190975278
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 26.850148011
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 26.67888431
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 7.430994479
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 27.238979118
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 27.235778862
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 7.522601808
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 5.074405952
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 11.30650452
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 8.448275862
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 3.689895191
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 3.411472917
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 8.187154972
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 8.187154972
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 94.06795877
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 6.487993437
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 6.38592945
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 5.109408752
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 5.109408752
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 45.696455716
+    },
+    {
+      "start_ns": 94456166,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 94.06795877
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 21.9408
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 21.4152
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.0888
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 10.0608
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 13.9392
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 13.9392
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 14.0435
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 3.8892
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 25.3804
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 24.9816
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.045
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.045
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 6.399599999
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 3.3424
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 9.018
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 6.4584
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 3.276
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 3.1392
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 15.018
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 9.654
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.026541666
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 95.981654166
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 9.523452009
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 7.832465955
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 17.099
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 6.886
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 25.3804
+    },
+    {
+      "start_ns": 94506958,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 96.008195832
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 16.618168772
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 16.332761988
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.11001714
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 7.422968071
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 10.753776856
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 10.753776856
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 10.815262885
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 3.069717383
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 24.086578706
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 21.651851556
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.22561486
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.22561486
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 5.287200542
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 2.716945031
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 7.580021525
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 5.409176067
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 2.81978714
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 2.713756128
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 23.860963845
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 12.286742137
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.402765044
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 94.999875433
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 10.156408163
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 8.042370612
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 26.751903376
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 7.312054051
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 26.751903376
+    },
+    {
+      "start_ns": 94557750,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 95.402640477
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 14.26237733
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 14.014329005
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.07746493
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 6.37379839
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 9.298199843
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 9.298199843
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 9.25796223
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 2.613136928
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 19.211302655
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 18.50609083
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.16917859
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.168977904
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 4.55959381
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 2.31190672
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 6.45728391
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 4.63103815
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 2.444761082
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 2.315117702
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 19.406369784
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 12.081819823
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.232704181
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 96.197340738
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 9.0112
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 9.382874074
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 20.192056834
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 7.231732525
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 20.192056834
+    },
+    {
+      "start_ns": 94608791,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 96.430044919
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 15.657206721
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 15.408134754
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.003592384
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 7.035484772
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 10.145291981
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 10.145291981
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 10.299564922
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 2.870614297
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 21.896778828
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 20.253462659
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.004191114
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.004191114
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 5.034127649
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 2.529038438
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 7.145651219
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 5.095198179
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 2.605675966
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 2.531433361
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 25.164151997
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 15.483175667
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.009529796
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 96.764974919
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 8.84394108
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 12.279201309
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 25.901089689
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 8.380233904
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 25.901089689
+    },
+    {
+      "start_ns": 94659416,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 96.774504715
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 17.643741375
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 17.047777133
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.25198488
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 7.27516349
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 10.66815991
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 10.66815991
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 10.538867667
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 2.913625182
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 21.762294262
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 21.551106933
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.124792512
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.124792512
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 4.994500329
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 2.636641801
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 7.395556266
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 5.297282163
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 2.751434913
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 2.643841369
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 21.505209687
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 10.434373937
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 1.555564999
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 93.650476804
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 9.358385561
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 10.874224774
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 28.694278343
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 8.050516968
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 28.694278343
+    },
+    {
+      "start_ns": 94710333,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 95.206041803
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 14.486707727
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 14.256872429
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.156240776
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 6.423975284
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 9.851039965
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 9.851039965
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 9.818375017
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 2.663767488
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 22.231842421
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 18.619807552
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.007477518
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.007477518
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 4.581357366
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 2.373915267
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 6.709301639
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 4.818276628
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 2.459709951
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 2.370766839
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 32.672327279
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 12.586335819
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.011199879
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 95.234955594
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 8.743670702
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 10.646624697
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 40.401719829
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 7.727424782
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 40.401719829
+    },
+    {
+      "start_ns": 94761125,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 95.246155473
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 16.50727904
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 16.226269517
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.028831901
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 7.403301455
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 10.749426407
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 10.749426407
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 10.791659052
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 2.934661225
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 22.932326247
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 21.459056668
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.115936732
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.115936732
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 5.269740715
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 2.676899961
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 7.558831292
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 5.373697995
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 2.822683803
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 2.67811821
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 19.932590201
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 10.445473188
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.19239457
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 97.199566167
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 10.197404326
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 11.140472545
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 27.172544719
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 8.414042354
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 27.172544719
+    },
+    {
+      "start_ns": 94812750,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 97.391960737
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 15.517699553
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 15.263857213
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.011105602
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 6.974318294
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 10.201685671
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 10.201685671
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 10.156866633
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 2.731581556
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 20.927714427
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 20.405354486
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.025780862
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.025780862
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 5.10104115
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 2.539216658
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 7.144075359
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 5.091522062
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 2.633217649
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 2.532077342
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 17.583044124
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 9.439266236
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.074479424
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 96.095347876
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 9.10226851
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 7.844973148
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 23.2692117
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 6.806147744
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 1.0
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 23.2692117
+    },
+    {
+      "start_ns": 94862833,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 96.1698273
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 17.144476608
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 16.835158606
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.204052713
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 7.566145063
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 11.504686329
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 11.504686329
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 11.515617725
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 3.084475394
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 22.727990445
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 22.027976274
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 5.545456385
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 2.77819389
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 7.858863539
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 5.640600012
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 2.885888378
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 2.777789024
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 15.367719994
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 9.588756857
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 97.604109732
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 10.070041493
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 8.720146058
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 18.039838863
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 7.428794105
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 22.727990445
+    },
+    {
+      "start_ns": 94914041,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 97.604109732
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 18.766726003
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 18.373902434
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.201612096
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 8.252895173
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 12.551553093
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 12.551553093
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 12.543152589
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 3.521611296
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 24.227053623
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 23.935436126
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 6.033161989
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 2.988979338
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 8.536912214
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 6.129567774
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 3.106186371
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 2.988979338
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 12.919775186
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 9.878092685
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 96.182308438
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 10.028065573
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 7.68
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 13.524811488
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 6.976918615
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 24.227053623
+    },
+    {
+      "start_ns": 94964250,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 96.182308438
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 18.845599999
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 18.416
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.6572
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 8.0104
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 12.99
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 12.99
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 13.00865
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 3.577299999
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 22.2516
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 22.1224
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 5.2616
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 2.7688
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 8.1068
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 5.886799999
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 2.7912
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 2.6764
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 12.1425
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 10.4035
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 94.353266666
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 10.60583429
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 8.020213289
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 11.424499999
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 7.4095
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 22.2516
+    },
+    {
+      "start_ns": 95015125,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 94.353266666
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 33.37120909
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 22.180523325
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.058414019
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 0.328078738
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 0.471313115
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 0.471313115
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 0.912268944
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 0.137032887
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 4.332239737
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 4.332239737
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 2.71825238
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 2.71825238
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.157237737
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.096023045
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 0.867808273
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 0.715371689
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 0.056813635
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 0.056813635
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 0.898715691
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 0.898715691
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 3.260315809
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 24.889106718
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 0.554421657
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 0.675386382
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 0.469612707
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 0.469612707
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 33.37120909
+    },
+    {
+      "start_ns": 95065875,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 28.149422527
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 96.791199999
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 65.667999999
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 12.106399999
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 12.106399999
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 8.062
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 8.062
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 1.5592
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 1.534
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 0.307
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 0.307
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 70.227725
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 0.001257985
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 1.14602457
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 0.4745
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 0.455999999
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 96.791199999
+    },
+    {
+      "start_ns": 95116666,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 70.227725
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 91.8192
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 63.988
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.5232
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 0.782
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 2.3712
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 2.0772
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 2.075
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 1.7032
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 10.6568
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 10.6568
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 8.9604
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 8.9604
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 1.3568
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 1.3224
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 4.6695
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 4.6695
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 70.291241666
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 6.318029556
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 3.357004926
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 3.836
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 3.836
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 91.8192
+    },
+    {
+      "start_ns": 95167541,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 70.291241666
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 96.60446791
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 64.079518409
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.161596768
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 0.245195096
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 0.485590288
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 0.485590288
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 0.472340553
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 0.267294654
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 10.275394492
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 10.275394492
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 10.174796504
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 10.174796504
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 1.319173616
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 1.288774224
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 1.20097598
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 1.20097598
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 70.34432228
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 1.372327868
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 1.119265573
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 0.9899802
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 0.9899802
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 96.60446791
+    },
+    {
+      "start_ns": 95218291,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 70.34432228
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 96.058557657
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 64.037438502
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.1199952
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 0.128394864
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 0.454781808
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 0.454781808
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 0.354185832
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 0.245140194
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 10.27598896
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 10.27598896
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 10.378584856
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 10.378584856
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 1.32074717
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 1.285548578
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 1.034958601
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 1.034958601
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 70.326245283
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 1.126484003
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 0.879514356
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 0.796968121
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 0.796968121
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 96.058557657
+    },
+    {
+      "start_ns": 95269125,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 70.326245283
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 94.123247394
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 63.755825349
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.400024001
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 0.651239074
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 1.572494349
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 1.572494349
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 1.656999419
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 0.969608176
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 10.280216813
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 10.280216813
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 9.947996879
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 9.947996879
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 1.30367822
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 1.276476588
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 2.95767746
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 2.95767746
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 70.287563087
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 3.57812459
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 2.438714754
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 2.388143288
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 2.388143288
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 94.123247394
+    },
+    {
+      "start_ns": 95319916,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 70.287563087
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 16.85372585
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 12.161913523
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.593176272
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 0.463181472
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 0.163393464
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 0.163393464
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 0.112295508
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 0.104045838
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 2.343906243
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 2.343906243
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 1.44574217
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 1.44574217
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.01599936
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.01599936
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 0.295588176
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 0.285188592
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 0.04599816
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 0.04599816
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 0.915463381
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 0.915463381
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 6.430551111
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 10.577301907
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 0.555681706
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 0.138605414
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 0.27548898
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 0.27548898
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 16.85372585
+    },
+    {
+      "start_ns": 95370750,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 17.007853018
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 75.27350547
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 67.746954939
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 16.215924318
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 21.440428808
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 7.478349566
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 7.478349566
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 6.092421848
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 4.680993619
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 6.081721634
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 6.075321506
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.252405048
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.252405048
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.05200104
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.05200104
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 0.81801636
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 0.80601612
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 1.590831816
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 1.541630832
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 8.286665733
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 8.212164243
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 33.046373427
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 1.775213114
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 2.149140983
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 1.59453189
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 1.55903118
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 75.27350547
+    },
+    {
+      "start_ns": 95421541,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 33.046373427
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 93.790124197
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 82.827943441
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 19.164016719
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 25.740685186
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 8.598028039
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 8.598028039
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 6.735265294
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 5.915131697
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 8.998220035
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 8.971420571
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.015199696
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.015199696
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 1.2599748
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 1.218375632
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 1.8699626
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 1.8699626
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 11.853762924
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 11.853762924
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 35.099668839
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 1.548590163
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 2.80634754
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 1.72896542
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 1.72896542
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 93.790124197
+    },
+    {
+      "start_ns": 95472375,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 35.099668839
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 92.566902676
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 82.183287331
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 15.070602824
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 29.355974238
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 10.573222928
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 10.573222928
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 8.643895755
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 6.613414536
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 9.313172526
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 9.313172526
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 1.090043601
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 1.083243329
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 2.136485459
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 2.136485459
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 10.239909596
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 10.239909596
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 35.015817299
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 1.356926108
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 2.977418719
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 1.718568742
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 1.718568742
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 92.566902676
+    },
+    {
+      "start_ns": 95523208,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 35.015817299
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 77.628
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 68.8224
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 15.85
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 21.737199999
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 7.2612
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 7.2612
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 5.77895
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 5.03435
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 8.6192
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 8.590399999
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 1.2008
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 1.1192
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 1.522
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 1.522
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 8.516999999
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 8.516999999
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 28.763225
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 0.716380327
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 2.168026229
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 1.1455
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 1.1455
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 77.628
+    },
+    {
+      "start_ns": 95573958,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 28.763225
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 0.120802416
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 0.119202384
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 0.011600232
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 0.059601192
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 0.001400028
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 0.001400028
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 0.001300026
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 0.000750015
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 0.065201304
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 0.058801176
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.06800136
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.06800136
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.3400068
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.3400068
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 0.011600232
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 0.011600232
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 0.16600332
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 0.16600332
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 0.023208797
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 0.030191646
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 0.059125307
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 0.03550071
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 0.03550071
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 0.3400068
+    },
+    {
+      "start_ns": 95624791,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 0.023208797
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 92.960348723
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 78.234788346
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 35.913698986
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 20.183559616
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 18.348963228
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 18.348963228
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 18.225140469
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 5.096328807
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 18.842254703
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 18.842254703
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.042990542
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.042990542
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 4.690168163
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 4.093099518
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 5.469596688
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 4.874927515
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 8.989222371
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 4.155085881
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 10.216252424
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 10.201255723
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 90.548458505
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 12.896603773
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 6.063356849
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 7.524844534
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 7.524844534
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 92.960348723
+    },
+    {
+      "start_ns": 95675666,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 90.548458505
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 70.257856728
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 59.68673108
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 27.135969913
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 15.354978095
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 13.190901998
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 13.190901998
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 13.31823001
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 3.546530236
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 14.954890075
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 14.954890075
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 10,
+      "name": "Buffer Read Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 11,
+      "name": "Buffer Load Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 12,
+      "name": "Buffer Write Limiter",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 13,
+      "name": "Buffer Store Utilization",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 14,
+      "name": "Threadgroup/Imageblock Load Limiter",
+      "value": 3.494368761
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 15,
+      "name": "Threadgroup/Imageblock Load Utilization",
+      "value": 2.99145812
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 16,
+      "name": "Threadgroup/Imageblock Store Limiter",
+      "value": 4.127308007
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 17,
+      "name": "Threadgroup/Imageblock Store Utilization",
+      "value": 3.680809778
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 18,
+      "name": "Fragment Input Interpolation Limiter",
+      "value": 5.74486387
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 19,
+      "name": "Fragment Input Interpolation Utilization",
+      "value": 2.929444477
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 20,
+      "name": "GPU Last Level Cache Limiter",
+      "value": 7.299605913
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 21,
+      "name": "GPU Last Level Cache Utilization",
+      "value": 7.299605913
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 22,
+      "name": "Vertex Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 23,
+      "name": "Fragment Occupancy",
+      "value": 65.738720851
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 24,
+      "name": "Compute Occupancy",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 25,
+      "name": "GPU Read Bandwidth",
+      "value": 9.310503691
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 26,
+      "name": "GPU Write Bandwidth",
+      "value": 5.204003281
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 27,
+      "name": "MMU Limiter",
+      "value": 5.757766708
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 28,
+      "name": "MMU Utilization",
+      "value": 5.757766708
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 29,
+      "name": "Partial Renders Count",
+      "value": 0.0
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 255,
+      "name": "Top Performance Limiter",
+      "value": 70.257856728
+    },
+    {
+      "start_ns": 95726458,
+      "duration_ns": 20000,
+      "counter_id": 254,
+      "name": "Total Occupancy",
+      "value": 65.738720851
+    },
+    {
+      "start_ns": 95777250,
+      "duration_ns": 20000,
+      "counter_id": 0,
+      "name": "ALU Limiter",
+      "value": 27.408251834
+    },
+    {
+      "start_ns": 95777250,
+      "duration_ns": 20000,
+      "counter_id": 1,
+      "name": "ALU Utilization",
+      "value": 25.793084138
+    },
+    {
+      "start_ns": 95777250,
+      "duration_ns": 20000,
+      "counter_id": 2,
+      "name": "F32 Utilization",
+      "value": 6.602667946
+    },
+    {
+      "start_ns": 95777250,
+      "duration_ns": 20000,
+      "counter_id": 3,
+      "name": "F16 Utilization",
+      "value": 7.621047579
+    },
+    {
+      "start_ns": 95777250,
+      "duration_ns": 20000,
+      "counter_id": 4,
+      "name": "Texture Sample Limiter",
+      "value": 2.248355032
+    },
+    {
+      "start_ns": 95777250,
+      "duration_ns": 20000,
+      "counter_id": 5,
+      "name": "Texture Sample Utilization",
+      "value": 2.248355032
+    },
+    {
+      "start_ns": 95777250,
+      "duration_ns": 20000,
+      "counter_id": 6,
+      "name": "Texture Filtering Limiter",
+      "value": 1.695316093
+    },
+    {
+      "start_ns": 95777250,
+      "duration_ns": 20000,
+      "counter_id": 7,
+      "name": "Texture Cache Limiter",
+      "value": 1.427171456
+    },
+    {
+      "start_ns": 95777250,
+      "duration_ns": 20000,
+      "counter_id": 8,
+      "name": "Texture Write Limiter",
+      "value": 1.846363072
+    },
+    {
+      "start_ns": 95777250,
+      "duration_ns": 20000,
+      "counter_id": 9,
+      "name": "Texture Write Utilization",
+      "value": 1.827163456
+    }
+  ]
+}

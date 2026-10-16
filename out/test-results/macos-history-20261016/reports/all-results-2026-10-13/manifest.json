@@ -1,0 +1,110 @@
+{
+  "sources": [
+    {
+      "path": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/results/results.json",
+      "label": "当前 Mac 主成绩",
+      "role": "main",
+      "count": 133,
+      "sha256": "84a458ff354c261becb05ba345c12b40f5faef0c3d002bc70bb65eeddac07562"
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/results/results.json",
+      "label": "仓库旧成绩",
+      "role": "legacy",
+      "count": 220,
+      "sha256": "5f01464406c9dfd9927061beeccdbc2b4c2f03cc4613c0f41e1e1fd8cc1b3c35"
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/native-smoke-data/results/results.json",
+      "label": "隔离验证：Apple 适配",
+      "role": "validation",
+      "count": 7,
+      "sha256": "7180dceb16b7765f8d54a94e55479b743326aa9bf300621b6061d6a4f8751ab7"
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-available-suite/current-data/results/results.json",
+      "label": "隔离验证：API 流程",
+      "role": "validation",
+      "count": 4,
+      "sha256": "23b38582d3b080dd6222fd31ae2a98a6255ebeb52a10804da217b3a587c65bdf"
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-available-suite/smoke-data/results/results.json",
+      "label": "隔离验证：OpenGL",
+      "role": "validation",
+      "count": 3,
+      "sha256": "4828e684571b9e6aa54583a8e91a397d1ee4f4430da021d7489591f428271c7d"
+    }
+  ],
+  "uniqueCount": 367,
+  "mainHistoryCount": 353,
+  "isolatedValidationCount": 14,
+  "sourceFilesUnchanged": true,
+  "snapshotsExcluded": [
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/cache-cpu-20261013/after-results.json",
+      "count": 133,
+      "newIDs": []
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/cache-cpu-20261013/before-results.json",
+      "count": 125,
+      "newIDs": []
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/cache-cpu-20261013/new-results.json",
+      "count": 8,
+      "newIDs": []
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-complete-20261013/after-results.json",
+      "count": 109,
+      "newIDs": []
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-complete-20261013/all-new-results.json",
+      "count": 48,
+      "newIDs": []
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-complete-20261013/before-results.json",
+      "count": 77,
+      "newIDs": []
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-complete-20261013/new-results.json",
+      "count": 32,
+      "newIDs": []
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-complete-20261013/selected-results.json",
+      "count": 32,
+      "newIDs": []
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-complete-suite/before-results.json",
+      "count": 76,
+      "newIDs": []
+    }
+  ],
+  "byApi": {
+    "Metal": 109,
+    "Vulkan": 68,
+    "CPU": 15,
+    "OpenGL": 54,
+    "DX11": 62,
+    "DX12": 59
+  },
+  "byWorkload": {
+    "gpu_cache": 3,
+    "membw": 4,
+    "cpu_membw": 4,
+    "cpu_multi_core": 6,
+    "cpu_single_core": 5,
+    "cinematic_liquid": 11,
+    "gpu_burn": 32,
+    "stream": 302
+  },
+  "cpuSingleCoreInterpretation": "14 scheduler-managed samples; not verified P/E or per-physical-core measurements",
+  "summaryPath": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/reports/all-results-2026-10-13/summary.md"
+}

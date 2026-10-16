@@ -1,0 +1,15 @@
+{
+  "attempt": "headless-fix-01",
+  "manifestID": "complete-suite-386BCA95-36DA-40BC-BE98-479C64BE6361",
+  "state": [
+    "passed",
+    3,
+    []
+  ],
+  "completed": 3,
+  "total": 3,
+  "appStopped": true,
+  "measurementState": "complete",
+  "curatedPassed": 24,
+  "curatedReview": 7
+}

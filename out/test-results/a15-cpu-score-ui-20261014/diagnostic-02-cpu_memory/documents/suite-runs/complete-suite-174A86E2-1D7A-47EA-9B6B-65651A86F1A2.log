@@ -1,0 +1,77 @@
+iOS complete suite complete-suite-174A86E2-1D7A-47EA-9B6B-65651A86F1A2
+Started: 2026-10-14T04:47:37Z
+
+Thermal precheck vulkan/gpu_burn-256: nominal after 0s cooling.
+
+=== 1/1 vulkan/gpu_burn-256: passed ===
+=== Preview gpu_burn?steps=256&vsync=0&api=vulkan 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple A15 GPU (Integrated GPU)
+Selected GPU [0]: Apple A15 GPU  |  Driver: 0.2.2210
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 256 particles
+[Profiling] Timestamp queries enabled (period = 1 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK GPU Burn requires per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 0.000 ms | Render: 434.188 ms | Total: 434.188 ms | FPS: 4 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 425.249 ms | Total: 425.249 ms | FPS: 2 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 425.019 ms | Total: 425.019 ms | FPS: 2 | T: 1.7 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 430.488 ms | Total: 430.488 ms | FPS: 2 | T: 2.1 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 432.712 ms | Total: 432.712 ms | FPS: 2 | T: 3.4 s
+[GPU Timing] Compute: 0.000 ms | Render: 434.445 ms | Total: 434.445 ms | FPS: 2 | T: 4.8 s
+[GPU Timing] Compute: 0.000 ms | Render: 428.098 ms | Total: 428.098 ms | FPS: 2 | T: 6.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 427.766 ms | Total: 427.766 ms | FPS: 2 | T: 7.3 s
+[GPU Timing] Compute: 0.000 ms | Render: 426.372 ms | Total: 426.372 ms | FPS: 2 | T: 8.6 s
+[GPU Timing] Compute: 0.000 ms | Render: 425.430 ms | Total: 425.430 ms | FPS: 2 | T: 9.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 428.293 ms | Total: 428.293 ms | FPS: 2 | T: 11.2 s
+[GPU Timing] Compute: 0.000 ms | Render: 433.691 ms | Total: 433.691 ms | FPS: 2 | T: 12.5 s
+[GPU Timing] Compute: 0.000 ms | Render: 429.254 ms | Total: 429.254 ms | FPS: 2 | T: 13.8 s
+[GPU Timing] Compute: 0.000 ms | Render: 424.815 ms | Total: 424.815 ms | FPS: 2 | T: 15.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A15 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.3 s (warmup: 2.0 s, measured: 31 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:        428.655   421.974   437.282
+Total GPU:     428.655   421.974   437.282
+
+--- Throughput ---
+Avg FPS:      2
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 256 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    1.10 Gpix-step/s  (428.655 ms render)
+
+--- Analysis ---
+Avg frame time:  429.141 ms
+Avg GPU time:    428.655 ms
+GPU utilisation: 99.9%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      10 x 1s
+Stable window: 1.10 Gpix-step/s  (CV 0.74%)
+Throughput:   early vs late mean change (drop positive) -0.4%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261014-154752-681 -> /var/mobile/Containers/Data/Application/7287B165-FAB5-43E7-8289-6876AF2CD830/Documents/results/results.json

@@ -1,0 +1,705 @@
+diff --git a/ios-gui/Mangekyo/Engine/BenchEngine.swift b/ios-gui/Mangekyo/Engine/BenchEngine.swift
+index 021f108..cabeaca 100644
+--- a/ios-gui/Mangekyo/Engine/BenchEngine.swift
++++ b/ios-gui/Mangekyo/Engine/BenchEngine.swift
+@@ -81,7 +81,9 @@ final class BenchEngine: ObservableObject {
+     var supportedSuiteJobs: [MobileSuiteJob] {
+         MobileSuiteJob.makeJobs(includeVulkan: allowTranslatedApis && vulkanAvailable,
+             vulkanLiquid: vulkanLiquidAvailable, gpuCache: gpuCacheAvailable, gles2: gles2Available,
+-            gles2MaxSteps: gles2MaxSteps, gpuCacheParallelSteps: gpuCacheParallelSteps)
++            gles2MaxSteps: gles2MaxSteps, gpuCacheParallelSteps: gpuCacheParallelSteps,
++            cpuCoreTypes: gpb_cpu_core_types_available(), particleFixedCoverage:
++                !ProcessInfo.processInfo.arguments.contains("--ios-legacy-particle-coverage"))
+     }
+ 
+     static var readyText: String {
+@@ -415,8 +417,7 @@ final class BenchEngine: ObservableObject {
+                 let valid = added.count == job.expectedRecords && added.allSatisfy {
+                     job.matches($0) && $0.score.isFinite && $0.score > 0 &&
+                     ($0.workloadVersion ?? $0.workload).contains("ios_preview")
+-                } && (job.id != "cpu_compute" || Set(added.map(\.workload)) ==
+-                    Set(["cpu_single_core", "cpu_multi_core"]))
++                } && job.matchesRecordGroup(added)
+                 let failed = channel == .cpu ? runFailed : !lastError.isEmpty
+                 // A late dismissal after a native job has saved its complete result
+                 // must not turn that completed job into a cancelled measurement.
+diff --git a/ios-gui/Mangekyo/Engine/GpuBenchBridge.h b/ios-gui/Mangekyo/Engine/GpuBenchBridge.h
+index 642f11b..d2f36a5 100644
+--- a/ios-gui/Mangekyo/Engine/GpuBenchBridge.h
++++ b/ios-gui/Mangekyo/Engine/GpuBenchBridge.h
+@@ -39,6 +39,7 @@ GPB_API char* gpb_engine_version(void); // malloc'd; caller gpb_free()
+ 
+ // Probe operations: returns allocated JSON array of GPUs. Must call gpb_free().
+ GPB_API char* gpb_list_gpus(void);
++GPB_API bool gpb_cpu_core_types_available(void);
+ 
+ // Run CPU benchmarks in-process; GPU tests use gpb_start_workload. Mutex-protected to guarantee one run at a time.
+ // argv/argc are standard command-line args. The live output callback context pointer
+diff --git a/ios-gui/Mangekyo/Engine/GpuBenchBridge.mm b/ios-gui/Mangekyo/Engine/GpuBenchBridge.mm
+index 4849918..8e18078 100644
+--- a/ios-gui/Mangekyo/Engine/GpuBenchBridge.mm
++++ b/ios-gui/Mangekyo/Engine/GpuBenchBridge.mm
+@@ -138,6 +138,10 @@ static void JoinWorkerUnlocked() {
+ 
+ extern "C" {
+ 
++bool gpb_cpu_core_types_available(void) {
++    return gpu_bench::CpuCoreTypeSchedulingSupported();
++}
++
+ void gpb_set_working_dir(const char* path) {
+     if (path && *path) chdir(path);
+ }
+diff --git a/ios-gui/Mangekyo/Models/MobileBenchmark.swift b/ios-gui/Mangekyo/Models/MobileBenchmark.swift
+index ce55b7c..80eab3c 100644
+--- a/ios-gui/Mangekyo/Models/MobileBenchmark.swift
++++ b/ios-gui/Mangekyo/Models/MobileBenchmark.swift
+@@ -176,10 +176,11 @@ struct MobileSuiteJob: Identifiable, Sendable {
+     let seconds: Double
+     let expectedRecords: Int
+ 
+-    static var all: [MobileSuiteJob] { makeJobs(includeVulkan: false) }
++    static var all: [MobileSuiteJob] { makeJobs(includeVulkan: false, particleFixedCoverage: true) }
+ 
+     static func makeJobs(includeVulkan: Bool, vulkanLiquid: Bool = true, gpuCache: Bool = true,
+-                         gles2: Bool = false, gles2MaxSteps: Int = 2048, gpuCacheParallelSteps: Int = 0) -> [MobileSuiteJob] {
++                         gles2: Bool = false, gles2MaxSteps: Int = 2048, gpuCacheParallelSteps: Int = 0,
++                         cpuCoreTypes: Bool = false, particleFixedCoverage: Bool = false) -> [MobileSuiteJob] {
+         var jobs: [MobileSuiteJob] = []
+         for api in includeVulkan ? ["metal", "vulkan"] : ["metal"] {
+             let prefix = api == "vulkan" ? "vulkan/" : ""
+@@ -188,7 +189,8 @@ struct MobileSuiteJob: Identifiable, Sendable {
+                     let test = headless ? "stream_headless" : "stream"
+                     jobs.append(MobileSuiteJob(id: "\(prefix)\(test)-\(particles)",
+                         title: "\(api == "vulkan" ? "Vulkan (MoltenVK)" : "Metal") · Particle \(particles) · \(headless ? "Compute" : "Render")",
+-                        gpuRequest: "\(test)?particles=\(particles)&vsync=0&api=\(api)", cpuArguments: [],
++                        gpuRequest: "\(test)?particles=\(particles)&vsync=0&api=\(api)" +
++                            (headless ? "" : "&coverage=\(particleFixedCoverage ? "fixed" : "legacy")"), cpuArguments: [],
+                         seconds: 15, expectedRecords: 1))
+                 }
+             }
+@@ -210,9 +212,9 @@ struct MobileSuiteJob: Identifiable, Sendable {
+             jobs.append(MobileSuiteJob(id: cacheID, title: "Metal · GPU Cache-state Diagnostic",
+             gpuRequest: request, cpuArguments: [], seconds: 0, expectedRecords: 1))
+         }
+-        jobs.append(MobileSuiteJob(id: "cpu_compute", title: "CPU Compute · Single + All Cores",
++        jobs.append(MobileSuiteJob(id: "cpu_compute", title: cpuCoreTypes ? "CPU Compute · Performance + Efficiency + All Cores" : "CPU Compute · Single + All Cores",
+             gpuRequest: nil, cpuArguments: ["gpu_benchmark", "--cpu-benchmark", "all",
+-                "--cpu-time", "15", "--cpu-warmup", "0.2"], seconds: 0, expectedRecords: 2))
++                "--cpu-time", "15", "--cpu-warmup", "0.2"], seconds: 0, expectedRecords: cpuCoreTypes ? 3 : 2))
+         jobs.append(MobileSuiteJob(id: "cpu_memory", title: "CPU Cache, Memory, Virtual Memory & Storage",
+             gpuRequest: nil, cpuArguments: ["gpu_benchmark", "--cpu-membw"],
+             seconds: 0, expectedRecords: 1))
+@@ -227,8 +229,13 @@ struct MobileSuiteJob: Identifiable, Sendable {
+ 
+     func matches(_ result: BenchResult) -> Bool {
+         if id == "cpu_compute" {
+-            return result.graphicsApi == "CPU" &&
+-                ["cpu_single_core", "cpu_multi_core"].contains(result.workload)
++            guard result.graphicsApi == "CPU" &&
++                ["cpu_single_core", "cpu_multi_core"].contains(result.workload) else { return false }
++            if expectedRecords == 3 && result.workload == "cpu_single_core" {
++                return ["performance", "efficiency"].contains(result.workloadConfigValue("coreType") ?? "") &&
++                    result.workloadConfigValue("residencyVerified") == "1"
++            }
++            return true
+         }
+         if id == "cpu_memory" {
+             return result.graphicsApi == "CPU" && result.workload == "cpu_membw"
+@@ -250,12 +257,17 @@ struct MobileSuiteJob: Identifiable, Sendable {
+         }
+         if testID.hasPrefix("stream") {
+             let parts = testID.split(separator: "-")
++            if gpuRequest?.contains("coverage=fixed") == true &&
++               result.workloadConfigValue("renderCoverage") != "wrapped_ndc_v2" { return false }
++            if gpuRequest?.contains("coverage=legacy") == true &&
++               result.workloadConfigValue("renderCoverage") == "wrapped_ndc_v2" { return false }
+             return version.hasPrefix("stream_v1") &&
+                 result.particleCount == UInt32(parts.last ?? "") &&
+                 result.headless == testID.hasPrefix("stream_headless")
+         }
+         if testID.hasPrefix("gpu_burn-") {
+             let steps = testID.split(separator: "-").last ?? ""
++            if translated && result.workloadConfigValue("timingMode") != "synchronized_wall_clock" { return false }
+             return version.hasPrefix("gpu_burn_v3_fixed_steps_\(steps)_")
+         }
+         if testID == "cinematic_liquid" { return version.hasPrefix("cinematic_liquid_v2") }
+@@ -273,6 +285,13 @@ struct MobileSuiteJob: Identifiable, Sendable {
+         return version.hasPrefix(translated ? "membw_v1" : "metal_memory_sweep_v1")
+     }
+ 
++    func matchesRecordGroup(_ records: [BenchResult]) -> Bool {
++        guard records.count == expectedRecords, records.allSatisfy(matches) else { return false }
++        guard id == "cpu_compute" else { return true }
++        guard Set(records.map(\.workload)) == Set(["cpu_single_core", "cpu_multi_core"]) else { return false }
++        return expectedRecords != 3 || Set(records.filter { $0.workload == "cpu_single_core" }
++            .compactMap { $0.workloadConfigValue("coreType") }) == Set(["performance", "efficiency"])
++    }
+ }
+ 
+ struct MobileSuiteReport: Codable, Sendable {
+@@ -322,7 +341,7 @@ struct MobileSuiteReport: Codable, Sendable {
+                 Set(old.resultIDs).count == next.expectedRecords &&
+                 saved.allSatisfy { next.matches($0) && $0.score.isFinite && $0.score > 0 &&
+                     ($0.workloadVersion ?? "").contains("ios_preview") } &&
+-                (next.id != "cpu_compute" || Set(saved.map(\.workload)) == Set(["cpu_single_core", "cpu_multi_core"]))
++                next.matchesRecordGroup(saved)
+             if valid && saved.allSatisfy({ $0.measurementReviewReasons.isEmpty }) { reused.append(old) }
+             else if !samePlan { break }
+         }
+diff --git a/ios-gui/Mangekyo/Views/CpuView.swift b/ios-gui/Mangekyo/Views/CpuView.swift
+index 37dcc0e..f4dc567 100644
+--- a/ios-gui/Mangekyo/Views/CpuView.swift
++++ b/ios-gui/Mangekyo/Views/CpuView.swift
+@@ -97,9 +97,9 @@ struct CpuView: View {
+                         "大约需要一分钟，设备会发热。存储测试会在 App 文档目录里写一个最大 1 GiB 的临时文件，测完即删除。请先关闭其他 App：扫描会占用大部分空闲内存。",
+                         "約 1 分かかり、端末が温かくなります。ストレージテストはアプリの書類フォルダに最大 1 GiB の一時ファイルを書き込み、終了後に削除します。空きメモリの大部分を使うため、先に他のアプリを閉じてください。")
+                      : Localization.tr(
+-                        "Single-core duration is applied once to each logical processor; the formal preset can take a long time.",
+-                        "单核测试会依次测试每个逻辑处理器；正式测试可能耗时较长。",
+-                        "単一コア時間は論理プロセッサごとに適用。正式プリセットは長時間かかる場合があります。"))
++                        "When core-type accounting is available, tests performance and efficiency cores separately and verifies placement. Otherwise, records system-scheduled single-thread samples. Progress is buffered during efficiency-core measurement to reduce interference.",
++                        "能验证核心类型时，会分别测试大核和小核；否则保存系统调度的单线程样本。小核测量期间暂存进度输出，减少干扰。",
++                        "コア種別を検証できる場合は性能コアと効率コアを個別に測定。それ以外はシステム選択の単一スレッドを記録。効率コア測定中は進捗を一時保存して干渉を減らします。"))
+                     .font(.caption2)
+                     .foregroundStyle(.secondary)
+             }
+diff --git a/ios-gui/Mangekyo/Views/RunView.swift b/ios-gui/Mangekyo/Views/RunView.swift
+index 913c917..9fe0fa7 100644
+--- a/ios-gui/Mangekyo/Views/RunView.swift
++++ b/ios-gui/Mangekyo/Views/RunView.swift
+@@ -103,7 +103,7 @@ enum GpuOptions {
+     static func request(test: String, particles: Int, steps: Int, vsync: Bool = false, api: String = "metal") -> String {
+         switch test {
+         case "memory_sweep", "gpu_cache": return "\(test)?api=\(api)"
+-        case "stream", "stream_headless": return "\(test)?particles=\(particles)&vsync=\(vsync ? 1 : 0)&api=\(api)"
++        case "stream", "stream_headless": return "\(test)?particles=\(particles)&vsync=\(vsync ? 1 : 0)&api=\(api)" + (test == "stream" ? "&coverage=fixed" : "")
+         case "gpu_burn": return "gpu_burn?steps=\(steps)&vsync=\(vsync ? 1 : 0)&api=\(api)"
+         default: return "\(test)?vsync=\(vsync ? 1 : 0)&api=\(api)"
+         }
+@@ -114,15 +114,17 @@ enum GpuOptions {
+         if api == "gles2" { return "gpu_burn_es2_legacy_v1_fixed_steps_\(steps)_ios_preview_sync_timing" }
+         if api == "vulkan" {
+             switch test {
+-            case "stream", "stream_headless": return "stream_v1_ios_preview_moltenvk"
+-            case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview_moltenvk"
++            case "stream": return "stream_v1_fixed_coverage_v2_ios_preview_moltenvk"
++            case "stream_headless": return "stream_v1_ios_preview_moltenvk"
++            case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview_sync_timing_moltenvk"
+             case "cinematic_liquid": return "cinematic_liquid_v2_…_ios_preview_moltenvk"
+             case "memory_sweep": return "membw_v1_ios_preview_moltenvk"
+             default: return test
+             }
+         }
+         switch test {
+-        case "stream", "stream_headless": return "stream_v1_ios_preview"
++        case "stream": return "stream_v1_fixed_coverage_v2_ios_preview_serial_timing_v2"
++        case "stream_headless": return "stream_v1_ios_preview"
+         case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview"
+         case "cinematic_liquid": return "cinematic_liquid_v2_physical_scene_v8_metal_preview_ios_preview"
+         case "memory_sweep": return "metal_memory_sweep_v1_preview_ios_preview"
+diff --git a/scripts/apple-check/ios-suite-tests.swift b/scripts/apple-check/ios-suite-tests.swift
+index 37bfd76..1bf89fb 100644
+--- a/scripts/apple-check/ios-suite-tests.swift
++++ b/scripts/apple-check/ios-suite-tests.swift
+@@ -2,7 +2,7 @@
+ import Foundation
+ let fixture = try Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[1]))
+ let rows = try JSONDecoder().decode([BenchResult].self, from: fixture)
+-let native = MobileSuiteJob.all
++let native = MobileSuiteJob.makeJobs(includeVulkan: false)
+ let translated = MobileSuiteJob.makeJobs(includeVulkan: true)
+ precondition(native.count == 16 && translated.count == 29)
+ precondition(Set(translated.map(\.id)).count == 29)
+@@ -20,6 +20,27 @@ let cpuOnly = translated.filter { MobileSuiteScope.cpu.includes($0) }
+ precondition(gpuOnly.count == 27 && cpuOnly.count == 2)
+ precondition(gpuOnly.allSatisfy { $0.gpuRequest != nil })
+ precondition(cpuOnly.reduce(0) { $0 + $1.expectedRecords } == 3)
++let splitCPU = MobileSuiteJob.makeJobs(includeVulkan: false, cpuCoreTypes: true)
++    .first { $0.id == "cpu_compute" }!
++precondition(splitCPU.expectedRecords == 3)
++let actualA15Plan = MobileSuiteJob.makeJobs(includeVulkan: true, vulkanLiquid: false,
++    gles2: true, cpuCoreTypes: true, particleFixedCoverage: true)
++precondition(actualA15Plan.count == 31 && actualA15Plan.reduce(0) { $0 + $1.expectedRecords } == 33)
++var p = rows.first { $0.workload == "cpu_single_core" }!
++precondition(!splitCPU.matches(p), "Unverified scheduler-managed sample accepted as a core type")
++p.workloadConfig = "coreType=performance;residencyVerified=1"
++var e = p; e.workloadConfig = "coreType=efficiency;residencyVerified=1"
++let allCPU = rows.first { $0.workload == "cpu_multi_core" }!
++precondition(splitCPU.matchesRecordGroup([p, e, allCPU]))
++precondition(!splitCPU.matchesRecordGroup([p, p, allCPU]), "Duplicate P result accepted in place of E")
++e.workloadConfig = "coreType=efficiency;residencyVerified=0"
++precondition(!splitCPU.matchesRecordGroup([p, e, allCPU]), "Unverified residency accepted")
++let fixedStream = MobileSuiteJob.makeJobs(includeVulkan: false, particleFixedCoverage: true)
++    .first { $0.id == "stream-1048576" }!
++var legacyStream = rows.first { $0.graphicsApi == "Metal" && $0.workload == "stream" && $0.particleCount == 1_048_576 && !$0.headless }!
++precondition(!fixedStream.matches(legacyStream), "Legacy coverage reused for fixed coverage")
++legacyStream.workloadConfig = (legacyStream.workloadConfig ?? "") + ";renderCoverage=wrapped_ndc_v2"
++precondition(fixedStream.matches(legacyStream))
+ precondition(translated.allSatisfy { MobileSuiteScope.all.includes($0) })
+ var overlap = rows.first { $0.graphicsApi == "Metal" && $0.workload == "stream" }!
+ overlap.avgTotalGpuMs = overlap.avgFrameTimeMs * 2
+@@ -41,6 +62,10 @@ for job in native where job.id != "gpu_cache-v2" {
+             other = row; other.graphicsApi = "Vulkan"
+             other.workloadVersion = job.id == "memory_sweep" ? "membw_v1_ios_preview_moltenvk" : (row.workloadVersion ?? "") + "_moltenvk"
+             other.workloadConfig = (row.workloadConfig ?? "") + ";apiImplementation=MoltenVK;translatedTo=Metal"
++            if job.id.hasPrefix("gpu_burn-") {
++                other.workloadConfig = (other.workloadConfig ?? "").split(separator: ";")
++                    .filter { !$0.hasPrefix("timingMode=") }.joined(separator: ";") + ";timingMode=synchronized_wall_clock"
++            }
+             precondition(vk.matches(other), "Valid translated contract rejected")
+             other.workloadConfig = ""
+             precondition(!vk.matches(other), "Translation metadata required")
+diff --git a/shaders/particle.metal b/shaders/particle.metal
+index 256e5d7..0682e9a 100644
+--- a/shaders/particle.metal
++++ b/shaders/particle.metal
+@@ -68,10 +68,11 @@ struct VertexOut {
+     float  pointSize [[point_size]];
+ };
+ 
+-vertex VertexOut vertexMain(const device Particle* particles [[buffer(0)]],
+-                            uint vid [[vertex_id]]) {
++static VertexOut particleVertex(const device Particle* particles, uint vid, bool fixedCoverage) {
+     VertexOut out;
+-    out.position  = float4(particles[vid].position.xy, 0.0, 1.0);
++    float2 displayed = particles[vid].position.xy;
++    if (fixedCoverage) displayed = fract((displayed + 1.0) * 0.5) * 2.0 - 1.0;
++    out.position  = float4(displayed, 0.0, 1.0);
+     out.pointSize = 2.0;
+ 
+     float speed = length(particles[vid].velocity.xy);
+@@ -81,6 +82,14 @@ vertex VertexOut vertexMain(const device Particle* particles [[buffer(0)]],
+     return out;
+ }
+ 
++vertex VertexOut vertexMain(const device Particle* particles [[buffer(0)]], uint vid [[vertex_id]]) {
++    return particleVertex(particles, vid, false);
++}
++
++vertex VertexOut vertexMainFixedCoverage(const device Particle* particles [[buffer(0)]], uint vid [[vertex_id]]) {
++    return particleVertex(particles, vid, true);
++}
++
+ fragment float4 fragmentMain(VertexOut in [[stage_in]]) {
+     return float4(in.color, 1.0);
+ }
+diff --git a/shaders/particle.vert b/shaders/particle.vert
+index aa8865c..f94d7f1 100644
+--- a/shaders/particle.vert
++++ b/shaders/particle.vert
+@@ -12,10 +12,12 @@ layout(location = 0) in vec4 inPosition;
+ layout(location = 1) in vec4 inVelocity;
+ 
+ layout(location = 0) out vec3 outColor;
++layout(constant_id = 0) const bool fixedCoverage = false;
+ 
+ void main() {
+     // Place the particle in 2D normalised device coordinates.
+-    gl_Position = vec4(inPosition.xy, 0.0, 1.0);
++    vec2 displayed = fixedCoverage ? fract((inPosition.xy + 1.0) * 0.5) * 2.0 - 1.0 : inPosition.xy;
++    gl_Position = vec4(displayed, 0.0, 1.0);
+     gl_PointSize = 2.0;
+ 
+     // Map speed to a colour gradient: slow = blue, fast = orange-red.
+diff --git a/src/app_base.cpp b/src/app_base.cpp
+index 35ba9dd..d15e2ac 100644
+--- a/src/app_base.cpp
++++ b/src/app_base.cpp
+@@ -1244,29 +1244,29 @@ void AppBase::PrintSummary() const {
+             case Workload::CinematicLiquid: unit = "MParticle-step/s"; break;
+             case Workload::SynthPeak:     unit = (config_.peakPrecision == Precision::INT32) ? "GIOPS" : "GFLOPS"; break;
+         }
+-        std::cout << "\n--- Thermal Stability ---\n"
++        std::cout << "\n--- Throughput Stability ---\n"
+             << "Windows:      " << windowScores_.size() << " x 1s\n";
+         if (thermalStable_) {
+             std::cout << std::setprecision(2)
+-                      << "Stable score: " << stableScore_ << " " << unit
++                      << "Stable window: " << stableScore_ << " " << unit
+                       << "  (CV " << stableVariancePct_ << "%)\n";
+         } else {
+-            std::cout << "Stable score: not reached — keep running to detect throttling.\n";
++            std::cout << "Stable window: not detected; this run has not reached a stable plateau.\n";
+         }
+-        if (throttlePct_ > 0.0) {
++        if (windowScores_.size() >= 10) {
+             std::cout << std::setprecision(1)
+-                      << "Throttling:   early vs late mean dropped " << throttlePct_ << "%";
++                      << "Throughput:   early vs late mean change (drop positive) " << throttlePct_ << "%";
+             if (throttlePct_ > 5.0) {
+-                std::cout << "  (>> sustained throttle / thermal limit)";
++                std::cout << "  (>> review workload, timing and scheduling)";
+             } else if (throttlePct_ > 2.0) {
+-                std::cout << "  (mild — likely normal warmup drift)";
++                std::cout << "  (small throughput change)";
+             }
+             std::cout << "\n";
+         }
+         if (thermalStable_ && throttlePct_ < 2.0) {
+-            std::cout << ">> Thermally stable; stableScore is a fair comparison metric.\n";
++            std::cout << ">> Stable throughput window detected; no hardware frequency was measured.\n";
+         } else if (throttlePct_ > 5.0) {
+-            std::cout << ">> Throttled: report stableScore (post-throttle), not peak.\n";
++            std::cout << ">> Throughput declined; retain the full-run mean and curve. A stable window may be earlier in the run.\n";
+         }
+     }
+ 
+@@ -1287,6 +1287,10 @@ BenchmarkResult AppBase::CollectResult() const {
+             r.workloadVersion = "stream_v1";
+             workloadConfig << "particles=" << config_.particleCount
+                            << ";bytesPerParticle=40";
++            if (!config_.headless && config_.particleFixedCoverage) {
++                r.workloadVersion += "_fixed_coverage_v2";
++                workloadConfig << ";renderCoverage=wrapped_ndc_v2;computeKernel=unchanged_stream_v1";
++            }
+             // The same work in smaller work groups is still another shader.
+             if (config_.computeWorkGroupSize != kComputeWorkGroupSize) {
+                 r.workloadVersion += "_wg" + std::to_string(config_.computeWorkGroupSize);
+diff --git a/src/cpu_benchmark.cpp b/src/cpu_benchmark.cpp
+index ae64bbc..e8054be 100644
+--- a/src/cpu_benchmark.cpp
++++ b/src/cpu_benchmark.cpp
+@@ -731,6 +731,12 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+         bool done = false;
+     } progress;
+ 
++    // A high-QoS observer waiting on the worker's progress mutex can donate
++    // priority to a background worker on iOS. Keep both at background QoS for
++    // the E stage; UI callbacks remain asynchronous. Residency still gates
++    // every measured round, independently of this scheduling request.
++    CpuQosScope observerQos(config.coreType == CpuCoreType::Efficiency
++        ? CpuCoreType::Efficiency : CpuCoreType::Automatic);
+     std::thread worker([&] {
+         ThreadAffinityScope affinity(cpu);
+         CpuQosScope qos(config.coreType);
+@@ -824,6 +830,17 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+     // transitions and otherwise limits GUI updates to four per second.
+     Phase lastPhase = Phase::Starting;
+     std::uint32_t lastRound = std::numeric_limits<std::uint32_t>::max();
++    // Main-thread SwiftUI progress/log redraws are themselves interactive
++    // CPU work. During E measurements, retain progress in the raw log and
++    // deliver it after the worker stops, keeping that observer out of the
++    // process accounting window. Do not weaken the residency threshold.
++    std::ostringstream deferredProgress;
++    const bool deferProgress = config.coreType == CpuCoreType::Efficiency;
++    std::ostream& progressOut = deferProgress ? deferredProgress : out;
++    if (deferProgress)
++        EmitProgress(out, "per_core", "warmup", static_cast<int>(cpu.ordinal), coreCount,
++                     0.0, static_cast<double>(stageIndex) / static_cast<double>(totalStages),
++                     0.0, -1, config.roundCount);
+     auto nextPeriodicUpdate = Clock::now();
+     std::unique_lock<std::mutex> lock(progress.mutex);
+     while (!progress.done) {
+@@ -841,7 +858,7 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+             if (phase == Phase::Warmup) {
+                 const double elapsed =
+                     std::chrono::duration<double>(now - phaseStart).count();
+-                EmitProgress(out, "per_core", "warmup", static_cast<int>(cpu.ordinal),
++                EmitProgress(progressOut, "per_core", "warmup", static_cast<int>(cpu.ordinal),
+                              coreCount, 0.0,
+                              static_cast<double>(stageIndex) /
+                                  static_cast<double>(totalStages),
+@@ -855,7 +872,7 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+                 const double fraction = (static_cast<double>(round) +
+                     std::clamp(elapsed / roundSeconds, 0.0, 1.0)) /
+                     static_cast<double>(roundCount);
+-                EmitProgress(out, "per_core", "measure",
++                EmitProgress(progressOut, "per_core", "measure",
+                              static_cast<int>(cpu.ordinal), coreCount, fraction,
+                              (static_cast<double>(stageIndex) + fraction) /
+                                  static_cast<double>(totalStages),
+@@ -870,6 +887,7 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+     }
+     lock.unlock();
+     worker.join();
++    if (deferProgress) out << deferredProgress.str();
+     EmitProgress(out, "per_core", "complete", static_cast<int>(cpu.ordinal),
+                  coreCount, 1.0,
+                  static_cast<double>(stageIndex + 1u) / static_cast<double>(totalStages),
+@@ -1125,6 +1143,10 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& requestedConfig,
+     if (config.mode == CpuBenchmarkMode::MultiCore) config.coreType = CpuCoreType::Automatic;
+     CpuBenchmarkReport report = ProbeCpuTopology();
+     PrintCpuTopology(report, out);
++    out << "CPU_TYPE_CAPS\tverified_scheduling=" << (CpuCoreTypeSchedulingSupported() ? 1 : 0)
++        << "\tperformance_count=" << AppleCoreTypeCount(CpuCoreType::Performance)
++        << "\tefficiency_count=" << AppleCoreTypeCount(CpuCoreType::Efficiency)
++        << "\tresidency_method=" << CpuResidencyMethod() << '\n';
+     out << "CPU_SCHEDULING\tcore_type=" << CpuCoreTypeName(config.coreType)
+         << "\tresidency_threshold=0.99\tscope=single_thread_stages\n" << std::flush;
+     if (!std::isfinite(config.measureSeconds) || config.measureSeconds <= 0.0 ||
+diff --git a/src/cpu_cli.cpp b/src/cpu_cli.cpp
+index 7db7f43..2b2d6a6 100644
+--- a/src/cpu_cli.cpp
++++ b/src/cpu_cli.cpp
+@@ -124,7 +124,7 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
+         const auto& item = report.perCore.front();
+         contract << ";coreType=" << CpuCoreTypeName(coreType)
+                  << ";scheduling=" << (coreType == CpuCoreType::Performance ? "user_interactive" : "background")
+-                 << ";residencyMethod=process_accounting_thread_clock_bound"
++                 << ";residencyMethod=" << CpuResidencyMethod()
+                  << ";residencyThreshold=0.99;residencyVerified=1"
+                  << ";residencyRetries=" << item.residencyRetries;
+         for (std::size_t i = 0; i < item.residencyRounds.size(); ++i) {
+@@ -274,7 +274,7 @@ static gpu_bench::BenchmarkResult MakeStoredCpuMemBwResult(
+              << ";aggregation=median;timing=wall_clock";
+     if (config.coreType != CpuCoreType::Automatic) {
+         contract << ";coreType=" << CpuCoreTypeName(config.coreType)
+-                 << ";residencyMethod=process_accounting_thread_clock_bound"
++                 << ";residencyMethod=" << CpuResidencyMethod()
+                  << ";residencyThreshold=0.99;residencyVerified=1"
+                  << ";schedulingScope=single_thread_curves_only";
+         for (const auto& entry : modes) {
+@@ -451,7 +451,14 @@ int RunCpuMemoryBandwidthCli(gpu_bench::CpuMemBwConfig config, bool saveResult)
+         if (!ec) config.storageDir = resultsDir.string();
+     }
+ #endif
+-    const auto report = gpu_bench::RunCpuMemoryBandwidth(config, std::cout);
++    // Classified 50ms windows are sensitive to interactive GUI redraws from
++    // the detailed per-sample log. Preserve every line, but release them only
++    // after the classified sweep has completed. Cancellation remains atomic.
++    std::ostringstream measuredLog;
++    const bool deferLog = config.coreType != CpuCoreType::Automatic;
++    const auto report = gpu_bench::RunCpuMemoryBandwidth(config,
++        deferLog ? static_cast<std::ostream&>(measuredLog) : std::cout);
++    if (deferLog) std::cout << measuredLog.str() << std::flush;
+     if (gpu_bench::CpuStopRequested()) { std::cout << "CPUMEM_CANCELLED\n" << std::flush; return 130; }
+     if (!report.valid) {
+         std::cerr << "CPU memory bandwidth sweep failed: "
+diff --git a/src/cpu_membw.cpp b/src/cpu_membw.cpp
+index 0ef30db..fca5c97 100644
+--- a/src/cpu_membw.cpp
++++ b/src/cpu_membw.cpp
+@@ -2234,6 +2234,8 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
+     for (std::size_t p = 0; p < plans.size(); ++p) {
+         if (CpuStopRequested()) return;
+         ModePlan& plan = plans[p];
++        CpuQosScope observerQos(plan.coreType == CpuCoreType::Efficiency
++            ? CpuCoreType::Efficiency : CpuCoreType::Automatic);
+         const std::uint32_t threads = static_cast<std::uint32_t>(plan.cpus.size());
+         const std::uint64_t memoryFrom = MemoryBandStart(plan.caches, threads);
+         out << "\n[" << plan.name << "] ";
+diff --git a/src/cpu_scheduling.h b/src/cpu_scheduling.h
+index 2425b35..615c0ae 100644
+--- a/src/cpu_scheduling.h
++++ b/src/cpu_scheduling.h
+@@ -4,8 +4,12 @@
+ #include <string>
+ #if defined(__APPLE__)
+ #include <TargetConditionals.h>
+-#if !TARGET_OS_IPHONE && defined(__aarch64__)
++#if defined(__aarch64__)
++#if !TARGET_OS_IPHONE
+ #include <libproc.h>
++#else
++#include <mach/mach.h>
++#endif
+ #include <mach/mach_time.h>
+ #include <pthread.h>
+ #include <sys/resource.h>
+@@ -26,7 +30,7 @@ inline const char* CpuCoreTypeName(CpuCoreType type) {
+     }
+ }
+ inline std::uint32_t AppleCoreTypeCount(CpuCoreType type) {
+-#if defined(__APPLE__) && !TARGET_OS_IPHONE && defined(__aarch64__)
++#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+     std::uint32_t count = 0;
+     std::size_t size = sizeof(count);
+     const char* key = type == CpuCoreType::Performance
+@@ -38,7 +42,7 @@ inline std::uint32_t AppleCoreTypeCount(CpuCoreType type) {
+     return 0;
+ }
+ inline bool CpuCoreTypeSchedulingSupported() {
+-#if defined(__APPLE__) && !TARGET_OS_IPHONE && defined(__aarch64__)
++#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+     // The subtraction below is valid only for a verified two-kind P/E machine.
+     std::uint32_t levels = 0;
+     std::size_t size = sizeof(levels);
+@@ -51,13 +55,28 @@ inline bool CpuCoreTypeSchedulingSupported() {
+         if (sysctlbyname(key.c_str(), name, &size, nullptr, 0) != 0 ||
+             std::string(name) != (level == 0 ? "Performance" : "Efficiency")) return false;
+     }
++#if TARGET_OS_IPHONE
++    task_power_info_v2_data_t usage{};
++    mach_msg_type_number_t count = TASK_POWER_INFO_V2_COUNT;
++    return task_info(mach_task_self(), TASK_POWER_INFO_V2,
++        reinterpret_cast<task_info_t>(&usage), &count) == KERN_SUCCESS &&
++        count >= TASK_POWER_INFO_V2_COUNT;
++#else
+     rusage_info_v6 usage{};
+     return proc_pid_rusage(getpid(), RUSAGE_INFO_V6,
+         reinterpret_cast<rusage_info_t*>(&usage)) == 0;
++#endif
+ #else
+     return false;
+ #endif
+ }
++inline const char* CpuResidencyMethod() {
++#if defined(__APPLE__) && TARGET_OS_IPHONE
++    return "mach_task_power_thread_clock_bound";
++#else
++    return "process_accounting_thread_clock_bound";
++#endif
++}
+ 
+ // Default policy covers both types whenever placement can be verified. It is
+ // shared by CLI, GUI workers and suite runs, without a user-facing selector.
+@@ -69,7 +88,7 @@ class CpuQosScope {
+ public:
+     explicit CpuQosScope(CpuCoreType type) {
+         applied_ = type == CpuCoreType::Automatic;
+-#if defined(__APPLE__) && !TARGET_OS_IPHONE && defined(__aarch64__)
++#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+         if (type == CpuCoreType::Performance || type == CpuCoreType::Efficiency) {
+             old_ = qos_class_self();
+             applied_ = pthread_set_qos_class_self_np(type == CpuCoreType::Performance
+@@ -79,14 +98,14 @@ public:
+ #endif
+     }
+     ~CpuQosScope() {
+-#if defined(__APPLE__) && !TARGET_OS_IPHONE && defined(__aarch64__)
++#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+         if (changed_) pthread_set_qos_class_self_np(old_, 0);
+ #endif
+     }
+     bool applied() const { return applied_; }
+ private:
+     bool applied_ = false;
+-#if defined(__APPLE__) && !TARGET_OS_IPHONE && defined(__aarch64__)
++#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+     qos_class_t old_ = QOS_CLASS_DEFAULT;
+     bool changed_ = false;
+ #endif
+@@ -100,12 +119,25 @@ struct CpuResidencySnapshot {
+ };
+ inline CpuResidencySnapshot CaptureCpuResidency() {
+     CpuResidencySnapshot result;
+-#if defined(__APPLE__) && !TARGET_OS_IPHONE && defined(__aarch64__)
++#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+     timespec before{}, after{};
++#if TARGET_OS_IPHONE
++    // Public iOS task accounting contains performance-core CPU time. The
++    // kernel's task_ptime is the sum on RCT_CPU_PERFORMANCE, not wall time.
++    // Bound the worker with thread CPU clocks exactly as on macOS; never infer
++    // placement from QoS alone or from the score. iOS provides no cycle count.
++    task_power_info_v2_data_t usage{};
++    mach_msg_type_number_t count = TASK_POWER_INFO_V2_COUNT;
++    if (clock_gettime(CLOCK_THREAD_CPUTIME_ID, &before) != 0) return result;
++    if (task_info(mach_task_self(), TASK_POWER_INFO_V2,
++            reinterpret_cast<task_info_t>(&usage), &count) != KERN_SUCCESS ||
++        count < TASK_POWER_INFO_V2_COUNT) return result;
++#else
+     rusage_info_v6 usage{};
+     if (clock_gettime(CLOCK_THREAD_CPUTIME_ID, &before) != 0) return result;
+     if (proc_pid_rusage(getpid(), RUSAGE_INFO_V6,
+             reinterpret_cast<rusage_info_t*>(&usage)) != 0) return result;
++#endif
+     if (clock_gettime(CLOCK_THREAD_CPUTIME_ID, &after) != 0) return result;
+     result.available = true;
+     mach_timebase_info_data_t timebase{};
+@@ -113,10 +145,15 @@ inline CpuResidencySnapshot CaptureCpuResidency() {
+     const auto nanos = [&](std::uint64_t ticks) {
+         return std::uint64_t(static_cast<long double>(ticks) * timebase.numer / timebase.denom);
+     };
++#if TARGET_OS_IPHONE
++    result.processNs = nanos(usage.cpu_energy.total_user + usage.cpu_energy.total_system);
++    result.performanceNs = nanos(usage.task_ptime);
++#else
+     result.processNs = nanos(usage.ri_user_time + usage.ri_system_time);
+     result.performanceNs = nanos(usage.ri_user_ptime + usage.ri_system_ptime);
+     result.cycles = usage.ri_cycles;
+     result.performanceCycles = usage.ri_pcycles;
++#endif
+     result.workerBeforeNs = std::uint64_t(before.tv_sec) * 1000000000ull + before.tv_nsec;
+     result.workerAfterNs = std::uint64_t(after.tv_sec) * 1000000000ull + after.tv_nsec;
+ #endif
+diff --git a/src/embedded_request.h b/src/embedded_request.h
+index 37696d5..45ce766 100644
+--- a/src/embedded_request.h
++++ b/src/embedded_request.h
+@@ -117,6 +117,15 @@ inline void ApplyEmbeddedTest(const std::string& request, BenchmarkConfig& cfg)
+                 cfg.vsync = value == "1";
+             } else if (name == "api") {
+                 // Read by the host, which picks the backend: see EmbeddedApi.
++            } else if (name == "coverage") {
++                if (value != "fixed" && value != "legacy")
++                    throw std::invalid_argument("coverage must be fixed or legacy");
++                if (id != "stream" && id != "particle" && id != "stream_heavy")
++                    throw std::invalid_argument("coverage is for rendered particles only");
++                const auto coverageApi = embedded_detail::OptionValue(request, "api");
++                if (value == "fixed" && (coverageApi == "gles" || coverageApi == "gles2"))
++                    throw std::invalid_argument("fixed coverage requires Metal or Vulkan");
++                cfg.particleFixedCoverage = value == "fixed";
+             } else if (name == "workgroup") {
+                 workGroup = embedded_detail::ParseCount(value, name);
+             } else {
+diff --git a/src/gpu_common.h b/src/gpu_common.h
+index aae3394..cebfa56 100644
+--- a/src/gpu_common.h
++++ b/src/gpu_common.h
+@@ -455,6 +455,7 @@ struct BenchmarkConfig {
+     std::string   memoryLabelOverride;
+     bool          particlesOverridden = false;
+     bool          headless           = false;    // pure compute, no window/swapchain/present
++    bool          particleFixedCoverage = false; // rendered stream only; separate score contract
+     bool          guiWorker          = false;    // internal: isolated WinUI child process
+     Workload      workload           = Workload::Stream;
+     float         softening          = 0.01f;     // N-body: avoids 1/0 singularity
+diff --git a/src/ios_engine_host.cpp b/src/ios_engine_host.cpp
+index bd6ccfe..89fafe2 100644
+--- a/src/ios_engine_host.cpp
++++ b/src/ios_engine_host.cpp
+@@ -175,6 +175,9 @@ int RunWorkload(const RunRequest& request, std::string& errorOut) {
+         BenchmarkConfig cfg;
+         // The test and its size, as the desktop command line sets them.
+         ApplyEmbeddedTest(request.workloadId, cfg);
++        if (cfg.workload == Workload::Stream && !cfg.headless &&
++            embedded_detail::OptionValue(request.workloadId, "coverage").empty())
++            cfg.particleFixedCoverage = true;
+         if (api == "gles2") ApplyEs2Legacy(cfg);
+         cfg.maxRunTimeSec = request.maxRunTimeSec > 0.0 ? request.maxRunTimeSec : 3.0;
+         cfg.renderDocEnabled = false;
+diff --git a/src/metal_backend.mm b/src/metal_backend.mm
+index 28361fb..feb8314 100644
+--- a/src/metal_backend.mm
++++ b/src/metal_backend.mm
+@@ -537,7 +537,9 @@ void MetalBackend::InitBackend() {
+             NSString* vfn = gpuBurn ? @"gpuBurnVertex"
+                          : fractal ? @"fractalVertex"
+                          : volumetric ? @"volumetricVertex"
+-                         : render3d ? @"render3dVertex" : @"vertexMain";
++                         : render3d ? @"render3dVertex"
++                         : config_.workload == Workload::Stream && config_.particleFixedCoverage
++                             ? @"vertexMainFixedCoverage" : @"vertexMain";
+             NSString* ffn = gpuBurn ? @"gpuBurnFragment"
+                          : fractal ? @"fractalFragment"
+                          : volumetric ? @"volumetricFragment"
+diff --git a/src/vulkan_backend.cpp b/src/vulkan_backend.cpp
+index eb33ef6..dbd6dc8 100644
+--- a/src/vulkan_backend.cpp
++++ b/src/vulkan_backend.cpp
+@@ -83,6 +83,13 @@ void VulkanBackend::InitBackend() {
+     }
+     CreateSyncObjects();
+     CreateTimestampQueryPool();
++#if defined(GPU_BENCH_MOLTENVK) && defined(GPU_BENCH_NO_GLFW) && defined(__APPLE__)
++    // A startup query can agree with synchronized timing, then under-report
++    // later Burn frames on A15. Always time this translated fixed-load path
++    // by submit/fence completion, rather than trusting the initial sample.
++    if (isGpuBurnWorkload(config_.workload))
++        EnableSynchronizedTimingFallback("MoltenVK GPU Burn requires per-frame completion timing");
++#endif
+     CheckTimestampsAgainstWallClock();
+ 
+     SetObjectName(VK_OBJECT_TYPE_BUFFER,   reinterpret_cast<std::uint64_t>(particleBuffer_),   "Particle SSBO");
+@@ -1037,6 +1044,10 @@ void VulkanBackend::CreateGraphicsPipeline() {
+     stages[0].stage  = VK_SHADER_STAGE_VERTEX_BIT;
+     stages[0].module = vertMod;
+     stages[0].pName  = "main";
++    VkBool32 fixedCoverage = config_.workload == Workload::Stream && config_.particleFixedCoverage;
++    VkSpecializationMapEntry coverageEntry{0, 0, sizeof(fixedCoverage)};
++    VkSpecializationInfo coverageSpecialization{1, &coverageEntry, sizeof(fixedCoverage), &fixedCoverage};
++    stages[0].pSpecializationInfo = &coverageSpecialization;
+     stages[1].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+     stages[1].stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
+     stages[1].module = fragMod;

@@ -1,0 +1,1 @@
+logical=1280x720 framebuffer=2560x1440 surface=2560x1440 retina=default

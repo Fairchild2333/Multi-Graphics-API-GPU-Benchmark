@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "2026-10-14T10:12:06Z",
+  "id" : "complete-suite-309B0CD4-CEB3-4576-99B0-EDEA331E7BC3",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-14T10:12:06Z",
+      "id" : "vulkan\/stream-1048576",
+      "request" : "stream?particles=1048576&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs" : [
+        "20261014-211205-966"
+      ],
+      "startedAt" : "2026-10-14T10:11:50Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan (MoltenVK) · Particle 1048576 · Render"
+    }
+  ],
+  "startedAt" : "2026-10-14T10:11:50Z",
+  "status" : "passed"
+}

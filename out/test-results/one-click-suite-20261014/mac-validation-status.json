@@ -1,0 +1,18 @@
+[
+  {
+    "name": "metal-stream4m",
+    "returnCode": 0
+  },
+  {
+    "name": "metal-burn256",
+    "returnCode": 0
+  },
+  {
+    "name": "metal-liquid",
+    "returnCode": 0
+  },
+  {
+    "name": "vulkan-burn256",
+    "returnCode": 0
+  }
+]

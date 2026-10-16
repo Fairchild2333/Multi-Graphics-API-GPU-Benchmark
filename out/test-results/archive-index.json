@@ -1,0 +1,51 @@
+{
+  "snapshotDate": "2026-10-16",
+  "purpose": "Verbatim benchmark-history backup; histories are not all accepted current-version scores. Simulator and control runs are separate.",
+  "devices": [
+    {
+      "device": "Mac M4 Pro",
+      "deviceModel": "Mac16,8",
+      "rows": 149,
+      "path": "macos-history-20261016/results/results.json",
+      "bytes": 286698,
+      "sha256": "62302b228db50009882fe386b65f32a258e3391519ba53f8f341c366367f67aa",
+      "notes": "Mac 主历史，包含旧格式和诊断轮次；保留原标签。"
+    },
+    {
+      "device": "iPhone 13 Pro / A15",
+      "deviceModel": "iPhone14,2",
+      "rows": 128,
+      "path": "a15-cache-isolation-20261014/phone-final/results/results.json",
+      "bytes": 348686,
+      "sha256": "10beabc823de964d6d6e2d2d807fa7c90a6db576718c1b686c628319bce99eb3",
+      "notes": "历史与缓存专项轮次；当前验收范围见 Apple 状态文档。"
+    },
+    {
+      "device": "12.9-inch iPad Pro / A12X",
+      "deviceModel": "iPad8,7",
+      "rows": 72,
+      "path": "a12x-targeted-retest-20261014/phone-final/results/results.json",
+      "bytes": 169003,
+      "sha256": "55497d1ffc1b66be576d01c426d482a93534875cfec9bd46e26598473edf7603",
+      "notes": "原 43 条保留；补测后 72 条，Metal 16M 稳定性提示仍保留。"
+    },
+    {
+      "device": "11-inch iPad Pro / A12X",
+      "deviceModel": "iPad8,1",
+      "rows": 51,
+      "path": "ipad81-design-review-20261016/phone-final/results/results.json",
+      "bytes": 123915,
+      "sha256": "43d43fb16d87ade98bdb80c7c319d8b8e04434eb69cf1c8f8f777e2284b6531b",
+      "notes": "51 条历史；当前完整选用 31 项/33 条来自不同真实轮次。"
+    },
+    {
+      "device": "iPhone 14 Pro Max / A16",
+      "deviceModel": "iPhone15,3",
+      "rows": 24,
+      "path": "a16-full-suite-20261016/phone-final/results/results.json",
+      "bytes": 46368,
+      "sha256": "da2a2612d9dfbb8381792987ea2b98f6a47e947f108cd7c39298498930dd7df1",
+      "notes": "24 条历史=22 条完整成绩+2 条中断诊断。19 passed、3 review；CPU 尚未测。"
+    }
+  ]
+}

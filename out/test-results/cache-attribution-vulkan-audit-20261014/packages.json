@@ -1,0 +1,68 @@
+{
+  "APK": {
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/android/app/build/outputs/apk/debug/app-debug.apk",
+    "sha256": "dbdf66303b70e5224e2fa3dd54da34a1743063cd8414e626c9e89d90408c5c3d",
+    "bytes": 28433082,
+    "check_shader_sha256": "166cddd43c77a34ddae7059e950584d9a527df80d1b87c95f117a683382ea62d",
+    "check_shader_atomic_or_instructions": 1,
+    "native_libraries": [
+      "lib/arm64-v8a/libandroidx.graphics.path.so",
+      "lib/armeabi-v7a/libandroidx.graphics.path.so",
+      "lib/x86/libandroidx.graphics.path.so",
+      "lib/x86_64/libandroidx.graphics.path.so",
+      "lib/arm64-v8a/libmangekyo_jni.so",
+      "lib/armeabi-v7a/libmangekyo_jni.so",
+      "lib/x86/libmangekyo_jni.so",
+      "lib/x86_64/libmangekyo_jni.so"
+    ],
+    "access_shader_structure": {
+      "read": {
+        "modulo_instructions": 1,
+        "volatile_decorations": 2
+      },
+      "write": {
+        "modulo_instructions": 0,
+        "volatile_decorations": 2
+      },
+      "copy": {
+        "modulo_instructions": 0,
+        "volatile_decorations": 4
+      },
+      "l1": {
+        "modulo_instructions": 1,
+        "volatile_decorations": 2
+      }
+    }
+  },
+  "HAP": {
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+    "sha256": "ae6acdb119ba14a081dd7b7440c3c9f3e70c16fa6c82976e980266d3da41eb18",
+    "bytes": 5730083,
+    "check_shader_sha256": "166cddd43c77a34ddae7059e950584d9a527df80d1b87c95f117a683382ea62d",
+    "check_shader_atomic_or_instructions": 1,
+    "native_libraries": [
+      "libs/arm64-v8a/libc++_shared.so",
+      "libs/arm64-v8a/libmangekyo.so",
+      "libs/x86_64/libc++_shared.so",
+      "libs/x86_64/libmangekyo.so"
+    ],
+    "access_shader_structure": {
+      "read": {
+        "modulo_instructions": 1,
+        "volatile_decorations": 2
+      },
+      "write": {
+        "modulo_instructions": 0,
+        "volatile_decorations": 2
+      },
+      "copy": {
+        "modulo_instructions": 0,
+        "volatile_decorations": 4
+      },
+      "l1": {
+        "modulo_instructions": 1,
+        "volatile_decorations": 2
+      }
+    }
+  }
+}

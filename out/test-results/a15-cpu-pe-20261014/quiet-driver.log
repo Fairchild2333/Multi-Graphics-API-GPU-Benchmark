@@ -1,0 +1,20 @@
+START 1/4 cpu_compute
+STATE cpu_compute ('running', 'running')
+STATE cpu_compute ('passed', 'passed')
+END cpu_compute passed ['20261014-153919-341-cpu-single-performance', '20261014-153919-369-cpu-single-efficiency', '20261014-153919-384-cpu-multi'] thermal=0->0 
+REST 20s
+START 2/4 stream-1048576
+STATE stream-1048576 ('running', 'running')
+STATE stream-1048576 ('passed', 'passed')
+END stream-1048576 passed ['20261014-153957-756'] thermal=0->0 
+REST 20s
+START 3/4 vulkan/stream-1048576
+STATE vulkan/stream-1048576 ('running', 'running')
+STATE vulkan/stream-1048576 ('passed', 'passed')
+END vulkan/stream-1048576 passed ['20261014-154040-188'] thermal=0->0 
+REST 20s
+START 4/4 vulkan/gpu_burn-256
+STATE vulkan/gpu_burn-256 ('running', 'running')
+STATE vulkan/gpu_burn-256 ('passed', 'passed')
+END vulkan/gpu_burn-256 passed ['20261014-154122-003'] thermal=0->0 
+DONE 4 jobs; archived /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-cpu-pe-20261014/quiet-final

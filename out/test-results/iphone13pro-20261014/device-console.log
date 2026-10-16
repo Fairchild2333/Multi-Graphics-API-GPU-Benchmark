@@ -1,0 +1,35 @@
+Launched application with com.fairchild.Mangekyo bundle identifier.
+Waiting for the application to terminate…
+IOS_SUITE_START 1/15 stream-65536
+IOS_SUITE_END 1/15 stream-65536 passed
+IOS_SUITE_START 2/15 stream_headless-65536
+IOS_SUITE_END 2/15 stream_headless-65536 passed
+IOS_SUITE_START 3/15 stream-1048576
+IOS_SUITE_END 3/15 stream-1048576 passed
+IOS_SUITE_START 4/15 stream_headless-1048576
+IOS_SUITE_END 4/15 stream_headless-1048576 passed
+IOS_SUITE_START 5/15 stream-4194304
+IOS_SUITE_END 5/15 stream-4194304 passed
+IOS_SUITE_START 6/15 stream_headless-4194304
+IOS_SUITE_END 6/15 stream_headless-4194304 passed
+IOS_SUITE_START 7/15 stream-16777216
+IOS_SUITE_END 7/15 stream-16777216 passed
+IOS_SUITE_START 8/15 stream_headless-16777216
+IOS_SUITE_END 8/15 stream_headless-16777216 passed
+IOS_SUITE_START 9/15 gpu_burn-16
+IOS_SUITE_END 9/15 gpu_burn-16 passed
+IOS_SUITE_START 10/15 gpu_burn-64
+IOS_SUITE_END 10/15 gpu_burn-64 passed
+IOS_SUITE_START 11/15 gpu_burn-256
+IOS_SUITE_END 11/15 gpu_burn-256 passed
+IOS_SUITE_START 12/15 cinematic_liquid
+IOS_SUITE_END 12/15 cinematic_liquid passed
+IOS_SUITE_START 13/15 memory_sweep
+IOS_SUITE_END 13/15 memory_sweep passed
+IOS_SUITE_START 14/15 cpu_compute
+IOS_SUITE_END 14/15 cpu_compute passed
+IOS_SUITE_START 15/15 cpu_memory
+2026-10-14 00:37:45.364 Mangekyo[37588:6977644] Successfully load keyboard extensions
+IOS_SUITE_END 15/15 cpu_memory cancelled
+IOS_SUITE_DONE cancelled 14/15
+App terminated due to signal 9.

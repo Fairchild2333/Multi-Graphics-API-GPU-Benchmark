@@ -1,0 +1,17 @@
+[
+  {
+    "name": "default-compute",
+    "exit": 0,
+    "note": "No core flags: P + E + 14-thread all-core passed"
+  },
+  {
+    "name": "short-all-core",
+    "exit": 0,
+    "note": "No core flags: short 14-thread multi-only passed"
+  },
+  {
+    "name": "cache-only-default",
+    "exit": 0,
+    "note": "Default P/E cache scans and all-core scan completed; limited to 1 MiB, an unsettled preview, not a full DRAM measurement; no-save"
+  }
+]

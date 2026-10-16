@@ -1,0 +1,80 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Apple M4 Pro (Integrated)                    38338 MB   -     -     -    YES   YES 
+============================================================
+
+Backend: Metal  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: GPU Burn v1 r2 / Plasma x Kaleidoscope  |  Auto-stop: 15s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple M4 Pro — 38338 MB
+Selected GPU [0]: Apple M4 Pro
+[Metal] GPU Burn: fullscreen raymarch (2 draws/frame, steps=64)
+[Profiling] GPU command-buffer timestamps enabled
+[Metal] Decoupled presenter: benchmark renders offscreen uncapped, preview presents at display refresh
+[GPU Timing] Compute: 0.000 ms | Render: 26.286 ms | Total: 26.286 ms | FPS: 69 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 26.971 ms | Total: 26.971 ms | FPS: 72 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 26.766 ms | Total: 26.766 ms | FPS: 69 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 27.120 ms | Total: 27.120 ms | FPS: 72 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 26.636 ms | Total: 26.636 ms | FPS: 73 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 26.805 ms | Total: 26.805 ms | FPS: 73 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 26.157 ms | Total: 26.157 ms | FPS: 74 | T: 2.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 26.010 ms | Total: 26.010 ms | FPS: 74 | T: 3.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 26.257 ms | Total: 26.257 ms | FPS: 73 | T: 4.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 26.418 ms | Total: 26.418 ms | FPS: 73 | T: 5.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 25.995 ms | Total: 25.995 ms | FPS: 74 | T: 6.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 25.957 ms | Total: 25.957 ms | FPS: 73 | T: 7.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 25.806 ms | Total: 25.806 ms | FPS: 73 | T: 8.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 25.931 ms | Total: 25.931 ms | FPS: 73 | T: 9.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 26.317 ms | Total: 26.317 ms | FPS: 73 | T: 11.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 25.897 ms | Total: 25.897 ms | FPS: 73 | T: 12.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 25.939 ms | Total: 25.939 ms | FPS: 73 | T: 13.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 26.290 ms | Total: 26.290 ms | FPS: 73 | T: 14.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 26.380 ms | Total: 26.380 ms | FPS: 73 | T: 15.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple M4 Pro
+Driver:       macOS 27.0.1
+CPU:          Apple M4 Pro
+OS:           macOS 27.0.1
+System:       macOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 960 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:         26.113    12.579    41.897
+Total GPU:      26.113    12.579    41.897
+
+--- Throughput ---
+Avg FPS:      73
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 64 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    4.52 Gpix-step/s  (26.113 ms render)
+
+--- Analysis ---
+Avg frame time:  13.531 ms
+Avg GPU time:    26.113 ms
+GPU utilisation: 193.0%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Thermal Stability ---
+Windows:      13 x 1s
+Stable score: 4.51 Gpix-step/s  (CV 0.78%)
+>> Thermally stable; stableScore is a fair comparison metric.
+==========================================================
+
+[Results] Saved as 20261013-183814-515 -> /Users/fairchild/Library/Application Support/GpuComputeBenchmark/results/results.json

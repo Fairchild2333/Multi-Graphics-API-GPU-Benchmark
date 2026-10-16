@@ -1,0 +1,222 @@
+diff --git a/HANDOFF.md b/HANDOFF.md
+index 557ad30..40a5684 100644
+--- a/HANDOFF.md
++++ b/HANDOFF.md
+@@ -4231,3 +4231,49 @@ PathService 已把 results/captures/reports/logs 改到
+   A15/Mac/Android/Harmony physical measurements this turn. Full31-job physical
+   button was NOT clicked this run; do not claim physical whole-button acceptance.
+ - No commit/push requested. Preserve existing dirty edits and xcuserdata.
++
++### 2026-10-16: New iPad8,1 actual one-button suite and timing correction
++
++- User switched to a new device, UDID 00008027-001969920A87002E, CoreDevice
++  9A44542D-75A2-58C6-B79C-18BEAED61843. Physical iPad Pro11 first gen/A12X,
++  iPadOS26.7.1, named Van的 iPad. Distinct from prior iPad8,7.
++- User enabled Developer Mode and trusted developer signature. Signed team
++  2W6PXCJAM6; fresh device had no app/history. Final signed app is in
++  build-ios/DerivedData-ipad81-fix/Build/Products/Release-iphoneos/Mangekyo.app.
++- Fixed iOS Auto language: preferredLanguages instead of Locale.current,
++  declared en/zh-Hans/ja, restore saved appLanguage before initial status.
++  Actual UI button Chinese; native log setting=auto preferred=zh-Hans-AU.
++- Actual XCTest tapped complete-suite-all, no suite-autorun arguments, ran
++  all31 jobs /33 records. Initial22 passed/9 review,0 execution failures.
++  Strict physical test asserted review==passed and FAILED as designed.
++  Afterwards Xcode stalled during log finalization. Only that completed host
++  PID12431 was INT/TERM stopped; xcresult is incomplete, screenshots cannot
++  be exported. Do not call the XCTest passed or cite incomplete result bundle
++  as successful acceptance. Actual click log and native full manifests saved.
++- Found wrong formal MoltenVK headless1M/4M timestamps despite startup check
++  passing: 0.067/0.343ms vs1.539/5.842ms wall, scores624.626/488.988GB/s.
++  iOS-only headless particles now whole-run synchronized timing, same existing
++  fallback as Burn; native Android/OHOS and macOS desktop path unchanged.
++  iOS result matching rejects query-timed headless resume. Updated Swift
++  acceptance/rejection tests PASS, Release engine and signed app builds PASS.
++- Actual corrected headless1M/4M/16M all PASS18.481/26.642/28.754GB/s, stable
++  18.206/26.632/28.757, timing matches wall and thermal0->0. Original33 rows
++  unchanged; final36. Current selection31 jobs/33 records =24 passed/7 review,
++  production model PASS. This is original full UI run plus3 actual retests,
++  NOT a second complete button run after the fix. GPU attribution out of scope.
++- CPU P110.384,E60.661,all655.509MWork/s; single P/E verified, all8 worker
++  aggregate valid but round2 P lower bound minimum98.372% fails full99% gate;
++  do not replace all-round quality with selected-round stats. CPU mem51.790
++  GB/s, cache curves/pages/storage complete, E memory remains background.
++  Vulkan RAM58.051GB/s verified whole wall-clock sweep. Remaining reviews:
++  Metal rendered1M/4M/16M, Vulkan rendered1M/4M/16M, CPU all-core residency.
++- All measurements ended. Final actual appPID873 killed; fresh process list
++  confirms absent. Safe unplug. No bench or test watcher active. No commit/push
++  this turn; previous committed baseline13aeafd. Preserve user's xcuserdata.
++- Evidence out/test-results/ipad8-1-full-suite-20261016/: report, phone-final,
++  curated-suite-results, selected-run-sources, original UI and corrected native
++  manifests/logs, verification and production-contract-audit,4 PNG/PDF/CSV
++  curve groups. SHA finala44e14deb4ccde5acbd256e46e8d61960fb96bae8031058c1c3155205080bdb0.
++  New concise tracked record docs/ipad8-1-one-click-20261016.md. Other devices
++  NOT retested. Old query-based iOS headless rows cannot fulfill new policy
++  automatically; do not silently relabel old measurements as synchronized.
+diff --git a/docs/TODO.md b/docs/TODO.md
+index b0ba559..a0114fd 100644
+--- a/docs/TODO.md
++++ b/docs/TODO.md
+@@ -326,6 +326,11 @@ macOS 上只有两个后端可用，其余均无法原生转译：
+ 
+ ### 2026-10-14：缓存归属与 Vulkan 代码核查
+ 
++- **2026-10-16 新 iPad8,1：**实际点击一键按钮并跑完 31 项；Auto 中文修复。
++  iOS MoltenVK 纯计算改为整轮同步计时，1M／4M／16M 三档复测通过；当前选用
++  24 项 passed、7 项 review，完整质量验收未通过，修正后未再点击整套。
++  详见 [真机记录及剩余复核项](ipad8-1-one-click-20261016.md)。
++
+ - [x] Android／HarmonyOS 共用 Vulkan 内存数据校验、同步、计时一致性、写入／复制目标检查；单工作组独占写入，保留重复访问；新版合同为 membw_v2_verified。
+ - [x] 移动 GPU Burn 启动计时核对；正式计分后切换来源时不保存混合成绩；相关构建、合同和故障验证通过。
+ - [x] App 本机查询可用性能计数器清单；仅枚举，尚未采样。正常成绩与曲线本机保存，电脑用于开发、诊断或归档。
+diff --git a/docs/apple-retest-status-20261014.md b/docs/apple-retest-status-20261014.md
+index 2374d18..02a1253 100644
+--- a/docs/apple-retest-status-20261014.md
++++ b/docs/apple-retest-status-20261014.md
+@@ -1,5 +1,10 @@
+ # Apple 设备复测判断与待办（2026-10-14）
+ 
++**2026-10-16 新增设备：**11 英寸 iPad8,1 已实际点击一键按钮并执行 31 项；修正
++两项 Vulkan 纯计算异常时间戳后，三档同步计时补测通过。当前选用 24 项 passed、
++7 项 review，修正后没有重新点击整套。Auto 中文跟随也已修复。详见
++[新设备的一键实测记录](ipad8-1-one-click-20261016.md)。以下 A12X 14 项补测仍指原来的 iPad8,7。
++
+ **最新判断：A12X 已完成 14 项补测及必要复核，选用 16 条新成绩；原 4 个异常均已复测通过，只剩 Metal 16M 绘制未找到稳定段的提示。A15 原稳定成绩保持不变，最新版可选 Vulkan 内存和真机整套按钮验收仍待执行。Mac 本轮未测，原 7 项 Metal 已验证，原显示配置的 Vulkan 1M 诊断尚未关闭。** 下文保留旧观察；旧成绩没有改写。
+ 
+ ## 最新 A12X 实测：已停止，可以拔线
+diff --git a/ios-gui/Info.plist b/ios-gui/Info.plist
+index ee3d134..73ed986 100644
+--- a/ios-gui/Info.plist
++++ b/ios-gui/Info.plist
+@@ -4,6 +4,12 @@
+ <dict>
+ 	<key>CFBundleDevelopmentRegion</key>
+ 	<string>$(DEVELOPMENT_LANGUAGE)</string>
++	<key>CFBundleLocalizations</key>
++	<array>
++		<string>en</string>
++		<string>zh-Hans</string>
++		<string>ja</string>
++	</array>
+ 	<key>CFBundleDisplayName</key>
+ 	<string>Mangekyo</string>
+ 	<key>CFBundleExecutable</key>
+diff --git a/ios-gui/Mangekyo/Engine/BenchEngine.swift b/ios-gui/Mangekyo/Engine/BenchEngine.swift
+index a94c337..e826e64 100644
+--- a/ios-gui/Mangekyo/Engine/BenchEngine.swift
++++ b/ios-gui/Mangekyo/Engine/BenchEngine.swift
+@@ -132,6 +132,8 @@ final class BenchEngine: ObservableObject {
+     private var pollTask: Task<Void, Never>?
+ 
+     init() {
++        Localization.current = AppLanguage(rawValue: UserDefaults.standard.string(forKey: "appLanguage") ?? "auto") ?? .auto_
++        print("IOS_LANGUAGE setting=\(Localization.current.rawValue) preferred=\(Locale.preferredLanguages.joined(separator: ",")) locale=\(Locale.current.identifier) effective=\(Localization.effectiveLang.rawValue)")
+         if ProcessInfo.processInfo.arguments.contains("--ios-allow-translated-api") {
+             allowTranslatedApis = true
+         }
+diff --git a/ios-gui/Mangekyo/Models/Localization.swift b/ios-gui/Mangekyo/Models/Localization.swift
+index 8189882..ce6b88f 100644
+--- a/ios-gui/Mangekyo/Models/Localization.swift
++++ b/ios-gui/Mangekyo/Models/Localization.swift
+@@ -13,7 +13,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
+ 
+     var displayName: String {
+         switch self {
+-        case .auto_: return "Auto"
++        case .auto_: return Localization.tr("Auto", "跟随系统", "システムに合わせる")
+         case .en:    return "English"
+         case .zh:    return "简体中文"
+         case .ja:    return "日本語"
+@@ -27,7 +27,9 @@ final class Localization {
+     /// Resolve the effective language (handles "auto").
+     static var effectiveLang: AppLanguage {
+         if current != .auto_ { return current }
+-        let lang = Locale.current.language.languageCode?.identifier ?? "en"
++        // Language preference is independent of the device's region. Match
++        // the macOS app instead of inferring UI language from Locale.current.
++        let lang = Locale.preferredLanguages.first ?? Locale.current.identifier
+         if lang.hasPrefix("zh") { return .zh }
+         if lang.hasPrefix("ja") { return .ja }
+         return .en
+diff --git a/ios-gui/Mangekyo/Models/MobileBenchmark.swift b/ios-gui/Mangekyo/Models/MobileBenchmark.swift
+index 5fff19d..ae29c4a 100644
+--- a/ios-gui/Mangekyo/Models/MobileBenchmark.swift
++++ b/ios-gui/Mangekyo/Models/MobileBenchmark.swift
+@@ -307,6 +307,8 @@ struct MobileSuiteJob: Identifiable, Sendable {
+         }
+         if testID.hasPrefix("stream") {
+             let parts = testID.split(separator: "-")
++            if translated && testID.hasPrefix("stream_headless") &&
++                result.workloadConfigValue("timingMode") != "synchronized_wall_clock" { return false }
+             if gpuRequest?.contains("coverage=fixed") == true &&
+                result.workloadConfigValue("renderCoverage") != "wrapped_ndc_v2" { return false }
+             if gpuRequest?.contains("coverage=legacy") == true &&
+diff --git a/ios-gui/MangekyoUITests/CompleteSuiteUITests.swift b/ios-gui/MangekyoUITests/CompleteSuiteUITests.swift
+index d8d0999..5ca2575 100644
+--- a/ios-gui/MangekyoUITests/CompleteSuiteUITests.swift
++++ b/ios-gui/MangekyoUITests/CompleteSuiteUITests.swift
+@@ -14,7 +14,13 @@ final class CompleteSuiteUITests: XCTestCase {
+         let ready = NSPredicate(format: "enabled == true")
+         let readyExpectation = XCTNSPredicateExpectation(predicate: ready, object: button)
+         XCTAssertEqual(XCTWaiter.wait(for: [readyExpectation], timeout: 30), .completed)
++        print("ONE_BUTTON_READY label=\(button.label)")
++        let before = XCTAttachment(screenshot: app.screenshot())
++        before.name = "Before tapping the complete-suite button"
++        before.lifetime = .keepAlways
++        add(before)
+         button.tap()
++        print("ONE_BUTTON_TAPPED")
+ 
+         // Leave the benchmark foreground and avoid repeatedly querying
+         // accessibility during measured CPU windows. The host also archives
+diff --git a/ios-gui/README.md b/ios-gui/README.md
+index 4449b40..1ea6377 100644
+--- a/ios-gui/README.md
++++ b/ios-gui/README.md
+@@ -76,6 +76,9 @@ shader copies from the bundle. Results live under the app's Documents directory.
+   GPU/CPU results.json and per-suite manifests/logs.
+ - Separate GPU/CPU logs, progress, scores and current-run charts.
+ - History preserving result schema, device model, memory and platform metadata.
++- Auto language follows the device's preferred language list, independently of
++  its region. English, Simplified Chinese and Japanese are declared in the
++  bundle; a saved manual language is restored before the initial status text.
+ - Filtered comparison charts by version, API, execution mode and particle size,
+   plus CPU comparison charts.
+ - Saved cache/memory curves accessible from History and Charts. Choose an older
+diff --git a/scripts/apple-check/ios-suite-tests.swift b/scripts/apple-check/ios-suite-tests.swift
+index 91ffdee..93830da 100644
+--- a/scripts/apple-check/ios-suite-tests.swift
++++ b/scripts/apple-check/ios-suite-tests.swift
+@@ -129,11 +129,16 @@ for job in native where job.id != "gpu_cache-v2" {
+             other.workloadVersion = job.id == "memory_sweep" ? "membw_v2_verified_ios_preview_moltenvk" : (row.workloadVersion ?? "") + "_moltenvk"
+             other.workloadConfig = (row.workloadConfig ?? "") + ";apiImplementation=MoltenVK;translatedTo=Metal"
+             if job.id == "memory_sweep" { other.workloadConfig = (other.workloadConfig ?? "") + ";dataVerified=1;writeCopyChecks=2;timestampAnomalies=0" }
+-            if job.id.hasPrefix("gpu_burn-") {
++            if job.id.hasPrefix("gpu_burn-") || job.id.hasPrefix("stream_headless-") {
+                 other.workloadConfig = (other.workloadConfig ?? "").split(separator: ";")
+                     .filter { !$0.hasPrefix("timingMode=") }.joined(separator: ";") + ";timingMode=synchronized_wall_clock"
+             }
+             precondition(vk.matches(other), "Valid translated contract rejected")
++            if job.id.hasPrefix("stream_headless-") {
++                var unchecked = other
++                unchecked.workloadConfig = unchecked.workloadConfig?.replacingOccurrences(of: "timingMode=synchronized_wall_clock", with: "timingMode=gpu_timestamp_query")
++                precondition(!vk.matches(unchecked), "Startup-only MoltenVK compute timestamps reused")
++            }
+             if job.id == "memory_sweep" {
+                 var unchecked = other
+                 unchecked.workloadVersion = "membw_v1_ios_preview_moltenvk"
+diff --git a/src/vulkan_backend.cpp b/src/vulkan_backend.cpp
+index 713807c..4afdb5a 100644
+--- a/src/vulkan_backend.cpp
++++ b/src/vulkan_backend.cpp
+@@ -89,6 +89,11 @@ void VulkanBackend::InitBackend() {
+     // by submit/fence completion, rather than trusting the initial sample.
+     if (isGpuBurnWorkload(config_.workload))
+         EnableSynchronizedTimingFallback("MoltenVK GPU Burn requires per-frame completion timing");
++    // A12X can pass the repeated-dispatch startup check yet report implausibly
++    // short timestamps for ordinary headless frames. Keep the complete iOS
++    // translated compute run on synchronized timing, including small presets.
++    if (config_.workload == Workload::Stream && config_.headless)
++        EnableSynchronizedTimingFallback("MoltenVK headless particles require per-frame completion timing");
+ #endif
+     CheckTimestampsAgainstWallClock();
+ 

@@ -1,0 +1,42 @@
+[
+  {
+    "name": "gpu-cache-full",
+    "args": [
+      "--gpu-cache-probe"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 22.9
+  },
+  {
+    "name": "gpu-cache-double-loads",
+    "args": [
+      "--gpu-cache-probe",
+      "--gpu-cache-steps",
+      "131072"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 27.04
+  },
+  {
+    "name": "vulkan-existing-memory-sweep",
+    "args": [
+      "--backend",
+      "vulkan",
+      "--allow-translated-api",
+      "--workload",
+      "membw",
+      "--gpu",
+      "0"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 7.78
+  },
+  {
+    "name": "gpu-cache-repeat",
+    "args": [
+      "--gpu-cache-probe"
+    ],
+    "exitCode": 0,
+    "durationSeconds": 22.5881238
+  }
+]

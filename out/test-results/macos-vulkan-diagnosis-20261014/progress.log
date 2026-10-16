@@ -1,0 +1,12 @@
+running vulkan-render-flight1
+finished vulkan-render-flight1 164.016 GB/s 16.54 % drop ['throughput fell by more than5%']
+rest60s
+running vulkan-headless-flight2
+finished vulkan-headless-flight2 264.14 GB/s -1.33 % drop []
+rest60s
+running vulkan-headless-flight1
+finished vulkan-headless-flight1 157.835 GB/s 0.19 % drop []
+rest60s
+running vulkan-render-flight2-baseline
+finished vulkan-render-flight2-baseline 156.753 GB/s 23.12 % drop ['throughput fell by more than5%']
+controls complete

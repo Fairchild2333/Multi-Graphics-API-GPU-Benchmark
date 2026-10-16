@@ -1,0 +1,36 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "apps",
+      "--device",
+      "00008027-001969920A87002E",
+      "--bundle-id",
+      "com.fairchild.Mangekyo",
+      "--json-output",
+      "out/test-results/ipad8-1-full-suite-20261016/installed-before-enabled.json",
+      "--timeout",
+      "25"
+    ],
+    "commandType" : "devicectl.device.info.apps",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "apps" : [
+
+    ],
+    "defaultAppsIncluded" : false,
+    "deviceIdentifier" : "9A44542D-75A2-58C6-B79C-18BEAED61843",
+    "hiddenAppsIncluded" : false,
+    "internalAppsIncluded" : false,
+    "matchingBundleIdentifier" : "com.fairchild.Mangekyo",
+    "removableAppsIncluded" : true
+  }
+}

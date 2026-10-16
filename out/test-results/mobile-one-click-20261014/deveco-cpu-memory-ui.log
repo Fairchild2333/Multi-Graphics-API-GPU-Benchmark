@@ -1,0 +1,157 @@
+Scenario simulation success.
+Analysis saved to: /Users/fairchild/.Huawei/Emulator/deployed/Huawei_Phone/uiLayout/analysis.md
+
+# Widget Tree Analysis
+
+- **Generated**: 2026-10-14 14:14:28
+- **Mode**: Interactive Only
+
+---
+
+## Widget Tree
+
+- Swiper [id:4] [top: 0, left: 0, width: 1260, height: 2473]
+  - Scroll [id:7] [top: 126, left: 52, width: 1156, height: 2347]
+    - Text CPU 测试 [id:8] [top: 178, left: 52, width: 339, height: 91]
+    - Text CPU 计算吞吐 [id:10] [top: 353, left: 97, width: 327, height: 61]
+    - Text Unknown CPU · 4 个逻辑处理器 · 4 个物理核心 · NEON [id:11] [top: 440, left: 97, width: 984, height: 46]
+    - Button 单核 [id:13] [top: 512, left: 97, width: 189, height: 104]
+    - Button 全核 [id:14] [top: 512, left: 312, width: 189, height: 104]
+    - Button 单核 + 全核 [id:15] [top: 512, left: 527, width: 321, height: 104]
+    - Button 缓存与内存 [id:16] [top: 642, left: 97, width: 316, height: 104]
+    - Button 快速 1 秒 [id:18] [top: 772, left: 97, width: 279, height: 104]
+    - Button 正式 15 秒 [id:19] [top: 772, left: 402, width: 303, height: 104]
+    - Text 单核测试会在每个逻辑处理器上各跑一次；正式预设每次 15 秒。停止会取消尚未完成的测试。 [id:20] [top: 902, left: 97, width: 1041, height: 92]
+    - Button 一键测试 CPU 全套 [id:21] [top: 1020, left: 97, width: 549, height: 130]
+    - Text 完成 2/2 · 待复核 0 · 失败 0 [id:22] [top: 1176, left: 97, width: 490, height: 46]
+    - Button 运行 [id:23] [top: 1248, left: 97, width: 209, height: 130]
+    - Text 完成 [id:26] [top: 1507, left: 97, width: 969, height: 53]
+    - Text 100% [id:27] [top: 1511, left: 1066, width: 97, height: 46]
+    - Progress 100.000000 [id:28] [top: 1586, left: 97, width: 1066, height: 13]
+    - Text 单线程，GB/s [id:30] [top: 1728, left: 97, width: 321, height: 61]
+    - Text 层级与容量 [id:33] [top: 1815, left: 97, width: 442, height: 50]
+    - Text 读 [id:34] [top: 1815, left: 565, width: 182, height: 50]
+    - Text 写 [id:35] [top: 1815, left: 773, width: 182, height: 50]
+    - Text 复制 [id:36] [top: 1815, left: 981, width: 182, height: 50]
+    - Text L1  128 KiB–192 KiB * [id:38] [top: 1878, left: 97, width: 442, height: 50]
+    - Text 120 [id:39] [top: 1878, left: 565, width: 182, height: 50]
+    - Text 109 [id:40] [top: 1878, left: 773, width: 182, height: 50]
+    - Text 177 [id:41] [top: 1878, left: 981, width: 182, height: 50]
+    - Text L2  3 MiB–4 MiB * [id:43] [top: 1941, left: 97, width: 442, height: 50]
+    - Text 99.2 [id:44] [top: 1941, left: 565, width: 182, height: 50]
+    - Text 112 [id:45] [top: 1941, left: 773, width: 182, height: 50]
+    - Text 156 [id:46] [top: 1941, left: 981, width: 182, height: 50]
+    - Text L3  12 MiB–64 MiB * [id:48] [top: 2004, left: 97, width: 442, height: 50]
+    - Text 86.2 [id:49] [top: 2004, left: 565, width: 182, height: 50]
+    - Text 108 [id:50] [top: 2004, left: 773, width: 182, height: 50]
+    - Text 144 [id:51] [top: 2004, left: 981, width: 182, height: 50]
+    - Text SoC  96 MiB–128 MiB * [id:53] [top: 2067, left: 97, width: 442, height: 50]
+    - Text 64.5 [id:54] [top: 2067, left: 565, width: 182, height: 50]
+    - Text 107 [id:55] [top: 2067, left: 773, width: 182, height: 50]
+    - Text 99.1 [id:56] [top: 2067, left: 981, width: 182, height: 50]
+    - Text 内存 [id:58] [top: 2130, left: 97, width: 442, height: 50]
+    - Text 54.2 [id:59] [top: 2130, left: 565, width: 182, height: 50]
+    - Text 101 [id:60] [top: 2130, left: 773, width: 182, height: 50]
+    - Text 93.9 [id:61] [top: 2130, left: 981, width: 182, height: 50]
+    - Text * 系统没有报告这级缓存的容量；容量是从曲线上读出来的，落在这个范围内。 [id:62] [top: 2193, left: 97, width: 1042, height: 92]
+    - Text 带宽（GB/s）随每个线程的数据量变化，双对数坐标。虚线标出系统报告的各级缓存容量。 [id:63] [top: 2311, left: 97, width: 1059, height: 92]
+    - Text 读 [id:68] [top: 2429, left: 162, width: 40, height: 46]
+    - Text 写 [id:71] [top: 2429, left: 313, width: 40, height: 46]
+    - Text 复制 [id:74] [top: 2429, left: 463, width: 79, height: 46]
+    - Text 全核 —— 4 个线程，GB/s（数据量按每个线程计） [id:77] [top: 3235, left: 97, width: 1017, height: 122]
+    - Text 层级与容量 [id:80] [top: 3383, left: 97, width: 442, height: 50]
+    - Text 读 [id:81] [top: 3383, left: 565, width: 182, height: 50]
+    - Text 写 [id:82] [top: 3383, left: 773, width: 182, height: 50]
+    - Text 复制 [id:83] [top: 3383, left: 981, width: 182, height: 50]
+    - Text L1  128 KiB–768 KiB * [id:85] [top: 3446, left: 97, width: 442, height: 50]
+    - Text 450 [id:86] [top: 3446, left: 565, width: 182, height: 50]
+    - Text 315 [id:87] [top: 3446, left: 773, width: 182, height: 50]
+    - Text 648 [id:88] [top: 3446, left: 981, width: 182, height: 50]
+    - Text L2  6 MiB–8 MiB * [id:90] [top: 3509, left: 97, width: 442, height: 50]
+    - Text 249 [id:91] [top: 3509, left: 565, width: 182, height: 50]
+    - Text 200 [id:92] [top: 3509, left: 773, width: 182, height: 50]
+    - Text 385 [id:93] [top: 3509, left: 981, width: 182, height: 50]
+    - Text L3  16 MiB–24 MiB * [id:95] [top: 3572, left: 97, width: 442, height: 50]
+    - Text 203 [id:96] [top: 3572, left: 565, width: 182, height: 50]
+    - Text 220 [id:97] [top: 3572, left: 773, width: 182, height: 50]
+    - Text 323 [id:98] [top: 3572, left: 981, width: 182, height: 50]
+    - Text 内存 [id:100] [top: 3635, left: 97, width: 442, height: 50]
+    - Text 163 [id:101] [top: 3635, left: 565, width: 182, height: 50]
+    - Text 212 [id:102] [top: 3635, left: 773, width: 182, height: 50]
+    - Text 191 [id:103] [top: 3635, left: 981, width: 182, height: 50]
+    - Text * 系统没有报告这级缓存的容量；容量是从曲线上读出来的，落在这个范围内。 [id:104] [top: 3698, left: 97, width: 1042, height: 92]
+    - Text 带宽（GB/s）随每个线程的数据量变化，双对数坐标。虚线标出系统报告的各级缓存容量。 [id:105] [top: 3816, left: 97, width: 1059, height: 92]
+    - Text 读 [id:110] [top: 3934, left: 162, width: 40, height: 46]
+    - Text 写 [id:113] [top: 3934, left: 313, width: 40, height: 46]
+    - Text 复制 [id:116] [top: 3934, left: 463, width: 79, height: 46]
+    - Text 虚拟内存与存储 [id:119] [top: 4739, left: 97, width: 365, height: 61]
+    - Text 映射新页面：5.02 GB/s · 815 ns / 4 KiB 页 [id:120] [top: 4826, left: 97, width: 800, height: 50]
+    - Text 系统换页到：swap of 2047 MiB, held by something this process may not see [id:121] [top: 4902, left: 97, width: 986, height: 92]
+    - Text 存储，顺序 1 MiB（MB/s） [id:122] [top: 5020, left: 97, width: 475, height: 46]
+    - Text 读 [id:125] [top: 5092, left: 97, width: 40, height: 46]
+    - Text 4,262 MB/s [id:128] [top: 5145, left: 841, width: 202, height: 46]
+    - Text 写 [id:130] [top: 5217, left: 97, width: 40, height: 46]
+    - Text 1,957 MB/s [id:133] [top: 5270, left: 449, width: 202, height: 46]
+    - Text 存储，随机 4 KiB，每次一个请求（MB/s） [id:134] [top: 5341, left: 97, width: 740, height: 46]
+    - Text 读 [id:137] [top: 5413, left: 97, width: 40, height: 46]
+    - Text 60.7 MB/s [id:140] [top: 5466, left: 841, width: 179, height: 46]
+    - Text 写 [id:142] [top: 5538, left: 97, width: 40, height: 46]
+    - Text 47.3 MB/s [id:145] [top: 5591, left: 681, width: 179, height: 46]
+    - Text 每秒 14,813 次读请求、11,553 次写请求 [id:146] [top: 5662, left: 97, width: 702, height: 46]
+    - Text 摘要 [id:148] [top: 5837, left: 97, width: 105, height: 61]
+    - Text 单核平均 [id:149] [top: 5924, left: 97, width: 157, height: 46]
+    - Text 187 MWork/s [id:150] [top: 5996, left: 97, width: 399, height: 76]
+    - Text 全核 [id:151] [top: 6098, left: 97, width: 79, height: 46]
+    - Text 548 MWork/s（4 线程） [id:152] [top: 6170, left: 97, width: 715, height: 76]
+    - Text 各逻辑处理器的成绩 (MWork/s) [id:154] [top: 6375, left: 97, width: 734, height: 61]
+    - Text #1  LP 0 · core 1 · InferredUniform  ·  182 MWork/s [id:156] [top: 7106, left: 97, width: 917, height: 46]
+    - Text #2  LP 1 · core 2 · InferredUniform  ·  188 MWork/s [id:157] [top: 7178, left: 97, width: 917, height: 46]
+    - Text #3  LP 2 · core 3 · InferredUniform  ·  189 MWork/s [id:158] [top: 7250, left: 97, width: 917, height: 46]
+    - Text #4  LP 3 · core 4 · InferredUniform  ·  190 MWork/s [id:159] [top: 7322, left: 97, width: 917, height: 46]
+    - Text 原始输出（最后几行） [id:160] [top: 7497, left: 97, width: 521, height: 61]
+    - Text            other parts; its capacity above includes the caches before it
+
+--- Summary: all cores (4 threads, data set sizes are per thread) ---
+Level              Cache size          Data sets used       Read      Write       Copy   GB/s
+L1        128 KiB - 768 KiB *         4 KiB - 128 KiB      450.1      315.2      647.6
+CPUMEM_LEVEL mode=all level=L1 cache_bytes=0 from_bytes=4096 to_bytes=131072 read_gbps=450.104 write_gbps=315.229 copy_gbps=647.580 write_nt_gbps=0.000 copy_nt_gbps=0.000 zero_gbps=0.000 read_low_gbps=425.766 read_high_gbps=458.117 from_curve=1 capacity_low_bytes=131072 capacity_high_bytes=786432 measured=1 settled=1
+L2            6 MiB - 8 MiB *         768 KiB - 6 MiB      248.7      200.0      385.1
+         not flat: read ranges from 226.9 to 298.0 GB/s across these data sets
+CPUMEM_LEVEL mode=all level=L2 cache_bytes=0 from_bytes=786432 to_bytes=6291456 read_gbps=248.684 write_gbps=199.958 copy_gbps=385.107 write_nt_gbps=0.000 copy_nt_gbps=0.000 zero_gbps=0.000 read_low_gbps=226.875 read_high_gbps=298.006 from_curve=1 capacity_low_bytes=6291456 capacity_high_bytes=8388608 measured=1 settled=1
+L3          16 MiB - 24 MiB *          8 MiB - 16 MiB      203.4      219.7      322.5
+CPUMEM_LEVEL mode=all level=L3 cache_bytes=0 from_bytes=8388608 to_bytes=16777216 read_gbps=203.364 write_gbps=219.661 copy_gbps=322.535 write_nt_gbps=0.000 copy_nt_gbps=0.000 zero_gbps=0.000 read_low_gbps=200.678 read_high_gbps=222.446 from_curve=1 capacity_low_bytes=16777216 capacity_high_bytes=25165824 measured=1 settled=1
+Memory                      -         24 MiB - 64 MiB      163.3      212.5      191.4
+CPUMEM_LEVEL mode=all level=memory cache_bytes=0 from_bytes=25165824 to_bytes=67108864 read_gbps=163.285 write_gbps=212.454 copy_gbps=191.386 write_nt_gbps=0.000 copy_nt_gbps=0.000 zero_gbps=0.000 read_low_gbps=149.900 read_high_gbps=174.191 from_curve=1 capacity_low_bytes=0 capacity_high_bytes=0 measured=1 settled=1
+         * read off the curve, because the OS reports no size for this cache: its
+           capacity lies between the two data sets shown
+
+--- Virtual memory ---
+Mapping new pages: 5.02 GB/s, 815 ns per 4 KiB page (first write to every page of a 256 MiB region, one thread)
+CPUMEM_PAGEFAULT measured=1 page_bytes=4096 region_bytes=268435456 gbps=5.023 ns_per_page=815.435 transparent_huge_pages=0
+
+--- Storage behind virtual memory ---
+Paging target: swap of 2047 MiB, held by something this process may not see
+Test file:     1 GiB in /data/storage/el2/base/haps/entry/files/, unbuffered I/O
+Sequential 1 MiB:   read 4262 MB/s, write 1957 MB/s
+Random 4 KiB, QD1:  read 60.7 MB/s (14813 IOPS), write 47.3 MB/s (11553 IOPS)
+Paging issues random 4 KiB requests, so that line is the closer estimate of
+how fast memory comes back from the drive.
+CPUMEM_STORAGE measured=1 backing=swap of 2047 MiB, held by something this process may not see directory=/data/storage/el2/base/haps/entry/files/ on_paging_drive=0 direct_io=1 file_bytes=1073741824 seq_read_mbps=4262.1 seq_write_mbps=1957.0 rand_read_mbps=60.7 rand_write_mbps=47.3 rand_read_iops=14813.3 rand_write_iops=11553.2 skipped=
+
+Note: write and copy use ordinary stores. Outside the caches every stored line is
+      first read from memory, so the memory traffic is 2x the write figure and 1.5x
+      the copy figure. Streaming stores skip that read.
+Note: cache-level figures are limited by how fast the core issues 16-byte loads and
+      stores, so they depend on the vector size and the clock.
+Note: 31 of 174 points were measured again because other activity on the machine
+      disturbed their first round.
+CPUMEM_DONE affinity=strict remeasured_points=31 duration_sec=52.8
+Duration:  52.8 s
+==========================================================
+[Results] Saved as 20261014-111313-575-cpu-membw -> /data/storage/el2/base/haps/entry/files/results/results.json [id:161] [top: 7584, left: 97, width: 1066, height: 3864]
+- TabBar [id:163] [top: 2473, left: 0, width: 1261, height: 248]
+  - Column image GPU [id:164] [top: 2490, left: 119, width: 78, height: 122]
+  - Column image CPU [id:165] [top: 2490, left: 434, width: 78, height: 122]
+  - Column symbol 历史 [id:166] [top: 2490, left: 748, width: 79, height: 122]
+  - Column symbol 图表 [id:167] [top: 2490, left: 1063, width: 79, height: 122]
+

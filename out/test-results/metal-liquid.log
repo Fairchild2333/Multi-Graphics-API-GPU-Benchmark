@@ -1,0 +1,58 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Apple M4 Pro (Discrete)                      38338 MB   -     -     -    YES    -  
+============================================================
+
+Backend: Metal  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: Cinematic Liquid v2 (fixed pool quality)  |  Auto-stop: 2s
+Available GPUs:
+  [0] Apple M4 Pro — 38338 MB
+Selected GPU [0]: Apple M4 Pro
+[Metal] Cinematic Liquid v2 MLS-MPM preview host: 320920 particles, grid 128x64x96, 10 substeps/frame, 352-step raymarch present (metal_preview scores)
+[Metal] Decoupled presenter: benchmark renders offscreen uncapped, preview presents at display refresh
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 29.788 ms | Render: 35.871 ms | Total: 36.584 ms | FPS: 28 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 32.617 ms | Render: 40.172 ms | Total: 40.219 ms | FPS: 24 | T: 1.4 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple M4 Pro
+Driver:       macOS 27.0.1
+CPU:          Apple M4 Pro
+OS:           macOS 27.0.1
+System:       macOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    320920 (Cinematic Liquid v2)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     1.5 s (warmup: 0.5 s, measured: 36 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        35.201    30.474    37.537
+Render:         42.765    37.111    45.976
+Total GPU:      42.808    37.190    46.020
+
+--- Throughput ---
+Avg FPS:      23
+Liquid:       320920 particles, 128x64x96 grid, 10 substeps
+Surface:      R32F density volume, 352-step raymarch, particle Spiky^2 splat 128x64x96 + adaptive 5x5x5 filter, 4-interface optics, finite pool overflow + clear PVC environment, 7 coupled rigid bodies
+Fluid rate:   41.16 MParticle-step/s  (35.201 ms compute + 42.765 ms render)
+
+--- Analysis ---
+Avg frame time:  42.914 ms
+Avg GPU time:    42.808 ms
+GPU utilisation: 99.8%
+>> GPU-bound: GPU is the bottleneck.
+==========================================================
+
+[Results] Saved as 20261012-141833-816 -> /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/native-smoke-data/results/results.json
+[warn] Short timed run: reducing warmup from 2s to 0.5s so measured frames and GPU timestamps are available.

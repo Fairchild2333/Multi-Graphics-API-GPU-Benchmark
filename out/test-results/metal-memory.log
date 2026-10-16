@@ -1,0 +1,103 @@
+
+--- GPU memory hierarchy sweep ---
+Device: Apple M4 Pro
+Method: the shipped particle update body, run by a fixed grid of 262144 threads over a working set swept from 64 KiB to 16 MiB.
+Every point moves the same 0 GiB, so the only variable is where the data is served from.
+A plateau is one level of the hierarchy; the last one is memory.
+MEMSWEEP_META	device=Apple M4 Pro	grid_threads=262144	bytes_per_particle=48	repeats=2
+
+[device_local / read_modify_write]
+  working set     particles       GB/s   stream-equiv       ms
+       64 KiB        2048      4415.1        3679.2     0.014
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=2048	bytes=65536	gbps=4415.059	stream_equiv_gbps=3679.216	ms=0.014
+      128 KiB        4096      4005.2        3337.6     0.016
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=4096	bytes=131072	gbps=4005.165	stream_equiv_gbps=3337.638	ms=0.016
+      256 KiB        8192      3219.5        2682.9     0.020
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=8192	bytes=262144	gbps=3219.511	stream_equiv_gbps=2682.926	ms=0.020
+      512 KiB       16384      2931.9        2443.3     0.021
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=16384	bytes=524288	gbps=2931.940	stream_equiv_gbps=2443.283	ms=0.021
+        1 MiB       32768      2780.8        2317.3     0.023
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=32768	bytes=1048576	gbps=2780.754	stream_equiv_gbps=2317.295	ms=0.023
+        2 MiB       65536      2735.4        2279.5     0.023
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=65536	bytes=2097152	gbps=2735.416	stream_equiv_gbps=2279.513	ms=0.023
+        4 MiB      131072      2590.0        2158.3     0.024
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=131072	bytes=4194304	gbps=2589.963	stream_equiv_gbps=2158.302	ms=0.024
+        8 MiB      262144      2169.5        1807.9     0.029
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=262144	bytes=8388608	gbps=2169.466	stream_equiv_gbps=1807.889	ms=0.029
+       16 MiB      524288       969.8         808.2     0.065
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=524288	bytes=16777216	gbps=969.781	stream_equiv_gbps=808.151	ms=0.065
+
+[device_local / read_only]
+  working set     particles       GB/s   stream-equiv       ms
+       64 KiB        2048      4119.2        5149.0     0.016
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=2048	bytes=65536	gbps=4119.210	stream_equiv_gbps=5149.012	ms=0.016
+      128 KiB        4096      4067.2        5084.0     0.017
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=4096	bytes=131072	gbps=4067.202	stream_equiv_gbps=5084.002	ms=0.017
+      256 KiB        8192      4067.2        5084.0     0.017
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=8192	bytes=262144	gbps=4067.202	stream_equiv_gbps=5084.002	ms=0.017
+      512 KiB       16384      3909.3        4886.6     0.017
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=16384	bytes=524288	gbps=3909.255	stream_equiv_gbps=4886.569	ms=0.017
+        1 MiB       32768      3702.6        4628.2     0.018
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=32768	bytes=1048576	gbps=3702.560	stream_equiv_gbps=4628.199	ms=0.018
+        2 MiB       65536      3728.3        4660.3     0.018
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=65536	bytes=2097152	gbps=3728.272	stream_equiv_gbps=4660.340	ms=0.018
+        4 MiB      131072      3509.0        4386.2     0.019
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=131072	bytes=4194304	gbps=3508.960	stream_equiv_gbps=4386.200	ms=0.019
+        8 MiB      262144      3240.7        4050.8     0.021
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=262144	bytes=8388608	gbps=3240.669	stream_equiv_gbps=4050.836	ms=0.021
+       16 MiB      524288      1715.2        2144.1     0.039
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=524288	bytes=16777216	gbps=1715.244	stream_equiv_gbps=2144.054	ms=0.039
+
+[host_visible / read_modify_write]
+  working set     particles       GB/s   stream-equiv       ms
+       64 KiB        2048      4631.7        3859.8     0.014
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=2048	bytes=65536	gbps=4631.745	stream_equiv_gbps=3859.787	ms=0.014
+      128 KiB        4096      4103.1        3419.3     0.015
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=4096	bytes=131072	gbps=4103.126	stream_equiv_gbps=3419.272	ms=0.015
+      256 KiB        8192      3311.3        2759.4     0.019
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=8192	bytes=262144	gbps=3311.293	stream_equiv_gbps=2759.411	ms=0.019
+      512 KiB       16384      2984.1        2486.7     0.021
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=16384	bytes=524288	gbps=2984.089	stream_equiv_gbps=2486.741	ms=0.021
+        1 MiB       32768      2780.8        2317.3     0.023
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=32768	bytes=1048576	gbps=2780.754	stream_equiv_gbps=2317.295	ms=0.023
+        2 MiB       65536      2691.5        2242.9     0.023
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=65536	bytes=2097152	gbps=2691.535	stream_equiv_gbps=2242.946	ms=0.023
+        4 MiB      131072      2621.4        2184.5     0.024
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=131072	bytes=4194304	gbps=2621.442	stream_equiv_gbps=2184.535	ms=0.024
+        8 MiB      262144      2217.3        1847.7     0.028
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=262144	bytes=8388608	gbps=2217.252	stream_equiv_gbps=1847.710	ms=0.028
+       16 MiB      524288       940.8         784.0     0.067
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=524288	bytes=16777216	gbps=940.778	stream_equiv_gbps=783.982	ms=0.067
+
+[host_visible / read_only]
+  working set     particles       GB/s   stream-equiv       ms
+       64 KiB        2048      4227.3        5284.2     0.016
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=2048	bytes=65536	gbps=4227.329	stream_equiv_gbps=5284.161	ms=0.016
+      128 KiB        4096      4006.5        5008.1     0.017
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=4096	bytes=131072	gbps=4006.497	stream_equiv_gbps=5008.121	ms=0.017
+      256 KiB        8192      4119.2        5149.0     0.016
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=8192	bytes=262144	gbps=4119.210	stream_equiv_gbps=5149.012	ms=0.016
+      512 KiB       16384      3890.4        4863.0     0.017
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=16384	bytes=524288	gbps=3890.372	stream_equiv_gbps=4862.965	ms=0.017
+        1 MiB       32768      3853.1        4816.4     0.017
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=32768	bytes=1048576	gbps=3853.141	stream_equiv_gbps=4816.427	ms=0.017
+        2 MiB       65536      3780.8        4726.0     0.018
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=65536	bytes=2097152	gbps=3780.783	stream_equiv_gbps=4725.979	ms=0.018
+        4 MiB      131072      3532.0        4415.1     0.019
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=131072	bytes=4194304	gbps=3532.046	stream_equiv_gbps=4415.057	ms=0.019
+        8 MiB      262144      3287.0        4108.7     0.020
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=262144	bytes=8388608	gbps=3286.966	stream_equiv_gbps=4108.708	ms=0.020
+       16 MiB      524288      1762.2        2202.7     0.038
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=524288	bytes=16777216	gbps=1762.159	stream_equiv_gbps=2202.699	ms=0.038
+
+--- Detected tiers (device-local, read-modify-write) ---
+       64 KiB -     128 KiB   4210.1 GB/s
+MEMSWEEP_TIER	from_bytes=65536	to_bytes=131072	gbps=4210.112
+      256 KiB -       4 MiB   2851.5 GB/s
+MEMSWEEP_TIER	from_bytes=262144	to_bytes=4194304	gbps=2851.517
+
+Peak on-chip read: 4415.1 GB/s at 64 KiB
+Device-local memory: 969.8 GB/s read-modify-write, 1715.2 GB/s read-only
+Host-visible memory: 940.8 GB/s
+  The two storage modes match, which is what unified memory looks like: there is no separate VRAM here.
+MEMSWEEP_RESULT	peak_cache_gbps=4415.059	peak_cache_bytes=65536	device_local_gbps=969.781	read_only_gbps=1715.244	host_visible_gbps=940.778	tiers=2

@@ -1,0 +1,65 @@
+{
+	"app":	{
+		"bundleName":	"com.mangekyo.benchmark",
+		"vendor":	"mangekyo",
+		"versionCode":	1000000,
+		"versionName":	"0.2.6",
+		"icon":	"$media:app_icon",
+		"label":	"$string:app_name",
+		"apiReleaseType":	"Release",
+		"compileSdkVersion":	"26.0.0.105",
+		"targetAPIVersion":	50000012,
+		"minAPIVersion":	50000012,
+		"compileSdkType":	"HarmonyOS",
+		"targetMinorAPIVersion":	0,
+		"targetPatchAPIVersion":	0,
+		"minMinorAPIVersion":	0,
+		"minPatchAPIVersion":	0,
+		"appEnvironments":	[],
+		"bundleType":	"app",
+		"buildMode":	"debug",
+		"debug":	true,
+		"iconId":	16777217,
+		"labelId":	16777216
+	},
+	"module":	{
+		"name":	"entry",
+		"type":	"entry",
+		"description":	"$string:module_desc",
+		"mainElement":	"EntryAbility",
+		"deviceTypes":	["phone", "tablet", "2in1", "tv", "car"],
+		"deliveryWithInstall":	true,
+		"installationFree":	false,
+		"pages":	"$profile:main_pages",
+		"metadata":	[{
+				"name":	"ohos.arkui.UIMaterial.state",
+				"value":	"enable"
+			}],
+		"abilities":	[{
+				"name":	"EntryAbility",
+				"srcEntry":	"./ets/entryability/EntryAbility.ets",
+				"description":	"$string:ability_desc",
+				"icon":	"$media:app_icon",
+				"label":	"$string:ability_label",
+				"startWindowIcon":	"$media:app_icon",
+				"startWindowBackground":	"$color:start_window_background",
+				"exported":	true,
+				"minWindowWidth":	360,
+				"minWindowHeight":	480,
+				"skills":	[{
+						"entities":	["entity.system.home"],
+						"actions":	["action.system.home"]
+					}],
+				"descriptionId":	16777218,
+				"iconId":	16777217,
+				"labelId":	16777219,
+				"startWindowIconId":	16777217,
+				"startWindowBackgroundId":	16777221
+			}],
+		"packageName":	"entry",
+		"virtualMachine":	"ark12.0.2.0",
+		"compileMode":	"esmodule",
+		"dependencies":	[],
+		"descriptionId":	16777220
+	}
+}

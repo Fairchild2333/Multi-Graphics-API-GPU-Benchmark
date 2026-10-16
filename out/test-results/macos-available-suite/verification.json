@@ -1,0 +1,28 @@
+{
+  "counts": {
+    "metal": 13,
+    "opengl": 3,
+    "cpu": 2
+  },
+  "tests": [
+    {
+      "test": "metal-capture",
+      "exitCode": 0
+    },
+    {
+      "test": "opengl-final-16",
+      "exitCode": 0
+    },
+    {
+      "test": "opengl-final-64",
+      "exitCode": 0
+    },
+    {
+      "test": "opengl-final-256",
+      "exitCode": 0
+    }
+  ],
+  "traces": [
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-available-suite/current-data/captures/Metal_Apple_M4_Pro_stream_particles65536_1064.gputrace"
+  ]
+}

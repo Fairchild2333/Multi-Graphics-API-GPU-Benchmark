@@ -1,0 +1,48 @@
+{
+  "profile": "Performance Limiters",
+  "profile_id": 3,
+  "device": "A15",
+  "names": [
+    "ALU Limiter",
+    "ALU Utilization",
+    "F32 Utilization",
+    "F16 Utilization",
+    "Texture Sample Limiter",
+    "Texture Sample Utilization",
+    "Texture Filtering Limiter",
+    "Texture Cache Limiter",
+    "Texture Write Limiter",
+    "Texture Write Utilization",
+    "Buffer Read Limiter",
+    "Buffer Load Utilization",
+    "Buffer Write Limiter",
+    "Buffer Store Utilization",
+    "Threadgroup/Imageblock Load Limiter",
+    "Threadgroup/Imageblock Load Utilization",
+    "Threadgroup/Imageblock Store Limiter",
+    "Threadgroup/Imageblock Store Utilization",
+    "Fragment Input Interpolation Limiter",
+    "Fragment Input Interpolation Utilization",
+    "GPU Last Level Cache Limiter",
+    "GPU Last Level Cache Utilization",
+    "Vertex Occupancy",
+    "Fragment Occupancy",
+    "Compute Occupancy",
+    "GPU Read Bandwidth",
+    "GPU Write Bandwidth",
+    "MMU Limiter",
+    "MMU Utilization",
+    "Partial Renders Count"
+  ],
+  "llc_counters": [
+    "GPU Last Level Cache Limiter",
+    "GPU Last Level Cache Utilization"
+  ],
+  "external_bandwidth_counters": [
+    "GPU Read Bandwidth",
+    "GPU Write Bandwidth"
+  ],
+  "has_independent_SLC_counter": false,
+  "has_named_L2_or_L3_counter": false,
+  "scope": "External Instruments profiling; not public in-app MTLCounter sets"
+}

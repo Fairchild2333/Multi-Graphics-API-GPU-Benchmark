@@ -1,0 +1,39 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "install",
+      "app",
+      "--device",
+      "00008110-00164D591485401E",
+      "build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app",
+      "--json-output",
+      "out/test-results/one-click-suite-20261014/iphone-install-final.json",
+      "--timeout",
+      "30"
+    ],
+    "commandType" : "devicectl.device.install.app",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "642.16"
+  },
+  "result" : {
+    "deviceIdentifier" : "45159977-97BF-543B-A3BE-3FFC567B816E",
+    "installedApplications" : [
+      {
+        "bundleID" : "com.fairchild.Mangekyo",
+        "databaseSequenceNumber" : 4872,
+        "databaseUUID" : "7179FC5B-AD6B-48F6-832B-0DEF4CE6E31D",
+        "installationURL" : "file:///private/var/containers/Bundle/Application/32EE48D6-E73A-4A58-BA3F-47268D5124DB/Mangekyo.app/",
+        "launchServicesIdentifier" : "unknown",
+        "options" : {
+
+        }
+      }
+    ]
+  }
+}

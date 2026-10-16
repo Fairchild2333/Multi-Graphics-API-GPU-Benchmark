@@ -1,0 +1,475 @@
+{
+  "finishedAt" : "",
+  "id" : "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:17:15Z",
+      "id" : "stream-65536",
+      "request" : "stream?particles=65536&vsync=0&api=metal&coverage=fixed",
+      "resultIDs" : [
+        "20261016-191715-506"
+      ],
+      "startedAt" : "2026-10-16T08:17:00Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 65536 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:17:31Z",
+      "id" : "stream_headless-65536",
+      "request" : "stream_headless?particles=65536&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261016-191731-483"
+      ],
+      "startedAt" : "2026-10-16T08:17:16Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 65536 · Compute"
+    },
+    {
+      "error" : "尚未达到稳定平台",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:17:47Z",
+      "id" : "stream-1048576",
+      "request" : "stream?particles=1048576&vsync=0&api=metal&coverage=fixed",
+      "resultIDs" : [
+        "20261016-191747-576"
+      ],
+      "startedAt" : "2026-10-16T08:17:32Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 1048576 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:18:04Z",
+      "id" : "stream_headless-1048576",
+      "request" : "stream_headless?particles=1048576&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261016-191803-475"
+      ],
+      "startedAt" : "2026-10-16T08:17:48Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 1048576 · Compute"
+    },
+    {
+      "error" : "尚未达到稳定平台; 运行中吞吐下降超过 5%",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:18:20Z",
+      "id" : "stream-4194304",
+      "request" : "stream?particles=4194304&vsync=0&api=metal&coverage=fixed",
+      "resultIDs" : [
+        "20261016-191820-261"
+      ],
+      "startedAt" : "2026-10-16T08:18:04Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 4194304 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:18:36Z",
+      "id" : "stream_headless-4194304",
+      "request" : "stream_headless?particles=4194304&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261016-191836-084"
+      ],
+      "startedAt" : "2026-10-16T08:18:20Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 4194304 · Compute"
+    },
+    {
+      "error" : "尚未达到稳定平台",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:18:54Z",
+      "id" : "stream-16777216",
+      "request" : "stream?particles=16777216&vsync=0&api=metal&coverage=fixed",
+      "resultIDs" : [
+        "20261016-191854-269"
+      ],
+      "startedAt" : "2026-10-16T08:18:36Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 16777216 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:19:11Z",
+      "id" : "stream_headless-16777216",
+      "request" : "stream_headless?particles=16777216&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261016-191910-680"
+      ],
+      "startedAt" : "2026-10-16T08:18:55Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 16777216 · Compute"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:19:27Z",
+      "id" : "gpu_burn-16",
+      "request" : "gpu_burn?steps=16&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261016-191926-855"
+      ],
+      "startedAt" : "2026-10-16T08:19:11Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · GPU Burn · 16"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:19:43Z",
+      "id" : "gpu_burn-64",
+      "request" : "gpu_burn?steps=64&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261016-191942-864"
+      ],
+      "startedAt" : "2026-10-16T08:19:27Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · GPU Burn · 64"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:19:59Z",
+      "id" : "gpu_burn-256",
+      "request" : "gpu_burn?steps=256&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261016-191959-297"
+      ],
+      "startedAt" : "2026-10-16T08:19:43Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · GPU Burn · 256"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:20:18Z",
+      "id" : "cinematic_liquid",
+      "request" : "cinematic_liquid?vsync=0&api=metal",
+      "resultIDs" : [
+        "20261016-192017-608"
+      ],
+      "startedAt" : "2026-10-16T08:19:59Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Cinematic Liquid"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:20:20Z",
+      "id" : "memory_sweep",
+      "request" : "memory_sweep?api=metal",
+      "resultIDs" : [
+        "20261016-192020-490-metal-memsweep"
+      ],
+      "startedAt" : "2026-10-16T08:20:18Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · GPU Cache & Memory"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:20:37Z",
+      "id" : "vulkan\/stream-65536",
+      "request" : "stream?particles=65536&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs" : [
+        "20261016-192037-301"
+      ],
+      "startedAt" : "2026-10-16T08:20:21Z",
+      "status" : "passed",
+      "thermalStateEnd" : 1,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan (MoltenVK) · Particle 65536 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:22:26Z",
+      "id" : "vulkan\/stream_headless-65536",
+      "request" : "stream_headless?particles=65536&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261016-192226-325"
+      ],
+      "startedAt" : "2026-10-16T08:22:11Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan (MoltenVK) · Particle 65536 · Compute"
+    },
+    {
+      "error" : "尚未达到稳定平台",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:22:43Z",
+      "id" : "vulkan\/stream-1048576",
+      "request" : "stream?particles=1048576&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs" : [
+        "20261016-192242-958"
+      ],
+      "startedAt" : "2026-10-16T08:22:27Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan (MoltenVK) · Particle 1048576 · Render"
+    },
+    {
+      "error" : "尚未达到稳定平台; 纯计算计时需要与实际耗时核对",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:22:59Z",
+      "id" : "vulkan\/stream_headless-1048576",
+      "request" : "stream_headless?particles=1048576&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261016-192259-219"
+      ],
+      "startedAt" : "2026-10-16T08:22:43Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan (MoltenVK) · Particle 1048576 · Compute"
+    },
+    {
+      "error" : "尚未达到稳定平台",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:23:18Z",
+      "id" : "vulkan\/stream-4194304",
+      "request" : "stream?particles=4194304&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs" : [
+        "20261016-192317-964"
+      ],
+      "startedAt" : "2026-10-16T08:23:00Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan (MoltenVK) · Particle 4194304 · Render"
+    },
+    {
+      "error" : "尚未达到稳定平台; 纯计算计时需要与实际耗时核对",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:23:34Z",
+      "id" : "vulkan\/stream_headless-4194304",
+      "request" : "stream_headless?particles=4194304&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261016-192334-332"
+      ],
+      "startedAt" : "2026-10-16T08:23:18Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan (MoltenVK) · Particle 4194304 · Compute"
+    },
+    {
+      "error" : "尚未达到稳定平台",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:24:01Z",
+      "id" : "vulkan\/stream-16777216",
+      "request" : "stream?particles=16777216&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs" : [
+        "20261016-192401-552"
+      ],
+      "startedAt" : "2026-10-16T08:23:35Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan (MoltenVK) · Particle 16777216 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:24:18Z",
+      "id" : "vulkan\/stream_headless-16777216",
+      "request" : "stream_headless?particles=16777216&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261016-192418-375"
+      ],
+      "startedAt" : "2026-10-16T08:24:02Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan (MoltenVK) · Particle 16777216 · Compute"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:24:35Z",
+      "id" : "vulkan\/gpu_burn-16",
+      "request" : "gpu_burn?steps=16&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261016-192435-030"
+      ],
+      "startedAt" : "2026-10-16T08:24:19Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan · GPU Burn · 16"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:24:51Z",
+      "id" : "vulkan\/gpu_burn-64",
+      "request" : "gpu_burn?steps=64&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261016-192451-160"
+      ],
+      "startedAt" : "2026-10-16T08:24:35Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan · GPU Burn · 64"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:25:08Z",
+      "id" : "vulkan\/gpu_burn-256",
+      "request" : "gpu_burn?steps=256&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261016-192507-871"
+      ],
+      "startedAt" : "2026-10-16T08:24:52Z",
+      "status" : "passed",
+      "thermalStateEnd" : 1,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan · GPU Burn · 256"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:28:00Z",
+      "id" : "vulkan\/memory_sweep",
+      "request" : "memory_sweep?api=vulkan",
+      "resultIDs" : [
+        "20261016-192800-011-membw"
+      ],
+      "startedAt" : "2026-10-16T08:27:06Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan · GPU Cache & Memory"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:28:59Z",
+      "id" : "gpu_cache-v3-parallel512",
+      "request" : "gpu_cache?api=metal&parallel_steps=512",
+      "resultIDs" : [
+        "20261016-192858-788-metal-cache"
+      ],
+      "startedAt" : "2026-10-16T08:28:00Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · GPU Cache-state Diagnostic"
+    },
+    {
+      "error" : "全核线程的驻留或占用未全部验证",
+      "expectedRecords" : 3,
+      "finishedAt" : "2026-10-16T08:29:45Z",
+      "id" : "cpu_compute",
+      "request" : "gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2",
+      "resultIDs" : [
+        "20261016-192945-416-cpu-single-performance",
+        "20261016-192945-425-cpu-single-efficiency",
+        "20261016-192945-429-cpu-multi"
+      ],
+      "startedAt" : "2026-10-16T08:28:59Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "CPU Compute · Performance + Efficiency + All Cores"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:32:21Z",
+      "id" : "cpu_memory",
+      "request" : "gpu_benchmark --cpu-membw",
+      "resultIDs" : [
+        "20261016-193221-142-cpu-membw"
+      ],
+      "startedAt" : "2026-10-16T08:29:46Z",
+      "status" : "passed",
+      "thermalStateEnd" : 1,
+      "thermalStateStart" : 0,
+      "title" : "CPU Cache, Memory, Virtual Memory & Storage"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "",
+      "id" : "gles2\/gpu_burn-16",
+      "request" : "gpu_burn?steps=16&api=gles2&vsync=0",
+      "resultIDs" : [
+
+      ],
+      "startedAt" : "",
+      "status" : "pending",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "OpenGL ES 2.0 · GPU Burn · 16"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "",
+      "id" : "gles2\/gpu_burn-64",
+      "request" : "gpu_burn?steps=64&api=gles2&vsync=0",
+      "resultIDs" : [
+
+      ],
+      "startedAt" : "",
+      "status" : "pending",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "OpenGL ES 2.0 · GPU Burn · 64"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "",
+      "id" : "gles2\/gpu_burn-256",
+      "request" : "gpu_burn?steps=256&api=gles2&vsync=0",
+      "resultIDs" : [
+
+      ],
+      "startedAt" : "",
+      "status" : "pending",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "OpenGL ES 2.0 · GPU Burn · 256"
+    }
+  ],
+  "startedAt" : "2026-10-16T08:17:00Z",
+  "status" : "running"
+}

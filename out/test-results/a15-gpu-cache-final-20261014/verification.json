@@ -1,0 +1,58 @@
+{
+  "old_rows_unchanged": 120,
+  "history_rows": 123,
+  "new_records": [
+    "20261014-173652-182-metal-cache",
+    "20261014-174431-970-metal-cache",
+    "20261014-174539-439-metal-cache"
+  ],
+  "verified_curve_points": 372,
+  "physical_test_passed": true,
+  "public_counter_inventory": "timestamp/GPUTimestamp",
+  "external_trace_counter_profile": 0,
+  "external_counter_rows": {
+    "gpu-counter-info": 0,
+    "gpu-counter-value": 0,
+    "gpu-counter-profile": 0
+  },
+  "independent_L2_L3_SLC_attribution": "not_established",
+  "attribution_reason": "No cache hit/miss or SLC traffic evidence collected; timing curves and checksum alone do not identify hardware levels",
+  "gpu_warm_load_count_comparison": {
+    "4096": {
+      "baseline_ns": 62.2119902,
+      "double_load_ns": 62.0896019,
+      "change_percent": -0.1967278327000166
+    },
+    "16384": {
+      "baseline_ns": 62.2774756,
+      "double_load_ns": 62.1843332,
+      "change_percent": -0.14956033317445883
+    },
+    "1048576": {
+      "baseline_ns": 106.23614,
+      "double_load_ns": 101.619721,
+      "change_percent": -4.345431789972798
+    },
+    "2097152": {
+      "baseline_ns": 166.196823,
+      "double_load_ns": 165.530205,
+      "change_percent": -0.40110153008159344
+    },
+    "33554432": {
+      "baseline_ns": 249.472937,
+      "double_load_ns": 257.005373,
+      "change_percent": 3.019339929444942
+    },
+    "134217728": {
+      "baseline_ns": 424.580257,
+      "double_load_ns": 414.175034,
+      "change_percent": -2.4507081590465996
+    }
+  },
+  "phone_benchmark_ended": true,
+  "results_sha256": "441320beeccca9fc2a2e24f3fdc5f82213ed43986824ae46d91bcc9b37a03095",
+  "gui_counter_scan_record": "20261014-182221-741-metal-cache",
+  "gui_counter_profile_visible": "Performance Limiters",
+  "gui_counter_trace_save_workaround": "Opened a copy of an existing trace and saved its exact profile3 configuration; original unsaved scan snapshot is incomplete",
+  "final_counter_capture": "running"
+}

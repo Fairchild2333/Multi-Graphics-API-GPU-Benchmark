@@ -1,0 +1,11 @@
+{
+  "head": "5c4e7df718728e498080b9d154abd8275ffeaace",
+  "app_sha256": "0c0d027a1a8633073d3f43b55916cbfdf752d5e755048639859a020bb784fdc2",
+  "device": "iPhone 13 Pro / A15",
+  "ios": "27.0.1",
+  "method": "foreground E + verified P helpers + private thread counters",
+  "clock_conservation_check": true,
+  "source_dirty": true,
+  "benchmark_active": false,
+  "archive": "foreground-confirm-final"
+}

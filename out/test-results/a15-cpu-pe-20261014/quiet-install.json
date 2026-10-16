@@ -1,0 +1,39 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "install",
+      "app",
+      "--device",
+      "00008110-00164D591485401E",
+      "build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app",
+      "--timeout",
+      "60",
+      "--json-output",
+      "out/test-results/a15-cpu-pe-20261014/quiet-install.json"
+    ],
+    "commandType" : "devicectl.device.install.app",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "642.16"
+  },
+  "result" : {
+    "deviceIdentifier" : "45159977-97BF-543B-A3BE-3FFC567B816E",
+    "installedApplications" : [
+      {
+        "bundleID" : "com.fairchild.Mangekyo",
+        "databaseSequenceNumber" : 4984,
+        "databaseUUID" : "7179FC5B-AD6B-48F6-832B-0DEF4CE6E31D",
+        "installationURL" : "file:///private/var/containers/Bundle/Application/BE629E57-9821-4F10-969E-7C02E5BCE53C/Mangekyo.app/",
+        "launchServicesIdentifier" : "unknown",
+        "options" : {
+
+        }
+      }
+    ]
+  }
+}

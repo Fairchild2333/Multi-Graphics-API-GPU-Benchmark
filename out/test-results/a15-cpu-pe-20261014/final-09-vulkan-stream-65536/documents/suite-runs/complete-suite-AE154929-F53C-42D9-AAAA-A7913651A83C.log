@@ -1,0 +1,81 @@
+iOS complete suite complete-suite-AE154929-F53C-42D9-AAAA-A7913651A83C
+Started: 2026-10-14T04:16:23Z
+
+Thermal precheck vulkan/gpu_burn-64: nominal after 0s cooling.
+
+=== 1/1 vulkan/gpu_burn-64: passed ===
+=== Preview gpu_burn?steps=64&vsync=0&api=vulkan 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple A15 GPU (Integrated GPU)
+Selected GPU [0]: Apple A15 GPU  |  Driver: 0.2.2210
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 256 particles
+[Profiling] Timestamp queries enabled (period = 1 ns/tick)
+[Profiling] Render timestamp check: 0.216167 ms GPU, 115.976 ms synchronized submit/wait.
+[Profiling] Vulkan timestamp queries cannot be used (render timestamps disagree with synchronized submit/wait); using synchronized wall-clock timing.
+[GPU Timing] Compute: 0.000 ms | Render: 118.140 ms | Total: 118.140 ms | FPS: 11 | T: 0.5 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 114.286 ms | Total: 114.286 ms | FPS: 8 | T: 0.8 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 113.300 ms | Total: 113.300 ms | FPS: 8 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 113.903 ms | Total: 113.903 ms | FPS: 8 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 115.045 ms | Total: 115.045 ms | FPS: 8 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 114.338 ms | Total: 114.338 ms | FPS: 8 | T: 2.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 113.012 ms | Total: 113.012 ms | FPS: 8 | T: 3.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 114.937 ms | Total: 114.937 ms | FPS: 8 | T: 4.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 112.706 ms | Total: 112.706 ms | FPS: 8 | T: 5.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 112.261 ms | Total: 112.261 ms | FPS: 8 | T: 7.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 112.428 ms | Total: 112.428 ms | FPS: 8 | T: 8.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 112.848 ms | Total: 112.848 ms | FPS: 8 | T: 9.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 112.743 ms | Total: 112.743 ms | FPS: 8 | T: 10.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 112.748 ms | Total: 112.748 ms | FPS: 8 | T: 11.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 114.569 ms | Total: 114.569 ms | FPS: 8 | T: 12.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 113.845 ms | Total: 113.845 ms | FPS: 8 | T: 13.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 113.370 ms | Total: 113.370 ms | FPS: 8 | T: 14.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 111.840 ms | Total: 111.840 ms | FPS: 8 | T: 15.1 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A15 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.2 s (warmup: 2.0 s, measured: 116 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:        113.169   109.847   122.846
+Total GPU:     113.169   109.847   122.846
+
+--- Throughput ---
+Avg FPS:      8
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 64 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    1.04 Gpix-step/s  (113.169 ms render)
+
+--- Analysis ---
+Avg frame time:  113.370 ms
+Avg GPU time:    113.169 ms
+GPU utilisation: 99.8%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Thermal Stability ---
+Windows:      13 x 1s
+Stable score: 1.04 Gpix-step/s  (CV 0.82%)
+>> Thermally stable; stableScore is a fair comparison metric.
+==========================================================
+
+[Results] Saved as 20261014-151639-505 -> /var/mobile/Containers/Data/Application/86D506A5-E982-49BF-978A-F8E11D2B7927/Documents/results/results.json

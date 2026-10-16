@@ -1,0 +1,83 @@
+Scenario simulation success.
+Analysis saved to: /Users/fairchild/.Huawei/Emulator/deployed/Huawei_Phone/uiLayout/analysis.md
+
+# Widget Tree Analysis
+
+- **Generated**: 2026-10-14 14:02:49
+- **Mode**: Interactive Only
+
+---
+
+## Widget Tree
+
+- Swiper [id:4] [top: 0, left: 0, width: 1260, height: 2473]
+  - Scroll [id:7] [top: 126, left: 52, width: 1156, height: 2347]
+    - Text CPU 测试 [id:8] [top: 178, left: 52, width: 339, height: 91]
+    - Text CPU 计算吞吐 [id:10] [top: 353, left: 97, width: 327, height: 61]
+    - Text Unknown CPU · 4 个逻辑处理器 · 4 个物理核心 [id:11] [top: 440, left: 97, width: 833, height: 46]
+    - Button 单核 [id:13] [top: 512, left: 97, width: 189, height: 104]
+    - Button 全核 [id:14] [top: 512, left: 312, width: 189, height: 104]
+    - Button 单核 + 全核 [id:15] [top: 512, left: 527, width: 321, height: 104]
+    - Button 缓存与内存 [id:16] [top: 642, left: 97, width: 316, height: 104]
+    - Button 快速 1 秒 [id:18] [top: 772, left: 97, width: 279, height: 104]
+    - Button 正式 15 秒 [id:19] [top: 772, left: 402, width: 303, height: 104]
+    - Text 单核测试会在每个逻辑处理器上各跑一次；正式预设每次 15 秒。停止会取消尚未完成的测试。 [id:20] [top: 902, left: 97, width: 1041, height: 92]
+    - Button 一键测试 CPU 全套 [id:21] [top: 1020, left: 97, width: 549, height: 130]
+    - Text 已取消 · 0/2 [id:22] [top: 1176, left: 97, width: 218, height: 46]
+    - Button 运行 [id:23] [top: 1248, left: 97, width: 209, height: 130]
+    - Text 已取消 [id:26] [top: 1507, left: 97, width: 991, height: 53]
+    - Text 80% [id:27] [top: 1511, left: 1088, width: 75, height: 46]
+    - Progress 80.000000 [id:28] [top: 1586, left: 97, width: 1066, height: 13]
+    - Text 摘要 [id:30] [top: 1728, left: 97, width: 105, height: 61]
+    - Text 全核 [id:31] [top: 1815, left: 97, width: 79, height: 46]
+    - Text 718 MWork/s（4 线程） [id:32] [top: 1887, left: 97, width: 715, height: 76]
+    - Text 各逻辑处理器的成绩 (MWork/s) [id:34] [top: 2092, left: 97, width: 734, height: 61]
+    - Text #1  LP 0 · core 1 · InferredUniform  ·  176 MWork/s [id:36] [top: 2823, left: 97, width: 917, height: 46]
+    - Text #2  LP 1 · core 2 · InferredUniform  ·  189 MWork/s [id:37] [top: 2895, left: 97, width: 917, height: 46]
+    - Text 原始输出（最后几行） [id:38] [top: 3070, left: 97, width: 521, height: 61]
+    - Text CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.552533 overall_fraction=0.510507 elapsed=8.288000 round_index=1 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.569205 overall_fraction=0.513841 elapsed=8.538071 round_index=1 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.585877 overall_fraction=0.517175 elapsed=8.788156 round_index=1 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.603078 overall_fraction=0.520616 elapsed=9.046166 round_index=1 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.619752 overall_fraction=0.523950 elapsed=9.296281 round_index=1 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.636423 overall_fraction=0.527285 elapsed=9.546344 round_index=1 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.654050 overall_fraction=0.530810 elapsed=9.810753 round_index=1 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.666673 overall_fraction=0.533335 elapsed=10.000095 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.683344 overall_fraction=0.536669 elapsed=10.250165 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.700851 overall_fraction=0.540170 elapsed=10.512769 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.717524 overall_fraction=0.543505 elapsed=10.762862 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.734195 overall_fraction=0.546839 elapsed=11.012927 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.751742 overall_fraction=0.550348 elapsed=11.276129 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.768413 overall_fraction=0.553683 elapsed=11.526196 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.785084 overall_fraction=0.557017 elapsed=11.776264 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.802813 overall_fraction=0.560563 elapsed=12.042193 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.819483 overall_fraction=0.563897 elapsed=12.292249 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.836154 overall_fraction=0.567231 elapsed=12.542312 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.853972 overall_fraction=0.570794 elapsed=12.809576 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.870643 overall_fraction=0.574129 elapsed=13.059649 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.887314 overall_fraction=0.577463 elapsed=13.309717 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.904474 overall_fraction=0.580895 elapsed=13.567105 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.921145 overall_fraction=0.584229 elapsed=13.817171 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.937816 overall_fraction=0.587563 elapsed=14.067242 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.955381 overall_fraction=0.591076 elapsed=14.330718 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.972052 overall_fraction=0.594410 elapsed=14.580785 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=1 core_count=4 core_fraction=0.988912 overall_fraction=0.597782 elapsed=14.833674 round_index=2 round_count=3
+CPU_PROGRESS mode=per_core phase=complete core_index=1 core_count=4 core_fraction=1.000000 overall_fraction=0.600000 elapsed=15.000000 round_index=0 round_count=3
+Logical processor sample 2 score: 189.16 MWork/s
+CPU_RESULT kind=core mode=per_core workload_version=cpu_mixed_v1_strict_sched_affinity score_contract=formal aggregation=median core_index=1 core_count=4 group=0 logical_index=1 physical_core=1 smt_index=0 smt_width=1 efficiency_class=1024 performance_level=0 core_class=InferredUniform core_type=auto residency_verified=1 requested_lower_bound=0.000000 classification_source=inferred_capacity_or_max_frequency_rank affinity=strict valid=1 score=189.158567 unit=MWork/s seconds=5.000012 requested_seconds=15.000000 round_count=3 median_round=1 checksum=dabc309e979d4f03 checksum_role=dce_sink
+CPU_PROGRESS mode=per_core phase=warmup core_index=2 core_count=4 core_fraction=0.000000 overall_fraction=0.600000 elapsed=0.000023 round_index=-1 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=2 core_count=4 core_fraction=0.000009 overall_fraction=0.600002 elapsed=0.000141 round_index=0 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=2 core_count=4 core_fraction=0.016680 overall_fraction=0.603336 elapsed=0.250206 round_index=0 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=2 core_count=4 core_fraction=0.033460 overall_fraction=0.606692 elapsed=0.501905 round_index=0 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=2 core_count=4 core_fraction=0.050766 overall_fraction=0.610153 elapsed=0.761493 round_index=0 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=2 core_count=4 core_fraction=0.068022 overall_fraction=0.613604 elapsed=1.020331 round_index=0 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=2 core_count=4 core_fraction=0.084906 overall_fraction=0.616981 elapsed=1.273586 round_index=0 round_count=3
+CPU_PROGRESS mode=per_core phase=measure core_index=2 core_count=4 core_fraction=0.101577 overall_fraction=0.620315 elapsed=1.523656 round_index=0 round_count=3
+CPU_PROGRESS mode=per_core phase=complete core_index=2 core_count=4 core_fraction=1.000000 overall_fraction=0.800000 elapsed=15.000000 round_index=-1 round_count=0
+CPU_CANCELLED [id:39] [top: 3157, left: 97, width: 1060, height: 5250]
+- TabBar [id:41] [top: 2473, left: 0, width: 1261, height: 248]
+  - Column image GPU [id:42] [top: 2490, left: 119, width: 78, height: 122]
+  - Column image CPU [id:43] [top: 2490, left: 434, width: 78, height: 122]
+  - Column symbol 历史 [id:44] [top: 2490, left: 748, width: 79, height: 122]
+  - Column symbol 图表 [id:45] [top: 2490, left: 1063, width: 79, height: 122]
+

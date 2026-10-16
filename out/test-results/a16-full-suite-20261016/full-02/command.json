@@ -1,0 +1,16 @@
+[
+  "xcrun",
+  "devicectl",
+  "device",
+  "process",
+  "launch",
+  "--device",
+  "00008120-000E2D3E0CEBC01E",
+  "--terminate-existing",
+  "--console",
+  "--json-output",
+  "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a16-full-suite-20261016/full-02/launch.json",
+  "com.fairchild.Mangekyo",
+  "--ios-allow-translated-api",
+  "--ios-complete-suite"
+]

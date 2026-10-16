@@ -1,0 +1,13 @@
+[  0%] Compiling membw_check.comp -> SPIR-V
+[  2%] Compiling particle.vert -> SPIR-V
+[100%] Built target compile_glsl
+[  4%] Built target glad_gl43
+[ 56%] Built target compile_glsl
+[ 77%] Built target glfw
+[ 97%] Built target gpu_engine
+[ 98%] Linking CXX executable gpu_benchmark
+ld: warning: building for macOS-11.0, but linking with dylib '/opt/homebrew/opt/vulkan-loader/lib/libvulkan.1.dylib' which was built for newer version 27.0
+Copying SPIR-V files next to executable
+Copying Metal shader files next to executable
+Copying OpenGL GLSL shader files next to executable
+[100%] Built target gpu_benchmark

@@ -1,0 +1,105 @@
+SUITE_PLAN	total=2	scope=CPU
+SUITE_RUN	index=1	total=2	job=cpu-compute
+SUITE_THERMAL	start=0	unknown=-1
+CPU_META	workload_version=cpu_mixed_v1_strict_sched_affinity	name=AOSP ranchu	logical_count=4	physical_count=4	topology_source=LinuxAllowedCpuSet+Sysfs	affinity_capability=strict_sched_affinity
+CPU_TOPOLOGY	core_index=0	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+CPU_TOPOLOGY	core_index=1	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+CPU_TOPOLOGY	core_index=2	group=0	logical_index=2	physical_core=2	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+CPU_TOPOLOGY	core_index=3	group=0	logical_index=3	physical_core=3	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+CPU_SCHEDULING	core_type=auto	residency_threshold=0.99	scope=single_thread_stages
+
+--- Native CPU mixed benchmark ---
+CPU: AOSP ranchu
+Topology: LinuxAllowedCpuSet+Sysfs, affinity: strict_sched_affinity
+Workload: cpu_mixed_v1_strict_sched_affinity, 3 rounds, median aggregation (the requested measurement time is split across rounds).
+Score contract: formal (formal = 15.0 s measurement, 0.2 s warm-up, 3 rounds).
+Each score is million mixed integer/branch/FP32/FP64 work units per second.
+The checksum is a dead-code-elimination sink, not a correctness oracle.
+
+--- CPU all-logical-processor test ---
+CPU_PROGRESS	mode=multi	phase=warmup	core_index=-1	core_count=4	core_fraction=0.000000	overall_fraction=0.000000	elapsed=0.000000	round_index=-1	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=0.333333	overall_fraction=0.066667	elapsed=5.000000	round_index=0	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=0.666667	overall_fraction=0.133333	elapsed=10.000000	round_index=1	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=1.000000	overall_fraction=0.200000	elapsed=15.000000	round_index=2	round_count=3
+CPU_PROGRESS	mode=multi	phase=complete	core_index=-1	core_count=4	core_fraction=1.000000	overall_fraction=0.200000	elapsed=15.000000	round_index=1	round_count=3
+All-core score (4 threads): 734.42 MWork/s
+CPU_RESULT	kind=multi	mode=multi	core_index=-1	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_count=4	thread_count=4	pinned_threads=4	affinity=strict	valid=1	score=734.417034	unit=MWork/s	seconds=5.000016	requested_seconds=15.000000	round_count=3	median_round=2	checksum=46b96ec64d101153	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=0	core_count=4	core_fraction=0.000000	overall_fraction=0.200000	elapsed=0.000026	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.000008	overall_fraction=0.200002	elapsed=0.000125	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.016830	overall_fraction=0.203366	elapsed=0.252443	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.033631	overall_fraction=0.206726	elapsed=0.504458	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.050308	overall_fraction=0.210062	elapsed=0.754618	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.066996	overall_fraction=0.213399	elapsed=1.004934	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.083735	overall_fraction=0.216747	elapsed=1.256020	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.100416	overall_fraction=0.220083	elapsed=1.506238	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.117215	overall_fraction=0.223443	elapsed=1.758220	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.133887	overall_fraction=0.226777	elapsed=2.008306	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.150597	overall_fraction=0.230119	elapsed=2.258956	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.167285	overall_fraction=0.233457	elapsed=2.509270	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.183975	overall_fraction=0.236795	elapsed=2.759629	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.200703	overall_fraction=0.240141	elapsed=3.010545	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.217396	overall_fraction=0.243479	elapsed=3.260942	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.234121	overall_fraction=0.246824	elapsed=3.511808	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.250804	overall_fraction=0.250161	elapsed=3.762063	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.267499	overall_fraction=0.253500	elapsed=4.012491	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.284244	overall_fraction=0.256849	elapsed=4.263660	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.301006	overall_fraction=0.260201	elapsed=4.515092	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.317773	overall_fraction=0.263555	elapsed=4.766596	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.333337	overall_fraction=0.266667	elapsed=5.000048	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.350124	overall_fraction=0.270025	elapsed=5.251860	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.366887	overall_fraction=0.273377	elapsed=5.503302	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.383608	overall_fraction=0.276722	elapsed=5.754118	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.400400	overall_fraction=0.280080	elapsed=6.006003	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.417097	overall_fraction=0.283419	elapsed=6.256460	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.433779	overall_fraction=0.286756	elapsed=6.506681	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.450558	overall_fraction=0.290112	elapsed=6.758377	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.467272	overall_fraction=0.293454	elapsed=7.009083	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.483976	overall_fraction=0.296795	elapsed=7.259638	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.500652	overall_fraction=0.300130	elapsed=7.509783	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.517400	overall_fraction=0.303480	elapsed=7.760994	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.534152	overall_fraction=0.306830	elapsed=8.012282	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.550833	overall_fraction=0.310167	elapsed=8.262498	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.567568	overall_fraction=0.313514	elapsed=8.513521	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.584280	overall_fraction=0.316856	elapsed=8.764194	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.601091	overall_fraction=0.320218	elapsed=9.016363	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.617783	overall_fraction=0.323557	elapsed=9.266744	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.634523	overall_fraction=0.326905	elapsed=9.517850	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.651504	overall_fraction=0.330301	elapsed=9.772559	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.666669	overall_fraction=0.333334	elapsed=10.000040	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.683515	overall_fraction=0.336703	elapsed=10.252725	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.700200	overall_fraction=0.340040	elapsed=10.503000	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.716936	overall_fraction=0.343387	elapsed=10.754047	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.733684	overall_fraction=0.346737	elapsed=11.005256	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.750427	overall_fraction=0.350085	elapsed=11.256407	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.767133	overall_fraction=0.353427	elapsed=11.506988	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.783816	overall_fraction=0.356763	elapsed=11.757246	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.800551	overall_fraction=0.360110	elapsed=12.008264	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.817291	overall_fraction=0.363458	elapsed=12.259364	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.833996	overall_fraction=0.366799	elapsed=12.509945	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.850674	overall_fraction=0.370135	elapsed=12.760108	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.867358	overall_fraction=0.373472	elapsed=13.010366	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.884064	overall_fraction=0.376813	elapsed=13.260967	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.900743	overall_fraction=0.380149	elapsed=13.511151	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.917438	overall_fraction=0.383488	elapsed=13.761565	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.934181	overall_fraction=0.386836	elapsed=14.012715	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.950890	overall_fraction=0.390178	elapsed=14.263350	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.967573	overall_fraction=0.393515	elapsed=14.513593	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.984253	overall_fraction=0.396851	elapsed=14.763801	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=0	core_count=4	core_fraction=1.000000	overall_fraction=0.400000	elapsed=15.000000	round_index=1	round_count=3
+Logical processor sample 1 score: 191.54 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_index=0	core_count=4	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	efficiency_class=1024	performance_level=0	core_class=InferredUniform	core_type=auto	residency_verified=1	requested_lower_bound=0.000000	classification_source=inferred_capacity_or_max_frequency_rank	affinity=strict	valid=1	score=191.536397	unit=MWork/s	seconds=5.000020	requested_seconds=15.000000	round_count=3	median_round=2	checksum=25c46f9bbb130aa0	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=1	core_count=4	core_fraction=0.000000	overall_fraction=0.400000	elapsed=0.000553	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.000005	overall_fraction=0.400001	elapsed=0.000079	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.016753	overall_fraction=0.403351	elapsed=0.251301	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.033427	overall_fraction=0.406685	elapsed=0.501400	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.050137	overall_fraction=0.410027	elapsed=0.752051	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.066825	overall_fraction=0.413365	elapsed=1.002380	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.083541	overall_fraction=0.416708	elapsed=1.253108	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.100221	overall_fraction=0.420044	elapsed=1.503322	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.116936	overall_fraction=0.423387	elapsed=1.754041	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.133661	overall_fraction=0.426732	elapsed=2.004908	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.150409	overall_fraction=0.430082	elapsed=2.256134	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.167114	overall_fraction=0.433423	elapsed=2.506717	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.183815	overall_fraction=0.436763	elapsed=2.757219	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=1	core_count=4	core_fraction=1.000000	overall_fraction=0.600000	elapsed=15.000000	round_index=-1	round_count=0
+CPU_CANCELLED

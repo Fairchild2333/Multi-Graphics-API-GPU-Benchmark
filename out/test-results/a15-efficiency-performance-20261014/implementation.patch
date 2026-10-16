@@ -1,0 +1,1834 @@
+diff --git a/HANDOFF.md b/HANDOFF.md
+index 72fbb02..1e38580 100644
+--- a/HANDOFF.md
++++ b/HANDOFF.md
+@@ -3785,3 +3785,212 @@ PathService 已把 results/captures/reports/logs 改到
+   sections. Android raw results exported as android-emulator-results.json and
+   final manifests/logs in android-studio-final-suites. Complete native logs in
+   android-cpu-complete.log/ohos-cpu-complete.log. Still emulator-only validation.
++
++## 2026-10-14: Mac remaining targeted retests
++
++- User requested testing this computer's pending candidates first. Rebuilt
++  current5c4e7df arm64 Release app + bundled worker/signature. Executed only
++  pending Metal stream render1M/16M, Burn16/64 and MoltenVK stream render1M.
++  Vulkan showed variation, so repeated once after60s+, same15s/1280x720 spec.
++  All6 runs AC, low-power mode false, thermal state0->0; per-job30s+ rest.
++- New Metal:1M189.944 GB/s,16M152.212 GB/s,Burn16 8.480 Gpix-step/s,
++  Burn64 9.401 Gpix-step/s. Serialized GPU/frame timing and stable CV pass.
++  With earlier3 Metal checks, original7 timing candidates now7/7 verified.
++- Vulkan particle stays in its original2-flight timestamp-query contract.
++  Initialization compute batch checks against synchronized submit/wait pass;
++  no GPU/frame overlap. Two means171.739/169.092 GB/s but within-run declines
++  11.74%/14.34% recur. This remains a stability/variation diagnosis, not a
++  proved thermal frequency event. stableScore182.345/182.608 refers to earlier
++  detected windows, not final sustained throughput; do not report it as such.
++  No endless repeats or score cherry-picking. Kept both observations.
++- Evidence: out/test-results/macos-targeted-retest-20261014/report.md,
++  audit.json,run-status.json,6 native logs,curves.csv(113 windows),PNG/PDF.
++  Result audit validates timing contracts/window overlap/duration/specs.
++- Canonical Mac history atomically merged137->147, retaining every existing
++  object unchanged:6 new rows plus4 previously isolated validated rows.
++  Backups/results/history-update.json record exact IDs and hashes; all raw
++  scores remain in project evidence. Comparison selected Mac groups and
++  retest-needed JSON/MD updated; iPhone/iPad unchanged(7/4 still pending).
++  No CPU/memory/other good cases repeated. New documentation is uncommitted.
++
++## 2026-10-14: continued Mac Vulkan drift controls
++
++- User said continue testing;6 additional isolated runs, same packaged worker
++  and1M/15s, all AC/low-power-off/thermal0->0,60s+ rest. Vulkan rendered
++  flight1:164.016 GB/s/drop16.54%. Headless flight2:264.140/drop-1.33%;
++  headless flight1:157.835/drop0.19%. Default rendered flight2:156.753/drop23.12%.
++- Isolated vertex-only variant wraps display XY into[-1,1) to retain on-screen
++  coverage (original Y and leftward X leave viewport over time). Identical
++  worker Mach-O, compute and fragment SPIR-V verified; variant only in out.
++  It measures181.467 GB/s/drop-0.01%, stableCV0.34%. Restore original shader
++  using standard packaged worker:167.361/drop15.57%. A-B-A controls support
++  dynamic render-load effects, not merely2-flight submission or a proven
++  thermal frequency event. No production engine/shader change was made.
++- Timestamp batch/synchronized wait checks and phase/frame checks pass all6.
++  GPU frequency unavailable because powermetrics requires administrator and
++  sudo -n has no authorization; did not prompt for/store a password. Per-run
++  stableScore can describe earlier windows, not final sustained speed.
++  Headless generic Render timestamp field is query-marker gap, not rendering.
++- Evidence out/test-results/macos-vulkan-diagnosis-20261014:report.md,audit.json,
++  curves.csv,control-curves.png/pdf,visibility-control.png/pdf,all logs,
++  original diagnostic result arrays and wrapped variant JSON + sidecar contract.
++  Import only2 default rendered2-flight rows; canonical149, all prior147
++  objects preserved. Other configurations/vertex variant remain separate to
++  avoid replacing standard scores. Checklist now records diagnosed dynamic
++  render-load effect with standard-contract/frequency investigation pending.
++  No phone/tablet/other good tests rerun; notes remain uncommitted.
++
++## 2026-10-14: durable A15/A12X retest judgments
++
++- User requested saving the prior judgments in Markdown. Added
++  [docs/apple-retest-status-20261014.md](docs/apple-retest-status-20261014.md)
++  outside ignored out/: A15 7 candidates, A12X 4, reasons, observed scores,
++  original result IDs, priority versus stability follow-up, already verified
++  exclusions and the retest method. Mac render-density diagnosis is recorded
++  as an isolated variant whose findings do not close mobile candidates.
++- No benchmarks launched or source/shader changes in this documentation step.
++
++## 2026-10-14: A15 targeted retest completed
++
++- User requested testing A15. Rebuilt current 5c4e7df iOS Release native/app,
++  signed and installed on the connected, unlocked physical iPhone 13 Pro.
++  Backed up Documents before install: 67 rows, SHA256
++  230c46905751f01d741049ca9a051eb0ef54a8e2a62e75db646496a4231d1ce4.
++- Ran the 7 documented candidates via production suite job subsets, one at
++  a time with 20s rest. Repeated the 4 review cases once each. All 11 runs
++  thermal0->0, original shaders, 1280x720,15s incl.2s warmup. No A12X, Mac,
++  CPU or other already-good cases rerun. No source/shader edits.
++- Passed Metal4M19.118 GB/s,16M17.525 GB/s,Burn16 1.408 Gpix-step/s.
++  VulkanBurn64 repeated calibration0.216ms GPU vs115.976ms synchronized wait
++  triggers fallback; synchronized result1.042/stable1.041/CV0.82 passes.
++  Preserve separate timing contract from first query-timed1.121.
++- Still review: Metal1M16.102/16.873, drop29.02/31.83%; Vulkan1M17.935/17.576,
++  drop11.47/13.69%; VulkanBurn2561.367/1.623,drop9.10/14.98%,no stable plateau.
++  1M render time falls while compute time increases near60FPS; not proven
++  thermal frequency change. Burn256 initial timestamp check passes but later
++  query windows vary; per-frame synchronized comparison remains needed.
++  Aggregate phase/frame checks do not establish every timestamp's accuracy.
++- Raw history now78, all67 prior objects unchanged; SHA256
++  dc9e706a39b4548add4cf59fd37aa0119febf7802b9885f89858490caa61ace1.
++  out/test-results/a15-targeted-retest-20261014 contains before, all11 suites,
++  final Documents, console/native logs, build-info,verification,audit,report,
++  curves.csv,a15-curves.png/pdf,7 latest rows and32-row curated suite (other
++  25 selections unchanged). Updated docs/apple-retest-status-20261014.md.
++  Stop repeating unchanged15s tests; next work is diagnosis of remaining3.
++
++## 2026-10-14: A15 P/E separation and remaining3 GPU fixes verified
++
++- User explicitly requested trying the Mac method on iOS, web research, and
++  resolving remaining3 GPU cases. iOS SDK exposes public TASK_POWER_INFO_V2;
++  Apple XNU maps task_ptime to performance CPU time. Add iOS task accounting
++  under the existing thread-clock/process-time conservative >=99% gate.
++  Runtime reports2P/4E and full accounting. No private SPI/root/numbered pinning.
++  Mac keeps libproc V6, simulators/unavailable capabilities retain auto.
++- First2 CPU attempts reject E lower bounds~97%, saving only validP+multi.
++  Buffer E progress until its worker stops and background its observer; then
++  CPU passes twice: P147.699/146.994,E29.611/26.740,all649.362/661.557 MWork/s.
++  Both class stages meet99% each round; E minimum>99.99%. E is background
++  policy throughput, not max-frequency capability. Kernel/threshold unchanged.
++- Enable defaultP/E+all in iOS buttons; compute suite expects3 distinct rows,
++  rejects duplicate/unverified types and preserves CPU cancellation. Cache
++  sweep first rejected E amidst interactive detailed log output. Buffer its
++  classified log until measurement completes: passes186 curve points>=99%.
++  System capacities P128KiB/12MiB,E64KiB/4MiB; L1 reads101.1/13.8GB/s,
++  L2 reads81.2/9.2,all-memory35.078. Page mapping/storage completed. No new
++  independent SoC/SLC attribution. Public cycles unavailable on iOS (GHz0=N/A).
++- iOS rendered stream defaults fixed vertex NDC wrapping, unchanged compute
++  kernel/count. Metal new vertex function, Vulkan specialization constant;
++  other platforms defaultlegacy. Persist fixed_coverage_v2+renderCoverage,
++  explicitly separate legacy/fixed suite requests and disallow old coverage
++  reuse. No new GUI setting; automation-only legacy launch argument for control.
++  Fixed1M first Metal21.905/Vk20.298 GB/s; legacy control drop32.94/13.69%;
++  restored fixed21.803/20.357,stable21.846/20.396,drop-0.15/-0.34%. All6 other
++  rendered sizes65K/4M/16M on both APIs pass. Dynamic draw-load effect supported.
++- iOS MoltenVK Burn always uses per-frame submit/fence elapsed timing instead
++  of startup-only GPU-query validation. Mac Burn policy unchanged. Vk256
++  first1.095,confirm1.101/stable1.102/drop-0.37%. Vk16/64 final0.844/1.036 pass.
++  Resume rejects prior GPU-query Burn rows; histories are retained. Throughput
++  summary no longer falsely diagnoses hardware throttling or early stable
++  windows as final sustained values.
++- Device rebuilt/signed/installed. iOS Release builds, Swift manifest tests
++  (31 jobs/33 records actualA15 plan, negative class/coverage tests), native5
++  relevant CTest checks pass. Final selected13 affected jobs pass. Historical
++  one-click set now33 records, other18 selections preserved. Source is dirty,
++  no commit/push requested. Leave Xcode xcuserdata untouched.
++- Evidence out/test-results/a15-cpu-pe-20261014 contains all22 attempted jobs,
++  successful/rejected native observations, console/suite manifests, original
++  shader controls, build fingerprints, implementation.patch,audit,verification,
++  report,curves.csv,gpu-fix-curves.png/pdf,selected and33-row curated set.
++  Phone history78->105 with all78 old objects unchanged; final SHA256
++  7583ffcf2d323e3775226a43c90b257860ee61b0c89fb35743a47e50a3b569c3.
++  Latest Documents snapshot policy-final. A15 original7 candidates closed;
++  A12X4 remain untested, Mac original-render diagnosis remains. Updated durable
++  docs/apple-retest-status-20261014.md,docs/apple-cpu-core-types.md,TODO and
++  ignored comparison checklist. No A12X/Android/HarmonyOS tests this turn.
++
++### 2026-10-14 A15 CPU additivity and landscape/black-screen follow-up
++
++- User questioned P~147/E~27 versus all-core~660. E is verified under
++  background QoS, not peak E performance; its policy differs from all-core.
++  Kept kernel/scoring unchanged. Added per-round worker work-unit/contribution
++  logging and selected-round workerScores in saved config; workers remain
++  unclassified, not numbered cores. Also saved worker CPU seconds for P/E.
++- Two live CPU passes: P147.029/E27.009/all642.251 and
++  P146.674/E26.706/all663.715. Both have >=99% typed residency, thermal0->0.
++  Six selected-round worker contributions sum exactly to each unrounded total.
++  E actual CPU time~4.8-5s per5s wall window; cannot mainly blame starvation.
++  iOS GHz still unavailable; do not infer a measured maximum E frequency.
++- GPU fullscreen suite wrapper caused CPU landscape/black screen. Added
++  requiresRenderSurface routing: visible ordinary progress card for CPU,
++  headless compute/cache; phone portrait during those stages, iPad follows
++  device. Surface kept attached/hidden; rendered GPU alone forces landscape.
++  CPU tap no longer cancels. Avoid placeholder-GPU rotation before suite starts.
++  P/E policy labels and non-additivity explanation added to both Apple apps'
++  shared results UI; iOS cache duration now says several minutes.
++- Full CPU memory/cache/pages/storage pass:34.834GB/s,186 classified points
++  verified>=99%. Physical screenshots show CPU1170x2532; final installed
++  build GPU->CPU transition confirms landscape2532x1170 then portrait.
++- iOS Release signed/install pass; Swift151 parser checks and manifest routing
++  tests pass; native cpu_residency/cpu_cancel/complete_suite pass. Original
++  105 rows preserved, history113, curated33. No extra devices tested.
++- Evidence out/test-results/a15-cpu-score-ui-20261014/report.md,
++  verification.json, screenshots, three manifests/native logs, latest complete
++  Documents under transition/documents. Final results SHA256
++  d5c39f3e074604c419f07622fc3031f8d518df1aad7e89fff1ffb1a22b28f18c.
++  Docs core-types and apple-retest-status updated. Changes uncommitted;
++  don't touch user's Xcode xcuserdata. No benchmark remains running.
++
++### 2026-10-14 A15 real performance-priority E compute completed
++
++- User rejected background E26 as insufficient. iOS CPU default now E
++  user-initiated QoS with two P/user-interactive helper threads. Target score
++  counts ONLY one E worker; helpers run original kernel but their work never
++  enters E or the independent all-core score. No new GUI/CLI option.
++- Resolve exported private `thread_selfcounts` SPI (flavor4,32-byte time/CPI
++  entry x verified two perflevels) to read target per-type CPU time/cycles.
++  Based on Apple resource_private.h/sys_recount.c. This is NOT public SDK or
++  App Store acceptance. Current development-signed phone works without root
++  or security changes. Public process bounds remain for P, macOS E and memory.
++- Every E round >=99% typed residency and90% busy; both helpers >=99% P.
++  Final reader sandwiches with public thread CPU clock, checks total within
++  50us, rejects missing/regressing/inconsistent counters and saves no false E.
++  Runtime failure is unsupported/invalid, never fallback to unverified score.
++- First physical P146.981/E89.658/all661.517; final confirmation
++  P147.120/E89.551/all661.962, all thermal0->0. E bounds~99.999%, busy~99.8%,
++  measured mean2.016GHz. Repeat difference0.1193%. 2P+4E estimate652.444,
++  1.4378% below all661.962; do not promise exact additivity or numbered binding.
++- Stored E version foreground_e_p_load_v1 and explicit foreground policy,
++  SPI method, per-round CPUtime/GHz/bounds, helper count/bounds. GUI labels
++  performance priority; iOS resume rejects old background E as new E record.
++  Memory curves retain previous background contract, not claimed peak E.
++- iOS Release signed/build/install and two native CPU suite runs passed;
++  153 shared parser checks, manifest compatibility tests, native residency,
++  cancellation incl helper cleanup, complete-suite checks pass. Current app
++  has final clock-conservation version. No other devices retested; no run active.
++- Evidence out/test-results/a15-efficiency-performance-20261014/report.md,
++  verification.json,first/confirm Documents+native logs,curated33. Phone history
++  113->119, all113 old objects unchanged; final SHA256
++  b11467296b2f74a3a336185f2442e87d9dcdb5028f66e4f376c01d86e7f2104f.
++  Confirmation IDs20261014-164342-791-P /803-E /812-multi full suffixes in
++  report. Updated core-types,retest-status,TODO,ios README. Dirty/uncommitted;
++  preserve user's Xcode xcuserdata. No commit/push requested this turn.
+diff --git a/docs/TODO.md b/docs/TODO.md
+index 9b8ec61..f280194 100644
+--- a/docs/TODO.md
++++ b/docs/TODO.md
+@@ -121,7 +121,8 @@
+   - [ ] **遗留：**
+     - **没有在任何手机或大小核 CPU 上实际运行过。** 需要接上手机后用 adb 跑一遍，核对各级缓存与芯片资料是否一致。
+     - ~~Android App 的 CPU 页还是空壳，iOS / macOS App 没有这项测试的入口~~：2026-10-06 三个前端都已接入，并带表格和曲线图。Android 编译通过；iOS 和 macOS 只做过类型检查，没有用 Xcode 编译；三端都没有在设备上运行过。
+-    - **iOS 和 macOS 不能绑定线程**，单线程扫描跑在系统挑选的核心上，能效核测不到。可以试的办法：用线程的 QoS 等级把线程放到能效核上（后台等级只在能效核上运行），并读取 `hw.perflevel1` 的缓存容量。还没有做。
++    - **Apple 核心类型验证（2026-10-14）**：macOS／iOS 仍不能按编号严格绑核，但现在以 QoS 请求核心类型，并用公开 CPU 时间统计和线程 CPU 时钟验证至少 99% 驻留。Mac 与 A15 已分别测出 P／E 成绩；A15 大核 147.699、小核 29.611 MWork/s。小核阶段暂存进度刷新，未通过验证的观察不保存成正式小核成绩。后台 QoS 本身不是只在小核执行的保证。详见 [Apple 分核方法](apple-cpu-core-types.md)。
++    - **A15 性能策略小核补测（2026-10-14 后续）**：上述 26–30 分只适用于后台策略。现 iOS 默认算力 E 线程使用性能优先级，配合验证通过的大核辅助负载，并以未公开 Recount 线程计数核对归属。两次 E 为 89.658／89.551 MWork/s，至少 99.999% E CPU 时间，平均约 2.016GHz；大核147.120，全核661.962。新版保存独立合同，不复用旧后台成绩；界面没有新选项。SPI 已在当前开发签名 A15 上实测，不等于 App Store 分发验收；缓存曲线仍按自己的后台合同解释。
+     - **Android App 里的 CPU 测试不能取消**，开始后只能等它跑完。
+     - **存储成绩没有和 CrystalDiskMark 等工具对比**（Windows 自带的 `winsat` 需要管理员权限）。GUI 里没有"跳过存储测试"的开关，每次运行都会写盘。
+     - **流式写入偏慢的原因没有查：** 9800X3D 上流式写入只有 30 GB/s（单线程和 8 线程相同），C 运行库的 `memset` 和 `rep stosb` 也是这个速度，而 `CLZERO` 能到 75 GB/s。
+diff --git a/docs/apple-cpu-core-types.md b/docs/apple-cpu-core-types.md
+index 17446ad..0ef8514 100644
+--- a/docs/apple-cpu-core-types.md
++++ b/docs/apple-cpu-core-types.md
+@@ -1,8 +1,10 @@
+-# Verified CPU core-type tests on Apple Silicon macOS
++# Verified CPU core-type tests on Apple Silicon macOS and iOS
+ 
+ The existing mixed compute and NEON read/write/copy kernels are unchanged.
+-Supported Apple Silicon macOS hosts automatically run both performance and
+-efficiency single-thread stages, using user-interactive and background QoS.
++Supported native Apple Silicon macOS and iOS hosts automatically run both performance and
++efficiency single-thread stages. P stages use user-interactive QoS. iOS E compute
++now uses user-initiated QoS with verified P-load helpers; macOS E compute and the
++current P/E memory sweep retain their separately labelled background E policy.
+ All-core computation always uses every logical processor. There is no
+ user-facing core-type selector or extra CLI flag; GUI, CLI and suite workers
+ share the same runtime-checked default. Other hosts retain their existing
+@@ -29,13 +31,23 @@ GHz and process P-time share; full per-sample observations are in the CLI log.
+ 
+ ## Verification and timing
+ 
+-Only public SDK interfaces are used: `pthread_set_qos_class_self_np`,
+-`proc_pid_rusage(RUSAGE_INFO_V6)`, and `CLOCK_THREAD_CPUTIME_ID`. No root access,
+-private SPI, security changes or persistent process policies are needed.
+-The capability check requires native arm64 macOS, two performance levels named
+-Performance/Efficiency, and available V6 process accounting. iOS and Intel
+-retain the existing automatic path; iOS displays imported verified records,
+-but does not expose an unverified core-type run option.
++The process-bound path uses public SDK interfaces: `pthread_set_qos_class_self_np`,
++`proc_pid_rusage(RUSAGE_INFO_V6)` on macOS, `task_info(TASK_POWER_INFO_V2)` on iOS,
++and `CLOCK_THREAD_CPUTIME_ID`. This path needs no private SPI. The new iOS
++foreground E compute path also resolves Recount's exported `thread_selfcounts`
++SPI at runtime to read per-thread P/E time and cycles. This is not a public SDK
++API; it is validated on this signed development device, not an App Store
++distribution claim. Neither method needs root access, security changes or
++persistent process policies.
++The capability check requires native arm64, two performance levels named
++Performance/Efficiency, and the full accounting structure. iOS uses the public
++`task_ptime` performance CPU-time counter and total user/system CPU time from
++`TASK_POWER_INFO_V2`; macOS retains V6 accounting. Simulators, Intel and hosts
++without verified capabilities retain the existing automatic path. The iOS
++one-click CPU job expects P, E and all-core records when supported and rejects
++duplicate types or unverified rows. Its current resume contract also rejects
++background E records in place of the new performance-priority measurement.
++No new user-facing selector is added.
+ 
+ Process counters use **Mach time**, whereas the thread CPU clock uses
+ nanoseconds. Convert cumulative counters with `mach_timebase_info` before
+@@ -58,7 +70,9 @@ the run invalid and prevents its affected result from being saved.
+ 
+ `CPU_RESIDENCY` and `CPUMEM_RESIDENCY` record process P-time fraction, the
+ conservative worker-type lower bound, and observed cycles / CPU-time in GHz.
+-The latter is an average over the measured policy context, not a fixed or
++Cycles are unavailable through the public iOS task API: `EffectiveGHz=0` on that
++path means unavailable, not zero clock speed. The new per-thread SPI path does
++report cycles and measured average GHz. On macOS the latter is an average over the measured policy context, not a fixed or
+ maximum clock. Background QoS can reduce E-core frequency; compare these scores
+ as background-policy results, not maximum-frequency E-core capability.
+ Existing fourteen automatic samples cannot be retrospectively assigned P/E
+@@ -73,9 +87,77 @@ P-requesting worker under `taskpolicy -b`: it must fail and append no result.
+ Apple parser tests also reject invalid/unverified rows and keep both class
+ names and saved curve verification metadata.
+ 
++On iPhone 13 Pro / A15 (2026-10-14), live UI progress updates produced E
++residency lower bounds around 97%, so those attempts were rejected. E-stage
++progress is now buffered until the worker stops, and the observer uses
++background QoS. P scored 147.699 MWork/s (minimum accepted residency 99.48%),
++E scored 29.611 (minimum 99.9968%), and all-core scored 649.362, all at nominal
++thermal state. The existing compute kernel and the 99% threshold are unchanged.
++The confirmation round measured P 146.994, E 26.740, all-core 661.557. P/E
++placement passed again; background E throughput varies with the policy context
++and must not be interpreted as a fixed maximum clock. Classified memory
++sweeps also buffer their detailed sample log until measurement completes, so
++interactive GUI output cannot contaminate their short accounting windows.
++Raw evidence is in `out/test-results/a15-cpu-pe-20261014`; earlier automatic
++single-thread summaries remain in history and are not retroactively relabelled.
++
++### A15 单线程与全核不能直接相加（2026-10-14）
++
++此前 P 146.994、E 26.740 的简单加权和是
++`2 × 146.994 + 4 × 26.740 = 400.948 MWork/s`，不是全核测得的
++661.557。E 单线程明确设置 background QoS，全核线程按系统正常策略调度；
++这两种测量的功耗／调度条件不同。99% 验证只证明核心类型，不能证明运行在
++该类型的峰值频率。iOS 公共计数器没有可用的周期计数，本项目没有独立测出
++本次 E 核频率，不能把这个差距直接说成某个确定的 GHz 数值。
++
++增加每轮全核工作量及线程贡献后，原工作负载复测 P 147.029、后台 E
++27.009、全核 642.251。选中的第 3 轮六个线程分别贡献 108.169、106.897、
++106.650、106.770、107.699、106.066，未取整的总和等于 642.250805 MWork/s。
++这些是可迁移线程的贡献，不能分别标成六个物理核心。公共进程计数器报告该轮 CPU 时间
++28.108 秒，其中 P 类型 9.707 秒，其余类型约 18.401 秒；共同墙钟时间
++5.000035 秒。单线程 E 三轮实际 CPU 时间 4.925／4.793／4.954 秒，也通过
++99% 类型归属验证，因此不能主要用“5 秒里没有获得运行时间”解释低分。
++全核的公共进程计数包含其他应用线程，仅作诊断，不用于给单个全核线程认证 P/E 类型。
++
++GUI 与新成绩标注后台策略，小核成绩不当作峰值，也不用于预测全核加和。
++`workerScores` 在 `workloadConfig` 保存选中一轮的贡献；所有原成绩保留。
++原始证据和截图在 `out/test-results/a15-cpu-score-ui-20261014`。
++Apple 的 [QoS 说明](https://developer.apple.com/documentation/dispatch/dispatchqos/qosclass-swift.enum)
++说明优先级会影响执行与节能策略；不同政策影响本轮吞吐的判断不等于直接测量频率。
++
++### iOS 性能优先级的小核算力（后续完成）
++
++背景优先级的 26–30 分没有满足正常性能条件下的小核算力要求。新方法将 E 计分
++线程设置为 user-initiated，用两个 user-interactive 辅助线程占用 A15 的 P 类型核心。
++辅助线程只提供调度压力，工作量完全不进入 E 分数，也不进入此前已完成的全核分数。
++每轮通过 `thread_selfcounts(THSC_TIME_CPI_PER_PERF_LEVEL)` 独立核对当前计分线程
++P/E CPU 时间，E 驻留保守下界必须达到 99%，线程 CPU 占墙钟时间至少 90%；
++两个辅助线程也必须通过至少 99% P 驻留验证。正常策略不能当作绑核保证。
++
++接口来自 Apple 开源 [Recount 实现](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/sys_recount.c)
++和 [ABI 定义](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/resource_private.h)，
++不是公开 SDK API。运行时缺失、计数倒退或计数总时间与独立线程 CPU 时钟不一致时
++直接拒绝成绩。确认版本在两个快照外包一对 CPU 时钟读数，以 50us 边界容差
++检查时间守恒；大核辅助线程亦接受该检查。
++
++A15 两轮 E 分别 **89.658／89.551 MWork/s**，三轮归属下界均约 **99.999%**，
++实测平均频率约 **2.016 GHz**。P 为 146.981／147.120，全核为 661.517／661.962，
++所有热状态 0→0。后一次 `2P + 4E` 的独立单线程估算为 652.444，与全核相差约
++1.44%；独立测量的时序、并发程度、初始状态仍不同，不能要求严格相等。
++这是 P 负载并存时的一线程 E 算力，不是从总分反推，也不是六个线程的平均。
++也不声称已经严格绑定到某一编号核心，或控制到固定最高主频。
++
++新版成绩增加 `_foreground_e_p_load_v1` 和
++`efficiencyPolicy=foreground_with_performance_load`，与旧背景策略分组。默认 iOS
++CPU／整机按钮使用该路径，不增加设置；旧成绩原样保留，不能被续测当作新版小核成绩。
++证据：`out/test-results/a15-efficiency-performance-20261014`。当前缓存／内存曲线的
++背景策略合同与此算力方法不同，应按各自字段解释。
++
+ Sources: [Apple QoS guidance](https://developer.apple.com/documentation/apple-silicon/tuning-your-code-s-performance-for-apple-silicon),
+ [XNU Recount](https://github.com/apple-oss-distributions/xnu/blob/main/doc/observability/recount.md),
+-[task accounting fields](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/bsd_kern.c).
++[task accounting fields](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/bsd_kern.c),
++[public task structure](https://developer.apple.com/documentation/kernel/task_power_info_v2_data_t),
++[XNU task power accounting](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/task.c).
+ 
+ ## Virtual-memory coverage
+ 
+diff --git a/ios-gui/Mangekyo/Components/ResultCharts.swift b/ios-gui/Mangekyo/Components/ResultCharts.swift
+index c8766fb..9ba80cc 100644
+--- a/ios-gui/Mangekyo/Components/ResultCharts.swift
++++ b/ios-gui/Mangekyo/Components/ResultCharts.swift
+@@ -153,10 +153,16 @@ struct CpuComputeResultsCard: View {
+ 
+     private func subtitle(unit: String) -> String {
+         if output.coreTypeSelection != "auto" {
++            if output.efficiencyForeground {
++                return unit + Localization.tr(
++                    ", one measured thread. Efficiency cores use performance priority while helper threads occupy performance cores. Each round verifies at least 99% efficiency-core CPU time; helper work is excluded from this score.",
++                    "，一个计分线程。小核采用性能优先级，大核辅助线程提供调度压力；每轮验证至少 99% 的 CPU 时间属于小核，辅助线程工作量不计入小核成绩。",
++                    "、計測は 1 スレッド。効率コアは性能優先度で実行し、補助スレッドが性能コアに負荷をかけます。各ラウンドで効率コア CPU 時間が 99% 以上であることを検証し、補助処理はスコアに含めません。")
++            }
+             return unit + Localization.tr(
+-                ", one thread. Every round verifies at least 99% CPU time on the requested core type. Background-mode scores reflect the system clock under that policy.",
+-                "，单线程。每轮确认至少 99% 的 CPU 时间属于所选核心类型；小核成绩反映后台策略下的实际时钟。",
+-                "、1 スレッド。各ラウンドで指定コア種別の CPU 時間が 99% 以上であることを確認。バックグラウンド設定のスコアはその時のクロックを反映します。")
++                ", one thread. Every round verifies at least 99% CPU time on the requested core type. The efficiency-core score uses background priority and is not its peak performance. These scores cannot be summed to predict the all-core score.",
++                "，单线程。每轮确认至少 99% 的 CPU 时间属于所选核心类型。小核使用后台优先级，成绩不代表其峰值；不能把这些单核成绩相加预测全核成绩。",
++                "、1 スレッド。各ラウンドで指定コア種別の CPU 時間が 99% 以上であることを確認。効率コアはバックグラウンド優先度で測定し、最大性能ではありません。合計して全コアスコアを予測することはできません。")
+         }
+         return output.schedulerManaged
+             ? unit + Localization.tr(
+diff --git a/ios-gui/Mangekyo/Components/ScreenOrientation.swift b/ios-gui/Mangekyo/Components/ScreenOrientation.swift
+index 2e08549..fac9d08 100644
+--- a/ios-gui/Mangekyo/Components/ScreenOrientation.swift
++++ b/ios-gui/Mangekyo/Components/ScreenOrientation.swift
+@@ -21,7 +21,18 @@ enum ScreenOrientation {
+     /// Landscape for a running test, or back to the way the device is held.
+     /// An iPad that shows the app beside another one ignores the request.
+     static func setLandscape(_ landscape: Bool) {
+-        AppDelegate.orientations = landscape ? .landscape : .allButUpsideDown
++        setAllowed(landscape ? .landscape : .allButUpsideDown)
++    }
++
++    static func setSuitePresentation(rendering: Bool) {
++        // Restore portrait on a phone when a GPU picture ends, even if its
++        // orientation lock kept the preceding landscape geometry in place.
++        setAllowed(rendering ? .landscape : UIDevice.current.userInterfaceIdiom == .phone
++            ? .portrait : .allButUpsideDown)
++    }
++
++    private static func setAllowed(_ orientations: UIInterfaceOrientationMask) {
++        AppDelegate.orientations = orientations
+         for scene in UIApplication.shared.connectedScenes {
+             guard let windowScene = scene as? UIWindowScene else { continue }
+             windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: AppDelegate.orientations))
+diff --git a/ios-gui/Mangekyo/Engine/BenchEngine.swift b/ios-gui/Mangekyo/Engine/BenchEngine.swift
+index 021f108..b479971 100644
+--- a/ios-gui/Mangekyo/Engine/BenchEngine.swift
++++ b/ios-gui/Mangekyo/Engine/BenchEngine.swift
+@@ -81,7 +81,10 @@ final class BenchEngine: ObservableObject {
+     var supportedSuiteJobs: [MobileSuiteJob] {
+         MobileSuiteJob.makeJobs(includeVulkan: allowTranslatedApis && vulkanAvailable,
+             vulkanLiquid: vulkanLiquidAvailable, gpuCache: gpuCacheAvailable, gles2: gles2Available,
+-            gles2MaxSteps: gles2MaxSteps, gpuCacheParallelSteps: gpuCacheParallelSteps)
++            gles2MaxSteps: gles2MaxSteps, gpuCacheParallelSteps: gpuCacheParallelSteps,
++            cpuCoreTypes: gpb_cpu_core_types_available(), particleFixedCoverage:
++                !ProcessInfo.processInfo.arguments.contains("--ios-legacy-particle-coverage"),
++            cpuEfficiencyForeground: true)
+     }
+ 
+     static var readyText: String {
+@@ -415,8 +418,7 @@ final class BenchEngine: ObservableObject {
+                 let valid = added.count == job.expectedRecords && added.allSatisfy {
+                     job.matches($0) && $0.score.isFinite && $0.score > 0 &&
+                     ($0.workloadVersion ?? $0.workload).contains("ios_preview")
+-                } && (job.id != "cpu_compute" || Set(added.map(\.workload)) ==
+-                    Set(["cpu_single_core", "cpu_multi_core"]))
++                } && job.matchesRecordGroup(added)
+                 let failed = channel == .cpu ? runFailed : !lastError.isEmpty
+                 // A late dismissal after a native job has saved its complete result
+                 // must not turn that completed job into a cancelled measurement.
+diff --git a/ios-gui/Mangekyo/Engine/GpuBenchBridge.h b/ios-gui/Mangekyo/Engine/GpuBenchBridge.h
+index 642f11b..d2f36a5 100644
+--- a/ios-gui/Mangekyo/Engine/GpuBenchBridge.h
++++ b/ios-gui/Mangekyo/Engine/GpuBenchBridge.h
+@@ -39,6 +39,7 @@ GPB_API char* gpb_engine_version(void); // malloc'd; caller gpb_free()
+ 
+ // Probe operations: returns allocated JSON array of GPUs. Must call gpb_free().
+ GPB_API char* gpb_list_gpus(void);
++GPB_API bool gpb_cpu_core_types_available(void);
+ 
+ // Run CPU benchmarks in-process; GPU tests use gpb_start_workload. Mutex-protected to guarantee one run at a time.
+ // argv/argc are standard command-line args. The live output callback context pointer
+diff --git a/ios-gui/Mangekyo/Engine/GpuBenchBridge.mm b/ios-gui/Mangekyo/Engine/GpuBenchBridge.mm
+index 4849918..8e18078 100644
+--- a/ios-gui/Mangekyo/Engine/GpuBenchBridge.mm
++++ b/ios-gui/Mangekyo/Engine/GpuBenchBridge.mm
+@@ -138,6 +138,10 @@ static void JoinWorkerUnlocked() {
+ 
+ extern "C" {
+ 
++bool gpb_cpu_core_types_available(void) {
++    return gpu_bench::CpuCoreTypeSchedulingSupported();
++}
++
+ void gpb_set_working_dir(const char* path) {
+     if (path && *path) chdir(path);
+ }
+diff --git a/ios-gui/Mangekyo/Models/EngineOutput.swift b/ios-gui/Mangekyo/Models/EngineOutput.swift
+index 52ca078..b2d382f 100644
+--- a/ios-gui/Mangekyo/Models/EngineOutput.swift
++++ b/ios-gui/Mangekyo/Models/EngineOutput.swift
+@@ -212,6 +212,7 @@ struct RunOutput: Sendable {
+ 
+     // CPU compute test.
+     var coreScores: [CoreScore] = []
++    var efficiencyForeground = false
+     var singleAverage: ScoreValue?
+     var multiScore: ScoreValue?
+ 
+@@ -606,9 +607,12 @@ struct RunOutput: Sendable {
+ 
+         case "CPU_SCHEDULING":
+             coreTypeSelection = f["core_type"] ?? "auto"
++            efficiencyForeground = f["efficiency_policy"] == "foreground_with_performance_load"
+             if coreTypeSelection != "auto" {
+                 coreLabels[0] = Localization.tr("Performance core", "大核", "性能コア")
+-                coreLabels[1] = Localization.tr("Efficiency core", "小核", "効率コア")
++                coreLabels[1] = efficiencyForeground
++                    ? Localization.tr("Efficiency core (performance priority)", "小核（性能优先级）", "効率コア（性能優先度）")
++                    : Localization.tr("Efficiency core (background)", "小核（后台策略）", "効率コア（バックグラウンド）")
+             }
+ 
+         case "CPU_TOPOLOGY":
+diff --git a/ios-gui/Mangekyo/Models/MobileBenchmark.swift b/ios-gui/Mangekyo/Models/MobileBenchmark.swift
+index ce55b7c..605e4f4 100644
+--- a/ios-gui/Mangekyo/Models/MobileBenchmark.swift
++++ b/ios-gui/Mangekyo/Models/MobileBenchmark.swift
+@@ -175,11 +175,22 @@ struct MobileSuiteJob: Identifiable, Sendable {
+     let cpuArguments: [String]
+     let seconds: Double
+     let expectedRecords: Int
++    var requiresForegroundEfficiency = false
+ 
+-    static var all: [MobileSuiteJob] { makeJobs(includeVulkan: false) }
++    /// Only a rendered GPU workload needs the landscape picture. CPU,
++    /// headless compute and cache sweeps use a visible progress screen.
++    var requiresRenderSurface: Bool {
++        guard let request = gpuRequest else { return false }
++        let workload = String(request.split(separator: "?", maxSplits: 1).first ?? "")
++        return ["stream", "gpu_burn", "cinematic_liquid"].contains(workload)
++    }
++
++    static var all: [MobileSuiteJob] { makeJobs(includeVulkan: false, particleFixedCoverage: true) }
+ 
+     static func makeJobs(includeVulkan: Bool, vulkanLiquid: Bool = true, gpuCache: Bool = true,
+-                         gles2: Bool = false, gles2MaxSteps: Int = 2048, gpuCacheParallelSteps: Int = 0) -> [MobileSuiteJob] {
++                         gles2: Bool = false, gles2MaxSteps: Int = 2048, gpuCacheParallelSteps: Int = 0,
++                         cpuCoreTypes: Bool = false, particleFixedCoverage: Bool = false,
++                         cpuEfficiencyForeground: Bool = false) -> [MobileSuiteJob] {
+         var jobs: [MobileSuiteJob] = []
+         for api in includeVulkan ? ["metal", "vulkan"] : ["metal"] {
+             let prefix = api == "vulkan" ? "vulkan/" : ""
+@@ -188,7 +199,8 @@ struct MobileSuiteJob: Identifiable, Sendable {
+                     let test = headless ? "stream_headless" : "stream"
+                     jobs.append(MobileSuiteJob(id: "\(prefix)\(test)-\(particles)",
+                         title: "\(api == "vulkan" ? "Vulkan (MoltenVK)" : "Metal") · Particle \(particles) · \(headless ? "Compute" : "Render")",
+-                        gpuRequest: "\(test)?particles=\(particles)&vsync=0&api=\(api)", cpuArguments: [],
++                        gpuRequest: "\(test)?particles=\(particles)&vsync=0&api=\(api)" +
++                            (headless ? "" : "&coverage=\(particleFixedCoverage ? "fixed" : "legacy")"), cpuArguments: [],
+                         seconds: 15, expectedRecords: 1))
+                 }
+             }
+@@ -210,9 +222,10 @@ struct MobileSuiteJob: Identifiable, Sendable {
+             jobs.append(MobileSuiteJob(id: cacheID, title: "Metal · GPU Cache-state Diagnostic",
+             gpuRequest: request, cpuArguments: [], seconds: 0, expectedRecords: 1))
+         }
+-        jobs.append(MobileSuiteJob(id: "cpu_compute", title: "CPU Compute · Single + All Cores",
++        jobs.append(MobileSuiteJob(id: "cpu_compute", title: cpuCoreTypes ? "CPU Compute · Performance + Efficiency + All Cores" : "CPU Compute · Single + All Cores",
+             gpuRequest: nil, cpuArguments: ["gpu_benchmark", "--cpu-benchmark", "all",
+-                "--cpu-time", "15", "--cpu-warmup", "0.2"], seconds: 0, expectedRecords: 2))
++                "--cpu-time", "15", "--cpu-warmup", "0.2"], seconds: 0, expectedRecords: cpuCoreTypes ? 3 : 2,
++            requiresForegroundEfficiency: cpuCoreTypes && cpuEfficiencyForeground))
+         jobs.append(MobileSuiteJob(id: "cpu_memory", title: "CPU Cache, Memory, Virtual Memory & Storage",
+             gpuRequest: nil, cpuArguments: ["gpu_benchmark", "--cpu-membw"],
+             seconds: 0, expectedRecords: 1))
+@@ -227,8 +240,18 @@ struct MobileSuiteJob: Identifiable, Sendable {
+ 
+     func matches(_ result: BenchResult) -> Bool {
+         if id == "cpu_compute" {
+-            return result.graphicsApi == "CPU" &&
+-                ["cpu_single_core", "cpu_multi_core"].contains(result.workload)
++            guard result.graphicsApi == "CPU" &&
++                ["cpu_single_core", "cpu_multi_core"].contains(result.workload) else { return false }
++            if expectedRecords == 3 && result.workload == "cpu_single_core" {
++                if requiresForegroundEfficiency && result.workloadConfigValue("coreType") == "efficiency" {
++                    guard result.workloadConfigValue("efficiencyPolicy") == "foreground_with_performance_load",
++                          result.workloadConfigValue("residencyMethod") == "thread_selfcounts_perf_level_spi",
++                          result.workloadConfigValue("scheduling") == "user_initiated" else { return false }
++                }
++                return ["performance", "efficiency"].contains(result.workloadConfigValue("coreType") ?? "") &&
++                    result.workloadConfigValue("residencyVerified") == "1"
++            }
++            return true
+         }
+         if id == "cpu_memory" {
+             return result.graphicsApi == "CPU" && result.workload == "cpu_membw"
+@@ -250,12 +273,17 @@ struct MobileSuiteJob: Identifiable, Sendable {
+         }
+         if testID.hasPrefix("stream") {
+             let parts = testID.split(separator: "-")
++            if gpuRequest?.contains("coverage=fixed") == true &&
++               result.workloadConfigValue("renderCoverage") != "wrapped_ndc_v2" { return false }
++            if gpuRequest?.contains("coverage=legacy") == true &&
++               result.workloadConfigValue("renderCoverage") == "wrapped_ndc_v2" { return false }
+             return version.hasPrefix("stream_v1") &&
+                 result.particleCount == UInt32(parts.last ?? "") &&
+                 result.headless == testID.hasPrefix("stream_headless")
+         }
+         if testID.hasPrefix("gpu_burn-") {
+             let steps = testID.split(separator: "-").last ?? ""
++            if translated && result.workloadConfigValue("timingMode") != "synchronized_wall_clock" { return false }
+             return version.hasPrefix("gpu_burn_v3_fixed_steps_\(steps)_")
+         }
+         if testID == "cinematic_liquid" { return version.hasPrefix("cinematic_liquid_v2") }
+@@ -273,6 +301,13 @@ struct MobileSuiteJob: Identifiable, Sendable {
+         return version.hasPrefix(translated ? "membw_v1" : "metal_memory_sweep_v1")
+     }
+ 
++    func matchesRecordGroup(_ records: [BenchResult]) -> Bool {
++        guard records.count == expectedRecords, records.allSatisfy(matches) else { return false }
++        guard id == "cpu_compute" else { return true }
++        guard Set(records.map(\.workload)) == Set(["cpu_single_core", "cpu_multi_core"]) else { return false }
++        return expectedRecords != 3 || Set(records.filter { $0.workload == "cpu_single_core" }
++            .compactMap { $0.workloadConfigValue("coreType") }) == Set(["performance", "efficiency"])
++    }
+ }
+ 
+ struct MobileSuiteReport: Codable, Sendable {
+@@ -322,7 +357,7 @@ struct MobileSuiteReport: Codable, Sendable {
+                 Set(old.resultIDs).count == next.expectedRecords &&
+                 saved.allSatisfy { next.matches($0) && $0.score.isFinite && $0.score > 0 &&
+                     ($0.workloadVersion ?? "").contains("ios_preview") } &&
+-                (next.id != "cpu_compute" || Set(saved.map(\.workload)) == Set(["cpu_single_core", "cpu_multi_core"]))
++                next.matchesRecordGroup(saved)
+             if valid && saved.allSatisfy({ $0.measurementReviewReasons.isEmpty }) { reused.append(old) }
+             else if !samePlan { break }
+         }
+diff --git a/ios-gui/Mangekyo/Views/CpuView.swift b/ios-gui/Mangekyo/Views/CpuView.swift
+index 37dcc0e..e0f626e 100644
+--- a/ios-gui/Mangekyo/Views/CpuView.swift
++++ b/ios-gui/Mangekyo/Views/CpuView.swift
+@@ -93,13 +93,13 @@ struct CpuView: View {
+ 
+                 Text(memoryMode
+                      ? Localization.tr(
+-                        "Takes about a minute and warms the device. The storage test writes a temporary file of up to 1 GiB in the app's documents and removes it afterwards. Close other apps first: the sweep uses a large part of the free memory.",
+-                        "大约需要一分钟，设备会发热。存储测试会在 App 文档目录里写一个最大 1 GiB 的临时文件，测完即删除。请先关闭其他 App：扫描会占用大部分空闲内存。",
+-                        "約 1 分かかり、端末が温かくなります。ストレージテストはアプリの書類フォルダに最大 1 GiB の一時ファイルを書き込み、終了後に削除します。空きメモリの大部分を使うため、先に他のアプリを閉じてください。")
++                        "Takes several minutes and warms the device. The storage test writes a temporary file of up to 1 GiB in the app's documents and removes it afterwards. Close other apps first: the sweep uses a large part of the free memory.",
++                        "需要几分钟，设备会发热。存储测试会在 App 文档目录里写一个最大 1 GiB 的临时文件，测完即删除。请先关闭其他 App：扫描会占用大部分空闲内存。",
++                        "数分かかり、端末が温かくなります。ストレージテストはアプリの書類フォルダに最大 1 GiB の一時ファイルを書き込み、終了後に削除します。空きメモリの大部分を使うため、先に他のアプリを閉じてください。")
+                      : Localization.tr(
+-                        "Single-core duration is applied once to each logical processor; the formal preset can take a long time.",
+-                        "单核测试会依次测试每个逻辑处理器；正式测试可能耗时较长。",
+-                        "単一コア時間は論理プロセッサごとに適用。正式プリセットは長時間かかる場合があります。"))
++                        "Tests both core types when placement can be verified. Efficiency cores use performance priority with helper load on performance cores. Only the measured thread contributes to its score; every round verifies core type. Progress pauses during verification.",
++                        "能验证归属时会分别测试大核和小核。小核采用性能优先级，大核辅助负载帮助调度；仅计分线程计入成绩，每轮验证核心类型。验证期间暂停刷新进度。",
++                        "コア種別を検証できる場合は両種別を測定。効率コアは性能優先度で実行し、性能コアに補助負荷をかけます。計測スレッドだけを採点し、各ラウンドで種別を検証します。検証中は進捗更新を停止します。"))
+                     .font(.caption2)
+                     .foregroundStyle(.secondary)
+             }
+diff --git a/ios-gui/Mangekyo/Views/RunView.swift b/ios-gui/Mangekyo/Views/RunView.swift
+index 913c917..4cff2d5 100644
+--- a/ios-gui/Mangekyo/Views/RunView.swift
++++ b/ios-gui/Mangekyo/Views/RunView.swift
+@@ -103,7 +103,7 @@ enum GpuOptions {
+     static func request(test: String, particles: Int, steps: Int, vsync: Bool = false, api: String = "metal") -> String {
+         switch test {
+         case "memory_sweep", "gpu_cache": return "\(test)?api=\(api)"
+-        case "stream", "stream_headless": return "\(test)?particles=\(particles)&vsync=\(vsync ? 1 : 0)&api=\(api)"
++        case "stream", "stream_headless": return "\(test)?particles=\(particles)&vsync=\(vsync ? 1 : 0)&api=\(api)" + (test == "stream" ? "&coverage=fixed" : "")
+         case "gpu_burn": return "gpu_burn?steps=\(steps)&vsync=\(vsync ? 1 : 0)&api=\(api)"
+         default: return "\(test)?vsync=\(vsync ? 1 : 0)&api=\(api)"
+         }
+@@ -114,15 +114,17 @@ enum GpuOptions {
+         if api == "gles2" { return "gpu_burn_es2_legacy_v1_fixed_steps_\(steps)_ios_preview_sync_timing" }
+         if api == "vulkan" {
+             switch test {
+-            case "stream", "stream_headless": return "stream_v1_ios_preview_moltenvk"
+-            case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview_moltenvk"
++            case "stream": return "stream_v1_fixed_coverage_v2_ios_preview_moltenvk"
++            case "stream_headless": return "stream_v1_ios_preview_moltenvk"
++            case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview_sync_timing_moltenvk"
+             case "cinematic_liquid": return "cinematic_liquid_v2_…_ios_preview_moltenvk"
+             case "memory_sweep": return "membw_v1_ios_preview_moltenvk"
+             default: return test
+             }
+         }
+         switch test {
+-        case "stream", "stream_headless": return "stream_v1_ios_preview"
++        case "stream": return "stream_v1_fixed_coverage_v2_ios_preview_serial_timing_v2"
++        case "stream_headless": return "stream_v1_ios_preview"
+         case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview"
+         case "cinematic_liquid": return "cinematic_liquid_v2_physical_scene_v8_metal_preview_ios_preview"
+         case "memory_sweep": return "metal_memory_sweep_v1_preview_ios_preview"
+@@ -549,7 +551,8 @@ struct RunView: View {
+     }
+ }
+ 
+-/// Keep one Metal surface alive across GPU and CPU jobs, without dismissing between tests.
++/// Keep the surface attached across jobs; show an ordinary progress screen
++/// whenever the current measurement has no rendered GPU picture.
+ private struct MobileSuiteFullscreenRun: View {
+     @EnvironmentObject var engine: BenchEngine
+     let resume: Bool
+@@ -558,12 +561,16 @@ private struct MobileSuiteFullscreenRun: View {
+     @State private var started = false
+ 
+     private var currentJob: MobileSuiteJob? {
+-        engine.completeSuiteJobs.indices.contains(engine.completeSuiteIndex)
++        engine.completeSuiteRunning && engine.completeSuiteJobs.indices.contains(engine.completeSuiteIndex)
+             ? engine.completeSuiteJobs[engine.completeSuiteIndex] : nil
+     }
++    private var rendering: Bool { currentJob?.requiresRenderSurface == true }
++    private var channelState: BenchChannelState {
++        engine.state(for: currentJob?.gpuRequest == nil ? .cpu : .gpu)
++    }
+     var body: some View {
+         ZStack(alignment: .top) {
+-            Color.black.ignoresSafeArea()
++            (rendering ? Color.black : Color(uiColor: .systemGroupedBackground)).ignoresSafeArea()
+             MetalBenchView(showGles: currentJob?.gpuRequest?.contains("api=gles2") == true) { layer, glLayer in
+                 guard !started else { return }
+                 started = true
+@@ -574,33 +581,52 @@ private struct MobileSuiteFullscreenRun: View {
+             }
+             .aspectRatio(16.0 / 9.0, contentMode: .fit)
+             .frame(maxWidth: .infinity, maxHeight: .infinity)
+-            if currentJob?.gpuRequest == nil {
+-            HStack {
+-                VStack(alignment: .leading, spacing: 4) {
+-                    Text("\(engine.completeSuiteIndex + 1)/\(engine.completeSuiteJobs.count) · " +
+-                         (currentJob?.title ?? ""))
+-                    Text(engine.state(for: currentJob?.gpuRequest == nil ? .cpu : .gpu).statusText)
+-                        .font(.caption).lineLimit(1)
++            .opacity(rendering ? 1 : 0)
++            .allowsHitTesting(false)
++            if !rendering {
++                ScrollView {
++                    VStack(alignment: .leading, spacing: 24) {
++                        Label(Localization.tr("Testing", "正在测试", "測定中"),
++                              systemImage: currentJob?.gpuRequest == nil ? "cpu" : "memorychip")
++                            .font(.largeTitle).fontWeight(.semibold)
++                        GlassCard {
++                            VStack(alignment: .leading, spacing: 16) {
++                                Text(currentJob?.title ?? Localization.tr("Preparing…", "正在准备…", "準備中…"))
++                                    .font(.headline)
++                                Text("\(engine.completeSuiteIndex + 1) / \(max(1, engine.completeSuiteJobs.count))")
++                                    .foregroundStyle(.secondary)
++                                ProgressView(value: channelState.progressFraction)
++                                Text(channelState.statusText).foregroundStyle(.secondary)
++                                Text(Localization.tr(
++                                    "Keep the app open. Cache and memory curves can take several minutes. Progress updates pause during core verification; results appear when it finishes.",
++                                    "请保持应用在前台。缓存和内存曲线需要几分钟；验证核心时会暂停刷新进度，完成后显示成绩。",
++                                    "アプリを開いたままにしてください。キャッシュとメモリの曲線には数分かかります。コア検証中は進捗表示を一時停止します。"))
++                                    .font(.callout).foregroundStyle(.secondary)
++                            }.frame(maxWidth: .infinity, alignment: .leading)
++                        }
++                        Button(Localization.tr("Stop testing", "停止测试", "測定を停止")) {
++                            engine.cancelCompleteSuite()
++                        }.buttonStyle(.borderedProminent)
++                    }.padding(24)
+                 }
+-                Spacer()
+-                Button(Localization.tr("Stop", "停止", "停止")) { engine.cancelCompleteSuite() }
+-                    .buttonStyle(.bordered)
+-            }
+-            .padding(12)
+-            .foregroundStyle(.white)
+-            .background(.black.opacity(0.65))
+             }
+         }
+-        .statusBarHidden(true)
+-        .persistentSystemOverlays(.hidden)
++        .statusBarHidden(rendering)
++        .persistentSystemOverlays(rendering ? .hidden : .automatic)
+         .contentShape(Rectangle())
+-        .onTapGesture { engine.cancelCompleteSuite() }
+-        .onAppear { ScreenOrientation.setLandscape(true) }
++        .onTapGesture { if rendering { engine.cancelCompleteSuite() } }
++        .onAppear { updatePresentation() }
++        .onChange(of: rendering) { _ in updatePresentation() }
+         .onDisappear { engine.cancelCompleteSuite(reason: "surface_disappeared"); ScreenOrientation.setLandscape(false) }
+         .onChange(of: engine.completeSuiteRunning) { running in
+             if started && !running { isPresented = false }
+         }
+     }
++
++    private func updatePresentation() {
++        ScreenOrientation.setSuitePresentation(rendering: rendering)
++        print("IOS_SUITE_PRESENTATION rendering=\(rendering) job=\(currentJob?.id ?? "preparing")")
++    }
+ }
+ 
+ /// The picture of a running test over the whole screen.
+diff --git a/ios-gui/README.md b/ios-gui/README.md
+index 4c4af63..ce4933f 100644
+--- a/ios-gui/README.md
++++ b/ios-gui/README.md
+@@ -118,6 +118,16 @@ hosted bridge tests on the iOS 18.5 simulator. Physical iPhone/iPad performance,
+ iOS 16 runtime acceptance, thermal contracts and App Store distribution remain
+ unverified.
+ 
++2026-10-14 physical follow-up: A15 CPU P/E/all-core tests passed. The iOS E
++compute stage now uses user-initiated QoS with P-load helpers and runtime-resolved
++Recount `thread_selfcounts` SPI to verify the measured thread's E CPU time.
++Two runs measured 89.658/89.551 MWork/s at about 2.016GHz, >=99.999% E residency.
++The default CPU suite uses this method, saves it separately from background E
++scores, and rejects background E results during resume. The SPI is not a public
++SDK API: this documents development-signed device validation, not App Store
++distribution acceptance. The memory sweep retains its own background E contract.
++See [core-type methodology](../docs/apple-cpu-core-types.md).
++
+ The saved-curve reader was verified on 2026-10-13 with 139 shared parser/geometry
+ checks and unsigned device/simulator builds. Actual CPU, Vulkan and Metal saved
+ curves were inspected in the macOS GUI; the iOS UI was build-checked only for
+diff --git a/macos-gui/GPUBenchmark/Components/ResultCharts.swift b/macos-gui/GPUBenchmark/Components/ResultCharts.swift
+index c8766fb..9ba80cc 100644
+--- a/macos-gui/GPUBenchmark/Components/ResultCharts.swift
++++ b/macos-gui/GPUBenchmark/Components/ResultCharts.swift
+@@ -153,10 +153,16 @@ struct CpuComputeResultsCard: View {
+ 
+     private func subtitle(unit: String) -> String {
+         if output.coreTypeSelection != "auto" {
++            if output.efficiencyForeground {
++                return unit + Localization.tr(
++                    ", one measured thread. Efficiency cores use performance priority while helper threads occupy performance cores. Each round verifies at least 99% efficiency-core CPU time; helper work is excluded from this score.",
++                    "，一个计分线程。小核采用性能优先级，大核辅助线程提供调度压力；每轮验证至少 99% 的 CPU 时间属于小核，辅助线程工作量不计入小核成绩。",
++                    "、計測は 1 スレッド。効率コアは性能優先度で実行し、補助スレッドが性能コアに負荷をかけます。各ラウンドで効率コア CPU 時間が 99% 以上であることを検証し、補助処理はスコアに含めません。")
++            }
+             return unit + Localization.tr(
+-                ", one thread. Every round verifies at least 99% CPU time on the requested core type. Background-mode scores reflect the system clock under that policy.",
+-                "，单线程。每轮确认至少 99% 的 CPU 时间属于所选核心类型；小核成绩反映后台策略下的实际时钟。",
+-                "、1 スレッド。各ラウンドで指定コア種別の CPU 時間が 99% 以上であることを確認。バックグラウンド設定のスコアはその時のクロックを反映します。")
++                ", one thread. Every round verifies at least 99% CPU time on the requested core type. The efficiency-core score uses background priority and is not its peak performance. These scores cannot be summed to predict the all-core score.",
++                "，单线程。每轮确认至少 99% 的 CPU 时间属于所选核心类型。小核使用后台优先级，成绩不代表其峰值；不能把这些单核成绩相加预测全核成绩。",
++                "、1 スレッド。各ラウンドで指定コア種別の CPU 時間が 99% 以上であることを確認。効率コアはバックグラウンド優先度で測定し、最大性能ではありません。合計して全コアスコアを予測することはできません。")
+         }
+         return output.schedulerManaged
+             ? unit + Localization.tr(
+diff --git a/macos-gui/GPUBenchmark/Models/EngineOutput.swift b/macos-gui/GPUBenchmark/Models/EngineOutput.swift
+index 52ca078..b2d382f 100644
+--- a/macos-gui/GPUBenchmark/Models/EngineOutput.swift
++++ b/macos-gui/GPUBenchmark/Models/EngineOutput.swift
+@@ -212,6 +212,7 @@ struct RunOutput: Sendable {
+ 
+     // CPU compute test.
+     var coreScores: [CoreScore] = []
++    var efficiencyForeground = false
+     var singleAverage: ScoreValue?
+     var multiScore: ScoreValue?
+ 
+@@ -606,9 +607,12 @@ struct RunOutput: Sendable {
+ 
+         case "CPU_SCHEDULING":
+             coreTypeSelection = f["core_type"] ?? "auto"
++            efficiencyForeground = f["efficiency_policy"] == "foreground_with_performance_load"
+             if coreTypeSelection != "auto" {
+                 coreLabels[0] = Localization.tr("Performance core", "大核", "性能コア")
+-                coreLabels[1] = Localization.tr("Efficiency core", "小核", "効率コア")
++                coreLabels[1] = efficiencyForeground
++                    ? Localization.tr("Efficiency core (performance priority)", "小核（性能优先级）", "効率コア（性能優先度）")
++                    : Localization.tr("Efficiency core (background)", "小核（后台策略）", "効率コア（バックグラウンド）")
+             }
+ 
+         case "CPU_TOPOLOGY":
+diff --git a/scripts/apple-check/ios-suite-tests.swift b/scripts/apple-check/ios-suite-tests.swift
+index 37bfd76..1b46f94 100644
+--- a/scripts/apple-check/ios-suite-tests.swift
++++ b/scripts/apple-check/ios-suite-tests.swift
+@@ -2,7 +2,7 @@
+ import Foundation
+ let fixture = try Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[1]))
+ let rows = try JSONDecoder().decode([BenchResult].self, from: fixture)
+-let native = MobileSuiteJob.all
++let native = MobileSuiteJob.makeJobs(includeVulkan: false)
+ let translated = MobileSuiteJob.makeJobs(includeVulkan: true)
+ precondition(native.count == 16 && translated.count == 29)
+ precondition(Set(translated.map(\.id)).count == 29)
+@@ -16,10 +16,42 @@ let restricted = MobileSuiteJob.makeJobs(includeVulkan: true, vulkanLiquid: fals
+ precondition(restricted.count == 27)
+ precondition(!restricted.contains { $0.id == "vulkan/cinematic_liquid" || $0.id == "gpu_cache-v2" })
+ let gpuOnly = translated.filter { MobileSuiteScope.gpu.includes($0) }
++precondition(translated.filter { $0.gpuRequest == nil }.allSatisfy { !$0.requiresRenderSurface })
++precondition(translated.filter { $0.id.contains("stream_headless") || $0.id.contains("memory_sweep") || $0.id == "gpu_cache-v2" }
++    .allSatisfy { !$0.requiresRenderSurface })
++precondition(translated.filter { $0.id.contains("gpu_burn-") || $0.id.contains("stream-") || $0.id.contains("cinematic_liquid") }
++    .allSatisfy { $0.requiresRenderSurface })
+ let cpuOnly = translated.filter { MobileSuiteScope.cpu.includes($0) }
+ precondition(gpuOnly.count == 27 && cpuOnly.count == 2)
+ precondition(gpuOnly.allSatisfy { $0.gpuRequest != nil })
+ precondition(cpuOnly.reduce(0) { $0 + $1.expectedRecords } == 3)
++let splitCPU = MobileSuiteJob.makeJobs(includeVulkan: false, cpuCoreTypes: true)
++    .first { $0.id == "cpu_compute" }!
++precondition(splitCPU.expectedRecords == 3)
++let actualA15Plan = MobileSuiteJob.makeJobs(includeVulkan: true, vulkanLiquid: false,
++    gles2: true, cpuCoreTypes: true, particleFixedCoverage: true)
++precondition(actualA15Plan.count == 31 && actualA15Plan.reduce(0) { $0 + $1.expectedRecords } == 33)
++var p = rows.first { $0.workload == "cpu_single_core" }!
++precondition(!splitCPU.matches(p), "Unverified scheduler-managed sample accepted as a core type")
++p.workloadConfig = "coreType=performance;residencyVerified=1"
++var e = p; e.workloadConfig = "coreType=efficiency;residencyVerified=1"
++let allCPU = rows.first { $0.workload == "cpu_multi_core" }!
++precondition(splitCPU.matchesRecordGroup([p, e, allCPU]))
++let performanceCPU = MobileSuiteJob.makeJobs(includeVulkan: false, cpuCoreTypes: true,
++    cpuEfficiencyForeground: true).first { $0.id == "cpu_compute" }!
++precondition(!performanceCPU.matchesRecordGroup([p, e, allCPU]), "Background E score reused as performance-priority E")
++var foregroundE = e
++foregroundE.workloadConfig = "coreType=efficiency;residencyVerified=1;efficiencyPolicy=foreground_with_performance_load;residencyMethod=thread_selfcounts_perf_level_spi;scheduling=user_initiated"
++precondition(performanceCPU.matchesRecordGroup([p, foregroundE, allCPU]))
++precondition(!splitCPU.matchesRecordGroup([p, p, allCPU]), "Duplicate P result accepted in place of E")
++e.workloadConfig = "coreType=efficiency;residencyVerified=0"
++precondition(!splitCPU.matchesRecordGroup([p, e, allCPU]), "Unverified residency accepted")
++let fixedStream = MobileSuiteJob.makeJobs(includeVulkan: false, particleFixedCoverage: true)
++    .first { $0.id == "stream-1048576" }!
++var legacyStream = rows.first { $0.graphicsApi == "Metal" && $0.workload == "stream" && $0.particleCount == 1_048_576 && !$0.headless }!
++precondition(!fixedStream.matches(legacyStream), "Legacy coverage reused for fixed coverage")
++legacyStream.workloadConfig = (legacyStream.workloadConfig ?? "") + ";renderCoverage=wrapped_ndc_v2"
++precondition(fixedStream.matches(legacyStream))
+ precondition(translated.allSatisfy { MobileSuiteScope.all.includes($0) })
+ var overlap = rows.first { $0.graphicsApi == "Metal" && $0.workload == "stream" }!
+ overlap.avgTotalGpuMs = overlap.avgFrameTimeMs * 2
+@@ -41,6 +73,10 @@ for job in native where job.id != "gpu_cache-v2" {
+             other = row; other.graphicsApi = "Vulkan"
+             other.workloadVersion = job.id == "memory_sweep" ? "membw_v1_ios_preview_moltenvk" : (row.workloadVersion ?? "") + "_moltenvk"
+             other.workloadConfig = (row.workloadConfig ?? "") + ";apiImplementation=MoltenVK;translatedTo=Metal"
++            if job.id.hasPrefix("gpu_burn-") {
++                other.workloadConfig = (other.workloadConfig ?? "").split(separator: ";")
++                    .filter { !$0.hasPrefix("timingMode=") }.joined(separator: ";") + ";timingMode=synchronized_wall_clock"
++            }
+             precondition(vk.matches(other), "Valid translated contract rejected")
+             other.workloadConfig = ""
+             precondition(!vk.matches(other), "Translation metadata required")
+diff --git a/scripts/apple-check/tests.swift b/scripts/apple-check/tests.swift
+index 7cd2296..b0e2700 100644
+--- a/scripts/apple-check/tests.swift
++++ b/scripts/apple-check/tests.swift
+@@ -352,6 +352,14 @@ CPU_RESULT\tkind=summary\tvalid=1\taverage_score=202.5\tunit=MWork/s
+ check.equal(typed.coreScores.map { $0.coreType }, ["performance", "efficiency"], "core types: reject invalid and unverified rows")
+ check.near(typed.coreScores[0].residencyLowerBound ?? 0, 0.999, "core types: preserve measured lower bound")
+ check.expect(typed.singleAverage == nil, "core types: never average P and E into one score")
++let foregroundTyped = RunOutput.parse("""
++CPU_SCHEDULING\tcore_type=both\tefficiency_policy=foreground_with_performance_load
++CPU_RESULT\tkind=core\tcore_index=1\tcore_type=efficiency\tvalid=1\tresidency_verified=1\trequested_lower_bound=0.99999\tscore=89.55\tunit=MWork/s
++""")
++check.expect(foregroundTyped.efficiencyForeground, "core types: parse performance-priority E policy")
++check.equal(foregroundTyped.coreScores.first?.label ?? "", Localization.tr(
++    "Efficiency core (performance priority)", "小核（性能优先级）", "効率コア（性能優先度）"),
++    "core types: foreground E is not labelled background")
+ let typedMemory = RunOutput.savedMemory(workload: "cpu_membw", api: "CPU", configuration:
+     "coreType=both;residencyVerified=1;residency_single=4:read:0.999:0,8:copy:0.997:1;coreClasses=2;class0Name=Performance;class0Cores=10;class1Name=Efficiency;class1Cores=4")
+ check.near(typedMemory.memoryResidencyLowerBound ?? 0, 0.997, "core types: restore saved memory verification")
+diff --git a/shaders/particle.metal b/shaders/particle.metal
+index 256e5d7..0682e9a 100644
+--- a/shaders/particle.metal
++++ b/shaders/particle.metal
+@@ -68,10 +68,11 @@ struct VertexOut {
+     float  pointSize [[point_size]];
+ };
+ 
+-vertex VertexOut vertexMain(const device Particle* particles [[buffer(0)]],
+-                            uint vid [[vertex_id]]) {
++static VertexOut particleVertex(const device Particle* particles, uint vid, bool fixedCoverage) {
+     VertexOut out;
+-    out.position  = float4(particles[vid].position.xy, 0.0, 1.0);
++    float2 displayed = particles[vid].position.xy;
++    if (fixedCoverage) displayed = fract((displayed + 1.0) * 0.5) * 2.0 - 1.0;
++    out.position  = float4(displayed, 0.0, 1.0);
+     out.pointSize = 2.0;
+ 
+     float speed = length(particles[vid].velocity.xy);
+@@ -81,6 +82,14 @@ vertex VertexOut vertexMain(const device Particle* particles [[buffer(0)]],
+     return out;
+ }
+ 
++vertex VertexOut vertexMain(const device Particle* particles [[buffer(0)]], uint vid [[vertex_id]]) {
++    return particleVertex(particles, vid, false);
++}
++
++vertex VertexOut vertexMainFixedCoverage(const device Particle* particles [[buffer(0)]], uint vid [[vertex_id]]) {
++    return particleVertex(particles, vid, true);
++}
++
+ fragment float4 fragmentMain(VertexOut in [[stage_in]]) {
+     return float4(in.color, 1.0);
+ }
+diff --git a/shaders/particle.vert b/shaders/particle.vert
+index aa8865c..f94d7f1 100644
+--- a/shaders/particle.vert
++++ b/shaders/particle.vert
+@@ -12,10 +12,12 @@ layout(location = 0) in vec4 inPosition;
+ layout(location = 1) in vec4 inVelocity;
+ 
+ layout(location = 0) out vec3 outColor;
++layout(constant_id = 0) const bool fixedCoverage = false;
+ 
+ void main() {
+     // Place the particle in 2D normalised device coordinates.
+-    gl_Position = vec4(inPosition.xy, 0.0, 1.0);
++    vec2 displayed = fixedCoverage ? fract((inPosition.xy + 1.0) * 0.5) * 2.0 - 1.0 : inPosition.xy;
++    gl_Position = vec4(displayed, 0.0, 1.0);
+     gl_PointSize = 2.0;
+ 
+     // Map speed to a colour gradient: slow = blue, fast = orange-red.
+diff --git a/src/app_base.cpp b/src/app_base.cpp
+index 35ba9dd..d15e2ac 100644
+--- a/src/app_base.cpp
++++ b/src/app_base.cpp
+@@ -1244,29 +1244,29 @@ void AppBase::PrintSummary() const {
+             case Workload::CinematicLiquid: unit = "MParticle-step/s"; break;
+             case Workload::SynthPeak:     unit = (config_.peakPrecision == Precision::INT32) ? "GIOPS" : "GFLOPS"; break;
+         }
+-        std::cout << "\n--- Thermal Stability ---\n"
++        std::cout << "\n--- Throughput Stability ---\n"
+             << "Windows:      " << windowScores_.size() << " x 1s\n";
+         if (thermalStable_) {
+             std::cout << std::setprecision(2)
+-                      << "Stable score: " << stableScore_ << " " << unit
++                      << "Stable window: " << stableScore_ << " " << unit
+                       << "  (CV " << stableVariancePct_ << "%)\n";
+         } else {
+-            std::cout << "Stable score: not reached — keep running to detect throttling.\n";
++            std::cout << "Stable window: not detected; this run has not reached a stable plateau.\n";
+         }
+-        if (throttlePct_ > 0.0) {
++        if (windowScores_.size() >= 10) {
+             std::cout << std::setprecision(1)
+-                      << "Throttling:   early vs late mean dropped " << throttlePct_ << "%";
++                      << "Throughput:   early vs late mean change (drop positive) " << throttlePct_ << "%";
+             if (throttlePct_ > 5.0) {
+-                std::cout << "  (>> sustained throttle / thermal limit)";
++                std::cout << "  (>> review workload, timing and scheduling)";
+             } else if (throttlePct_ > 2.0) {
+-                std::cout << "  (mild — likely normal warmup drift)";
++                std::cout << "  (small throughput change)";
+             }
+             std::cout << "\n";
+         }
+         if (thermalStable_ && throttlePct_ < 2.0) {
+-            std::cout << ">> Thermally stable; stableScore is a fair comparison metric.\n";
++            std::cout << ">> Stable throughput window detected; no hardware frequency was measured.\n";
+         } else if (throttlePct_ > 5.0) {
+-            std::cout << ">> Throttled: report stableScore (post-throttle), not peak.\n";
++            std::cout << ">> Throughput declined; retain the full-run mean and curve. A stable window may be earlier in the run.\n";
+         }
+     }
+ 
+@@ -1287,6 +1287,10 @@ BenchmarkResult AppBase::CollectResult() const {
+             r.workloadVersion = "stream_v1";
+             workloadConfig << "particles=" << config_.particleCount
+                            << ";bytesPerParticle=40";
++            if (!config_.headless && config_.particleFixedCoverage) {
++                r.workloadVersion += "_fixed_coverage_v2";
++                workloadConfig << ";renderCoverage=wrapped_ndc_v2;computeKernel=unchanged_stream_v1";
++            }
+             // The same work in smaller work groups is still another shader.
+             if (config_.computeWorkGroupSize != kComputeWorkGroupSize) {
+                 r.workloadVersion += "_wg" + std::to_string(config_.computeWorkGroupSize);
+diff --git a/src/cpu_benchmark.cpp b/src/cpu_benchmark.cpp
+index ae64bbc..b6481c0 100644
+--- a/src/cpu_benchmark.cpp
++++ b/src/cpu_benchmark.cpp
+@@ -710,6 +710,7 @@ struct TimedKernelResult {
+     std::vector<CpuResidency> residencyRounds;
+     std::uint32_t residencyRetries = 0;
+     bool residencyValid = true;
++    std::vector<CpuResidency> placementHelpers;
+ };
+ 
+ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+@@ -720,6 +721,13 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+                                         std::size_t totalStages,
+                                         std::ostream& out) {
+     TimedKernelResult result;
++    const bool foregroundE = config.coreType == CpuCoreType::Efficiency && config.efficiencyForeground;
++    const auto helperCount = foregroundE ? AppleCoreTypeCount(CpuCoreType::Performance) : 0;
++    if (foregroundE && (helperCount == 0 || helperCount > 64 || !CaptureCpuThreadCounters().available)) {
++        result.residencyValid = false;
++        out << "CPU_ERROR\tmessage=foreground_efficiency_thread_accounting_unavailable\n" << std::flush;
++        return result;
++    }
+ 
+     enum class Phase { Starting, Warmup, Measure, Complete };
+     struct ProgressState {
+@@ -731,11 +739,39 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+         bool done = false;
+     } progress;
+ 
++    // A high-QoS observer waiting on the worker's progress mutex can donate
++    // priority to a background worker on iOS. Keep both at background QoS for
++    // the E stage; UI callbacks remain asynchronous. Residency still gates
++    // every measured round, independently of this scheduling request.
++    CpuQosScope observerQos(config.coreType == CpuCoreType::Efficiency
++        ? CpuCoreType::Efficiency : CpuCoreType::Automatic);
+     std::thread worker([&] {
+         ThreadAffinityScope affinity(cpu);
+-        CpuQosScope qos(config.coreType);
++        CpuQosScope qos(config.coreType, foregroundE);
+         result.residencyValid = qos.applied();
+         result.strictAffinity = affinity.strict();
++        // Keep the P cores busy at higher priority while the measured E
++        // thread uses normal performance priority. This is placement pressure,
++        // not binding: independently verify both target and helper CPU types.
++        std::atomic<bool> helperStop{false};
++        std::atomic<std::uint32_t> helpersReady{0};
++        std::vector<CpuResidency> helperResidency(helperCount);
++        std::vector<std::thread> helpers;
++        for (std::uint32_t i = 0; i < helperCount; ++i) {
++            helpers.emplace_back([&, i] {
++                CpuQosScope helperQos(CpuCoreType::Performance);
++                auto helperState = MakeKernelState(kPerCoreKernelSeed);
++                const auto before = CaptureCpuThreadCounters();
++                helpersReady.fetch_add(1, std::memory_order_release);
++                while (!helperStop.load(std::memory_order_relaxed) && !CpuStopRequested())
++                    RunKernelBatch(helperState);
++                helperResidency[i] = EvaluateCpuThreadCounters(before, CaptureCpuThreadCounters(), CpuCoreType::Performance);
++                if (!helperQos.applied()) helperResidency[i].available = false;
++                g_cpuBenchmarkSink.fetch_xor(helperState.checksum, std::memory_order_relaxed);
++            });
++        }
++        while (helpersReady.load(std::memory_order_acquire) < helperCount && !CpuStopRequested())
++            std::this_thread::yield();
+         // Every logical processor and every scored round must execute exactly
+         // the same dependency chain.  Core identity is metadata, not a seed.
+         KernelState state = MakeKernelState(kPerCoreKernelSeed);
+@@ -770,7 +806,8 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+                 }
+                 progress.cv.notify_one();
+                 const auto accountingStart = config.coreType == CpuCoreType::Automatic
+-                    ? CpuResidencySnapshot{} : CaptureCpuResidency();
++                    || foregroundE ? CpuResidencySnapshot{} : CaptureCpuResidency();
++                const auto threadStart = foregroundE ? CaptureCpuThreadCounters() : CpuThreadCounters{};
+                 const auto start = Clock::now();
+                 const auto end = start + std::chrono::duration_cast<Clock::duration>(
+                     std::chrono::duration<double>(roundSeconds));
+@@ -781,7 +818,11 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+                     if (Clock::now() >= end || CpuStopRequested()) break;
+                 }
+                 sample.seconds = std::chrono::duration<double>(Clock::now() - start).count();
+-                if (config.coreType != CpuCoreType::Automatic)
++                if (foregroundE) {
++                    residency = EvaluateCpuThreadCounters(threadStart, CaptureCpuThreadCounters(), config.coreType);
++                    const double busyFraction = residency.workerCpuNs / 1e9 / sample.seconds;
++                    if (busyFraction < 0.90 || busyFraction > 1.05) residency.available = false;
++                } else if (config.coreType != CpuCoreType::Automatic)
+                     residency = EvaluateCpuResidency(accountingStart, CaptureCpuResidency(), config.coreType);
+                 if (CpuStopRequested() || config.coreType == CpuCoreType::Automatic || residency.verified()) break;
+                 if (attempt < 2) ++result.residencyRetries;
+@@ -796,6 +837,11 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+         }
+ 
+         result.strictAffinity = affinity.held();
++        helperStop.store(true, std::memory_order_relaxed);
++        for (auto& helper : helpers) helper.join();
++        result.placementHelpers = helperResidency;
++        for (const auto& helper : helperResidency)
++            result.residencyValid = result.residencyValid && helper.verified();
+         if (!CpuStopRequested() && !rounds.empty()) {
+             const std::size_t median = MedianRoundIndex(rounds);
+             result.workUnits = rounds[median].workUnits;
+@@ -824,6 +870,17 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+     // transitions and otherwise limits GUI updates to four per second.
+     Phase lastPhase = Phase::Starting;
+     std::uint32_t lastRound = std::numeric_limits<std::uint32_t>::max();
++    // Main-thread SwiftUI progress/log redraws are themselves interactive
++    // CPU work. During E measurements, retain progress in the raw log and
++    // deliver it after the worker stops, keeping that observer out of the
++    // process accounting window. Do not weaken the residency threshold.
++    std::ostringstream deferredProgress;
++    const bool deferProgress = config.coreType == CpuCoreType::Efficiency;
++    std::ostream& progressOut = deferProgress ? deferredProgress : out;
++    if (deferProgress)
++        EmitProgress(out, "per_core", "warmup", static_cast<int>(cpu.ordinal), coreCount,
++                     0.0, static_cast<double>(stageIndex) / static_cast<double>(totalStages),
++                     0.0, -1, config.roundCount);
+     auto nextPeriodicUpdate = Clock::now();
+     std::unique_lock<std::mutex> lock(progress.mutex);
+     while (!progress.done) {
+@@ -841,7 +898,7 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+             if (phase == Phase::Warmup) {
+                 const double elapsed =
+                     std::chrono::duration<double>(now - phaseStart).count();
+-                EmitProgress(out, "per_core", "warmup", static_cast<int>(cpu.ordinal),
++                EmitProgress(progressOut, "per_core", "warmup", static_cast<int>(cpu.ordinal),
+                              coreCount, 0.0,
+                              static_cast<double>(stageIndex) /
+                                  static_cast<double>(totalStages),
+@@ -855,7 +912,7 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+                 const double fraction = (static_cast<double>(round) +
+                     std::clamp(elapsed / roundSeconds, 0.0, 1.0)) /
+                     static_cast<double>(roundCount);
+-                EmitProgress(out, "per_core", "measure",
++                EmitProgress(progressOut, "per_core", "measure",
+                              static_cast<int>(cpu.ordinal), coreCount, fraction,
+                              (static_cast<double>(stageIndex) + fraction) /
+                                  static_cast<double>(totalStages),
+@@ -870,6 +927,16 @@ static TimedKernelResult RunSingleTimed(const CpuLogicalProcessor& cpu,
+     }
+     lock.unlock();
+     worker.join();
++    for (std::size_t i = 0; i < result.placementHelpers.size(); ++i) {
++        const auto& helper = result.placementHelpers[i];
++        out << std::fixed << std::setprecision(9) << "CPU_PLACEMENT_HELPER\tindex=" << i
++            << "\trequested_lower_bound=" << helper.requestedLowerBound
++            << "\tperformance_fraction=" << helper.performanceFraction
++            << "\tworker_cpu_seconds=" << helper.workerCpuNs / 1e9
++            << "\teffective_ghz=" << helper.effectiveGHz
++            << "\tverified=" << (helper.verified() ? 1 : 0) << '\n';
++    }
++    if (deferProgress) out << deferredProgress.str();
+     EmitProgress(out, "per_core", "complete", static_cast<int>(cpu.ordinal),
+                  coreCount, 1.0,
+                  static_cast<double>(stageIndex + 1u) / static_cast<double>(totalStages),
+@@ -914,6 +981,9 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>&
+     struct MultiRoundResult {
+         KernelRoundResult kernel;
+         std::uint32_t pinned = 0;
++        std::vector<double> workerScores;
++        double processCpuSeconds = 0.0;
++        double performanceCpuSeconds = 0.0;
+     };
+ 
+     const std::uint32_t roundCount = (std::max)(1u, config.roundCount);
+@@ -969,6 +1039,7 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>&
+         }
+ 
+         Clock::time_point start;
++        CpuResidencySnapshot accountingStart;
+         const double warmup = round == 0 ? config.warmupSeconds : 0.0;
+         // Emit the phase boundary before starting the common timer so stdout
+         // formatting is never charged to the benchmark.
+@@ -987,6 +1058,7 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>&
+                 std::chrono::duration<double>(warmup));
+             gate.measureEnd = gate.warmupEnd + std::chrono::duration_cast<Clock::duration>(
+                 std::chrono::duration<double>(roundSeconds));
++            accountingStart = CaptureCpuResidency();
+             gate.start = true;
+         }
+         gate.cv.notify_all();
+@@ -996,6 +1068,7 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>&
+         // round boundary, after all workers have joined and timing has stopped.
+         WaitUntilCpuStop(gate.measureEnd);
+         for (auto& worker : workers) worker.join();
++        const auto accountingEnd = CaptureCpuResidency();
+         if (CpuStopRequested()) return result;
+ 
+         MultiRoundResult sample;
+@@ -1013,6 +1086,27 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>&
+         // and inflating short-run scores.
+         sample.kernel.seconds =
+             std::chrono::duration<double>(lastFinish - gate.warmupEnd).count();
++        // Process counters include the first round's warm-up and a little
++        // observer work; they diagnose scheduling, never classify workers.
++        if (accountingStart.available && accountingEnd.available &&
++            accountingEnd.processNs >= accountingStart.processNs &&
++            accountingEnd.performanceNs >= accountingStart.performanceNs) {
++            sample.processCpuSeconds = double(accountingEnd.processNs - accountingStart.processNs) / 1e9;
++            sample.performanceCpuSeconds = double(accountingEnd.performanceNs - accountingStart.performanceNs) / 1e9;
++        }
++        for (std::size_t i = 0; i < workerResults.size(); ++i) {
++            const double score = double(workerResults[i].units) / sample.kernel.seconds / 1e6;
++            sample.workerScores.push_back(score);
++            out << std::fixed << std::setprecision(9)
++                << "CPU_MULTI_WORKER\tround=" << round + 1 << "\tworker=" << i
++                << "\twork_units=" << workerResults[i].units
++                << "\tcommon_seconds=" << sample.kernel.seconds << "\tscore=" << score
++                << "\tclassification=unclassified_worker\n";
++        }
++        out << "CPU_MULTI_ACCOUNTING\tround=" << round + 1
++            << "\tprocess_cpu_seconds=" << sample.processCpuSeconds
++            << "\tperformance_cpu_seconds=" << sample.performanceCpuSeconds
++            << "\tincludes_warmup_seconds=" << warmup << '\n';
+         rounds.push_back(sample);
+ 
+         const double roundComplete =
+@@ -1043,6 +1137,9 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>&
+     result.roundCount = static_cast<std::uint32_t>(rounds.size());
+     result.medianRound = static_cast<std::uint32_t>(median + 1u);
+     result.affinityMode = MultiAffinityMode(result.pinnedThreadCount, result.threadCount);
++    result.workerScores = selected.workerScores;
++    result.processCpuSeconds = selected.processCpuSeconds;
++    result.performanceCpuSeconds = selected.performanceCpuSeconds;
+     // As many busy threads as there are processors fill the machine wherever
+     // the system puts them, so this result does not depend on the pinning (the
+     // user's decision of 2026-10-08). How many threads were held is recorded
+@@ -1125,7 +1222,12 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& requestedConfig,
+     if (config.mode == CpuBenchmarkMode::MultiCore) config.coreType = CpuCoreType::Automatic;
+     CpuBenchmarkReport report = ProbeCpuTopology();
+     PrintCpuTopology(report, out);
++    out << "CPU_TYPE_CAPS\tverified_scheduling=" << (CpuCoreTypeSchedulingSupported() ? 1 : 0)
++        << "\tperformance_count=" << AppleCoreTypeCount(CpuCoreType::Performance)
++        << "\tefficiency_count=" << AppleCoreTypeCount(CpuCoreType::Efficiency)
++        << "\tresidency_method=" << CpuResidencyMethod() << '\n';
+     out << "CPU_SCHEDULING\tcore_type=" << CpuCoreTypeName(config.coreType)
++        << "\tefficiency_policy=" << (config.efficiencyForeground ? "foreground_with_performance_load" : "background")
+         << "\tresidency_threshold=0.99\tscope=single_thread_stages\n" << std::flush;
+     if (!std::isfinite(config.measureSeconds) || config.measureSeconds <= 0.0 ||
+         !std::isfinite(config.warmupSeconds) || config.warmupSeconds < 0.0 ||
+@@ -1252,15 +1354,21 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& requestedConfig,
+             result.coreType = stageConfig.coreType;
+             result.residencyRounds = timed.residencyRounds;
+             result.residencyRetries = timed.residencyRetries;
++            result.foregroundEfficiency = stageConfig.coreType == CpuCoreType::Efficiency && stageConfig.efficiencyForeground;
++            if (result.foregroundEfficiency) result.processor.classificationSource = "thread_perf_level_counters_spi";
++            result.placementHelpers = timed.placementHelpers;
+             result.valid = timed.workUnits > 0 && SingleAffinityIsValid(timed.strictAffinity)
+                            && timed.residencyValid;
+             for (std::size_t round = 0; round < timed.residencyRounds.size(); ++round) {
+                 const auto& residency = timed.residencyRounds[round];
+                 out << std::fixed << std::setprecision(6)
+                     << "CPU_RESIDENCY\tcore_type=" << CpuCoreTypeName(result.coreType)
++                    << "\tmethod=" << (result.foregroundEfficiency ? "thread_selfcounts_perf_level_spi" : CpuResidencyMethod())
+                     << "\tround=" << round + 1 << "\tp_fraction=" << residency.performanceFraction
+                     << "\trequested_lower_bound=" << residency.requestedLowerBound
+                     << "\teffective_ghz=" << residency.effectiveGHz
++                    << "\tworker_cpu_seconds=" << residency.workerCpuNs / 1e9
++                    << "\tprocess_cpu_seconds=" << residency.processCpuNs / 1e9
+                     << "\tverified=" << (residency.verified() ? 1 : 0)
+                     << "\tretries=" << timed.residencyRetries << '\n' << std::flush;
+             }
+@@ -1289,11 +1397,12 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& requestedConfig,
+                 << "\tperformance_level=" << cpu.performanceLevel
+                 << "\tcore_class=" << cpu.coreClass
+                 << "\tcore_type=" << CpuCoreTypeName(result.coreType)
++                << "\tefficiency_policy=" << (result.foregroundEfficiency ? "foreground_with_performance_load" : "background")
+                 << "\tresidency_verified=" << (timed.residencyValid ? 1 : 0)
+                 << "\trequested_lower_bound=" << (timed.residencyRounds.empty() ? 0.0 :
+                     std::min_element(timed.residencyRounds.begin(), timed.residencyRounds.end(),
+                         [](const auto& a, const auto& b) { return a.requestedLowerBound < b.requestedLowerBound; })->requestedLowerBound)
+-                << "\tclassification_source=" << cpu.classificationSource
++                << "\tclassification_source=" << result.processor.classificationSource
+                 << "\taffinity=" << result.affinityMode
+                 << "\tvalid=" << (result.valid ? 1 : 0)
+                 << "\tscore=" << result.scoreMWorkPerSec
+diff --git a/src/cpu_benchmark.h b/src/cpu_benchmark.h
+index 13e39eb..f9dd08a 100644
+--- a/src/cpu_benchmark.h
++++ b/src/cpu_benchmark.h
+@@ -37,6 +37,7 @@ struct CpuBenchmarkConfig {
+     double warmupSeconds = 0.15;
+     std::uint32_t roundCount = 3;
+     CpuCoreType coreType = DefaultCpuCoreType(); // single-thread stages only
++    bool efficiencyForeground = DefaultCpuEfficiencyForeground();
+ };
+ 
+ struct CpuCoreResult {
+@@ -52,6 +53,8 @@ struct CpuCoreResult {
+     CpuCoreType coreType = CpuCoreType::Automatic;
+     std::vector<CpuResidency> residencyRounds;
+     std::uint32_t residencyRetries = 0;
++    bool foregroundEfficiency = false;
++    std::vector<CpuResidency> placementHelpers;
+ };
+ 
+ struct CpuMultiCoreResult {
+@@ -64,6 +67,11 @@ struct CpuMultiCoreResult {
+     std::uint32_t roundCount = 0;
+     std::uint32_t medianRound = 0;
+     std::string affinityMode;
++    // Contributions from the same selected round and common wall-clock
++    // denominator. A scheduler-managed worker is not a numbered core.
++    std::vector<double> workerScores;
++    double processCpuSeconds = 0.0;
++    double performanceCpuSeconds = 0.0;
+     bool valid = false;
+ };
+ 
+diff --git a/src/cpu_cli.cpp b/src/cpu_cli.cpp
+index 7db7f43..326aa49 100644
+--- a/src/cpu_cli.cpp
++++ b/src/cpu_cli.cpp
+@@ -40,9 +40,11 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
+     stored.workloadVersion = storedVersion.str();
+     const auto coreType = !multiCore && !report.perCore.empty()
+         ? report.perCore.front().coreType : CpuCoreType::Automatic;
++    const bool foregroundE = !multiCore && !report.perCore.empty() && report.perCore.front().foregroundEfficiency;
+     if (coreType != CpuCoreType::Automatic) {
+         stored.workloadVersion += std::string("_qos_bound_v1_") + CpuCoreTypeName(coreType);
+         stored.id += std::string("-") + CpuCoreTypeName(coreType);
++        if (foregroundE) stored.workloadVersion += "_foreground_e_p_load_v1";
+     }
+ #if defined(__APPLE__) && TARGET_OS_IPHONE
+     stored.workloadVersion += "_ios_preview";
+@@ -56,7 +58,7 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
+     stored.processArchitecture = gpu_bench::CurrentProcessArchitecture();
+     stored.difficulty = multiCore ? "Multi-core" : coreType == CpuCoreType::Performance
+         ? "Performance single-thread" : coreType == CpuCoreType::Efficiency
+-        ? "Efficiency single-thread" : "Per-core";
++        ? (foregroundE ? "Efficiency single-thread (performance priority)" : "Efficiency single-thread (background)") : "Per-core";
+     stored.headless = true;
+     stored.framesInFlight = 0;
+     stored.scoreUnit = "MWork/s";
+@@ -93,6 +95,16 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
+                  << ";affinityMode=" << report.multiCore.affinityMode
+                  << ";threads=" << report.multiCore.threadCount
+                  << ";pinnedThreads=" << report.multiCore.pinnedThreadCount;
++        contract << std::setprecision(9) << ";workerScores=";
++        for (std::size_t i = 0; i < report.multiCore.workerScores.size(); ++i) {
++            if (i) contract << ',';
++            contract << report.multiCore.workerScores[i];
++        }
++        contract << ";workerScoreScope=selected_round_common_wall_clock"
++                 << ";workerLabels=unclassified_threads_not_numbered_cores"
++                 << ";processCpuSeconds=" << report.multiCore.processCpuSeconds
++                 << ";performanceCpuSeconds=" << report.multiCore.performanceCpuSeconds
++                 << ";accountingIncludesWarmup=" << (report.multiCore.medianRound == 1 ? config.warmupSeconds : 0.0);
+     } else {
+         double sum = 0.0;
+         std::vector<std::string> affinityModes;
+@@ -123,16 +135,31 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
+     if (coreType != CpuCoreType::Automatic) {
+         const auto& item = report.perCore.front();
+         contract << ";coreType=" << CpuCoreTypeName(coreType)
+-                 << ";scheduling=" << (coreType == CpuCoreType::Performance ? "user_interactive" : "background")
+-                 << ";residencyMethod=process_accounting_thread_clock_bound"
++                 << ";scheduling=" << (coreType == CpuCoreType::Performance ? "user_interactive" : foregroundE ? "user_initiated" : "background")
++                 << ";scoreScope=wall_clock_under_requested_qos"
++                 << ";additiveWithAllCore=0"
++                 << ";residencyMethod=" << (foregroundE ? "thread_selfcounts_perf_level_spi" : CpuResidencyMethod())
+                  << ";residencyThreshold=0.99;residencyVerified=1"
+                  << ";residencyRetries=" << item.residencyRetries;
++        if (foregroundE) {
++            contract << ";efficiencyPolicy=foreground_with_performance_load"
++                     << ";placementHelperThreads=" << item.placementHelpers.size()
++                     << ";minimumWorkerBusyFraction=0.90";
++            for (std::size_t i = 0; i < item.placementHelpers.size(); ++i) {
++                const auto& helper = item.placementHelpers[i];
++                contract << std::setprecision(9)
++                         << ";helper" << i << "RequestedLowerBound=" << helper.requestedLowerBound
++                         << ";helper" << i << "EffectiveGHz=" << helper.effectiveGHz;
++            }
++        }
+         for (std::size_t i = 0; i < item.residencyRounds.size(); ++i) {
+             const auto& round = item.residencyRounds[i];
+             const std::string prefix = ";round" + std::to_string(i + 1);
+             contract << std::setprecision(9)
+                      << prefix << "PFraction=" << round.performanceFraction
+                      << prefix << "RequestedLowerBound=" << round.requestedLowerBound
++                     << prefix << "WorkerCpuSeconds=" << round.workerCpuNs / 1e9
++                     << prefix << "ProcessCpuSeconds=" << round.processCpuNs / 1e9
+                      << prefix << "EffectiveGHz=" << round.effectiveGHz;
+         }
+     }
+@@ -274,7 +301,7 @@ static gpu_bench::BenchmarkResult MakeStoredCpuMemBwResult(
+              << ";aggregation=median;timing=wall_clock";
+     if (config.coreType != CpuCoreType::Automatic) {
+         contract << ";coreType=" << CpuCoreTypeName(config.coreType)
+-                 << ";residencyMethod=process_accounting_thread_clock_bound"
++                 << ";residencyMethod=" << CpuResidencyMethod()
+                  << ";residencyThreshold=0.99;residencyVerified=1"
+                  << ";schedulingScope=single_thread_curves_only";
+         for (const auto& entry : modes) {
+@@ -451,7 +478,14 @@ int RunCpuMemoryBandwidthCli(gpu_bench::CpuMemBwConfig config, bool saveResult)
+         if (!ec) config.storageDir = resultsDir.string();
+     }
+ #endif
+-    const auto report = gpu_bench::RunCpuMemoryBandwidth(config, std::cout);
++    // Classified 50ms windows are sensitive to interactive GUI redraws from
++    // the detailed per-sample log. Preserve every line, but release them only
++    // after the classified sweep has completed. Cancellation remains atomic.
++    std::ostringstream measuredLog;
++    const bool deferLog = config.coreType != CpuCoreType::Automatic;
++    const auto report = gpu_bench::RunCpuMemoryBandwidth(config,
++        deferLog ? static_cast<std::ostream&>(measuredLog) : std::cout);
++    if (deferLog) std::cout << measuredLog.str() << std::flush;
+     if (gpu_bench::CpuStopRequested()) { std::cout << "CPUMEM_CANCELLED\n" << std::flush; return 130; }
+     if (!report.valid) {
+         std::cerr << "CPU memory bandwidth sweep failed: "
+diff --git a/src/cpu_membw.cpp b/src/cpu_membw.cpp
+index 0ef30db..fca5c97 100644
+--- a/src/cpu_membw.cpp
++++ b/src/cpu_membw.cpp
+@@ -2234,6 +2234,8 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
+     for (std::size_t p = 0; p < plans.size(); ++p) {
+         if (CpuStopRequested()) return;
+         ModePlan& plan = plans[p];
++        CpuQosScope observerQos(plan.coreType == CpuCoreType::Efficiency
++            ? CpuCoreType::Efficiency : CpuCoreType::Automatic);
+         const std::uint32_t threads = static_cast<std::uint32_t>(plan.cpus.size());
+         const std::uint64_t memoryFrom = MemoryBandStart(plan.caches, threads);
+         out << "\n[" << plan.name << "] ";
+diff --git a/src/cpu_scheduling.h b/src/cpu_scheduling.h
+index 2425b35..57e4bc4 100644
+--- a/src/cpu_scheduling.h
++++ b/src/cpu_scheduling.h
+@@ -4,14 +4,19 @@
+ #include <string>
+ #if defined(__APPLE__)
+ #include <TargetConditionals.h>
+-#if !TARGET_OS_IPHONE && defined(__aarch64__)
++#if defined(__aarch64__)
++#if !TARGET_OS_IPHONE
+ #include <libproc.h>
++#else
++#include <mach/mach.h>
++#endif
+ #include <mach/mach_time.h>
+ #include <pthread.h>
+ #include <sys/resource.h>
+ #include <sys/sysctl.h>
+ #include <time.h>
+ #include <unistd.h>
++#include <dlfcn.h>
+ #endif
+ #endif
+ 
+@@ -26,7 +31,7 @@ inline const char* CpuCoreTypeName(CpuCoreType type) {
+     }
+ }
+ inline std::uint32_t AppleCoreTypeCount(CpuCoreType type) {
+-#if defined(__APPLE__) && !TARGET_OS_IPHONE && defined(__aarch64__)
++#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+     std::uint32_t count = 0;
+     std::size_t size = sizeof(count);
+     const char* key = type == CpuCoreType::Performance
+@@ -38,7 +43,7 @@ inline std::uint32_t AppleCoreTypeCount(CpuCoreType type) {
+     return 0;
+ }
+ inline bool CpuCoreTypeSchedulingSupported() {
+-#if defined(__APPLE__) && !TARGET_OS_IPHONE && defined(__aarch64__)
++#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+     // The subtraction below is valid only for a verified two-kind P/E machine.
+     std::uint32_t levels = 0;
+     std::size_t size = sizeof(levels);
+@@ -51,13 +56,28 @@ inline bool CpuCoreTypeSchedulingSupported() {
+         if (sysctlbyname(key.c_str(), name, &size, nullptr, 0) != 0 ||
+             std::string(name) != (level == 0 ? "Performance" : "Efficiency")) return false;
+     }
++#if TARGET_OS_IPHONE
++    task_power_info_v2_data_t usage{};
++    mach_msg_type_number_t count = TASK_POWER_INFO_V2_COUNT;
++    return task_info(mach_task_self(), TASK_POWER_INFO_V2,
++        reinterpret_cast<task_info_t>(&usage), &count) == KERN_SUCCESS &&
++        count >= TASK_POWER_INFO_V2_COUNT;
++#else
+     rusage_info_v6 usage{};
+     return proc_pid_rusage(getpid(), RUSAGE_INFO_V6,
+         reinterpret_cast<rusage_info_t*>(&usage)) == 0;
++#endif
+ #else
+     return false;
+ #endif
+ }
++inline const char* CpuResidencyMethod() {
++#if defined(__APPLE__) && TARGET_OS_IPHONE
++    return "mach_task_power_thread_clock_bound";
++#else
++    return "process_accounting_thread_clock_bound";
++#endif
++}
+ 
+ // Default policy covers both types whenever placement can be verified. It is
+ // shared by CLI, GUI workers and suite runs, without a user-facing selector.
+@@ -67,26 +87,28 @@ inline CpuCoreType DefaultCpuCoreType() {
+ 
+ class CpuQosScope {
+ public:
+-    explicit CpuQosScope(CpuCoreType type) {
++    explicit CpuQosScope(CpuCoreType type, bool foregroundEfficiency = false) {
+         applied_ = type == CpuCoreType::Automatic;
+-#if defined(__APPLE__) && !TARGET_OS_IPHONE && defined(__aarch64__)
++#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+         if (type == CpuCoreType::Performance || type == CpuCoreType::Efficiency) {
+             old_ = qos_class_self();
+             applied_ = pthread_set_qos_class_self_np(type == CpuCoreType::Performance
+-                ? QOS_CLASS_USER_INTERACTIVE : QOS_CLASS_BACKGROUND, 0) == 0;
++                ? QOS_CLASS_USER_INTERACTIVE : foregroundEfficiency
++                    ? QOS_CLASS_USER_INITIATED : QOS_CLASS_BACKGROUND, 0) == 0;
+             changed_ = applied_;
+         }
+ #endif
++        (void)foregroundEfficiency;
+     }
+     ~CpuQosScope() {
+-#if defined(__APPLE__) && !TARGET_OS_IPHONE && defined(__aarch64__)
++#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+         if (changed_) pthread_set_qos_class_self_np(old_, 0);
+ #endif
+     }
+     bool applied() const { return applied_; }
+ private:
+     bool applied_ = false;
+-#if defined(__APPLE__) && !TARGET_OS_IPHONE && defined(__aarch64__)
++#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+     qos_class_t old_ = QOS_CLASS_DEFAULT;
+     bool changed_ = false;
+ #endif
+@@ -100,12 +122,25 @@ struct CpuResidencySnapshot {
+ };
+ inline CpuResidencySnapshot CaptureCpuResidency() {
+     CpuResidencySnapshot result;
+-#if defined(__APPLE__) && !TARGET_OS_IPHONE && defined(__aarch64__)
++#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+     timespec before{}, after{};
++#if TARGET_OS_IPHONE
++    // Public iOS task accounting contains performance-core CPU time. The
++    // kernel's task_ptime is the sum on RCT_CPU_PERFORMANCE, not wall time.
++    // Bound the worker with thread CPU clocks exactly as on macOS; never infer
++    // placement from QoS alone or from the score. iOS provides no cycle count.
++    task_power_info_v2_data_t usage{};
++    mach_msg_type_number_t count = TASK_POWER_INFO_V2_COUNT;
++    if (clock_gettime(CLOCK_THREAD_CPUTIME_ID, &before) != 0) return result;
++    if (task_info(mach_task_self(), TASK_POWER_INFO_V2,
++            reinterpret_cast<task_info_t>(&usage), &count) != KERN_SUCCESS ||
++        count < TASK_POWER_INFO_V2_COUNT) return result;
++#else
+     rusage_info_v6 usage{};
+     if (clock_gettime(CLOCK_THREAD_CPUTIME_ID, &before) != 0) return result;
+     if (proc_pid_rusage(getpid(), RUSAGE_INFO_V6,
+             reinterpret_cast<rusage_info_t*>(&usage)) != 0) return result;
++#endif
+     if (clock_gettime(CLOCK_THREAD_CPUTIME_ID, &after) != 0) return result;
+     result.available = true;
+     mach_timebase_info_data_t timebase{};
+@@ -113,10 +148,15 @@ inline CpuResidencySnapshot CaptureCpuResidency() {
+     const auto nanos = [&](std::uint64_t ticks) {
+         return std::uint64_t(static_cast<long double>(ticks) * timebase.numer / timebase.denom);
+     };
++#if TARGET_OS_IPHONE
++    result.processNs = nanos(usage.cpu_energy.total_user + usage.cpu_energy.total_system);
++    result.performanceNs = nanos(usage.task_ptime);
++#else
+     result.processNs = nanos(usage.ri_user_time + usage.ri_system_time);
+     result.performanceNs = nanos(usage.ri_user_ptime + usage.ri_system_ptime);
+     result.cycles = usage.ri_cycles;
+     result.performanceCycles = usage.ri_pcycles;
++#endif
+     result.workerBeforeNs = std::uint64_t(before.tv_sec) * 1000000000ull + before.tv_nsec;
+     result.workerAfterNs = std::uint64_t(after.tv_sec) * 1000000000ull + after.tv_nsec;
+ #endif
+@@ -128,6 +168,79 @@ struct CpuResidency {
+     double processCpuNs = 0, workerCpuNs = 0;
+     bool verified() const { return available && requestedLowerBound >= 0.99; }
+ };
++
++// Recount's exported SPI is absent from the public SDK headers. Its layout
++// and perf-level ordering are specified by Apple's resource_private.h and
++// sys_recount.c. Resolve it at runtime, fail closed, and keep this method
++// distinct from the public process-accounting bound in saved results.
++struct CpuThreadCounters {
++    bool available = false;
++    std::uint64_t cpuNs[2]{}, cycles[2]{};
++    std::uint64_t workerBeforeNs = 0, workerAfterNs = 0;
++};
++inline CpuThreadCounters CaptureCpuThreadCounters() {
++    CpuThreadCounters result;
++#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
++    using Reader = int (*)(std::uint32_t, void*, std::size_t);
++    static const auto reader = reinterpret_cast<Reader>(dlsym(RTLD_DEFAULT, "thread_selfcounts"));
++    if (!reader || !CpuCoreTypeSchedulingSupported()) return result;
++    struct Counts { std::uint64_t instructions, cycles, userMach, systemMach; } counts[2]{};
++    static_assert(sizeof(Counts) == 32, "Recount time/CPI ABI");
++    constexpr std::uint32_t timeCpiPerPerfLevel = 4;
++    timespec before{}, after{};
++    if (clock_gettime(CLOCK_THREAD_CPUTIME_ID, &before) != 0) return result;
++    if (reader(timeCpiPerPerfLevel, counts, sizeof(counts)) != 0) return result;
++    if (clock_gettime(CLOCK_THREAD_CPUTIME_ID, &after) != 0) return result;
++    mach_timebase_info_data_t timebase{};
++    if (mach_timebase_info(&timebase) != KERN_SUCCESS || !timebase.denom) return result;
++    for (unsigned i = 0; i < 2; ++i) {
++        result.cpuNs[i] = static_cast<std::uint64_t>(
++            static_cast<long double>(counts[i].userMach + counts[i].systemMach) * timebase.numer / timebase.denom);
++        result.cycles[i] = counts[i].cycles;
++    }
++    result.workerBeforeNs = std::uint64_t(before.tv_sec) * 1000000000ull + before.tv_nsec;
++    result.workerAfterNs = std::uint64_t(after.tv_sec) * 1000000000ull + after.tv_nsec;
++    result.available = true;
++#endif
++    return result;
++}
++inline CpuResidency EvaluateCpuThreadCounters(const CpuThreadCounters& before,
++                                               const CpuThreadCounters& after,
++                                               CpuCoreType requested) {
++    CpuResidency result;
++    if (!before.available || !after.available ||
++        after.workerBeforeNs <= before.workerAfterNs ||
++        (requested != CpuCoreType::Performance && requested != CpuCoreType::Efficiency)) return result;
++    double time[2]{}, cycles[2]{};
++    for (unsigned i = 0; i < 2; ++i) {
++        if (after.cpuNs[i] < before.cpuNs[i] || after.cycles[i] < before.cycles[i]) return result;
++        time[i] = static_cast<double>(after.cpuNs[i] - before.cpuNs[i]);
++        cycles[i] = static_cast<double>(after.cycles[i] - before.cycles[i]);
++    }
++    const double total = time[0] + time[1];
++    if (total <= 100000.0) return result;
++    const double lower = double(after.workerBeforeNs - before.workerAfterNs);
++    const double upper = double(after.workerAfterNs - before.workerBeforeNs);
++    // A changed SPI layout must not certify a core type. Independently check
++    // conservation against the SDK's current-thread CPU-clock sandwich.
++    if (total < lower - 50000.0 || total > upper + 50000.0) return result;
++    const unsigned wanted = requested == CpuCoreType::Performance ? 0 : 1;
++    result.available = true;
++    result.workerCpuNs = total;
++    result.performanceFraction = time[0] / total;
++    // Charge an extra 50us against placement for the two boundary calls.
++    result.requestedLowerBound = std::clamp((time[wanted] - 50000.0) / total, 0.0, 1.0);
++    if (time[wanted] > 0.0) result.effectiveGHz = cycles[wanted] / time[wanted];
++    return result;
++}
++
++inline bool DefaultCpuEfficiencyForeground() {
++#if defined(__APPLE__) && TARGET_OS_IPHONE && !TARGET_OS_SIMULATOR && defined(__aarch64__)
++    return true;
++#else
++    return false;
++#endif
++}
+ inline CpuResidency EvaluateCpuResidency(const CpuResidencySnapshot& before,
+                                          const CpuResidencySnapshot& after,
+                                          CpuCoreType requested) {
+diff --git a/src/embedded_request.h b/src/embedded_request.h
+index 37696d5..45ce766 100644
+--- a/src/embedded_request.h
++++ b/src/embedded_request.h
+@@ -117,6 +117,15 @@ inline void ApplyEmbeddedTest(const std::string& request, BenchmarkConfig& cfg)
+                 cfg.vsync = value == "1";
+             } else if (name == "api") {
+                 // Read by the host, which picks the backend: see EmbeddedApi.
++            } else if (name == "coverage") {
++                if (value != "fixed" && value != "legacy")
++                    throw std::invalid_argument("coverage must be fixed or legacy");
++                if (id != "stream" && id != "particle" && id != "stream_heavy")
++                    throw std::invalid_argument("coverage is for rendered particles only");
++                const auto coverageApi = embedded_detail::OptionValue(request, "api");
++                if (value == "fixed" && (coverageApi == "gles" || coverageApi == "gles2"))
++                    throw std::invalid_argument("fixed coverage requires Metal or Vulkan");
++                cfg.particleFixedCoverage = value == "fixed";
+             } else if (name == "workgroup") {
+                 workGroup = embedded_detail::ParseCount(value, name);
+             } else {
+diff --git a/src/gpu_common.h b/src/gpu_common.h
+index aae3394..cebfa56 100644
+--- a/src/gpu_common.h
++++ b/src/gpu_common.h
+@@ -455,6 +455,7 @@ struct BenchmarkConfig {
+     std::string   memoryLabelOverride;
+     bool          particlesOverridden = false;
+     bool          headless           = false;    // pure compute, no window/swapchain/present
++    bool          particleFixedCoverage = false; // rendered stream only; separate score contract
+     bool          guiWorker          = false;    // internal: isolated WinUI child process
+     Workload      workload           = Workload::Stream;
+     float         softening          = 0.01f;     // N-body: avoids 1/0 singularity
+diff --git a/src/ios_engine_host.cpp b/src/ios_engine_host.cpp
+index bd6ccfe..89fafe2 100644
+--- a/src/ios_engine_host.cpp
++++ b/src/ios_engine_host.cpp
+@@ -175,6 +175,9 @@ int RunWorkload(const RunRequest& request, std::string& errorOut) {
+         BenchmarkConfig cfg;
+         // The test and its size, as the desktop command line sets them.
+         ApplyEmbeddedTest(request.workloadId, cfg);
++        if (cfg.workload == Workload::Stream && !cfg.headless &&
++            embedded_detail::OptionValue(request.workloadId, "coverage").empty())
++            cfg.particleFixedCoverage = true;
+         if (api == "gles2") ApplyEs2Legacy(cfg);
+         cfg.maxRunTimeSec = request.maxRunTimeSec > 0.0 ? request.maxRunTimeSec : 3.0;
+         cfg.renderDocEnabled = false;
+diff --git a/src/metal_backend.mm b/src/metal_backend.mm
+index 28361fb..feb8314 100644
+--- a/src/metal_backend.mm
++++ b/src/metal_backend.mm
+@@ -537,7 +537,9 @@ void MetalBackend::InitBackend() {
+             NSString* vfn = gpuBurn ? @"gpuBurnVertex"
+                          : fractal ? @"fractalVertex"
+                          : volumetric ? @"volumetricVertex"
+-                         : render3d ? @"render3dVertex" : @"vertexMain";
++                         : render3d ? @"render3dVertex"
++                         : config_.workload == Workload::Stream && config_.particleFixedCoverage
++                             ? @"vertexMainFixedCoverage" : @"vertexMain";
+             NSString* ffn = gpuBurn ? @"gpuBurnFragment"
+                          : fractal ? @"fractalFragment"
+                          : volumetric ? @"volumetricFragment"
+diff --git a/src/vulkan_backend.cpp b/src/vulkan_backend.cpp
+index eb33ef6..dbd6dc8 100644
+--- a/src/vulkan_backend.cpp
++++ b/src/vulkan_backend.cpp
+@@ -83,6 +83,13 @@ void VulkanBackend::InitBackend() {
+     }
+     CreateSyncObjects();
+     CreateTimestampQueryPool();
++#if defined(GPU_BENCH_MOLTENVK) && defined(GPU_BENCH_NO_GLFW) && defined(__APPLE__)
++    // A startup query can agree with synchronized timing, then under-report
++    // later Burn frames on A15. Always time this translated fixed-load path
++    // by submit/fence completion, rather than trusting the initial sample.
++    if (isGpuBurnWorkload(config_.workload))
++        EnableSynchronizedTimingFallback("MoltenVK GPU Burn requires per-frame completion timing");
++#endif
+     CheckTimestampsAgainstWallClock();
+ 
+     SetObjectName(VK_OBJECT_TYPE_BUFFER,   reinterpret_cast<std::uint64_t>(particleBuffer_),   "Particle SSBO");
+@@ -1037,6 +1044,10 @@ void VulkanBackend::CreateGraphicsPipeline() {
+     stages[0].stage  = VK_SHADER_STAGE_VERTEX_BIT;
+     stages[0].module = vertMod;
+     stages[0].pName  = "main";
++    VkBool32 fixedCoverage = config_.workload == Workload::Stream && config_.particleFixedCoverage;
++    VkSpecializationMapEntry coverageEntry{0, 0, sizeof(fixedCoverage)};
++    VkSpecializationInfo coverageSpecialization{1, &coverageEntry, sizeof(fixedCoverage), &fixedCoverage};
++    stages[0].pSpecializationInfo = &coverageSpecialization;
+     stages[1].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+     stages[1].stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
+     stages[1].module = fragMod;
+diff --git a/tests/cpu_cancel_test.cpp b/tests/cpu_cancel_test.cpp
+index b7ac7a6..84abce3 100644
+--- a/tests/cpu_cancel_test.cpp
++++ b/tests/cpu_cancel_test.cpp
+@@ -25,6 +25,25 @@ int main() {
+         auto report = run.get();
+         if (report.multiCore.valid || !report.perCore.empty()) return 1;
+     }
++    if (CpuCoreTypeSchedulingSupported() && CaptureCpuThreadCounters().available) {
++        ClearCpuStop();
++        auto foreground = std::async(std::launch::async, [] {
++            CpuBenchmarkConfig config;
++            config.mode = CpuBenchmarkMode::PerCore;
++            config.coreType = CpuCoreType::Efficiency;
++            config.efficiencyForeground = true;
++            config.measureSeconds = 60; config.warmupSeconds = 60;
++            std::ostringstream output;
++            return RunCpuBenchmark(config, output);
++        });
++        std::this_thread::sleep_for(std::chrono::milliseconds(150));
++        RequestCpuStop();
++        if (foreground.wait_for(std::chrono::seconds(5)) != std::future_status::ready) {
++            std::cerr << "Foreground E cancellation did not join its P-load helpers\n";
++            std::terminate();
++        }
++        if (!foreground.get().perCore.empty()) return 3;
++    }
+     ClearCpuStop();
+     auto memory = std::async(std::launch::async, [] {
+         CpuMemBwConfig config;
+diff --git a/tests/cpu_residency_test.cpp b/tests/cpu_residency_test.cpp
+index 4e77111..8ab35e4 100644
+--- a/tests/cpu_residency_test.cpp
++++ b/tests/cpu_residency_test.cpp
+@@ -26,5 +26,25 @@ int main() {
+     if (EvaluateCpuResidency(before, after, CpuCoreType::Performance).available) return 6;
+     after.available = false;
+     if (EvaluateCpuResidency(before, after, CpuCoreType::Performance).verified()) return 7;
++    CpuThreadCounters threadBefore, threadAfter;
++    threadBefore.available = threadAfter.available = true;
++    threadAfter.cpuNs[1] = 1000000000;
++    threadAfter.cycles[1] = 2000000000;
++    threadAfter.workerBeforeNs = threadAfter.workerAfterNs = 1000000000;
++    const auto directE = EvaluateCpuThreadCounters(threadBefore, threadAfter, CpuCoreType::Efficiency);
++    if (!directE.verified() || directE.effectiveGHz != 2.0) return 8;
++    if (EvaluateCpuThreadCounters(threadBefore, threadAfter, CpuCoreType::Performance).verified()) return 9;
++    threadAfter.cpuNs[0] = 20000000; // A >1% P migration must fail even if E throughput looks plausible.
++    threadAfter.workerBeforeNs = threadAfter.workerAfterNs = 1020000000;
++    if (EvaluateCpuThreadCounters(threadBefore, threadAfter, CpuCoreType::Efficiency).verified()) return 10;
++    threadBefore.cpuNs[0] = 30000000;
++    if (EvaluateCpuThreadCounters(threadBefore, threadAfter, CpuCoreType::Efficiency).available) return 11;
++    threadAfter.available = false;
++    if (EvaluateCpuThreadCounters(threadBefore, threadAfter, CpuCoreType::Efficiency).verified()) return 12;
++    threadBefore = {};
++    threadBefore.available = threadAfter.available = true;
++    threadAfter.cpuNs[0] = 0;
++    threadAfter.workerBeforeNs = threadAfter.workerAfterNs = 1500000000;
++    if (EvaluateCpuThreadCounters(threadBefore, threadAfter, CpuCoreType::Efficiency).verified()) return 13;
+     std::cout << "CPU-type accounting rejects mixed/contaminated and unavailable observations.\n";
+ }

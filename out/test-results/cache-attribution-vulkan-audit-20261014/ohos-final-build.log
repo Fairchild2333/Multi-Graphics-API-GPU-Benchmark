@@ -1,0 +1,134 @@
+[32minstall completed in 0s 73ms[39m
+HarmonyOS shaders ready: 39 SPIR-V + 7 GLES sources
+> hvigor [32mFinished :entry:stageGpuShaders... after 139 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@PreBuild...  [39m
+> hvigor [32mFinished :entry:default@CreateModuleInfo... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@GenerateMetadata...  [39m
+> hvigor [32mFinished :entry:default@ConfigureCmake... after 6 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@MergeProfile...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@CreateBuildProfile...  [39m
+> hvigor [32mFinished :entry:default@PreCheckSyscap... after 1 ms [39m
+> hvigor [32mFinished :entry:default@GeneratePkgContextInfo... after 4 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@GeneratePkgSdkInfo...  [39m
+> hvigor [32mFinished :entry:default@ProcessIntegratedHsp... after 1 ms [39m
+> hvigor [32mFinished :entry:default@BuildNativeWithCmake... after 7 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@MakePackInfo...  [39m
+> hvigor [32mFinished :entry:default@SyscapTransform... after 6 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessProfile...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessRouterMap...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessShareConfig...  [39m
+> hvigor [32mFinished :entry:default@ProcessStartupConfig... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessResource...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@GenerateLoaderJson...  [39m
+> hvigor [32mFinished :entry:default@CompileResource... after 134 ms [39m
+> hvigor [32mFinished :entry:default@BuildJS... after 1 ms [39m
+> hvigor [33mWARN: When performing compilation for the x86_64 architecture:
+[33mclang++: warning: argument unused during compilation: '--gcc-toolchain=/Applications/DevEco-Studio.app/Contents/sdk/default/openharmony/native/llvm' [-Wunused-command-line-argument][33m[39m
+[39m
+> hvigor [33mWARN: When performing compilation for the arm64-v8a architecture:
+[33mclang++: warning: argument unused during compilation: '--gcc-toolchain=/Applications/DevEco-Studio.app/Contents/sdk/default/openharmony/native/llvm' [-Wunused-command-line-argument][33m[39m
+[39m
+> hvigor [32mFinished :entry:default@BuildNativeWithNinja... after 1 s 782 ms [39m
+> hvigor [32mFinished :entry:default@ProcessLibs... after 64 ms [39m
+> hvigor [32mFinished :entry:default@DoNativeStrip... after 27 ms [39m
+> hvigor [32mFinished :entry:default@CacheNativeLibs... after 2 ms [39m
+> hvigor [33mWARN: [33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/common/MobileSuite.ets:95:13
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/common/MobileSuite.ets:95:54
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/common/MobileSuite.ets:96:8
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/common/MobileSuite.ets:108:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/common/MobileSuite.ets:109:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/common/MobileSuite.ets:109:62
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/common/MobileSuite.ets:115:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/common/MobileSuite.ets:116:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/common/MobileSuite.ets:116:75
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/common/RunController.ets:433:13
+ This API is unavailable to 2in1, tv, car.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/common/RunController.ets:440:13
+ This API is unavailable to 2in1.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:23:41
+ The 'HdsTabsController' API is supported since SDK version 6.0.0(20). However, the current compatible SDK version is 5.0.0(12).
+ It is recommended to use apiAvailable to safeguard API compatibility.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:23:41
+ This API is unavailable to tv, car.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:63:7
+ The 'HdsTabs' API is supported since SDK version 6.0.0(20). However, the current compatible SDK version is 5.0.0(12).
+ It is recommended to use apiAvailable to safeguard API compatibility.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:85:8
+ The 'vertical' API is supported since SDK version 6.0.0(20). However, the current compatible SDK version is 5.0.0(12).
+ It is recommended to use apiAvailable to safeguard API compatibility.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:85:8
+ This API is unavailable to tv, car.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:88:8
+ The 'barOverlap' API is supported since SDK version 6.0.0(20). However, the current compatible SDK version is 5.0.0(12).
+ It is recommended to use apiAvailable to safeguard API compatibility.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:88:8
+ This API is unavailable to tv, car.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:89:8
+ The 'barFloatingStyle' API is supported since SDK version 6.1.0(23). However, the current compatible SDK version is 5.0.0(12).
+ It is recommended to use apiAvailable to safeguard API compatibility.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:89:8
+ This API is unavailable to tv.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:90:47
+ The 'hdsMaterial' API is supported since SDK version 6.1.0(23). However, the current compatible SDK version is 5.0.0(12).
+ It is recommended to use apiAvailable to safeguard API compatibility.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:90:47
+ This API is unavailable to tv, car.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:90:59
+ The 'MaterialType' API is supported since SDK version 6.1.0(23). However, the current compatible SDK version is 5.0.0(12).
+ It is recommended to use apiAvailable to safeguard API compatibility.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:90:59
+ This API is unavailable to tv, car.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:90:72
+ The 'ADAPTIVE' API is supported since SDK version 6.1.0(23). However, the current compatible SDK version is 5.0.0(12).
+ It is recommended to use apiAvailable to safeguard API compatibility.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/src/main/ets/pages/IndexHds.ets:90:72
+ This API is unavailable to tv, car.
+[39m[39m
+[39m
+> hvigor [32mFinished :entry:default@CompileArkTS... after 1 s 616 ms [39m
+> hvigor [32mFinished :entry:default@GeneratePkgModuleJson... after 1 ms [39m
+> hvigor [32mFinished :entry:default@ProcessCompiledResources... after 1 ms [39m
+> hvigor [32mFinished :entry:default@PackageHap... after 294 ms [39m
+> hvigor [32mFinished :entry:default@PackingCheck... after 2 ms [39m
+> hvigor [33mWARN: Will skip sign 'hos_hap'. No signingConfigs profile is configured in current project.
+             If needed, configure the signingConfigs in /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/build-profile.json5.[39m
+> hvigor [32mFinished :entry:default@SignHap... after 1 ms [39m
+> hvigor [32mFinished :entry:default@CollectDebugSymbol... after 1 ms [39m
+> hvigor [32mFinished :entry:assembleHap... after 1 ms [39m
+> hvigor [32mBUILD SUCCESSFUL in 3 s 736 ms [39m
+
+34 tasks in total: 23 executed, 11 up-to-date

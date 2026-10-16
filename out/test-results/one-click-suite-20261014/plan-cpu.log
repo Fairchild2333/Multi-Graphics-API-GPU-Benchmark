@@ -1,0 +1,3 @@
+SUITE_PLAN	total=2
+SUITE_JOB	index=1	backend=cpu	workload=cpu_all
+SUITE_JOB	index=2	backend=cpu	workload=cpu_membw

@@ -1,0 +1,647 @@
+SUITE_PLAN	total=2	scope=CPU
+SUITE_RUN	index=1	total=2	job=cpu-compute
+SUITE_THERMAL	start=0	unknown=-1
+CPU_META	workload_version=cpu_mixed_v1_strict_sched_affinity	name=AOSP ranchu	logical_count=4	physical_count=4	topology_source=LinuxAllowedCpuSet+Sysfs	affinity_capability=strict_sched_affinity
+CPU_TOPOLOGY	core_index=0	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+CPU_TOPOLOGY	core_index=1	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+CPU_TOPOLOGY	core_index=2	group=0	logical_index=2	physical_core=2	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+CPU_TOPOLOGY	core_index=3	group=0	logical_index=3	physical_core=3	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+CPU_SCHEDULING	core_type=auto	residency_threshold=0.99	scope=single_thread_stages
+
+--- Native CPU mixed benchmark ---
+CPU: AOSP ranchu
+Topology: LinuxAllowedCpuSet+Sysfs, affinity: strict_sched_affinity
+Workload: cpu_mixed_v1_strict_sched_affinity, 3 rounds, median aggregation (the requested measurement time is split across rounds).
+Score contract: formal (formal = 15.0 s measurement, 0.2 s warm-up, 3 rounds).
+Each score is million mixed integer/branch/FP32/FP64 work units per second.
+The checksum is a dead-code-elimination sink, not a correctness oracle.
+
+--- CPU all-logical-processor test ---
+CPU_PROGRESS	mode=multi	phase=warmup	core_index=-1	core_count=4	core_fraction=0.000000	overall_fraction=0.000000	elapsed=0.000000	round_index=-1	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=0.333333	overall_fraction=0.066667	elapsed=5.000000	round_index=0	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=0.666667	overall_fraction=0.133333	elapsed=10.000000	round_index=1	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=1.000000	overall_fraction=0.200000	elapsed=15.000000	round_index=2	round_count=3
+CPU_PROGRESS	mode=multi	phase=complete	core_index=-1	core_count=4	core_fraction=1.000000	overall_fraction=0.200000	elapsed=15.000000	round_index=1	round_count=3
+All-core score (4 threads): 751.37 MWork/s
+CPU_RESULT	kind=multi	mode=multi	core_index=-1	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_count=4	thread_count=4	pinned_threads=4	affinity=strict	valid=1	score=751.367293	unit=MWork/s	seconds=5.000107	requested_seconds=15.000000	round_count=3	median_round=2	checksum=d7cf7277c0ad9db3	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=0	core_count=4	core_fraction=0.000000	overall_fraction=0.200000	elapsed=0.000038	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.000004	overall_fraction=0.200001	elapsed=0.000060	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.016685	overall_fraction=0.203337	elapsed=0.250269	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.033450	overall_fraction=0.206690	elapsed=0.501745	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.050250	overall_fraction=0.210050	elapsed=0.753745	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.067058	overall_fraction=0.213412	elapsed=1.005865	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.083776	overall_fraction=0.216755	elapsed=1.256638	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.100497	overall_fraction=0.220099	elapsed=1.507461	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.117336	overall_fraction=0.223467	elapsed=1.760040	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.134177	overall_fraction=0.226835	elapsed=2.012662	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.150857	overall_fraction=0.230171	elapsed=2.262849	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.167565	overall_fraction=0.233513	elapsed=2.513472	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.184297	overall_fraction=0.236859	elapsed=2.764457	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.200993	overall_fraction=0.240199	elapsed=3.014897	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.217682	overall_fraction=0.243536	elapsed=3.265234	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.234474	overall_fraction=0.246895	elapsed=3.517103	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.251247	overall_fraction=0.250249	elapsed=3.768711	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.267946	overall_fraction=0.253589	elapsed=4.019195	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.284938	overall_fraction=0.256988	elapsed=4.274075	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.301693	overall_fraction=0.260339	elapsed=4.525402	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.318369	overall_fraction=0.263674	elapsed=4.775530	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.333338	overall_fraction=0.266668	elapsed=5.000066	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.350025	overall_fraction=0.270005	elapsed=5.250376	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.366780	overall_fraction=0.273356	elapsed=5.501695	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.383516	overall_fraction=0.276703	elapsed=5.752742	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.400480	overall_fraction=0.280096	elapsed=6.007202	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.417281	overall_fraction=0.283456	elapsed=6.259208	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.433989	overall_fraction=0.286798	elapsed=6.509833	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.450667	overall_fraction=0.290133	elapsed=6.760006	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.467443	overall_fraction=0.293489	elapsed=7.011646	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.484146	overall_fraction=0.296829	elapsed=7.262185	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.500957	overall_fraction=0.300191	elapsed=7.514353	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.517695	overall_fraction=0.303539	elapsed=7.765419	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.534386	overall_fraction=0.306877	elapsed=8.015786	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.551116	overall_fraction=0.310223	elapsed=8.266741	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.567801	overall_fraction=0.313560	elapsed=8.517008	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.584548	overall_fraction=0.316910	elapsed=8.768218	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.601302	overall_fraction=0.320260	elapsed=9.019533	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.618017	overall_fraction=0.323603	elapsed=9.270259	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.634751	overall_fraction=0.326950	elapsed=9.521269	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.651509	overall_fraction=0.330302	elapsed=9.772639	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.666669	overall_fraction=0.333334	elapsed=10.000037	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.683360	overall_fraction=0.336672	elapsed=10.250403	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.700076	overall_fraction=0.340015	elapsed=10.501141	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.716798	overall_fraction=0.343360	elapsed=10.751965	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.733599	overall_fraction=0.346720	elapsed=11.003980	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.750277	overall_fraction=0.350055	elapsed=11.254153	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.766980	overall_fraction=0.353396	elapsed=11.504694	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.783788	overall_fraction=0.356758	elapsed=11.756818	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.800484	overall_fraction=0.360097	elapsed=12.007255	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.817279	overall_fraction=0.363456	elapsed=12.259187	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.834157	overall_fraction=0.366831	elapsed=12.512358	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.850928	overall_fraction=0.370186	elapsed=12.763916	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.867656	overall_fraction=0.373531	elapsed=13.014841	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.884332	overall_fraction=0.376866	elapsed=13.264976	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.901011	overall_fraction=0.380202	elapsed=13.515166	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.917754	overall_fraction=0.383551	elapsed=13.766312	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.934532	overall_fraction=0.386906	elapsed=14.017986	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.951315	overall_fraction=0.390263	elapsed=14.269725	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.968054	overall_fraction=0.393611	elapsed=14.520810	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.984790	overall_fraction=0.396958	elapsed=14.771844	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=0	core_count=4	core_fraction=1.000000	overall_fraction=0.400000	elapsed=15.000000	round_index=1	round_count=3
+Logical processor sample 1 score: 189.27 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_index=0	core_count=4	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	efficiency_class=1024	performance_level=0	core_class=InferredUniform	core_type=auto	residency_verified=1	requested_lower_bound=0.000000	classification_source=inferred_capacity_or_max_frequency_rank	affinity=strict	valid=1	score=189.266401	unit=MWork/s	seconds=5.000020	requested_seconds=15.000000	round_count=3	median_round=2	checksum=911ddad0c71712b6	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=1	core_count=4	core_fraction=0.000000	overall_fraction=0.400000	elapsed=0.000260	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.000004	overall_fraction=0.400001	elapsed=0.000062	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.016716	overall_fraction=0.403343	elapsed=0.250747	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.033498	overall_fraction=0.406700	elapsed=0.502475	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.050205	overall_fraction=0.410041	elapsed=0.753078	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.066929	overall_fraction=0.413386	elapsed=1.003941	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.083617	overall_fraction=0.416723	elapsed=1.254248	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.100291	overall_fraction=0.420058	elapsed=1.504366	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.117002	overall_fraction=0.423400	elapsed=1.755033	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.133716	overall_fraction=0.426743	elapsed=2.005734	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.150435	overall_fraction=0.430087	elapsed=2.256529	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.167239	overall_fraction=0.433448	elapsed=2.508578	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.183923	overall_fraction=0.436785	elapsed=2.758840	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.200663	overall_fraction=0.440133	elapsed=3.009948	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.217454	overall_fraction=0.443491	elapsed=3.261806	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.234131	overall_fraction=0.446826	elapsed=3.511972	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.250806	overall_fraction=0.450161	elapsed=3.762086	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.267538	overall_fraction=0.453508	elapsed=4.013065	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.284221	overall_fraction=0.456844	elapsed=4.263321	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.300904	overall_fraction=0.460181	elapsed=4.513567	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.317634	overall_fraction=0.463527	elapsed=4.764506	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.333337	overall_fraction=0.466667	elapsed=5.000062	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.350038	overall_fraction=0.470008	elapsed=5.250571	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.366812	overall_fraction=0.473362	elapsed=5.502179	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.383491	overall_fraction=0.476698	elapsed=5.752359	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.400306	overall_fraction=0.480061	elapsed=6.004585	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.416998	overall_fraction=0.483400	elapsed=6.254969	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.433717	overall_fraction=0.486743	elapsed=6.505751	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.450504	overall_fraction=0.490101	elapsed=6.757563	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.467232	overall_fraction=0.493446	elapsed=7.008476	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.483960	overall_fraction=0.496792	elapsed=7.259400	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.500706	overall_fraction=0.500141	elapsed=7.510587	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.517454	overall_fraction=0.503491	elapsed=7.761817	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.534149	overall_fraction=0.506830	elapsed=8.012229	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.550827	overall_fraction=0.510165	elapsed=8.262398	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.567503	overall_fraction=0.513501	elapsed=8.512552	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.584195	overall_fraction=0.516839	elapsed=8.762929	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.600871	overall_fraction=0.520174	elapsed=9.013059	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.617568	overall_fraction=0.523514	elapsed=9.263523	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.634247	overall_fraction=0.526849	elapsed=9.513699	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.650973	overall_fraction=0.530195	elapsed=9.764597	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.666670	overall_fraction=0.533334	elapsed=10.000050	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.683350	overall_fraction=0.536670	elapsed=10.250257	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.700056	overall_fraction=0.540011	elapsed=10.500845	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.716747	overall_fraction=0.543349	elapsed=10.751202	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.733504	overall_fraction=0.546701	elapsed=11.002557	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.750226	overall_fraction=0.550045	elapsed=11.253393	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.767033	overall_fraction=0.553407	elapsed=11.505496	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.783814	overall_fraction=0.556763	elapsed=11.757204	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.800511	overall_fraction=0.560102	elapsed=12.007668	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.817247	overall_fraction=0.563449	elapsed=12.258712	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.833949	overall_fraction=0.566790	elapsed=12.509237	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.850626	overall_fraction=0.570125	elapsed=12.759389	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.867302	overall_fraction=0.573460	elapsed=13.009533	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.884024	overall_fraction=0.576805	elapsed=13.260366	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.900713	overall_fraction=0.580143	elapsed=13.510699	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.917413	overall_fraction=0.583483	elapsed=13.761191	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.934090	overall_fraction=0.586818	elapsed=14.011344	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.950780	overall_fraction=0.590156	elapsed=14.261705	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.967483	overall_fraction=0.593497	elapsed=14.512250	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.984198	overall_fraction=0.596840	elapsed=14.762967	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=1	core_count=4	core_fraction=1.000000	overall_fraction=0.600000	elapsed=15.000000	round_index=1	round_count=3
+Logical processor sample 2 score: 193.65 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_index=1	core_count=4	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	efficiency_class=1024	performance_level=0	core_class=InferredUniform	core_type=auto	residency_verified=1	requested_lower_bound=0.000000	classification_source=inferred_capacity_or_max_frequency_rank	affinity=strict	valid=1	score=193.648711	unit=MWork/s	seconds=5.000009	requested_seconds=15.000000	round_count=3	median_round=2	checksum=af32a3a770e89a7f	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=2	core_count=4	core_fraction=0.000000	overall_fraction=0.600000	elapsed=0.000033	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.000005	overall_fraction=0.600001	elapsed=0.000073	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.016726	overall_fraction=0.603345	elapsed=0.250885	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.033410	overall_fraction=0.606682	elapsed=0.501145	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.050099	overall_fraction=0.610020	elapsed=0.751485	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.066825	overall_fraction=0.613365	elapsed=1.002371	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.083505	overall_fraction=0.616701	elapsed=1.252579	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.100180	overall_fraction=0.620036	elapsed=1.502704	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.116947	overall_fraction=0.623389	elapsed=1.754203	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.133646	overall_fraction=0.626729	elapsed=2.004695	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.150422	overall_fraction=0.630084	elapsed=2.256329	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.167159	overall_fraction=0.633432	elapsed=2.507387	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.183846	overall_fraction=0.636769	elapsed=2.757690	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.200541	overall_fraction=0.640108	elapsed=3.008111	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.217252	overall_fraction=0.643450	elapsed=3.258773	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.233977	overall_fraction=0.646795	elapsed=3.509653	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.250681	overall_fraction=0.650136	elapsed=3.760216	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.267390	overall_fraction=0.653478	elapsed=4.010854	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.284100	overall_fraction=0.656820	elapsed=4.261504	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.300775	overall_fraction=0.660155	elapsed=4.511622	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.317504	overall_fraction=0.663501	elapsed=4.762557	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.333336	overall_fraction=0.666667	elapsed=5.000040	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.350045	overall_fraction=0.670009	elapsed=5.250674	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.366762	overall_fraction=0.673352	elapsed=5.501436	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.383471	overall_fraction=0.676694	elapsed=5.752071	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.400151	overall_fraction=0.680030	elapsed=6.002258	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.416903	overall_fraction=0.683381	elapsed=6.253545	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.433607	overall_fraction=0.686721	elapsed=6.504098	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.450302	overall_fraction=0.690060	elapsed=6.754531	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.467017	overall_fraction=0.693403	elapsed=7.005252	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.483793	overall_fraction=0.696759	elapsed=7.256900	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.500546	overall_fraction=0.700109	elapsed=7.508183	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.517245	overall_fraction=0.703449	elapsed=7.758668	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.533921	overall_fraction=0.706784	elapsed=8.008811	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.550611	overall_fraction=0.710122	elapsed=8.259158	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.567288	overall_fraction=0.713458	elapsed=8.509316	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.583985	overall_fraction=0.716797	elapsed=8.759770	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.600679	overall_fraction=0.720136	elapsed=9.010191	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.617372	overall_fraction=0.723474	elapsed=9.260581	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.634081	overall_fraction=0.726816	elapsed=9.511214	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.650792	overall_fraction=0.730158	elapsed=9.761875	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.666669	overall_fraction=0.733334	elapsed=10.000036	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.683386	overall_fraction=0.736677	elapsed=10.250786	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.700151	overall_fraction=0.740030	elapsed=10.502268	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.716957	overall_fraction=0.743391	elapsed=10.754360	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.733696	overall_fraction=0.746739	elapsed=11.005440	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.750489	overall_fraction=0.750098	elapsed=11.257333	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.767268	overall_fraction=0.753454	elapsed=11.509025	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.783949	overall_fraction=0.756790	elapsed=11.759229	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.800628	overall_fraction=0.760126	elapsed=12.009416	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.817325	overall_fraction=0.763465	elapsed=12.259874	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.834001	overall_fraction=0.766800	elapsed=12.510012	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.850696	overall_fraction=0.770139	elapsed=12.760441	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.867397	overall_fraction=0.773479	elapsed=13.010952	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.884079	overall_fraction=0.776816	elapsed=13.261180	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.900778	overall_fraction=0.780156	elapsed=13.511664	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.917509	overall_fraction=0.783502	elapsed=13.762632	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.934186	overall_fraction=0.786837	elapsed=14.012796	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.950901	overall_fraction=0.790180	elapsed=14.263518	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.967579	overall_fraction=0.793516	elapsed=14.513683	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.984290	overall_fraction=0.796858	elapsed=14.764355	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=2	core_count=4	core_fraction=1.000000	overall_fraction=0.800000	elapsed=15.000000	round_index=1	round_count=3
+Logical processor sample 3 score: 194.24 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_index=2	core_count=4	group=0	logical_index=2	physical_core=2	smt_index=0	smt_width=1	efficiency_class=1024	performance_level=0	core_class=InferredUniform	core_type=auto	residency_verified=1	requested_lower_bound=0.000000	classification_source=inferred_capacity_or_max_frequency_rank	affinity=strict	valid=1	score=194.240661	unit=MWork/s	seconds=5.000017	requested_seconds=15.000000	round_count=3	median_round=2	checksum=af3079d753c167b7	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=3	core_count=4	core_fraction=0.000000	overall_fraction=0.800000	elapsed=0.000200	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.000003	overall_fraction=0.800001	elapsed=0.000038	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.016727	overall_fraction=0.803345	elapsed=0.250902	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.033554	overall_fraction=0.806711	elapsed=0.503316	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.050300	overall_fraction=0.810060	elapsed=0.754507	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.067091	overall_fraction=0.813418	elapsed=1.006367	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.083795	overall_fraction=0.816759	elapsed=1.256928	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.100564	overall_fraction=0.820113	elapsed=1.508466	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.117303	overall_fraction=0.823461	elapsed=1.759549	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.133979	overall_fraction=0.826796	elapsed=2.009692	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.150683	overall_fraction=0.830137	elapsed=2.260242	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.167358	overall_fraction=0.833472	elapsed=2.510367	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.184062	overall_fraction=0.836812	elapsed=2.760929	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.200768	overall_fraction=0.840154	elapsed=3.011525	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.217469	overall_fraction=0.843494	elapsed=3.262034	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.234150	overall_fraction=0.846830	elapsed=3.512250	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.250863	overall_fraction=0.850173	elapsed=3.762942	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.267549	overall_fraction=0.853510	elapsed=4.013241	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.284291	overall_fraction=0.856858	elapsed=4.264365	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.300992	overall_fraction=0.860198	elapsed=4.514876	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.317709	overall_fraction=0.863542	elapsed=4.765636	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.333336	overall_fraction=0.866667	elapsed=5.000040	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.350056	overall_fraction=0.870011	elapsed=5.250839	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.366732	overall_fraction=0.873346	elapsed=5.500973	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.383407	overall_fraction=0.876681	elapsed=5.751101	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.400132	overall_fraction=0.880026	elapsed=6.001975	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.416807	overall_fraction=0.883361	elapsed=6.252101	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.433561	overall_fraction=0.886712	elapsed=6.503413	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.450358	overall_fraction=0.890072	elapsed=6.755363	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.467104	overall_fraction=0.893421	elapsed=7.006566	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.483802	overall_fraction=0.896760	elapsed=7.257023	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.500489	overall_fraction=0.900098	elapsed=7.507339	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.517222	overall_fraction=0.903444	elapsed=7.758329	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.533901	overall_fraction=0.906780	elapsed=8.008510	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.550580	overall_fraction=0.910116	elapsed=8.258706	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.567254	overall_fraction=0.913451	elapsed=8.508810	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.583951	overall_fraction=0.916790	elapsed=8.759268	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.600647	overall_fraction=0.920129	elapsed=9.009703	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.617327	overall_fraction=0.923465	elapsed=9.259901	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.634030	overall_fraction=0.926806	elapsed=9.510453	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.650718	overall_fraction=0.930144	elapsed=9.760769	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.666670	overall_fraction=0.933334	elapsed=10.000048	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.683392	overall_fraction=0.936678	elapsed=10.250885	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.700089	overall_fraction=0.940018	elapsed=10.501329	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.716829	overall_fraction=0.943366	elapsed=10.752439	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.733669	overall_fraction=0.946734	elapsed=11.005038	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.750385	overall_fraction=0.950077	elapsed=11.255782	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.767095	overall_fraction=0.953419	elapsed=11.506419	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.783925	overall_fraction=0.956785	elapsed=11.758880	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.800617	overall_fraction=0.960123	elapsed=12.009254	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.817316	overall_fraction=0.963463	elapsed=12.259747	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.834018	overall_fraction=0.966804	elapsed=12.510271	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.850736	overall_fraction=0.970147	elapsed=12.761046	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.867455	overall_fraction=0.973491	elapsed=13.011829	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.884137	overall_fraction=0.976827	elapsed=13.262056	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.900812	overall_fraction=0.980162	elapsed=13.512177	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.917641	overall_fraction=0.983528	elapsed=13.764612	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.934338	overall_fraction=0.986868	elapsed=14.015067	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.951074	overall_fraction=0.990215	elapsed=14.266105	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.967766	overall_fraction=0.993553	elapsed=14.516491	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.984509	overall_fraction=0.996902	elapsed=14.767635	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=3	core_count=4	core_fraction=1.000000	overall_fraction=1.000000	elapsed=15.000000	round_index=2	round_count=3
+Logical processor sample 4 score: 194.01 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_index=3	core_count=4	group=0	logical_index=3	physical_core=3	smt_index=0	smt_width=1	efficiency_class=1024	performance_level=0	core_class=InferredUniform	core_type=auto	residency_verified=1	requested_lower_bound=0.000000	classification_source=inferred_capacity_or_max_frequency_rank	affinity=strict	valid=1	score=194.005030	unit=MWork/s	seconds=5.000010	requested_seconds=15.000000	round_count=3	median_round=3	checksum=0b6aa1894531d7ee	checksum_role=dce_sink
+Average per-logical-processor score: 192.79 MWork/s
+CPU_RESULT	kind=summary	mode=per_core	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=arithmetic_mean_of_per_core_medians	core_count=4	completed=4	invalid_count=0	valid=1	average_score=192.790201	min_score=189.266401	max_score=194.240661	unit=MWork/s	round_count=3	checksum=51d8ed12809a0fce	checksum_role=dce_sink
+[Results] Saved CPU single-thread summary as 20261014-141149-850-cpu-single -> /storage/emulated/0/Android/data/com.mangekyo.benchmark/files/results/results.json
+[Results] Saved CPU multi-core summary as 20261014-141149-852-cpu-multi -> /storage/emulated/0/Android/data/com.mangekyo.benchmark/files/results/results.json
+SUITE_RESULT	status=success	job=cpu-compute	reason= 
+SUITE_RUN	index=2	total=2	job=cpu-memory
+SUITE_THERMAL	start=0	unknown=-1
+
+========== CPU Memory Bandwidth Sweep (cpu_membw_v1) ==========
+CPU:       AOSP ranchu (4 cores / 4 threads)
+Vectors:   NEON, 16-byte loads and stores
+Caches:    sizes not reported by the OS; levels are read off the curve
+Memory:    2.4 GiB installed, 1.2 GiB free
+Sweep:     4 KiB - 256 MiB on one thread; 4 KiB - 64 MiB per thread on 4 threads
+Timing:    wall clock, 2 warm-up + 7 measured samples of 10 ms per point, median reported
+CPUMEM_META	name=AOSP ranchu	vector=NEON	vector_bytes=16	physical_count=4	logical_count=4	core_type=auto	all_threads=4	reference_logical_index=1	class_count=1	cache_source=curve
+CPUMEM_CLASS	rank=0	mode=single	name=InferredUniform	cores=4	reference_logical_index=1	cache_source=curve
+
+[single] one thread on logical processor 1
+    Data set       Read      Write       Copy   Write NT    Copy NT  Zero fill   GB/s (median)
+       4 KiB      123.9      105.6      233.2          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=4096	threads=1	median_gbps=123.892	best_gbps=124.953	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=4096	threads=1	median_gbps=105.592	best_gbps=115.863	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=4096	threads=1	median_gbps=233.202	best_gbps=237.143	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.0167
+       8 KiB      124.4       88.8      207.7          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=8192	threads=1	median_gbps=124.409	best_gbps=125.978	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=8192	threads=1	median_gbps=88.837	best_gbps=98.858	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=8192	threads=1	median_gbps=207.703	best_gbps=228.683	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.0333
+      16 KiB      118.9       86.3      152.9          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=16384	threads=1	median_gbps=118.874	best_gbps=123.843	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=16384	threads=1	median_gbps=86.345	best_gbps=104.457	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=16384	threads=1	median_gbps=152.852	best_gbps=170.247	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.0500
+      24 KiB      122.4      106.9      159.4          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=24576	threads=1	median_gbps=122.373	best_gbps=123.908	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=24576	threads=1	median_gbps=106.937	best_gbps=111.073	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=24576	threads=1	median_gbps=159.397	best_gbps=215.942	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.0667
+      32 KiB      122.8       97.3      171.4          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=32768	threads=1	median_gbps=122.774	best_gbps=123.729	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=32768	threads=1	median_gbps=97.309	best_gbps=112.120	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=32768	threads=1	median_gbps=171.383	best_gbps=195.094	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.0833
+      48 KiB      123.3       96.1      155.1          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=49152	threads=1	median_gbps=123.316	best_gbps=124.605	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=49152	threads=1	median_gbps=96.088	best_gbps=112.381	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=49152	threads=1	median_gbps=155.121	best_gbps=188.653	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.1000
+      64 KiB      122.8      104.5      186.8          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=65536	threads=1	median_gbps=122.835	best_gbps=125.995	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=65536	threads=1	median_gbps=104.519	best_gbps=111.536	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=65536	threads=1	median_gbps=186.839	best_gbps=229.879	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.1167
+      96 KiB      120.4      100.3      174.4          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=98304	threads=1	median_gbps=120.382	best_gbps=124.640	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=98304	threads=1	median_gbps=100.297	best_gbps=109.933	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=98304	threads=1	median_gbps=174.405	best_gbps=223.237	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.1333
+     128 KiB      122.8      103.3      195.2          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=131072	threads=1	median_gbps=122.799	best_gbps=123.538	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=131072	threads=1	median_gbps=103.319	best_gbps=109.012	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=131072	threads=1	median_gbps=195.177	best_gbps=207.979	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.1500
+     192 KiB      106.9      113.5      220.2          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=196608	threads=1	median_gbps=106.928	best_gbps=108.211	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=196608	threads=1	median_gbps=113.537	best_gbps=117.221	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=196608	threads=1	median_gbps=220.228	best_gbps=228.813	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.1667
+     256 KiB      105.8      105.1      232.2          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=262144	threads=1	median_gbps=105.760	best_gbps=106.892	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=262144	threads=1	median_gbps=105.115	best_gbps=115.382	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=262144	threads=1	median_gbps=232.222	best_gbps=237.749	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.1833
+     384 KiB       99.9      112.0      112.4          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=393216	threads=1	median_gbps=99.941	best_gbps=103.706	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=393216	threads=1	median_gbps=112.015	best_gbps=115.499	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=393216	threads=1	median_gbps=112.373	best_gbps=114.074	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.2000
+     512 KiB      103.7      111.0      160.4          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=524288	threads=1	median_gbps=103.725	best_gbps=107.359	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=524288	threads=1	median_gbps=110.972	best_gbps=117.892	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=524288	threads=1	median_gbps=160.443	best_gbps=163.600	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.2167
+     768 KiB      102.4      109.8      113.0          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=786432	threads=1	median_gbps=102.409	best_gbps=103.766	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=786432	threads=1	median_gbps=109.846	best_gbps=112.581	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=786432	threads=1	median_gbps=113.032	best_gbps=113.754	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.2333
+       1 MiB      101.5      108.2      157.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=1048576	threads=1	median_gbps=101.504	best_gbps=103.371	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=1048576	threads=1	median_gbps=108.210	best_gbps=112.768	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=1048576	threads=1	median_gbps=157.539	best_gbps=163.972	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.2500
+     1.5 MiB       98.4      110.8      149.7          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=1572864	threads=1	median_gbps=98.415	best_gbps=102.300	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=1572864	threads=1	median_gbps=110.828	best_gbps=114.374	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=1572864	threads=1	median_gbps=149.696	best_gbps=155.859	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.2667
+       2 MiB      100.4      111.4      110.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=2097152	threads=1	median_gbps=100.415	best_gbps=101.468	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=2097152	threads=1	median_gbps=111.353	best_gbps=113.041	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=2097152	threads=1	median_gbps=110.475	best_gbps=114.660	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.2833
+       3 MiB       99.1      105.1      156.7          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=3145728	threads=1	median_gbps=99.063	best_gbps=101.607	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=3145728	threads=1	median_gbps=105.105	best_gbps=114.461	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=3145728	threads=1	median_gbps=156.686	best_gbps=163.832	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.3000
+       4 MiB       99.5      110.7      153.2          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=4194304	threads=1	median_gbps=99.535	best_gbps=100.704	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=4194304	threads=1	median_gbps=110.703	best_gbps=113.441	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=4194304	threads=1	median_gbps=153.229	best_gbps=156.066	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.3167
+       6 MiB       97.3      110.6      110.7          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=6291456	threads=1	median_gbps=97.345	best_gbps=99.934	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=6291456	threads=1	median_gbps=110.641	best_gbps=111.980	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=6291456	threads=1	median_gbps=110.680	best_gbps=112.594	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.3333
+       8 MiB       92.5      110.4      138.2          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=8388608	threads=1	median_gbps=92.544	best_gbps=95.708	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=8388608	threads=1	median_gbps=110.444	best_gbps=114.560	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=8388608	threads=1	median_gbps=138.160	best_gbps=156.359	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.3500
+      12 MiB       92.7      108.2      147.8          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=12582912	threads=1	median_gbps=92.701	best_gbps=97.416	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=12582912	threads=1	median_gbps=108.238	best_gbps=112.204	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=12582912	threads=1	median_gbps=147.836	best_gbps=152.642	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.3667
+      16 MiB       73.2      111.6      121.1          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=16777216	threads=1	median_gbps=73.155	best_gbps=82.764	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=16777216	threads=1	median_gbps=111.635	best_gbps=113.707	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=16777216	threads=1	median_gbps=121.138	best_gbps=130.173	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.3833
+      24 MiB       62.1      111.2      110.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=25165824	threads=1	median_gbps=62.071	best_gbps=69.073	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=25165824	threads=1	median_gbps=111.166	best_gbps=113.117	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=25165824	threads=1	median_gbps=110.539	best_gbps=123.070	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.4000
+      32 MiB       64.9      110.4      103.1          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=33554432	threads=1	median_gbps=64.883	best_gbps=69.361	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=33554432	threads=1	median_gbps=110.392	best_gbps=114.706	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=33554432	threads=1	median_gbps=103.139	best_gbps=107.887	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.4167
+      48 MiB       56.1      108.7       94.8          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=50331648	threads=1	median_gbps=56.073	best_gbps=60.604	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=50331648	threads=1	median_gbps=108.654	best_gbps=110.633	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=50331648	threads=1	median_gbps=94.837	best_gbps=99.805	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.4333
+      64 MiB       54.5      108.5       87.8          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=67108864	threads=1	median_gbps=54.526	best_gbps=57.874	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=67108864	threads=1	median_gbps=108.502	best_gbps=111.798	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=67108864	threads=1	median_gbps=87.800	best_gbps=97.969	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.4500
+      96 MiB       51.7      104.4       66.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=100663296	threads=1	median_gbps=51.737	best_gbps=60.252	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=100663296	threads=1	median_gbps=104.396	best_gbps=107.732	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=100663296	threads=1	median_gbps=66.488	best_gbps=76.744	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.4667
+     128 MiB       44.9      100.3       81.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=134217728	threads=1	median_gbps=44.933	best_gbps=48.397	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=134217728	threads=1	median_gbps=100.315	best_gbps=107.018	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=134217728	threads=1	median_gbps=81.510	best_gbps=103.851	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.4833
+     192 MiB       43.7       80.4       63.1          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=201326592	threads=1	median_gbps=43.736	best_gbps=46.021	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=201326592	threads=1	median_gbps=80.437	best_gbps=96.482	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=201326592	threads=1	median_gbps=63.064	best_gbps=67.839	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.5000
+     256 MiB       42.9       71.7       71.3          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=268435456	threads=1	median_gbps=42.922	best_gbps=46.030	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=268435456	threads=1	median_gbps=71.749	best_gbps=79.915	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=268435456	threads=1	median_gbps=71.300	best_gbps=77.940	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.5167
+
+[all] 4 threads, one per physical core, each with a private data set
+    Data set       Read      Write       Copy   Write NT    Copy NT  Zero fill   GB/s (median)
+       4 KiB      476.1      406.6      898.4          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=4096	threads=4	median_gbps=476.060	best_gbps=480.989	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=4096	threads=4	median_gbps=406.646	best_gbps=430.038	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=4096	threads=4	median_gbps=898.417	best_gbps=912.661	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.5333
+       8 KiB      479.3      342.1      769.2          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=8192	threads=4	median_gbps=479.255	best_gbps=482.537	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=8192	threads=4	median_gbps=342.149	best_gbps=363.282	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=8192	threads=4	median_gbps=769.205	best_gbps=845.577	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.5500
+      16 KiB      479.0      352.3      659.9          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=16384	threads=4	median_gbps=478.981	best_gbps=481.669	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=16384	threads=4	median_gbps=352.253	best_gbps=380.696	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=16384	threads=4	median_gbps=659.894	best_gbps=704.644	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.5667
+      24 KiB      469.1      402.4      647.3          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=24576	threads=4	median_gbps=469.135	best_gbps=479.966	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=24576	threads=4	median_gbps=402.424	best_gbps=421.548	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=24576	threads=4	median_gbps=647.283	best_gbps=786.861	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.5833
+      32 KiB      473.9      290.7      716.1          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=32768	threads=4	median_gbps=473.875	best_gbps=484.932	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=32768	threads=4	median_gbps=290.718	best_gbps=329.686	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=32768	threads=4	median_gbps=716.099	best_gbps=809.325	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.6000
+      48 KiB      484.4      414.3      742.8          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=49152	threads=4	median_gbps=484.386	best_gbps=489.136	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=49152	threads=4	median_gbps=414.296	best_gbps=419.875	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=49152	threads=4	median_gbps=742.781	best_gbps=800.390	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.6167
+      64 KiB      484.4      338.5      689.0          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=65536	threads=4	median_gbps=484.442	best_gbps=487.789	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=65536	threads=4	median_gbps=338.523	best_gbps=374.690	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=65536	threads=4	median_gbps=689.042	best_gbps=719.827	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.6333
+      96 KiB      471.4      307.8      792.7          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=98304	threads=4	median_gbps=471.412	best_gbps=483.610	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=98304	threads=4	median_gbps=307.830	best_gbps=314.390	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=98304	threads=4	median_gbps=792.719	best_gbps=806.008	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.6500
+     128 KiB      444.8      254.2      635.2          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=131072	threads=4	median_gbps=444.818	best_gbps=487.596	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=131072	threads=4	median_gbps=254.188	best_gbps=282.825	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=131072	threads=4	median_gbps=635.157	best_gbps=743.681	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.6667
+     192 KiB      416.3      297.1      677.1          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=196608	threads=4	median_gbps=416.290	best_gbps=426.118	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=196608	threads=4	median_gbps=297.072	best_gbps=322.532	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=196608	threads=4	median_gbps=677.057	best_gbps=712.648	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.6833
+     256 KiB      415.8      264.8      778.8          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=262144	threads=4	median_gbps=415.844	best_gbps=420.944	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=262144	threads=4	median_gbps=264.840	best_gbps=289.300	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=262144	threads=4	median_gbps=778.849	best_gbps=807.714	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.7000
+     384 KiB      400.9      253.3      530.1          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=393216	threads=4	median_gbps=400.940	best_gbps=406.068	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=393216	threads=4	median_gbps=253.299	best_gbps=280.450	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=393216	threads=4	median_gbps=530.076	best_gbps=574.665	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.7167
+     512 KiB      415.1      243.9      509.9          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=524288	threads=4	median_gbps=415.124	best_gbps=424.283	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=524288	threads=4	median_gbps=243.890	best_gbps=256.589	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=524288	threads=4	median_gbps=509.910	best_gbps=552.016	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.7333
+     768 KiB      398.1      212.3      501.2          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=786432	threads=4	median_gbps=398.118	best_gbps=408.948	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=786432	threads=4	median_gbps=212.294	best_gbps=245.902	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=786432	threads=4	median_gbps=501.171	best_gbps=538.912	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.7500
+       1 MiB      403.8      244.1      511.8          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=1048576	threads=4	median_gbps=403.804	best_gbps=406.991	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=1048576	threads=4	median_gbps=244.075	best_gbps=248.650	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=1048576	threads=4	median_gbps=511.763	best_gbps=528.423	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.7667
+     1.5 MiB      405.1      247.4      503.5          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=1572864	threads=4	median_gbps=405.112	best_gbps=406.482	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=1572864	threads=4	median_gbps=247.381	best_gbps=250.621	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=1572864	threads=4	median_gbps=503.488	best_gbps=509.597	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.7833
+       2 MiB      391.3      211.5      446.4          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=2097152	threads=4	median_gbps=391.334	best_gbps=394.952	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=2097152	threads=4	median_gbps=211.451	best_gbps=248.644	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=2097152	threads=4	median_gbps=446.446	best_gbps=517.515	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.8000
+       3 MiB      398.0      216.3      497.1          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=3145728	threads=4	median_gbps=398.009	best_gbps=407.943	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=3145728	threads=4	median_gbps=216.340	best_gbps=250.208	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=3145728	threads=4	median_gbps=497.064	best_gbps=506.185	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.8167
+       4 MiB      379.0      243.9      409.2          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=4194304	threads=4	median_gbps=379.037	best_gbps=396.345	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=4194304	threads=4	median_gbps=243.945	best_gbps=249.178	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=4194304	threads=4	median_gbps=409.240	best_gbps=480.118	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.8333
+       6 MiB      355.8      214.1      477.4          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=6291456	threads=4	median_gbps=355.827	best_gbps=390.327	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=6291456	threads=4	median_gbps=214.126	best_gbps=249.837	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=6291456	threads=4	median_gbps=477.421	best_gbps=495.866	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.8500
+       8 MiB      366.6      239.3      486.2          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=8388608	threads=4	median_gbps=366.561	best_gbps=389.628	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=8388608	threads=4	median_gbps=239.344	best_gbps=246.917	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=8388608	threads=4	median_gbps=486.248	best_gbps=491.529	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.8667
+      12 MiB      270.2      215.6      431.3          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=12582912	threads=4	median_gbps=270.152	best_gbps=284.225	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=12582912	threads=4	median_gbps=215.625	best_gbps=244.715	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=12582912	threads=4	median_gbps=431.348	best_gbps=440.893	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.8833
+      16 MiB      224.0      239.3      327.9          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=16777216	threads=4	median_gbps=224.030	best_gbps=237.142	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=16777216	threads=4	median_gbps=239.337	best_gbps=244.010	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=16777216	threads=4	median_gbps=327.873	best_gbps=335.099	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.9000
+      24 MiB      191.1      223.3      245.4          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=25165824	threads=4	median_gbps=191.065	best_gbps=207.207	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=25165824	threads=4	median_gbps=223.305	best_gbps=241.434	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=25165824	threads=4	median_gbps=245.409	best_gbps=262.490	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.9167
+      32 MiB      198.8      243.4      235.8          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=33554432	threads=4	median_gbps=198.781	best_gbps=215.977	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=33554432	threads=4	median_gbps=243.383	best_gbps=246.818	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=33554432	threads=4	median_gbps=235.806	best_gbps=239.947	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.9333
+      48 MiB      205.1      233.4      214.5          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=50331648	threads=4	median_gbps=205.091	best_gbps=208.007	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=50331648	threads=4	median_gbps=233.404	best_gbps=243.192	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=50331648	threads=4	median_gbps=214.450	best_gbps=220.241	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.9500
+      64 MiB      179.0      225.4      213.3          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=67108864	threads=4	median_gbps=179.048	best_gbps=202.635	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=67108864	threads=4	median_gbps=225.446	best_gbps=247.902	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=67108864	threads=4	median_gbps=213.315	best_gbps=216.759	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.9667
+CPUMEM_PROGRESS	mode=pagefault	fraction=0.9833
+CPUMEM_PROGRESS	mode=storage	fraction=1.0000
+
+--- Summary: one thread (logical processor 1) ---
+Level              Cache size          Data sets used       Read      Write       Copy   GB/s
+L1        128 KiB - 192 KiB *         4 KiB - 128 KiB      122.8      100.3      174.4
+CPUMEM_LEVEL	mode=single	level=L1	cache_bytes=0	from_bytes=4096	to_bytes=131072	read_gbps=122.799	write_gbps=100.297	copy_gbps=174.405	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=118.874	read_high_gbps=124.409	from_curve=1	capacity_low_bytes=131072	capacity_high_bytes=196608	measured=1	settled=1
+L2           6 MiB - 32 MiB *         192 KiB - 6 MiB      100.4      110.7      153.2
+CPUMEM_LEVEL	mode=single	level=L2	cache_bytes=0	from_bytes=196608	to_bytes=6291456	read_gbps=100.415	write_gbps=110.703	copy_gbps=153.229	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=97.345	read_high_gbps=106.928	from_curve=1	capacity_low_bytes=6291456	capacity_high_bytes=33554432	measured=1	settled=1
+L3          64 MiB - 96 MiB *         32 MiB - 64 MiB       56.1      108.7       94.8
+CPUMEM_LEVEL	mode=single	level=L3	cache_bytes=0	from_bytes=33554432	to_bytes=67108864	read_gbps=56.073	write_gbps=108.654	copy_gbps=94.837	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=54.526	read_high_gbps=64.883	from_curve=1	capacity_low_bytes=67108864	capacity_high_bytes=100663296	measured=1	settled=1
+Memory                      -        96 MiB - 256 MiB       44.3       90.4       68.9
+CPUMEM_LEVEL	mode=single	level=memory	cache_bytes=0	from_bytes=100663296	to_bytes=268435456	read_gbps=44.335	write_gbps=90.376	copy_gbps=68.894	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=42.922	read_high_gbps=51.737	from_curve=1	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=1
+         * read off the curve, because the OS reports no size for this cache: its
+           capacity lies between the two data sets shown
+
+--- Summary: all cores (4 threads, data set sizes are per thread) ---
+Level              Cache size          Data sets used       Read      Write       Copy   GB/s
+L1        128 KiB - 192 KiB *         4 KiB - 128 KiB      476.1      342.1      716.1
+CPUMEM_LEVEL	mode=all	level=L1	cache_bytes=0	from_bytes=4096	to_bytes=131072	read_gbps=476.060	write_gbps=342.149	copy_gbps=716.099	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=444.818	read_high_gbps=484.442	from_curve=1	capacity_low_bytes=131072	capacity_high_bytes=196608	measured=1	settled=1
+L2           6 MiB - 24 MiB *         192 KiB - 6 MiB      400.9      243.9      503.5
+CPUMEM_LEVEL	mode=all	level=L2	cache_bytes=0	from_bytes=196608	to_bytes=6291456	read_gbps=400.940	write_gbps=243.945	copy_gbps=503.488	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=355.827	read_high_gbps=416.290	from_curve=1	capacity_low_bytes=6291456	capacity_high_bytes=25165824	measured=1	settled=1
+Memory                      -         24 MiB - 64 MiB      194.9      229.4      225.1
+CPUMEM_LEVEL	mode=all	level=memory	cache_bytes=0	from_bytes=25165824	to_bytes=67108864	read_gbps=194.923	write_gbps=229.425	copy_gbps=225.128	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=179.048	read_high_gbps=205.091	from_curve=1	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=1
+         * read off the curve, because the OS reports no size for this cache: its
+           capacity lies between the two data sets shown
+
+--- Virtual memory ---
+Mapping new pages: 9.53 GB/s, 430 ns per 4 KiB page (first write to every page of a 154 MiB region, one thread)
+CPUMEM_PAGEFAULT	measured=1	page_bytes=4096	region_bytes=161480704	gbps=9.529	ns_per_page=429.841	transparent_huge_pages=0
+
+--- Storage behind virtual memory ---
+Paging target: swap of 1854 MiB, held by something this process may not see (on Android normally zram: memory is compressed in RAM, no drive is involved)
+Test file:     1 GiB in /data/user/0/com.mangekyo.benchmark/files/, unbuffered I/O
+Sequential 1 MiB:   read 2848 MB/s, write 2808 MB/s
+Random 4 KiB, QD1:  read 30.4 MB/s (7424 IOPS), write 754.0 MB/s (184077 IOPS)
+Paging issues random 4 KiB requests, so that line is the closer estimate of
+how fast memory comes back from the drive.
+CPUMEM_STORAGE	measured=1	backing=swap of 1854 MiB, held by something this process may not see (on Android normally zram: memory is compressed in RAM, no drive is involved)	directory=/data/user/0/com.mangekyo.benchmark/files/	on_paging_drive=0	direct_io=1	file_bytes=1073741824	seq_read_mbps=2848.2	seq_write_mbps=2808.3	rand_read_mbps=30.4	rand_write_mbps=754.0	rand_read_iops=7423.5	rand_write_iops=184077.3	skipped=
+
+Note: write and copy use ordinary stores. Outside the caches every stored line is
+      first read from memory, so the memory traffic is 2x the write figure and 1.5x
+      the copy figure. Streaming stores skip that read.
+Note: cache-level figures are limited by how fast the core issues 16-byte loads and
+      stores, so they depend on the vector size and the clock.
+Note: 18 of 174 points were measured again because other activity on the machine
+      disturbed their first round.
+CPUMEM_DONE	affinity=strict	remeasured_points=18	duration_sec=32.7
+Duration:  32.7 s
+==========================================================
+[Results] Saved as 20261014-141252-659-cpu-membw -> /storage/emulated/0/Android/data/com.mangekyo.benchmark/files/results/results.json
+SUITE_RESULT	status=success	job=cpu-memory	reason= 

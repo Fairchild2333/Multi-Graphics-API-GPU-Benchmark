@@ -1,0 +1,59 @@
+{
+  "scope": "75ms bounded subset of ring trace; counters intersecting actual labeled Mangekyo GPU execution, not entire-run or isolated peak",
+  "sample_start_ns": 37333,
+  "sample_end_ns": 74932875,
+  "active_labels": [
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cbd",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cbf",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cc1",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cc3",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cc5",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cc7",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cc9",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1ccb",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1ccd",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1ccf",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cd1",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cd3",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cd5",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cd7",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cd9",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cdb",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cdd",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1cdf",
+    "GCACHE warm 100663296:GCACHE warm 100663296   (Mangekyo (40387)) 0xe69b1ce1"
+  ],
+  "metrics": {
+    "GPU Last Level Cache Limiter": {
+      "overlap_rows": 1432,
+      "weighted_mean": 0.06338748901876558,
+      "maximum": 0.075490941,
+      "unit": "%"
+    },
+    "GPU Last Level Cache Utilization": {
+      "overlap_rows": 1432,
+      "weighted_mean": 0.06338748901876558,
+      "maximum": 0.075490941,
+      "unit": "%"
+    },
+    "GPU Read Bandwidth": {
+      "overlap_rows": 1432,
+      "weighted_mean": 0.18756604963506654,
+      "maximum": 0.227745819,
+      "unit": "GB/s"
+    },
+    "MMU Limiter": {
+      "overlap_rows": 1432,
+      "weighted_mean": 0.06337029378640996,
+      "maximum": 0.075490941,
+      "unit": "%"
+    },
+    "Compute Occupancy": {
+      "overlap_rows": 1432,
+      "weighted_mean": 0.20728543379656547,
+      "maximum": 0.20881779,
+      "unit": "%"
+    }
+  },
+  "independent_cache_attribution": "unverified"
+}

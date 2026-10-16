@@ -1,0 +1,718 @@
+10-14 11:09:19.673  9880  9880 I A00000/Mangekyo: SUITE_PLAN	total=5	scope=all	folder=/data/storage/el2/base/haps/entry/files/suite-runs/1791947359672
+10-14 11:09:19.675  9880  9880 I A00000/Mangekyo: SUITE_RUN	index=1	total=5	job=gles2-burn-16
+10-14 11:09:19.723  9880  9880 I A00000/Mangekyo: XComponent callbacks registered
+10-14 11:09:19.723  9880  9880 I A00000/Mangekyo: surface created
+10-14 11:09:19.767  9880  9880 I A00000/Mangekyo: surface changed
+10-14 11:09:19.777  9880  9880 I A00000/Mangekyo: surface changed
+10-14 11:09:20.277  9880 10693 I A00000/MangekyoEngine: [RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+10-14 11:09:20.277  9880 10693 I A00000/MangekyoEngine: [OpenGL ES Init] Creating the context...
+10-14 11:09:20.288  9880 10693 I A00000/MangekyoEngine: [OpenGL ES] Present mode: unsynchronised (swap interval 0, not tied to the refresh rate)
+10-14 11:09:20.288  9880 10693 I A00000/MangekyoEngine: [OpenGL ES] Every frame is drawn in full; the picture on screen is renewed about 30 times a second.
+10-14 11:09:20.288  9880 10693 I A00000/MangekyoEngine: [OpenGL ES Init] Mali-G77  |  OpenGL ES 3.0 (4.1 Metal - 91.7)
+10-14 11:09:20.288  9880 10693 I A00000/MangekyoEngine: [OpenGL ES Init] Compiling the OpenGL ES 2.0 GPU Burn (16 steps)...
+10-14 11:09:20.294  9880 10693 I A00000/MangekyoEngine: [Profiling] OpenGL ES 2.0: frames are timed by wall clock.
+10-14 11:09:20.294  9880 10693 I A00000/MangekyoEngine: [OpenGL ES Init] Initialisation complete.
+10-14 11:09:20.600  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.547 ms | Total: 3.547 ms | FPS: 232 | T: 0.3 s (warm-up)
+10-14 11:09:20.901  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 5.015 ms | Total: 5.015 ms | FPS: 166 | T: 0.6 s (warm-up)
+10-14 11:09:21.210  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.919 ms | Total: 4.919 ms | FPS: 170 | T: 0.9 s (warm-up)
+10-14 11:09:21.510  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.687 ms | Total: 3.687 ms | FPS: 165 | T: 1.2 s (warm-up)
+10-14 11:09:21.828  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 5.046 ms | Total: 5.046 ms | FPS: 167 | T: 1.5 s (warm-up)
+10-14 11:09:22.128  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.714 ms | Total: 3.714 ms | FPS: 207 | T: 1.8 s (warm-up)
+10-14 11:09:23.142  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.381 ms | Total: 3.381 ms | FPS: 231 | T: 2.8 s
+10-14 11:09:24.140  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.827 ms | Total: 3.827 ms | FPS: 197 | T: 3.8 s
+10-14 11:09:25.144  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.973 ms | Total: 4.973 ms | FPS: 170 | T: 4.9 s
+10-14 11:09:26.144  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.788 ms | Total: 4.788 ms | FPS: 166 | T: 5.9 s
+10-14 11:09:27.158  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.745 ms | Total: 3.745 ms | FPS: 194 | T: 6.9 s
+10-14 11:09:28.160  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.605 ms | Total: 4.605 ms | FPS: 174 | T: 7.9 s
+10-14 11:09:29.162  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.821 ms | Total: 4.821 ms | FPS: 163 | T: 8.9 s
+10-14 11:09:30.163  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 4.532 ms | Total: 4.532 ms | FPS: 177 | T: 9.9 s
+10-14 11:09:31.167  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.971 ms | Total: 3.971 ms | FPS: 209 | T: 10.9 s
+10-14 11:09:32.165  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.965 ms | Total: 3.965 ms | FPS: 202 | T: 11.9 s
+10-14 11:09:33.183  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.831 ms | Total: 3.831 ms | FPS: 225 | T: 12.9 s
+10-14 11:09:34.183  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.665 ms | Total: 3.665 ms | FPS: 225 | T: 13.9 s
+10-14 11:09:35.174  9880 10693 I A00000/MangekyoEngine: [GPU Timing] Compute: 0.000 ms | Render: 3.528 ms | Total: 3.528 ms | FPS: 237 | T: 14.9 s
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: ==========================================================
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine:                    Benchmark Summary
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: ==========================================================
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Graphics API: OpenGL ES 2.0
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: GPU:          Mali-G77
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Driver:       OpenGL ES 3.0 (4.1 Metal - 91.7)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: CPU:          Unknown
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: OS:           HarmonyOS 5.0.1 (API 16)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: System:       HarmonyOS ARM64
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Memory:       Device-local VRAM
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Mode:         Windowed
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Resolution:   1280x720
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Workload:     GPU Burn ES 2.0 legacy v1 / Quasicrystal plasma (no particle data)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Flights:      2
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Multi-GPU:    Off
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: V-Sync:       OFF
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Duration:     13.0 s (warmup: 2.0 s, measured: 2577 frames)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: --- GPU Timing (ms) ---
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine:                      Avg       Min       Max
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Compute:         0.000     0.000     0.000
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Render:          4.081     0.074    59.345
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Total GPU:       4.081     0.074    59.345
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: --- Throughput ---
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Avg FPS:      198
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: GPU Burn:     ES 2.0 legacy v1 quasicrystal plasma, 2 draws x 16 fixed steps/pixel  (1280x720 px)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Visual:       waves in seven directions, two draws added together, mediump
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Burn rate:    7.23 Gpix-step/s  (4.081 ms render)
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: --- Analysis ---
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Avg frame time:  5.050 ms
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Avg GPU time:    4.081 ms
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: GPU utilisation: 80.8%
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: >> GPU-bound: GPU is the bottleneck.
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: --- Thermal Stability ---
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Windows:      13 x 1s
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: Stable score: not reached — keep running to detect throttling.
+10-14 11:09:35.308  9880 10693 I A00000/MangekyoEngine: ==========================================================
+10-14 11:09:35.330  9880 10693 I A00000/MangekyoEngine: [Results] Saved as 20261014-110935-308 -> /data/storage/el2/base/haps/entry/files/results/results.json
+10-14 11:09:35.383  9880  9880 I A00000/Mangekyo: SUITE_RESULT	status=review	job=gles2-burn-16	reason= 尚未达到稳定吞吐
+10-14 11:09:35.399  9880  9880 I A00000/Mangekyo: surface destroyed
+10-14 11:09:35.632  1164  1164 I A01b01/HOME: AppName --> observerCallback appName: Mangekyo, LayoutId: AppName_text_com.mangekyo.benchmark_Mangekyo_mv7iu0xyyvjx090ydin, nameOpacity: 1
+10-14 11:09:50.268  9880  9880 I A00000/Mangekyo: SUITE_END	finished=1	total=5	review=1	failed=0	cancelled=true
+10-14 11:10:34.014  9880  9880 I A00000/Mangekyo: SUITE_PLAN	total=2	scope=cpu	folder=/data/storage/el2/base/haps/entry/files/suite-runs/1791947434014
+10-14 11:10:34.215  9880  9880 I A00000/Mangekyo: SUITE_RUN	index=1	total=2	job=cpu-compute
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: CPU_META	workload_version=cpu_mixed_v1_strict_sched_affinity	name=Unknown CPU	logical_count=4	physical_count=4	topology_source=LinuxAllowedCpuSet+Sysfs	affinity_capability=strict_sched_affinity
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: CPU_TOPOLOGY	core_index=0	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: CPU_TOPOLOGY	core_index=1	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: CPU_TOPOLOGY	core_index=2	group=0	logical_index=2	physical_core=2	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: CPU_TOPOLOGY	core_index=3	group=0	logical_index=3	physical_core=3	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: CPU_SCHEDULING	core_type=auto	residency_threshold=0.99	scope=single_thread_stages
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: --- Native CPU mixed benchmark ---
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: CPU: Unknown CPU
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: Topology: LinuxAllowedCpuSet+Sysfs, affinity: strict_sched_affinity
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: Workload: cpu_mixed_v1_strict_sched_affinity, 3 rounds, median aggregation (the requested measurement time is split across rounds).
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: Score contract: formal (formal = 15.0 s measurement, 0.2 s warm-up, 3 rounds).
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: Each score is million mixed integer/branch/FP32/FP64 work units per second.
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: The checksum is a dead-code-elimination sink, not a correctness oracle.
+10-14 11:10:34.224  9880 11782 I A00000/MangekyoEngine: --- CPU all-logical-processor test ---
+10-14 11:10:34.226  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=multi	phase=warmup	core_index=-1	core_count=4	core_fraction=0.000000	overall_fraction=0.000000	elapsed=0.000000	round_index=-1	round_count=3
+10-14 11:10:39.442  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=0.333333	overall_fraction=0.066667	elapsed=5.000000	round_index=0	round_count=3
+10-14 11:10:44.443  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=0.666667	overall_fraction=0.133333	elapsed=10.000000	round_index=1	round_count=3
+10-14 11:10:49.444  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=1.000000	overall_fraction=0.200000	elapsed=15.000000	round_index=2	round_count=3
+10-14 11:10:49.444  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=multi	phase=complete	core_index=-1	core_count=4	core_fraction=1.000000	overall_fraction=0.200000	elapsed=15.000000	round_index=1	round_count=3
+10-14 11:10:49.444  9880 11782 I A00000/MangekyoEngine: All-core score (4 threads): 547.74 MWork/s
+10-14 11:10:49.444  9880 11782 I A00000/MangekyoEngine: CPU_RESULT	kind=multi	mode=multi	core_index=-1	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_count=4	thread_count=4	pinned_threads=4	affinity=strict	valid=1	score=547.736520	unit=MWork/s	seconds=5.000174	requested_seconds=15.000000	round_count=3	median_round=2	checksum=9fb6fa2fb27badb9	checksum_role=dce_sink
+10-14 11:10:49.444  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=warmup	core_index=0	core_count=4	core_fraction=0.000000	overall_fraction=0.200000	elapsed=0.000025	round_index=-1	round_count=3
+10-14 11:10:49.644  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.000002	overall_fraction=0.200000	elapsed=0.000023	round_index=0	round_count=3
+10-14 11:10:49.897  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.016849	overall_fraction=0.203370	elapsed=0.252736	round_index=0	round_count=3
+10-14 11:10:50.175  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.035379	overall_fraction=0.207076	elapsed=0.530678	round_index=0	round_count=3
+10-14 11:10:50.437  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.052879	overall_fraction=0.210576	elapsed=0.793189	round_index=0	round_count=3
+10-14 11:10:50.687  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.069551	overall_fraction=0.213910	elapsed=1.043260	round_index=0	round_count=3
+10-14 11:10:50.938  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.086281	overall_fraction=0.217256	elapsed=1.294217	round_index=0	round_count=3
+10-14 11:10:51.217  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.104856	overall_fraction=0.220971	elapsed=1.572834	round_index=0	round_count=3
+10-14 11:10:51.467  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.121554	overall_fraction=0.224311	elapsed=1.823305	round_index=0	round_count=3
+10-14 11:10:51.717  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.138225	overall_fraction=0.227645	elapsed=2.073374	round_index=0	round_count=3
+10-14 11:10:51.970  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.155067	overall_fraction=0.231013	elapsed=2.326012	round_index=0	round_count=3
+10-14 11:10:52.222  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.171890	overall_fraction=0.234378	elapsed=2.578344	round_index=0	round_count=3
+10-14 11:10:52.472  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.188561	overall_fraction=0.237712	elapsed=2.828413	round_index=0	round_count=3
+10-14 11:10:52.736  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.206117	overall_fraction=0.241223	elapsed=3.091749	round_index=0	round_count=3
+10-14 11:10:52.989  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.223033	overall_fraction=0.244607	elapsed=3.345501	round_index=0	round_count=3
+10-14 11:10:53.240  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.239705	overall_fraction=0.247941	elapsed=3.595569	round_index=0	round_count=3
+10-14 11:10:53.511  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.257797	overall_fraction=0.251559	elapsed=3.866955	round_index=0	round_count=3
+10-14 11:10:53.761  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.274468	overall_fraction=0.254894	elapsed=4.117026	round_index=0	round_count=3
+10-14 11:10:54.011  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.291140	overall_fraction=0.258228	elapsed=4.367104	round_index=0	round_count=3
+10-14 11:10:54.267  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.308194	overall_fraction=0.261639	elapsed=4.622914	round_index=0	round_count=3
+10-14 11:10:54.520  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.325097	overall_fraction=0.265019	elapsed=4.876449	round_index=0	round_count=3
+10-14 11:10:54.644  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.333337	overall_fraction=0.266667	elapsed=5.000050	round_index=1	round_count=3
+10-14 11:10:54.901  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.350447	overall_fraction=0.270089	elapsed=5.256698	round_index=1	round_count=3
+10-14 11:10:55.153  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.367255	overall_fraction=0.273451	elapsed=5.508818	round_index=1	round_count=3
+10-14 11:10:55.403  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.383926	overall_fraction=0.276785	elapsed=5.758894	round_index=1	round_count=3
+10-14 11:10:55.657  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.400864	overall_fraction=0.280173	elapsed=6.012955	round_index=1	round_count=3
+10-14 11:10:55.907  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.417536	overall_fraction=0.283507	elapsed=6.263042	round_index=1	round_count=3
+10-14 11:10:56.157  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.434207	overall_fraction=0.286841	elapsed=6.513108	round_index=1	round_count=3
+10-14 11:10:56.414  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.451361	overall_fraction=0.290272	elapsed=6.770408	round_index=1	round_count=3
+10-14 11:10:56.667  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.468188	overall_fraction=0.293638	elapsed=7.022814	round_index=1	round_count=3
+10-14 11:10:56.917  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.484882	overall_fraction=0.296976	elapsed=7.273224	round_index=1	round_count=3
+10-14 11:10:57.168  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.501574	overall_fraction=0.300315	elapsed=7.523610	round_index=1	round_count=3
+10-14 11:10:57.418  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.518245	overall_fraction=0.303649	elapsed=7.773679	round_index=1	round_count=3
+10-14 11:10:57.668  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.534916	overall_fraction=0.306983	elapsed=8.023747	round_index=1	round_count=3
+10-14 11:10:57.920  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.551749	overall_fraction=0.310350	elapsed=8.276238	round_index=1	round_count=3
+10-14 11:10:58.175  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.568758	overall_fraction=0.313752	elapsed=8.531373	round_index=1	round_count=3
+10-14 11:10:58.432  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.585890	overall_fraction=0.317178	elapsed=8.788353	round_index=1	round_count=3
+10-14 11:10:58.697  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.603523	overall_fraction=0.320705	elapsed=9.052852	round_index=1	round_count=3
+10-14 11:10:58.947  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.620195	overall_fraction=0.324039	elapsed=9.302923	round_index=1	round_count=3
+10-14 11:10:59.197  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.636866	overall_fraction=0.327373	elapsed=9.552992	round_index=1	round_count=3
+10-14 11:10:59.454  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.653973	overall_fraction=0.330795	elapsed=9.809597	round_index=1	round_count=3
+10-14 11:10:59.644  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.666668	overall_fraction=0.333334	elapsed=10.000027	round_index=2	round_count=3
+10-14 11:10:59.894  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.683340	overall_fraction=0.336668	elapsed=10.250093	round_index=2	round_count=3
+10-14 11:11:00.145  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.700051	overall_fraction=0.340010	elapsed=10.500758	round_index=2	round_count=3
+10-14 11:11:00.395  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.716721	overall_fraction=0.343344	elapsed=10.750822	round_index=2	round_count=3
+10-14 11:11:00.645  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.733433	overall_fraction=0.346687	elapsed=11.001499	round_index=2	round_count=3
+10-14 11:11:00.924  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.752009	overall_fraction=0.350402	elapsed=11.280139	round_index=2	round_count=3
+10-14 11:11:01.180  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.769057	overall_fraction=0.353811	elapsed=11.535849	round_index=2	round_count=3
+10-14 11:11:01.430  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.785728	overall_fraction=0.357146	elapsed=11.785921	round_index=2	round_count=3
+10-14 11:11:01.688  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.802963	overall_fraction=0.360593	elapsed=12.044450	round_index=2	round_count=3
+10-14 11:11:01.938  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.819635	overall_fraction=0.363927	elapsed=12.294522	round_index=2	round_count=3
+10-14 11:11:02.189  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.836319	overall_fraction=0.367264	elapsed=12.544780	round_index=2	round_count=3
+10-14 11:11:02.465  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.854746	overall_fraction=0.370949	elapsed=12.821193	round_index=2	round_count=3
+10-14 11:11:02.717  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.871518	overall_fraction=0.374304	elapsed=13.072776	round_index=2	round_count=3
+10-14 11:11:02.967  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.888190	overall_fraction=0.377638	elapsed=13.322846	round_index=2	round_count=3
+10-14 11:11:03.251  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.907153	overall_fraction=0.381431	elapsed=13.607292	round_index=2	round_count=3
+10-14 11:11:03.501  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.923821	overall_fraction=0.384764	elapsed=13.857322	round_index=2	round_count=3
+10-14 11:11:03.751  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.940493	overall_fraction=0.388099	elapsed=14.107392	round_index=2	round_count=3
+10-14 11:11:04.037  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.959559	overall_fraction=0.391912	elapsed=14.393390	round_index=2	round_count=3
+10-14 11:11:04.287  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.976231	overall_fraction=0.395246	elapsed=14.643460	round_index=2	round_count=3
+10-14 11:11:04.543  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.993279	overall_fraction=0.398656	elapsed=14.899180	round_index=2	round_count=3
+10-14 11:11:04.644  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=complete	core_index=0	core_count=4	core_fraction=1.000000	overall_fraction=0.400000	elapsed=15.000000	round_index=1	round_count=3
+10-14 11:11:04.644  9880 11782 I A00000/MangekyoEngine: Logical processor sample 1 score: 182.26 MWork/s
+10-14 11:11:04.644  9880 11782 I A00000/MangekyoEngine: CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_index=0	core_count=4	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	efficiency_class=1024	performance_level=0	core_class=InferredUniform	core_type=auto	residency_verified=1	requested_lower_bound=0.000000	classification_source=inferred_capacity_or_max_frequency_rank	affinity=strict	valid=1	score=182.264719	unit=MWork/s	seconds=5.000020	requested_seconds=15.000000	round_count=3	median_round=2	checksum=9c27b330315ef8df	checksum_role=dce_sink
+10-14 11:11:04.645  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=warmup	core_index=1	core_count=4	core_fraction=0.000000	overall_fraction=0.400000	elapsed=0.000326	round_index=-1	round_count=3
+10-14 11:11:04.845  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.000002	overall_fraction=0.400000	elapsed=0.000030	round_index=0	round_count=3
+10-14 11:11:05.097  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.016793	overall_fraction=0.403359	elapsed=0.251901	round_index=0	round_count=3
+10-14 11:11:05.348  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.033522	overall_fraction=0.406704	elapsed=0.502835	round_index=0	round_count=3
+10-14 11:11:05.607  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.050808	overall_fraction=0.410162	elapsed=0.762118	round_index=0	round_count=3
+10-14 11:11:05.857  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.067479	overall_fraction=0.413496	elapsed=1.012183	round_index=0	round_count=3
+10-14 11:11:06.107  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.084150	overall_fraction=0.416830	elapsed=1.262249	round_index=0	round_count=3
+10-14 11:11:06.359  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.100916	overall_fraction=0.420183	elapsed=1.513744	round_index=0	round_count=3
+10-14 11:11:06.609  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.117587	overall_fraction=0.423517	elapsed=1.763812	round_index=0	round_count=3
+10-14 11:11:06.859  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.134297	overall_fraction=0.426859	elapsed=2.014462	round_index=0	round_count=3
+10-14 11:11:07.129  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.152270	overall_fraction=0.430454	elapsed=2.284056	round_index=0	round_count=3
+10-14 11:11:07.379  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.168941	overall_fraction=0.433788	elapsed=2.534122	round_index=0	round_count=3
+10-14 11:11:07.629  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.185613	overall_fraction=0.437123	elapsed=2.784193	round_index=0	round_count=3
+10-14 11:11:07.897  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.203462	overall_fraction=0.440692	elapsed=3.051935	round_index=0	round_count=3
+10-14 11:11:08.147  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.220134	overall_fraction=0.444027	elapsed=3.302003	round_index=0	round_count=3
+10-14 11:11:08.397  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.236805	overall_fraction=0.447361	elapsed=3.552069	round_index=0	round_count=3
+10-14 11:11:08.647  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.253476	overall_fraction=0.450695	elapsed=3.802138	round_index=0	round_count=3
+10-14 11:11:08.900  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.270314	overall_fraction=0.454063	elapsed=4.054716	round_index=0	round_count=3
+10-14 11:11:09.167  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.288108	overall_fraction=0.457622	elapsed=4.321617	round_index=0	round_count=3
+10-14 11:11:09.421  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.305069	overall_fraction=0.461014	elapsed=4.576041	round_index=0	round_count=3
+10-14 11:11:09.671  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.321741	overall_fraction=0.464348	elapsed=4.826114	round_index=0	round_count=3
+10-14 11:11:09.845  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.333337	overall_fraction=0.466667	elapsed=5.000056	round_index=1	round_count=3
+10-14 11:11:10.095  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.350015	overall_fraction=0.470003	elapsed=5.250230	round_index=1	round_count=3
+10-14 11:11:10.347  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.366833	overall_fraction=0.473367	elapsed=5.502495	round_index=1	round_count=3
+10-14 11:11:10.601  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.383732	overall_fraction=0.476746	elapsed=5.755974	round_index=1	round_count=3
+10-14 11:11:10.851  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.400403	overall_fraction=0.480081	elapsed=6.006045	round_index=1	round_count=3
+10-14 11:11:11.101  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.417074	overall_fraction=0.483415	elapsed=6.256113	round_index=1	round_count=3
+10-14 11:11:11.352  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.433797	overall_fraction=0.486759	elapsed=6.506959	round_index=1	round_count=3
+10-14 11:11:11.606  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.450766	overall_fraction=0.490153	elapsed=6.761491	round_index=1	round_count=3
+10-14 11:11:11.857  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.467437	overall_fraction=0.493487	elapsed=7.011559	round_index=1	round_count=3
+10-14 11:11:12.107  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.484110	overall_fraction=0.496822	elapsed=7.261649	round_index=1	round_count=3
+10-14 11:11:12.389  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.502912	overall_fraction=0.500582	elapsed=7.543681	round_index=1	round_count=3
+10-14 11:11:12.639  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.519583	overall_fraction=0.503917	elapsed=7.793748	round_index=1	round_count=3
+10-14 11:11:12.889  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.536254	overall_fraction=0.507251	elapsed=8.043816	round_index=1	round_count=3
+10-14 11:11:13.143  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.553177	overall_fraction=0.510635	elapsed=8.297662	round_index=1	round_count=3
+10-14 11:11:13.393  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.569848	overall_fraction=0.513970	elapsed=8.547727	round_index=1	round_count=3
+10-14 11:11:13.643  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.586520	overall_fraction=0.517304	elapsed=8.797795	round_index=1	round_count=3
+10-14 11:11:13.893  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.603191	overall_fraction=0.520638	elapsed=9.047860	round_index=1	round_count=3
+10-14 11:11:14.147  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.620130	overall_fraction=0.524026	elapsed=9.301952	round_index=1	round_count=3
+10-14 11:11:14.397  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.636801	overall_fraction=0.527360	elapsed=9.552017	round_index=1	round_count=3
+10-14 11:11:14.651  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.653749	overall_fraction=0.530750	elapsed=9.806234	round_index=1	round_count=3
+10-14 11:11:14.845  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.666669	overall_fraction=0.533334	elapsed=10.000041	round_index=2	round_count=3
+10-14 11:11:15.099  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.683570	overall_fraction=0.536714	elapsed=10.253548	round_index=2	round_count=3
+10-14 11:11:15.357  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.700780	overall_fraction=0.540156	elapsed=10.511697	round_index=2	round_count=3
+10-14 11:11:15.607  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.717451	overall_fraction=0.543490	elapsed=10.761761	round_index=2	round_count=3
+10-14 11:11:15.857  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.734122	overall_fraction=0.546824	elapsed=11.011831	round_index=2	round_count=3
+10-14 11:11:16.121  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.751756	overall_fraction=0.550351	elapsed=11.276343	round_index=2	round_count=3
+10-14 11:11:16.371  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.768428	overall_fraction=0.553686	elapsed=11.526414	round_index=2	round_count=3
+10-14 11:11:16.628  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.785558	overall_fraction=0.557112	elapsed=11.783375	round_index=2	round_count=3
+10-14 11:11:16.901  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.803724	overall_fraction=0.560745	elapsed=12.055856	round_index=2	round_count=3
+10-14 11:11:17.155  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.820679	overall_fraction=0.564136	elapsed=12.310182	round_index=2	round_count=3
+10-14 11:11:17.407  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.837479	overall_fraction=0.567496	elapsed=12.562181	round_index=2	round_count=3
+10-14 11:11:17.658  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.854214	overall_fraction=0.570843	elapsed=12.813204	round_index=2	round_count=3
+10-14 11:11:17.908  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.870885	overall_fraction=0.574177	elapsed=13.063272	round_index=2	round_count=3
+10-14 11:11:18.161  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.887752	overall_fraction=0.577550	elapsed=13.316286	round_index=2	round_count=3
+10-14 11:11:18.411  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.904424	overall_fraction=0.580885	elapsed=13.566353	round_index=2	round_count=3
+10-14 11:11:18.662  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.921095	overall_fraction=0.584219	elapsed=13.816423	round_index=2	round_count=3
+10-14 11:11:18.912  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.937766	overall_fraction=0.587553	elapsed=14.066497	round_index=2	round_count=3
+10-14 11:11:19.164  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.954584	overall_fraction=0.590917	elapsed=14.318760	round_index=2	round_count=3
+10-14 11:11:19.414  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.971290	overall_fraction=0.594258	elapsed=14.569357	round_index=2	round_count=3
+10-14 11:11:19.664  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.987962	overall_fraction=0.597592	elapsed=14.819433	round_index=2	round_count=3
+10-14 11:11:19.845  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=complete	core_index=1	core_count=4	core_fraction=1.000000	overall_fraction=0.600000	elapsed=15.000000	round_index=0	round_count=3
+10-14 11:11:19.845  9880 11782 I A00000/MangekyoEngine: Logical processor sample 2 score: 188.48 MWork/s
+10-14 11:11:19.845  9880 11782 I A00000/MangekyoEngine: CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_index=1	core_count=4	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	efficiency_class=1024	performance_level=0	core_class=InferredUniform	core_type=auto	residency_verified=1	requested_lower_bound=0.000000	classification_source=inferred_capacity_or_max_frequency_rank	affinity=strict	valid=1	score=188.480802	unit=MWork/s	seconds=5.000019	requested_seconds=15.000000	round_count=3	median_round=1	checksum=959926d56a3edc93	checksum_role=dce_sink
+10-14 11:11:19.848  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=warmup	core_index=2	core_count=4	core_fraction=0.000000	overall_fraction=0.600000	elapsed=0.000024	round_index=-1	round_count=3
+10-14 11:11:20.048  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.000002	overall_fraction=0.600000	elapsed=0.000026	round_index=0	round_count=3
+10-14 11:11:20.298  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.016673	overall_fraction=0.603335	elapsed=0.250094	round_index=0	round_count=3
+10-14 11:11:20.548  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.033344	overall_fraction=0.606669	elapsed=0.500160	round_index=0	round_count=3
+10-14 11:11:20.811  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.050916	overall_fraction=0.610183	elapsed=0.763737	round_index=0	round_count=3
+10-14 11:11:21.061  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.067587	overall_fraction=0.613517	elapsed=1.013805	round_index=0	round_count=3
+10-14 11:11:21.311  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.084258	overall_fraction=0.616852	elapsed=1.263871	round_index=0	round_count=3
+10-14 11:11:21.588  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.102702	overall_fraction=0.620540	elapsed=1.540527	round_index=0	round_count=3
+10-14 11:11:21.838  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.119378	overall_fraction=0.623876	elapsed=1.790667	round_index=0	round_count=3
+10-14 11:11:22.095  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.136509	overall_fraction=0.627302	elapsed=2.047632	round_index=0	round_count=3
+10-14 11:11:22.371  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.154915	overall_fraction=0.630983	elapsed=2.323724	round_index=0	round_count=3
+10-14 11:11:22.621  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.171595	overall_fraction=0.634319	elapsed=2.573926	round_index=0	round_count=3
+10-14 11:11:22.872  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.188316	overall_fraction=0.637663	elapsed=2.824740	round_index=0	round_count=3
+10-14 11:11:23.122  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.204989	overall_fraction=0.640998	elapsed=3.074831	round_index=0	round_count=3
+10-14 11:11:23.372  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.221660	overall_fraction=0.644332	elapsed=3.324901	round_index=0	round_count=3
+10-14 11:11:23.623  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.238346	overall_fraction=0.647669	elapsed=3.575197	round_index=0	round_count=3
+10-14 11:11:23.895  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.256500	overall_fraction=0.651300	elapsed=3.847500	round_index=0	round_count=3
+10-14 11:11:24.146  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.273211	overall_fraction=0.654642	elapsed=4.098163	round_index=0	round_count=3
+10-14 11:11:24.408  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.290694	overall_fraction=0.658139	elapsed=4.360403	round_index=0	round_count=3
+10-14 11:11:24.672  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.308265	overall_fraction=0.661653	elapsed=4.623972	round_index=0	round_count=3
+10-14 11:11:24.922  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.324936	overall_fraction=0.664987	elapsed=4.874041	round_index=0	round_count=3
+10-14 11:11:25.048  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.333337	overall_fraction=0.666667	elapsed=5.000057	round_index=1	round_count=3
+10-14 11:11:25.304  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.350446	overall_fraction=0.670089	elapsed=5.256685	round_index=1	round_count=3
+10-14 11:11:25.554  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.367117	overall_fraction=0.673423	elapsed=5.506752	round_index=1	round_count=3
+10-14 11:11:25.804  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.383788	overall_fraction=0.676758	elapsed=5.756817	round_index=1	round_count=3
+10-14 11:11:26.101  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.403586	overall_fraction=0.680717	elapsed=6.053788	round_index=1	round_count=3
+10-14 11:11:26.351  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.420257	overall_fraction=0.684051	elapsed=6.303855	round_index=1	round_count=3
+10-14 11:11:26.601  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.436929	overall_fraction=0.687386	elapsed=6.553931	round_index=1	round_count=3
+10-14 11:11:26.852  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.453600	overall_fraction=0.690720	elapsed=6.803997	round_index=1	round_count=3
+10-14 11:11:27.102  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.470271	overall_fraction=0.694054	elapsed=7.054065	round_index=1	round_count=3
+10-14 11:11:27.352  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.486942	overall_fraction=0.697388	elapsed=7.304131	round_index=1	round_count=3
+10-14 11:11:27.612  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.504330	overall_fraction=0.700866	elapsed=7.564951	round_index=1	round_count=3
+10-14 11:11:27.865  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.521142	overall_fraction=0.704228	elapsed=7.817136	round_index=1	round_count=3
+10-14 11:11:28.115  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.537814	overall_fraction=0.707563	elapsed=8.067207	round_index=1	round_count=3
+10-14 11:11:28.376  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.555218	overall_fraction=0.711044	elapsed=8.328274	round_index=1	round_count=3
+10-14 11:11:28.626  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.571890	overall_fraction=0.714378	elapsed=8.578347	round_index=1	round_count=3
+10-14 11:11:28.876  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.588561	overall_fraction=0.717712	elapsed=8.828414	round_index=1	round_count=3
+10-14 11:11:29.129  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.605433	overall_fraction=0.721087	elapsed=9.081489	round_index=1	round_count=3
+10-14 11:11:29.379  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.622105	overall_fraction=0.724421	elapsed=9.331572	round_index=1	round_count=3
+10-14 11:11:29.630  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.638804	overall_fraction=0.727761	elapsed=9.582056	round_index=1	round_count=3
+10-14 11:11:29.887  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.655958	overall_fraction=0.731192	elapsed=9.839369	round_index=1	round_count=3
+10-14 11:11:30.048  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.666668	overall_fraction=0.733334	elapsed=10.000023	round_index=2	round_count=3
+10-14 11:11:30.298  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.683357	overall_fraction=0.736671	elapsed=10.250360	round_index=2	round_count=3
+10-14 11:11:30.548  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.700028	overall_fraction=0.740006	elapsed=10.500426	round_index=2	round_count=3
+10-14 11:11:30.798  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.716706	overall_fraction=0.743341	elapsed=10.750587	round_index=2	round_count=3
+10-14 11:11:31.048  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.733377	overall_fraction=0.746675	elapsed=11.000654	round_index=2	round_count=3
+10-14 11:11:31.313  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.751057	overall_fraction=0.750211	elapsed=11.265861	round_index=2	round_count=3
+10-14 11:11:31.563  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.767729	overall_fraction=0.753546	elapsed=11.515929	round_index=2	round_count=3
+10-14 11:11:31.814  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.784400	overall_fraction=0.756880	elapsed=11.765993	round_index=2	round_count=3
+10-14 11:11:32.087  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.802620	overall_fraction=0.760524	elapsed=12.039305	round_index=2	round_count=3
+10-14 11:11:32.337  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.819291	overall_fraction=0.763858	elapsed=12.289370	round_index=2	round_count=3
+10-14 11:11:32.587  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.835963	overall_fraction=0.767193	elapsed=12.539438	round_index=2	round_count=3
+10-14 11:11:32.854  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.853792	overall_fraction=0.770758	elapsed=12.806873	round_index=2	round_count=3
+10-14 11:11:33.104  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.870463	overall_fraction=0.774093	elapsed=13.056946	round_index=2	round_count=3
+10-14 11:11:33.355  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.887168	overall_fraction=0.777434	elapsed=13.307522	round_index=2	round_count=3
+10-14 11:11:33.607  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.903957	overall_fraction=0.780791	elapsed=13.559353	round_index=2	round_count=3
+10-14 11:11:33.857  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.920628	overall_fraction=0.784126	elapsed=13.809419	round_index=2	round_count=3
+10-14 11:11:34.107  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.937299	overall_fraction=0.787460	elapsed=14.059485	round_index=2	round_count=3
+10-14 11:11:34.357  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.953970	overall_fraction=0.790794	elapsed=14.309554	round_index=2	round_count=3
+10-14 11:11:34.612  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.970931	overall_fraction=0.794186	elapsed=14.563972	round_index=2	round_count=3
+10-14 11:11:34.867  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=4	core_fraction=0.987936	overall_fraction=0.797587	elapsed=14.819034	round_index=2	round_count=3
+10-14 11:11:35.048  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=complete	core_index=2	core_count=4	core_fraction=1.000000	overall_fraction=0.800000	elapsed=15.000000	round_index=0	round_count=3
+10-14 11:11:35.048  9880 11782 I A00000/MangekyoEngine: Logical processor sample 3 score: 188.96 MWork/s
+10-14 11:11:35.048  9880 11782 I A00000/MangekyoEngine: CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_index=2	core_count=4	group=0	logical_index=2	physical_core=2	smt_index=0	smt_width=1	efficiency_class=1024	performance_level=0	core_class=InferredUniform	core_type=auto	residency_verified=1	requested_lower_bound=0.000000	classification_source=inferred_capacity_or_max_frequency_rank	affinity=strict	valid=1	score=188.963974	unit=MWork/s	seconds=5.000002	requested_seconds=15.000000	round_count=3	median_round=1	checksum=2a7177b4cafa5b1c	checksum_role=dce_sink
+10-14 11:11:35.048  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=warmup	core_index=3	core_count=4	core_fraction=0.000000	overall_fraction=0.800000	elapsed=0.000027	round_index=-1	round_count=3
+10-14 11:11:35.248  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.000002	overall_fraction=0.800000	elapsed=0.000027	round_index=0	round_count=3
+10-14 11:11:35.501  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.016881	overall_fraction=0.803376	elapsed=0.253222	round_index=0	round_count=3
+10-14 11:11:35.754  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.033719	overall_fraction=0.806744	elapsed=0.505779	round_index=0	round_count=3
+10-14 11:11:36.004  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.050390	overall_fraction=0.810078	elapsed=0.755845	round_index=0	round_count=3
+10-14 11:11:36.254  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.067061	overall_fraction=0.813412	elapsed=1.005917	round_index=0	round_count=3
+10-14 11:11:36.506  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.083854	overall_fraction=0.816771	elapsed=1.257809	round_index=0	round_count=3
+10-14 11:11:36.756  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.100525	overall_fraction=0.820105	elapsed=1.507878	round_index=0	round_count=3
+10-14 11:11:37.006  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.117198	overall_fraction=0.823440	elapsed=1.757969	round_index=0	round_count=3
+10-14 11:11:37.256  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.133868	overall_fraction=0.826774	elapsed=2.008013	round_index=0	round_count=3
+10-14 11:11:37.507  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.150611	overall_fraction=0.830122	elapsed=2.259161	round_index=0	round_count=3
+10-14 11:11:37.760  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.167426	overall_fraction=0.833485	elapsed=2.511393	round_index=0	round_count=3
+10-14 11:11:38.010  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.184097	overall_fraction=0.836819	elapsed=2.761459	round_index=0	round_count=3
+10-14 11:11:38.267  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.201281	overall_fraction=0.840256	elapsed=3.019217	round_index=0	round_count=3
+10-14 11:11:38.517  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.217952	overall_fraction=0.843590	elapsed=3.269281	round_index=0	round_count=3
+10-14 11:11:38.787  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.235946	overall_fraction=0.847189	elapsed=3.539194	round_index=0	round_count=3
+10-14 11:11:39.051  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.253541	overall_fraction=0.850708	elapsed=3.803114	round_index=0	round_count=3
+10-14 11:11:39.301  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.270212	overall_fraction=0.854042	elapsed=4.053181	round_index=0	round_count=3
+10-14 11:11:39.556  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.287192	overall_fraction=0.857438	elapsed=4.307881	round_index=0	round_count=3
+10-14 11:11:39.814  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.304404	overall_fraction=0.860881	elapsed=4.566058	round_index=0	round_count=3
+10-14 11:11:40.064  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.321075	overall_fraction=0.864215	elapsed=4.816126	round_index=0	round_count=3
+10-14 11:11:40.248  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.333335	overall_fraction=0.866667	elapsed=5.000029	round_index=1	round_count=3
+10-14 11:11:40.511  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.350872	overall_fraction=0.870174	elapsed=5.263076	round_index=1	round_count=3
+10-14 11:11:40.761  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.367543	overall_fraction=0.873509	elapsed=5.513141	round_index=1	round_count=3
+10-14 11:11:41.011  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.384214	overall_fraction=0.876843	elapsed=5.763205	round_index=1	round_count=3
+10-14 11:11:41.261  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.400885	overall_fraction=0.880177	elapsed=6.013271	round_index=1	round_count=3
+10-14 11:11:41.512  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.417556	overall_fraction=0.883511	elapsed=6.263336	round_index=1	round_count=3
+10-14 11:11:41.762  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.434227	overall_fraction=0.886845	elapsed=6.513403	round_index=1	round_count=3
+10-14 11:11:42.037  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.452618	overall_fraction=0.890524	elapsed=6.789266	round_index=1	round_count=3
+10-14 11:11:42.292  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.469590	overall_fraction=0.893918	elapsed=7.043855	round_index=1	round_count=3
+10-14 11:11:42.542  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.486261	overall_fraction=0.897252	elapsed=7.293922	round_index=1	round_count=3
+10-14 11:11:42.799  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.503399	overall_fraction=0.900680	elapsed=7.550982	round_index=1	round_count=3
+10-14 11:11:43.049  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.520070	overall_fraction=0.904014	elapsed=7.801047	round_index=1	round_count=3
+10-14 11:11:43.299  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.536741	overall_fraction=0.907348	elapsed=8.051115	round_index=1	round_count=3
+10-14 11:11:43.556  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.553883	overall_fraction=0.910777	elapsed=8.308244	round_index=1	round_count=3
+10-14 11:11:43.807  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.570554	overall_fraction=0.914111	elapsed=8.558313	round_index=1	round_count=3
+10-14 11:11:44.057  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.587225	overall_fraction=0.917445	elapsed=8.808380	round_index=1	round_count=3
+10-14 11:11:44.315  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.604469	overall_fraction=0.920894	elapsed=9.067036	round_index=1	round_count=3
+10-14 11:11:44.570  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.621447	overall_fraction=0.924289	elapsed=9.321704	round_index=1	round_count=3
+10-14 11:11:44.820  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.638118	overall_fraction=0.927624	elapsed=9.571768	round_index=1	round_count=3
+10-14 11:11:45.072  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.654905	overall_fraction=0.930981	elapsed=9.823579	round_index=1	round_count=3
+10-14 11:11:45.248  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.666669	overall_fraction=0.933334	elapsed=10.000035	round_index=2	round_count=3
+10-14 11:11:45.501  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.683505	overall_fraction=0.936701	elapsed=10.252568	round_index=2	round_count=3
+10-14 11:11:45.798  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.703319	overall_fraction=0.940664	elapsed=10.549783	round_index=2	round_count=3
+10-14 11:11:46.048  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.719990	overall_fraction=0.943998	elapsed=10.799849	round_index=2	round_count=3
+10-14 11:11:46.298  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.736667	overall_fraction=0.947333	elapsed=11.050001	round_index=2	round_count=3
+10-14 11:11:46.588  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.755990	overall_fraction=0.951198	elapsed=11.339844	round_index=2	round_count=3
+10-14 11:11:46.853  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.773623	overall_fraction=0.954725	elapsed=11.604349	round_index=2	round_count=3
+10-14 11:11:47.103  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.790294	overall_fraction=0.958059	elapsed=11.854414	round_index=2	round_count=3
+10-14 11:11:47.366  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.807850	overall_fraction=0.961570	elapsed=12.117747	round_index=2	round_count=3
+10-14 11:11:47.616  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.824521	overall_fraction=0.964904	elapsed=12.367816	round_index=2	round_count=3
+10-14 11:11:47.874  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.841745	overall_fraction=0.968349	elapsed=12.626171	round_index=2	round_count=3
+10-14 11:11:48.137  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.859242	overall_fraction=0.971848	elapsed=12.888635	round_index=2	round_count=3
+10-14 11:11:48.395  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.876453	overall_fraction=0.975291	elapsed=13.146793	round_index=2	round_count=3
+10-14 11:11:48.645  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.893124	overall_fraction=0.978625	elapsed=13.396860	round_index=2	round_count=3
+10-14 11:11:48.912  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.910900	overall_fraction=0.982180	elapsed=13.663495	round_index=2	round_count=3
+10-14 11:11:49.167  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.927897	overall_fraction=0.985579	elapsed=13.918459	round_index=2	round_count=3
+10-14 11:11:49.418  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.944685	overall_fraction=0.988937	elapsed=14.170278	round_index=2	round_count=3
+10-14 11:11:49.686  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.962544	overall_fraction=0.992509	elapsed=14.438158	round_index=2	round_count=3
+10-14 11:11:49.938  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.979346	overall_fraction=0.995869	elapsed=14.690192	round_index=2	round_count=3
+10-14 11:11:50.189  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=4	core_fraction=0.996028	overall_fraction=0.999206	elapsed=14.940420	round_index=2	round_count=3
+10-14 11:11:50.249  9880 11782 I A00000/MangekyoEngine: CPU_PROGRESS	mode=per_core	phase=complete	core_index=3	core_count=4	core_fraction=1.000000	overall_fraction=1.000000	elapsed=15.000000	round_index=2	round_count=3
+10-14 11:11:50.249  9880 11782 I A00000/MangekyoEngine: Logical processor sample 4 score: 190.05 MWork/s
+10-14 11:11:50.249  9880 11782 I A00000/MangekyoEngine: CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_index=3	core_count=4	group=0	logical_index=3	physical_core=3	smt_index=0	smt_width=1	efficiency_class=1024	performance_level=0	core_class=InferredUniform	core_type=auto	residency_verified=1	requested_lower_bound=0.000000	classification_source=inferred_capacity_or_max_frequency_rank	affinity=strict	valid=1	score=190.051187	unit=MWork/s	seconds=5.000020	requested_seconds=15.000000	round_count=3	median_round=3	checksum=d448d448bcf96da1	checksum_role=dce_sink
+10-14 11:11:50.249  9880 11782 I A00000/MangekyoEngine: Average per-logical-processor score: 187.44 MWork/s
+10-14 11:11:50.249  9880 11782 I A00000/MangekyoEngine: CPU_RESULT	kind=summary	mode=per_core	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=arithmetic_mean_of_per_core_medians	core_count=4	completed=4	invalid_count=0	valid=1	average_score=187.440170	min_score=182.264719	max_score=190.051187	unit=MWork/s	round_count=3	checksum=792d04185202810d	checksum_role=dce_sink
+10-14 11:11:50.249  9880 11782 I A00000/MangekyoEngine: [Results] Saved CPU single-thread summary as 20261014-111150-249-cpu-single -> /data/storage/el2/base/haps/entry/files/results/results.json
+10-14 11:11:50.250  9880 11782 I A00000/MangekyoEngine: [Results] Saved CPU multi-core summary as 20261014-111150-249-cpu-multi -> /data/storage/el2/base/haps/entry/files/results/results.json
+10-14 11:11:50.453  9880  9880 I A00000/Mangekyo: SUITE_RESULT	status=success	job=cpu-compute	reason= 
+10-14 11:12:20.739  9880  9880 I A00000/Mangekyo: SUITE_RUN	index=2	total=2	job=cpu-memory
+10-14 11:12:20.740  9880 13329 I A00000/MangekyoEngine: ========== CPU Memory Bandwidth Sweep (cpu_membw_v1) ==========
+10-14 11:12:20.740  9880 13329 I A00000/MangekyoEngine: CPU:       Unknown CPU (4 cores / 4 threads)
+10-14 11:12:20.740  9880 13329 I A00000/MangekyoEngine: Vectors:   NEON, 16-byte loads and stores
+10-14 11:12:20.740  9880 13329 I A00000/MangekyoEngine: Caches:    sizes not reported by the OS; levels are read off the curve
+10-14 11:12:20.740  9880 13329 I A00000/MangekyoEngine: Memory:    3.8 GiB installed, 2.4 GiB free
+10-14 11:12:20.740  9880 13329 I A00000/MangekyoEngine: Sweep:     4 KiB - 256 MiB on one thread; 4 KiB - 64 MiB per thread on 4 threads
+10-14 11:12:20.740  9880 13329 I A00000/MangekyoEngine: Timing:    wall clock, 2 warm-up + 7 measured samples of 10 ms per point, median reported
+10-14 11:12:20.740  9880 13329 I A00000/MangekyoEngine: CPUMEM_META	name=Unknown CPU	vector=NEON	vector_bytes=16	physical_count=4	logical_count=4	core_type=auto	all_threads=4	reference_logical_index=1	class_count=1	cache_source=curve
+10-14 11:12:20.740  9880 13329 I A00000/MangekyoEngine: CPUMEM_CLASS	rank=0	mode=single	name=InferredUniform	cores=4	reference_logical_index=1	cache_source=curve
+10-14 11:12:20.740  9880 13329 I A00000/MangekyoEngine: [single] one thread on logical processor 1
+10-14 11:12:20.740  9880 13329 I A00000/MangekyoEngine:     Data set       Read      Write       Copy   Write NT    Copy NT  Zero fill   GB/s (median)
+10-14 11:12:21.097  9880 13329 I A00000/MangekyoEngine:        4 KiB      112.7      110.0      232.8          -          -          -
+10-14 11:12:21.097  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=4096	threads=1	median_gbps=112.723	best_gbps=122.717	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:21.097  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=4096	threads=1	median_gbps=109.995	best_gbps=113.896	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:21.097  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=4096	threads=1	median_gbps=232.761	best_gbps=236.072	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:21.097  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0167
+10-14 11:12:21.541  9880 13329 I A00000/MangekyoEngine:        8 KiB      119.6      105.4      207.9          -          -          -
+10-14 11:12:21.541  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=8192	threads=1	median_gbps=119.554	best_gbps=125.103	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:21.541  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=8192	threads=1	median_gbps=105.389	best_gbps=109.127	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:21.541  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=8192	threads=1	median_gbps=207.924	best_gbps=215.145	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:21.541  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0333
+10-14 11:12:22.191  9880 13329 I A00000/MangekyoEngine:       16 KiB      121.8      109.2      167.9          -          -          -
+10-14 11:12:22.191  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=16384	threads=1	median_gbps=121.807	best_gbps=123.940	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:22.191  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=16384	threads=1	median_gbps=109.167	best_gbps=116.427	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:22.191  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=16384	threads=1	median_gbps=167.863	best_gbps=192.276	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:22.191  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0500
+10-14 11:12:22.814  9880 13329 I A00000/MangekyoEngine:       24 KiB      124.8      109.2      166.2          -          -          -
+10-14 11:12:22.814  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=24576	threads=1	median_gbps=124.763	best_gbps=126.844	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:22.814  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=24576	threads=1	median_gbps=109.180	best_gbps=112.497	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:22.814  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=24576	threads=1	median_gbps=166.216	best_gbps=199.453	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:22.814  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0667
+10-14 11:12:23.229  9880 13329 I A00000/MangekyoEngine:       32 KiB      124.7      107.1      156.1          -          -          -
+10-14 11:12:23.229  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=32768	threads=1	median_gbps=124.692	best_gbps=127.145	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:23.229  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=32768	threads=1	median_gbps=107.111	best_gbps=120.026	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:23.229  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=32768	threads=1	median_gbps=156.072	best_gbps=174.058	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:23.229  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0833
+10-14 11:12:23.594  9880 13329 I A00000/MangekyoEngine:       48 KiB      120.1      102.0      131.4          -          -          -
+10-14 11:12:23.594  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=49152	threads=1	median_gbps=120.065	best_gbps=123.100	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:23.594  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=49152	threads=1	median_gbps=102.010	best_gbps=118.862	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:23.594  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=49152	threads=1	median_gbps=131.403	best_gbps=152.178	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:23.594  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1000
+10-14 11:12:23.990  9880 13329 I A00000/MangekyoEngine:       64 KiB      119.1      109.3      177.1          -          -          -
+10-14 11:12:23.990  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=65536	threads=1	median_gbps=119.141	best_gbps=122.542	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:23.990  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=65536	threads=1	median_gbps=109.254	best_gbps=112.051	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:23.990  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=65536	threads=1	median_gbps=177.052	best_gbps=188.509	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:23.990  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1167
+10-14 11:12:24.354  9880 13329 I A00000/MangekyoEngine:       96 KiB      121.0      109.3      190.9          -          -          -
+10-14 11:12:24.354  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=98304	threads=1	median_gbps=120.970	best_gbps=121.992	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:24.354  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=98304	threads=1	median_gbps=109.324	best_gbps=116.214	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:24.354  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=98304	threads=1	median_gbps=190.915	best_gbps=205.104	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:24.354  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1333
+10-14 11:12:24.781  9880 13329 I A00000/MangekyoEngine:      128 KiB      111.8      111.0      191.5          -          -          -
+10-14 11:12:24.781  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=131072	threads=1	median_gbps=111.801	best_gbps=122.628	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:24.781  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=131072	threads=1	median_gbps=110.984	best_gbps=120.661	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:24.781  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=131072	threads=1	median_gbps=191.465	best_gbps=216.433	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:24.781  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1500
+10-14 11:12:25.162  9880 13329 I A00000/MangekyoEngine:      192 KiB       99.2      114.5      208.1          -          -          -
+10-14 11:12:25.162  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=196608	threads=1	median_gbps=99.213	best_gbps=101.662	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:25.162  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=196608	threads=1	median_gbps=114.520	best_gbps=121.771	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:25.162  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=196608	threads=1	median_gbps=208.121	best_gbps=212.607	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:25.162  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1667
+10-14 11:12:25.577  9880 13329 I A00000/MangekyoEngine:      256 KiB      103.9      115.4      219.4          -          -          -
+10-14 11:12:25.577  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=262144	threads=1	median_gbps=103.855	best_gbps=107.004	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:25.577  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=262144	threads=1	median_gbps=115.438	best_gbps=125.900	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:25.577  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=262144	threads=1	median_gbps=219.426	best_gbps=227.007	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:25.577  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1833
+10-14 11:12:25.952  9880 13329 I A00000/MangekyoEngine:      384 KiB      103.7      115.1      160.5          -          -          -
+10-14 11:12:25.952  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=393216	threads=1	median_gbps=103.694	best_gbps=106.529	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:25.952  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=393216	threads=1	median_gbps=115.143	best_gbps=119.805	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:25.952  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=393216	threads=1	median_gbps=160.453	best_gbps=163.841	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:25.952  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.2000
+10-14 11:12:26.320  9880 13329 I A00000/MangekyoEngine:      512 KiB       98.1      116.9      152.9          -          -          -
+10-14 11:12:26.320  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=524288	threads=1	median_gbps=98.067	best_gbps=102.698	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:26.320  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=524288	threads=1	median_gbps=116.906	best_gbps=123.427	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:26.320  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=524288	threads=1	median_gbps=152.860	best_gbps=166.139	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:26.320  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.2167
+10-14 11:12:26.655  9880 13329 I A00000/MangekyoEngine:      768 KiB      100.7      111.9      156.8          -          -          -
+10-14 11:12:26.655  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=786432	threads=1	median_gbps=100.693	best_gbps=105.260	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:26.655  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=786432	threads=1	median_gbps=111.854	best_gbps=117.088	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:26.655  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=786432	threads=1	median_gbps=156.752	best_gbps=162.666	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:26.655  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.2333
+10-14 11:12:26.978  9880 13329 I A00000/MangekyoEngine:        1 MiB      100.6      110.7      150.2          -          -          -
+10-14 11:12:26.978  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=1048576	threads=1	median_gbps=100.610	best_gbps=102.992	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:26.978  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=1048576	threads=1	median_gbps=110.669	best_gbps=113.921	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:26.978  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=1048576	threads=1	median_gbps=150.196	best_gbps=161.301	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:26.978  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.2500
+10-14 11:12:27.328  9880 13329 I A00000/MangekyoEngine:      1.5 MiB       98.0      105.1      156.3          -          -          -
+10-14 11:12:27.328  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=1572864	threads=1	median_gbps=97.968	best_gbps=100.672	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:27.328  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=1572864	threads=1	median_gbps=105.066	best_gbps=111.045	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:27.328  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=1572864	threads=1	median_gbps=156.322	best_gbps=157.810	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:27.328  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.2667
+10-14 11:12:27.726  9880 13329 I A00000/MangekyoEngine:        2 MiB       98.2      111.8      149.8          -          -          -
+10-14 11:12:27.726  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=2097152	threads=1	median_gbps=98.180	best_gbps=100.223	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:27.726  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=2097152	threads=1	median_gbps=111.800	best_gbps=112.156	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:27.726  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=2097152	threads=1	median_gbps=149.761	best_gbps=156.841	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:27.726  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.2833
+10-14 11:12:28.003  9880 13329 I A00000/MangekyoEngine:        3 MiB       92.1      108.2      154.0          -          -          -
+10-14 11:12:28.003  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=3145728	threads=1	median_gbps=92.144	best_gbps=99.758	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:28.003  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=3145728	threads=1	median_gbps=108.229	best_gbps=112.600	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:28.003  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=3145728	threads=1	median_gbps=153.990	best_gbps=162.253	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:28.003  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.3000
+10-14 11:12:28.282  9880 13329 I A00000/MangekyoEngine:        4 MiB       90.1      111.8      153.7          -          -          -
+10-14 11:12:28.282  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=4194304	threads=1	median_gbps=90.123	best_gbps=95.804	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:28.282  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=4194304	threads=1	median_gbps=111.783	best_gbps=114.547	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:28.282  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=4194304	threads=1	median_gbps=153.656	best_gbps=158.530	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:28.282  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.3167
+10-14 11:12:28.562  9880 13329 I A00000/MangekyoEngine:        6 MiB       86.0      109.4      143.4          -          -          -
+10-14 11:12:28.562  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=6291456	threads=1	median_gbps=85.974	best_gbps=91.711	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:28.562  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=6291456	threads=1	median_gbps=109.435	best_gbps=114.271	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:28.562  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=6291456	threads=1	median_gbps=143.407	best_gbps=158.873	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:28.562  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.3333
+10-14 11:12:28.842  9880 13329 I A00000/MangekyoEngine:        8 MiB       86.5      106.1      145.3          -          -          -
+10-14 11:12:28.842  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=8388608	threads=1	median_gbps=86.499	best_gbps=95.543	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:28.842  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=8388608	threads=1	median_gbps=106.061	best_gbps=117.406	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:28.842  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=8388608	threads=1	median_gbps=145.319	best_gbps=155.530	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:28.842  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.3500
+10-14 11:12:29.123  9880 13329 I A00000/MangekyoEngine:       12 MiB       80.8      105.1      138.5          -          -          -
+10-14 11:12:29.123  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=12582912	threads=1	median_gbps=80.795	best_gbps=89.725	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:29.123  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=12582912	threads=1	median_gbps=105.054	best_gbps=108.286	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:29.123  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=12582912	threads=1	median_gbps=138.531	best_gbps=153.581	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:29.123  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.3667
+10-14 11:12:29.478  9880 13329 I A00000/MangekyoEngine:       16 MiB       72.7      110.0      118.6          -          -          -
+10-14 11:12:29.478  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=16777216	threads=1	median_gbps=72.705	best_gbps=83.823	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:29.478  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=16777216	threads=1	median_gbps=110.003	best_gbps=113.228	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:29.478  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=16777216	threads=1	median_gbps=118.648	best_gbps=122.615	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:29.478  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.3833
+10-14 11:12:30.000  9880 13329 I A00000/MangekyoEngine:       24 MiB       65.6      103.2      118.1          -          -          -
+10-14 11:12:30.000  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=25165824	threads=1	median_gbps=65.555	best_gbps=80.904	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:30.000  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=25165824	threads=1	median_gbps=103.224	best_gbps=111.467	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:30.000  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=25165824	threads=1	median_gbps=118.129	best_gbps=122.515	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:30.000  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.4000
+10-14 11:12:30.496  9880 13329 I A00000/MangekyoEngine:       32 MiB       47.9      105.3       97.8          -          -          -
+10-14 11:12:30.496  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=33554432	threads=1	median_gbps=47.861	best_gbps=52.873	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:30.496  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=33554432	threads=1	median_gbps=105.300	best_gbps=110.146	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:30.496  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=33554432	threads=1	median_gbps=97.810	best_gbps=108.432	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:30.496  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.4167
+10-14 11:12:31.211  9880 13329 I A00000/MangekyoEngine:       48 MiB       47.0       98.5       81.1          -          -          -
+10-14 11:12:31.211  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=50331648	threads=1	median_gbps=47.031	best_gbps=51.926	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:31.211  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=50331648	threads=1	median_gbps=98.518	best_gbps=114.239	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:31.211  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=50331648	threads=1	median_gbps=81.109	best_gbps=93.741	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:31.211  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.4333
+10-14 11:12:31.624  9880 13329 I A00000/MangekyoEngine:       64 MiB       65.9      110.2      100.5          -          -          -
+10-14 11:12:31.624  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=67108864	threads=1	median_gbps=65.915	best_gbps=74.569	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:31.624  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=67108864	threads=1	median_gbps=110.158	best_gbps=114.183	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:31.624  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=67108864	threads=1	median_gbps=100.506	best_gbps=108.787	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:31.624  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.4500
+10-14 11:12:32.005  9880 13329 I A00000/MangekyoEngine:       96 MiB       63.1      104.6       97.7          -          -          -
+10-14 11:12:32.005  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=100663296	threads=1	median_gbps=63.092	best_gbps=69.721	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:32.005  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=100663296	threads=1	median_gbps=104.573	best_gbps=116.034	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:32.005  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=100663296	threads=1	median_gbps=97.705	best_gbps=105.386	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:32.005  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.4667
+10-14 11:12:32.385  9880 13329 I A00000/MangekyoEngine:      128 MiB       54.2      109.4       97.0          -          -          -
+10-14 11:12:32.385  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=134217728	threads=1	median_gbps=54.219	best_gbps=62.864	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:32.385  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=134217728	threads=1	median_gbps=109.429	best_gbps=113.042	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:32.385  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=134217728	threads=1	median_gbps=97.021	best_gbps=100.176	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:32.385  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.4833
+10-14 11:12:32.978  9880 13329 I A00000/MangekyoEngine:      192 MiB       60.4      100.9       93.9          -          -          -
+10-14 11:12:32.979  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=201326592	threads=1	median_gbps=60.368	best_gbps=63.236	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:32.979  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=201326592	threads=1	median_gbps=100.903	best_gbps=111.126	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:32.979  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=201326592	threads=1	median_gbps=93.926	best_gbps=101.530	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:32.979  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.5000
+10-14 11:12:33.374  9880 13329 I A00000/MangekyoEngine:      256 MiB       48.4       91.9       68.9          -          -          -
+10-14 11:12:33.374  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=268435456	threads=1	median_gbps=48.434	best_gbps=50.832	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:33.374  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=268435456	threads=1	median_gbps=91.880	best_gbps=100.440	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:33.374  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=268435456	threads=1	median_gbps=68.890	best_gbps=76.275	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:33.374  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.5167
+10-14 11:12:33.387  9880 13329 I A00000/MangekyoEngine: [all] 4 threads, one per physical core, each with a private data set
+10-14 11:12:33.387  9880 13329 I A00000/MangekyoEngine:     Data set       Read      Write       Copy   Write NT    Copy NT  Zero fill   GB/s (median)
+10-14 11:12:34.108  9880 13329 I A00000/MangekyoEngine:        4 KiB      441.5      399.9      947.5          -          -          -
+10-14 11:12:34.108  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=4096	threads=4	median_gbps=441.478	best_gbps=472.613	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:34.108  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=4096	threads=4	median_gbps=399.862	best_gbps=441.178	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:34.108  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=4096	threads=4	median_gbps=947.470	best_gbps=972.950	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:34.108  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.5333
+10-14 11:12:34.961  9880 13329 I A00000/MangekyoEngine:        8 KiB      453.4      317.3      830.5          -          -          -
+10-14 11:12:34.961  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=8192	threads=4	median_gbps=453.364	best_gbps=491.383	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:34.961  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=8192	threads=4	median_gbps=317.264	best_gbps=343.106	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:34.961  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=8192	threads=4	median_gbps=830.494	best_gbps=842.569	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:34.961  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.5500
+10-14 11:12:36.031  9880 13329 I A00000/MangekyoEngine:       16 KiB      451.5      315.2      719.7          -          -          -
+10-14 11:12:36.031  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=16384	threads=4	median_gbps=451.528	best_gbps=490.189	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:36.031  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=16384	threads=4	median_gbps=315.229	best_gbps=334.625	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:36.031  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=16384	threads=4	median_gbps=719.682	best_gbps=801.014	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:36.031  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.5667
+10-14 11:12:37.083  9880 13329 I A00000/MangekyoEngine:       24 KiB      437.4      350.0      698.7          -          -          -
+10-14 11:12:37.083  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=24576	threads=4	median_gbps=437.381	best_gbps=454.070	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:37.083  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=24576	threads=4	median_gbps=350.040	best_gbps=375.192	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:37.083  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=24576	threads=4	median_gbps=698.715	best_gbps=768.584	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:37.083  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.5833
+10-14 11:12:38.373  9880 13329 I A00000/MangekyoEngine:       32 KiB      450.1      387.0      647.6          -          -          -
+10-14 11:12:38.373  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=32768	threads=4	median_gbps=450.104	best_gbps=480.867	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:38.373  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=32768	threads=4	median_gbps=386.976	best_gbps=409.473	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:38.373  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=32768	threads=4	median_gbps=647.580	best_gbps=682.924	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:38.373  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.6000
+10-14 11:12:39.581  9880 13329 I A00000/MangekyoEngine:       48 KiB      456.3      312.4      619.7          -          -          -
+10-14 11:12:39.581  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=49152	threads=4	median_gbps=456.335	best_gbps=488.056	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:39.581  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=49152	threads=4	median_gbps=312.350	best_gbps=330.401	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:39.581  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=49152	threads=4	median_gbps=619.725	best_gbps=755.620	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:39.581  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.6167
+10-14 11:12:41.562  9880 13329 I A00000/MangekyoEngine:       64 KiB      458.1      203.9      480.3          -          -          -
+10-14 11:12:41.562  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=65536	threads=4	median_gbps=458.117	best_gbps=488.961	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:41.562  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=65536	threads=4	median_gbps=203.887	best_gbps=279.165	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:41.562  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=65536	threads=4	median_gbps=480.272	best_gbps=671.258	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:41.562  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.6333
+10-14 11:12:42.912  9880 13329 I A00000/MangekyoEngine:       96 KiB      434.2      207.9      426.6          -          -          -
+10-14 11:12:42.912  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=98304	threads=4	median_gbps=434.182	best_gbps=488.446	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:42.912  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=98304	threads=4	median_gbps=207.886	best_gbps=230.444	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:42.912  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=98304	threads=4	median_gbps=426.603	best_gbps=559.154	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:42.912  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.6500
+10-14 11:12:44.164  9880 13329 I A00000/MangekyoEngine:      128 KiB      425.8      223.7      562.2          -          -          -
+10-14 11:12:44.164  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=131072	threads=4	median_gbps=425.766	best_gbps=472.055	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:44.164  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=131072	threads=4	median_gbps=223.703	best_gbps=242.948	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:44.164  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=131072	threads=4	median_gbps=562.237	best_gbps=656.311	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:44.164  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.6667
+10-14 11:12:46.011  9880 13329 I A00000/MangekyoEngine:      192 KiB      327.0      219.3      502.5          -          -          -
+10-14 11:12:46.012  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=196608	threads=4	median_gbps=326.978	best_gbps=415.397	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:46.012  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=196608	threads=4	median_gbps=219.274	best_gbps=250.955	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:46.012  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=196608	threads=4	median_gbps=502.485	best_gbps=619.660	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:46.012  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.6833
+10-14 11:12:47.243  9880 13329 I A00000/MangekyoEngine:      256 KiB      365.0      220.6      443.2          -          -          -
+10-14 11:12:47.243  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=262144	threads=4	median_gbps=365.009	best_gbps=378.745	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:47.243  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=262144	threads=4	median_gbps=220.598	best_gbps=232.599	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:47.243  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=262144	threads=4	median_gbps=443.181	best_gbps=506.080	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:47.243  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.7000
+10-14 11:12:48.561  9880 13329 I A00000/MangekyoEngine:      384 KiB      289.4      224.2      465.4          -          -          -
+10-14 11:12:48.561  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=393216	threads=4	median_gbps=289.352	best_gbps=322.757	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:48.561  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=393216	threads=4	median_gbps=224.175	best_gbps=249.785	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:48.561  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=393216	threads=4	median_gbps=465.444	best_gbps=497.069	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:48.561  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.7167
+10-14 11:12:49.392  9880 13329 I A00000/MangekyoEngine:      512 KiB      313.9      247.8      436.2          -          -          -
+10-14 11:12:49.392  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=524288	threads=4	median_gbps=313.907	best_gbps=334.985	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:49.392  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=524288	threads=4	median_gbps=247.825	best_gbps=264.157	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:49.392  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=524288	threads=4	median_gbps=436.180	best_gbps=449.536	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:49.392  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.7333
+10-14 11:12:50.151  9880 13329 I A00000/MangekyoEngine:      768 KiB      251.5      240.8      421.0          -          -          -
+10-14 11:12:50.151  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=786432	threads=4	median_gbps=251.516	best_gbps=290.548	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:50.151  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=786432	threads=4	median_gbps=240.756	best_gbps=246.447	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:50.151  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=786432	threads=4	median_gbps=421.014	best_gbps=489.450	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:50.151  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.7500
+10-14 11:12:50.942  9880 13329 I A00000/MangekyoEngine:        1 MiB      257.2      170.2      354.2          -          -          -
+10-14 11:12:50.942  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=1048576	threads=4	median_gbps=257.169	best_gbps=286.601	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:50.942  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=1048576	threads=4	median_gbps=170.222	best_gbps=185.977	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:50.942  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=1048576	threads=4	median_gbps=354.185	best_gbps=367.495	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:50.942  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.7667
+10-14 11:12:52.312  9880 13329 I A00000/MangekyoEngine:      1.5 MiB      228.5      189.8      339.9          -          -          -
+10-14 11:12:52.312  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=1572864	threads=4	median_gbps=228.517	best_gbps=239.485	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:52.312  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=1572864	threads=4	median_gbps=189.838	best_gbps=195.737	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:52.312  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=1572864	threads=4	median_gbps=339.926	best_gbps=353.464	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:52.312  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.7833
+10-14 11:12:53.671  9880 13329 I A00000/MangekyoEngine:        2 MiB      226.9      187.6      372.2          -          -          -
+10-14 11:12:53.671  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=2097152	threads=4	median_gbps=226.875	best_gbps=386.096	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:53.671  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=2097152	threads=4	median_gbps=187.560	best_gbps=196.211	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:53.671  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=2097152	threads=4	median_gbps=372.202	best_gbps=408.542	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:53.671  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8000
+10-14 11:12:54.441  9880 13329 I A00000/MangekyoEngine:        3 MiB      248.7      200.0      415.9          -          -          -
+10-14 11:12:54.441  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=3145728	threads=4	median_gbps=248.684	best_gbps=264.754	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:54.441  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=3145728	threads=4	median_gbps=199.958	best_gbps=234.225	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:54.441  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=3145728	threads=4	median_gbps=415.911	best_gbps=441.572	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:54.441  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8167
+10-14 11:12:55.263  9880 13329 I A00000/MangekyoEngine:        4 MiB      298.0      214.6      441.1          -          -          -
+10-14 11:12:55.263  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=4194304	threads=4	median_gbps=298.006	best_gbps=307.209	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:55.263  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=4194304	threads=4	median_gbps=214.552	best_gbps=238.751	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:55.263  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=4194304	threads=4	median_gbps=441.135	best_gbps=462.058	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:55.263  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8333
+10-14 11:12:56.031  9880 13329 I A00000/MangekyoEngine:        6 MiB      238.3      208.8      385.1          -          -          -
+10-14 11:12:56.031  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=6291456	threads=4	median_gbps=238.267	best_gbps=259.644	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:56.031  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=6291456	threads=4	median_gbps=208.830	best_gbps=217.952	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:56.031  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=6291456	threads=4	median_gbps=385.107	best_gbps=434.757	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:56.031  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8500
+10-14 11:12:57.301  9880 13329 I A00000/MangekyoEngine:        8 MiB      222.4      222.1      380.1          -          -          -
+10-14 11:12:57.301  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=8388608	threads=4	median_gbps=222.446	best_gbps=261.789	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:57.301  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=8388608	threads=4	median_gbps=222.131	best_gbps=244.212	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:57.301  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=8388608	threads=4	median_gbps=380.083	best_gbps=433.692	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:57.301  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8667
+10-14 11:12:58.412  9880 13329 I A00000/MangekyoEngine:       12 MiB      203.4      211.4      322.5          -          -          -
+10-14 11:12:58.412  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=12582912	threads=4	median_gbps=203.364	best_gbps=216.202	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:58.412  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=12582912	threads=4	median_gbps=211.356	best_gbps=222.098	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:58.412  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=12582912	threads=4	median_gbps=322.535	best_gbps=357.094	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:58.412  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8833
+10-14 11:12:59.251  9880 13329 I A00000/MangekyoEngine:       16 MiB      200.7      219.7      217.1          -          -          -
+10-14 11:12:59.251  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=16777216	threads=4	median_gbps=200.678	best_gbps=230.674	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:59.252  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=16777216	threads=4	median_gbps=219.661	best_gbps=226.375	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:59.252  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=16777216	threads=4	median_gbps=217.094	best_gbps=248.517	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:12:59.252  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9000
+10-14 11:13:00.043  9880 13329 I A00000/MangekyoEngine:       24 MiB      174.2      215.9      187.5          -          -          -
+10-14 11:13:00.043  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=25165824	threads=4	median_gbps=174.191	best_gbps=194.419	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:13:00.043  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=25165824	threads=4	median_gbps=215.886	best_gbps=232.099	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:13:00.043  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=25165824	threads=4	median_gbps=187.506	best_gbps=206.349	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:13:00.043  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9167
+10-14 11:13:00.871  9880 13329 I A00000/MangekyoEngine:       32 MiB      154.8      209.0      194.7          -          -          -
+10-14 11:13:00.871  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=33554432	threads=4	median_gbps=154.763	best_gbps=178.956	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:13:00.871  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=33554432	threads=4	median_gbps=209.022	best_gbps=217.706	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:13:00.871  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=33554432	threads=4	median_gbps=194.737	best_gbps=216.469	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:13:00.871  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9333
+10-14 11:13:02.302  9880 13329 I A00000/MangekyoEngine:       48 MiB      171.8      217.2      194.5          -          -          -
+10-14 11:13:02.302  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=50331648	threads=4	median_gbps=171.807	best_gbps=205.051	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:13:02.302  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=50331648	threads=4	median_gbps=217.167	best_gbps=229.117	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:13:02.302  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=50331648	threads=4	median_gbps=194.475	best_gbps=204.881	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:13:02.302  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9500
+10-14 11:13:03.101  9880 13329 I A00000/MangekyoEngine:       64 MiB      149.9      208.3      188.3          -          -          -
+10-14 11:13:03.101  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=67108864	threads=4	median_gbps=149.900	best_gbps=175.532	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:13:03.101  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=67108864	threads=4	median_gbps=208.331	best_gbps=223.849	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:13:03.101  9880 13329 I A00000/MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=67108864	threads=4	median_gbps=188.297	best_gbps=208.938	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+10-14 11:13:03.101  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9667
+10-14 11:13:03.709  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=pagefault	fraction=0.9833
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: CPUMEM_PROGRESS	mode=storage	fraction=1.0000
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: --- Summary: one thread (logical processor 1) ---
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: Level              Cache size          Data sets used       Read      Write       Copy   GB/s
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: L1        128 KiB - 192 KiB *         4 KiB - 128 KiB      120.1      109.2      177.1
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: CPUMEM_LEVEL	mode=single	level=L1	cache_bytes=0	from_bytes=4096	to_bytes=131072	read_gbps=120.065	write_gbps=109.180	copy_gbps=177.052	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=111.801	read_high_gbps=124.763	from_curve=1	capacity_low_bytes=131072	capacity_high_bytes=196608	measured=1	settled=1
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: L2            3 MiB - 4 MiB *         192 KiB - 3 MiB       99.2      111.9      156.3
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: CPUMEM_LEVEL	mode=single	level=L2	cache_bytes=0	from_bytes=196608	to_bytes=3145728	read_gbps=99.213	write_gbps=111.854	copy_gbps=156.322	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=92.144	read_high_gbps=103.855	from_curve=1	capacity_low_bytes=3145728	capacity_high_bytes=4194304	measured=1	settled=1
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: L3          12 MiB - 64 MiB *          4 MiB - 12 MiB       86.2      107.7      144.4
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: CPUMEM_LEVEL	mode=single	level=L3	cache_bytes=0	from_bytes=4194304	to_bytes=12582912	read_gbps=86.236	write_gbps=107.748	copy_gbps=144.363	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=80.795	read_high_gbps=90.123	from_curve=1	capacity_low_bytes=12582912	capacity_high_bytes=67108864	measured=1	settled=1
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: SoC        96 MiB - 128 MiB *         64 MiB - 96 MiB       64.5      107.4       99.1
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: CPUMEM_LEVEL	mode=single	level=SoC	cache_bytes=0	from_bytes=67108864	to_bytes=100663296	read_gbps=64.504	write_gbps=107.365	copy_gbps=99.106	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=63.092	read_high_gbps=65.915	from_curve=1	capacity_low_bytes=100663296	capacity_high_bytes=134217728	measured=1	settled=1
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: Memory                      -       128 MiB - 256 MiB       54.2      100.9       93.9
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: CPUMEM_LEVEL	mode=single	level=memory	cache_bytes=0	from_bytes=134217728	to_bytes=268435456	read_gbps=54.219	write_gbps=100.903	copy_gbps=93.926	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=48.434	read_high_gbps=60.368	from_curve=1	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=1
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine:          * read off the curve, because the OS reports no size for this cache: its
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine:            capacity lies between the two data sets shown
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine:          SoC: a cache behind the CPU's own levels that the OS does not list. On a
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine:            phone chip it is the system cache, which the CPU shares with the GPU and
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine:            other parts; its capacity above includes the caches before it
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: --- Summary: all cores (4 threads, data set sizes are per thread) ---
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: Level              Cache size          Data sets used       Read      Write       Copy   GB/s
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: L1        128 KiB - 768 KiB *         4 KiB - 128 KiB      450.1      315.2      647.6
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: CPUMEM_LEVEL	mode=all	level=L1	cache_bytes=0	from_bytes=4096	to_bytes=131072	read_gbps=450.104	write_gbps=315.229	copy_gbps=647.580	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=425.766	read_high_gbps=458.117	from_curve=1	capacity_low_bytes=131072	capacity_high_bytes=786432	measured=1	settled=1
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: L2            6 MiB - 8 MiB *         768 KiB - 6 MiB      248.7      200.0      385.1
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine:          not flat: read ranges from 226.9 to 298.0 GB/s across these data sets
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: CPUMEM_LEVEL	mode=all	level=L2	cache_bytes=0	from_bytes=786432	to_bytes=6291456	read_gbps=248.684	write_gbps=199.958	copy_gbps=385.107	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=226.875	read_high_gbps=298.006	from_curve=1	capacity_low_bytes=6291456	capacity_high_bytes=8388608	measured=1	settled=1
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: L3          16 MiB - 24 MiB *          8 MiB - 16 MiB      203.4      219.7      322.5
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: CPUMEM_LEVEL	mode=all	level=L3	cache_bytes=0	from_bytes=8388608	to_bytes=16777216	read_gbps=203.364	write_gbps=219.661	copy_gbps=322.535	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=200.678	read_high_gbps=222.446	from_curve=1	capacity_low_bytes=16777216	capacity_high_bytes=25165824	measured=1	settled=1
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: Memory                      -         24 MiB - 64 MiB      163.3      212.5      191.4
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: CPUMEM_LEVEL	mode=all	level=memory	cache_bytes=0	from_bytes=25165824	to_bytes=67108864	read_gbps=163.285	write_gbps=212.454	copy_gbps=191.386	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=149.900	read_high_gbps=174.191	from_curve=1	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=1
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine:          * read off the curve, because the OS reports no size for this cache: its
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine:            capacity lies between the two data sets shown
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: --- Virtual memory ---
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: Mapping new pages: 5.02 GB/s, 815 ns per 4 KiB page (first write to every page of a 256 MiB region, one thread)
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: CPUMEM_PAGEFAULT	measured=1	page_bytes=4096	region_bytes=268435456	gbps=5.023	ns_per_page=815.435	transparent_huge_pages=0
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: --- Storage behind virtual memory ---
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: Paging target: swap of 2047 MiB, held by something this process may not see
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: Test file:     1 GiB in /data/storage/el2/base/haps/entry/files/, unbuffered I/O
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: Sequential 1 MiB:   read 4262 MB/s, write 1957 MB/s
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: Random 4 KiB, QD1:  read 60.7 MB/s (14813 IOPS), write 47.3 MB/s (11553 IOPS)
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: Paging issues random 4 KiB requests, so that line is the closer estimate of
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: how fast memory comes back from the drive.
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: CPUMEM_STORAGE	measured=1	backing=swap of 2047 MiB, held by something this process may not see	directory=/data/storage/el2/base/haps/entry/files/	on_paging_drive=0	direct_io=1	file_bytes=1073741824	seq_read_mbps=4262.1	seq_write_mbps=1957.0	rand_read_mbps=60.7	rand_write_mbps=47.3	rand_read_iops=14813.3	rand_write_iops=11553.2	skipped=
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: Note: write and copy use ordinary stores. Outside the caches every stored line is
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine:       first read from memory, so the memory traffic is 2x the write figure and 1.5x
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine:       the copy figure. Streaming stores skip that read.
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: Note: cache-level figures are limited by how fast the core issues 16-byte loads and
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine:       stores, so they depend on the vector size and the clock.
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: Note: 31 of 174 points were measured again because other activity on the machine
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine:       disturbed their first round.
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: CPUMEM_DONE	affinity=strict	remeasured_points=31	duration_sec=52.8
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: Duration:  52.8 s
+10-14 11:13:13.575  9880 13329 I A00000/MangekyoEngine: ==========================================================
+10-14 11:13:13.576  9880 13329 I A00000/MangekyoEngine: [Results] Saved as 20261014-111313-575-cpu-membw -> /data/storage/el2/base/haps/entry/files/results/results.json
+10-14 11:13:13.712  9880  9880 I A00000/Mangekyo: SUITE_RESULT	status=success	job=cpu-memory	reason= 
+10-14 11:13:13.712  9880  9880 I A00000/Mangekyo: SUITE_END	finished=2	total=2	review=0	failed=0	cancelled=false

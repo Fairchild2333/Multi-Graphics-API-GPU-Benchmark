@@ -1,0 +1,10 @@
+START 1/2 cpu_compute
+STATE cpu_compute ('running', 'running')
+STATE cpu_compute ('passed', 'passed')
+END cpu_compute passed ['20261014-214458-868-cpu-single-performance', '20261014-214458-904-cpu-single-efficiency', '20261014-214458-918-cpu-multi'] thermal=0->0 
+REST 20s
+START 2/2 cpu_memory
+STATE cpu_memory ('running', 'running')
+STATE cpu_memory ('passed', 'passed')
+END cpu_memory passed ['20261014-214819-212-cpu-membw'] thermal=0->0 
+DONE 2 jobs; archived /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a12x-targeted-retest-20261014/finalcpu-final

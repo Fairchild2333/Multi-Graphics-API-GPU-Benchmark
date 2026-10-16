@@ -1,0 +1,262 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "details",
+      "--device",
+      "00008120-000E2D3E0CEBC01E",
+      "--json-output",
+      "/tmp/mangekyo-new-iphone-details-20261016.json"
+    ],
+    "commandType" : "devicectl.device.info.details",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "_deprecationNotice" : {
+      "deprecatedFields" : [
+        "hardwareProperties",
+        "deviceProperties",
+        "connectionProperties"
+      ],
+      "message" : "The 'hardwareProperties', 'deviceProperties', 'connectionProperties' fields are deprecated and will be removed in a future release. Use the 'properties' dictionary instead.",
+      "replacement" : "properties"
+    },
+    "capabilities" : [
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.acquireusageassertion",
+        "name" : "Acquire Usage Assertion"
+      },
+      {
+        "featureIdentifier" : "com.apple.dt.serviceconnection.create",
+        "name" : "Create Service Connection"
+      },
+      {
+        "featureIdentifier" : "com.apple.dt.servicesocket.create",
+        "name" : "Create Service Socket"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.disconnectdevice",
+        "name" : "Disconnect from Device"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.enableddiservices",
+        "name" : "Enable Developer Disk Image Services"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.fetchdyldsharecache",
+        "name" : "Fetch dyld Shared Cache Files"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.getlockstate",
+        "name" : "Get Lock State"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.installapp",
+        "name" : "Install Application"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.default.user.credentials",
+        "name" : "Modify Credentials for Default Users for a Device"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.tags",
+        "name" : "Modify Tags"
+      },
+      {
+        "featureIdentifier" : "com.apple.dt.customer.postdarwinnotification",
+        "name" : "Post Darwin Notification"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.provisioningprofiles",
+        "name" : "Provisioning Profile Management"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.servicexpcpeerconnection",
+        "name" : "Service XPC Peer Connection"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.unpairdevice",
+        "name" : "Unpair Device"
+      },
+      {
+        "featureIdentifier" : "com.apple.coredevice.feature.viewdevicescreen",
+        "name" : "View Device Screen"
+      }
+    ],
+    "connectionProperties" : {
+      "authenticationType" : "manualPairing",
+      "isMobileDeviceOnly" : false,
+      "lastConnectionDate" : "2026-10-16T10:15:00.000Z",
+      "localHostnames" : [
+        "zhongguoyoujuguhuajiaozuo.coredevice.local",
+        "256C41DC-AC03-5FF9-9D3F-8FDFFC83CDBE.coredevice.local",
+        "00008120-000E2D3E0CEBC01E.coredevice.local"
+      ],
+      "pairingState" : "paired",
+      "potentialHostnames" : [
+        "zhongguoyoujuguhuajiaozuo.coredevice.local",
+        "256C41DC-AC03-5FF9-9D3F-8FDFFC83CDBE.coredevice.local",
+        "00008120-000E2D3E0CEBC01E.coredevice.local"
+      ],
+      "transportType" : "wired",
+      "tunnelIPAddress" : "fdf5:12a4:6e4::1",
+      "tunnelState" : "connected",
+      "tunnelTransportProtocol" : "tcp"
+    },
+    "deviceProperties" : {
+      "bootState" : "booted",
+      "ddiServicesAvailable" : false,
+      "developerModeStatus" : "disabled",
+      "hasInternalOSBuild" : false,
+      "name" : "中国有句古话叫做",
+      "osBuildUpdate" : "24A446",
+      "osVersionNumber" : "27.0.1",
+      "screenViewingURL" : "devices://device/open?id=256C41DC-AC03-5FF9-9D3F-8FDFFC83CDBE"
+    },
+    "hardwareProperties" : {
+      "cpuType" : {
+        "name" : "arm64e",
+        "subType" : -2147483646,
+        "type" : 16777228
+      },
+      "deviceType" : "iPhone",
+      "ecid" : 3990394201948190,
+      "hardwareModel" : "D74AP",
+      "isProductionFused" : true,
+      "marketingName" : "iPhone 14 Pro Max",
+      "platform" : "iOS",
+      "productType" : "iPhone15,3",
+      "reality" : "physical",
+      "serialNumber" : "JNVGX4F1YP",
+      "supportedCPUTypes" : [
+        {
+          "name" : "arm64e",
+          "subType" : -2147483646,
+          "type" : 16777228
+        },
+        {
+          "name" : "arm64",
+          "subType" : 0,
+          "type" : 16777228
+        }
+      ],
+      "supportedDeviceFamilies" : [
+        1
+      ],
+      "thinningProductType" : "iPhone15,3",
+      "udid" : "00008120-000E2D3E0CEBC01E"
+    },
+    "identifier" : "256C41DC-AC03-5FF9-9D3F-8FDFFC83CDBE",
+    "properties" : {
+      "connection" : {
+        "authenticationType" : "manualPairing",
+        "lastConnectionDate" : 813838500,
+        "pairingState" : "paired",
+        "screenViewingURL" : {
+          "relative" : "devices://device/open?id=256C41DC-AC03-5FF9-9D3F-8FDFFC83CDBE"
+        },
+        "state" : "connected",
+        "transportType" : "wired",
+        "tunnelIPAddressString" : "fdf5:12a4:6e4::1",
+        "tunnelTransportProtocol" : "tcp"
+      },
+      "hardware" : {
+        "cpuType" : {
+          "subtype" : 18446744071562067970,
+          "type" : 16777228
+        },
+        "deviceType" : "iPhone",
+        "ecid" : 3990394201948190,
+        "marketingName" : "iPhone 14 Pro Max",
+        "platform" : "iOS",
+        "productType" : "iPhone15,3",
+        "reality" : "physical",
+        "serialNumber" : "JNVGX4F1YP",
+        "supportedCPUTypes" : [
+          {
+            "subtype" : 18446744071562067970,
+            "type" : 16777228
+          },
+          {
+            "subtype" : 0,
+            "type" : 16777228
+          }
+        ],
+        "supportedDeviceFamilies" : [
+          1
+        ],
+        "thinningProductType" : "iPhone15,3",
+        "udid" : "00008120-000E2D3E0CEBC01E"
+      },
+      "software" : {
+        "osBuildVersions" : {
+          "buildVersion" : {
+            "majorLetterComponent" : "A",
+            "majorNumberComponent" : 24,
+            "name" : "24A446",
+            "revisionVersion" : {
+              "components" : [
+                24,
+                1,
+                446,
+                0,
+                0
+              ],
+              "originalComponentsCount" : 5,
+              "stringValue" : "24.1.446.0.0"
+            },
+            "trainProgram" : "iOS",
+            "updateNumberComponent" : 446
+          },
+          "supplementalBuildVersion" : {
+            "majorLetterComponent" : "A",
+            "majorNumberComponent" : 24,
+            "name" : "24A446",
+            "revisionVersion" : {
+              "components" : [
+                24,
+                1,
+                446,
+                0,
+                0
+              ],
+              "originalComponentsCount" : 5,
+              "stringValue" : "24.1.446.0.0"
+            },
+            "trainProgram" : "iOS",
+            "updateNumberComponent" : 446
+          }
+        },
+        "osVersionNumber" : {
+          "components" : [
+            27,
+            0,
+            1,
+            0,
+            0
+          ],
+          "originalComponentsCount" : 3,
+          "stringValue" : "27.0.1"
+        }
+      },
+      "state" : {
+        "bootState" : "booted",
+        "developerModeStatus" : {
+          "disabled" : {
+
+          }
+        },
+        "name" : "中国有句古话叫做"
+      }
+    },
+    "propertyDisplayNames" : null,
+    "visibilityClass" : "default"
+  }
+}

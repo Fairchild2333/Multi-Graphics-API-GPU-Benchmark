@@ -1,0 +1,115 @@
+{
+  "finishedAt": "2026-10-16T08:56:43Z",
+  "id": "complete-suite-D50381FA-B135-4EDE-A020-064D35DBFDD5",
+  "jobs": [
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T08:54:30Z",
+      "id": "stream-1048576",
+      "request": "stream?particles=1048576&vsync=0&api=metal&coverage=fixed",
+      "resultIDs": [
+        "20261016-195430-532"
+      ],
+      "startedAt": "2026-10-16T08:54:15Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 Particle 1048576 \u00b7 Render"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T08:54:47Z",
+      "id": "stream-4194304",
+      "request": "stream?particles=4194304&vsync=0&api=metal&coverage=fixed",
+      "resultIDs": [
+        "20261016-195446-899"
+      ],
+      "startedAt": "2026-10-16T08:54:31Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 Particle 4194304 \u00b7 Render"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T08:55:05Z",
+      "id": "stream-16777216",
+      "request": "stream?particles=16777216&vsync=0&api=metal&coverage=fixed",
+      "resultIDs": [
+        "20261016-195504-980"
+      ],
+      "startedAt": "2026-10-16T08:54:47Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 Particle 16777216 \u00b7 Render"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T08:55:21Z",
+      "id": "vulkan/stream-1048576",
+      "request": "stream?particles=1048576&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs": [
+        "20261016-195521-226"
+      ],
+      "startedAt": "2026-10-16T08:55:06Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Vulkan (MoltenVK) \u00b7 Particle 1048576 \u00b7 Render"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T08:55:38Z",
+      "id": "vulkan/stream-4194304",
+      "request": "stream?particles=4194304&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs": [
+        "20261016-195537-852"
+      ],
+      "startedAt": "2026-10-16T08:55:22Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Vulkan (MoltenVK) \u00b7 Particle 4194304 \u00b7 Render"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T08:55:56Z",
+      "id": "vulkan/stream-16777216",
+      "request": "stream?particles=16777216&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs": [
+        "20261016-195556-067"
+      ],
+      "startedAt": "2026-10-16T08:55:38Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Vulkan (MoltenVK) \u00b7 Particle 16777216 \u00b7 Render"
+    },
+    {
+      "error": "",
+      "expectedRecords": 3,
+      "finishedAt": "2026-10-16T08:56:43Z",
+      "id": "cpu_compute",
+      "request": "gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2",
+      "resultIDs": [
+        "20261016-195643-008-cpu-single-performance",
+        "20261016-195643-019-cpu-single-efficiency",
+        "20261016-195643-025-cpu-multi"
+      ],
+      "startedAt": "2026-10-16T08:55:57Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "CPU Compute \u00b7 Performance + Efficiency + All Cores"
+    }
+  ],
+  "startedAt": "2026-10-16T08:54:15Z",
+  "status": "passed"
+}

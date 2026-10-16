@@ -1,0 +1,9 @@
+{
+  "scope": "CPU",
+  "total": 2,
+  "finished": 0,
+  "review": 0,
+  "failed": 1,
+  "cancelled": true,
+  "jobs": []
+}

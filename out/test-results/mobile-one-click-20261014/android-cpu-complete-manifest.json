@@ -1,0 +1,38 @@
+{
+  "scope": "CPU",
+  "total": 2,
+  "finished": 2,
+  "review": 0,
+  "failed": 0,
+  "cooldownPolicy": "30s_pause_and_android29_thermal_when_available",
+  "plannedJobIDs": [
+    "cpu-compute",
+    "cpu-memory"
+  ],
+  "cancelled": false,
+  "jobs": [
+    {
+      "id": "cpu-compute",
+      "status": "success",
+      "error": "",
+      "thermalStart": 0,
+      "thermalEnd": 0,
+      "reviewReasons": [],
+      "resultIDs": [
+        "20261014-141149-850-cpu-single",
+        "20261014-141149-852-cpu-multi"
+      ]
+    },
+    {
+      "id": "cpu-memory",
+      "status": "success",
+      "error": "",
+      "thermalStart": 0,
+      "thermalEnd": 0,
+      "reviewReasons": [],
+      "resultIDs": [
+        "20261014-141252-659-cpu-membw"
+      ]
+    }
+  ]
+}

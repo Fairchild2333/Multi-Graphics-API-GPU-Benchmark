@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "2026-10-14T10:10:44Z",
+  "id" : "complete-suite-8231C513-12AE-4F24-B9F0-01A6E35E46D3",
+  "jobs" : [
+    {
+      "error" : "Stable throughput was not reached",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-14T10:10:43Z",
+      "id" : "stream-16777216",
+      "request" : "stream?particles=16777216&vsync=0&api=metal&coverage=fixed",
+      "resultIDs" : [
+        "20261014-211043-370"
+      ],
+      "startedAt" : "2026-10-14T10:10:25Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 16777216 · Render"
+    }
+  ],
+  "startedAt" : "2026-10-14T10:10:25Z",
+  "status" : "review"
+}

@@ -1,0 +1,7 @@
+{
+  "jobsCompleted": 31,
+  "physicalManifestStatus": "review",
+  "testCaseStatus": "failed_due_to_review",
+  "hostFinalization": "stalled_after_test_case_end; interrupted then terminated",
+  "nativeArchivePreserved": true
+}

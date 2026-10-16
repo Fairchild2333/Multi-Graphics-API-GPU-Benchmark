@@ -1,0 +1,62 @@
+[  5%] Built target glad_gl43
+[ 54%] Built target glfw
+[ 60%] Building CXX object CMakeFiles/gpu_engine.dir/src/vulkan_membw.cpp.o
+[ 60%] Building CXX object CMakeFiles/gpu_engine.dir/src/vulkan_membw_results.cpp.o
+[ 60%] Building CXX object CMakeFiles/gpu_engine.dir/src/main.cpp.o
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw.cpp:1:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw.h:3:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+  204 | #  warning "The selected platform is no longer suIn file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw_results.cpp:1In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cppppo:1:
+In file included from rte/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/app_base.h:3d b:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw_results.h:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/gpu_common.h:3:2:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/benchmark_results.h:3:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:204:4y libc++."
+      |    ^
+: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+:146  204 | #  wa:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configrning "T:15:
+he selected platform is no longer suppor/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: ted by lib"The selected platform is no longer supported by libc++." [-W#warnings]
+c++."
+      |    ^
+  204 | #  warning "The selected platform is no longer supported by libc++."
+      |    ^
+1 warning generated.
+1 warning generated.
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:434:20: warning: unused function 'QuoteSuiteProcessArg' [-Wunused-function]
+  434 | static std::string QuoteSuiteProcessArg(const std::string& value) {
+      |                    ^~~~~~~~~~~~~~~~~~~~
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:454:13: warning: unused function 'NameLooksIntegrated' [-Wunused-function]
+  454 | static bool NameLooksIntegrated(const std::string& name) {
+      |             ^~~~~~~~~~~~~~~~~~~
+3 warnings generated.
+[ 62%] Linking CXX static library libgpu_engine.a
+[100%] Built target gpu_engine
+[  0%] Building CXX object CMakeFiles/vulkan_membw_results_test.dir/src/vulkan_membw_results.cpp.o
+[ 20%] Building CXX object CMakeFiles/vulkan_membw_results_test.dir/tests/vulkan_membw_results_test.cpp.o
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw_results.cpp:1In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/tests/vulkan_membw_results_test.cpp:1:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw_results.h:2:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/benchmark_results.h:3:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw_results.h:2:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/benchmark_results.h:3:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+  204 | #    204 | #warning "The selected platform  warni is no longer sung "The selecpported by libc++.ted platform is no longer supported by libc++"
+      |    ^
+."
+      |    ^
+1 warning generated.
+1 warning generated.
+[ 40%] Linking CXX executable vulkan_membw_results_test
+[100%] Built target vulkan_membw_results_test
+make: *** No rule to make target `shaders'.  Stop.

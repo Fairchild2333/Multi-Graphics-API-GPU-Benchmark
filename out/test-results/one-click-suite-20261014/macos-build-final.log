@@ -1,0 +1,112 @@
+Configuring Metal/OpenGL engine (macOS 12.0, arm64)...
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/install_name_tool: warning: changes being made to the file will invalidate the code signature in: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/build/macos-arm64-Release/translated/libMoltenVK.dylib
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/build/macos-arm64-Release/translated/libMoltenVK.dylib: replacing existing signature
+-- Including Cocoa support
+-- GLFW: source build (inherits deployment target 12.0)
+-- Vulkan backend: ENABLED
+-- DX12 backend:   DISABLED (by option)
+-- DX11 backend:   DISABLED (by option)
+-- Metal backend:  ENABLED
+-- OpenGL backend: ENABLED
+-- Configuring done (0.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/build/macos-arm64-release
+[ 16%] Built target glad_gl43
+[ 47%] Built target compile_glsl
+[ 50%] Built target result_quality_test
+[ 50%] Built target complete_suite_test
+[ 51%] Built target cpu_residency_test
+[ 52%] Building CXX object CMakeFiles/suite_process_test.dir/src/suite_process.cpp.o
+[ 56%] Built target results_compat_test
+[ 61%] Built target vulkan_membw_results_test
+[ 79%] Built target glfw
+[ 80%] Building CXX object CMakeFiles/gpu_engine.dir/src/suite_process.cpp.o
+[ 81%] Linking CXX executable suite_process_test
+[ 82%] Built target suite_process_test
+[ 83%] Linking CXX static library libgpu_engine.a
+[ 98%] Built target gpu_engine
+[ 98%] Linking CXX executable gpu_benchmark
+Copying SPIR-V files next to executable
+Copying Metal shader files next to executable
+Copying OpenGL GLSL shader files next to executable
+[100%] Built target gpu_benchmark
+Building SwiftUI app...
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/macos-gui/GPUBenchmark.xcodeproj" -scheme GPUBenchmark -configuration Release -derivedDataPath "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-Release" -destination generic/platform=macOS ARCHS=arm64 ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO MACOSX_DEPLOYMENT_TARGET=12.0 "GPU_BENCH_NATIVE_LIB_DIR=/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/build/macos-arm64-Release" "GPU_BENCH_GLFW_LIB_DIR=/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/build/macos-arm64-Release/_deps/glfw-build/src" GPU_BENCH_TRANSLATED_LDFLAGS=-lMoltenVK build
+
+Build settings from command line:
+    ARCHS = arm64
+    CODE_SIGNING_ALLOWED = NO
+    GPU_BENCH_GLFW_LIB_DIR = /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/build/macos-arm64-Release/_deps/glfw-build/src
+    GPU_BENCH_NATIVE_LIB_DIR = /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/build/macos-arm64-Release
+    GPU_BENCH_TRANSLATED_LDFLAGS = -lMoltenVK
+    MACOSX_DEPLOYMENT_TARGET = 12.0
+    ONLY_ACTIVE_ARCH = NO
+
+2026-10-14 03:55:42.986 xcodebuild[74260:1130295] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (1 target)
+    Target 'GPUBenchmark' in project 'GPUBenchmark' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/macos-gui/GPUBenchmark.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+
+Ld /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app/Contents/MacOS/Mangekyo normal (in target 'GPUBenchmark' from project 'GPUBenchmark')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/macos-gui
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ -Xlinker -reproducible -target arm64-apple-macos12.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -Os -Xlinker -no_warn_duplicate_libraries -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/EagerLinkingTBDs/Release -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/build/macos-arm64-Release -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/build/macos-arm64-Release/_deps/glfw-build/src -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/build/macos-arm64-Release/translated -F/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/EagerLinkingTBDs/Release -F/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release -filelist /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/GPUBenchmark.build/Release/GPUBenchmark.build/Objects-normal/arm64/Mangekyo.LinkFileList -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @executable_path/../Frameworks -Xlinker -object_path_lto -Xlinker /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/GPUBenchmark.build/Release/GPUBenchmark.build/Objects-normal/arm64/Mangekyo_lto.o -Xlinker -dependency_info -Xlinker /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/GPUBenchmark.build/Release/GPUBenchmark.build/Objects-normal/arm64/Mangekyo_dependency_info.dat -stdlib\=libc++ -fobjc-arc -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/GPUBenchmark.build/Release/GPUBenchmark.build/Objects-normal/arm64/Mangekyo.swiftmodule -lgpu_engine -lglfw3 -lglad_gl43 -lMoltenVK -framework OpenGL -framework Metal -framework QuartzCore -framework Cocoa -framework CoreFoundation -framework Foundation -framework IOKit -weak_framework Charts -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app/Contents/MacOS/Mangekyo
+
+GenerateDSYMFile /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app.dSYM /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app/Contents/MacOS/Mangekyo (in target 'GPUBenchmark' from project 'GPUBenchmark')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/macos-gui
+    export PATH\=/Applications/Xcode.app/Contents/SharedFrameworks/SwiftBuild.framework/Versions/A/PlugIns/SWBBuildService.bundle/Contents/PlugIns/SWBUniversalPlatformPlugin.bundle/Contents/Frameworks/SWBUniversalPlatform.framework/Resources:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec:/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/usr/local/bin:/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/local/bin:/Applications/Xcode.app/Contents/Developer/usr/bin:/Applications/Xcode.app/Contents/Developer/usr/local/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/fairchild/.grok/bin:/Users/fairchild/.antigravity-ide/antigravity-ide/bin:/opt/homebrew/opt/postgresql@18/bin:/Users/fairchild/.antigravity/antigravity/bin:/Users/fairchild/.local/bin:/opt/homebrew/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Library/Apple/usr/bin:/Library/TeX/texbin:/Users/fairchild/.codex/tmp/arg0/codex-arg0gX5TaO:/Users/fairchild/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/opt/anaconda3/condabin:/Users/fairchild/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/dsymutil /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app/Contents/MacOS/Mangekyo -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app.dSYM
+
+CopySwiftLibs /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app (in target 'GPUBenchmark' from project 'GPUBenchmark')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/macos-gui
+    builtin-swiftStdLibTool --copy --verbose --scan-executable /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app/Contents/MacOS/Mangekyo --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app/Contents/Frameworks --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app/Contents/PlugIns --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app/Contents/Library/SystemExtensions --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app/Contents/Extensions --platform macosx --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app/Contents/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/GPUBenchmark.build/Release/GPUBenchmark.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+Ignoring --strip-bitcode because --sign was not passed
+
+ExtractAppIntentsMetadata (in target 'GPUBenchmark' from project 'GPUBenchmark')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/macos-gui
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name Mangekyo --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk --xcode-version 27A266a --platform-family macOS --deployment-target 12.0 --bundle-identifier com.fairchild.GPUBenchmark --output /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app/Contents/Resources --target-triple arm64-apple-macos12.0 --binary-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Products/Release/Mangekyo.app/Contents/MacOS/Mangekyo --dependency-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/GPUBenchmark.build/Release/GPUBenchmark.build/Objects-normal/arm64/Mangekyo_dependency_info.dat --stringsdata-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/GPUBenchmark.build/Release/GPUBenchmark.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/GPUBenchmark.build/Release/GPUBenchmark.build/Objects-normal/arm64/Mangekyo.SwiftFileList --metadata-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/GPUBenchmark.build/Release/GPUBenchmark.build/Mangekyo.DependencyMetadataFileList --static-metadata-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/GPUBenchmark.build/Release/GPUBenchmark.build/Mangekyo.DependencyStaticMetadataFileList --swift-const-vals-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/GPUBenchmark.build/Release/GPUBenchmark.build/Objects-normal/arm64/Mangekyo.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-10-14 03:55:43.409 appintentsmetadataprocessor[74272:1130435] Starting appintentsmetadataprocessor export
+2026-10-14 03:55:43.410 appintentsmetadataprocessor[74272:1130435] warning: Metadata extraction skipped, no AppIntents.framework dependency found
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/xcode/macos-arm64-release/SDKExplicitPrecompiledModules
+
+** BUILD SUCCEEDED **
+
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/.Mangekyo-stage.2HlXdj/Mangekyo.app/Contents/Frameworks/libMoltenVK.dylib: replacing existing signature
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/.Mangekyo-stage.2HlXdj/Mangekyo.app/Contents/Helpers/gpu_benchmark: replacing existing signature
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/.Mangekyo-stage.2HlXdj/Mangekyo.app: replacing existing signature
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/.Mangekyo-stage.2HlXdj/Mangekyo.app: valid on disk
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/.Mangekyo-stage.2HlXdj/Mangekyo.app: satisfies its Designated Requirement
+
+macOS build complete:
+  App: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app
+  CLI: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark
+  Version: 0.2.6
+  Architecture: arm64
+  API: Metal + native OpenGL 4.1 GPU Burn
+  Minimum OS: macOS 12.0
+  Signing: - (not notarized)
+  Runtime: native CLI help + Metal enumeration passed

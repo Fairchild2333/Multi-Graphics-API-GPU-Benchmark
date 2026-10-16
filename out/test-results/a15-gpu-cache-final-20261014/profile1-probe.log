@@ -1,0 +1,14 @@
+Starting recording with the limiters-profile1 template. Targeting All Processes. Time limit: 8.0 s
+Ctrl-C to stop the recording
+Reached specified time limit, ending recording...
+Timeline modification failed -- dylibs overlap by 0x10d0:
+    0x1c6f78000-0x1c6f790d0 [0x10d0] (15671806195936-9223372036854775807) /Users/fairchild/Library/Developer/Xcode/iOS DeviceSupport/iPhone14,2 27.0.1 (24A446)/arm64e/Symbols/usr/lib/objc/libobjcMsgSend5.dylib
+    0x1c6f78000-0x1c6f790d0 [0x10d0] (0-9223372036854775807) /usr/lib/objc/libobjcMsgSend5.dylib
+Timeline modification failed -- dylibs overlap by 0x28fc0:
+    0x1a6f2a000-0x1a6f52fc0 [0x28fc0] (15671806188970-9223372036854775807) /Users/fairchild/Library/Developer/Xcode/iOS DeviceSupport/iPhone14,2 27.0.1 (24A446)/arm64e/Symbols/usr/lib/system/libsystem_info.dylib
+    0x1a6f2a000-0x1a6f52fc0 [0x28fc0] (0-9223372036854775807) /usr/lib/system/libsystem_info.dylib
+Run issues were detected (trace is still ready to be viewed):
+* [Warning] GPU Service reported error: Selected counter profile is not supported on target device
+
+Recording completed. Saving output file...
+Output file saved as: profile1-probe.trace

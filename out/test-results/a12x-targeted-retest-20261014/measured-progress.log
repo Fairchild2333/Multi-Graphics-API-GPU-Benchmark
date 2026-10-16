@@ -1,0 +1,66 @@
+START 1/14 stream-65536
+STATE stream-65536 ('running', 'running')
+STATE stream-65536 ('running', 'passed')
+STATE stream-65536 ('passed', 'passed')
+END stream-65536 passed ['20261014-210824-830'] thermal=0->0 
+REST 20s
+START 2/14 stream-1048576
+STATE stream-1048576 ('running', 'running')
+STATE stream-1048576 ('passed', 'passed')
+END stream-1048576 passed ['20261014-210918-754'] thermal=0->0 
+REST 20s
+START 3/14 stream-4194304
+STATE stream-4194304 ('running', 'running')
+STATE stream-4194304 ('passed', 'passed')
+END stream-4194304 passed ['20261014-210959-613'] thermal=0->0 
+REST 20s
+START 4/14 stream-16777216
+STATE stream-16777216 ('running', 'running')
+STATE stream-16777216 ('review', 'review')
+END stream-16777216 review ['20261014-211043-370'] thermal=0->0 Stable throughput was not reached
+REST 20s
+START 5/14 vulkan/stream-65536
+STATE vulkan/stream-65536 ('running', 'running')
+STATE vulkan/stream-65536 ('passed', 'passed')
+END vulkan/stream-65536 passed ['20261014-211124-330'] thermal=0->0 
+REST 20s
+START 6/14 vulkan/stream-1048576
+STATE vulkan/stream-1048576 ('running', 'running')
+STATE vulkan/stream-1048576 ('passed', 'passed')
+END vulkan/stream-1048576 passed ['20261014-211205-966'] thermal=0->0 
+REST 20s
+START 7/14 vulkan/stream-4194304
+STATE vulkan/stream-4194304 ('running', 'running')
+STATE vulkan/stream-4194304 ('review', 'review')
+END vulkan/stream-4194304 review ['20261014-211250-495'] thermal=0->0 Stable throughput was not reached
+REST 20s
+START 8/14 vulkan/stream-16777216
+STATE vulkan/stream-16777216 ('running', 'running')
+STATE vulkan/stream-16777216 ('review', 'review')
+END vulkan/stream-16777216 review ['20261014-211340-944'] thermal=0->0 Stable throughput was not reached; Throughput fell by more than 5%
+REST 20s
+START 9/14 vulkan/gpu_burn-16
+STATE vulkan/gpu_burn-16 ('running', 'running')
+STATE vulkan/gpu_burn-16 ('passed', 'passed')
+END vulkan/gpu_burn-16 passed ['20261014-211424-270'] thermal=0->0 
+REST 20s
+START 10/14 vulkan/gpu_burn-64
+STATE vulkan/gpu_burn-64 ('running', 'running')
+STATE vulkan/gpu_burn-64 ('passed', 'passed')
+END vulkan/gpu_burn-64 passed ['20261014-211507-642'] thermal=0->0 
+REST 20s
+START 11/14 vulkan/gpu_burn-256
+STATE vulkan/gpu_burn-256 ('running', 'running')
+STATE vulkan/gpu_burn-256 ('passed', 'passed')
+END vulkan/gpu_burn-256 passed ['20261014-211552-893'] thermal=0->0 
+REST 20s
+START 12/14 vulkan/memory_sweep
+STATE vulkan/memory_sweep ('failed', 'failed')
+END vulkan/memory_sweep failed [] thermal=0->0 Vulkan timestamps became unreliable during the sweep; mixed timing is rejected and no score is saved
+Traceback (most recent call last):
+  File "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a12x-targeted-retest-20261014/run_targeted.py", line 86, in <module>
+    main()
+    ~~~~^^
+  File "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a12x-targeted-retest-20261014/run_targeted.py", line 75, in main
+    raise RuntimeError(f"Measurement failed: {job}")
+RuntimeError: Measurement failed: vulkan/memory_sweep

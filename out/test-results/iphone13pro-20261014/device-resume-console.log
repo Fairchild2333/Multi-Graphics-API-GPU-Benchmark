@@ -1,0 +1,8 @@
+Launched application with com.fairchild.Mangekyo bundle identifier.
+Waiting for the application to terminate…
+IOS_SUITE_START 15/15 cpu_memory
+IOS_SUITE_END 15/15 cpu_memory passed
+IOS_SUITE_DONE passed 15/15
+2026-10-14 00:51:48.658 Mangekyo[37642:6984321] Successfully load keyboard extensions
+Charts: Custom UnitPoint values are not supported in AxisValueLabel's anchor property. Please use leading, topLeading, center, etc.
+App terminated due to signal 9.

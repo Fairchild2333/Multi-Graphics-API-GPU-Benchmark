@@ -1,0 +1,89 @@
+Reusing configuration cache.
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:compileDebugKotlin
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:configureCMakeDebug[arm64-v8a] FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:configureCMakeDebug[arm64-v8a]' (registered by plugin 'com.android.internal.application').
+> [CXX1428] exception while building Json A problem occurred starting process 'command '/Users/fairchild/Library/Android/sdk/cmake/3.22.1/bin/cmake'' : org.gradle.process.ProcessExecutionException: A problem occurred starting process 'command '/Users/fairchild/Library/Android/sdk/cmake/3.22.1/bin/cmake''
+  	at org.gradle.process.internal.DefaultExecHandle.execExceptionFor(DefaultExecHandle.java:245)
+  	at org.gradle.process.internal.DefaultExecHandle.setEndStateInfo(DefaultExecHandle.java:222)
+  	at org.gradle.process.internal.DefaultExecHandle.failed(DefaultExecHandle.java:412)
+  	at org.gradle.process.internal.ExecHandleRunner.lambda$run$3(ExecHandleRunner.java:181)
+  	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:84)
+  	at org.gradle.process.internal.ExecHandleRunner.run(ExecHandleRunner.java:180)
+  	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+  	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
+  	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+  	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+  	at java.base/java.lang.Thread.run(Unknown Source)
+  Caused by: net.rubygrapefruit.platform.NativeException: Could not start '/Users/fairchild/Library/Android/sdk/cmake/3.22.1/bin/cmake'
+  	at net.rubygrapefruit.platform.internal.DefaultProcessLauncher.start(DefaultProcessLauncher.java:27)
+  	at net.rubygrapefruit.platform.internal.WrapperProcessLauncher.start(WrapperProcessLauncher.java:36)
+  	at org.gradle.process.internal.ExecHandleRunner.startProcess(ExecHandleRunner.java:201)
+  	at org.gradle.process.internal.ExecHandleRunner.lambda$run$0(ExecHandleRunner.java:159)
+  	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:84)
+  	at org.gradle.process.internal.ExecHandleRunner.run(ExecHandleRunner.java:158)
+  	... 5 more
+  Caused by: java.io.IOException: Cannot run program "/Users/fairchild/Library/Android/sdk/cmake/3.22.1/bin/cmake" (in directory "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/android/app"): Failed to exec spawn helper: pid: 5511, exit code: 1, error: 0 (none) 
+  Possible reasons:
+    - Spawn helper ran into JDK version mismatch
+    - Spawn helper ran into unexpected internal error
+    - Spawn helper was terminated by another process
+  Possible solutions:
+    - Restart JVM, especially after in-place JDK updates
+    - Check system logs for JDK-related errors
+    - Re-install JDK to fix permission/versioning problems
+    - Switch to legacy launch mechanism with -Djdk.lang.Process.launchMechanism=FORK
+  
+  	at java.base/java.lang.ProcessBuilder.start(Unknown Source)
+  	at java.base/java.lang.ProcessBuilder.start(Unknown Source)
+  	at net.rubygrapefruit.platform.internal.DefaultProcessLauncher.start(DefaultProcessLauncher.java:25)
+  	... 10 more
+  Caused by: java.io.IOException: Failed to exec spawn helper: pid: 5511, exit code: 1, error: 0 (none) 
+  Possible reasons:
+    - Spawn helper ran into JDK version mismatch
+    - Spawn helper ran into unexpected internal error
+    - Spawn helper was terminated by another process
+  Possible solutions:
+    - Restart JVM, especially after in-place JDK updates
+    - Check system logs for JDK-related errors
+    - Re-install JDK to fix permission/versioning problems
+    - Switch to legacy launch mechanism with -Djdk.lang.Process.launchMechanism=FORK
+  
+  	at java.base/java.lang.ProcessImpl.forkAndExec(Native Method)
+  	at java.base/java.lang.ProcessImpl.<init>(Unknown Source)
+  	at java.base/java.lang.ProcessImpl.start(Unknown Source)
+  	... 13 more
+
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1s
+18 actionable tasks: 2 executed, 16 up-to-date
+Configuration cache entry reused.

@@ -1,0 +1,26 @@
+[
+  {
+    "test": "cpu",
+    "exitCode": 0
+  },
+  {
+    "test": "cpu-memory",
+    "exitCode": 0
+  },
+  {
+    "test": "metal-headless",
+    "exitCode": 0
+  },
+  {
+    "test": "metal-burn",
+    "exitCode": 0
+  },
+  {
+    "test": "metal-liquid",
+    "exitCode": 0
+  },
+  {
+    "test": "metal-memory",
+    "exitCode": 0
+  }
+]

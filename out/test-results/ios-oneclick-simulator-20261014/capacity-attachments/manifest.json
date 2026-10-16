@@ -1,0 +1,17 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "53987196-51C0-4920-B6E9-3620653551F9",
+        "deviceName" : "iPhone 16 Pro",
+        "exportedFileName" : "3DF60E26-8410-48B2-847A-8008918F0D11.txt",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Runtime Vulkan particle capacity_0_57910A53-2F41-4638-8947-86F4A8AA2E3F.txt",
+        "timestamp" : 1791961176.161
+      }
+    ],
+    "testIdentifier" : "CpuBridgeTests/testVulkanRuntimeParticleCapacity()",
+    "testIdentifierURL" : "test://com.apple.xcode/Mangekyo/MangekyoTests/CpuBridgeTests/testVulkanRuntimeParticleCapacity"
+  }
+]

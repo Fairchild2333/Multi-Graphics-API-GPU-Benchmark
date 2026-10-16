@@ -1,0 +1,35 @@
+{
+  "gui_core_selector_removed": true,
+  "gui_default_mode": "single-thread + all-core",
+  "cli_extra_core_flag_removed": true,
+  "default_engine_core_types": "both where supported",
+  "default_no_flag_smokes": [
+    {
+      "name": "default-compute",
+      "exit": 0,
+      "note": "No core flags: P + E + 14-thread all-core passed"
+    },
+    {
+      "name": "short-all-core",
+      "exit": 0,
+      "note": "No core flags: short 14-thread multi-only passed"
+    },
+    {
+      "name": "cache-only-default",
+      "exit": 0,
+      "note": "Default P/E cache scans and all-core scan completed; limited to 1 MiB, an unsettled preview, not a full DRAM measurement; no-save"
+    }
+  ],
+  "background_short_sample_retries_auto_extend": true,
+  "builds": [
+    "macOS arm64",
+    "macOS x86_64",
+    "iOS device",
+    "iOS simulator"
+  ],
+  "ctest": "4/4",
+  "main_results_unchanged": {
+    "count": 137,
+    "sha256": "b6284e581490616bb5892ff58ba3f19bdc4dd507086ff181ac2424b0083c96cf"
+  }
+}

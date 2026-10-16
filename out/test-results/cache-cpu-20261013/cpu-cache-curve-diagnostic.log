@@ -1,0 +1,390 @@
+
+========== CPU Memory Bandwidth Sweep (cpu_membw_v1) ==========
+CPU:       Apple M4 Pro (14 cores / 14 threads)
+Vectors:   NEON, 16-byte loads and stores
+Caches:    sizes not reported by the OS; levels are read off the curve
+Memory:    48.0 GiB installed, 18.3 GiB free
+Sweep:     4 KiB - 1 GiB on one thread; 4 KiB - 256 MiB per thread on 14 threads
+Timing:    wall clock, 2 warm-up + 7 measured samples of 10 ms per point, median reported
+CPUMEM_META	name=Apple M4 Pro	vector=NEON	vector_bytes=16	physical_count=14	logical_count=14	all_threads=14	reference_logical_index=1	class_count=1	cache_source=curve
+CPUMEM_CLASS	rank=0	mode=single	name=Unclassified	cores=14	reference_logical_index=1	cache_source=curve
+
+[single] one thread on logical processor 1
+    Data set       Read      Write       Copy   Write NT    Copy NT  Zero fill   GB/s (median)
+       4 KiB      129.1      125.9      235.4          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=4096	threads=1	median_gbps=129.095	best_gbps=129.238
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=4096	threads=1	median_gbps=125.931	best_gbps=127.226
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=4096	threads=1	median_gbps=235.383	best_gbps=235.837
+CPUMEM_PROGRESS	mode=single	fraction=0.0149
+       8 KiB      128.3      120.7      233.3          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=8192	threads=1	median_gbps=128.297	best_gbps=129.105
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=8192	threads=1	median_gbps=120.651	best_gbps=126.697
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=8192	threads=1	median_gbps=233.257	best_gbps=236.650
+CPUMEM_PROGRESS	mode=single	fraction=0.0299
+      16 KiB      128.9      111.9      206.7          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=16384	threads=1	median_gbps=128.856	best_gbps=129.314
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=16384	threads=1	median_gbps=111.858	best_gbps=128.478
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=16384	threads=1	median_gbps=206.714	best_gbps=229.682
+CPUMEM_PROGRESS	mode=single	fraction=0.0448
+      24 KiB      128.1      115.6      181.2          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=24576	threads=1	median_gbps=128.094	best_gbps=129.581
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=24576	threads=1	median_gbps=115.612	best_gbps=128.354
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=24576	threads=1	median_gbps=181.174	best_gbps=210.803
+CPUMEM_PROGRESS	mode=single	fraction=0.0597
+      32 KiB      128.2      102.7      189.8          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=32768	threads=1	median_gbps=128.156	best_gbps=129.549
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=32768	threads=1	median_gbps=102.691	best_gbps=118.083
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=32768	threads=1	median_gbps=189.847	best_gbps=206.247
+CPUMEM_PROGRESS	mode=single	fraction=0.0746
+      48 KiB      127.5      108.7      171.8          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=49152	threads=1	median_gbps=127.519	best_gbps=128.789
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=49152	threads=1	median_gbps=108.686	best_gbps=120.240
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=49152	threads=1	median_gbps=171.778	best_gbps=197.264
+CPUMEM_PROGRESS	mode=single	fraction=0.0896
+      64 KiB      128.3      113.0      191.6          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=65536	threads=1	median_gbps=128.259	best_gbps=129.141
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=65536	threads=1	median_gbps=112.982	best_gbps=125.271
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=65536	threads=1	median_gbps=191.560	best_gbps=239.529
+CPUMEM_PROGRESS	mode=single	fraction=0.1045
+      96 KiB      128.7      117.4      228.1          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=98304	threads=1	median_gbps=128.668	best_gbps=129.543
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=98304	threads=1	median_gbps=117.384	best_gbps=120.472
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=98304	threads=1	median_gbps=228.056	best_gbps=232.976
+CPUMEM_PROGRESS	mode=single	fraction=0.1194
+     128 KiB      128.5      119.5      194.3          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=131072	threads=1	median_gbps=128.498	best_gbps=129.246
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=131072	threads=1	median_gbps=119.550	best_gbps=129.898
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=131072	threads=1	median_gbps=194.335	best_gbps=224.269
+CPUMEM_PROGRESS	mode=single	fraction=0.1343
+     192 KiB      112.6      119.9      205.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=196608	threads=1	median_gbps=112.616	best_gbps=113.424
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=196608	threads=1	median_gbps=119.857	best_gbps=125.736
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=196608	threads=1	median_gbps=205.481	best_gbps=211.647
+CPUMEM_PROGRESS	mode=single	fraction=0.1493
+     256 KiB      110.0      115.3      244.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=262144	threads=1	median_gbps=110.019	best_gbps=111.718
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=262144	threads=1	median_gbps=115.315	best_gbps=121.267
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=262144	threads=1	median_gbps=244.480	best_gbps=251.723
+CPUMEM_PROGRESS	mode=single	fraction=0.1642
+     384 KiB      111.5      119.8      120.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=393216	threads=1	median_gbps=111.548	best_gbps=111.949
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=393216	threads=1	median_gbps=119.802	best_gbps=125.624
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=393216	threads=1	median_gbps=120.540	best_gbps=126.682
+CPUMEM_PROGRESS	mode=single	fraction=0.1791
+     512 KiB      111.5      125.4      120.2          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=524288	threads=1	median_gbps=111.544	best_gbps=112.339
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=524288	threads=1	median_gbps=125.395	best_gbps=127.804
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=524288	threads=1	median_gbps=120.205	best_gbps=120.537
+CPUMEM_PROGRESS	mode=single	fraction=0.1940
+     768 KiB      111.5      123.5      118.1          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=786432	threads=1	median_gbps=111.493	best_gbps=112.818
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=786432	threads=1	median_gbps=123.540	best_gbps=128.526
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=786432	threads=1	median_gbps=118.115	best_gbps=119.033
+CPUMEM_PROGRESS	mode=single	fraction=0.2090
+       1 MiB      110.9      125.2      120.2          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=1048576	threads=1	median_gbps=110.926	best_gbps=111.723
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=1048576	threads=1	median_gbps=125.196	best_gbps=128.741
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=1048576	threads=1	median_gbps=120.204	best_gbps=121.659
+CPUMEM_PROGRESS	mode=single	fraction=0.2239
+     1.5 MiB      111.4      126.8      119.4          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=1572864	threads=1	median_gbps=111.414	best_gbps=111.886
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=1572864	threads=1	median_gbps=126.803	best_gbps=128.700
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=1572864	threads=1	median_gbps=119.356	best_gbps=120.369
+CPUMEM_PROGRESS	mode=single	fraction=0.2388
+       2 MiB      112.1      126.9      120.3          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=2097152	threads=1	median_gbps=112.060	best_gbps=112.883
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=2097152	threads=1	median_gbps=126.923	best_gbps=129.061
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=2097152	threads=1	median_gbps=120.321	best_gbps=121.107
+CPUMEM_PROGRESS	mode=single	fraction=0.2537
+       3 MiB      110.2      123.3      120.7          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=3145728	threads=1	median_gbps=110.178	best_gbps=111.220
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=3145728	threads=1	median_gbps=123.309	best_gbps=127.256
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=3145728	threads=1	median_gbps=120.669	best_gbps=121.213
+CPUMEM_PROGRESS	mode=single	fraction=0.2687
+       4 MiB      110.0      125.2      119.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=4194304	threads=1	median_gbps=110.002	best_gbps=110.892
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=4194304	threads=1	median_gbps=125.159	best_gbps=127.481
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=4194304	threads=1	median_gbps=119.494	best_gbps=120.860
+CPUMEM_PROGRESS	mode=single	fraction=0.2836
+       6 MiB      110.6      124.8      120.3          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=6291456	threads=1	median_gbps=110.628	best_gbps=111.157
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=6291456	threads=1	median_gbps=124.830	best_gbps=126.534
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=6291456	threads=1	median_gbps=120.301	best_gbps=121.449
+CPUMEM_PROGRESS	mode=single	fraction=0.2985
+       8 MiB      109.6      126.7      120.0          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=8388608	threads=1	median_gbps=109.570	best_gbps=109.919
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=8388608	threads=1	median_gbps=126.727	best_gbps=127.254
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=8388608	threads=1	median_gbps=119.959	best_gbps=120.935
+CPUMEM_PROGRESS	mode=single	fraction=0.3134
+      12 MiB      105.3      125.7      121.2          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=12582912	threads=1	median_gbps=105.291	best_gbps=107.099
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=12582912	threads=1	median_gbps=125.749	best_gbps=127.244
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=12582912	threads=1	median_gbps=121.158	best_gbps=121.809
+CPUMEM_PROGRESS	mode=single	fraction=0.3284
+      16 MiB      107.0      125.8      120.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=16777216	threads=1	median_gbps=106.976	best_gbps=108.136
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=16777216	threads=1	median_gbps=125.775	best_gbps=127.119
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=16777216	threads=1	median_gbps=120.527	best_gbps=121.351
+CPUMEM_PROGRESS	mode=single	fraction=0.3433
+      24 MiB      107.4      126.3      118.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=25165824	threads=1	median_gbps=107.360	best_gbps=108.161
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=25165824	threads=1	median_gbps=126.267	best_gbps=127.785
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=25165824	threads=1	median_gbps=118.542	best_gbps=120.469
+CPUMEM_PROGRESS	mode=single	fraction=0.3582
+      32 MiB      101.9      125.5      117.6          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=33554432	threads=1	median_gbps=101.909	best_gbps=103.100
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=33554432	threads=1	median_gbps=125.468	best_gbps=127.265
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=33554432	threads=1	median_gbps=117.562	best_gbps=118.966
+CPUMEM_PROGRESS	mode=single	fraction=0.3731
+      48 MiB       90.1      125.1      117.4          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=50331648	threads=1	median_gbps=90.075	best_gbps=91.955
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=50331648	threads=1	median_gbps=125.120	best_gbps=125.688
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=50331648	threads=1	median_gbps=117.402	best_gbps=118.557
+CPUMEM_PROGRESS	mode=single	fraction=0.3881
+      64 MiB       88.2      125.4      117.8          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=67108864	threads=1	median_gbps=88.222	best_gbps=89.289
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=67108864	threads=1	median_gbps=125.418	best_gbps=126.656
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=67108864	threads=1	median_gbps=117.764	best_gbps=118.457
+CPUMEM_PROGRESS	mode=single	fraction=0.4030
+      96 MiB       86.4      125.8      112.9          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=100663296	threads=1	median_gbps=86.420	best_gbps=87.923
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=100663296	threads=1	median_gbps=125.789	best_gbps=126.389
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=100663296	threads=1	median_gbps=112.921	best_gbps=122.372
+CPUMEM_PROGRESS	mode=single	fraction=0.4179
+     128 MiB       86.0      126.3      117.1          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=134217728	threads=1	median_gbps=85.995	best_gbps=86.225
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=134217728	threads=1	median_gbps=126.253	best_gbps=127.165
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=134217728	threads=1	median_gbps=117.102	best_gbps=117.771
+CPUMEM_PROGRESS	mode=single	fraction=0.4328
+     192 MiB       85.5      126.9      116.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=201326592	threads=1	median_gbps=85.467	best_gbps=85.940
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=201326592	threads=1	median_gbps=126.856	best_gbps=127.060
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=201326592	threads=1	median_gbps=116.538	best_gbps=117.472
+CPUMEM_PROGRESS	mode=single	fraction=0.4478
+     256 MiB       84.6      125.6      115.4          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=268435456	threads=1	median_gbps=84.624	best_gbps=85.347
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=268435456	threads=1	median_gbps=125.632	best_gbps=127.074
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=268435456	threads=1	median_gbps=115.399	best_gbps=116.203
+CPUMEM_PROGRESS	mode=single	fraction=0.4627
+     384 MiB       84.3      126.2      115.6          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=402653184	threads=1	median_gbps=84.284	best_gbps=84.364
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=402653184	threads=1	median_gbps=126.210	best_gbps=127.706
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=402653184	threads=1	median_gbps=115.585	best_gbps=116.016
+CPUMEM_PROGRESS	mode=single	fraction=0.4776
+     512 MiB       83.6      125.6      114.4          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=536870912	threads=1	median_gbps=83.563	best_gbps=84.066
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=536870912	threads=1	median_gbps=125.648	best_gbps=127.308
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=536870912	threads=1	median_gbps=114.429	best_gbps=115.273
+CPUMEM_PROGRESS	mode=single	fraction=0.4925
+     768 MiB       83.1      125.3      115.8          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=805306368	threads=1	median_gbps=83.076	best_gbps=83.701
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=805306368	threads=1	median_gbps=125.284	best_gbps=127.079
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=805306368	threads=1	median_gbps=115.825	best_gbps=116.627
+CPUMEM_PROGRESS	mode=single	fraction=0.5075
+       1 GiB       81.6      125.8      112.8          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=1073741824	threads=1	median_gbps=81.551	best_gbps=83.082
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=1073741824	threads=1	median_gbps=125.781	best_gbps=126.301
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=1073741824	threads=1	median_gbps=112.848	best_gbps=114.884
+CPUMEM_PROGRESS	mode=single	fraction=0.5224
+
+[all] 14 threads, one per physical core, each with a private data set
+    Data set       Read      Write       Copy   Write NT    Copy NT  Zero fill   GB/s (median)
+       4 KiB     1477.8     1301.2     2563.6          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=4096	threads=14	median_gbps=1477.811	best_gbps=1488.150
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=4096	threads=14	median_gbps=1301.243	best_gbps=1336.003
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=4096	threads=14	median_gbps=2563.625	best_gbps=2580.487
+CPUMEM_PROGRESS	mode=all	fraction=0.5373
+       8 KiB     1491.3     1123.4     2502.7          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=8192	threads=14	median_gbps=1491.328	best_gbps=1503.747
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=8192	threads=14	median_gbps=1123.362	best_gbps=1211.260
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=8192	threads=14	median_gbps=2502.695	best_gbps=2513.731
+CPUMEM_PROGRESS	mode=all	fraction=0.5522
+      16 KiB     1506.8      643.5     2119.6          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=16384	threads=14	median_gbps=1506.769	best_gbps=1520.066
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=16384	threads=14	median_gbps=643.467	best_gbps=759.670
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=16384	threads=14	median_gbps=2119.626	best_gbps=2294.946
+CPUMEM_PROGRESS	mode=all	fraction=0.5672
+      24 KiB     1513.0      707.4     2075.3          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=24576	threads=14	median_gbps=1512.971	best_gbps=1521.026
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=24576	threads=14	median_gbps=707.443	best_gbps=782.563
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=24576	threads=14	median_gbps=2075.349	best_gbps=2301.273
+CPUMEM_PROGRESS	mode=all	fraction=0.5821
+      32 KiB     1505.7      524.0     1896.5          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=32768	threads=14	median_gbps=1505.673	best_gbps=1519.177
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=32768	threads=14	median_gbps=524.030	best_gbps=665.805
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=32768	threads=14	median_gbps=1896.519	best_gbps=2118.748
+CPUMEM_PROGRESS	mode=all	fraction=0.5970
+      48 KiB     1491.4      460.4     1692.5          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=49152	threads=14	median_gbps=1491.408	best_gbps=1509.587
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=49152	threads=14	median_gbps=460.420	best_gbps=518.633
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=49152	threads=14	median_gbps=1692.495	best_gbps=2021.902
+CPUMEM_PROGRESS	mode=all	fraction=0.6119
+      64 KiB     1498.5      409.8     1477.0          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=65536	threads=14	median_gbps=1498.524	best_gbps=1520.515
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=65536	threads=14	median_gbps=409.753	best_gbps=455.925
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=65536	threads=14	median_gbps=1476.960	best_gbps=1587.834
+CPUMEM_PROGRESS	mode=all	fraction=0.6269
+      96 KiB     1378.1      369.9     1100.8          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=98304	threads=14	median_gbps=1378.051	best_gbps=1385.785
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=98304	threads=14	median_gbps=369.899	best_gbps=449.042
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=98304	threads=14	median_gbps=1100.841	best_gbps=1167.056
+CPUMEM_PROGRESS	mode=all	fraction=0.6418
+     128 KiB     1380.4      376.5      945.7          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=131072	threads=14	median_gbps=1380.368	best_gbps=1387.361
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=131072	threads=14	median_gbps=376.539	best_gbps=414.913
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=131072	threads=14	median_gbps=945.663	best_gbps=1134.380
+CPUMEM_PROGRESS	mode=all	fraction=0.6567
+     192 KiB     1156.3      380.6      821.5          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=196608	threads=14	median_gbps=1156.329	best_gbps=1161.803
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=196608	threads=14	median_gbps=380.615	best_gbps=417.980
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=196608	threads=14	median_gbps=821.475	best_gbps=833.068
+CPUMEM_PROGRESS	mode=all	fraction=0.6716
+     256 KiB     1118.0      392.1      818.7          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=262144	threads=14	median_gbps=1117.972	best_gbps=1134.482
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=262144	threads=14	median_gbps=392.126	best_gbps=408.232
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=262144	threads=14	median_gbps=818.696	best_gbps=929.686
+CPUMEM_PROGRESS	mode=all	fraction=0.6866
+     384 KiB     1139.3      391.1      833.0          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=393216	threads=14	median_gbps=1139.328	best_gbps=1148.341
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=393216	threads=14	median_gbps=391.076	best_gbps=399.661
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=393216	threads=14	median_gbps=832.998	best_gbps=880.701
+CPUMEM_PROGRESS	mode=all	fraction=0.7015
+     512 KiB     1131.3      344.7      761.0          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=524288	threads=14	median_gbps=1131.253	best_gbps=1138.933
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=524288	threads=14	median_gbps=344.680	best_gbps=391.653
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=524288	threads=14	median_gbps=760.969	best_gbps=803.395
+CPUMEM_PROGRESS	mode=all	fraction=0.7164
+     768 KiB     1130.3      350.7      725.7          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=786432	threads=14	median_gbps=1130.269	best_gbps=1143.722
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=786432	threads=14	median_gbps=350.723	best_gbps=387.026
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=786432	threads=14	median_gbps=725.699	best_gbps=730.814
+CPUMEM_PROGRESS	mode=all	fraction=0.7313
+       1 MiB     1086.1      346.1      653.9          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=1048576	threads=14	median_gbps=1086.059	best_gbps=1112.461
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=1048576	threads=14	median_gbps=346.121	best_gbps=368.026
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=1048576	threads=14	median_gbps=653.880	best_gbps=690.676
+CPUMEM_PROGRESS	mode=all	fraction=0.7463
+     1.5 MiB     1039.3      257.2      489.2          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=1572864	threads=14	median_gbps=1039.307	best_gbps=1051.546
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=1572864	threads=14	median_gbps=257.157	best_gbps=270.887
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=1572864	threads=14	median_gbps=489.150	best_gbps=506.252
+CPUMEM_PROGRESS	mode=all	fraction=0.7612
+       2 MiB     1004.4      253.5      470.8          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=2097152	threads=14	median_gbps=1004.426	best_gbps=1018.927
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=2097152	threads=14	median_gbps=253.538	best_gbps=254.521
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=2097152	threads=14	median_gbps=470.754	best_gbps=617.402
+CPUMEM_PROGRESS	mode=all	fraction=0.7761
+       3 MiB      896.3      242.0      471.6          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=3145728	threads=14	median_gbps=896.286	best_gbps=910.596
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=3145728	threads=14	median_gbps=241.992	best_gbps=254.037
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=3145728	threads=14	median_gbps=471.556	best_gbps=490.769
+CPUMEM_PROGRESS	mode=all	fraction=0.7910
+       4 MiB      571.4      229.2      455.3          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=4194304	threads=14	median_gbps=571.359	best_gbps=588.368
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=4194304	threads=14	median_gbps=229.184	best_gbps=257.185
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=4194304	threads=14	median_gbps=455.266	best_gbps=460.621
+CPUMEM_PROGRESS	mode=all	fraction=0.8060
+       6 MiB      377.6      226.1      394.4          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=6291456	threads=14	median_gbps=377.554	best_gbps=430.134
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=6291456	threads=14	median_gbps=226.085	best_gbps=227.476
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=6291456	threads=14	median_gbps=394.443	best_gbps=400.495
+CPUMEM_PROGRESS	mode=all	fraction=0.8209
+       8 MiB      294.9      225.6      332.8          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=8388608	threads=14	median_gbps=294.874	best_gbps=318.966
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=8388608	threads=14	median_gbps=225.574	best_gbps=230.715
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=8388608	threads=14	median_gbps=332.773	best_gbps=350.805
+CPUMEM_PROGRESS	mode=all	fraction=0.8358
+      12 MiB      257.7      224.2      238.0          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=12582912	threads=14	median_gbps=257.730	best_gbps=259.903
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=12582912	threads=14	median_gbps=224.170	best_gbps=226.280
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=12582912	threads=14	median_gbps=238.015	best_gbps=239.164
+CPUMEM_PROGRESS	mode=all	fraction=0.8507
+      16 MiB      250.9      223.8      231.5          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=16777216	threads=14	median_gbps=250.901	best_gbps=260.791
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=16777216	threads=14	median_gbps=223.829	best_gbps=225.124
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=16777216	threads=14	median_gbps=231.465	best_gbps=232.966
+CPUMEM_PROGRESS	mode=all	fraction=0.8657
+      24 MiB      248.7      224.3      231.2          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=25165824	threads=14	median_gbps=248.742	best_gbps=251.001
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=25165824	threads=14	median_gbps=224.287	best_gbps=227.668
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=25165824	threads=14	median_gbps=231.245	best_gbps=363.697
+CPUMEM_PROGRESS	mode=all	fraction=0.8806
+      32 MiB      249.8      192.7      231.7          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=33554432	threads=14	median_gbps=249.829	best_gbps=250.947
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=33554432	threads=14	median_gbps=192.744	best_gbps=226.718
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=33554432	threads=14	median_gbps=231.730	best_gbps=247.623
+CPUMEM_PROGRESS	mode=all	fraction=0.8955
+      48 MiB      249.3      224.6      227.0          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=50331648	threads=14	median_gbps=249.290	best_gbps=250.318
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=50331648	threads=14	median_gbps=224.589	best_gbps=225.131
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=50331648	threads=14	median_gbps=227.004	best_gbps=231.916
+CPUMEM_PROGRESS	mode=all	fraction=0.9104
+      64 MiB      247.1      224.9      231.8          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=67108864	threads=14	median_gbps=247.056	best_gbps=250.148
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=67108864	threads=14	median_gbps=224.880	best_gbps=226.408
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=67108864	threads=14	median_gbps=231.792	best_gbps=232.398
+CPUMEM_PROGRESS	mode=all	fraction=0.9254
+      96 MiB      248.2      223.2      228.5          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=100663296	threads=14	median_gbps=248.201	best_gbps=256.919
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=100663296	threads=14	median_gbps=223.214	best_gbps=325.737
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=100663296	threads=14	median_gbps=228.530	best_gbps=231.666
+CPUMEM_PROGRESS	mode=all	fraction=0.9403
+     128 MiB      241.4      242.8      227.9          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=134217728	threads=14	median_gbps=241.402	best_gbps=255.003
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=134217728	threads=14	median_gbps=242.830	best_gbps=326.355
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=134217728	threads=14	median_gbps=227.879	best_gbps=230.655
+CPUMEM_PROGRESS	mode=all	fraction=0.9552
+     192 MiB      247.2      224.3      230.8          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=201326592	threads=14	median_gbps=247.217	best_gbps=258.496
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=201326592	threads=14	median_gbps=224.327	best_gbps=224.755
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=201326592	threads=14	median_gbps=230.848	best_gbps=232.332
+CPUMEM_PROGRESS	mode=all	fraction=0.9701
+     256 MiB      245.8      223.7      230.7          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=268435456	threads=14	median_gbps=245.813	best_gbps=265.021
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=268435456	threads=14	median_gbps=223.657	best_gbps=225.350
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=268435456	threads=14	median_gbps=230.676	best_gbps=231.634
+CPUMEM_PROGRESS	mode=all	fraction=0.9851
+CPUMEM_PROGRESS	mode=pagefault	fraction=1.0000
+
+--- Summary: one thread (logical processor 1) ---
+Level              Cache size          Data sets used       Read      Write       Copy   GB/s
+L1        192 KiB - 256 KiB *         4 KiB - 192 KiB      128.3      116.5      199.9
+CPUMEM_LEVEL	mode=single	level=L1	cache_bytes=0	from_bytes=4096	to_bytes=196608	read_gbps=128.278	write_gbps=116.498	copy_gbps=199.908	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=112.616	read_high_gbps=129.095	from_curve=1	capacity_low_bytes=196608	capacity_high_bytes=262144	measured=1	settled=1
+L2          24 MiB - 32 MiB *        256 KiB - 24 MiB      110.4      125.3      120.3
+CPUMEM_LEVEL	mode=single	level=L2	cache_bytes=0	from_bytes=262144	to_bytes=25165824	read_gbps=110.403	write_gbps=125.296	copy_gbps=120.253	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=105.291	read_high_gbps=112.060	from_curve=1	capacity_low_bytes=25165824	capacity_high_bytes=33554432	measured=1	settled=1
+Memory                      -          32 MiB - 1 GiB       85.5      125.6      115.8
+CPUMEM_LEVEL	mode=single	level=memory	cache_bytes=0	from_bytes=33554432	to_bytes=1073741824	read_gbps=85.467	write_gbps=125.648	copy_gbps=115.825	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=81.551	read_high_gbps=101.909	from_curve=1	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=1
+         * read off the curve, because the OS reports no size for this cache: its
+           capacity lies between the two data sets shown
+
+--- Summary: all cores (14 threads, data set sizes are per thread) ---
+Level              Cache size          Data sets used       Read      Write       Copy   GB/s
+L1        128 KiB - 192 KiB *         4 KiB - 128 KiB     1491.4      524.0     1896.5
+CPUMEM_LEVEL	mode=all	level=L1	cache_bytes=0	from_bytes=4096	to_bytes=131072	read_gbps=1491.408	write_gbps=524.030	copy_gbps=1896.519	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=1378.051	read_high_gbps=1512.971	from_curve=1	capacity_low_bytes=131072	capacity_high_bytes=196608	measured=1	settled=1
+L2          1.5 MiB - 8 MiB *       192 KiB - 1.5 MiB     1130.3      350.7      761.0
+CPUMEM_LEVEL	mode=all	level=L2	cache_bytes=0	from_bytes=196608	to_bytes=1572864	read_gbps=1130.269	write_gbps=350.723	copy_gbps=760.969	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=1039.307	read_high_gbps=1156.329	from_curve=1	capacity_low_bytes=1572864	capacity_high_bytes=8388608	measured=1	settled=1
+Memory                      -         8 MiB - 256 MiB      248.7      224.3      231.2
+CPUMEM_LEVEL	mode=all	level=memory	cache_bytes=0	from_bytes=8388608	to_bytes=268435456	read_gbps=248.742	write_gbps=224.287	copy_gbps=231.245	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=241.402	read_high_gbps=294.874	from_curve=1	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=1
+         * read off the curve, because the OS reports no size for this cache: its
+           capacity lies between the two data sets shown
+
+--- Virtual memory ---
+Mapping new pages: 22.45 GB/s, 730 ns per 16 KiB page (first write to every page of a 256 MiB region, one thread)
+CPUMEM_PAGEFAULT	measured=1	page_bytes=16384	region_bytes=268435456	gbps=22.450	ns_per_page=729.815	transparent_huge_pages=0
+
+--- Storage behind virtual memory ---
+Not measured: switched off
+CPUMEM_STORAGE	measured=0	backing=	directory=	on_paging_drive=0	direct_io=0	file_bytes=0	seq_read_mbps=0.0	seq_write_mbps=0.0	rand_read_mbps=0.0	rand_write_mbps=0.0	rand_read_iops=0.0	rand_write_iops=0.0	skipped=switched off
+
+Note: write and copy use ordinary stores. Outside the caches every stored line is
+      first read from memory, so the memory traffic is 2x the write figure and 1.5x
+      the copy figure. Streaming stores skip that read.
+Note: cache-level figures are limited by how fast the core issues 16-byte loads and
+      stores, so they depend on the vector size and the clock.
+Note: thread affinity is 'scheduler_managed'; threads may have moved between cores.
+Note: 17 of 198 points were measured again because other activity on the machine
+      disturbed their first round.
+CPUMEM_DONE	affinity=scheduler_managed	remeasured_points=17	duration_sec=37.3
+Duration:  37.3 s
+==========================================================
+[Results] Saved as 20261013-195653-520-cpu-membw -> /Users/fairchild/Library/Application Support/GpuComputeBenchmark/results/results.json

@@ -1,0 +1,39 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "install",
+      "app",
+      "--device",
+      "00008027-001969920A87002E",
+      "build-ios/DerivedData-ipad81-fix/Build/Products/Release-iphoneos/Mangekyo.app",
+      "--json-output",
+      "out/test-results/ipad81-design-review-20261016/install.json",
+      "--timeout",
+      "60"
+    ],
+    "commandType" : "devicectl.device.install.app",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "9A44542D-75A2-58C6-B79C-18BEAED61843",
+    "installedApplications" : [
+      {
+        "bundleID" : "com.fairchild.Mangekyo",
+        "databaseSequenceNumber" : 1664,
+        "databaseUUID" : "7AA7B9B6-B8AF-43AC-9E28-E5778C0F4DDC",
+        "installationURL" : "file:///private/var/containers/Bundle/Application/96AC2E53-B9F3-4F05-92FA-30D978539A90/Mangekyo.app/",
+        "launchServicesIdentifier" : "unknown",
+        "options" : {
+
+        }
+      }
+    ]
+  }
+}

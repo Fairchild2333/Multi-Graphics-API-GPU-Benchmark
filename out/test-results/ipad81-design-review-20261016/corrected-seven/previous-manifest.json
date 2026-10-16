@@ -1,0 +1,70 @@
+{
+  "finishedAt" : "2026-10-16T08:51:02Z",
+  "id" : "complete-suite-C5552FB2-AB17-498A-876C-3D00AB5B803E",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:49:41Z",
+      "id" : "stream-1048576",
+      "request" : "stream?particles=1048576&vsync=0&api=metal&coverage=fixed",
+      "resultIDs" : [
+        "20261016-194941-358"
+      ],
+      "startedAt" : "2026-10-16T08:49:26Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 1048576 · Render"
+    },
+    {
+      "error" : "尚未达到稳定平台",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:49:58Z",
+      "id" : "stream-4194304",
+      "request" : "stream?particles=4194304&vsync=0&api=metal&coverage=fixed",
+      "resultIDs" : [
+        "20261016-194957-772"
+      ],
+      "startedAt" : "2026-10-16T08:49:42Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 4194304 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T08:50:16Z",
+      "id" : "stream-16777216",
+      "request" : "stream?particles=16777216&vsync=0&api=metal&coverage=fixed",
+      "resultIDs" : [
+        "20261016-195015-831"
+      ],
+      "startedAt" : "2026-10-16T08:49:58Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 16777216 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 3,
+      "finishedAt" : "2026-10-16T08:51:02Z",
+      "id" : "cpu_compute",
+      "request" : "gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2",
+      "resultIDs" : [
+        "20261016-195102-306-cpu-single-performance",
+        "20261016-195102-315-cpu-single-efficiency",
+        "20261016-195102-321-cpu-multi"
+      ],
+      "startedAt" : "2026-10-16T08:50:16Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "CPU Compute · Performance + Efficiency + All Cores"
+    }
+  ],
+  "startedAt" : "2026-10-16T08:49:26Z",
+  "status" : "review"
+}

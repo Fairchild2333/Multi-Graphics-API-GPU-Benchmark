@@ -1,0 +1,41 @@
+{
+  "job": "vulkan-render-flight2-wrapped",
+  "classification": "diagnostic_shader_variant_not_standard_score",
+  "command": [
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-vulkan-diagnosis-20261014/wrapped-worker/gpu_benchmark",
+    "--gui-worker",
+    "--gpu",
+    "0",
+    "--time",
+    "15",
+    "--no-renderdoc",
+    "--backend",
+    "vulkan",
+    "--allow-translated-api",
+    "--workload",
+    "stream",
+    "--particles",
+    "1048576",
+    "--flights",
+    "2"
+  ],
+  "thermalBefore": {
+    "activeProcessorCount": 14,
+    "lowPowerMode": false,
+    "thermalState": 0,
+    "thermalStateName": "nominal",
+    "timestamp": "2026-10-14T03:47:16Z"
+  },
+  "returnCode": 0,
+  "thermalAfter": {
+    "activeProcessorCount": 14,
+    "lowPowerMode": false,
+    "thermalState": 0,
+    "thermalStateName": "nominal",
+    "timestamp": "2026-10-14T03:47:32Z"
+  },
+  "resultID": "20261014-144732-256",
+  "score": 181.467,
+  "stableScore": 181.12,
+  "throughputDropPct": -0.01
+}

@@ -1,0 +1,25 @@
+{
+  "checkpointCommit": "5d4dbc4",
+  "apk": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/mobile-one-click-20261014/Mangekyo-android-debug.apk",
+  "sha256": "4aa69e2cf72a0f69f629971bd2c095e7a3c7a06ffd5980efd717c08893ef7c57",
+  "abi": [
+    "arm64-v8a",
+    "armeabi-v7a",
+    "x86_64",
+    "x86"
+  ],
+  "kind": "debug",
+  "hap": {
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/mobile-one-click-20261014/Mangekyo-ohos-debug-unsigned.hap",
+    "sha256": "eaf835d445d1f8abd9dcdbf638a743266f29c6ba1ab44ba6b0911d7ea432fcb5",
+    "abi": [
+      "arm64-v8a",
+      "x86_64"
+    ],
+    "signed": false,
+    "spirvCount": 39,
+    "glesSourceCount": 7,
+    "toolchain": "DevEco Studio 26.0 / API26 / hvigor6.26.8"
+  },
+  "physicalDeviceRetest": false
+}

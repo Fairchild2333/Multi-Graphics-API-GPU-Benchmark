@@ -1,0 +1,26 @@
+{
+  "deviceModel": "iPhone15,3",
+  "marketingName": "iPhone 14 Pro Max",
+  "plannedJobs": 31,
+  "plannedRecords": 33,
+  "completedJobs": 22,
+  "completedRecords": 22,
+  "counts": {
+    "passed": 19,
+    "review": 3,
+    "cancelled": 1,
+    "failed": 0,
+    "not_run": 8,
+    "running": 0,
+    "pending": 0
+  },
+  "lastCancellationReason": "user",
+  "rawHistoryRows": 24,
+  "historySHA256": "da2a2612d9dfbb8381792987ea2b98f6a47e947f108cd7c39298498930dd7df1",
+  "originalCancelledRowPreserved": true,
+  "otherDeviceHistoriesUnchanged": true,
+  "completeSuiteFinished": false,
+  "cpuTested": false,
+  "stopRequestedByUser": true,
+  "navigationFixRegressionPassed": true
+}

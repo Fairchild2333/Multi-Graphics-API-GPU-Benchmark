@@ -1,0 +1,73 @@
+{
+  "ipad": {
+    "jobsPassed": 11,
+    "newRecords": 11,
+    "historyBefore": 32,
+    "historyAfter": 43,
+    "priorRecordsUnchanged": true,
+    "intervalChecksPassed": true,
+    "computeRenderOverlapAbsent": true,
+    "rawSha256": "d51ff3173cef53022a902ecf9d76a7a0e9828ee89c285f17077edaae67ec1633",
+    "manifestIDs": [
+      "complete-suite-24CF73BB-DB14-4B90-82EF-A303FD34EB33"
+    ],
+    "thermalStart": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "thermalEnd": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "iphone": {
+    "jobsPassed": 7,
+    "newRecords": 11,
+    "historyBefore": 56,
+    "historyAfter": 67,
+    "priorRecordsUnchanged": true,
+    "intervalChecksPassed": true,
+    "computeRenderOverlapAbsent": true,
+    "rawSha256": "230c46905751f01d741049ca9a051eb0ef54a8e2a62e75db646496a4231d1ce4",
+    "manifestIDs": [
+      "complete-suite-29BB4645-2D5C-420C-93DA-51AAD88F51D6",
+      "complete-suite-F47F1151-F150-42D8-A705-D552FDDDE7CD"
+    ],
+    "thermalStart": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "thermalEnd": [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1
+    ]
+  }
+}

@@ -56,12 +56,13 @@ Release 引擎／签名 App 构建、CPU 驻留与取消检查、Swift 合同正
 其他设备没有重测；GPU 独立 L2／L3／SoC-SLC 归属仍不纳入当前范围。
 
 设备历史共 51 条，复核前 36 条逐字段保留。实际 App PID 914 已停止，新进程列表
-确认不存在，可拔线。代码、测试与本页记录纳入后续统一 Git 提交；原始成绩按既有
-忽略规则保留在本地 out，用户的 Xcode 个人配置保持原样。
+确认不存在，可拔线。代码、测试与本页记录纳入统一 Git 提交；原始成绩、导出曲线
+和文字日志也按 [小文件归档策略](test-result-archives.md) 纳入仓库。大型诊断包仍留
+本地，用户的 Xcode 个人配置保持原样。
 
 - [完整报告与曲线](../out/test-results/ipad81-design-review-20261016/report.md)
 - [最终设备成绩](../out/test-results/ipad81-design-review-20261016/phone-final/results/results.json)
 - [完整选用结果](../out/test-results/ipad81-design-review-20261016/curated-suite-results.json)
 - [验证记录](../out/test-results/ipad81-design-review-20261016/verification.json)
 
-原始数据在项目本地 out，按既有 Git 忽略规则保留。
+原始数据保留原 out 路径并纳入 Git；完整大型诊断 bundle 仍只在本地。

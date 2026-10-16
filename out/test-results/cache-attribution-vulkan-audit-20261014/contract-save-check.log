@@ -1,0 +1,84 @@
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Timing contract test
+CPU:          Apple M4 Pro
+OS:           macOS 27.0.1
+System:       macOS ARM64
+Memory:       Device-local VRAM
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    1 (Medium)
+Buffer:       0.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     0.0 s (warmup: 2.0 s, measured: 5 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.100     0.100     0.100
+Render:          0.000     0.000     0.000
+Total GPU:       0.100     0.100     0.100
+
+--- Throughput ---
+Avg FPS:      794
+Particles:    1
+Working set:  0.00 MiB
+VRAM rate:   0.00 GB/s  (0.100 ms compute)
+
+--- Analysis ---
+Avg frame time:  1.258 ms
+Avg GPU time:    0.100 ms
+GPU utilisation: 7.9%
+>> CPU-bound: GPU is idle 92% of the time.
+   -> Try a higher difficulty for more accurate GPU benchmarking.
+==========================================================
+
+Rejected: GPU timing source changed during measurement; mixed timing is rejected and no score is saved
+Guard status rejected=1 cleaned=1 rows=220
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Timing contract test
+CPU:          Apple M4 Pro
+OS:           macOS 27.0.1
+System:       macOS ARM64
+Memory:       Device-local VRAM
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    1 (Medium)
+Buffer:       0.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     0.0 s (warmup: 2.0 s, measured: 5 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.100     0.100     0.100
+Render:          0.000     0.000     0.000
+Total GPU:       0.100     0.100     0.100
+
+--- Throughput ---
+Avg FPS:      790
+Particles:    1
+Working set:  0.00 MiB
+VRAM rate:   0.00 GB/s  (0.100 ms compute)
+
+--- Analysis ---
+Avg frame time:  1.265 ms
+Avg GPU time:    0.100 ms
+GPU utilisation: 7.9%
+>> CPU-bound: GPU is idle 92% of the time.
+   -> Try a higher difficulty for more accurate GPU benchmarking.
+==========================================================
+
+[Results] Saved as 20261014-194629-406 -> /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/cache-attribution-vulkan-audit-20261014/isolated-history-2/results/results.json
+Mixed timing rejected after cleanup with no new history row; valid run saves one row

@@ -1,0 +1,80 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Apple M4 Pro (Integrated)                    38338 MB  YES    -     -    YES   YES 
+============================================================
+
+Backend: Vulkan  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: GPU Burn v1 r2 / Plasma x Kaleidoscope  |  Auto-stop: 15s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple M4 Pro (Integrated GPU)
+Selected GPU [0]: Apple M4 Pro  |  Driver: 0.2.2210
+[Vulkan] Present mode: immediate (not tied to the refresh rate)
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 256 particles
+[Profiling] Timestamp queries enabled (period = 1 ns/tick)
+[GPU Timing] Compute: 0.296 ms | Render: 18.709 ms | Total: 19.670 ms | FPS: 46 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.202 ms | Render: 17.813 ms | Total: 18.891 ms | FPS: 47 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.468 ms | Render: 17.819 ms | Total: 18.409 ms | FPS: 52 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 0.129 ms | Render: 18.024 ms | Total: 18.222 ms | FPS: 53 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 0.089 ms | Render: 18.450 ms | Total: 18.541 ms | FPS: 53 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 0.071 ms | Render: 18.257 ms | Total: 18.359 ms | FPS: 53 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 0.101 ms | Render: 18.368 ms | Total: 18.518 ms | FPS: 53 | T: 2.9 s
+[GPU Timing] Compute: 0.092 ms | Render: 18.356 ms | Total: 18.538 ms | FPS: 53 | T: 3.9 s
+[GPU Timing] Compute: 0.071 ms | Render: 18.459 ms | Total: 18.571 ms | FPS: 53 | T: 4.9 s
+[GPU Timing] Compute: 0.113 ms | Render: 18.364 ms | Total: 18.511 ms | FPS: 53 | T: 5.9 s
+[GPU Timing] Compute: 0.061 ms | Render: 18.314 ms | Total: 18.393 ms | FPS: 53 | T: 7.0 s
+[GPU Timing] Compute: 0.164 ms | Render: 17.808 ms | Total: 18.150 ms | FPS: 53 | T: 8.0 s
+[GPU Timing] Compute: 0.116 ms | Render: 18.189 ms | Total: 18.359 ms | FPS: 53 | T: 9.0 s
+[GPU Timing] Compute: 0.068 ms | Render: 18.249 ms | Total: 18.327 ms | FPS: 53 | T: 10.0 s
+[GPU Timing] Compute: 0.046 ms | Render: 18.435 ms | Total: 18.486 ms | FPS: 53 | T: 11.0 s
+[GPU Timing] Compute: 0.084 ms | Render: 18.381 ms | Total: 18.543 ms | FPS: 53 | T: 12.0 s
+[GPU Timing] Compute: 0.103 ms | Render: 18.047 ms | Total: 18.286 ms | FPS: 53 | T: 13.0 s
+[GPU Timing] Compute: 0.091 ms | Render: 18.385 ms | Total: 18.514 ms | FPS: 53 | T: 14.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple M4 Pro
+Driver:       0.2.2210
+CPU:          Apple M4 Pro
+OS:           macOS 27.0.1
+System:       macOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 695 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.092     0.002     2.532
+Render:         18.260    14.277    23.264
+Total GPU:      18.413    15.557    23.269
+
+--- Throughput ---
+Avg FPS:      53
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 64 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    6.46 Gpix-step/s  (18.260 ms render)
+
+--- Analysis ---
+Avg frame time:  18.716 ms
+Avg GPU time:    18.413 ms
+GPU utilisation: 98.4%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Thermal Stability ---
+Windows:      12 x 1s
+Stable score: 6.45 Gpix-step/s  (CV 0.77%)
+>> Thermally stable; stableScore is a fair comparison metric.
+==========================================================
+
+[Results] Saved as 20261013-183340-938 -> /Users/fairchild/Library/Application Support/GpuComputeBenchmark/results/results.json

@@ -1,0 +1,67 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Apple M4 Pro (Integrated)                    38338 MB   -     -     -    YES   YES 
+============================================================
+
+Backend: Metal  |  V-Sync: OFF  |  Memory: Device-local  |  Particles: 65536 (Medium)  |  Auto-stop: 3s
+[Capture] RenderDoc unavailable on this platform; will try native GPU capture (MTLCaptureManager) after backend init.
+Available GPUs:
+  [0] Apple M4 Pro — 38338 MB
+Selected GPU [0]: Apple M4 Pro
+Created particle buffer: 65536 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[Metal] Decoupled presenter: benchmark renders offscreen uncapped, preview presents at display refresh
+[Capture] Using native Metal GPU capture (.gputrace).
+[GPU Timing] Compute: 0.028 ms | Render: 0.190 ms | Total: 0.232 ms | FPS: 4999 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.025 ms | Render: 0.181 ms | Total: 0.222 ms | FPS: 6204 | T: 0.6 s (warm-up)
+[Capture] Metal .gputrace at 1.1s (frame 5885)
+  -> /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-available-suite/current-data/captures/Metal_Apple_M4_Pro_stream_particles65536_1064.gputrace
+[GPU Timing] Compute: 0.021 ms | Render: 0.179 ms | Total: 0.210 ms | FPS: 5410 | T: 1.6 s
+[GPU Timing] Compute: 0.021 ms | Render: 0.172 ms | Total: 0.202 ms | FPS: 6471 | T: 2.6 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple M4 Pro
+Driver:       macOS 27.0.1
+CPU:          Apple M4 Pro
+OS:           macOS 27.0.1
+System:       macOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    65536 (Medium)
+Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     2.1 s (warmup: 0.8 s, measured: 13622 frames)
+Capture:      0.137 s excluded from score; async samples discarded (1 attempt(s), 1 saved)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.021     0.008     0.350
+Render:          0.173     0.157     0.355
+Total GPU:       0.203     0.169     0.715
+
+--- Throughput ---
+Avg FPS:      6447
+Particles:    65536
+Working set:  2.00 MiB
+VRAM rate:   127.48 GB/s  (0.021 ms compute)
+
+--- Analysis ---
+Avg frame time:  0.155 ms
+Avg GPU time:    0.203 ms
+GPU utilisation: 130.9%
+>> GPU-bound: GPU is the bottleneck.
+==========================================================
+
+[Results] Saved as 20261012-150947-317 -> /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-available-suite/current-data/results/results.json
+[warn] Short timed run: reducing warmup from 2s to 0.75s so measured frames and GPU timestamps are available.

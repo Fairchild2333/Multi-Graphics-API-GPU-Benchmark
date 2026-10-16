@@ -1,0 +1,232 @@
+[
+  {
+    "job": "metal-stream1m-render",
+    "command": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--gui-worker",
+      "--gpu",
+      "0",
+      "--time",
+      "15",
+      "--no-renderdoc",
+      "--backend",
+      "metal",
+      "--workload",
+      "stream",
+      "--particles",
+      "1048576"
+    ],
+    "thermalBefore": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-14T03:27:11Z"
+    },
+    "returnCode": 0,
+    "thermalAfter": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-14T03:27:27Z"
+    },
+    "resultID": "20261014-142727-066",
+    "score": 189.944,
+    "unit": "GB/s",
+    "reviewReasons": []
+  },
+  {
+    "job": "metal-stream16m-render",
+    "command": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--gui-worker",
+      "--gpu",
+      "0",
+      "--time",
+      "15",
+      "--no-renderdoc",
+      "--backend",
+      "metal",
+      "--workload",
+      "stream",
+      "--particles",
+      "16777216"
+    ],
+    "thermalBefore": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-14T03:27:57Z"
+    },
+    "returnCode": 0,
+    "thermalAfter": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-14T03:28:12Z"
+    },
+    "resultID": "20261014-142812-535",
+    "score": 152.212,
+    "unit": "GB/s",
+    "reviewReasons": []
+  },
+  {
+    "job": "metal-burn16",
+    "command": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--gui-worker",
+      "--gpu",
+      "0",
+      "--time",
+      "15",
+      "--no-renderdoc",
+      "--backend",
+      "metal",
+      "--workload",
+      "gpu_burn",
+      "--iter",
+      "16"
+    ],
+    "thermalBefore": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-14T03:28:42Z"
+    },
+    "returnCode": 0,
+    "thermalAfter": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-14T03:28:57Z"
+    },
+    "resultID": "20261014-142857-806",
+    "score": 8.48,
+    "unit": "Gpix-step/s",
+    "reviewReasons": []
+  },
+  {
+    "job": "metal-burn64",
+    "command": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--gui-worker",
+      "--gpu",
+      "0",
+      "--time",
+      "15",
+      "--no-renderdoc",
+      "--backend",
+      "metal",
+      "--workload",
+      "gpu_burn",
+      "--iter",
+      "64"
+    ],
+    "thermalBefore": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-14T03:29:27Z"
+    },
+    "returnCode": 0,
+    "thermalAfter": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-14T03:29:43Z"
+    },
+    "resultID": "20261014-142943-066",
+    "score": 9.401,
+    "unit": "Gpix-step/s",
+    "reviewReasons": []
+  },
+  {
+    "job": "vulkan-stream1m-render",
+    "command": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--gui-worker",
+      "--gpu",
+      "0",
+      "--time",
+      "15",
+      "--no-renderdoc",
+      "--backend",
+      "vulkan",
+      "--allow-translated-api",
+      "--workload",
+      "stream",
+      "--particles",
+      "1048576"
+    ],
+    "thermalBefore": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-14T03:30:13Z"
+    },
+    "returnCode": 0,
+    "thermalAfter": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-14T03:30:28Z"
+    },
+    "resultID": "20261014-143028-422",
+    "score": 171.739,
+    "unit": "GB/s",
+    "reviewReasons": [
+      "throughput fell by more than 5 percent"
+    ]
+  },
+  {
+    "job": "vulkan-stream1m-render-repeat",
+    "command": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--gui-worker",
+      "--gpu",
+      "0",
+      "--time",
+      "15",
+      "--no-renderdoc",
+      "--backend",
+      "vulkan",
+      "--allow-translated-api",
+      "--workload",
+      "stream",
+      "--particles",
+      "1048576"
+    ],
+    "thermalBefore": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-14T03:31:54Z"
+    },
+    "repeatOf": "20261014-143028-422",
+    "restPolicy": "at least60s since first Vulkan run",
+    "returnCode": 0,
+    "thermalAfter": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-14T03:32:09Z"
+    },
+    "resultID": "20261014-143209-593",
+    "score": 169.092,
+    "unit": "GB/s",
+    "reviewReasons": [
+      "throughput fell by more than 5 percent"
+    ]
+  }
+]

@@ -1,0 +1,654 @@
+iOS complete suite complete-suite-D50381FA-B135-4EDE-A020-064D35DBFDD5
+Started: 2026-10-16T08:54:15Z
+
+Thermal precheck stream-1048576: nominal after 0s cooling.
+
+=== 1/7 stream-1048576: passed ===
+=== Preview stream?particles=1048576&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A12X GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 1048576 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 1.906 ms | Render: 29.590 ms | Total: 33.975 ms | FPS: 31 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 1.508 ms | Render: 46.980 ms | Total: 49.676 ms | FPS: 19 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 1.547 ms | Render: 57.046 ms | Total: 59.680 ms | FPS: 16 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 1.196 ms | Render: 55.548 ms | Total: 57.754 ms | FPS: 16 | T: 1.4 s (warm-up)
+[GPU Timing] Compute: 1.224 ms | Render: 60.083 ms | Total: 62.271 ms | FPS: 15 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 1.140 ms | Render: 54.001 ms | Total: 56.083 ms | FPS: 17 | T: 2.0 s (warm-up)
+[GPU Timing] Compute: 1.181 ms | Render: 59.158 ms | Total: 61.379 ms | FPS: 15 | T: 3.0 s
+[GPU Timing] Compute: 1.217 ms | Render: 58.622 ms | Total: 60.820 ms | FPS: 16 | T: 4.1 s
+[GPU Timing] Compute: 1.238 ms | Render: 60.363 ms | Total: 62.458 ms | FPS: 15 | T: 5.1 s
+[GPU Timing] Compute: 1.196 ms | Render: 60.053 ms | Total: 62.072 ms | FPS: 15 | T: 6.1 s
+[GPU Timing] Compute: 1.181 ms | Render: 60.392 ms | Total: 62.475 ms | FPS: 15 | T: 7.1 s
+[GPU Timing] Compute: 1.202 ms | Render: 59.022 ms | Total: 61.056 ms | FPS: 16 | T: 8.2 s
+[GPU Timing] Compute: 1.179 ms | Render: 61.648 ms | Total: 63.732 ms | FPS: 15 | T: 9.2 s
+[GPU Timing] Compute: 1.197 ms | Render: 58.839 ms | Total: 60.936 ms | FPS: 16 | T: 10.3 s
+[GPU Timing] Compute: 1.178 ms | Render: 58.345 ms | Total: 60.380 ms | FPS: 16 | T: 11.3 s
+[GPU Timing] Compute: 1.200 ms | Render: 58.525 ms | Total: 60.528 ms | FPS: 16 | T: 12.3 s
+[GPU Timing] Compute: 1.203 ms | Render: 61.916 ms | Total: 63.999 ms | FPS: 15 | T: 13.4 s
+[GPU Timing] Compute: 1.201 ms | Render: 59.718 ms | Total: 61.749 ms | FPS: 15 | T: 14.4 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A12X GPU
+Driver:       iOS 26.7.1
+CPU:          Apple Silicon (iPad8,1)
+OS:           iOS 26.7.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    1048576 (Medium)
+Buffer:       32.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.1 s (warmup: 2.0 s, measured: 209 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         1.196     1.029     1.684
+Render:         59.500    31.210    65.974
+Total GPU:      61.575    32.894    68.319
+
+--- Throughput ---
+Avg FPS:      15
+Particles:    1048576
+Working set:  32.00 MiB
+VRAM rate:   35.08 GB/s  (1.196 ms compute)
+
+--- Analysis ---
+Avg frame time:  62.597 ms
+Avg GPU time:    61.575 ms
+GPU utilisation: 98.4%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 35.08 GB/s  (CV 0.77%)
+Throughput:   early vs late mean change (drop positive) -0.5%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-195430-532 -> /var/mobile/Containers/Data/Application/3BBA6FB1-DB13-4FB4-BB58-6D09AFCCA22F/Documents/results/results.json
+
+Thermal precheck stream-4194304: nominal after 0s cooling.
+
+=== 2/7 stream-4194304: passed ===
+=== Preview stream?particles=4194304&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A12X GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 4194304 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 6.069 ms | Render: 142.332 ms | Total: 155.430 ms | FPS: 9 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 5.348 ms | Render: 250.234 ms | Total: 256.259 ms | FPS: 3 | T: 1.1 s (warm-up)
+[GPU Timing] Compute: 5.477 ms | Render: 267.756 ms | Total: 274.122 ms | FPS: 3 | T: 1.7 s (warm-up)
+[GPU Timing] Compute: 6.679 ms | Render: 278.469 ms | Total: 286.105 ms | FPS: 3 | T: 2.3 s (warm-up)
+[GPU Timing] Compute: 5.420 ms | Render: 276.497 ms | Total: 283.099 ms | FPS: 3 | T: 3.4 s
+[GPU Timing] Compute: 5.615 ms | Render: 289.805 ms | Total: 296.282 ms | FPS: 3 | T: 4.6 s
+[GPU Timing] Compute: 5.365 ms | Render: 290.771 ms | Total: 297.216 ms | FPS: 3 | T: 5.8 s
+[GPU Timing] Compute: 5.552 ms | Render: 290.908 ms | Total: 297.444 ms | FPS: 3 | T: 7.0 s
+[GPU Timing] Compute: 5.410 ms | Render: 291.642 ms | Total: 298.031 ms | FPS: 3 | T: 8.2 s
+[GPU Timing] Compute: 5.436 ms | Render: 291.394 ms | Total: 297.587 ms | FPS: 3 | T: 9.4 s
+[GPU Timing] Compute: 5.430 ms | Render: 293.022 ms | Total: 299.488 ms | FPS: 3 | T: 10.6 s
+[GPU Timing] Compute: 5.464 ms | Render: 294.408 ms | Total: 300.765 ms | FPS: 3 | T: 11.8 s
+[GPU Timing] Compute: 5.445 ms | Render: 291.729 ms | Total: 298.117 ms | FPS: 3 | T: 13.0 s
+[GPU Timing] Compute: 5.385 ms | Render: 291.533 ms | Total: 298.020 ms | FPS: 3 | T: 14.2 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A12X GPU
+Driver:       iOS 26.7.1
+CPU:          Apple Silicon (iPad8,1)
+OS:           iOS 26.7.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    4194304 (Heavy)
+Buffer:       128.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.1 s (warmup: 2.0 s, measured: 44 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         5.472     5.252     5.964
+Render:        290.526   249.642   295.995
+Total GPU:     296.976   256.401   302.011
+
+--- Throughput ---
+Avg FPS:      3
+Particles:    4194304
+Working set:  128.00 MiB
+VRAM rate:   30.66 GB/s  (5.472 ms compute)
+
+--- Analysis ---
+Avg frame time:  298.107 ms
+Avg GPU time:    296.976 ms
+GPU utilisation: 99.6%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      10 x 1s
+Stable window: 30.89 GB/s  (CV 0.48%)
+Throughput:   early vs late mean change (drop positive) -0.7%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-195446-899 -> /var/mobile/Containers/Data/Application/3BBA6FB1-DB13-4FB4-BB58-6D09AFCCA22F/Documents/results/results.json
+
+Thermal precheck stream-16777216: nominal after 0s cooling.
+
+=== 3/7 stream-16777216: passed ===
+=== Preview stream?particles=16777216&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A12X GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 16777216 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 22.758 ms | Render: 567.991 ms | Total: 607.404 ms | FPS: 2 | T: 2.4 s (warm-up)
+[GPU Timing] Compute: 23.095 ms | Render: 1097.749 ms | Total: 1121.572 ms | FPS: 0 | T: 3.5 s
+[GPU Timing] Compute: 23.135 ms | Render: 1136.390 ms | Total: 1161.008 ms | FPS: 0 | T: 4.7 s
+[GPU Timing] Compute: 23.190 ms | Render: 1162.919 ms | Total: 1187.501 ms | FPS: 0 | T: 5.9 s
+[GPU Timing] Compute: 22.109 ms | Render: 1167.634 ms | Total: 1191.228 ms | FPS: 0 | T: 7.1 s
+[GPU Timing] Compute: 25.913 ms | Render: 1168.349 ms | Total: 1195.604 ms | FPS: 0 | T: 8.3 s
+[GPU Timing] Compute: 23.569 ms | Render: 1174.711 ms | Total: 1199.620 ms | FPS: 0 | T: 9.5 s
+[GPU Timing] Compute: 23.167 ms | Render: 1167.598 ms | Total: 1191.560 ms | FPS: 0 | T: 10.7 s
+[GPU Timing] Compute: 23.916 ms | Render: 1173.306 ms | Total: 1198.357 ms | FPS: 0 | T: 11.9 s
+[GPU Timing] Compute: 23.281 ms | Render: 1174.118 ms | Total: 1198.473 ms | FPS: 0 | T: 13.1 s
+[GPU Timing] Compute: 23.854 ms | Render: 1174.842 ms | Total: 1199.870 ms | FPS: 0 | T: 14.3 s
+[GPU Timing] Compute: 23.837 ms | Render: 1178.634 ms | Total: 1204.324 ms | FPS: 0 | T: 15.5 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A12X GPU
+Driver:       iOS 26.7.1
+CPU:          Apple Silicon (iPad8,1)
+OS:           iOS 26.7.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    16777216 (Extreme)
+Buffer:       512.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     14.3 s (warmup: 2.0 s, measured: 12 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        23.572    22.109    25.913
+Render:       1169.734  1136.390  1181.771
+Total GPU:    1194.572  1161.008  1206.172
+
+--- Throughput ---
+Avg FPS:      0
+Particles:    16777216
+Working set:  512.00 MiB
+VRAM rate:   28.47 GB/s  (23.572 ms compute)
+
+--- Analysis ---
+Avg frame time:  1195.727 ms
+Avg GPU time:    1194.572 ms
+GPU utilisation: 99.9%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      11 x 1s
+Stable window: 28.43 GB/s  (CV 1.36%)
+Throughput:   early vs late mean change (drop positive) 0.8%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-195504-980 -> /var/mobile/Containers/Data/Application/3BBA6FB1-DB13-4FB4-BB58-6D09AFCCA22F/Documents/results/results.json
+
+Thermal precheck vulkan/stream-1048576: nominal after 0s cooling.
+
+=== 4/7 vulkan/stream-1048576: passed ===
+=== Preview stream?particles=1048576&vsync=0&api=vulkan&coverage=fixed 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple A12X GPU (Integrated GPU)
+Selected GPU [0]: Apple A12X GPU  |  Driver: 0.2.2210
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 1048576 particles
+[Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK particles require per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 1.719 ms | Render: 50.034 ms | Total: 51.754 ms | FPS: 22 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 2.083 ms | Render: 54.171 ms | Total: 56.254 ms | FPS: 17 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 1.998 ms | Render: 55.521 ms | Total: 57.518 ms | FPS: 17 | T: 1.1 s (warm-up)
+[GPU Timing] Compute: 1.954 ms | Render: 59.309 ms | Total: 61.263 ms | FPS: 16 | T: 1.4 s (warm-up)
+[GPU Timing] Compute: 1.950 ms | Render: 57.620 ms | Total: 59.570 ms | FPS: 16 | T: 1.7 s (warm-up)
+[GPU Timing] Compute: 2.096 ms | Render: 60.302 ms | Total: 62.398 ms | FPS: 15 | T: 2.0 s (warm-up)
+[GPU Timing] Compute: 1.959 ms | Render: 61.961 ms | Total: 63.920 ms | FPS: 15 | T: 3.0 s
+[GPU Timing] Compute: 1.979 ms | Render: 63.201 ms | Total: 65.180 ms | FPS: 15 | T: 4.1 s
+[GPU Timing] Compute: 2.024 ms | Render: 62.322 ms | Total: 64.346 ms | FPS: 15 | T: 5.1 s
+[GPU Timing] Compute: 1.928 ms | Render: 60.847 ms | Total: 62.774 ms | FPS: 15 | T: 6.1 s
+[GPU Timing] Compute: 1.923 ms | Render: 61.476 ms | Total: 63.399 ms | FPS: 15 | T: 7.1 s
+[GPU Timing] Compute: 1.970 ms | Render: 62.484 ms | Total: 64.454 ms | FPS: 15 | T: 8.2 s
+[GPU Timing] Compute: 1.970 ms | Render: 63.259 ms | Total: 65.229 ms | FPS: 15 | T: 9.2 s
+[GPU Timing] Compute: 1.998 ms | Render: 63.494 ms | Total: 65.492 ms | FPS: 15 | T: 10.3 s
+[GPU Timing] Compute: 1.964 ms | Render: 62.390 ms | Total: 64.354 ms | FPS: 15 | T: 11.3 s
+[GPU Timing] Compute: 1.984 ms | Render: 62.061 ms | Total: 64.046 ms | FPS: 15 | T: 12.4 s
+[GPU Timing] Compute: 1.965 ms | Render: 62.488 ms | Total: 64.453 ms | FPS: 15 | T: 13.4 s
+[GPU Timing] Compute: 1.959 ms | Render: 63.124 ms | Total: 65.083 ms | FPS: 15 | T: 14.5 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A12X GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPad8,1)
+OS:           iOS 26.7.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    1048576 (Medium)
+Buffer:       32.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.1 s (warmup: 2.0 s, measured: 201 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         1.967     1.453     3.520
+Render:         62.481    35.051    96.457
+Total GPU:      64.449    36.822    99.977
+
+--- Throughput ---
+Avg FPS:      15
+Particles:    1048576
+Working set:  32.00 MiB
+VRAM rate:   21.32 GB/s  (1.967 ms compute)
+
+--- Analysis ---
+Avg frame time:  65.075 ms
+Avg GPU time:    64.449 ms
+GPU utilisation: 99.0%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 21.25 GB/s  (CV 0.73%)
+Throughput:   early vs late mean change (drop positive) 0.6%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-195521-226 -> /var/mobile/Containers/Data/Application/3BBA6FB1-DB13-4FB4-BB58-6D09AFCCA22F/Documents/results/results.json
+
+Thermal precheck vulkan/stream-4194304: nominal after 0s cooling.
+
+=== 5/7 vulkan/stream-4194304: passed ===
+=== Preview stream?particles=4194304&vsync=0&api=vulkan&coverage=fixed 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple A12X GPU (Integrated GPU)
+Selected GPU [0]: Apple A12X GPU  |  Driver: 0.2.2210
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 4194304 particles
+[Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK particles require per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 6.510 ms | Render: 187.651 ms | Total: 194.161 ms | FPS: 7 | T: 0.8 s (warm-up)
+[GPU Timing] Compute: 5.947 ms | Render: 257.136 ms | Total: 263.083 ms | FPS: 3 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 6.059 ms | Render: 269.235 ms | Total: 275.294 ms | FPS: 3 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 6.222 ms | Render: 264.284 ms | Total: 270.506 ms | FPS: 3 | T: 2.9 s
+[GPU Timing] Compute: 6.230 ms | Render: 261.303 ms | Total: 267.533 ms | FPS: 3 | T: 4.0 s
+[GPU Timing] Compute: 6.270 ms | Render: 254.501 ms | Total: 260.771 ms | FPS: 3 | T: 5.1 s
+[GPU Timing] Compute: 6.204 ms | Render: 258.286 ms | Total: 264.490 ms | FPS: 3 | T: 6.1 s
+[GPU Timing] Compute: 6.238 ms | Render: 258.053 ms | Total: 264.292 ms | FPS: 3 | T: 7.2 s
+[GPU Timing] Compute: 6.379 ms | Render: 255.154 ms | Total: 261.533 ms | FPS: 3 | T: 8.2 s
+[GPU Timing] Compute: 6.286 ms | Render: 256.622 ms | Total: 262.909 ms | FPS: 3 | T: 9.3 s
+[GPU Timing] Compute: 6.196 ms | Render: 257.736 ms | Total: 263.931 ms | FPS: 3 | T: 10.3 s
+[GPU Timing] Compute: 6.084 ms | Render: 258.848 ms | Total: 264.932 ms | FPS: 3 | T: 11.4 s
+[GPU Timing] Compute: 6.049 ms | Render: 260.630 ms | Total: 266.679 ms | FPS: 3 | T: 12.5 s
+[GPU Timing] Compute: 6.083 ms | Render: 257.924 ms | Total: 264.007 ms | FPS: 3 | T: 13.5 s
+[GPU Timing] Compute: 6.271 ms | Render: 254.853 ms | Total: 261.125 ms | FPS: 3 | T: 14.6 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A12X GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPad8,1)
+OS:           iOS 26.7.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    4194304 (Heavy)
+Buffer:       128.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.2 s (warmup: 2.0 s, measured: 50 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         6.214     5.930     6.806
+Render:        257.764   250.252   266.024
+Total GPU:     263.977   256.552   272.061
+
+--- Throughput ---
+Avg FPS:      3
+Particles:    4194304
+Working set:  128.00 MiB
+VRAM rate:   27.00 GB/s  (6.214 ms compute)
+
+--- Analysis ---
+Avg frame time:  264.488 ms
+Avg GPU time:    263.977 ms
+GPU utilisation: 99.8%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 27.34 GB/s  (CV 1.35%)
+Throughput:   early vs late mean change (drop positive) -1.6%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-195537-852 -> /var/mobile/Containers/Data/Application/3BBA6FB1-DB13-4FB4-BB58-6D09AFCCA22F/Documents/results/results.json
+
+Thermal precheck vulkan/stream-16777216: nominal after 0s cooling.
+
+=== 6/7 vulkan/stream-16777216: passed ===
+=== Preview stream?particles=16777216&vsync=0&api=vulkan&coverage=fixed 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple A12X GPU (Integrated GPU)
+Selected GPU [0]: Apple A12X GPU  |  Driver: 0.2.2210
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 16777216 particles
+[Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK particles require per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 23.522 ms | Render: 751.066 ms | Total: 774.589 ms | FPS: 2 | T: 2.3 s (warm-up)
+[GPU Timing] Compute: 23.125 ms | Render: 1140.745 ms | Total: 1163.870 ms | FPS: 0 | T: 3.5 s
+[GPU Timing] Compute: 23.305 ms | Render: 1155.756 ms | Total: 1179.061 ms | FPS: 0 | T: 4.7 s
+[GPU Timing] Compute: 22.982 ms | Render: 1175.385 ms | Total: 1198.367 ms | FPS: 0 | T: 5.9 s
+[GPU Timing] Compute: 23.362 ms | Render: 1175.359 ms | Total: 1198.721 ms | FPS: 0 | T: 7.1 s
+[GPU Timing] Compute: 23.301 ms | Render: 1171.499 ms | Total: 1194.800 ms | FPS: 0 | T: 8.3 s
+[GPU Timing] Compute: 23.762 ms | Render: 1173.231 ms | Total: 1196.993 ms | FPS: 0 | T: 9.5 s
+[GPU Timing] Compute: 23.238 ms | Render: 1185.810 ms | Total: 1209.048 ms | FPS: 0 | T: 10.7 s
+[GPU Timing] Compute: 22.685 ms | Render: 1172.727 ms | Total: 1195.412 ms | FPS: 0 | T: 11.9 s
+[GPU Timing] Compute: 23.253 ms | Render: 1176.179 ms | Total: 1199.432 ms | FPS: 0 | T: 13.1 s
+[GPU Timing] Compute: 22.849 ms | Render: 1175.823 ms | Total: 1198.672 ms | FPS: 0 | T: 14.3 s
+[GPU Timing] Compute: 23.034 ms | Render: 1175.713 ms | Total: 1198.747 ms | FPS: 0 | T: 15.5 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A12X GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPad8,1)
+OS:           iOS 26.7.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    16777216 (Extreme)
+Buffer:       512.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     14.3 s (warmup: 2.0 s, measured: 12 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        23.179    22.685    23.762
+Render:       1174.739  1155.756  1185.810
+Total GPU:    1197.918  1179.061  1209.048
+
+--- Throughput ---
+Avg FPS:      0
+Particles:    16777216
+Working set:  512.00 MiB
+VRAM rate:   28.95 GB/s  (23.179 ms compute)
+
+--- Analysis ---
+Avg frame time:  1195.725 ms
+Avg GPU time:    1197.918 ms
+GPU utilisation: 100.2%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      11 x 1s
+Stable window: 29.17 GB/s  (CV 0.96%)
+Throughput:   early vs late mean change (drop positive) -0.9%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261016-195556-067 -> /var/mobile/Containers/Data/Application/3BBA6FB1-DB13-4FB4-BB58-6D09AFCCA22F/Documents/results/results.json
+
+Thermal precheck cpu_compute: nominal after 0s cooling.
+
+=== 7/7 cpu_compute: passed ===
+=== Job 1 of 1: gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2 ===
+CPU_META	workload_version=cpu_mixed_v1_scheduler_managed	name=Apple Silicon (iPad8,1)	logical_count=8	physical_count=8	topology_source=AppleSchedulerManagedEstimate	affinity_capability=scheduler_managed
+CPU_TOPOLOGY	core_index=0	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=1	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=2	group=0	logical_index=2	physical_core=2	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=3	group=0	logical_index=3	physical_core=3	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=4	group=0	logical_index=4	physical_core=4	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=5	group=0	logical_index=5	physical_core=5	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=6	group=0	logical_index=6	physical_core=6	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=7	group=0	logical_index=7	physical_core=7	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TYPE_CAPS	verified_scheduling=1	performance_count=4	efficiency_count=4	residency_method=thread_selfcounts_perf_level_spi
+CPU_SCHEDULING	core_type=both	efficiency_policy=foreground_utility_without_helpers	residency_threshold=0.99	scope=single_thread_stages
+--- Native CPU mixed benchmark ---
+CPU: Apple Silicon (iPad8,1)
+Topology: AppleSchedulerManagedEstimate, affinity: scheduler_managed
+Workload: cpu_mixed_v1_scheduler_managed, 3 rounds, median aggregation (the requested measurement time is split across rounds).
+Score contract: formal (formal = 15.0 s measurement, 0.2 s warm-up, 3 rounds).
+Each score is million mixed integer/branch/FP32/FP64 work units per second.
+The checksum is a dead-code-elimination sink, not a correctness oracle.
+--- CPU all-logical-processor test ---
+CPU_PROGRESS	mode=multi	phase=warmup	core_index=-1	core_count=8	core_fraction=0.000000	overall_fraction=0.000000	elapsed=0.000000	round_index=-1	round_count=3
+CPU_MULTI_WORKER	round=1	worker=0	work_units=521191424	common_seconds=5.000057334	score=104.237089534	classification=requested_performance_type	requested_lower_bound=0.999003466	worker_cpu_seconds=4.996482876	busy_fraction=0.999306069
+CPU_MULTI_WORKER	round=1	worker=1	work_units=520253440	common_seconds=5.000057334	score=104.049494885	classification=requested_performance_type	requested_lower_bound=0.995581927	worker_cpu_seconds=4.994900208	busy_fraction=0.998993570
+CPU_MULTI_WORKER	round=1	worker=2	work_units=520552448	common_seconds=5.000057334	score=104.109295800	classification=requested_performance_type	requested_lower_bound=0.996342333	worker_cpu_seconds=4.996354750	busy_fraction=0.999285939
+CPU_MULTI_WORKER	round=1	worker=3	work_units=521228288	common_seconds=5.000057334	score=104.244462250	classification=requested_performance_type	requested_lower_bound=0.998380521	worker_cpu_seconds=4.998342333	busy_fraction=0.999678747
+CPU_MULTI_WORKER	round=1	worker=4	work_units=301346816	common_seconds=5.000057334	score=60.268672111	classification=requested_efficiency_type	requested_lower_bound=0.999989684	worker_cpu_seconds=4.846678000	busy_fraction=0.969359196
+CPU_MULTI_WORKER	round=1	worker=5	work_units=301875200	common_seconds=5.000057334	score=60.374347699	classification=requested_efficiency_type	requested_lower_bound=0.999989701	worker_cpu_seconds=4.854670708	busy_fraction=0.970951773
+CPU_MULTI_WORKER	round=1	worker=6	work_units=300531712	common_seconds=5.000057334	score=60.105653180	classification=requested_efficiency_type	requested_lower_bound=0.999989654	worker_cpu_seconds=4.832690416	busy_fraction=0.966555344
+CPU_MULTI_WORKER	round=1	worker=7	work_units=300118016	common_seconds=5.000057334	score=60.022914929	classification=requested_efficiency_type	requested_lower_bound=0.999989637	worker_cpu_seconds=4.825089875	busy_fraction=0.965030480
+CPU_MULTI_ACCOUNTING	round=1	process_cpu_seconds=40.823708000	performance_cpu_seconds=20.674252958	includes_warmup_seconds=0.200000000
+CPU_MULTI_PARTICIPATION	round=1	performance_occupancy=0.996631745	efficiency_occupancy=0.970606156	minimum_worker_occupancy=0.965030480	verified=1	individual_type_purity_verified=1
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=8	core_fraction=0.333333	overall_fraction=0.111111	elapsed=5.000000	round_index=0	round_count=3
+CPU_MULTI_WORKER	round=2	worker=0	work_units=521244672	common_seconds=5.000056875	score=104.247748582	classification=requested_performance_type	requested_lower_bound=0.998235469	worker_cpu_seconds=4.998732291	busy_fraction=0.999778385
+CPU_MULTI_WORKER	round=2	worker=1	work_units=521236480	common_seconds=5.000056875	score=104.246110200	classification=requested_performance_type	requested_lower_bound=0.998608817	worker_cpu_seconds=4.998023583	busy_fraction=0.999616187
+CPU_MULTI_WORKER	round=2	worker=2	work_units=521617408	common_seconds=5.000056875	score=104.322294934	classification=requested_performance_type	requested_lower_bound=0.999856620	worker_cpu_seconds=4.998941542	busy_fraction=0.999807505
+CPU_MULTI_WORKER	round=2	worker=3	work_units=520728576	common_seconds=5.000056875	score=104.144530556	classification=requested_performance_type	requested_lower_bound=0.998250240	worker_cpu_seconds=4.993517668	busy_fraction=0.998724074
+CPU_MULTI_WORKER	round=2	worker=4	work_units=302936064	common_seconds=5.000056875	score=60.586523628	classification=requested_efficiency_type	requested_lower_bound=0.999989730	worker_cpu_seconds=4.868641916	busy_fraction=0.973758951
+CPU_MULTI_WORKER	round=2	worker=5	work_units=303067136	common_seconds=5.000056875	score=60.612737730	classification=requested_efficiency_type	requested_lower_bound=0.999989737	worker_cpu_seconds=4.871721208	busy_fraction=0.974367407
+CPU_MULTI_WORKER	round=2	worker=6	work_units=302972928	common_seconds=5.000056875	score=60.593896344	classification=requested_efficiency_type	requested_lower_bound=0.999989733	worker_cpu_seconds=4.869887750	busy_fraction=0.974001015
+CPU_MULTI_WORKER	round=2	worker=7	work_units=302198784	common_seconds=5.000056875	score=60.439069306	classification=requested_efficiency_type	requested_lower_bound=0.999989709	worker_cpu_seconds=4.858489375	busy_fraction=0.973562873
+CPU_MULTI_ACCOUNTING	round=2	process_cpu_seconds=39.495933625	performance_cpu_seconds=19.996257333	includes_warmup_seconds=0.000000000
+CPU_MULTI_PARTICIPATION	round=2	performance_occupancy=0.998198010	efficiency_occupancy=0.974677315	minimum_worker_occupancy=0.973562873	verified=1	individual_type_purity_verified=1
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=8	core_fraction=0.666667	overall_fraction=0.222222	elapsed=10.000000	round_index=1	round_count=3
+CPU_MULTI_WORKER	round=3	worker=0	work_units=521265152	common_seconds=5.000081583	score=104.251329373	classification=requested_performance_type	requested_lower_bound=0.998047050	worker_cpu_seconds=4.999253999	busy_fraction=0.999864573
+CPU_MULTI_WORKER	round=3	worker=1	work_units=521666560	common_seconds=5.000081583	score=104.331609663	classification=requested_performance_type	requested_lower_bound=0.999837368	worker_cpu_seconds=4.999266625	busy_fraction=0.999864065
+CPU_MULTI_WORKER	round=3	worker=2	work_units=521535488	common_seconds=5.000081583	score=104.305395691	classification=requested_performance_type	requested_lower_bound=0.999280196	worker_cpu_seconds=4.999104000	busy_fraction=0.999829798
+CPU_MULTI_WORKER	round=3	worker=3	work_units=521207808	common_seconds=5.000081583	score=104.239860760	classification=requested_performance_type	requested_lower_bound=0.997988220	worker_cpu_seconds=4.998703417	busy_fraction=0.999777983
+CPU_MULTI_WORKER	round=3	worker=4	work_units=301862912	common_seconds=5.000081583	score=60.371597341	classification=requested_efficiency_type	requested_lower_bound=0.999989694	worker_cpu_seconds=4.851666541	busy_fraction=0.970379288
+CPU_MULTI_WORKER	round=3	worker=5	work_units=300253184	common_seconds=5.000081583	score=60.049656994	classification=requested_efficiency_type	requested_lower_bound=0.999989643	worker_cpu_seconds=4.827431166	busy_fraction=0.966900204
+CPU_MULTI_WORKER	round=3	worker=6	work_units=301064192	common_seconds=5.000081583	score=60.211855947	classification=requested_efficiency_type	requested_lower_bound=0.999989673	worker_cpu_seconds=4.841625333	busy_fraction=0.968368353
+CPU_MULTI_WORKER	round=3	worker=7	work_units=301080576	common_seconds=5.000081583	score=60.215132694	classification=requested_efficiency_type	requested_lower_bound=0.999989669	worker_cpu_seconds=4.839912333	busy_fraction=0.968015944
+CPU_MULTI_ACCOUNTING	round=3	process_cpu_seconds=39.389273708	performance_cpu_seconds=19.997016167	includes_warmup_seconds=0.000000000
+CPU_MULTI_PARTICIPATION	round=3	performance_occupancy=0.998598558	efficiency_occupancy=0.969217504	minimum_worker_occupancy=0.966900204	verified=1	individual_type_purity_verified=1
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=8	core_fraction=1.000000	overall_fraction=0.333333	elapsed=15.000000	round_index=2	round_count=3
+CPU_PROGRESS	mode=multi	phase=complete	core_index=-1	core_count=8	core_fraction=1.000000	overall_fraction=0.333333	elapsed=15.000000	round_index=2	round_count=3
+All-core score (8 threads): 657.98 MWork/s
+CPU_RESULT	kind=multi	mode=multi	core_index=-1	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=formal	aggregation=median	core_count=8	thread_count=8	pinned_threads=0	affinity=scheduler_managed	valid=1	score=657.976438	unit=MWork/s	seconds=5.000082	requested_seconds=15.000000	round_count=3	median_round=3	checksum=d247187cb0537911	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=0	core_count=2	core_fraction=0.000000	overall_fraction=0.333333	elapsed=0.000020	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.000003	overall_fraction=0.333334	elapsed=0.000039	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.017004	overall_fraction=0.339001	elapsed=0.255057	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.034005	overall_fraction=0.344668	elapsed=0.510080	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.051007	overall_fraction=0.350336	elapsed=0.765099	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.068007	overall_fraction=0.356002	elapsed=1.020112	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.085008	overall_fraction=0.361669	elapsed=1.275125	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.102009	overall_fraction=0.367336	elapsed=1.530139	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.119010	overall_fraction=0.373003	elapsed=1.785155	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.136011	overall_fraction=0.378670	elapsed=2.040170	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.153014	overall_fraction=0.384338	elapsed=2.295208	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.170015	overall_fraction=0.390005	elapsed=2.550226	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.186806	overall_fraction=0.395602	elapsed=2.802089	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.203705	overall_fraction=0.401235	elapsed=3.055569	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.220707	overall_fraction=0.406902	elapsed=3.310599	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.237708	overall_fraction=0.412569	elapsed=3.565613	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.254709	overall_fraction=0.418236	elapsed=3.820629	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.271710	overall_fraction=0.423903	elapsed=4.075654	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.288711	overall_fraction=0.429570	elapsed=4.330671	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.305712	overall_fraction=0.435237	elapsed=4.585686	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.322714	overall_fraction=0.440905	elapsed=4.840711	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.333336	overall_fraction=0.444445	elapsed=5.000036	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.350338	overall_fraction=0.450113	elapsed=5.255074	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.367009	overall_fraction=0.455670	elapsed=5.505128	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.384010	overall_fraction=0.461337	elapsed=5.760146	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.401011	overall_fraction=0.467004	elapsed=6.015169	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.418012	overall_fraction=0.472671	elapsed=6.270184	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.435016	overall_fraction=0.478339	elapsed=6.525235	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.452017	overall_fraction=0.484006	elapsed=6.780254	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.469018	overall_fraction=0.489673	elapsed=7.035274	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.486019	overall_fraction=0.495340	elapsed=7.290292	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.503021	overall_fraction=0.501007	elapsed=7.545317	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.520022	overall_fraction=0.506674	elapsed=7.800337	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.537024	overall_fraction=0.512341	elapsed=8.055358	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.554026	overall_fraction=0.518009	elapsed=8.310398	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.571028	overall_fraction=0.523676	elapsed=8.565427	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.588030	overall_fraction=0.529343	elapsed=8.820449	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.605031	overall_fraction=0.535010	elapsed=9.075467	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.622032	overall_fraction=0.540677	elapsed=9.330481	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.639036	overall_fraction=0.546345	elapsed=9.585543	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.656037	overall_fraction=0.552012	elapsed=9.840557	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.666669	overall_fraction=0.555556	elapsed=10.000040	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.683671	overall_fraction=0.561224	elapsed=10.255062	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.700673	overall_fraction=0.566891	elapsed=10.510096	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.717674	overall_fraction=0.572558	elapsed=10.765114	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.734675	overall_fraction=0.578225	elapsed=11.020129	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.751677	overall_fraction=0.583892	elapsed=11.275152	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.768678	overall_fraction=0.589559	elapsed=11.530175	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.785683	overall_fraction=0.595228	elapsed=11.785238	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.802684	overall_fraction=0.600895	elapsed=12.040257	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.819686	overall_fraction=0.606562	elapsed=12.295290	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.836687	overall_fraction=0.612229	elapsed=12.550308	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.853689	overall_fraction=0.617896	elapsed=12.805335	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.870692	overall_fraction=0.623564	elapsed=13.060384	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.887694	overall_fraction=0.629231	elapsed=13.315411	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.904696	overall_fraction=0.634899	elapsed=13.570434	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.921697	overall_fraction=0.640566	elapsed=13.825453	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.938698	overall_fraction=0.646233	elapsed=14.080477	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.955700	overall_fraction=0.651900	elapsed=14.335503	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.972702	overall_fraction=0.657567	elapsed=14.590526	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.989704	overall_fraction=0.663235	elapsed=14.845560	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=0	core_count=2	core_fraction=1.000000	overall_fraction=0.666667	elapsed=15.000000	round_index=0	round_count=3
+CPU_RESIDENCY	core_type=performance	method=thread_selfcounts_perf_level_spi	round=1	p_fraction=1.000000	requested_lower_bound=0.999990	effective_ghz=2.484216	worker_cpu_seconds=5.000081	process_cpu_seconds=0.000000	verified=1	retries=0
+CPU_RESIDENCY	core_type=performance	method=thread_selfcounts_perf_level_spi	round=2	p_fraction=1.000000	requested_lower_bound=0.999990	effective_ghz=2.483371	worker_cpu_seconds=5.000014	process_cpu_seconds=0.000000	verified=1	retries=0
+CPU_RESIDENCY	core_type=performance	method=thread_selfcounts_perf_level_spi	round=3	p_fraction=1.000000	requested_lower_bound=0.999990	effective_ghz=2.484356	worker_cpu_seconds=5.000072	process_cpu_seconds=0.000000	verified=1	retries=0
+Performance core type (QoS, verified CPU time; no numbered-core binding) score: 111.08 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=formal	aggregation=median	core_index=0	core_count=8	group=0	logical_index=-1	physical_core=-1	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=0	core_class=Performance	core_type=performance	efficiency_policy=background	residency_verified=1	requested_lower_bound=0.999990	classification_source=thread_perf_level_counters_spi	affinity=scheduler_managed	valid=1	score=111.076326	unit=MWork/s	seconds=5.000029	requested_seconds=15.000000	round_count=3	median_round=1	checksum=f4d9b839d3b1c997	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=1	core_count=2	core_fraction=0.000000	overall_fraction=0.666667	elapsed=0.000000	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=1	core_count=2	core_fraction=0.000000	overall_fraction=0.666667	elapsed=0.000055	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.000004	overall_fraction=0.666668	elapsed=0.000061	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.017007	overall_fraction=0.672336	elapsed=0.255104	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.034010	overall_fraction=0.678003	elapsed=0.510147	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.051013	overall_fraction=0.683671	elapsed=0.765195	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.068016	overall_fraction=0.689339	elapsed=1.020238	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.085019	overall_fraction=0.695006	elapsed=1.275285	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.102022	overall_fraction=0.700674	elapsed=1.530327	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.119025	overall_fraction=0.706342	elapsed=1.785370	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.136028	overall_fraction=0.712009	elapsed=2.040414	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.153031	overall_fraction=0.717677	elapsed=2.295461	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.170034	overall_fraction=0.723345	elapsed=2.550504	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.187037	overall_fraction=0.729012	elapsed=2.805548	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.204039	overall_fraction=0.734680	elapsed=3.060591	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.221042	overall_fraction=0.740347	elapsed=3.315633	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.238045	overall_fraction=0.746015	elapsed=3.570679	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.255048	overall_fraction=0.751683	elapsed=3.825723	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.272051	overall_fraction=0.757350	elapsed=4.080767	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.289054	overall_fraction=0.763018	elapsed=4.335810	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.306057	overall_fraction=0.768686	elapsed=4.590853	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.323060	overall_fraction=0.774353	elapsed=4.845897	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.333337	overall_fraction=0.777779	elapsed=5.000058	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.350340	overall_fraction=0.783447	elapsed=5.255102	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.367343	overall_fraction=0.789114	elapsed=5.510145	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.384346	overall_fraction=0.794782	elapsed=5.765189	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.401349	overall_fraction=0.800450	elapsed=6.020233	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.418352	overall_fraction=0.806117	elapsed=6.275276	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.435355	overall_fraction=0.811785	elapsed=6.530321	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.452358	overall_fraction=0.817453	elapsed=6.785364	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.469360	overall_fraction=0.823120	elapsed=7.040407	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.486363	overall_fraction=0.828788	elapsed=7.295452	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.503366	overall_fraction=0.834455	elapsed=7.550495	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.520369	overall_fraction=0.840123	elapsed=7.805537	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.537372	overall_fraction=0.845791	elapsed=8.060582	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.554375	overall_fraction=0.851458	elapsed=8.315624	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.571378	overall_fraction=0.857126	elapsed=8.570666	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.588380	overall_fraction=0.862793	elapsed=8.825706	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.605383	overall_fraction=0.868461	elapsed=9.080751	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.622386	overall_fraction=0.874129	elapsed=9.335793	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.639389	overall_fraction=0.879796	elapsed=9.590841	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.656392	overall_fraction=0.885464	elapsed=9.845886	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.666671	overall_fraction=0.888890	elapsed=10.000064	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.683674	overall_fraction=0.894558	elapsed=10.255107	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.700677	overall_fraction=0.900226	elapsed=10.510151	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.717680	overall_fraction=0.905893	elapsed=10.765196	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.734683	overall_fraction=0.911561	elapsed=11.020240	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.751686	overall_fraction=0.917229	elapsed=11.275284	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.768688	overall_fraction=0.922896	elapsed=11.530327	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.785691	overall_fraction=0.928564	elapsed=11.785370	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.802694	overall_fraction=0.934231	elapsed=12.040414	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.819697	overall_fraction=0.939899	elapsed=12.295458	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.836700	overall_fraction=0.945567	elapsed=12.550500	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.853703	overall_fraction=0.951234	elapsed=12.805544	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.870706	overall_fraction=0.956902	elapsed=13.060588	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.887709	overall_fraction=0.962570	elapsed=13.315631	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.904712	overall_fraction=0.968237	elapsed=13.570675	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.921715	overall_fraction=0.973905	elapsed=13.825720	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.938718	overall_fraction=0.979573	elapsed=14.080763	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.955720	overall_fraction=0.985240	elapsed=14.335806	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.972723	overall_fraction=0.990908	elapsed=14.590848	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.989726	overall_fraction=0.996575	elapsed=14.845893	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=1	core_count=2	core_fraction=1.000000	overall_fraction=1.000000	elapsed=15.000000	round_index=2	round_count=3
+CPU_RESIDENCY	core_type=efficiency	method=thread_selfcounts_perf_level_spi	round=1	p_fraction=0.000000	requested_lower_bound=0.999990	effective_ghz=1.571983	worker_cpu_seconds=4.937250	process_cpu_seconds=0.000000	verified=1	retries=0
+CPU_RESIDENCY	core_type=efficiency	method=thread_selfcounts_perf_level_spi	round=2	p_fraction=0.000000	requested_lower_bound=0.999990	effective_ghz=1.571984	worker_cpu_seconds=4.981995	process_cpu_seconds=0.000000	verified=1	retries=0
+CPU_RESIDENCY	core_type=efficiency	method=thread_selfcounts_perf_level_spi	round=3	p_fraction=0.000000	requested_lower_bound=0.999990	effective_ghz=1.571971	worker_cpu_seconds=4.980303	process_cpu_seconds=0.000000	verified=1	retries=0
+Efficiency core type (QoS, verified CPU time; no numbered-core binding) score: 60.79 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=formal	aggregation=median	core_index=1	core_count=8	group=0	logical_index=-1	physical_core=-1	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=1	core_class=Efficiency	core_type=efficiency	efficiency_policy=foreground_with_performance_load	residency_verified=1	requested_lower_bound=0.999990	classification_source=thread_perf_level_counters_spi	affinity=scheduler_managed	valid=1	score=60.790546	unit=MWork/s	seconds=5.000053	requested_seconds=15.000000	round_count=3	median_round=3	checksum=adc74c862f58e0fd	checksum_role=dce_sink
+CPU_RESULT	kind=class_summary	completed=2	invalid_count=0	valid=1	core_type=both
+[Results] Saved CPU single-thread summary as 20261016-195643-008-cpu-single-performance -> /var/mobile/Containers/Data/Application/3BBA6FB1-DB13-4FB4-BB58-6D09AFCCA22F/Documents/results/results.json
+[Results] Saved CPU single-thread summary as 20261016-195643-019-cpu-single-efficiency -> /var/mobile/Containers/Data/Application/3BBA6FB1-DB13-4FB4-BB58-6D09AFCCA22F/Documents/results/results.json
+[Results] Saved CPU multi-core summary as 20261016-195643-025-cpu-multi -> /var/mobile/Containers/Data/Application/3BBA6FB1-DB13-4FB4-BB58-6D09AFCCA22F/Documents/results/results.json

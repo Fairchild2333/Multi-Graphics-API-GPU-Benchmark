@@ -1,0 +1,54 @@
+CPU_META	workload_version=cpu_mixed_v1_scheduler_managed	name=Apple M4 Pro	logical_count=14	physical_count=14	topology_source=AppleSchedulerManagedEstimate	affinity_capability=scheduler_managed
+CPU_TOPOLOGY	core_index=0	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=1	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=2	group=0	logical_index=2	physical_core=2	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=3	group=0	logical_index=3	physical_core=3	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=4	group=0	logical_index=4	physical_core=4	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=5	group=0	logical_index=5	physical_core=5	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=6	group=0	logical_index=6	physical_core=6	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=7	group=0	logical_index=7	physical_core=7	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=8	group=0	logical_index=8	physical_core=8	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=9	group=0	logical_index=9	physical_core=9	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=10	group=0	logical_index=10	physical_core=10	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=11	group=0	logical_index=11	physical_core=11	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=12	group=0	logical_index=12	physical_core=12	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=13	group=0	logical_index=13	physical_core=13	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_SCHEDULING	core_type=both	residency_threshold=0.99	scope=single_thread_stages
+
+--- Native CPU mixed benchmark ---
+CPU: Apple M4 Pro
+Topology: AppleSchedulerManagedEstimate, affinity: scheduler_managed
+Workload: cpu_mixed_v1_scheduler_managed, 3 rounds, median aggregation (the requested measurement time is split across rounds).
+Score contract: preview (formal = 15.0 s measurement, 0.2 s warm-up, 3 rounds).
+Each score is million mixed integer/branch/FP32/FP64 work units per second.
+The checksum is a dead-code-elimination sink, not a correctness oracle.
+
+--- CPU all-logical-processor test ---
+CPU_PROGRESS	mode=multi	phase=warmup	core_index=-1	core_count=14	core_fraction=0.000000	overall_fraction=0.000000	elapsed=0.000000	round_index=-1	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=14	core_fraction=0.333333	overall_fraction=0.111111	elapsed=0.200000	round_index=0	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=14	core_fraction=0.666667	overall_fraction=0.222222	elapsed=0.400000	round_index=1	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=14	core_fraction=1.000000	overall_fraction=0.333333	elapsed=0.600000	round_index=2	round_count=3
+CPU_PROGRESS	mode=multi	phase=complete	core_index=-1	core_count=14	core_fraction=1.000000	overall_fraction=0.333333	elapsed=0.600000	round_index=1	round_count=3
+All-core score (14 threads): 3710.59 MWork/s
+CPU_RESULT	kind=multi	mode=multi	core_index=-1	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_count=14	thread_count=14	pinned_threads=0	affinity=scheduler_managed	valid=1	score=3710.591748	unit=MWork/s	seconds=0.200030	requested_seconds=0.600000	round_count=3	median_round=2	checksum=6266fd28b14e173f	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=0	core_count=2	core_fraction=0.000000	overall_fraction=0.333333	elapsed=0.000007	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.000015	overall_fraction=0.333338	elapsed=0.000009	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.333347	overall_fraction=0.444449	elapsed=0.200008	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=2	core_fraction=0.666680	overall_fraction=0.555560	elapsed=0.400008	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=0	core_count=2	core_fraction=1.000000	overall_fraction=0.666667	elapsed=0.600000	round_index=2	round_count=3
+CPU_RESIDENCY	core_type=performance	round=1	p_fraction=1.000000	requested_lower_bound=0.999422	effective_ghz=4.404179	verified=1	retries=0
+CPU_RESIDENCY	core_type=performance	round=2	p_fraction=1.000000	requested_lower_bound=0.999453	effective_ghz=4.459598	verified=1	retries=0
+CPU_RESIDENCY	core_type=performance	round=3	p_fraction=0.999845	requested_lower_bound=0.999295	effective_ghz=4.417466	verified=1	retries=0
+Performance core type (QoS, verified CPU time; no numbered-core binding) score: 335.06 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=0	core_count=14	group=0	logical_index=-1	physical_core=-1	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=0	core_class=Performance	core_type=performance	residency_verified=1	requested_lower_bound=0.999295	classification_source=qos_verified_cpu_time_bound	affinity=scheduler_managed	valid=1	score=335.062112	unit=MWork/s	seconds=0.200007	requested_seconds=0.600000	round_count=3	median_round=3	checksum=22c31a842066ceb8	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=1	core_count=2	core_fraction=0.000000	overall_fraction=0.666667	elapsed=0.000016	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.000058	overall_fraction=0.666686	elapsed=0.000035	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.333362	overall_fraction=0.777787	elapsed=0.200017	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=2	core_fraction=0.666719	overall_fraction=0.888906	elapsed=0.400031	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=1	core_count=2	core_fraction=1.000000	overall_fraction=1.000000	elapsed=0.600000	round_index=2	round_count=3
+CPU_RESIDENCY	core_type=efficiency	round=1	p_fraction=0.000690	requested_lower_bound=0.998256	effective_ghz=2.528874	verified=1	retries=0
+CPU_RESIDENCY	core_type=efficiency	round=2	p_fraction=0.000000	requested_lower_bound=0.996653	effective_ghz=2.534237	verified=1	retries=0
+CPU_RESIDENCY	core_type=efficiency	round=3	p_fraction=0.002247	requested_lower_bound=0.995421	effective_ghz=2.530642	verified=1	retries=0
+Efficiency core type (QoS, verified CPU time; no numbered-core binding) score: 47.11 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=1	core_count=14	group=0	logical_index=-1	physical_core=-1	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=1	core_class=Efficiency	core_type=efficiency	residency_verified=1	requested_lower_bound=0.995421	classification_source=qos_verified_cpu_time_bound	affinity=scheduler_managed	valid=1	score=47.106440	unit=MWork/s	seconds=0.200772	requested_seconds=0.600000	round_count=3	median_round=3	checksum=5ed9329994890df1	checksum_role=dce_sink
+CPU_RESULT	kind=class_summary	completed=2	invalid_count=0	valid=1	core_type=both

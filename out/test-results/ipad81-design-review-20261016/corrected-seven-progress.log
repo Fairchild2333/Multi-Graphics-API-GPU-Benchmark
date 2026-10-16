@@ -1,0 +1,11 @@
+{"status": "running", "finished": 0, "total": 7, "running": ["stream-1048576"], "reviews": [], "failed": []}
+{"status": "running", "finished": 1, "total": 7, "running": ["stream-4194304"], "reviews": [], "failed": []}
+{"status": "running", "finished": 2, "total": 7, "running": ["stream-16777216"], "reviews": [], "failed": []}
+{"status": "running", "finished": 3, "total": 7, "running": [], "reviews": [], "failed": []}
+{"status": "running", "finished": 3, "total": 7, "running": ["vulkan/stream-1048576"], "reviews": [], "failed": []}
+{"status": "running", "finished": 4, "total": 7, "running": ["vulkan/stream-4194304"], "reviews": [], "failed": []}
+{"status": "running", "finished": 5, "total": 7, "running": ["vulkan/stream-16777216"], "reviews": [], "failed": []}
+{"status": "running", "finished": 6, "total": 7, "running": [], "reviews": [], "failed": []}
+{"status": "running", "finished": 6, "total": 7, "running": ["cpu_compute"], "reviews": [], "failed": []}
+{"status": "passed", "finished": 7, "total": 7, "running": [], "reviews": [], "failed": []}
+DONE passed; archived /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad81-design-review-20261016/corrected-seven/documents

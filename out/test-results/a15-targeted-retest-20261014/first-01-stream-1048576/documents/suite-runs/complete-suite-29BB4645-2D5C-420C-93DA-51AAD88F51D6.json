@@ -1,0 +1,113 @@
+{
+  "finishedAt" : "2026-10-13T16:04:56Z",
+  "id" : "complete-suite-29BB4645-2D5C-420C-93DA-51AAD88F51D6",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T16:03:12Z",
+      "id" : "stream-4194304",
+      "request" : "stream?particles=4194304&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261014-030312-355"
+      ],
+      "startedAt" : "2026-10-13T16:02:57Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 4194304 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T16:03:29Z",
+      "id" : "stream-16777216",
+      "request" : "stream?particles=16777216&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261014-030328-879"
+      ],
+      "startedAt" : "2026-10-13T16:03:13Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 16777216 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T16:03:45Z",
+      "id" : "gpu_burn-16",
+      "request" : "gpu_burn?steps=16&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261014-030344-824"
+      ],
+      "startedAt" : "2026-10-13T16:03:29Z",
+      "status" : "passed",
+      "thermalStateEnd" : 1,
+      "thermalStateStart" : 0,
+      "title" : "Metal · GPU Burn · 16"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T16:04:01Z",
+      "id" : "gpu_burn-64",
+      "request" : "gpu_burn?steps=64&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261014-030401-007"
+      ],
+      "startedAt" : "2026-10-13T16:03:45Z",
+      "status" : "passed",
+      "thermalStateEnd" : 2,
+      "thermalStateStart" : 1,
+      "title" : "Metal · GPU Burn · 64"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T16:04:18Z",
+      "id" : "gpu_burn-256",
+      "request" : "gpu_burn?steps=256&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261014-030417-852"
+      ],
+      "startedAt" : "2026-10-13T16:04:01Z",
+      "status" : "passed",
+      "thermalStateEnd" : 2,
+      "thermalStateStart" : 2,
+      "title" : "Metal · GPU Burn · 256"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T16:04:34Z",
+      "id" : "cinematic_liquid",
+      "request" : "cinematic_liquid?vsync=0&api=metal",
+      "resultIDs" : [
+        "20261014-030434-330"
+      ],
+      "startedAt" : "2026-10-13T16:04:18Z",
+      "status" : "passed",
+      "thermalStateEnd" : 2,
+      "thermalStateStart" : 2,
+      "title" : "Metal · Cinematic Liquid"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T16:04:56Z",
+      "id" : "vulkan\/gpu_burn-256",
+      "request" : "gpu_burn?steps=256&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261014-030455-789"
+      ],
+      "startedAt" : "2026-10-13T16:04:35Z",
+      "status" : "passed",
+      "thermalStateEnd" : 2,
+      "thermalStateStart" : 2,
+      "title" : "Vulkan · GPU Burn · 256"
+    }
+  ],
+  "startedAt" : "2026-10-13T16:02:57Z",
+  "status" : "passed"
+}

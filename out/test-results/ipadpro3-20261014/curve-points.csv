@@ -1,0 +1,428 @@
+API,series,working_set_bytes,value,unit
+CPU,single_read,4096.0,78.9,GB/s
+CPU,single_read,8192.0,78.2,GB/s
+CPU,single_read,16384.0,78.8,GB/s
+CPU,single_read,24576.0,78.7,GB/s
+CPU,single_read,32768.0,78.7,GB/s
+CPU,single_read,49152.0,78.9,GB/s
+CPU,single_read,65536.0,78.9,GB/s
+CPU,single_read,98304.0,78.6,GB/s
+CPU,single_read,131072.0,78.2,GB/s
+CPU,single_read,196608.0,52.1,GB/s
+CPU,single_read,262144.0,52.2,GB/s
+CPU,single_read,393216.0,52.4,GB/s
+CPU,single_read,524288.0,52.3,GB/s
+CPU,single_read,786432.0,52.3,GB/s
+CPU,single_read,1048576.0,52.6,GB/s
+CPU,single_read,1572864.0,52.6,GB/s
+CPU,single_read,2097152.0,52.3,GB/s
+CPU,single_read,3145728.0,52.5,GB/s
+CPU,single_read,4194304.0,52.2,GB/s
+CPU,single_read,6291456.0,52.0,GB/s
+CPU,single_read,8388608.0,45.8,GB/s
+CPU,single_read,12582912.0,46.3,GB/s
+CPU,single_read,16777216.0,42.9,GB/s
+CPU,single_read,25165824.0,41.9,GB/s
+CPU,single_read,33554432.0,42.0,GB/s
+CPU,single_read,50331648.0,42.4,GB/s
+CPU,single_read,67108864.0,42.5,GB/s
+CPU,single_read,100663296.0,41.9,GB/s
+CPU,single_read,134217728.0,42.1,GB/s
+CPU,single_read,201326592.0,42.2,GB/s
+CPU,single_read,268435456.0,34.6,GB/s
+CPU,single_write,4096.0,78.9,GB/s
+CPU,single_write,8192.0,77.4,GB/s
+CPU,single_write,16384.0,78.0,GB/s
+CPU,single_write,24576.0,78.7,GB/s
+CPU,single_write,32768.0,78.4,GB/s
+CPU,single_write,49152.0,78.8,GB/s
+CPU,single_write,65536.0,78.7,GB/s
+CPU,single_write,98304.0,78.8,GB/s
+CPU,single_write,131072.0,76.1,GB/s
+CPU,single_write,196608.0,51.9,GB/s
+CPU,single_write,262144.0,52.0,GB/s
+CPU,single_write,393216.0,52.3,GB/s
+CPU,single_write,524288.0,51.9,GB/s
+CPU,single_write,786432.0,52.0,GB/s
+CPU,single_write,1048576.0,51.9,GB/s
+CPU,single_write,1572864.0,52.1,GB/s
+CPU,single_write,2097152.0,52.0,GB/s
+CPU,single_write,3145728.0,51.5,GB/s
+CPU,single_write,4194304.0,51.1,GB/s
+CPU,single_write,6291456.0,50.6,GB/s
+CPU,single_write,8388608.0,47.7,GB/s
+CPU,single_write,12582912.0,42.6,GB/s
+CPU,single_write,16777216.0,26.5,GB/s
+CPU,single_write,25165824.0,19.3,GB/s
+CPU,single_write,33554432.0,19.3,GB/s
+CPU,single_write,50331648.0,19.3,GB/s
+CPU,single_write,67108864.0,18.8,GB/s
+CPU,single_write,100663296.0,19.3,GB/s
+CPU,single_write,134217728.0,19.3,GB/s
+CPU,single_write,201326592.0,18.6,GB/s
+CPU,single_write,268435456.0,19.0,GB/s
+CPU,single_copy,4096.0,116.4,GB/s
+CPU,single_copy,8192.0,116.4,GB/s
+CPU,single_copy,16384.0,111.8,GB/s
+CPU,single_copy,24576.0,113.4,GB/s
+CPU,single_copy,32768.0,113.8,GB/s
+CPU,single_copy,49152.0,114.3,GB/s
+CPU,single_copy,65536.0,115.3,GB/s
+CPU,single_copy,98304.0,115.2,GB/s
+CPU,single_copy,131072.0,113.7,GB/s
+CPU,single_copy,196608.0,63.4,GB/s
+CPU,single_copy,262144.0,63.5,GB/s
+CPU,single_copy,393216.0,63.6,GB/s
+CPU,single_copy,524288.0,63.5,GB/s
+CPU,single_copy,786432.0,63.7,GB/s
+CPU,single_copy,1048576.0,63.8,GB/s
+CPU,single_copy,1572864.0,63.7,GB/s
+CPU,single_copy,2097152.0,63.4,GB/s
+CPU,single_copy,3145728.0,63.7,GB/s
+CPU,single_copy,4194304.0,63.0,GB/s
+CPU,single_copy,6291456.0,63.0,GB/s
+CPU,single_copy,8388608.0,57.7,GB/s
+CPU,single_copy,12582912.0,55.6,GB/s
+CPU,single_copy,16777216.0,54.7,GB/s
+CPU,single_copy,25165824.0,37.2,GB/s
+CPU,single_copy,33554432.0,32.3,GB/s
+CPU,single_copy,50331648.0,32.6,GB/s
+CPU,single_copy,67108864.0,32.6,GB/s
+CPU,single_copy,100663296.0,33.0,GB/s
+CPU,single_copy,134217728.0,33.1,GB/s
+CPU,single_copy,201326592.0,31.4,GB/s
+CPU,single_copy,268435456.0,31.2,GB/s
+CPU,all_read,4096.0,364.2,GB/s
+CPU,all_read,8192.0,356.3,GB/s
+CPU,all_read,16384.0,360.4,GB/s
+CPU,all_read,24576.0,365.7,GB/s
+CPU,all_read,32768.0,359.9,GB/s
+CPU,all_read,49152.0,342.6,GB/s
+CPU,all_read,65536.0,342.8,GB/s
+CPU,all_read,98304.0,343.4,GB/s
+CPU,all_read,131072.0,342.0,GB/s
+CPU,all_read,196608.0,241.5,GB/s
+CPU,all_read,262144.0,240.9,GB/s
+CPU,all_read,393216.0,245.3,GB/s
+CPU,all_read,524288.0,236.1,GB/s
+CPU,all_read,786432.0,227.1,GB/s
+CPU,all_read,1048576.0,224.6,GB/s
+CPU,all_read,1572864.0,201.5,GB/s
+CPU,all_read,2097152.0,123.1,GB/s
+CPU,all_read,3145728.0,54.1,GB/s
+CPU,all_read,4194304.0,53.7,GB/s
+CPU,all_read,6291456.0,53.4,GB/s
+CPU,all_read,8388608.0,51.8,GB/s
+CPU,all_read,12582912.0,51.2,GB/s
+CPU,all_read,16777216.0,51.4,GB/s
+CPU,all_read,25165824.0,50.9,GB/s
+CPU,all_read,33554432.0,51.3,GB/s
+CPU,all_read,50331648.0,51.1,GB/s
+CPU,all_read,67108864.0,51.2,GB/s
+CPU,all_write,4096.0,340.3,GB/s
+CPU,all_write,8192.0,334.7,GB/s
+CPU,all_write,16384.0,332.3,GB/s
+CPU,all_write,24576.0,338.4,GB/s
+CPU,all_write,32768.0,336.2,GB/s
+CPU,all_write,49152.0,324.0,GB/s
+CPU,all_write,65536.0,324.3,GB/s
+CPU,all_write,98304.0,324.9,GB/s
+CPU,all_write,131072.0,314.9,GB/s
+CPU,all_write,196608.0,218.2,GB/s
+CPU,all_write,262144.0,219.5,GB/s
+CPU,all_write,393216.0,217.8,GB/s
+CPU,all_write,524288.0,220.1,GB/s
+CPU,all_write,786432.0,213.2,GB/s
+CPU,all_write,1048576.0,210.4,GB/s
+CPU,all_write,1572864.0,185.0,GB/s
+CPU,all_write,2097152.0,117.1,GB/s
+CPU,all_write,3145728.0,48.7,GB/s
+CPU,all_write,4194304.0,29.6,GB/s
+CPU,all_write,6291456.0,27.6,GB/s
+CPU,all_write,8388608.0,27.6,GB/s
+CPU,all_write,12582912.0,27.9,GB/s
+CPU,all_write,16777216.0,28.0,GB/s
+CPU,all_write,25165824.0,28.1,GB/s
+CPU,all_write,33554432.0,27.8,GB/s
+CPU,all_write,50331648.0,28.0,GB/s
+CPU,all_write,67108864.0,27.8,GB/s
+CPU,all_copy,4096.0,485.3,GB/s
+CPU,all_copy,8192.0,477.4,GB/s
+CPU,all_copy,16384.0,477.3,GB/s
+CPU,all_copy,24576.0,482.0,GB/s
+CPU,all_copy,32768.0,476.2,GB/s
+CPU,all_copy,49152.0,455.0,GB/s
+CPU,all_copy,65536.0,465.0,GB/s
+CPU,all_copy,98304.0,462.6,GB/s
+CPU,all_copy,131072.0,452.6,GB/s
+CPU,all_copy,196608.0,273.7,GB/s
+CPU,all_copy,262144.0,276.9,GB/s
+CPU,all_copy,393216.0,275.1,GB/s
+CPU,all_copy,524288.0,274.3,GB/s
+CPU,all_copy,786432.0,270.7,GB/s
+CPU,all_copy,1048576.0,267.1,GB/s
+CPU,all_copy,1572864.0,243.4,GB/s
+CPU,all_copy,2097152.0,141.9,GB/s
+CPU,all_copy,3145728.0,54.9,GB/s
+CPU,all_copy,4194304.0,48.5,GB/s
+CPU,all_copy,6291456.0,34.3,GB/s
+CPU,all_copy,8388608.0,34.0,GB/s
+CPU,all_copy,12582912.0,34.5,GB/s
+CPU,all_copy,16777216.0,34.5,GB/s
+CPU,all_copy,25165824.0,34.4,GB/s
+CPU,all_copy,33554432.0,34.7,GB/s
+CPU,all_copy,50331648.0,34.5,GB/s
+CPU,all_copy,67108864.0,34.2,GB/s
+Metal,device_local/read_modify_write,65536,148.645,GB/s
+Metal,device_local/read_modify_write,131072,142.65,GB/s
+Metal,device_local/read_modify_write,262144,140.976,GB/s
+Metal,device_local/read_modify_write,524288,140.925,GB/s
+Metal,device_local/read_modify_write,1048576,136.259,GB/s
+Metal,device_local/read_modify_write,2097152,136.087,GB/s
+Metal,device_local/read_modify_write,4194304,135.988,GB/s
+Metal,device_local/read_modify_write,8388608,135.857,GB/s
+Metal,device_local/read_modify_write,16777216,128.903,GB/s
+Metal,device_local/read_modify_write,33554432,97.599,GB/s
+Metal,device_local/read_modify_write,67108864,92.5214,GB/s
+Metal,device_local/read_modify_write,134217728,46.4273,GB/s
+Metal,device_local/read_modify_write,268435456,40.1354,GB/s
+Metal,device_local/read_only,65536,242.434,GB/s
+Metal,device_local/read_only,131072,222.953,GB/s
+Metal,device_local/read_only,262144,219.534,GB/s
+Metal,device_local/read_only,524288,219.564,GB/s
+Metal,device_local/read_only,1048576,219.871,GB/s
+Metal,device_local/read_only,2097152,218.908,GB/s
+Metal,device_local/read_only,4194304,218.329,GB/s
+Metal,device_local/read_only,8388608,217.379,GB/s
+Metal,device_local/read_only,16777216,212.496,GB/s
+Metal,device_local/read_only,33554432,178.155,GB/s
+Metal,device_local/read_only,67108864,111.924,GB/s
+Metal,device_local/read_only,134217728,87.5428,GB/s
+Metal,device_local/read_only,268435456,59.9036,GB/s
+Metal,host_visible/read_modify_write,65536,149.047,GB/s
+Metal,host_visible/read_modify_write,131072,142.592,GB/s
+Metal,host_visible/read_modify_write,262144,141.158,GB/s
+Metal,host_visible/read_modify_write,524288,141.023,GB/s
+Metal,host_visible/read_modify_write,1048576,136.262,GB/s
+Metal,host_visible/read_modify_write,2097152,136.286,GB/s
+Metal,host_visible/read_modify_write,4194304,136.254,GB/s
+Metal,host_visible/read_modify_write,8388608,135.988,GB/s
+Metal,host_visible/read_modify_write,16777216,128.21,GB/s
+Metal,host_visible/read_modify_write,33554432,97.3578,GB/s
+Metal,host_visible/read_modify_write,67108864,90.8631,GB/s
+Metal,host_visible/read_modify_write,134217728,46.6641,GB/s
+Metal,host_visible/read_modify_write,268435456,40.1875,GB/s
+Metal,host_visible/read_only,65536,243.534,GB/s
+Metal,host_visible/read_only,131072,223.015,GB/s
+Metal,host_visible/read_only,262144,218.878,GB/s
+Metal,host_visible/read_only,524288,218.96,GB/s
+Metal,host_visible/read_only,1048576,218.975,GB/s
+Metal,host_visible/read_only,2097152,219.116,GB/s
+Metal,host_visible/read_only,4194304,218.174,GB/s
+Metal,host_visible/read_only,8388608,218.085,GB/s
+Metal,host_visible/read_only,16777216,212.44,GB/s
+Metal,host_visible/read_only,33554432,178.313,GB/s
+Metal,host_visible/read_only,67108864,112.045,GB/s
+Metal,host_visible/read_only,134217728,87.4205,GB/s
+Metal,host_visible/read_only,268435456,59.3785,GB/s
+Vulkan,read,1048576.0,202.1,GB/s
+Vulkan,read,1572864.0,171.5,GB/s
+Vulkan,read,2097152.0,145.5,GB/s
+Vulkan,read,3145728.0,138.5,GB/s
+Vulkan,read,4194304.0,130.7,GB/s
+Vulkan,read,6291456.0,118.7,GB/s
+Vulkan,read,8388608.0,103.3,GB/s
+Vulkan,read,12582912.0,61.9,GB/s
+Vulkan,read,16777216.0,57.7,GB/s
+Vulkan,read,25165824.0,57.2,GB/s
+Vulkan,read,33554432.0,56.8,GB/s
+Vulkan,read,50331648.0,57.0,GB/s
+Vulkan,read,67108864.0,58.5,GB/s
+Vulkan,read,100663296.0,56.5,GB/s
+Vulkan,read,134217728.0,56.7,GB/s
+Vulkan,read,201326592.0,56.8,GB/s
+Vulkan,read,268435456.0,57.4,GB/s
+Vulkan,write,1048576.0,131.0,GB/s
+Vulkan,write,1572864.0,117.8,GB/s
+Vulkan,write,2097152.0,108.7,GB/s
+Vulkan,write,3145728.0,69.5,GB/s
+Vulkan,write,4194304.0,66.1,GB/s
+Vulkan,write,6291456.0,58.6,GB/s
+Vulkan,write,8388608.0,56.6,GB/s
+Vulkan,write,12582912.0,57.2,GB/s
+Vulkan,write,16777216.0,59.7,GB/s
+Vulkan,write,25165824.0,56.4,GB/s
+Vulkan,write,33554432.0,57.0,GB/s
+Vulkan,write,50331648.0,56.9,GB/s
+Vulkan,write,67108864.0,55.8,GB/s
+Vulkan,write,100663296.0,55.1,GB/s
+Vulkan,write,134217728.0,55.7,GB/s
+Vulkan,write,201326592.0,55.2,GB/s
+Vulkan,write,268435456.0,53.4,GB/s
+Vulkan,copy,1048576.0,159.7,GB/s
+Vulkan,copy,1572864.0,148.2,GB/s
+Vulkan,copy,2097152.0,134.0,GB/s
+Vulkan,copy,3145728.0,125.7,GB/s
+Vulkan,copy,4194304.0,123.8,GB/s
+Vulkan,copy,6291456.0,90.4,GB/s
+Vulkan,copy,8388608.0,73.2,GB/s
+Vulkan,copy,12582912.0,53.0,GB/s
+Vulkan,copy,16777216.0,52.4,GB/s
+Vulkan,copy,25165824.0,51.9,GB/s
+Vulkan,copy,33554432.0,51.6,GB/s
+Vulkan,copy,50331648.0,51.0,GB/s
+Vulkan,copy,67108864.0,52.5,GB/s
+Vulkan,copy,100663296.0,51.4,GB/s
+Vulkan,copy,134217728.0,51.7,GB/s
+Vulkan,copy,201326592.0,50.7,GB/s
+Vulkan,copy,268435456.0,53.1,GB/s
+Vulkan,l1,16384.0,220.1,GB/s
+Vulkan,l1,24576.0,212.4,GB/s
+Vulkan,l1,32768.0,124.9,GB/s
+Vulkan,l1,49152.0,107.3,GB/s
+Vulkan,l1,65536.0,111.7,GB/s
+Vulkan,l1,98304.0,111.5,GB/s
+Vulkan,l1,131072.0,95.4,GB/s
+Vulkan,l1,196608.0,110.4,GB/s
+Vulkan,l1,262144.0,107.5,GB/s
+Vulkan,l1,393216.0,76.9,GB/s
+Vulkan,l1,524288.0,61.3,GB/s
+Vulkan,l1,786432.0,54.5,GB/s
+Vulkan,l1,1048576.0,56.4,GB/s
+Vulkan,l1_single,16384.0,38.8,GB/s
+Vulkan,l1_single,24576.0,38.7,GB/s
+Vulkan,l1_single,32768.0,38.7,GB/s
+Vulkan,l1_single,49152.0,38.7,GB/s
+Vulkan,l1_single,65536.0,38.9,GB/s
+Vulkan,l1_single,98304.0,38.6,GB/s
+Vulkan,l1_single,131072.0,38.5,GB/s
+Vulkan,l1_single,196608.0,38.5,GB/s
+Vulkan,l1_single,262144.0,38.8,GB/s
+Vulkan,l1_single,393216.0,38.6,GB/s
+Vulkan,l1_single,524288.0,38.6,GB/s
+Vulkan,l1_single,786432.0,26.8,GB/s
+Vulkan,l1_single,1048576.0,27.2,GB/s
+GPU cache,gpu_warm,4096.0,128.296534,ns/load
+GPU cache,gpu_warm,6144.0,123.978933,ns/load
+GPU cache,gpu_warm,8192.0,124.005636,ns/load
+GPU cache,gpu_warm,12288.0,124.056498,ns/load
+GPU cache,gpu_warm,16384.0,124.097188,ns/load
+GPU cache,gpu_warm,24576.0,163.273493,ns/load
+GPU cache,gpu_warm,32768.0,163.306554,ns/load
+GPU cache,gpu_warm,49152.0,163.420359,ns/load
+GPU cache,gpu_warm,65536.0,163.541794,ns/load
+GPU cache,gpu_warm,98304.0,163.823446,ns/load
+GPU cache,gpu_warm,131072.0,164.070765,ns/load
+GPU cache,gpu_warm,196608.0,164.482117,ns/load
+GPU cache,gpu_warm,262144.0,164.930979,ns/load
+GPU cache,gpu_warm,393216.0,165.859222,ns/load
+GPU cache,gpu_warm,524288.0,166.833878,ns/load
+GPU cache,gpu_warm,786432.0,168.6999,ns/load
+GPU cache,gpu_warm,1048576.0,170.60407,ns/load
+GPU cache,gpu_warm,1572864.0,223.033905,ns/load
+GPU cache,gpu_warm,2097152.0,225.224177,ns/load
+GPU cache,gpu_warm,3145728.0,250.211716,ns/load
+GPU cache,gpu_warm,4194304.0,262.655258,ns/load
+GPU cache,gpu_warm,6291456.0,306.386948,ns/load
+GPU cache,gpu_warm,8388608.0,307.877858,ns/load
+GPU cache,gpu_warm,12582912.0,297.41478,ns/load
+GPU cache,gpu_warm,16777216.0,301.130295,ns/load
+GPU cache,gpu_warm,25165824.0,298.435211,ns/load
+GPU cache,gpu_warm,33554432.0,299.569448,ns/load
+GPU cache,gpu_warm,50331648.0,318.235397,ns/load
+GPU cache,gpu_warm,67108864.0,326.075236,ns/load
+GPU cache,gpu_warm,100663296.0,356.554031,ns/load
+GPU cache,gpu_warm,134217728.0,356.150309,ns/load
+GPU cache,eviction_pass,4096.0,129.991531,ns/load
+GPU cache,eviction_pass,6144.0,124.101003,ns/load
+GPU cache,eviction_pass,8192.0,124.064128,ns/load
+GPU cache,eviction_pass,12288.0,124.172846,ns/load
+GPU cache,eviction_pass,16384.0,124.225616,ns/load
+GPU cache,eviction_pass,24576.0,163.493474,ns/load
+GPU cache,eviction_pass,32768.0,163.581848,ns/load
+GPU cache,eviction_pass,49152.0,163.82281,ns/load
+GPU cache,eviction_pass,65536.0,164.152145,ns/load
+GPU cache,eviction_pass,98304.0,164.619446,ns/load
+GPU cache,eviction_pass,131072.0,165.188471,ns/load
+GPU cache,eviction_pass,196608.0,166.138331,ns/load
+GPU cache,eviction_pass,262144.0,167.474747,ns/load
+GPU cache,eviction_pass,393216.0,169.410706,ns/load
+GPU cache,eviction_pass,524288.0,171.621323,ns/load
+GPU cache,eviction_pass,786432.0,176.002502,ns/load
+GPU cache,eviction_pass,1048576.0,180.835088,ns/load
+GPU cache,eviction_pass,1572864.0,238.525391,ns/load
+GPU cache,eviction_pass,2097152.0,244.917552,ns/load
+GPU cache,eviction_pass,3145728.0,266.410828,ns/load
+GPU cache,eviction_pass,4194304.0,290.869395,ns/load
+GPU cache,eviction_pass,6291456.0,306.313833,ns/load
+GPU cache,eviction_pass,8388608.0,297.077815,ns/load
+GPU cache,eviction_pass,12582912.0,299.079895,ns/load
+GPU cache,eviction_pass,16777216.0,300.14356,ns/load
+GPU cache,eviction_pass,25165824.0,301.541011,ns/load
+GPU cache,eviction_pass,33554432.0,298.559189,ns/load
+GPU cache,eviction_pass,50331648.0,321.149826,ns/load
+GPU cache,eviction_pass,67108864.0,326.395035,ns/load
+GPU cache,eviction_pass,100663296.0,350.63235,ns/load
+GPU cache,eviction_pass,134217728.0,351.827621,ns/load
+GPU cache,cpu_warm,4096.0,124.094009,ns/load
+GPU cache,cpu_warm,6144.0,124.027252,ns/load
+GPU cache,cpu_warm,8192.0,124.064763,ns/load
+GPU cache,cpu_warm,12288.0,124.099096,ns/load
+GPU cache,cpu_warm,16384.0,124.173482,ns/load
+GPU cache,cpu_warm,24576.0,163.365682,ns/load
+GPU cache,cpu_warm,32768.0,163.513184,ns/load
+GPU cache,cpu_warm,49152.0,163.658778,ns/load
+GPU cache,cpu_warm,65536.0,163.909912,ns/load
+GPU cache,cpu_warm,98304.0,164.194743,ns/load
+GPU cache,cpu_warm,131072.0,164.474487,ns/load
+GPU cache,cpu_warm,196608.0,165.491104,ns/load
+GPU cache,cpu_warm,262144.0,166.856766,ns/load
+GPU cache,cpu_warm,393216.0,168.052673,ns/load
+GPU cache,cpu_warm,524288.0,167.703629,ns/load
+GPU cache,cpu_warm,786432.0,169.044495,ns/load
+GPU cache,cpu_warm,1048576.0,171.384811,ns/load
+GPU cache,cpu_warm,1572864.0,225.369771,ns/load
+GPU cache,cpu_warm,2097152.0,228.738149,ns/load
+GPU cache,cpu_warm,3145728.0,250.240962,ns/load
+GPU cache,cpu_warm,4194304.0,250.617981,ns/load
+GPU cache,cpu_warm,6291456.0,288.808823,ns/load
+GPU cache,cpu_warm,8388608.0,292.137146,ns/load
+GPU cache,cpu_warm,12582912.0,292.510986,ns/load
+GPU cache,cpu_warm,16777216.0,293.231328,ns/load
+GPU cache,cpu_warm,25165824.0,310.850143,ns/load
+GPU cache,cpu_warm,33554432.0,295.629501,ns/load
+GPU cache,cpu_warm,50331648.0,317.24294,ns/load
+GPU cache,cpu_warm,67108864.0,331.507365,ns/load
+GPU cache,cpu_warm,100663296.0,345.986048,ns/load
+GPU cache,cpu_warm,134217728.0,358.100891,ns/load
+GPU cache,parallel_gpu_warm,4096.0,113.679612,GB/s payload
+GPU cache,parallel_gpu_warm,6144.0,112.159662,GB/s payload
+GPU cache,parallel_gpu_warm,8192.0,113.104826,GB/s payload
+GPU cache,parallel_gpu_warm,12288.0,110.740699,GB/s payload
+GPU cache,parallel_gpu_warm,16384.0,110.014531,GB/s payload
+GPU cache,parallel_gpu_warm,24576.0,92.436452,GB/s payload
+GPU cache,parallel_gpu_warm,32768.0,91.9299507,GB/s payload
+GPU cache,parallel_gpu_warm,49152.0,91.4289708,GB/s payload
+GPU cache,parallel_gpu_warm,65536.0,92.9485645,GB/s payload
+GPU cache,parallel_gpu_warm,98304.0,89.0431631,GB/s payload
+GPU cache,parallel_gpu_warm,131072.0,62.3302142,GB/s payload
+GPU cache,parallel_gpu_warm,196608.0,34.1868894,GB/s payload
+GPU cache,parallel_gpu_warm,262144.0,24.3589343,GB/s payload
+GPU cache,parallel_gpu_warm,393216.0,15.9252169,GB/s payload
+GPU cache,parallel_gpu_warm,524288.0,11.9708998,GB/s payload
+GPU cache,parallel_gpu_warm,786432.0,11.7755508,GB/s payload
+GPU cache,parallel_gpu_warm,1048576.0,11.7309516,GB/s payload
+GPU cache,parallel_gpu_warm,1572864.0,7.57094585,GB/s payload
+GPU cache,parallel_gpu_warm,2097152.0,7.20052189,GB/s payload
+GPU cache,parallel_gpu_warm,3145728.0,7.10422358,GB/s payload
+GPU cache,parallel_gpu_warm,4194304.0,7.02049001,GB/s payload
+GPU cache,parallel_gpu_warm,6291456.0,6.70753263,GB/s payload
+GPU cache,parallel_gpu_warm,8388608.0,4.39127079,GB/s payload
+GPU cache,parallel_gpu_warm,12582912.0,2.2353229,GB/s payload
+GPU cache,parallel_gpu_warm,16777216.0,2.10174958,GB/s payload
+GPU cache,parallel_gpu_warm,25165824.0,2.02277295,GB/s payload
+GPU cache,parallel_gpu_warm,33554432.0,1.93749066,GB/s payload
+GPU cache,parallel_gpu_warm,50331648.0,0.346808665,GB/s payload
+GPU cache,parallel_gpu_warm,67108864.0,0.228808559,GB/s payload
+GPU cache,parallel_gpu_warm,100663296.0,0.175608545,GB/s payload
+GPU cache,parallel_gpu_warm,134217728.0,0.153417756,GB/s payload

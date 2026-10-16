@@ -1,0 +1,53 @@
+-- Including Cocoa support
+-- GLFW: source build (inherits deployment target 10.15)
+-- Vulkan backend: ENABLED
+-- DX12 backend:   DISABLED (by option)
+-- DX11 backend:   DISABLED (by option)
+-- Metal backend:  ENABLED
+-- OpenGL backend: ENABLED
+CMake Warning at cmake/Packaging.cmake:174 (message):
+  No GPU_BENCH_GUI_PAYLOAD_DIR was supplied.  Install/CPack output will be
+  CLI-only and is not the intended final GUI-first product.
+Call Stack (most recent call first):
+  CMakeLists.txt:608 (include)
+
+
+-- Configuring done (0.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build
+[ 21%] Built target glfw
+[ 23%] Built target glad_gl43
+[ 23%] Building CXX object CMakeFiles/gpu_engine.dir/src/main.cpp.o
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:1:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/app_base.h:3:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/gpu_common.h:3:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+  204 | #  warning "The selected platform is no longer supported by libc++."
+      |    ^
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:433:20: warning: unused function 'QuoteSuiteProcessArg' [-Wunused-function]
+  433 | static std::string QuoteSuiteProcessArg(const std::string& value) {
+      |                    ^~~~~~~~~~~~~~~~~~~~
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:453:13: warning: unused function 'NameLooksIntegrated' [-Wunused-function]
+  453 | static bool NameLooksIntegrated(const std::string& name) {
+      |             ^~~~~~~~~~~~~~~~~~~
+3 warnings generated.
+[ 25%] Building OBJCXX object CMakeFiles/gpu_engine.dir/src/gpu_cache_probe.mm.o
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/gpu_cache_probe.mm:1:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/gpu_cache_probe.h:2:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+  204 | #  warning "The selected platform is no longer supported by libc++."
+      |    ^
+1 warning generated.
+[ 26%] Linking CXX static library libgpu_engine.a
+[ 42%] Built target gpu_engine
+[ 97%] Built target compile_glsl
+[ 98%] Linking CXX executable gpu_benchmark
+ld: warning: building for macOS-11.0, but linking with dylib '/opt/homebrew/opt/vulkan-loader/lib/libvulkan.1.dylib' which was built for newer version 27.0
+Copying SPIR-V files next to executable
+Copying Metal shader files next to executable
+Copying OpenGL GLSL shader files next to executable
+[100%] Built target gpu_benchmark

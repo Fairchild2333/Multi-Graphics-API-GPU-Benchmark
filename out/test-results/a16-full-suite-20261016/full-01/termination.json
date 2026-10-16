@@ -1,0 +1,35 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "process",
+      "terminate",
+      "--device",
+      "00008120-000E2D3E0CEBC01E",
+      "--pid",
+      "703",
+      "--json-output",
+      "out/test-results/a16-full-suite-20261016/full-01/termination.json"
+    ],
+    "commandType" : "devicectl.device.process.terminate",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "256C41DC-AC03-5FF9-9D3F-8FDFFC83CDBE",
+    "deviceTimestamp" : "2026-10-16T10:20:24.221Z",
+    "process" : {
+      "executable" : "file:///private/var/containers/Bundle/Application/960E0A5B-C36B-4AF7-8FFB-DF7EC4A7AF0B/Mangekyo.app/Mangekyo",
+      "processIdentifier" : 703
+    },
+    "signal" : {
+      "name" : "SIGTERM",
+      "value" : 15
+    }
+  }
+}

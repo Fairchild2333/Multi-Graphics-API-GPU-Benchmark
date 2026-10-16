@@ -1,0 +1,60 @@
+Scenario simulation success.
+Analysis saved to: /Users/fairchild/.Huawei/Emulator/deployed/Huawei_Phone/uiLayout/analysis.md
+
+# Widget Tree Analysis
+
+- **Generated**: 2026-10-14 14:08:43
+- **Mode**: Interactive Only
+
+---
+
+## Widget Tree
+
+- Swiper [id:4] [top: 0, left: 0, width: 1260, height: 2473]
+  - Scroll [id:7] [top: 126, left: 52, width: 1156, height: 2347]
+    - Text GPU 测试 [id:8] [top: 178, left: 52, width: 343, height: 91]
+    - Text 全屏运行 [id:10] [top: 353, left: 97, width: 209, height: 61]
+    - Text 测试开始后横屏占满屏幕。渲染尺寸固定为 1280 × 720。 [id:11] [top: 440, left: 97, width: 990, height: 46]
+    - Text 引擎：mangekyo-ohos-0.2.6-gpu_engine [id:12] [top: 512, left: 97, width: 736, height: 46]
+    - Text 图形 API [id:14] [top: 687, left: 97, width: 200, height: 61]
+    - Button Vulkan [id:16] [top: 774, left: 97, width: 236, height: 104]
+    - Button OpenGL ES 3.1 [id:17] [top: 774, left: 359, width: 395, height: 104]
+    - Button OpenGL ES 2.0 [id:18] [top: 904, left: 97, width: 395, height: 104]
+    - Text OpenGL ES 3.1 有粒子测试和 GPU Burn。OpenGL ES 2.0 只有它自己的 GPU Burn，成绩单独成组。其余测试需要 Vulkan。 [id:19] [top: 1034, left: 97, width: 1049, height: 138]
+    - Button 一键测试 GPU 全套 [id:21] [top: 1256, left: 52, width: 1156, height: 130]
+    - Button 一键测试全部项目 [id:22] [top: 1425, left: 52, width: 1156, height: 130]
+    - Button 运行 [id:23] [top: 1594, left: 52, width: 209, height: 130]
+    - Text 测试项目 [id:26] [top: 1847, left: 97, width: 209, height: 61]
+    - Text 成绩按测试名下面那一行的名字保存。 [id:27] [top: 1934, left: 97, width: 664, height: 46]
+    - Column [id:28] [top: 2006, left: 97, width: 1066, height: 188]
+      - Text 粒子 —— 内存吞吐 [id:29] [top: 2045, left: 136, width: 417, height: 57]
+      - Text stream_v1_ohos_preview [id:30] [top: 2109, left: 136, width: 434, height: 46]
+    - Column [id:31] [top: 2220, left: 97, width: 1066, height: 234]
+      - Text 等离子晶核 × 万花镜 —— GPU Burn [id:32] [top: 2259, left: 136, width: 791, height: 57]
+      - Text gpu_burn_v3_fixed_steps_16_kaleidoscope_ohos_preview [id:33] [top: 2323, left: 136, width: 972, height: 92]
+    - Column [id:34] [top: 2479, left: 97, width: 1066, height: 188]
+      - Text 流体 —— 互动水池 [id:35] [top: 2518, left: 136, width: 417, height: 57]
+      - Text cinematic_liquid_v2_physical_scene_v8_ohos_preview [id:36] [top: 2582, left: 136, width: 930, height: 46]
+    - Column [id:37] [top: 2693, left: 97, width: 1066, height: 188]
+      - Text 显存带宽 —— 显存 / 缓存 [id:38] [top: 2732, left: 136, width: 556, height: 57]
+      - Text membw_v1_ohos_preview [id:39] [top: 2796, left: 136, width: 451, height: 46]
+    - Text 测试设置 [id:41] [top: 3009, left: 97, width: 209, height: 61]
+    - Text 粒子数 [id:43] [top: 3096, left: 97, width: 137, height: 53]
+    - Button 轻量 —— 65K [id:45] [top: 3169, left: 97, width: 375, height: 104]
+    - Button 中等 —— 1M [id:46] [top: 3169, left: 498, width: 358, height: 104]
+    - Button 重载 —— 4M [id:47] [top: 3299, left: 97, width: 358, height: 104]
+    - Button 极限 —— 16M [id:48] [top: 3299, left: 481, width: 382, height: 104]
+    - Button 自定义… [id:49] [top: 3299, left: 889, width: 273, height: 104]
+    - Button Headless [id:50] [top: 3429, left: 97, width: 282, height: 104]
+    - Text Headless 只做计算：不渲染，也不显示画面。 [id:51] [top: 3559, left: 97, width: 797, height: 46]
+    - Text 运行时长 [id:53] [top: 3631, left: 97, width: 183, height: 53]
+    - Button 3 秒 [id:55] [top: 3704, left: 97, width: 183, height: 104]
+    - Button 15 秒 [id:56] [top: 3704, left: 306, width: 207, height: 104]
+    - Button 60 秒 [id:57] [top: 3704, left: 539, width: 207, height: 104]
+    - Button 自定义… [id:58] [top: 3704, left: 772, width: 273, height: 104]
+- TabBar [id:60] [top: 2473, left: 0, width: 1261, height: 248]
+  - Column image GPU [id:61] [top: 2490, left: 119, width: 78, height: 122]
+  - Column image CPU [id:62] [top: 2490, left: 434, width: 78, height: 122]
+  - Column symbol 历史 [id:63] [top: 2490, left: 748, width: 79, height: 122]
+  - Column symbol 图表 [id:64] [top: 2490, left: 1063, width: 79, height: 122]
+

@@ -1,0 +1,41 @@
+iOS complete suite complete-suite-0D5DEF58-1AE0-4F4D-B666-5A3C3A5B841C
+Started: 2026-10-16T10:18:58Z
+
+Thermal precheck stream-65536: nominal after 0s cooling.
+
+=== 1/31 stream-65536: cancelled ===
+=== Preview stream?particles=65536&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A16 GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 65536 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A16 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone15,3)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    65536 (Light)
+Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     173.6 s (warmup: 2.0 s, measured: 0 frames)
+
+--- Throughput ---
+Avg FPS:      0
+
+(No timestamp data available for analysis.)
+==========================================================
+
+[Results] Saved as 20261016-211859-329 -> /var/mobile/Containers/Data/Application/65F34078-384A-499A-85E6-59F8BCB3E823/Documents/results/results.json

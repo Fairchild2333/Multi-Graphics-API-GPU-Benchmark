@@ -1,0 +1,74 @@
+{
+  "old_rows_unchanged": 120,
+  "history_rows": 125,
+  "new_records": [
+    "20261014-173652-182-metal-cache",
+    "20261014-174431-970-metal-cache",
+    "20261014-174539-439-metal-cache",
+    "20261014-182221-741-metal-cache",
+    "20261014-183550-918-metal-cache"
+  ],
+  "all_curve_points": 620,
+  "final_phone_suite": {
+    "finishedAt": "2026-10-14T07:35:51Z",
+    "id": "complete-suite-315143A7-2DA9-42CF-9346-2E74BAEC015E",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T07:35:51Z",
+        "id": "gpu_cache-v2",
+        "request": "gpu_cache?api=metal",
+        "resultIDs": [
+          "20261014-183550-918-metal-cache"
+        ],
+        "startedAt": "2026-10-14T07:35:13Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Metal \u00b7 GPU Cache-state Diagnostic"
+      }
+    ],
+    "startedAt": "2026-10-14T07:35:13Z",
+    "status": "passed"
+  },
+  "results_sha256": "959cdfce62a775e67c8e35548985ca4feb7a4e8b642ab042dcfea278831c7ea0",
+  "independent_cache_attribution": "unverified",
+  "hardware_counter_review": "Captured30 named hardware metrics under profile3; independent hardware L2/L3/SLC speed attribution remains unverified",
+  "phone_benchmark_ended": true,
+  "hardware_counter_names": [
+    "ALU Limiter",
+    "ALU Utilization",
+    "F32 Utilization",
+    "F16 Utilization",
+    "Texture Sample Limiter",
+    "Texture Sample Utilization",
+    "Texture Filtering Limiter",
+    "Texture Cache Limiter",
+    "Texture Write Limiter",
+    "Texture Write Utilization",
+    "Buffer Read Limiter",
+    "Buffer Load Utilization",
+    "Buffer Write Limiter",
+    "Buffer Store Utilization",
+    "Threadgroup/Imageblock Load Limiter",
+    "Threadgroup/Imageblock Load Utilization",
+    "Threadgroup/Imageblock Store Limiter",
+    "Threadgroup/Imageblock Store Utilization",
+    "Fragment Input Interpolation Limiter",
+    "Fragment Input Interpolation Utilization",
+    "GPU Last Level Cache Limiter",
+    "GPU Last Level Cache Utilization",
+    "Vertex Occupancy",
+    "Fragment Occupancy",
+    "Compute Occupancy",
+    "GPU Read Bandwidth",
+    "GPU Write Bandwidth",
+    "MMU Limiter",
+    "MMU Utilization",
+    "Partial Renders Count"
+  ],
+  "hardware_counter_trace": "a15-limiters-final.trace",
+  "selected_current_records": 33,
+  "selected_current_jobs": 31
+}

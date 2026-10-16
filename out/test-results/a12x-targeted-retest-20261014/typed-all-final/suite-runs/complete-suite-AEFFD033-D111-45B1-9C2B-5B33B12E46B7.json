@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "2026-10-14T10:10:00Z",
+  "id" : "complete-suite-AEFFD033-D111-45B1-9C2B-5B33B12E46B7",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-14T10:09:59Z",
+      "id" : "stream-4194304",
+      "request" : "stream?particles=4194304&vsync=0&api=metal&coverage=fixed",
+      "resultIDs" : [
+        "20261014-210959-613"
+      ],
+      "startedAt" : "2026-10-14T10:09:43Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 4194304 · Render"
+    }
+  ],
+  "startedAt" : "2026-10-14T10:09:43Z",
+  "status" : "passed"
+}

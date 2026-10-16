@@ -1,0 +1,376 @@
+10-14 14:00:03.651  3132  3132 I Mangekyo: AUTORUN accepted test=cpu_suite
+10-14 14:00:04.270  3132  3132 I Mangekyo: SUITE_PLAN	total=2	scope=CPU
+10-14 14:00:04.272  3132  3132 I Mangekyo: SUITE_RUN	index=1	total=2	job=cpu-compute
+10-14 14:00:04.272  3132  3132 I Mangekyo: SUITE_THERMAL	start=0	unknown=-1
+10-14 14:00:04.491  3132  3132 I Mangekyo: CPU_META	workload_version=cpu_mixed_v1_strict_sched_affinity	name=AOSP ranchu	logical_count=4	physical_count=4	topology_source=LinuxAllowedCpuSet+Sysfs	affinity_capability=strict_sched_affinity
+10-14 14:00:04.492  3132  3132 I Mangekyo: CPU_TOPOLOGY	core_index=0	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+10-14 14:00:04.499  3132  3132 I Mangekyo: CPU_TOPOLOGY	core_index=1	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+10-14 14:00:04.500  3132  3132 I Mangekyo: CPU_TOPOLOGY	core_index=2	group=0	logical_index=2	physical_core=2	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+10-14 14:00:04.502  3132  3132 I Mangekyo: CPU_TOPOLOGY	core_index=3	group=0	logical_index=3	physical_core=3	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=1024	performance_level=0	core_class=InferredUniform	classification_source=inferred_capacity_or_max_frequency_rank	parked=0
+10-14 14:00:04.502  3132  3132 I Mangekyo: CPU_SCHEDULING	core_type=auto	residency_threshold=0.99	scope=single_thread_stages
+10-14 14:00:04.502  3132  3132 I Mangekyo: 
+10-14 14:00:04.502  3132  3132 I Mangekyo: --- Native CPU mixed benchmark ---
+10-14 14:00:04.502  3132  3132 I Mangekyo: CPU: AOSP ranchu
+10-14 14:00:04.502  3132  3132 I Mangekyo: Topology: LinuxAllowedCpuSet+Sysfs, affinity: strict_sched_affinity
+10-14 14:00:04.502  3132  3132 I Mangekyo: Workload: cpu_mixed_v1_strict_sched_affinity, 3 rounds, median aggregation (the requested measurement time is split across rounds).
+10-14 14:00:04.502  3132  3132 I Mangekyo: Score contract: formal (formal = 15.0 s measurement, 0.2 s warm-up, 3 rounds).
+10-14 14:00:04.502  3132  3132 I Mangekyo: Each score is million mixed integer/branch/FP32/FP64 work units per second.
+10-14 14:00:04.502  3132  3132 I Mangekyo: The checksum is a dead-code-elimination sink, not a correctness oracle.
+10-14 14:00:04.503  3132  3132 I Mangekyo: 
+10-14 14:00:04.503  3132  3132 I Mangekyo: --- CPU all-logical-processor test ---
+10-14 14:00:04.503  3132  3132 I Mangekyo: CPU_PROGRESS	mode=multi	phase=warmup	core_index=-1	core_count=4	core_fraction=0.000000	overall_fraction=0.000000	elapsed=0.000000	round_index=-1	round_count=3
+10-14 14:00:09.619  3132  3132 I Mangekyo: CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=0.333333	overall_fraction=0.066667	elapsed=5.000000	round_index=0	round_count=3
+10-14 14:00:14.663  3132  3132 I Mangekyo: CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=0.666667	overall_fraction=0.133333	elapsed=10.000000	round_index=1	round_count=3
+10-14 14:00:19.654  3132  3132 I Mangekyo: CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=4	core_fraction=1.000000	overall_fraction=0.200000	elapsed=15.000000	round_index=2	round_count=3
+10-14 14:00:19.654  3132  3132 I Mangekyo: CPU_PROGRESS	mode=multi	phase=complete	core_index=-1	core_count=4	core_fraction=1.000000	overall_fraction=0.200000	elapsed=15.000000	round_index=1	round_count=3
+10-14 14:00:19.654  3132  3132 I Mangekyo: All-core score (4 threads): 734.42 MWork/s
+10-14 14:00:19.655  3132  3132 I Mangekyo: CPU_RESULT	kind=multi	mode=multi	core_index=-1	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_count=4	thread_count=4	pinned_threads=4	affinity=strict	valid=1	score=734.417034	unit=MWork/s	seconds=5.000016	requested_seconds=15.000000	round_count=3	median_round=2	checksum=46b96ec64d101153	checksum_role=dce_sink
+10-14 14:00:19.656  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=warmup	core_index=0	core_count=4	core_fraction=0.000000	overall_fraction=0.200000	elapsed=0.000026	round_index=-1	round_count=3
+10-14 14:00:19.808  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.000008	overall_fraction=0.200002	elapsed=0.000125	round_index=0	round_count=3
+10-14 14:00:20.110  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.016830	overall_fraction=0.203366	elapsed=0.252443	round_index=0	round_count=3
+10-14 14:00:20.261  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.033631	overall_fraction=0.206726	elapsed=0.504458	round_index=0	round_count=3
+10-14 14:00:20.563  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.050308	overall_fraction=0.210062	elapsed=0.754618	round_index=0	round_count=3
+10-14 14:00:20.868  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.066996	overall_fraction=0.213399	elapsed=1.004934	round_index=0	round_count=3
+10-14 14:00:21.021  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.083735	overall_fraction=0.216747	elapsed=1.256020	round_index=0	round_count=3
+10-14 14:00:21.324  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.100416	overall_fraction=0.220083	elapsed=1.506238	round_index=0	round_count=3
+10-14 14:00:21.627  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.117215	overall_fraction=0.223443	elapsed=1.758220	round_index=0	round_count=3
+10-14 14:00:21.779  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.133887	overall_fraction=0.226777	elapsed=2.008306	round_index=0	round_count=3
+10-14 14:00:22.082  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.150597	overall_fraction=0.230119	elapsed=2.258956	round_index=0	round_count=3
+10-14 14:00:22.383  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.167285	overall_fraction=0.233457	elapsed=2.509270	round_index=0	round_count=3
+10-14 14:00:22.534  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.183975	overall_fraction=0.236795	elapsed=2.759629	round_index=0	round_count=3
+10-14 14:00:22.838  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.200703	overall_fraction=0.240141	elapsed=3.010545	round_index=0	round_count=3
+10-14 14:00:23.142  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.217396	overall_fraction=0.243479	elapsed=3.260942	round_index=0	round_count=3
+10-14 14:00:23.293  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.234121	overall_fraction=0.246824	elapsed=3.511808	round_index=0	round_count=3
+10-14 14:00:23.595  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.250804	overall_fraction=0.250161	elapsed=3.762063	round_index=0	round_count=3
+10-14 14:00:23.898  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.267499	overall_fraction=0.253500	elapsed=4.012491	round_index=0	round_count=3
+10-14 14:00:24.050  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.284244	overall_fraction=0.256849	elapsed=4.263660	round_index=0	round_count=3
+10-14 14:00:24.354  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.301006	overall_fraction=0.260201	elapsed=4.515092	round_index=0	round_count=3
+10-14 14:00:24.657  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.317773	overall_fraction=0.263555	elapsed=4.766596	round_index=0	round_count=3
+10-14 14:00:24.808  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.333337	overall_fraction=0.266667	elapsed=5.000048	round_index=1	round_count=3
+10-14 14:00:25.108  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.350124	overall_fraction=0.270025	elapsed=5.251860	round_index=1	round_count=3
+10-14 14:00:25.259  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.366887	overall_fraction=0.273377	elapsed=5.503302	round_index=1	round_count=3
+10-14 14:00:25.561  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.383608	overall_fraction=0.276722	elapsed=5.754118	round_index=1	round_count=3
+10-14 14:00:25.863  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.400400	overall_fraction=0.280080	elapsed=6.006003	round_index=1	round_count=3
+10-14 14:00:26.016  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.417097	overall_fraction=0.283419	elapsed=6.256460	round_index=1	round_count=3
+10-14 14:00:26.319  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.433779	overall_fraction=0.286756	elapsed=6.506681	round_index=1	round_count=3
+10-14 14:00:26.622  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.450558	overall_fraction=0.290112	elapsed=6.758377	round_index=1	round_count=3
+10-14 14:00:26.773  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.467272	overall_fraction=0.293454	elapsed=7.009083	round_index=1	round_count=3
+10-14 14:00:27.076  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.483976	overall_fraction=0.296795	elapsed=7.259638	round_index=1	round_count=3
+10-14 14:00:27.380  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.500652	overall_fraction=0.300130	elapsed=7.509783	round_index=1	round_count=3
+10-14 14:00:27.531  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.517400	overall_fraction=0.303480	elapsed=7.760994	round_index=1	round_count=3
+10-14 14:00:27.836  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.534152	overall_fraction=0.306830	elapsed=8.012282	round_index=1	round_count=3
+10-14 14:00:28.139  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.550833	overall_fraction=0.310167	elapsed=8.262498	round_index=1	round_count=3
+10-14 14:00:28.291  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.567568	overall_fraction=0.313514	elapsed=8.513521	round_index=1	round_count=3
+10-14 14:00:28.594  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.584280	overall_fraction=0.316856	elapsed=8.764194	round_index=1	round_count=3
+10-14 14:00:28.897  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.601091	overall_fraction=0.320218	elapsed=9.016363	round_index=1	round_count=3
+10-14 14:00:29.048  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.617783	overall_fraction=0.323557	elapsed=9.266744	round_index=1	round_count=3
+10-14 14:00:29.352  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.634523	overall_fraction=0.326905	elapsed=9.517850	round_index=1	round_count=3
+10-14 14:00:29.655  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.651504	overall_fraction=0.330301	elapsed=9.772559	round_index=1	round_count=3
+10-14 14:00:29.807  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.666669	overall_fraction=0.333334	elapsed=10.000040	round_index=2	round_count=3
+10-14 14:00:30.109  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.683515	overall_fraction=0.336703	elapsed=10.252725	round_index=2	round_count=3
+10-14 14:00:30.260  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.700200	overall_fraction=0.340040	elapsed=10.503000	round_index=2	round_count=3
+10-14 14:00:30.563  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.716936	overall_fraction=0.343387	elapsed=10.754047	round_index=2	round_count=3
+10-14 14:00:30.865  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.733684	overall_fraction=0.346737	elapsed=11.005256	round_index=2	round_count=3
+10-14 14:00:31.016  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.750427	overall_fraction=0.350085	elapsed=11.256407	round_index=2	round_count=3
+10-14 14:00:31.319  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.767133	overall_fraction=0.353427	elapsed=11.506988	round_index=2	round_count=3
+10-14 14:00:31.620  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.783816	overall_fraction=0.356763	elapsed=11.757246	round_index=2	round_count=3
+10-14 14:00:31.772  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.800551	overall_fraction=0.360110	elapsed=12.008264	round_index=2	round_count=3
+10-14 14:00:32.076  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.817291	overall_fraction=0.363458	elapsed=12.259364	round_index=2	round_count=3
+10-14 14:00:32.382  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.833996	overall_fraction=0.366799	elapsed=12.509945	round_index=2	round_count=3
+10-14 14:00:32.533  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.850674	overall_fraction=0.370135	elapsed=12.760108	round_index=2	round_count=3
+10-14 14:00:32.835  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.867358	overall_fraction=0.373472	elapsed=13.010366	round_index=2	round_count=3
+10-14 14:00:33.139  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.884064	overall_fraction=0.376813	elapsed=13.260967	round_index=2	round_count=3
+10-14 14:00:33.293  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.900743	overall_fraction=0.380149	elapsed=13.511151	round_index=2	round_count=3
+10-14 14:00:33.595  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.917438	overall_fraction=0.383488	elapsed=13.761565	round_index=2	round_count=3
+10-14 14:00:33.897  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.934181	overall_fraction=0.386836	elapsed=14.012715	round_index=2	round_count=3
+10-14 14:00:34.048  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.950890	overall_fraction=0.390178	elapsed=14.263350	round_index=2	round_count=3
+10-14 14:00:34.352  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.967573	overall_fraction=0.393515	elapsed=14.513593	round_index=2	round_count=3
+10-14 14:00:34.655  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=4	core_fraction=0.984253	overall_fraction=0.396851	elapsed=14.763801	round_index=2	round_count=3
+10-14 14:00:34.806  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=complete	core_index=0	core_count=4	core_fraction=1.000000	overall_fraction=0.400000	elapsed=15.000000	round_index=1	round_count=3
+10-14 14:00:34.806  3132  3132 I Mangekyo: Logical processor sample 1 score: 191.54 MWork/s
+10-14 14:00:34.806  3132  3132 I Mangekyo: CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_strict_sched_affinity	score_contract=formal	aggregation=median	core_index=0	core_count=4	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	efficiency_class=1024	performance_level=0	core_class=InferredUniform	core_type=auto	residency_verified=1	requested_lower_bound=0.000000	classification_source=inferred_capacity_or_max_frequency_rank	affinity=strict	valid=1	score=191.536397	unit=MWork/s	seconds=5.000020	requested_seconds=15.000000	round_count=3	median_round=2	checksum=25c46f9bbb130aa0	checksum_role=dce_sink
+10-14 14:00:34.806  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=warmup	core_index=1	core_count=4	core_fraction=0.000000	overall_fraction=0.400000	elapsed=0.000553	round_index=-1	round_count=3
+10-14 14:00:34.957  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.000005	overall_fraction=0.400001	elapsed=0.000079	round_index=0	round_count=3
+10-14 14:00:35.258  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.016753	overall_fraction=0.403351	elapsed=0.251301	round_index=0	round_count=3
+10-14 14:00:35.561  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.033427	overall_fraction=0.406685	elapsed=0.501400	round_index=0	round_count=3
+10-14 14:00:35.712  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.050137	overall_fraction=0.410027	elapsed=0.752051	round_index=0	round_count=3
+10-14 14:00:36.014  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.066825	overall_fraction=0.413365	elapsed=1.002380	round_index=0	round_count=3
+10-14 14:00:36.315  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.083541	overall_fraction=0.416708	elapsed=1.253108	round_index=0	round_count=3
+10-14 14:00:36.466  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.100221	overall_fraction=0.420044	elapsed=1.503322	round_index=0	round_count=3
+10-14 14:00:36.766  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.116936	overall_fraction=0.423387	elapsed=1.754041	round_index=0	round_count=3
+10-14 14:00:37.066  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.133661	overall_fraction=0.426732	elapsed=2.004908	round_index=0	round_count=3
+10-14 14:00:37.219  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.150409	overall_fraction=0.430082	elapsed=2.256134	round_index=0	round_count=3
+10-14 14:00:37.521  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.167114	overall_fraction=0.433423	elapsed=2.506717	round_index=0	round_count=3
+10-14 14:00:37.825  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=4	core_fraction=0.183815	overall_fraction=0.436763	elapsed=2.757219	round_index=0	round_count=3
+10-14 14:00:37.956  3132  3132 I Mangekyo: AUTORUN accepted test=suite_stop
+10-14 14:00:37.976  3132  3132 I Mangekyo: CPU_PROGRESS	mode=per_core	phase=complete	core_index=1	core_count=4	core_fraction=1.000000	overall_fraction=0.600000	elapsed=15.000000	round_index=-1	round_count=0
+10-14 14:00:37.976  3132  3132 I Mangekyo: CPU_CANCELLED
+10-14 14:02:48.048  3132  3132 I Mangekyo: AUTORUN accepted test=gpu_suite
+10-14 14:02:48.161  3132  3132 I Mangekyo: SUITE_PLAN	total=23	scope=GPU
+10-14 14:02:48.161  3132  3132 I Mangekyo: SUITE_RUN	index=1	total=23	job=vulkan-stream-65536-false
+10-14 14:02:48.162  3132  3132 I Mangekyo: SUITE_THERMAL	start=0	unknown=-1
+10-14 14:02:48.929  3132  3132 I Mangekyo: [RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+10-14 14:02:48.929  3132  3132 I Mangekyo: Available GPUs:
+10-14 14:02:48.930  3132  3132 I Mangekyo:   [0] SwiftShader Device (LLVM 10.0.0) (CPU)
+10-14 14:02:48.930  3132  3132 I Mangekyo: Selected GPU [0]: SwiftShader Device (LLVM 10.0.0)  |  Driver: 5.0.0
+10-14 14:02:48.930  3132  3132 I Mangekyo: [Vulkan] Present mode: mailbox (not tied to the refresh rate)
+10-14 14:02:48.930  3132  3132 I Mangekyo: Created particle buffer (device-local via staging): 65536 particles
+10-14 14:02:48.930  3132  3132 I Mangekyo: [Profiling] Timestamp queries enabled (period = 1.000000 ns/tick)
+10-14 14:02:49.383  3132  3132 I Mangekyo: [Profiling] Timestamp check: 49.199375 ms by the GPU's clock (35.535084 ms with one frame behind the other), 31.441084 ms by wall clock.
+10-14 14:02:49.688  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.115 ms | Render: 14.977 ms | Total: 15.093 ms | FPS: 67 | T: 0.3 s (warm-up)
+10-14 14:02:49.990  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.115 ms | Render: 13.078 ms | Total: 13.194 ms | FPS: 60 | T: 0.6 s (warm-up)
+10-14 14:02:50.442  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.117 ms | Render: 14.636 ms | Total: 14.753 ms | FPS: 58 | T: 0.9 s (warm-up)
+10-14 14:02:50.598  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.113 ms | Render: 14.737 ms | Total: 14.851 ms | FPS: 63 | T: 1.3 s (warm-up)
+10-14 14:02:51.051  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.115 ms | Render: 15.108 ms | Total: 15.223 ms | FPS: 60 | T: 1.6 s (warm-up)
+10-14 14:02:51.354  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.111 ms | Render: 15.168 ms | Total: 15.279 ms | FPS: 60 | T: 1.9 s (warm-up)
+10-14 14:02:52.259  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.117 ms | Render: 14.201 ms | Total: 14.319 ms | FPS: 60 | T: 2.9 s
+10-14 14:02:53.320  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.117 ms | Render: 14.235 ms | Total: 14.352 ms | FPS: 60 | T: 3.9 s
+10-14 14:02:54.377  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.138 ms | Render: 14.263 ms | Total: 14.401 ms | FPS: 61 | T: 4.9 s
+10-14 14:02:55.286  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.117 ms | Render: 13.972 ms | Total: 14.089 ms | FPS: 61 | T: 5.9 s
+10-14 14:02:56.343  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.232 ms | Render: 13.674 ms | Total: 13.906 ms | FPS: 61 | T: 6.9 s
+10-14 14:02:57.405  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.117 ms | Render: 13.580 ms | Total: 13.697 ms | FPS: 62 | T: 7.9 s
+10-14 14:02:58.314  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.119 ms | Render: 13.644 ms | Total: 13.764 ms | FPS: 66 | T: 8.9 s
+10-14 14:02:59.372  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.129 ms | Render: 13.974 ms | Total: 14.103 ms | FPS: 60 | T: 9.9 s
+10-14 14:03:00.426  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.117 ms | Render: 13.653 ms | Total: 13.770 ms | FPS: 61 | T: 11.0 s
+10-14 14:03:01.334  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.118 ms | Render: 12.944 ms | Total: 13.062 ms | FPS: 60 | T: 12.0 s
+10-14 14:03:02.394  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.139 ms | Render: 14.292 ms | Total: 14.431 ms | FPS: 64 | T: 13.0 s
+10-14 14:03:03.456  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.124 ms | Render: 14.365 ms | Total: 14.489 ms | FPS: 60 | T: 14.0 s
+10-14 14:03:04.361  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.116 ms | Render: 12.739 ms | Total: 12.855 ms | FPS: 62 | T: 15.0 s
+10-14 14:03:04.516  3132  3132 I Mangekyo: 
+10-14 14:03:04.516  3132  3132 I Mangekyo: ==========================================================
+10-14 14:03:04.516  3132  3132 I Mangekyo:                    Benchmark Summary
+10-14 14:03:04.516  3132  3132 I Mangekyo: ==========================================================
+10-14 14:03:04.516  3132  3132 I Mangekyo: Graphics API: Vulkan
+10-14 14:03:04.516  3132  3132 I Mangekyo: CPU Renderer: SwiftShader Device (LLVM 10.0.0)
+10-14 14:03:04.516  3132  3132 I Mangekyo: Driver:       5.0.0
+10-14 14:03:04.516  3132  3132 I Mangekyo: CPU:          AOSP ranchu
+10-14 14:03:04.516  3132  3132 I Mangekyo: OS:           Android 15 (API 35)
+10-14 14:03:04.516  3132  3132 I Mangekyo: System:       Android ARM64
+10-14 14:03:04.516  3132  3132 I Mangekyo: Memory:       Device-local VRAM
+10-14 14:03:04.517  3132  3132 I Mangekyo: Mode:         Windowed
+10-14 14:03:04.517  3132  3132 I Mangekyo: Resolution:   1280x720
+10-14 14:03:04.517  3132  3132 I Mangekyo: Particles:    65536 (Light)
+10-14 14:03:04.517  3132  3132 I Mangekyo: Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+10-14 14:03:04.517  3132  3132 I Mangekyo: Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+10-14 14:03:04.518  3132  3132 I Mangekyo: Flights:      2
+10-14 14:03:04.518  3132  3132 I Mangekyo: Multi-GPU:    Off
+10-14 14:03:04.518  3132  3132 I Mangekyo: V-Sync:       OFF
+10-14 14:03:04.518  3132  3132 I Mangekyo: Duration:     13.0 s (warmup: 2.0 s, measured: 807 frames)
+10-14 14:03:04.518  3132  3132 I Mangekyo: 
+10-14 14:03:04.518  3132  3132 I Mangekyo: --- Device Timing (ms) ---
+10-14 14:03:04.518  3132  3132 I Mangekyo:                      Avg       Min       Max
+10-14 14:03:04.518  3132  3132 I Mangekyo: Compute:         0.131     0.080     7.267
+10-14 14:03:04.518  3132  3132 I Mangekyo: Render:         13.836     4.799    28.407
+10-14 14:03:04.518  3132  3132 I Mangekyo: Total:          13.967     4.911    28.509
+10-14 14:03:04.518  3132  3132 I Mangekyo: 
+10-14 14:03:04.519  3132  3132 I Mangekyo: --- Throughput ---
+10-14 14:03:04.519  3132  3132 I Mangekyo: Avg FPS:      62
+10-14 14:03:04.520  3132  3132 I Mangekyo: Particles:    65536
+10-14 14:03:04.520  3132  3132 I Mangekyo: Working set:  2.00 MiB
+10-14 14:03:04.520  3132  3132 I Mangekyo: VRAM rate:   20.07 GB/s  (0.131 ms compute)
+10-14 14:03:04.520  3132  3132 I Mangekyo: 
+10-14 14:03:04.520  3132  3132 I Mangekyo: --- Analysis ---
+10-14 14:03:04.520  3132  3132 I Mangekyo: Avg frame time:  16.127 ms
+10-14 14:03:04.520  3132  3132 I Mangekyo: Avg device time:  13.967 ms
+10-14 14:03:04.520  3132  3132 I Mangekyo: Device utilisation: 86.6%
+10-14 14:03:04.520  3132  3132 I Mangekyo: >> Software renderer -- all work runs on CPU.
+10-14 14:03:04.520  3132  3132 I Mangekyo: 
+10-14 14:03:04.521  3132  3132 I Mangekyo: --- Thermal Stability ---
+10-14 14:03:04.521  3132  3132 I Mangekyo: Windows:      13 x 1s
+10-14 14:03:04.521  3132  3132 I Mangekyo: Stable score: not reached — keep running to detect throttling.
+10-14 14:03:04.521  3132  3132 I Mangekyo: ==========================================================
+10-14 14:03:04.521  3132  3132 I Mangekyo: 
+10-14 14:03:04.521  3132  3132 I Mangekyo: [Results] Saved as 20261014-140304-388 -> /storage/emulated/0/Android/data/com.mangekyo.benchmark/files/results/results.json
+10-14 14:03:04.523  3132  3132 I Mangekyo: SUITE_RESULT	status=success	job=vulkan-stream-65536-false	reason= 
+10-14 14:03:34.607  3132  3132 I Mangekyo: SUITE_RUN	index=2	total=23	job=vulkan-stream-1048576-false
+10-14 14:03:34.609  3132  3132 I Mangekyo: SUITE_THERMAL	start=0	unknown=-1
+10-14 14:03:35.372  3132  3132 I Mangekyo: [RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+10-14 14:03:35.372  3132  3132 I Mangekyo: Available GPUs:
+10-14 14:03:35.372  3132  3132 I Mangekyo:   [0] SwiftShader Device (LLVM 10.0.0) (CPU)
+10-14 14:03:35.372  3132  3132 I Mangekyo: Selected GPU [0]: SwiftShader Device (LLVM 10.0.0)  |  Driver: 5.0.0
+10-14 14:03:35.372  3132  3132 I Mangekyo: [Vulkan] Present mode: mailbox (not tied to the refresh rate)
+10-14 14:03:35.372  3132  3132 I Mangekyo: Created particle buffer (device-local via staging): 1048576 particles
+10-14 14:03:35.372  3132  3132 I Mangekyo: [Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+10-14 14:03:36.432  3132  3132 I Mangekyo: [Profiling] Timestamp check: 29.8 ms by the GPU's clock (25.9 ms with one frame behind the other), 19.6 ms by wall clock.
+10-14 14:03:36.887  3132  3132 I Mangekyo: [GPU Timing] Compute: 3.337 ms | Render: 89.062 ms | Total: 92.400 ms | FPS: 16 | T: 0.5 s (warm-up)
+10-14 14:03:37.193  3132  3132 I Mangekyo: [GPU Timing] Compute: 2.481 ms | Render: 94.860 ms | Total: 97.342 ms | FPS: 10 | T: 0.9 s (warm-up)
+10-14 14:03:37.647  3132  3132 I Mangekyo: [GPU Timing] Compute: 2.495 ms | Render: 87.747 ms | Total: 90.243 ms | FPS: 10 | T: 1.2 s (warm-up)
+10-14 14:03:37.951  3132  3132 I Mangekyo: [GPU Timing] Compute: 1.962 ms | Render: 89.660 ms | Total: 91.623 ms | FPS: 10 | T: 1.6 s (warm-up)
+10-14 14:03:38.404  3132  3132 I Mangekyo: [GPU Timing] Compute: 2.396 ms | Render: 89.622 ms | Total: 92.019 ms | FPS: 10 | T: 2.0 s (warm-up)
+10-14 14:03:39.461  3132  3132 I Mangekyo: [GPU Timing] Compute: 2.721 ms | Render: 94.948 ms | Total: 97.669 ms | FPS: 10 | T: 3.1 s
+10-14 14:03:40.521  3132  3132 I Mangekyo: [GPU Timing] Compute: 3.037 ms | Render: 88.446 ms | Total: 91.484 ms | FPS: 10 | T: 4.1 s
+10-14 14:03:41.578  3132  3132 I Mangekyo: [GPU Timing] Compute: 2.114 ms | Render: 91.628 ms | Total: 93.743 ms | FPS: 10 | T: 5.1 s
+10-14 14:03:42.486  3132  3132 I Mangekyo: [GPU Timing] Compute: 2.865 ms | Render: 89.508 ms | Total: 92.374 ms | FPS: 10 | T: 6.1 s
+10-14 14:03:43.546  3132  3132 I Mangekyo: [GPU Timing] Compute: 2.756 ms | Render: 90.252 ms | Total: 93.009 ms | FPS: 10 | T: 7.2 s
+10-14 14:03:44.608  3132  3132 I Mangekyo: [GPU Timing] Compute: 2.642 ms | Render: 90.048 ms | Total: 92.690 ms | FPS: 10 | T: 8.2 s
+10-14 14:03:45.662  3132  3132 I Mangekyo: [GPU Timing] Compute: 2.518 ms | Render: 89.503 ms | Total: 92.022 ms | FPS: 10 | T: 9.2 s
+10-14 14:03:46.723  3132  3132 I Mangekyo: [GPU Timing] Compute: 2.560 ms | Render: 90.845 ms | Total: 93.406 ms | FPS: 10 | T: 10.3 s
+10-14 14:03:47.632  3132  3132 I Mangekyo: [GPU Timing] Compute: 2.694 ms | Render: 90.563 ms | Total: 93.258 ms | FPS: 10 | T: 11.3 s
+10-14 14:03:48.695  3132  3132 I Mangekyo: [GPU Timing] Compute: 2.444 ms | Render: 90.011 ms | Total: 92.455 ms | FPS: 10 | T: 12.3 s
+10-14 14:03:49.762  3132  3132 I Mangekyo: [GPU Timing] Compute: 1.929 ms | Render: 92.076 ms | Total: 94.006 ms | FPS: 10 | T: 13.4 s
+10-14 14:03:50.826  3132  3132 I Mangekyo: [GPU Timing] Compute: 1.838 ms | Render: 91.653 ms | Total: 93.492 ms | FPS: 10 | T: 14.4 s
+10-14 14:03:51.590  3132  3132 I Mangekyo: 
+10-14 14:03:51.590  3132  3132 I Mangekyo: ==========================================================
+10-14 14:03:51.590  3132  3132 I Mangekyo:                    Benchmark Summary
+10-14 14:03:51.591  3132  3132 I Mangekyo: ==========================================================
+10-14 14:03:51.591  3132  3132 I Mangekyo: Graphics API: Vulkan
+10-14 14:03:51.591  3132  3132 I Mangekyo: CPU Renderer: SwiftShader Device (LLVM 10.0.0)
+10-14 14:03:51.591  3132  3132 I Mangekyo: Driver:       5.0.0
+10-14 14:03:51.591  3132  3132 I Mangekyo: CPU:          AOSP ranchu
+10-14 14:03:51.591  3132  3132 I Mangekyo: OS:           Android 15 (API 35)
+10-14 14:03:51.591  3132  3132 I Mangekyo: System:       Android ARM64
+10-14 14:03:51.591  3132  3132 I Mangekyo: Memory:       Device-local VRAM
+10-14 14:03:51.591  3132  3132 I Mangekyo: Mode:         Windowed
+10-14 14:03:51.591  3132  3132 I Mangekyo: Resolution:   1280x720
+10-14 14:03:51.591  3132  3132 I Mangekyo: Particles:    1048576 (Medium)
+10-14 14:03:51.591  3132  3132 I Mangekyo: Buffer:       32.0 MB  [cache-resident: reads above memory bandwidth]
+10-14 14:03:51.592  3132  3132 I Mangekyo: Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+10-14 14:03:51.592  3132  3132 I Mangekyo: Flights:      2
+10-14 14:03:51.592  3132  3132 I Mangekyo: Multi-GPU:    Off
+10-14 14:03:51.592  3132  3132 I Mangekyo: V-Sync:       OFF
+10-14 14:03:51.592  3132  3132 I Mangekyo: Duration:     13.1 s (warmup: 2.0 s, measured: 139 frames)
+10-14 14:03:51.592  3132  3132 I Mangekyo: 
+10-14 14:03:51.592  3132  3132 I Mangekyo: --- Device Timing (ms) ---
+10-14 14:03:51.592  3132  3132 I Mangekyo:                      Avg       Min       Max
+10-14 14:03:51.592  3132  3132 I Mangekyo: Compute:         2.520     1.084    11.326
+10-14 14:03:51.592  3132  3132 I Mangekyo: Render:         90.751    84.432   107.767
+10-14 14:03:51.592  3132  3132 I Mangekyo: Total:          93.272    87.179   112.463
+10-14 14:03:51.592  3132  3132 I Mangekyo: 
+10-14 14:03:51.592  3132  3132 I Mangekyo: --- Throughput ---
+10-14 14:03:51.593  3132  3132 I Mangekyo: Avg FPS:      10
+10-14 14:03:51.593  3132  3132 I Mangekyo: Particles:    1048576
+10-14 14:03:51.593  3132  3132 I Mangekyo: Working set:  32.00 MiB
+10-14 14:03:51.593  3132  3132 I Mangekyo: VRAM rate:   16.64 GB/s  (2.520 ms compute)
+10-14 14:03:51.593  3132  3132 I Mangekyo: 
+10-14 14:03:51.593  3132  3132 I Mangekyo: --- Analysis ---
+10-14 14:03:51.593  3132  3132 I Mangekyo: Avg frame time:  94.082 ms
+10-14 14:03:51.593  3132  3132 I Mangekyo: Avg device time:  93.272 ms
+10-14 14:03:51.593  3132  3132 I Mangekyo: Device utilisation: 99.1%
+10-14 14:03:51.593  3132  3132 I Mangekyo: >> Software renderer -- all work runs on CPU.
+10-14 14:03:51.593  3132  3132 I Mangekyo: 
+10-14 14:03:51.593  3132  3132 I Mangekyo: --- Thermal Stability ---
+10-14 14:03:51.594  3132  3132 I Mangekyo: Windows:      12 x 1s
+10-14 14:03:51.594  3132  3132 I Mangekyo: Stable score: not reached — keep running to detect throttling.
+10-14 14:03:51.594  3132  3132 I Mangekyo: ==========================================================
+10-14 14:03:51.594  3132  3132 I Mangekyo: 
+10-14 14:03:51.594  3132  3132 I Mangekyo: [Results] Saved as 20261014-140351-557 -> /storage/emulated/0/Android/data/com.mangekyo.benchmark/files/results/results.json
+10-14 14:03:51.595  3132  3132 I Mangekyo: SUITE_RESULT	status=review	job=vulkan-stream-1048576-false	reason= Stable throughput not reached
+10-14 14:04:21.701  3132  3132 I Mangekyo: SUITE_RUN	index=3	total=23	job=vulkan-stream-4194304-false
+10-14 14:04:21.702  3132  3132 I Mangekyo: SUITE_THERMAL	start=0	unknown=-1
+10-14 14:04:22.463  3132  3132 I Mangekyo: [RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+10-14 14:04:22.463  3132  3132 I Mangekyo: Available GPUs:
+10-14 14:04:22.463  3132  3132 I Mangekyo:   [0] SwiftShader Device (LLVM 10.0.0) (CPU)
+10-14 14:04:22.463  3132  3132 I Mangekyo: Selected GPU [0]: SwiftShader Device (LLVM 10.0.0)  |  Driver: 5.0.0
+10-14 14:04:22.463  3132  3132 I Mangekyo: [Vulkan] Present mode: mailbox (not tied to the refresh rate)
+10-14 14:04:22.463  3132  3132 I Mangekyo: Created particle buffer (device-local via staging): 4194304 particles
+10-14 14:04:22.613  3132  3132 I Mangekyo: [Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+10-14 14:04:24.477  3132  3132 I Mangekyo: AUTORUN accepted test=suite_stop
+10-14 14:04:25.657  3132  3132 I Mangekyo: [Profiling] Timestamp check: 24.7 ms by the GPU's clock (25.3 ms with one frame behind the other), 21.5 ms by wall clock.
+10-14 14:04:25.657  3132  3132 I Mangekyo: 
+10-14 14:04:25.657  3132  3132 I Mangekyo: ==========================================================
+10-14 14:04:25.657  3132  3132 I Mangekyo:                    Benchmark Summary
+10-14 14:04:25.657  3132  3132 I Mangekyo: ==========================================================
+10-14 14:04:25.658  3132  3132 I Mangekyo: Graphics API: Vulkan
+10-14 14:04:25.658  3132  3132 I Mangekyo: CPU Renderer: SwiftShader Device (LLVM 10.0.0)
+10-14 14:04:25.658  3132  3132 I Mangekyo: Driver:       5.0.0
+10-14 14:04:25.658  3132  3132 I Mangekyo: CPU:          AOSP ranchu
+10-14 14:04:25.658  3132  3132 I Mangekyo: OS:           Android 15 (API 35)
+10-14 14:04:25.658  3132  3132 I Mangekyo: System:       Android ARM64
+10-14 14:04:25.658  3132  3132 I Mangekyo: Memory:       Device-local VRAM
+10-14 14:04:25.658  3132  3132 I Mangekyo: Mode:         Windowed
+10-14 14:04:25.658  3132  3132 I Mangekyo: Resolution:   1280x720
+10-14 14:04:25.658  3132  3132 I Mangekyo: Particles:    4194304 (Heavy)
+10-14 14:04:25.658  3132  3132 I Mangekyo: Buffer:       128.0 MB
+10-14 14:04:25.658  3132  3132 I Mangekyo: Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+10-14 14:04:25.658  3132  3132 I Mangekyo: Flights:      2
+10-14 14:04:25.658  3132  3132 I Mangekyo: Multi-GPU:    Off
+10-14 14:04:25.658  3132  3132 I Mangekyo: V-Sync:       OFF
+10-14 14:04:25.658  3132  3132 I Mangekyo: Duration:     312.1 s (warmup: 2.0 s, measured: 0 frames)
+10-14 14:04:25.658  3132  3132 I Mangekyo: 
+10-14 14:04:25.658  3132  3132 I Mangekyo: --- Throughput ---
+10-14 14:04:25.658  3132  3132 I Mangekyo: Avg FPS:      0
+10-14 14:04:25.659  3132  3132 I Mangekyo: 
+10-14 14:04:25.660  3132  3132 I Mangekyo: (No timestamp data available for analysis.)
+10-14 14:04:25.660  3132  3132 I Mangekyo: ==========================================================
+10-14 14:04:25.660  3132  3132 I Mangekyo: 
+10-14 14:04:25.660  3132  3132 I Mangekyo: [Results] Saved as 20261014-140425-510 -> /storage/emulated/0/Android/data/com.mangekyo.benchmark/files/results/results.json
+10-14 14:09:19.435  3132  3132 I Mangekyo: AUTORUN accepted test=all_suite
+10-14 14:09:19.455  3132  3132 I Mangekyo: SUITE_PLAN	total=25	scope=ALL
+10-14 14:09:19.456  3132  3132 I Mangekyo: SUITE_RUN	index=1	total=25	job=vulkan-stream-65536-false
+10-14 14:09:19.456  3132  3132 I Mangekyo: SUITE_THERMAL	start=0	unknown=-1
+10-14 14:09:20.209  3132  3132 I Mangekyo: [RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+10-14 14:09:20.209  3132  3132 I Mangekyo: Available GPUs:
+10-14 14:09:20.209  3132  3132 I Mangekyo:   [0] SwiftShader Device (LLVM 10.0.0) (CPU)
+10-14 14:09:20.209  3132  3132 I Mangekyo: Selected GPU [0]: SwiftShader Device (LLVM 10.0.0)  |  Driver: 5.0.0
+10-14 14:09:20.209  3132  3132 I Mangekyo: [Vulkan] Present mode: mailbox (not tied to the refresh rate)
+10-14 14:09:20.209  3132  3132 I Mangekyo: Created particle buffer (device-local via staging): 65536 particles
+10-14 14:09:20.209  3132  3132 I Mangekyo: [Profiling] Timestamp queries enabled (period = 1.0 ns/tick)
+10-14 14:09:20.660  3132  3132 I Mangekyo: [Profiling] Timestamp check: 48.5 ms by the GPU's clock (52.9 ms with one frame behind the other), 28.7 ms by wall clock.
+10-14 14:09:20.965  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.124 ms | Render: 14.730 ms | Total: 14.853 ms | FPS: 68 | T: 0.3 s (warm-up)
+10-14 14:09:21.269  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.129 ms | Render: 15.160 ms | Total: 15.289 ms | FPS: 60 | T: 0.6 s (warm-up)
+10-14 14:09:21.571  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.118 ms | Render: 15.656 ms | Total: 15.775 ms | FPS: 60 | T: 1.0 s (warm-up)
+10-14 14:09:21.873  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.132 ms | Render: 15.839 ms | Total: 15.972 ms | FPS: 59 | T: 1.2 s (warm-up)
+10-14 14:09:22.175  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.121 ms | Render: 14.894 ms | Total: 15.015 ms | FPS: 63 | T: 1.6 s (warm-up)
+10-14 14:09:22.477  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.116 ms | Render: 15.558 ms | Total: 15.674 ms | FPS: 59 | T: 1.9 s (warm-up)
+10-14 14:09:23.538  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.116 ms | Render: 15.810 ms | Total: 15.926 ms | FPS: 59 | T: 2.9 s
+10-14 14:09:24.447  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.129 ms | Render: 15.697 ms | Total: 15.826 ms | FPS: 60 | T: 3.9 s
+10-14 14:09:25.510  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.131 ms | Render: 15.557 ms | Total: 15.689 ms | FPS: 60 | T: 4.9 s
+10-14 14:09:26.571  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.122 ms | Render: 15.263 ms | Total: 15.385 ms | FPS: 60 | T: 5.9 s
+10-14 14:09:27.476  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.126 ms | Render: 15.639 ms | Total: 15.766 ms | FPS: 59 | T: 6.9 s
+10-14 14:09:28.537  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.117 ms | Render: 15.596 ms | Total: 15.714 ms | FPS: 59 | T: 7.9 s
+10-14 14:09:29.605  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.125 ms | Render: 15.342 ms | Total: 15.467 ms | FPS: 60 | T: 9.0 s
+10-14 14:09:30.512  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.170 ms | Render: 16.302 ms | Total: 16.473 ms | FPS: 56 | T: 10.0 s
+10-14 14:09:31.572  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.147 ms | Render: 14.599 ms | Total: 14.747 ms | FPS: 60 | T: 11.0 s
+10-14 14:09:32.632  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.128 ms | Render: 15.283 ms | Total: 15.412 ms | FPS: 60 | T: 12.0 s
+10-14 14:09:33.540  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.122 ms | Render: 15.541 ms | Total: 15.663 ms | FPS: 59 | T: 13.0 s
+10-14 14:09:34.595  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.125 ms | Render: 15.697 ms | Total: 15.823 ms | FPS: 59 | T: 14.0 s
+10-14 14:09:35.657  3132  3132 I Mangekyo: [GPU Timing] Compute: 0.147 ms | Render: 15.373 ms | Total: 15.520 ms | FPS: 60 | T: 15.0 s
+10-14 14:09:35.658  3132  3132 I Mangekyo: 
+10-14 14:09:35.658  3132  3132 I Mangekyo: ==========================================================
+10-14 14:09:35.658  3132  3132 I Mangekyo:                    Benchmark Summary
+10-14 14:09:35.658  3132  3132 I Mangekyo: ==========================================================
+10-14 14:09:35.658  3132  3132 I Mangekyo: Graphics API: Vulkan
+10-14 14:09:35.658  3132  3132 I Mangekyo: CPU Renderer: SwiftShader Device (LLVM 10.0.0)
+10-14 14:09:35.658  3132  3132 I Mangekyo: Driver:       5.0.0
+10-14 14:09:35.658  3132  3132 I Mangekyo: CPU:          AOSP ranchu
+10-14 14:09:35.658  3132  3132 I Mangekyo: OS:           Android 15 (API 35)
+10-14 14:09:35.658  3132  3132 I Mangekyo: System:       Android ARM64
+10-14 14:09:35.658  3132  3132 I Mangekyo: Memory:       Device-local VRAM
+10-14 14:09:35.658  3132  3132 I Mangekyo: Mode:         Windowed
+10-14 14:09:35.658  3132  3132 I Mangekyo: Resolution:   1280x720
+10-14 14:09:35.658  3132  3132 I Mangekyo: Particles:    65536 (Light)
+10-14 14:09:35.658  3132  3132 I Mangekyo: Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+10-14 14:09:35.658  3132  3132 I Mangekyo: Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+10-14 14:09:35.658  3132  3132 I Mangekyo: Flights:      2
+10-14 14:09:35.659  3132  3132 I Mangekyo: Multi-GPU:    Off
+10-14 14:09:35.659  3132  3132 I Mangekyo: V-Sync:       OFF
+10-14 14:09:35.659  3132  3132 I Mangekyo: Duration:     13.0 s (warmup: 2.0 s, measured: 780 frames)
+10-14 14:09:35.659  3132  3132 I Mangekyo: 
+10-14 14:09:35.659  3132  3132 I Mangekyo: --- Device Timing (ms) ---
+10-14 14:09:35.659  3132  3132 I Mangekyo:                      Avg       Min       Max
+10-14 14:09:35.659  3132  3132 I Mangekyo: Compute:         0.131     0.088     2.299
+10-14 14:09:35.659  3132  3132 I Mangekyo: Render:         15.506     5.244    41.194
+10-14 14:09:35.659  3132  3132 I Mangekyo: Total:          15.637     5.367    41.329
+10-14 14:09:35.659  3132  3132 I Mangekyo: 
+10-14 14:09:35.659  3132  3132 I Mangekyo: --- Throughput ---
+10-14 14:09:35.659  3132  3132 I Mangekyo: Avg FPS:      59
+10-14 14:09:35.659  3132  3132 I Mangekyo: Particles:    65536
+10-14 14:09:35.659  3132  3132 I Mangekyo: Working set:  2.00 MiB
+10-14 14:09:35.659  3132  3132 I Mangekyo: VRAM rate:   20.00 GB/s  (0.131 ms compute)
+10-14 14:09:35.659  3132  3132 I Mangekyo: 
+10-14 14:09:35.660  3132  3132 I Mangekyo: --- Analysis ---
+10-14 14:09:35.660  3132  3132 I Mangekyo: Avg frame time:  16.691 ms
+10-14 14:09:35.660  3132  3132 I Mangekyo: Avg device time:  15.637 ms
+10-14 14:09:35.660  3132  3132 I Mangekyo: Device utilisation: 93.7%
+10-14 14:09:35.660  3132  3132 I Mangekyo: >> Software renderer -- all work runs on CPU.
+10-14 14:09:35.660  3132  3132 I Mangekyo: 
+10-14 14:09:35.660  3132  3132 I Mangekyo: --- Thermal Stability ---
+10-14 14:09:35.660  3132  3132 I Mangekyo: Windows:      13 x 1s
+10-14 14:09:35.660  3132  3132 I Mangekyo: Stable score: not reached — keep running to detect throttling.
+10-14 14:09:35.660  3132  3132 I Mangekyo: Throttling:   early vs late mean dropped 6.3%  (>> sustained throttle / thermal limit)
+10-14 14:09:35.660  3132  3132 I Mangekyo: >> Throttled: report stableScore (post-throttle), not peak.
+10-14 14:09:35.660  3132  3132 I Mangekyo: ==========================================================
+10-14 14:09:35.660  3132  3132 I Mangekyo: 
+10-14 14:09:35.660  3132  3132 I Mangekyo: [Results] Saved as 20261014-140935-593 -> /storage/emulated/0/Android/data/com.mangekyo.benchmark/files/results/results.json
+10-14 14:09:35.662  3132  3132 I Mangekyo: SUITE_RESULT	status=review	job=vulkan-stream-65536-false	reason= Throughput dropped by over 5%
+10-14 14:09:50.871  3132  3132 I Mangekyo: AUTORUN accepted test=suite_stop

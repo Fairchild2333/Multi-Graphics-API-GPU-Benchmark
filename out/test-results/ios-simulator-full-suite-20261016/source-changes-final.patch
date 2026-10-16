@@ -1,0 +1,529 @@
+diff --git a/HANDOFF.md b/HANDOFF.md
+index 557ad30..aba1557 100644
+--- a/HANDOFF.md
++++ b/HANDOFF.md
+@@ -4231,3 +4231,94 @@ PathService 已把 results/captures/reports/logs 改到
+   A15/Mac/Android/Harmony physical measurements this turn. Full31-job physical
+   button was NOT clicked this run; do not claim physical whole-button acceptance.
+ - No commit/push requested. Preserve existing dirty edits and xcuserdata.
++
++### 2026-10-16: New iPad8,1 actual one-button suite and timing correction
++
++- User switched to a new device, UDID 00008027-001969920A87002E, CoreDevice
++  9A44542D-75A2-58C6-B79C-18BEAED61843. Physical iPad Pro11 first gen/A12X,
++  iPadOS26.7.1, named Van的 iPad. Distinct from prior iPad8,7.
++- User enabled Developer Mode and trusted developer signature. Signed team
++  2W6PXCJAM6; fresh device had no app/history. Final signed app is in
++  build-ios/DerivedData-ipad81-fix/Build/Products/Release-iphoneos/Mangekyo.app.
++- Fixed iOS Auto language: preferredLanguages instead of Locale.current,
++  declared en/zh-Hans/ja, restore saved appLanguage before initial status.
++  Actual UI button Chinese; native log setting=auto preferred=zh-Hans-AU.
++- Actual XCTest tapped complete-suite-all, no suite-autorun arguments, ran
++  all31 jobs /33 records. Initial22 passed/9 review,0 execution failures.
++  Strict physical test asserted review==passed and FAILED as designed.
++  Afterwards Xcode stalled during log finalization. Only that completed host
++  PID12431 was INT/TERM stopped; xcresult is incomplete, screenshots cannot
++  be exported. Do not call the XCTest passed or cite incomplete result bundle
++  as successful acceptance. Actual click log and native full manifests saved.
++- Found wrong formal MoltenVK headless1M/4M timestamps despite startup check
++  passing: 0.067/0.343ms vs1.539/5.842ms wall, scores624.626/488.988GB/s.
++  iOS-only headless particles now whole-run synchronized timing, same existing
++  fallback as Burn; native Android/OHOS and macOS desktop path unchanged.
++  iOS result matching rejects query-timed headless resume. Updated Swift
++  acceptance/rejection tests PASS, Release engine and signed app builds PASS.
++- Actual corrected headless1M/4M/16M all PASS18.481/26.642/28.754GB/s, stable
++  18.206/26.632/28.757, timing matches wall and thermal0->0. Original33 rows
++  unchanged; final36. Current selection31 jobs/33 records =24 passed/7 review,
++  production model PASS. This is original full UI run plus3 actual retests,
++  NOT a second complete button run after the fix. GPU attribution out of scope.
++- CPU P110.384,E60.661,all655.509MWork/s; single P/E verified, all8 worker
++  aggregate valid but round2 P lower bound minimum98.372% fails full99% gate;
++  do not replace all-round quality with selected-round stats. CPU mem51.790
++  GB/s, cache curves/pages/storage complete, E memory remains background.
++  Vulkan RAM58.051GB/s verified whole wall-clock sweep. Remaining reviews:
++  Metal rendered1M/4M/16M, Vulkan rendered1M/4M/16M, CPU all-core residency.
++- All measurements ended. Final actual appPID873 killed; fresh process list
++  confirms absent. Safe unplug. No bench or test watcher active. No commit/push
++  this turn; previous committed baseline13aeafd. Preserve user's xcuserdata.
++- Evidence out/test-results/ipad8-1-full-suite-20261016/: report, phone-final,
++  curated-suite-results, selected-run-sources, original UI and corrected native
++  manifests/logs, verification and production-contract-audit,4 PNG/PDF/CSV
++  curve groups. SHA finala44e14deb4ccde5acbd256e46e8d61960fb96bae8031058c1c3155205080bdb0.
++  New concise tracked record docs/ipad8-1-one-click-20261016.md. Other devices
++  NOT retested. Old query-based iOS headless rows cannot fulfill new policy
++  automatically; do not silently relabel old measurements as synchronized.
++
++### 2026-10-16: Remaining iPad8,1 seven reviews closed; app design fixes
++
++- User explicitly requested further review and fixing genuine test-design issues.
++  New root out/test-results/ipad81-design-review-20261016/. Do NOT rerun tests
++  merely because the earlier report still has7 reviews; latest7 actual PASS.
++- Uninstrumented original-app baseline4 jobs: Metal1M35.209 passed,4M29.369
++  review(no stable window, drop-2.44%),16M28.340 passed; CPU111.097/60.795/
++  656.464 passed. Preserve6 baseline rows. Different thermal/order conditions
++  prevent quantifying UI-automation overhead; do not assert sole causation.
++- iOS-only MoltenVK synchronized completion now covers ALL particles, rendered
++  and headless. Startup-only query checking is insufficient. iOS model rejects
++  old query-timed rendered particle rows as well. Native Android/OHOS and
++  macOS desktop selection untouched; API toggle retained.
++- A12X all-core score algorithm unchanged(common wall time,8 workers,3 rounds
++  median). New aggregate_cpu_time_v1 validates actual work-thread P/E CPU time
++  versus each group's physical capacity, and minimum worker occupancy, in
++  EVERY round. Each group/worker >=90%, rejects missing/invalid/excess counters.
++  Individual P/E type purity still saved; single-core99% requirement intact.
++  Core-group participation is independent of individual-worker type purity.
++  New workload version aggregate_occupancy_v1 and fields; do not relabel old
++  failed-purity records retroactively. Apple Swift readers remain identical.
++- Corrected actual7 jobs allPASS,0review/fail,selected9 new rows:
++  Metal render1M35.076/4M30.661/16M28.470GB/s; Vulkan render1M21.318/4M26.999/
++  16M28.952GB/s all synchronized; CPU P111.076,E60.791,all657.976MWork/s.
++  Metal kernel/coverage and2% stability threshold UNCHANGED. Lowest all-round
++  P occupancy99.6631745%,E96.9217504%,worker96.503048%;24 worker samples
++  and3 participation rounds archived. New run individual purity also passes.
++- Real current selection31 jobs/33rows production contract AND quality PASS,
++  built from prior passed records plus corrected7. NOT a new31-job full-button
++  execution. Old failed full-button XCTest remains failed; no false acceptance.
++- Final history51; original36 records unchanged. SHA43d43fb16d87ade98bdb80c7c319d8b8e04434eb69cf1c8f8f777e2284b6531b.
++  phone-final,curated-suite-results,selected-run-sources,production-contract-
++  audit,verification,baseline and corrected7 raw logs/manifests,4 PNG/PDF/CSV
++  plot groups saved. CPU memory267,Metal memory52,Vulkan memory77,cache124
++  curve points unchanged(from prior passing jobs); no attribution research.
++- Native CPU residency/cancel2/2 PASS; Swift contract tests include balanced
++  migration, starved group and legacy query rejection PASS. Release native
++  engine and signed app PASS; installed on iPad8,1. No tests of other devices.
++- Device actual appPID914 killed; fresh process list confirms absent. All
++  benchmarks/controllers complete, safe unplug. New tracked summary
++  docs/ipad81-design-review-20261016.md; earlier docs link to latest status.
++- Still uncommitted since baseline13aeafd; no commit/push requested this turn.
++  Preserve user's Xcode xcuserdata. Normal subsequent noise still gets review;
++  do not promise every future run reaches a stable plateau.
+diff --git a/docs/TODO.md b/docs/TODO.md
+index b0ba559..6bdc530 100644
+--- a/docs/TODO.md
++++ b/docs/TODO.md
+@@ -326,6 +326,13 @@ macOS 上只有两个后端可用，其余均无法原生转译：
+ 
+ ### 2026-10-14：缓存归属与 Vulkan 代码核查
+ 
++- **2026-10-16 新 iPad8,1：**实际点击一键按钮并跑完 31 项；Auto 中文修复。
++  iOS MoltenVK 纯计算改为整轮同步计时，1M／4M／16M 三档复测通过；当前选用
++  首轮选用 24 项 passed、7 项 review；随后七项复核均通过，当前选用 31 项均无警告，
++  仍未再次点击整套。Vulkan 全程同步和 CPU 实际参与检查见
++  [后续设计修正](ipad81-design-review-20261016.md)。
++  详见 [真机记录及剩余复核项](ipad8-1-one-click-20261016.md)。
++
+ - [x] Android／HarmonyOS 共用 Vulkan 内存数据校验、同步、计时一致性、写入／复制目标检查；单工作组独占写入，保留重复访问；新版合同为 membw_v2_verified。
+ - [x] 移动 GPU Burn 启动计时核对；正式计分后切换来源时不保存混合成绩；相关构建、合同和故障验证通过。
+ - [x] App 本机查询可用性能计数器清单；仅枚举，尚未采样。正常成绩与曲线本机保存，电脑用于开发、诊断或归档。
+diff --git a/docs/apple-retest-status-20261014.md b/docs/apple-retest-status-20261014.md
+index 2374d18..f95d0a1 100644
+--- a/docs/apple-retest-status-20261014.md
++++ b/docs/apple-retest-status-20261014.md
+@@ -1,5 +1,11 @@
+ # Apple 设备复测判断与待办（2026-10-14）
+ 
++**2026-10-16 新增设备：**11 英寸 iPad8,1 已实际点击一键按钮并执行 31 项；修正
++两项 Vulkan 纯计算异常时间戳后，三档同步计时补测通过。当前选用 24 项 passed、
++7 项 review；随后七项复核均通过，当前完整选用 31 项均无警告，仍未重新点击整套。
++见 [七项复核及设计修正](ipad81-design-review-20261016.md)。Auto 中文跟随也已修复。首轮详见
++[新设备的一键实测记录](ipad8-1-one-click-20261016.md)。以下 A12X 14 项补测仍指原来的 iPad8,7。
++
+ **最新判断：A12X 已完成 14 项补测及必要复核，选用 16 条新成绩；原 4 个异常均已复测通过，只剩 Metal 16M 绘制未找到稳定段的提示。A15 原稳定成绩保持不变，最新版可选 Vulkan 内存和真机整套按钮验收仍待执行。Mac 本轮未测，原 7 项 Metal 已验证，原显示配置的 Vulkan 1M 诊断尚未关闭。** 下文保留旧观察；旧成绩没有改写。
+ 
+ ## 最新 A12X 实测：已停止，可以拔线
+diff --git a/ios-gui/Info.plist b/ios-gui/Info.plist
+index ee3d134..73ed986 100644
+--- a/ios-gui/Info.plist
++++ b/ios-gui/Info.plist
+@@ -4,6 +4,12 @@
+ <dict>
+ 	<key>CFBundleDevelopmentRegion</key>
+ 	<string>$(DEVELOPMENT_LANGUAGE)</string>
++	<key>CFBundleLocalizations</key>
++	<array>
++		<string>en</string>
++		<string>zh-Hans</string>
++		<string>ja</string>
++	</array>
+ 	<key>CFBundleDisplayName</key>
+ 	<string>Mangekyo</string>
+ 	<key>CFBundleExecutable</key>
+diff --git a/ios-gui/Mangekyo/Engine/BenchEngine.swift b/ios-gui/Mangekyo/Engine/BenchEngine.swift
+index a94c337..e826e64 100644
+--- a/ios-gui/Mangekyo/Engine/BenchEngine.swift
++++ b/ios-gui/Mangekyo/Engine/BenchEngine.swift
+@@ -132,6 +132,8 @@ final class BenchEngine: ObservableObject {
+     private var pollTask: Task<Void, Never>?
+ 
+     init() {
++        Localization.current = AppLanguage(rawValue: UserDefaults.standard.string(forKey: "appLanguage") ?? "auto") ?? .auto_
++        print("IOS_LANGUAGE setting=\(Localization.current.rawValue) preferred=\(Locale.preferredLanguages.joined(separator: ",")) locale=\(Locale.current.identifier) effective=\(Localization.effectiveLang.rawValue)")
+         if ProcessInfo.processInfo.arguments.contains("--ios-allow-translated-api") {
+             allowTranslatedApis = true
+         }
+diff --git a/ios-gui/Mangekyo/Models/BenchResult.swift b/ios-gui/Mangekyo/Models/BenchResult.swift
+index b2f8452..d9175e1 100644
+--- a/ios-gui/Mangekyo/Models/BenchResult.swift
++++ b/ios-gui/Mangekyo/Models/BenchResult.swift
+@@ -98,6 +98,13 @@ struct BenchResult: Codable, Identifiable, Hashable {
+     /// Read a `key=value` item from the semicolon-delimited workload contract.
+     /// A completed run may still need metrology or stability review.
+     var measurementReviewReasons: [String] {
++        if workload == "cpu_multi_core" && workloadConfigValue("allCoreValidation") == "aggregate_cpu_time_v1" {
++            let occupancy = ["minimumRoundPerformanceOccupancy", "minimumRoundEfficiencyOccupancy", "minimumRoundWorkerOccupancy"]
++                .compactMap { Double(workloadConfigValue($0) ?? "") }
++            return workloadConfigValue("allCoreParticipationVerified") == "1" && occupancy.count == 3 &&
++                occupancy.allSatisfy { $0.isFinite && $0 >= 0.90 && $0 <= 1.05 } ? [] :
++                [Localization.tr("All-core CPU participation was not fully verified", "全核 CPU 的实际参与未全部验证", "全コアの実稼働が未検証です")]
++        }
+         if workload == "cpu_multi_core" && workloadConfigValue("workerSchedulingPolicy") == "apple_pe_qos_v1" &&
+            workloadConfigValue("allCorePlacementVerified") != "1" {
+             return [Localization.tr("All-core thread placement or occupancy was not fully verified", "全核线程的驻留或占用未全部验证", "全スレッドの配置または稼働率が未検証です")]
+diff --git a/ios-gui/Mangekyo/Models/Localization.swift b/ios-gui/Mangekyo/Models/Localization.swift
+index 8189882..8bdab1b 100644
+--- a/ios-gui/Mangekyo/Models/Localization.swift
++++ b/ios-gui/Mangekyo/Models/Localization.swift
+@@ -13,7 +13,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
+ 
+     var displayName: String {
+         switch self {
+-        case .auto_: return "Auto"
++        case .auto_: return Localization.tr("Auto", "跟随系统", "システムに合わせる")
+         case .en:    return "English"
+         case .zh:    return "简体中文"
+         case .ja:    return "日本語"
+@@ -27,7 +27,9 @@ final class Localization {
+     /// Resolve the effective language (handles "auto").
+     static var effectiveLang: AppLanguage {
+         if current != .auto_ { return current }
+-        let lang = Locale.current.language.languageCode?.identifier ?? "en"
++        // UI language follows the BCP-47 preference list, independently of
++        // the device's region; this also supports macOS Monterey.
++        let lang = Locale.preferredLanguages.first ?? Locale.current.identifier
+         if lang.hasPrefix("zh") { return .zh }
+         if lang.hasPrefix("ja") { return .ja }
+         return .en
+diff --git a/ios-gui/Mangekyo/Models/MobileBenchmark.swift b/ios-gui/Mangekyo/Models/MobileBenchmark.swift
+index 5fff19d..b616cb7 100644
+--- a/ios-gui/Mangekyo/Models/MobileBenchmark.swift
++++ b/ios-gui/Mangekyo/Models/MobileBenchmark.swift
+@@ -307,6 +307,8 @@ struct MobileSuiteJob: Identifiable, Sendable {
+         }
+         if testID.hasPrefix("stream") {
+             let parts = testID.split(separator: "-")
++            if translated &&
++                result.workloadConfigValue("timingMode") != "synchronized_wall_clock" { return false }
+             if gpuRequest?.contains("coverage=fixed") == true &&
+                result.workloadConfigValue("renderCoverage") != "wrapped_ndc_v2" { return false }
+             if gpuRequest?.contains("coverage=legacy") == true &&
+diff --git a/ios-gui/MangekyoUITests/CompleteSuiteUITests.swift b/ios-gui/MangekyoUITests/CompleteSuiteUITests.swift
+index d8d0999..5ca2575 100644
+--- a/ios-gui/MangekyoUITests/CompleteSuiteUITests.swift
++++ b/ios-gui/MangekyoUITests/CompleteSuiteUITests.swift
+@@ -14,7 +14,13 @@ final class CompleteSuiteUITests: XCTestCase {
+         let ready = NSPredicate(format: "enabled == true")
+         let readyExpectation = XCTNSPredicateExpectation(predicate: ready, object: button)
+         XCTAssertEqual(XCTWaiter.wait(for: [readyExpectation], timeout: 30), .completed)
++        print("ONE_BUTTON_READY label=\(button.label)")
++        let before = XCTAttachment(screenshot: app.screenshot())
++        before.name = "Before tapping the complete-suite button"
++        before.lifetime = .keepAlways
++        add(before)
+         button.tap()
++        print("ONE_BUTTON_TAPPED")
+ 
+         // Leave the benchmark foreground and avoid repeatedly querying
+         // accessibility during measured CPU windows. The host also archives
+diff --git a/ios-gui/README.md b/ios-gui/README.md
+index 4449b40..31a94bd 100644
+--- a/ios-gui/README.md
++++ b/ios-gui/README.md
+@@ -76,6 +76,15 @@ shader copies from the bundle. Results live under the app's Documents directory.
+   GPU/CPU results.json and per-suite manifests/logs.
+ - Separate GPU/CPU logs, progress, scores and current-run charts.
+ - History preserving result schema, device model, memory and platform metadata.
++- Auto language follows the device's preferred language list, independently of
++  its region. English, Simplified Chinese and Japanese are declared in the
++  bundle; a saved manual language is restored before the initial status text.
++- Translated Vulkan particles use synchronized compute/render completion timing
++  throughout the run. Old query-timed particle records are kept in history and
++  do not fulfill the current suite's translated-particle jobs.
++- A12X all-core verification checks measured CPU participation of both core
++  groups in every round, while retaining per-worker core-type purity as detail.
++  Single-core P/E scores still require 99% verified residency.
+ - Filtered comparison charts by version, API, execution mode and particle size,
+   plus CPU comparison charts.
+ - Saved cache/memory curves accessible from History and Charts. Choose an older
+diff --git a/macos-gui/GPUBenchmark/Models/BenchResult.swift b/macos-gui/GPUBenchmark/Models/BenchResult.swift
+index b2f8452..d9175e1 100644
+--- a/macos-gui/GPUBenchmark/Models/BenchResult.swift
++++ b/macos-gui/GPUBenchmark/Models/BenchResult.swift
+@@ -98,6 +98,13 @@ struct BenchResult: Codable, Identifiable, Hashable {
+     /// Read a `key=value` item from the semicolon-delimited workload contract.
+     /// A completed run may still need metrology or stability review.
+     var measurementReviewReasons: [String] {
++        if workload == "cpu_multi_core" && workloadConfigValue("allCoreValidation") == "aggregate_cpu_time_v1" {
++            let occupancy = ["minimumRoundPerformanceOccupancy", "minimumRoundEfficiencyOccupancy", "minimumRoundWorkerOccupancy"]
++                .compactMap { Double(workloadConfigValue($0) ?? "") }
++            return workloadConfigValue("allCoreParticipationVerified") == "1" && occupancy.count == 3 &&
++                occupancy.allSatisfy { $0.isFinite && $0 >= 0.90 && $0 <= 1.05 } ? [] :
++                [Localization.tr("All-core CPU participation was not fully verified", "全核 CPU 的实际参与未全部验证", "全コアの実稼働が未検証です")]
++        }
+         if workload == "cpu_multi_core" && workloadConfigValue("workerSchedulingPolicy") == "apple_pe_qos_v1" &&
+            workloadConfigValue("allCorePlacementVerified") != "1" {
+             return [Localization.tr("All-core thread placement or occupancy was not fully verified", "全核线程的驻留或占用未全部验证", "全スレッドの配置または稼働率が未検証です")]
+diff --git a/macos-gui/GPUBenchmark/Models/Localization.swift b/macos-gui/GPUBenchmark/Models/Localization.swift
+index a0523f3..8bdab1b 100644
+--- a/macos-gui/GPUBenchmark/Models/Localization.swift
++++ b/macos-gui/GPUBenchmark/Models/Localization.swift
+@@ -13,7 +13,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
+ 
+     var displayName: String {
+         switch self {
+-        case .auto_: return "Auto"
++        case .auto_: return Localization.tr("Auto", "跟随系统", "システムに合わせる")
+         case .en:    return "English"
+         case .zh:    return "简体中文"
+         case .ja:    return "日本語"
+@@ -27,8 +27,8 @@ final class Localization {
+     /// Resolve the effective language (handles "auto").
+     static var effectiveLang: AppLanguage {
+         if current != .auto_ { return current }
+-        // `Locale.Language` is macOS 13-only. The BCP-47 preference list is
+-        // available on Monterey and preserves the same zh/ja auto-detection.
++        // UI language follows the BCP-47 preference list, independently of
++        // the device's region; this also supports macOS Monterey.
+         let lang = Locale.preferredLanguages.first ?? Locale.current.identifier
+         if lang.hasPrefix("zh") { return .zh }
+         if lang.hasPrefix("ja") { return .ja }
+diff --git a/scripts/apple-check/ios-suite-tests.swift b/scripts/apple-check/ios-suite-tests.swift
+index 91ffdee..3524ddf 100644
+--- a/scripts/apple-check/ios-suite-tests.swift
++++ b/scripts/apple-check/ios-suite-tests.swift
+@@ -55,6 +55,12 @@ var utilityAll = allCPU
+ utilityAll.workloadVersion = "cpu_mixed_v1_apple_pe_qos_workers_v1_ios_preview"
+ utilityAll.workloadConfig = (utilityAll.workloadConfig ?? "") + ";workerSchedulingPolicy=apple_pe_qos_v1;allCorePlacementVerified=1"
+ precondition(performanceCPU.matchesRecordGroup([p, utilityE, utilityAll]))
++var migratedAll = utilityAll
++migratedAll.workloadConfig = "workerSchedulingPolicy=apple_pe_qos_v1;allCorePlacementVerified=0;allCoreValidation=aggregate_cpu_time_v1;allCoreParticipationVerified=1;minimumRoundPerformanceOccupancy=0.97;minimumRoundEfficiencyOccupancy=0.94;minimumRoundWorkerOccupancy=0.92"
++precondition(migratedAll.measurementReviewReasons.isEmpty, "Balanced all-core migration is not a failed single-core purity measurement")
++var starvedAll = migratedAll
++starvedAll.workloadConfig = starvedAll.workloadConfig?.replacingOccurrences(of: "minimumRoundEfficiencyOccupancy=0.94", with: "minimumRoundEfficiencyOccupancy=0.74")
++precondition(!starvedAll.measurementReviewReasons.isEmpty, "An idle core group must remain review even with a claimed verified flag")
+ precondition(!performanceCPU.matchesRecordGroup([p, utilityE, allCPU]), "Inherited-QoS all-core score reused for typed workers")
+ var invalidUtility = utilityE
+ invalidUtility.workloadConfig = invalidUtility.workloadConfig?.replacingOccurrences(of: "residencyVerified=1", with: "residencyVerified=0")
+@@ -129,11 +135,16 @@ for job in native where job.id != "gpu_cache-v2" {
+             other.workloadVersion = job.id == "memory_sweep" ? "membw_v2_verified_ios_preview_moltenvk" : (row.workloadVersion ?? "") + "_moltenvk"
+             other.workloadConfig = (row.workloadConfig ?? "") + ";apiImplementation=MoltenVK;translatedTo=Metal"
+             if job.id == "memory_sweep" { other.workloadConfig = (other.workloadConfig ?? "") + ";dataVerified=1;writeCopyChecks=2;timestampAnomalies=0" }
+-            if job.id.hasPrefix("gpu_burn-") {
++            if job.id.hasPrefix("gpu_burn-") || job.id.hasPrefix("stream") {
+                 other.workloadConfig = (other.workloadConfig ?? "").split(separator: ";")
+                     .filter { !$0.hasPrefix("timingMode=") }.joined(separator: ";") + ";timingMode=synchronized_wall_clock"
+             }
+             precondition(vk.matches(other), "Valid translated contract rejected")
++            if job.id.hasPrefix("stream") {
++                var unchecked = other
++                unchecked.workloadConfig = unchecked.workloadConfig?.replacingOccurrences(of: "timingMode=synchronized_wall_clock", with: "timingMode=gpu_timestamp_query")
++                precondition(!vk.matches(unchecked), "Startup-only MoltenVK compute timestamps reused")
++            }
+             if job.id == "memory_sweep" {
+                 var unchecked = other
+                 unchecked.workloadVersion = "membw_v1_ios_preview_moltenvk"
+diff --git a/src/cpu_benchmark.cpp b/src/cpu_benchmark.cpp
+index f86f59b..b891e5e 100644
+--- a/src/cpu_benchmark.cpp
++++ b/src/cpu_benchmark.cpp
+@@ -978,6 +978,7 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>&
+         bool verifiedCoreTypes = true;
+         std::vector<CpuResidency> workerResidencies;
+         std::vector<double> workerBusyFractions;
++        CpuParticipation participation;
+     };
+ 
+     const std::uint32_t roundCount = (std::max)(1u, config.roundCount);
+@@ -1096,6 +1097,9 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>&
+         // and inflating short-run scores.
+         sample.kernel.seconds =
+             std::chrono::duration<double>(lastFinish - gate.warmupEnd).count();
++        if (typedScheduling)
++            sample.participation = EvaluateCpuParticipation(sample.workerResidencies,
++                sample.workerBusyFractions, performanceCount, efficiencyCount, sample.kernel.seconds);
+         // Process counters include the first round's warm-up and a little
+         // observer work; they diagnose scheduling, never classify workers.
+         if (accountingStart.available && accountingEnd.available &&
+@@ -1121,6 +1125,13 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>&
+             << "\tprocess_cpu_seconds=" << sample.processCpuSeconds
+             << "\tperformance_cpu_seconds=" << sample.performanceCpuSeconds
+             << "\tincludes_warmup_seconds=" << warmup << '\n';
++        if (typedScheduling)
++            out << "CPU_MULTI_PARTICIPATION\tround=" << round + 1
++                << "\tperformance_occupancy=" << sample.participation.performanceOccupancy
++                << "\tefficiency_occupancy=" << sample.participation.efficiencyOccupancy
++                << "\tminimum_worker_occupancy=" << sample.participation.minimumWorkerOccupancy
++                << "\tverified=" << sample.participation.verified()
++                << "\tindividual_type_purity_verified=" << sample.verifiedCoreTypes << '\n';
+         rounds.push_back(sample);
+ 
+         const double roundComplete =
+@@ -1156,8 +1167,10 @@ static CpuMultiCoreResult RunMultiTimed(const std::vector<CpuLogicalProcessor>&
+     result.performanceCpuSeconds = selected.performanceCpuSeconds;
+     result.typedScheduling = typedScheduling;
+     result.verifiedCoreTypes = typedScheduling;
+-    for (const auto& round : rounds)
++    for (const auto& round : rounds) {
+         result.verifiedCoreTypes = result.verifiedCoreTypes && round.verifiedCoreTypes;
++        if (typedScheduling) result.participationRounds.push_back(round.participation);
++    }
+     result.workerResidencies = selected.workerResidencies;
+     result.workerBusyFractions = selected.workerBusyFractions;
+     // As many busy threads as there are processors fill the machine wherever
+diff --git a/src/cpu_benchmark.h b/src/cpu_benchmark.h
+index 7899113..cd8508c 100644
+--- a/src/cpu_benchmark.h
++++ b/src/cpu_benchmark.h
+@@ -90,6 +90,7 @@ struct CpuMultiCoreResult {
+     std::vector<double> workerScores;
+     bool typedScheduling = false;
+     bool verifiedCoreTypes = false;
++    std::vector<CpuParticipation> participationRounds;
+     std::vector<CpuResidency> workerResidencies;
+     std::vector<double> workerBusyFractions;
+     double processCpuSeconds = 0.0;
+diff --git a/src/cpu_cli.cpp b/src/cpu_cli.cpp
+index 9d5178c..37c5c06 100644
+--- a/src/cpu_cli.cpp
++++ b/src/cpu_cli.cpp
+@@ -39,7 +39,7 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
+                   << "_sequence_" << (beforePerCore ? "before_percore" : "standalone");
+     stored.workloadVersion = storedVersion.str();
+     if (multiCore && report.multiCore.typedScheduling)
+-        stored.workloadVersion += "_apple_pe_qos_workers_v1";
++        stored.workloadVersion += "_apple_pe_qos_workers_v1_aggregate_occupancy_v1";
+     const auto coreType = !multiCore && !report.perCore.empty()
+         ? report.perCore.front().coreType : CpuCoreType::Automatic;
+     const bool foregroundE = !multiCore && !report.perCore.empty() && report.perCore.front().foregroundEfficiency;
+@@ -110,8 +110,21 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
+                  << ";performanceCpuSeconds=" << report.multiCore.performanceCpuSeconds
+                  << ";accountingIncludesWarmup=" << (report.multiCore.medianRound == 1 ? config.warmupSeconds : 0.0);
+         if (report.multiCore.typedScheduling) {
++            bool participationVerified = report.multiCore.participationRounds.size() == report.multiCore.roundCount;
++            double minimumP = 1.05, minimumE = 1.05, minimumWorker = 1.05;
++            for (const auto& round : report.multiCore.participationRounds) {
++                participationVerified = participationVerified && round.verified();
++                minimumP = (std::min)(minimumP, round.performanceOccupancy);
++                minimumE = (std::min)(minimumE, round.efficiencyOccupancy);
++                minimumWorker = (std::min)(minimumWorker, round.minimumWorkerOccupancy);
++            }
+             contract << ";workerSchedulingPolicy=apple_pe_qos_v1"
+                      << ";allCorePlacementVerified=" << (report.multiCore.verifiedCoreTypes ? 1 : 0)
++                     << ";allCoreValidation=aggregate_cpu_time_v1"
++                     << ";allCoreParticipationVerified=" << (participationVerified ? 1 : 0)
++                     << ";minimumRoundPerformanceOccupancy=" << minimumP
++                     << ";minimumRoundEfficiencyOccupancy=" << minimumE
++                     << ";minimumRoundWorkerOccupancy=" << minimumWorker
+                      << ";performanceWorkers=" << AppleCoreTypeCount(CpuCoreType::Performance)
+                      << ";efficiencyWorkers=" << AppleCoreTypeCount(CpuCoreType::Efficiency)
+                      << ";workerResidency=";
+diff --git a/src/cpu_scheduling.h b/src/cpu_scheduling.h
+index cfa28c2..189ad36 100644
+--- a/src/cpu_scheduling.h
++++ b/src/cpu_scheduling.h
+@@ -1,7 +1,9 @@
+ #pragma once
+ #include <algorithm>
+ #include <cstdint>
++#include <cmath>
+ #include <string>
++#include <vector>
+ #if defined(__APPLE__)
+ #include <TargetConditionals.h>
+ #if defined(__aarch64__)
+@@ -196,6 +198,43 @@ struct CpuResidency {
+     bool verified() const { return available && requestedLowerBound >= 0.99; }
+ };
+ 
++// All-core work does not require each worker to remain on one core type.
++// Verify actual participation of both core groups, independently of the
++// stricter 99% purity contract used for single-core P/E measurements.
++struct CpuParticipation {
++    bool available = false;
++    double performanceOccupancy = 0, efficiencyOccupancy = 0, minimumWorkerOccupancy = 0;
++    bool verified() const {
++        return available && performanceOccupancy >= .90 && performanceOccupancy <= 1.05 &&
++            efficiencyOccupancy >= .90 && efficiencyOccupancy <= 1.05 &&
++            minimumWorkerOccupancy >= .90 && minimumWorkerOccupancy <= 1.05;
++    }
++};
++inline CpuParticipation EvaluateCpuParticipation(const std::vector<CpuResidency>& workers,
++                                                 const std::vector<double>& busy,
++                                                 std::uint32_t performanceCount,
++                                                 std::uint32_t efficiencyCount,
++                                                 double wallSeconds) {
++    CpuParticipation result;
++    if (!std::isfinite(wallSeconds) || wallSeconds <= 0 || !performanceCount || !efficiencyCount ||
++        workers.size() != std::size_t(performanceCount) + efficiencyCount || busy.size() != workers.size()) return result;
++    double performanceNs = 0, efficiencyNs = 0, minimumBusy = 1.05;
++    for (std::size_t i = 0; i < workers.size(); ++i) {
++        const auto& worker = workers[i];
++        if (!worker.available || !std::isfinite(worker.workerCpuNs) || worker.workerCpuNs <= 0 ||
++            !std::isfinite(worker.performanceFraction) || worker.performanceFraction < 0 || worker.performanceFraction > 1 ||
++            !std::isfinite(busy[i]) || busy[i] < 0 || busy[i] > 1.05) return result;
++        performanceNs += worker.workerCpuNs * worker.performanceFraction;
++        efficiencyNs += worker.workerCpuNs * (1 - worker.performanceFraction);
++        minimumBusy = std::min(minimumBusy, busy[i]);
++    }
++    result.available = true;
++    result.performanceOccupancy = performanceNs / 1e9 / wallSeconds / performanceCount;
++    result.efficiencyOccupancy = efficiencyNs / 1e9 / wallSeconds / efficiencyCount;
++    result.minimumWorkerOccupancy = minimumBusy;
++    return result;
++}
++
+ // Recount's exported SPI is absent from the public SDK headers. Its layout
+ // and perf-level ordering are specified by Apple's resource_private.h and
+ // sys_recount.c. Resolve it at runtime, fail closed, and keep this method
+diff --git a/src/vulkan_backend.cpp b/src/vulkan_backend.cpp
+index 713807c..82b35ac 100644
+--- a/src/vulkan_backend.cpp
++++ b/src/vulkan_backend.cpp
+@@ -89,6 +89,11 @@ void VulkanBackend::InitBackend() {
+     // by submit/fence completion, rather than trusting the initial sample.
+     if (isGpuBurnWorkload(config_.workload))
+         EnableSynchronizedTimingFallback("MoltenVK GPU Burn requires per-frame completion timing");
++    // A12X can pass the repeated-dispatch startup check yet under-report
++    // ordinary frames. Use the same synchronized compute/render boundaries
++    // for the entire translated particle run, including rendered presets.
++    if (config_.workload == Workload::Stream)
++        EnableSynchronizedTimingFallback("MoltenVK particles require per-frame completion timing");
+ #endif
+     CheckTimestampsAgainstWallClock();
+ 
+diff --git a/tests/cpu_residency_test.cpp b/tests/cpu_residency_test.cpp
+index 8ab35e4..c44fab1 100644
+--- a/tests/cpu_residency_test.cpp
++++ b/tests/cpu_residency_test.cpp
+@@ -46,5 +46,22 @@ int main() {
+     threadAfter.cpuNs[0] = 0;
+     threadAfter.workerBeforeNs = threadAfter.workerAfterNs = 1500000000;
+     if (EvaluateCpuThreadCounters(threadBefore, threadAfter, CpuCoreType::Efficiency).verified()) return 13;
++    // Four workers can exchange core types while both groups remain busy.
++    // Their aggregate throughput must not acquire the single-core purity gate.
++    std::vector<CpuResidency> workers(4);
++    for (auto& worker : workers) {
++        worker.available = true; worker.workerCpuNs = 5000000000.0;
++    }
++    workers[0].performanceFraction = .98; workers[1].performanceFraction = .97;
++    workers[2].performanceFraction = .03; workers[3].performanceFraction = .02;
++    std::vector<double> busy(4,1.0);
++    if (!EvaluateCpuParticipation(workers,busy,2,2,5).verified()) return 14;
++    workers[2].workerCpuNs = workers[3].workerCpuNs = 2500000000.0;
++    if (EvaluateCpuParticipation(workers,busy,2,2,5).verified()) return 15;
++    workers[2].workerCpuNs = workers[3].workerCpuNs = 5000000000.0;
++    busy[3] = .70;
++    if (EvaluateCpuParticipation(workers,busy,2,2,5).verified()) return 16;
++    busy[3] = 1.0; workers[0].available = false;
++    if (EvaluateCpuParticipation(workers,busy,2,2,5).verified()) return 17;
+     std::cout << "CPU-type accounting rejects mixed/contaminated and unavailable observations.\n";
+ }

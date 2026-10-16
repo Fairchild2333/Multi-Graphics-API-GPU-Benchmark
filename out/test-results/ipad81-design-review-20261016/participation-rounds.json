@@ -1,0 +1,26 @@
+[
+  {
+    "round": "1",
+    "performance_occupancy": "0.996631745",
+    "efficiency_occupancy": "0.970606156",
+    "minimum_worker_occupancy": "0.965030480",
+    "verified": "1",
+    "individual_type_purity_verified": "1"
+  },
+  {
+    "round": "2",
+    "performance_occupancy": "0.998198010",
+    "efficiency_occupancy": "0.974677315",
+    "minimum_worker_occupancy": "0.973562873",
+    "verified": "1",
+    "individual_type_purity_verified": "1"
+  },
+  {
+    "round": "3",
+    "performance_occupancy": "0.998598558",
+    "efficiency_occupancy": "0.969217504",
+    "minimum_worker_occupancy": "0.966900204",
+    "verified": "1",
+    "individual_type_purity_verified": "1"
+  }
+]

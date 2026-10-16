@@ -1,0 +1,22 @@
+[  0%] Building CXX object CMakeFiles/vulkan_membw_results_test.dir/src/vulkan_membw_results.cpp.o
+[ 20%] Building CXX object CMakeFiles/vulkan_membw_results_test.dir/tests/vulkan_membw_results_test.cpp.o
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw_results.cpp:1:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw_results.h:2:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/benchmark_results.h:3:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/tests/vulkan_membw_results_test.cpp:1:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw_results.h:2:
+In file included from warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/benchmark_results.h  204 | #:3:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config  warning "The sele:15cted platform :
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+i  204 | #  warning "The selected platfos nrm is no longer so longupported by libc++."
+      |    ^
+er supported by libc++."
+      |    ^
+1 warning generated.
+1 warning generated.
+[ 40%] Linking CXX executable vulkan_membw_results_test
+[100%] Built target vulkan_membw_results_test

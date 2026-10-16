@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "passedJobs": 31,
+  "jobCount": 31,
+  "selectedRecords": 32,
+  "rawHistoryRecords": 56,
+  "oldPhoneRecordsPreserved": true,
+  "oldPhoneRecordCount": 17,
+  "resultIDsUnique": true,
+  "apiCounts": {
+    "OpenGL ES 2.0": 3,
+    "CPU": 3,
+    "Vulkan": 12,
+    "Metal": 14
+  },
+  "curvePointCounts": {
+    "Vulkan": 77,
+    "GPU cache": 124,
+    "CPU": 174,
+    "Metal": 52
+  },
+  "gpuCacheAttribution": "unverified",
+  "warming": "bounded_complete_cycle",
+  "cpuPageMappingMeasured": true,
+  "storageMeasured": true,
+  "rawSha256": "d3f3b10f96789f7c118fb0cae9af234d6ad5b67c96c16be4b7796debc269cf20",
+  "selectedSha256": "789b24040b1fb11eb26278eb3dd60b1fe280fbe1cc130be7814963ebde38c71a"
+}

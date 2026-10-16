@@ -1,0 +1,40 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Apple M4 Pro (Integrated)                    38338 MB  YES    -     -    YES   YES 
+============================================================
+
+SUITE_PLAN	total=30
+SUITE_JOB	index=1	backend=vulkan	workload=stream	particles=65536	steps=0	headless=0	capture=0
+SUITE_JOB	index=2	backend=vulkan	workload=stream	particles=1048576	steps=0	headless=0	capture=0
+SUITE_JOB	index=3	backend=vulkan	workload=stream	particles=4194304	steps=0	headless=0	capture=0
+SUITE_JOB	index=4	backend=vulkan	workload=stream	particles=16777216	steps=0	headless=0	capture=0
+SUITE_JOB	index=5	backend=vulkan	workload=stream	particles=65536	steps=0	headless=1	capture=0
+SUITE_JOB	index=6	backend=vulkan	workload=stream	particles=1048576	steps=0	headless=1	capture=0
+SUITE_JOB	index=7	backend=vulkan	workload=stream	particles=4194304	steps=0	headless=1	capture=0
+SUITE_JOB	index=8	backend=vulkan	workload=stream	particles=16777216	steps=0	headless=1	capture=0
+SUITE_JOB	index=9	backend=vulkan	workload=gpu_burn	particles=0	steps=16	headless=0	capture=0
+SUITE_JOB	index=10	backend=vulkan	workload=gpu_burn	particles=0	steps=64	headless=0	capture=0
+SUITE_JOB	index=11	backend=vulkan	workload=gpu_burn	particles=0	steps=256	headless=0	capture=0
+SUITE_JOB	index=12	backend=vulkan	workload=cinematic_liquid	particles=0	steps=0	headless=0	capture=0
+SUITE_JOB	index=13	backend=vulkan	workload=membw	particles=0	steps=0	headless=1	capture=0
+SUITE_JOB	index=14	backend=metal	workload=stream	particles=65536	steps=0	headless=0	capture=0
+SUITE_JOB	index=15	backend=metal	workload=stream	particles=1048576	steps=0	headless=0	capture=0
+SUITE_JOB	index=16	backend=metal	workload=stream	particles=4194304	steps=0	headless=0	capture=0
+SUITE_JOB	index=17	backend=metal	workload=stream	particles=16777216	steps=0	headless=0	capture=0
+SUITE_JOB	index=18	backend=metal	workload=stream	particles=65536	steps=0	headless=1	capture=0
+SUITE_JOB	index=19	backend=metal	workload=stream	particles=1048576	steps=0	headless=1	capture=0
+SUITE_JOB	index=20	backend=metal	workload=stream	particles=4194304	steps=0	headless=1	capture=0
+SUITE_JOB	index=21	backend=metal	workload=stream	particles=16777216	steps=0	headless=1	capture=0
+SUITE_JOB	index=22	backend=metal	workload=gpu_burn	particles=0	steps=16	headless=0	capture=0
+SUITE_JOB	index=23	backend=metal	workload=gpu_burn	particles=0	steps=64	headless=0	capture=0
+SUITE_JOB	index=24	backend=metal	workload=gpu_burn	particles=0	steps=256	headless=0	capture=0
+SUITE_JOB	index=25	backend=metal	workload=cinematic_liquid	particles=0	steps=0	headless=0	capture=0
+SUITE_JOB	index=26	backend=metal	workload=membw	particles=0	steps=0	headless=1	capture=0
+SUITE_JOB	index=27	backend=metal	workload=gpu_cache	particles=0	steps=0	headless=1	capture=0
+SUITE_JOB	index=28	backend=opengl	workload=gpu_burn	particles=0	steps=16	headless=0	capture=0
+SUITE_JOB	index=29	backend=opengl	workload=gpu_burn	particles=0	steps=64	headless=0	capture=0
+SUITE_JOB	index=30	backend=opengl	workload=gpu_burn	particles=0	steps=256	headless=0	capture=0

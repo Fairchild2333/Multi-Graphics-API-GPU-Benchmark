@@ -30,3 +30,7 @@ CMakeLists.txt text eol=lf
 *.rdc binary
 *.3dmark-result binary
 *.csv text eol=lf
+
+# Preserve archived results, counters and console logs byte for byte.
+out/test-results/** -text
+results/** -text

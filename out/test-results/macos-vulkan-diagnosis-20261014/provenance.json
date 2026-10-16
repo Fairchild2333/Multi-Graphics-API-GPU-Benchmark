@@ -1,0 +1,20 @@
+{
+  "sourceRevision": "5c4e7df718728e498080b9d154abd8275ffeaace",
+  "worker": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+  "workerSha256": "2a37390e51b7fafaf050e0d06cd51ef0e0f0fb64f88420c6390238310825d1d4",
+  "canonicalBeforeCount": 147,
+  "canonicalBeforeSha256": "6b9ff820784e7ac861ce631191515e0ba9c62e9bf2da2f9798c824946a12b3bf",
+  "scope": "Mac Vulkan particle drift controls",
+  "frequencyTelemetry": "powermetrics GPU sampler requires administrator; no noninteractive authorization available",
+  "controlParameters": [
+    "rendered vs headless",
+    "frames-in-flight 1 vs 2"
+  ],
+  "fixedParameters": {
+    "particles": 1048576,
+    "runSeconds": 15,
+    "warmupSeconds": 2,
+    "viewport": "1280x720 when rendered"
+  },
+  "resultsPolicy": "Preserve control variants separately; default rendered2-flight run remains eligible for baseline history."
+}

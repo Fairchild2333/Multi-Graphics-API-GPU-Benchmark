@@ -1,0 +1,38 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "process",
+      "terminate",
+      "--device",
+      "00008027-001969920A87002E",
+      "--pid",
+      "873",
+      "--kill",
+      "--json-output",
+      "out/test-results/ipad8-1-full-suite-20261016/termination.json",
+      "--timeout",
+      "20"
+    ],
+    "commandType" : "devicectl.device.process.terminate",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "9A44542D-75A2-58C6-B79C-18BEAED61843",
+    "deviceTimestamp" : "2026-10-16T08:40:56.513Z",
+    "process" : {
+      "executable" : "file:///private/var/containers/Bundle/Application/3269F3A9-E140-442C-B7DF-6137FFE1101A/Mangekyo.app/Mangekyo",
+      "processIdentifier" : 873
+    },
+    "signal" : {
+      "name" : "SIGKILL",
+      "value" : 9
+    }
+  }
+}

@@ -1,0 +1,9 @@
+Test project /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build
+    Start 5: cpu_residency
+1/2 Test #5: cpu_residency ....................   Passed    0.30 sec
+    Start 6: cpu_cancel
+2/2 Test #6: cpu_cancel .......................   Passed    2.95 sec
+
+100% tests passed out of 2
+
+Total Test time (real) =   3.26 sec

@@ -1,0 +1,29 @@
+{
+  "deviceModel": "iPad8,7",
+  "soc": "A12X",
+  "deviceID": "00008027-000C39923E85002E",
+  "jobs": [
+    "stream-65536",
+    "stream-1048576",
+    "stream-4194304",
+    "stream-16777216",
+    "vulkan/stream-65536",
+    "vulkan/stream-1048576",
+    "vulkan/stream-4194304",
+    "vulkan/stream-16777216",
+    "vulkan/gpu_burn-16",
+    "vulkan/gpu_burn-64",
+    "vulkan/gpu_burn-256",
+    "vulkan/memory_sweep",
+    "cpu_compute",
+    "cpu_memory"
+  ],
+  "expectedJobs": 14,
+  "expectedRecords": 16,
+  "renderCoverage": "fixed_coverage_v2",
+  "translatedApis": true,
+  "durationSeconds": 15,
+  "restBetweenJobsSeconds": 20,
+  "independentGpuCacheAttribution": "out_of_scope_per_user",
+  "historyBefore": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a12x-targeted-retest-20261014/before/results/results.json"
+}

@@ -1,0 +1,44 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "apps",
+      "--device",
+      "00008027-000C39923E85002E",
+      "--json-output",
+      "out/test-results/ipadpro3-20261014/apps-before.json"
+    ],
+    "commandType" : "devicectl.device.info.apps",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "642.16"
+  },
+  "result" : {
+    "apps" : [
+      {
+        "appClip" : false,
+        "builtByDeveloper" : true,
+        "bundleIdentifier" : "com.anixplayer.ios",
+        "bundleVersion" : "2023122401",
+        "containerAccessible" : true,
+        "defaultApp" : false,
+        "hidden" : false,
+        "internalApp" : false,
+        "name" : "AniXPlayer",
+        "removable" : true,
+        "url" : "file:///private/var/containers/Bundle/Application/14BD8967-C158-45F6-AD97-96F36F0842F0/AniXPlayer.app/",
+        "version" : "6.0.1"
+      }
+    ],
+    "defaultAppsIncluded" : false,
+    "deviceIdentifier" : "26FF195B-5CEA-513C-B531-19954AE9DF2B",
+    "hiddenAppsIncluded" : false,
+    "internalAppsIncluded" : false,
+    "removableAppsIncluded" : true
+  }
+}

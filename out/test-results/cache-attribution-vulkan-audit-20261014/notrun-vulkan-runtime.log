@@ -1,0 +1,2 @@
+MEMBW_COUNTERS	extension_advertised=0	status=extension_not_advertised	inventory=	cache_attribution=unverified
+RUNTIME_VALIDATION valid=0 data_verified=0 write_copy_checks=0 points=0 timestamp_anomalies=0 error=Vulkan memory data check did not execute or cannot be read back; no unchecked score is saved

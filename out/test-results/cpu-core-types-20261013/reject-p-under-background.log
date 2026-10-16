@@ -1,0 +1,37 @@
+CPU_META	workload_version=cpu_mixed_v1_scheduler_managed	name=Apple M4 Pro	logical_count=14	physical_count=14	topology_source=AppleSchedulerManagedEstimate	affinity_capability=scheduler_managed
+CPU_TOPOLOGY	core_index=0	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=1	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=2	group=0	logical_index=2	physical_core=2	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=3	group=0	logical_index=3	physical_core=3	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=4	group=0	logical_index=4	physical_core=4	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=5	group=0	logical_index=5	physical_core=5	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=6	group=0	logical_index=6	physical_core=6	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=7	group=0	logical_index=7	physical_core=7	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=8	group=0	logical_index=8	physical_core=8	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=9	group=0	logical_index=9	physical_core=9	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=10	group=0	logical_index=10	physical_core=10	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=11	group=0	logical_index=11	physical_core=11	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=12	group=0	logical_index=12	physical_core=12	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=13	group=0	logical_index=13	physical_core=13	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_SCHEDULING	core_type=performance	residency_threshold=0.99	scope=single_thread_stages
+
+--- Native CPU mixed benchmark ---
+CPU: Apple M4 Pro
+Topology: AppleSchedulerManagedEstimate, affinity: scheduler_managed
+Workload: cpu_mixed_v1_scheduler_managed, 3 rounds, median aggregation (the requested measurement time is split across rounds).
+Score contract: preview (formal = 15.0 s measurement, 0.2 s warm-up, 3 rounds).
+Each score is million mixed integer/branch/FP32/FP64 work units per second.
+The checksum is a dead-code-elimination sink, not a correctness oracle.
+CPU_PROGRESS	mode=per_core	phase=warmup	core_index=0	core_count=1	core_fraction=0.000000	overall_fraction=0.000000	elapsed=0.000020	round_index=-1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=1	core_fraction=0.000084	overall_fraction=0.000084	elapsed=0.000025	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=1	core_fraction=0.333408	overall_fraction=0.333408	elapsed=0.100023	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=1	core_fraction=0.666744	overall_fraction=0.666744	elapsed=0.200023	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=0	core_count=1	core_fraction=1.000000	overall_fraction=1.000000	elapsed=0.300000	round_index=0	round_count=3
+CPU_RESIDENCY	core_type=performance	round=1	p_fraction=0.000000	requested_lower_bound=0.000000	effective_ghz=0.000000	verified=0	retries=6
+CPU_RESIDENCY	core_type=performance	round=2	p_fraction=0.000000	requested_lower_bound=0.000000	effective_ghz=0.000000	verified=0	retries=6
+CPU_RESIDENCY	core_type=performance	round=3	p_fraction=0.000000	requested_lower_bound=0.000000	effective_ghz=0.000000	verified=0	retries=6
+Performance core type (QoS, verified CPU time; no numbered-core binding) score: 112.53 MWork/s [INVALID: placement contract not met]
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=0	core_count=14	group=0	logical_index=-1	physical_core=-1	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=0	core_class=Performance	core_type=performance	residency_verified=0	requested_lower_bound=0.000000	classification_source=qos_verified_cpu_time_bound	affinity=scheduler_managed	valid=0	score=112.532291	unit=MWork/s	seconds=0.100023	requested_seconds=0.300000	round_count=3	median_round=1	checksum=0753e20cc8ac4c4f	checksum_role=dce_sink
+Average per-logical-processor score: 0.00 MWork/s [INVALID/INCOMPLETE]
+CPU_RESULT	kind=summary	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=arithmetic_mean_of_per_core_medians	core_count=14	completed=0	invalid_count=1	valid=0	average_score=0.000000	min_score=0.000000	max_score=0.000000	unit=MWork/s	round_count=3	checksum=0ea7c4199158989e	checksum_role=dce_sink
+CPU benchmark did not meet its affinity/completion contract; see CPU_ERROR and valid=0 records above.

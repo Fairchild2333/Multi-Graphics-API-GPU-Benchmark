@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad8-1-full-suite-20261016/run_suite.py", line 99, in <module>
+    main()
+    ~~~~^^
+  File "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad8-1-full-suite-20261016/run_suite.py", line 69, in main
+    raise RuntimeError(f"Launch failed ({proc.returncode}); see {folder / 'console.log'}")
+RuntimeError: Launch failed (1); see /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad8-1-full-suite-20261016/whole-01/console.log

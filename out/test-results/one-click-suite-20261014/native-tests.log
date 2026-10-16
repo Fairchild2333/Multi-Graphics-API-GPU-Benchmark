@@ -1,0 +1,17 @@
+Test project /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build
+    Start 1: results_compat
+1/6 Test #1: results_compat ...................   Passed    0.01 sec
+    Start 2: result_quality
+2/6 Test #2: result_quality ...................   Passed    0.33 sec
+    Start 3: complete_suite
+3/6 Test #3: complete_suite ...................   Passed    0.27 sec
+    Start 4: vulkan_membw_results
+4/6 Test #4: vulkan_membw_results .............   Passed    0.01 sec
+    Start 5: cpu_residency
+5/6 Test #5: cpu_residency ....................   Passed    0.01 sec
+    Start 6: suite_process
+6/6 Test #6: suite_process ....................   Passed    0.04 sec
+
+100% tests passed out of 6
+
+Total Test time (real) =   0.67 sec

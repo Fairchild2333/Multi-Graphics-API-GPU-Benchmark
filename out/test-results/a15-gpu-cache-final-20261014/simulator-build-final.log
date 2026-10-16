@@ -1,0 +1,157 @@
+MoltenVK 1.4.2 ready (SHA-256 verified; public-API build).
+
+=================================================================
+  Building libgpu_engine.a for iphonesimulator (Release)
+=================================================================
+-- iOS Vulkan: MoltenVK (runtime selection requires explicit opt-in)
+-- DX12 backend:   DISABLED (by option)
+-- DX11 backend:   DISABLED (by option)
+-- Metal backend:  ENABLED
+-- iOS engine host: ENABLED (CAMetalLayer embed)
+-- OpenGL backend: DISABLED (by option)
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project Mangekyo.xcodeproj build -configuration Release -parallelizeTargets -hideShellScriptEnvironment -sdk iphonesimulator -target gpu_engine
+
+Build settings from command line:
+    SDKROOT = iphonesimulator27.0
+
+ComputePackagePrebuildTargetDependencyGraph
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (3 targets)
+    Target 'gpu_engine' in project 'Mangekyo'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'Mangekyo'
+        ➜ Explicit dependency on target 'compile_glsl' in project 'Mangekyo'
+    Target 'compile_glsl' in project 'Mangekyo'
+        ➜ Explicit dependency on target 'ZERO_CHECK' in project 'Mangekyo'
+    Target 'ZERO_CHECK' in project 'Mangekyo' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -x c++ -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -x objective-c++ -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool -V
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch x86_64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -x c++ -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch x86_64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch x86_64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -x objective-c++ -c /dev/null
+
+Build description signature: afed770671255f977dc01a3ca0e44105
+Build description path: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/XCBuildData/afed770671255f977dc01a3ca0e44105.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/SDKStatCaches.noindex/iphonesimulator27.0-24A430-8dc58220667be655e1bcc261a7455254.sdkstatcache
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/Mangekyo.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -o /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/SDKStatCaches.noindex/iphonesimulator27.0-24A430-8dc58220667be655e1bcc261a7455254.sdkstatcache
+
+note: Run script build phase 'Generate CMakeFiles/ZERO_CHECK' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'ZERO_CHECK' from project 'Mangekyo')
+PhaseScriptExecution Generate\ CMakeFiles/ZERO_CHECK /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/Mangekyo.build/Release-iphonesimulator/ZERO_CHECK.build/Script-225296767E077CA6E8F93267.sh (in target 'ZERO_CHECK' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/Mangekyo.build/Release-iphonesimulator/ZERO_CHECK.build/Script-225296767E077CA6E8F93267.sh
+make: `/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/CMakeFiles/cmake.check_cache' is up to date.
+
+note: Run script build phase 'Generate CMakeFiles/compile_glsl' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'compile_glsl' from project 'Mangekyo')
+PhaseScriptExecution Generate\ CMakeFiles/compile_glsl /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/Mangekyo.build/Release-iphonesimulator/compile_glsl.build/Script-65C7015824FB92181A2C34DF.sh (in target 'compile_glsl' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/Mangekyo.build/Release-iphonesimulator/compile_glsl.build/Script-65C7015824FB92181A2C34DF.sh
+
+CompileC /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/x86_64/gpu_cache_probe.o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/src/gpu_cache_probe.mm normal x86_64 objective-c++ com.apple.compilers.llvm.clang.1_0.compiler (in target 'gpu_engine' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    
+    Using response file: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/x86_64/af3fcb34312c57c0f52879cdce924b91-common-args.resp
+    
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x objective-c++ -ivfsstatcache /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/SDKStatCaches.noindex/iphonesimulator27.0-24A430-8dc58220667be655e1bcc261a7455254.sdkstatcache -target x86_64-apple-ios16.0-simulator -fmessage-length\=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit\=0 -fno-color-diagnostics -Wno-trigraphs -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-implicit-atomic-properties -Wno-objc-interface-ivars -Wno-arc-repeated-use-of-weak -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-float-conversion -Wno-non-literal-null-conversion -Wno-objc-literal-conversion -Wshorten-64-to-32 -Wno-newline-eof -Wno-selector -Wno-strict-selector-match -Wno-undeclared-selector -Wno-deprecated-implementations -Wno-c++11-extensions -Wno-implicit-fallthrough -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -fstrict-aliasing -Wprotocol -Wdeprecated-declarations -Winvalid-offsetof -Wno-sign-conversion -Wno-infinite-recursion -Wno-move -Wno-comma -Wno-block-capture-autoreleasing -Wno-strict-prototypes -Wno-range-loop-analysis -Wno-semicolon-before-method-body -Wall -Wextra -Wpedantic @/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/x86_64/af3fcb34312c57c0f52879cdce924b91-common-args.resp -fobjc-arc -MMD -MT dependencies -MF /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/x86_64/gpu_cache_probe.d --serialize-diagnostics /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/x86_64/gpu_cache_probe.dia -c /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/src/gpu_cache_probe.mm -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/x86_64/gpu_cache_probe.o
+
+CompileC /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/arm64/gpu_cache_probe.o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/src/gpu_cache_probe.mm normal arm64 objective-c++ com.apple.compilers.llvm.clang.1_0.compiler (in target 'gpu_engine' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    
+    Using response file: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/arm64/af3fcb34312c57c0f52879cdce924b91-common-args.resp
+    
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x objective-c++ -ivfsstatcache /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.0-27A266a/Xcode/SDKStatCaches.noindex/iphonesimulator27.0-24A430-8dc58220667be655e1bcc261a7455254.sdkstatcache -target arm64-apple-ios16.0-simulator -fmessage-length\=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit\=0 -fno-color-diagnostics -Wno-trigraphs -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-implicit-atomic-properties -Wno-objc-interface-ivars -Wno-arc-repeated-use-of-weak -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-float-conversion -Wno-non-literal-null-conversion -Wno-objc-literal-conversion -Wshorten-64-to-32 -Wno-newline-eof -Wno-selector -Wno-strict-selector-match -Wno-undeclared-selector -Wno-deprecated-implementations -Wno-c++11-extensions -Wno-implicit-fallthrough -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -fstrict-aliasing -Wprotocol -Wdeprecated-declarations -Winvalid-offsetof -Wno-sign-conversion -Wno-infinite-recursion -Wno-move -Wno-comma -Wno-block-capture-autoreleasing -Wno-strict-prototypes -Wno-range-loop-analysis -Wno-semicolon-before-method-body -Wall -Wextra -Wpedantic @/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/arm64/af3fcb34312c57c0f52879cdce924b91-common-args.resp -fobjc-arc -MMD -MT dependencies -MF /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/arm64/gpu_cache_probe.d --serialize-diagnostics /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/arm64/gpu_cache_probe.dia -c /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/src/gpu_cache_probe.mm -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/arm64/gpu_cache_probe.o
+
+Libtool /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/x86_64/Binary/libgpu_engine.a normal x86_64 (in target 'gpu_engine' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool -static -arch_only x86_64 -D -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/Release-iphonesimulator -filelist /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/x86_64/gpu_engine.LinkFileList -dependency_info /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/x86_64/gpu_engine_libtool_dependency_info.dat -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/x86_64/Binary/libgpu_engine.a
+
+Libtool /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/arm64/Binary/libgpu_engine.a normal arm64 (in target 'gpu_engine' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool -static -arch_only arm64 -D -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk -L/Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/Release-iphonesimulator -filelist /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/arm64/gpu_engine.LinkFileList -dependency_info /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/arm64/gpu_engine_libtool_dependency_info.dat -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/arm64/Binary/libgpu_engine.a
+
+CreateUniversalBinary /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/Release-iphonesimulator/libgpu_engine.a normal arm64\ x86_64 (in target 'gpu_engine' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo -create /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/arm64/Binary/libgpu_engine.a /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/gpu_engine.build/Release-iphonesimulator/Objects-normal/x86_64/Binary/libgpu_engine.a -output /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/Release-iphonesimulator/libgpu_engine.a
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/build/ExplicitPrecompiledModules
+
+** BUILD SUCCEEDED **
+
+  Static library: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/Release-iphonesimulator/libgpu_engine.a
+  Size: 2.4M
+
+=================================================================
+  Generating iOS Xcode project (XcodeGen)
+=================================================================
+
+=================================================================
+  Building Mangekyo.app for iphonesimulator (Release)
+=================================================================
+    export __DIAGNOSE_DEPRECATED_ARCHS\=YES
+    export __DIAGNOSE_INVALID_DEPLOYMENT_TARGET_AS_ERROR\=YES
+    export __IS_NOT_MACOS\=YES
+    export __IS_NOT_MACOS_macosx\=NO
+    export __IS_NOT_SIMULATOR\=NO
+    export __IS_NOT_SIMULATOR_simulator\=NO
+    export __ORIGINAL_SDK_DEFINED_LLVM_TARGET_TRIPLE_SYS\=ios
+    export arch\=undefined_arch
+    export variant\=normal
+    /bin/sh -c /Users/fairchild/VSCode\\\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Intermediates.noindex/Mangekyo.build/Release-iphonesimulator/Mangekyo.build/Script-FBD85741E30D66459188907A.sh
+
+CopySwiftLibs /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Products/Release-iphonesimulator/Mangekyo.app (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    builtin-swiftStdLibTool --copy --verbose --scan-executable /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Products/Release-iphonesimulator/Mangekyo.app/Mangekyo --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Products/Release-iphonesimulator/Mangekyo.app/Frameworks --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Products/Release-iphonesimulator/Mangekyo.app/PlugIns --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Products/Release-iphonesimulator/Mangekyo.app/SystemExtensions --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Products/Release-iphonesimulator/Mangekyo.app/Extensions --platform iphonesimulator --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Products/Release-iphonesimulator/Mangekyo.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Intermediates.noindex/Mangekyo.build/Release-iphonesimulator/Mangekyo.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+Ignoring --strip-bitcode because --sign was not passed
+
+ExtractAppIntentsMetadata (in target 'Mangekyo' from project 'Mangekyo')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/ios-gui
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name Mangekyo --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.0.sdk --xcode-version 27A266a --platform-family iOS --deployment-target 16.0 --bundle-identifier com.fairchild.Mangekyo --output /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Products/Release-iphonesimulator/Mangekyo.app --target-triple arm64-apple-ios16.0-simulator --target-triple x86_64-apple-ios16.0-simulator --binary-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Products/Release-iphonesimulator/Mangekyo.app/Mangekyo --dependency-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Intermediates.noindex/Mangekyo.build/Release-iphonesimulator/Mangekyo.build/Objects-normal/arm64/Mangekyo_dependency_info.dat --dependency-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Intermediates.noindex/Mangekyo.build/Release-iphonesimulator/Mangekyo.build/Objects-normal/x86_64/Mangekyo_dependency_info.dat --stringsdata-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Intermediates.noindex/Mangekyo.build/Release-iphonesimulator/Mangekyo.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --stringsdata-file /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Intermediates.noindex/Mangekyo.build/Release-iphonesimulator/Mangekyo.build/Objects-normal/x86_64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Intermediates.noindex/Mangekyo.build/Release-iphonesimulator/Mangekyo.build/Objects-normal/arm64/Mangekyo.SwiftFileList --source-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Intermediates.noindex/Mangekyo.build/Release-iphonesimulator/Mangekyo.build/Objects-normal/x86_64/Mangekyo.SwiftFileList --metadata-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Intermediates.noindex/Mangekyo.build/Release-iphonesimulator/Mangekyo.build/Mangekyo.DependencyMetadataFileList --static-metadata-file-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Intermediates.noindex/Mangekyo.build/Release-iphonesimulator/Mangekyo.build/Mangekyo.DependencyStaticMetadataFileList --swift-const-vals-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Intermediates.noindex/Mangekyo.build/Release-iphonesimulator/Mangekyo.build/Objects-normal/arm64/Mangekyo.SwiftConstValuesFileList --swift-const-vals-list /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Intermediates.noindex/Mangekyo.build/Release-iphonesimulator/Mangekyo.build/Objects-normal/x86_64/Mangekyo.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-10-14 17:43:46.527 appintentsmetadataprocessor[8805:2207536] Starting appintentsmetadataprocessor export
+2026-10-14 17:43:46.528 appintentsmetadataprocessor[8805:2207536] warning: Metadata extraction skipped, no AppIntents.framework dependency found
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/SDKExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+** BUILD SUCCEEDED **
+
+  Staged 3 Metal shader sources
+
+  iOS app: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Products/Release-iphonesimulator/Mangekyo.app
+  SDK: iphonesimulator
+  Architecture: arm64
+  Configuration: Release
+
+=================================================================
+  iOS build complete.
+=================================================================

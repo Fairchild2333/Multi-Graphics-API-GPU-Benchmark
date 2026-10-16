@@ -1,0 +1,10 @@
+START 1/2 vulkan/gpu_burn-16
+STATE vulkan/gpu_burn-16 ('running', 'running')
+STATE vulkan/gpu_burn-16 ('passed', 'passed')
+END vulkan/gpu_burn-16 passed ['20261014-155810-196'] thermal=0->0 
+REST 20s
+START 2/2 vulkan/gpu_burn-64
+STATE vulkan/gpu_burn-64 ('running', 'running')
+STATE vulkan/gpu_burn-64 ('passed', 'passed')
+END vulkan/gpu_burn-64 passed ['20261014-155852-634'] thermal=0->0 
+DONE 2 jobs; archived /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-cpu-pe-20261014/policy-final

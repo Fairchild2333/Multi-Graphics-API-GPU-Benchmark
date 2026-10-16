@@ -79,4 +79,5 @@ GPU 缓存曲线继续标为未归属，独立 L2／L3／SoC-SLC 归属不纳入
 - [当前选用结果](../out/test-results/ipad8-1-full-suite-20261016/curated-suite-results.json)
 - [核对记录](../out/test-results/ipad8-1-full-suite-20261016/verification.json)
 
-原始数据在项目本地 out 目录，按仓库现有忽略规则不纳入 Git。
+原始结果、导出曲线与文字日志现保留原 out 路径并纳入 Git；大型诊断包仍在本地。
+详见 [测试资料入库说明](test-result-archives.md)。

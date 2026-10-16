@@ -1,0 +1,75 @@
+{
+  "scope": "GPU",
+  "total": 23,
+  "finished": 3,
+  "review": 3,
+  "failed": 0,
+  "cooldownPolicy": "30s_pause_and_android29_thermal_when_available",
+  "plannedJobIDs": [
+    "vulkan-stream-65536-false",
+    "vulkan-stream-1048576-false",
+    "vulkan-stream-4194304-false",
+    "vulkan-stream-65536-true",
+    "vulkan-stream-1048576-true",
+    "vulkan-stream-4194304-true",
+    "vulkan-burn-16",
+    "vulkan-burn-64",
+    "vulkan-burn-256",
+    "vulkan-liquid",
+    "vulkan-memory",
+    "gles-stream-65536-false",
+    "gles-stream-1048576-false",
+    "gles-stream-4194304-false",
+    "gles-stream-65536-true",
+    "gles-stream-1048576-true",
+    "gles-stream-4194304-true",
+    "gles-burn-16",
+    "gles-burn-64",
+    "gles-burn-256",
+    "gles2-burn-16",
+    "gles2-burn-64",
+    "gles2-burn-256"
+  ],
+  "cancelled": true,
+  "jobs": [
+    {
+      "id": "vulkan-stream-65536-false",
+      "status": "review",
+      "error": "",
+      "thermalStart": 0,
+      "thermalEnd": 0,
+      "reviewReasons": [
+        "Throughput dropped by over 5%"
+      ],
+      "resultIDs": [
+        "20261014-131506-988"
+      ]
+    },
+    {
+      "id": "vulkan-stream-1048576-false",
+      "status": "review",
+      "error": "",
+      "thermalStart": 0,
+      "thermalEnd": 0,
+      "reviewReasons": [
+        "Stable throughput not reached"
+      ],
+      "resultIDs": [
+        "20261014-131553-806"
+      ]
+    },
+    {
+      "id": "vulkan-stream-4194304-false",
+      "status": "review",
+      "error": "",
+      "thermalStart": 0,
+      "thermalEnd": 0,
+      "reviewReasons": [
+        "Stable throughput not reached"
+      ],
+      "resultIDs": [
+        "20261014-131643-511"
+      ]
+    }
+  ]
+}

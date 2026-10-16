@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "passedJobs": 31,
+  "jobCount": 31,
+  "selectedRecords": 32,
+  "rawHistoryRecords": 32,
+  "oldDeviceRecordsPreserved": true,
+  "oldDeviceRecordCount": 0,
+  "resultIDsUnique": true,
+  "apiCounts": {
+    "Metal": 14,
+    "CPU": 3,
+    "OpenGL ES 2.0": 3,
+    "Vulkan": 12
+  },
+  "curvePointCounts": {
+    "Metal": 52,
+    "GPU cache": 124,
+    "CPU": 174,
+    "Vulkan": 77
+  },
+  "gpuCacheAttribution": "unverified",
+  "warming": "bounded_complete_cycle",
+  "cpuPageMappingMeasured": true,
+  "storageMeasured": true,
+  "gpuCacheVersion": "metal_dependent_cache_v3_parallel_512_preview_ios_preview",
+  "gpuCacheParallelSteps": "512",
+  "firstRunRecordCount": 31,
+  "firstRunRecordsPreserved": true,
+  "rawSha256": "ea9701c5e4641381455294d05ff6c106edcb94043f02366c715d2bc65a550622",
+  "selectedSha256": "c1fbaf03a4fdffbdc045274be21a380d500cdf7b1026f30b6a00da62f9321087"
+}

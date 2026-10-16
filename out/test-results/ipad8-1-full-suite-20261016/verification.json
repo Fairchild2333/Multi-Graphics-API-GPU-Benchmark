@@ -1,0 +1,53 @@
+{
+  "deviceModel": "iPad8,1",
+  "manifestID": "complete-suite-B9DAC90B-CDF1-450C-A142-F8AC000A9106",
+  "manifestStatus": "review",
+  "jobCount": 31,
+  "statuses": {
+    "passed": 22,
+    "review": 9
+  },
+  "historyRecords": 33,
+  "originalRecords": 0,
+  "originalRecordsUnchanged": true,
+  "selectedRecords": 33,
+  "actualButtonTapped": true,
+  "automaticChineseObserved": true,
+  "resultsSha256": "432adeead13798ac6cf0b6c6dfd2783305405e9da88b3a33be6eaa0fe82932a4",
+  "independentGpuCacheAttribution": "unverified_out_of_scope_per_user",
+  "finalHistoryRecords": 36,
+  "uiHistoryRecordsUnchanged": true,
+  "curatedJobs": 31,
+  "curatedRecords": 33,
+  "curatedStatuses": {
+    "passed": 24,
+    "review": 7
+  },
+  "targetedRetestJobs": 3,
+  "targetedRetestStatus": "passed",
+  "appStopped": true,
+  "stoppedPID": 873,
+  "fullButtonRerunAfterFix": false,
+  "finalResultsSha256": "a44e14deb4ccde5acbd256e46e8d61960fb96bae8031058c1c3155205080bdb0",
+  "excludedQueryScores": [
+    {
+      "job": "vulkan/stream_headless-1048576",
+      "resultIDs": [
+        "20261016-192259-219"
+      ]
+    },
+    {
+      "job": "vulkan/stream_headless-4194304",
+      "resultIDs": [
+        "20261016-192334-332"
+      ]
+    },
+    {
+      "job": "vulkan/stream_headless-16777216",
+      "resultIDs": [
+        "20261016-192418-375"
+      ]
+    }
+  ],
+  "xctest": "Strict review==passed assertion failed; host log finalization stalled and was stopped; native manifests preserved"
+}

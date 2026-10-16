@@ -1,0 +1,35 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "apps",
+      "--device",
+      "00008120-000E2D3E0CEBC01E",
+      "--include-all-apps",
+      "--bundle-id",
+      "com.fairchild.Mangekyo",
+      "--json-output",
+      "out/test-results/a16-full-suite-20261016/app-before.json"
+    ],
+    "commandType" : "devicectl.device.info.apps",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "apps" : [
+
+    ],
+    "defaultAppsIncluded" : true,
+    "deviceIdentifier" : "256C41DC-AC03-5FF9-9D3F-8FDFFC83CDBE",
+    "hiddenAppsIncluded" : true,
+    "internalAppsIncluded" : true,
+    "matchingBundleIdentifier" : "com.fairchild.Mangekyo",
+    "removableAppsIncluded" : true
+  }
+}

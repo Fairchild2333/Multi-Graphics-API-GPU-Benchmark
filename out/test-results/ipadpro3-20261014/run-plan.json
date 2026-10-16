@@ -1,0 +1,12 @@
+{
+  "deviceModel": "iPad8,7",
+  "deviceID": "00008027-000C39923E85002E",
+  "suite": "supported iOS complete suite",
+  "translatedApis": true,
+  "durationSeconds": 15,
+  "cpuGroups": [
+    "compute all",
+    "memory and cache, page mapping, storage"
+  ],
+  "historyBefore": "Mangekyo not installed"
+}

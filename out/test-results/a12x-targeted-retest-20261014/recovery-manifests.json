@@ -1,0 +1,70 @@
+[
+  {
+    "finishedAt": "2026-10-14T10:30:37Z",
+    "id": "complete-suite-8B594F42-D48E-43A6-9B1F-7944A7E47BA0",
+    "jobs": [
+      {
+        "error": "Expected 3 matching saved results; found 2. See log.",
+        "expectedRecords": 3,
+        "finishedAt": "2026-10-14T10:30:37Z",
+        "id": "cpu_compute",
+        "request": "gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2",
+        "resultIDs": [
+          "20261014-213037-335-cpu-single-performance",
+          "20261014-213037-344-cpu-multi"
+        ],
+        "startedAt": "2026-10-14T10:29:21Z",
+        "status": "failed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "CPU Compute \u00b7 Performance + Efficiency + All Cores"
+      }
+    ],
+    "startedAt": "2026-10-14T10:29:21Z",
+    "status": "failed"
+  },
+  {
+    "finishedAt": "2026-10-14T10:31:55Z",
+    "id": "complete-suite-2F273549-1C51-4BAB-89D6-8CAAEE57F6EB",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:31:54Z",
+        "id": "vulkan/memory_sweep",
+        "request": "memory_sweep?api=vulkan",
+        "resultIDs": [
+          "20261014-213154-372-membw"
+        ],
+        "startedAt": "2026-10-14T10:31:02Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Vulkan \u00b7 GPU Cache & Memory"
+      }
+    ],
+    "startedAt": "2026-10-14T10:31:02Z",
+    "status": "passed"
+  },
+  {
+    "finishedAt": "2026-10-14T10:32:22Z",
+    "id": "complete-suite-D9CB4ADF-0917-4691-B6AC-6208A72EA294",
+    "jobs": [
+      {
+        "error": "Expected 1 matching saved results; found 0. See log.",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-14T10:32:21Z",
+        "id": "cpu_memory",
+        "request": "gpu_benchmark --cpu-membw",
+        "resultIDs": [],
+        "startedAt": "2026-10-14T10:32:18Z",
+        "status": "failed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "CPU Cache, Memory, Virtual Memory & Storage"
+      }
+    ],
+    "startedAt": "2026-10-14T10:32:18Z",
+    "status": "failed"
+  }
+]

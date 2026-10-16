@@ -1,0 +1,80 @@
+iOS complete suite complete-suite-3353784D-DB9B-4C49-9E42-519AFF7E4E48
+Started: 2026-10-14T04:13:38Z
+
+Thermal precheck vulkan/gpu_burn-64: nominal after 0s cooling.
+
+=== 1/1 vulkan/gpu_burn-64: review ===
+=== Preview gpu_burn?steps=64&vsync=0&api=vulkan 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple A15 GPU (Integrated GPU)
+Selected GPU [0]: Apple A15 GPU  |  Driver: 0.2.2210
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 256 particles
+[Profiling] Timestamp queries enabled (period = 1 ns/tick)
+[Profiling] Render timestamp check: 110.863 ms GPU, 116.854 ms synchronized submit/wait.
+[GPU Timing] Compute: 0.040 ms | Render: 82.874 ms | Total: 82.937 ms | FPS: 14 | T: 0.5 s (warm-up)
+[GPU Timing] Compute: 0.040 ms | Render: 104.346 ms | Total: 104.402 ms | FPS: 8 | T: 0.8 s (warm-up)
+[GPU Timing] Compute: 0.039 ms | Render: 108.425 ms | Total: 108.476 ms | FPS: 8 | T: 1.1 s (warm-up)
+[GPU Timing] Compute: 0.039 ms | Render: 109.093 ms | Total: 109.144 ms | FPS: 8 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 0.039 ms | Render: 109.069 ms | Total: 109.120 ms | FPS: 8 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 0.273 ms | Render: 110.189 ms | Total: 110.487 ms | FPS: 8 | T: 2.8 s
+[GPU Timing] Compute: 0.044 ms | Render: 97.571 ms | Total: 97.632 ms | FPS: 8 | T: 3.9 s
+[GPU Timing] Compute: 0.048 ms | Render: 100.802 ms | Total: 100.868 ms | FPS: 8 | T: 4.9 s
+[GPU Timing] Compute: 0.253 ms | Render: 109.740 ms | Total: 110.009 ms | FPS: 8 | T: 5.9 s
+[GPU Timing] Compute: 0.080 ms | Render: 109.000 ms | Total: 109.097 ms | FPS: 8 | T: 6.9 s
+[GPU Timing] Compute: 0.042 ms | Render: 104.382 ms | Total: 104.439 ms | FPS: 8 | T: 7.9 s
+[GPU Timing] Compute: 0.237 ms | Render: 108.938 ms | Total: 109.191 ms | FPS: 8 | T: 8.9 s
+[GPU Timing] Compute: 0.055 ms | Render: 92.729 ms | Total: 92.798 ms | FPS: 8 | T: 10.0 s
+[GPU Timing] Compute: 0.047 ms | Render: 101.910 ms | Total: 101.971 ms | FPS: 8 | T: 11.0 s
+[GPU Timing] Compute: 0.289 ms | Render: 110.476 ms | Total: 110.784 ms | FPS: 8 | T: 12.0 s
+[GPU Timing] Compute: 0.066 ms | Render: 109.725 ms | Total: 110.021 ms | FPS: 8 | T: 13.0 s
+[GPU Timing] Compute: 0.267 ms | Render: 109.687 ms | Total: 110.194 ms | FPS: 8 | T: 14.0 s
+[GPU Timing] Compute: 0.041 ms | Render: 104.225 ms | Total: 104.282 ms | FPS: 8 | T: 15.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A15 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.1 s (warmup: 2.0 s, measured: 116 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.135     0.022     2.089
+Render:        105.260     0.015   113.354
+Total GPU:     105.447     0.081   113.466
+
+--- Throughput ---
+Avg FPS:      8
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 64 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    1.12 Gpix-step/s  (105.260 ms render)
+
+--- Analysis ---
+Avg frame time:  113.059 ms
+Avg GPU time:    105.447 ms
+GPU utilisation: 93.3%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Thermal Stability ---
+Windows:      13 x 1s
+Stable score: not reached — keep running to detect throttling.
+Throttling:   early vs late mean dropped 1.8%
+==========================================================
+
+[Results] Saved as 20261014-151354-657 -> /var/mobile/Containers/Data/Application/86D506A5-E982-49BF-978A-F8E11D2B7927/Documents/results/results.json

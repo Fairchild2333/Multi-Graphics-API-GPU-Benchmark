@@ -1,0 +1,79 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Apple M4 Pro (Integrated)                    38338 MB   -     -     -    YES   YES 
+============================================================
+
+Backend: Metal  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: GPU Burn v1 r2 / Plasma x Kaleidoscope  |  Auto-stop: 15s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Available GPUs:
+  [0] Apple M4 Pro — 38338 MB
+Selected GPU [0]: Apple M4 Pro
+[Metal] GPU Burn: fullscreen raymarch (2 draws/frame, steps=256)
+[Profiling] GPU command-buffer timestamps enabled
+[Metal] Decoupled presenter: benchmark renders offscreen uncapped, preview presents at display refresh
+[GPU Timing] Compute: 0.000 ms | Render: 55.240 ms | Total: 55.240 ms | FPS: 17 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 53.180 ms | Total: 53.180 ms | FPS: 18 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 51.502 ms | Total: 51.502 ms | FPS: 19 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 48.866 ms | Total: 48.866 ms | FPS: 20 | T: 1.4 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 48.969 ms | Total: 48.969 ms | FPS: 20 | T: 1.7 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 48.835 ms | Total: 48.835 ms | FPS: 20 | T: 2.8 s
+[GPU Timing] Compute: 0.000 ms | Render: 48.865 ms | Total: 48.865 ms | FPS: 20 | T: 3.8 s
+[GPU Timing] Compute: 0.000 ms | Render: 48.839 ms | Total: 48.839 ms | FPS: 20 | T: 4.8 s
+[GPU Timing] Compute: 0.000 ms | Render: 48.861 ms | Total: 48.861 ms | FPS: 20 | T: 5.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 48.938 ms | Total: 48.938 ms | FPS: 20 | T: 6.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 48.829 ms | Total: 48.829 ms | FPS: 20 | T: 7.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 48.822 ms | Total: 48.822 ms | FPS: 20 | T: 8.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 48.907 ms | Total: 48.907 ms | FPS: 20 | T: 10.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 48.823 ms | Total: 48.823 ms | FPS: 20 | T: 11.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 48.872 ms | Total: 48.872 ms | FPS: 20 | T: 12.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 48.894 ms | Total: 48.894 ms | FPS: 20 | T: 13.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 48.830 ms | Total: 48.830 ms | FPS: 20 | T: 14.1 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple M4 Pro
+Driver:       macOS 27.0.1
+CPU:          Apple M4 Pro
+OS:           macOS 27.0.1
+System:       macOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.1 s (warmup: 2.0 s, measured: 266 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:         48.857    48.723    50.356
+Total GPU:      48.857    48.723    50.356
+
+--- Throughput ---
+Avg FPS:      20
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 256 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    9.66 Gpix-step/s  (48.857 ms render)
+
+--- Analysis ---
+Avg frame time:  49.151 ms
+Avg GPU time:    48.857 ms
+GPU utilisation: 99.4%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Thermal Stability ---
+Windows:      12 x 1s
+Stable score: 9.66 Gpix-step/s  (CV 0.07%)
+>> Thermally stable; stableScore is a fair comparison metric.
+==========================================================
+
+[Results] Saved as 20261014-035348-639 -> /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/one-click-suite-20261014/mac-validation/results/results.json

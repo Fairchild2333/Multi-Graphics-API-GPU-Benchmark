@@ -1,0 +1,146 @@
+[
+  {
+    "device": "MIX Fold3 / SD8 Gen2",
+    "cpuAllMWork": 936.75,
+    "vulkan16MGBps": 26.14,
+    "vulkanReadGBps": 53.0,
+    "es31Burn256Gpix": 3.08,
+    "notes": "CPU8线程；内存扫描上限128MiB，未到平台；源2286/2084"
+  },
+  {
+    "device": "Quest3 / XR2 Gen2",
+    "cpuAllMWork": 608.5,
+    "vulkan16MGBps": 14.79,
+    "vulkanReadGBps": 32.6,
+    "es31Burn256Gpix": 2.64,
+    "notes": "CPU6线程；头显频率限制；ES新方法；源2253/1758"
+  },
+  {
+    "device": "黑鲨5Pro / SD8 Gen1",
+    "cpuAllMWork": 844.99,
+    "vulkan16MGBps": 19.24,
+    "vulkanReadGBps": 44.17,
+    "es31Burn256Gpix": 1.9,
+    "notes": "CPU8线程；cpu6受到额外干扰；源2012/1749"
+  },
+  {
+    "device": "MIX4 / SD888+",
+    "cpuAllMWork": 758.8,
+    "vulkan16MGBps": 20.85,
+    "vulkanReadGBps": 32.7,
+    "es31Burn256Gpix": 1.09,
+    "notes": "内存校验后改为32.7；16M512MiB粒子缓冲未做同类校验；源1972/1665"
+  },
+  {
+    "device": "黑鲨3Pro / SD865",
+    "cpuAllMWork": 773.17,
+    "vulkan16MGBps": 13.46,
+    "vulkanReadGBps": 23.2,
+    "es31Burn256Gpix": 0.81,
+    "notes": "CPU8线程；256MiB内存校验；16M粒子缓冲未核验；源1941/1665"
+  },
+  {
+    "device": "小米平板5 / SD860",
+    "cpuAllMWork": 607.79,
+    "vulkan16MGBps": 10.17,
+    "vulkanReadGBps": 24.6,
+    "es31Burn256Gpix": 0.66,
+    "notes": "Vulkan Burn256不稳，使用ES列；源1913/1665"
+  },
+  {
+    "device": "MIX2S / SD845",
+    "cpuAllMWork": 548.44,
+    "vulkan16MGBps": 9.07,
+    "vulkanReadGBps": 15.4,
+    "es31Burn256Gpix": 0.48,
+    "notes": "Vulkan Burn256不稳；源1874/1665"
+  },
+  {
+    "device": "小米5C / 澎湃S1",
+    "cpuAllMWork": 416.18,
+    "vulkan16MGBps": null,
+    "vulkanReadGBps": null,
+    "es31Burn256Gpix": 0.079,
+    "notes": "CPU8线程强制全速状态；多数GPU项不支持；源1828"
+  },
+  {
+    "device": "Switch / TegraX1",
+    "cpuAllMWork": 273.97,
+    "vulkan16MGBps": 5.13,
+    "vulkanReadGBps": 11.2,
+    "es31Burn256Gpix": 0.74,
+    "notes": "内存时钟800MHz；CPU4线程；源1714"
+  },
+  {
+    "device": "小米平板3 / MT8176",
+    "cpuAllMWork": 352.11,
+    "vulkan16MGBps": null,
+    "vulkanReadGBps": null,
+    "es31Burn256Gpix": 0.076,
+    "notes": "CPU6线程；无Vulkan；重档只3帧；源1625"
+  },
+  {
+    "device": "初代小米平板 / TegraK1",
+    "cpuAllMWork": 129.77,
+    "vulkan16MGBps": null,
+    "vulkanReadGBps": null,
+    "es31Burn256Gpix": 0.57,
+    "notes": "32位CPU4线程；另有performance策略130.92，单独保留；无Vulkan；源1583/1510"
+  },
+  {
+    "device": "小米平板2 / Atomx5",
+    "cpuAllMWork": 105.58,
+    "vulkan16MGBps": null,
+    "vulkanReadGBps": null,
+    "es31Burn256Gpix": 0.173,
+    "notes": "32位CPU4线程；无Vulkan；重档5帧；源1549"
+  },
+  {
+    "device": "小米3 / Tegra4",
+    "cpuAllMWork": 94.79,
+    "vulkan16MGBps": null,
+    "vulkanReadGBps": null,
+    "es31Burn256Gpix": null,
+    "notes": "CPU4线程强制在线后；仅CLI日志；ES2独立256步0.45；源1510"
+  },
+  {
+    "device": "Quest2 / XR2",
+    "cpuAllMWork": 359.23,
+    "vulkan16MGBps": 7.72,
+    "vulkanReadGBps": 14.2,
+    "es31Burn256Gpix": 0.66,
+    "notes": "CPU4线程；GPU限制490–525MHz；源1455"
+  },
+  {
+    "device": "小米电视 / MT9655",
+    "cpuAllMWork": 224.23,
+    "vulkan16MGBps": null,
+    "vulkanReadGBps": 5.2,
+    "es31Burn256Gpix": 0.094,
+    "notes": "CPU4线程；16M不稳定；重档2–3帧；源1423"
+  },
+  {
+    "device": "TCL电视 / MT5889",
+    "cpuAllMWork": 69.95,
+    "vulkan16MGBps": 2.33,
+    "vulkanReadGBps": 2.3,
+    "es31Burn256Gpix": 0.039,
+    "notes": "32位CPU4线程；16M超驱动声明范围未验数据；Burn仅1帧；源1365"
+  },
+  {
+    "device": "MateBookPro / KirinX90",
+    "cpuAllMWork": 1901.7,
+    "vulkan16MGBps": 17.79,
+    "vulkanReadGBps": 60.2,
+    "es31Burn256Gpix": 1.21,
+    "notes": "CPU20线程；CPU内存扫描10线程；源1315"
+  },
+  {
+    "device": "Mate60Pro / Kirin9000S",
+    "cpuAllMWork": 697.1,
+    "vulkan16MGBps": 7.86,
+    "vulkanReadGBps": 29.3,
+    "es31Burn256Gpix": 0.63,
+    "notes": "CPU12线程；CPU内存扫描8线程；源1265"
+  }
+]

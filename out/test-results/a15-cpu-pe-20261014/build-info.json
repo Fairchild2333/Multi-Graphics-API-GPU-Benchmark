@@ -1,0 +1,13 @@
+{
+  "baseCommit": "5c4e7df718728e498080b9d154abd8275ffeaace",
+  "sourceModified": true,
+  "appSha256": "632bd31d7eae9f4580320efe0fe8e7ee492283f579149e85b94c24d097722c95",
+  "configuration": "Release",
+  "iOSVersion": "27.0.1",
+  "deviceModel": "iPhone14,2",
+  "kernels": "unchanged cpu_mixed_v1 and particle computeMain; particle vertex coverage specialization added",
+  "api": "Metal; Vulkan translated by MoltenVK",
+  "cpuPlacement": "QoS plus public task_info CPU-time bound, threshold99%; no numbered-core pinning",
+  "nativeSha256": "6579fea05765c3cc5edfbac134aa6f5d99b5bc699d252907123e765976c93c5a",
+  "memoryLogBuffered": true
+}

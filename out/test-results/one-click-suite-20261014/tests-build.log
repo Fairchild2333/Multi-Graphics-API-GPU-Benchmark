@@ -1,0 +1,29 @@
+-- Including Cocoa support
+-- GLFW: source build (inherits deployment target 10.15)
+-- Vulkan backend: ENABLED
+-- DX12 backend:   DISABLED (by option)
+-- DX11 backend:   DISABLED (by option)
+-- Metal backend:  ENABLED
+-- OpenGL backend: ENABLED
+CMake Warning at cmake/Packaging.cmake:174 (message):
+  No GPU_BENCH_GUI_PAYLOAD_DIR was supplied.  Install/CPack output will be
+  CLI-only and is not the intended final GUI-first product.
+Call Stack (most recent call first):
+  CMakeLists.txt:611 (include)
+
+
+-- Configuring done (0.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build
+[ 50%] Building CXX object CMakeFiles/complete_suite_test.dir/tests/complete_suite_test.cpp.o
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/tests/complete_suite_test.cpp:1:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/complete_suite.h:3:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+  204 | #  warning "The selected platform is no longer supported by libc++."
+      |    ^
+1 warning generated.
+[100%] Linking CXX executable complete_suite_test
+[100%] Built target complete_suite_test
+make: *** No rule to make target `result_quality_test'.  Stop.

@@ -1,0 +1,8 @@
+[100%] Built target cpu_residency_test
+[  5%] Built target glad_gl43
+[ 51%] Built target glfw
+[ 94%] Built target gpu_engine
+[ 97%] Building CXX object CMakeFiles/cpu_cancel_test.dir/tests/cpu_cancel_test.cpp.o
+[100%] Linking CXX executable cpu_cancel_test
+[100%] Built target cpu_cancel_test
+[100%] Built target complete_suite_test

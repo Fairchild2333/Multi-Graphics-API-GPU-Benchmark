@@ -1,0 +1,29 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -project ios-gui/Mangekyo.xcodeproj -scheme Mangekyo -configuration Release -destination id=00008110-00164D591485401E -derivedDataPath build-ios/DerivedData-iphoneos "-only-testing:MangekyoUITests/CompleteSuiteUITests/testOneButtonRunsCompleteSuite" -parallel-testing-enabled NO -resultBundlePath out/test-results/a15-complete-app-20261014/ui-suite.xcresult -allowProvisioningUpdates DEVELOPMENT_TEAM=2W6PXCJAM6 CODE_SIGN_STYLE=Automatic
+
+Build settings from command line:
+    CODE_SIGN_STYLE = Automatic
+    DEVELOPMENT_TEAM = 2W6PXCJAM6
+
+Writing result bundle at path:
+	/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-complete-app-20261014/ui-suite.xcresult
+
+2026-10-14 17:20:02.456341+1100 MangekyoUITests-Runner[39779:7402026] [Default] Running tests...
+2026-10-14 17:21:02.762966+1100 MangekyoUITests-Runner[39779:7402026] [Default] Failed to initialize for UI testing: Error Domain=com.apple.dt.XCTest.XCTFuture Code=1000 "Timed out while enabling automation mode." UserInfo={NSLocalizedDescription=Timed out while enabling automation mode.}
+
+
+*** If you believe this error represents a bug, please attach the result bundle at /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-complete-app-20261014/ui-suite.xcresult
+
+2026-10-14 17:24:24.950 xcodebuild[98589:2156227] [MT] IDETestOperationsObserverDebug: 266.103 elapsed -- Testing started completed.
+2026-10-14 17:24:24.951 xcodebuild[98589:2156227] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-14 17:24:24.951 xcodebuild[98589:2156227] [MT] IDETestOperationsObserverDebug: 266.103 sec, +266.103 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-complete-app-20261014/ui-suite.xcresult
+
+Testing failed:
+	MangekyoUITests-Runner (39779) encountered an error (The test runner failed to initialize for UI testing. (Underlying Error: Timed out while enabling automation mode.))
+
+** TEST EXECUTE FAILED **
+
+Testing started

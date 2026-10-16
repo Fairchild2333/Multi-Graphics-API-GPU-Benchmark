@@ -1,0 +1,10 @@
+START 1/2 stream-1048576
+STATE stream-1048576 ('running', 'running')
+STATE stream-1048576 ('review', 'review')
+END stream-1048576 review ['20261014-154322-867'] thermal=0->0 Throughput fell by more than 5%
+REST 20s
+START 2/2 vulkan/stream-1048576
+STATE vulkan/stream-1048576 ('running', 'running')
+STATE vulkan/stream-1048576 ('review', 'review')
+END vulkan/stream-1048576 review ['20261014-154404-685'] thermal=0->0 Throughput fell by more than 5%
+DONE 2 jobs; archived /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-cpu-pe-20261014/legacy-control-final

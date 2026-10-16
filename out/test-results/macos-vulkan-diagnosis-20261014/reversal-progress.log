@@ -1,0 +1,47 @@
+{
+  "job": "vulkan-render-flight2-reversal",
+  "headless": false,
+  "flights": 2,
+  "classification": "baseline_reversal",
+  "command": [
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+    "--gui-worker",
+    "--gpu",
+    "0",
+    "--time",
+    "15",
+    "--no-renderdoc",
+    "--backend",
+    "vulkan",
+    "--allow-translated-api",
+    "--workload",
+    "stream",
+    "--particles",
+    "1048576",
+    "--flights",
+    "2"
+  ],
+  "thermalBefore": {
+    "activeProcessorCount": 14,
+    "lowPowerMode": false,
+    "thermalState": 0,
+    "thermalStateName": "nominal",
+    "timestamp": "2026-10-14T03:49:32Z"
+  },
+  "afterWrappedResultID": "20261014-144732-256",
+  "returnCode": 0,
+  "thermalAfter": {
+    "activeProcessorCount": 14,
+    "lowPowerMode": false,
+    "thermalState": 0,
+    "thermalStateName": "nominal",
+    "timestamp": "2026-10-14T03:49:48Z"
+  },
+  "resultID": "20261014-144948-095",
+  "score": 167.361,
+  "stableScore": 183.281,
+  "throughputDropPct": 15.57,
+  "reviewReasons": [
+    "throughput fell by more than5%"
+  ]
+}

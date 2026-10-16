@@ -1,0 +1,47 @@
+{
+  "updatedAt": "2026-10-14",
+  "reason": "A15 foreground E compute and memory verified; full button acceptance deferred by user; A12X still pending",
+  "a15": {
+    "closed": [
+      "previous GPU anomalies",
+      "CPU P/E compute and all-core",
+      "CPU P/E cache and memory curves, page fault and storage"
+    ],
+    "pending": [
+      {
+        "job": "complete_suite_UI_acceptance",
+        "scope": "real one-click button and end-to-end workflow",
+        "status": "deferred_by_user",
+        "nextValidation": "Xcode simulator workflow only; no new test started"
+      }
+    ]
+  },
+  "a12x": {
+    "oldAnomalyJobs": [
+      "stream-1048576",
+      "vulkan/stream-1048576",
+      "vulkan/stream-4194304",
+      "vulkan/gpu_burn-64"
+    ],
+    "recommendedJobs": [
+      "stream-65536",
+      "stream-1048576",
+      "stream-4194304",
+      "stream-16777216",
+      "vulkan/stream-65536",
+      "vulkan/stream-1048576",
+      "vulkan/stream-4194304",
+      "vulkan/stream-16777216",
+      "vulkan/gpu_burn-16",
+      "vulkan/gpu_burn-64",
+      "vulkan/gpu_burn-256",
+      "cpu_compute",
+      "cpu_memory"
+    ],
+    "jobCount": 13,
+    "expectedRecords": 15,
+    "cpuMemoryForegroundRequiresMethodAdaptation": false,
+    "otherStableUnchangedJobsNeedNoRepeat": true
+  },
+  "startedNewTests": false
+}

@@ -1,0 +1,63 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Apple M4 Pro (Integrated)                    38338 MB   -     -     -    YES   YES 
+============================================================
+
+Backend: OpenGL  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: GPU Burn v1 r2 / Plasma x Kaleidoscope  |  Auto-stop: 3s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[OpenGL Init] Loading GL functions...
+[OpenGL Init] GLAD loaded GL 4.1
+[OpenGL Init] Apple M4 Pro  |  GL 4.1 Metal - 91.7
+[OpenGL Init] Compiling shaders...
+[OpenGL Init] Creating particle buffers...
+[OpenGL Init] Creating timestamp queries...
+[Profiling] OpenGL timestamp queries are unreliable (timestamp queries are not supported); using synchronized wall-clock timing.
+[OpenGL Init] Initialisation complete.
+[GPU Timing] Compute: 0.000 ms | Render: 19.201 ms | Total: 19.201 ms | FPS: 44 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 18.614 ms | Total: 18.614 ms | FPS: 51 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 18.152 ms | Total: 18.152 ms | FPS: 54 | T: 1.7 s
+[GPU Timing] Compute: 0.000 ms | Render: 18.161 ms | Total: 18.161 ms | FPS: 54 | T: 2.7 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: OpenGL
+GPU:          Apple M4 Pro
+Driver:       4.1 Metal - 91.7
+CPU:          Apple M4 Pro
+OS:           macOS 27.0.1
+System:       macOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     2.3 s (warmup: 0.8 s, measured: 123 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:         18.160    17.994    18.676
+Total GPU:      18.160    17.994    18.676
+
+--- Throughput ---
+Avg FPS:      54
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 64 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    6.50 Gpix-step/s  (18.160 ms render)
+
+--- Analysis ---
+Avg frame time:  18.401 ms
+Avg GPU time:    18.160 ms
+GPU utilisation: 98.7%
+>> GPU-bound: GPU is the bottleneck.
+==========================================================
+
+[Results] Saved as 20261012-150953-690 -> /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/macos-available-suite/current-data/results/results.json
+[warn] Short timed run: reducing warmup from 2s to 0.75s so measured frames and GPU timestamps are available.

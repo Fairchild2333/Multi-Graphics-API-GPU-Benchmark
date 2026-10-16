@@ -1,0 +1,120 @@
+CPU_META	workload_version=cpu_mixed_v1_scheduler_managed	name=Apple M4 Pro	logical_count=14	physical_count=14	topology_source=AppleSchedulerManagedEstimate	affinity_capability=scheduler_managed
+CPU_TOPOLOGY	core_index=0	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=1	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=2	group=0	logical_index=2	physical_core=2	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=3	group=0	logical_index=3	physical_core=3	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=4	group=0	logical_index=4	physical_core=4	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=5	group=0	logical_index=5	physical_core=5	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=6	group=0	logical_index=6	physical_core=6	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=7	group=0	logical_index=7	physical_core=7	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=8	group=0	logical_index=8	physical_core=8	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=9	group=0	logical_index=9	physical_core=9	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=10	group=0	logical_index=10	physical_core=10	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=11	group=0	logical_index=11	physical_core=11	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=12	group=0	logical_index=12	physical_core=12	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=13	group=0	logical_index=13	physical_core=13	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+
+--- Native CPU mixed benchmark ---
+CPU: Apple M4 Pro
+Topology: AppleSchedulerManagedEstimate, affinity: scheduler_managed
+Workload: cpu_mixed_v1_scheduler_managed, 3 rounds, median aggregation (the requested measurement time is split across rounds).
+Score contract: preview (formal = 15.0 s measurement, 0.2 s warm-up, 3 rounds).
+Each score is million mixed integer/branch/FP32/FP64 work units per second.
+The checksum is a dead-code-elimination sink, not a correctness oracle.
+
+--- CPU all-logical-processor test ---
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=14	core_fraction=0.000000	overall_fraction=0.000000	elapsed=0.000000	round_index=0	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=14	core_fraction=0.333333	overall_fraction=0.022222	elapsed=0.010000	round_index=0	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=14	core_fraction=0.666667	overall_fraction=0.044444	elapsed=0.020000	round_index=1	round_count=3
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=14	core_fraction=1.000000	overall_fraction=0.066667	elapsed=0.030000	round_index=2	round_count=3
+CPU_PROGRESS	mode=multi	phase=complete	core_index=-1	core_count=14	core_fraction=1.000000	overall_fraction=0.066667	elapsed=0.030000	round_index=1	round_count=3
+All-core score (14 threads): 3454.09 MWork/s
+CPU_RESULT	kind=multi	mode=multi	core_index=-1	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_count=14	thread_count=14	pinned_threads=0	affinity=scheduler_managed	valid=1	score=3454.094495	unit=MWork/s	seconds=0.010025	requested_seconds=0.030000	round_count=3	median_round=2	checksum=8226a1f245e58fb5	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=14	core_fraction=0.000114	overall_fraction=0.066674	elapsed=0.000003	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=14	core_fraction=0.333621	overall_fraction=0.088908	elapsed=0.010009	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=0	core_count=14	core_fraction=0.666908	overall_fraction=0.111127	elapsed=0.020007	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=0	core_count=14	core_fraction=1.000000	overall_fraction=0.133333	elapsed=0.030000	round_index=1	round_count=3
+Logical processor 1 (physical core 1, SMT 1/1, Unclassified) score: 319.29 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=0	core_count=14	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	affinity=scheduler_managed	valid=1	score=319.289753	unit=MWork/s	seconds=0.010006	requested_seconds=0.030000	round_count=3	median_round=2	checksum=c2d283b44013471e	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=14	core_fraction=0.000111	overall_fraction=0.133341	elapsed=0.000003	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=14	core_fraction=0.333586	overall_fraction=0.155572	elapsed=0.010008	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=1	core_count=14	core_fraction=0.666867	overall_fraction=0.177791	elapsed=0.020006	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=1	core_count=14	core_fraction=1.000000	overall_fraction=0.200000	elapsed=0.030000	round_index=1	round_count=3
+Logical processor 2 (physical core 2, SMT 1/1, Unclassified) score: 323.45 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=1	core_count=14	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	affinity=scheduler_managed	valid=1	score=323.445177	unit=MWork/s	seconds=0.010004	requested_seconds=0.030000	round_count=3	median_round=2	checksum=ebf87d562066eed1	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=14	core_fraction=0.000183	overall_fraction=0.200012	elapsed=0.000005	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=14	core_fraction=0.333796	overall_fraction=0.222253	elapsed=0.010014	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=2	core_count=14	core_fraction=0.667033	overall_fraction=0.244469	elapsed=0.020011	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=2	core_count=14	core_fraction=1.000000	overall_fraction=0.266667	elapsed=0.030000	round_index=2	round_count=3
+Logical processor 3 (physical core 3, SMT 1/1, Unclassified) score: 327.92 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=2	core_count=14	group=0	logical_index=2	physical_core=2	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	affinity=scheduler_managed	valid=1	score=327.920164	unit=MWork/s	seconds=0.010005	requested_seconds=0.030000	round_count=3	median_round=3	checksum=f4c394a27bfcb934	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=14	core_fraction=0.000203	overall_fraction=0.266680	elapsed=0.000006	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=14	core_fraction=0.333783	overall_fraction=0.288919	elapsed=0.010013	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=3	core_count=14	core_fraction=0.666856	overall_fraction=0.311124	elapsed=0.020006	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=3	core_count=14	core_fraction=1.000000	overall_fraction=0.333333	elapsed=0.030000	round_index=1	round_count=3
+Logical processor 4 (physical core 4, SMT 1/1, Unclassified) score: 322.74 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=3	core_count=14	group=0	logical_index=3	physical_core=3	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	affinity=scheduler_managed	valid=1	score=322.744085	unit=MWork/s	seconds=0.010013	requested_seconds=0.030000	round_count=3	median_round=2	checksum=eef89a4f9db78783	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=4	core_count=14	core_fraction=0.000174	overall_fraction=0.333345	elapsed=0.000005	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=4	core_count=14	core_fraction=0.333683	overall_fraction=0.355579	elapsed=0.010011	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=4	core_count=14	core_fraction=0.666994	overall_fraction=0.377800	elapsed=0.020010	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=4	core_count=14	core_fraction=1.000000	overall_fraction=0.400000	elapsed=0.030000	round_index=1	round_count=3
+Logical processor 5 (physical core 5, SMT 1/1, Unclassified) score: 323.01 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=4	core_count=14	group=0	logical_index=4	physical_core=4	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	affinity=scheduler_managed	valid=1	score=323.007502	unit=MWork/s	seconds=0.010005	requested_seconds=0.030000	round_count=3	median_round=2	checksum=eef89a4f9db78783	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=5	core_count=14	core_fraction=0.000056	overall_fraction=0.400004	elapsed=0.000002	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=5	core_count=14	core_fraction=0.333553	overall_fraction=0.422237	elapsed=0.010007	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=5	core_count=14	core_fraction=0.666915	overall_fraction=0.444461	elapsed=0.020007	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=5	core_count=14	core_fraction=1.000000	overall_fraction=0.466667	elapsed=0.030000	round_index=1	round_count=3
+Logical processor 6 (physical core 6, SMT 1/1, Unclassified) score: 318.54 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=5	core_count=14	group=0	logical_index=5	physical_core=5	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	affinity=scheduler_managed	valid=1	score=318.536066	unit=MWork/s	seconds=0.010004	requested_seconds=0.030000	round_count=3	median_round=2	checksum=e3a47a8d2927603a	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=6	core_count=14	core_fraction=0.000071	overall_fraction=0.466671	elapsed=0.000002	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=6	core_count=14	core_fraction=0.333601	overall_fraction=0.488907	elapsed=0.010008	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=6	core_count=14	core_fraction=0.666936	overall_fraction=0.511129	elapsed=0.020008	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=6	core_count=14	core_fraction=1.000000	overall_fraction=0.533333	elapsed=0.030000	round_index=2	round_count=3
+Logical processor 7 (physical core 7, SMT 1/1, Unclassified) score: 324.79 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=6	core_count=14	group=0	logical_index=6	physical_core=6	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	affinity=scheduler_managed	valid=1	score=324.787109	unit=MWork/s	seconds=0.010001	requested_seconds=0.030000	round_count=3	median_round=3	checksum=ed37c69bb8f34669	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=7	core_count=14	core_fraction=0.000160	overall_fraction=0.533344	elapsed=0.000005	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=7	core_count=14	core_fraction=0.333569	overall_fraction=0.555571	elapsed=0.010007	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=7	core_count=14	core_fraction=0.666946	overall_fraction=0.577796	elapsed=0.020008	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=7	core_count=14	core_fraction=1.000000	overall_fraction=0.600000	elapsed=0.030000	round_index=2	round_count=3
+Logical processor 8 (physical core 8, SMT 1/1, Unclassified) score: 318.70 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=7	core_count=14	group=0	logical_index=7	physical_core=7	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	affinity=scheduler_managed	valid=1	score=318.703923	unit=MWork/s	seconds=0.010012	requested_seconds=0.030000	round_count=3	median_round=3	checksum=dd612a4220d22de8	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=8	core_count=14	core_fraction=0.000193	overall_fraction=0.600013	elapsed=0.000006	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=8	core_count=14	core_fraction=0.333572	overall_fraction=0.622238	elapsed=0.010007	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=8	core_count=14	core_fraction=0.666906	overall_fraction=0.644460	elapsed=0.020007	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=8	core_count=14	core_fraction=1.000000	overall_fraction=0.666667	elapsed=0.030000	round_index=0	round_count=3
+Logical processor 9 (physical core 9, SMT 1/1, Unclassified) score: 326.83 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=8	core_count=14	group=0	logical_index=8	physical_core=8	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	affinity=scheduler_managed	valid=1	score=326.830830	unit=MWork/s	seconds=0.010001	requested_seconds=0.030000	round_count=3	median_round=1	checksum=34343bc7074d7279	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=9	core_count=14	core_fraction=0.000107	overall_fraction=0.666674	elapsed=0.000003	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=9	core_count=14	core_fraction=0.333572	overall_fraction=0.688905	elapsed=0.010007	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=9	core_count=14	core_fraction=0.667099	overall_fraction=0.711140	elapsed=0.020013	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=9	core_count=14	core_fraction=1.000000	overall_fraction=0.733333	elapsed=0.030000	round_index=1	round_count=3
+Logical processor 10 (physical core 10, SMT 1/1, Unclassified) score: 327.17 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=9	core_count=14	group=0	logical_index=9	physical_core=9	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	affinity=scheduler_managed	valid=1	score=327.169534	unit=MWork/s	seconds=0.010003	requested_seconds=0.030000	round_count=3	median_round=2	checksum=6a2dc87b886a0517	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=10	core_count=14	core_fraction=0.000174	overall_fraction=0.733345	elapsed=0.000005	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=10	core_count=14	core_fraction=0.333571	overall_fraction=0.755571	elapsed=0.010007	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=10	core_count=14	core_fraction=0.666922	overall_fraction=0.777795	elapsed=0.020008	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=10	core_count=14	core_fraction=1.000000	overall_fraction=0.800000	elapsed=0.030000	round_index=1	round_count=3
+Logical processor 11 (physical core 11, SMT 1/1, Unclassified) score: 325.34 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=10	core_count=14	group=0	logical_index=10	physical_core=10	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	affinity=scheduler_managed	valid=1	score=325.340560	unit=MWork/s	seconds=0.010009	requested_seconds=0.030000	round_count=3	median_round=2	checksum=5fa8eceb2d2c67e0	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=11	core_count=14	core_fraction=0.000211	overall_fraction=0.800014	elapsed=0.000006	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=11	core_count=14	core_fraction=0.333546	overall_fraction=0.822236	elapsed=0.010006	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=11	core_count=14	core_fraction=0.666894	overall_fraction=0.844460	elapsed=0.020007	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=11	core_count=14	core_fraction=1.000000	overall_fraction=0.866667	elapsed=0.030000	round_index=1	round_count=3
+Logical processor 12 (physical core 12, SMT 1/1, Unclassified) score: 327.20 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=11	core_count=14	group=0	logical_index=11	physical_core=11	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	affinity=scheduler_managed	valid=1	score=327.195440	unit=MWork/s	seconds=0.010002	requested_seconds=0.030000	round_count=3	median_round=2	checksum=6a2dc87b886a0517	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=12	core_count=14	core_fraction=0.000011	overall_fraction=0.866667	elapsed=0.000000	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=12	core_count=14	core_fraction=0.333717	overall_fraction=0.888914	elapsed=0.010011	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=12	core_count=14	core_fraction=0.666893	overall_fraction=0.911126	elapsed=0.020007	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=12	core_count=14	core_fraction=1.000000	overall_fraction=0.933333	elapsed=0.030000	round_index=0	round_count=3
+Logical processor 13 (physical core 13, SMT 1/1, Unclassified) score: 321.82 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=12	core_count=14	group=0	logical_index=12	physical_core=12	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	affinity=scheduler_managed	valid=1	score=321.815554	unit=MWork/s	seconds=0.010004	requested_seconds=0.030000	round_count=3	median_round=1	checksum=f55f28f2220a332d	checksum_role=dce_sink
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=13	core_count=14	core_fraction=0.000068	overall_fraction=0.933338	elapsed=0.000002	round_index=0	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=13	core_count=14	core_fraction=0.333560	overall_fraction=0.955571	elapsed=0.010007	round_index=1	round_count=3
+CPU_PROGRESS	mode=per_core	phase=measure	core_index=13	core_count=14	core_fraction=0.666997	overall_fraction=0.977800	elapsed=0.020010	round_index=2	round_count=3
+CPU_PROGRESS	mode=per_core	phase=complete	core_index=13	core_count=14	core_fraction=1.000000	overall_fraction=1.000000	elapsed=0.030000	round_index=1	round_count=3
+Logical processor 14 (physical core 14, SMT 1/1, Unclassified) score: 321.18 MWork/s
+CPU_RESULT	kind=core	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=median	core_index=13	core_count=14	group=0	logical_index=13	physical_core=13	smt_index=0	smt_width=1	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	affinity=scheduler_managed	valid=1	score=321.177341	unit=MWork/s	seconds=0.010011	requested_seconds=0.030000	round_count=3	median_round=2	checksum=48a1c9da61259f69	checksum_role=dce_sink
+Average per-logical-processor score: 323.43 MWork/s
+CPU_RESULT	kind=summary	mode=per_core	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=preview	aggregation=arithmetic_mean_of_per_core_medians	core_count=14	completed=14	invalid_count=0	valid=1	average_score=323.425931	min_score=318.536066	max_score=327.920164	unit=MWork/s	round_count=3	checksum=7ccb4b5781a79111	checksum_role=dce_sink
+[Results] Saved CPU per-core summary as 20261012-141805-564-cpu-single -> /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/native-smoke-data/results/results.json
+[Results] Saved CPU multi-core summary as 20261012-141805-565-cpu-multi -> /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/native-smoke-data/results/results.json

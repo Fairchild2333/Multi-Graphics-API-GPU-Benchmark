@@ -1,0 +1,18 @@
+[
+  "xcrun",
+  "devicectl",
+  "device",
+  "process",
+  "launch",
+  "--device",
+  "00008027-001969920A87002E",
+  "--terminate-existing",
+  "--console",
+  "--json-output",
+  "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad81-design-review-20261016/standalone-baseline/launch.json",
+  "com.fairchild.Mangekyo",
+  "--ios-allow-translated-api",
+  "--ios-complete-suite",
+  "--ios-suite-jobs",
+  "stream-1048576,stream-4194304,stream-16777216,cpu_compute"
+]

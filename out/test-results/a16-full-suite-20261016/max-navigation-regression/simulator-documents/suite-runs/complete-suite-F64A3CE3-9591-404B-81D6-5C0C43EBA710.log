@@ -1,0 +1,64 @@
+iOS complete suite complete-suite-F64A3CE3-9591-404B-81D6-5C0C43EBA710
+Started: 2026-10-16T10:23:55Z
+
+Thermal precheck stream-65536: nominal after 0s cooling.
+
+=== 1/27 stream-65536: cancelled ===
+=== Preview stream?particles=65536&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple iOS simulator GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 65536 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 0.221 ms | Render: 0.199 ms | Total: 0.862 ms | FPS: 103 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.078 ms | Render: 0.153 ms | Total: 0.702 ms | FPS: 119 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.072 ms | Render: 0.124 ms | Total: 0.656 ms | FPS: 107 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 0.081 ms | Render: 0.116 ms | Total: 0.702 ms | FPS: 136 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 0.079 ms | Render: 0.109 ms | Total: 0.637 ms | FPS: 91 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 0.073 ms | Render: 0.117 ms | Total: 0.612 ms | FPS: 93 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 0.083 ms | Render: 0.127 ms | Total: 0.697 ms | FPS: 114 | T: 2.9 s
+[GPU Timing] Compute: 0.079 ms | Render: 0.117 ms | Total: 0.657 ms | FPS: 115 | T: 3.9 s
+[GPU Timing] Compute: 0.072 ms | Render: 0.114 ms | Total: 0.644 ms | FPS: 71 | T: 4.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple iOS simulator GPU
+Driver:       iOS 27.0.0
+CPU:          Apple M4 Pro
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    65536 (Light)
+Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     3.2 s (warmup: 2.0 s, measured: 309 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.079     0.017     0.161
+Render:          0.120     0.031     0.220
+Total GPU:       0.672     0.272     1.829
+
+--- Throughput ---
+Avg FPS:      96
+Particles:    65536
+Working set:  2.00 MiB
+VRAM rate:   33.29 GB/s  (0.079 ms compute)
+
+--- Analysis ---
+Avg frame time:  10.347 ms
+Avg GPU time:    0.672 ms
+GPU utilisation: 6.5%
+>> Display-bound: every frame waits for the display, so the GPU is idle 93% of the time.
+   -> The score may be too low. Use a heavier test.
+==========================================================
+
+[Results] Saved as 20261016-212401-443 -> /Users/fairchild/Library/Developer/CoreSimulator/Devices/A7474361-2948-4E66-AB00-ADA87A403527/data/Containers/Data/Application/3A0A23F5-C683-43B6-81CF-44283B3E9F0A/Documents/results/results.json
