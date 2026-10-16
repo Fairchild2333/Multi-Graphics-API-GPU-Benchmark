@@ -2,6 +2,27 @@
 
 > **2026-10-17：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** Mac软件问题已修复；A15已补测V3内存和CPU，历史132条。内存受现有iOS 256 MiB软件预览上限影响，仍保留review；其他设备待办见主文档。
 
+## 2026-10-17 wired iPad8,7 Vulkan V3 follow-up completed
+
+- Identified actual wired12.9-inch A12X iPad8,7, OS26.7.1, developer mode on
+  and unlocked. Other paired11-inch iPad8,1 was not connected or tested.
+- Ran only pending vulkan/memory_sweep with current signed Release App.
+  Same validated A15 package, production sources unchanged since5ec3730,
+  provisioning profile includes this iPad; signatures and SPIR-V hashes checked.
+- Read reference53.932/write53.0/copy51.4 GB/s;55.1s,77 saved curve points,
+  34 data checks passed, timestamp anomalies0, nominal0->0. V3/ordered full
+  traversal and synchronized MoltenVK wall-clock metadata saved correctly.
+- Existing iOS256MiB software preview cap still means mixed128/192/256 tail
+  cannot establish V3 plateau. Keep plateau0/review, do not call this formal
+  DRAM bandwidth or replace the old V2 row. No threshold/code changes.
+- History72->73, all72 old rows unchanged; other4 current histories/live Mac
+  hashes unchanged. Current production Swift validates contract and restores
+  all77 points; native logs, Documents, CSV, report and exact commands archived
+  under out/test-results/ipad87-v3-memory-20261017/.
+- App PID3132 stopped after export; can unplug. Stable GPU/CPU projects not
+  repeated; old12.9-inch Metal16M rendering stability review remains preserved.
+  11-inch iPad8,1 Metal headless16M and V3 follow-ups still await that device.
+
 ## 2026-10-17 M4 Pro independent CPU baseline and controlled research
 
 - User authorized one Geekbench CPU run and automatic public upload. Official

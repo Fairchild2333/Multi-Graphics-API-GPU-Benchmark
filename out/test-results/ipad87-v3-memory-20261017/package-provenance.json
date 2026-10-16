@@ -1,0 +1,10 @@
+{
+  "reusedSignedApp": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-a15-v3-confirm/Build/Products/Release-iphoneos/Mangekyo.app",
+  "originalBuildCommit": "5ec37309e3e823317be145a251524978196221f0",
+  "currentCommit": "21660688e5a369e5725bfe6c1070f25354611adb",
+  "sourceDiffSinceBuild": "",
+  "appSha256": "677074409d85e41097bc06d575980112d8e5a8e040410084a1decc9f30b924d5",
+  "nativeLibrarySha256": "fefd9119af29f0339dc2a90b53bfa2dddcacc8079ad5b7b9b80eb922e3f831d2",
+  "readSpirvSha256": "099d88caac16181d66a6883ad64a7ce04e0b3b562502228ce4e787920d6aa728",
+  "reason": "Current production sources unchanged since latest signed A15 build; embedded provisioning profile includes this iPad"
+}

@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "2026-10-14T10:16:22Z",
+  "id" : "complete-suite-8F18D05E-68A2-49C9-B994-EF0EC39A9114",
+  "jobs" : [
+    {
+      "error" : "Vulkan timestamps became unreliable during the sweep; mixed timing is rejected and no score is saved",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-14T10:16:22Z",
+      "id" : "vulkan\/memory_sweep",
+      "request" : "memory_sweep?api=vulkan",
+      "resultIDs" : [
+
+      ],
+      "startedAt" : "2026-10-14T10:16:20Z",
+      "status" : "failed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan · GPU Cache & Memory"
+    }
+  ],
+  "startedAt" : "2026-10-14T10:16:20Z",
+  "status" : "failed"
+}

@@ -1,0 +1,21 @@
+[
+  "xcrun",
+  "devicectl",
+  "device",
+  "copy",
+  "from",
+  "--device",
+  "00008027-000C39923E85002E",
+  "--domain-type",
+  "appDataContainer",
+  "--domain-identifier",
+  "com.fairchild.Mangekyo",
+  "--source",
+  "Documents",
+  "--destination",
+  "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad87-v3-memory-20261017/phone-before",
+  "--timeout",
+  "30",
+  "--json-output",
+  "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad87-v3-memory-20261017/backup-device.json"
+]

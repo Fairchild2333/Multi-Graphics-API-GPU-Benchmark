@@ -1,0 +1,12 @@
+{
+  "deviceModel": "iPad8,7",
+  "deviceOS": "26.7.1",
+  "transport": "wired",
+  "developerMode": "enabled",
+  "lockState": {
+    "deviceIdentifier": "26FF195B-5CEA-513C-B531-19954AE9DF2B",
+    "passcodeRequired": false,
+    "unlockedSinceBoot": true
+  },
+  "commit": "21660688e5a369e5725bfe6c1070f25354611adb"
+}

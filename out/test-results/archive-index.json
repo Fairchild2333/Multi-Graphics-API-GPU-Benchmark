@@ -23,11 +23,11 @@
     {
       "device": "12.9-inch iPad Pro / A12X",
       "deviceModel": "iPad8,7",
-      "rows": 72,
-      "path": "a12x-targeted-retest-20261014/phone-final/results/results.json",
-      "bytes": 169003,
-      "sha256": "55497d1ffc1b66be576d01c426d482a93534875cfec9bd46e26598473edf7603",
-      "notes": "原 43 条保留；补测后 72 条，Metal 16M 稳定性提示仍保留。"
+      "rows": 73,
+      "path": "ipad87-v3-memory-20261017/phone-final/results/results.json",
+      "bytes": 172584,
+      "sha256": "010cc42fbcc97e9f61d63ecd58dd2ec8ad071ba14e1dc20b5283b3e90a11b024",
+      "notes": "iPad8,7主历史73条；原72条保留。V3内存读取参考53.932，77点/34次校验通过，256MiB预览上限未建立平台；旧Metal16M稳定性提示保留。"
     },
     {
       "device": "11-inch iPad Pro / A12X",

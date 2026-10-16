@@ -1,0 +1,25 @@
+{
+  "finishedAt" : "2026-10-14T11:16:00Z",
+  "id" : "complete-suite-6700CD13-C571-4F65-A1BF-F926494596EB",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 3,
+      "finishedAt" : "2026-10-14T11:16:00Z",
+      "id" : "cpu_compute",
+      "request" : "gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2",
+      "resultIDs" : [
+        "20261014-221600-131-cpu-single-performance",
+        "20261014-221600-146-cpu-single-efficiency",
+        "20261014-221600-154-cpu-multi"
+      ],
+      "startedAt" : "2026-10-14T11:15:14Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "CPU Compute · Performance + Efficiency + All Cores"
+    }
+  ],
+  "startedAt" : "2026-10-14T11:15:14Z",
+  "status" : "passed"
+}

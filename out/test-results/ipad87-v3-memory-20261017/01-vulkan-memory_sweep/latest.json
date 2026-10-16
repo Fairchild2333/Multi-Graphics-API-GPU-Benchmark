@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "2026-10-16T14:54:30Z",
+  "id" : "complete-suite-C0C38F9A-E746-48C6-B64A-70C9E718276A",
+  "jobs" : [
+    {
+      "error" : "Memory plateau was not reached",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T14:54:29Z",
+      "id" : "vulkan\/memory_sweep",
+      "request" : "memory_sweep?api=vulkan",
+      "resultIDs" : [
+        "20261017-015429-155-membw"
+      ],
+      "startedAt" : "2026-10-16T14:53:34Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan · GPU Cache & Memory"
+    }
+  ],
+  "startedAt" : "2026-10-16T14:53:33Z",
+  "status" : "review"
+}

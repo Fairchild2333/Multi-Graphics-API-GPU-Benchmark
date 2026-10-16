@@ -1,0 +1,16 @@
+[
+  {
+    "contractPassed" : true,
+    "job" : "vulkan\/memory_sweep",
+    "resultIDs" : [
+      "20261017-015429-155-membw"
+    ],
+    "reviewReasons" : [
+      "Memory plateau was not reached"
+    ],
+    "status" : "review",
+    "thermalEnd" : 0,
+    "thermalStart" : 0,
+    "vulkanMemoryPoints" : 77
+  }
+]

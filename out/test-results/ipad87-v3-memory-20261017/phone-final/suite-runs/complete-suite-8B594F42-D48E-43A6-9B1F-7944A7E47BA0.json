@@ -1,0 +1,24 @@
+{
+  "finishedAt" : "2026-10-14T10:30:37Z",
+  "id" : "complete-suite-8B594F42-D48E-43A6-9B1F-7944A7E47BA0",
+  "jobs" : [
+    {
+      "error" : "Expected 3 matching saved results; found 2. See log.",
+      "expectedRecords" : 3,
+      "finishedAt" : "2026-10-14T10:30:37Z",
+      "id" : "cpu_compute",
+      "request" : "gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2",
+      "resultIDs" : [
+        "20261014-213037-335-cpu-single-performance",
+        "20261014-213037-344-cpu-multi"
+      ],
+      "startedAt" : "2026-10-14T10:29:21Z",
+      "status" : "failed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "CPU Compute · Performance + Efficiency + All Cores"
+    }
+  ],
+  "startedAt" : "2026-10-14T10:29:21Z",
+  "status" : "failed"
+}
