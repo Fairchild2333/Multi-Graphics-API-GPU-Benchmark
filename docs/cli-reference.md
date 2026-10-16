@@ -286,6 +286,16 @@ panel. When several GPUs run in one job list, the charts show the last one.
   | M4 Pro (MoltenVK) | 252.4 | 300.9 (above the 273 specified) | 245.9 - 250.4 |
   | A12X, iPad8,7 (MoltenVK) | 56.76 | 57.90 | 56.66 |
   | A15 (MoltenVK) | 29.30 | - | 28.84 (256 MiB cap, no plateau) |
+  | Kirin X90, MateBook Pro (Maleoon 916) | 52.6, 60.2 | - | 55.0 |
+  | Xiaomi TV (Mali-G57) | 5.23, 5.24 | - | 5.04 |
+  | Snapdragon 888+, MIX 4 (Adreno 660) | 32.7 | - | 29.1 |
+  | Snapdragon 8 Gen 1, Black Shark 5 Pro (Adreno 730) | 41.9, 44.2 (no plateau) | - | 40.3 |
+
+  The phone rows were measured nine days apart (V1 2026-10-07/08, V3
+  2026-10-17). On the MIX 4 the points from 6 to 48 MiB, which both versions
+  measure the same way, read about 6 % lower on the second day, so most of its
+  11 % gap is the phone; its V1 points from 96 MiB up also stood above its own
+  6 - 64 MiB stretch, which the V3 curve does not.
 
   V2 ran on Apple devices only (2026-10-14 to 2026-10-16). Android, HarmonyOS and
   Windows results are V1 and stay comparable. The complete-suite fill and the
@@ -301,10 +311,22 @@ panel. When several GPUs run in one job list, the charts show the last one.
   Pro, MIX 4, Black Shark 3 Pro, Pad 5, MIX 2S, Mate 40 Pro, Mate 60 Pro, MateBook
   Pro, Xiaomi TV and TCL TV. The MIX Fold 3, Quest 3, Black Shark 5 Pro and
   Quest 2 never reached the plateau, and the Switch result predates the check.
-  These five need the memory test once more if their figure is to count. The
-  four 128 MiB devices could not reach it under V3 either until the streaming
-  start followed the ceiling (2026-10-17); one run of the current build each is
-  enough. The Switch (580 MiB) streams from 256 MiB as before.
+  The four 128 MiB devices could not reach it under V3 either until the
+  streaming start followed the ceiling (2026-10-17). The Black Shark 5 Pro has
+  since reached it with the current build (40.3 GB/s); the MIX Fold 3, Quest 3,
+  Quest 2 and the Switch (580 MiB, streams from 256 MiB as before) need one run
+  each if their figure is to count.
+
+  The ceiling-relative start was checked on four devices on 2026-10-17, one
+  run each, and read, write and copy reached the plateau on all of them except
+  the Black Shark's write (one noisy 128 MiB point):
+
+  | device | ceiling | streaming from | read tail (GB/s) |
+  |---|---|---|---|
+  | Black Shark 5 Pro | 128 MiB | 32 MiB | 64/96/128 MiB: 40.2, 40.3, 40.3 |
+  | MIX 4 | 256 MiB (512 failed the data check) | 64 MiB | 128/192/256 MiB: 29.6, 29.0, 29.1 |
+  | Xiaomi TV | 261.5 MiB (by available memory) | 65 MiB | 192/256/261.5 MiB: 5.02, 5.03, 5.03 |
+  | MateBook Pro | 1024 MiB | 256 MiB (unchanged) | 512/768/1024 MiB: 53.7, 55.0, 55.1 |
 - **Data check:** before anything is timed, the buffer is filled by the write
   kernel and a fifth kernel (`membw_check.comp`, never timed) loads every
   element and compares it with the value that was stored. If any differs, the
