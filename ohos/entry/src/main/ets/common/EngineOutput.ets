@@ -225,6 +225,13 @@ export class CpuRunState {
       parts.push(tr(`${textOf(fields, 'physical_count')} physical`,
         `${textOf(fields, 'physical_count')} 个物理核心`));
     }
+    // The engine names the machine's own counts where the system gives an app fewer.
+    if (fields.has('system_logical_count')) {
+      const cores: string = textOf(fields, 'system_physical_count');
+      const threads: string = textOf(fields, 'system_logical_count');
+      parts.push(tr(`of the machine's ${cores} cores / ${threads} threads; the system keeps the rest from apps`,
+        `整机是 ${cores} 核 ${threads} 线程，其余的系统不给应用使用`));
+    }
     if (last.length > 0) {
       parts.push(last);
     }

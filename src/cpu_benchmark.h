@@ -104,6 +104,11 @@ struct CpuBenchmarkReport {
     std::string topologySource;
     std::string affinityCapability;
     std::vector<CpuLogicalProcessor> processors;
+    // What the machine has, where the system keeps some of it from this
+    // process; 0 where `processors` is the whole machine or the system does
+    // not say.
+    std::uint32_t systemLogicalCount = 0;
+    std::uint32_t systemPhysicalCount = 0;
     std::vector<CpuCoreResult> perCore;
     CpuMultiCoreResult multiCore;
 };

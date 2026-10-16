@@ -2063,6 +2063,8 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
     if (topology.processors.empty()) throw std::runtime_error("no logical processors available");
     report.cpuName = topology.cpuName;
     report.logicalProcessors = static_cast<std::uint32_t>(topology.processors.size());
+    report.systemLogicalProcessors = topology.systemLogicalCount;
+    report.systemPhysicalCores = topology.systemPhysicalCount;
 
     // One thread per physical core.
     std::vector<CpuLogicalProcessor> cores;
@@ -2165,7 +2167,12 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
     out << "\n========== CPU Memory Bandwidth Sweep (" << kCpuMemBwWorkloadVersion
         << ") ==========\n"
         << "CPU:       " << report.cpuName << " (" << report.physicalCores << " cores / "
-        << report.logicalProcessors << " threads)\n"
+        << report.logicalProcessors << " threads";
+    if (report.systemLogicalProcessors > 0) {
+        out << " open to this process; the machine has " << report.systemPhysicalCores << " cores / "
+            << report.systemLogicalProcessors << " threads";
+    }
+    out << ")\n"
         << "Vectors:   " << kernels.name << ", " << kernels.vectorBytes
         << "-byte loads and stores\n";
     if (!report.mixedCoreTypes) {
@@ -2212,7 +2219,12 @@ void RunSweep(const CpuMemBwConfig& config, std::ostream& out, CpuMemBwReport& r
         << "\tall_threads=" << (runAll ? allThreads : 0)
         << "\treference_logical_index=" << (config.coreType == CpuCoreType::Automatic ? long(report.referenceLogicalIndex) : -1L)
         << "\tclass_count=" << report.classes.size()
-        << "\tcache_source=" << report.cacheSource << "\n";
+        << "\tcache_source=" << report.cacheSource;
+    if (report.systemLogicalProcessors > 0) {
+        out << "\tsystem_logical_count=" << report.systemLogicalProcessors
+            << "\tsystem_physical_count=" << report.systemPhysicalCores;
+    }
+    out << "\n";
     for (const auto& cpuClass : report.classes) {
         out << "CPUMEM_CLASS\trank=" << cpuClass.rank
             << "\tmode=" << (cpuClass.rank == 0 ? std::string("single")

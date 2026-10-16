@@ -156,6 +156,9 @@ struct CpuMemBwReport {
     bool zeroFill = false;
     std::uint32_t logicalProcessors = 0;
     std::uint32_t physicalCores = 0;
+    // What the machine has, where this process is given less; else 0.
+    std::uint32_t systemLogicalProcessors = 0;
+    std::uint32_t systemPhysicalCores = 0;
     std::uint32_t referenceLogicalIndex = 0;
     bool mixedCoreTypes = false;
     std::string affinity;  // strict | partial | failed | scheduler_managed

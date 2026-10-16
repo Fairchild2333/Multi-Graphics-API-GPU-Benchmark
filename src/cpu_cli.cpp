@@ -81,8 +81,13 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
              << ";topologySource=" << report.topologySource
              << ";affinityCapability=" << report.affinityCapability
              << ";logicalProcessors=" << report.processors.size()
-             << ";physicalCores=" << physicalCount
-             << ";coreClassLabels=" << (multiCore && report.multiCore.typedScheduling
+             << ";physicalCores=" << physicalCount;
+    // The machine's own counts, where the system gave this process fewer.
+    if (report.systemLogicalCount > 0) {
+        contract << ";systemLogicalProcessors=" << report.systemLogicalCount
+                 << ";systemPhysicalCores=" << report.systemPhysicalCount;
+    }
+    contract << ";coreClassLabels=" << (multiCore && report.multiCore.typedScheduling
                  ? (report.multiCore.verifiedCoreTypes ? "verified_types_not_numbered_cores" : "requested_types_not_numbered_cores")
                  : coreType == CpuCoreType::Automatic ? "inferred_rank_not_architectural_identity" : "verified_type_not_numbered_core")
              << ";checksumRole=dce_sink";
@@ -275,8 +280,12 @@ static gpu_bench::BenchmarkResult MakeStoredCpuMemBwResult(
              << ";vector=" << report.vectorName
              << ";vectorBytes=" << report.vectorBytes
              << ";physicalCores=" << report.physicalCores
-             << ";logicalProcessors=" << report.logicalProcessors
-             << ";allCoreThreads=" << report.all.threads
+             << ";logicalProcessors=" << report.logicalProcessors;
+    if (report.systemLogicalProcessors > 0) {
+        contract << ";systemLogicalProcessors=" << report.systemLogicalProcessors
+                 << ";systemPhysicalCores=" << report.systemPhysicalCores;
+    }
+    contract << ";allCoreThreads=" << report.all.threads
              << ";affinity=" << report.affinity
              << ";cacheSource=" << report.cacheSource;
     for (const auto& cache : report.caches) {

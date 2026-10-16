@@ -22,6 +22,15 @@ fun protocolFields(line: String): Map<String, String> =
 private fun Map<String, String>.number(key: String): Double = this[key]?.toDoubleOrNull() ?: 0.0
 private fun Map<String, String>.flag(key: String): Boolean = number(key) > 0.5
 
+/** The machine's own counts, which the engine names where the system gives an app fewer processors. */
+private fun machineLabel(f: Map<String, String>): String? {
+    val logical = f["system_logical_count"] ?: return null
+    val physical = f["system_physical_count"] ?: return null
+    return tr(
+        "of the machine's $physical cores / $logical threads; the system keeps the rest from apps",
+        "整机是 $physical 核 $logical 线程，其余的系统不给应用使用")
+}
+
 /** "48 KiB", "1.5 MiB", "1 GiB". */
 fun formatBytes(bytes: Double): String {
     val kib = bytes / 1024.0
@@ -164,7 +173,7 @@ object CpuRun {
         when (tag) {
             "CPU_META" -> cpuLabel = listOfNotNull(
                 f["name"], f["logical_count"]?.let { tr("$it logical", "$it 个逻辑处理器") },
-                f["physical_count"]?.let { tr("$it physical", "$it 个物理核心") },
+                f["physical_count"]?.let { tr("$it physical", "$it 个物理核心") }, machineLabel(f),
             ).joinToString(" · ")
             "CPU_TOPOLOGY" -> {
                 val core = f["core_index"]?.toIntOrNull() ?: return
@@ -203,7 +212,7 @@ object CpuRun {
                 allThreads = f.number("all_threads").toInt()
                 cpuLabel = listOfNotNull(
                     f["name"], f["logical_count"]?.let { tr("$it logical", "$it 个逻辑处理器") },
-                    f["physical_count"]?.let { tr("$it physical", "$it 个物理核心") }, f["vector"],
+                    f["physical_count"]?.let { tr("$it physical", "$it 个物理核心") }, machineLabel(f), f["vector"],
                 ).joinToString(" · ")
             }
             "CPUMEM_CLASS" -> classes.add(

@@ -644,7 +644,9 @@ See [ohos/README.md](ohos/README.md) for the status, build and test notes.
 |----------|-------------|
 | [`docs/report.md`](docs/report.md) | Full cross-platform & cross-GPU performance analysis |
 | [`docs/benchmark-workload-suite.md`](docs/benchmark-workload-suite.md) | Workload suite design — bandwidth / compute / fill / peak axes, scoring |
-| [`docs/interpreting-stream-bandwidth.md`](docs/interpreting-stream-bandwidth.md) | What the Particle GB/s score means — byte accounting, cache vs memory, vendor peaks |
+| [`docs/interpreting-stream-bandwidth.md`](docs/interpreting-stream-bandwidth.md) | What the Particle GB/s score means — byte accounting, cache vs memory, vendor peaks, why it follows each phone's memory |
+| [`docs/interpreting-gpu-burn.md`](docs/interpreting-gpu-burn.md) | What the GPU Burn score measures — special-function throughput, why Apple GPUs score about half per TFLOPS |
+| [`docs/interpreting-cinematic-liquid.md`](docs/interpreting-cinematic-liquid.md) | What the Cinematic Liquid score measures — atomics and latency on a 12 MB grid, why the A15 beats the A12X twice over |
 | [`docs/nbody-workload-plan.md`](docs/nbody-workload-plan.md) | N-body compute workload — algorithm, scaling, integration |
 | [`docs/winui3-render3d-plan.md`](docs/winui3-render3d-plan.md) | WinUI3 integration, true-3D rendering, and RenderDoc plan |
 | [`docs/building.md`](docs/building.md) | Detailed build prerequisites and platform setup |

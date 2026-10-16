@@ -348,6 +348,15 @@ sources. The checksum is a dead-code-elimination sink, not a correctness oracle.
 Successful persistence stores per-core average and multi-core summary rows;
 detailed logical-processor rows remain in stdout/the current GUI session.
 
+`logical_count` and `physical_count` are the processors and cores this process
+may use. Where the system gives it fewer than the machine has (a phone that
+keeps its small cores from the app in front, a headset that reserves half the
+chip), `CPU_META` and `CPUMEM_META` also carry `system_logical_count` and
+`system_physical_count`, the text output says so in a `Processors:` line, and
+the stored rows carry `systemLogicalProcessors` and `systemPhysicalCores`. The
+two fields are absent where the process sees the whole machine. Linux, Android
+and HarmonyOS only (read from `/sys/devices/system/cpu/present`).
+
 Windows formal results require strict group affinity. Linux/Android require
 pthread affinity to succeed and read back as the requested sole CPU under the
 separate `strict_sched_affinity` identity. A failed required bind marks the
@@ -361,6 +370,35 @@ emulators, on a Linux kernel, stay strict); affinity capability, timing and `mul
 part of the stored result identity, so unlike contracts do not share a comparison
 group. Core-class names prefixed with `Inferred` are OS-metadata ranks, not
 authoritative P/E/Mid/LPE microarchitecture identification.
+
+#### What the score measures
+
+A work unit of `cpu_mixed_v1` is one step of a single dependency chain: two
+64-bit multiplies, rotates and xors, int-to-float conversions, FP32 and FP64
+multiply-adds, and a branch on bit 0 of a pseudo-random value. Each step needs
+the result of the one before, so the score is about the clock divided by the
+cycles one step takes; the width of a core (how many instructions it can run at
+once) and its caches hardly count. No branch predictor can foresee that bit, so
+every core takes the wrong path about half the time, and the cost of recovering
+from it is a large part of the cycles. Measured on a Ryzen 7 9800X3D (Zen 5,
+5.19 GHz) in 2026-10: about 25 cycles a step, 15 when the branch is made
+predictable. Arm big cores (Cortex-A77 to X925) take about 16 - 17 cycles a step
+with the same mispredictions, A55/A510 about 35, Apple's A12X and A15 big cores
+about 22 (at their rated clocks; iOS does not report the clock of a big core). So a 9800X3D core (about 205 MWork/s) and a Snapdragon 8 Gen 2's
+Cortex-X3 (about 200) come out level here, where general benchmarks such as
+Geekbench 6 have the 9800X3D 1.6 times ahead. Read the score as this kernel's
+speed and use it to compare devices with each other; it is not a general
+single-core rating.
+
+Every platform runs the same timed code shape: MSVC (x64, ARM64), the Android
+NDK, HarmonyOS and iOS keep the branch as a branch. Clang targeting arm64 macOS
+(default CPU `apple-m1`) had turned it into conditional selects, which pay no
+misprediction: an M4 Pro then took about 13 cycles a step. Since 2026-10-16 an
+empty `asm volatile` in each arm keeps the branch there (`GPU_BENCH_KEEP_BRANCH`,
+arm64 macOS only; elsewhere the code is byte for byte what it was), and arm64
+Mac results carry `_kept_branch` in their version. Earlier arm64 Mac CPU results
+stay in their old group and are not comparable with other platforms. Intel Macs
+were not affected.
 
 ### CPU cache and memory bandwidth sweep (`cpu_membw_v1`)
 

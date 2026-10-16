@@ -66,6 +66,22 @@ static std::uint64_t RotL(std::uint64_t value, unsigned shift) {
     return (value << shift) | (value >> (64u - shift));
 }
 
+// Keeps the kernel's data-dependent branch a branch on arm64 macOS. Clang
+// targeting it (default CPU apple-m1) turned both arms into conditional
+// selects (csel/fcsel), so an M4 Pro paid no misprediction where every other
+// platform pays for one in half the work units, and scored about 1.6 times as
+// much per clock (2026-10-16). MSVC (x64 and ARM64), the Android NDK and
+// HarmonyOS keep the branch in the timed loops, and so does iOS. Elsewhere the
+// barrier stays out: on 32-bit x86 Android it changed the register allocation
+// of the timed loop, and every earlier result must keep its exact code. The
+// two statements must differ: identical ones were hoisted above the branch
+// and the selects came back.
+#if defined(__APPLE__) && defined(__aarch64__) && !TARGET_OS_IPHONE
+#define GPU_BENCH_KEEP_BRANCH(text) __asm__ __volatile__(text)
+#else
+#define GPU_BENCH_KEEP_BRANCH(text) ((void)0)
+#endif
+
 // One work unit deliberately combines integer dependency chains, branches,
 // FP32 and FP64 arithmetic. State is carried between batches and consumed by
 // an atomic sink after measurement, preventing dead-code elimination without
@@ -84,10 +100,12 @@ static void RunKernelBatch(KernelState& state) {
         const float inputF = static_cast<float>((a >> 40) & 0xffu) * (1.0f / 255.0f);
         const double inputD = static_cast<double>((b >> 39) & 0x1ffu) * (1.0 / 511.0);
         if ((a ^ b) & 1ull) {
+            GPU_BENCH_KEEP_BRANCH(" ");
             f = f * 0.99991f + inputF * 0.00037f;
             d = d * 0.9999991 + inputD * 0.0000037;
             b ^= RotL(a, 29);
         } else {
+            GPU_BENCH_KEEP_BRANCH("  ");
             f = f * 0.99973f - inputF * 0.00019f;
             d = d * 0.9999973 - inputD * 0.0000019;
             a ^= RotL(b, 11);
@@ -353,6 +371,44 @@ static std::string ReadLineFile(const std::string& path) {
     return line;
 }
 
+// A core is known by the list of processors that share it. Package and
+// core_id are the fallback only: HarmonyOS on its own kernel numbers core_id
+// per processor, and a MateBook Pro (Kirin X90, ten cores of two threads
+// each) came out as twenty cores (2026-10-08).
+static std::string CoreKeyOf(int logicalId) {
+    const std::string base = "/sys/devices/system/cpu/cpu" + std::to_string(logicalId);
+    std::string key = ReadLineFile(base + "/topology/core_cpus_list");
+    if (key.empty()) key = ReadLineFile(base + "/topology/thread_siblings_list");
+    if (key.empty()) {
+        const int package = ReadIntFile(base + "/topology/physical_package_id", 0);
+        const int coreId = ReadIntFile(base + "/topology/core_id", logicalId);
+        key = "package " + std::to_string(package) + " core " + std::to_string(coreId);
+    }
+    return key;
+}
+
+// The processors and cores the machine has, whether or not this process may
+// run on them. A phone keeps some from the app in front: a Xiaomi 15S Pro
+// (XRing O1, ten cores) gives it cpu2-9 and a Quest 2 four of its eight, and
+// the counts of the allowed set alone read like a smaller chip (2026-10-10).
+// False where the system does not say.
+static bool CountSystemProcessors(std::uint32_t& logical, std::uint32_t& physical) {
+    const std::string present = ReadLineFile("/sys/devices/system/cpu/present");
+    if (present.empty()) return false;
+    cpu_set_t processors;
+    CPU_ZERO(&processors);
+    parked_cores::AddCpuList(present, processors);
+    std::set<std::string> cores;
+    logical = 0;
+    for (int cpu = 0; cpu < CPU_SETSIZE; ++cpu) {
+        if (!CPU_ISSET(cpu, &processors)) continue;
+        ++logical;
+        cores.insert(CoreKeyOf(cpu));
+    }
+    physical = static_cast<std::uint32_t>(cores.size());
+    return logical > 0;
+}
+
 static std::vector<CpuLogicalProcessor> ProbeLinuxTopology(std::string& source) {
     // Enumerate the calling process's actual allowed set. Containers and
     // Android cpusets commonly expose sparse logical IDs, so 0..online-1 is
@@ -393,18 +449,8 @@ static std::vector<CpuLogicalProcessor> ProbeLinuxTopology(std::string& source) 
     std::map<std::string, std::uint32_t> coreOrdinals;
     for (const int logicalId : logicalIds) {
         const std::string base = "/sys/devices/system/cpu/cpu" + std::to_string(logicalId);
-        // A core is known by the list of processors that share it. Package and
-        // core_id are the fallback only: HarmonyOS on its own kernel numbers
-        // core_id per processor, and a MateBook Pro (Kirin X90, ten cores of
-        // two threads each) came out as twenty cores (2026-10-08).
-        std::string key = ReadLineFile(base + "/topology/core_cpus_list");
-        if (key.empty()) key = ReadLineFile(base + "/topology/thread_siblings_list");
-        if (key.empty()) {
-            const int package = ReadIntFile(base + "/topology/physical_package_id", 0);
-            const int coreId = ReadIntFile(base + "/topology/core_id", logicalId);
-            key = "package " + std::to_string(package) + " core " + std::to_string(coreId);
-        }
-        auto inserted = coreOrdinals.emplace(key, static_cast<std::uint32_t>(coreOrdinals.size()));
+        auto inserted = coreOrdinals.emplace(CoreKeyOf(logicalId),
+                                             static_cast<std::uint32_t>(coreOrdinals.size()));
 
         CpuLogicalProcessor cpu;
         cpu.group = 0;
@@ -1223,12 +1269,24 @@ CpuBenchmarkReport ProbeCpuTopology() {
     // less than half of a 64-bit Cortex-A53 per GHz (2026-10-08). Such results
     // are a group of their own and are not charted with 64-bit ones.
     if (sizeof(void*) == 4) report.workloadVersion += "_32bit";
+#if defined(__APPLE__) && defined(__aarch64__) && !TARGET_OS_IPHONE
+    // Before GPU_BENCH_KEEP_BRANCH an arm64 Mac ran the kernel without its
+    // branch; its earlier results stay in the old group, out of comparisons.
+    report.workloadVersion += "_kept_branch";
+#endif
 #ifdef _WIN32
     report.processors = ProbeWindowsCpuSets(report.topologySource);
     if (report.processors.empty())
         report.processors = ProbeWindowsCoreRelation(report.topologySource);
 #elif defined(__linux__) || defined(__ANDROID__)
     report.processors = ProbeLinuxTopology(report.topologySource);
+    std::uint32_t systemLogical = 0;
+    std::uint32_t systemPhysical = 0;
+    if (CountSystemProcessors(systemLogical, systemPhysical) &&
+        systemLogical > report.processors.size()) {
+        report.systemLogicalCount = systemLogical;
+        report.systemPhysicalCount = systemPhysical;
+    }
 #elif defined(__APPLE__)
     report.processors = ProbeAppleTopology(report.topologySource);
 #else
@@ -1253,7 +1311,12 @@ void PrintCpuTopology(const CpuBenchmarkReport& report, std::ostream& out) {
         << "\tlogical_count=" << report.processors.size()
         << "\tphysical_count=" << physical.size()
         << "\ttopology_source=" << SanitizeField(report.topologySource)
-        << "\taffinity_capability=" << report.affinityCapability << '\n';
+        << "\taffinity_capability=" << report.affinityCapability;
+    if (report.systemLogicalCount > 0) {
+        out << "\tsystem_logical_count=" << report.systemLogicalCount
+            << "\tsystem_physical_count=" << report.systemPhysicalCount;
+    }
+    out << '\n';
     for (const auto& cpu : report.processors) {
         out << "CPU_TOPOLOGY\tcore_index=" << cpu.ordinal
             << "\tgroup=" << cpu.group
@@ -1328,8 +1391,15 @@ CpuBenchmarkReport RunCpuBenchmark(const CpuBenchmarkConfig& requestedConfig,
     std::size_t stage = 0;
 
     out << "\n--- Native CPU mixed benchmark ---\n"
-        << "CPU: " << report.cpuName << "\n"
-        << "Topology: " << report.topologySource
+        << "CPU: " << report.cpuName << "\n";
+    if (report.systemLogicalCount > 0) {
+        std::set<std::uint32_t> usableCores;
+        for (const auto& cpu : report.processors) usableCores.insert(cpu.physicalCore);
+        out << "Processors: " << report.processors.size() << " of the machine's "
+            << report.systemLogicalCount << " are open to this process (" << usableCores.size()
+            << " of " << report.systemPhysicalCount << " cores); the system keeps the rest from it.\n";
+    }
+    out << "Topology: " << report.topologySource
         << ", affinity: " << report.affinityCapability << "\n"
         << "Workload: " << report.workloadVersion << ", " << config.roundCount
         << " rounds, median aggregation (the requested measurement time is split across rounds).\n"

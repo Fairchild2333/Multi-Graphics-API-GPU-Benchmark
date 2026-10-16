@@ -1,5 +1,7 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
+> **2026-10-16：苹果设备的下一步测试任务和有问题的成绩，先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** 在 Mac 上：确认 CPU 内核保留了分支，重跑 M4 Pro 的 CPU 算力；运行 `scripts/metal-math-probe`。
+
 ## 2026-10-16 Test results now belong in Git
 
 User explicitly requested that small raw scores, full curves and logs no longer
@@ -1272,6 +1274,103 @@ PathService 已把 results/captures/reports/logs 改到
 6. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Collaboration → HTC HD2（探索）；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
 
 ## 10. 验证记录
+
+### 2026-10-16 苹果设备在 GPU Burn 和粒子测试里偏弱的原因（只读分析，写进文档；Mac 小测试代码已写，未编译）
+
+- **A15 大核 147 MWork/s 核对过，是对的。** 测小核时，陪跑的两个大核线程记下的实测频率是 2.94 GHz（两核同时满载时的最高频率）。按单核 3.23 GHz 算，每个工作单元 22.0 个周期。A12X 大核的频率也是实测的（2.47–2.49 GHz），每单元 22.3 个周期，两者一致。7 次运行都落在 146.7–147.7。
+- **GPU Burn：** 每一步光线行进约要算 2 次 `atan`、9–11 次 `sin`、2 次 `cos`、1 次 `pow`、1 次 `exp`，所以这项量的主要是特殊函数的吞吐。苹果 GPU 每 TFLOPS 只跑出约 1.1，RTX 5090 和 9800X3D 核显是 1.9–2.5。
+  - 已排除的原因：
+    - 计时：A15 每帧 GPU 时间 75.8 ms，帧间隔 77.1 ms。
+    - 转译：苹果设备上 Metal 原生最快。M4 Pro 的 Burn 256，Metal 9.66、MoltenVK 7.10、OpenGL 5.92；A15 的 Burn 64，Metal 1.555、MoltenVK 1.036。
+    - 编译选项：Metal 版本来就开了快速数学。
+  - 确切原因还没确认。写在 `docs/interpreting-gpu-burn.md`；Mac 上 10-14 之前的 Metal Burn（4.2–4.8）是旧的计时错误，同样写在里面。
+- **粒子：** 16M 粒子的分数跟着各设备自己实测的内存带宽走。苹果把带宽转成粒子吞吐的比例是 0.49–0.67，安卓是 0.43–0.64，同一档。A15 分数一般，是因为它用的是 64 位 LPDDR4X，实测 30.9 GB/s，是这些旗舰里最慢的内存；A12X 的 128 位总线让两台 iPad 排在最前面。写在 `docs/interpreting-stream-bandwidth.md`。麒麟 9000S（0.27）和 X90（0.30）明显偏离，原因没查。
+- **流体：** A15（Metal 移植版）12.93，和 15S Pro 的 12.81 并列移动端第一，不弱。
+  - A15 比 A12X（6.1–6.9）快一倍，差距全在模拟（154 对 350–418 ms/帧）；渲染只差 1.2 倍（94 对 112–114）。
+  - 原因：模拟每个子步要对约 12.6 MB 的网格（128×64×96 格，每格 16 字节）做大量分散的原子加法。GPU 缓存诊断的曲线显示，A15 到 32 MB 都还在缓存那一段，A12X 从约 6 MB 起就到了内存级的延迟。两边的测法不同（每条访问链 512 次读取对 8192 次），只能比曲线在哪里拐到顶。
+  - 写在 `docs/interpreting-cinematic-liquid.md`。
+- **`scripts/metal-math-probe/`：** 在 Mac 上用计算着色器量 FMA、`sin`、`cos`、`atan2`、`exp`、`pow`、`sqrt`、除法的吞吐（以 FMA 为基准的比值），外加一份原样复制的 GPU Burn 单步。用 `bash scripts/metal-math-probe/run.sh` 运行，结果存到 `out/test-results/metal-math-probe-<时间>/`。
+  - 在 Windows 上写的，没有编译过。`mathFloatingPointFunctions` 需要 macOS 15 SDK。
+  - 要和其他厂商的 GPU 对比，还得写同样内核的 Vulkan 或 D3D 版本，现在还没有。
+- 尚未提交。
+
+### 2026-10-16 CPU 算力测试：M4 Pro 单核偏高是因为 macOS 编译掉了内核里的分支（已修，测试本身不变）
+
+- **起因：** 把苹果设备和安卓、电脑放在一起排名时，M4 Pro 大核 312 MWork/s。按实测 4.13–4.17 GHz 算，每个工作单元约 13.3 个周期；而 A15、A12X 约 22，Arm 大核（A77–X925）约 16–17，9800X3D（Zen 5）约 25。
+- **原因：** 内核里的分支 `(a ^ b) & 1` 取的是伪随机数的最低位，谁都猜不中，一半的工作单元要付猜错的代价。clang 编译 arm64 macOS 时默认目标 CPU 是 `apple-m1`，会把这个分支改写成 `csel`/`fcsel`，于是 M4 不付这个代价。用本机 NDK 的 clang 19（不是 Apple clang）编同一段内核核对过：
+  - 默认目标下，macOS 有 4 条条件选择；iOS、安卓、鸿蒙保留分支。
+  - MSVC（x64 和 ARM64，`cl /FA`）也保留分支。
+  - 在真实的 `cpu_benchmark.cpp` 里，安卓和鸿蒙 arm64 **预热**那份内核也被改写了（结果丢弃、不计时），**正式计时**那份一直保留着 `tbz`，所以以前的安卓、鸿蒙成绩没有问题。
+- **改法：** `GPU_BENCH_KEEP_BRANCH`，在 if 和 else 两边各放一条空的 `asm volatile`，**只在 arm64 macOS 上生效**。两条的内容必须不同，否则会被合并挪到判断之前，等于没加。
+  - 第一版对所有 clang/GCC 平台都生效，结果 32 位 x86 安卓（小米平板 2）正式计时循环的寄存器分配变了，arm64 的预热代码也变了，所以收窄到只对 arm64 macOS。
+  - 验证：
+    - 安卓 4 个 ABI、鸿蒙 2 个 ABI：整份 `cpu_benchmark.cpp` 改动前后编出的汇编逐行相同（只去掉了 `.loc`/`.file` 行号记录）。
+    - MSVC x64 和 ARM64：去掉按行号生成的标号和名字哈希后逐行相同。
+    - 独立那份内核：macOS 默认目标和 `-mcpu=apple-m1` 都恢复成了分支。
+    - Windows 编译和 `ctest` 通过。
+- **成绩分组：** arm64 Mac 的 CPU 算力成绩版本名里多一段 `_kept_branch`。改动前的 arm64 Mac CPU 成绩留在旧组里，不和其他平台比。Intel Mac 不受影响（`x86_64-apple-macos` 本来就保留分支）。
+- **用户的决定：** 测试流程和内容不变，不新增测试，除 Mac 外不重测。9800X3D 和骁龙 8 Gen 2 打平是这项测试本身的特点（串行链，加上一半猜错的分支），已写进 `docs/cli-reference.md` 的 "What the score measures"。
+  - 当天在 9800X3D 上用临时代码做过对照：1 条链、分支一半猜错，208–216 MWork/s；同样的分支改成 4 条链，218；4 条链、分支 16 次里 1 次走另一边，556；4 条链、分支总能猜中，669。这些只作参考，没有采用。
+- **待办：**
+  - 在 Mac 上用 Xcode 自带的编译器反汇编确认分支确实保留了，然后重跑 M4 Pro 的 CPU 算力测试（大核、小核、全核）。
+  - Linux 上用 GCC 编译的版本（Jetson）没有核对过。
+- 尚未提交。
+
+### 2026-10-10 第十九台设备：小米 15S Pro（玄戒 O1，Immortalis-G925）——第一台玄戒；前台应用只能用 10 个核心里的 8 个；29 项里 27 项有成绩
+
+- **设备：** `25042PN24C`（代号 dijun，序列号 `0B02500081A00540`），Android 17（API 37），16 GB 内存，交换 16 GiB。玄戒 O1 是 10 核：`cpu0-1` Cortex-A520（1795 MHz），`cpu2-3` Cortex-A725（1891 MHz），`cpu4-7` Cortex-A725（3398 MHz），`cpu8-9` Cortex-X925（3898 MHz）；开跑前四组都在各自的频率上限。GPU 是 Mali-G925 Immortalis（驱动 `49.1.0`）。电池 31.6 → 34.5 °C，系统在每项开始前都没有报温控。
+- **App 只能用 8 个核心。** `/dev/cpuset/top-app/cpus` 是 `2-9`，两个 A520 不给前台应用用（`background` 是 `0-3`）。这是这台手机对所有应用的做法，没有改动。所以“全核”是 8 线程，两个小核没有成绩。CPU 日志里 `logical_count=8` 对不上 10 核，就是这样查出来的。
+- **新加的 Vulkan 时间戳核对在这颗 Mali 上通过**（GPU 时钟 25.7 ms，一帧接一帧 20–24 ms，墙钟 25.9 ms），照常用时间戳。Adreno 上仍然没验过。
+- **窗口粒子的“计算”时间在这台上明显偏长，原因多半是时间戳的归属，不是算得慢：**
+  - 同样一步，窗口对 Headless：100 万 3.70 对 1.41 ms，400 万 9.8 对 5.9 ms，1600 万 27.9 对 24.1 ms。
+  - 窗口模式开跑的前半秒，一步是 1.05 ms（和 Headless 一样），之后稳定在 3.6–3.8 ms；而整帧耗时几乎没变（6.3 → 7.3 ms），是“渲染”那一段变短了、“计算”那一段变长了。帧一帧接一帧之后，两段之间的那个时间戳往后挪了。
+  - 这和 Maleoon 的方向正好相反（那边是计算读成 0）。开跑前的核对只查“盖得太少”，查不出“盖得太多”，所以通过了。**这台看 Headless 的数。** 引擎没有改。
+- **正式成绩**（完整副本 `out\adb\Xiaomi-25042PN24C-20261010-213704\results.json`，58 条，没有要删的；测试间等待 5 秒）：
+
+  | 测试 | 成绩 |
+  |---|---|
+  | Vulkan 粒子，Headless，65K / 1M / 4M / 16M | 31.0 / 29.7 / 28.3 / 27.8 GB/s |
+  | Vulkan 粒子，窗口，65K / 1M / 4M / 16M | 39.8 / 11.3 / 17.1 / 24.0 GB/s（见上） |
+  | Vulkan GPU Burn 16 / 64 / 256 步 | 2.56 / 3.42 / 3.65 Gpix-step/s |
+  | 流体 | 12.81 MParticle-step/s（快速检查 3 秒时是 17.60） |
+  | 显存带宽 读 / 写 / 拷贝 | 44.6 / 33.7 / 41.8 GB/s（最大数据集 1713 MiB，数据校验通过；时间戳 86.7 ms 对墙钟 86.9 ms） |
+  | OpenGL ES 3.1 粒子，Headless，65K / 1M / 4M | 22.4 / 29.3 / 18.2 GB/s（400 万那项时间戳读不出，退回了墙钟） |
+  | OpenGL ES 3.1 粒子，窗口，65K / 1M / 4M | 20.3 / 12.2 / 20.2 GB/s |
+  | OpenGL ES 3.1 GPU Burn 16 / 64 / 256 步 | 2.34 / 3.34 / 3.46（墙钟） |
+  | OpenGL ES 2.0 GPU Burn 16 / 64 / 256 步 | 11.2 / 18.2 / 29.7 |
+  | CPU 全核（8 线程） | 1179.19 MWork/s |
+  | CPU 逐核 | A725 低频 118.9 / 119.0，A725 214.1–214.3，X925 227.1 / 228.9 |
+
+  - 缓存 / 内存（X925 单线程读 / 写 / 拷贝，GB/s）：第一段 91.4 / 111.9 / 199.0，第二段 69.7 / 82.0 / 114.6，内存 37.8 / 52.4 / 46.0；全核（8 线程）内存 56.9 / 38.2 / 49.7。两类 A725 的内存“写”只有 9.3 和 11.9 GB/s（读是 33.0 和 22.7），偏低，没有查。
+  - 虚拟内存：映射新页 4.01 GB/s（1022 ns/页）；换页目标是 16383 MiB 的交换；存储顺序读 2373、写 2655 MB/s，随机 4K 读 52.9、写 117.0 MB/s。
+- **看这些数要知道的：**
+  - 全核 1179 是 8 个线程之和（1551）的 76%：八个核一起跑时降了频。快速检查 1 秒时是 1285。
+  - 引擎标了四项“越跑越慢”：Vulkan 粒子 65K 窗口 13.5%、Headless 8.9%，OpenGL ES 粒子 100 万窗口 19.0%，OpenGL ES GPU Burn 256 步 12.6%。GPU 频率没有 root 读不到。
+  - 和此前最快的手机 MIX Fold 3 比：粒子 Headless 29.7 对 27.2，GPU Burn 256 步 3.65 对 2.95，显存读 44.6 对 53.0，CPU 全核 1179（8 线程）对 937（8 线程）。
+  - OpenGL ES 的 1600 万粒子 2 项跑不了，和别的设备一样。
+- **当晚应用户要求改了一处：核心数同时报整机的。** 这台 10 核芯片在 App 里显示成“8 个逻辑处理器 · 8 个物理核心”，用户问为什么是 8 核。引擎数的是进程被允许使用的处理器，本身没错，但读起来像一颗 8 核芯片。
+  - 改法：`ProbeCpuTopology` 在 Linux / Android / HarmonyOS 上另外读 `/sys/devices/system/cpu/present`，按同样的“共用核心的处理器列表”数出整机的处理器数和核心数；**只有整机比进程可用的多时**才报出来（`CpuBenchmarkReport::systemLogicalCount` / `systemPhysicalCount`，否则是 0）。
+  - 出现在四处：`CPU_META` 和 `CPUMEM_META` 多两个字段 `system_logical_count` / `system_physical_count`；文字输出多一行 `Processors: 8 of the machine's 10 are open to this process …`；保存的成绩的 `workloadConfig` 里多 `systemLogicalProcessors` / `systemPhysicalCores`（只是字符串里多两个键，没有新增成绩字段，旧版本照常能读）；Android 和 HarmonyOS 的 CPU 页在核心数后面加一句“整机是 10 核 10 线程，其余的系统不给应用使用”。
+  - Windows、macOS、iOS 的前端没有动：这几个平台上引擎不报这两个数。成绩和分组都不受影响。
+  - 验证：这台手机上 `logical_count=8 physical_count=8 … system_logical_count=10 system_physical_count=10`，CPU 页截图确认了那句话；Windows 上输出和以前一样（16 / 8，没有多出字段），`ctest` 通过；HarmonyOS 包编译通过，但没有在鸿蒙设备上看过（那两台都能用全部核心，不会出现这句话）。
+  - 这台此前存下的正式成绩里没有这两个键（是改之前跑的），没有为此重跑。Quest 2 同理，下次接上时会带上。
+- **还没有提交。**
+
+### 2026-10-09 更正：各设备有成绩的项数（按清理后的成绩文件逐项数出来的）
+
+- 下面几节里有的标题写着“29 项跑齐”“29 项全过”，指的是 29 项都跑过了，**不是 29 项都有成绩**。做全设备汇总时按 `out\adb`、`out\hdc` 里清理后的 `results.json` 重新数了一遍：
+
+  | 设备 | 有成绩 | 没有成绩的项 |
+  |---|---|---|
+  | Switch | 29 | 无 |
+  | Quest 3、Quest 2、MateBook Pro、Mate 60 Pro、小米 15S Pro | 27 | OpenGL ES 1600 万粒子 2 项 |
+  | MIX Fold 3、黑鲨 5 Pro、MIX 4、黑鲨 3 Pro、小米平板 5、MIX 2S | 26 | 流体；OpenGL ES 1600 万粒子 2 项 |
+  | TCL 电视 | 26 | Vulkan 1600 万窗口；OpenGL ES 1600 万 2 项 |
+  | 小米电视 | 25 | Vulkan 1600 万 2 项；OpenGL ES 1600 万 2 项（下面那节写的 24 是数错了） |
+  | 小米 5C、小米平板 3、小米平板 1、小米平板 2 | 14 | 全部 Vulkan 项（没有 Vulkan）；OpenGL ES 1600 万 2 项 |
+  | 小米 3 | 命令行 3 项 | 装不了 App |
+
+- **流体在六台高通手机上都被引擎拒绝**：`Cinematic Liquid v2 fixed score requires linear-filterable R32_SFLOAT 3D images`，它们的驱动不支持对这种 3D 纹理做线性过滤。同是 Adreno 的 Quest 3 和 Quest 2 能跑。
 
 ### 2026-10-08 第十八台设备：华为 Mate 60 Pro（麒麟 9000S，Maleoon 910，HarmonyOS 7）——第一台鸿蒙手机；全核 CPU 成绩不再受绑核影响；29 项里 27 项有成绩
 

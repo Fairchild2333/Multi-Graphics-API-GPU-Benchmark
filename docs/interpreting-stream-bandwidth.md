@@ -100,6 +100,36 @@ ceiling for this class of kernel". That was wrong — it was inferred from a cop
 kernel, which also writes. Use 251 GB/s as this machine's read bandwidth and
 ~176 GB/s as its read-modify-write bandwidth.
 
+## Comparing phones and tablets: the score follows the memory
+
+Across mobile devices the 16M-particle headless score tracks each device's own
+measured memory bandwidth (the VRAM / GPU memory test), not the strength of its
+GPU. Measured 2026-10 (Apple: Metal, or MoltenVK where noted; Android and
+HarmonyOS: Vulkan):
+
+| device | 16M particles (GB/s) | GPU memory test (GB/s) | ratio |
+|---|---|---|---|
+| A12X, iPad Pro 12.9" 3rd gen | 29.5 | 59.9 | 0.49 |
+| A12X, iPad Pro 11" 1st gen (MoltenVK) | 28.8 | 58.1 | 0.50 |
+| XRing O1, Xiaomi 15S Pro | 27.8 | 44.6 | 0.62 |
+| A16, iPhone 14 Pro Max | 27.5 | 41.0 | 0.67 |
+| Snapdragon 8 Gen 2, MIX Fold 3 | 26.1 | 53.0 | 0.49 |
+| Snapdragon 888+, MIX 4 | 20.9 | 32.7 | 0.64 |
+| Snapdragon 8 Gen 1, Black Shark 5 Pro | 19.2 | 44.2 | 0.43 |
+| A15, iPhone 13 Pro | 19.0 | 30.9 | 0.61 |
+| Kirin 9000, Mate 40 Pro | 17.2 | 30.2 | 0.57 |
+| Snapdragon 865, Black Shark 3 Pro | 13.5 | 23.2 | 0.58 |
+
+Apple's GPUs turn their bandwidth into particle throughput as well as the
+others do (0.49 - 0.67 against 0.43 - 0.64). Where an Apple device ranks low
+here, its memory is the reason: the A15 has 64-bit LPDDR4X (about 34 GB/s on
+paper, 30.9 measured), the slowest memory of these flagships, while the A12X's
+128-bit bus puts both iPads at the top. Games hide much of a narrow bus behind
+large on-chip caches and tile memory; a 512 MB buffer streamed every frame
+cannot. Two outliers sit
+far below the line (Kirin 9000S 0.27, Kirin X90 0.30) and are not explained
+yet.
+
 ## Summary
 
 The score is useful for comparing **the same workload at the same particle
