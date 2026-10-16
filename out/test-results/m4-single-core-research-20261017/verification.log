@@ -1,0 +1,87 @@
+{
+  "auditPassed": true,
+  "geekbench": {
+    "single": 3675,
+    "multi": 22129,
+    "url": "https://browser.geekbench.com/v6/cpu/19350647",
+    "runs": 1,
+    "singleVs3900SamplePercent": -5.769230769230771,
+    "singleVs3916SamplePercent": -6.154239019407559,
+    "multiVs22688SamplePercent": -2.46385754583921,
+    "vsA15Public2423SamplePercent": 51.67148163433759,
+    "A15GeekbenchMeasuredThisTurn": false
+  },
+  "diagnostic": {
+    "defaultRandomMedian": 225.620723306,
+    "m4TargetRandomMedian": 224.870592818,
+    "m4TargetChangePercent": -0.3324741083214344,
+    "defaultAlternatingMedian": 423.491504595,
+    "alternatingChangePercent": 87.700623590607,
+    "randomCyclesPerWork": 19.013994586,
+    "alternatingCyclesPerWork": 10.354696122,
+    "actualHardwareBranchMissRateMeasured": false,
+    "notProductionScores": true,
+    "assembly": [
+      {
+        "target": "default",
+        "function": "RunKernelBatch",
+        "realBit0Branch": true,
+        "conditionalSelectCount": 0,
+        "FP32AndFP64FMA": true
+      },
+      {
+        "target": "default",
+        "function": "RunAlternatingBranchBatch",
+        "realBit0Branch": true,
+        "conditionalSelectCount": 0,
+        "FP32AndFP64FMA": true
+      },
+      {
+        "target": "apple-m4",
+        "function": "RunKernelBatch",
+        "realBit0Branch": true,
+        "conditionalSelectCount": 0,
+        "FP32AndFP64FMA": true
+      },
+      {
+        "target": "apple-m4",
+        "function": "RunAlternatingBranchBatch",
+        "realBit0Branch": true,
+        "conditionalSelectCount": 0,
+        "FP32AndFP64FMA": true
+      }
+    ]
+  },
+  "existingAppSingleCoreRatioPercent": 47.440136054421764,
+  "allFiveCanonicalHistoriesUnchanged": [
+    {
+      "device": "Mac M4 Pro",
+      "rows": 171,
+      "sha256": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f"
+    },
+    {
+      "device": "iPhone 13 Pro / A15",
+      "rows": 132,
+      "sha256": "8f3a379f29ad0fd3b3b7607f0ff5ff96610cdcf0090f50ec75543afdf6e3a2a6"
+    },
+    {
+      "device": "12.9-inch iPad Pro / A12X",
+      "rows": 72,
+      "sha256": "55497d1ffc1b66be576d01c426d482a93534875cfec9bd46e26598473edf7603"
+    },
+    {
+      "device": "11-inch iPad Pro / A12X",
+      "rows": 51,
+      "sha256": "43d43fb16d87ade98bdb80c7c319d8b8e04434eb69cf1c8f8f777e2284b6531b"
+    },
+    {
+      "device": "iPhone 14 Pro Max / A16",
+      "rows": 24,
+      "sha256": "da2a2612d9dfbb8381792987ea2b98f6a47e947f108cd7c39298498930dd7df1"
+    }
+  ],
+  "liveMacHistoryUnchanged": true,
+  "productionSourceChanged": false,
+  "peakPerformanceEstablished": false,
+  "causeOfGeekbenchReferenceGapEstablished": false
+}

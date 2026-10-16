@@ -1,0 +1,176 @@
+
+#include "cpu_scheduling.h"
+#include <atomic>
+#include <chrono>
+#include <cstdint>
+#include <cstring>
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <thread>
+#include <TargetConditionals.h>
+constexpr std::uint64_t kKernelBatch = 4096;
+struct KernelState {
+    std::uint64_t a;
+    std::uint64_t b;
+    float f;
+    double d;
+    std::uint64_t checksum;
+};
+
+static std::uint64_t RotL(std::uint64_t value, unsigned shift) {
+    return (value << shift) | (value >> (64u - shift));
+}
+
+// Keeps the kernel's data-dependent branch a branch on arm64 macOS. Clang
+// targeting it (default CPU apple-m1) turned both arms into conditional
+// selects (csel/fcsel), so an M4 Pro paid no misprediction where every other
+// platform pays for one in half the work units, and scored about 1.6 times as
+// much per clock (2026-10-16). MSVC (x64 and ARM64), the Android NDK and
+// HarmonyOS keep the branch in the timed loops, and so does iOS. Elsewhere the
+// barrier stays out: on 32-bit x86 Android it changed the register allocation
+// of the timed loop, and every earlier result must keep its exact code. The
+// two statements must differ: identical ones were hoisted above the branch
+// and the selects came back.
+#if defined(__APPLE__) && defined(__aarch64__) && !TARGET_OS_IPHONE
+#define GPU_BENCH_KEEP_BRANCH(text) __asm__ __volatile__(text)
+#else
+#define GPU_BENCH_KEEP_BRANCH(text) ((void)0)
+#endif
+
+// One work unit deliberately combines integer dependency chains, branches,
+// FP32 and FP64 arithmetic. State is carried between batches and consumed by
+// an atomic sink after measurement, preventing dead-code elimination without
+// turning the workload into a memory-bandwidth benchmark.
+static void RunKernelBatch(KernelState& state) {
+    std::uint64_t a = state.a;
+    std::uint64_t b = state.b;
+    float f = state.f;
+    double d = state.d;
+
+    for (std::uint64_t i = 0; i < kKernelBatch; ++i) {
+        a = a * 6364136223846793005ull + 1442695040888963407ull;
+        b ^= RotL(a + b + i, 17);
+        b *= 0xd6e8feb86659fd93ull;
+
+        const float inputF = static_cast<float>((a >> 40) & 0xffu) * (1.0f / 255.0f);
+        const double inputD = static_cast<double>((b >> 39) & 0x1ffu) * (1.0 / 511.0);
+        if ((a ^ b) & 1ull) {
+            GPU_BENCH_KEEP_BRANCH(" ");
+            f = f * 0.99991f + inputF * 0.00037f;
+            d = d * 0.9999991 + inputD * 0.0000037;
+            b ^= RotL(a, 29);
+        } else {
+            GPU_BENCH_KEEP_BRANCH("  ");
+            f = f * 0.99973f - inputF * 0.00019f;
+            d = d * 0.9999973 - inputD * 0.0000019;
+            a ^= RotL(b, 11);
+        }
+    }
+
+    std::uint32_t fBits = 0;
+    std::uint64_t dBits = 0;
+    std::memcpy(&fBits, &f, sizeof(fBits));
+    std::memcpy(&dBits, &d, sizeof(dBits));
+    state.a = a;
+    state.b = b;
+    state.f = f;
+    state.d = d;
+    state.checksum ^= a ^ RotL(b, 7) ^ dBits ^ static_cast<std::uint64_t>(fBits);
+}
+
+static KernelState MakeKernelState(std::uint64_t seed) {
+    KernelState state{};
+    state.a = 0x243f6a8885a308d3ull ^ (seed * 0x9e3779b97f4a7c15ull);
+    state.b = 0x13198a2e03707344ull + (seed * 0xbf58476d1ce4e5b9ull);
+    state.f = 0.625f + static_cast<float>(seed & 7u) * 0.015625f;
+    state.d = 0.875 + static_cast<double>(seed & 15u) * 0.0078125;
+    state.checksum = seed;
+    return state;
+}
+
+static void RunAlternatingBranchBatch(KernelState& state) {
+    std::uint64_t a = state.a;
+    std::uint64_t b = state.b;
+    float f = state.f;
+    double d = state.d;
+
+    for (std::uint64_t i = 0; i < kKernelBatch; ++i) {
+        a = a * 6364136223846793005ull + 1442695040888963407ull;
+        b ^= RotL(a + b + i, 17);
+        b *= 0xd6e8feb86659fd93ull;
+
+        const float inputF = static_cast<float>((a >> 40) & 0xffu) * (1.0f / 255.0f);
+        const double inputD = static_cast<double>((b >> 39) & 0x1ffu) * (1.0 / 511.0);
+        if (i & 1ull) {
+            GPU_BENCH_KEEP_BRANCH(" ");
+            f = f * 0.99991f + inputF * 0.00037f;
+            d = d * 0.9999991 + inputD * 0.0000037;
+            b ^= RotL(a, 29);
+        } else {
+            GPU_BENCH_KEEP_BRANCH("  ");
+            f = f * 0.99973f - inputF * 0.00019f;
+            d = d * 0.9999973 - inputD * 0.0000019;
+            a ^= RotL(b, 11);
+        }
+    }
+
+    std::uint32_t fBits = 0;
+    std::uint64_t dBits = 0;
+    std::memcpy(&fBits, &f, sizeof(fBits));
+    std::memcpy(&dBits, &d, sizeof(dBits));
+    state.a = a;
+    state.b = b;
+    state.f = f;
+    state.d = d;
+    state.checksum ^= a ^ RotL(b, 7) ^ dBits ^ static_cast<std::uint64_t>(fBits);
+}
+
+
+std::atomic<std::uint64_t> sink{0};
+int main(int argc, char** argv) {
+    using Clock = std::chrono::steady_clock;
+    using namespace gpu_bench;
+    if (argc != 2) return 2;
+    const std::string mode = argv[1];
+    if (mode != "random" && mode != "alternating") return 2;
+    const auto batch = mode == "random" ? RunKernelBatch : RunAlternatingBranchBatch;
+    int result = 0;
+    std::thread worker([&] {
+        CpuQosScope qos(CpuCoreType::Performance);
+        if (!qos.applied()) { result = 3; return; }
+        auto fixed = MakeKernelState(0x4350555f53494e47ull);
+        for (int i = 0; i < 256; ++i) batch(fixed);
+        sink.fetch_xor(fixed.checksum);
+        std::cout << "FIXED mode=" << mode << " batches=256 checksum=" << std::hex
+                  << fixed.checksum << std::dec << '\n' << std::flush;
+        for (int round = 1; round <= 3; ++round) {
+            auto state = MakeKernelState(0x4350555f53494e47ull);
+            auto warmEnd = Clock::now() + std::chrono::milliseconds(200);
+            do { batch(state); } while (Clock::now() < warmEnd);
+            const auto before = CaptureCpuThreadCounters();
+            const auto start = Clock::now();
+            const auto end = start + std::chrono::seconds(2);
+            std::uint64_t units = 0;
+            do { batch(state); units += kKernelBatch; } while (Clock::now() < end);
+            const double elapsed = std::chrono::duration<double>(Clock::now() - start).count();
+            const auto after = CaptureCpuThreadCounters();
+            const auto residency = EvaluateCpuThreadCounters(before, after, CpuCoreType::Performance);
+            sink.fetch_xor(state.checksum);
+            const double score = units / elapsed / 1e6;
+            const double busy = residency.workerCpuNs / 1e9 / elapsed;
+            const bool valid = residency.verified() && busy >= .90;
+            if (!valid) result = 4;
+            std::cout << std::fixed << std::setprecision(9)
+                      << "ROUND mode=" << mode << " round=" << round
+                      << " score=" << score << " units=" << units << " seconds=" << elapsed
+                      << " p_lower_bound=" << residency.requestedLowerBound
+                      << " busy=" << busy << " effective_ghz=" << residency.effectiveGHz
+                      << " cycles_per_work=" << residency.effectiveGHz * 1000 / score
+                      << " valid=" << valid << " checksum=" << std::hex << state.checksum
+                      << std::dec << '\n' << std::flush;
+        }
+    });
+    worker.join();
+    return result;
+}

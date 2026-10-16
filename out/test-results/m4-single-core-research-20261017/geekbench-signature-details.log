@@ -1,0 +1,17 @@
+Executable=/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/research/geekbench6/Geekbench 6.app/Contents/MacOS/Geekbench 6
+Identifier=com.primatelabs.Geekbench6
+Format=app bundle with Mach-O universal (x86_64 arm64)
+CodeDirectory v=20500 size=143622 flags=0x10000(runtime) hashes=4477+7 location=embedded
+Signature size=9053
+Authority=Developer ID Application: Primate Labs Inc. (SRW94G4YYQ)
+Authority=Developer ID Certification Authority
+Authority=Apple Root CA
+Timestamp=27 Apr 2026 at 10:02:29 pm
+Notarization Ticket=stapled
+Info.plist entries=36
+TeamIdentifier=SRW94G4YYQ
+Runtime Version=26.1.0
+Sealed Resources version=2 rules=13 files=45
+Internal requirements count=1 size=220
+Total signatures=1
+Chosen signature=1

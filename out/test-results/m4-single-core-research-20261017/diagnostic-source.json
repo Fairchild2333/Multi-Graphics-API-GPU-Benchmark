@@ -1,0 +1,8 @@
+{
+  "productionSourceSha256": "a0fb43039b44ce900fe9b0966fb473a36800e307e9651842d6bcb72e4ae23818",
+  "sourceSha256": "618e0e0bd10a58a9bd337b866862572eef985de8ddd023336b2438b3ac95ad3f",
+  "randomKernelExtractedVerbatim": true,
+  "alternatingVariantChange": "Only branch predicate: ((a ^ b) & 1ull) -> (i & 1ull)",
+  "timing": "Three 2-second rounds, .2-second warmup each, P QoS and verified per-thread P residency",
+  "scope": "CONTROLLED DIAGNOSTIC; not production score, not cross-device general ranking"
+}

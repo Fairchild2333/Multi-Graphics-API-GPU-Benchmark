@@ -2,6 +2,29 @@
 
 > **2026-10-17：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** Mac软件问题已修复；A15已补测V3内存和CPU，历史132条。内存受现有iOS 256 MiB软件预览上限影响，仍保留review；其他设备待办见主文档。
 
+## 2026-10-17 M4 Pro independent CPU baseline and controlled research
+
+- User authorized one Geekbench CPU run and automatic public upload. Official
+  signed6.7.1 ran native AArch64:single3675/multi22129, exit0, nominal before
+  and after, AC/low-power off. Public result19350647. Single remains about6%
+  below selected public M4Pro samples; cause/peak performance not established.
+- Fixed isolated matrix:default vs apple-m4 target, original vs alternating
+  branch, three2s rounds/.2s warmup each, P residency and worker busy verified.
+  Original225.621 vs224.871(-.33%), alternating423.492(+87.70%) default.
+  Original/alternating cycles per unit19.014/10.355. All4 actual functions keep
+  bit0 branch and FP32/64FMA, no csel/fcsel; fixed checksums match CPU targets.
+- Strong evidence this serial mixed kernel is branch/dependency-sensitive,
+  not a comprehensive single-core score. Geekbench additionally covers SIMD,
+  matrix/SME and diverse application workloads. No measured hardware branch-
+  miss rate, no claim that branch/SME explains every performance difference.
+- Diagnostic values are not App replacements. Production216.737 retained;
+  no benchmark code/build option changes, no score scaling, no new CPU suite.
+  All5 histories and live Mac hash untouched(Mac171,A15132). A15 Geekbench
+  was not run; any A15 Geekbench comparison is an identified public sample.
+- Evidence in out/test-results/m4-single-core-research-20261017/. Small logs,
+  code and metadata versioned; official binary/ZIP stay local. Claim token
+  redacted in versioned log, unredacted original stays in ignored out/research.
+
 ## 2026-10-17 A15 physical V3 memory and standard CPU confirmation
 
 - Latest signed Release at5ec3730 installed on connected/unlocked iPhone14,2.

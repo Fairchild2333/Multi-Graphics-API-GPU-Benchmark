@@ -1,0 +1,6 @@
+{
+  "log": "geekbench-cpu.log",
+  "redaction": "Only the private result-claim token; scores and execution output unchanged",
+  "rawLocalFile": "out/research/geekbench6/geekbench-cpu-private.log",
+  "resultUrl": "https://browser.geekbench.com/v6/cpu/19350647"
+}

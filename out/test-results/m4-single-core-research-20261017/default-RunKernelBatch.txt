@@ -1,0 +1,106 @@
+10000092c: d29029e8    	mov	x8, #0x814f             ; =33103
+100000930: f2beece8    	movk	x8, #0xf767, lsl #16
+100000934: f2cf6fc8    	movk	x8, #0x7b7e, lsl #32
+100000938: f2e280a8    	movk	x8, #0x1405, lsl #48
+10000093c: 5282000b    	mov	w11, #0x1000            ; =4096
+100000940: d28fe5ac    	mov	x12, #0x7f2d            ; =32557
+100000944: f2a992ac    	movk	x12, #0x4c95, lsl #16
+100000948: f2de85ac    	movk	x12, #0xf42d, lsl #32
+10000094c: f2eb0a2c    	movk	x12, #0x5851, lsl #48
+100000950: a9402809    	ldp	x9, x10, [x0]
+100000954: d29fb26d    	mov	x13, #0xfd93            ; =64915
+100000958: f2accb2d    	movk	x13, #0x6659, lsl #16
+10000095c: f2dfd70d    	movk	x13, #0xfeb8, lsl #32
+100000960: f2fadd0d    	movk	x13, #0xd6e8, lsl #48
+100000964: 5290102e    	mov	w14, #0x8081            ; =32897
+100000968: 72a7700e    	movk	w14, #0x3b80, lsl #16
+10000096c: bd401000    	ldr	s0, [x0, #0x10]
+100000970: 1e2701c2    	fmov	s2, w14
+100000974: d280100e    	mov	x14, #0x80              ; =128
+100000978: f2a0402e    	movk	x14, #0x201, lsl #16
+10000097c: f2c1008e    	movk	x14, #0x804, lsl #32
+100000980: f2e7ec0e    	movk	x14, #0x3f60, lsl #48
+100000984: fd400c01    	ldr	d1, [x0, #0x18]
+100000988: 9e6701c3    	fmov	d3, x14
+10000098c: 528757ae    	mov	w14, #0x3abd            ; =15037
+100000990: 72b728ee    	movk	w14, #0xb947, lsl #16
+100000994: 1e2701c4    	fmov	s4, w14
+100000998: 529dc9ce    	mov	w14, #0xee4e            ; =61006
+10000099c: 72a7efee    	movk	w14, #0x3f7f, lsl #16
+1000009a0: 1e2701c5    	fmov	s5, w14
+1000009a4: d28204ce    	mov	x14, #0x1026            ; =4134
+1000009a8: f2a2f80e    	movk	x14, #0x17c0, lsl #16
+1000009ac: f2dc0e0e    	movk	x14, #0xe070, lsl #32
+1000009b0: f2f7d7ee    	movk	x14, #0xbebf, lsl #48
+1000009b4: 9e6701c6    	fmov	d6, x14
+1000009b8: d29a6b8e    	mov	x14, #0xd35c            ; =54108
+1000009bc: f2aace4e    	movk	x14, #0x5672, lsl #16
+1000009c0: f2dfff4e    	movk	x14, #0xfffa, lsl #32
+1000009c4: f2e7fdee    	movk	x14, #0x3fef, lsl #48
+1000009c8: 9e6701c7    	fmov	d7, x14
+1000009cc: d293000e    	mov	x14, #0x9800            ; =38912
+1000009d0: f2b9fd8e    	movk	x14, #0xcfec, lsl #16
+1000009d4: f2d8664e    	movk	x14, #0xc332, lsl #32
+1000009d8: f2e8feae    	movk	x14, #0x47f5, lsl #48
+1000009dc: 529f91ef    	mov	w15, #0xfc8f            ; =64655
+1000009e0: 72a7382f    	movk	w15, #0x39c1, lsl #16
+1000009e4: 1e2701f0    	fmov	s16, w15
+1000009e8: 529f434f    	mov	w15, #0xfa1a            ; =64026
+1000009ec: 72a7efef    	movk	w15, #0x3f7f, lsl #16
+1000009f0: 1e2701f1    	fmov	s17, w15
+1000009f4: d285558f    	mov	x15, #0x2aac            ; =10924
+1000009f8: f2b05d4f    	movk	x15, #0x82ea, lsl #16
+1000009fc: f2c1360f    	movk	x15, #0x9b0, lsl #32
+100000a00: f2e7d9ef    	movk	x15, #0x3ecf, lsl #48
+100000a04: 9e6701f2    	fmov	d18, x15
+100000a08: d29e23ef    	mov	x15, #0xf11f            ; =61727
+100000a0c: f2a39a0f    	movk	x15, #0x1cd0, lsl #16
+100000a10: f2dfffcf    	movk	x15, #0xfffe, lsl #32
+100000a14: f2e7fdef    	movk	x15, #0x3fef, lsl #48
+100000a18: 9e6701f3    	fmov	d19, x15
+100000a1c: aa0803ef    	mov	x15, x8
+100000a20: 1400000b    	b	0x100000a4c <RunKernelBatch(KernelState&)+0x120>
+100000a24: 1e240ab5    	fmul	s21, s21, s4
+100000a28: 1f055400    	fmadd	s0, s0, s5, s21
+100000a2c: 1e660a94    	fmul	d20, d20, d6
+100000a30: 1f475021    	fmadd	d1, d1, d7, d20
+100000a34: 9b0e7e10    	mul	x16, x16, x14
+100000a38: b375fd50    	bfxil	x16, x10, #53, #11
+100000a3c: ca090209    	eor	x9, x16, x9
+100000a40: 910005ef    	add	x15, x15, #0x1
+100000a44: f100056b    	subs	x11, x11, #0x1
+100000a48: 540002e0    	b.eq	0x100000aa4 <RunKernelBatch(KernelState&)+0x178>
+100000a4c: 9b0c7d29    	mul	x9, x9, x12
+100000a50: 8b0a01f0    	add	x16, x15, x10
+100000a54: 8b090210    	add	x16, x16, x9
+100000a58: cad0bd50    	eor	x16, x10, x16, ror #47
+100000a5c: 9b0d7e0a    	mul	x10, x16, x13
+100000a60: 8b080129    	add	x9, x9, x8
+100000a64: 4a090151    	eor	w17, w10, w9
+100000a68: d368bd21    	ubfx	x1, x9, #40, #8
+100000a6c: 9e230034    	ucvtf	s20, x1
+100000a70: 1e220a95    	fmul	s21, s20, s2
+100000a74: d367bd41    	ubfx	x1, x10, #39, #9
+100000a78: 9e630034    	ucvtf	d20, x1
+100000a7c: 1e630a94    	fmul	d20, d20, d3
+100000a80: 3607fd31    	tbz	w17, #0x0, 0x100000a24 <RunKernelBatch(KernelState&)+0xf8>
+100000a84: 1e300ab5    	fmul	s21, s21, s16
+100000a88: 1f115400    	fmadd	s0, s0, s17, s21
+100000a8c: 1e720a94    	fmul	d20, d20, d18
+100000a90: 1f535021    	fmadd	d1, d1, d19, d20
+100000a94: cac98d4a    	eor	x10, x10, x9, ror #35
+100000a98: 910005ef    	add	x15, x15, #0x1
+100000a9c: f100056b    	subs	x11, x11, #0x1
+100000aa0: 54fffd61    	b.ne	0x100000a4c <RunKernelBatch(KernelState&)+0x120>
+100000aa4: 1e260008    	fmov	w8, s0
+100000aa8: 9e66002b    	fmov	x11, d1
+100000aac: a9002809    	stp	x9, x10, [x0]
+100000ab0: bd001000    	str	s0, [x0, #0x10]
+100000ab4: fd000c01    	str	d1, [x0, #0x18]
+100000ab8: cacae56a    	eor	x10, x11, x10, ror #57
+100000abc: f940100b    	ldr	x11, [x0, #0x20]
+100000ac0: ca0b0108    	eor	x8, x8, x11
+100000ac4: ca090108    	eor	x8, x8, x9
+100000ac8: ca080148    	eor	x8, x10, x8
+100000acc: f9001008    	str	x8, [x0, #0x20]
+100000ad0: d65f03c0    	ret

@@ -1,0 +1,9 @@
+{
+  "downloadUrl": "https://geekbench-cdn.b-cdn.net/Geekbench-6.7.1-Mac.zip",
+  "zipSha256": "0cceb31fce4f40af265292c3ffe050ceb509aeabe647240dde73842e62401008",
+  "bytes": 309252820,
+  "appPath": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/research/geekbench6/Geekbench 6.app",
+  "cliPaths": [
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/research/geekbench6/Geekbench 6.app/Contents/Resources/geekbench6"
+  ]
+}

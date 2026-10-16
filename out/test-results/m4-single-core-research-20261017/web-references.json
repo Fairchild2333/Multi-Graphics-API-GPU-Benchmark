@@ -1,0 +1,45 @@
+[
+  {
+    "url": "https://browser.geekbench.com/v6/cpu/11986767",
+    "kind": "Public reference, not current host",
+    "version": "6.4.0",
+    "device": "Mac16,8 M4 Pro 14C 48GB",
+    "single": 3900
+  },
+  {
+    "url": "https://browser.geekbench.com/v6/cpu/13574757",
+    "kind": "Public reference, not our A15 physical rerun",
+    "version": "6.4.0",
+    "device": "iPhone14,2 A15",
+    "single": 2443
+  },
+  {
+    "url": "https://browser.geekbench.com/v6/cpu/17694365",
+    "kind": "Public reference, different MacBook chassis",
+    "version": "6.7.0",
+    "device": "Mac16,7 M4 Pro 14C",
+    "single": 3916
+  },
+  {
+    "url": "https://browser.geekbench.com/v6/cpu/19107912",
+    "kind": "Public reference, not our A15 physical rerun",
+    "version": "6.7.0",
+    "device": "iPhone14,2 A15",
+    "single": 2423
+  },
+  {
+    "url": "https://www.geekbench.com/blog/2024/04/geekbench-63/",
+    "kind": "Vendor methodology",
+    "finding": "SME matrix kernels added to ML workloads in 6.3; supported hardware can gain relative to older versions"
+  },
+  {
+    "url": "https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf",
+    "kind": "Vendor methodology",
+    "finding": "Composite CPU includes diverse workloads, SIMD and matrix extensions; unlike single serial mixed kernel"
+  },
+  {
+    "url": "https://developer.arm.com/mobile-graphics-and-gaming/ai-mobile",
+    "kind": "Architecture vendor",
+    "finding": "Apple M4 and iPhone16 support SME2 matrix-oriented compute"
+  }
+]

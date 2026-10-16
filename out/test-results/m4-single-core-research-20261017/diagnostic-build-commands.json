@@ -1,0 +1,45 @@
+[
+  {
+    "target": "default",
+    "binary": "diagnostic-default",
+    "command": [
+      "xcrun",
+      "clang++",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++17",
+      "-arch",
+      "arm64",
+      "-mmacosx-version-min=12.0",
+      "-I",
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src",
+      "-x",
+      "c++",
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/m4-single-core-research-20261017/diagnostic.cpp.txt",
+      "-o",
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/m4-single-core-research-20261017/diagnostic-default"
+    ]
+  },
+  {
+    "target": "apple-m4",
+    "binary": "diagnostic-apple-m4",
+    "command": [
+      "xcrun",
+      "clang++",
+      "-mcpu=apple-m4",
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++17",
+      "-arch",
+      "arm64",
+      "-mmacosx-version-min=12.0",
+      "-I",
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src",
+      "-x",
+      "c++",
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/m4-single-core-research-20261017/diagnostic.cpp.txt",
+      "-o",
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/m4-single-core-research-20261017/diagnostic-apple-m4"
+    ]
+  }
+]

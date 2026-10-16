@@ -1,0 +1,36 @@
+Geekbench 6.7.1 : https://www.geekbench.com/
+
+Geekbench 6 requires an active internet connection and automatically uploads 
+benchmark results to the Geekbench Browser.
+
+Upgrade to Geekbench 6 Pro to enable offline use and unlock other features:
+
+  https://store.primatelabs.com/v6
+
+Enter your Geekbench 6 Pro license using the following command line:
+
+  /Users/fairchild/VSCode 
+Projects/Vulkan-GPU-Compute-Microbenchmark/out/research/geekbench6/Geekbench 
+6.app/Contents/Resources/geekbench6 --unlock <email> <key>
+
+System Information
+  Operating System              macOS 27.0.1 (Build 26A434)
+  Model                         MacBook Pro (14-inch, 2024)
+  Model ID                      Mac16,8
+  Motherboard                   Mac16,8
+
+CPU Information
+  Name                          Apple M4 Pro
+  Topology                      1 Processor, 14 Cores
+  Identifier                    Apple M4 Pro
+  Cluster 1                     10 Cores
+  Cluster 2                     4 Cores
+  L1 Instruction Cache          128 KB
+  L1 Data Cache                 64.0 KB
+  L2 Cache                      4.00 MB
+  Instruction Sets              neon aes sha1 sha2 neon-fp16 neon-dotprod i8mm
+sme-i8i32 sme-f32f32 sme2
+
+Memory Information
+  Size                          48.0 GB
+

@@ -1,0 +1,4 @@
+FIXED mode=alternating batches=256 checksum=3b3ee8b7cce2675b
+ROUND mode=alternating round=1 score=426.168044695 units=852336640 seconds=2.000001292 p_lower_bound=0.999974998 busy=0.999902333 effective_ghz=4.417358394 cycles_per_work=10.365297090 valid=1 checksum=37fa13bdacc973a4
+ROUND mode=alternating round=2 score=419.500926372 units=839004160 seconds=2.000005500 p_lower_bound=0.999454555 busy=0.998264921 effective_ghz=4.359158864 cycles_per_work=10.391297350 valid=1 checksum=3fb9353502bd7eef
+ROUND mode=alternating round=3 score=408.567702644 units=817139712 seconds=2.000010541 p_lower_bound=0.998695757 busy=0.997859803 effective_ghz=4.264904896 cycles_per_work=10.438673610 valid=1 checksum=95f749641b812d00

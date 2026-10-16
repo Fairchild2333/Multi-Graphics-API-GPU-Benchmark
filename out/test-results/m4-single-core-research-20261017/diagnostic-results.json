@@ -1,0 +1,265 @@
+{
+  "scope": "isolated single-thread diagnostic; not an App score",
+  "measurements": [
+    {
+      "target": "default",
+      "mode": "random",
+      "startedAt": "2026-10-16T14:44:23.299541+00:00",
+      "medianScore": 225.620723306,
+      "medianRound": {
+        "mode": "random",
+        "round": 2.0,
+        "score": 225.620723306,
+        "units": 451244032.0,
+        "seconds": 2.000011459,
+        "p_lower_bound": 0.999974993,
+        "busy": 0.999721126,
+        "effective_ghz": 4.289951212,
+        "cycles_per_work": 19.013994586,
+        "valid": 1.0,
+        "checksum": "50ea3336bccfb2c6"
+      },
+      "fixedChecksum": "3fb24de5b8eff225",
+      "rounds": [
+        {
+          "mode": "random",
+          "round": 1.0,
+          "score": 226.845944981,
+          "units": 453693440.0,
+          "seconds": 2.000006833,
+          "p_lower_bound": 0.999974996,
+          "busy": 0.999822501,
+          "effective_ghz": 4.311061279,
+          "cycles_per_work": 19.004356807,
+          "valid": 1.0,
+          "checksum": "95c3dd87354ba44a"
+        },
+        {
+          "mode": "random",
+          "round": 2.0,
+          "score": 225.620723306,
+          "units": 451244032.0,
+          "seconds": 2.000011459,
+          "p_lower_bound": 0.999974993,
+          "busy": 0.999721126,
+          "effective_ghz": 4.289951212,
+          "cycles_per_work": 19.013994586,
+          "valid": 1.0,
+          "checksum": "50ea3336bccfb2c6"
+        },
+        {
+          "mode": "random",
+          "round": 3.0,
+          "score": 225.100811046,
+          "units": 450203648.0,
+          "seconds": 2.000009,
+          "p_lower_bound": 0.99993746,
+          "busy": 0.999692272,
+          "effective_ghz": 4.28414973,
+          "cycles_per_work": 19.032138134,
+          "valid": 1.0,
+          "checksum": "debd472cf75b15f7"
+        }
+      ]
+    },
+    {
+      "target": "apple-m4",
+      "mode": "random",
+      "startedAt": "2026-10-16T14:44:35.273193+00:00",
+      "medianScore": 224.870592818,
+      "medianRound": {
+        "mode": "random",
+        "round": 3.0,
+        "score": 224.870592818,
+        "units": 449744896.0,
+        "seconds": 2.0000165,
+        "p_lower_bound": 0.999957658,
+        "busy": 0.99978596,
+        "effective_ghz": 4.275644546,
+        "cycles_per_work": 19.013800305,
+        "valid": 1.0,
+        "checksum": "c4b115eeb3cd279a"
+      },
+      "fixedChecksum": "3fb24de5b8eff225",
+      "rounds": [
+        {
+          "mode": "random",
+          "round": 1.0,
+          "score": 224.446202071,
+          "units": 448892928.0,
+          "seconds": 2.000002334,
+          "p_lower_bound": 0.999929659,
+          "busy": 0.999596437,
+          "effective_ghz": 4.264935043,
+          "cycles_per_work": 19.002037031,
+          "valid": 1.0,
+          "checksum": "a6637ba0d7066b1a"
+        },
+        {
+          "mode": "random",
+          "round": 2.0,
+          "score": 225.121084632,
+          "units": 450244608.0,
+          "seconds": 2.000010833,
+          "p_lower_bound": 0.999862321,
+          "busy": 0.999601731,
+          "effective_ghz": 4.28021487,
+          "cycles_per_work": 19.012945308,
+          "valid": 1.0,
+          "checksum": "8afb42d51aa2c563"
+        },
+        {
+          "mode": "random",
+          "round": 3.0,
+          "score": 224.870592818,
+          "units": 449744896.0,
+          "seconds": 2.0000165,
+          "p_lower_bound": 0.999957658,
+          "busy": 0.99978596,
+          "effective_ghz": 4.275644546,
+          "cycles_per_work": 19.013800305,
+          "valid": 1.0,
+          "checksum": "c4b115eeb3cd279a"
+        }
+      ]
+    },
+    {
+      "target": "apple-m4",
+      "mode": "alternating",
+      "startedAt": "2026-10-16T14:44:47.119708+00:00",
+      "medianScore": 419.500926372,
+      "medianRound": {
+        "mode": "alternating",
+        "round": 2.0,
+        "score": 419.500926372,
+        "units": 839004160.0,
+        "seconds": 2.0000055,
+        "p_lower_bound": 0.999454555,
+        "busy": 0.998264921,
+        "effective_ghz": 4.359158864,
+        "cycles_per_work": 10.39129735,
+        "valid": 1.0,
+        "checksum": "3fb9353502bd7eef"
+      },
+      "fixedChecksum": "3b3ee8b7cce2675b",
+      "rounds": [
+        {
+          "mode": "alternating",
+          "round": 1.0,
+          "score": 426.168044695,
+          "units": 852336640.0,
+          "seconds": 2.000001292,
+          "p_lower_bound": 0.999974998,
+          "busy": 0.999902333,
+          "effective_ghz": 4.417358394,
+          "cycles_per_work": 10.36529709,
+          "valid": 1.0,
+          "checksum": "37fa13bdacc973a4"
+        },
+        {
+          "mode": "alternating",
+          "round": 2.0,
+          "score": 419.500926372,
+          "units": 839004160.0,
+          "seconds": 2.0000055,
+          "p_lower_bound": 0.999454555,
+          "busy": 0.998264921,
+          "effective_ghz": 4.359158864,
+          "cycles_per_work": 10.39129735,
+          "valid": 1.0,
+          "checksum": "3fb9353502bd7eef"
+        },
+        {
+          "mode": "alternating",
+          "round": 3.0,
+          "score": 408.567702644,
+          "units": 817139712.0,
+          "seconds": 2.000010541,
+          "p_lower_bound": 0.998695757,
+          "busy": 0.997859803,
+          "effective_ghz": 4.264904896,
+          "cycles_per_work": 10.43867361,
+          "valid": 1.0,
+          "checksum": "95f749641b812d00"
+        }
+      ]
+    },
+    {
+      "target": "default",
+      "mode": "alternating",
+      "startedAt": "2026-10-16T14:44:58.741812+00:00",
+      "medianScore": 423.491504595,
+      "medianRound": {
+        "mode": "alternating",
+        "round": 1.0,
+        "score": 423.491504595,
+        "units": 846983168.0,
+        "seconds": 2.000000375,
+        "p_lower_bound": 0.999894693,
+        "busy": 0.999658709,
+        "effective_ghz": 4.38512584,
+        "cycles_per_work": 10.354696122,
+        "valid": 1.0,
+        "checksum": "6125095580b76216"
+      },
+      "fixedChecksum": "3b3ee8b7cce2675b",
+      "rounds": [
+        {
+          "mode": "alternating",
+          "round": 1.0,
+          "score": 423.491504595,
+          "units": 846983168.0,
+          "seconds": 2.000000375,
+          "p_lower_bound": 0.999894693,
+          "busy": 0.999658709,
+          "effective_ghz": 4.38512584,
+          "cycles_per_work": 10.354696122,
+          "valid": 1.0,
+          "checksum": "6125095580b76216"
+        },
+        {
+          "mode": "alternating",
+          "round": 2.0,
+          "score": 420.743927472,
+          "units": 841490432.0,
+          "seconds": 2.000006125,
+          "p_lower_bound": 0.999878367,
+          "busy": 0.99958198,
+          "effective_ghz": 4.350674227,
+          "cycles_per_work": 10.340432607,
+          "valid": 1.0,
+          "checksum": "64a307594733ccfa"
+        },
+        {
+          "mode": "alternating",
+          "round": 3.0,
+          "score": 423.68355771,
+          "units": 847368192.0,
+          "seconds": 2.000002541,
+          "p_lower_bound": 0.999950341,
+          "busy": 0.999745418,
+          "effective_ghz": 4.380592722,
+          "cycles_per_work": 10.339303102,
+          "valid": 1.0,
+          "checksum": "58990e40ad20da87"
+        }
+      ]
+    }
+  ],
+  "fixedChecksumsMatchAcrossTargets": true,
+  "productionSourceChanged": false,
+  "thermalBefore": {
+    "activeProcessorCount": 14,
+    "lowPowerMode": false,
+    "thermalState": 0,
+    "thermalStateName": "nominal",
+    "timestamp": "2026-10-16T14:44:17Z"
+  },
+  "thermalAfter": {
+    "activeProcessorCount": 14,
+    "lowPowerMode": false,
+    "thermalState": 0,
+    "thermalStateName": "nominal",
+    "timestamp": "2026-10-16T14:45:05Z"
+  }
+}

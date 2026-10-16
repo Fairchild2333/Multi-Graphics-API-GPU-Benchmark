@@ -402,18 +402,29 @@ A work unit of `cpu_mixed_v1` is one step of a single dependency chain: two
 64-bit multiplies, rotates and xors, int-to-float conversions, FP32 and FP64
 multiply-adds, and a branch on bit 0 of a pseudo-random value. Each step needs
 the result of the one before, so the score is about the clock divided by the
-cycles one step takes; the width of a core (how many instructions it can run at
-once) and its caches hardly count. No branch predictor can foresee that bit, so
-every core takes the wrong path about half the time, and the cost of recovering
-from it is a large part of the cycles. Measured on a Ryzen 7 9800X3D (Zen 5,
+cycles one step takes. The dependency chain restricts instruction-level
+parallelism; it does not independently measure SIMD, matrix or cache throughput.
+The pseudo-random predicate makes the workload sensitive to branch behavior.
+Hardware branch-miss counters are not collected, so a 50% actual miss rate is
+not established. Measured on a Ryzen 7 9800X3D (Zen 5,
 5.19 GHz) in 2026-10: about 25 cycles a step, 15 when the branch is made
 predictable. Arm big cores (Cortex-A77 to X925) take about 16 - 17 cycles a step
-with the same mispredictions, A55/A510 about 35, Apple's A12X and A15 big cores
+with this branch-heavy kernel, A55/A510 about 35, Apple's A12X and A15 big cores
 about 22 (at their rated clocks; iOS does not report the clock of a big core). So a 9800X3D core (about 205 MWork/s) and a Snapdragon 8 Gen 2's
 Cortex-X3 (about 200) come out level here, where general benchmarks such as
 Geekbench 6 have the 9800X3D 1.6 times ahead. Read the score as this kernel's
 speed and use it to compare devices with each other; it is not a general
 single-core rating.
+
+A 2026-10-17 isolated M4 Pro diagnostic retained the actual branch but changed
+its predicate to predictable alternation: about 19.01 versus 10.35 cycles per
+work unit. This supports sensitivity to branch/data-dependency patterns, not a
+precise hardware misprediction penalty. Compiling the original kernel for
+`apple-m4` rather than the default target changed its median by -0.33%.
+These controls are not production scores. The same Mac independently measured
+Geekbench 6.7.1 single/multi 3675/22129; its roughly 6% single-core gap from
+selected public M4 Pro samples remains unexplained. See
+[the full research report](../out/test-results/m4-single-core-research-20261017/report.md).
 
 Every platform runs the same timed code shape: MSVC (x64, ARM64), the Android
 NDK, HarmonyOS and iOS keep the branch as a branch. Clang targeting arm64 macOS

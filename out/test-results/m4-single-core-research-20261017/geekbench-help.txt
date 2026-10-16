@@ -1,0 +1,24 @@
+Geekbench 6.7.1 : https://www.geekbench.com/
+
+Usage:
+
+  /Users/fairchild/VSCode 
+Projects/Vulkan-GPU-Compute-Microbenchmark/out/research/geekbench6/Geekbench 
+6.app/Contents/Resources/geekbench6 [ options ]
+
+Options:
+
+  -h, --help                  print this message
+  --unlock EMAIL KEY          unlock Geekbench using EMAIL and KEY
+
+  --cpu                       run the CPU benchmark
+  --sysinfo                   display system information and exit
+
+  --gpu [API]                 run the GPU benchmark
+                                API can be one of: Metal, OpenCL (default)
+  --gpu-list                  list available GPU platforms, devices and exit
+  --gpu-platform-id ID        use GPU platform ID (default is 0)
+  --gpu-device-id ID          use GPU device ID (default is 0)
+
+  If no options are given, the default action is to run the CPU benchmark.
+
