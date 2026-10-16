@@ -58,9 +58,15 @@ export class ResultEntry {
     if (job.workload === 'membw') {
       const fields: string[] = this.workloadConfig.split(';');
       const checks: string = fields.find((f: string) => f.startsWith('writeCopyChecks=')) ?? '';
-      return this.workloadVersion.startsWith('membw_v3_streaming_') && fields.indexOf('dataVerified=1') >= 0 &&
+      const v3: boolean = this.workloadVersion.startsWith('membw_v3_streaming_') && fields.indexOf('dataVerified=1') >= 0 &&
         fields.indexOf('largeDatasetTraversal=ordered_full_dataset_passes') >= 0 &&
         Number(checks.substring('writeCopyChecks='.length)) > 0 && fields.indexOf('timestampAnomalies=0') >= 0;
+      // A V1 result with a plateau, saved after the data check (2026-10-08 04:50),
+      // measured the same as V3 (within 0.2 - 3 %); see LegacyV1VulkanMemoryComparable
+      // in src/result_quality.h.
+      const v1: boolean = this.workloadVersion === 'membw_v1_ohos_preview' && this.id >= '20261008-045054' &&
+        fields.indexOf('memoryPlateauReached=1') >= 0 && fields.indexOf('timestampAnomalies=0') >= 0;
+      return v3 || v1;
     }
     if (this.durationSec < 11 || (job.particles > 0 && this.particleCount !== job.particles)) return false;
     return job.steps === 0 || this.workloadConfig.split(';').indexOf('steps=' + job.steps.toString()) >= 0 ||

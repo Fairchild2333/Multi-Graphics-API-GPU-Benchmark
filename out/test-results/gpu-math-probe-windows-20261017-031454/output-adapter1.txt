@@ -1,0 +1,28 @@
+Host: DESKTOP-0G3KI44 / AMD Ryzen 7 9800X3D 8-Core Processor / Microsoft Windows 11 Pro 10.0.26300
+GPU: AMD Radeon(TM) Graphics (DXGI adapter 1, driver 32.0.21045.5002)
+
+Maths: D3DCompile cs_5_0, flags 0 (as the engine compiles GPU Burn for DX11/DX12)
+function       iterations    GPU ms    G results/s     vs fma
+fma                  1127    49.829         333.51      1.000   (0.67 FP32 TFLOPS)
+MATHPROBE	maths=d3d_default	function=k_fma	iterations=1127	group=256	seconds=0.049829	rate=3.335053e+11
+sin                   268    49.849          79.28      0.238
+MATHPROBE	maths=d3d_default	function=k_sin	iterations=268	group=256	seconds=0.049849	rate=7.927570e+10
+cos                   268    49.900          79.19      0.237
+MATHPROBE	maths=d3d_default	function=k_cos	iterations=268	group=256	seconds=0.049900	rate=7.919417e+10
+atan2                  45    49.746          13.34      0.040
+MATHPROBE	maths=d3d_default	function=k_atan2	iterations=45	group=256	seconds=0.049746	rate=1.333880e+10
+exp                   267    49.779          79.09      0.237
+MATHPROBE	maths=d3d_default	function=k_exp	iterations=267	group=256	seconds=0.049779	rate=7.909045e+10
+pow                   137    49.833          40.54      0.122
+MATHPROBE	maths=d3d_default	function=k_pow	iterations=137	group=256	seconds=0.049833	rate=4.053844e+10
+sqrt                  266    49.914          78.58      0.236
+MATHPROBE	maths=d3d_default	function=k_sqrt	iterations=266	group=256	seconds=0.049914	rate=7.858106e+10
+division              268    49.872          79.24      0.238
+MATHPROBE	maths=d3d_default	function=k_div	iterations=268	group=256	seconds=0.049872	rate=7.923882e+10
+GPU Burn step          87    49.427          1.622          -   (G pixel-steps/s)
+MATHPROBE	maths=d3d_default	function=k_burn_step	iterations=87	group=256	seconds=0.049427	rate=1.622185e+09
+
+Check: fma again after all rows: 333.19 G results/s, 0.999 of the first fma row
+MATHPROBE	maths=d3d_default	function=k_fma_again	iterations=1127	group=256	seconds=0.049876	rate=3.331908e+11
+Check: fma with literal a and b: 331.59 G results/s, 0.994 of the first fma row   (0.66 FP32 TFLOPS)
+MATHPROBE	maths=d3d_default	function=k_fma_literal	iterations=1122	group=256	seconds=0.049895	rate=3.315889e+11

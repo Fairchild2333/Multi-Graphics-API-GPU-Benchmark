@@ -67,14 +67,21 @@ assert(!record({durationSec:3}).matches(stream));
 assert(!record({graphicsApi:'OpenGL ES'}).matches(stream));
 assert(!record({particleCount:1048576}).matches(stream));
 const memoryJob = {api:'vulkan', workload:'membw', particles:0, steps:0, headless:true};
-const memoryRecord = {workload:'membw',workloadVersion:'membw_v2_verified_ohos_preview',
-  workloadConfig:'dataVerified=1;writeCopyChecks=2;timestampAnomalies=0'};
+const memoryRecord = {workload:'membw',workloadVersion:'membw_v3_streaming_ohos_preview',
+  workloadConfig:'dataVerified=1;writeCopyChecks=2;timestampAnomalies=0;largeDatasetTraversal=ordered_full_dataset_passes'};
 assert(record(memoryRecord).matches(memoryJob));
-for (const config of ['dataVerified=0;writeCopyChecks=2;timestampAnomalies=0',
-  'dataVerified=1;writeCopyChecks=0;timestampAnomalies=0',
-  'dataVerified=1;writeCopyChecks=2;timestampAnomalies=1'])
+for (const config of ['dataVerified=0;writeCopyChecks=2;timestampAnomalies=0;largeDatasetTraversal=ordered_full_dataset_passes',
+  'dataVerified=1;writeCopyChecks=0;timestampAnomalies=0;largeDatasetTraversal=ordered_full_dataset_passes',
+  'dataVerified=1;writeCopyChecks=2;timestampAnomalies=1;largeDatasetTraversal=ordered_full_dataset_passes',
+  'dataVerified=1;writeCopyChecks=2;timestampAnomalies=0'])
   assert(!record({...memoryRecord,workloadConfig:config}).matches(memoryJob));
-assert(!record({...memoryRecord,workloadVersion:'membw_v1_ohos_preview'}).matches(memoryJob));
+assert(!record({...memoryRecord,workloadVersion:'membw_v2_verified_ohos_preview'}).matches(memoryJob));
+// V1 with a plateau, saved after the data check (2026-10-08 04:50), compares with V3.
+const legacyMemory = {workload:'membw',workloadVersion:'membw_v1_ohos_preview',id:'20261008-191936-000-membw',
+  workloadConfig:'memoryPlateauReached=1;timestampAnomalies=0'};
+assert(record(legacyMemory).matches(memoryJob));
+assert(!record({...legacyMemory,id:'20261007-231700-000-membw'}).matches(memoryJob));
+assert(!record({...legacyMemory,workloadConfig:'memoryPlateauReached=0;timestampAnomalies=0'}).matches(memoryJob));
 assert.equal(record().reviewReasons().length,0);
 for (const overrides of [{avgComputeMs:0.002},{avgTotalGpuMs:20},{avgComputeMs:8,avgRenderMs:8},{stableScore:0},{throughputDropPct:8}])
   assert(record(overrides).reviewReasons().length > 0);

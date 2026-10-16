@@ -120,6 +120,13 @@ HarmonyOS: Vulkan):
 | Kirin 9000, Mate 40 Pro | 17.2 | 30.2 | 0.57 |
 | Snapdragon 865, Black Shark 3 Pro | 13.5 | 23.2 | 0.58 |
 
+The GPU memory column mixes versions of the memory test: V1 on Android and
+HarmonyOS, the native Metal sweep on the A15, A16 and the 12.9" iPad, V2 on the
+11" iPad. V1 and the current V3 agree within 0.2 - 3 % (RTX 5090, M4 Pro, A12X,
+A15; table in [cli-reference.md](cli-reference.md), memory-bandwidth sweep).
+V2 read too high only on the M4 Pro and is 2 % above V3 on the A12X. The ratios
+above stand.
+
 Apple's GPUs turn their bandwidth into particle throughput as well as the
 others do (0.49 - 0.67 against 0.43 - 0.64). Where an Apple device ranks low
 here, its memory is the reason: the A15 has 64-bit LPDDR4X (about 34 GB/s on

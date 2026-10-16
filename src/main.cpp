@@ -406,7 +406,8 @@ static bool SuiteResultMatches(const gpu_bench::BenchmarkResult& result,
         return false;
 #endif
     if (job.workload == "membw" && job.backend == "vulkan" &&
-        !gpu_bench::CurrentVulkanMemoryContractVerified(result)) return false;
+        !gpu_bench::CurrentVulkanMemoryContractVerified(result) &&
+        !gpu_bench::LegacyV1VulkanMemoryComparable(result)) return false;
     if (job.workload == "gpu_burn" &&
         SuiteConfigInteger(result.workloadConfig, "steps", -1) != job.burnSteps)
         return false;

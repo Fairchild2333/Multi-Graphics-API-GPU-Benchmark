@@ -64,6 +64,24 @@ int main() {
     auto oldTraversal = result;
     oldTraversal.workloadVersion = "membw_v2_verified_preview";
     assert(!CurrentVulkanMemoryContractVerified(oldTraversal));
+    assert(!LegacyV1VulkanMemoryComparable(oldTraversal));
+    // V1 with a plateau, saved after the data check, compares with V3.
+    BenchmarkResult legacy;
+    legacy.workload = "membw";
+    legacy.graphicsApi = "Vulkan";
+    legacy.workloadVersion = "membw_v1_android_preview";
+    legacy.id = "20261010-213410-151-membw";
+    legacy.workloadConfig = "score=read_largest_datasets;memoryPlateauReached=1;timestampAnomalies=0";
+    assert(LegacyV1VulkanMemoryComparable(legacy));
+    auto beforeCheck = legacy;
+    beforeCheck.id = "20261007-231700-000-membw";
+    assert(!LegacyV1VulkanMemoryComparable(beforeCheck));
+    auto noPlateau = legacy;
+    noPlateau.workloadConfig = "memoryPlateauReached=0;timestampAnomalies=0";
+    assert(!LegacyV1VulkanMemoryComparable(noPlateau));
+    auto translated = legacy;
+    translated.workloadVersion = "membw_v1_moltenvk";
+    assert(!LegacyV1VulkanMemoryComparable(translated));
     assert(result.workloadConfig.find("largeDatasetTraversal=ordered_full_dataset_passes") != std::string::npos);
     assert(VulkanTimestampIntervalVerified(4, 4.2));
     assert(VulkanTimestampIntervalVerified(0.05, 0.25));

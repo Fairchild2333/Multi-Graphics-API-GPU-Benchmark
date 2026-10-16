@@ -349,6 +349,8 @@ private:
                   std::uint32_t orderedPasses = 1);
     Sample Dispatch(std::size_t kernel, std::uint32_t chunkCount, std::uint64_t passes);
     double TimeOf(const Sample& sample);
+    void BeginCoverage();
+    void CheckCoverage();
     std::uint64_t MaxPasses(std::uint32_t chunkCount) const;
     std::uint64_t CalibratePasses(std::size_t kernel, std::uint32_t chunkCount);
     MemBwPoint MeasurePoint(std::size_t kernel, std::uint32_t chunkCount,
@@ -397,6 +399,9 @@ private:
     double targetDispatchMs_ = 4.0;
     std::uint32_t timestampAnomalies_ = 0;
     std::uint32_t writeCopyChecks_ = 0;
+    // The least delayed submission of the samples of one point; see CheckCoverage.
+    Sample leastDelayed_{};
+    bool haveLeastDelayed_ = false;
 };
 
 void Runner::CreateInstance() {
@@ -1080,17 +1085,43 @@ Runner::Sample Runner::Execute() {
     return sample;
 }
 
+// Each sample is checked for what a correct clock cannot give: no interval, or
+// more GPU time than the submission took. Whether the stamps cover too little
+// of the work is judged once per point by CheckCoverage, because the wall
+// clock of a single submission may include milliseconds of wake-up latency:
+// judged per sample, three sweeps on an RTX 5090 under Windows aborted at
+// random points (12 MiB read, 256 MiB read, 192 MiB copy; 2026-10-17).
 double Runner::TimeOf(const Sample& sample) {
     if (!std::isfinite(sample.wallMs) || sample.wallMs <= 0)
         throw std::runtime_error("Invalid synchronized Vulkan wall-clock interval");
     if (!useGpuTimestamps_) return sample.wallMs;
-    if (!VulkanTimestampIntervalVerified(sample.gpuMs, sample.wallMs)) {
+    if (!std::isfinite(sample.gpuMs) || sample.gpuMs <= 0 ||
+        sample.gpuMs > sample.wallMs * 1.1 + 0.1) {
         ++timestampAnomalies_;
         // Per-sample fallback used to mix two timing contracts inside one
         // median/curve, while labeling everything gpu_timestamp.
         throw std::runtime_error("Vulkan timestamps became unreliable during the sweep; mixed timing is rejected and no score is saved");
     }
+    if (!haveLeastDelayed_ || sample.wallMs < leastDelayed_.wallMs) {
+        leastDelayed_ = sample;
+        haveLeastDelayed_ = true;
+    }
     return sample.gpuMs;
+}
+
+void Runner::BeginCoverage() { haveLeastDelayed_ = false; }
+
+// Stamps that are latched too early read far less than the work took. The
+// least delayed submission of a point is the one whose wall clock is closest
+// to the work itself, so it decides; one late wake-up no longer does.
+void Runner::CheckCoverage() {
+    const bool checked = haveLeastDelayed_;
+    haveLeastDelayed_ = false;
+    if (!useGpuTimestamps_ || !checked) return;
+    if (!VulkanTimestampIntervalVerified(leastDelayed_.gpuMs, leastDelayed_.wallMs)) {
+        ++timestampAnomalies_;
+        throw std::runtime_error("Vulkan timestamps became unreliable during the sweep; mixed timing is rejected and no score is saved");
+    }
 }
 
 // GPU timestamps are only trusted if they scale with the work: some drivers
@@ -1176,8 +1207,10 @@ MemBwPoint Runner::MeasurePoint(std::size_t kernel, std::uint32_t chunkCount,
 
     std::vector<double> times;
     times.reserve(config_.measuredRuns);
+    BeginCoverage();
     for (std::uint32_t i = 0; i < config_.measuredRuns; ++i)
         times.push_back(TimeOf(Dispatch(kernel, chunkCount, passes)));
+    CheckCoverage();
 
     MemBwPoint point;
     point.kernel = name ? name : kKernels[kernel].name;
@@ -1247,7 +1280,9 @@ MemBwPoint Runner::MeasureL1Point(bool singleGroup, std::uint32_t stripes) {
     for (std::uint32_t i = 0; i < config_.warmupRuns; ++i) run(repeats);
     std::vector<double> times;
     times.reserve(config_.measuredRuns);
+    BeginCoverage();
     for (std::uint32_t i = 0; i < config_.measuredRuns; ++i) times.push_back(run(repeats));
+    CheckCoverage();
 
     MemBwPoint point;
     point.kernel = singleGroup ? "l1_single" : "l1";
@@ -1303,8 +1338,10 @@ void Runner::MeasureHostMemory(MemBwReport& report) {
         for (std::uint32_t i = 0; i < config_.warmupRuns; ++i)
             SubmitCopy(source, destination, copyBytes);
         std::vector<double> times;
+        BeginCoverage();
         for (std::uint32_t i = 0; i < config_.measuredRuns; ++i)
             times.push_back(TimeOf(SubmitCopy(source, destination, copyBytes)));
+        CheckCoverage();
         const double ms = Median(times);
         return ms > 0.0 ? static_cast<double>(copyBytes) / (ms / 1000.0) / 1.0e9 : 0.0;
     };

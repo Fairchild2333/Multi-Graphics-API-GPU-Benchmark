@@ -60,9 +60,15 @@ data class HistoryEntry(
                 val parts = it.split('=', limit = 2)
                 if (parts.size == 2) parts[0] to parts[1] else null
             }.toMap()
-            return workloadVersion.startsWith("membw_v3_streaming_") && fields["dataVerified"] == "1" &&
+            val v3 = workloadVersion.startsWith("membw_v3_streaming_") && fields["dataVerified"] == "1" &&
                 fields["largeDatasetTraversal"] == "ordered_full_dataset_passes" &&
                 (fields["writeCopyChecks"]?.toIntOrNull() ?: 0) > 0 && fields["timestampAnomalies"] == "0"
+            // A V1 result with a plateau, saved after the data check (2026-10-08 04:50),
+            // measured the same as V3 (within 0.2 - 3 %); see LegacyV1VulkanMemoryComparable
+            // in src/result_quality.h.
+            val v1 = workloadVersion == "membw_v1_android_preview" && id >= "20261008-045054" &&
+                fields["memoryPlateauReached"] == "1" && fields["timestampAnomalies"] == "0"
+            return v3 || v1
         }
         if (durationSec < 11) return false
         if (job.particles > 0 && particleCount != job.particles) return false

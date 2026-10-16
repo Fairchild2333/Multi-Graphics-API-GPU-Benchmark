@@ -269,6 +269,24 @@ panel. When several GPUs run in one job list, the charts show the last one.
   That can recycle cached data even with a 2 GiB allocation. V3 orders complete
   large-set passes and removes modulo indexing from that path. It has a new
   identity; old observations are preserved, not relabeled as V3.
+
+  V1 did not have V2's fault. Where V1 reached its plateau, it measured the same
+  large-set bandwidth as V3 (read plateau, GB/s):
+
+  | device | V1 | V2 | V3 |
+  |---|---|---|---|
+  | RTX 5090 (Windows) | 1528 - 1542 | - | 1530 - 1538 |
+  | M4 Pro (MoltenVK) | 252.4 | 300.9 (above the 273 specified) | 245.9 - 250.4 |
+  | A12X, iPad8,7 (MoltenVK) | 56.76 | 57.90 | 56.66 |
+  | A15 (MoltenVK) | 29.30 | - | 28.84 (256 MiB cap, no plateau) |
+
+  V2 ran on Apple devices only (2026-10-14 to 2026-10-16). Android, HarmonyOS and
+  Windows results are V1 and stay comparable. The complete-suite fill and the
+  Android and HarmonyOS one-click suites therefore accept a V1 result as done
+  when it reached its plateau, had no timestamp anomaly and was saved after the
+  data check existed (id from `20261008-045054`, commit 266a197); see
+  `LegacyV1VulkanMemoryComparable` in `src/result_quality.h`. Translated
+  MoltenVK V1 rows and V2 rows are not accepted.
 - **Data check:** before anything is timed, the buffer is filled by the write
   kernel and a fifth kernel (`membw_check.comp`, never timed) loads every
   element and compares it with the value that was stored. If any differs, the
@@ -284,7 +302,13 @@ panel. When several GPUs run in one job list, the charts show the last one.
   median is the score and the fastest sample is also printed. The timing source
   is selected before the curve. MoltenVK always uses synchronized wall clock;
   native Vulkan keeps verified GPU queries. Later query anomalies reject the
-  sweep instead of mixing timing sources within a saved curve.
+  sweep instead of mixing timing sources within a saved curve. Each sample is
+  rejected only for what a correct clock cannot give (no interval, or more GPU
+  time than the submission took). Whether the stamps cover too little of the
+  work is judged once per point, on its least delayed submission: the wall clock
+  of a single submission can include milliseconds of wake-up latency, and judged
+  per sample, three sweeps on an RTX 5090 under Windows aborted at random
+  points (2026-10-17).
 - **Summary:** the memory plateau is the median of the three largest data
   sets. The cache plateau is the longest flat stretch of the curve that is
   clearly above it.

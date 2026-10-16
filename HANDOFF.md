@@ -1520,6 +1520,29 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-10-17 Windows 上显存测试随机作废（已修）；V1 与 V3 可比，非苹果设备不用重测；两个数学小测试的结论
+
+- **显存测试随机作废：** 拉取 Mac 那边的 8 个提交（到 `2832f08`）后，在 RTX 5090 上跑 `--workload membw`，连续三次都中途作废，位置都不同：12 MiB 读取、256 MiB 读取、192 MiB 复制。报错是 "Vulkan timestamps became unreliable during the sweep"。
+  - 原因：10-14 的 `13aeafd` 对每个样本都检查"GPU 时间不能短于墙钟的一半且相差超过 2 ms"。Windows 上单次提交的墙钟时间会带上几毫秒的线程唤醒延迟，于是被误判。
+  - 修法（`src/vulkan_membw.cpp`）：每个样本只排除不可能出现的值（没有区间，或 GPU 时间比墙钟还长）；"少算了"改为每个数据点检查一次，用该点墙钟最短的那次提交来判断（`BeginCoverage` / `CheckCoverage`）。测出来的数不变。
+  - 修后在 5090 上跑了 4 次，全部完整完成（119 个点）。用户在看视频时那两次，读取中位数只有 1360–1366；停了视频后两次是 1530.3 和 1538.1。
+- **V1 与 V3 可比：**
+
+  | 设备 | V1 | V2 | V3 |
+  |---|---|---|---|
+  | RTX 5090 读取平台 | 1528–1542 | — | 1530–1538 |
+  | M4 Pro | 252.4 | 300.9 | 245.9–250.4 |
+  | A12X（iPad8,7） | 56.76 | 57.90 | 56.66 |
+
+  出问题的是 V2（10-14 引入，只在苹果设备上跑过）。新增 `LegacyV1VulkanMemoryComparable`（`src/result_quality.h`）：V1 已到平台、`timestampAnomalies=0`、编号不早于 `20261008-045054`（数据校验 `266a197` 的提交时间），就当作和 V3 可比。桌面版补缺（`src/main.cpp`）、安卓和鸿蒙的一键测试（两个 `ResultsStore`）都接受这样的 V1，所以 19 台设备和电脑的显存成绩不用重测。转译的 MoltenVK V1 和 V2 不接受；苹果前端没有改。
+  - 测试：`tests/vulkan_membw_results_test.cpp` 和 `SuitePlanTest.kt` 各加了 V1 的接受/拒绝用例；`scripts/check-mobile-suite.cjs` 原来还停在 V2 规则（按现有代码会失败），已改为 V3 加 V1。
+- **两个数学小测试：** `scripts/gpu-math-probe-windows`（D3D11，另一个会话写的）在 5090 和核显上跑了，见 `out/test-results/gpu-math-probe-windows-20261017-031454/report.md`。
+  - 按实测算力，M4 Pro 每 TFLOPS 的 Burn 分数是其他 GPU 的 0.46–0.83 倍，不是"一半"。
+  - 只看计算循环，每步相当于 180–240 次 FMA 的时间，各 GPU 相近。
+  - 差距大头在循环之外：真实 Burn 跑到自己纯计算循环速度的比例，M4 Pro 是 66%，5090 是 97–109%，核显是 69–86%，原因未查。
+  - 已更新 `docs/interpreting-gpu-burn.md`；Mac 上的后续任务记为 `APPLE-NEXT-TESTS.md` 的 M5。
+- 验证：Windows 编译和 `ctest` 6/6，安卓单元测试 5/5 和 APK，鸿蒙 HAP 和 `check-mobile-suite.cjs` 均通过。
+
 ### 2026-10-16 苹果设备在 GPU Burn 和粒子测试里偏弱的原因（只读分析，写进文档；Mac 小测试代码已写，未编译）
 
 - **A15 大核 147 MWork/s 核对过，是对的。** 测小核时，陪跑的两个大核线程记下的实测频率是 2.94 GHz（两核同时满载时的最高频率）。按单核 3.23 GHz 算，每个工作单元 22.0 个周期。A12X 大核的频率也是实测的（2.47–2.49 GHz），每单元 22.3 个周期，两者一致。7 次运行都落在 146.7–147.7。

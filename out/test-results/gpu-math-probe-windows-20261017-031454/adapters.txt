@@ -1,0 +1,6 @@
+Host: DESKTOP-0G3KI44 / AMD Ryzen 7 9800X3D 8-Core Processor / Microsoft Windows 11 Pro 10.0.26300
+ADAPTER	0	NVIDIA GeForce RTX 5090	software=0	luid=000000000001a8dd	vram_mb=32187	driver=32.0.16.1692
+ADAPTER	1	AMD Radeon(TM) Graphics	software=0	luid=000000000001bff1	vram_mb=2021	driver=32.0.21045.5002
+ADAPTER	2	NVIDIA GeForce RTX 5090	software=0	luid=000000000002f90c	vram_mb=32187	driver=32.0.16.1692
+ADAPTER	3	NVIDIA GeForce RTX 5090	software=0	luid=000000000002c4a2	vram_mb=32187	driver=32.0.16.1692
+ADAPTER	4	Microsoft Basic Render Driver	software=1	luid=000000000001bfaa	vram_mb=0	driver=10.0.26100.9549
