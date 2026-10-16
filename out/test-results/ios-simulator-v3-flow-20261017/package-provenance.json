@@ -1,0 +1,9 @@
+{
+  "commit": "35ea4ebe069de7c572507e73df1e41a81c274e98",
+  "appSha256": "5dd10c6d9feddad8808422fe67a0a05885460ff371a0156716298f10c60dae26",
+  "nativeLibrarySha256": "50a20a3c6e15dd8bceadc1ab2b79ffebf2fc829bba8aaec04e4a399ec53bbd5b",
+  "readSpirvSha256": "099d88caac16181d66a6883ad64a7ce04e0b3b562502228ce4e787920d6aa728",
+  "uiTestSourceSha256": "1f9843816ef74f682ffa1313834f7bed65b35334abd51fb714d6b4f03ff0a372",
+  "appArchitecture": "arm64",
+  "sourceDiff": ""
+}

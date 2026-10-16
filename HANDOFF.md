@@ -2,6 +2,29 @@
 
 > **2026-10-17：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** Mac M1–M4 软件问题及定向验证已完成；Vulkan 内存 V3 三轮正式平台通过，小容量边界正确保留 preview，固定覆盖/完成计时两轮稳定。iOS/Android/HarmonyOS 已重编译，手机真机补测等连接设备。
 
+## 2026-10-17 latest iOS simulator one-button flow passed
+
+- User asked whether simulator validation was needed. Ran the existing real-UI
+  acceptance against Release at35ea4eb on a fresh, dedicated iPhone18ProMax /
+  iOS27.0 simulator, with Chinese test language. No production source change.
+- XCTest tapped actual complete-suite-all; only the existing translation gate
+  was enabled, no automatic suite launch, targeted job or resume.27/27 jobs
+  finished,28 unique records,18 passed/9 review/0 failed/cancelled; XCTest1/1
+  passed and xcodebuild exit0. Before/after screenshots exported and inspected.
+- Current production models match every requested contract and result group.
+  Persisted CPU174/Metal memory52/Vulkan memory77 points restored; page mapping
+  and storage details present. Both CPU progress-page screenshots are portrait
+  and normal, with their native job still running at capture time.
+- V3 Vulkan memory correctly remains review at the simulator's256MiB ceiling:
+  dataVerified1,34 checks, ordered_full_dataset_passes marker, plateau0. This is
+  an expected boundary result; other8 reviews are stability/throughput notices.
+  All Vulkan particle/Burn rows retain synchronized_wall_clock. No rerun to
+  choose high simulated scores; no physical-device performance claim.
+- Evidence/report in out/test-results/ios-simulator-v3-flow-20261017/. All five
+  hardware histories and live Mac results hashes unchanged (Mac169 rows).
+  Simulator stopped and preserved for reuse; full xcresult stays local, readable
+  logs/JSON/screenshots are versioned. A16/A12X/A15 physical follow-ups unchanged.
+
 ## 2026-10-17 Mac measurement fixes completed and verified
 
 - User explicitly requested continuing repairs until completion. This supersedes

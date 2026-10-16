@@ -1,0 +1,14 @@
+Monitoring boot status for Mangekyo Flow 20261017 (46753076-75AF-49C0-90A2-3A30ECC498AC).
+[2026-10-16 13:48:38 +0000] Status=2, isTerminal=NO, Elapsed=00:15.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.WebBookmarks.migrator (WebBookmarks.migrator)
+		Migration Elapsed:00:11 seconds
+
+[2026-10-16 13:48:39 +0000] Status=2, isTerminal=NO, Elapsed=00:15.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.MobileSafari.migrator (MobileSafari.migrator)
+		Migration Elapsed:00:13 seconds
+
+[2026-10-16 13:48:39 +0000] Status=4294967295, isTerminal=YES, Elapsed=00:16.
+	Finished
+

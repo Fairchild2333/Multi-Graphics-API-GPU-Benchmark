@@ -1,0 +1,18 @@
+[
+  {
+    "job": "cpu_compute",
+    "returnCode": 0,
+    "commandOutput": "Detected file type from extension: PNG\nNote: No display specified. Defaulting to display: FAAD4AA6-28BE-4AB2-B798-04CDED10C1E0 (screenID: 1, name: LCD)\nWrote screenshot to: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ios-simulator-v3-flow-20261017/cpu_compute-progress.png\n",
+    "runningAfterScreenshot": [
+      "cpu_compute"
+    ]
+  },
+  {
+    "job": "cpu_memory",
+    "returnCode": 0,
+    "commandOutput": "Detected file type from extension: PNG\nNote: No display specified. Defaulting to display: FAAD4AA6-28BE-4AB2-B798-04CDED10C1E0 (screenID: 1, name: LCD)\nWrote screenshot to: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ios-simulator-v3-flow-20261017/cpu_memory-progress.png\n",
+    "runningAfterScreenshot": [
+      "cpu_memory"
+    ]
+  }
+]

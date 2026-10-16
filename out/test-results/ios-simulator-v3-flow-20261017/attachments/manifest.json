@@ -1,0 +1,26 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "46753076-75AF-49C0-90A2-3A30ECC498AC",
+        "deviceName" : "Mangekyo Flow 20261017",
+        "exportedFileName" : "10631FD7-13E3-4CFB-AE63-03A6A2279FE3.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "One-button complete suite_0_DF3AE859-7DE9-449D-B770-83EBF681D5B4.png",
+        "timestamp" : 1792159270.402
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "46753076-75AF-49C0-90A2-3A30ECC498AC",
+        "deviceName" : "Mangekyo Flow 20261017",
+        "exportedFileName" : "A8F77019-1BDD-4E5A-86A2-0C5368B1617D.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "Before tapping the complete-suite button_0_B35C4CE7-1267-4BA7-8AE9-E4C09EF545DB.png",
+        "timestamp" : 1792158566.542
+      }
+    ],
+    "testIdentifier" : "CompleteSuiteUITests/testOneButtonRunsCompleteSuite()",
+    "testIdentifierURL" : "test://com.apple.xcode/Mangekyo/MangekyoUITests/CompleteSuiteUITests/testOneButtonRunsCompleteSuite"
+  }
+]

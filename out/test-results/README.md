@@ -27,7 +27,7 @@ Mac 最新修复见 [报告、曲线、原生日志及跨平台构建验证](mac
 - Mac 本轮 14 条新增记录中 10 条通过、3 条旧查询对照保留 review、1 条小容量负向复核正确保留 preview/review。默认内存三轮读取 245.897/245.908/250.419 GB/s。新版身份为 `membw_v3_streaming`，旧 V1/V2 不自动变成新版设备成绩。
 - A16 实际进度及 3 项警告数值见 [设备记录](../../docs/a16-partial-run-20261016.md)。
 - iPad8,1 当前选用结果及源清单在 `ipad81-design-review-20261016/`，不是新跑的一轮整套。
-- 模拟器资料如 `ios-simulator-full-suite-20261016/` 仅验证流程，不作真机性能结论。
+- [最新模拟器一键验收](ios-simulator-v3-flow-20261017/report.md)：27/27 项完成、28 条成绩、0 执行失败，18 passed / 9 review；V3 小容量平台提示正确，保存曲线完整。仅验证流程，不作真机性能结论。上一轮 `ios-simulator-full-suite-20261016/` 保留。
 - 其他日期文件夹保留完整 native 日志、套件 manifests、曲线 CSV/JSON 和 PNG/PDF 导出。
 
 ## 仍在本地的内容

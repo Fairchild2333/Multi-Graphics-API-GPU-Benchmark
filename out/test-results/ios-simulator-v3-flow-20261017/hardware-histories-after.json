@@ -1,0 +1,32 @@
+[
+  {
+    "device": "Mac M4 Pro",
+    "path": "out/test-results/macos-measurement-fixes-20261016/results-after.json",
+    "sha256": "003ae4d4398e7dca2066ae7491dbc1bab9d78fa6ad1a587482522ee4dc6bb7ce",
+    "rows": 169
+  },
+  {
+    "device": "iPhone 13 Pro / A15",
+    "path": "out/test-results/a15-cache-isolation-20261014/phone-final/results/results.json",
+    "sha256": "10beabc823de964d6d6e2d2d807fa7c90a6db576718c1b686c628319bce99eb3",
+    "rows": 128
+  },
+  {
+    "device": "12.9-inch iPad Pro / A12X",
+    "path": "out/test-results/a12x-targeted-retest-20261014/phone-final/results/results.json",
+    "sha256": "55497d1ffc1b66be576d01c426d482a93534875cfec9bd46e26598473edf7603",
+    "rows": 72
+  },
+  {
+    "device": "11-inch iPad Pro / A12X",
+    "path": "out/test-results/ipad81-design-review-20261016/phone-final/results/results.json",
+    "sha256": "43d43fb16d87ade98bdb80c7c319d8b8e04434eb69cf1c8f8f777e2284b6531b",
+    "rows": 51
+  },
+  {
+    "device": "iPhone 14 Pro Max / A16",
+    "path": "out/test-results/a16-full-suite-20261016/phone-final/results/results.json",
+    "sha256": "da2a2612d9dfbb8381792987ea2b98f6a47e947f108cd7c39298498930dd7df1",
+    "rows": 24
+  }
+]

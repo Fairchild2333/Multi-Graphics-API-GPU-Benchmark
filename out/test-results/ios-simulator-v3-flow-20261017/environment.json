@@ -1,0 +1,11 @@
+{
+  "purpose": "SIMULATOR FUNCTIONAL FLOW ONLY; NOT PHYSICAL DEVICE PERFORMANCE",
+  "simulator": "46753076-75AF-49C0-90A2-3A30ECC498AC",
+  "deviceName": "Mangekyo Flow 20261017",
+  "deviceType": "iPhone 18 Pro Max",
+  "runtime": "iOS 27.0",
+  "commit": "35ea4ebe069de7c572507e73df1e41a81c274e98",
+  "language": "zh-Hans",
+  "region": "CN",
+  "freshSimulatorCreatedForThisTask": true
+}

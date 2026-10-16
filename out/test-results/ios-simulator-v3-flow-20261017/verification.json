@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "scope": "SIMULATOR FUNCTIONAL FLOW ONLY; not physical-device performance acceptance",
+  "jobs": 27,
+  "records": 28,
+  "passedJobs": 18,
+  "reviewJobs": 9,
+  "failedJobs": 0,
+  "expectedSmallMemoryPreview": 1,
+  "qualityReviewPreserved": true,
+  "freshRealButtonRun": true,
+  "savedCurves": {
+    "cpuCurvePoints": 174,
+    "metalMemoryPoints": 52,
+    "vulkanMemoryPoints": 77
+  },
+  "fiveHardwareHistoriesUnchanged": true,
+  "liveMacHistoryUnchanged": true,
+  "sourceImplementationUnchanged": true,
+  "xctestPassed": 1
+}

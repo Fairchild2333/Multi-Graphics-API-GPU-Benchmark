@@ -1,0 +1,414 @@
+{
+  "finishedAt": "2026-10-16T14:00:59Z",
+  "id": "complete-suite-61E17192-CFE4-412A-8E83-1DAE3891076F",
+  "jobs": [
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:49:43Z",
+      "id": "stream-65536",
+      "request": "stream?particles=65536&vsync=0&api=metal&coverage=fixed",
+      "resultIDs": [
+        "20261017-004942-712"
+      ],
+      "startedAt": "2026-10-16T13:49:26Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 Particle 65536 \u00b7 Render"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:49:59Z",
+      "id": "stream_headless-65536",
+      "request": "stream_headless?particles=65536&vsync=0&api=metal",
+      "resultIDs": [
+        "20261017-004958-690"
+      ],
+      "startedAt": "2026-10-16T13:49:43Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 Particle 65536 \u00b7 Compute"
+    },
+    {
+      "error": "\u5c1a\u672a\u8fbe\u5230\u7a33\u5b9a\u5e73\u53f0",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:50:15Z",
+      "id": "stream-1048576",
+      "request": "stream?particles=1048576&vsync=0&api=metal&coverage=fixed",
+      "resultIDs": [
+        "20261017-005014-587"
+      ],
+      "startedAt": "2026-10-16T13:49:59Z",
+      "status": "review",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 Particle 1048576 \u00b7 Render"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:50:30Z",
+      "id": "stream_headless-1048576",
+      "request": "stream_headless?particles=1048576&vsync=0&api=metal",
+      "resultIDs": [
+        "20261017-005030-556"
+      ],
+      "startedAt": "2026-10-16T13:50:15Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 Particle 1048576 \u00b7 Compute"
+    },
+    {
+      "error": "\u5c1a\u672a\u8fbe\u5230\u7a33\u5b9a\u5e73\u53f0",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:50:46Z",
+      "id": "stream-4194304",
+      "request": "stream?particles=4194304&vsync=0&api=metal&coverage=fixed",
+      "resultIDs": [
+        "20261017-005046-567"
+      ],
+      "startedAt": "2026-10-16T13:50:31Z",
+      "status": "review",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 Particle 4194304 \u00b7 Render"
+    },
+    {
+      "error": "\u5c1a\u672a\u8fbe\u5230\u7a33\u5b9a\u5e73\u53f0; \u8fd0\u884c\u4e2d\u541e\u5410\u4e0b\u964d\u8d85\u8fc7 5%",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:51:02Z",
+      "id": "stream_headless-4194304",
+      "request": "stream_headless?particles=4194304&vsync=0&api=metal",
+      "resultIDs": [
+        "20261017-005102-407"
+      ],
+      "startedAt": "2026-10-16T13:50:47Z",
+      "status": "review",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 Particle 4194304 \u00b7 Compute"
+    },
+    {
+      "error": "\u5c1a\u672a\u8fbe\u5230\u7a33\u5b9a\u5e73\u53f0",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:51:18Z",
+      "id": "stream-16777216",
+      "request": "stream?particles=16777216&vsync=0&api=metal&coverage=fixed",
+      "resultIDs": [
+        "20261017-005118-493"
+      ],
+      "startedAt": "2026-10-16T13:51:03Z",
+      "status": "review",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 Particle 16777216 \u00b7 Render"
+    },
+    {
+      "error": "\u5c1a\u672a\u8fbe\u5230\u7a33\u5b9a\u5e73\u53f0; \u8fd0\u884c\u4e2d\u541e\u5410\u4e0b\u964d\u8d85\u8fc7 5%",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:51:34Z",
+      "id": "stream_headless-16777216",
+      "request": "stream_headless?particles=16777216&vsync=0&api=metal",
+      "resultIDs": [
+        "20261017-005134-591"
+      ],
+      "startedAt": "2026-10-16T13:51:19Z",
+      "status": "review",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 Particle 16777216 \u00b7 Compute"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:51:50Z",
+      "id": "gpu_burn-16",
+      "request": "gpu_burn?steps=16&vsync=0&api=metal",
+      "resultIDs": [
+        "20261017-005150-575"
+      ],
+      "startedAt": "2026-10-16T13:51:35Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 GPU Burn \u00b7 16"
+    },
+    {
+      "error": "\u5c1a\u672a\u8fbe\u5230\u7a33\u5b9a\u5e73\u53f0",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:52:06Z",
+      "id": "gpu_burn-64",
+      "request": "gpu_burn?steps=64&vsync=0&api=metal",
+      "resultIDs": [
+        "20261017-005206-363"
+      ],
+      "startedAt": "2026-10-16T13:51:51Z",
+      "status": "review",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 GPU Burn \u00b7 64"
+    },
+    {
+      "error": "\u5c1a\u672a\u8fbe\u5230\u7a33\u5b9a\u5e73\u53f0",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:52:22Z",
+      "id": "gpu_burn-256",
+      "request": "gpu_burn?steps=256&vsync=0&api=metal",
+      "resultIDs": [
+        "20261017-005222-322"
+      ],
+      "startedAt": "2026-10-16T13:52:07Z",
+      "status": "review",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 GPU Burn \u00b7 256"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:52:39Z",
+      "id": "cinematic_liquid",
+      "request": "cinematic_liquid?vsync=0&api=metal",
+      "resultIDs": [
+        "20261017-005238-694"
+      ],
+      "startedAt": "2026-10-16T13:52:23Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 Cinematic Liquid"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:52:40Z",
+      "id": "memory_sweep",
+      "request": "memory_sweep?api=metal",
+      "resultIDs": [
+        "20261017-005239-953-metal-memsweep"
+      ],
+      "startedAt": "2026-10-16T13:52:39Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Metal \u00b7 GPU Cache & Memory"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:52:56Z",
+      "id": "vulkan/stream-65536",
+      "request": "stream?particles=65536&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs": [
+        "20261017-005256-579"
+      ],
+      "startedAt": "2026-10-16T13:52:41Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Vulkan (MoltenVK) \u00b7 Particle 65536 \u00b7 Render"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:53:12Z",
+      "id": "vulkan/stream_headless-65536",
+      "request": "stream_headless?particles=65536&vsync=0&api=vulkan",
+      "resultIDs": [
+        "20261017-005312-499"
+      ],
+      "startedAt": "2026-10-16T13:52:57Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Vulkan (MoltenVK) \u00b7 Particle 65536 \u00b7 Compute"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:53:28Z",
+      "id": "vulkan/stream-1048576",
+      "request": "stream?particles=1048576&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs": [
+        "20261017-005328-494"
+      ],
+      "startedAt": "2026-10-16T13:53:13Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Vulkan (MoltenVK) \u00b7 Particle 1048576 \u00b7 Render"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:53:44Z",
+      "id": "vulkan/stream_headless-1048576",
+      "request": "stream_headless?particles=1048576&vsync=0&api=vulkan",
+      "resultIDs": [
+        "20261017-005344-201"
+      ],
+      "startedAt": "2026-10-16T13:53:29Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Vulkan (MoltenVK) \u00b7 Particle 1048576 \u00b7 Compute"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:54:00Z",
+      "id": "vulkan/stream-4194304",
+      "request": "stream?particles=4194304&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs": [
+        "20261017-005400-148"
+      ],
+      "startedAt": "2026-10-16T13:53:45Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Vulkan (MoltenVK) \u00b7 Particle 4194304 \u00b7 Render"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:54:16Z",
+      "id": "vulkan/stream_headless-4194304",
+      "request": "stream_headless?particles=4194304&vsync=0&api=vulkan",
+      "resultIDs": [
+        "20261017-005416-036"
+      ],
+      "startedAt": "2026-10-16T13:54:00Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Vulkan (MoltenVK) \u00b7 Particle 4194304 \u00b7 Compute"
+    },
+    {
+      "error": "\u5c1a\u672a\u8fbe\u5230\u7a33\u5b9a\u5e73\u53f0",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:54:32Z",
+      "id": "vulkan/gpu_burn-16",
+      "request": "gpu_burn?steps=16&vsync=0&api=vulkan",
+      "resultIDs": [
+        "20261017-005431-930"
+      ],
+      "startedAt": "2026-10-16T13:54:16Z",
+      "status": "review",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Vulkan \u00b7 GPU Burn \u00b7 16"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:54:48Z",
+      "id": "vulkan/gpu_burn-64",
+      "request": "gpu_burn?steps=64&vsync=0&api=vulkan",
+      "resultIDs": [
+        "20261017-005448-001"
+      ],
+      "startedAt": "2026-10-16T13:54:32Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Vulkan \u00b7 GPU Burn \u00b7 64"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:55:04Z",
+      "id": "vulkan/gpu_burn-256",
+      "request": "gpu_burn?steps=256&vsync=0&api=vulkan",
+      "resultIDs": [
+        "20261017-005503-975"
+      ],
+      "startedAt": "2026-10-16T13:54:48Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Vulkan \u00b7 GPU Burn \u00b7 256"
+    },
+    {
+      "error": "\u5c1a\u672a\u8fbe\u5230\u5185\u5b58\u5e26\u5bbd\u5e73\u53f0",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T13:55:54Z",
+      "id": "vulkan/memory_sweep",
+      "request": "memory_sweep?api=vulkan",
+      "resultIDs": [
+        "20261017-005554-563-membw"
+      ],
+      "startedAt": "2026-10-16T13:55:04Z",
+      "status": "review",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "Vulkan \u00b7 GPU Cache & Memory"
+    },
+    {
+      "error": "",
+      "expectedRecords": 2,
+      "finishedAt": "2026-10-16T13:59:43Z",
+      "id": "cpu_compute",
+      "request": "gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2",
+      "resultIDs": [
+        "20261017-005943-253-cpu-single",
+        "20261017-005943-254-cpu-multi"
+      ],
+      "startedAt": "2026-10-16T13:55:55Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "CPU Compute \u00b7 Single + All Cores"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T14:00:22Z",
+      "id": "cpu_memory",
+      "request": "gpu_benchmark --cpu-membw",
+      "resultIDs": [
+        "20261017-010022-602-cpu-membw"
+      ],
+      "startedAt": "2026-10-16T13:59:43Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "CPU Cache, Memory, Virtual Memory & Storage"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T14:00:39Z",
+      "id": "gles2/gpu_burn-16",
+      "request": "gpu_burn?steps=16&api=gles2&vsync=0",
+      "resultIDs": [
+        "20261017-010039-141"
+      ],
+      "startedAt": "2026-10-16T14:00:23Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "OpenGL ES 2.0 \u00b7 GPU Burn \u00b7 16"
+    },
+    {
+      "error": "",
+      "expectedRecords": 1,
+      "finishedAt": "2026-10-16T14:00:59Z",
+      "id": "gles2/gpu_burn-64",
+      "request": "gpu_burn?steps=64&api=gles2&vsync=0",
+      "resultIDs": [
+        "20261017-010058-935"
+      ],
+      "startedAt": "2026-10-16T14:00:40Z",
+      "status": "passed",
+      "thermalStateEnd": 0,
+      "thermalStateStart": 0,
+      "title": "OpenGL ES 2.0 \u00b7 GPU Burn \u00b7 64"
+    }
+  ],
+  "startedAt": "2026-10-16T13:49:26Z",
+  "status": "review"
+}
