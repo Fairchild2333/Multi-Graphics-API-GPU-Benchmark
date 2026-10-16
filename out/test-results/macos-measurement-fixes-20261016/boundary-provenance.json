@@ -1,0 +1,8 @@
+{
+  "worker": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+  "workerSha256": "6bf03a7b6efcf55d9a79cad4e37ea7a34f40e2ec47fc685ae2f99943126548db",
+  "purpose": "Verify final three memory plateau datasets all use ordered full-dataset traversal; default result valid, 256 MiB limit must remain preview",
+  "sourceBase": "1af320220793c574acb430b0dc1dd2a3beaf2eaa",
+  "sourceDiffSha256": "97912e4d73ee1317be8c9ea14c6066161323ca5418f6af57df224bf2cfd61622",
+  "postBuildSourceChanges": "Comments only: clarify sample-wide byte and timestamp scope; no further implementation change."
+}

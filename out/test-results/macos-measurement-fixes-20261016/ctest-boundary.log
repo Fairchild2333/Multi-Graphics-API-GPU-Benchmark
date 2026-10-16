@@ -1,0 +1,19 @@
+Test project /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/build/macos-arm64-release
+    Start 1: results_compat
+1/7 Test #1: results_compat ...................   Passed    0.01 sec
+    Start 2: result_quality
+2/7 Test #2: result_quality ...................   Passed    0.21 sec
+    Start 3: complete_suite
+3/7 Test #3: complete_suite ...................   Passed    0.00 sec
+    Start 4: vulkan_membw_results
+4/7 Test #4: vulkan_membw_results .............   Passed    0.31 sec
+    Start 5: cpu_residency
+5/7 Test #5: cpu_residency ....................   Passed    0.00 sec
+    Start 6: cpu_cancel
+6/7 Test #6: cpu_cancel .......................   Passed    3.01 sec
+    Start 7: suite_process
+7/7 Test #7: suite_process ....................   Passed    0.04 sec
+
+100% tests passed out of 7
+
+Total Test time (real) =   3.59 sec

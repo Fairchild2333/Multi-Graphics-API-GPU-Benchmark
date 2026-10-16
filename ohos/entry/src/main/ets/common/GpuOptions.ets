@@ -185,7 +185,7 @@ export function gpuSavedAs(testId: string, steps: number, seconds: number, api: 
       : 'cinematic_liquid_v2_physical_scene_v8_preview_ohos_preview';
   }
   if (testId === 'membw') {
-    return 'membw_v2_verified_ohos_preview';
+    return 'membw_v3_streaming_ohos_preview';
   }
   return testId;
 }

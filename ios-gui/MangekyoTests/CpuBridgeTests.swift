@@ -233,7 +233,7 @@ final class CpuBridgeTests: XCTestCase {
         let row = try XCTUnwrap(try savedRows().last(where: {
             $0["graphicsApi"] as? String == "Vulkan" && $0["workload"] as? String == "membw"
         }))
-        XCTAssertEqual(row["workloadVersion"] as? String, "membw_v2_verified_ios_preview_moltenvk")
+        XCTAssertEqual(row["workloadVersion"] as? String, "membw_v3_streaming_ios_preview_moltenvk")
         let config = row["workloadConfig"] as? String ?? ""
         for family in ["read", "write", "copy", "l1", "l1_single"] {
             XCTAssertTrue(config.contains("curve_\(family)="), config)

@@ -1,0 +1,143 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Reusing configuration cache.
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:generateDebugGlobalSynthetics UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:configureCMakeDebug[x86_64]
+> Task :app:configureCMakeDebug[armeabi-v7a]
+> Task :app:configureCMakeDebug[x86]
+> Task :app:configureCMakeDebug[arm64-v8a]
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:dexBuilderDebug UP-TO-DATE
+> Task :app:compileDebugUnitTestKotlin UP-TO-DATE
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:mergeProjectDexDebug UP-TO-DATE
+> Task :app:testDebugUnitTest UP-TO-DATE
+
+> Task :app:buildCMakeDebug[x86_64]
+C/C++: ninja: Entering directory `/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/android/app/.cxx/Debug/5g2y6a1x/x86_64'
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw.cpp:33:25: warning: unused variable 'kMemoryPlateauBytes' [-Wunused-const-variable]
+C/C++:    33 | constexpr std::uint64_t kMemoryPlateauBytes = kMemBwStreamingMinBytes;
+C/C++:       |                         ^~~~~~~~~~~~~~~~~~~
+C/C++: 1 warning generated.
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:1196:10: warning: variable 'saveMemorySweep' set but not used [-Wunused-but-set-variable]
+C/C++:  1196 |     bool saveMemorySweep = false;
+C/C++:       |          ^
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:1198:10: warning: variable 'saveGpuCacheProbe' set but not used [-Wunused-but-set-variable]
+C/C++:  1198 |     bool saveGpuCacheProbe = true;
+C/C++:       |          ^
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:450:20: warning: unused function 'QuoteSuiteProcessArg' [-Wunused-function]
+C/C++:   450 | static std::string QuoteSuiteProcessArg(const std::string& value) {
+C/C++:       |                    ^~~~~~~~~~~~~~~~~~~~
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:470:13: warning: unused function 'NameLooksIntegrated' [-Wunused-function]
+C/C++:   470 | static bool NameLooksIntegrated(const std::string& name) {
+C/C++:       |             ^~~~~~~~~~~~~~~~~~~
+C/C++: 4 warnings generated.
+
+> Task :app:buildCMakeDebug[armeabi-v7a]
+C/C++: ninja: Entering directory `/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/android/app/.cxx/Debug/5g2y6a1x/armeabi-v7a'
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw.cpp:33:25: warning: unused variable 'kMemoryPlateauBytes' [-Wunused-const-variable]
+C/C++:    33 | constexpr std::uint64_t kMemoryPlateauBytes = kMemBwStreamingMinBytes;
+C/C++:       |                         ^~~~~~~~~~~~~~~~~~~
+C/C++: 1 warning generated.
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:1196:10: warning: variable 'saveMemorySweep' set but not used [-Wunused-but-set-variable]
+C/C++:  1196 |     bool saveMemorySweep = false;
+C/C++:       |          ^
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:1198:10: warning: variable 'saveGpuCacheProbe' set but not used [-Wunused-but-set-variable]
+C/C++:  1198 |     bool saveGpuCacheProbe = true;
+C/C++:       |          ^
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:450:20: warning: unused function 'QuoteSuiteProcessArg' [-Wunused-function]
+C/C++:   450 | static std::string QuoteSuiteProcessArg(const std::string& value) {
+C/C++:       |                    ^~~~~~~~~~~~~~~~~~~~
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:470:13: warning: unused function 'NameLooksIntegrated' [-Wunused-function]
+C/C++:   470 | static bool NameLooksIntegrated(const std::string& name) {
+C/C++:       |             ^~~~~~~~~~~~~~~~~~~
+C/C++: 4 warnings generated.
+
+> Task :app:buildCMakeDebug[x86]
+C/C++: ninja: Entering directory `/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/android/app/.cxx/Debug/5g2y6a1x/x86'
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw.cpp:33:25: warning: unused variable 'kMemoryPlateauBytes' [-Wunused-const-variable]
+C/C++:    33 | constexpr std::uint64_t kMemoryPlateauBytes = kMemBwStreamingMinBytes;
+C/C++:       |                         ^~~~~~~~~~~~~~~~~~~
+C/C++: 1 warning generated.
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:1196:10: warning: variable 'saveMemorySweep' set but not used [-Wunused-but-set-variable]
+C/C++:  1196 |     bool saveMemorySweep = false;
+C/C++:       |          ^
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:1198:10: warning: variable 'saveGpuCacheProbe' set but not used [-Wunused-but-set-variable]
+C/C++:  1198 |     bool saveGpuCacheProbe = true;
+C/C++:       |          ^
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:450:20: warning: unused function 'QuoteSuiteProcessArg' [-Wunused-function]
+C/C++:   450 | static std::string QuoteSuiteProcessArg(const std::string& value) {
+C/C++:       |                    ^~~~~~~~~~~~~~~~~~~~
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:470:13: warning: unused function 'NameLooksIntegrated' [-Wunused-function]
+C/C++:   470 | static bool NameLooksIntegrated(const std::string& name) {
+C/C++:       |             ^~~~~~~~~~~~~~~~~~~
+C/C++: 4 warnings generated.
+
+> Task :app:buildCMakeDebug[arm64-v8a]
+C/C++: ninja: Entering directory `/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/android/app/.cxx/Debug/5g2y6a1x/arm64-v8a'
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/vulkan_membw.cpp:33:25: warning: unused variable 'kMemoryPlateauBytes' [-Wunused-const-variable]
+C/C++:    33 | constexpr std::uint64_t kMemoryPlateauBytes = kMemBwStreamingMinBytes;
+C/C++:       |                         ^~~~~~~~~~~~~~~~~~~
+C/C++: 1 warning generated.
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:1196:10: warning: variable 'saveMemorySweep' set but not used [-Wunused-but-set-variable]
+C/C++:  1196 |     bool saveMemorySweep = false;
+C/C++:       |          ^
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:1198:10: warning: variable 'saveGpuCacheProbe' set but not used [-Wunused-but-set-variable]
+C/C++:  1198 |     bool saveGpuCacheProbe = true;
+C/C++:       |          ^
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:450:20: warning: unused function 'QuoteSuiteProcessArg' [-Wunused-function]
+C/C++:   450 | static std::string QuoteSuiteProcessArg(const std::string& value) {
+C/C++:       |                    ^~~~~~~~~~~~~~~~~~~~
+C/C++: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/main.cpp:470:13: warning: unused function 'NameLooksIntegrated' [-Wunused-function]
+C/C++:   470 | static bool NameLooksIntegrated(const std::string& name) {
+C/C++:       |             ^~~~~~~~~~~~~~~~~~~
+C/C++: 4 warnings generated.
+
+> Task :app:buildCMakeDebug
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:mergeDebugNativeLibs
+> Task :app:stripDebugDebugSymbols
+> Task :app:packageDebug
+> Task :app:assembleDebug
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+
+BUILD SUCCESSFUL in 9s
+50 actionable tasks: 11 executed, 39 up-to-date
+Configuration cache entry reused.

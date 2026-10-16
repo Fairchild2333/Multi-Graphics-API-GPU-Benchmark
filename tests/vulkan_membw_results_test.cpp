@@ -1,5 +1,9 @@
 #include "vulkan_membw_results.h"
 #include "vulkan_timing_validation.h"
+#include "result_quality.h"
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
@@ -7,6 +11,8 @@
 int main() {
     using namespace gpu_bench;
     MemBwConfig config;
+    assert(!MemBwStreamingTailEligible(128ull << 20, 192ull << 20, 256ull << 20));
+    assert(MemBwStreamingTailEligible(256ull << 20, 384ull << 20, 512ull << 20));
     MemBwReport report;
     report.valid = true;
     report.dataVerified = true;
@@ -39,7 +45,13 @@ int main() {
     assert(result.workloadConfig.find("memoryPlateauReached=0") != std::string::npos);
     assert(result.workloadConfig.find("score=read_largest_datasets;") == 0);
     assert(result.workloadConfig.find("dataVerified=1;writeCopyChecks=2") != std::string::npos);
-    assert(result.workloadVersion.find("membw_v2_verified") == 0);
+    assert(result.workloadVersion.find("membw_v3_streaming") == 0);
+    assert(CurrentVulkanMemoryContractVerified(result));
+    assert(!MeasurementReviewReasons(result).empty());
+    auto oldTraversal = result;
+    oldTraversal.workloadVersion = "membw_v2_verified_preview";
+    assert(!CurrentVulkanMemoryContractVerified(oldTraversal));
+    assert(result.workloadConfig.find("largeDatasetTraversal=ordered_full_dataset_passes") != std::string::npos);
     assert(VulkanTimestampIntervalVerified(4, 4.2));
     assert(VulkanTimestampIntervalVerified(0.05, 0.25));
     assert(!VulkanTimestampIntervalVerified(0.02, 11)); // known under-reporting pattern
@@ -61,6 +73,7 @@ int main() {
     result = MakeStoredVulkanMemBwResult(report, config, "Named GPU", 1024);
     assert(result.deviceName == "Named GPU" && result.vramMB == 1024);
     assert(result.workloadVersion.find("preview") == std::string::npos);
+    assert(MeasurementReviewReasons(result).empty());
     config.maxDatasetBytes = 256ull << 20;
     result = MakeStoredVulkanMemBwResult(report, config);
     assert(result.workloadVersion.find("preview") != std::string::npos);

@@ -53,12 +53,16 @@ class SuitePlanTest {
     }
     @Test fun memorySuiteRequiresVerifiedDataAndOneTimingContract() {
         val job = SuiteJob("vulkan-memory", "vulkan", "membw", headless = true)
-        val verified = record(workload = "membw").copy(workloadVersion = "membw_v2_verified_android_preview",
-            workloadConfig = "dataVerified=1;writeCopyChecks=2;timestampAnomalies=0")
+        val verified = record(workload = "membw").copy(workloadVersion = "membw_v3_streaming_android_preview",
+            workloadConfig = "dataVerified=1;writeCopyChecks=2;timestampAnomalies=0;largeDatasetTraversal=ordered_full_dataset_passes")
         assertTrue(verified.matches(job))
+        assertFalse(verified.measurementReviewReasons.isEmpty())
+        assertTrue(verified.copy(workloadConfig = verified.workloadConfig + ";memoryPlateauReached=1").measurementReviewReasons.isEmpty())
         assertFalse(verified.copy(workloadVersion = "membw_v1_android_preview").matches(job))
-        assertFalse(verified.copy(workloadConfig = "dataVerified=0;writeCopyChecks=2;timestampAnomalies=0").matches(job))
-        assertFalse(verified.copy(workloadConfig = "dataVerified=1;writeCopyChecks=0;timestampAnomalies=0").matches(job))
-        assertFalse(verified.copy(workloadConfig = "dataVerified=1;writeCopyChecks=2;timestampAnomalies=1").matches(job))
+        assertFalse(verified.copy(workloadVersion = "membw_v2_verified_android_preview").matches(job))
+        assertFalse(verified.copy(workloadConfig = verified.workloadConfig.replace("dataVerified=1", "dataVerified=0")).matches(job))
+        assertFalse(verified.copy(workloadConfig = verified.workloadConfig.replace("writeCopyChecks=2", "writeCopyChecks=0")).matches(job))
+        assertFalse(verified.copy(workloadConfig = verified.workloadConfig.replace("timestampAnomalies=0", "timestampAnomalies=1")).matches(job))
+        assertFalse(verified.copy(workloadConfig = verified.workloadConfig.replace("ordered_full_dataset_passes", "private_chunk_repeats")).matches(job))
     }
 }

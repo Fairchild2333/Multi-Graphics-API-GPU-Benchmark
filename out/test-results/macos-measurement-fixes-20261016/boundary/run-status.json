@@ -1,0 +1,96 @@
+[
+  {
+    "job": "vulkan-v3-final-default",
+    "command": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--gui-worker",
+      "--gpu",
+      "0",
+      "--backend",
+      "vulkan",
+      "--allow-translated-api",
+      "--workload",
+      "membw",
+      "--no-renderdoc"
+    ],
+    "thermalBefore": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T13:34:05Z"
+    },
+    "state": "completed",
+    "workerSha256": "6bf03a7b6efcf55d9a79cad4e37ea7a34f40e2ec47fc685ae2f99943126548db",
+    "returnCode": 0,
+    "thermalAfter": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T13:35:10Z"
+    },
+    "results": [
+      {
+        "id": "20261017-003510-928-membw",
+        "workload": "membw",
+        "workloadVersion": "membw_v3_streaming_moltenvk",
+        "score": 250.419,
+        "scoreUnit": "GB/s",
+        "avgComputeMs": 0.0,
+        "avgTotalGpuMs": 0.0,
+        "avgFrameTimeMs": 0.0,
+        "stableScore": 0.0,
+        "throttlePct": 0.0
+      }
+    ]
+  },
+  {
+    "job": "vulkan-v3-256m-preview",
+    "command": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--gui-worker",
+      "--gpu",
+      "0",
+      "--backend",
+      "vulkan",
+      "--allow-translated-api",
+      "--workload",
+      "membw",
+      "--no-renderdoc",
+      "--membw-max-mib",
+      "256"
+    ],
+    "thermalBefore": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T13:35:40Z"
+    },
+    "state": "completed",
+    "workerSha256": "6bf03a7b6efcf55d9a79cad4e37ea7a34f40e2ec47fc685ae2f99943126548db",
+    "returnCode": 0,
+    "thermalAfter": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T13:36:32Z"
+    },
+    "results": [
+      {
+        "id": "20261017-003632-193-membw",
+        "workload": "membw",
+        "workloadVersion": "membw_v3_streaming_preview_moltenvk",
+        "score": 249.937,
+        "scoreUnit": "GB/s",
+        "avgComputeMs": 0.0,
+        "avgTotalGpuMs": 0.0,
+        "avgFrameTimeMs": 0.0,
+        "stableScore": 0.0,
+        "throttlePct": 0.0
+      }
+    ]
+  }
+]

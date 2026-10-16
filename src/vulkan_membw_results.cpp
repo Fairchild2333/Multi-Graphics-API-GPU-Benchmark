@@ -100,7 +100,10 @@ BenchmarkResult MakeStoredVulkanMemBwResult(
              << ";dataVerified=" << (report.dataVerified ? 1 : 0)
              << ";writeCopyChecks=" << report.writeCopyChecks
              << ";resourceSynchronization=explicit_compute_transfer_host"
-             << ";writeCopyDispatch=one_owner_per_chunk;writeCopyRepeats=in_shader;memoryAccess=volatile"
+             << ";writeCopyDispatch=one_owner_per_chunk;writeCopyRepeats=cache_points_in_shader;memoryAccess=volatile"
+             << ";largeDatasetTraversal=ordered_full_dataset_passes"
+             << ";streamingMinMiB=" << kMemBwStreamingMinBytes / (1024 * 1024)
+             << ";largeDatasetRepeats=one_per_dispatch;readAddressing=unique_chunk_no_modulo"
              << ";cacheAttribution=unverified;l1Attribution=workgroup_footprint_inference"
              << ";performanceQueryAdvertised=" << (report.performanceQueryAdvertised ? 1 : 0)
              << ";performanceCounterStatus=" << report.performanceCounterStatus

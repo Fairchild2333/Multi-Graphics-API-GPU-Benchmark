@@ -30,7 +30,7 @@ constexpr std::uint32_t kHashSeed = 0x4d42u;
 constexpr std::uint64_t kMiB = 1ull << 20;
 // The memory plateau needs a sweep of at least this size whose three largest
 // data sets agree within kMemoryTailSpread.
-constexpr std::uint64_t kMemoryPlateauBytes = 256 * kMiB;
+constexpr std::uint64_t kMemoryPlateauBytes = kMemBwStreamingMinBytes;
 constexpr double kMemoryTailSpread = 1.2;
 constexpr double kPlateauSpread = 1.3;
 // Upper bound on the traffic of a single dispatch.
@@ -195,7 +195,8 @@ MemBwKernelSummary Summarise(const std::vector<MemBwPoint>& points, const char* 
     const double tailLow = *std::min_element(tail.begin(), tail.end());
     const double tailHigh = *std::max_element(tail.begin(), tail.end());
     summary.memoryPlateauReached =
-        tail.size() == 3 && curve.back()->datasetBytes >= kMemoryPlateauBytes &&
+        tail.size() == 3 && MemBwStreamingTailEligible(curve[count - 3]->datasetBytes,
+            curve[count - 2]->datasetBytes, curve[count - 1]->datasetBytes) &&
         tailLow > 0.0 && tailHigh / tailLow <= kMemoryTailSpread;
     if (!summary.memoryPlateauReached) return summary;
 
@@ -336,7 +337,8 @@ private:
     void Destroy();
 
     Sample Submit(std::size_t kernel, std::uint32_t chunkCount, std::uint32_t stripesPerChunk,
-                  std::uint64_t totalGroups, std::uint32_t repeats);
+                  std::uint64_t totalGroups, std::uint32_t repeats,
+                  std::uint32_t orderedPasses = 1);
     Sample Dispatch(std::size_t kernel, std::uint32_t chunkCount, std::uint64_t passes);
     double TimeOf(const Sample& sample);
     std::uint64_t MaxPasses(std::uint32_t chunkCount) const;
@@ -853,7 +855,8 @@ void Runner::CreateCommandObjects() {
 void Runner::RecordResourceBarrier() {
     VkMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
-    barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+    barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT |
+                            VK_ACCESS_TRANSFER_WRITE_BIT;
     barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT |
                             VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
     vkCmdPipelineBarrier(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT,
@@ -863,6 +866,13 @@ void Runner::RecordResourceBarrier() {
 
 Runner::Sample Runner::Dispatch(std::size_t kernel, std::uint32_t chunkCount,
                                 std::uint64_t passes) {
+    if (chunkCount * kChunkBytes >= kMemBwStreamingMinBytes) {
+        // Each dispatch visits every chunk once. A compute execution/memory
+        // dependency orders the next complete pass, preventing private-chunk
+        // write/copy loops from recycling the same cache-resident block.
+        return Submit(kernel, chunkCount, kStripesPerChunk, chunkCount, 1,
+                      static_cast<std::uint32_t>(passes));
+    }
     if (kernel == kWriteKernel || kernel == kCopyKernel)
         return Submit(kernel, chunkCount, kStripesPerChunk, chunkCount,
                       static_cast<std::uint32_t>(passes));
@@ -872,7 +882,7 @@ Runner::Sample Runner::Dispatch(std::size_t kernel, std::uint32_t chunkCount,
 
 Runner::Sample Runner::Submit(std::size_t kernel, std::uint32_t chunkCount,
                               std::uint32_t stripesPerChunk, std::uint64_t total,
-                              std::uint32_t repeats) {
+                              std::uint32_t repeats, std::uint32_t orderedPasses) {
     const auto groupsX = static_cast<std::uint32_t>(
         (std::min)(total, static_cast<std::uint64_t>(groupsXLimit_)));
     const auto groupsY = static_cast<std::uint32_t>((total + groupsX - 1) / groupsX);
@@ -892,10 +902,13 @@ Runner::Sample Runner::Submit(std::size_t kernel, std::uint32_t chunkCount,
     vkCmdPushConstants(cmd_, pipelineLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0,
                        sizeof(PushParams), &params);
     // The queue is idle here (every dispatch is submitted and waited on its
-    // own), so the two timestamps bracket exactly this dispatch.
+    // own), so the timestamps bracket the entire ordered dispatch batch.
     if (queryPool_)
         vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queryPool_, 0);
-    vkCmdDispatch(cmd_, groupsX, groupsY, 1);
+    for (std::uint32_t pass = 0; pass < orderedPasses; ++pass) {
+        vkCmdDispatch(cmd_, groupsX, groupsY, 1);
+        if (pass + 1 < orderedPasses) RecordResourceBarrier();
+    }
     if (queryPool_)
         vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queryPool_, 1);
     return Execute();
@@ -1156,6 +1169,8 @@ MemBwPoint Runner::MeasurePoint(std::size_t kernel, std::uint32_t chunkCount,
     point.datasetBytes = chunkCount * kChunkBytes;
     point.passes = static_cast<std::uint32_t>(passes);
     point.bytesPerDispatch = chunkCount * passes * kKernels[kernel].bytesPerChunkVisit;
+    point.dispatchesPerSample = point.datasetBytes >= kMemBwStreamingMinBytes
+        ? static_cast<std::uint32_t>(passes) : 1;
     FillStatistics(point, times);
     VerifyWrittenData(kernel, chunkCount);
     return point;
@@ -1299,6 +1314,7 @@ void Runner::PrintPoint(const MemBwPoint& point, bool blockSweep) {
          << "\tdataset_bytes=" << point.datasetBytes
          << "\tpasses=" << point.passes
          << "\tdispatch_bytes=" << point.bytesPerDispatch
+         << "\tdispatches_per_sample=" << point.dispatchesPerSample
          << std::setprecision(6)
          << "\tmedian_ms=" << point.medianMs << "\tmin_ms=" << point.minMs
          << std::setprecision(3)
@@ -1342,7 +1358,10 @@ void Runner::Run(MemBwReport& report) {
          << (report.datasetLimitedByDevice ? " (ceiling lowered by the device)" : "") << "\n"
          << "Timing:    " << (useGpuTimestamps_ ? "GPU timestamps" : "wall clock") << ", "
          << config_.warmupRuns << " warm-up + " << config_.measuredRuns
-         << " measured dispatches per point, median reported\n";
+         << " measured samples per point, median reported\n";
+    out_ << "Traversal: complete ordered data-set passes from "
+         << FormatMiB(kMemBwStreamingMinBytes)
+         << "; smaller points retain cache-workgroup repetition.\n";
 
     const auto chunkCounts = SweepChunkCounts(maxChunks_);
     for (std::size_t k = 0; k < kSweepKernelCount; ++k) {

@@ -1,0 +1,298 @@
+[
+  {
+    "job": "vulkan-membw-v3",
+    "command": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--gui-worker",
+      "--gpu",
+      "0",
+      "--backend",
+      "vulkan",
+      "--allow-translated-api",
+      "--workload",
+      "membw",
+      "--no-renderdoc"
+    ],
+    "thermalBefore": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T12:57:53Z"
+    },
+    "state": "completed",
+    "workerSha256": "9a056740b3e11a75f3c06133ed1817d3cf5f18f49faf9b6f24879873fef31500",
+    "returnCode": 0,
+    "thermalAfter": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T12:59:00Z"
+    },
+    "results": [
+      {
+        "id": "20261016-235900-300-membw",
+        "workload": "membw",
+        "workloadVersion": "membw_v3_streaming_moltenvk",
+        "score": 245.897,
+        "scoreUnit": "GB/s",
+        "avgComputeMs": 0.0,
+        "avgTotalGpuMs": 0.0,
+        "avgFrameTimeMs": 0.0,
+        "stableScore": 0.0,
+        "throttlePct": 0.0
+      }
+    ]
+  },
+  {
+    "job": "metal-fixed-render-1m",
+    "command": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--gui-worker",
+      "--gpu",
+      "0",
+      "--backend",
+      "metal",
+      "--workload",
+      "stream",
+      "--particles",
+      "1048576",
+      "--time",
+      "15",
+      "--no-renderdoc"
+    ],
+    "thermalBefore": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T12:59:30Z"
+    },
+    "state": "completed",
+    "workerSha256": "9a056740b3e11a75f3c06133ed1817d3cf5f18f49faf9b6f24879873fef31500",
+    "returnCode": 0,
+    "thermalAfter": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T12:59:45Z"
+    },
+    "results": [
+      {
+        "id": "20261016-235945-601",
+        "workload": "stream",
+        "workloadVersion": "stream_v1_fixed_coverage_v2_serial_timing_v2",
+        "score": 186.244,
+        "scoreUnit": "GB/s",
+        "avgComputeMs": 0.225,
+        "avgTotalGpuMs": 3.443,
+        "avgFrameTimeMs": 3.561,
+        "stableScore": 188.267,
+        "throttlePct": -3.1
+      }
+    ]
+  },
+  {
+    "job": "vulkan-fixed-render-1m-a",
+    "command": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--gui-worker",
+      "--gpu",
+      "0",
+      "--backend",
+      "vulkan",
+      "--allow-translated-api",
+      "--workload",
+      "stream",
+      "--particles",
+      "1048576",
+      "--time",
+      "15",
+      "--no-renderdoc"
+    ],
+    "thermalBefore": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T13:00:15Z"
+    },
+    "state": "completed",
+    "workerSha256": "9a056740b3e11a75f3c06133ed1817d3cf5f18f49faf9b6f24879873fef31500",
+    "returnCode": 0,
+    "thermalAfter": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T13:00:31Z"
+    },
+    "results": [
+      {
+        "id": "20261017-000030-981",
+        "workload": "stream",
+        "workloadVersion": "stream_v1_fixed_coverage_v2_moltenvk_viewport1280x720_v1",
+        "score": 179.75,
+        "scoreUnit": "GB/s",
+        "avgComputeMs": 0.233,
+        "avgTotalGpuMs": 3.327,
+        "avgFrameTimeMs": 3.512,
+        "stableScore": 179.419,
+        "throttlePct": 0.14
+      }
+    ]
+  },
+  {
+    "job": "metal-headless-1m",
+    "command": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--gui-worker",
+      "--gpu",
+      "0",
+      "--backend",
+      "metal",
+      "--workload",
+      "stream",
+      "--particles",
+      "1048576",
+      "--headless",
+      "--time",
+      "15",
+      "--no-renderdoc"
+    ],
+    "thermalBefore": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T13:01:01Z"
+    },
+    "state": "completed",
+    "workerSha256": "9a056740b3e11a75f3c06133ed1817d3cf5f18f49faf9b6f24879873fef31500",
+    "returnCode": 0,
+    "thermalAfter": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T13:01:16Z"
+    },
+    "results": [
+      {
+        "id": "20261017-000116-161",
+        "workload": "stream",
+        "workloadVersion": "stream_v1_command_buffer_timing_v1",
+        "score": 161.361,
+        "scoreUnit": "GB/s",
+        "avgComputeMs": 0.26,
+        "avgTotalGpuMs": 0.26,
+        "avgFrameTimeMs": 0.26,
+        "stableScore": 161.722,
+        "throttlePct": -0.45
+      }
+    ]
+  },
+  {
+    "job": "vulkan-headless-1m",
+    "command": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--gui-worker",
+      "--gpu",
+      "0",
+      "--backend",
+      "vulkan",
+      "--allow-translated-api",
+      "--workload",
+      "stream",
+      "--particles",
+      "1048576",
+      "--headless",
+      "--time",
+      "15",
+      "--no-renderdoc"
+    ],
+    "thermalBefore": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T13:01:46Z"
+    },
+    "state": "completed",
+    "workerSha256": "9a056740b3e11a75f3c06133ed1817d3cf5f18f49faf9b6f24879873fef31500",
+    "returnCode": 0,
+    "thermalAfter": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T13:02:01Z"
+    },
+    "results": [
+      {
+        "id": "20261017-000201-387",
+        "workload": "stream",
+        "workloadVersion": "stream_v1_moltenvk",
+        "score": 265.295,
+        "scoreUnit": "GB/s",
+        "avgComputeMs": 0.158,
+        "avgTotalGpuMs": 0.226,
+        "avgFrameTimeMs": 0.263,
+        "stableScore": 264.911,
+        "throttlePct": 0.07
+      }
+    ]
+  },
+  {
+    "job": "vulkan-fixed-render-1m-b",
+    "command": [
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+      "--gui-worker",
+      "--gpu",
+      "0",
+      "--backend",
+      "vulkan",
+      "--allow-translated-api",
+      "--workload",
+      "stream",
+      "--particles",
+      "1048576",
+      "--time",
+      "15",
+      "--no-renderdoc"
+    ],
+    "thermalBefore": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T13:02:31Z"
+    },
+    "state": "completed",
+    "workerSha256": "9a056740b3e11a75f3c06133ed1817d3cf5f18f49faf9b6f24879873fef31500",
+    "returnCode": 0,
+    "thermalAfter": {
+      "activeProcessorCount": 14,
+      "lowPowerMode": false,
+      "thermalState": 0,
+      "thermalStateName": "nominal",
+      "timestamp": "2026-10-16T13:02:46Z"
+    },
+    "results": [
+      {
+        "id": "20261017-000246-698",
+        "workload": "stream",
+        "workloadVersion": "stream_v1_fixed_coverage_v2_moltenvk_viewport1280x720_v1",
+        "score": 183.108,
+        "scoreUnit": "GB/s",
+        "avgComputeMs": 0.229,
+        "avgTotalGpuMs": 3.316,
+        "avgFrameTimeMs": 3.519,
+        "stableScore": 183.027,
+        "throttlePct": -0.91
+      }
+    ]
+  }
+]

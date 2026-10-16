@@ -1,0 +1,90 @@
+{
+  "status": "passed",
+  "artifacts": [
+    {
+      "platform": "iphoneos",
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphoneos/Build/Products/Release-iphoneos/Mangekyo.app",
+      "binaryArchitecture": "arm64",
+      "libraryArchitecture": "arm64",
+      "binarySha256": "019802a4599eee0325fe2b087b4d8ad4a4a0c014e1cdb206484beea4c98e49c3",
+      "librarySha256": "fefd9119af29f0339dc2a90b53bfa2dddcacc8079ad5b7b9b80eb922e3f831d2",
+      "hasV3Memory": true,
+      "hasMacOnlyBranchVersion": false,
+      "codeSigningAllowed": false,
+      "physicalDeviceExecuted": false,
+      "libraryPath": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphoneos/Release-iphoneos/libgpu_engine.a"
+    },
+    {
+      "platform": "iphonesimulator",
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-iphonesimulator/Build/Products/Release-iphonesimulator/Mangekyo.app",
+      "binaryArchitecture": "x86_64 arm64",
+      "libraryArchitecture": "x86_64 arm64",
+      "binarySha256": "d6a62d5d4743173ae2873059131fc912894c365cfda163caa6a8c0eb72169c4e",
+      "librarySha256": "50a20a3c6e15dd8bceadc1ab2b79ffebf2fc829bba8aaec04e4a399ec53bbd5b",
+      "hasV3Memory": true,
+      "hasMacOnlyBranchVersion": false,
+      "codeSigningAllowed": false,
+      "physicalDeviceExecuted": false,
+      "libraryPath": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/Release-iphonesimulator/Release-iphonesimulator/libgpu_engine.a"
+    },
+    {
+      "platform": "android",
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/android/app/build/outputs/apk/debug/app-debug.apk",
+      "bytes": 30402186,
+      "sha256": "e91509373cba52b61c3beac714ccbf6a7df6a63a30b7208297928eb9c48a1738",
+      "physicalDeviceExecuted": false
+    },
+    {
+      "platform": "ohos",
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+      "bytes": 5762723,
+      "sha256": "06a8c472a539fae38a39803cda4dcd74e46385d752c9f14dd8b3651634a2f518",
+      "physicalDeviceExecuted": false
+    }
+  ],
+  "androidJUnit": [
+    {
+      "name": "com.mangekyo.benchmark.core.SuitePlanTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0
+    }
+  ],
+  "nativeCTest": {
+    "passed": 7,
+    "failed": 0
+  },
+  "sharedChecks": {
+    "passed": 154,
+    "failed": 0
+  },
+  "iosManifestRegression": "passed",
+  "productionCppReader": "passed final 6/6; boundary formal accepted and 256 MiB preview flagged",
+  "productionSwiftReader": "10/14 accepted; 3 query controls and 1 boundary preview flagged; full curves restored",
+  "sharedAppleFilesIdentical": [
+    "Models/EngineOutput.swift",
+    "Models/ChartGeometry.swift",
+    "Models/Localization.swift",
+    "Models/BenchResult.swift",
+    "Components/BenchCharts.swift",
+    "Components/ResultCharts.swift"
+  ],
+  "scope": "No mobile physical benchmark or Windows build in this turn",
+  "macos": {
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app",
+    "workerSha256": "6bf03a7b6efcf55d9a79cad4e37ea7a34f40e2ec47fc685ae2f99943126548db",
+    "architecture": "arm64",
+    "signature": "verified",
+    "help": "passed"
+  },
+  "finalBoundaryGuardBuildLogs": {
+    "macos": "build-macos-boundary.log",
+    "ios": "build-ios-boundary.log",
+    "android": "build-android-boundary.log",
+    "ohos": "build-ohos-boundary.log",
+    "ctest": "ctest-boundary.log"
+  },
+  "boundaryWorkerMatchesMeasurements": true,
+  "particleMeasurementsWorkerSha256": "f3799b944bdf53505416f95f5d291ffc90da032cd6979051e3153a0404d3213a",
+  "postParticleCodeChange": "Only memory-tail eligibility changed; comments subsequently clarified. Particle kernels and timing unchanged."
+}

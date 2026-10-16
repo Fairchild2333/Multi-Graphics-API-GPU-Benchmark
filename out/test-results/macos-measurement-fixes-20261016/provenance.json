@@ -1,0 +1,7 @@
+{
+  "baseCommit": "1af320220793c574acb430b0dc1dd2a3beaf2eaa",
+  "worker": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+  "workerSha256": "9a056740b3e11a75f3c06133ed1817d3cf5f18f49faf9b6f24879873fef31500",
+  "kernelChanges": "v3 complete ordered passes >=256 MiB; direct read chunk indexing; Apple fixed render coverage; Metal headless timing label corrected",
+  "power": "Battery Power:\n Sleep On Power Button 1\n powermode            0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         30\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n powermode            2\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         180\n womp                 1\n networkoversleep     0\n sleep                1\n tcpkeepalive         1\n disksleep            10\n"
+}

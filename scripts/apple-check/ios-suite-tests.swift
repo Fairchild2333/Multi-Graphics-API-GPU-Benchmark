@@ -132,9 +132,9 @@ for job in native where job.id != "gpu_cache-v2" {
         }
         if let vk = translated.first(where: { $0.id == "vulkan/" + job.id }) {
             other = row; other.graphicsApi = "Vulkan"
-            other.workloadVersion = job.id == "memory_sweep" ? "membw_v2_verified_ios_preview_moltenvk" : (row.workloadVersion ?? "") + "_moltenvk"
+            other.workloadVersion = job.id == "memory_sweep" ? "membw_v3_streaming_ios_preview_moltenvk" : (row.workloadVersion ?? "") + "_moltenvk"
             other.workloadConfig = (row.workloadConfig ?? "") + ";apiImplementation=MoltenVK;translatedTo=Metal"
-            if job.id == "memory_sweep" { other.workloadConfig = (other.workloadConfig ?? "") + ";dataVerified=1;writeCopyChecks=2;timestampAnomalies=0" }
+            if job.id == "memory_sweep" { other.workloadConfig = (other.workloadConfig ?? "") + ";dataVerified=1;writeCopyChecks=2;timestampAnomalies=0;largeDatasetTraversal=ordered_full_dataset_passes" }
             if job.id.hasPrefix("gpu_burn-") || job.id.hasPrefix("stream") {
                 other.workloadConfig = (other.workloadConfig ?? "").split(separator: ";")
                     .filter { !$0.hasPrefix("timingMode=") }.joined(separator: ";") + ";timingMode=synchronized_wall_clock"
@@ -149,6 +149,12 @@ for job in native where job.id != "gpu_cache-v2" {
                 var unchecked = other
                 unchecked.workloadVersion = "membw_v1_ios_preview_moltenvk"
                 precondition(!vk.matches(unchecked), "Unchecked old Vulkan sweep reused")
+                unchecked.workloadVersion = "membw_v2_verified_ios_preview_moltenvk"
+                precondition(!vk.matches(unchecked), "Private-chunk repeats reused as whole-dataset streaming")
+                var noPlateau = other
+                noPlateau.workloadConfig = (noPlateau.workloadConfig ?? "").split(separator: ";")
+                    .filter { !$0.hasPrefix("memoryPlateauReached=") }.joined(separator: ";") + ";memoryPlateauReached=0"
+                precondition(!noPlateau.measurementReviewReasons.isEmpty, "A completed preview must retain its memory-platform warning")
                 unchecked = other
                 unchecked.workloadConfig = unchecked.workloadConfig?.replacingOccurrences(of: "timestampAnomalies=0", with: "timestampAnomalies=1")
                 precondition(!vk.matches(unchecked), "Mixed-timing sweep reused")

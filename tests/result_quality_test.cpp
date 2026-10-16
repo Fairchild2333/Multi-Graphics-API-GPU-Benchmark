@@ -25,5 +25,12 @@ int main() {
     if (MeasurementReviewReasons(r).empty()) return 7; // Falling but locally stable is still review.
     r.workload = "cpu_membw";
     if (!MeasurementReviewReasons(r).empty()) return 8;
+    r.workload = "stream"; r.platform = "macOS"; r.graphicsApi = "Vulkan";
+    r.headless = true; r.avgComputeMs = r.avgTotalGpuMs = 0.26;
+    r.avgRenderMs = 0; r.avgFrameTimeMs = 0.27; r.stableScore = 160; r.throttlePct = 0;
+    r.workloadConfig = "apiImplementation=MoltenVK;timingMode=gpu_timestamp_query";
+    if (MeasurementReviewReasons(r).empty()) return 9;
+    r.workloadConfig = "apiImplementation=MoltenVK;timingMode=synchronized_wall_clock";
+    if (!MeasurementReviewReasons(r).empty()) return 10;
     std::cout << "Real invalid timestamps, overlap and falling throughput flagged; verified reruns and liquid accepted.\n";
 }

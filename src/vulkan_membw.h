@@ -12,7 +12,16 @@ namespace gpu_bench {
 inline constexpr char kMemBwWorkloadId[] = "membw";
 // `MemBwReport::error` of a sweep that RequestStop() ended early.
 inline constexpr char kMemBwStopped[] = "stopped";
-inline constexpr char kMemBwWorkloadVersion[] = "membw_v2_verified";
+inline constexpr char kMemBwWorkloadVersion[] = "membw_v3_streaming";
+// Large data sets must finish one whole-buffer pass before reusing any chunk.
+// Repeating a private 512 KiB chunk in a workgroup measures cache traffic even
+// when the allocation is much larger than the cache.
+inline constexpr std::uint64_t kMemBwStreamingMinBytes = 256ull << 20;
+inline bool MemBwStreamingTailEligible(std::uint64_t first, std::uint64_t second,
+                                      std::uint64_t third) {
+    return first >= kMemBwStreamingMinBytes && second >= kMemBwStreamingMinBytes &&
+           third >= kMemBwStreamingMinBytes;
+}
 
 struct MemBwConfig {
     // vkEnumeratePhysicalDevices index; negative selects the first device.
@@ -33,8 +42,9 @@ struct MemBwPoint {
     // of one workgroup and `passes` is how often each workgroup re-reads it.
     std::string kernel;
     std::uint64_t datasetBytes = 0;
-    std::uint32_t passes = 0;           // visits of every chunk per dispatch
-    std::uint64_t bytesPerDispatch = 0; // bytes the kernel actually requests
+    std::uint32_t passes = 0;           // visits of every chunk in one timed sample
+    std::uint64_t bytesPerDispatch = 0; // legacy name: logical bytes in the entire timed sample
+    std::uint32_t dispatchesPerSample = 1; // ordered whole-buffer passes, or one cache dispatch
     double medianMs = 0.0;
     double minMs = 0.0;
     double medianGBps = 0.0;

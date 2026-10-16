@@ -1556,6 +1556,8 @@ BenchmarkResult AppBase::CollectResult() const {
         r.workloadVersion += "_sync_timing";
     else if (timingMode == "serialized_command_buffer_gpu_time")
         r.workloadVersion += "_serial_timing_v2";
+    else if (timingMode == "command_buffer_gpu_time")
+        r.workloadVersion += "_command_buffer_timing_v1";
     else if (timingMode == "validated_single_frame_gpu_query")
         r.workloadVersion += "_single_frame_timing_v2";
 #ifdef GPU_BENCH_MOLTENVK

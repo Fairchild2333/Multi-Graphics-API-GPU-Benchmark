@@ -27,13 +27,15 @@ layout(push_constant) uniform MemBwParams {
     uint groupsX;          // dispatch width, used to flatten the 2D group index
     uint seed;             // write kernel only
     float never;           // value the checksum can never reach
+    uint repeats;          // 1: one uniquely owned chunk per whole-buffer pass; 0: cache sweep
 } params;
 
 void main() {
     const uint group = gl_WorkGroupID.x + gl_WorkGroupID.y * params.groupsX;
     if (group >= params.totalGroups) return;
 
-    const uint base = (group % params.chunkCount) * params.stripesPerChunk * 256u
+    const uint chunk = params.repeats == 1u ? group : group % params.chunkCount;
+    const uint base = chunk * params.stripesPerChunk * 256u
                     + gl_LocalInvocationID.x;
 
     // Two independent loads per iteration keep two requests in flight per thread.

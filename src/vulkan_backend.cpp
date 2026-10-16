@@ -83,15 +83,19 @@ void VulkanBackend::InitBackend() {
     }
     CreateSyncObjects();
     CreateTimestampQueryPool();
-#if defined(GPU_BENCH_MOLTENVK) && defined(GPU_BENCH_NO_GLFW) && defined(__APPLE__)
+#if defined(GPU_BENCH_MOLTENVK) && defined(__APPLE__)
+#if defined(GPU_BENCH_NO_GLFW)
     // A startup query can agree with synchronized timing, then under-report
     // later Burn frames on A15. Always time this translated fixed-load path
     // by submit/fence completion, rather than trusting the initial sample.
     if (isGpuBurnWorkload(config_.workload))
         EnableSynchronizedTimingFallback("MoltenVK GPU Burn requires per-frame completion timing");
+#endif
     // A12X can pass the repeated-dispatch startup check yet under-report
-    // ordinary frames. Use the same synchronized compute/render boundaries
-    // for the entire translated particle run, including rendered presets.
+    // ordinary frames. macOS also exposes an inner compute query interval
+    // substantially shorter than the complete command-buffer/frame interval.
+    // Use verified completion boundaries for translated particles on BOTH
+    // Apple hosts. Native Android/Harmony Vulkan remains on validated queries.
     if (config_.workload == Workload::Stream)
         EnableSynchronizedTimingFallback("MoltenVK particles require per-frame completion timing");
 #endif

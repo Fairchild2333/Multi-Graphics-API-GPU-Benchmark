@@ -378,6 +378,9 @@ static bool SuiteResultMatches(const gpu_bench::BenchmarkResult& result,
     if (result.graphicsApi != job.apiName || !workloadMatches || result.headless != job.headless ||
         !std::isfinite(result.score) || result.score <= 0) return false;
     if (cpuAll && result.workloadVersion.find("_t15000ms_w200ms") == std::string::npos) return false;
+#if defined(__APPLE__) && defined(__aarch64__)
+    if (cpuAll && result.workloadVersion.find("_kept_branch") == std::string::npos) return false;
+#endif
     if (job.backend != "cpu" && job.workload != "membw" && job.workload != "gpu_cache" &&
         (result.warmupSec < 1.9 || result.durationSec < 11.0)) return false;
 
@@ -391,6 +394,19 @@ static bool SuiteResultMatches(const gpu_bench::BenchmarkResult& result,
     }
     if (job.workload == "stream" && result.particleCount != job.particleCount)
         return false;
+#if defined(__APPLE__)
+    if (job.workload == "stream" && !job.headless &&
+        gpu_bench::ResultConfigValue(result, "renderCoverage") != "wrapped_ndc_v2")
+        return false;
+    if (job.workload == "stream" && job.headless && job.backend == "metal" &&
+        gpu_bench::ResultConfigValue(result, "timingMode") != "command_buffer_gpu_time")
+        return false;
+    if (job.workload == "stream" && job.backend == "vulkan" &&
+        gpu_bench::ResultConfigValue(result, "timingMode") != "synchronized_wall_clock")
+        return false;
+#endif
+    if (job.workload == "membw" && job.backend == "vulkan" &&
+        !gpu_bench::CurrentVulkanMemoryContractVerified(result)) return false;
     if (job.workload == "gpu_burn" &&
         SuiteConfigInteger(result.workloadConfig, "steps", -1) != job.burnSteps)
         return false;

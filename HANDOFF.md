@@ -1,6 +1,63 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
-> **2026-10-16：苹果设备的最新任务与状态，先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** Mac M1/M2/M4 指定核查已执行，M3 已补测但正式内存平台/历史波动原因未关闭；iOS 真机与模拟器已重编译。
+> **2026-10-17：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** Mac M1–M4 软件问题及定向验证已完成；Vulkan 内存 V3 三轮正式平台通过，小容量边界正确保留 preview，固定覆盖/完成计时两轮稳定。iOS/Android/HarmonyOS 已重编译，手机真机补测等连接设备。
+
+## 2026-10-17 Mac measurement fixes completed and verified
+
+- User explicitly requested continuing repairs until completion. This supersedes
+  the earlier no-implementation-changes limit for the identified Mac issues.
+  Base 1af3202; no benchmark score constants or historical observations changed.
+- V2 write/copy looped a private 512 KiB chunk, permitting cache reuse despite
+  large allocation size. V3 orders complete-buffer passes at >=256 MiB with
+  compute execution/memory barriers and direct read chunk addressing. All
+  platforms use new membw_v3_streaming identities; smaller cache/L1 probes stay
+  diagnostics. No plateau remains preview/review, not a falsely completed score.
+- Three default physical sweeps: read245.897/245.908/250.419 GB/s, each95 points,46 checks,
+  dataVerified1, read platform reached, synchronized MoltenVK wall clock,
+  timestampAnomalies0. Latest saved write244.7/copy238.9 GB/s. V2 preview300.885
+  and its high repeated-write throughput are not V3 or DRAM peak measurements.
+- Final eligibility guard requires all3 tail sets >=256MiB:128/192/256 cannot
+  establish a plateau. All platforms rebuilt and CTest passed after this guard.
+  Final default run passed; explicit256MiB negative control retained77 points,
+  34 data checks but memoryPlateauReached0/preview/review as intended. Its
+  diagnostic write550.5 must not be reported as formal DRAM bandwidth.
+- Apple defaults to the existing wrapped coverage shader; CPU/particle update
+  kernels and the40 B convention unchanged. Query A/B controls retain flat
+  ~3.1 ms rendering versus old3.2-><1 ms. Candidate query drifts .14%/-.91%.
+  Non-Apple particle defaults unchanged. Fixed-coverage captures get a distinct
+  file tag; suite reuse rejects old coverage and unkept-branch Mac CPU rows.
+- Mac MoltenVK particles now use completion timing as iOS already did; Android/
+  Harmony native Vulkan query policy unchanged. Native Metal headless keeps its
+  command-buffer GPU span, now accurately named command_buffer_gpu_time and
+  separately versioned. These intervals are not interchangeable API peak scores.
+- Final real6 jobs all passed, no execution failure/review: memory245.908;
+  Vulkan rendered1M A126.338/B127.526 GB/s, drop-1.73%/-.19%; headless1M111.462,
+  headless16M146.072; Metal rendered1M194.269. Candidate stage6 also retained:
+  current policy accepts3 and flags3 Vulkan query controls. Latest valid per
+  configuration selection has6 target configurations; never highest-score choice.
+- All runs thermal0->0,30 s rests, ACmode2. Final tests began only after builds
+  ended plus cooldown. No GPU frequency telemetry; do not invent thermal cause.
+  Independent cache-level attribution remains out of scope per user agreement.
+- Mac Release/package checks PASS; iOS device arm64 and universal simulator
+  libraries/apps PASS; Android4 ABI APK and Kotlin5/5 tests PASS; OHOS2 ABI HAP
+  PASS. Native CTest7/7 (memory assertions active in Release), shared154/154,
+  iOS version/resume regression PASS. Five packages' new read SPIR-V bytes match
+  their fresh outputs/staging. C++ and Swift production readers accept final6;
+  Swift restores95 Vulkan points per sweep. RunOutput.points is CPU-only;
+  use vulkanMemoryPoints for Vulkan, gpuMemoryPoints for Metal. An initial audit
+  script used the wrong collection; fixed the script, not the production parser.
+- Evidence out/test-results/macos-measurement-fixes-20261016/ (session started
+  Oct16, finished17), report/verification/production audits/CSV/PNG/PDF/logs,
+  candidate and final raw6 each plus boundary2, shader-package-verification,
+  source patches and per-phase worker hashes.14 records total:10 accepted,
+  3 legacy-query reviews,1 expected preview. Latest selection remains6 configs.
+  Mac history155->169, all old objects unchanged; four iOS hashes
+  unchanged. archive-index now points to newest Mac snapshot. All test workers
+  exited. No physical iOS or Windows measurements/builds claimed this turn.
+- docs/macos-measurement-fixes-20261017.md and APPLE-NEXT-TESTS are current.
+  A16 nine unfinished jobs and iPad8,1 Metal16M remain device-dependent. A15/two
+  iPads have V1/V2 memory histories; next connection needs a V3 memory run only,
+  not wholesale rerunning valid CPU/Metal scores. Preserve xcuserdata.
 
 ## 2026-10-16 Mac targeted follow-ups completed; iOS Release rebuilt
 

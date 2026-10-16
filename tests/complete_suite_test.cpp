@@ -34,6 +34,14 @@ int main() {
     capture.workload = Workload::Stream;
     capture.particlesOverridden = true;
     capture.particleCount = 65536;
+    capture.particleFixedCoverage = false;
     if (CaptureFileStem("Metal", "Apple M4 Pro", capture) != "Metal_Apple_M4_Pro_stream_particles65536") return 6;
+    capture.particleFixedCoverage = true;
+    if (CaptureFileStem("Metal", "Apple M4 Pro", capture) != "Metal_Apple_M4_Pro_stream_particles65536_coveragev2") return 10;
+#if defined(__APPLE__)
+    if (!BenchmarkConfig{}.particleFixedCoverage) return 11;
+#else
+    if (BenchmarkConfig{}.particleFixedCoverage) return 11;
+#endif
     std::cout << "Available APIs produce 18 jobs: Metal 13 + GL4.1 Burn 3 + CPU 2; absent APIs produce no jobs.\n";
 }

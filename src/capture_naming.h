@@ -54,6 +54,8 @@ inline std::string CaptureFileStem(const std::string& backend, const std::string
     if (config.particlesOverridden &&
         (config.workload == Workload::Stream || config.workload == Workload::Render3D))
         stem += "_particles" + std::to_string(config.particleCount);
+    if (config.workload == Workload::Stream && !config.headless && config.particleFixedCoverage)
+        stem += "_coveragev2";
     return stem;
 }
 }  // namespace gpu_bench

@@ -118,13 +118,13 @@ enum GpuOptions {
             case "stream_headless": return "stream_v1_ios_preview_moltenvk"
             case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview_sync_timing_moltenvk"
             case "cinematic_liquid": return "cinematic_liquid_v2_…_ios_preview_moltenvk"
-            case "memory_sweep": return "membw_v2_verified_ios_preview_moltenvk"
+            case "memory_sweep": return "membw_v3_streaming_ios_preview_moltenvk"
             default: return test
             }
         }
         switch test {
         case "stream": return "stream_v1_fixed_coverage_v2_ios_preview_serial_timing_v2"
-        case "stream_headless": return "stream_v1_ios_preview"
+        case "stream_headless": return "stream_v1_ios_preview_command_buffer_timing_v1"
         case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview"
         case "cinematic_liquid": return "cinematic_liquid_v2_physical_scene_v8_metal_preview_ios_preview"
         case "memory_sweep": return "metal_memory_sweep_v1_preview_ios_preview"

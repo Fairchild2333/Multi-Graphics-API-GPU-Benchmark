@@ -979,7 +979,7 @@ void MetalBackend::DrawFrame(float deltaTime) {
 
 std::string MetalBackend::GetTimingMode() const {
     if (!config_.headless) return "serialized_command_buffer_gpu_time";
-    return "gpu_timestamp_query";
+    return "command_buffer_gpu_time";
 }
 
 void MetalBackend::WaitIdle() {

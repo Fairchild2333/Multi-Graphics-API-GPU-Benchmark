@@ -35,6 +35,10 @@ export class ResultEntry {
 
   reviewReasons(): string[] {
     const reasons: string[] = [];
+    if (this.workload === 'membw' && this.graphicsApi === 'Vulkan' && this.workloadVersion.startsWith('membw_v3_streaming')) {
+      if (this.workloadConfig.split(';').indexOf('memoryPlateauReached=1') < 0) reasons.push(tr('Memory plateau was not reached', '尚未达到内存带宽平台'));
+      return reasons;
+    }
     if (['stream', 'gpu_burn', 'cinematic_liquid'].indexOf(this.workload) < 0) return reasons;
     if (this.avgFrameTimeMs > 0 && this.avgTotalGpuMs > this.avgFrameTimeMs * 1.1) reasons.push(tr('GPU timing exceeds frame interval', 'GPU 计时超过帧间隔'));
     if (this.avgComputeMs + this.avgRenderMs > this.avgTotalGpuMs + 0.1) reasons.push(tr('Compute/render timing overlaps', '计算与渲染计时重叠'));
@@ -54,7 +58,8 @@ export class ResultEntry {
     if (job.workload === 'membw') {
       const fields: string[] = this.workloadConfig.split(';');
       const checks: string = fields.find((f: string) => f.startsWith('writeCopyChecks=')) ?? '';
-      return this.workloadVersion.startsWith('membw_v2_verified_') && fields.indexOf('dataVerified=1') >= 0 &&
+      return this.workloadVersion.startsWith('membw_v3_streaming_') && fields.indexOf('dataVerified=1') >= 0 &&
+        fields.indexOf('largeDatasetTraversal=ordered_full_dataset_passes') >= 0 &&
         Number(checks.substring('writeCopyChecks='.length)) > 0 && fields.indexOf('timestampAnomalies=0') >= 0;
     }
     if (this.durationSec < 11 || (job.particles > 0 && this.particleCount !== job.particles)) return false;

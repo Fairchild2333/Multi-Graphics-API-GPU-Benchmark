@@ -1,0 +1,124 @@
+{
+  "workerSha256": "f3799b944bdf53505416f95f5d291ffc90da032cd6979051e3153a0404d3213a",
+  "sourceDiffSha256": "ec2d14646d027b468368083a8d40a2114e55a1afe3b3d76fb0cfd162aa5bd8f8",
+  "plans": [
+    [
+      "vulkan-membw-v3-repeat",
+      [
+        "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+        "--gui-worker",
+        "--gpu",
+        "0",
+        "--backend",
+        "vulkan",
+        "--allow-translated-api",
+        "--workload",
+        "membw",
+        "--no-renderdoc"
+      ],
+      900
+    ],
+    [
+      "vulkan-fixed-1m-a",
+      [
+        "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+        "--gui-worker",
+        "--gpu",
+        "0",
+        "--backend",
+        "vulkan",
+        "--workload",
+        "stream",
+        "--particles",
+        "1048576",
+        "--time",
+        "15",
+        "--no-renderdoc",
+        "--allow-translated-api"
+      ],
+      150
+    ],
+    [
+      "vulkan-headless-1m",
+      [
+        "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+        "--gui-worker",
+        "--gpu",
+        "0",
+        "--backend",
+        "vulkan",
+        "--workload",
+        "stream",
+        "--particles",
+        "1048576",
+        "--time",
+        "15",
+        "--no-renderdoc",
+        "--allow-translated-api",
+        "--headless"
+      ],
+      150
+    ],
+    [
+      "vulkan-headless-16m",
+      [
+        "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+        "--gui-worker",
+        "--gpu",
+        "0",
+        "--backend",
+        "vulkan",
+        "--workload",
+        "stream",
+        "--particles",
+        "16777216",
+        "--time",
+        "15",
+        "--no-renderdoc",
+        "--allow-translated-api",
+        "--headless"
+      ],
+      150
+    ],
+    [
+      "metal-fixed-1m",
+      [
+        "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+        "--gui-worker",
+        "--gpu",
+        "0",
+        "--backend",
+        "metal",
+        "--workload",
+        "stream",
+        "--particles",
+        "1048576",
+        "--time",
+        "15",
+        "--no-renderdoc"
+      ],
+      150
+    ],
+    [
+      "vulkan-fixed-1m-b",
+      [
+        "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark",
+        "--gui-worker",
+        "--gpu",
+        "0",
+        "--backend",
+        "vulkan",
+        "--workload",
+        "stream",
+        "--particles",
+        "1048576",
+        "--time",
+        "15",
+        "--no-renderdoc",
+        "--allow-translated-api"
+      ],
+      150
+    ]
+  ],
+  "candidateResultsPolicy": "Preserve queries as diagnostic history; select corrected completion-timed Vulkan records, not a maximum score."
+}

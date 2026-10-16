@@ -1,0 +1,207 @@
+{
+  "status": "passed",
+  "rawRecords": 14,
+  "currentPolicyPassedRecords": 10,
+  "queryControlsForReview": 3,
+  "expectedBoundaryPreview": 1,
+  "currentTargetConfigurations": 6,
+  "selection": "latest valid per configuration, not maximum score",
+  "runs": [
+    {
+      "phase": "candidate",
+      "job": "vulkan-membw-v3",
+      "id": "20261016-235900-300-membw",
+      "status": "passed",
+      "score": 245.897,
+      "unit": "GB/s",
+      "version": "membw_v3_streaming_moltenvk",
+      "dropPct": 0.0,
+      "readTailGBps": [
+        240.625,
+        245.897,
+        246.549
+      ],
+      "writeGBps": 232.5,
+      "readTailDatasetBytes": [
+        1073741824,
+        1610612736,
+        2147483648
+      ],
+      "writeCopyChecks": 46,
+      "copyGBps": 231.8,
+      "curvePoints": 95
+    },
+    {
+      "phase": "candidate",
+      "job": "metal-fixed-render-1m",
+      "id": "20261016-235945-601",
+      "status": "passed",
+      "score": 186.244,
+      "unit": "GB/s",
+      "version": "stream_v1_fixed_coverage_v2_serial_timing_v2",
+      "dropPct": -3.1
+    },
+    {
+      "phase": "candidate",
+      "job": "vulkan-fixed-render-1m-a",
+      "id": "20261017-000030-981",
+      "status": "diagnostic_legacy_query",
+      "score": 179.75,
+      "unit": "GB/s",
+      "version": "stream_v1_fixed_coverage_v2_moltenvk_viewport1280x720_v1",
+      "dropPct": 0.14
+    },
+    {
+      "phase": "candidate",
+      "job": "metal-headless-1m",
+      "id": "20261017-000116-161",
+      "status": "passed",
+      "score": 161.361,
+      "unit": "GB/s",
+      "version": "stream_v1_command_buffer_timing_v1",
+      "dropPct": -0.45
+    },
+    {
+      "phase": "candidate",
+      "job": "vulkan-headless-1m",
+      "id": "20261017-000201-387",
+      "status": "diagnostic_legacy_query",
+      "score": 265.295,
+      "unit": "GB/s",
+      "version": "stream_v1_moltenvk",
+      "dropPct": 0.07
+    },
+    {
+      "phase": "candidate",
+      "job": "vulkan-fixed-render-1m-b",
+      "id": "20261017-000246-698",
+      "status": "diagnostic_legacy_query",
+      "score": 183.108,
+      "unit": "GB/s",
+      "version": "stream_v1_fixed_coverage_v2_moltenvk_viewport1280x720_v1",
+      "dropPct": -0.91
+    },
+    {
+      "phase": "final",
+      "job": "vulkan-membw-v3-repeat",
+      "id": "20261017-000854-281-membw",
+      "status": "passed",
+      "score": 245.908,
+      "unit": "GB/s",
+      "version": "membw_v3_streaming_moltenvk",
+      "dropPct": 0.0,
+      "readTailGBps": [
+        245.908,
+        246.758,
+        242.885
+      ],
+      "writeGBps": 234.9,
+      "readTailDatasetBytes": [
+        1073741824,
+        1610612736,
+        2147483648
+      ],
+      "writeCopyChecks": 46,
+      "copyGBps": 238.9,
+      "curvePoints": 95
+    },
+    {
+      "phase": "final",
+      "job": "vulkan-fixed-1m-a",
+      "id": "20261017-000939-551",
+      "status": "passed",
+      "score": 126.338,
+      "unit": "GB/s",
+      "version": "stream_v1_fixed_coverage_v2_sync_timing_moltenvk_viewport1280x720_v1",
+      "dropPct": -1.73
+    },
+    {
+      "phase": "final",
+      "job": "vulkan-headless-1m",
+      "id": "20261017-001024-770",
+      "status": "passed",
+      "score": 111.462,
+      "unit": "GB/s",
+      "version": "stream_v1_sync_timing_moltenvk",
+      "dropPct": 0.64
+    },
+    {
+      "phase": "final",
+      "job": "vulkan-headless-16m",
+      "id": "20261017-001110-110",
+      "status": "passed",
+      "score": 146.072,
+      "unit": "GB/s",
+      "version": "stream_v1_sync_timing_moltenvk",
+      "dropPct": -0.8
+    },
+    {
+      "phase": "final",
+      "job": "metal-fixed-1m",
+      "id": "20261017-001155-305",
+      "status": "passed",
+      "score": 194.269,
+      "unit": "GB/s",
+      "version": "stream_v1_fixed_coverage_v2_serial_timing_v2",
+      "dropPct": 0.13
+    },
+    {
+      "phase": "final",
+      "job": "vulkan-fixed-1m-b",
+      "id": "20261017-001240-532",
+      "status": "passed",
+      "score": 127.526,
+      "unit": "GB/s",
+      "version": "stream_v1_fixed_coverage_v2_sync_timing_moltenvk_viewport1280x720_v1",
+      "dropPct": -0.19
+    },
+    {
+      "phase": "boundary",
+      "job": "vulkan-v3-final-default",
+      "id": "20261017-003510-928-membw",
+      "status": "passed",
+      "score": 250.419,
+      "unit": "GB/s",
+      "version": "membw_v3_streaming_moltenvk",
+      "dropPct": 0.0,
+      "readTailGBps": [
+        242.36,
+        250.419,
+        251.674
+      ],
+      "writeGBps": 244.7,
+      "readTailDatasetBytes": [
+        1073741824,
+        1610612736,
+        2147483648
+      ],
+      "writeCopyChecks": 46,
+      "copyGBps": 238.9,
+      "curvePoints": 95
+    },
+    {
+      "phase": "boundary",
+      "job": "vulkan-v3-256m-preview",
+      "id": "20261017-003632-193-membw",
+      "status": "expected_preview",
+      "score": 249.937,
+      "unit": "GB/s",
+      "version": "membw_v3_streaming_preview_moltenvk",
+      "dropPct": 0.0,
+      "readTailGBps": [
+        277.767,
+        244.753,
+        249.937
+      ],
+      "writeGBps": 550.5,
+      "readTailDatasetBytes": [
+        134217728,
+        201326592,
+        268435456
+      ],
+      "writeCopyChecks": 34,
+      "copyGBps": 237.2,
+      "curvePoints": 77
+    }
+  ]
+}

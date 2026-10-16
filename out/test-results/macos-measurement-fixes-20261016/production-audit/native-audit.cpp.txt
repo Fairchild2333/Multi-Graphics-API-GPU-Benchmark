@@ -1,0 +1,17 @@
+#include "benchmark_results.h"
+#include "result_quality.h"
+#include <iostream>
+int main(int argc, char**) {
+    const bool boundary = argc > 1;
+    const auto rows = gpu_bench::LoadResults();
+    if (rows.size() != (boundary ? 2 : 6)) return 1;
+    int previews = 0;
+    for (const auto& row : rows) {
+        const bool preview = row.workloadVersion.find("_preview") != std::string::npos;
+        if (gpu_bench::MeasurementReviewReasons(row).empty() == preview) return 2;
+        if (preview) ++previews;
+        if (row.workload == "membw" && !gpu_bench::CurrentVulkanMemoryContractVerified(row)) return 3;
+    }
+    if (previews != (boundary ? 1 : 0)) return 4;
+    std::cout << "Production C++ reader: " << rows.size() << " records, " << previews << " expected boundary previews\n";
+}

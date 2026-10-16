@@ -34,6 +34,11 @@ data class HistoryEntry(
     val stableScore: Double = 0.0, val throughputDropPct: Double = 0.0,
 ) {
     val measurementReviewReasons: List<String> get() = buildList {
+        if (workload == "membw" && graphicsApi == "Vulkan" && workloadVersion.startsWith("membw_v3_streaming")) {
+            if ("memoryPlateauReached=1" !in workloadConfig.split(';'))
+                add(tr("Memory plateau was not reached", "尚未达到内存带宽平台"))
+            return@buildList
+        }
         if (workload !in listOf("stream", "gpu_burn", "cinematic_liquid")) return@buildList
         if (avgFrameTimeMs > 0 && avgTotalGpuMs > avgFrameTimeMs * 1.1) add(tr("GPU timing exceeds frame interval", "GPU 计时超过帧间隔"))
         if (avgComputeMs + avgRenderMs > avgTotalGpuMs + 0.1) add(tr("Compute/render timing overlaps", "计算与渲染计时重叠"))
@@ -55,7 +60,8 @@ data class HistoryEntry(
                 val parts = it.split('=', limit = 2)
                 if (parts.size == 2) parts[0] to parts[1] else null
             }.toMap()
-            return workloadVersion.startsWith("membw_v2_verified_") && fields["dataVerified"] == "1" &&
+            return workloadVersion.startsWith("membw_v3_streaming_") && fields["dataVerified"] == "1" &&
+                fields["largeDatasetTraversal"] == "ordered_full_dataset_passes" &&
                 (fields["writeCopyChecks"]?.toIntOrNull() ?: 0) > 0 && fields["timestampAnomalies"] == "0"
         }
         if (durationSec < 11) return false

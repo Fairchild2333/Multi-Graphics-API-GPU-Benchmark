@@ -1,0 +1,32 @@
+{
+  "beforeRows": 155,
+  "afterRows": 169,
+  "beforeSha256": "cbc3e5e7b3fde78e2b543fd68bf4e20fa42e9e220ff34dce52d471a7372f1499",
+  "afterSha256": "003ae4d4398e7dca2066ae7491dbc1bab9d78fa6ad1a587482522ee4dc6bb7ce",
+  "allOldRowsUnchanged": true,
+  "addedIDs": [
+    "20261016-235900-300-membw",
+    "20261016-235945-601",
+    "20261017-000030-981",
+    "20261017-000116-161",
+    "20261017-000201-387",
+    "20261017-000246-698",
+    "20261017-000854-281-membw",
+    "20261017-000939-551",
+    "20261017-001024-770",
+    "20261017-001110-110",
+    "20261017-001155-305",
+    "20261017-001240-532",
+    "20261017-003510-928-membw",
+    "20261017-003632-193-membw"
+  ],
+  "currentPolicyPass": 10,
+  "diagnosticQueryControls": 3,
+  "selection": "latest valid per configuration, not maximum",
+  "source": "all-new-results.json",
+  "livePath": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/results/results.json",
+  "expectedBoundaryPreview": 1,
+  "preBoundaryRows": 167,
+  "preBoundarySnapshot": "results-before-boundary.json",
+  "allPreBoundaryRowsUnchanged": true
+}

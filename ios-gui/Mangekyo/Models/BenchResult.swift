@@ -98,6 +98,11 @@ struct BenchResult: Codable, Identifiable, Hashable {
     /// Read a `key=value` item from the semicolon-delimited workload contract.
     /// A completed run may still need metrology or stability review.
     var measurementReviewReasons: [String] {
+        if workload == "membw" && graphicsApi == "Vulkan" &&
+           (workloadVersion ?? "").hasPrefix("membw_v3_streaming") {
+            return workloadConfigValue("memoryPlateauReached") == "1" ? [] :
+                [Localization.tr("Memory plateau was not reached", "尚未达到内存带宽平台", "メモリ帯域の安定域に達していません")]
+        }
         if workload == "cpu_multi_core" && workloadConfigValue("allCoreValidation") == "aggregate_cpu_time_v1" {
             let occupancy = ["minimumRoundPerformanceOccupancy", "minimumRoundEfficiencyOccupancy", "minimumRoundWorkerOccupancy"]
                 .compactMap { Double(workloadConfigValue($0) ?? "") }
@@ -111,6 +116,11 @@ struct BenchResult: Codable, Identifiable, Hashable {
         }
         guard ["stream", "gpu_burn", "cinematic_liquid"].contains(workload) else { return [] }
         var reasons: [String] = []
+        if platform == "macOS" && workload == "stream" && graphicsApi == "Vulkan" &&
+           workloadConfigValue("apiImplementation") == "MoltenVK" &&
+           workloadConfigValue("timingMode") != "synchronized_wall_clock" {
+            reasons.append(Localization.tr("Translated particle timing requires completion verification", "转译粒子计时需要完成时间验证", "変換された粒子計時を完了時間で確認してください"))
+        }
         if avgFrameTimeMs > 0 && avgTotalGpuMs > avgFrameTimeMs * 1.1 {
             reasons.append(Localization.tr("GPU timing exceeds the frame interval", "GPU 计时跨度超过帧间隔", "GPU 計時がフレーム間隔を超えます"))
         }

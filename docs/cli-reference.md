@@ -210,7 +210,7 @@ For `--liquid-solver sph`, every duration—including 15 seconds—is currently
 saved as `cinematic_liquid_sph_slice_v1_preview`; changing only the duration
 does not make the four open correctness contracts formal.
 
-### Memory-bandwidth sweep (`membw_v1`)
+### Memory-bandwidth sweep (`membw_v3_streaming`)
 
 ```powershell
 # Full sweep on GPU 0: data sets from 1 MiB to 2048 MiB, the L1 sweep and the
@@ -218,8 +218,9 @@ does not make the four open correctness contracts formal.
 .\out\build\windows-x64-release\Release\gpu_benchmark.exe --workload membw --gpu 0
 ```
 
-`membw` measures real VRAM and cache bandwidth, which the particle test
-(`stream`) cannot do. It is a separate Vulkan code path in
+`membw` reports the logical traffic of checked read/write/copy kernels across
+working-set sizes, identifying a large-set bandwidth plateau separately from
+cache-assisted points. It does not read a DRAM traffic counter. It is a separate Vulkan code path in
 `src/vulkan_membw.cpp`: it creates its own device, and it opens no window,
 swapchain or RenderDoc capture.
 
@@ -242,8 +243,23 @@ panel. When several GPUs run in one job list, the charts show the last one.
   requests, not an estimate.
 - **Data sets:** every workgroup streams one 512 KiB chunk. The number of
   distinct chunks sets the data-set size, which is swept from 1 MiB to
-  `--membw-max-mib` in ×1.5 / ×2 steps. The number of dispatched workgroups is
-  calibrated separately so that each dispatch lasts about 4 ms at any size.
+  `--membw-max-mib` in ×1.5 / ×2 steps. Below 256 MiB, repetitions retain the
+  cache-probe layout. From 256 MiB, each dispatch visits the complete data set
+  once; compute execution/memory barriers order subsequent complete passes.
+  The timed batch is calibrated to about 4 ms, or at least 50 ms with wall-clock
+  timing. `dispatches_per_sample` reports the complete-pass count; the legacy
+  `dispatch_bytes` field counts bytes of the whole timed sample.
+
+  The memory plateau requires all three largest points to use this complete-pass
+  method and agree within the existing 20% spread. A 256 MiB ceiling leaves a
+  mixed-method 128/192/256 MiB tail, so it remains preview; the normal sweep
+  needs at least 512 MiB to have three eligible points. A flat small-set curve
+  alone does not prove a memory plateau.
+
+  V2 repeated write/copy visits inside one workgroup's private 512 KiB chunk.
+  That can recycle cached data even with a 2 GiB allocation. V3 orders complete
+  large-set passes and removes modulo indexing from that path. It has a new
+  identity; old observations are preserved, not relabeled as V3.
 - **Data check:** before anything is timed, the buffer is filled by the write
   kernel and a fifth kernel (`membw_check.comp`, never timed) loads every
   element and compares it with the value that was stored. If any differs, the
@@ -254,10 +270,12 @@ panel. When several GPUs run in one job list, the charts show the last one.
   reports 512 MiB, loads zeros from a buffer of that size without touching
   memory and reported 116 GB/s for it; at 256 MiB it is correct (32.7 GB/s).
   The system-memory buffer of the PCIe pass is checked the same way.
-- **Timing:** each dispatch is submitted on its own and bracketed by GPU
-  timestamps. Each point runs 3 warm-up and 10 measured dispatches; the median
-  is the score and the fastest run is also printed. If the timestamps do not
-  scale with the workload, the run falls back to wall-clock timing and says so.
+- **Timing:** each sample's batch is submitted and waited for, with timestamps
+  bracketing the batch. Each point runs 3 warm-up and 10 measured samples; the
+  median is the score and the fastest sample is also printed. The timing source
+  is selected before the curve. MoltenVK always uses synchronized wall clock;
+  native Vulkan keeps verified GPU queries. Later query anomalies reject the
+  sweep instead of mixing timing sources within a saved curve.
 - **Summary:** the memory plateau is the median of the three largest data
   sets. The cache plateau is the longest flat stretch of the curve that is
   clearly above it.
@@ -285,9 +303,16 @@ panel. When several GPUs run in one job list, the charts show the last one.
 - **Output:** a table per kernel, a summary, and tab-separated `MEMBW_POINT` /
   `MEMBW_SUMMARY` / `MEMBW_L1` / `MEMBW_HOST` lines for tools.
 - **Result:** workload `membw`, score = read memory plateau in GB/s. The
-  version is `membw_v1` for the default sweep when the memory plateau is
-  reached, otherwise `membw_v1_preview`. `workloadConfig` stores the write and
+  version is `membw_v3_streaming` for the default sweep when the memory plateau is
+  reached, otherwise `membw_v3_streaming_preview` (mobile/platform suffixes are
+  separate). No plateau remains a visible review, even after successful data
+  checks. `workloadConfig` stores traversal identity, the write and
   copy plateaus, the L1 figures, the system-memory figures and the full curves.
+
+The ordered passes use the execution and memory dependencies described in the
+[Vulkan synchronization specification](https://docs.vulkan.org/spec/latest/chapters/synchronization.html).
+Cache/L1 labels remain footprint inferences (`cacheAttribution=unverified`),
+not independently attributed L2/L3/SLC speeds or a guaranteed hardware peak.
 
 Compare the system-memory figures with the PCIe link, which the tool cannot
 read through Vulkan. On Windows, `nvidia-smi
@@ -638,7 +663,7 @@ Parity details:
 `--memory-sweep` runs the particle-derived Metal cache/memory diagnostic with
 no window. `--memory-sweep-save` additionally stores a separate
 `metal_memory_sweep_v1_preview` result; it does not change the ordinary particle
-score or the Vulkan `membw_v1` contract. The Apple GUI uses this native probe.
+score or the Vulkan `membw_v3_streaming` contract. The Apple GUI uses this native probe.
 
 Bounds and sampling options are `--memory-sweep-min-kib`,
 `--memory-sweep-max-kib`, `--memory-sweep-traffic-mib`,

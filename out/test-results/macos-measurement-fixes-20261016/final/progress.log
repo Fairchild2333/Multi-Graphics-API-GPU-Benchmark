@@ -1,0 +1,19 @@
+Initial 30-second cooldown after builds
+Running vulkan-membw-v3-repeat
+Finished vulkan-membw-v3-repeat exit 0 new rows 1
+Cooling down for 30 seconds
+Running vulkan-fixed-1m-a
+Finished vulkan-fixed-1m-a exit 0 new rows 1
+Cooling down for 30 seconds
+Running vulkan-headless-1m
+Finished vulkan-headless-1m exit 0 new rows 1
+Cooling down for 30 seconds
+Running vulkan-headless-16m
+Finished vulkan-headless-16m exit 0 new rows 1
+Cooling down for 30 seconds
+Running metal-fixed-1m
+Finished metal-fixed-1m exit 0 new rows 1
+Cooling down for 30 seconds
+Running vulkan-fixed-1m-b
+Finished vulkan-fixed-1m-b exit 0 new rows 1
+Authorized Mac follow-ups ended

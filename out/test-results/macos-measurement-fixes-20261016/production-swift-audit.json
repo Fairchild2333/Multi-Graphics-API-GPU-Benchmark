@@ -1,0 +1,135 @@
+{
+  "records" : [
+    {
+      "id" : "20261016-235900-300-membw",
+      "phase" : "candidate",
+      "restoredCurvePoints" : 95,
+      "reviewReasons" : [
+
+      ],
+      "score" : 245.89699999999999,
+      "version" : "membw_v3_streaming_moltenvk"
+    },
+    {
+      "id" : "20261016-235945-601",
+      "phase" : "candidate",
+      "reviewReasons" : [
+
+      ],
+      "score" : 186.244,
+      "version" : "stream_v1_fixed_coverage_v2_serial_timing_v2"
+    },
+    {
+      "id" : "20261017-000030-981",
+      "phase" : "candidate",
+      "reviewReasons" : [
+        "Translated particle timing requires completion verification"
+      ],
+      "score" : 179.75,
+      "version" : "stream_v1_fixed_coverage_v2_moltenvk_viewport1280x720_v1"
+    },
+    {
+      "id" : "20261017-000116-161",
+      "phase" : "candidate",
+      "reviewReasons" : [
+
+      ],
+      "score" : 161.36099999999999,
+      "version" : "stream_v1_command_buffer_timing_v1"
+    },
+    {
+      "id" : "20261017-000201-387",
+      "phase" : "candidate",
+      "reviewReasons" : [
+        "Translated particle timing requires completion verification"
+      ],
+      "score" : 265.29500000000002,
+      "version" : "stream_v1_moltenvk"
+    },
+    {
+      "id" : "20261017-000246-698",
+      "phase" : "candidate",
+      "reviewReasons" : [
+        "Translated particle timing requires completion verification"
+      ],
+      "score" : 183.108,
+      "version" : "stream_v1_fixed_coverage_v2_moltenvk_viewport1280x720_v1"
+    },
+    {
+      "id" : "20261017-000854-281-membw",
+      "phase" : "final",
+      "restoredCurvePoints" : 95,
+      "reviewReasons" : [
+
+      ],
+      "score" : 245.90799999999999,
+      "version" : "membw_v3_streaming_moltenvk"
+    },
+    {
+      "id" : "20261017-000939-551",
+      "phase" : "final",
+      "reviewReasons" : [
+
+      ],
+      "score" : 126.33799999999999,
+      "version" : "stream_v1_fixed_coverage_v2_sync_timing_moltenvk_viewport1280x720_v1"
+    },
+    {
+      "id" : "20261017-001024-770",
+      "phase" : "final",
+      "reviewReasons" : [
+
+      ],
+      "score" : 111.462,
+      "version" : "stream_v1_sync_timing_moltenvk"
+    },
+    {
+      "id" : "20261017-001110-110",
+      "phase" : "final",
+      "reviewReasons" : [
+
+      ],
+      "score" : 146.072,
+      "version" : "stream_v1_sync_timing_moltenvk"
+    },
+    {
+      "id" : "20261017-001155-305",
+      "phase" : "final",
+      "reviewReasons" : [
+
+      ],
+      "score" : 194.26900000000001,
+      "version" : "stream_v1_fixed_coverage_v2_serial_timing_v2"
+    },
+    {
+      "id" : "20261017-001240-532",
+      "phase" : "final",
+      "reviewReasons" : [
+
+      ],
+      "score" : 127.526,
+      "version" : "stream_v1_fixed_coverage_v2_sync_timing_moltenvk_viewport1280x720_v1"
+    },
+    {
+      "id" : "20261017-003510-928-membw",
+      "phase" : "boundary",
+      "restoredCurvePoints" : 95,
+      "reviewReasons" : [
+
+      ],
+      "score" : 250.41900000000001,
+      "version" : "membw_v3_streaming_moltenvk"
+    },
+    {
+      "id" : "20261017-003632-193-membw",
+      "phase" : "boundary",
+      "restoredCurvePoints" : 77,
+      "reviewReasons" : [
+        "Memory plateau was not reached"
+      ],
+      "score" : 249.93700000000001,
+      "version" : "membw_v3_streaming_preview_moltenvk"
+    }
+  ],
+  "status" : "passed"
+}

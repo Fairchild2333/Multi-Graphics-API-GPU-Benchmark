@@ -126,7 +126,7 @@ object GpuOptions {
         "cinematic_liquid" ->
             if (seconds == 15) "cinematic_liquid_v2_physical_scene_v8_android_preview"
             else "cinematic_liquid_v2_physical_scene_v8_preview_android_preview"
-        "membw" -> "membw_v2_verified_android_preview"
+        "membw" -> "membw_v3_streaming_android_preview"
         else -> testId
     }
 

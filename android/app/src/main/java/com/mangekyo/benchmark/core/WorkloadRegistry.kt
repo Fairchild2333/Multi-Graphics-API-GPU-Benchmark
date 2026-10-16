@@ -51,7 +51,7 @@ object WorkloadRegistry {
             "membw",
             "Memory Bandwidth — VRAM / Cache",
             "显存带宽 —— 显存 / 缓存",
-            "membw_v2_verified_android_preview",
+            "membw_v3_streaming_android_preview",
             isPreview = true,
         ),
     )

@@ -1,0 +1,436 @@
+diff --git a/shaders/membw_read.comp b/shaders/membw_read.comp
+index 7dc0782..d670948 100644
+--- a/shaders/membw_read.comp
++++ b/shaders/membw_read.comp
+@@ -27,13 +27,15 @@ layout(push_constant) uniform MemBwParams {
+     uint groupsX;          // dispatch width, used to flatten the 2D group index
+     uint seed;             // write kernel only
+     float never;           // value the checksum can never reach
++    uint repeats;          // 1: one uniquely owned chunk per whole-buffer pass; 0: cache sweep
+ } params;
+ 
+ void main() {
+     const uint group = gl_WorkGroupID.x + gl_WorkGroupID.y * params.groupsX;
+     if (group >= params.totalGroups) return;
+ 
+-    const uint base = (group % params.chunkCount) * params.stripesPerChunk * 256u
++    const uint chunk = params.repeats == 1u ? group : group % params.chunkCount;
++    const uint base = chunk * params.stripesPerChunk * 256u
+                     + gl_LocalInvocationID.x;
+ 
+     // Two independent loads per iteration keep two requests in flight per thread.
+diff --git a/src/app_base.cpp b/src/app_base.cpp
+index b9c27a3..19258a7 100644
+--- a/src/app_base.cpp
++++ b/src/app_base.cpp
+@@ -1556,6 +1556,8 @@ BenchmarkResult AppBase::CollectResult() const {
+         r.workloadVersion += "_sync_timing";
+     else if (timingMode == "serialized_command_buffer_gpu_time")
+         r.workloadVersion += "_serial_timing_v2";
++    else if (timingMode == "command_buffer_gpu_time")
++        r.workloadVersion += "_command_buffer_timing_v1";
+     else if (timingMode == "validated_single_frame_gpu_query")
+         r.workloadVersion += "_single_frame_timing_v2";
+ #ifdef GPU_BENCH_MOLTENVK
+diff --git a/src/capture_naming.h b/src/capture_naming.h
+index 8abbb1e..84f5ae4 100644
+--- a/src/capture_naming.h
++++ b/src/capture_naming.h
+@@ -54,6 +54,8 @@ inline std::string CaptureFileStem(const std::string& backend, const std::string
+     if (config.particlesOverridden &&
+         (config.workload == Workload::Stream || config.workload == Workload::Render3D))
+         stem += "_particles" + std::to_string(config.particleCount);
++    if (config.workload == Workload::Stream && !config.headless && config.particleFixedCoverage)
++        stem += "_coveragev2";
+     return stem;
+ }
+ }  // namespace gpu_bench
+diff --git a/src/gpu_common.h b/src/gpu_common.h
+index cebfa56..2349e81 100644
+--- a/src/gpu_common.h
++++ b/src/gpu_common.h
+@@ -455,7 +455,13 @@ struct BenchmarkConfig {
+     std::string   memoryLabelOverride;
+     bool          particlesOverridden = false;
+     bool          headless           = false;    // pure compute, no window/swapchain/present
+-    bool          particleFixedCoverage = false; // rendered stream only; separate score contract
++    // Apple rendering already supports the wrapped-coverage shader. Keep the
++    // rendered workload fixed as particles move; legacy rows stay separate.
++#if defined(__APPLE__)
++    bool          particleFixedCoverage = true;
++#else
++    bool          particleFixedCoverage = false;
++#endif
+     bool          guiWorker          = false;    // internal: isolated WinUI child process
+     Workload      workload           = Workload::Stream;
+     float         softening          = 0.01f;     // N-body: avoids 1/0 singularity
+diff --git a/src/main.cpp b/src/main.cpp
+index 17f5f02..3d68a3d 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -378,6 +378,9 @@ static bool SuiteResultMatches(const gpu_bench::BenchmarkResult& result,
+     if (result.graphicsApi != job.apiName || !workloadMatches || result.headless != job.headless ||
+         !std::isfinite(result.score) || result.score <= 0) return false;
+     if (cpuAll && result.workloadVersion.find("_t15000ms_w200ms") == std::string::npos) return false;
++#if defined(__APPLE__) && defined(__aarch64__)
++    if (cpuAll && result.workloadVersion.find("_kept_branch") == std::string::npos) return false;
++#endif
+     if (job.backend != "cpu" && job.workload != "membw" && job.workload != "gpu_cache" &&
+         (result.warmupSec < 1.9 || result.durationSec < 11.0)) return false;
+ 
+@@ -391,6 +394,19 @@ static bool SuiteResultMatches(const gpu_bench::BenchmarkResult& result,
+     }
+     if (job.workload == "stream" && result.particleCount != job.particleCount)
+         return false;
++#if defined(__APPLE__)
++    if (job.workload == "stream" && !job.headless &&
++        gpu_bench::ResultConfigValue(result, "renderCoverage") != "wrapped_ndc_v2")
++        return false;
++    if (job.workload == "stream" && job.headless && job.backend == "metal" &&
++        gpu_bench::ResultConfigValue(result, "timingMode") != "command_buffer_gpu_time")
++        return false;
++    if (job.workload == "stream" && job.backend == "vulkan" &&
++        gpu_bench::ResultConfigValue(result, "timingMode") != "synchronized_wall_clock")
++        return false;
++#endif
++    if (job.workload == "membw" && job.backend == "vulkan" &&
++        !gpu_bench::CurrentVulkanMemoryContractVerified(result)) return false;
+     if (job.workload == "gpu_burn" &&
+         SuiteConfigInteger(result.workloadConfig, "steps", -1) != job.burnSteps)
+         return false;
+diff --git a/src/metal_backend.mm b/src/metal_backend.mm
+index feb8314..2e074ec 100644
+--- a/src/metal_backend.mm
++++ b/src/metal_backend.mm
+@@ -979,7 +979,7 @@ void MetalBackend::DrawFrame(float deltaTime) {
+ 
+ std::string MetalBackend::GetTimingMode() const {
+     if (!config_.headless) return "serialized_command_buffer_gpu_time";
+-    return "gpu_timestamp_query";
++    return "command_buffer_gpu_time";
+ }
+ 
+ void MetalBackend::WaitIdle() {
+diff --git a/src/result_quality.h b/src/result_quality.h
+index e4bc494..ab98556 100644
+--- a/src/result_quality.h
++++ b/src/result_quality.h
+@@ -1,14 +1,48 @@
+ #pragma once
+ #include "benchmark_results.h"
++#include "vulkan_membw.h"
+ #include <cmath>
+ #include <string>
+ #include <vector>
+ namespace gpu_bench {
++inline std::string ResultConfigValue(const BenchmarkResult& r, const std::string& key) {
++    const std::string prefix = key + "=";
++    std::size_t start = 0;
++    while (start < r.workloadConfig.size()) {
++        const auto end = r.workloadConfig.find(';', start);
++        const auto field = r.workloadConfig.substr(start, end == std::string::npos ? end : end - start);
++        if (field.compare(0, prefix.size(), prefix) == 0) return field.substr(prefix.size());
++        if (end == std::string::npos) break;
++        start = end + 1;
++    }
++    return {};
++}
++
++inline bool CurrentVulkanMemoryContractVerified(const BenchmarkResult& r) {
++    if (r.workload != "membw" || r.graphicsApi != "Vulkan" ||
++        r.workloadVersion.find(kMemBwWorkloadVersion) != 0) return false;
++    try {
++        return ResultConfigValue(r, "dataVerified") == "1" &&
++            std::stoul(ResultConfigValue(r, "writeCopyChecks")) > 0 &&
++            ResultConfigValue(r, "timestampAnomalies") == "0" &&
++            ResultConfigValue(r, "largeDatasetTraversal") == "ordered_full_dataset_passes";
++    } catch (...) { return false; }
++}
+ // Completion and validity are separate: retain raw observations, but surface
+ // questionable score denominators or changing throughput for later review.
+ inline std::vector<std::string> MeasurementReviewReasons(const BenchmarkResult& r) {
++    if (r.workload == "membw" && r.graphicsApi == "Vulkan" &&
++        r.workloadVersion.find(kMemBwWorkloadVersion) == 0) {
++        if (!CurrentVulkanMemoryContractVerified(r)) return {"Vulkan memory data or traversal was not verified"};
++        return ResultConfigValue(r, "memoryPlateauReached") == "1"
++            ? std::vector<std::string>{} : std::vector<std::string>{"Memory plateau was not reached"};
++    }
+     if (r.workload != "stream" && r.workload != "gpu_burn" && r.workload != "cinematic_liquid") return {};
+     std::vector<std::string> reasons;
++    if (r.platform == "macOS" && r.workload == "stream" && r.graphicsApi == "Vulkan" &&
++        ResultConfigValue(r, "apiImplementation") == "MoltenVK" &&
++        ResultConfigValue(r, "timingMode") != "synchronized_wall_clock")
++        reasons.push_back("Translated particle timing requires completion verification");
+     if (r.avgFrameTimeMs > 0 && r.avgTotalGpuMs > r.avgFrameTimeMs * 1.1)
+         reasons.push_back("GPU timing span exceeds the frame interval");
+     if (r.avgComputeMs + r.avgRenderMs > r.avgTotalGpuMs + 0.1)
+diff --git a/src/vulkan_backend.cpp b/src/vulkan_backend.cpp
+index 82b35ac..ef00e88 100644
+--- a/src/vulkan_backend.cpp
++++ b/src/vulkan_backend.cpp
+@@ -83,15 +83,19 @@ void VulkanBackend::InitBackend() {
+     }
+     CreateSyncObjects();
+     CreateTimestampQueryPool();
+-#if defined(GPU_BENCH_MOLTENVK) && defined(GPU_BENCH_NO_GLFW) && defined(__APPLE__)
++#if defined(GPU_BENCH_MOLTENVK) && defined(__APPLE__)
++#if defined(GPU_BENCH_NO_GLFW)
+     // A startup query can agree with synchronized timing, then under-report
+     // later Burn frames on A15. Always time this translated fixed-load path
+     // by submit/fence completion, rather than trusting the initial sample.
+     if (isGpuBurnWorkload(config_.workload))
+         EnableSynchronizedTimingFallback("MoltenVK GPU Burn requires per-frame completion timing");
++#endif
+     // A12X can pass the repeated-dispatch startup check yet under-report
+-    // ordinary frames. Use the same synchronized compute/render boundaries
+-    // for the entire translated particle run, including rendered presets.
++    // ordinary frames. macOS also exposes an inner compute query interval
++    // substantially shorter than the complete command-buffer/frame interval.
++    // Use verified completion boundaries for translated particles on BOTH
++    // Apple hosts. Native Android/Harmony Vulkan remains on validated queries.
+     if (config_.workload == Workload::Stream)
+         EnableSynchronizedTimingFallback("MoltenVK particles require per-frame completion timing");
+ #endif
+diff --git a/src/vulkan_membw.cpp b/src/vulkan_membw.cpp
+index 33f77a3..2a950cc 100644
+--- a/src/vulkan_membw.cpp
++++ b/src/vulkan_membw.cpp
+@@ -30,7 +30,7 @@ constexpr std::uint32_t kHashSeed = 0x4d42u;
+ constexpr std::uint64_t kMiB = 1ull << 20;
+ // The memory plateau needs a sweep of at least this size whose three largest
+ // data sets agree within kMemoryTailSpread.
+-constexpr std::uint64_t kMemoryPlateauBytes = 256 * kMiB;
++constexpr std::uint64_t kMemoryPlateauBytes = kMemBwStreamingMinBytes;
+ constexpr double kMemoryTailSpread = 1.2;
+ constexpr double kPlateauSpread = 1.3;
+ // Upper bound on the traffic of a single dispatch.
+@@ -195,7 +195,8 @@ MemBwKernelSummary Summarise(const std::vector<MemBwPoint>& points, const char*
+     const double tailLow = *std::min_element(tail.begin(), tail.end());
+     const double tailHigh = *std::max_element(tail.begin(), tail.end());
+     summary.memoryPlateauReached =
+-        tail.size() == 3 && curve.back()->datasetBytes >= kMemoryPlateauBytes &&
++        tail.size() == 3 && MemBwStreamingTailEligible(curve[count - 3]->datasetBytes,
++            curve[count - 2]->datasetBytes, curve[count - 1]->datasetBytes) &&
+         tailLow > 0.0 && tailHigh / tailLow <= kMemoryTailSpread;
+     if (!summary.memoryPlateauReached) return summary;
+ 
+@@ -336,7 +337,8 @@ private:
+     void Destroy();
+ 
+     Sample Submit(std::size_t kernel, std::uint32_t chunkCount, std::uint32_t stripesPerChunk,
+-                  std::uint64_t totalGroups, std::uint32_t repeats);
++                  std::uint64_t totalGroups, std::uint32_t repeats,
++                  std::uint32_t orderedPasses = 1);
+     Sample Dispatch(std::size_t kernel, std::uint32_t chunkCount, std::uint64_t passes);
+     double TimeOf(const Sample& sample);
+     std::uint64_t MaxPasses(std::uint32_t chunkCount) const;
+@@ -853,7 +855,8 @@ void Runner::CreateCommandObjects() {
+ void Runner::RecordResourceBarrier() {
+     VkMemoryBarrier barrier{};
+     barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+-    barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
++    barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT |
++                            VK_ACCESS_TRANSFER_WRITE_BIT;
+     barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT |
+                             VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+     vkCmdPipelineBarrier(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT,
+@@ -863,6 +866,13 @@ void Runner::RecordResourceBarrier() {
+ 
+ Runner::Sample Runner::Dispatch(std::size_t kernel, std::uint32_t chunkCount,
+                                 std::uint64_t passes) {
++    if (chunkCount * kChunkBytes >= kMemBwStreamingMinBytes) {
++        // Each dispatch visits every chunk once. A compute execution/memory
++        // dependency orders the next complete pass, preventing private-chunk
++        // write/copy loops from recycling the same cache-resident block.
++        return Submit(kernel, chunkCount, kStripesPerChunk, chunkCount, 1,
++                      static_cast<std::uint32_t>(passes));
++    }
+     if (kernel == kWriteKernel || kernel == kCopyKernel)
+         return Submit(kernel, chunkCount, kStripesPerChunk, chunkCount,
+                       static_cast<std::uint32_t>(passes));
+@@ -872,7 +882,7 @@ Runner::Sample Runner::Dispatch(std::size_t kernel, std::uint32_t chunkCount,
+ 
+ Runner::Sample Runner::Submit(std::size_t kernel, std::uint32_t chunkCount,
+                               std::uint32_t stripesPerChunk, std::uint64_t total,
+-                              std::uint32_t repeats) {
++                              std::uint32_t repeats, std::uint32_t orderedPasses) {
+     const auto groupsX = static_cast<std::uint32_t>(
+         (std::min)(total, static_cast<std::uint64_t>(groupsXLimit_)));
+     const auto groupsY = static_cast<std::uint32_t>((total + groupsX - 1) / groupsX);
+@@ -892,10 +902,13 @@ Runner::Sample Runner::Submit(std::size_t kernel, std::uint32_t chunkCount,
+     vkCmdPushConstants(cmd_, pipelineLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0,
+                        sizeof(PushParams), &params);
+     // The queue is idle here (every dispatch is submitted and waited on its
+-    // own), so the two timestamps bracket exactly this dispatch.
++    // own), so the timestamps bracket the entire ordered dispatch batch.
+     if (queryPool_)
+         vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queryPool_, 0);
+-    vkCmdDispatch(cmd_, groupsX, groupsY, 1);
++    for (std::uint32_t pass = 0; pass < orderedPasses; ++pass) {
++        vkCmdDispatch(cmd_, groupsX, groupsY, 1);
++        if (pass + 1 < orderedPasses) RecordResourceBarrier();
++    }
+     if (queryPool_)
+         vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queryPool_, 1);
+     return Execute();
+@@ -1156,6 +1169,8 @@ MemBwPoint Runner::MeasurePoint(std::size_t kernel, std::uint32_t chunkCount,
+     point.datasetBytes = chunkCount * kChunkBytes;
+     point.passes = static_cast<std::uint32_t>(passes);
+     point.bytesPerDispatch = chunkCount * passes * kKernels[kernel].bytesPerChunkVisit;
++    point.dispatchesPerSample = point.datasetBytes >= kMemBwStreamingMinBytes
++        ? static_cast<std::uint32_t>(passes) : 1;
+     FillStatistics(point, times);
+     VerifyWrittenData(kernel, chunkCount);
+     return point;
+@@ -1299,6 +1314,7 @@ void Runner::PrintPoint(const MemBwPoint& point, bool blockSweep) {
+          << "\tdataset_bytes=" << point.datasetBytes
+          << "\tpasses=" << point.passes
+          << "\tdispatch_bytes=" << point.bytesPerDispatch
++         << "\tdispatches_per_sample=" << point.dispatchesPerSample
+          << std::setprecision(6)
+          << "\tmedian_ms=" << point.medianMs << "\tmin_ms=" << point.minMs
+          << std::setprecision(3)
+@@ -1342,7 +1358,10 @@ void Runner::Run(MemBwReport& report) {
+          << (report.datasetLimitedByDevice ? " (ceiling lowered by the device)" : "") << "\n"
+          << "Timing:    " << (useGpuTimestamps_ ? "GPU timestamps" : "wall clock") << ", "
+          << config_.warmupRuns << " warm-up + " << config_.measuredRuns
+-         << " measured dispatches per point, median reported\n";
++         << " measured samples per point, median reported\n";
++    out_ << "Traversal: complete ordered data-set passes from "
++         << FormatMiB(kMemBwStreamingMinBytes)
++         << "; smaller points retain cache-workgroup repetition.\n";
+ 
+     const auto chunkCounts = SweepChunkCounts(maxChunks_);
+     for (std::size_t k = 0; k < kSweepKernelCount; ++k) {
+diff --git a/src/vulkan_membw.h b/src/vulkan_membw.h
+index 87f6d41..944971a 100644
+--- a/src/vulkan_membw.h
++++ b/src/vulkan_membw.h
+@@ -12,7 +12,16 @@ namespace gpu_bench {
+ inline constexpr char kMemBwWorkloadId[] = "membw";
+ // `MemBwReport::error` of a sweep that RequestStop() ended early.
+ inline constexpr char kMemBwStopped[] = "stopped";
+-inline constexpr char kMemBwWorkloadVersion[] = "membw_v2_verified";
++inline constexpr char kMemBwWorkloadVersion[] = "membw_v3_streaming";
++// Large data sets must finish one whole-buffer pass before reusing any chunk.
++// Repeating a private 512 KiB chunk in a workgroup measures cache traffic even
++// when the allocation is much larger than the cache.
++inline constexpr std::uint64_t kMemBwStreamingMinBytes = 256ull << 20;
++inline bool MemBwStreamingTailEligible(std::uint64_t first, std::uint64_t second,
++                                      std::uint64_t third) {
++    return first >= kMemBwStreamingMinBytes && second >= kMemBwStreamingMinBytes &&
++           third >= kMemBwStreamingMinBytes;
++}
+ 
+ struct MemBwConfig {
+     // vkEnumeratePhysicalDevices index; negative selects the first device.
+@@ -33,8 +42,9 @@ struct MemBwPoint {
+     // of one workgroup and `passes` is how often each workgroup re-reads it.
+     std::string kernel;
+     std::uint64_t datasetBytes = 0;
+-    std::uint32_t passes = 0;           // visits of every chunk per dispatch
+-    std::uint64_t bytesPerDispatch = 0; // bytes the kernel actually requests
++    std::uint32_t passes = 0;           // visits of every chunk in one timed sample
++    std::uint64_t bytesPerDispatch = 0; // legacy name: logical bytes in the entire timed sample
++    std::uint32_t dispatchesPerSample = 1; // ordered whole-buffer passes, or one cache dispatch
+     double medianMs = 0.0;
+     double minMs = 0.0;
+     double medianGBps = 0.0;
+diff --git a/src/vulkan_membw_results.cpp b/src/vulkan_membw_results.cpp
+index 285e8f1..ffe7fed 100644
+--- a/src/vulkan_membw_results.cpp
++++ b/src/vulkan_membw_results.cpp
+@@ -100,7 +100,10 @@ BenchmarkResult MakeStoredVulkanMemBwResult(
+              << ";dataVerified=" << (report.dataVerified ? 1 : 0)
+              << ";writeCopyChecks=" << report.writeCopyChecks
+              << ";resourceSynchronization=explicit_compute_transfer_host"
+-             << ";writeCopyDispatch=one_owner_per_chunk;writeCopyRepeats=in_shader;memoryAccess=volatile"
++             << ";writeCopyDispatch=one_owner_per_chunk;writeCopyRepeats=cache_points_in_shader;memoryAccess=volatile"
++             << ";largeDatasetTraversal=ordered_full_dataset_passes"
++             << ";streamingMinMiB=" << kMemBwStreamingMinBytes / (1024 * 1024)
++             << ";largeDatasetRepeats=one_per_dispatch;readAddressing=unique_chunk_no_modulo"
+              << ";cacheAttribution=unverified;l1Attribution=workgroup_footprint_inference"
+              << ";performanceQueryAdvertised=" << (report.performanceQueryAdvertised ? 1 : 0)
+              << ";performanceCounterStatus=" << report.performanceCounterStatus
+diff --git a/tests/complete_suite_test.cpp b/tests/complete_suite_test.cpp
+index 37ce1ee..ed7407b 100644
+--- a/tests/complete_suite_test.cpp
++++ b/tests/complete_suite_test.cpp
+@@ -34,6 +34,14 @@ int main() {
+     capture.workload = Workload::Stream;
+     capture.particlesOverridden = true;
+     capture.particleCount = 65536;
++    capture.particleFixedCoverage = false;
+     if (CaptureFileStem("Metal", "Apple M4 Pro", capture) != "Metal_Apple_M4_Pro_stream_particles65536") return 6;
++    capture.particleFixedCoverage = true;
++    if (CaptureFileStem("Metal", "Apple M4 Pro", capture) != "Metal_Apple_M4_Pro_stream_particles65536_coveragev2") return 10;
++#if defined(__APPLE__)
++    if (!BenchmarkConfig{}.particleFixedCoverage) return 11;
++#else
++    if (BenchmarkConfig{}.particleFixedCoverage) return 11;
++#endif
+     std::cout << "Available APIs produce 18 jobs: Metal 13 + GL4.1 Burn 3 + CPU 2; absent APIs produce no jobs.\n";
+ }
+diff --git a/tests/result_quality_test.cpp b/tests/result_quality_test.cpp
+index 692939d..51b0822 100644
+--- a/tests/result_quality_test.cpp
++++ b/tests/result_quality_test.cpp
+@@ -25,5 +25,12 @@ int main() {
+     if (MeasurementReviewReasons(r).empty()) return 7; // Falling but locally stable is still review.
+     r.workload = "cpu_membw";
+     if (!MeasurementReviewReasons(r).empty()) return 8;
++    r.workload = "stream"; r.platform = "macOS"; r.graphicsApi = "Vulkan";
++    r.headless = true; r.avgComputeMs = r.avgTotalGpuMs = 0.26;
++    r.avgRenderMs = 0; r.avgFrameTimeMs = 0.27; r.stableScore = 160; r.throttlePct = 0;
++    r.workloadConfig = "apiImplementation=MoltenVK;timingMode=gpu_timestamp_query";
++    if (MeasurementReviewReasons(r).empty()) return 9;
++    r.workloadConfig = "apiImplementation=MoltenVK;timingMode=synchronized_wall_clock";
++    if (!MeasurementReviewReasons(r).empty()) return 10;
+     std::cout << "Real invalid timestamps, overlap and falling throughput flagged; verified reruns and liquid accepted.\n";
+ }
+diff --git a/tests/vulkan_membw_results_test.cpp b/tests/vulkan_membw_results_test.cpp
+index 3bc758f..74b0649 100644
+--- a/tests/vulkan_membw_results_test.cpp
++++ b/tests/vulkan_membw_results_test.cpp
+@@ -1,5 +1,9 @@
+ #include "vulkan_membw_results.h"
+ #include "vulkan_timing_validation.h"
++#include "result_quality.h"
++#ifdef NDEBUG
++#undef NDEBUG
++#endif
+ #include <cassert>
+ #include <iostream>
+ #include <stdexcept>
+@@ -7,6 +11,8 @@
+ int main() {
+     using namespace gpu_bench;
+     MemBwConfig config;
++    assert(!MemBwStreamingTailEligible(128ull << 20, 192ull << 20, 256ull << 20));
++    assert(MemBwStreamingTailEligible(256ull << 20, 384ull << 20, 512ull << 20));
+     MemBwReport report;
+     report.valid = true;
+     report.dataVerified = true;
+@@ -39,7 +45,13 @@ int main() {
+     assert(result.workloadConfig.find("memoryPlateauReached=0") != std::string::npos);
+     assert(result.workloadConfig.find("score=read_largest_datasets;") == 0);
+     assert(result.workloadConfig.find("dataVerified=1;writeCopyChecks=2") != std::string::npos);
+-    assert(result.workloadVersion.find("membw_v2_verified") == 0);
++    assert(result.workloadVersion.find("membw_v3_streaming") == 0);
++    assert(CurrentVulkanMemoryContractVerified(result));
++    assert(!MeasurementReviewReasons(result).empty());
++    auto oldTraversal = result;
++    oldTraversal.workloadVersion = "membw_v2_verified_preview";
++    assert(!CurrentVulkanMemoryContractVerified(oldTraversal));
++    assert(result.workloadConfig.find("largeDatasetTraversal=ordered_full_dataset_passes") != std::string::npos);
+     assert(VulkanTimestampIntervalVerified(4, 4.2));
+     assert(VulkanTimestampIntervalVerified(0.05, 0.25));
+     assert(!VulkanTimestampIntervalVerified(0.02, 11)); // known under-reporting pattern
+@@ -61,6 +73,7 @@ int main() {
+     result = MakeStoredVulkanMemBwResult(report, config, "Named GPU", 1024);
+     assert(result.deviceName == "Named GPU" && result.vramMB == 1024);
+     assert(result.workloadVersion.find("preview") == std::string::npos);
++    assert(MeasurementReviewReasons(result).empty());
+     config.maxDatasetBytes = 256ull << 20;
+     result = MakeStoredVulkanMemBwResult(report, config);
+     assert(result.workloadVersion.find("preview") != std::string::npos);

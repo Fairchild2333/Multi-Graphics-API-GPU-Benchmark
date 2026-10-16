@@ -1,0 +1,39 @@
+[
+  {
+    "platform": "macos",
+    "bytes": 3748,
+    "sha256": "099d88caac16181d66a6883ad64a7ce04e0b3b562502228ce4e787920d6aa728",
+    "packedEqualsFreshOutput": true,
+    "newPushConstantMemberPresent": true
+  },
+  {
+    "platform": "iphoneos",
+    "bytes": 3748,
+    "sha256": "099d88caac16181d66a6883ad64a7ce04e0b3b562502228ce4e787920d6aa728",
+    "packedEqualsFreshOutput": true,
+    "newPushConstantMemberPresent": true
+  },
+  {
+    "platform": "iphonesimulator",
+    "bytes": 3748,
+    "sha256": "099d88caac16181d66a6883ad64a7ce04e0b3b562502228ce4e787920d6aa728",
+    "packedEqualsFreshOutput": true,
+    "newPushConstantMemberPresent": true
+  },
+  {
+    "platform": "android",
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/android/app/build/outputs/apk/debug/app-debug.apk",
+    "sha256": "8dff464addd5a579f5f92bdf7995fa833156b0c8dbbb759eb2575a89b410fe0a",
+    "bytes": 3748,
+    "packedEqualsStaged": true,
+    "newPushConstantMemberPresent": true
+  },
+  {
+    "platform": "ohos",
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/ohos/entry/build/default/outputs/default/entry-default-unsigned.hap",
+    "sha256": "8dff464addd5a579f5f92bdf7995fa833156b0c8dbbb759eb2575a89b410fe0a",
+    "bytes": 3748,
+    "packedEqualsStaged": true,
+    "newPushConstantMemberPresent": true
+  }
+]

@@ -1,0 +1,652 @@
+diff --git a/android/app/src/main/java/com/mangekyo/benchmark/core/GpuOptions.kt b/android/app/src/main/java/com/mangekyo/benchmark/core/GpuOptions.kt
+index 4f7af36..665e006 100644
+--- a/android/app/src/main/java/com/mangekyo/benchmark/core/GpuOptions.kt
++++ b/android/app/src/main/java/com/mangekyo/benchmark/core/GpuOptions.kt
+@@ -126,7 +126,7 @@ object GpuOptions {
+         "cinematic_liquid" ->
+             if (seconds == 15) "cinematic_liquid_v2_physical_scene_v8_android_preview"
+             else "cinematic_liquid_v2_physical_scene_v8_preview_android_preview"
+-        "membw" -> "membw_v2_verified_android_preview"
++        "membw" -> "membw_v3_streaming_android_preview"
+         else -> testId
+     }
+ 
+diff --git a/android/app/src/main/java/com/mangekyo/benchmark/core/ResultsStore.kt b/android/app/src/main/java/com/mangekyo/benchmark/core/ResultsStore.kt
+index ad1ab67..01f069d 100644
+--- a/android/app/src/main/java/com/mangekyo/benchmark/core/ResultsStore.kt
++++ b/android/app/src/main/java/com/mangekyo/benchmark/core/ResultsStore.kt
+@@ -34,6 +34,11 @@ data class HistoryEntry(
+     val stableScore: Double = 0.0, val throughputDropPct: Double = 0.0,
+ ) {
+     val measurementReviewReasons: List<String> get() = buildList {
++        if (workload == "membw" && graphicsApi == "Vulkan" && workloadVersion.startsWith("membw_v3_streaming")) {
++            if ("memoryPlateauReached=1" !in workloadConfig.split(';'))
++                add(tr("Memory plateau was not reached", "尚未达到内存带宽平台"))
++            return@buildList
++        }
+         if (workload !in listOf("stream", "gpu_burn", "cinematic_liquid")) return@buildList
+         if (avgFrameTimeMs > 0 && avgTotalGpuMs > avgFrameTimeMs * 1.1) add(tr("GPU timing exceeds frame interval", "GPU 计时超过帧间隔"))
+         if (avgComputeMs + avgRenderMs > avgTotalGpuMs + 0.1) add(tr("Compute/render timing overlaps", "计算与渲染计时重叠"))
+@@ -55,7 +60,8 @@ data class HistoryEntry(
+                 val parts = it.split('=', limit = 2)
+                 if (parts.size == 2) parts[0] to parts[1] else null
+             }.toMap()
+-            return workloadVersion.startsWith("membw_v2_verified_") && fields["dataVerified"] == "1" &&
++            return workloadVersion.startsWith("membw_v3_streaming_") && fields["dataVerified"] == "1" &&
++                fields["largeDatasetTraversal"] == "ordered_full_dataset_passes" &&
+                 (fields["writeCopyChecks"]?.toIntOrNull() ?: 0) > 0 && fields["timestampAnomalies"] == "0"
+         }
+         if (durationSec < 11) return false
+diff --git a/android/app/src/main/java/com/mangekyo/benchmark/core/WorkloadRegistry.kt b/android/app/src/main/java/com/mangekyo/benchmark/core/WorkloadRegistry.kt
+index cb39188..99291d6 100644
+--- a/android/app/src/main/java/com/mangekyo/benchmark/core/WorkloadRegistry.kt
++++ b/android/app/src/main/java/com/mangekyo/benchmark/core/WorkloadRegistry.kt
+@@ -51,7 +51,7 @@ object WorkloadRegistry {
+             "membw",
+             "Memory Bandwidth — VRAM / Cache",
+             "显存带宽 —— 显存 / 缓存",
+-            "membw_v2_verified_android_preview",
++            "membw_v3_streaming_android_preview",
+             isPreview = true,
+         ),
+     )
+diff --git a/android/app/src/test/java/com/mangekyo/benchmark/core/SuitePlanTest.kt b/android/app/src/test/java/com/mangekyo/benchmark/core/SuitePlanTest.kt
+index 063ca3c..b618d25 100644
+--- a/android/app/src/test/java/com/mangekyo/benchmark/core/SuitePlanTest.kt
++++ b/android/app/src/test/java/com/mangekyo/benchmark/core/SuitePlanTest.kt
+@@ -53,12 +53,16 @@ class SuitePlanTest {
+     }
+     @Test fun memorySuiteRequiresVerifiedDataAndOneTimingContract() {
+         val job = SuiteJob("vulkan-memory", "vulkan", "membw", headless = true)
+-        val verified = record(workload = "membw").copy(workloadVersion = "membw_v2_verified_android_preview",
+-            workloadConfig = "dataVerified=1;writeCopyChecks=2;timestampAnomalies=0")
++        val verified = record(workload = "membw").copy(workloadVersion = "membw_v3_streaming_android_preview",
++            workloadConfig = "dataVerified=1;writeCopyChecks=2;timestampAnomalies=0;largeDatasetTraversal=ordered_full_dataset_passes")
+         assertTrue(verified.matches(job))
++        assertFalse(verified.measurementReviewReasons.isEmpty())
++        assertTrue(verified.copy(workloadConfig = verified.workloadConfig + ";memoryPlateauReached=1").measurementReviewReasons.isEmpty())
+         assertFalse(verified.copy(workloadVersion = "membw_v1_android_preview").matches(job))
+-        assertFalse(verified.copy(workloadConfig = "dataVerified=0;writeCopyChecks=2;timestampAnomalies=0").matches(job))
+-        assertFalse(verified.copy(workloadConfig = "dataVerified=1;writeCopyChecks=0;timestampAnomalies=0").matches(job))
+-        assertFalse(verified.copy(workloadConfig = "dataVerified=1;writeCopyChecks=2;timestampAnomalies=1").matches(job))
++        assertFalse(verified.copy(workloadVersion = "membw_v2_verified_android_preview").matches(job))
++        assertFalse(verified.copy(workloadConfig = verified.workloadConfig.replace("dataVerified=1", "dataVerified=0")).matches(job))
++        assertFalse(verified.copy(workloadConfig = verified.workloadConfig.replace("writeCopyChecks=2", "writeCopyChecks=0")).matches(job))
++        assertFalse(verified.copy(workloadConfig = verified.workloadConfig.replace("timestampAnomalies=0", "timestampAnomalies=1")).matches(job))
++        assertFalse(verified.copy(workloadConfig = verified.workloadConfig.replace("ordered_full_dataset_passes", "private_chunk_repeats")).matches(job))
+     }
+ }
+diff --git a/ios-gui/Mangekyo/Models/BenchResult.swift b/ios-gui/Mangekyo/Models/BenchResult.swift
+index d9175e1..e42350b 100644
+--- a/ios-gui/Mangekyo/Models/BenchResult.swift
++++ b/ios-gui/Mangekyo/Models/BenchResult.swift
+@@ -98,6 +98,11 @@ struct BenchResult: Codable, Identifiable, Hashable {
+     /// Read a `key=value` item from the semicolon-delimited workload contract.
+     /// A completed run may still need metrology or stability review.
+     var measurementReviewReasons: [String] {
++        if workload == "membw" && graphicsApi == "Vulkan" &&
++           (workloadVersion ?? "").hasPrefix("membw_v3_streaming") {
++            return workloadConfigValue("memoryPlateauReached") == "1" ? [] :
++                [Localization.tr("Memory plateau was not reached", "尚未达到内存带宽平台", "メモリ帯域の安定域に達していません")]
++        }
+         if workload == "cpu_multi_core" && workloadConfigValue("allCoreValidation") == "aggregate_cpu_time_v1" {
+             let occupancy = ["minimumRoundPerformanceOccupancy", "minimumRoundEfficiencyOccupancy", "minimumRoundWorkerOccupancy"]
+                 .compactMap { Double(workloadConfigValue($0) ?? "") }
+@@ -111,6 +116,11 @@ struct BenchResult: Codable, Identifiable, Hashable {
+         }
+         guard ["stream", "gpu_burn", "cinematic_liquid"].contains(workload) else { return [] }
+         var reasons: [String] = []
++        if platform == "macOS" && workload == "stream" && graphicsApi == "Vulkan" &&
++           workloadConfigValue("apiImplementation") == "MoltenVK" &&
++           workloadConfigValue("timingMode") != "synchronized_wall_clock" {
++            reasons.append(Localization.tr("Translated particle timing requires completion verification", "转译粒子计时需要完成时间验证", "変換された粒子計時を完了時間で確認してください"))
++        }
+         if avgFrameTimeMs > 0 && avgTotalGpuMs > avgFrameTimeMs * 1.1 {
+             reasons.append(Localization.tr("GPU timing exceeds the frame interval", "GPU 计时跨度超过帧间隔", "GPU 計時がフレーム間隔を超えます"))
+         }
+diff --git a/ios-gui/Mangekyo/Models/MobileBenchmark.swift b/ios-gui/Mangekyo/Models/MobileBenchmark.swift
+index b616cb7..85718c9 100644
+--- a/ios-gui/Mangekyo/Models/MobileBenchmark.swift
++++ b/ios-gui/Mangekyo/Models/MobileBenchmark.swift
+@@ -335,7 +335,8 @@ struct MobileSuiteJob: Identifiable, Sendable {
+                 result.workloadConfigValue("cacheAttribution") == "unverified"
+         }
+         if translated {
+-            return version.hasPrefix("membw_v2_verified") &&
++            return version.hasPrefix("membw_v3_streaming") &&
++                result.workloadConfigValue("largeDatasetTraversal") == "ordered_full_dataset_passes" &&
+                 result.workloadConfigValue("dataVerified") == "1" &&
+                 (Int(result.workloadConfigValue("writeCopyChecks") ?? "0") ?? 0) > 0 &&
+                 result.workloadConfigValue("timestampAnomalies") == "0"
+diff --git a/ios-gui/Mangekyo/Views/RunView.swift b/ios-gui/Mangekyo/Views/RunView.swift
+index 36d66a4..fd3ef9a 100644
+--- a/ios-gui/Mangekyo/Views/RunView.swift
++++ b/ios-gui/Mangekyo/Views/RunView.swift
+@@ -118,13 +118,13 @@ enum GpuOptions {
+             case "stream_headless": return "stream_v1_ios_preview_moltenvk"
+             case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview_sync_timing_moltenvk"
+             case "cinematic_liquid": return "cinematic_liquid_v2_…_ios_preview_moltenvk"
+-            case "memory_sweep": return "membw_v2_verified_ios_preview_moltenvk"
++            case "memory_sweep": return "membw_v3_streaming_ios_preview_moltenvk"
+             default: return test
+             }
+         }
+         switch test {
+         case "stream": return "stream_v1_fixed_coverage_v2_ios_preview_serial_timing_v2"
+-        case "stream_headless": return "stream_v1_ios_preview"
++        case "stream_headless": return "stream_v1_ios_preview_command_buffer_timing_v1"
+         case "gpu_burn": return "gpu_burn_v3_fixed_steps_\(steps)_kaleidoscope_ios_preview"
+         case "cinematic_liquid": return "cinematic_liquid_v2_physical_scene_v8_metal_preview_ios_preview"
+         case "memory_sweep": return "metal_memory_sweep_v1_preview_ios_preview"
+diff --git a/ios-gui/MangekyoTests/CpuBridgeTests.swift b/ios-gui/MangekyoTests/CpuBridgeTests.swift
+index 0378a0f..fe0941b 100644
+--- a/ios-gui/MangekyoTests/CpuBridgeTests.swift
++++ b/ios-gui/MangekyoTests/CpuBridgeTests.swift
+@@ -233,7 +233,7 @@ final class CpuBridgeTests: XCTestCase {
+         let row = try XCTUnwrap(try savedRows().last(where: {
+             $0["graphicsApi"] as? String == "Vulkan" && $0["workload"] as? String == "membw"
+         }))
+-        XCTAssertEqual(row["workloadVersion"] as? String, "membw_v2_verified_ios_preview_moltenvk")
++        XCTAssertEqual(row["workloadVersion"] as? String, "membw_v3_streaming_ios_preview_moltenvk")
+         let config = row["workloadConfig"] as? String ?? ""
+         for family in ["read", "write", "copy", "l1", "l1_single"] {
+             XCTAssertTrue(config.contains("curve_\(family)="), config)
+diff --git a/macos-gui/GPUBenchmark/Models/BenchResult.swift b/macos-gui/GPUBenchmark/Models/BenchResult.swift
+index d9175e1..e42350b 100644
+--- a/macos-gui/GPUBenchmark/Models/BenchResult.swift
++++ b/macos-gui/GPUBenchmark/Models/BenchResult.swift
+@@ -98,6 +98,11 @@ struct BenchResult: Codable, Identifiable, Hashable {
+     /// Read a `key=value` item from the semicolon-delimited workload contract.
+     /// A completed run may still need metrology or stability review.
+     var measurementReviewReasons: [String] {
++        if workload == "membw" && graphicsApi == "Vulkan" &&
++           (workloadVersion ?? "").hasPrefix("membw_v3_streaming") {
++            return workloadConfigValue("memoryPlateauReached") == "1" ? [] :
++                [Localization.tr("Memory plateau was not reached", "尚未达到内存带宽平台", "メモリ帯域の安定域に達していません")]
++        }
+         if workload == "cpu_multi_core" && workloadConfigValue("allCoreValidation") == "aggregate_cpu_time_v1" {
+             let occupancy = ["minimumRoundPerformanceOccupancy", "minimumRoundEfficiencyOccupancy", "minimumRoundWorkerOccupancy"]
+                 .compactMap { Double(workloadConfigValue($0) ?? "") }
+@@ -111,6 +116,11 @@ struct BenchResult: Codable, Identifiable, Hashable {
+         }
+         guard ["stream", "gpu_burn", "cinematic_liquid"].contains(workload) else { return [] }
+         var reasons: [String] = []
++        if platform == "macOS" && workload == "stream" && graphicsApi == "Vulkan" &&
++           workloadConfigValue("apiImplementation") == "MoltenVK" &&
++           workloadConfigValue("timingMode") != "synchronized_wall_clock" {
++            reasons.append(Localization.tr("Translated particle timing requires completion verification", "转译粒子计时需要完成时间验证", "変換された粒子計時を完了時間で確認してください"))
++        }
+         if avgFrameTimeMs > 0 && avgTotalGpuMs > avgFrameTimeMs * 1.1 {
+             reasons.append(Localization.tr("GPU timing exceeds the frame interval", "GPU 计时跨度超过帧间隔", "GPU 計時がフレーム間隔を超えます"))
+         }
+diff --git a/ohos/entry/src/main/ets/common/GpuOptions.ets b/ohos/entry/src/main/ets/common/GpuOptions.ets
+index 3fc365b..149bbe7 100644
+--- a/ohos/entry/src/main/ets/common/GpuOptions.ets
++++ b/ohos/entry/src/main/ets/common/GpuOptions.ets
+@@ -185,7 +185,7 @@ export function gpuSavedAs(testId: string, steps: number, seconds: number, api:
+       : 'cinematic_liquid_v2_physical_scene_v8_preview_ohos_preview';
+   }
+   if (testId === 'membw') {
+-    return 'membw_v2_verified_ohos_preview';
++    return 'membw_v3_streaming_ohos_preview';
+   }
+   return testId;
+ }
+diff --git a/ohos/entry/src/main/ets/common/ResultsStore.ets b/ohos/entry/src/main/ets/common/ResultsStore.ets
+index 3d130bd..a22b0f6 100644
+--- a/ohos/entry/src/main/ets/common/ResultsStore.ets
++++ b/ohos/entry/src/main/ets/common/ResultsStore.ets
+@@ -35,6 +35,10 @@ export class ResultEntry {
+ 
+   reviewReasons(): string[] {
+     const reasons: string[] = [];
++    if (this.workload === 'membw' && this.graphicsApi === 'Vulkan' && this.workloadVersion.startsWith('membw_v3_streaming')) {
++      if (this.workloadConfig.split(';').indexOf('memoryPlateauReached=1') < 0) reasons.push(tr('Memory plateau was not reached', '尚未达到内存带宽平台'));
++      return reasons;
++    }
+     if (['stream', 'gpu_burn', 'cinematic_liquid'].indexOf(this.workload) < 0) return reasons;
+     if (this.avgFrameTimeMs > 0 && this.avgTotalGpuMs > this.avgFrameTimeMs * 1.1) reasons.push(tr('GPU timing exceeds frame interval', 'GPU 计时超过帧间隔'));
+     if (this.avgComputeMs + this.avgRenderMs > this.avgTotalGpuMs + 0.1) reasons.push(tr('Compute/render timing overlaps', '计算与渲染计时重叠'));
+@@ -54,7 +58,8 @@ export class ResultEntry {
+     if (job.workload === 'membw') {
+       const fields: string[] = this.workloadConfig.split(';');
+       const checks: string = fields.find((f: string) => f.startsWith('writeCopyChecks=')) ?? '';
+-      return this.workloadVersion.startsWith('membw_v2_verified_') && fields.indexOf('dataVerified=1') >= 0 &&
++      return this.workloadVersion.startsWith('membw_v3_streaming_') && fields.indexOf('dataVerified=1') >= 0 &&
++        fields.indexOf('largeDatasetTraversal=ordered_full_dataset_passes') >= 0 &&
+         Number(checks.substring('writeCopyChecks='.length)) > 0 && fields.indexOf('timestampAnomalies=0') >= 0;
+     }
+     if (this.durationSec < 11 || (job.particles > 0 && this.particleCount !== job.particles)) return false;
+diff --git a/scripts/apple-check/ios-suite-tests.swift b/scripts/apple-check/ios-suite-tests.swift
+index 3524ddf..1e0489f 100644
+--- a/scripts/apple-check/ios-suite-tests.swift
++++ b/scripts/apple-check/ios-suite-tests.swift
+@@ -132,9 +132,9 @@ for job in native where job.id != "gpu_cache-v2" {
+         }
+         if let vk = translated.first(where: { $0.id == "vulkan/" + job.id }) {
+             other = row; other.graphicsApi = "Vulkan"
+-            other.workloadVersion = job.id == "memory_sweep" ? "membw_v2_verified_ios_preview_moltenvk" : (row.workloadVersion ?? "") + "_moltenvk"
++            other.workloadVersion = job.id == "memory_sweep" ? "membw_v3_streaming_ios_preview_moltenvk" : (row.workloadVersion ?? "") + "_moltenvk"
+             other.workloadConfig = (row.workloadConfig ?? "") + ";apiImplementation=MoltenVK;translatedTo=Metal"
+-            if job.id == "memory_sweep" { other.workloadConfig = (other.workloadConfig ?? "") + ";dataVerified=1;writeCopyChecks=2;timestampAnomalies=0" }
++            if job.id == "memory_sweep" { other.workloadConfig = (other.workloadConfig ?? "") + ";dataVerified=1;writeCopyChecks=2;timestampAnomalies=0;largeDatasetTraversal=ordered_full_dataset_passes" }
+             if job.id.hasPrefix("gpu_burn-") || job.id.hasPrefix("stream") {
+                 other.workloadConfig = (other.workloadConfig ?? "").split(separator: ";")
+                     .filter { !$0.hasPrefix("timingMode=") }.joined(separator: ";") + ";timingMode=synchronized_wall_clock"
+@@ -149,6 +149,12 @@ for job in native where job.id != "gpu_cache-v2" {
+                 var unchecked = other
+                 unchecked.workloadVersion = "membw_v1_ios_preview_moltenvk"
+                 precondition(!vk.matches(unchecked), "Unchecked old Vulkan sweep reused")
++                unchecked.workloadVersion = "membw_v2_verified_ios_preview_moltenvk"
++                precondition(!vk.matches(unchecked), "Private-chunk repeats reused as whole-dataset streaming")
++                var noPlateau = other
++                noPlateau.workloadConfig = (noPlateau.workloadConfig ?? "").split(separator: ";")
++                    .filter { !$0.hasPrefix("memoryPlateauReached=") }.joined(separator: ";") + ";memoryPlateauReached=0"
++                precondition(!noPlateau.measurementReviewReasons.isEmpty, "A completed preview must retain its memory-platform warning")
+                 unchecked = other
+                 unchecked.workloadConfig = unchecked.workloadConfig?.replacingOccurrences(of: "timestampAnomalies=0", with: "timestampAnomalies=1")
+                 precondition(!vk.matches(unchecked), "Mixed-timing sweep reused")
+diff --git a/shaders/membw_read.comp b/shaders/membw_read.comp
+index 7dc0782..d670948 100644
+--- a/shaders/membw_read.comp
++++ b/shaders/membw_read.comp
+@@ -27,13 +27,15 @@ layout(push_constant) uniform MemBwParams {
+     uint groupsX;          // dispatch width, used to flatten the 2D group index
+     uint seed;             // write kernel only
+     float never;           // value the checksum can never reach
++    uint repeats;          // 1: one uniquely owned chunk per whole-buffer pass; 0: cache sweep
+ } params;
+ 
+ void main() {
+     const uint group = gl_WorkGroupID.x + gl_WorkGroupID.y * params.groupsX;
+     if (group >= params.totalGroups) return;
+ 
+-    const uint base = (group % params.chunkCount) * params.stripesPerChunk * 256u
++    const uint chunk = params.repeats == 1u ? group : group % params.chunkCount;
++    const uint base = chunk * params.stripesPerChunk * 256u
+                     + gl_LocalInvocationID.x;
+ 
+     // Two independent loads per iteration keep two requests in flight per thread.
+diff --git a/src/app_base.cpp b/src/app_base.cpp
+index b9c27a3..19258a7 100644
+--- a/src/app_base.cpp
++++ b/src/app_base.cpp
+@@ -1556,6 +1556,8 @@ BenchmarkResult AppBase::CollectResult() const {
+         r.workloadVersion += "_sync_timing";
+     else if (timingMode == "serialized_command_buffer_gpu_time")
+         r.workloadVersion += "_serial_timing_v2";
++    else if (timingMode == "command_buffer_gpu_time")
++        r.workloadVersion += "_command_buffer_timing_v1";
+     else if (timingMode == "validated_single_frame_gpu_query")
+         r.workloadVersion += "_single_frame_timing_v2";
+ #ifdef GPU_BENCH_MOLTENVK
+diff --git a/src/capture_naming.h b/src/capture_naming.h
+index 8abbb1e..84f5ae4 100644
+--- a/src/capture_naming.h
++++ b/src/capture_naming.h
+@@ -54,6 +54,8 @@ inline std::string CaptureFileStem(const std::string& backend, const std::string
+     if (config.particlesOverridden &&
+         (config.workload == Workload::Stream || config.workload == Workload::Render3D))
+         stem += "_particles" + std::to_string(config.particleCount);
++    if (config.workload == Workload::Stream && !config.headless && config.particleFixedCoverage)
++        stem += "_coveragev2";
+     return stem;
+ }
+ }  // namespace gpu_bench
+diff --git a/src/gpu_common.h b/src/gpu_common.h
+index cebfa56..2349e81 100644
+--- a/src/gpu_common.h
++++ b/src/gpu_common.h
+@@ -455,7 +455,13 @@ struct BenchmarkConfig {
+     std::string   memoryLabelOverride;
+     bool          particlesOverridden = false;
+     bool          headless           = false;    // pure compute, no window/swapchain/present
+-    bool          particleFixedCoverage = false; // rendered stream only; separate score contract
++    // Apple rendering already supports the wrapped-coverage shader. Keep the
++    // rendered workload fixed as particles move; legacy rows stay separate.
++#if defined(__APPLE__)
++    bool          particleFixedCoverage = true;
++#else
++    bool          particleFixedCoverage = false;
++#endif
+     bool          guiWorker          = false;    // internal: isolated WinUI child process
+     Workload      workload           = Workload::Stream;
+     float         softening          = 0.01f;     // N-body: avoids 1/0 singularity
+diff --git a/src/main.cpp b/src/main.cpp
+index 17f5f02..3d68a3d 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -378,6 +378,9 @@ static bool SuiteResultMatches(const gpu_bench::BenchmarkResult& result,
+     if (result.graphicsApi != job.apiName || !workloadMatches || result.headless != job.headless ||
+         !std::isfinite(result.score) || result.score <= 0) return false;
+     if (cpuAll && result.workloadVersion.find("_t15000ms_w200ms") == std::string::npos) return false;
++#if defined(__APPLE__) && defined(__aarch64__)
++    if (cpuAll && result.workloadVersion.find("_kept_branch") == std::string::npos) return false;
++#endif
+     if (job.backend != "cpu" && job.workload != "membw" && job.workload != "gpu_cache" &&
+         (result.warmupSec < 1.9 || result.durationSec < 11.0)) return false;
+ 
+@@ -391,6 +394,19 @@ static bool SuiteResultMatches(const gpu_bench::BenchmarkResult& result,
+     }
+     if (job.workload == "stream" && result.particleCount != job.particleCount)
+         return false;
++#if defined(__APPLE__)
++    if (job.workload == "stream" && !job.headless &&
++        gpu_bench::ResultConfigValue(result, "renderCoverage") != "wrapped_ndc_v2")
++        return false;
++    if (job.workload == "stream" && job.headless && job.backend == "metal" &&
++        gpu_bench::ResultConfigValue(result, "timingMode") != "command_buffer_gpu_time")
++        return false;
++    if (job.workload == "stream" && job.backend == "vulkan" &&
++        gpu_bench::ResultConfigValue(result, "timingMode") != "synchronized_wall_clock")
++        return false;
++#endif
++    if (job.workload == "membw" && job.backend == "vulkan" &&
++        !gpu_bench::CurrentVulkanMemoryContractVerified(result)) return false;
+     if (job.workload == "gpu_burn" &&
+         SuiteConfigInteger(result.workloadConfig, "steps", -1) != job.burnSteps)
+         return false;
+diff --git a/src/metal_backend.mm b/src/metal_backend.mm
+index feb8314..2e074ec 100644
+--- a/src/metal_backend.mm
++++ b/src/metal_backend.mm
+@@ -979,7 +979,7 @@ void MetalBackend::DrawFrame(float deltaTime) {
+ 
+ std::string MetalBackend::GetTimingMode() const {
+     if (!config_.headless) return "serialized_command_buffer_gpu_time";
+-    return "gpu_timestamp_query";
++    return "command_buffer_gpu_time";
+ }
+ 
+ void MetalBackend::WaitIdle() {
+diff --git a/src/result_quality.h b/src/result_quality.h
+index e4bc494..ab98556 100644
+--- a/src/result_quality.h
++++ b/src/result_quality.h
+@@ -1,14 +1,48 @@
+ #pragma once
+ #include "benchmark_results.h"
++#include "vulkan_membw.h"
+ #include <cmath>
+ #include <string>
+ #include <vector>
+ namespace gpu_bench {
++inline std::string ResultConfigValue(const BenchmarkResult& r, const std::string& key) {
++    const std::string prefix = key + "=";
++    std::size_t start = 0;
++    while (start < r.workloadConfig.size()) {
++        const auto end = r.workloadConfig.find(';', start);
++        const auto field = r.workloadConfig.substr(start, end == std::string::npos ? end : end - start);
++        if (field.compare(0, prefix.size(), prefix) == 0) return field.substr(prefix.size());
++        if (end == std::string::npos) break;
++        start = end + 1;
++    }
++    return {};
++}
++
++inline bool CurrentVulkanMemoryContractVerified(const BenchmarkResult& r) {
++    if (r.workload != "membw" || r.graphicsApi != "Vulkan" ||
++        r.workloadVersion.find(kMemBwWorkloadVersion) != 0) return false;
++    try {
++        return ResultConfigValue(r, "dataVerified") == "1" &&
++            std::stoul(ResultConfigValue(r, "writeCopyChecks")) > 0 &&
++            ResultConfigValue(r, "timestampAnomalies") == "0" &&
++            ResultConfigValue(r, "largeDatasetTraversal") == "ordered_full_dataset_passes";
++    } catch (...) { return false; }
++}
+ // Completion and validity are separate: retain raw observations, but surface
+ // questionable score denominators or changing throughput for later review.
+ inline std::vector<std::string> MeasurementReviewReasons(const BenchmarkResult& r) {
++    if (r.workload == "membw" && r.graphicsApi == "Vulkan" &&
++        r.workloadVersion.find(kMemBwWorkloadVersion) == 0) {
++        if (!CurrentVulkanMemoryContractVerified(r)) return {"Vulkan memory data or traversal was not verified"};
++        return ResultConfigValue(r, "memoryPlateauReached") == "1"
++            ? std::vector<std::string>{} : std::vector<std::string>{"Memory plateau was not reached"};
++    }
+     if (r.workload != "stream" && r.workload != "gpu_burn" && r.workload != "cinematic_liquid") return {};
+     std::vector<std::string> reasons;
++    if (r.platform == "macOS" && r.workload == "stream" && r.graphicsApi == "Vulkan" &&
++        ResultConfigValue(r, "apiImplementation") == "MoltenVK" &&
++        ResultConfigValue(r, "timingMode") != "synchronized_wall_clock")
++        reasons.push_back("Translated particle timing requires completion verification");
+     if (r.avgFrameTimeMs > 0 && r.avgTotalGpuMs > r.avgFrameTimeMs * 1.1)
+         reasons.push_back("GPU timing span exceeds the frame interval");
+     if (r.avgComputeMs + r.avgRenderMs > r.avgTotalGpuMs + 0.1)
+diff --git a/src/vulkan_backend.cpp b/src/vulkan_backend.cpp
+index 82b35ac..ef00e88 100644
+--- a/src/vulkan_backend.cpp
++++ b/src/vulkan_backend.cpp
+@@ -83,15 +83,19 @@ void VulkanBackend::InitBackend() {
+     }
+     CreateSyncObjects();
+     CreateTimestampQueryPool();
+-#if defined(GPU_BENCH_MOLTENVK) && defined(GPU_BENCH_NO_GLFW) && defined(__APPLE__)
++#if defined(GPU_BENCH_MOLTENVK) && defined(__APPLE__)
++#if defined(GPU_BENCH_NO_GLFW)
+     // A startup query can agree with synchronized timing, then under-report
+     // later Burn frames on A15. Always time this translated fixed-load path
+     // by submit/fence completion, rather than trusting the initial sample.
+     if (isGpuBurnWorkload(config_.workload))
+         EnableSynchronizedTimingFallback("MoltenVK GPU Burn requires per-frame completion timing");
++#endif
+     // A12X can pass the repeated-dispatch startup check yet under-report
+-    // ordinary frames. Use the same synchronized compute/render boundaries
+-    // for the entire translated particle run, including rendered presets.
++    // ordinary frames. macOS also exposes an inner compute query interval
++    // substantially shorter than the complete command-buffer/frame interval.
++    // Use verified completion boundaries for translated particles on BOTH
++    // Apple hosts. Native Android/Harmony Vulkan remains on validated queries.
+     if (config_.workload == Workload::Stream)
+         EnableSynchronizedTimingFallback("MoltenVK particles require per-frame completion timing");
+ #endif
+diff --git a/src/vulkan_membw.cpp b/src/vulkan_membw.cpp
+index 33f77a3..3721d1c 100644
+--- a/src/vulkan_membw.cpp
++++ b/src/vulkan_membw.cpp
+@@ -30,7 +30,7 @@ constexpr std::uint32_t kHashSeed = 0x4d42u;
+ constexpr std::uint64_t kMiB = 1ull << 20;
+ // The memory plateau needs a sweep of at least this size whose three largest
+ // data sets agree within kMemoryTailSpread.
+-constexpr std::uint64_t kMemoryPlateauBytes = 256 * kMiB;
++constexpr std::uint64_t kMemoryPlateauBytes = kMemBwStreamingMinBytes;
+ constexpr double kMemoryTailSpread = 1.2;
+ constexpr double kPlateauSpread = 1.3;
+ // Upper bound on the traffic of a single dispatch.
+@@ -336,7 +336,8 @@ private:
+     void Destroy();
+ 
+     Sample Submit(std::size_t kernel, std::uint32_t chunkCount, std::uint32_t stripesPerChunk,
+-                  std::uint64_t totalGroups, std::uint32_t repeats);
++                  std::uint64_t totalGroups, std::uint32_t repeats,
++                  std::uint32_t orderedPasses = 1);
+     Sample Dispatch(std::size_t kernel, std::uint32_t chunkCount, std::uint64_t passes);
+     double TimeOf(const Sample& sample);
+     std::uint64_t MaxPasses(std::uint32_t chunkCount) const;
+@@ -853,7 +854,8 @@ void Runner::CreateCommandObjects() {
+ void Runner::RecordResourceBarrier() {
+     VkMemoryBarrier barrier{};
+     barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+-    barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
++    barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT |
++                            VK_ACCESS_TRANSFER_WRITE_BIT;
+     barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT |
+                             VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+     vkCmdPipelineBarrier(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT,
+@@ -863,6 +865,13 @@ void Runner::RecordResourceBarrier() {
+ 
+ Runner::Sample Runner::Dispatch(std::size_t kernel, std::uint32_t chunkCount,
+                                 std::uint64_t passes) {
++    if (chunkCount * kChunkBytes >= kMemBwStreamingMinBytes) {
++        // Each dispatch visits every chunk once. A compute execution/memory
++        // dependency orders the next complete pass, preventing private-chunk
++        // write/copy loops from recycling the same cache-resident block.
++        return Submit(kernel, chunkCount, kStripesPerChunk, chunkCount, 1,
++                      static_cast<std::uint32_t>(passes));
++    }
+     if (kernel == kWriteKernel || kernel == kCopyKernel)
+         return Submit(kernel, chunkCount, kStripesPerChunk, chunkCount,
+                       static_cast<std::uint32_t>(passes));
+@@ -872,7 +881,7 @@ Runner::Sample Runner::Dispatch(std::size_t kernel, std::uint32_t chunkCount,
+ 
+ Runner::Sample Runner::Submit(std::size_t kernel, std::uint32_t chunkCount,
+                               std::uint32_t stripesPerChunk, std::uint64_t total,
+-                              std::uint32_t repeats) {
++                              std::uint32_t repeats, std::uint32_t orderedPasses) {
+     const auto groupsX = static_cast<std::uint32_t>(
+         (std::min)(total, static_cast<std::uint64_t>(groupsXLimit_)));
+     const auto groupsY = static_cast<std::uint32_t>((total + groupsX - 1) / groupsX);
+@@ -895,7 +904,10 @@ Runner::Sample Runner::Submit(std::size_t kernel, std::uint32_t chunkCount,
+     // own), so the two timestamps bracket exactly this dispatch.
+     if (queryPool_)
+         vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queryPool_, 0);
+-    vkCmdDispatch(cmd_, groupsX, groupsY, 1);
++    for (std::uint32_t pass = 0; pass < orderedPasses; ++pass) {
++        vkCmdDispatch(cmd_, groupsX, groupsY, 1);
++        if (pass + 1 < orderedPasses) RecordResourceBarrier();
++    }
+     if (queryPool_)
+         vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, queryPool_, 1);
+     return Execute();
+@@ -1156,6 +1168,8 @@ MemBwPoint Runner::MeasurePoint(std::size_t kernel, std::uint32_t chunkCount,
+     point.datasetBytes = chunkCount * kChunkBytes;
+     point.passes = static_cast<std::uint32_t>(passes);
+     point.bytesPerDispatch = chunkCount * passes * kKernels[kernel].bytesPerChunkVisit;
++    point.dispatchesPerSample = point.datasetBytes >= kMemBwStreamingMinBytes
++        ? static_cast<std::uint32_t>(passes) : 1;
+     FillStatistics(point, times);
+     VerifyWrittenData(kernel, chunkCount);
+     return point;
+@@ -1299,6 +1313,7 @@ void Runner::PrintPoint(const MemBwPoint& point, bool blockSweep) {
+          << "\tdataset_bytes=" << point.datasetBytes
+          << "\tpasses=" << point.passes
+          << "\tdispatch_bytes=" << point.bytesPerDispatch
++         << "\tdispatches_per_sample=" << point.dispatchesPerSample
+          << std::setprecision(6)
+          << "\tmedian_ms=" << point.medianMs << "\tmin_ms=" << point.minMs
+          << std::setprecision(3)
+@@ -1342,7 +1357,10 @@ void Runner::Run(MemBwReport& report) {
+          << (report.datasetLimitedByDevice ? " (ceiling lowered by the device)" : "") << "\n"
+          << "Timing:    " << (useGpuTimestamps_ ? "GPU timestamps" : "wall clock") << ", "
+          << config_.warmupRuns << " warm-up + " << config_.measuredRuns
+-         << " measured dispatches per point, median reported\n";
++         << " measured samples per point, median reported\n";
++    out_ << "Traversal: complete ordered data-set passes from "
++         << FormatMiB(kMemBwStreamingMinBytes)
++         << "; smaller points retain cache-workgroup repetition.\n";
+ 
+     const auto chunkCounts = SweepChunkCounts(maxChunks_);
+     for (std::size_t k = 0; k < kSweepKernelCount; ++k) {
+diff --git a/src/vulkan_membw.h b/src/vulkan_membw.h
+index 87f6d41..e28a519 100644
+--- a/src/vulkan_membw.h
++++ b/src/vulkan_membw.h
+@@ -12,7 +12,11 @@ namespace gpu_bench {
+ inline constexpr char kMemBwWorkloadId[] = "membw";
+ // `MemBwReport::error` of a sweep that RequestStop() ended early.
+ inline constexpr char kMemBwStopped[] = "stopped";
+-inline constexpr char kMemBwWorkloadVersion[] = "membw_v2_verified";
++inline constexpr char kMemBwWorkloadVersion[] = "membw_v3_streaming";
++// Large data sets must finish one whole-buffer pass before reusing any chunk.
++// Repeating a private 512 KiB chunk in a workgroup measures cache traffic even
++// when the allocation is much larger than the cache.
++inline constexpr std::uint64_t kMemBwStreamingMinBytes = 256ull << 20;
+ 
+ struct MemBwConfig {
+     // vkEnumeratePhysicalDevices index; negative selects the first device.
+@@ -35,6 +39,7 @@ struct MemBwPoint {
+     std::uint64_t datasetBytes = 0;
+     std::uint32_t passes = 0;           // visits of every chunk per dispatch
+     std::uint64_t bytesPerDispatch = 0; // bytes the kernel actually requests
++    std::uint32_t dispatchesPerSample = 1; // ordered whole-buffer passes, or one cache dispatch
+     double medianMs = 0.0;
+     double minMs = 0.0;
+     double medianGBps = 0.0;
+diff --git a/src/vulkan_membw_results.cpp b/src/vulkan_membw_results.cpp
+index 285e8f1..ffe7fed 100644
+--- a/src/vulkan_membw_results.cpp
++++ b/src/vulkan_membw_results.cpp
+@@ -100,7 +100,10 @@ BenchmarkResult MakeStoredVulkanMemBwResult(
+              << ";dataVerified=" << (report.dataVerified ? 1 : 0)
+              << ";writeCopyChecks=" << report.writeCopyChecks
+              << ";resourceSynchronization=explicit_compute_transfer_host"
+-             << ";writeCopyDispatch=one_owner_per_chunk;writeCopyRepeats=in_shader;memoryAccess=volatile"
++             << ";writeCopyDispatch=one_owner_per_chunk;writeCopyRepeats=cache_points_in_shader;memoryAccess=volatile"
++             << ";largeDatasetTraversal=ordered_full_dataset_passes"
++             << ";streamingMinMiB=" << kMemBwStreamingMinBytes / (1024 * 1024)
++             << ";largeDatasetRepeats=one_per_dispatch;readAddressing=unique_chunk_no_modulo"
+              << ";cacheAttribution=unverified;l1Attribution=workgroup_footprint_inference"
+              << ";performanceQueryAdvertised=" << (report.performanceQueryAdvertised ? 1 : 0)
+              << ";performanceCounterStatus=" << report.performanceCounterStatus
+diff --git a/tests/complete_suite_test.cpp b/tests/complete_suite_test.cpp
+index 37ce1ee..ed7407b 100644
+--- a/tests/complete_suite_test.cpp
++++ b/tests/complete_suite_test.cpp
+@@ -34,6 +34,14 @@ int main() {
+     capture.workload = Workload::Stream;
+     capture.particlesOverridden = true;
+     capture.particleCount = 65536;
++    capture.particleFixedCoverage = false;
+     if (CaptureFileStem("Metal", "Apple M4 Pro", capture) != "Metal_Apple_M4_Pro_stream_particles65536") return 6;
++    capture.particleFixedCoverage = true;
++    if (CaptureFileStem("Metal", "Apple M4 Pro", capture) != "Metal_Apple_M4_Pro_stream_particles65536_coveragev2") return 10;
++#if defined(__APPLE__)
++    if (!BenchmarkConfig{}.particleFixedCoverage) return 11;
++#else
++    if (BenchmarkConfig{}.particleFixedCoverage) return 11;
++#endif
+     std::cout << "Available APIs produce 18 jobs: Metal 13 + GL4.1 Burn 3 + CPU 2; absent APIs produce no jobs.\n";
+ }
+diff --git a/tests/result_quality_test.cpp b/tests/result_quality_test.cpp
+index 692939d..51b0822 100644
+--- a/tests/result_quality_test.cpp
++++ b/tests/result_quality_test.cpp
+@@ -25,5 +25,12 @@ int main() {
+     if (MeasurementReviewReasons(r).empty()) return 7; // Falling but locally stable is still review.
+     r.workload = "cpu_membw";
+     if (!MeasurementReviewReasons(r).empty()) return 8;
++    r.workload = "stream"; r.platform = "macOS"; r.graphicsApi = "Vulkan";
++    r.headless = true; r.avgComputeMs = r.avgTotalGpuMs = 0.26;
++    r.avgRenderMs = 0; r.avgFrameTimeMs = 0.27; r.stableScore = 160; r.throttlePct = 0;
++    r.workloadConfig = "apiImplementation=MoltenVK;timingMode=gpu_timestamp_query";
++    if (MeasurementReviewReasons(r).empty()) return 9;
++    r.workloadConfig = "apiImplementation=MoltenVK;timingMode=synchronized_wall_clock";
++    if (!MeasurementReviewReasons(r).empty()) return 10;
+     std::cout << "Real invalid timestamps, overlap and falling throughput flagged; verified reruns and liquid accepted.\n";
+ }
+diff --git a/tests/vulkan_membw_results_test.cpp b/tests/vulkan_membw_results_test.cpp
+index 3bc758f..d689a7e 100644
+--- a/tests/vulkan_membw_results_test.cpp
++++ b/tests/vulkan_membw_results_test.cpp
+@@ -1,5 +1,9 @@
+ #include "vulkan_membw_results.h"
+ #include "vulkan_timing_validation.h"
++#include "result_quality.h"
++#ifdef NDEBUG
++#undef NDEBUG
++#endif
+ #include <cassert>
+ #include <iostream>
+ #include <stdexcept>
+@@ -39,7 +43,13 @@ int main() {
+     assert(result.workloadConfig.find("memoryPlateauReached=0") != std::string::npos);
+     assert(result.workloadConfig.find("score=read_largest_datasets;") == 0);
+     assert(result.workloadConfig.find("dataVerified=1;writeCopyChecks=2") != std::string::npos);
+-    assert(result.workloadVersion.find("membw_v2_verified") == 0);
++    assert(result.workloadVersion.find("membw_v3_streaming") == 0);
++    assert(CurrentVulkanMemoryContractVerified(result));
++    assert(!MeasurementReviewReasons(result).empty());
++    auto oldTraversal = result;
++    oldTraversal.workloadVersion = "membw_v2_verified_preview";
++    assert(!CurrentVulkanMemoryContractVerified(oldTraversal));
++    assert(result.workloadConfig.find("largeDatasetTraversal=ordered_full_dataset_passes") != std::string::npos);
+     assert(VulkanTimestampIntervalVerified(4, 4.2));
+     assert(VulkanTimestampIntervalVerified(0.05, 0.25));
+     assert(!VulkanTimestampIntervalVerified(0.02, 11)); // known under-reporting pattern
+@@ -61,6 +71,7 @@ int main() {
+     result = MakeStoredVulkanMemBwResult(report, config, "Named GPU", 1024);
+     assert(result.deviceName == "Named GPU" && result.vramMB == 1024);
+     assert(result.workloadVersion.find("preview") == std::string::npos);
++    assert(MeasurementReviewReasons(result).empty());
+     config.maxDatasetBytes = 256ull << 20;
+     result = MakeStoredVulkanMemBwResult(report, config);
+     assert(result.workloadVersion.find("preview") != std::string::npos);

@@ -1,165 +1,107 @@
-# ⚠️ 苹果设备：下一步要测的和有问题的成绩（2026-10-16，先读这一份）
+# 苹果设备：最新状态与下一步（2026-10-17，先读这一份）
 
-在 Mac 上接手的人（ChatGPT / Codex）请从这里开始。每项任务都写了怎么跑、怎么判断结果对不对。原因和背景在文末链接的文档里。
+**本轮 Mac 软件问题已修复并复核。**最新报告：
+[Mac 修复结果](docs/macos-measurement-fixes-20261017.md)、
+[完整原始数据、曲线和限制](out/test-results/macos-measurement-fixes-20261016/report.md)。
+目录名 20261016 是本轮开始日期，最终复核在 17 日完成。
 
-**2026-10-16 Mac 最新：**M1、M2、M4 的指定核查已执行，M3 两项也各补测一次。
-CPU 分支保留版大核/后台小核/全核为 207.532/69.902/2436.328 MWork/s；
-Metal 1M 纯计算 162.761 GB/s，计时与帧间隔一致。Vulkan v2 内存虽通过校验，
-没有读取平台，仍是 preview；Vulkan 1M 本轮下降 4.66%，不能据此关闭历史原因。
-iOS 真机/模拟器 Release 均已编译，原生 CTest 7/7 通过。详见
-[最新补测说明](docs/macos-targeted-retest-20261016.md) 和
-[原始报告与曲线](out/test-results/macos-targeted-retest-20261016/report.md)。
+## 当前范围
 
-## 规则
+- 用户最新要求“继续修复，直到完成”，本轮对已确认的 Mac 测法、计时范围及成绩复用问题做了必要修复，均单独记录新版本；不能沿用此前“测试内容一律不改”的旧阶段限制来阻止这些已授权修复。
+- 不为贴合规格、排名或消除正常波动反复挑分。旧结果原样保留，新的不同合同分组保存。
+- 小体积原始 JSON、完整曲线、日志和报告纳入 Git。跨电脑核对应从 [五台设备主历史索引](out/test-results/README.md) 开始，不只读根目录旧历史。
+- iPhone/iPad 的物理测试等用户接回设备。本轮只有构建及软件回归，没有新增手机成绩。
+- GPU L2/L3/SoC-SLC 独立归属仍按用户决定排除在验收外；已有曲线保留未归属，不虚填独立速度。
 
-- **只测下面列出的项目。** 已有的稳定成绩不要重跑；要重跑别的，先问用户。
-- **测试内容不改**（内核、着色器、计分方式、默认设置）。唯一的例外：`scripts/metal-math-probe` 如果编译不过，可以修这个小测试本身。
-- 原始数据照旧放在 `out/test-results/<名字>-<日期>/`，原样保存，已经纳入 Git。
-- 测完在本文件里勾选对应的项、写下结果，并在 `HANDOFF.md` 里记一笔。
-- iPhone 和 iPad 的任务要等用户接上设备再做。
+## Mac M4 Pro：本轮完成
 
-## Mac（M4 Pro）上的任务
+### [x] M1. CPU 随机分支保留与正式复测
 
-### [x] M1. CPU 算力：确认内核分支保留了，然后重跑大核、小核、全核
+Apple clang 的五处内核循环均保留最低位分支，循环内没有 `fcsel`。
+旧固定 40 行扫描会包含循环后的钳位代码；实际按循环回边检查。
+新 `_kept_branch` formal 大核 **207.532**、后台小核 **69.902**、全核 **2436.328 MWork/s**。
+大核约 4.034 GHz、19.44 周期/单元，P/E 三轮驻留均通过，14 线程贡献与总分一致。
+旧 312/3582 等无分支版本保留在旧组，不再作为新版比较或一键补缺依据。
 
-**背景：** macOS 版的编译器把 CPU 内核里那个随机分支改写成了条件选择指令（`csel`/`fcsel`），M4 Pro 因此不用付猜错的代价。它每个工作单元只要 13 个周期，其他平台要 16–25 个。现在的代码里用 `GPU_BENCH_KEEP_BRANCH` 保留了这个分支，只对 arm64 macOS 生效。
+详见 [10-16 CPU 原始日志与汇编](out/test-results/macos-targeted-retest-20261016/report.md#m1分支已保留)。
 
-1. 拉取最新代码，用 `./scripts/build-macos.sh` 重新编译 Release 版。
-2. 用 Xcode 的编译器确认分支保留了：
-   ```bash
-   xcrun clang++ -std=c++17 -O3 -DNDEBUG -arch arm64 -mmacosx-version-min=12.0 -I src -S src/cpu_benchmark.cpp -o /tmp/cpu_benchmark.s
-   python3 - <<'PY'
-   import re
-   from pathlib import Path
-   text = Path('/tmp/cpu_benchmark.s').read_text()
-   loops = re.findall(r'(?m)^\s*eor[^\n]*ror #47[^\n]*\n[\s\S]*?^\s*b\.ne\s+LBB[^\n]*', text)
-   assert loops, 'No kernel loops found; inspect the assembly manually'
-   assert all(not re.search(r'\bfcsel\b', s) for s in loops)
-   assert all(re.search(r'\btbn?z\s+w[0-9]+, #0', s) for s in loops)
-   print('Branch retained in', len(loops), 'kernel loops')
-   PY
-   ```
-   **对的结果：** 内核循环内没有 `fcsel`，每处有按第 0 位跳转的分支。
-   不要固定截取 40 行：当前 Apple clang 的一个循环之后有两条用于钳位的 `fcsel`，
-   会造成假阳性。本轮按循环回边划定范围，五处内核均通过。
-3. 在 App 的 CPU 页跑一次正式的算力测试（大核、小核、全核，每项 15 秒）。只跑这一项，不跑缓存/内存测试。
+### [x] M2. Metal 数学探针
 
-**对的结果：**
-- 新成绩的版本名里有 `_kept_branch`。
-- 大核单线程明显低于原来的 312 MWork/s。
-- 用日志里 `CPU_RESIDENCY` 的 `effective_ghz` 算每单元周期数（GHz × 1000 ÷ 分数），应该在 16–25 之间，而不是 13。
+探针在 Mac 未改即编译运行成功。fast FMA **6.964 TFLOPS**，sin/atan2/exp/pow
+相对 FMA 为 **0.122/0.067/0.288/0.140**；Burn 单步 **14.644 Gpix-step/s**。
+原 8–10 TFLOPS 是预估，探针未证明能达到硬件峰值，不能用预估当验收阈值。
+支持特殊函数成本影响 Burn；尚无其他厂商同实现探针，不能断言解释全部跨厂商分差。
 
-旧的 Mac CPU 成绩留在原来的组里，不删。
+[完整探针输出](out/test-results/metal-math-probe-20261016-233740/output.txt)。
 
-**已测：**新三条均带 `_kept_branch`；大核 207.532，小核 69.902，全核 2436.328。
-大核选中轮次有效频率 4.034 GHz，约 19.44 周期/工作单元；P/E 三轮驻留均通过。
-CPU 由 App 内同一 CLI worker 执行，本轮没有另外点击 GUI 验收。
+### [x] M3. Vulkan 内存与粒子 1M 波动的软件修复
 
-### [x] M2. Metal 数学小测试
+- 内存 V2 私有 chunk 重复会受缓存影响。V3 从 **256 MiB** 起按完整数据集逐轮遍历并排序同步，去掉大数据集 read 的取模路径，数据检查、字节计数和默认扫描上限不变。
+- 三次默认扫描读取 **245.897/245.908/250.419 GB/s**，均找到平台，每轮 95 点、46 次 write/copy 校验通过；最新写入/复制 **244.7/238.9 GB/s**。版本为 **`membw_v3_streaming_moltenvk`**。旧 300.885 是 V2 preview，不与 V3 混排。
+- 平台尾部的三个数据集必须全部使用完整遍历；256 MiB 上限的 128/192/256 MiB 混合方法不能算平台。实际负向复核保存了 77 点、34 次校验，正确显示 preview/review，没有冒充正式内存速度。默认 2 GiB 扫描不受此边界限制。
+- Mac 默认采用固定可见覆盖，避免粒子移出画面。查询计时 A/B 对照确认原渲染负载逐渐减少的趋势消失。
+- Mac MoltenVK 粒子与 iOS 一样按逐帧完成计时，版本带 `_sync_timing`。最终 1M 绘制两轮 **126.338/127.526 GB/s**，前后下降 **-1.73%/-0.19%**，均稳定；1M/16M 纯计算 **111.462/146.072 GB/s**。
+- 旧查询对照继续存档并显示 review；原生 Android/HarmonyOS 粒子计时没有改为 Apple 同步路径。没有硬件 GPU 频率遥测，不称旧波动为已证实热降频。
 
-**背景：** GPU Burn 在苹果 GPU 上每 TFLOPS 只跑出约 1.1，NVIDIA 和 AMD 是 1.9–2.5。Burn 每一步要算二十多次 `sin`/`cos`/`atan2`/`exp`/`pow`。这个小测试量的是这些函数相对 FMA 的速度。
+这是有校验的大数据集内核访问平台，不是硬件流量计数或绝对 DRAM 峰值；缓存归属仍未确认。
 
-```bash
-bash scripts/metal-math-probe/run.sh
-```
+### [x] M4. Metal 1M 纯计算计时范围核对
 
-- 它最初在 Windows 上编写；本轮已在 Mac 直接编译运行成功，未改代码。
-- 结果会存到 `out/test-results/metal-math-probe-<时间>/output.txt`，把表格抄到下面"结果"一栏。
+Metal headless GPU 命令缓冲与帧间隔匹配，没有发现需修正其分母的证据。
+标签由笼统查询改为准确的 **`command_buffer_gpu_time`**，新身份带
+`_command_buffer_timing_v1`，计算内核与数值算法保持原样。
 
-**读取结果：**
-- 原预估 FMA 为 8–10 TFLOPS；本轮实际 fast 6.964、precise 7.054。
-  该探针没有验证能达到硬件峰值，预估不是验收阈值，不为贴合预估而修改或挑选成绩。
-- `GPU Burn step` 应该不低于真实 Burn 的 9.4–9.7 Gpix-step/s。真实 Burn 每像素还要多算一段收尾的着色，所以这一行会更高一些。
-- 要看的是 `sin`、`atan2`、`exp`、`pow` 的 `vs fma` 是不是远小于 1。
+旧 Vulkan 内部 compute 查询和 Metal 整个命令缓冲不是同一范围，不能直接用
+219/146 等比值推断 API 优劣。最终 MoltenVK 同步计时包含提交/等待成本，旧、新
+分数分组保存；原 Metal 纯计算、绘制、Vulkan 之间的差异不再被冒充相同计时合同。
+最终 Metal 固定覆盖 1M **194.269 GB/s**，均值和曲线保留。
 
-**已测：**fast 的上述比值依次 0.122/0.067/0.288/0.140，Burn 单步 14.644
-Gpix-step/s。支持特殊函数成本影响 Burn，但缺少其他厂商同实现探针，不能独立确认跨厂商原因。
+## 构建与验证
 
-### [ ] M3（可选，10-14 起就挂着）
+Mac/iOS 真机/iOS 模拟器/Android/HarmonyOS 均构建成功，新 read SPIR-V
+在五个平台包内与各自新构建件一致。原生 CTest **7/7**、共享检查 **154/154**、
+Android JUnit **5/5**、iOS 版本/清单/复用回归通过。
+生产 C++ 与 Swift 均接受最终 **6/6** 实测结果；边界轮正式记录通过、小容量 preview 正确提示。默认 Vulkan 内存每轮还原 **95 点**，小容量诊断还原 **77 点**。
 
-- 用新的 `membw_v2_verified` 测法，补一条 Mac 的 Vulkan 显存带宽正式成绩。
-- Mac 上 Vulkan 显示粒子 1M 的吞吐会在运行中往下掉，诊断还没收尾。
+本轮原始记录 14 条，10 条通过当前策略，3 条查询对照和 1 条预期的小容量诊断保留 review；按配置最新选用，
+不是选最高分。Mac 主历史 **155→169**，旧记录不变，四台 iOS 主历史哈希不变。
+所有测量已结束。手机/平板的新物理成绩和 Windows 本机构建未在本轮执行。
 
-**已补测但待办未关闭：**默认 Vulkan 内存 1–2048 MiB、95 点、46 次写入/复制
-校验通过；300.885 GB/s 被程序标为 `membw_v2_verified_preview_moltenvk`，
-没有读取平台，不能视作正式 DRAM 带宽。Vulkan 1M 本轮 177.361 GB/s、下降
-4.66%；本轮在阈值内，历史下降原因仍未确认。未改默认上限、计时或内核。
+## iPhone / iPad 下一步：等连接
 
-### [x] M4. 查 Metal 纯计算 1M 粒子为什么偏低（已完成指定核查，差异归因仍未确认）
+### [ ] I1. iPhone 14 Pro Max / A16：补齐 9 个未完成项目
 
-- 现在的 146.7 GB/s，比 Vulkan 转译的 219.7 低三分之一，和 16M 的 143.3 差不多。
-- 先看日志里每帧的计算时间是怎么记的（命令缓冲的起止，还是只包住计算那一段）。
-- 再用同一个包短跑一次 Metal 纯计算 1M，对比命令缓冲时间和实际帧间隔。
-- 结论写进本文件。改计时方法之前要先问用户。
+Vulkan Burn64（此前取消）、Burn256、GPU 内存（现在应跑 V3）、GPU 缓存诊断、
+CPU 算力、CPU 缓存/内存/页面首次访问/存储，以及 GLES2 Burn16/64/256。
+只补这些项目，每项前检查系统热状态。
 
-**核查：**新成绩 162.761 GB/s，compute=total GPU=帧间隔约 0.258 ms，稳定。
-headless 命令缓冲内只有 compute，没有 render/present；未发现跨度计时明显偏大。
-旧 Vulkan 219.681 的 compute 为 0.191 ms，但总 GPU 为 0.267 ms、帧间隔
-0.305 ms，不能直接和 Metal 整个 compute 缓冲相除推断 API 开销。
-没有 encoder 内独立计时证据，不能声称全部差距由固定开销造成。保持现有计时方式。
+已完成的 22 项和 3 个稳定性提示保留。Burn256 的下降 16.69%、Vulkan Burn16
+下降 19.08% 没有直接频率证据；不称作已证实降频。是否做一次冷机对照取决于比较需求。
+[现有 A16 记录](docs/a16-partial-run-20261016.md)。
 
-## iPhone / iPad 上的任务（等用户接上设备）
+### [ ] I2. iPad8,1 / 11 英寸 A12X：复核 Metal 纯计算 16M
 
-### [ ] I1. iPhone 14 Pro Max（A16）：补齐 9 个没跑的项目
+旧约 20.1 GB/s，比本机 Vulkan 28.8、另一台 A12X Metal 29.5 低约 30%。
+只复核该项，并检查 GPU/帧间隔，保留全部原始记录。其他通过项目不因这个疑点重跑。
 
-- **未执行的项目：**
-  - 被取消的 Vulkan GPU Burn 64；
-  - Vulkan GPU Burn 256、Vulkan 显存带宽、GPU 缓存诊断；
-  - CPU 算力、CPU 缓存/内存/虚拟内存/存储；
-  - GLES2 GPU Burn 16/64/256。
-- 只跑这 9 项，不要整套重跑。每项开始前要等系统热状态回到 0。
-- **可选：** Metal GPU Burn 256（1.269，运行中掉了 16.7%）和流体（9.14）当时排在发热的测试后面，凉下来以后各补测一次。
+### [ ] I3. 已测 A15 / 两台 A12X：下一次接入时补新版 Vulkan 内存
 
-### [ ] I2. iPad Pro 11 寸一代（iPad8,1）：重测 Metal 纯计算 16M 粒子
+现有 V1/V2 数字仍是历史观测，不能标成 V3。每台只需按新算法补一条 GPU 内存，
+不能因 Windows 拉取最新代码就伪装成新设备实测；本轮仅完成其软件构建与版本复用保护。
+A15 真机完整点击一次“一键测试全部项目”的验收仍是可选待办，模拟器通过不等于真机性能。
 
-- 现在的 20.1 GB/s，比它自己的 Vulkan（28.8）和另一台 A12X 的 Metal（29.5）都低 30%，疑似有问题。只重测这一项。
-- 测完核对 GPU 时间和帧间隔是否对得上。
+## 其余判断的使用限制
 
-### [ ] I3（可选）iPhone 13 Pro（A15）
+- Mac 小核后台 QoS 的分数不是小核峰值，不和 iOS Utility/大核陪跑测法直接混比。
+- GPU Burn 着重特殊函数，粒子是特定内核的逻辑 GB/s，流体包含模拟和渲染；不能互相替代或当通用性能分。
+- A15 CPU 内存略超按公开规格推算的数字，尚未独立确认原因；数据集大于某一级缓存不足以证明完全没有缓存影响。
+- A15/A12X 流体差距与访问延迟/原子操作有关，具体缓存层级归因仍是推断；两种依赖链参数也不同，不能拿延迟数直接相除排名。
+- 旧 Metal Burn 4.2–4.8 已被修正计时的 9.4–9.7 取代；原文件继续保留。
 
-- 用新的 `membw_v2_verified` 补一条 Vulkan 显存带宽成绩（现在只有旧版 v1 的 29.3）。
-- 真机上完整点一次"一键测试全部项目"的验收，一直没做过。
+## 背景及证据
 
-## 苹果这边有问题或偏低的成绩（2026-10-16 汇总）
-
-| 设备 | 项目 | 现象 | 判断 | 处理 |
-|---|---|---|---|---|
-| M4 Pro | 旧 CPU 大核 312、全核 3582 | 原编译版本每单元约 13 个周期 | 编译器把分支改成了条件选择 | M1 已验证；新版 207.532/2436.328，旧成绩保留在旧组 |
-| M4 Pro | 10-14 之前的 Metal Burn（4.2–4.8） | 记下的 GPU 时间是帧间隔的两倍 | 旧的计时错误 | 已被 9.4–9.7 取代，不再使用 |
-| M4 Pro | Metal 纯计算 1M：旧 146.7，新 162.761 GB/s | 本轮 GPU 与帧间隔均约 0.258 ms | 指定计时核查通过，未证明固定开销解释全部差距；API 阶段范围不同 | M4 指定短测已完成，原因保留未确认，未改计时 |
-| M4 Pro | Vulkan 显示粒子 1M：旧 167.4，新 177.361 | 本轮下降 4.66%；此前 12–23% | 本轮在阈值内，历史原因和 GPU 频率仍未确认 | M3 保留 |
-| M4 Pro | 新版 Vulkan 内存 300.885 GB/s | 默认扫描无读取平台，版本为 preview | 校验通过不代表物理 DRAM 峰值；大工作集交替波动 | M3 正式平台验收未完成 |
-| M4 Pro | Metal 显示粒子 4M、16M | 比纯计算还高约 7%（153.3 对 142.2，152.2 对 143.3） | 小疑点：显示是一次一帧计时，纯计算是两帧排队 | 不处理，记录在案 |
-| M4 Pro | 小核单线程 80.8 | 后台优先级下只跑到 1.57–1.62 GHz | 不是小核的最高性能 | 不横向比较 |
-| 所有苹果 GPU | GPU Burn | 每 TFLOPS 约 1.1，NVIDIA/AMD 是 1.9–2.5；A15、A16、A12X 只到麒麟 9000 的水平 | Mac 探针显示特殊函数显著慢于 FMA；没有跨厂商同实现对照 | M2 已测；不能把推断写成全部差距的已证实原因 |
-| A15 | 16M 粒子 19.0、显存带宽 30.9 | 低于同代的安卓旗舰 | 64 位 LPDDR4X，是这些旗舰里最慢的内存；把带宽用起来的效率不低（0.61） | 不用处理 |
-| A15 | CPU 全核内存读 34.3–35.2 GB/s | 略高于按 LPDDR4X-4266 64 位算的理论值 34.1 | 数据集每线程 12–64 MiB，6 线程合计超过 72 MiB，已超出 32 MB 系统缓存，所以不是缓存造成的；原因不明（公开的内存规格不准，或计时/字节数有约 3% 偏差） | 待查 |
-| A15、A12X | CPU 大核单线程 147 和 111 | 低于骁龙 865（179） | 测试特点：这两代苹果核每单元要 20–22 个周期；频率已实测确认正常 | 不用处理 |
-| A12X（两台） | 流体 6.1–6.9 | 只有 A15 的一半 | 约 12.6 MB 的模拟网格放不进它的缓存 | 不用处理 |
-| A16 | Metal Burn 256 1.269、流体 9.14 | 运行中受热掉速 | 排在发热的测试后面 | I1 可选冷机补测 |
-| A16 | Vulkan 1M 显示粒子、Vulkan Burn 16 | 没有稳定段；运行中掉了 19% | 稳定性提示 | 不强制重测 |
-| A16 | CPU 和其余共 9 项 | 没有成绩 | 测到一半拔了线 | I1 |
-| iPad8,1 | Metal 纯计算 16M 粒子 20.1 | 比自己的 Vulkan 和另一台 A12X 低 30% | 疑似错误 | I2 |
-| iPad8,7 | Metal 显示粒子 16M | 两轮都没有稳定段 | 稳定性提示，计时核对通过 | 保留 |
-| 所有 iOS 设备 | 65K/1M 显示粒子、Burn 16 | 偏低（A16 的 65K：显示 7.1，纯计算 64.6） | 画面跟屏幕刷新走、一次只排一帧，GPU 空闲时会降频 | 只粗看，比较时用纯计算的结果 |
-| 所有 iOS 设备 | Vulkan（MoltenVK）的各项 | 比 Metal 低 30–50% | 转译开销，加上每帧做完才计时 | 苹果设备一律拿 Metal 的结果比 |
-| 三台 iOS 设备和 Mac | 小核单线程 | 三种测法：Mac 是后台优先级；A15 让大核陪跑；A12X 是 Utility 优先级 | 测法不同 | 不横向比较 |
-
-## 背景文档
-
-- [docs/cli-reference.md](docs/cli-reference.md) 里的 "What the score measures"：CPU 算力测试量的是什么，以及 macOS 编译那个分支的问题。
-- [docs/interpreting-gpu-burn.md](docs/interpreting-gpu-burn.md)：GPU Burn 量的是特殊函数的速度。
-- [docs/interpreting-stream-bandwidth.md](docs/interpreting-stream-bandwidth.md)：粒子分数跟着各设备的内存带宽走。
-- [docs/interpreting-cinematic-liquid.md](docs/interpreting-cinematic-liquid.md)：流体模拟看缓存，A15 比 A12X 快一倍的原因。
-- [docs/apple-retest-status-20261014.md](docs/apple-retest-status-20261014.md)、[docs/a16-partial-run-20261016.md](docs/a16-partial-run-20261016.md)：之前的复测记录。
-
-## 结果
-
-| 任务 | 日期 | 结果 | 原始数据 |
-|---|---|---|---|
-| M1 | 2026-10-16 | 5 个内核循环保留分支；207.532/69.902/2436.328，formal | [原始历史、日志、汇编](out/test-results/macos-targeted-retest-20261016/report.md#m1分支已保留) |
-| M2 | 2026-10-16 | fast FMA 6.964 TFLOPS，Burn 单步 14.644；跨厂商原因未完全确认 | [探针输出](out/test-results/metal-math-probe-20261016-233740/output.txt) |
-| M3 | 2026-10-16 | 已补测；内存仍 preview，Vulkan 1M 历史原因仍开放 | [完整报告](out/test-results/macos-targeted-retest-20261016/report.md#m3vulkan-内存及历史波动) |
-| M4 | 2026-10-16 | 162.761 GB/s，GPU/帧间隔一致；未改计时，API 差异归因仍未确认 | [曲线与核查](out/test-results/macos-targeted-retest-20261016/report.md#m41m-纯计算计时核对) |
-| I1 | | | |
-| I2 | | | |
+- [本轮完整修复报告](out/test-results/macos-measurement-fixes-20261016/report.md)
+- [上一轮定向补测](docs/macos-targeted-retest-20261016.md)
+- [CPU 分数含义与 Vulkan V3](docs/cli-reference.md)
+- [GPU Burn 解读](docs/interpreting-gpu-burn.md)、[粒子解读](docs/interpreting-stream-bandwidth.md)、[流体解读](docs/interpreting-cinematic-liquid.md)
+- [Apple 历史复测状态](docs/apple-retest-status-20261014.md)

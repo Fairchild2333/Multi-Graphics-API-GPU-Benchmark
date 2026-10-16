@@ -455,7 +455,13 @@ struct BenchmarkConfig {
     std::string   memoryLabelOverride;
     bool          particlesOverridden = false;
     bool          headless           = false;    // pure compute, no window/swapchain/present
-    bool          particleFixedCoverage = false; // rendered stream only; separate score contract
+    // Apple rendering already supports the wrapped-coverage shader. Keep the
+    // rendered workload fixed as particles move; legacy rows stay separate.
+#if defined(__APPLE__)
+    bool          particleFixedCoverage = true;
+#else
+    bool          particleFixedCoverage = false;
+#endif
     bool          guiWorker          = false;    // internal: isolated WinUI child process
     Workload      workload           = Workload::Stream;
     float         softening          = 0.01f;     // N-body: avoids 1/0 singularity
