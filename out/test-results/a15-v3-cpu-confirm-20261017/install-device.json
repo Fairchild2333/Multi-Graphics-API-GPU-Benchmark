@@ -1,0 +1,37 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "install",
+      "app",
+      "--device",
+      "00008110-00164D591485401E",
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-a15-v3-confirm/Build/Products/Release-iphoneos/Mangekyo.app",
+      "--json-output",
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-v3-cpu-confirm-20261017/install-device.json"
+    ],
+    "commandType" : "devicectl.device.install.app",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "45159977-97BF-543B-A3BE-3FFC567B816E",
+    "installedApplications" : [
+      {
+        "bundleID" : "com.fairchild.Mangekyo",
+        "databaseSequenceNumber" : 5404,
+        "databaseUUID" : "7179FC5B-AD6B-48F6-832B-0DEF4CE6E31D",
+        "installationURL" : "file:///private/var/containers/Bundle/Application/EF6F7617-5870-44F0-8E95-9B5F09976A48/Mangekyo.app/",
+        "launchServicesIdentifier" : "unknown",
+        "options" : {
+
+        }
+      }
+    ]
+  }
+}

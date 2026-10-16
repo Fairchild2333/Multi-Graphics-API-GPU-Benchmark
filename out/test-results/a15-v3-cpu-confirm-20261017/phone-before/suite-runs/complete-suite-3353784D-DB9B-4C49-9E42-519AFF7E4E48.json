@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "2026-10-14T04:13:55Z",
+  "id" : "complete-suite-3353784D-DB9B-4C49-9E42-519AFF7E4E48",
+  "jobs" : [
+    {
+      "error" : "Stable throughput was not reached",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-14T04:13:54Z",
+      "id" : "vulkan\/gpu_burn-64",
+      "request" : "gpu_burn?steps=64&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261014-151354-657"
+      ],
+      "startedAt" : "2026-10-14T04:13:38Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan · GPU Burn · 64"
+    }
+  ],
+  "startedAt" : "2026-10-14T04:13:38Z",
+  "status" : "review"
+}

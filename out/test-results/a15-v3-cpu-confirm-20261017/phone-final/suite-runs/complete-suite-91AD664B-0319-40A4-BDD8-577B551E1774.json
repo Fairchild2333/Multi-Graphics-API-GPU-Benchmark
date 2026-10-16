@@ -1,0 +1,234 @@
+{
+  "finishedAt" : "2026-10-13T13:37:47Z",
+  "id" : "complete-suite-91AD664B-0319-40A4-BDD8-577B551E1774",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T13:32:13Z",
+      "id" : "stream-65536",
+      "request" : "stream?particles=65536&vsync=0",
+      "resultIDs" : [
+        "20261014-003213-315"
+      ],
+      "startedAt" : "2026-10-13T13:31:57Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Particle 65536 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T13:32:29Z",
+      "id" : "stream_headless-65536",
+      "request" : "stream_headless?particles=65536&vsync=0",
+      "resultIDs" : [
+        "20261014-003229-180"
+      ],
+      "startedAt" : "2026-10-13T13:32:14Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Particle 65536 · Compute"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T13:32:45Z",
+      "id" : "stream-1048576",
+      "request" : "stream?particles=1048576&vsync=0",
+      "resultIDs" : [
+        "20261014-003245-106"
+      ],
+      "startedAt" : "2026-10-13T13:32:30Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Particle 1048576 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T13:33:01Z",
+      "id" : "stream_headless-1048576",
+      "request" : "stream_headless?particles=1048576&vsync=0",
+      "resultIDs" : [
+        "20261014-003301-264"
+      ],
+      "startedAt" : "2026-10-13T13:32:46Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Particle 1048576 · Compute"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T13:33:17Z",
+      "id" : "stream-4194304",
+      "request" : "stream?particles=4194304&vsync=0",
+      "resultIDs" : [
+        "20261014-003317-440"
+      ],
+      "startedAt" : "2026-10-13T13:33:02Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Particle 4194304 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T13:33:33Z",
+      "id" : "stream_headless-4194304",
+      "request" : "stream_headless?particles=4194304&vsync=0",
+      "resultIDs" : [
+        "20261014-003333-471"
+      ],
+      "startedAt" : "2026-10-13T13:33:18Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Particle 4194304 · Compute"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T13:33:50Z",
+      "id" : "stream-16777216",
+      "request" : "stream?particles=16777216&vsync=0",
+      "resultIDs" : [
+        "20261014-003350-242"
+      ],
+      "startedAt" : "2026-10-13T13:33:34Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Particle 16777216 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T13:34:06Z",
+      "id" : "stream_headless-16777216",
+      "request" : "stream_headless?particles=16777216&vsync=0",
+      "resultIDs" : [
+        "20261014-003406-364"
+      ],
+      "startedAt" : "2026-10-13T13:33:51Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Particle 16777216 · Compute"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T13:34:22Z",
+      "id" : "gpu_burn-16",
+      "request" : "gpu_burn?steps=16&vsync=0",
+      "resultIDs" : [
+        "20261014-003422-469"
+      ],
+      "startedAt" : "2026-10-13T13:34:07Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "GPU Burn · 16"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T13:34:38Z",
+      "id" : "gpu_burn-64",
+      "request" : "gpu_burn?steps=64&vsync=0",
+      "resultIDs" : [
+        "20261014-003438-638"
+      ],
+      "startedAt" : "2026-10-13T13:34:23Z",
+      "status" : "passed",
+      "thermalStateEnd" : 1,
+      "thermalStateStart" : 0,
+      "title" : "GPU Burn · 64"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T13:34:56Z",
+      "id" : "gpu_burn-256",
+      "request" : "gpu_burn?steps=256&vsync=0",
+      "resultIDs" : [
+        "20261014-003455-674"
+      ],
+      "startedAt" : "2026-10-13T13:34:39Z",
+      "status" : "passed",
+      "thermalStateEnd" : 1,
+      "thermalStateStart" : 1,
+      "title" : "GPU Burn · 256"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T13:35:14Z",
+      "id" : "cinematic_liquid",
+      "request" : "cinematic_liquid?vsync=0",
+      "resultIDs" : [
+        "20261014-003513-889"
+      ],
+      "startedAt" : "2026-10-13T13:34:56Z",
+      "status" : "passed",
+      "thermalStateEnd" : 2,
+      "thermalStateStart" : 1,
+      "title" : "Cinematic Liquid"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T13:35:16Z",
+      "id" : "memory_sweep",
+      "request" : "memory_sweep",
+      "resultIDs" : [
+        "20261014-003516-201-metal-memsweep"
+      ],
+      "startedAt" : "2026-10-13T13:35:14Z",
+      "status" : "passed",
+      "thermalStateEnd" : 2,
+      "thermalStateStart" : 2,
+      "title" : "GPU Cache & Memory"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 2,
+      "finishedAt" : "2026-10-13T13:37:03Z",
+      "id" : "cpu_compute",
+      "request" : "gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2",
+      "resultIDs" : [
+        "20261014-003703-587-cpu-single",
+        "20261014-003703-590-cpu-multi"
+      ],
+      "startedAt" : "2026-10-13T13:35:17Z",
+      "status" : "passed",
+      "thermalStateEnd" : 2,
+      "thermalStateStart" : 2,
+      "title" : "CPU Compute · Single + All Cores"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-13T13:37:47Z",
+      "id" : "cpu_memory",
+      "request" : "gpu_benchmark --cpu-membw",
+      "resultIDs" : [
+        "20261014-003745-223-cpu-membw"
+      ],
+      "startedAt" : "2026-10-13T13:37:04Z",
+      "status" : "cancelled",
+      "thermalStateEnd" : 2,
+      "thermalStateStart" : 2,
+      "title" : "CPU Cache, Memory, Virtual Memory & Storage"
+    }
+  ],
+  "startedAt" : "2026-10-13T13:31:57Z",
+  "status" : "cancelled"
+}

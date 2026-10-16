@@ -1,0 +1,32 @@
+[
+  {
+    "contractPassed" : true,
+    "job" : "vulkan\/memory_sweep",
+    "resultIDs" : [
+      "20261017-012659-180-membw"
+    ],
+    "reviewReasons" : [
+      "Memory plateau was not reached"
+    ],
+    "status" : "review",
+    "thermalEnd" : 0,
+    "thermalStart" : 0,
+    "vulkanMemoryPoints" : 77
+  },
+  {
+    "contractPassed" : true,
+    "job" : "cpu_compute",
+    "resultIDs" : [
+      "20261017-012813-905-cpu-single-performance",
+      "20261017-012813-917-cpu-single-efficiency",
+      "20261017-012813-928-cpu-multi"
+    ],
+    "reviewReasons" : [
+
+    ],
+    "status" : "passed",
+    "thermalEnd" : 0,
+    "thermalStart" : 0,
+    "vulkanMemoryPoints" : 0
+  }
+]

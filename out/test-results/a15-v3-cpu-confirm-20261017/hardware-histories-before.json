@@ -1,0 +1,47 @@
+[
+  {
+    "device": "Mac M4 Pro",
+    "deviceModel": "Mac16,8",
+    "rows": 171,
+    "path": "m4-single-core-check-20261017/results-after.json",
+    "bytes": 336781,
+    "sha256": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f",
+    "notes": "Mac \u4e3b\u5386\u53f2 171 \u6761\uff1b\u5355\u6838\u539f\u65b9\u6cd5\u786e\u8ba4\u5927\u6838216.737\u3001\u540e\u53f0\u5c0f\u683876.322\uff0c\u539f169\u6761\u4e0d\u53d8\u3002V3\u5185\u5b58\u548c\u7c92\u5b50\u4fee\u590d\u7ed3\u679c\u53ca\u8bca\u65ad\u5bf9\u7167\u7ee7\u7eed\u4fdd\u7559\u3002"
+  },
+  {
+    "device": "iPhone 13 Pro / A15",
+    "deviceModel": "iPhone14,2",
+    "rows": 128,
+    "path": "a15-cache-isolation-20261014/phone-final/results/results.json",
+    "bytes": 348686,
+    "sha256": "10beabc823de964d6d6e2d2d807fa7c90a6db576718c1b686c628319bce99eb3",
+    "notes": "\u5386\u53f2\u4e0e\u7f13\u5b58\u4e13\u9879\u8f6e\u6b21\uff1b\u5f53\u524d\u9a8c\u6536\u8303\u56f4\u89c1 Apple \u72b6\u6001\u6587\u6863\u3002"
+  },
+  {
+    "device": "12.9-inch iPad Pro / A12X",
+    "deviceModel": "iPad8,7",
+    "rows": 72,
+    "path": "a12x-targeted-retest-20261014/phone-final/results/results.json",
+    "bytes": 169003,
+    "sha256": "55497d1ffc1b66be576d01c426d482a93534875cfec9bd46e26598473edf7603",
+    "notes": "\u539f 43 \u6761\u4fdd\u7559\uff1b\u8865\u6d4b\u540e 72 \u6761\uff0cMetal 16M \u7a33\u5b9a\u6027\u63d0\u793a\u4ecd\u4fdd\u7559\u3002"
+  },
+  {
+    "device": "11-inch iPad Pro / A12X",
+    "deviceModel": "iPad8,1",
+    "rows": 51,
+    "path": "ipad81-design-review-20261016/phone-final/results/results.json",
+    "bytes": 123915,
+    "sha256": "43d43fb16d87ade98bdb80c7c319d8b8e04434eb69cf1c8f8f777e2284b6531b",
+    "notes": "51 \u6761\u5386\u53f2\uff1b\u5f53\u524d\u5b8c\u6574\u9009\u7528 31 \u9879/33 \u6761\u6765\u81ea\u4e0d\u540c\u771f\u5b9e\u8f6e\u6b21\u3002"
+  },
+  {
+    "device": "iPhone 14 Pro Max / A16",
+    "deviceModel": "iPhone15,3",
+    "rows": 24,
+    "path": "a16-full-suite-20261016/phone-final/results/results.json",
+    "bytes": 46368,
+    "sha256": "da2a2612d9dfbb8381792987ea2b98f6a47e947f108cd7c39298498930dd7df1",
+    "notes": "24 \u6761\u5386\u53f2=22 \u6761\u5b8c\u6574\u6210\u7ee9+2 \u6761\u4e2d\u65ad\u8bca\u65ad\u300219 passed\u30013 review\uff1bCPU \u5c1a\u672a\u6d4b\u3002"
+  }
+]

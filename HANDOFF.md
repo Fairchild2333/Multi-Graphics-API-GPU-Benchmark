@@ -1,6 +1,28 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
-> **2026-10-17：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** Mac M1–M4 软件问题及定向验证已完成；Vulkan 内存 V3 三轮正式平台通过，小容量边界正确保留 preview，固定覆盖/完成计时两轮稳定。iOS/Android/HarmonyOS 已重编译，手机真机补测等连接设备。
+> **2026-10-17：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** Mac软件问题已修复；A15已补测V3内存和CPU，历史132条。内存受现有iOS 256 MiB软件预览上限影响，仍保留review；其他设备待办见主文档。
+
+## 2026-10-17 A15 physical V3 memory and standard CPU confirmation
+
+- Latest signed Release at5ec3730 installed on connected/unlocked iPhone14,2.
+  Ran existing targeted jobs vulkan/memory_sweep and cpu_compute exactly once;
+  no production source/threshold changes and no whole-suite button claim.
+- Vulkan V3:28.842 GB/s reference,77 persisted points,34 data checks passed,
+  timestamp anomalies0, synchronized MoltenVK wall clock, thermal0->0.
+  Existing iOS software cap256MiB means mixed128/192/256 tail cannot establish
+  the new plateau; correctly review/plateau0. This is not a hardware buffer
+  limit. A formal iOS Vulkan memory plateau is still unestablished.
+- CPU P147.000/E89.287/all634.868 MWork/s; changes-0.08%/-0.29%/-4.09% from
+  retained147.120/89.551/661.962. P/E residency bounds >=99.8728%/99.9989%,
+  worker busy >=99.9875%/99.5396%; E uses existing two-P-helper foreground
+  strategy. A15 all-core remains6 scheduler-managed, unclassified workers;
+  do not claim the A12X-specific typed participation contract was exercised.
+- Current production models validate both jobs, four unique records and full
+  saved Vulkan curve. Old128 rows unchanged, new132-row primary snapshot;
+  Mac and three other iOS primary histories untouched. Native logs and exact
+  commands in out/test-results/a15-v3-cpu-confirm-20261017/.
+- App PID46012 stopped after final Documents copy. Phone can be unplugged.
+  Two A12X V3 follow-ups and A16 missing projects remain separate pending work.
 
 ## 2026-10-17 M4 Pro single-core low-score confirmation
 

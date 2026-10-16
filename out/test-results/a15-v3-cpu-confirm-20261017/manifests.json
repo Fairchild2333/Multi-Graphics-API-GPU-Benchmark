@@ -1,0 +1,50 @@
+[
+  {
+    "finishedAt": "2026-10-16T14:27:00Z",
+    "id": "complete-suite-E05152D4-7AD5-41B5-8F24-705BE26A6E0B",
+    "jobs": [
+      {
+        "error": "\u5c1a\u672a\u8fbe\u5230\u5185\u5b58\u5e26\u5bbd\u5e73\u53f0",
+        "expectedRecords": 1,
+        "finishedAt": "2026-10-16T14:26:59Z",
+        "id": "vulkan/memory_sweep",
+        "request": "memory_sweep?api=vulkan",
+        "resultIDs": [
+          "20261017-012659-180-membw"
+        ],
+        "startedAt": "2026-10-16T14:26:05Z",
+        "status": "review",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "Vulkan \u00b7 GPU Cache & Memory"
+      }
+    ],
+    "startedAt": "2026-10-16T14:26:05Z",
+    "status": "review"
+  },
+  {
+    "finishedAt": "2026-10-16T14:28:14Z",
+    "id": "complete-suite-7EB974A0-5A56-4E51-9ED8-E03F8C9F4951",
+    "jobs": [
+      {
+        "error": "",
+        "expectedRecords": 3,
+        "finishedAt": "2026-10-16T14:28:14Z",
+        "id": "cpu_compute",
+        "request": "gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2",
+        "resultIDs": [
+          "20261017-012813-905-cpu-single-performance",
+          "20261017-012813-917-cpu-single-efficiency",
+          "20261017-012813-928-cpu-multi"
+        ],
+        "startedAt": "2026-10-16T14:27:28Z",
+        "status": "passed",
+        "thermalStateEnd": 0,
+        "thermalStateStart": 0,
+        "title": "CPU Compute \u00b7 Performance + Efficiency + All Cores"
+      }
+    ],
+    "startedAt": "2026-10-16T14:27:28Z",
+    "status": "passed"
+  }
+]

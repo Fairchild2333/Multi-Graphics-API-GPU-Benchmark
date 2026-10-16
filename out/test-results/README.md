@@ -9,7 +9,7 @@
 | 设备 | 型号 | 历史条数 | 原始文件 | 说明 |
 | --- | --- | ---: | --- | --- |
 | Mac M4 Pro | Mac16,8 | 171 | [最新主历史](m4-single-core-check-20261017/results-after.json) | 最新单核确认大核216.737、后台小核76.322；原169条不变，V3内存与粒子修复和诊断对照均保留。 |
-| iPhone 13 Pro / A15 | iPhone14,2 | 128 | [results.json](a15-cache-isolation-20261014/phone-final/results/results.json) | 历史与缓存专项轮次；当前验收范围见 Apple 状态文档。 |
+| iPhone 13 Pro / A15 | iPhone14,2 | 132 | [results.json](a15-v3-cpu-confirm-20261017/phone-final/results/results.json) | 新增V3内存参考28.842（未达平台，review）及CPU147.000/89.287/634.868；原128条不变。 |
 | 12.9-inch iPad Pro / A12X | iPad8,7 | 72 | [results.json](a12x-targeted-retest-20261014/phone-final/results/results.json) | 原 43 条保留；补测后 72 条，Metal 16M 稳定性提示仍保留。 |
 | 11-inch iPad Pro / A12X | iPad8,1 | 51 | [results.json](ipad81-design-review-20261016/phone-final/results/results.json) | 51 条历史；当前完整选用 31 项/33 条来自不同真实轮次。 |
 | iPhone 14 Pro Max / A16 | iPhone15,3 | 24 | [results.json](a16-full-suite-20261016/phone-final/results/results.json) | 24 条历史=22 条完整成绩+2 条中断诊断。19 passed、3 review；CPU 尚未测。 |
@@ -27,6 +27,7 @@ Mac 最新修复见 [报告、曲线、原生日志及跨平台构建验证](mac
 - 原始历史包含旧口径、对照、取消和未稳定轮次，不把所有 JSON 递归合并为当前成绩榜。
 - Mac 本轮 14 条新增记录中 10 条通过、3 条旧查询对照保留 review、1 条小容量负向复核正确保留 preview/review。默认内存三轮读取 245.897/245.908/250.419 GB/s。新版身份为 `membw_v3_streaming`，旧 V1/V2 不自动变成新版设备成绩。
 - A16 实际进度及 3 项警告数值见 [设备记录](../../docs/a16-partial-run-20261016.md)。
+- [A15最新两项真机补测](a15-v3-cpu-confirm-20261017/report.md)：CPU通过，V3内存77点/34次校验通过，但iOS软件预览上限256 MiB，正式平台未建立。没有重跑其他稳定项目。
 - iPad8,1 当前选用结果及源清单在 `ipad81-design-review-20261016/`，不是新跑的一轮整套。
 - [最新模拟器一键验收](ios-simulator-v3-flow-20261017/report.md)：27/27 项完成、28 条成绩、0 执行失败，18 passed / 9 review；V3 小容量平台提示正确，保存曲线完整。仅验证流程，不作真机性能结论。上一轮 `ios-simulator-full-suite-20261016/` 保留。
 - 其他日期文件夹保留完整 native 日志、套件 manifests、曲线 CSV/JSON 和 PNG/PDF 导出。

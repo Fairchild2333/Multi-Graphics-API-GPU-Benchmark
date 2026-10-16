@@ -1,0 +1,99 @@
+{
+  "status": "passed",
+  "jobs": 2,
+  "newRows": 4,
+  "historyRows": 132,
+  "oldRowsUnchanged": 128,
+  "physicalDevice": "iPhone14,2 / A15",
+  "productionSourceChanged": false,
+  "memory": {
+    "score": 28.842,
+    "unit": "GB/s",
+    "status": "review",
+    "platformReached": false,
+    "maxDatasetMiB": 256,
+    "scanLimitReason": "Existing iOS software preview cap, not hardware buffer limit",
+    "curvePoints": 77,
+    "dataChecks": 34,
+    "timestampAnomalies": 0
+  },
+  "singleCore": [
+    {
+      "coreType": "performance",
+      "resultID": "20261017-012813-905-cpu-single-performance",
+      "score": 147.0,
+      "priorScore": 147.12,
+      "changePercent": -0.08156606851550396,
+      "minimumResidencyLowerBound": 0.998728043,
+      "minimumWorkerBusyFraction": 0.9998749739999999,
+      "roundEffectiveGHz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "coreType": "efficiency",
+      "resultID": "20261017-012813-917-cpu-single-efficiency",
+      "score": 89.287,
+      "priorScore": 89.551,
+      "changePercent": -0.29480407812307874,
+      "minimumResidencyLowerBound": 0.999989954,
+      "minimumWorkerBusyFraction": 0.995395816,
+      "roundEffectiveGHz": [
+        2.01567656,
+        2.01566448,
+        2.01561821
+      ]
+    }
+  ],
+  "allCore": {
+    "score": 634.868,
+    "priorScore": 661.962,
+    "changePercent": -4.092984189424764,
+    "workerScores": [
+      106.194372,
+      105.654524,
+      106.160785,
+      106.341827,
+      105.342412,
+      105.173658
+    ],
+    "threads": 6,
+    "scheduling": "scheduler_managed",
+    "typedPerWorkerParticipationVerified": false,
+    "processCpuSecondsSelectedRound": 29.8752969,
+    "performanceCpuSecondsSelectedRound": 10.3760123,
+    "accountingIncludesWarmupSeconds": 0.2
+  },
+  "thermal": "nominal -> nominal for each job",
+  "previousCanonicalArchives": [
+    {
+      "device": "Mac M4 Pro",
+      "sha256": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f",
+      "unchanged": true
+    },
+    {
+      "device": "iPhone 13 Pro / A15",
+      "sha256": "10beabc823de964d6d6e2d2d807fa7c90a6db576718c1b686c628319bce99eb3",
+      "unchanged": true
+    },
+    {
+      "device": "12.9-inch iPad Pro / A12X",
+      "sha256": "55497d1ffc1b66be576d01c426d482a93534875cfec9bd46e26598473edf7603",
+      "unchanged": true
+    },
+    {
+      "device": "11-inch iPad Pro / A12X",
+      "sha256": "43d43fb16d87ade98bdb80c7c319d8b8e04434eb69cf1c8f8f777e2284b6531b",
+      "unchanged": true
+    },
+    {
+      "device": "iPhone 14 Pro Max / A16",
+      "sha256": "da2a2612d9dfbb8381792987ea2b98f6a47e947f108cd7c39298498930dd7df1",
+      "unchanged": true
+    }
+  ],
+  "beforeSha256": "10beabc823de964d6d6e2d2d807fa7c90a6db576718c1b686c628319bce99eb3",
+  "afterSha256": "8f3a379f29ad0fd3b3b7607f0ff5ff96610cdcf0090f50ec75543afdf6e3a2a6"
+}

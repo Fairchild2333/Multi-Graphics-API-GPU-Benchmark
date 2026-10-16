@@ -14,11 +14,11 @@
     {
       "device": "iPhone 13 Pro / A15",
       "deviceModel": "iPhone14,2",
-      "rows": 128,
-      "path": "a15-cache-isolation-20261014/phone-final/results/results.json",
-      "bytes": 348686,
-      "sha256": "10beabc823de964d6d6e2d2d807fa7c90a6db576718c1b686c628319bce99eb3",
-      "notes": "历史与缓存专项轮次；当前验收范围见 Apple 状态文档。"
+      "rows": 132,
+      "path": "a15-v3-cpu-confirm-20261017/phone-final/results/results.json",
+      "bytes": 360257,
+      "sha256": "8f3a379f29ad0fd3b3b7607f0ff5ff96610cdcf0090f50ec75543afdf6e3a2a6",
+      "notes": "A15主历史132条；原128条不变。V3内存28.842仅参考，256MiB软件预览上限未建立平台；CPU147.000/89.287/634.868通过。"
     },
     {
       "device": "12.9-inch iPad Pro / A12X",
