@@ -288,6 +288,7 @@ panel. When several GPUs run in one job list, the charts show the last one.
   | A15 (MoltenVK) | 29.30 | - | 28.84 (256 MiB cap, no plateau) |
   | Kirin X90, MateBook Pro (Maleoon 916) | 52.6, 60.2 | - | 55.0 |
   | Xiaomi TV (Mali-G57) | 5.23, 5.24 | - | 5.04 |
+  | TCL TV (Mali-G52, wall clock) | 2.24, 2.26 | - | 2.20 |
   | Snapdragon 888+, MIX 4 (Adreno 660) | 32.7 | - | 29.1 |
   | Snapdragon 8 Gen 1, Black Shark 5 Pro (Adreno 730) | 41.9, 44.2 (no plateau) | - | 40.3 |
 
@@ -317,15 +318,17 @@ panel. When several GPUs run in one job list, the charts show the last one.
   Quest 2 and the Switch (580 MiB, streams from 256 MiB as before) need one run
   each if their figure is to count.
 
-  The ceiling-relative start was checked on four devices on 2026-10-17, one
+  The ceiling-relative start was checked on five devices on 2026-10-17, one
   run each, and read, write and copy reached the plateau on all of them except
-  the Black Shark's write (one noisy 128 MiB point):
+  the Black Shark's write (one noisy 128 MiB point). The TCL TV has no GPU
+  timestamps, so it also covers wall-clock timing:
 
   | device | ceiling | streaming from | read tail (GB/s) |
   |---|---|---|---|
   | Black Shark 5 Pro | 128 MiB | 32 MiB | 64/96/128 MiB: 40.2, 40.3, 40.3 |
   | MIX 4 | 256 MiB (512 failed the data check) | 64 MiB | 128/192/256 MiB: 29.6, 29.0, 29.1 |
   | Xiaomi TV | 261.5 MiB (by available memory) | 65 MiB | 192/256/261.5 MiB: 5.02, 5.03, 5.03 |
+  | TCL TV (wall clock) | 256 MiB | 64 MiB | 128/192/256 MiB: 2.18, 2.20, 2.20 |
   | MateBook Pro | 1024 MiB | 256 MiB (unchanged) | 512/768/1024 MiB: 53.7, 55.0, 55.1 |
 - **Data check:** before anything is timed, the buffer is filled by the write
   kernel and a fifth kernel (`membw_check.comp`, never timed) loads every
