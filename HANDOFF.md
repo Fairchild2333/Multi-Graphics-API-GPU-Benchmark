@@ -2,6 +2,21 @@
 
 > **2026-10-17：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** iOS Vulkan固定256 MiB限制已修复，iPad8,7新预算版本确认56.657 GB/s平台，历史74条。A15/另一台iPad仍需接回补这一新版本；旧记录保留。
 
+## 2026-10-17 A12X Metal memory status clarification
+
+- The completed iPad8,7 V3 memory plateau is Vulkan/MoltenVK, not native Metal.
+  Metal records exist on both A12X devices: iPad8,7 59.904 and iPad8,1 49.821 GB/s,
+  both metal_memory_sweep_v1_preview_ios_preview, memoryPlateauVerified=0.
+- gpu_memory_sweep.mm saves that flag as0; the iOS Metal diagnostic remains a
+  fixed-grid particle-derived sweep capped at256MiB. Existing job completion
+  must not be described as verified native-Metal memory plateau. Repeating it,
+  increasing the cap alone or reusing Vulkan scores cannot establish that.
+- A formal Metal platform requires a separate method/check/plateau implementation
+  and physical validation. This turn only clarified docs/status, changed no
+  production code and ran no device benchmarks. The11-inch Metal headless16M
+  low-score check remains pending; the12.9-inch rendered16M review was already
+  investigated and is not a mandatory rerun just to remove its warning.
+
 ## 2026-10-17 M4 Pro GPU Burn diagnosis completed (M5)
 
 - Built and ran the new literal-FMA/fragment rows unchanged. Initial fast FMA
