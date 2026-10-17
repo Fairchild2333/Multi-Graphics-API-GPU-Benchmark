@@ -75,11 +75,11 @@ __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia ./build/gpu_benchma
 
 ### NVIDIA Jetson Xavier NX (JetPack 5.1.x, aarch64)
 
-> **Verification status: build-checked only.** An `ubuntu:20.04` container
-> matching the JetPack 5 userland (GCC 9.4, glibc 2.31, `libvulkan-dev`
-> 1.2.131, GLFW 3.3.2) configures, builds and links the CLI, and every engine
-> source compiles with `aarch64-linux-gnu-g++` 9.4. The CLI has not yet run on
-> real Jetson hardware.
+> **Verification status: built on real hardware** (Xavier NX Developer Kit,
+> JetPack 5.1.7 / L4T R35.6.5, 2026-10-17): configures, builds with no
+> warnings and passes `ctest`; Vulkan and OpenGL are both detected. The
+> Vulkan 1.2.131 headers of Ubuntu 20.04 lack `VK_KHR_portability_enumeration`;
+> the engine compiles that code only where the headers have it.
 
 Xavier NX supports JetPack up to 5.1.x (Ubuntu 20.04); JetPack 6 does not
 support Xavier. JetPack 4.x ships GCC 7, whose C++17 `<filesystem>` support is

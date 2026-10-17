@@ -166,18 +166,25 @@ void VulkanBackend::CreateInstance() {
     if (hasDebugUtils)
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
+    // Headers from before 2022 (Ubuntu 20.04 / JetPack 5 ship 1.2.131) do
+    // not know this extension; only translated implementations
+    // such as MoltenVK need it, and those come with newer headers.
+#ifdef VK_KHR_portability_enumeration
     bool portability = std::any_of(availableExtensions.begin(), availableExtensions.end(),
         [](const VkExtensionProperties& ext) {
             return std::strcmp(ext.extensionName, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME) == 0;
         });
     if (portability) extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+#endif
 
     VkInstanceCreateInfo ci{};
     ci.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     ci.pApplicationInfo        = &appInfo;
     ci.enabledExtensionCount   = static_cast<std::uint32_t>(extensions.size());
     ci.ppEnabledExtensionNames = extensions.data();
+#ifdef VK_KHR_portability_enumeration
     if (portability) ci.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
 
     const VkResult created = vkCreateInstance(&ci, nullptr, &instance_);
     if (created != VK_SUCCESS) {
