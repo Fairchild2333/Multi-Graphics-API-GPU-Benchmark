@@ -291,6 +291,7 @@ panel. When several GPUs run in one job list, the charts show the last one.
   | TCL TV (Mali-G52, wall clock) | 2.24, 2.26 | - | 2.20 |
   | Snapdragon 888+, MIX 4 (Adreno 660) | 32.7 | - | 29.1 |
   | Snapdragon 8 Gen 1, Black Shark 5 Pro (Adreno 730) | 41.9, 44.2 (no plateau) | - | 40.3 |
+  | Snapdragon 8 Gen 2, MIX Fold 3 (Adreno 740) | 51.8, 53.0, 56.8 (no plateau) | - | 55.9 |
 
   The phone rows were measured nine days apart (V1 2026-10-07/08, V3
   2026-10-17). On the MIX 4 the points from 6 to 48 MiB, which both versions
@@ -313,12 +314,12 @@ panel. When several GPUs run in one job list, the charts show the last one.
   Pro, Xiaomi TV and TCL TV. The MIX Fold 3, Quest 3, Black Shark 5 Pro and
   Quest 2 never reached the plateau, and the Switch result predates the check.
   The four 128 MiB devices could not reach it under V3 either until the
-  streaming start followed the ceiling (2026-10-17). The Black Shark 5 Pro has
-  since reached it with the current build (40.3 GB/s); the MIX Fold 3, Quest 3,
-  Quest 2 and the Switch (580 MiB, streams from 256 MiB as before) need one run
-  each if their figure is to count.
+  streaming start followed the ceiling (2026-10-17). The Black Shark 5 Pro
+  (40.3 GB/s) and the MIX Fold 3 (55.9) have since reached it with the current
+  build; the Quest 3, Quest 2 and the Switch (580 MiB, streams from 256 MiB as
+  before) need one run each if their figure is to count.
 
-  The ceiling-relative start was checked on five devices on 2026-10-17, one
+  The ceiling-relative start was checked on six devices on 2026-10-17, one
   run each, and read, write and copy reached the plateau on all of them except
   the Black Shark's write (one noisy 128 MiB point). The TCL TV has no GPU
   timestamps, so it also covers wall-clock timing:
@@ -329,6 +330,13 @@ panel. When several GPUs run in one job list, the charts show the last one.
   | MIX 4 | 256 MiB (512 failed the data check) | 64 MiB | 128/192/256 MiB: 29.6, 29.0, 29.1 |
   | Xiaomi TV | 261.5 MiB (by available memory) | 65 MiB | 192/256/261.5 MiB: 5.02, 5.03, 5.03 |
   | TCL TV (wall clock) | 256 MiB | 64 MiB | 128/192/256 MiB: 2.18, 2.20, 2.20 |
+  | MIX Fold 3 | 128 MiB | 32 MiB | 64/96/128 MiB: 56.7, 55.9, 54.9 |
+
+  The MIX Fold 3 ran folded, with mi_thermald stopped so that the GPU was not
+  held two power levels down (615 of 719 MHz). A root-tuning comparison on the
+  same phone on 2026-10-11 had read the V1 GPU memory test at 52.66 GB/s with
+  its normal clocks and 52.68 at the highest stock clocks, so the clocks do
+  not move this test.
   | MateBook Pro | 1024 MiB | 256 MiB (unchanged) | 512/768/1024 MiB: 53.7, 55.0, 55.1 |
 - **Data check:** before anything is timed, the buffer is filled by the write
   kernel and a fifth kernel (`membw_check.comp`, never timed) loads every

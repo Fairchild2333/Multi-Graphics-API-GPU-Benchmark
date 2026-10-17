@@ -113,7 +113,7 @@ HarmonyOS: Vulkan):
 | A12X, iPad Pro 11" 1st gen (MoltenVK) | 28.8 | 58.1 | 0.50 |
 | XRing O1, Xiaomi 15S Pro | 27.8 | 44.6 | 0.62 |
 | A16, iPhone 14 Pro Max | 27.5 | 41.0 | 0.67 |
-| Snapdragon 8 Gen 2, MIX Fold 3 | 26.1 | 53.0 (no plateau) | 0.49 |
+| Snapdragon 8 Gen 2, MIX Fold 3 | 26.1 | 55.9 (V3) | 0.47 |
 | Snapdragon 888+, MIX 4 | 20.9 | 32.7 | 0.64 |
 | Snapdragon 8 Gen 1, Black Shark 5 Pro | 19.2 | 40.3 (V3) | 0.48 |
 | A15, iPhone 13 Pro | 19.0 | 30.9 | 0.61 |
@@ -121,20 +121,19 @@ HarmonyOS: Vulkan):
 | Snapdragon 865, Black Shark 3 Pro | 13.5 | 23.2 | 0.58 |
 
 The GPU memory column mixes versions of the memory test: V1 on Android and
-HarmonyOS (V3 on the Black Shark 5 Pro), the native Metal sweep on the A15, A16
+HarmonyOS (V3 on the MIX Fold 3 and Black Shark 5 Pro), the native Metal sweep on the A15, A16
 and the 12.9" iPad, V2 on the 11" iPad. V1 and the current V3 agree within
 0.2 - 3 % on the RTX 5090, M4 Pro, A12X and A15, and within 4 - 11 % on phones
 measured nine days apart (table in [cli-reference.md](cli-reference.md),
 memory-bandwidth sweep). V2 read too high only on the M4 Pro and is 2 % above
-V3 on the A12X. The Black Shark 5 Pro's V1 value (44.2) had not reached the
-plateau; its V3 run on 2026-10-17 did, at 40.3, with the particle score from
-2026-10-07. The MIX Fold 3 value still has no plateau and predates the data
-check, so its ratio is less certain; the others stand. The MIX 4 read 29.1 on
+V3 on the A12X. The MIX Fold 3 and Black Shark 5 Pro V1 values (53.0, 44.2)
+had not reached the plateau; their V3 runs on 2026-10-17 did, at 55.9 and
+40.3, with the particle scores from 2026-10-07. The MIX 4 read 29.1 on
 V3 on 2026-10-17, on a day when the whole curve ran about 6 % lower; the table
 keeps the 10-08 value measured in the same state as its particle score.
 
 Apple's GPUs turn their bandwidth into particle throughput as well as the
-others do (0.49 - 0.67 against 0.48 - 0.64). Where an Apple device ranks low
+others do (0.49 - 0.67 against 0.47 - 0.64). Where an Apple device ranks low
 here, its memory is the reason: the A15 has 64-bit LPDDR4X (about 34 GB/s on
 paper, 30.9 measured), the slowest memory of these flagships, while the A12X's
 128-bit bus puts both iPads at the top. Games hide much of a narrow bus behind

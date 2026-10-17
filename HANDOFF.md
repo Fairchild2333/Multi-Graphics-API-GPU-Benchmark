@@ -1529,7 +1529,7 @@ PathService 已把 results/captures/reports/logs 改到
   - 起点按数据校验之后的实际上限算（校验失败会把缓冲减半，例如 Adreno 660 从 512 退到 256）。分派方式、`dispatches_per_sample`、平台判定和保存的 `streamingMinMiB` 都用同一个值；系统内存那一段也一样。
   - 版本号不变（`membw_v3_streaming`）：上限 ≥ 512 MiB 的结果和以前完全一样，上限更小的设备以前 V3 只会得到"未到平台"。安卓、鸿蒙、苹果前端都不读 `streamingMinMiB`，不用改。
 - **验证：** Windows 编译和 `ctest` 6/6（`vulkan_membw_results_test` 加了各档上限的起点和尾部用例），安卓 APK、鸿蒙 HAP 和 `check-mobile-suite.cjs` 通过。
-- **真机（同日，每台只跑显存一项、一次）：** 五台的读取都到了平台，写入和复制除黑鲨 5 Pro 的写入外也都到了。TCL 电视没有 GPU 时间戳，用墙钟计时，所以也验证了墙钟这条路。
+- **真机（同日，每台只跑显存一项、一次）：** 六台的读取都到了平台，写入和复制除黑鲨 5 Pro 的写入外也都到了。TCL 电视没有 GPU 时间戳，用墙钟计时，所以也验证了墙钟这条路。
 
   | 设备 | 上限 | 起点 | 读取（最大三点） | 旧版 V1 |
   |---|---|---|---|---|
@@ -1538,11 +1538,14 @@ PathService 已把 results/captures/reports/logs 改到
   | 小米电视（Mali-G57） | 261.5 MiB（按可用内存，上次 342） | 65 MiB | 5.02/5.03/5.03 → 5.04 | 5.23、5.24 |
   | MateBook Pro（Maleoon 916） | 1024 MiB | 256 MiB（不变） | 53.7/55.0/55.1 → 55.0 | 52.6、60.2 |
   | TCL 电视（Mali-G52，墙钟） | 256 MiB | 64 MiB | 2.18/2.20/2.20 → 2.20 | 2.24、2.26 |
+  | MIX Fold 3（Adreno 740） | 128 MiB | 32 MiB | 56.7/55.9/54.9 → 55.9 | 51.8、53.0、56.8（未到平台） |
 
   - 黑鲨 5 Pro 的写入差一点：128 MiB 那个点这一轮波动大（中位 28.5，最好 37.6），三点差距超过 20%。分数只看读取，不受影响。
   - MIX 4 比 V1 低 11%：两版测法相同的 6–48 MiB 这天也低约 6%，大半是手机当天的状态；V1 在 96 MiB 以上反而比它自己 6–64 MiB 那段高，V3 曲线没有这个现象。
   - 成绩副本在 `out\adb\blackshark-SHARK-KTUS-A0-20261017-035416`、`out\adb\Xiaomi-2106118C-20261017-040126`、`out\adb\xiaomi-MiTV-MFFU1-20261017-041143`、`out\adb\TCL-Smart-TV-Pro-20261017-145138`、`out\hdc\HUAWEI-HAD-W24-20261017-035734`，已按各台以前的 `REMOVED-ENTRIES.txt` 删掉已知错误的记录（每台都是上次最终副本加今天这一条）。小米电视的编号 `20261017-011228-396-membw` 用的是电视自己的时钟，比电脑慢 3 小时。
-  - 还没到平台、要补测一次显存的：MIX Fold 3、Quest 3、Quest 2（128 MiB），Switch（早于数据校验）。电脑上的完整回归等用户安排。
+  - MIX Fold 3 是折着测的（装了散热背甲，展开不了）。折叠时 `mi_thermald` 把 GPU 压低两档（615/719 MHz）、大核压到 2342/3360 MHz；`cmd device_state state 3` 假装展开没用，小米按真实铰链限频。用户用 su 运行了我写的脚本（`/data/local/tmp/uncap.sh` 只放开上限；`uncap2.sh` 停掉 `mi_thermald` 并清掉 CPU/GPU 降频档位），GPU 回到 719 MHz，CPU 上限没放开（另一套机制），显存测试不看 CPU。10-11 有一次 root 调频对照（`out\adb\mixfold3-root-tuning-20261011\`）：V1 显存读取默认频率 52.66、最高档 52.68，频率不影响这项。状态记在副本旁的 `DEVICE-STATE.txt`。恢复：`su -c start mi_thermald` 或重启。
+  - MIX Fold 3 的 PC 副本 `out\adb\Xiaomi-2308CPXD0C-20261017-152220`：按以前的清单删 48 条；另外删了 10-11 那次调频对照里最高档的 15 条和一条记录里没有、在恢复设置途中跑的全核测试（`20261011-133738-134-cpu-multi`），共 16 条，理由写在 `REMOVED-ENTRIES.txt`；那次默认频率的 20 条保留（和之前的成绩对得上）。
+  - 还没到平台、要补测一次显存的：Quest 3、Quest 2（128 MiB），Switch（早于数据校验）。电脑上的完整回归等用户安排。
 
 ### 2026-10-17 Windows 上显存测试随机作废（已修）；V1 与 V3 可比，非苹果设备不用重测；两个数学小测试的结论
 
