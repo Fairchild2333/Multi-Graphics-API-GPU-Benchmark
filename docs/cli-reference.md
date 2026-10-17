@@ -294,6 +294,7 @@ panel. When several GPUs run in one job list, the charts show the last one.
   | Snapdragon 8 Gen 2, MIX Fold 3 (Adreno 740) | 51.8, 53.0, 56.8 (no plateau) | - | 55.9 |
   | Tegra X1, Switch (memory at 800 MHz) | 11.2 (before the data check) | - | 10.46 |
   | Snapdragon XR2, Quest 2 (Adreno 650) | 14.16 (no plateau) | - | 14.86 |
+  | Snapdragon XR2 Gen 2, Quest 3 (Adreno 740) | 34.2, 32.6 (no plateau) | - | 32.3 |
 
   The phone rows were measured nine days apart (V1 2026-10-07/08, V3
   2026-10-17). On the MIX 4 the points from 6 to 48 MiB, which both versions
@@ -316,12 +317,12 @@ panel. When several GPUs run in one job list, the charts show the last one.
   Pro, Xiaomi TV and TCL TV. The MIX Fold 3, Quest 3, Black Shark 5 Pro and
   Quest 2 never reached the plateau, and the Switch result predates the check.
   The four 128 MiB devices could not reach it under V3 either until the
-  streaming start followed the ceiling (2026-10-17). The Black Shark 5 Pro
-  (40.3 GB/s) and the MIX Fold 3 (55.9) have since reached it with the current
-  build, as has the Quest 2 (14.86), and the Switch has a checked run (10.46);
-  the Quest 3 needs one run if its figure is to count.
+  streaming start followed the ceiling (2026-10-17). All five have since been
+  run once with the current build and reached it: Black Shark 5 Pro 40.3 GB/s,
+  MIX Fold 3 55.9, Quest 3 32.3, Quest 2 14.86, Switch 10.46. Every Android and
+  HarmonyOS device with a Vulkan driver now has a memory figure that counts.
 
-  The ceiling-relative start was checked on eight devices on 2026-10-17, one
+  The ceiling-relative start was checked on nine devices on 2026-10-17, one
   run each, and read, write and copy reached the plateau on all of them except
   the Black Shark's write (one noisy 128 MiB point). The TCL TV has no GPU
   timestamps, so it also covers wall-clock timing:
@@ -335,6 +336,7 @@ panel. When several GPUs run in one job list, the charts show the last one.
   | MIX Fold 3 | 128 MiB | 32 MiB | 64/96/128 MiB: 56.7, 55.9, 54.9 |
   | Switch | 439 MiB (by available memory; 580.5 on 10-08) | 109 MiB | 256/384/439 MiB: 10.4, 10.2, 10.5 |
   | Quest 2 | 128 MiB | 32 MiB | 64/96/128 MiB: 14.8, 13.8, 15.2 |
+  | Quest 3 | 128 MiB | 32 MiB | 64/96/128 MiB: 30.9, 33.1, 32.3 |
 
   The MIX Fold 3 ran folded, with mi_thermald stopped so that the GPU was not
   held two power levels down (615 of 719 MHz). A root-tuning comparison on the
