@@ -179,6 +179,59 @@ __GLX_VENDOR_LIBRARY_NAME=mesa LIBGL_ALWAYS_SOFTWARE=1 DISPLAY=:0 ./build/gpu_be
   use `--time 120` or longer; otherwise the run may measure no frames after the
   2 s warm-up.
 
+### Raspberry Pi 4 (Raspberry Pi OS 64-bit, aarch64)
+
+> **Verification status: run on real hardware** (Pi 4 Model B Rev 1.5, 4 GB,
+> Raspberry Pi OS based on Debian 13 trixie, Mesa 26.2.2, 2026-10-17). The
+> first ARM Linux board the CLI has run on.
+
+Use the 64-bit image: a 32-bit build costs the CPU compute test a factor of
+about 2.6 on the same core type (see the TCL TV). The GPU (V3D 4.2) has
+Vulkan 1.3 through Mesa's V3DV driver with 64-bit timestamps, so the Vulkan
+workloads run. OpenGL is not available (the backend needs 4.3; the Pi offers
+3.1 / ES 3.1), and Cinematic Liquid is refused (no linear-filterable
+R32_SFLOAT 3D images, as on Adreno).
+
+**1. Dependencies.** Everything is packaged, `glslc` included, so the shaders
+are built on the Pi. `xvfb` is only needed without a monitor.
+
+```bash
+sudo apt-get install -y cmake libglfw3-dev libvulkan-dev glslc xvfb
+```
+
+**2. Build** (about 15 minutes with `-j4`):
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DGPU_BENCH_ENABLE_PACKAGING=OFF
+cmake --build build -j4
+ctest --test-dir build
+```
+
+**3. Before benchmarking.**
+
+- Cooling: the Pi 4 throttles at 80 C and on undervoltage. Check
+  `vcgencmd get_throttled` (`0x0` means neither has happened since boot) and
+  `vcgencmd measure_temp`. A Pimoroni Fan SHIM is switched by GPIO18; the
+  kernel can drive it with `dtoverlay=gpio-fan,gpiopin=18,temp=50000` in
+  `/boot/firmware/config.txt`.
+- `--gpu 0` is V3D; llvmpipe is listed as GPU 1. `--complete-suite` would run
+  every GPU job a second time on llvmpipe, so run the V3D jobs on their own
+  with the suite's arguments.
+- Without a monitor, run GPU commands under `xvfb-run -a -s "-screen 0
+  1920x1080x24"`. Headless runs then measure the GPU normally; windowed runs
+  present through software and are not results (below).
+
+**Known limits on V3D.**
+
+- Windowed particle runs: the compute timestamps of a windowed frame do not
+  bracket the work (0.01 - 93 ms for the same step), so 65K/1M/4M read
+  70.5/5.5/4.9 GB/s against about 2.0 headless. Use the headless figures; the
+  windowed ones were seen on Xvfb only and still need a check with a monitor.
+- V3D allows 65,535 work groups per dispatch, and 16,777,216 particles need
+  65,536. Before 2026-10-17 that dispatch did no work (15,086 GB/s); the
+  Vulkan backend now splits such a step into dispatches over separate parts
+  of the buffer, and 16M reads 1.98 GB/s like the other sizes.
+
 ---
 
 ## Windows (x64 / ARM64)

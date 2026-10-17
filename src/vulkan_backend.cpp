@@ -1414,31 +1414,82 @@ void VulkanBackend::CreateComputeDescriptorSetLayout() {
 }
 
 void VulkanBackend::CreateComputeDescriptorResources() {
-    VkDescriptorPoolSize ps{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 };
+    // One step of the particle test is one dispatch of particleCount / 256
+    // work groups. 16,777,216 particles need 65,536, one more than the
+    // minimum the Vulkan specification guarantees; V3D (Raspberry Pi 4)
+    // allows exactly 65,535 and then does no work at all (2026-10-17: 0.04 ms
+    // a step, 15,086 GB/s). The shader indexes from the start of its binding,
+    // so such a step is split into dispatches that each bind their own part of
+    // the buffer: the same work, and the same commands on every device whose
+    // limit is large enough.
+    const std::uint32_t groups = config_.particleCount / kComputeWorkGroupSize;
+    std::uint32_t slices = 1;
+    if (config_.workload == Workload::Stream) {
+        VkPhysicalDeviceProperties props{};
+        vkGetPhysicalDeviceProperties(physicalDevice_, &props);
+        const std::uint32_t limit = props.limits.maxComputeWorkGroupCount[0];
+        if (limit > 0 && groups > limit) {
+            slices = (groups + limit - 1) / limit;
+            std::cout << "[Vulkan] " << config_.particleCount << " particles need " << groups
+                      << " work groups; this device allows " << limit
+                      << " in one dispatch, so each step runs as " << slices
+                      << " dispatches over separate parts of the buffer.\n";
+        }
+    }
+
+    VkDescriptorPoolSize ps{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, slices };
     VkDescriptorPoolCreateInfo pi{};
     pi.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     pi.poolSizeCount = 1;  pi.pPoolSizes = &ps;
-    pi.maxSets       = 1;
+    pi.maxSets       = slices;
     if (vkCreateDescriptorPool(device_, &pi, nullptr, &descriptorPool_) != VK_SUCCESS)
         throw std::runtime_error("vkCreateDescriptorPool failed");
 
+    std::vector<VkDescriptorSetLayout> layouts(slices, computeDescriptorSetLayout_);
+    std::vector<VkDescriptorSet> sets(slices);
     VkDescriptorSetAllocateInfo ai{};
     ai.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     ai.descriptorPool     = descriptorPool_;
-    ai.descriptorSetCount = 1;
-    ai.pSetLayouts        = &computeDescriptorSetLayout_;
-    if (vkAllocateDescriptorSets(device_, &ai, &computeDescriptorSet_) != VK_SUCCESS)
+    ai.descriptorSetCount = slices;
+    ai.pSetLayouts        = layouts.data();
+    if (vkAllocateDescriptorSets(device_, &ai, sets.data()) != VK_SUCCESS)
         throw std::runtime_error("vkAllocateDescriptorSets failed");
+    computeDescriptorSet_ = sets[0];
 
-    VkDescriptorBufferInfo bi{ particleBuffer_, 0, VK_WHOLE_SIZE };
-    VkWriteDescriptorSet wr{};
-    wr.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    wr.dstSet          = computeDescriptorSet_;
-    wr.dstBinding      = 0;
-    wr.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    wr.descriptorCount = 1;
-    wr.pBufferInfo     = &bi;
-    vkUpdateDescriptorSets(device_, 1, &wr, 0, nullptr);
+    const std::uint32_t perSlice = (groups + slices - 1) / slices;
+    const VkDeviceSize groupBytes = VkDeviceSize(kComputeWorkGroupSize) * sizeof(Particle);
+    for (std::uint32_t slice = 0; slice < slices; ++slice) {
+        const std::uint32_t first = slice * perSlice;
+        const std::uint32_t count = (std::min)(perSlice, groups - first);
+        VkDescriptorBufferInfo bi{ particleBuffer_, 0, VK_WHOLE_SIZE };
+        if (slices > 1) {
+            bi.offset = first * groupBytes;  // a multiple of 8 KiB, so always aligned
+            bi.range  = count * groupBytes;
+            particleSliceSets_.push_back(sets[slice]);
+            particleSliceGroups_.push_back(count);
+        }
+        VkWriteDescriptorSet wr{};
+        wr.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        wr.dstSet          = sets[slice];
+        wr.dstBinding      = 0;
+        wr.descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        wr.descriptorCount = 1;
+        wr.pBufferInfo     = &bi;
+        vkUpdateDescriptorSets(device_, 1, &wr, 0, nullptr);
+    }
+}
+
+void VulkanBackend::RecordParticleDispatch(VkCommandBuffer cmd) {
+    if (particleSliceSets_.empty()) {
+        vkCmdDispatch(cmd, config_.particleCount / kComputeWorkGroupSize, 1, 1);
+        return;
+    }
+    // The slices touch separate particles, so no barrier is needed between them.
+    for (std::size_t slice = 0; slice < particleSliceSets_.size(); ++slice) {
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, computePipelineLayout_,
+                                0, 1, &particleSliceSets_[slice], 0, nullptr);
+        vkCmdDispatch(cmd, particleSliceGroups_[slice], 1, 1);
+    }
 }
 
 void VulkanBackend::CreateComputePipeline() {
@@ -1852,7 +1903,7 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
         vkCmdPushConstants(cmd, computePipelineLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0,
                            sizeof(ComputeParams), &params);
     }
-    vkCmdDispatch(cmd, config_.particleCount / kComputeWorkGroupSize, 1, 1);
+    RecordParticleDispatch(cmd);
     // More than the one step of a frame is taken by the timestamp check only.
     for (std::uint32_t repeat = 1; repeat < checkDispatchRepeats_; ++repeat) {
         VkBufferMemoryBarrier betweenSteps{};
@@ -1866,7 +1917,7 @@ void VulkanBackend::RecordCommandBuffer(std::uint32_t imageIndex, float deltaTim
         vkCmdPipelineBarrier(cmd,
             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
             0, 0, nullptr, 1, &betweenSteps, 0, nullptr);
-        vkCmdDispatch(cmd, config_.particleCount / kComputeWorkGroupSize, 1, 1);
+        RecordParticleDispatch(cmd);
 
 
     }
@@ -2035,7 +2086,7 @@ void VulkanBackend::DrawFrame(float deltaTime) {
             vkCmdPushConstants(cmd, computePipelineLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0,
                                sizeof(ComputeParams), &params);
         }
-        vkCmdDispatch(cmd, config_.particleCount / kComputeWorkGroupSize, 1, 1);
+        RecordParticleDispatch(cmd);
 
         // The validation workload must scale in the compute-only path too.
         for (std::uint32_t repeat = 1; repeat < checkDispatchRepeats_; ++repeat) {
@@ -2049,7 +2100,7 @@ void VulkanBackend::DrawFrame(float deltaTime) {
             betweenSteps.size = VK_WHOLE_SIZE;
             vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
                 VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 1, &betweenSteps, 0, nullptr);
-            vkCmdDispatch(cmd, config_.particleCount / kComputeWorkGroupSize, 1, 1);
+            RecordParticleDispatch(cmd);
         }
 
         if (timestampsSupported_)
@@ -2230,6 +2281,8 @@ void VulkanBackend::CleanupBackend() {
     if (computePipeline_)           { vkDestroyPipeline(device_, computePipeline_, nullptr); }
     if (computePipelineLayout_)     { vkDestroyPipelineLayout(device_, computePipelineLayout_, nullptr); }
     if (descriptorPool_)            { vkDestroyDescriptorPool(device_, descriptorPool_, nullptr); }
+    particleSliceSets_.clear();
+    particleSliceGroups_.clear();
     if (computeDescriptorSetLayout_){ vkDestroyDescriptorSetLayout(device_, computeDescriptorSetLayout_, nullptr); }
     if (graphicsPipeline_)          { vkDestroyPipeline(device_, graphicsPipeline_, nullptr); }
     if (graphicsPipelineLayout_)    { vkDestroyPipelineLayout(device_, graphicsPipelineLayout_, nullptr); }

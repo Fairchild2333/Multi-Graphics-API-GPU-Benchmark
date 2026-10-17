@@ -92,6 +92,10 @@ private:
     VkDescriptorSetLayout computeDescriptorSetLayout_ = VK_NULL_HANDLE;
     VkDescriptorPool      descriptorPool_              = VK_NULL_HANDLE;
     VkDescriptorSet       computeDescriptorSet_        = VK_NULL_HANDLE;
+    // Particle test only, and empty unless one dispatch would exceed the
+    // device's work-group limit: each slice binds its own part of the buffer.
+    std::vector<VkDescriptorSet> particleSliceSets_;
+    std::vector<std::uint32_t>   particleSliceGroups_;
     VkPipelineLayout      computePipelineLayout_       = VK_NULL_HANDLE;
     VkPipeline            computePipeline_             = VK_NULL_HANDLE;
 
@@ -350,6 +354,7 @@ private:
     void CreateQuadBuffer();
     void CreateComputeDescriptorSetLayout();
     void CreateComputeDescriptorResources();
+    void RecordParticleDispatch(VkCommandBuffer cmd);
     void CreateComputePipeline();
     VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>&) const;
     VkPresentModeKHR   ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>&) const;
