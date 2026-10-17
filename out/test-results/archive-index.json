@@ -14,11 +14,11 @@
     {
       "device": "iPhone 13 Pro / A15",
       "deviceModel": "iPhone14,2",
-      "rows": 141,
-      "path": "a15-app-budget-completion-20261017/phone-final/results/results.json",
-      "bytes": 378557,
-      "sha256": "97fed023d2e1a71de58a5eda447f5135995cfaebeb02f58519a1eef61e9649b1",
-      "notes": "A15主历史141条；原132条不变。新版512MiB Vulkan内存平台29.803、83点/38次校验及八个粒子同步计时组合已补齐，31项有当前合同覆盖。1M纯计算5.41%下降、64K纯计算30.22%增长均保留；CPU147.000/89.287/634.868沿用。"
+      "rows": 155,
+      "path": "a15-metal-confirm-20261017/phone-final/results/results.json",
+      "bytes": 408760,
+      "sha256": "441c731effdfb365c76d58c6d09d04a72cbe1fd0d4eb84f6adfb192bfefb9024",
+      "notes": "A15主历史155条；原141条不变。Vulkan512MiB平台29.803及八个粒子同步计时已齐；额外14项Metal确认236秒、13通过/1波动提示。Metal内存30.679仍preview。当前31项覆盖，Metal64K纯计算18.18%及Vulkan1M纯计算5.41%下降提示保留。CPU147.000/89.287/634.868沿用。"
     },
     {
       "device": "12.9-inch iPad Pro / A12X",

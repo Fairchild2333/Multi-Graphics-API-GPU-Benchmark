@@ -1,0 +1,633 @@
+{
+  "completeCount" : 31,
+  "historyRows" : 155,
+  "jobs" : [
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "stream-65536",
+      "request" : "stream?particles=65536&vsync=0&api=metal&coverage=fixed",
+      "resultIDs" : [
+        "20261017-193729-841"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        23.888999999999999
+      ],
+      "versions" : [
+        "stream_v1_fixed_coverage_v2_ios_preview_serial_timing_v2"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "stream_headless-65536",
+      "request" : "stream_headless?particles=65536&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261017-193745-770"
+      ],
+      "reviewReasons" : [
+        "Throughput fell by more than 5%"
+      ],
+      "scores" : [
+        56.627000000000002
+      ],
+      "versions" : [
+        "stream_v1_ios_preview_command_buffer_timing_v1"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "stream-1048576",
+      "request" : "stream?particles=1048576&vsync=0&api=metal&coverage=fixed",
+      "resultIDs" : [
+        "20261017-193801-747"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        21.960000000000001
+      ],
+      "versions" : [
+        "stream_v1_fixed_coverage_v2_ios_preview_serial_timing_v2"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "stream_headless-1048576",
+      "request" : "stream_headless?particles=1048576&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261017-193817-837"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        20.974
+      ],
+      "versions" : [
+        "stream_v1_ios_preview_command_buffer_timing_v1"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "stream-4194304",
+      "request" : "stream?particles=4194304&vsync=0&api=metal&coverage=fixed",
+      "resultIDs" : [
+        "20261017-193834-120"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        19.227
+      ],
+      "versions" : [
+        "stream_v1_fixed_coverage_v2_ios_preview_serial_timing_v2"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "stream_headless-4194304",
+      "request" : "stream_headless?particles=4194304&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261017-193850-268"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        19.041
+      ],
+      "versions" : [
+        "stream_v1_ios_preview_command_buffer_timing_v1"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "stream-16777216",
+      "request" : "stream?particles=16777216&vsync=0&api=metal&coverage=fixed",
+      "resultIDs" : [
+        "20261017-193907-358"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        18.370000000000001
+      ],
+      "versions" : [
+        "stream_v1_fixed_coverage_v2_ios_preview_serial_timing_v2"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "stream_headless-16777216",
+      "request" : "stream_headless?particles=16777216&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261017-193923-957"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        19.149999999999999
+      ],
+      "versions" : [
+        "stream_v1_ios_preview_command_buffer_timing_v1"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "gpu_burn-16",
+      "request" : "gpu_burn?steps=16&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261017-193939-823"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        1.409
+      ],
+      "versions" : [
+        "gpu_burn_v3_fixed_steps_16_kaleidoscope_ios_preview_serial_timing_v2"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "gpu_burn-64",
+      "request" : "gpu_burn?steps=64&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261017-193956-010"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        1.5580000000000001
+      ],
+      "versions" : [
+        "gpu_burn_v3_fixed_steps_64_kaleidoscope_ios_preview_serial_timing_v2"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "gpu_burn-256",
+      "request" : "gpu_burn?steps=256&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261017-194012-441"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        1.5900000000000001
+      ],
+      "versions" : [
+        "gpu_burn_v3_fixed_steps_256_kaleidoscope_ios_preview_serial_timing_v2"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "cinematic_liquid",
+      "request" : "cinematic_liquid?vsync=0&api=metal",
+      "resultIDs" : [
+        "20261017-194029-128"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        11.451000000000001
+      ],
+      "versions" : [
+        "cinematic_liquid_v2_physical_scene_v8_metal_preview_ios_preview_serial_timing_v2"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "memory_sweep",
+      "request" : "memory_sweep?api=metal",
+      "resultIDs" : [
+        "20261017-194031-576-metal-memsweep"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        30.678999999999998
+      ],
+      "versions" : [
+        "metal_memory_sweep_v1_preview_ios_preview"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "vulkan\/stream-65536",
+      "request" : "stream?particles=65536&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs" : [
+        "20261017-192417-139"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        2.8639999999999999
+      ],
+      "versions" : [
+        "stream_v1_fixed_coverage_v2_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "vulkan\/stream_headless-65536",
+      "request" : "stream_headless?particles=65536&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261017-192503-385"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        3.8980000000000001
+      ],
+      "versions" : [
+        "stream_v1_ios_preview_sync_timing_moltenvk"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "vulkan\/stream-1048576",
+      "request" : "stream?particles=1048576&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs" : [
+        "20261017-192549-633"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        14.555
+      ],
+      "versions" : [
+        "stream_v1_fixed_coverage_v2_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "vulkan\/stream_headless-1048576",
+      "request" : "stream_headless?particles=1048576&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261017-192635-978"
+      ],
+      "reviewReasons" : [
+        "Throughput fell by more than 5%"
+      ],
+      "scores" : [
+        14.337
+      ],
+      "versions" : [
+        "stream_v1_ios_preview_sync_timing_moltenvk"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "vulkan\/stream-4194304",
+      "request" : "stream?particles=4194304&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs" : [
+        "20261017-192722-653"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        16.859000000000002
+      ],
+      "versions" : [
+        "stream_v1_fixed_coverage_v2_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "vulkan\/stream_headless-4194304",
+      "request" : "stream_headless?particles=4194304&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261017-192808-814"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        17.363
+      ],
+      "versions" : [
+        "stream_v1_ios_preview_sync_timing_moltenvk"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "vulkan\/stream-16777216",
+      "request" : "stream?particles=16777216&vsync=0&api=vulkan&coverage=fixed",
+      "resultIDs" : [
+        "20261017-192856-326"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        18.369
+      ],
+      "versions" : [
+        "stream_v1_fixed_coverage_v2_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "vulkan\/stream_headless-16777216",
+      "request" : "stream_headless?particles=16777216&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261017-192941-927"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        18.504999999999999
+      ],
+      "versions" : [
+        "stream_v1_ios_preview_sync_timing_moltenvk"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "vulkan\/gpu_burn-16",
+      "request" : "gpu_burn?steps=16&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261014-155810-196"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        0.84399999999999997
+      ],
+      "versions" : [
+        "gpu_burn_v3_fixed_steps_16_kaleidoscope_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "vulkan\/gpu_burn-64",
+      "request" : "gpu_burn?steps=64&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261014-155852-634"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        1.036
+      ],
+      "versions" : [
+        "gpu_burn_v3_fixed_steps_64_kaleidoscope_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "vulkan\/gpu_burn-256",
+      "request" : "gpu_burn?steps=256&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261014-154752-681"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        1.101
+      ],
+      "versions" : [
+        "gpu_burn_v3_fixed_steps_256_kaleidoscope_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "vulkan\/memory_sweep",
+      "request" : "memory_sweep?api=vulkan",
+      "resultIDs" : [
+        "20261017-192326-416-membw"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        29.803000000000001
+      ],
+      "versions" : [
+        "membw_v3_streaming_ios_preview_app_budget_v1_moltenvk"
+      ],
+      "vulkanMemoryPoints" : 83
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "gpu_cache-v2",
+      "request" : "gpu_cache?api=metal",
+      "resultIDs" : [
+        "20261017-194109-335-metal-cache"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        315.16300000000001
+      ],
+      "versions" : [
+        "metal_dependent_cache_v2_preview_ios_preview"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 3,
+      "job" : "cpu_compute",
+      "request" : "gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2",
+      "resultIDs" : [
+        "20261017-012813-905-cpu-single-performance",
+        "20261017-012813-917-cpu-single-efficiency",
+        "20261017-012813-928-cpu-multi"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        147,
+        89.287000000000006,
+        634.86800000000005
+      ],
+      "versions" : [
+        "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_standalone_qos_bound_v1_performance_ios_preview",
+        "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_standalone_qos_bound_v1_efficiency_foreground_e_p_load_v1_ios_preview",
+        "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_before_percore_ios_preview"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 267,
+      "expectedRecords" : 1,
+      "job" : "cpu_memory",
+      "request" : "gpu_benchmark --cpu-membw",
+      "resultIDs" : [
+        "20261014-171607-442-cpu-membw"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        35.177999999999997
+      ],
+      "versions" : [
+        "cpu_membw_v1_ios_preview_qos_bound_v1_both_foreground_e_p_load_v1"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "gles2\/gpu_burn-16",
+      "request" : "gpu_burn?steps=16&api=gles2&vsync=0",
+      "resultIDs" : [
+        "20261014-014319-099"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        1.458
+      ],
+      "versions" : [
+        "gpu_burn_es2_legacy_v1_fixed_steps_16_ios_preview_sync_timing"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "gles2\/gpu_burn-64",
+      "request" : "gpu_burn?steps=64&api=gles2&vsync=0",
+      "resultIDs" : [
+        "20261014-014335-356"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        5.7590000000000003
+      ],
+      "versions" : [
+        "gpu_burn_es2_legacy_v1_fixed_steps_64_ios_preview_sync_timing"
+      ],
+      "vulkanMemoryPoints" : 0
+    },
+    {
+      "complete" : true,
+      "cpuMemoryPoints" : 0,
+      "expectedRecords" : 1,
+      "job" : "gles2\/gpu_burn-256",
+      "request" : "gpu_burn?steps=256&api=gles2&vsync=0",
+      "resultIDs" : [
+        "20261014-014351-384"
+      ],
+      "reviewReasons" : [
+
+      ],
+      "scores" : [
+        15.179
+      ],
+      "versions" : [
+        "gpu_burn_es2_legacy_v1_fixed_steps_256_ios_preview_sync_timing"
+      ],
+      "vulkanMemoryPoints" : 0
+    }
+  ],
+  "planCount" : 31
+}

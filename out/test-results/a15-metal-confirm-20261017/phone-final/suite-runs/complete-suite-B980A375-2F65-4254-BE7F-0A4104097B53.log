@@ -1,0 +1,1781 @@
+iOS complete suite complete-suite-B980A375-2F65-4254-BE7F-0A4104097B53
+Started: 2026-10-17T08:37:14Z
+
+Thermal precheck stream-65536: nominal after 0s cooling.
+
+=== 1/14 stream-65536: passed ===
+=== Preview stream?particles=65536&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A15 GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 65536 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 0.235 ms | Render: 2.592 ms | Total: 3.420 ms | FPS: 66 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.204 ms | Render: 2.949 ms | Total: 3.812 ms | FPS: 48 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.138 ms | Render: 3.801 ms | Total: 4.551 ms | FPS: 58 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 0.087 ms | Render: 3.700 ms | Total: 4.761 ms | FPS: 59 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 0.091 ms | Render: 3.320 ms | Total: 4.289 ms | FPS: 48 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 0.095 ms | Render: 3.515 ms | Total: 4.465 ms | FPS: 57 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 0.109 ms | Render: 3.496 ms | Total: 4.449 ms | FPS: 56 | T: 2.9 s
+[GPU Timing] Compute: 0.169 ms | Render: 3.599 ms | Total: 4.441 ms | FPS: 59 | T: 3.9 s
+[GPU Timing] Compute: 0.115 ms | Render: 3.669 ms | Total: 4.516 ms | FPS: 59 | T: 4.9 s
+[GPU Timing] Compute: 0.101 ms | Render: 3.643 ms | Total: 4.484 ms | FPS: 60 | T: 5.9 s
+[GPU Timing] Compute: 0.095 ms | Render: 3.655 ms | Total: 4.497 ms | FPS: 60 | T: 6.9 s
+[GPU Timing] Compute: 0.105 ms | Render: 3.648 ms | Total: 4.487 ms | FPS: 59 | T: 7.9 s
+[GPU Timing] Compute: 0.088 ms | Render: 3.664 ms | Total: 4.493 ms | FPS: 60 | T: 8.9 s
+[GPU Timing] Compute: 0.128 ms | Render: 3.633 ms | Total: 4.573 ms | FPS: 59 | T: 9.9 s
+[GPU Timing] Compute: 0.112 ms | Render: 3.636 ms | Total: 4.528 ms | FPS: 59 | T: 10.9 s
+[GPU Timing] Compute: 0.099 ms | Render: 3.633 ms | Total: 4.597 ms | FPS: 60 | T: 12.0 s
+[GPU Timing] Compute: 0.088 ms | Render: 3.628 ms | Total: 4.582 ms | FPS: 59 | T: 13.0 s
+[GPU Timing] Compute: 0.103 ms | Render: 3.601 ms | Total: 4.540 ms | FPS: 59 | T: 14.0 s
+[GPU Timing] Compute: 0.111 ms | Render: 3.643 ms | Total: 4.615 ms | FPS: 59 | T: 15.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    65536 (Light)
+Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 778 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.110     0.060     1.100
+Render:          3.628     2.202     5.792
+Total GPU:       4.525     3.156     7.398
+
+--- Throughput ---
+Avg FPS:      59
+Particles:    65536
+Working set:  2.00 MiB
+VRAM rate:   23.89 GB/s  (0.110 ms compute)
+
+--- Analysis ---
+Avg frame time:  16.733 ms
+Avg GPU time:    4.525 ms
+GPU utilisation: 27.0%
+>> Display-bound: every frame waits for the display, so the GPU is idle 72% of the time.
+   -> The score may be too low. Use a heavier test.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: not detected; this run has not reached a stable plateau.
+Throughput:   early vs late mean change (drop positive) -11.3%
+==========================================================
+
+[Results] Saved as 20261017-193729-841 -> /var/mobile/Containers/Data/Application/C8B31026-1006-448F-BD0A-F6B22FC787A8/Documents/results/results.json
+
+Thermal precheck stream_headless-65536: nominal after 0s cooling.
+
+=== 2/14 stream_headless-65536: review ===
+=== Preview stream_headless?particles=65536&vsync=0&api=metal 15.0s ===
+Selected GPU: Apple A15 GPU
+Created particle buffer: 65536 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[Metal] Headless mode: pure compute, no rendering
+[GPU Timing] Compute: 0.110 ms | Render: 0.000 ms | Total: 0.110 ms | FPS: 3806 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.067 ms | Render: 0.000 ms | Total: 0.067 ms | FPS: 3402 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.045 ms | Render: 0.000 ms | Total: 0.045 ms | FPS: 7127 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 0.041 ms | Render: 0.000 ms | Total: 0.041 ms | FPS: 8618 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 0.043 ms | Render: 0.000 ms | Total: 0.043 ms | FPS: 8700 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 0.042 ms | Render: 0.000 ms | Total: 0.042 ms | FPS: 8303 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 0.043 ms | Render: 0.000 ms | Total: 0.043 ms | FPS: 8968 | T: 2.8 s
+[GPU Timing] Compute: 0.042 ms | Render: 0.000 ms | Total: 0.042 ms | FPS: 8610 | T: 3.8 s
+[GPU Timing] Compute: 0.040 ms | Render: 0.000 ms | Total: 0.040 ms | FPS: 9586 | T: 4.8 s
+[GPU Timing] Compute: 0.040 ms | Render: 0.000 ms | Total: 0.040 ms | FPS: 10086 | T: 5.8 s
+[GPU Timing] Compute: 0.042 ms | Render: 0.000 ms | Total: 0.042 ms | FPS: 9180 | T: 6.8 s
+[GPU Timing] Compute: 0.051 ms | Render: 0.000 ms | Total: 0.051 ms | FPS: 7063 | T: 7.8 s
+[GPU Timing] Compute: 0.049 ms | Render: 0.000 ms | Total: 0.049 ms | FPS: 7265 | T: 8.8 s
+[GPU Timing] Compute: 0.050 ms | Render: 0.000 ms | Total: 0.050 ms | FPS: 7147 | T: 9.8 s
+[GPU Timing] Compute: 0.050 ms | Render: 0.000 ms | Total: 0.050 ms | FPS: 7063 | T: 10.8 s
+[GPU Timing] Compute: 0.051 ms | Render: 0.000 ms | Total: 0.051 ms | FPS: 7054 | T: 11.8 s
+[GPU Timing] Compute: 0.050 ms | Render: 0.000 ms | Total: 0.050 ms | FPS: 7131 | T: 12.8 s
+[GPU Timing] Compute: 0.051 ms | Render: 0.000 ms | Total: 0.051 ms | FPS: 7141 | T: 13.8 s
+[GPU Timing] Compute: 0.050 ms | Render: 0.000 ms | Total: 0.050 ms | FPS: 7220 | T: 14.8 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    65536 (Light)
+Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 103216 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.046     0.034     0.649
+Render:          0.000     0.000     0.000
+Total GPU:       0.046     0.034     0.649
+
+--- Throughput ---
+Avg FPS:      7939
+Particles:    65536
+Working set:  2.00 MiB
+VRAM rate:   56.63 GB/s  (0.046 ms compute)
+
+--- Analysis ---
+Avg frame time:  0.126 ms
+Avg GPU time:    0.046 ms
+GPU utilisation: 36.8%
+>> CPU-bound: GPU is idle 63% of the time.
+   -> Try a higher difficulty for more accurate GPU benchmarking.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 52.01 GB/s  (CV 0.69%)
+Throughput:   early vs late mean change (drop positive) 18.2%  (>> review workload, timing and scheduling)
+>> Throughput declined; retain the full-run mean and curve. A stable window may be earlier in the run.
+==========================================================
+
+[Results] Saved as 20261017-193745-770 -> /var/mobile/Containers/Data/Application/C8B31026-1006-448F-BD0A-F6B22FC787A8/Documents/results/results.json
+
+Thermal precheck stream-1048576: nominal after 0s cooling.
+
+=== 3/14 stream-1048576: passed ===
+=== Preview stream?particles=1048576&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A15 GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 1048576 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 4.569 ms | Render: 23.870 ms | Total: 29.639 ms | FPS: 35 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 2.839 ms | Render: 21.902 ms | Total: 25.545 ms | FPS: 37 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 1.938 ms | Render: 21.567 ms | Total: 24.414 ms | FPS: 39 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 1.944 ms | Render: 21.745 ms | Total: 25.128 ms | FPS: 38 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 1.926 ms | Render: 22.247 ms | Total: 24.947 ms | FPS: 38 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 1.976 ms | Render: 21.901 ms | Total: 24.766 ms | FPS: 38 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 1.916 ms | Render: 21.680 ms | Total: 24.514 ms | FPS: 39 | T: 2.9 s
+[GPU Timing] Compute: 1.911 ms | Render: 22.234 ms | Total: 24.979 ms | FPS: 38 | T: 3.9 s
+[GPU Timing] Compute: 1.922 ms | Render: 22.057 ms | Total: 24.865 ms | FPS: 38 | T: 4.9 s
+[GPU Timing] Compute: 1.900 ms | Render: 22.216 ms | Total: 24.986 ms | FPS: 38 | T: 5.9 s
+[GPU Timing] Compute: 1.929 ms | Render: 22.409 ms | Total: 25.249 ms | FPS: 38 | T: 6.9 s
+[GPU Timing] Compute: 1.918 ms | Render: 22.320 ms | Total: 25.111 ms | FPS: 38 | T: 8.0 s
+[GPU Timing] Compute: 1.911 ms | Render: 21.990 ms | Total: 24.804 ms | FPS: 38 | T: 9.0 s
+[GPU Timing] Compute: 1.913 ms | Render: 21.674 ms | Total: 24.507 ms | FPS: 39 | T: 10.0 s
+[GPU Timing] Compute: 1.914 ms | Render: 21.264 ms | Total: 24.072 ms | FPS: 40 | T: 11.0 s
+[GPU Timing] Compute: 1.910 ms | Render: 20.909 ms | Total: 23.718 ms | FPS: 40 | T: 12.0 s
+[GPU Timing] Compute: 1.888 ms | Render: 21.242 ms | Total: 24.019 ms | FPS: 40 | T: 13.0 s
+[GPU Timing] Compute: 1.889 ms | Render: 21.560 ms | Total: 24.333 ms | FPS: 39 | T: 14.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    1048576 (Medium)
+Buffer:       32.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 511 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         1.910     1.755     3.097
+Render:         21.787    20.583    23.329
+Total GPU:      24.586    23.277    26.420
+
+--- Throughput ---
+Avg FPS:      39
+Particles:    1048576
+Working set:  32.00 MiB
+VRAM rate:   21.96 GB/s  (1.910 ms compute)
+
+--- Analysis ---
+Avg frame time:  25.479 ms
+Avg GPU time:    24.586 ms
+GPU utilisation: 96.5%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 22.05 GB/s  (CV 0.61%)
+Throughput:   early vs late mean change (drop positive) -0.7%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261017-193801-747 -> /var/mobile/Containers/Data/Application/C8B31026-1006-448F-BD0A-F6B22FC787A8/Documents/results/results.json
+
+Thermal precheck stream_headless-1048576: nominal after 0s cooling.
+
+=== 4/14 stream_headless-1048576: passed ===
+=== Preview stream_headless?particles=1048576&vsync=0&api=metal 15.0s ===
+Selected GPU: Apple A15 GPU
+Created particle buffer: 1048576 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[Metal] Headless mode: pure compute, no rendering
+[GPU Timing] Compute: 3.472 ms | Render: 0.000 ms | Total: 3.472 ms | FPS: 293 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 2.704 ms | Render: 0.000 ms | Total: 2.704 ms | FPS: 365 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 2.113 ms | Render: 0.000 ms | Total: 2.113 ms | FPS: 465 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 2.102 ms | Render: 0.000 ms | Total: 2.102 ms | FPS: 467 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 1.998 ms | Render: 0.000 ms | Total: 1.998 ms | FPS: 491 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 2.119 ms | Render: 0.000 ms | Total: 2.119 ms | FPS: 464 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 2.002 ms | Render: 0.000 ms | Total: 2.002 ms | FPS: 490 | T: 2.8 s
+[GPU Timing] Compute: 2.002 ms | Render: 0.000 ms | Total: 2.002 ms | FPS: 490 | T: 3.8 s
+[GPU Timing] Compute: 2.010 ms | Render: 0.000 ms | Total: 2.010 ms | FPS: 488 | T: 4.8 s
+[GPU Timing] Compute: 1.995 ms | Render: 0.000 ms | Total: 1.995 ms | FPS: 492 | T: 5.8 s
+[GPU Timing] Compute: 2.001 ms | Render: 0.000 ms | Total: 2.001 ms | FPS: 490 | T: 6.8 s
+[GPU Timing] Compute: 2.005 ms | Render: 0.000 ms | Total: 2.005 ms | FPS: 489 | T: 7.8 s
+[GPU Timing] Compute: 2.012 ms | Render: 0.000 ms | Total: 2.012 ms | FPS: 485 | T: 8.8 s
+[GPU Timing] Compute: 1.994 ms | Render: 0.000 ms | Total: 1.994 ms | FPS: 491 | T: 9.8 s
+[GPU Timing] Compute: 1.988 ms | Render: 0.000 ms | Total: 1.988 ms | FPS: 493 | T: 10.8 s
+[GPU Timing] Compute: 1.992 ms | Render: 0.000 ms | Total: 1.992 ms | FPS: 492 | T: 11.8 s
+[GPU Timing] Compute: 1.993 ms | Render: 0.000 ms | Total: 1.993 ms | FPS: 492 | T: 12.8 s
+[GPU Timing] Compute: 2.016 ms | Render: 0.000 ms | Total: 2.016 ms | FPS: 487 | T: 13.8 s
+[GPU Timing] Compute: 2.001 ms | Render: 0.000 ms | Total: 2.001 ms | FPS: 490 | T: 14.8 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    1048576 (Medium)
+Buffer:       32.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 6381 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         2.000     1.947     3.456
+Render:          0.000     0.000     0.000
+Total GPU:       2.000     1.947     3.456
+
+--- Throughput ---
+Avg FPS:      490
+Particles:    1048576
+Working set:  32.00 MiB
+VRAM rate:   20.97 GB/s  (2.000 ms compute)
+
+--- Analysis ---
+Avg frame time:  2.038 ms
+Avg GPU time:    2.000 ms
+GPU utilisation: 98.1%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 21.00 GB/s  (CV 0.50%)
+Throughput:   early vs late mean change (drop positive) -0.2%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261017-193817-837 -> /var/mobile/Containers/Data/Application/C8B31026-1006-448F-BD0A-F6B22FC787A8/Documents/results/results.json
+
+Thermal precheck stream-4194304: nominal after 0s cooling.
+
+=== 5/14 stream-4194304: passed ===
+=== Preview stream?particles=4194304&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A15 GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 4194304 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 11.607 ms | Render: 82.903 ms | Total: 98.355 ms | FPS: 13 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 9.904 ms | Render: 95.015 ms | Total: 106.321 ms | FPS: 9 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 8.419 ms | Render: 91.432 ms | Total: 100.872 ms | FPS: 9 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 8.834 ms | Render: 93.328 ms | Total: 103.080 ms | FPS: 9 | T: 1.4 s (warm-up)
+[GPU Timing] Compute: 8.544 ms | Render: 95.609 ms | Total: 105.217 ms | FPS: 9 | T: 1.7 s (warm-up)
+[GPU Timing] Compute: 9.504 ms | Render: 97.166 ms | Total: 107.484 ms | FPS: 9 | T: 2.0 s (warm-up)
+[GPU Timing] Compute: 9.041 ms | Render: 97.284 ms | Total: 107.220 ms | FPS: 9 | T: 3.1 s
+[GPU Timing] Compute: 8.960 ms | Render: 99.059 ms | Total: 109.028 ms | FPS: 9 | T: 4.2 s
+[GPU Timing] Compute: 8.983 ms | Render: 100.115 ms | Total: 110.039 ms | FPS: 9 | T: 5.3 s
+[GPU Timing] Compute: 8.745 ms | Render: 100.202 ms | Total: 110.006 ms | FPS: 9 | T: 6.4 s
+[GPU Timing] Compute: 8.620 ms | Render: 100.393 ms | Total: 109.993 ms | FPS: 9 | T: 7.5 s
+[GPU Timing] Compute: 8.471 ms | Render: 99.634 ms | Total: 109.047 ms | FPS: 9 | T: 8.6 s
+[GPU Timing] Compute: 8.548 ms | Render: 97.496 ms | Total: 107.033 ms | FPS: 9 | T: 9.7 s
+[GPU Timing] Compute: 8.714 ms | Render: 93.121 ms | Total: 102.787 ms | FPS: 9 | T: 10.7 s
+[GPU Timing] Compute: 8.664 ms | Render: 89.981 ms | Total: 99.576 ms | FPS: 9 | T: 11.7 s
+[GPU Timing] Compute: 8.652 ms | Render: 90.952 ms | Total: 100.553 ms | FPS: 9 | T: 12.7 s
+[GPU Timing] Compute: 8.831 ms | Render: 95.360 ms | Total: 105.159 ms | FPS: 9 | T: 13.8 s
+[GPU Timing] Compute: 8.615 ms | Render: 96.102 ms | Total: 105.684 ms | FPS: 9 | T: 14.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    4194304 (Heavy)
+Buffer:       128.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.2 s (warmup: 2.0 s, measured: 123 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         8.726     8.274    10.862
+Render:         96.663    87.610   102.866
+Total GPU:     106.355    97.137   112.298
+
+--- Throughput ---
+Avg FPS:      9
+Particles:    4194304
+Working set:  128.00 MiB
+VRAM rate:   19.23 GB/s  (8.726 ms compute)
+
+--- Analysis ---
+Avg frame time:  107.335 ms
+Avg GPU time:    106.355 ms
+GPU utilisation: 99.1%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 19.30 GB/s  (CV 0.85%)
+Throughput:   early vs late mean change (drop positive) -2.0%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261017-193834-120 -> /var/mobile/Containers/Data/Application/C8B31026-1006-448F-BD0A-F6B22FC787A8/Documents/results/results.json
+
+Thermal precheck stream_headless-4194304: nominal after 0s cooling.
+
+=== 6/14 stream_headless-4194304: passed ===
+=== Preview stream_headless?particles=4194304&vsync=0&api=metal 15.0s ===
+Selected GPU: Apple A15 GPU
+Created particle buffer: 4194304 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[Metal] Headless mode: pure compute, no rendering
+[GPU Timing] Compute: 14.172 ms | Render: 0.000 ms | Total: 14.172 ms | FPS: 79 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 9.605 ms | Render: 0.000 ms | Total: 9.605 ms | FPS: 103 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 9.028 ms | Render: 0.000 ms | Total: 9.028 ms | FPS: 110 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 8.779 ms | Render: 0.000 ms | Total: 8.779 ms | FPS: 113 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 8.790 ms | Render: 0.000 ms | Total: 8.790 ms | FPS: 113 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 9.255 ms | Render: 0.000 ms | Total: 9.255 ms | FPS: 107 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 8.821 ms | Render: 0.000 ms | Total: 8.821 ms | FPS: 112 | T: 2.9 s
+[GPU Timing] Compute: 8.990 ms | Render: 0.000 ms | Total: 8.990 ms | FPS: 110 | T: 3.9 s
+[GPU Timing] Compute: 8.958 ms | Render: 0.000 ms | Total: 8.958 ms | FPS: 111 | T: 4.9 s
+[GPU Timing] Compute: 8.851 ms | Render: 0.000 ms | Total: 8.851 ms | FPS: 112 | T: 5.9 s
+[GPU Timing] Compute: 8.796 ms | Render: 0.000 ms | Total: 8.796 ms | FPS: 113 | T: 6.9 s
+[GPU Timing] Compute: 8.778 ms | Render: 0.000 ms | Total: 8.778 ms | FPS: 113 | T: 7.9 s
+[GPU Timing] Compute: 8.802 ms | Render: 0.000 ms | Total: 8.802 ms | FPS: 113 | T: 8.9 s
+[GPU Timing] Compute: 8.754 ms | Render: 0.000 ms | Total: 8.754 ms | FPS: 113 | T: 9.9 s
+[GPU Timing] Compute: 8.756 ms | Render: 0.000 ms | Total: 8.756 ms | FPS: 113 | T: 10.9 s
+[GPU Timing] Compute: 8.773 ms | Render: 0.000 ms | Total: 8.773 ms | FPS: 113 | T: 11.9 s
+[GPU Timing] Compute: 8.782 ms | Render: 0.000 ms | Total: 8.782 ms | FPS: 113 | T: 12.9 s
+[GPU Timing] Compute: 8.744 ms | Render: 0.000 ms | Total: 8.744 ms | FPS: 113 | T: 13.9 s
+[GPU Timing] Compute: 8.744 ms | Render: 0.000 ms | Total: 8.744 ms | FPS: 114 | T: 14.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    4194304 (Heavy)
+Buffer:       128.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 1471 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         8.811     8.622    11.013
+Render:          0.000     0.000     0.000
+Total GPU:       8.811     8.622    11.013
+
+--- Throughput ---
+Avg FPS:      113
+Particles:    4194304
+Working set:  128.00 MiB
+VRAM rate:   19.04 GB/s  (8.811 ms compute)
+
+--- Analysis ---
+Avg frame time:  8.849 ms
+Avg GPU time:    8.811 ms
+GPU utilisation: 99.6%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 19.15 GB/s  (CV 0.18%)
+Throughput:   early vs late mean change (drop positive) -1.4%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261017-193850-268 -> /var/mobile/Containers/Data/Application/C8B31026-1006-448F-BD0A-F6B22FC787A8/Documents/results/results.json
+
+Thermal precheck stream-16777216: nominal after 0s cooling.
+
+=== 7/14 stream-16777216: passed ===
+=== Preview stream?particles=16777216&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A15 GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 16777216 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 39.949 ms | Render: 297.398 ms | Total: 356.177 ms | FPS: 4 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 39.581 ms | Render: 375.434 ms | Total: 415.808 ms | FPS: 2 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 37.292 ms | Render: 370.304 ms | Total: 408.873 ms | FPS: 2 | T: 2.0 s (warm-up)
+[GPU Timing] Compute: 36.424 ms | Render: 376.939 ms | Total: 414.688 ms | FPS: 2 | T: 2.4 s (warm-up)
+[GPU Timing] Compute: 37.066 ms | Render: 389.971 ms | Total: 429.057 ms | FPS: 2 | T: 3.7 s
+[GPU Timing] Compute: 36.430 ms | Render: 396.788 ms | Total: 434.286 ms | FPS: 2 | T: 5.0 s
+[GPU Timing] Compute: 36.824 ms | Render: 398.452 ms | Total: 436.254 ms | FPS: 2 | T: 6.3 s
+[GPU Timing] Compute: 36.885 ms | Render: 401.685 ms | Total: 439.514 ms | FPS: 2 | T: 7.7 s
+[GPU Timing] Compute: 36.264 ms | Render: 396.885 ms | Total: 434.241 ms | FPS: 2 | T: 9.0 s
+[GPU Timing] Compute: 36.403 ms | Render: 396.186 ms | Total: 433.845 ms | FPS: 2 | T: 10.3 s
+[GPU Timing] Compute: 36.631 ms | Render: 377.970 ms | Total: 415.640 ms | FPS: 2 | T: 11.5 s
+[GPU Timing] Compute: 36.929 ms | Render: 367.460 ms | Total: 405.537 ms | FPS: 2 | T: 12.7 s
+[GPU Timing] Compute: 36.079 ms | Render: 375.588 ms | Total: 412.874 ms | FPS: 2 | T: 14.0 s
+[GPU Timing] Compute: 36.681 ms | Render: 389.389 ms | Total: 427.157 ms | FPS: 2 | T: 15.3 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    16777216 (Extreme)
+Buffer:       512.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.3 s (warmup: 2.0 s, measured: 31 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        36.533    35.794    38.297
+Render:        389.762   366.215   403.209
+Total GPU:     427.393   403.487   440.006
+
+--- Throughput ---
+Avg FPS:      2
+Particles:    16777216
+Working set:  512.00 MiB
+VRAM rate:   18.37 GB/s  (36.533 ms compute)
+
+--- Analysis ---
+Avg frame time:  428.598 ms
+Avg GPU time:    427.393 ms
+GPU utilisation: 99.7%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      10 x 1s
+Stable window: 18.36 GB/s  (CV 0.79%)
+Throughput:   early vs late mean change (drop positive) -0.4%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261017-193907-358 -> /var/mobile/Containers/Data/Application/C8B31026-1006-448F-BD0A-F6B22FC787A8/Documents/results/results.json
+
+Thermal precheck stream_headless-16777216: nominal after 0s cooling.
+
+=== 8/14 stream_headless-16777216: passed ===
+=== Preview stream_headless?particles=16777216&vsync=0&api=metal 15.0s ===
+Selected GPU: Apple A15 GPU
+Created particle buffer: 16777216 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[Metal] Headless mode: pure compute, no rendering
+[GPU Timing] Compute: 42.288 ms | Render: 0.000 ms | Total: 42.288 ms | FPS: 30 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 35.296 ms | Render: 0.000 ms | Total: 35.296 ms | FPS: 28 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 35.921 ms | Render: 0.000 ms | Total: 35.921 ms | FPS: 27 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 35.386 ms | Render: 0.000 ms | Total: 35.386 ms | FPS: 28 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 36.133 ms | Render: 0.000 ms | Total: 36.133 ms | FPS: 27 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 35.433 ms | Render: 0.000 ms | Total: 35.433 ms | FPS: 28 | T: 2.0 s (warm-up)
+[GPU Timing] Compute: 35.130 ms | Render: 0.000 ms | Total: 35.130 ms | FPS: 28 | T: 3.0 s
+[GPU Timing] Compute: 35.088 ms | Render: 0.000 ms | Total: 35.088 ms | FPS: 28 | T: 4.0 s
+[GPU Timing] Compute: 35.169 ms | Render: 0.000 ms | Total: 35.169 ms | FPS: 28 | T: 5.0 s
+[GPU Timing] Compute: 34.997 ms | Render: 0.000 ms | Total: 34.997 ms | FPS: 28 | T: 6.0 s
+[GPU Timing] Compute: 34.980 ms | Render: 0.000 ms | Total: 34.980 ms | FPS: 28 | T: 7.1 s
+[GPU Timing] Compute: 35.003 ms | Render: 0.000 ms | Total: 35.003 ms | FPS: 28 | T: 8.1 s
+[GPU Timing] Compute: 35.027 ms | Render: 0.000 ms | Total: 35.027 ms | FPS: 28 | T: 9.1 s
+[GPU Timing] Compute: 35.230 ms | Render: 0.000 ms | Total: 35.230 ms | FPS: 28 | T: 10.1 s
+[GPU Timing] Compute: 34.924 ms | Render: 0.000 ms | Total: 34.924 ms | FPS: 28 | T: 11.1 s
+[GPU Timing] Compute: 34.979 ms | Render: 0.000 ms | Total: 34.979 ms | FPS: 28 | T: 12.1 s
+[GPU Timing] Compute: 34.961 ms | Render: 0.000 ms | Total: 34.961 ms | FPS: 28 | T: 13.2 s
+[GPU Timing] Compute: 35.010 ms | Render: 0.000 ms | Total: 35.010 ms | FPS: 28 | T: 14.2 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    16777216 (Extreme)
+Buffer:       512.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 371 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        35.043    34.544    38.404
+Render:          0.000     0.000     0.000
+Total GPU:      35.043    34.544    38.404
+
+--- Throughput ---
+Avg FPS:      28
+Particles:    16777216
+Working set:  512.00 MiB
+VRAM rate:   19.15 GB/s  (35.043 ms compute)
+
+--- Analysis ---
+Avg frame time:  35.083 ms
+Avg GPU time:    35.043 ms
+GPU utilisation: 99.9%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 19.16 GB/s  (CV 0.31%)
+Throughput:   early vs late mean change (drop positive) -0.1%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261017-193923-957 -> /var/mobile/Containers/Data/Application/C8B31026-1006-448F-BD0A-F6B22FC787A8/Documents/results/results.json
+
+Thermal precheck gpu_burn-16: nominal after 0s cooling.
+
+=== 9/14 gpu_burn-16: passed ===
+=== Preview gpu_burn?steps=16&vsync=0&api=metal 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A15 GPU
+[Metal] Render target follows host layer: 1280x720
+[Metal] GPU Burn: fullscreen raymarch (2 draws/frame, steps=16)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 0.000 ms | Render: 22.269 ms | Total: 22.269 ms | FPS: 40 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 21.482 ms | Total: 21.482 ms | FPS: 39 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 20.885 ms | Total: 20.885 ms | FPS: 45 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 20.916 ms | Total: 20.916 ms | FPS: 38 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 20.926 ms | Total: 20.926 ms | FPS: 45 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 20.986 ms | Total: 20.986 ms | FPS: 45 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 20.918 ms | Total: 20.918 ms | FPS: 45 | T: 2.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 20.930 ms | Total: 20.930 ms | FPS: 45 | T: 3.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 20.954 ms | Total: 20.954 ms | FPS: 45 | T: 4.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 20.929 ms | Total: 20.929 ms | FPS: 45 | T: 5.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 20.950 ms | Total: 20.950 ms | FPS: 45 | T: 6.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 20.937 ms | Total: 20.937 ms | FPS: 45 | T: 8.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 20.929 ms | Total: 20.929 ms | FPS: 45 | T: 9.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 20.938 ms | Total: 20.938 ms | FPS: 45 | T: 10.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 20.935 ms | Total: 20.935 ms | FPS: 45 | T: 11.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 20.946 ms | Total: 20.946 ms | FPS: 45 | T: 12.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 20.934 ms | Total: 20.934 ms | FPS: 45 | T: 13.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 20.942 ms | Total: 20.942 ms | FPS: 45 | T: 14.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 592 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:         20.936    20.858    22.102
+Total GPU:      20.936    20.858    22.102
+
+--- Throughput ---
+Avg FPS:      45
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 16 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    1.41 Gpix-step/s  (20.936 ms render)
+
+--- Analysis ---
+Avg frame time:  21.989 ms
+Avg GPU time:    20.936 ms
+GPU utilisation: 95.2%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 1.41 Gpix-step/s  (CV 0.02%)
+Throughput:   early vs late mean change (drop positive) 0.0%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261017-193939-823 -> /var/mobile/Containers/Data/Application/C8B31026-1006-448F-BD0A-F6B22FC787A8/Documents/results/results.json
+
+Thermal precheck gpu_burn-64: nominal after 0s cooling.
+
+=== 10/14 gpu_burn-64: passed ===
+=== Preview gpu_burn?steps=64&vsync=0&api=metal 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A15 GPU
+[Metal] Render target follows host layer: 1280x720
+[Metal] GPU Burn: fullscreen raymarch (2 draws/frame, steps=64)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 0.000 ms | Render: 78.084 ms | Total: 78.084 ms | FPS: 15 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 75.728 ms | Total: 75.728 ms | FPS: 12 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 75.688 ms | Total: 75.688 ms | FPS: 13 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 75.695 ms | Total: 75.695 ms | FPS: 12 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 75.708 ms | Total: 75.708 ms | FPS: 12 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 75.821 ms | Total: 75.821 ms | FPS: 12 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 75.691 ms | Total: 75.691 ms | FPS: 12 | T: 2.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.704 ms | Total: 75.704 ms | FPS: 12 | T: 3.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.801 ms | Total: 75.801 ms | FPS: 12 | T: 4.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.826 ms | Total: 75.826 ms | FPS: 12 | T: 5.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.700 ms | Total: 75.700 ms | FPS: 12 | T: 6.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.704 ms | Total: 75.704 ms | FPS: 12 | T: 7.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.789 ms | Total: 75.789 ms | FPS: 12 | T: 8.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.770 ms | Total: 75.770 ms | FPS: 12 | T: 9.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.708 ms | Total: 75.708 ms | FPS: 12 | T: 10.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.719 ms | Total: 75.719 ms | FPS: 12 | T: 11.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.732 ms | Total: 75.732 ms | FPS: 12 | T: 12.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.764 ms | Total: 75.764 ms | FPS: 12 | T: 13.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 75.663 ms | Total: 75.663 ms | FPS: 12 | T: 14.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.1 s (warmup: 2.0 s, measured: 170 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:         75.739    75.511    77.057
+Total GPU:      75.739    75.511    77.057
+
+--- Throughput ---
+Avg FPS:      12
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 64 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    1.56 Gpix-step/s  (75.739 ms render)
+
+--- Analysis ---
+Avg frame time:  76.991 ms
+Avg GPU time:    75.739 ms
+GPU utilisation: 98.4%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 1.56 Gpix-step/s  (CV 0.04%)
+Throughput:   early vs late mean change (drop positive) -0.0%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261017-193956-010 -> /var/mobile/Containers/Data/Application/C8B31026-1006-448F-BD0A-F6B22FC787A8/Documents/results/results.json
+
+Thermal precheck gpu_burn-256: nominal after 0s cooling.
+
+=== 11/14 gpu_burn-256: passed ===
+=== Preview gpu_burn?steps=256&vsync=0&api=metal 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A15 GPU
+[Metal] Render target follows host layer: 1280x720
+[Metal] GPU Burn: fullscreen raymarch (2 draws/frame, steps=256)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 0.000 ms | Render: 300.575 ms | Total: 300.575 ms | FPS: 6 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 296.456 ms | Total: 296.456 ms | FPS: 3 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 295.931 ms | Total: 295.931 ms | FPS: 3 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 302.611 ms | Total: 302.611 ms | FPS: 3 | T: 2.1 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 295.496 ms | Total: 295.496 ms | FPS: 3 | T: 3.3 s
+[GPU Timing] Compute: 0.000 ms | Render: 296.547 ms | Total: 296.547 ms | FPS: 3 | T: 4.5 s
+[GPU Timing] Compute: 0.000 ms | Render: 295.593 ms | Total: 295.593 ms | FPS: 3 | T: 5.7 s
+[GPU Timing] Compute: 0.000 ms | Render: 297.350 ms | Total: 297.350 ms | FPS: 3 | T: 6.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 297.141 ms | Total: 297.141 ms | FPS: 3 | T: 8.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 296.755 ms | Total: 296.755 ms | FPS: 3 | T: 9.2 s
+[GPU Timing] Compute: 0.000 ms | Render: 297.710 ms | Total: 297.710 ms | FPS: 3 | T: 10.4 s
+[GPU Timing] Compute: 0.000 ms | Render: 296.728 ms | Total: 296.728 ms | FPS: 3 | T: 11.6 s
+[GPU Timing] Compute: 0.000 ms | Render: 295.588 ms | Total: 295.588 ms | FPS: 3 | T: 12.8 s
+[GPU Timing] Compute: 0.000 ms | Render: 296.130 ms | Total: 296.130 ms | FPS: 3 | T: 14.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 298.466 ms | Total: 298.466 ms | FPS: 3 | T: 15.2 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.4 s (warmup: 2.0 s, measured: 45 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:        296.721   294.600   302.438
+Total GPU:     296.721   294.600   302.438
+
+--- Throughput ---
+Avg FPS:      3
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 256 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    1.59 Gpix-step/s  (296.721 ms render)
+
+--- Analysis ---
+Avg frame time:  298.281 ms
+Avg GPU time:    296.721 ms
+GPU utilisation: 99.5%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      11 x 1s
+Stable window: 1.59 Gpix-step/s  (CV 0.35%)
+Throughput:   early vs late mean change (drop positive) 0.2%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261017-194012-441 -> /var/mobile/Containers/Data/Application/C8B31026-1006-448F-BD0A-F6B22FC787A8/Documents/results/results.json
+
+Thermal precheck cinematic_liquid: nominal after 0s cooling.
+
+=== 12/14 cinematic_liquid: passed ===
+=== Preview cinematic_liquid?vsync=0&api=metal 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A15 GPU
+[Metal] Render target follows host layer: 1280x720
+[Metal] Cinematic Liquid v2 MLS-MPM preview host: 320920 particles, grid 128x64x96, 10 substeps/frame, 352-step raymarch present (metal_preview scores)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 131.746 ms | Render: 61.939 ms | Total: 195.130 ms | FPS: 7 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 129.984 ms | Render: 65.526 ms | Total: 196.488 ms | FPS: 5 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 130.227 ms | Render: 57.546 ms | Total: 188.657 ms | FPS: 5 | T: 1.4 s (warm-up)
+[GPU Timing] Compute: 130.560 ms | Render: 63.349 ms | Total: 194.981 ms | FPS: 5 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 134.033 ms | Render: 72.913 ms | Total: 207.898 ms | FPS: 4 | T: 2.2 s (warm-up)
+[GPU Timing] Compute: 140.125 ms | Render: 80.978 ms | Total: 222.165 ms | FPS: 4 | T: 3.3 s
+[GPU Timing] Compute: 155.640 ms | Render: 97.657 ms | Total: 254.313 ms | FPS: 3 | T: 4.4 s
+[GPU Timing] Compute: 143.650 ms | Render: 93.586 ms | Total: 238.119 ms | FPS: 4 | T: 5.6 s
+[GPU Timing] Compute: 153.402 ms | Render: 99.121 ms | Total: 253.550 ms | FPS: 3 | T: 6.6 s
+[GPU Timing] Compute: 164.148 ms | Render: 119.107 ms | Total: 284.164 ms | FPS: 3 | T: 7.8 s
+[GPU Timing] Compute: 175.254 ms | Render: 119.892 ms | Total: 296.134 ms | FPS: 3 | T: 9.0 s
+[GPU Timing] Compute: 184.214 ms | Render: 125.430 ms | Total: 310.572 ms | FPS: 3 | T: 10.3 s
+[GPU Timing] Compute: 190.680 ms | Render: 129.450 ms | Total: 321.078 ms | FPS: 3 | T: 11.6 s
+[GPU Timing] Compute: 194.071 ms | Render: 122.861 ms | Total: 317.908 ms | FPS: 3 | T: 12.8 s
+[GPU Timing] Compute: 194.666 ms | Render: 116.582 ms | Total: 312.248 ms | FPS: 3 | T: 14.1 s
+[GPU Timing] Compute: 194.191 ms | Render: 95.952 ms | Total: 291.191 ms | FPS: 3 | T: 15.2 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    320920 (Cinematic Liquid v2)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.3 s (warmup: 2.0 s, measured: 47 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:       172.304   138.096   195.418
+Render:        107.947    78.605   131.411
+Total GPU:     281.234   217.968   322.175
+
+--- Throughput ---
+Avg FPS:      3
+Liquid:       320920 particles, 128x64x96 grid, 10 substeps
+Surface:      R32F density volume, 352-step raymarch, particle Spiky^2 splat 128x64x96 + adaptive 5x5x5 filter, 4-interface optics, finite pool overflow + clear PVC environment, 7 coupled rigid bodies
+Fluid rate:   11.45 MParticle-step/s  (172.304 ms compute + 107.947 ms render)
+
+--- Analysis ---
+Avg frame time:  283.238 ms
+Avg GPU time:    281.234 ms
+GPU utilisation: 99.3%
+>> GPU-bound: GPU is the bottleneck.
+==========================================================
+
+[Results] Saved as 20261017-194029-128 -> /var/mobile/Containers/Data/Application/C8B31026-1006-448F-BD0A-F6B22FC787A8/Documents/results/results.json
+
+Thermal precheck memory_sweep: nominal after 0s cooling.
+
+=== 13/14 memory_sweep: passed ===
+=== Preview memory_sweep?api=metal 0.0s ===
+
+--- GPU memory hierarchy sweep ---
+Device: Apple A15 GPU
+Method: the shipped particle update body, run by a fixed grid of 262144 threads over a working set swept from 64 KiB to 256 MiB.
+Every point moves the same 0 GiB, so the only variable is where the data is served from.
+A plateau is one level of the hierarchy; the last one is memory.
+MEMSWEEP_META	device=Apple A15 GPU	grid_threads=262144	bytes_per_particle=48	repeats=5
+
+[device_local / read_modify_write]
+  working set     particles       GB/s   stream-equiv       ms
+       64 KiB        2048       119.2          99.3     2.216
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=2048	bytes=65536	gbps=119.220	stream_equiv_gbps=99.350	ms=2.216
+      128 KiB        4096       128.7         107.2     2.054
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=4096	bytes=131072	gbps=128.671	stream_equiv_gbps=107.225	ms=2.054
+      256 KiB        8192       164.2         136.9     1.609
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=8192	bytes=262144	gbps=164.227	stream_equiv_gbps=136.856	ms=1.609
+      512 KiB       16384       182.6         152.2     1.447
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=16384	bytes=524288	gbps=182.597	stream_equiv_gbps=152.164	ms=1.447
+        1 MiB       32768       182.6         152.2     1.447
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=32768	bytes=1048576	gbps=182.587	stream_equiv_gbps=152.156	ms=1.447
+        2 MiB       65536       182.6         152.2     1.447
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=65536	bytes=2097152	gbps=182.624	stream_equiv_gbps=152.186	ms=1.447
+        4 MiB      131072       182.6         152.1     1.447
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=131072	bytes=4194304	gbps=182.576	stream_equiv_gbps=152.147	ms=1.447
+        8 MiB      262144       182.6         152.1     1.448
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=262144	bytes=8388608	gbps=182.550	stream_equiv_gbps=152.125	ms=1.448
+       16 MiB      524288       191.0         159.2     1.383
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=524288	bytes=16777216	gbps=191.006	stream_equiv_gbps=159.172	ms=1.383
+       32 MiB     1048576        93.8          78.1     2.818
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=1048576	bytes=33554432	gbps=93.769	stream_equiv_gbps=78.141	ms=2.818
+       64 MiB     2097152        46.0          38.3     5.743
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=2097152	bytes=67108864	gbps=46.007	stream_equiv_gbps=38.339	ms=5.743
+      128 MiB     4194304        25.3          21.1    10.432
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=4194304	bytes=134217728	gbps=25.329	stream_equiv_gbps=21.107	ms=10.432
+      256 MiB     8388608        20.4          17.0    12.953
+MEMSWEEP_POINT	storage=device_local	access=read_modify_write	particles=8388608	bytes=268435456	gbps=20.401	stream_equiv_gbps=17.001	ms=12.953
+
+[device_local / read_only]
+  working set     particles       GB/s   stream-equiv       ms
+       64 KiB        2048       357.8         447.3     0.750
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=2048	bytes=65536	gbps=357.834	stream_equiv_gbps=447.293	ms=0.750
+      128 KiB        4096       343.9         429.8     0.781
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=4096	bytes=131072	gbps=343.873	stream_equiv_gbps=429.841	ms=0.781
+      256 KiB        8192       334.9         418.6     0.802
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=8192	bytes=262144	gbps=334.899	stream_equiv_gbps=418.624	ms=0.802
+      512 KiB       16384       334.1         417.6     0.803
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=16384	bytes=524288	gbps=334.083	stream_equiv_gbps=417.603	ms=0.803
+        1 MiB       32768       333.5         416.9     0.805
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=32768	bytes=1048576	gbps=333.512	stream_equiv_gbps=416.890	ms=0.805
+        2 MiB       65536       333.3         416.6     0.805
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=65536	bytes=2097152	gbps=333.305	stream_equiv_gbps=416.631	ms=0.805
+        4 MiB      131072       333.7         417.1     0.804
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=131072	bytes=4194304	gbps=333.667	stream_equiv_gbps=417.084	ms=0.804
+        8 MiB      262144       332.2         415.3     0.808
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=262144	bytes=8388608	gbps=332.239	stream_equiv_gbps=415.299	ms=0.808
+       16 MiB      524288       274.4         343.0     0.978
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=524288	bytes=16777216	gbps=274.404	stream_equiv_gbps=343.005	ms=0.978
+       32 MiB     1048576        70.8          88.5     3.791
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=1048576	bytes=33554432	gbps=70.809	stream_equiv_gbps=88.512	ms=3.791
+       64 MiB     2097152        60.3          75.4     4.451
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=2097152	bytes=67108864	gbps=60.312	stream_equiv_gbps=75.390	ms=4.451
+      128 MiB     4194304        54.7          68.3     4.910
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=4194304	bytes=134217728	gbps=54.672	stream_equiv_gbps=68.340	ms=4.910
+      256 MiB     8388608        30.7          38.3     8.750
+MEMSWEEP_POINT	storage=device_local	access=read_only	particles=8388608	bytes=268435456	gbps=30.679	stream_equiv_gbps=38.349	ms=8.750
+
+[host_visible / read_modify_write]
+  working set     particles       GB/s   stream-equiv       ms
+       64 KiB        2048       254.0         211.7     1.040
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=2048	bytes=65536	gbps=253.986	stream_equiv_gbps=211.655	ms=1.040
+      128 KiB        4096       249.8         208.1     1.058
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=4096	bytes=131072	gbps=249.765	stream_equiv_gbps=208.138	ms=1.058
+      256 KiB        8192       247.3         206.1     1.068
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=8192	bytes=262144	gbps=247.330	stream_equiv_gbps=206.108	ms=1.068
+      512 KiB       16384       246.8         205.7     1.071
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=16384	bytes=524288	gbps=246.839	stream_equiv_gbps=205.699	ms=1.071
+        1 MiB       32768       246.9         205.8     1.070
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=32768	bytes=1048576	gbps=246.945	stream_equiv_gbps=205.787	ms=1.070
+        2 MiB       65536       247.6         206.3     1.067
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=65536	bytes=2097152	gbps=247.562	stream_equiv_gbps=206.301	ms=1.067
+        4 MiB      131072       247.0         205.8     1.070
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=131072	bytes=4194304	gbps=246.954	stream_equiv_gbps=205.795	ms=1.070
+        8 MiB      262144       247.0         205.8     1.070
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=262144	bytes=8388608	gbps=247.012	stream_equiv_gbps=205.843	ms=1.070
+       16 MiB      524288       243.6         203.0     1.085
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=524288	bytes=16777216	gbps=243.624	stream_equiv_gbps=203.020	ms=1.085
+       32 MiB     1048576        89.3          74.4     2.959
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=1048576	bytes=33554432	gbps=89.290	stream_equiv_gbps=74.408	ms=2.959
+       64 MiB     2097152        50.2          41.8     5.266
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=2097152	bytes=67108864	gbps=50.181	stream_equiv_gbps=41.818	ms=5.266
+      128 MiB     4194304        27.4          22.8     9.643
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=4194304	bytes=134217728	gbps=27.404	stream_equiv_gbps=22.836	ms=9.643
+      256 MiB     8388608        21.8          18.2    12.110
+MEMSWEEP_POINT	storage=host_visible	access=read_modify_write	particles=8388608	bytes=268435456	gbps=21.821	stream_equiv_gbps=18.184	ms=12.110
+
+[host_visible / read_only]
+  working set     particles       GB/s   stream-equiv       ms
+       64 KiB        2048       358.4         447.9     0.749
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=2048	bytes=65536	gbps=358.352	stream_equiv_gbps=447.940	ms=0.749
+      128 KiB        4096       342.6         428.3     0.784
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=4096	bytes=131072	gbps=342.611	stream_equiv_gbps=428.263	ms=0.784
+      256 KiB        8192       333.9         417.3     0.804
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=8192	bytes=262144	gbps=333.875	stream_equiv_gbps=417.344	ms=0.804
+      512 KiB       16384       332.9         416.2     0.806
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=16384	bytes=524288	gbps=332.943	stream_equiv_gbps=416.179	ms=0.806
+        1 MiB       32768       331.7         414.6     0.809
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=32768	bytes=1048576	gbps=331.709	stream_equiv_gbps=414.636	ms=0.809
+        2 MiB       65536       330.4         413.0     0.812
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=65536	bytes=2097152	gbps=330.433	stream_equiv_gbps=413.041	ms=0.812
+        4 MiB      131072       329.7         412.1     0.814
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=131072	bytes=4194304	gbps=329.655	stream_equiv_gbps=412.069	ms=0.814
+        8 MiB      262144       329.9         412.3     0.814
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=262144	bytes=8388608	gbps=329.875	stream_equiv_gbps=412.343	ms=0.814
+       16 MiB      524288       278.6         348.3     0.963
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=524288	bytes=16777216	gbps=278.629	stream_equiv_gbps=348.286	ms=0.963
+       32 MiB     1048576        71.2          89.0     3.770
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=1048576	bytes=33554432	gbps=71.205	stream_equiv_gbps=89.007	ms=3.770
+       64 MiB     2097152        60.3          75.4     4.452
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=2097152	bytes=67108864	gbps=60.297	stream_equiv_gbps=75.371	ms=4.452
+      128 MiB     4194304        54.9          68.6     4.890
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=4194304	bytes=134217728	gbps=54.895	stream_equiv_gbps=68.618	ms=4.890
+      256 MiB     8388608        30.2          37.7     8.899
+MEMSWEEP_POINT	storage=host_visible	access=read_only	particles=8388608	bytes=268435456	gbps=30.163	stream_equiv_gbps=37.704	ms=8.899
+
+--- Detected tiers (device-local, read-modify-write) ---
+       64 KiB -     128 KiB   123.9 GB/s
+MEMSWEEP_TIER	from_bytes=65536	to_bytes=131072	gbps=123.945
+      256 KiB -      16 MiB   181.2 GB/s
+MEMSWEEP_TIER	from_bytes=262144	to_bytes=16777216	gbps=181.167
+
+Peak on-chip read: 191.0 GB/s at 16 MiB
+Device-local memory: 20.4 GB/s read-modify-write, 30.7 GB/s read-only
+Host-visible memory: 21.8 GB/s
+  The two storage modes match, which is what unified memory looks like: there is no separate VRAM here.
+MEMSWEEP_RESULT	peak_cache_gbps=191.006	peak_cache_bytes=16777216	device_local_gbps=20.401	read_only_gbps=30.679	host_visible_gbps=21.821	tiers=2
+
+Thermal precheck gpu_cache-v2: nominal after 0s cooling.
+
+=== 14/14 gpu_cache-v2: passed ===
+=== Preview gpu_cache?api=metal 0.0s ===
+GCACHE_META	device=Apple A15 GPU	method=random_dependent_uint32_cycle	stride_bytes=128	steps=65536	repeats=5	parallel_lanes=4096	eviction_bytes=268435456	parallel_steps=8192	counter_sets=timestamp	counter_inventory=timestamp/GPUTimestamp	attribution_evidence=timing_and_checksum_only	cache_attribution=unverified	eviction_verified=0
+GCACHE_SAMPLE	condition=gpu_warm	bytes=4096	repeat=0	ms=4.709374974	value=71.859359352	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=4096	repeat=0	ms=4.073375021	value=62.154770220	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=4096	repeat=0	ms=4.164124955	value=63.539504325	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=4096	repeat=0	ms=0.527083408	value=254.642293687	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=4096	repeat=1	ms=4.195749993	value=64.022064095	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=4096	repeat=1	ms=4.072875017	value=62.147140767	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=4096	repeat=1	ms=0.526916701	value=254.722857820	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=4096	repeat=1	ms=4.071375006	value=62.124252409	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=4096	repeat=2	ms=4.082749947	value=62.297820236	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=4096	repeat=2	ms=0.527375028	value=254.501485195	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=4096	repeat=2	ms=4.070374998	value=62.108993504	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=4096	repeat=2	ms=4.072249983	value=62.137603507	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=4096	repeat=3	ms=0.526583288	value=254.884139115	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=4096	repeat=3	ms=4.127874970	value=62.986373450	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=4096	repeat=3	ms=4.190374981	value=63.940047923	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=4096	repeat=3	ms=4.077208345	value=62.213262098	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=4096	repeat=4	ms=4.070374998	value=62.108993504	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=4096	repeat=4	ms=4.074249999	value=62.168121318	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=4096	repeat=4	ms=4.073499935	value=62.156676250	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=4096	repeat=4	ms=0.531250029	value=252.645121329	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=4096	median=62.124252409	min=62.108993504	max=71.859359352	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=4096	median=62.168121318	min=62.137603507	max=64.022064095	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=4096	median=62.213262098	min=62.147140767	max=63.539504325	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=4096	median=254.642293687	min=252.645121329	max=254.884139115	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=6144	repeat=0	ms=4.078499973	value=62.232970777	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=6144	repeat=0	ms=4.080625018	value=62.265396394	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=6144	repeat=0	ms=4.077499965	value=62.217711871	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=6144	repeat=0	ms=0.537500018	value=249.707392450	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=6144	repeat=1	ms=4.216166679	value=64.333598004	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=6144	repeat=1	ms=4.073833348	value=62.161763736	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=6144	repeat=1	ms=0.533999992	value=251.344063877	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=6144	repeat=1	ms=4.071666626	value=62.128702183	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=6144	repeat=2	ms=4.075500066	value=62.187195837	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=6144	repeat=2	ms=0.533999992	value=251.344063877	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=6144	repeat=2	ms=4.073041608	value=62.149682734	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=6144	repeat=2	ms=4.173874971	value=63.688277763	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=6144	repeat=3	ms=0.533958315	value=251.363681865	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=6144	repeat=3	ms=4.073458374	value=62.156042091	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=6144	repeat=3	ms=4.076541751	value=62.203090678	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=6144	repeat=3	ms=4.092458286	value=62.445957738	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=6144	repeat=4	ms=4.071999923	value=62.133787893	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=6144	repeat=4	ms=4.075500066	value=62.187195837	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=6144	repeat=4	ms=4.073708318	value=62.159855929	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=6144	repeat=4	ms=0.534124905	value=251.285283053	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=6144	median=62.149682734	min=62.128702183	max=62.232970777	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=6144	median=62.265396394	min=62.187195837	max=64.333598004	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=6144	median=62.187195837	min=62.159855929	max=62.445957738	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=6144	median=251.344063877	min=249.707392450	max=251.363681865	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=8192	repeat=0	ms=4.075375036	value=62.185288030	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=8192	repeat=0	ms=4.079874954	value=62.253951327	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=8192	repeat=0	ms=4.083541688	value=62.309901239	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=8192	repeat=0	ms=0.527958386	value=254.220278812	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=8192	repeat=1	ms=4.079208360	value=62.243779908	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=8192	repeat=1	ms=4.077708349	value=62.220891550	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=8192	repeat=1	ms=0.527499942	value=254.441218445	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=8192	repeat=1	ms=4.260458401	value=65.009436057	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=8192	repeat=2	ms=4.239541711	value=64.690272694	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=8192	repeat=2	ms=0.526791671	value=254.783314381	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=8192	repeat=2	ms=4.072874901	value=62.147138991	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=8192	repeat=2	ms=4.079374950	value=62.246321875	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=8192	repeat=3	ms=0.527499942	value=254.441218445	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=8192	repeat=3	ms=4.074750002	value=62.175750770	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=8192	repeat=3	ms=4.158125026	value=63.447952670	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=8192	repeat=3	ms=4.078874947	value=62.238692422	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=8192	repeat=4	ms=4.076291574	value=62.199273287	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=8192	repeat=4	ms=4.081624909	value=62.280653523	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=8192	repeat=4	ms=4.079166683	value=62.243143972	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=8192	repeat=4	ms=0.526624965	value=254.863967785	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=8192	median=62.185288030	min=62.147138991	max=65.009436057	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=8192	median=62.253951327	min=62.243779908	max=63.447952670	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=8192	median=62.243143972	min=62.220891550	max=64.690272694	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=8192	median=254.441218445	min=254.220278812	max=254.863967785	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=12288	repeat=0	ms=4.075624980	value=62.189101868	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=12288	repeat=0	ms=4.083333421	value=62.306723336	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=12288	repeat=0	ms=4.078833270	value=62.238056486	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=12288	repeat=0	ms=0.534083345	value=251.304837088	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=12288	repeat=1	ms=4.085208406	value=62.335333340	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=12288	repeat=1	ms=4.082916654	value=62.300363979	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=12288	repeat=1	ms=0.535375089	value=250.698492816	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=12288	repeat=1	ms=4.080875078	value=62.269212009	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=12288	repeat=2	ms=4.112625029	value=62.753677810	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=12288	repeat=2	ms=0.536625041	value=250.114545207	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=12288	repeat=2	ms=4.080875078	value=62.269212009	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=12288	repeat=2	ms=4.082625033	value=62.295914205	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=12288	repeat=3	ms=0.533958315	value=251.363681865	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=12288	repeat=3	ms=4.075124976	value=62.181472416	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=12288	repeat=3	ms=4.081749939	value=62.282561331	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=12288	repeat=3	ms=4.078874947	value=62.238692422	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=12288	repeat=4	ms=4.078000085	value=62.225343100	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=12288	repeat=4	ms=4.085041699	value=62.332789597	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=12288	repeat=4	ms=4.087375011	value=62.368393117	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=12288	repeat=4	ms=0.534749939	value=250.991572293	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=12288	median=62.225343100	min=62.181472416	max=62.269212009	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=12288	median=62.306723336	min=62.282561331	max=62.335333340	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=12288	median=62.300363979	min=62.238056486	max=62.753677810	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=12288	median=250.991572293	min=250.114545207	max=251.363681865	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=16384	repeat=0	ms=4.082500003	value=62.294006398	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=16384	repeat=0	ms=4.104375024	value=62.627792730	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=16384	repeat=0	ms=4.093874944	value=62.467574224	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=16384	repeat=0	ms=0.527124968	value=254.622216850	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=16384	repeat=1	ms=4.087416688	value=62.369029052	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=16384	repeat=1	ms=4.082874977	value=62.299728043	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=16384	repeat=1	ms=0.527124968	value=254.622216850	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=16384	repeat=1	ms=4.078249913	value=62.229155162	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=16384	repeat=2	ms=4.092374933	value=62.444685867	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=16384	repeat=2	ms=0.527791679	value=254.300576088	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=16384	repeat=2	ms=4.123374936	value=62.917708377	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=16384	repeat=2	ms=4.273749888	value=65.212248046	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=16384	repeat=3	ms=0.528583303	value=253.919726965	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=16384	repeat=3	ms=4.142208258	value=63.205082057	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=16384	repeat=3	ms=4.162624944	value=63.516615967	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=16384	repeat=3	ms=4.460000084	value=68.054200497	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=16384	repeat=4	ms=4.078166676	value=62.227885067	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=16384	repeat=4	ms=4.088375019	value=62.383652022	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=16384	repeat=4	ms=4.082750063	value=62.297822012	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=16384	repeat=4	ms=0.527708326	value=254.340743751	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=16384	median=62.294006398	min=62.227885067	max=63.205082057	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=16384	median=62.627792730	min=62.369029052	max=65.212248046	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=16384	median=62.444685867	min=62.297822012	max=68.054200497	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=16384	median=254.340743751	min=253.919726965	max=254.622216850	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=24576	repeat=0	ms=5.728250020	value=87.406158755	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=24576	repeat=0	ms=5.738874897	value=87.568281515	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=24576	repeat=0	ms=5.738208303	value=87.558110096	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=24576	repeat=0	ms=0.775000080	value=173.184147180	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=24576	repeat=1	ms=5.738749984	value=87.566375484	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=24576	repeat=1	ms=5.732333288	value=87.468464471	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=24576	repeat=1	ms=0.774833374	value=173.221408049	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=24576	repeat=1	ms=5.718750064	value=87.261200932	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=24576	repeat=2	ms=5.725124967	value=87.358474232	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=24576	repeat=2	ms=0.773875043	value=173.435917400	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=24576	repeat=2	ms=5.719500012	value=87.272644222	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=24576	repeat=2	ms=5.739124957	value=87.572097129	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=24576	repeat=3	ms=0.774083310	value=173.389254489	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=24576	repeat=3	ms=5.724208313	value=87.344487198	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=24576	repeat=3	ms=5.738375010	value=87.560653839	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=24576	repeat=3	ms=5.737624946	value=87.549208772	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=24576	repeat=4	ms=5.724249990	value=87.345123134	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=24576	repeat=4	ms=5.736166611	value=87.526956349	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=24576	repeat=4	ms=5.724749994	value=87.352752587	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=24576	repeat=4	ms=0.773291686	value=173.566754300	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=24576	median=87.344487198	min=87.261200932	max=87.406158755	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=24576	median=87.566375484	min=87.526956349	max=87.572097129	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=24576	median=87.468464471	min=87.352752587	max=87.558110096	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=24576	median=173.389254489	min=173.184147180	max=173.566754300	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=32768	repeat=0	ms=5.723375012	value=87.331772036	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=32768	repeat=0	ms=5.741875037	value=87.614060007	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=32768	repeat=0	ms=5.738875014	value=87.568283291	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=32768	repeat=0	ms=0.768875005	value=174.563781077	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=32768	repeat=1	ms=5.750666605	value=87.748208699	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=32768	repeat=1	ms=5.743750022	value=87.642670010	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=32768	repeat=1	ms=0.772124971	value=173.829021202	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=32768	repeat=1	ms=5.791833391	value=88.376364005	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=32768	repeat=2	ms=5.742624984	value=87.625503298	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=32768	repeat=2	ms=0.768999918	value=174.535425551	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=32768	repeat=2	ms=5.788000068	value=88.317872127	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=32768	repeat=2	ms=5.868999986	value=89.553832794	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=32768	repeat=3	ms=0.768624945	value=174.620572674	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=32768	repeat=3	ms=5.805999972	value=88.592528869	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=32768	repeat=3	ms=5.914166686	value=90.243021944	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=32768	repeat=3	ms=5.737458239	value=87.546665029	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=32768	repeat=4	ms=5.729416735	value=87.423961403	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=32768	repeat=4	ms=5.752375000	value=87.774276736	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=32768	repeat=4	ms=5.756833358	value=87.842305874	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=32768	repeat=4	ms=0.770458370	value=174.205036003	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=32768	median=88.317872127	min=87.331772036	max=88.592528869	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=32768	median=87.774276736	min=87.614060007	max=90.243021944	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=32768	median=87.625503298	min=87.546665029	max=87.842305874	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=32768	median=174.535425551	min=173.829021202	max=174.620572674	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=49152	repeat=0	ms=5.748041673	value=87.708155405	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=49152	repeat=0	ms=5.773041630	value=88.089624484	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=49152	repeat=0	ms=5.759833264	value=87.888080813	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=49152	repeat=0	ms=0.771791558	value=173.904115233	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=49152	repeat=1	ms=5.774124991	value=88.106155260	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=49152	repeat=1	ms=5.758499959	value=87.867736198	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=49152	repeat=1	ms=0.771624967	value=173.941660341	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=49152	repeat=1	ms=5.811625044	value=88.678360655	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=49152	repeat=2	ms=5.774208345	value=88.107427132	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=49152	repeat=2	ms=0.774499960	value=173.295977908	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=49152	repeat=2	ms=5.739583285	value=87.579090646	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=49152	repeat=2	ms=5.806333385	value=88.597616354	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=49152	repeat=3	ms=0.772166648	value=173.819639007	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=49152	repeat=3	ms=5.728999968	value=87.417602046	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=49152	repeat=3	ms=5.763124907	value=87.938307303	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=49152	repeat=3	ms=5.749166594	value=87.725320341	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=49152	repeat=4	ms=5.731208366	value=87.451299535	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=49152	repeat=4	ms=5.770624964	value=88.052749092	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=49152	repeat=4	ms=5.759458290	value=87.882359168	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=49152	repeat=4	ms=0.773125095	value=173.604153865	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=49152	median=87.579090646	min=87.417602046	max=88.678360655	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=49152	median=88.089624484	min=87.938307303	max=88.597616354	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=49152	median=87.882359168	min=87.725320341	max=88.107427132	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=49152	median=173.819639007	min=173.295977908	max=173.941660341	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=65536	repeat=0	ms=5.749500007	value=87.730407827	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=65536	repeat=0	ms=5.792916636	value=88.392893005	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=65536	repeat=0	ms=5.781750078	value=88.222504857	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=65536	repeat=0	ms=0.793125015	value=169.226446655	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=65536	repeat=1	ms=5.805208348	value=88.580449642	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=65536	repeat=1	ms=5.763499998	value=87.944030724	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=65536	repeat=1	ms=0.796249951	value=168.562306084	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=65536	repeat=1	ms=5.741291679	value=87.605158683	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=65536	repeat=2	ms=5.783999921	value=88.256834729	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=65536	repeat=2	ms=0.797208399	value=168.359651302	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=65536	repeat=2	ms=5.753375008	value=87.789535641	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=65536	repeat=2	ms=5.795458332	value=88.431676204	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=65536	repeat=3	ms=0.797000015	value=168.403670575	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=65536	repeat=3	ms=5.755208316	value=87.817509709	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=65536	repeat=3	ms=5.786833353	value=88.300069478	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=65536	repeat=3	ms=5.782875000	value=88.239669793	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=65536	repeat=4	ms=5.749208271	value=87.725956277	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=65536	repeat=4	ms=5.790208350	value=88.351567840	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=65536	repeat=4	ms=5.780958338	value=88.210423854	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=65536	repeat=4	ms=0.793958316	value=169.048834628	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=65536	median=87.730407827	min=87.605158683	max=87.817509709	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=65536	median=88.392893005	min=88.300069478	max=88.580449642	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=65536	median=88.222504857	min=87.944030724	max=88.256834729	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=65536	median=168.562306084	min=168.359651302	max=169.226446655	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=98304	repeat=0	ms=5.769291660	value=88.032404477	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=98304	repeat=0	ms=5.832624971	value=88.998794112	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=98304	repeat=0	ms=5.814666627	value=88.724771530	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=98304	repeat=0	ms=0.796749955	value=168.456524096	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=98304	repeat=1	ms=5.859291647	value=89.405695292	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=98304	repeat=1	ms=5.840749945	value=89.122771385	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=98304	repeat=1	ms=0.802916591	value=167.162728352	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=98304	repeat=1	ms=5.756041617	value=87.830224871	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=98304	repeat=2	ms=5.786291673	value=88.291804090	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=98304	repeat=2	ms=0.801875023	value=167.379858608	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=98304	repeat=2	ms=5.772499950	value=88.081359095	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=98304	repeat=2	ms=5.837125005	value=89.067459186	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=98304	repeat=3	ms=0.805208343	value=166.686956430	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=98304	repeat=3	ms=5.772624980	value=88.083266903	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=98304	repeat=3	ms=5.836625001	value=89.059829733	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=98304	repeat=3	ms=5.829250091	value=88.947297527	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=98304	repeat=4	ms=5.784375011	value=88.262558151	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=98304	repeat=4	ms=5.836625001	value=89.059829733	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=98304	repeat=4	ms=6.076249992	value=92.716216926	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=98304	repeat=4	ms=0.789875048	value=169.922734366	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=98304	median=88.081359095	min=87.830224871	max=88.262558151	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=98304	median=89.059829733	min=88.998794112	max=89.405695292	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=98304	median=88.947297527	min=88.291804090	max=92.716216926	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=98304	median=167.379858608	min=166.686956430	max=169.922734366	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=131072	repeat=0	ms=5.771124968	value=88.060378545	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=131072	repeat=0	ms=5.857374985	value=89.376449353	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=131072	repeat=0	ms=5.855500000	value=89.347839349	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=131072	repeat=0	ms=0.989124994	value=135.693394507	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=131072	repeat=1	ms=6.096750032	value=93.029022707	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=131072	repeat=1	ms=5.880624987	value=89.731216235	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=131072	repeat=1	ms=0.970749999	value=138.261888317	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=131072	repeat=1	ms=5.815875018	value=88.743210114	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=131072	repeat=2	ms=5.822583335	value=88.845570900	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=131072	repeat=2	ms=1.081000082	value=124.160701013	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=131072	repeat=2	ms=5.797833321	value=88.467915660	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=131072	repeat=2	ms=5.879875040	value=89.719772944	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=131072	repeat=3	ms=1.327541657	value=101.102460562	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=131072	repeat=3	ms=5.790083436	value=88.349661809	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=131072	repeat=3	ms=5.881041638	value=89.737573816	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=131072	repeat=3	ms=5.847749999	value=89.229583722	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=131072	repeat=4	ms=5.811833311	value=88.681538557	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=131072	repeat=4	ms=5.889750086	value=89.870454190	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=131072	repeat=4	ms=5.864791572	value=89.489617494	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=131072	repeat=4	ms=1.169541618	value=114.760967845	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=131072	median=88.467915660	min=88.060378545	max=88.743210114	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=131072	median=89.737573816	min=89.376449353	max=93.029022707	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=131072	median=89.347839349	min=88.845570900	max=89.731216235	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=131072	median=124.160701013	min=101.102460562	max=138.261888317	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=196608	repeat=0	ms=5.797249964	value=88.459014336	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=196608	repeat=0	ms=5.961708375	value=90.968450550	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=196608	repeat=0	ms=5.919125048	value=90.318680535	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=196608	repeat=0	ms=2.296125051	value=58.454014934	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=196608	repeat=1	ms=5.927916733	value=90.452831003	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=196608	repeat=1	ms=5.928958301	value=90.468724068	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=196608	repeat=1	ms=2.326291637	value=57.696002466	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=196608	repeat=1	ms=5.853875075	value=89.323044961	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=196608	repeat=2	ms=5.946208374	value=90.731939295	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=196608	repeat=2	ms=2.333375043	value=57.520855205	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=196608	repeat=2	ms=5.829666741	value=88.953655109	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=196608	repeat=2	ms=5.893416703	value=89.926402325	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=196608	repeat=3	ms=2.299291664	value=58.373511335	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=196608	repeat=3	ms=5.852250033	value=89.298248795	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=196608	repeat=3	ms=5.974833271	value=91.168720573	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=196608	repeat=3	ms=5.952916690	value=90.834300082	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=196608	repeat=4	ms=5.866916617	value=89.522043112	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=196608	repeat=4	ms=5.964625045	value=91.012955394	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=196608	repeat=4	ms=5.971999955	value=91.125487600	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=196608	repeat=4	ms=2.443958423	value=54.918171574	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=196608	median=89.298248795	min=88.459014336	max=89.522043112	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=196608	median=90.968450550	min=89.926402325	max=91.168720573	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=196608	median=90.731939295	min=90.318680535	max=91.125487600	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=196608	median=57.696002466	min=54.918171574	max=58.454014934	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=262144	repeat=0	ms=5.858374992	value=89.391708258	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=262144	repeat=0	ms=6.505208323	value=99.261601605	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=262144	repeat=0	ms=5.984499934	value=91.316222139	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=262144	repeat=0	ms=3.617250011	value=37.104907756	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=262144	repeat=1	ms=6.009416655	value=91.696421123	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=262144	repeat=1	ms=5.975250038	value=91.175079930	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=262144	repeat=1	ms=3.523874911	value=38.088107941	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=262144	repeat=1	ms=5.896375049	value=89.971543105	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=262144	repeat=2	ms=5.983249983	value=91.297149396	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=262144	repeat=2	ms=3.569249995	value=37.603902272	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=262144	repeat=2	ms=5.889125052	value=89.860916930	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=262144	repeat=2	ms=6.331874989	value=96.616744827	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=262144	repeat=3	ms=3.462249995	value=38.766041790	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=262144	repeat=3	ms=5.828625057	value=88.937760268	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=262144	repeat=3	ms=6.000041612	value=91.553369330	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=262144	repeat=3	ms=5.974625004	value=91.165542671	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=262144	repeat=4	ms=5.872874986	value=89.612960608	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=262144	repeat=4	ms=6.035499973	value=92.094420978	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=262144	repeat=4	ms=6.014583400	value=91.775259392	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=262144	repeat=4	ms=3.625499899	value=37.020474892	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=262144	median=89.612960608	min=88.937760268	max=89.971543105	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=262144	median=92.094420978	min=91.553369330	max=99.261601605	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=262144	median=91.297149396	min=91.165542671	max=91.775259392	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=262144	median=37.603902272	min=37.020474892	max=38.766041790	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=393216	repeat=0	ms=5.976125016	value=91.188431028	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=393216	repeat=0	ms=6.167416694	value=94.107310389	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=393216	repeat=0	ms=5.976666580	value=91.196694640	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=393216	repeat=0	ms=5.636583315	value=23.811894634	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=393216	repeat=1	ms=6.217624992	value=94.873428225	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=393216	repeat=1	ms=6.095208344	value=93.005498414	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=393216	repeat=1	ms=5.627625040	value=23.849799347	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=393216	repeat=1	ms=5.956958281	value=90.895969862	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=393216	repeat=2	ms=6.107708323	value=93.196232953	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=393216	repeat=2	ms=5.639041658	value=23.801513830	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=393216	repeat=2	ms=5.967999925	value=91.064451979	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=393216	repeat=2	ms=6.391458330	value=97.525914455	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=393216	repeat=3	ms=5.653708358	value=23.739768572	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=393216	repeat=3	ms=5.954791675	value=90.862910085	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=393216	repeat=3	ms=6.202750024	value=94.646454230	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=393216	repeat=3	ms=6.125250016	value=93.463897954	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=393216	repeat=4	ms=5.974499974	value=91.163634863	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=393216	repeat=4	ms=6.200250005	value=94.608306966	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=393216	repeat=4	ms=6.141874939	value=93.717574146	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=393216	repeat=4	ms=5.610458436	value=23.922773784	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=393216	median=91.064451979	min=90.862910085	max=91.188431028	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=393216	median=94.646454230	min=94.107310389	max=97.525914455	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=393216	median=93.196232953	min=91.196694640	max=93.717574146	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=393216	median=23.811894634	min=23.739768572	max=23.922773784	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=524288	repeat=0	ms=6.043624948	value=92.218398251	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=524288	repeat=0	ms=6.549124955	value=99.931716235	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=524288	repeat=0	ms=6.205374957	value=94.686507524	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=524288	repeat=0	ms=7.585958345	value=17.692916557	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=524288	repeat=1	ms=6.377416663	value=97.311655622	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=524288	repeat=1	ms=6.233416614	value=95.114389254	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=524288	repeat=1	ms=7.589375018	value=17.684951354	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=524288	repeat=1	ms=6.038958323	value=92.147191211	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=524288	repeat=2	ms=6.238749949	value=95.195769489	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=524288	repeat=2	ms=7.585500018	value=17.693985589	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=524288	repeat=2	ms=6.058666622	value=92.447915989	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=524288	repeat=2	ms=6.307499949	value=96.244811232	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=524288	repeat=3	ms=7.668708335	value=17.501999312	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=524288	repeat=3	ms=5.945166689	value=90.716044454	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=524288	repeat=3	ms=6.301000016	value=96.145630124	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=524288	repeat=3	ms=6.101291627	value=93.098321940	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=524288	repeat=4	ms=5.941250012	value=90.656280705	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=524288	repeat=4	ms=6.362749962	value=97.087859530	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=524288	repeat=4	ms=6.244958378	value=95.290502600	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=524288	repeat=4	ms=7.582999999	value=17.699819072	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=524288	median=92.147191211	min=90.656280705	max=92.447915989	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=524288	median=97.087859530	min=96.145630124	max=99.931716235	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=524288	median=95.114389254	min=93.098321940	max=95.290502600	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=524288	median=17.692916557	min=17.501999312	max=17.699819072	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=786432	repeat=0	ms=6.223500008	value=94.963073849	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=786432	repeat=0	ms=6.728000008	value=102.661132928	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=786432	repeat=0	ms=6.558499997	value=100.074768028	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=786432	repeat=0	ms=7.629500004	value=17.591942845	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=786432	repeat=1	ms=6.717375014	value=102.499008392	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=786432	repeat=1	ms=6.765208323	value=103.228886772	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=786432	repeat=1	ms=7.624374935	value=17.603768065	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=786432	repeat=1	ms=6.217874936	value=94.877242063	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=786432	repeat=2	ms=6.723625003	value=102.594375662	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=786432	repeat=2	ms=7.640000083	value=17.567765253	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=786432	repeat=2	ms=6.230416708	value=95.068614314	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=786432	repeat=2	ms=6.636499893	value=101.264951979	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=786432	repeat=3	ms=7.730583311	value=17.361914696	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=786432	repeat=3	ms=6.199874915	value=94.602583545	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=786432	repeat=3	ms=6.725291605	value=102.619805986	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=786432	repeat=3	ms=6.859875051	value=104.673386403	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=786432	repeat=4	ms=6.228875020	value=95.045090021	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=786432	repeat=4	ms=6.733916583	value=102.751412712	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=786432	repeat=4	ms=6.783791701	value=103.512446614	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=786432	repeat=4	ms=7.643791731	value=17.559050891	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=786432	median=94.963073849	min=94.602583545	max=95.068614314	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=786432	median=102.619805986	min=101.264951979	max=102.751412712	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=786432	median=103.228886772	min=100.074768028	max=104.673386403	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=786432	median=17.567765253	min=17.361914696	max=17.603768065	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=1048576	repeat=0	ms=6.983666681	value=106.562296764	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=1048576	repeat=0	ms=7.454250008	value=113.742828489	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=1048576	repeat=0	ms=9.072249988	value=138.431548891	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=1048576	repeat=0	ms=7.587875007	value=17.688447409	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=1048576	repeat=1	ms=7.592416601	value=115.851083393	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=1048576	repeat=1	ms=8.855999913	value=135.131834611	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=1048576	repeat=1	ms=7.607833366	value=17.642043608	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=1048576	repeat=1	ms=6.988416659	value=106.634775676	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=1048576	repeat=2	ms=9.701124975	value=148.027419655	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=1048576	repeat=2	ms=7.599500008	value=17.661389284	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=1048576	repeat=2	ms=6.946416688	value=105.993906985	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=1048576	repeat=2	ms=7.586874999	value=115.766525255	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=1048576	repeat=3	ms=7.619541604	value=17.614934726	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=1048576	repeat=3	ms=6.988374982	value=106.634139740	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=1048576	repeat=3	ms=7.620708318	value=116.282780738	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=1048576	repeat=3	ms=8.921416593	value=136.130013928	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=1048576	repeat=4	ms=7.039083284	value=107.407887029	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=1048576	repeat=4	ms=7.768125040	value=118.532181403	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=1048576	repeat=4	ms=8.937666658	value=136.377970250	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=1048576	repeat=4	ms=7.614374976	value=17.626887096	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=1048576	median=106.634139740	min=105.993906985	max=107.407887029	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=1048576	median=115.851083393	min=113.742828489	max=118.532181403	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=1048576	median=136.377970250	min=135.131834611	max=148.027419655	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=1048576	median=17.642043608	min=17.614934726	max=17.688447409	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=1572864	repeat=0	ms=10.999208433	value=167.834601328	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=1572864	repeat=0	ms=11.889791698	value=181.423823520	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=1572864	repeat=0	ms=15.815749997	value=241.329193074	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=1572864	repeat=0	ms=18.681666697	value=7.184462188	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=1572864	repeat=1	ms=11.884833337	value=181.348164929	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=1572864	repeat=1	ms=16.453166725	value=251.055400469	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=1572864	repeat=1	ms=19.909208291	value=6.741489970	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=1572864	repeat=1	ms=11.030375026	value=168.310165805	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=1572864	repeat=2	ms=16.109375050	value=245.809555821	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=1572864	repeat=2	ms=19.188291626	value=6.994772157	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=1572864	repeat=2	ms=10.867625009	value=165.826797627	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=1572864	repeat=2	ms=12.086999952	value=184.432982664	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=1572864	repeat=3	ms=20.007083309	value=6.708510477	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=1572864	repeat=3	ms=10.875708307	value=165.950138964	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=1572864	repeat=3	ms=11.947000050	value=182.296753692	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=1572864	repeat=3	ms=16.802375088	value=256.383897224	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=1572864	repeat=4	ms=10.996833327	value=167.798360096	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=1572864	repeat=4	ms=12.117416598	value=184.897103850	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=1572864	repeat=4	ms=16.091250000	value=245.532989496	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=1572864	repeat=4	ms=19.159625052	value=7.005237714	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=1572864	median=167.798360096	min=165.826797627	max=168.310165805	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=1572864	median=182.296753692	min=181.348164929	max=184.897103850	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=1572864	median=245.809555821	min=241.329193074	max=256.383897224	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=1572864	median=6.994772157	min=6.708510477	max=7.184462188	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=2097152	repeat=0	ms=10.873125051	value=165.910721606	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=2097152	repeat=0	ms=12.452708324	value=190.013249579	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=2097152	repeat=0	ms=16.412291676	value=250.431696713	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=2097152	repeat=0	ms=27.668166673	value=4.850980175	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=2097152	repeat=1	ms=12.259958312	value=187.072117797	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=2097152	repeat=1	ms=16.460874933	value=251.173018384	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=2097152	repeat=1	ms=27.640999993	value=4.855747912	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=2097152	repeat=1	ms=10.859249975	value=165.699004739	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=2097152	repeat=2	ms=16.425375012	value=250.631332577	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=2097152	repeat=2	ms=27.904333314	value=4.809924197	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=2097152	repeat=2	ms=10.867749923	value=165.828703658	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=2097152	repeat=2	ms=12.198583339	value=186.135610036	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=2097152	repeat=3	ms=28.456000029	value=4.716675846	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=2097152	repeat=3	ms=10.876499931	value=165.962218190	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=2097152	repeat=3	ms=12.037833338	value=183.682759669	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=2097152	repeat=3	ms=16.333583277	value=249.230701854	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=2097152	repeat=4	ms=11.017166660	value=168.108622134	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=2097152	repeat=4	ms=12.325958349	value=188.079198438	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=2097152	repeat=4	ms=15.968708438	value=243.663153654	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=2097152	repeat=4	ms=27.607666678	value=4.861610710	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=2097152	median=165.910721606	min=165.699004739	max=168.108622134	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=2097152	median=187.072117797	min=183.682759669	max=190.013249579	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=2097152	median=250.431696713	min=243.663153654	max=251.173018384	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=2097152	median=4.850980175	min=4.716675846	max=4.861610710	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=3145728	repeat=0	ms=10.884999996	value=166.091918885	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=3145728	repeat=0	ms=13.037333265	value=198.933918227	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=3145728	repeat=0	ms=16.551458277	value=252.555210523	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=3145728	repeat=0	ms=30.948375002	value=4.336826344	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=3145728	repeat=1	ms=13.186375028	value=201.208115058	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=3145728	repeat=1	ms=16.511166701	value=251.940409868	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=3145728	repeat=1	ms=30.995458364	value=4.330238528	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=3145728	repeat=1	ms=11.274833349	value=172.040303781	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=3145728	repeat=2	ms=16.008916660	value=244.276682437	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=3145728	repeat=2	ms=30.942999991	value=4.337579680	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=3145728	repeat=2	ms=11.243124958	value=171.556472139	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=3145728	repeat=2	ms=13.186291675	value=201.206843187	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=3145728	repeat=3	ms=31.154333381	value=4.308155991	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=3145728	repeat=3	ms=11.264625005	value=171.884536826	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=3145728	repeat=3	ms=13.031416689	value=198.843638444	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=3145728	repeat=3	ms=16.257666633	value=248.072305808	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=3145728	repeat=4	ms=11.485583382	value=175.256094082	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=3145728	repeat=4	ms=13.245916693	value=202.116648751	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=3145728	repeat=4	ms=17.319166684	value=264.269511163	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=3145728	repeat=4	ms=31.109249918	value=4.314399362	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=3145728	median=171.884536826	min=166.091918885	max=175.256094082	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=3145728	median=201.206843187	min=198.843638444	max=202.116648751	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=3145728	median=251.940409868	min=244.276682437	max=264.269511163	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=3145728	median=4.330238528	min=4.308155991	max=4.337579680	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=4194304	repeat=0	ms=11.617791606	value=177.273431490	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=4194304	repeat=0	ms=14.044999960	value=214.309691771	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=4194304	repeat=0	ms=15.876083286	value=242.249805993	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=4194304	repeat=0	ms=31.892625033	value=4.208425235	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=4194304	repeat=1	ms=13.197125052	value=201.372147401	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=4194304	repeat=1	ms=16.311374959	value=248.891829813	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=4194304	repeat=1	ms=31.894374988	value=4.208194331	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=4194304	repeat=1	ms=11.547124945	value=176.195143808	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=4194304	repeat=2	ms=15.075624920	value=230.035780646	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=4194304	repeat=2	ms=31.971999910	value=4.197977242	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=4194304	repeat=2	ms=10.922875023	value=166.669845925	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=4194304	repeat=2	ms=13.585833251	value=207.303363808	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=4194304	repeat=3	ms=32.068166649	value=4.185388253	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=4194304	repeat=3	ms=11.590750073	value=176.860810441	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=4194304	repeat=3	ms=13.978875009	value=213.300705099	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=4194304	repeat=3	ms=17.424624995	value=265.878677297	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=4194304	repeat=4	ms=10.915375082	value=166.555405912	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=4194304	repeat=4	ms=13.665833394	value=208.524069123	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=4194304	repeat=4	ms=16.798749915	value=256.328581472	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=4194304	repeat=4	ms=31.904500094	value=4.206858832	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=4194304	median=176.195143808	min=166.555405912	max=177.273431490	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=4194304	median=208.524069123	min=201.372147401	max=214.309691771	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=4194304	median=248.891829813	min=230.035780646	max=265.878677297	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=4194304	median=4.206858832	min=4.185388253	max=4.208425235	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=6291456	repeat=0	ms=11.822208413	value=180.392584426	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=6291456	repeat=0	ms=14.793124981	value=225.725173664	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=6291456	repeat=0	ms=14.477125020	value=220.903396908	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=6291456	repeat=0	ms=33.160125022	value=4.047563992	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=6291456	repeat=1	ms=15.450499952	value=235.755919675	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=6291456	repeat=1	ms=18.856583280	value=287.728626702	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=6291456	repeat=1	ms=33.202999970	value=4.042337383	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=6291456	repeat=1	ms=11.759499903	value=179.435728498	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=6291456	repeat=2	ms=17.553624930	value=267.847060087	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=6291456	repeat=2	ms=33.172250027	value=4.046084540	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=6291456	repeat=2	ms=11.222541681	value=171.242396263	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=6291456	repeat=2	ms=15.144375036	value=231.084824165	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=6291456	repeat=3	ms=33.231416717	value=4.038880712	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=6291456	repeat=3	ms=11.909208377	value=181.720098524	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=6291456	repeat=3	ms=15.191250015	value=231.800079575	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=6291456	repeat=3	ms=16.178124934	value=246.858595787	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=6291456	repeat=4	ms=11.903458275	value=181.632358931	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=6291456	repeat=4	ms=15.002791653	value=228.924433188	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=6291456	repeat=4	ms=14.311249950	value=218.372344207	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=6291456	repeat=4	ms=33.145125024	value=4.049395738	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=6291456	median=180.392584426	min=171.242396263	max=181.720098524	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=6291456	median=231.084824165	min=225.725173664	max=235.755919675	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=6291456	median=246.858595787	min=218.372344207	max=287.728626702	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=6291456	median=4.046084540	min=4.038880712	max=4.049395738	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=8388608	repeat=0	ms=12.621000060	value=192.581177672	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=8388608	repeat=0	ms=15.836250037	value=241.641998855	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=8388608	repeat=0	ms=19.932208234	value=304.141360985	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=8388608	repeat=0	ms=33.628833364	value=3.991150289	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=8388608	repeat=1	ms=16.502375016	value=251.806259399	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=8388608	repeat=1	ms=16.942875111	value=258.527757424	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=8388608	repeat=1	ms=33.502124948	value=4.006245222	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=8388608	repeat=1	ms=11.692499975	value=178.413390728	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=8388608	repeat=2	ms=18.253500108	value=278.526307795	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=8388608	repeat=2	ms=33.665875089	value=3.986758926	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=8388608	repeat=2	ms=12.485166662	value=190.508524511	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=8388608	repeat=2	ms=17.401749967	value=265.529632060	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=8388608	repeat=3	ms=33.654124942	value=3.988150880	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=8388608	repeat=3	ms=12.866791571	value=196.331658486	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=8388608	repeat=3	ms=16.601208365	value=253.314336618	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=8388608	repeat=3	ms=19.893750083	value=303.554536174	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=8388608	repeat=4	ms=12.324666721	value=188.059489759	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=8388608	repeat=4	ms=15.211166698	value=232.103984033	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=8388608	repeat=4	ms=16.898875008	value=257.856369146	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=8388608	repeat=4	ms=33.509041648	value=4.005418281	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=8388608	median=190.508524511	min=178.413390728	max=196.331658486	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=8388608	median=251.806259399	min=232.103984033	max=265.529632060	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=8388608	median=278.526307795	min=257.856369146	max=304.141360985	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=8388608	median=3.991150289	min=3.986758926	max=4.006245222	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=12582912	repeat=0	ms=13.177874964	value=201.078414364	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=12582912	repeat=0	ms=16.530333320	value=252.232869258	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=12582912	repeat=0	ms=14.056249987	value=214.481353566	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=12582912	repeat=0	ms=36.202333402	value=3.707433068	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=12582912	repeat=1	ms=16.444250010	value=250.919342193	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=12582912	repeat=1	ms=20.071125007	value=306.261062732	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=12582912	repeat=1	ms=33.789874986	value=3.972128576	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=12582912	repeat=1	ms=14.129625051	value=215.600968190	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=12582912	repeat=2	ms=20.040374948	value=305.791854061	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=12582912	repeat=2	ms=33.852625056	value=3.964765739	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=12582912	repeat=2	ms=13.895458309	value=212.027867263	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=12582912	repeat=2	ms=15.664875042	value=239.027023952	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=12582912	repeat=3	ms=35.473249969	value=3.783632120	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=12582912	repeat=3	ms=13.495416730	value=205.923717189	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=12582912	repeat=3	ms=15.464208322	value=235.965092799	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=12582912	repeat=3	ms=17.525249976	value=267.414092647	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=12582912	repeat=4	ms=13.777249958	value=210.224150976	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=12582912	repeat=4	ms=17.017249949	value=259.662627400	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=12582912	repeat=4	ms=20.546708256	value=313.517887207	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=12582912	repeat=4	ms=33.831833280	value=3.967202335	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=12582912	median=210.224150976	min=201.078414364	max=215.600968190	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=12582912	median=250.919342193	min=235.965092799	max=259.662627400	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=12582912	median=305.791854061	min=214.481353566	max=313.517887207	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=12582912	median=3.964765739	min=3.707433068	max=3.972128576	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=16777216	repeat=0	ms=15.208541648	value=232.063928962	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=16777216	repeat=0	ms=16.483083367	value=251.511892202	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=16777216	repeat=0	ms=19.917499973	value=303.916930733	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=16777216	repeat=0	ms=50.513750059	value=2.657053334	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=16777216	repeat=1	ms=16.288708430	value=248.545966031	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=16777216	repeat=1	ms=17.019333318	value=259.694417082	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=16777216	repeat=1	ms=40.312499972	value=3.329432015	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=16777216	repeat=1	ms=15.667125001	value=239.061355600	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=16777216	repeat=2	ms=20.780958235	value=317.092258229	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=16777216	repeat=2	ms=47.782249982	value=2.808945331	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=16777216	repeat=2	ms=15.351166716	value=234.240214780	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=16777216	repeat=2	ms=16.592000029	value=253.173828568	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=16777216	repeat=3	ms=51.841708366	value=2.588991224	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=16777216	repeat=3	ms=15.694458387	value=239.478429975	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=16777216	repeat=3	ms=16.760291648	value=255.741754884	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=16777216	repeat=3	ms=18.077791668	value=275.845209785	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=16777216	repeat=4	ms=14.755791752	value=225.155513789	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=16777216	repeat=4	ms=15.395791736	value=234.921138542	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=16777216	repeat=4	ms=16.292916727	value=248.610179554	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=16777216	repeat=4	ms=49.907958251	value=2.689305127	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=16777216	median=234.240214780	min=225.155513789	max=239.478429975	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=16777216	median=251.511892202	min=234.921138542	max=255.741754884	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=16777216	median=275.845209785	min=248.610179554	max=317.092258229	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=16777216	median=2.689305127	min=2.588991224	max=3.329432015	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=25165824	repeat=0	ms=15.601916704	value=238.066355962	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=25165824	repeat=0	ms=16.230624984	value=247.659682984	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=25165824	repeat=0	ms=19.209416583	value=293.112435656	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=25165824	repeat=0	ms=69.255999988	value=1.937994225	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=25165824	repeat=1	ms=15.622874955	value=238.386153484	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=25165824	repeat=1	ms=19.888874958	value=303.480147679	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=25165824	repeat=1	ms=68.818333442	value=1.950319359	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=25165824	repeat=1	ms=15.992749948	value=244.029997987	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=25165824	repeat=2	ms=15.656958334	value=238.906224581	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=25165824	repeat=2	ms=71.921541705	value=1.866168672	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=25165824	repeat=2	ms=16.493499978	value=251.670837059	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=25165824	repeat=2	ms=16.592249973	value=253.177642406	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=25165824	repeat=3	ms=72.903541615	value=1.841031657	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=25165824	repeat=3	ms=16.389250057	value=250.080109510	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=25165824	repeat=3	ms=16.748750000	value=255.565643315	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=25165824	repeat=3	ms=17.026916612	value=259.810128966	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=25165824	repeat=4	ms=16.618499998	value=253.578186005	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=25165824	repeat=4	ms=16.518916702	value=252.058665495	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=25165824	repeat=4	ms=19.602000015	value=299.102783430	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=25165824	repeat=4	ms=73.857083335	value=1.817262772	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=25165824	median=250.080109510	min=238.066355962	max=253.578186005	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=25165824	median=252.058665495	min=238.386153484	max=255.565643315	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=25165824	median=293.112435656	min=238.906224581	max=303.480147679	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=25165824	median=1.866168672	min=1.817262772	max=1.950319359	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=33554432	repeat=0	ms=15.827000025	value=241.500854870	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=33554432	repeat=0	ms=16.489124973	value=251.604079793	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=33554432	repeat=0	ms=19.567375071	value=298.574448721	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=33554432	repeat=0	ms=76.866916614	value=1.746105268	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=33554432	repeat=1	ms=16.381750000	value=249.965667720	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=33554432	repeat=1	ms=19.388500019	value=295.845032028	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=33554432	repeat=1	ms=77.966750017	value=1.721473936	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=33554432	repeat=1	ms=15.759124886	value=240.465162449	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=33554432	repeat=2	ms=17.479624948	value=266.717909980	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=33554432	repeat=2	ms=76.811874984	value=1.747356487	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=33554432	repeat=2	ms=15.909375041	value=242.757797864	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=33554432	repeat=2	ms=16.189249931	value=247.028349776	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=33554432	repeat=3	ms=76.636499958	value=1.751355139	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=33554432	repeat=3	ms=15.727916616	value=239.988962036	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=33554432	repeat=3	ms=16.527416650	value=252.188364414	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=33554432	repeat=3	ms=18.921250012	value=288.715362728	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=33554432	repeat=4	ms=16.778208315	value=256.015141531	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=33554432	repeat=4	ms=16.256541712	value=248.055140872	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=33554432	repeat=4	ms=18.495958298	value=282.225926185	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=33554432	repeat=4	ms=77.239833307	value=1.737675009	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=33554432	median=241.500854870	min=239.988962036	max=256.015141531	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=33554432	median=249.965667720	min=247.028349776	max=252.188364414	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=33554432	median=288.715362728	min=266.717909980	max=298.574448721	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=33554432	median=1.746105268	min=1.721473936	max=1.751355139	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=50331648	repeat=0	ms=22.351791617	value=341.061273446	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=50331648	repeat=0	ms=21.942749969	value=334.819793224	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=50331648	repeat=0	ms=26.312666712	value=401.499431035	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=50331648	repeat=0	ms=84.578500013	value=1.586901257	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=50331648	repeat=1	ms=18.833958311	value=287.383397080	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=50331648	repeat=1	ms=21.971374983	value=335.256576278	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=50331648	repeat=1	ms=79.926166683	value=1.679271427	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=50331648	repeat=1	ms=17.856374965	value=272.466659013	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=50331648	repeat=2	ms=17.816625070	value=271.860123746	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=50331648	repeat=2	ms=80.359041691	value=1.670225592	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=50331648	repeat=2	ms=18.482458312	value=282.019932740	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=50331648	repeat=2	ms=17.717791605	value=270.352044751	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=50331648	repeat=3	ms=79.324249993	value=1.692013829	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=50331648	repeat=3	ms=18.421083339	value=281.083424980	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=50331648	repeat=3	ms=18.364125048	value=280.214310422	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=50331648	repeat=3	ms=17.435083282	value=266.038258090	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=50331648	repeat=4	ms=18.421291723	value=281.086604659	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=50331648	repeat=4	ms=18.178333296	value=277.379353264	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=50331648	repeat=4	ms=19.257666660	value=293.848673394	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=50331648	repeat=4	ms=79.937250004	value=1.679038596	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=50331648	median=281.086604659	min=272.466659013	max=341.061273446	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=50331648	median=280.214310422	min=270.352044751	max=334.819793224	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=50331648	median=293.848673394	min=266.038258090	max=401.499431035	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=50331648	median=1.679038596	min=1.586901257	max=1.692013829	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=67108864	repeat=0	ms=22.249875008	value=339.506149416	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=67108864	repeat=0	ms=22.147250012	value=337.940216255	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=67108864	repeat=0	ms=25.254291599	value=385.349908427	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=67108864	repeat=0	ms=84.202750004	value=1.593982714	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=67108864	repeat=1	ms=19.246999989	value=293.685912922	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=67108864	repeat=1	ms=22.888416774	value=349.249523524	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=67108864	repeat=1	ms=83.032583236	value=1.616446493	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=67108864	repeat=1	ms=19.283375004	value=294.240951604	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=67108864	repeat=2	ms=18.987625022	value=289.728165015	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=67108864	repeat=2	ms=81.973458291	value=1.637331531	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=67108864	repeat=2	ms=19.329624949	value=294.946669754	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=67108864	repeat=2	ms=19.387000008	value=295.822143670	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=67108864	repeat=3	ms=81.937791663	value=1.638044244	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=67108864	repeat=3	ms=18.495416734	value=282.217662573	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=67108864	repeat=3	ms=18.291500048	value=279.106140866	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=67108864	repeat=3	ms=23.267333396	value=355.031332333	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=67108864	repeat=4	ms=19.669208326	value=300.128300879	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=67108864	repeat=4	ms=19.551499980	value=298.332214044	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=67108864	repeat=4	ms=21.175958333	value=323.119481394	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=67108864	repeat=4	ms=80.996958422	value=1.657071211	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=67108864	median=294.946669754	min=282.217662573	max=339.506149416	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=67108864	median=295.822143670	min=279.106140866	max=337.940216255	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=67108864	median=349.249523524	min=289.728165015	max=385.349908427	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=67108864	median=1.637331531	min=1.593982714	max=1.657071211	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=100663296	repeat=0	ms=25.215249974	value=384.754180516	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=100663296	repeat=0	ms=20.221750019	value=308.559418016	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=100663296	repeat=0	ms=23.925375077	value=365.072251540	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=100663296	repeat=0	ms=92.074916698	value=1.457701324	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=100663296	repeat=1	ms=19.402416656	value=296.057383053	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=100663296	repeat=1	ms=23.791374988	value=363.027572448	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=100663296	repeat=1	ms=92.045083409	value=1.458173789	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=100663296	repeat=1	ms=20.448916708	value=312.025706606	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=100663296	repeat=2	ms=23.384999949	value=356.826781456	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=100663296	repeat=2	ms=92.387249926	value=1.452773279	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=100663296	repeat=2	ms=20.215500030	value=308.464050747	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=100663296	repeat=2	ms=19.732416607	value=301.092782706	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=100663296	repeat=3	ms=92.242416576	value=1.455054334	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=100663296	repeat=3	ms=20.259625046	value=309.137345056	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=100663296	repeat=3	ms=19.385083346	value=295.792897731	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=100663296	repeat=3	ms=23.175125010	value=353.624344029	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=100663296	repeat=4	ms=20.509833354	value=312.955220849	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=100663296	repeat=4	ms=20.409499994	value=311.424255273	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=100663296	repeat=4	ms=20.291749970	value=309.627532502	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=100663296	repeat=4	ms=91.942999978	value=1.459792785	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=100663296	median=312.025706606	min=308.464050747	max=384.754180516	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=100663296	median=301.092782706	min=295.792897731	max=311.424255273	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=100663296	median=356.826781456	min=309.627532502	max=365.072251540	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=100663296	median=1.457701324	min=1.452773279	max=1.459792785	unit=GB/s_payload
+GCACHE_SAMPLE	condition=gpu_warm	bytes=134217728	repeat=0	ms=21.635125042	value=330.125809356	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=134217728	repeat=0	ms=20.257125027	value=309.099197793	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=134217728	repeat=0	ms=24.072916713	value=367.323558237	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=134217728	repeat=0	ms=102.386833401	value=1.310888554	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=134217728	repeat=1	ms=21.115833428	value=322.202048153	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=134217728	repeat=1	ms=20.355291665	value=310.597101816	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=134217728	repeat=1	ms=102.258416591	value=1.312534777	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=134217728	repeat=1	ms=20.654499996	value=315.162658637	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=134217728	repeat=2	ms=21.252291743	value=324.284236797	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=134217728	repeat=2	ms=102.272500051	value=1.312354034	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=134217728	repeat=2	ms=20.226666704	value=308.634440671	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=134217728	repeat=2	ms=20.561374957	value=313.741683300	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=134217728	repeat=3	ms=102.334249998	value=1.311562141	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=134217728	repeat=3	ms=20.462625078	value=312.234879729	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=134217728	repeat=3	ms=20.391833270	value=311.154682464	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=134217728	repeat=3	ms=22.622375051	value=345.190048989	checksum_valid=1
+GCACHE_SAMPLE	condition=gpu_warm	bytes=134217728	repeat=4	ms=20.665291697	value=315.327326916	checksum_valid=1
+GCACHE_SAMPLE	condition=eviction_pass	bytes=134217728	repeat=4	ms=20.599458367	value=314.322790018	checksum_valid=1
+GCACHE_SAMPLE	condition=cpu_warm	bytes=134217728	repeat=4	ms=21.168999956	value=323.013304993	checksum_valid=1
+GCACHE_SAMPLE	condition=parallel_gpu_warm	bytes=134217728	repeat=4	ms=102.217499982	value=1.313060171	checksum_valid=1
+GCACHE_POINT	condition=gpu_warm	bytes=134217728	median=315.162658637	min=308.634440671	max=330.125809356	unit=ns/load
+GCACHE_POINT	condition=eviction_pass	bytes=134217728	median=313.741683300	min=309.099197793	max=322.202048153	unit=ns/load
+GCACHE_POINT	condition=cpu_warm	bytes=134217728	median=324.284236797	min=310.597101816	max=367.323558237	unit=ns/load
+GCACHE_POINT	condition=parallel_gpu_warm	bytes=134217728	median=1.312354034	min=1.310888554	max=1.313060171	unit=GB/s_payload
+GCACHE_SAVED	id=20261017-194109-335-metal-cache
+GCACHE_DONE	points=124	checksum_valid=1	duration=36.777039750	cache_attribution=unverified

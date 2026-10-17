@@ -1,6 +1,31 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
-> **2026-10-17晚：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** A15新版Vulkan内存29.803 GB/s平台及八个粒子同步计时组合已补完，31项有当前合同覆盖、历史141条；1M纯计算5.41%下降提示保留。11英寸iPad仍需新版内存，12.9英寸iPad另缺五个粒子新计时组合。
+> **2026-10-17晚：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** A15 Vulkan九项必补及额外一次14项Metal确认已完成，31项有当前合同覆盖、历史155条。Vulkan1M/Metal64K纯计算波动提示保留；Metal内存仍是预览。11英寸iPad仍需新版内存，12.9英寸iPad另缺五个粒子新计时组合。
+
+## 2026-10-17 A15 native Metal one-pass confirmation completed
+
+- User requested a quick run if inexpensive. Reused exact installed signed
+  Release package, no rebuild/installation or production changes. One14-job
+  native Metal subset through the existing suite,236seconds,13passed/1review,
+  zero execution failures; all thermal0->0. Not a full31-job UI-button test.
+- 1M/4M/16M render/headless scores within-0.3%..+2.1%; Burn+0.1%..+0.3%, memory
+  preview30.917->30.679GB/s(-0.77%), cache318.438->315.163ns(-1.03%).
+- 64K render-14.50%, compute0.094->0.110ms but totalGPU4.464->4.525/frame
+  16.737->16.733ms, not a14.5% frame slowdown.64K headless56.627(+6.93%)
+  nevertheless drops18.18% within run=>review, stable52.011/CV0.69%. Headless
+  rows now carry accurate command_buffer_gpu_time/version; old rows retained.
+- Liquid12.931->11.451(-11.45%), sim154.141->172.304ms/render94.045->107.947,
+  GPU/frame time consistent. Same version/config, cause unconfirmed; no direct
+  frequency evidence. Retain actual differences; no repeated runs to pick scores.
+- Production Swift confirms14 rows/requests/groups/quality,52Metal memory
+  points and124cache points. Memory remains preview,plateauVerified0; cache
+  checksumValid1/attributionunverified, not formal DRAM or independently mapped
+  L2/L3/SLC. Current31-job coverage/33selected rows includes2stability flags
+  (this64K and prior Vulkan1M); CPU/Vulkan not rerun.
+- History141->155, all141old rows and other canonical/liveMac histories intact.
+  A15 current index advanced to155-row export. App PID48051 stopped; can unplug.
+  RawDocuments/native log/manifest/comparison/curveCSVs/verification:
+  out/test-results/a15-metal-confirm-20261017/report.md. Other devices unchanged.
 
 ## 2026-10-17 A15 current-contract follow-ups completed
 

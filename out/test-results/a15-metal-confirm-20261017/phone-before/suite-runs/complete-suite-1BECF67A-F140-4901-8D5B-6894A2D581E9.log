@@ -1,0 +1,80 @@
+iOS complete suite complete-suite-1BECF67A-F140-4901-8D5B-6894A2D581E9
+Started: 2026-10-17T08:28:39Z
+
+Thermal precheck vulkan/stream-16777216: nominal after 0s cooling.
+
+=== 1/1 vulkan/stream-16777216: passed ===
+=== Preview stream?particles=16777216&vsync=0&api=vulkan&coverage=fixed 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Apple A15 GPU (Integrated GPU)
+Selected GPU [0]: Apple A15 GPU  |  Driver: 0.2.2210
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+[Vulkan] Render extent: 1280x720
+Created particle buffer (device-local via staging): 16777216 particles
+[Profiling] Timestamp queries enabled (period = 1 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK particles require per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 45.613 ms | Render: 324.587 ms | Total: 370.200 ms | FPS: 6 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 37.983 ms | Render: 381.341 ms | Total: 419.324 ms | FPS: 2 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 36.390 ms | Render: 376.381 ms | Total: 412.771 ms | FPS: 2 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 38.705 ms | Render: 382.462 ms | Total: 421.167 ms | FPS: 2 | T: 2.0 s (warm-up)
+[GPU Timing] Compute: 36.867 ms | Render: 383.715 ms | Total: 420.582 ms | FPS: 2 | T: 2.4 s (warm-up)
+[GPU Timing] Compute: 36.517 ms | Render: 387.748 ms | Total: 424.265 ms | FPS: 2 | T: 3.7 s
+[GPU Timing] Compute: 36.500 ms | Render: 398.957 ms | Total: 435.457 ms | FPS: 2 | T: 5.0 s
+[GPU Timing] Compute: 37.094 ms | Render: 400.174 ms | Total: 437.267 ms | FPS: 2 | T: 6.3 s
+[GPU Timing] Compute: 36.428 ms | Render: 400.962 ms | Total: 437.390 ms | FPS: 2 | T: 7.6 s
+[GPU Timing] Compute: 36.615 ms | Render: 400.338 ms | Total: 436.953 ms | FPS: 2 | T: 8.9 s
+[GPU Timing] Compute: 36.521 ms | Render: 393.242 ms | Total: 429.763 ms | FPS: 2 | T: 10.2 s
+[GPU Timing] Compute: 36.074 ms | Render: 373.664 ms | Total: 409.737 ms | FPS: 2 | T: 11.5 s
+[GPU Timing] Compute: 36.750 ms | Render: 368.135 ms | Total: 404.884 ms | FPS: 2 | T: 12.7 s
+[GPU Timing] Compute: 36.435 ms | Render: 382.742 ms | Total: 419.177 ms | FPS: 2 | T: 13.9 s
+[GPU Timing] Compute: 36.889 ms | Render: 391.923 ms | Total: 428.812 ms | FPS: 2 | T: 15.2 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A15 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    16777216 (Extreme)
+Buffer:       512.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.2 s (warmup: 2.0 s, measured: 31 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        36.533    35.618    38.605
+Render:        390.183   366.576   403.292
+Total GPU:     426.716   404.151   439.769
+
+--- Throughput ---
+Avg FPS:      2
+Particles:    16777216
+Working set:  512.00 MiB
+VRAM rate:   18.37 GB/s  (36.533 ms compute)
+
+--- Analysis ---
+Avg frame time:  426.930 ms
+Avg GPU time:    426.716 ms
+GPU utilisation: 99.9%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      10 x 1s
+Stable window: 18.37 GB/s  (CV 0.77%)
+Throughput:   early vs late mean change (drop positive) -0.3%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261017-192856-326 -> /var/mobile/Containers/Data/Application/C8B31026-1006-448F-BD0A-F6B22FC787A8/Documents/results/results.json

@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "2026-10-17T08:26:36Z",
+  "id" : "complete-suite-AC93F220-EAA5-40A9-A54F-BB0638BBBE38",
+  "jobs" : [
+    {
+      "error" : "运行中吞吐下降超过 5%",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-17T08:26:36Z",
+      "id" : "vulkan\/stream_headless-1048576",
+      "request" : "stream_headless?particles=1048576&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261017-192635-978"
+      ],
+      "startedAt" : "2026-10-17T08:26:20Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan (MoltenVK) · Particle 1048576 · Compute"
+    }
+  ],
+  "startedAt" : "2026-10-17T08:26:20Z",
+  "status" : "review"
+}

@@ -5,12 +5,14 @@
 [完整原始数据、曲线和限制](out/test-results/macos-measurement-fixes-20261016/report.md)。
 目录名 20261016 是本轮开始日期，最终复核在 17 日完成。
 
-**A15于17日晚完成全部当前必补9项：**新512MiB Vulkan内存平台
-**29.803 GB/s**、83点/38次校验通过，另补八个Vulkan粒子同步计时组合。
-本轮8 passed、1 review（1M纯计算下降5.41%）、0执行失败；全清单**31/31项有覆盖，
-选用33条成绩**。CPU沿用已通过的大核/小核/全核147.000/89.287/634.868 MWork/s。
-历史132→141条，原132条不变，App已停止，可拔线。见
-[最新A15结果、波动及完整记录](out/test-results/a15-app-budget-completion-20261017/report.md)。
+**A15于17日晚完成当前必补9项，随后按要求确认14项Metal，最新历史155条。**
+512MiB Vulkan内存平台**29.803 GB/s**、83点/38次校验通过，八个Vulkan粒子同步
+计时组合也补齐；该轮8 passed/1 review。随后一次Metal确认用时236秒，
+14/14完成、13 passed/1 review。全清单**31/31项有覆盖、选用33条成绩**，
+当前两项稳定性提示为Vulkan1M纯计算下降5.41%、Metal64K纯计算下降18.18%。
+CPU沿用147.000/89.287/634.868 MWork/s。历史132→141→155条，旧记录不变，
+App已停止，可拔线。见[最新Metal确认与新旧比较](out/test-results/a15-metal-confirm-20261017/report.md)、
+[此前九项必补结果](out/test-results/a15-app-budget-completion-20261017/report.md)。
 此前256MiB/28.842参考记录仍原样保留，不再作为新版正式平台。
 
 **iOS Vulkan固定上限已修复并真机验收：**默认目标512 MiB，按实时App余量及设备
@@ -192,6 +194,13 @@ A15 真机完整点击一次“一键测试全部项目”的验收仍是可选�
 见[逐设备合同核对](out/test-results/a15-app-budget-completion-20261017/other-devices-particle-contract-audit.json)。
 
 ### Metal 内存状态补充：已有预览曲线，正式平台未验证
+
+17日晚A15额外确认14项Metal，13 passed/1 review；1M/4M/16M粒子约−0.3%至+2.1%，
+Burn约+0.1%至+0.3%，基本接近原记录。64K绘制−14.50%、流体−11.45%保留，
+具体原因未确认；热状态均0→0，不直接认定热降频，不为挑分反复测。
+A15 Metal内存参考30.679 GB/s、52曲线点，缓存诊断校验通过、124点，
+**仍为`memoryPlateauVerified=0`及未归属缓存**。这次重复现有诊断没有建立正式Metal
+平台；仅执行一轮14项，App已停止。见[本轮原始数据](out/test-results/a15-metal-confirm-20261017/report.md)。
 
 上面的V3平台验收仅指Vulkan，不代表原生Metal也已确认正式内存平台。
 两台A12X都有Metal内存记录：iPad8,7为59.904、iPad8,1为49.821 GB/s，版本均为

@@ -1,0 +1,36 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "copy",
+      "from",
+      "--device",
+      "00008110-00164D591485401E",
+      "--domain-type",
+      "appDataContainer",
+      "--domain-identifier",
+      "com.fairchild.Mangekyo",
+      "--source",
+      "Documents",
+      "--destination",
+      "out/test-results/a15-metal-confirm-20261017/phone-before",
+      "--json-output",
+      "out/test-results/a15-metal-confirm-20261017/backup-device.json"
+    ],
+    "commandType" : "devicectl.device.copy.from",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "destination" : "file:///Users/fairchild/VSCode%20Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-metal-confirm-20261017/phone-before",
+    "deviceIdentifier" : "45159977-97BF-543B-A3BE-3FFC567B816E",
+    "domain" : "appDataContainer",
+    "domainIdentifier" : "com.fairchild.Mangekyo",
+    "source" : "Documents"
+  }
+}

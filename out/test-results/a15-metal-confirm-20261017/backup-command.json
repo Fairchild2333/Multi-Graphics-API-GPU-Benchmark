@@ -1,0 +1,19 @@
+[
+  "xcrun",
+  "devicectl",
+  "device",
+  "copy",
+  "from",
+  "--device",
+  "00008110-00164D591485401E",
+  "--domain-type",
+  "appDataContainer",
+  "--domain-identifier",
+  "com.fairchild.Mangekyo",
+  "--source",
+  "Documents",
+  "--destination",
+  "out/test-results/a15-metal-confirm-20261017/phone-before",
+  "--json-output",
+  "out/test-results/a15-metal-confirm-20261017/backup-device.json"
+]

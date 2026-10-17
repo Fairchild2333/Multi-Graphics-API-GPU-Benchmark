@@ -1,0 +1,40 @@
+{
+  "finishedAt" : "2026-10-14T05:19:12Z",
+  "id" : "complete-suite-648BC359-EBA8-408F-A809-7D0040D0A00F",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-14T05:18:25Z",
+      "id" : "stream-65536",
+      "request" : "stream?particles=65536&vsync=0&api=metal&coverage=fixed",
+      "resultIDs" : [
+        "20261014-161825-548"
+      ],
+      "startedAt" : "2026-10-14T05:18:10Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 65536 · Render"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 3,
+      "finishedAt" : "2026-10-14T05:19:12Z",
+      "id" : "cpu_compute",
+      "request" : "gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2",
+      "resultIDs" : [
+        "20261014-161911-989-cpu-single-performance",
+        "20261014-161912-021-cpu-single-efficiency",
+        "20261014-161912-040-cpu-multi"
+      ],
+      "startedAt" : "2026-10-14T05:18:26Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "CPU Compute · Performance + Efficiency + All Cores"
+    }
+  ],
+  "startedAt" : "2026-10-14T05:18:10Z",
+  "status" : "passed"
+}

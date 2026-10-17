@@ -1,0 +1,316 @@
+{
+  "reusedFrom": "out/test-results/a15-app-budget-completion-20261017/package-provenance.json",
+  "noRebuildOrInstallNeeded": true,
+  "package": {
+    "baseCommit": "addfaee2e0b1031558f48d315ae962a0abc76e4d",
+    "physicalDevice": "iPhone14,2 / A15",
+    "osVersion": "iOS 27.0.1",
+    "app": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-a15-app-budget/Build/Products/Release-iphoneos/Mangekyo.app",
+    "appBinarySha256": "2ad2c3dc032318e0558ecd693a8e00c40fa68530040e57034495359d3d534b68",
+    "sources": [
+      {
+        "path": "src/cpu_scheduling.h",
+        "sha256": "29dbb43da134eee245d057516cc60cdf8cde97c080618cb34971ef59a5dff9b2"
+      },
+      {
+        "path": "src/cpu_cli.cpp",
+        "sha256": "339ada7956c02edadb5df7c88756a3aa20d632e9d8912fd757b8c1f30796b0d0"
+      },
+      {
+        "path": "src/benchmark_results.cpp",
+        "sha256": "d387b4c18446564d0260ad78b639190329d5c7161d8b2c3720568dc15f7228b9"
+      },
+      {
+        "path": "src/vulkan_membw.cpp",
+        "sha256": "894fd21cec3dbdf259932bed7c9b0fb92b7fc1c38d357a9d83b2b51f681fbab2"
+      },
+      {
+        "path": "src/vulkan_membw.h",
+        "sha256": "2a1da6d16e00b6bbd93cbe1ee3ac9692ac76475b9fcd5fbb41064363c9719e55"
+      },
+      {
+        "path": "src/vulkan_membw_results.cpp",
+        "sha256": "cbdbf1ce567e81b8e52dab7e5be38883fa53707a10bd86b1fa7d51dc961e7fe5"
+      },
+      {
+        "path": "shaders/membw_read.comp",
+        "sha256": "9cecef2e3172adfc75e11fcab3108b327ef49247ce7fe83e4c7c8e3ca4dbe22e"
+      },
+      {
+        "path": "ios-gui/Mangekyo/Engine/BenchEngine.swift",
+        "sha256": "acec007653e1863ec7ba2a2215aa28e2ab04b85f0dff5bb13e881798b2848bf6"
+      },
+      {
+        "path": "ios-gui/Mangekyo/Models/MobileBenchmark.swift",
+        "sha256": "d9e38cea3a393843bfaab5a421f0be3f5992fa799d1d7e602149a8b26a366358"
+      },
+      {
+        "path": "ios-gui/Mangekyo/Models/BenchResult.swift",
+        "sha256": "728460e2a6b205d3615e272d32641906c8107c5ff68596fb96262b770ac498b8"
+      },
+      {
+        "path": "src/ios_engine_host.cpp",
+        "sha256": "2ea51bc9f6b87bd5cfd1a57eac3a2c5bc596d3cb2a98693d3c3a1214e9593777"
+      },
+      {
+        "path": "src/vulkan_backend.cpp",
+        "sha256": "3876e45368935510df38b158a6fc1557263f75417ba0f27923c24f388e9980b8"
+      },
+      {
+        "path": "src/cpu_benchmark.cpp",
+        "sha256": "a0fb43039b44ce900fe9b0966fb473a36800e307e9651842d6bcb72e4ae23818"
+      },
+      {
+        "path": "shaders/particle.vert",
+        "sha256": "ae72b0ec14379b90d3c8aa297e6f68ee94f7994d5ab0116786c02be5ab40c049"
+      },
+      {
+        "path": "shaders/particle.frag",
+        "sha256": "3e037793cb5ffaa000731fe9cba8ff8639bf4d479c4ab9917c365a45b9df6ecd"
+      },
+      {
+        "path": "shaders/membw_copy.comp",
+        "sha256": "95b493b76bf044a15082e47ec9ebff6f7664ae06e594de9e6c4e780f492d272b"
+      },
+      {
+        "path": "shaders/membw_write.comp",
+        "sha256": "1fb32eb51dc9da839e5d0ef7b39525b5c6c6653d74d1acb06387cd0e6da4ada9"
+      },
+      {
+        "path": "shaders/membw_l1.comp",
+        "sha256": "8165f64751f0f67534b6c4792e07ddae76aa480774a08a2bc869d6a02a2eb092"
+      },
+      {
+        "path": "shaders/membw_check.comp",
+        "sha256": "7d762032818e18d50ed4e4203c21adaea08d1ca486b417be69a96b2eed428831"
+      }
+    ],
+    "engineSha256": "eaec1bf33f199af33ef30b90eeb61f18dd4c377f3f06e05fb45a1e47cae49a30",
+    "spv": [
+      {
+        "name": "cinematic_liquid_render.frag.spv",
+        "sha256": "ccae6ba954402a0dcf6339529201fd622629b85ad852efdc50d933372eaa9f66"
+      },
+      {
+        "name": "cinematic_liquid_render.vert.spv",
+        "sha256": "44bb8b1a91cec4fdec8bef37e67daefc52096875ddaf5af0f9737965e411dfb1"
+      },
+      {
+        "name": "cinematic_liquid_render_v2.frag.spv",
+        "sha256": "425e903d1060388fa798436c6a1b286f34bda559e78362063899454079b0ddba"
+      },
+      {
+        "name": "cinematic_liquid_render_v2.vert.spv",
+        "sha256": "44bb8b1a91cec4fdec8bef37e67daefc52096875ddaf5af0f9737965e411dfb1"
+      },
+      {
+        "name": "cinematic_liquid_resolve.comp.spv",
+        "sha256": "e94e887b218ba0b65dd5b81b63c7e0c28886dacc229dd5de31406670cc2cfd2a"
+      },
+      {
+        "name": "cinematic_liquid_resolve_v2.comp.spv",
+        "sha256": "df94b4d6f29fbcb42c68fa23e03cf21d40f877f564ec6ff887a66b02f70e041f"
+      },
+      {
+        "name": "cinematic_liquid_rigid_integrate_v2.comp.spv",
+        "sha256": "214679d519d762de5c68f5a1ff446b5cc6a1b638db3ff8d00bb5148765719091"
+      },
+      {
+        "name": "cinematic_liquid_sph_density.comp.spv",
+        "sha256": "289c9ad896fbda775a836e1b87b6eafb8f84567f18ca2447d0f511e4affef772"
+      },
+      {
+        "name": "cinematic_liquid_sph_external.comp.spv",
+        "sha256": "a0dcf73e2d07755259846fcc9070eda51a8e98e940cd4d580acfb9183060226c"
+      },
+      {
+        "name": "cinematic_liquid_sph_hash_count.comp.spv",
+        "sha256": "0b7ccc85cf27d6ba3dfad8dc5b6da647763bb9b72f9fe8e5ad7ad961e490b737"
+      },
+      {
+        "name": "cinematic_liquid_sph_integrate.comp.spv",
+        "sha256": "e7257fb863e29cf30df193f42449abbdc9bce286964e855bc5b26eee6df08d8a"
+      },
+      {
+        "name": "cinematic_liquid_sph_pressure.comp.spv",
+        "sha256": "f23d141ecabcdb41d81d7550fdc3f46e7a1a463e952eb917f84fe0014312f09f"
+      },
+      {
+        "name": "cinematic_liquid_sph_scan_add.comp.spv",
+        "sha256": "fd913db84a060f20b28a00a59e7f7834a0c94209e650a0aa2555be37ae191ea8"
+      },
+      {
+        "name": "cinematic_liquid_sph_scan_block.comp.spv",
+        "sha256": "a2cf0d47c6be4ac0531c0a4240652c9a664521940ed42635729aba2d4d7ae519"
+      },
+      {
+        "name": "cinematic_liquid_sph_scatter.comp.spv",
+        "sha256": "c213f76222a76653944dad8aa21d5c83af43284cbd123ac192d2eb2f8bc9c17b"
+      },
+      {
+        "name": "cinematic_liquid_sph_viscosity.comp.spv",
+        "sha256": "11fd3f1260006f7bc45fa1d9025daceba90f033e774e9da0b725104c21d8bee7"
+      },
+      {
+        "name": "cinematic_liquid_surface_clear_v2.comp.spv",
+        "sha256": "f236520ab122d7fa2c1e54ab5e3fdb47cf80c1109a48b809b5f39e2c1c9aea22"
+      },
+      {
+        "name": "cinematic_liquid_surface_resolve_v2.comp.spv",
+        "sha256": "b516ad6319368437db2e006423ba290c9c70af1783c72ab2f54ead04baf0848e"
+      },
+      {
+        "name": "cinematic_liquid_surface_splat_v2.comp.spv",
+        "sha256": "be3c93c6d90e5bc93c3279216edf70c884faff8935ddbab646c0a7611a807412"
+      },
+      {
+        "name": "compute.comp.spv",
+        "sha256": "ad35df498b1527825de6a0a5443036732be94caf4c88bf069f234311cd79a4c9"
+      },
+      {
+        "name": "fluid_advect.comp.spv",
+        "sha256": "03d2f843e7148fa9d535d20ed19f084cc2807d2991ac6faa46255d39114b0a7e"
+      },
+      {
+        "name": "fluid_divergence.comp.spv",
+        "sha256": "4c7cac010052350c22f63f89c43c8df65bb6d48af61efbc480b6d8eba99416ed"
+      },
+      {
+        "name": "fluid_jacobi.comp.spv",
+        "sha256": "ada78139c0dfa1562fe6d2c797ee4e48a920865f9131b2bfd6c3a21d1b564453"
+      },
+      {
+        "name": "fluid_render.frag.spv",
+        "sha256": "ace3ce2281fe0e7dcbbe9c1fceb4d8d8442db14787fc61046060523a5cecd839"
+      },
+      {
+        "name": "fluid_render.vert.spv",
+        "sha256": "44bb8b1a91cec4fdec8bef37e67daefc52096875ddaf5af0f9737965e411dfb1"
+      },
+      {
+        "name": "fluid_subtract.comp.spv",
+        "sha256": "63ce3b1d4e22143fd78f03d9e322770703dd5bcc8ef6dac8ee375d810da8878a"
+      },
+      {
+        "name": "fractal.frag.spv",
+        "sha256": "25b667f5edf354be5f25dc100241ed4ba41aa3198415085df83840904e8b1bd7"
+      },
+      {
+        "name": "fractal.vert.spv",
+        "sha256": "44bb8b1a91cec4fdec8bef37e67daefc52096875ddaf5af0f9737965e411dfb1"
+      },
+      {
+        "name": "gpu_burn.frag.spv",
+        "sha256": "8e6138fdde8a10b9dfc52f835f1474a7fb8ff063b55dcaedc194f75822a67bb7"
+      },
+      {
+        "name": "gpu_stress.frag.spv",
+        "sha256": "1dabebaf83db4c680a3b9d63c95a48f0e43b415696201f931678e2c93274772f"
+      },
+      {
+        "name": "membw_check.comp.spv",
+        "sha256": "7a917bd806526615d957698db109ce2449a1577308570b28252236977c2003cb"
+      },
+      {
+        "name": "membw_copy.comp.spv",
+        "sha256": "c205e48a5d8ea79114192e93136f4dded5404e97da1baa76351a039e52054d69"
+      },
+      {
+        "name": "membw_l1.comp.spv",
+        "sha256": "5b2054cfb8c6e3e80049fd84ea0776fdff0db2c341d8b49a1292162d585ccd43"
+      },
+      {
+        "name": "membw_read.comp.spv",
+        "sha256": "099d88caac16181d66a6883ad64a7ce04e0b3b562502228ce4e787920d6aa728"
+      },
+      {
+        "name": "membw_write.comp.spv",
+        "sha256": "22e8f0112f2406e84cea35e1cb9ee51d57fb6993d1a2e276cd5291b452146537"
+      },
+      {
+        "name": "mls_mpm_clear_grid.comp.spv",
+        "sha256": "7d7866242f3defa650b5d0600ef1576327fb62de6bd9f68a8ca1874d8811ec8d"
+      },
+      {
+        "name": "mls_mpm_clear_grid_v2.comp.spv",
+        "sha256": "1231d7f6a1922646660198e8a71212d990c11ab6ad18eb996be750f241e3d7bc"
+      },
+      {
+        "name": "mls_mpm_g2p.comp.spv",
+        "sha256": "331f64c8625bd23a0a2bc97e59768c04f841e24d8beed0d756a27be2980cc384"
+      },
+      {
+        "name": "mls_mpm_g2p_v2.comp.spv",
+        "sha256": "45dd91a9014deebc910513216d6db297a779f618b3c4c8b4abd74c39964478d3"
+      },
+      {
+        "name": "mls_mpm_grid_update.comp.spv",
+        "sha256": "ec5948918558244d971829ce8be4e1ca2ff5e668c48be11cafbbdf95cd50d1b7"
+      },
+      {
+        "name": "mls_mpm_grid_update_v2.comp.spv",
+        "sha256": "2fe7b60d34168d67c1c9944586011ec664c506efeccea6fd11e93df36bfbdebb"
+      },
+      {
+        "name": "mls_mpm_p2g_density_stress.comp.spv",
+        "sha256": "5d9c6601efec49fc16710195a21b7ddfdede11d2b07833d86a12823a895b2290"
+      },
+      {
+        "name": "mls_mpm_p2g_density_stress_v2.comp.spv",
+        "sha256": "e22f998a250b279437f6432b87becfc6bd69c2bd7c70dd04041b5ca1f85ce1e1"
+      },
+      {
+        "name": "mls_mpm_p2g_mass_momentum.comp.spv",
+        "sha256": "9948ffa8c17b7d68e22f12784e3ad4342546f2c06d62a2b5da7e57987c3a0e34"
+      },
+      {
+        "name": "mls_mpm_p2g_mass_momentum_v2.comp.spv",
+        "sha256": "f79b21bb84e5f1990887d497450f2f25787c447efc1fd08e7d2d045ad0a14c41"
+      },
+      {
+        "name": "nbody.comp.spv",
+        "sha256": "9ba46e77b29c7913c6a22dcdd1f477c6aa699b418c830da1dc5d5728d3f72d1b"
+      },
+      {
+        "name": "particle.frag.spv",
+        "sha256": "5f556541ddd6fbed2e76022a98d4f35176a407097219c36ba41ae377db21ca42"
+      },
+      {
+        "name": "particle.vert.spv",
+        "sha256": "85f8ba5b402ac11b3bbcfcf13e142f0f4442792f4f6f9b6cd3eaaa5edd9eed74"
+      },
+      {
+        "name": "render3d.frag.spv",
+        "sha256": "fa6362d3b622785733143262708f83a86daa0cf741416207e31e0ed2d82911b2"
+      },
+      {
+        "name": "render3d.vert.spv",
+        "sha256": "f313f699db4123f1404fabea25682fbf29abace51bd3294005db1a3f22250ad2"
+      },
+      {
+        "name": "synthpeak_fp16.comp.spv",
+        "sha256": "d08b26c945cc553d33bd6269310bbb1883b019f5d83c8837669ff82e7404da8a"
+      },
+      {
+        "name": "synthpeak_fp32.comp.spv",
+        "sha256": "79b8f1798f50a3a3505401c794ee86bc16b2af362f10e010bfb75513ff74bf14"
+      },
+      {
+        "name": "synthpeak_fp64.comp.spv",
+        "sha256": "30d31d427a0ffe71cfade39a6dc4933f6ec269646e3069e4951fe2f9544d948c"
+      },
+      {
+        "name": "synthpeak_int32.comp.spv",
+        "sha256": "c9cd744fb90e172d6de53e1c0479ae7580f3d2562c563639ca9db7fd18f54fb0"
+      },
+      {
+        "name": "volumetric.frag.spv",
+        "sha256": "98886b6061e21a04f338a854f60844078bab047885ab151fa78d41a3a141b295"
+      },
+      {
+        "name": "volumetric.vert.spv",
+        "sha256": "44bb8b1a91cec4fdec8bef37e67daefc52096875ddaf5af0f9737965e411dfb1"
+      }
+    ]
+  }
+}

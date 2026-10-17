@@ -9,7 +9,7 @@
 | 设备 | 型号 | 历史条数 | 原始文件 | 说明 |
 | --- | --- | ---: | --- | --- |
 | Mac M4 Pro | Mac16,8 | 171 | [最新主历史](m4-single-core-check-20261017/results-after.json) | 最新单核确认大核216.737、后台小核76.322；原169条不变，V3内存与粒子修复和诊断对照均保留。 |
-| iPhone 13 Pro / A15 | iPhone14,2 | 141 | [results.json](a15-app-budget-completion-20261017/phone-final/results/results.json) | 新512MiB平台29.803、83点/38校验及八个粒子同步计时组合齐全；1M纯计算5.41%下降提示保留。31项有覆盖，原132条不变。 |
+| iPhone 13 Pro / A15 | iPhone14,2 | 155 | [results.json](a15-metal-confirm-20261017/phone-final/results/results.json) | Vulkan九项必补后额外一次14项Metal确认完成；31项有覆盖。Metal/Vulkan各一项纯计算波动提示保留，Metal内存30.679仍预览；原141条不变。 |
 | 12.9-inch iPad Pro / A12X | iPad8,7 | 74 | [results.json](ios-vulkan-memory-platform-fix-20261017/phone-final/results/results.json) | 新预算版本512 MiB读取平台56.657，83点/38次校验通过；原73条含53.932参考和旧Metal16M稳定性提示保留。 |
 | 11-inch iPad Pro / A12X | iPad8,1 | 51 | [results.json](ipad81-design-review-20261016/phone-final/results/results.json) | 51 条历史；当前完整选用 31 项/33 条来自不同真实轮次。 |
 | iPhone 14 Pro Max / A16 | iPhone15,3 | 24 | [results.json](a16-full-suite-20261016/phone-final/results/results.json) | 24 条历史=22 条完整成绩+2 条中断诊断。19 passed、3 review；CPU 尚未测。 |
@@ -35,7 +35,8 @@ Mac 最新修复见 [报告、曲线、原生日志及跨平台构建验证](mac
 - 原始历史包含旧口径、对照、取消和未稳定轮次，不把所有 JSON 递归合并为当前成绩榜。
 - Mac 本轮 14 条新增记录中 10 条通过、3 条旧查询对照保留 review、1 条小容量负向复核正确保留 preview/review。默认内存三轮读取 245.897/245.908/250.419 GB/s。新版身份为 `membw_v3_streaming`，旧 V1/V2 不自动变成新版设备成绩。
 - A16 实际进度及 3 项警告数值见 [设备记录](../../docs/a16-partial-run-20261016.md)。
-- [A15最新九项补测与全清单核对](a15-app-budget-completion-20261017/report.md)：512MiB内存平台29.803通过，另补八个粒子同步计时合同。8 passed/1 review/0执行失败，31/31项有当前匹配记录，历史141条；完整JSON、83点内存曲线及逐秒粒子时间线齐全。原CPU与其他稳定记录保留。
+- [A15最新Metal全套确认](a15-metal-confirm-20261017/report.md)：一次14项用时236秒、13 passed/1 review/0失败，新增14条到155条。多数接近原成绩，64K绘制−14.50%、流体−11.45%、64K纯计算18.18%下降均保留。内存52点/缓存124点及原始日志完整，Metal平台仍未验证，App已停止。
+- [A15此前九项必补与全清单核对](a15-app-budget-completion-20261017/report.md)：512MiB内存平台29.803通过，另补八个粒子同步计时合同。8 passed/1 review/0执行失败，31/31项有当前匹配记录，历史当时141条；完整JSON、83点内存曲线及逐秒粒子时间线齐全。原CPU与其他稳定记录保留。
 - [A15此前两项真机补测](a15-v3-cpu-confirm-20261017/report.md)：CPU通过，旧256MiB V3内存77点/34次校验，仅参考未达平台；旧记录未改写，平台待办已由上述新一轮完成。
 - [M4 GPU Burn最新诊断](metal-math-diagnosis-20261017/report.md)：固定步数简化片元达到计算的约98%；完整着色器约50%额外FS调用，discard控制支持可见性执行为主要因素。正式成绩未改，不能把无discard的遮挡剔除速率当新分数。
 - [M4独立单核研究](m4-single-core-research-20261017/report.md)：本机Geekbench 6.7.1为3675/22129，另做编译目标和分支对照。约6%的参考单核差距尚未归因；独立基准及控制程序均未混入项目主历史。

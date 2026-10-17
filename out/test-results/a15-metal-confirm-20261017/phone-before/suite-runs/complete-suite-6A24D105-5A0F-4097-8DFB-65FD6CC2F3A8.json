@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "2026-10-17T08:25:04Z",
+  "id" : "complete-suite-6A24D105-5A0F-4097-8DFB-65FD6CC2F3A8",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-17T08:25:03Z",
+      "id" : "vulkan\/stream_headless-65536",
+      "request" : "stream_headless?particles=65536&vsync=0&api=vulkan",
+      "resultIDs" : [
+        "20261017-192503-385"
+      ],
+      "startedAt" : "2026-10-17T08:24:48Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan (MoltenVK) · Particle 65536 · Compute"
+    }
+  ],
+  "startedAt" : "2026-10-17T08:24:48Z",
+  "status" : "passed"
+}

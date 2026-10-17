@@ -1,0 +1,18 @@
+[
+  "xcrun",
+  "devicectl",
+  "device",
+  "process",
+  "launch",
+  "--device",
+  "00008110-00164D591485401E",
+  "--terminate-existing",
+  "--console",
+  "--json-output",
+  "out/test-results/a15-metal-confirm-20261017/launch.json",
+  "com.fairchild.Mangekyo",
+  "--ios-allow-translated-api",
+  "--ios-complete-suite",
+  "--ios-suite-jobs",
+  "stream-65536,stream_headless-65536,stream-1048576,stream_headless-1048576,stream-4194304,stream_headless-4194304,stream-16777216,stream_headless-16777216,gpu_burn-16,gpu_burn-64,gpu_burn-256,cinematic_liquid,memory_sweep,gpu_cache-v2"
+]
