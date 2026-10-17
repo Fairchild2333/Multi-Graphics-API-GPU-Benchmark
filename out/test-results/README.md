@@ -22,6 +22,14 @@ Mac 最新修复见 [报告、曲线、原生日志及跨平台构建验证](mac
 原 149 条快照仍保留在 [macos-history-20261016/results/results.json](macos-history-20261016/results/results.json)。
 仓库根目录的 [旧多设备历史](../../results/results.json) 也保留原样；其中包含更早的测试合同。
 
+## Apple Watch CPU 模拟器流程记录
+
+[watchOS CPU 实现与验收](watchos-cpu-implementation-20261017/report.md)：
+独立App的一键、默认时长、取消、历史重启、六条曲线均通过模拟器实际点击验证；
+真机架构包编译通过但尚未接入手表。标准配置保存108曲线点和页面／存储子项，
+平台未确认时保留review。15条累计模拟器记录均标为宿主Mac成绩，**不是Watch速度，
+不加入上方五台真机的比较**。JSON、原始日志、曲线CSV及导出截图均在该目录。
+
 ## 如何解读
 
 - 原始历史包含旧口径、对照、取消和未稳定轮次，不把所有 JSON 递归合并为当前成绩榜。

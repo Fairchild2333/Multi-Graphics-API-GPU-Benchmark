@@ -1,0 +1,35 @@
+{
+  "BuildMachineOSBuild": "26A434",
+  "CFBundleDevelopmentRegion": "en",
+  "CFBundleDisplayName": "Mangekyo CPU",
+  "CFBundleExecutable": "MangekyoWatch",
+  "CFBundleIcons": {
+    "CFBundlePrimaryIcon": {
+      "CFBundleIconName": "AppIcon"
+    }
+  },
+  "CFBundleIdentifier": "com.fairchild.Mangekyo.cpu.watchkitapp",
+  "CFBundleInfoDictionaryVersion": "6.0",
+  "CFBundleName": "MangekyoWatch",
+  "CFBundlePackageType": "APPL",
+  "CFBundleShortVersionString": "0.2.6",
+  "CFBundleSupportedPlatforms": [
+    "WatchOS"
+  ],
+  "CFBundleVersion": "1",
+  "DTCompiler": "com.apple.compilers.llvm.clang.1_0",
+  "DTPlatformBuild": "24R360",
+  "DTPlatformName": "watchos",
+  "DTPlatformVersion": "27.0",
+  "DTSDKBuild": "24R360",
+  "DTSDKName": "watchos27.0",
+  "DTXcode": "2710",
+  "DTXcodeBuild": "27A9275",
+  "MinimumOSVersion": "10.0",
+  "MinimumOSVersion~ipad": "9.0",
+  "UIDeviceFamily": [
+    4
+  ],
+  "WKApplication": true,
+  "WKWatchOnly": true
+}

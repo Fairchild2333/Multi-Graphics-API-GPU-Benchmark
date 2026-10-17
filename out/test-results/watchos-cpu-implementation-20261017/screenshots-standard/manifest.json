@@ -1,0 +1,17 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "E31D5516-5EAD-4FC9-A400-AA6C781ED488",
+        "deviceName" : "Mangekyo Watch CPU 20261017",
+        "exportedFileName" : "6C931E30-8A12-4E8F-8E3A-92ECC99D0011.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "watch-standard-completed_0_27AD1A5F-3A19-452A-8058-C883DB2DD7D7.png",
+        "timestamp" : 1792224749.112
+      }
+    ],
+    "testIdentifier" : "WatchFlowTests/testStandardProfileCompletes()",
+    "testIdentifierURL" : "test://com.apple.xcode/MangekyoWatch/MangekyoWatchUITests/WatchFlowTests/testStandardProfileCompletes"
+  }
+]

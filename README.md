@@ -20,6 +20,11 @@ two active product goals, verified blockers, and the next implementation slice.
 See [`docs/TODO.md`](docs/TODO.md) and [`docs/roadmap.md`](docs/roadmap.md) for
 older specialised plans and historical context.
 See [`docs/macos-notes.md`](docs/macos-notes.md) for macOS platform notes and limitations.
+An independent **watchOS 10+ CPU app** is available in
+[`watch-gui/`](watch-gui/README.md), with one-button compute, cache/memory,
+page-first-touch and storage tests, history and curves. Its Watch device and
+simulator targets compile; simulator results are explicitly host-CPU references.
+Physical Apple Watch performance acceptance remains pending.
 
 ## Supported Graphics APIs
 

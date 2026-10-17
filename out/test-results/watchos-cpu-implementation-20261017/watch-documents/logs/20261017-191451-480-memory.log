@@ -1,0 +1,198 @@
+WATCH_PROFILE	profile=smoke	core_placement=scheduler_managed_unclassified
+WATCH_MEMORY_BUDGET	available_app_bytes=0	max_dataset_bytes=1048576	page_region_cap_bytes=8388608
+
+========== CPU Memory Bandwidth Sweep (cpu_membw_v1) ==========
+CPU:       Apple M4 Pro (14 cores / 14 threads)
+Vectors:   NEON, 16-byte loads and stores
+Caches:    L1d 128 KiB per core | L2 16 MiB shared by 5 cores | L4 not present
+Memory:    48.0 GiB installed
+Sweep:     4 KiB - 1 MiB on one thread; 4 KiB - 256 KiB per thread on 14 threads
+Timing:    wall clock, 1 warm-up + 3 measured samples of 1 ms per point, median reported
+CPUMEM_META	name=Apple M4 Pro	vector=NEON	vector_bytes=16	physical_count=14	logical_count=14	core_type=auto	efficiency_policy=background	all_threads=14	reference_logical_index=1	class_count=1	cache_source=sysctl
+CPUMEM_CLASS	rank=0	mode=single	name=Unclassified	cores=14	reference_logical_index=1	cache_source=sysctl
+CPUMEM_CACHE	class=0	level=1	size_bytes=131072	shared_cores=1	shared_threads=1	line_bytes=128
+CPUMEM_CACHE	class=0	level=2	size_bytes=16777216	shared_cores=5	shared_threads=5	line_bytes=128
+
+[single] one thread on logical processor 1
+    Data set       Read      Write       Copy   Write NT    Copy NT  Zero fill   GB/s (median)
+       4 KiB      129.2       92.0      205.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=4096	threads=1	median_gbps=129.159	best_gbps=130.227	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=4096	threads=1	median_gbps=91.952	best_gbps=101.791	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=4096	threads=1	median_gbps=205.523	best_gbps=227.420	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.0357
+       8 KiB      111.4      112.1      226.1          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=8192	threads=1	median_gbps=111.401	best_gbps=122.257	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=8192	threads=1	median_gbps=112.124	best_gbps=120.781	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=8192	threads=1	median_gbps=226.123	best_gbps=244.355	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.0714
+      16 KiB      120.1      112.6      223.3          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=16384	threads=1	median_gbps=120.122	best_gbps=138.569	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=16384	threads=1	median_gbps=112.604	best_gbps=128.512	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=16384	threads=1	median_gbps=223.330	best_gbps=224.866	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.1071
+      24 KiB      136.7      123.1      244.6          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=24576	threads=1	median_gbps=136.684	best_gbps=141.996	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=24576	threads=1	median_gbps=123.103	best_gbps=139.167	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=24576	threads=1	median_gbps=244.636	best_gbps=249.183	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.1429
+      32 KiB      133.6      137.8      231.1          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=32768	threads=1	median_gbps=133.573	best_gbps=133.927	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=32768	threads=1	median_gbps=137.755	best_gbps=141.543	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=32768	threads=1	median_gbps=231.138	best_gbps=256.871	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.1786
+      48 KiB      139.6      136.0      242.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=49152	threads=1	median_gbps=139.621	best_gbps=142.693	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=49152	threads=1	median_gbps=135.999	best_gbps=141.072	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=49152	threads=1	median_gbps=242.530	best_gbps=262.140	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.2143
+      64 KiB      136.5      140.6      239.4          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=65536	threads=1	median_gbps=136.544	best_gbps=137.356	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=65536	threads=1	median_gbps=140.646	best_gbps=142.498	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=65536	threads=1	median_gbps=239.352	best_gbps=249.996	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.2500
+      96 KiB      127.5      128.0      246.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=98304	threads=1	median_gbps=127.513	best_gbps=129.635	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=98304	threads=1	median_gbps=128.037	best_gbps=128.234	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=98304	threads=1	median_gbps=246.523	best_gbps=249.660	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.2857
+     128 KiB      130.2      127.0      196.2          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=131072	threads=1	median_gbps=130.202	best_gbps=131.635	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=131072	threads=1	median_gbps=127.033	best_gbps=128.320	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=131072	threads=1	median_gbps=196.184	best_gbps=221.189	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.3214
+     192 KiB      114.4      135.0      245.2          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=196608	threads=1	median_gbps=114.408	best_gbps=117.550	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=196608	threads=1	median_gbps=135.018	best_gbps=135.050	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=196608	threads=1	median_gbps=245.215	best_gbps=261.605	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.3571
+     256 KiB      117.4      120.9      262.0          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=262144	threads=1	median_gbps=117.376	best_gbps=120.473	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=262144	threads=1	median_gbps=120.942	best_gbps=121.831	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=262144	threads=1	median_gbps=262.022	best_gbps=262.691	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.3929
+     384 KiB      113.8      139.1      130.6          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=393216	threads=1	median_gbps=113.753	best_gbps=120.389	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=393216	threads=1	median_gbps=139.070	best_gbps=139.575	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=393216	threads=1	median_gbps=130.556	best_gbps=131.198	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.4286
+     512 KiB      119.8      137.0      133.8          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=524288	threads=1	median_gbps=119.758	best_gbps=124.371	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=524288	threads=1	median_gbps=136.997	best_gbps=137.124	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=524288	threads=1	median_gbps=133.825	best_gbps=133.834	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.4643
+     768 KiB      107.8      136.3      123.3          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=786432	threads=1	median_gbps=107.826	best_gbps=112.513	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=786432	threads=1	median_gbps=136.301	best_gbps=136.567	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=786432	threads=1	median_gbps=123.288	best_gbps=123.390	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.5000
+       1 MiB      119.4      136.2      125.5          -          -          -
+CPUMEM_POINT	mode=single	kernel=read	block_bytes=1048576	threads=1	median_gbps=119.422	best_gbps=120.019	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=write	block_bytes=1048576	threads=1	median_gbps=136.176	best_gbps=142.651	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=single	kernel=copy	block_bytes=1048576	threads=1	median_gbps=125.507	best_gbps=128.861	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=single	fraction=0.5357
+
+[all] 14 threads, one per physical core, each with a private data set
+    Data set       Read      Write       Copy   Write NT    Copy NT  Zero fill   GB/s (median)
+       4 KiB     1473.4     1315.2     2523.9          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=4096	threads=14	median_gbps=1473.376	best_gbps=1474.239	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=4096	threads=14	median_gbps=1315.188	best_gbps=1329.939	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=4096	threads=14	median_gbps=2523.891	best_gbps=2572.635	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.5714
+       8 KiB     1343.2     1166.9     2370.8          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=8192	threads=14	median_gbps=1343.248	best_gbps=1476.076	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=8192	threads=14	median_gbps=1166.878	best_gbps=1246.753	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=8192	threads=14	median_gbps=2370.768	best_gbps=2373.281	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.6071
+      16 KiB     1453.9      881.4     2134.0          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=16384	threads=14	median_gbps=1453.893	best_gbps=1499.807	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=16384	threads=14	median_gbps=881.378	best_gbps=1015.925	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=16384	threads=14	median_gbps=2133.962	best_gbps=2149.638	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.6429
+      24 KiB     1457.3      754.5     2142.0          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=24576	threads=14	median_gbps=1457.306	best_gbps=1497.014	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=24576	threads=14	median_gbps=754.520	best_gbps=815.205	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=24576	threads=14	median_gbps=2142.006	best_gbps=2194.712	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.6786
+      32 KiB     1440.2      541.9     1448.7          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=32768	threads=14	median_gbps=1440.172	best_gbps=1477.558	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=32768	threads=14	median_gbps=541.918	best_gbps=587.427	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=32768	threads=14	median_gbps=1448.688	best_gbps=1675.232	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.7143
+      48 KiB     1473.4      505.5     1169.9          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=49152	threads=14	median_gbps=1473.417	best_gbps=1516.078	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=49152	threads=14	median_gbps=505.454	best_gbps=508.435	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=49152	threads=14	median_gbps=1169.858	best_gbps=1444.964	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.7500
+      64 KiB     1494.0      458.0      974.4          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=65536	threads=14	median_gbps=1493.982	best_gbps=1496.177	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=65536	threads=14	median_gbps=457.993	best_gbps=492.765	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=65536	threads=14	median_gbps=974.434	best_gbps=1019.002	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.7857
+      96 KiB     1346.8      352.2      784.4          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=98304	threads=14	median_gbps=1346.793	best_gbps=1391.873	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=98304	threads=14	median_gbps=352.200	best_gbps=358.401	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=98304	threads=14	median_gbps=784.419	best_gbps=905.320	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.8214
+     128 KiB     1357.5      400.8      914.8          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=131072	threads=14	median_gbps=1357.538	best_gbps=1366.618	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=131072	threads=14	median_gbps=400.804	best_gbps=417.373	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=131072	threads=14	median_gbps=914.782	best_gbps=916.885	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.8571
+     192 KiB     1112.7      404.6      748.1          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=196608	threads=14	median_gbps=1112.686	best_gbps=1129.542	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=196608	threads=14	median_gbps=404.568	best_gbps=405.437	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=196608	threads=14	median_gbps=748.080	best_gbps=831.252	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.8929
+     256 KiB     1116.3      391.6      759.0          -          -          -
+CPUMEM_POINT	mode=all	kernel=read	block_bytes=262144	threads=14	median_gbps=1116.267	best_gbps=1121.133	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=write	block_bytes=262144	threads=14	median_gbps=391.626	best_gbps=398.376	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_POINT	mode=all	kernel=copy	block_bytes=262144	threads=14	median_gbps=758.966	best_gbps=763.310	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=1.000000
+CPUMEM_PROGRESS	mode=all	fraction=0.9286
+CPUMEM_PROGRESS	mode=pagefault	fraction=0.9643
+CPUMEM_PROGRESS	mode=storage	fraction=1.0000
+
+--- Summary: one thread (logical processor 1) ---
+Level              Cache size          Data sets used       Read      Write       Copy   GB/s
+L1                    128 KiB         32 KiB - 64 KiB      136.5      137.8      239.4
+CPUMEM_LEVEL	mode=single	level=L1	cache_bytes=131072	from_bytes=32768	to_bytes=65536	read_gbps=136.544	write_gbps=137.755	copy_gbps=239.352	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=133.573	read_high_gbps=139.621	from_curve=0	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=1
+L2                     16 MiB         256 KiB - 1 MiB      117.4      136.3      130.6
+CPUMEM_LEVEL	mode=single	level=L2	cache_bytes=16777216	from_bytes=262144	to_bytes=1048576	read_gbps=117.376	write_gbps=136.301	copy_gbps=130.556	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=107.826	read_high_gbps=119.758	from_curve=0	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=1
+Memory                      -                   1 MiB      119.4      136.2      125.5
+         not a settled memory plateau: the sweep ends inside the caches or is still descending
+CPUMEM_LEVEL	mode=single	level=memory	cache_bytes=0	from_bytes=1048576	to_bytes=1048576	read_gbps=119.422	write_gbps=136.176	copy_gbps=125.507	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=119.422	read_high_gbps=119.422	from_curve=0	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=0
+
+--- Summary: all cores (14 threads, data set sizes are per thread) ---
+Level              Cache size          Data sets used       Read      Write       Copy   GB/s
+L1                    128 KiB         32 KiB - 64 KiB     1473.4      505.5     1169.9
+CPUMEM_LEVEL	mode=all	level=L1	cache_bytes=131072	from_bytes=32768	to_bytes=65536	read_gbps=1473.417	write_gbps=505.454	copy_gbps=1169.858	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=1440.172	read_high_gbps=1493.982	from_curve=0	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=1
+L2                     16 MiB                 256 KiB     1116.3      391.6      759.0
+CPUMEM_LEVEL	mode=all	level=L2	cache_bytes=16777216	from_bytes=262144	to_bytes=262144	read_gbps=1116.267	write_gbps=391.626	copy_gbps=758.966	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=1116.267	read_high_gbps=1116.267	from_curve=0	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=1
+Memory                      -                 256 KiB     1116.3      391.6      759.0
+         not a settled memory plateau: the sweep ends inside the caches or is still descending
+CPUMEM_LEVEL	mode=all	level=memory	cache_bytes=0	from_bytes=262144	to_bytes=262144	read_gbps=1116.267	write_gbps=391.626	copy_gbps=758.966	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=1116.267	read_high_gbps=1116.267	from_curve=0	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=0
+
+--- Virtual memory ---
+Mapping new pages: 21.60 GB/s, 758 ns per 16 KiB page (first write to every page of a 8 MiB region, one thread)
+CPUMEM_PAGEFAULT	measured=1	page_bytes=16384	region_bytes=8388608	gbps=21.602	ns_per_page=758.463	transparent_huge_pages=0
+
+--- Storage behind virtual memory ---
+Paging target: unclassified on watchOS (file I/O only, not a swap measurement)
+Test file:     32 MiB in /Users/fairchild/Library/Developer/CoreSimulator/Devices/E31D5516-5EAD-4FC9-A400-AA6C781ED488/data/Containers/Data/Application/FF4DEE35-BD54-4C19-B8F5-BB24C14A404E/Documents/Mangekyo/, unbuffered I/O
+Sequential 1 MiB:   read 3157 MB/s, write 5779 MB/s
+Random 4 KiB, QD1:  read 52.0 MB/s (12698 IOPS), write 35.3 MB/s (8629 IOPS)
+Paging issues random 4 KiB requests, so that line is the closer estimate of
+how fast memory comes back from the drive.
+CPUMEM_STORAGE	measured=1	backing=unclassified on watchOS (file I/O only, not a swap measurement)	directory=/Users/fairchild/Library/Developer/CoreSimulator/Devices/E31D5516-5EAD-4FC9-A400-AA6C781ED488/data/Containers/Data/Application/FF4DEE35-BD54-4C19-B8F5-BB24C14A404E/Documents/Mangekyo/	on_paging_drive=0	direct_io=1	file_bytes=33554432	seq_read_mbps=3156.6	seq_write_mbps=5779.1	rand_read_mbps=52.0	rand_write_mbps=35.3	rand_read_iops=12697.8	rand_write_iops=8628.8	skipped=
+
+Note: write and copy use ordinary stores. Outside the caches every stored line is
+      first read from memory, so the memory traffic is 2x the write figure and 1.5x
+      the copy figure. Streaming stores skip that read.
+Note: cache-level figures are limited by how fast the core issues 16-byte loads and
+      stores, so they depend on the vector size and the clock.
+Note: thread affinity is 'scheduler_managed'; threads may have moved between cores.
+Note: 5 of 78 points were measured again because other activity on the machine
+      disturbed their first round.
+CPUMEM_DONE	affinity=scheduler_managed	remeasured_points=5	duration_sec=6.9
+Duration:  6.9 s
+==========================================================
+[Results] Saved as 20261017-191458-391-cpu-membw -> /Users/fairchild/Library/Developer/CoreSimulator/Devices/E31D5516-5EAD-4FC9-A400-AA6C781ED488/data/Containers/Data/Application/FF4DEE35-BD54-4C19-B8F5-BB24C14A404E/Documents/Mangekyo/results/results.json

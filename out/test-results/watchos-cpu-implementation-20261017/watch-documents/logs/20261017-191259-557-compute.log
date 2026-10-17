@@ -1,0 +1,32 @@
+WATCH_PROFILE	profile=standard	core_placement=scheduler_managed_unclassified
+CPU_META	workload_version=cpu_mixed_v1_scheduler_managed	name=Apple M4 Pro	logical_count=14	physical_count=14	topology_source=AppleSchedulerManagedEstimate	affinity_capability=scheduler_managed
+CPU_TOPOLOGY	core_index=0	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=1	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=2	group=0	logical_index=2	physical_core=2	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=3	group=0	logical_index=3	physical_core=3	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=4	group=0	logical_index=4	physical_core=4	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=5	group=0	logical_index=5	physical_core=5	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=6	group=0	logical_index=6	physical_core=6	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=7	group=0	logical_index=7	physical_core=7	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=8	group=0	logical_index=8	physical_core=8	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=9	group=0	logical_index=9	physical_core=9	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=10	group=0	logical_index=10	physical_core=10	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=11	group=0	logical_index=11	physical_core=11	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=12	group=0	logical_index=12	physical_core=12	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=13	group=0	logical_index=13	physical_core=13	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TYPE_CAPS	verified_scheduling=0	performance_count=0	efficiency_count=0	residency_method=unavailable_watchos
+CPU_SCHEDULING	core_type=auto	efficiency_policy=background	residency_threshold=0.99	scope=single_thread_stages
+
+--- Native CPU mixed benchmark ---
+CPU: Apple M4 Pro
+Topology: AppleSchedulerManagedEstimate, affinity: scheduler_managed
+Workload: cpu_mixed_v1_scheduler_managed, 3 rounds, median aggregation (the requested measurement time is split across rounds).
+Score contract: formal (formal = 15.0 s measurement, 0.2 s warm-up, 3 rounds).
+Each score is million mixed integer/branch/FP32/FP64 work units per second.
+The checksum is a dead-code-elimination sink, not a correctness oracle.
+
+--- CPU all-logical-processor test ---
+CPU_PROGRESS	mode=multi	phase=warmup	core_index=-1	core_count=14	core_fraction=0.000000	overall_fraction=0.000000	elapsed=0.000000	round_index=-1	round_count=3
+All-core score (0 threads): 0.00 MWork/s [INVALID: nothing was measured]
+CPU_RESULT	kind=multi	mode=multi	core_index=-1	workload_version=cpu_mixed_v1_scheduler_managed	score_contract=formal	aggregation=median	core_count=14	thread_count=0	pinned_threads=0	affinity=	valid=0	score=0.000000	unit=MWork/s	seconds=0.000000	requested_seconds=15.000000	round_count=0	median_round=0	checksum=0000000000000000	checksum_role=dce_sink
+CPU_CANCELLED

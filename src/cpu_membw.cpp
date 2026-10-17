@@ -89,12 +89,20 @@ constexpr std::uint64_t kMinBlockBytes = 4 * kKiB;
 // is walked often enough to fill one. Every kernel length is a multiple of
 // 256 bytes, which is four vectors at the widest vector size.
 constexpr std::size_t kSliceBytes = 256 * kKiB;
+#if defined(__APPLE__) && TARGET_OS_WATCH
+constexpr std::uint64_t kAllCoreMaxTotalBytes = 16 * kMiB;
+#else
 constexpr std::uint64_t kAllCoreMaxTotalBytes = 8 * kGiB;
+#endif
 // A data set counts as memory-bound from four times the last-level cache
 // share of one thread. Without cache sizes from the OS this size is used.
 constexpr std::uint64_t kMemoryFallbackBytes = 256 * kMiB;
 constexpr double kSettledSpread = 1.25;
+#if defined(__APPLE__) && TARGET_OS_WATCH
+constexpr std::uint64_t kPageFaultRegionBytes = 8 * kMiB;
+#else
 constexpr std::uint64_t kPageFaultRegionBytes = 256 * kMiB;
+#endif
 constexpr std::uint32_t kPageFaultRuns = 9;
 // A round whose median is this far below its best sample was disturbed by
 // other activity on the machine and is measured again, at most twice.
@@ -1847,7 +1855,9 @@ bool PlanStorage(const CpuMemBwConfig& config, CpuMemBwStorage& storage,
         return false;
     }
 #elif defined(__APPLE__)
-#if TARGET_OS_IPHONE
+#if TARGET_OS_WATCH
+    storage.backing = "unclassified on watchOS (file I/O only, not a swap measurement)";
+#elif TARGET_OS_IPHONE
     storage.backing = "none (iOS compresses memory and does not page to storage)";
 #else
     storage.backing = "swap files in /private/var/vm";

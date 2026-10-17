@@ -1,0 +1,43 @@
+{
+  "result": "passed",
+  "simulatorOnly": true,
+  "resultRows": 15,
+  "completedSuites": [
+    {
+      "suite": "22BFA27D-0AB6-4394-BDFB-272D67282088",
+      "profile": "smoke",
+      "curvePoints": 78,
+      "maxDatasetKiB": 1024.0,
+      "memoryStatus": "review"
+    },
+    {
+      "suite": "75520159-0C9D-44A0-8581-D0346A7265E8",
+      "profile": "smoke",
+      "curvePoints": 78,
+      "maxDatasetKiB": 1024.0,
+      "memoryStatus": "review"
+    },
+    {
+      "suite": "691C0B45-FA43-4367-A4B3-8885E8E610AD",
+      "profile": "smoke",
+      "curvePoints": 78,
+      "maxDatasetKiB": 1024.0,
+      "memoryStatus": "review"
+    },
+    {
+      "suite": "C4A81B04-2C24-4E48-8139-D89A56F96999",
+      "profile": "smoke",
+      "curvePoints": 78,
+      "maxDatasetKiB": 1024.0,
+      "memoryStatus": "review"
+    },
+    {
+      "suite": "5D889FF8-A1B7-47FE-AF92-CB49F5E064ED",
+      "profile": "standard",
+      "curvePoints": 108,
+      "maxDatasetKiB": 8192.0,
+      "memoryStatus": "review"
+    }
+  ],
+  "cancelledSuites": 3
+}

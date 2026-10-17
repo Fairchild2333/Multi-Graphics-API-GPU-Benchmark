@@ -34,7 +34,7 @@ inline const char* CpuCoreTypeName(CpuCoreType type) {
     }
 }
 inline std::uint32_t AppleCoreTypeCount(CpuCoreType type) {
-#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+#if defined(__APPLE__) && !TARGET_OS_WATCH && !TARGET_OS_SIMULATOR && defined(__aarch64__)
     std::uint32_t count = 0;
     std::size_t size = sizeof(count);
     const char* key = type == CpuCoreType::Performance
@@ -46,7 +46,7 @@ inline std::uint32_t AppleCoreTypeCount(CpuCoreType type) {
     return 0;
 }
 inline bool CpuRequiresDirectTypeAccounting() {
-#if defined(__APPLE__) && TARGET_OS_IPHONE && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+#if defined(__APPLE__) && TARGET_OS_IPHONE && !TARGET_OS_WATCH && !TARGET_OS_SIMULATOR && defined(__aarch64__)
     static const bool required = [] {
         std::uint32_t family = 0;
         std::size_t size = sizeof(family);
@@ -70,7 +70,7 @@ inline const char* CpuForegroundEfficiencyVersionSuffix() {
     return CpuRequiresDirectTypeAccounting() ? "_foreground_e_utility_v1" : "_foreground_e_p_load_v1";
 }
 inline bool CpuCoreTypeSchedulingSupported() {
-#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+#if defined(__APPLE__) && !TARGET_OS_WATCH && !TARGET_OS_SIMULATOR && defined(__aarch64__)
     // The subtraction below is valid only for a verified two-kind P/E machine.
     std::uint32_t levels = 0;
     std::size_t size = sizeof(levels);
@@ -99,7 +99,9 @@ inline bool CpuCoreTypeSchedulingSupported() {
 #endif
 }
 inline const char* CpuResidencyMethod() {
-#if defined(__APPLE__) && TARGET_OS_IPHONE
+#if defined(__APPLE__) && TARGET_OS_WATCH
+    return "unavailable_watchos";
+#elif defined(__APPLE__) && TARGET_OS_IPHONE
     return CpuRequiresDirectTypeAccounting() ? "thread_selfcounts_perf_level_spi"
                                             : "mach_task_power_thread_clock_bound";
 #else
@@ -117,7 +119,7 @@ class CpuQosScope {
 public:
     explicit CpuQosScope(CpuCoreType type, bool foregroundEfficiency = false) {
         applied_ = type == CpuCoreType::Automatic;
-#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+#if defined(__APPLE__) && !TARGET_OS_WATCH && !TARGET_OS_SIMULATOR && defined(__aarch64__)
         if (type == CpuCoreType::Performance || type == CpuCoreType::Efficiency) {
             old_ = qos_class_self();
             applied_ = pthread_set_qos_class_self_np(type == CpuCoreType::Performance
@@ -130,14 +132,14 @@ public:
         (void)foregroundEfficiency;
     }
     ~CpuQosScope() {
-#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+#if defined(__APPLE__) && !TARGET_OS_WATCH && !TARGET_OS_SIMULATOR && defined(__aarch64__)
         if (changed_) pthread_set_qos_class_self_np(old_, 0);
 #endif
     }
     bool applied() const { return applied_; }
 private:
     bool applied_ = false;
-#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+#if defined(__APPLE__) && !TARGET_OS_WATCH && !TARGET_OS_SIMULATOR && defined(__aarch64__)
     qos_class_t old_ = QOS_CLASS_DEFAULT;
     bool changed_ = false;
 #endif
@@ -151,7 +153,7 @@ struct CpuResidencySnapshot {
 };
 inline CpuResidencySnapshot CaptureCpuResidency() {
     CpuResidencySnapshot result;
-#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+#if defined(__APPLE__) && !TARGET_OS_WATCH && !TARGET_OS_SIMULATOR && defined(__aarch64__)
     timespec before{}, after{};
 #if TARGET_OS_IPHONE
     // Public iOS task accounting contains performance-core CPU time. The
@@ -246,7 +248,7 @@ struct CpuThreadCounters {
 };
 inline CpuThreadCounters CaptureCpuThreadCounters() {
     CpuThreadCounters result;
-#if defined(__APPLE__) && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+#if defined(__APPLE__) && !TARGET_OS_WATCH && !TARGET_OS_SIMULATOR && defined(__aarch64__)
     using Reader = int (*)(std::uint32_t, void*, std::size_t);
     static const auto reader = reinterpret_cast<Reader>(dlsym(RTLD_DEFAULT, "thread_selfcounts"));
     if (!reader || !CpuCoreTypeSchedulingSupported()) return result;
@@ -301,7 +303,7 @@ inline CpuResidency EvaluateCpuThreadCounters(const CpuThreadCounters& before,
 }
 
 inline bool DefaultCpuEfficiencyForeground() {
-#if defined(__APPLE__) && TARGET_OS_IPHONE && !TARGET_OS_SIMULATOR && defined(__aarch64__)
+#if defined(__APPLE__) && TARGET_OS_IPHONE && !TARGET_OS_WATCH && !TARGET_OS_SIMULATOR && defined(__aarch64__)
     return CaptureCpuThreadCounters().available;
 #else
     return false;

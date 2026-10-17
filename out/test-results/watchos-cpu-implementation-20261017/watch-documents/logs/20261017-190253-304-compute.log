@@ -1,0 +1,61 @@
+WATCH_PROFILE	profile=standard	core_placement=scheduler_managed_unclassified
+CPU_META	workload_version=cpu_mixed_v1_scheduler_managed	name=Apple M4 Pro	logical_count=14	physical_count=14	topology_source=AppleSchedulerManagedEstimate	affinity_capability=scheduler_managed
+CPU_TOPOLOGY	core_index=0	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=1	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=2	group=0	logical_index=2	physical_core=2	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=3	group=0	logical_index=3	physical_core=3	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=4	group=0	logical_index=4	physical_core=4	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=5	group=0	logical_index=5	physical_core=5	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=6	group=0	logical_index=6	physical_core=6	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=7	group=0	logical_index=7	physical_core=7	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=8	group=0	logical_index=8	physical_core=8	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=9	group=0	logical_index=9	physical_core=9	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=10	group=0	logical_index=10	physical_core=10	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=11	group=0	logical_index=11	physical_core=11	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=12	group=0	logical_index=12	physical_core=12	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=13	group=0	logical_index=13	physical_core=13	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TYPE_CAPS	verified_scheduling=0	performance_count=0	efficiency_count=0	residency_method=unavailable_watchos
+CPU_SCHEDULING	core_type=auto	efficiency_policy=background	residency_threshold=0.99	scope=single_thread_stages
+
+--- Native CPU mixed benchmark ---
+CPU: Apple M4 Pro
+Topology: AppleSchedulerManagedEstimate, affinity: scheduler_managed
+Workload: cpu_mixed_v1_scheduler_managed, 3 rounds, median aggregation (the requested measurement time is split across rounds).
+Score contract: formal (formal = 15.0 s measurement, 0.2 s warm-up, 3 rounds).
+Each score is million mixed integer/branch/FP32/FP64 work units per second.
+The checksum is a dead-code-elimination sink, not a correctness oracle.
+
+--- CPU all-logical-processor test ---
+CPU_PROGRESS	mode=multi	phase=warmup	core_index=-1	core_count=14	core_fraction=0.000000	overall_fraction=0.000000	elapsed=0.000000	round_index=-1	round_count=3
+CPU_MULTI_WORKER	round=1	worker=0	work_units=874635264	common_seconds=5.000042125	score=174.925579052	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=1	worker=1	work_units=878764032	common_seconds=5.000042125	score=175.751325695	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=1	worker=2	work_units=883527680	common_seconds=5.000042125	score=176.704047268	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=1	worker=3	work_units=879820800	common_seconds=5.000042125	score=175.962677514	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=1	worker=4	work_units=840916992	common_seconds=5.000042125	score=168.181981467	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=1	worker=5	work_units=876613632	common_seconds=5.000042125	score=175.321249318	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=1	worker=6	work_units=888467456	common_seconds=5.000042125	score=177.691994145	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=1	worker=7	work_units=884670464	common_seconds=5.000042125	score=176.932602143	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=1	worker=8	work_units=891322368	common_seconds=5.000042125	score=178.262971734	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=1	worker=9	work_units=864546816	common_seconds=5.000042125	score=172.907906451	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=1	worker=10	work_units=880496640	common_seconds=5.000042125	score=176.097844376	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=1	worker=11	work_units=882913280	common_seconds=5.000042125	score=176.581168304	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=1	worker=12	work_units=861859840	common_seconds=5.000042125	score=172.370515778	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=1	worker=13	work_units=846422016	common_seconds=5.000042125	score=169.282976991	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_ACCOUNTING	round=1	process_cpu_seconds=0.000000000	performance_cpu_seconds=0.000000000	includes_warmup_seconds=0.200000000
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=14	core_fraction=0.333333	overall_fraction=0.022222	elapsed=5.000000	round_index=0	round_count=3
+CPU_MULTI_WORKER	round=2	worker=0	work_units=848764928	common_seconds=5.000029250	score=169.751992551	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=2	worker=1	work_units=807206912	common_seconds=5.000029250	score=161.440437973	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=2	worker=2	work_units=823025664	common_seconds=5.000029250	score=164.604169866	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=2	worker=3	work_units=814686208	common_seconds=5.000029250	score=162.936288423	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=2	worker=4	work_units=820064256	common_seconds=5.000029250	score=164.011891730	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=2	worker=5	work_units=828825600	common_seconds=5.000029250	score=165.764150280	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=2	worker=6	work_units=827092992	common_seconds=5.000029250	score=165.417630707	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=2	worker=7	work_units=811667456	common_seconds=5.000029250	score=162.332541555	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=2	worker=8	work_units=813891584	common_seconds=5.000029250	score=162.777364552	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=2	worker=9	work_units=817090560	common_seconds=5.000029250	score=163.417156010	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=2	worker=10	work_units=792612864	common_seconds=5.000029250	score=158.521645448	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=2	worker=11	work_units=823767040	common_seconds=5.000029250	score=164.752444198	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=2	worker=12	work_units=816607232	common_seconds=5.000029250	score=163.320490975	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=2	worker=13	work_units=817582080	common_seconds=5.000029250	score=163.515459435	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_ACCOUNTING	round=2	process_cpu_seconds=0.000000000	performance_cpu_seconds=0.000000000	includes_warmup_seconds=0.000000000
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=14	core_fraction=0.666667	overall_fraction=0.044444	elapsed=10.000000	round_index=1	round_count=3

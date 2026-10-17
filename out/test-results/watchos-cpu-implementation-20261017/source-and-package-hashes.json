@@ -1,0 +1,140 @@
+{
+  "baseCommit": "740cec2dc859354b5dd6212537f0ee318ac81243",
+  "xcode": "Xcode 27.1\nBuild version 27A9275",
+  "simulator": "E31D5516-5EAD-4FC9-A400-AA6C781ED488",
+  "physicalWatchTested": false,
+  "sources": [
+    {
+      "path": "scripts/build-watchos.sh",
+      "bytes": 1301,
+      "sha256": "5ddcfb0d7e03f72eaec0d7579a3c9e64288cc2c7531f622201168594539e9b46"
+    },
+    {
+      "path": "src/benchmark_results.cpp",
+      "bytes": 50657,
+      "sha256": "d387b4c18446564d0260ad78b639190329d5c7161d8b2c3720568dc15f7228b9"
+    },
+    {
+      "path": "src/cpu_benchmark.cpp",
+      "bytes": 76157,
+      "sha256": "a0fb43039b44ce900fe9b0966fb473a36800e307e9651842d6bcb72e4ae23818"
+    },
+    {
+      "path": "src/cpu_benchmark.h",
+      "bytes": 4453,
+      "sha256": "278a5a9a8eb067044437140f357c6ec694e29417bf635d01bd0f94c63492ca51"
+    },
+    {
+      "path": "src/cpu_cli.cpp",
+      "bytes": 39383,
+      "sha256": "339ada7956c02edadb5df7c88756a3aa20d632e9d8912fd757b8c1f30796b0d0"
+    },
+    {
+      "path": "src/cpu_membw.cpp",
+      "bytes": 117818,
+      "sha256": "312772951df11415ff60dca2e42934c98c00ecf8cff2126dd1973ed11b8fda97"
+    },
+    {
+      "path": "src/cpu_membw.h",
+      "bytes": 8329,
+      "sha256": "0fe59e55ef6d6f0185b5c243d72bbbc83f45af66c5a8eb5defbda9be6b4181a2"
+    },
+    {
+      "path": "src/cpu_scheduling.h",
+      "bytes": 16970,
+      "sha256": "29dbb43da134eee245d057516cc60cdf8cde97c080618cb34971ef59a5dff9b2"
+    },
+    {
+      "path": "src/path_service.cpp",
+      "bytes": 3281,
+      "sha256": "34863a3010e7e5a5b62d6b41d4c3f02ba6755f742dc14a2a571ffb4ae363747a"
+    },
+    {
+      "path": "src/system_info.cpp",
+      "bytes": 8325,
+      "sha256": "8eb74cb8b326c028b5f95592a3dcff37c7d777d850a223b27231830e2c647478"
+    },
+    {
+      "path": "watch-gui/MangekyoWatch/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "bytes": 209,
+      "sha256": "3394d23e6f96de29390dd3a6d68e25d068970d29759f7100f55808439e85cb5b"
+    },
+    {
+      "path": "watch-gui/MangekyoWatch/Assets.xcassets/AppIcon.appiconset/icon_1024.png",
+      "bytes": 1170133,
+      "sha256": "692f81cf9adf8b91df4df47dfa3da6fd5d0f8feef15fcbb8618bfeb8eee94254"
+    },
+    {
+      "path": "watch-gui/MangekyoWatch/Assets.xcassets/Contents.json",
+      "bytes": 60,
+      "sha256": "f5fb0e1f3a8142892ed092efb5955c1c2cc537003a89ad7bbdb9dade7fe8985f"
+    },
+    {
+      "path": "watch-gui/MangekyoWatch/MangekyoWatchApp.swift",
+      "bytes": 7781,
+      "sha256": "36d8c00d4990fc1b74b87592d755bc81d8c2d4f5cf0d5dd1e7bd6b07db656e59"
+    },
+    {
+      "path": "watch-gui/MangekyoWatch/WatchCpuBridge.h",
+      "bytes": 500,
+      "sha256": "65e6b23a34a005d113e632e1517f438e2a7a11e78a0f86cd98e1845a96a2f34e"
+    },
+    {
+      "path": "watch-gui/MangekyoWatch/WatchCpuBridge.mm",
+      "bytes": 6419,
+      "sha256": "e627e088878918ffd94ee58b2074d2ebf924875d373e611cd7abcb28964a2f71"
+    },
+    {
+      "path": "watch-gui/MangekyoWatch/WatchEngine.swift",
+      "bytes": 6999,
+      "sha256": "475f1516d7142fd5e11075d7358e5d535cf41af19044a282f9c0b1e24da2de36"
+    },
+    {
+      "path": "watch-gui/MangekyoWatch/WatchModels.swift",
+      "bytes": 3690,
+      "sha256": "14715dfb9ee3277b2c5a79f29f64595eee5fdda53806501b8e212caf6b014e26"
+    },
+    {
+      "path": "watch-gui/MangekyoWatch.xcodeproj/project.pbxproj",
+      "bytes": 23030,
+      "sha256": "f59fd2b5e22426c029b423d3fdf93f03f5b82af1e930f48939b694c97ede42a3"
+    },
+    {
+      "path": "watch-gui/MangekyoWatch.xcodeproj/project.xcworkspace/contents.xcworkspacedata",
+      "bytes": 135,
+      "sha256": "7f3b00b5c3fdb45242d7b87e1e5c4e25d1fa8129a16c94295ecc4e8ea2235c5f"
+    },
+    {
+      "path": "watch-gui/MangekyoWatch.xcodeproj/xcshareddata/xcschemes/MangekyoWatch.xcscheme",
+      "bytes": 4386,
+      "sha256": "07cc4a1c540496d8251d39c382ef186712cd94112c3a769e87cdfc9646613b9e"
+    },
+    {
+      "path": "watch-gui/MangekyoWatchTests/WatchModelsTests.swift",
+      "bytes": 2007,
+      "sha256": "34ea83081cb14311205a8a38f421652458e391b95c6601ab1ad257a195579107"
+    },
+    {
+      "path": "watch-gui/MangekyoWatchUITests/WatchFlowTests.swift",
+      "bytes": 3094,
+      "sha256": "f37212b8697407c5d35f2ffacb5b3a0f87e90ee5897ac44fdcff044a92565f2f"
+    },
+    {
+      "path": "watch-gui/project.yml",
+      "bytes": 1949,
+      "sha256": "bebe69f302c9058cdda1f2732017c2bee805ec05214673cb55a4950614eec104"
+    }
+  ],
+  "unsignedPackages": [
+    {
+      "path": "build-watchos/watchos/Build/Products/Release-watchos/MangekyoWatch.app/MangekyoWatch",
+      "bytes": 1465048,
+      "sha256": "3618d28d54ecb3ddbdd70c21cd29250dfd7e01a4201d4bd6ca641299236b0181"
+    },
+    {
+      "path": "build-watchos/watchsimulator/Build/Products/Release-watchsimulator/MangekyoWatch.app/MangekyoWatch",
+      "bytes": 1431280,
+      "sha256": "a13255e2a9f74728a4be53abb191d3260566126193c60d7e988b8d2cda8377e7"
+    }
+  ]
+}

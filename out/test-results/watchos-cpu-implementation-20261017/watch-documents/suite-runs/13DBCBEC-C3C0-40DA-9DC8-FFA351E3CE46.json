@@ -1,0 +1,30 @@
+{
+  "executionEnvironment" : "simulator",
+  "id" : "13DBCBEC-C3C0-40DA-9DC8-FFA351E3CE46",
+  "jobs" : [
+    {
+      "id" : "cpu_compute",
+      "notes" : [
+
+      ],
+      "resultIDs" : [
+
+      ],
+      "status" : "interrupted"
+    },
+    {
+      "id" : "cpu_memory",
+      "notes" : [
+
+      ],
+      "resultIDs" : [
+
+      ],
+      "status" : "pending"
+    }
+  ],
+  "profile" : "standard",
+  "startedAt" : 813916973.274665,
+  "status" : "interrupted",
+  "updatedAt" : 813916988.501442
+}

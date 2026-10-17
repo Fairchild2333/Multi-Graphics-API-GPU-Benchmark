@@ -16,7 +16,9 @@ inline constexpr const char* kCpuMemBwWorkloadVersion = "cpu_membw_v1";
 
 // Phones have smaller caches and less free memory than desktops, so their
 // sweep ends earlier.
-#if defined(__ANDROID__) || defined(__OHOS__) || (defined(__APPLE__) && TARGET_OS_IPHONE)
+#if defined(__APPLE__) && TARGET_OS_WATCH
+inline constexpr std::uint64_t kCpuMemBwDefaultMaxBytes = 8ull << 20;
+#elif defined(__ANDROID__) || defined(__OHOS__) || (defined(__APPLE__) && TARGET_OS_IPHONE)
 inline constexpr std::uint64_t kCpuMemBwDefaultMaxBytes = 256ull << 20;
 #else
 inline constexpr std::uint64_t kCpuMemBwDefaultMaxBytes = 1024ull << 20;

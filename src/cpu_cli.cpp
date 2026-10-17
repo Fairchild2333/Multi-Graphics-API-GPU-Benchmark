@@ -48,7 +48,9 @@ static gpu_bench::BenchmarkResult MakeStoredCpuResult(
         stored.id += std::string("-") + CpuCoreTypeName(coreType);
         if (foregroundE) stored.workloadVersion += CpuForegroundEfficiencyVersionSuffix();
     }
-#if defined(__APPLE__) && TARGET_OS_IPHONE
+#if defined(__APPLE__) && TARGET_OS_WATCH
+    stored.workloadVersion += "_watchos_preview";
+#elif defined(__APPLE__) && TARGET_OS_IPHONE
     stored.workloadVersion += "_ios_preview";
 #endif
     stored.graphicsApi = "CPU";
@@ -248,6 +250,8 @@ static gpu_bench::BenchmarkResult MakeStoredCpuMemBwResult(
         std::string(gpu_bench::kCpuMemBwWorkloadVersion) + "_android_preview";
 #elif defined(__OHOS__)
     stored.workloadVersion = std::string(gpu_bench::kCpuMemBwWorkloadVersion) + "_ohos_preview";
+#elif defined(__APPLE__) && TARGET_OS_WATCH
+    stored.workloadVersion = std::string(gpu_bench::kCpuMemBwWorkloadVersion) + "_watchos_preview";
 #elif defined(__APPLE__) && TARGET_OS_IPHONE
     stored.workloadVersion = std::string(gpu_bench::kCpuMemBwWorkloadVersion) + "_ios_preview";
 #endif

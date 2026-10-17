@@ -553,6 +553,21 @@ cmake -S . -B build
 cmake --build build --config Release
 ```
 
+### Apple Watch (CPU only)
+
+The independent watchOS 10+ project reuses the native CPU engine without GPU
+dependencies. A checked-in Xcode project and shared scheme are provided:
+
+```bash
+bash scripts/build-watchos.sh # unsigned Release: device and simulator
+```
+
+Open `watch-gui/MangekyoWatch.xcodeproj` in Xcode to select a development Team
+and a physical Watch for signing/installing. Simulator flow tests, memory
+budgets, local `results.json` and measurement limits are documented in
+[`watch-gui/README.md`](../watch-gui/README.md). Simulator CPU scores belong to
+the host Mac and cannot be used as Watch performance results.
+
 ### Backend Toggles
 
 ```bash

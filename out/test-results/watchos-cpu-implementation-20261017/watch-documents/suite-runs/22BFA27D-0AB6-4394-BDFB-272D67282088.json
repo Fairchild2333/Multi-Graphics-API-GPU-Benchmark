@@ -1,0 +1,31 @@
+{
+  "executionEnvironment" : "simulator",
+  "id" : "22BFA27D-0AB6-4394-BDFB-272D67282088",
+  "jobs" : [
+    {
+      "id" : "cpu_compute",
+      "notes" : [
+
+      ],
+      "resultIDs" : [
+        "20261017-190712-894-cpu-single",
+        "20261017-190712-895-cpu-multi"
+      ],
+      "status" : "passed"
+    },
+    {
+      "id" : "cpu_memory",
+      "notes" : [
+        "内存平台未确认；保留原始曲线"
+      ],
+      "resultIDs" : [
+        "20261017-190720-175-cpu-membw"
+      ],
+      "status" : "review"
+    }
+  ],
+  "profile" : "smoke",
+  "startedAt" : 813917230.908608,
+  "status" : "review",
+  "updatedAt" : 813917293.138689
+}

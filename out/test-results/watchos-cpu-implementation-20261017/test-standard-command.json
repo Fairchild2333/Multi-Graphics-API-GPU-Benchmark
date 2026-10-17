@@ -1,0 +1,22 @@
+[
+  "xcodebuild",
+  "test",
+  "-project",
+  "watch-gui/MangekyoWatch.xcodeproj",
+  "-scheme",
+  "MangekyoWatch",
+  "-configuration",
+  "Release",
+  "-destination",
+  "platform=watchOS Simulator,id=E31D5516-5EAD-4FC9-A400-AA6C781ED488",
+  "-derivedDataPath",
+  "build-watchos/test",
+  "-resultBundlePath",
+  "out/test-results/watchos-cpu-implementation-20261017/watch-standard.xcresult",
+  "CODE_SIGNING_ALLOWED=NO",
+  "CODE_SIGNING_REQUIRED=NO",
+  "ENABLE_TESTABILITY=YES",
+  "-parallel-testing-enabled",
+  "NO",
+  "-only-testing:MangekyoWatchUITests/WatchFlowTests/testStandardProfileCompletes"
+]

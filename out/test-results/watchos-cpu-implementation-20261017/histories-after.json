@@ -1,0 +1,38 @@
+[
+  {
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/m4-single-core-check-20261017/results-after.json",
+    "before": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f",
+    "after": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-v3-cpu-confirm-20261017/phone-final/results/results.json",
+    "before": "8f3a379f29ad0fd3b3b7607f0ff5ff96610cdcf0090f50ec75543afdf6e3a2a6",
+    "after": "8f3a379f29ad0fd3b3b7607f0ff5ff96610cdcf0090f50ec75543afdf6e3a2a6",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ios-vulkan-memory-platform-fix-20261017/phone-final/results/results.json",
+    "before": "89a175ace875c15cf336a479e7a67df96988206f89e5bb95d0bad710ec5dc6d0",
+    "after": "89a175ace875c15cf336a479e7a67df96988206f89e5bb95d0bad710ec5dc6d0",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad81-design-review-20261016/phone-final/results/results.json",
+    "before": "43d43fb16d87ade98bdb80c7c319d8b8e04434eb69cf1c8f8f777e2284b6531b",
+    "after": "43d43fb16d87ade98bdb80c7c319d8b8e04434eb69cf1c8f8f777e2284b6531b",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a16-full-suite-20261016/phone-final/results/results.json",
+    "before": "da2a2612d9dfbb8381792987ea2b98f6a47e947f108cd7c39298498930dd7df1",
+    "after": "da2a2612d9dfbb8381792987ea2b98f6a47e947f108cd7c39298498930dd7df1",
+    "unchanged": true
+  },
+  {
+    "path": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/results/results.json",
+    "before": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f",
+    "after": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f",
+    "unchanged": true
+  }
+]

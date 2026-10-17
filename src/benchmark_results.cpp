@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdlib>
 #include <ctime>
 #include <filesystem>
 #include <fstream>
@@ -141,10 +142,16 @@ std::string CurrentOsVersion() {
         }
     }
 #elif defined(__APPLE__)
+#if TARGET_OS_WATCH
+    if (const char* version = std::getenv("GPU_BENCH_WATCH_OS_VERSION"))
+        return std::string("watchOS ") + version;
+#endif
     char buf[64]{};
     size_t len = sizeof(buf);
     if (sysctlbyname("kern.osproductversion", buf, &len, nullptr, 0) == 0) {
-#if TARGET_OS_IPHONE
+#if TARGET_OS_WATCH
+        return "watchOS " + std::string(buf);
+#elif TARGET_OS_IPHONE
         return "iOS " + std::string(buf);
 #else
         return "macOS " + std::string(buf);
@@ -184,7 +191,9 @@ std::string CurrentPlatform() {
 #elif defined(__OHOS__)
     return "HarmonyOS";
 #elif defined(__APPLE__)
-#if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
+#if TARGET_OS_WATCH
+    return "watchOS";
+#elif defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
     return "iOS";
 #else
     return "macOS";
@@ -199,7 +208,9 @@ std::string CurrentPlatform() {
 }
 
 std::string CurrentProcessArchitecture() {
-#if defined(_M_ARM64) || defined(__aarch64__) || defined(__arm64__)
+#if defined(__arm64_32__)
+    return "ARM64_32";
+#elif defined(_M_ARM64) || defined(__aarch64__) || defined(__arm64__)
     return "ARM64";
 #elif defined(_M_X64) || defined(__x86_64__)
     return "x64";
@@ -873,6 +884,20 @@ bool AppendResult(const BenchmarkResult& r) {
     BenchmarkResult& saved = results.back();
     if (saved.deviceModel.empty()) saved.deviceModel = SystemDeviceModel();
     if (saved.systemMemoryMB == 0) saved.systemMemoryMB = SystemMemoryMB();
+#if defined(__APPLE__) && TARGET_OS_WATCH
+    saved.workloadConfig += ";watchProfile=cpu_watch_v1;corePlacement=scheduler_managed_unclassified";
+    const char* watchProfile = std::getenv("GPU_BENCH_WATCH_PROFILE");
+    const bool watchSmoke = watchProfile && std::string(watchProfile) == "smoke";
+    saved.workloadConfig += watchSmoke ? ";watchRunProfile=smoke" : ";watchRunProfile=standard";
+    if (watchSmoke) saved.workloadVersion += "_ui_smoke";
+#if TARGET_OS_SIMULATOR
+    saved.isSoftware = true;
+    saved.workloadVersion += "_simulator";
+    saved.workloadConfig += ";executionEnvironment=simulator;performanceScope=host_cpu_not_watch";
+#else
+    saved.workloadConfig += ";executionEnvironment=device";
+#endif
+#endif
     return SaveResults(results);
 }
 

@@ -1,0 +1,29 @@
+[ 44%] Built target glad_gl43
+[ 46%] Built target compile_glsl
+[ 50%] Built target cpu_residency_test
+[ 53%] Built target result_quality_test
+[ 53%] Built target complete_suite_test
+[ 53%] Built target suite_process_test
+[ 57%] Built target results_compat_test
+[ 62%] Built target vulkan_membw_results_test
+[ 79%] Built target glfw
+[ 80%] Building CXX object CMakeFiles/gpu_engine.dir/src/cpu_membw.cpp.o
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/cpu_membw.cpp:1:
+In file included from /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/src/cpu_membw.h:3:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint:146:
+In file included from /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__config:15:
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__configuration/availability.h:204:4: warning: "The selected platform is no longer supported by libc++." [-W#warnings]
+  204 | #  warning "The selected platform is no longer supported by libc++."
+      |    ^
+1 warning generated.
+[ 81%] Linking CXX static library libgpu_engine.a
+[ 95%] Built target gpu_engine
+[ 96%] Linking CXX executable gpu_benchmark
+[ 97%] Linking CXX executable cpu_cancel_test
+ld: warning: building for macOS-11.0, but linking with dylib '/opt/homebrew/opt/vulkan-loader/lib/libvulkan.1.dylib' which was built for newer version 27.0
+ld: warning: building for macOS-11.0, but linking with dylib '/opt/homebrew/opt/vulkan-loader/lib/libvulkan.1.dylib' which was built for newer version 27.0
+Copying SPIR-V files next to executable
+[ 98%] Built target cpu_cancel_test
+Copying Metal shader files next to executable
+Copying OpenGL GLSL shader files next to executable
+[100%] Built target gpu_benchmark

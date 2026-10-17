@@ -1,0 +1,84 @@
+__ZN9gpu_bench12_GLOBAL__N_114RunKernelBatchERNS0_11KernelStateE:
+00008b98	mov	x10, #0x814f
+00008b9c	movk	x10, #0xf767, lsl #16
+00008ba0	movk	x10, #0x7b7e, lsl #32
+00008ba4	movk	x10, #0x1405, lsl #48
+00008ba8	ldp	x8, x9, [x0]
+00008bac	ldr	s0, [x0, #0x10]
+00008bb0	mov	w11, #0x1000
+00008bb4	mov	x12, #0x7f2d
+00008bb8	movk	x12, #0x4c95, lsl #16
+00008bbc	movk	x12, #0xf42d, lsl #32
+00008bc0	movk	x12, #0x5851, lsl #48
+00008bc4	mov	x13, #0xfd93
+00008bc8	movk	x13, #0x6659, lsl #16
+00008bcc	movk	x13, #0xfeb8, lsl #32
+00008bd0	movk	x13, #0xd6e8, lsl #48
+00008bd4	adrp	x14, 0 ; 0x8000
+00008bd8	ldr	s1, [x14]
+00008bdc	adrp	x14, 0 ; 0x8000
+00008be0	ldr	d2, [x14]
+00008be4	adrp	x14, 0 ; 0x8000
+00008be8	ldr	s3, [x14]
+00008bec	adrp	x14, 0 ; 0x8000
+00008bf0	ldr	s4, [x14]
+00008bf4	adrp	x14, 0 ; 0x8000
+00008bf8	ldr	d5, [x14]
+00008bfc	adrp	x14, 0 ; 0x8000
+00008c00	ldr	d6, [x14]
+00008c04	mov	x14, #0x9800
+00008c08	movk	x14, #0xcfec, lsl #16
+00008c0c	movk	x14, #0xc332, lsl #32
+00008c10	movk	x14, #0x47f5, lsl #48
+00008c14	adrp	x15, 0 ; 0x8000
+00008c18	ldr	s7, [x15]
+00008c1c	adrp	x15, 0 ; 0x8000
+00008c20	ldr	s17, [x15]
+00008c24	adrp	x15, 0 ; 0x8000
+00008c28	ldr	d18, [x15]
+00008c2c	adrp	x15, 0 ; 0x8000
+00008c30	ldr	d19, [x15]
+00008c34	mov	x15, x10
+00008c38	ldr	d16, [x0, #0x18]
+00008c3c	mul	x16, x8, x12
+00008c40	add	x8, x16, x10
+00008c44	add	x17, x15, x9
+00008c48	add	x16, x17, x16
+00008c4c	eor	x16, x9, x16, ror #47
+00008c50	mul	x9, x16, x13
+00008c54	ubfx	x17, x8, #40, #8
+00008c58	ucvtf	s20, x17
+00008c5c	fmul	s21, s20, s1
+00008c60	ubfx	x17, x9, #39, #9
+00008c64	ucvtf	d20, x17
+00008c68	fmul	d20, d20, d2
+00008c6c	eor	w17, w9, w8
+00008c70	tbnz	w17, #0x0, 0x8c94
+00008c74	fmul	s21, s21, s3
+00008c78	fmadd	s0, s0, s4, s21
+00008c7c	fmul	d20, d20, d5
+00008c80	fmadd	d16, d16, d6, d20
+00008c84	mul	x16, x16, x14
+00008c88	bfxil	x16, x9, #53, #11
+00008c8c	eor	x8, x16, x8
+00008c90	b	0x8ca8
+00008c94	fmul	s21, s21, s7
+00008c98	fmadd	s0, s0, s17, s21
+00008c9c	fmul	d20, d20, d18
+00008ca0	fmadd	d16, d16, d19, d20
+00008ca4	eor	x9, x9, x8, ror #35
+00008ca8	add	x15, x15, #0x1
+00008cac	subs	x11, x11, #0x1
+00008cb0	b.ne	0x8c3c
+00008cb4	fmov	w10, s0
+00008cb8	fmov	x11, d16
+00008cbc	stp	x8, x9, [x0]
+00008cc0	str	s0, [x0, #0x10]
+00008cc4	str	d16, [x0, #0x18]
+00008cc8	eor	x9, x11, x9, ror #57
+00008ccc	ldr	x11, [x0, #0x20]
+00008cd0	eor	x10, x10, x11
+00008cd4	eor	x8, x10, x8
+00008cd8	eor	x8, x9, x8
+00008cdc	str	x8, [x0, #0x20]
+00008ce0	ret

@@ -1,0 +1,574 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		029EB68088A14E6088DC0279 /* benchmark_results.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9F774C5BC723EDF9847845DC /* benchmark_results.cpp */; };
+		23D7BD7E1300871123BB891F /* WatchModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D56BF5A9712F830ECE6F9 /* WatchModels.swift */; };
+		2A1A2C77C0DB35C748C4E050 /* WatchFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5525B1FD742F263287EB525 /* WatchFlowTests.swift */; };
+		4C454AC9B62A25F4593F806D /* MangekyoWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA1AA423CD7403090D3E0120 /* MangekyoWatchApp.swift */; };
+		68E8CC09E21BFF617FCCD95F /* cpu_membw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 827401F4AB3B9CE97B38B12F /* cpu_membw.cpp */; };
+		6CC88DC64EDE2CE2D8BC818D /* path_service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48390E57C5EA8046783D740F /* path_service.cpp */; };
+		798A3155959F42E024CC9C12 /* cpu_cli.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 588DC8AEC42B85017FA9D3EA /* cpu_cli.cpp */; };
+		899B2B42AD84297BE5A0F39E /* WatchModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D55F34351F84941C52316B82 /* WatchModelsTests.swift */; };
+		9995DBF915A4973DEEFA67AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EDEC17BC10576E9DCBE79AE2 /* Assets.xcassets */; };
+		BD59D8D15D8DF06329CE1600 /* cpu_benchmark.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B11E5A2FA69FBBC41312CB3D /* cpu_benchmark.cpp */; };
+		EBA437921578B594229997CB /* system_info.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0BA43760122C597EE352E109 /* system_info.cpp */; };
+		F86D06E5838C7850CE4A2058 /* WatchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6744C334517734984DA97E2 /* WatchEngine.swift */; };
+		FB8794F4904CB9CA556F6061 /* WatchCpuBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9954816C08C2BD40470F60CE /* WatchCpuBridge.mm */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A3B0C193598BD16632415F08 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EDCCEEFFEA9C6D07FAD0A1A4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6BD6706B72A02017A435AEED;
+			remoteInfo = MangekyoWatch;
+		};
+		A3DC4079AE13DFA23234FFBB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EDCCEEFFEA9C6D07FAD0A1A4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6BD6706B72A02017A435AEED;
+			remoteInfo = MangekyoWatch;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0BA43760122C597EE352E109 /* system_info.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = system_info.cpp; sourceTree = "<group>"; };
+		3FC8172A767698E53AC38C75 /* MangekyoWatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MangekyoWatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		48390E57C5EA8046783D740F /* path_service.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = path_service.cpp; sourceTree = "<group>"; };
+		4F873A00275BCF7C08CE5547 /* MangekyoWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MangekyoWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		588DC8AEC42B85017FA9D3EA /* cpu_cli.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = cpu_cli.cpp; sourceTree = "<group>"; };
+		827401F4AB3B9CE97B38B12F /* cpu_membw.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = cpu_membw.cpp; sourceTree = "<group>"; };
+		842D56BF5A9712F830ECE6F9 /* WatchModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchModels.swift; sourceTree = "<group>"; };
+		946891FDE671D087F9F45C15 /* MangekyoWatchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MangekyoWatchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9954816C08C2BD40470F60CE /* WatchCpuBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = WatchCpuBridge.mm; sourceTree = "<group>"; };
+		9F774C5BC723EDF9847845DC /* benchmark_results.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = benchmark_results.cpp; sourceTree = "<group>"; };
+		A6744C334517734984DA97E2 /* WatchEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchEngine.swift; sourceTree = "<group>"; };
+		B11E5A2FA69FBBC41312CB3D /* cpu_benchmark.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = cpu_benchmark.cpp; sourceTree = "<group>"; };
+		B5525B1FD742F263287EB525 /* WatchFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchFlowTests.swift; sourceTree = "<group>"; };
+		D55F34351F84941C52316B82 /* WatchModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchModelsTests.swift; sourceTree = "<group>"; };
+		EA1AA423CD7403090D3E0120 /* MangekyoWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangekyoWatchApp.swift; sourceTree = "<group>"; };
+		EDEC17BC10576E9DCBE79AE2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F49D856BD1D8A9FED2BCA74F /* WatchCpuBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WatchCpuBridge.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		2224A925C3609A24D798FE79 /* MangekyoWatch */ = {
+			isa = PBXGroup;
+			children = (
+				EDEC17BC10576E9DCBE79AE2 /* Assets.xcassets */,
+				EA1AA423CD7403090D3E0120 /* MangekyoWatchApp.swift */,
+				F49D856BD1D8A9FED2BCA74F /* WatchCpuBridge.h */,
+				9954816C08C2BD40470F60CE /* WatchCpuBridge.mm */,
+				A6744C334517734984DA97E2 /* WatchEngine.swift */,
+				842D56BF5A9712F830ECE6F9 /* WatchModels.swift */,
+			);
+			path = MangekyoWatch;
+			sourceTree = "<group>";
+		};
+		62C3DC16EF56826E204F9491 /* Vulkan-GPU-Compute-Microbenchmark */ = {
+			isa = PBXGroup;
+			children = (
+				6F265C124BF3A0801766C0DD /* src */,
+			);
+			name = "Vulkan-GPU-Compute-Microbenchmark";
+			path = ..;
+			sourceTree = "<group>";
+		};
+		6F265C124BF3A0801766C0DD /* src */ = {
+			isa = PBXGroup;
+			children = (
+				9F774C5BC723EDF9847845DC /* benchmark_results.cpp */,
+				B11E5A2FA69FBBC41312CB3D /* cpu_benchmark.cpp */,
+				588DC8AEC42B85017FA9D3EA /* cpu_cli.cpp */,
+				827401F4AB3B9CE97B38B12F /* cpu_membw.cpp */,
+				48390E57C5EA8046783D740F /* path_service.cpp */,
+				0BA43760122C597EE352E109 /* system_info.cpp */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		791C5033F929626E71F122A0 = {
+			isa = PBXGroup;
+			children = (
+				2224A925C3609A24D798FE79 /* MangekyoWatch */,
+				9A62DB32684F110B1453D64D /* MangekyoWatchTests */,
+				BD29F9346846381AE1DA4D7F /* MangekyoWatchUITests */,
+				62C3DC16EF56826E204F9491 /* Vulkan-GPU-Compute-Microbenchmark */,
+				9F7320692A3418DDFB6830A1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9A62DB32684F110B1453D64D /* MangekyoWatchTests */ = {
+			isa = PBXGroup;
+			children = (
+				D55F34351F84941C52316B82 /* WatchModelsTests.swift */,
+			);
+			path = MangekyoWatchTests;
+			sourceTree = "<group>";
+		};
+		9F7320692A3418DDFB6830A1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4F873A00275BCF7C08CE5547 /* MangekyoWatch.app */,
+				3FC8172A767698E53AC38C75 /* MangekyoWatchTests.xctest */,
+				946891FDE671D087F9F45C15 /* MangekyoWatchUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BD29F9346846381AE1DA4D7F /* MangekyoWatchUITests */ = {
+			isa = PBXGroup;
+			children = (
+				B5525B1FD742F263287EB525 /* WatchFlowTests.swift */,
+			);
+			path = MangekyoWatchUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1BB872396F93C317C69ED0F5 /* MangekyoWatchUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 46A51B9130FF50D17FC17DD6 /* Build configuration list for PBXNativeTarget "MangekyoWatchUITests" */;
+			buildPhases = (
+				764BB2F0ACB131D25D679BE9 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0A81A6F1DBD43C17FA7FA7C4 /* PBXTargetDependency */,
+			);
+			name = MangekyoWatchUITests;
+			packageProductDependencies = (
+			);
+			productName = MangekyoWatchUITests;
+			productReference = 946891FDE671D087F9F45C15 /* MangekyoWatchUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		46FE504F7605CF8D16EF5E6F /* MangekyoWatchTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 760C8F7C63A9BCD209615B58 /* Build configuration list for PBXNativeTarget "MangekyoWatchTests" */;
+			buildPhases = (
+				EFBE99674B1F54E614D24588 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				ED769D8232424288099B97B4 /* PBXTargetDependency */,
+			);
+			name = MangekyoWatchTests;
+			packageProductDependencies = (
+			);
+			productName = MangekyoWatchTests;
+			productReference = 3FC8172A767698E53AC38C75 /* MangekyoWatchTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		6BD6706B72A02017A435AEED /* MangekyoWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 51860FC9708E4365C8324807 /* Build configuration list for PBXNativeTarget "MangekyoWatch" */;
+			buildPhases = (
+				3B83BF30AB1426E73D5EEA4E /* Sources */,
+				AABD92CE79EAF9002FE2C886 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MangekyoWatch;
+			packageProductDependencies = (
+			);
+			productName = MangekyoWatch;
+			productReference = 4F873A00275BCF7C08CE5547 /* MangekyoWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EDCCEEFFEA9C6D07FAD0A1A4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					1BB872396F93C317C69ED0F5 = {
+						TestTargetID = 6BD6706B72A02017A435AEED;
+					};
+					6BD6706B72A02017A435AEED = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = D89F293A1DDF9E362BD9B88E /* Build configuration list for PBXProject "MangekyoWatch" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 791C5033F929626E71F122A0;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 9F7320692A3418DDFB6830A1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6BD6706B72A02017A435AEED /* MangekyoWatch */,
+				46FE504F7605CF8D16EF5E6F /* MangekyoWatchTests */,
+				1BB872396F93C317C69ED0F5 /* MangekyoWatchUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AABD92CE79EAF9002FE2C886 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9995DBF915A4973DEEFA67AA /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3B83BF30AB1426E73D5EEA4E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C454AC9B62A25F4593F806D /* MangekyoWatchApp.swift in Sources */,
+				FB8794F4904CB9CA556F6061 /* WatchCpuBridge.mm in Sources */,
+				F86D06E5838C7850CE4A2058 /* WatchEngine.swift in Sources */,
+				23D7BD7E1300871123BB891F /* WatchModels.swift in Sources */,
+				029EB68088A14E6088DC0279 /* benchmark_results.cpp in Sources */,
+				BD59D8D15D8DF06329CE1600 /* cpu_benchmark.cpp in Sources */,
+				798A3155959F42E024CC9C12 /* cpu_cli.cpp in Sources */,
+				68E8CC09E21BFF617FCCD95F /* cpu_membw.cpp in Sources */,
+				6CC88DC64EDE2CE2D8BC818D /* path_service.cpp in Sources */,
+				EBA437921578B594229997CB /* system_info.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		764BB2F0ACB131D25D679BE9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2A1A2C77C0DB35C748C4E050 /* WatchFlowTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EFBE99674B1F54E614D24588 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				899B2B42AD84297BE5A0F39E /* WatchModelsTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0A81A6F1DBD43C17FA7FA7C4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6BD6706B72A02017A435AEED /* MangekyoWatch */;
+			targetProxy = A3DC4079AE13DFA23234FFBB /* PBXContainerItemProxy */;
+		};
+		ED769D8232424288099B97B4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6BD6706B72A02017A435AEED /* MangekyoWatch */;
+			targetProxy = A3B0C193598BD16632415F08 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		09958931B56E868E663B842B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		1114244F195540D6646A855F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = MangekyoWatch;
+			};
+			name = Release;
+		};
+		26A1B02109BC15D8CD5298F5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"HAVE_CPU_MEMBW=1",
+					"GPU_BENCH_APP_VERSION=\\\"0.2.6\\\"",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "\"$(PROJECT_DIR)/../src\"";
+				INFOPLIST_KEY_CFBundleDisplayName = "Mangekyo CPU";
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				MARKETING_VERSION = 0.2.6;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fairchild.Mangekyo.cpu.watchkitapp;
+				PRODUCT_NAME = MangekyoWatch;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = MangekyoWatch/WatchCpuBridge.h;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		37F881ACE994BC6F7B836684 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = MangekyoWatch;
+			};
+			name = Debug;
+		};
+		3A529466A48507A8D00EB605 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MangekyoWatch.app/MangekyoWatch";
+			};
+			name = Release;
+		};
+		6F0492B2802B1AD671418264 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"HAVE_CPU_MEMBW=1",
+					"GPU_BENCH_APP_VERSION=\\\"0.2.6\\\"",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "\"$(PROJECT_DIR)/../src\"";
+				INFOPLIST_KEY_CFBundleDisplayName = "Mangekyo CPU";
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				MARKETING_VERSION = 0.2.6;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fairchild.Mangekyo.cpu.watchkitapp;
+				PRODUCT_NAME = MangekyoWatch;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = MangekyoWatch/WatchCpuBridge.h;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+		D933F00EE0CCE92B6D647882 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		ED1F15DCD950063109EDE670 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MangekyoWatch.app/MangekyoWatch";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		46A51B9130FF50D17FC17DD6 /* Build configuration list for PBXNativeTarget "MangekyoWatchUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				37F881ACE994BC6F7B836684 /* Debug */,
+				1114244F195540D6646A855F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		51860FC9708E4365C8324807 /* Build configuration list for PBXNativeTarget "MangekyoWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				26A1B02109BC15D8CD5298F5 /* Debug */,
+				6F0492B2802B1AD671418264 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		760C8F7C63A9BCD209615B58 /* Build configuration list for PBXNativeTarget "MangekyoWatchTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ED1F15DCD950063109EDE670 /* Debug */,
+				3A529466A48507A8D00EB605 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D89F293A1DDF9E362BD9B88E /* Build configuration list for PBXProject "MangekyoWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				09958931B56E868E663B842B /* Debug */,
+				D933F00EE0CCE92B6D647882 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = EDCCEEFFEA9C6D07FAD0A1A4 /* Project object */;
+}

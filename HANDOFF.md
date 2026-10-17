@@ -2,6 +2,30 @@
 
 > **2026-10-17：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** iOS Vulkan固定256 MiB限制已修复，iPad8,7新预算版本确认56.657 GB/s平台，历史74条。A15/另一台iPad仍需接回补这一新版本；旧记录保留。
 
+## 2026-10-17 independent watchOS CPU app implemented
+
+- New `watch-gui/` watchOS10+ standalone CPU app and `scripts/build-watchos.sh`.
+  One button runs shared compute and cache/memory/page/storage jobs, stores
+  three result rows plus full curves/logs/manifests, and exposes history,
+  full-screen curves, progress and a top-level stop button. Auto zh/en works.
+- CPU kernels/timing unchanged; scheduler-managed, no numbered-core/P/E claims
+  or Watch private residency accounting. Single scan <=16MiB/current app
+  allowance/4, unknown allowance fallback8MiB; all-core cap16MiB, pages8MiB,
+  file32MiB. Unsettled headline remains reference/review. File I/O is not swap.
+- Watch device arm64_32/arm64 unsigned Release and simulator builds pass.
+  Both device hot loops retain random branch+FP32/FP64 FMA. Final3 model tests,
+  2 UI flow tests and1 standard-profile UI test pass; native CTest7/7 passes.
+  Standard simulator run uses host14 CPUs and saves108 curve points, pages
+  and storage measured; plateau unconfirmed =>review correctly. Final UI run
+  opens actual6-series chart, persists history after relaunch and cancels.
+- All15 archived rows are simulator-only, flaggedsoftware/host CPU with
+  separate versions. No physical Apple Watch tested or signed/installed;
+  hardware performance, headroom/thermals and foreground behavior remain open.
+- Five canonical Apple histories/liveMac unchanged. Dedicated simulator shut
+  down. Docs/raw logs/failures/JSON/CSV/screenshots/hashes and verification:
+  out/test-results/watchos-cpu-implementation-20261017/report.md.
+  Existing A15/A12X/A16 pending physical tests remain as below.
+
 ## 2026-10-17 A12X Metal memory status clarification
 
 - The completed iPad8,7 V3 memory plateau is Vulkan/MoltenVK, not native Metal.

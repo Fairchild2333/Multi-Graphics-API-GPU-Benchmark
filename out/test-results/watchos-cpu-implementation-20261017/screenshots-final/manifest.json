@@ -1,0 +1,26 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "E31D5516-5EAD-4FC9-A400-AA6C781ED488",
+        "deviceName" : "Mangekyo Watch CPU 20261017",
+        "exportedFileName" : "54ACC026-F19B-4ABA-A8CB-CCC0B9E342FC.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "watch-memory-curves_0_70C723C4-D00F-43F1-B4F6-7A7B0149A5E6.png",
+        "timestamp" : 1792224905.013
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "E31D5516-5EAD-4FC9-A400-AA6C781ED488",
+        "deviceName" : "Mangekyo Watch CPU 20261017",
+        "exportedFileName" : "BE6C77CC-9CB8-45AB-94CA-F5154133B6F1.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "watch-completed_0_9F10C545-5C1F-4F44-96FD-67BDF3DCBF4C.png",
+        "timestamp" : 1792224898.893
+      }
+    ],
+    "testIdentifier" : "WatchFlowTests/testOneButtonCompletesAndHistorySurvivesRelaunch()",
+    "testIdentifierURL" : "test://com.apple.xcode/MangekyoWatch/MangekyoWatchUITests/WatchFlowTests/testOneButtonCompletesAndHistorySurvivesRelaunch"
+  }
+]

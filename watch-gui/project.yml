@@ -1,0 +1,70 @@
+name: MangekyoWatch
+options:
+  deploymentTarget:
+    watchOS: "10.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    CLANG_CXX_LANGUAGE_STANDARD: "c++17"
+    CLANG_ENABLE_OBJC_ARC: YES
+targets:
+  MangekyoWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: MangekyoWatch
+      - path: ../src/cpu_benchmark.cpp
+      - path: ../src/cpu_membw.cpp
+      - path: ../src/cpu_cli.cpp
+      - path: ../src/benchmark_results.cpp
+      - path: ../src/path_service.cpp
+      - path: ../src/system_info.cpp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fairchild.Mangekyo.cpu.watchkitapp
+        PRODUCT_NAME: MangekyoWatch
+        MARKETING_VERSION: "0.2.6"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Mangekyo CPU
+        INFOPLIST_KEY_WKApplication: YES
+        INFOPLIST_KEY_WKWatchOnly: YES
+        SWIFT_OBJC_BRIDGING_HEADER: MangekyoWatch/WatchCpuBridge.h
+        HEADER_SEARCH_PATHS: '"$(PROJECT_DIR)/../src"'
+        GCC_PREPROCESSOR_DEFINITIONS:
+          - "$(inherited)"
+          - HAVE_CPU_MEMBW=1
+          - GPU_BENCH_APP_VERSION=\"0.2.6\"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_USER_SCRIPT_SANDBOXING: YES
+  MangekyoWatchTests:
+    type: bundle.unit-test
+    platform: watchOS
+    sources:
+      - path: MangekyoWatchTests
+    dependencies:
+      - target: MangekyoWatch
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+  MangekyoWatchUITests:
+    type: bundle.ui-testing
+    platform: watchOS
+    sources:
+      - path: MangekyoWatchUITests
+    dependencies:
+      - target: MangekyoWatch
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  MangekyoWatch:
+    build:
+      targets:
+        MangekyoWatch: all
+    test:
+      targets:
+        - MangekyoWatchTests
+        - MangekyoWatchUITests

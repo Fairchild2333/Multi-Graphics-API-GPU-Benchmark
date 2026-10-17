@@ -1,0 +1,30 @@
+{
+  "executionEnvironment" : "simulator",
+  "id" : "3EEE6E5D-3A8B-482C-9B85-1ED2BD81E7B9",
+  "jobs" : [
+    {
+      "id" : "cpu_compute",
+      "notes" : [
+
+      ],
+      "resultIDs" : [
+
+      ],
+      "status" : "cancelled"
+    },
+    {
+      "id" : "cpu_memory",
+      "notes" : [
+
+      ],
+      "resultIDs" : [
+
+      ],
+      "status" : "pending"
+    }
+  ],
+  "profile" : "standard",
+  "startedAt" : 813917223.091987,
+  "status" : "cancelled",
+  "updatedAt" : 813917228.534788
+}

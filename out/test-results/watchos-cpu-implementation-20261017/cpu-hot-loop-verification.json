@@ -1,0 +1,28 @@
+[
+  {
+    "architecture": "arm64_32",
+    "command": [
+      "xcrun",
+      "otool",
+      "-tvV",
+      "build-watchos/watchos/Build/Intermediates.noindex/MangekyoWatch.build/Release-watchos/MangekyoWatch.build/Objects-normal/arm64_32/cpu_benchmark.o"
+    ],
+    "objectSha256": "a4b5b2efc10f637c9cce584355b79fafaed31a9f85842024242c81b0b990b48e",
+    "lowestBitBranch": true,
+    "fp32Fp64FMA": true,
+    "noFcselInKernel": true
+  },
+  {
+    "architecture": "arm64",
+    "command": [
+      "xcrun",
+      "otool",
+      "-tvV",
+      "build-watchos/watchos/Build/Intermediates.noindex/MangekyoWatch.build/Release-watchos/MangekyoWatch.build/Objects-normal/arm64/cpu_benchmark.o"
+    ],
+    "objectSha256": "a2820585a837c1edd05e0f969784a4b98d6ea87c139108a874f6567c93411a22",
+    "lowestBitBranch": true,
+    "fp32Fp64FMA": true,
+    "noFcselInKernel": true
+  }
+]

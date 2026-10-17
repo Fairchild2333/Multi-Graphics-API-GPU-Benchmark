@@ -1,0 +1,25 @@
+[
+  {
+    "command": [
+      "xcrun",
+      "simctl",
+      "terminate",
+      "E31D5516-5EAD-4FC9-A400-AA6C781ED488",
+      "com.fairchild.Mangekyo.cpu.watchkitapp"
+    ],
+    "returnCode": 3,
+    "stdout": "",
+    "stderr": "An error was encountered processing the command (domain=NSPOSIXErrorDomain, code=3):\nSimulator device failed to terminate com.fairchild.Mangekyo.cpu.watchkitapp.\nfound nothing to terminate\nUnderlying error (domain=NSPOSIXErrorDomain, code=3):\n\tThe request to terminate \"com.fairchild.Mangekyo.cpu.watchkitapp\" failed. found nothing to terminate\n\tfound nothing to terminate\n"
+  },
+  {
+    "command": [
+      "xcrun",
+      "simctl",
+      "shutdown",
+      "E31D5516-5EAD-4FC9-A400-AA6C781ED488"
+    ],
+    "returnCode": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

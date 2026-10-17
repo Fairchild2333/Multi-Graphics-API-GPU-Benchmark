@@ -1,0 +1,11 @@
+{
+  "id": "E31D5516-5EAD-4FC9-A400-AA6C781ED488",
+  "command": [
+    "xcrun",
+    "simctl",
+    "create",
+    "Mangekyo Watch CPU 20261017",
+    "com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-12-46mm",
+    "com.apple.CoreSimulator.SimRuntime.watchOS-27-0"
+  ]
+}
