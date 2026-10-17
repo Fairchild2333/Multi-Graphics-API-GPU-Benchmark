@@ -1,0 +1,46 @@
+{
+  "buildCommand": [
+    "xcrun",
+    "clang++",
+    "-std=c++17",
+    "-O2",
+    "-fobjc-arc",
+    "-framework",
+    "Foundation",
+    "-framework",
+    "Metal",
+    "scripts/metal-math-probe/burn_stage_probe.mm",
+    "-o",
+    "/var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/T/metal-math-probe/burn_stage_probe"
+  ],
+  "sourceSha256": "bc34870724d2dc49c494e3b15231cc77fef1914ec2d7941ec438c40189b55e7f",
+  "runs": [
+    {
+      "command": [
+        "/var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/T/metal-math-probe/burn_stage_probe",
+        "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/shaders/gpu_burn.metal",
+        "fma"
+      ],
+      "returnCode": 0,
+      "log": "fma-pair-output.log"
+    },
+    {
+      "command": [
+        "/var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/T/metal-math-probe/burn_stage_probe",
+        "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/shaders/gpu_burn.metal",
+        "discard"
+      ],
+      "returnCode": 0,
+      "log": "discard-output.log"
+    },
+    {
+      "command": [
+        "/var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/T/metal-math-probe/burn_stage_probe",
+        "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/shaders/gpu_burn.metal",
+        "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/metal-math-diagnosis-20261017/discard-control.gputrace"
+      ],
+      "returnCode": 0,
+      "log": "discard-capture.log"
+    }
+  ]
+}

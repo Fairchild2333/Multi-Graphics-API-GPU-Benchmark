@@ -1,0 +1,8 @@
+Cost,Name,Type,Pipeline State,# SIMD Groups,# Allocated Registers,High Register,Spilled Bytes
+59.12%,gpuBurnFragment,Fragment,Unmodified engine shader,14970,134,134,0 bytes
+18.37%,gpuBurnFragment (2),Fragment,Diagnostic only: no discard,8489,126,126,0 bytes
+17.91%,f_burn_step,Fragment,Simplified fragment loop,28920,68,68,0 bytes
+4.13%,k_burn_step,Compute,MTLComputePipelineState 1,3824,72,72,0 bytes
+0.00%,gpuBurnVertex (2),Vertex,Diagnostic only: no discard,0,4,4,0 bytes
+0.00%,gpuBurnVertex,Vertex,Unmodified engine shader,4,4,4,0 bytes
+0.00%,v_fullscreen,Vertex,Simplified fragment loop,2,4,4,0 bytes

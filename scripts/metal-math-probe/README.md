@@ -56,6 +56,38 @@ It raised two questions that the two newer rows answer:
   loss. The next look is then a GPU capture in Xcode of both versions:
   occupancy and register use.
 
-The `fma (literal)` and `Burn fragment` rows were added on Windows on
-2026-10-17 and have not been compiled yet. The `mathFloatingPointFunctions`
-setting needs the macOS 15 SDK or newer.
+The two rows were compiled and run on the M4 Pro on 2026-10-17 (Xcode 27.1).
+Fixed 256-step fragment/compute was 97.7–98.4%, so the pure fragment stage does
+not account for the real shader's 67%. Xcode found about 50% extra fragment
+invocations in the complete shader. Removing the final discard only in a
+diagnostic copy almost halved single-draw time, but made the first of two opaque
+draws disappear and changed the image. The control is not a valid replacement
+benchmark. Warmed paired literal FMA was 7.030 versus 6.817 TFLOPS, gain 3.13%.
+See the [report and captures](../../out/test-results/metal-math-diagnosis-20261017/report.md).
+
+## Fixed-step and visibility controls
+
+`burn_stage_probe.mm` reuses the simplified loop from the original probe and
+reads `shaders/gpu_burn.metal` directly for the unmodified full shader. It stores
+no App scores. From the repository root:
+
+```bash
+mkdir -p "${TMPDIR:-/tmp}/metal-math-probe"
+xcrun clang++ -std=c++17 -O2 -fobjc-arc -framework Foundation -framework Metal \
+  scripts/metal-math-probe/burn_stage_probe.mm \
+  -o "${TMPDIR:-/tmp}/metal-math-probe/burn_stage_probe"
+"${TMPDIR:-/tmp}/metal-math-probe/burn_stage_probe" shaders/gpu_burn.metal
+```
+
+An optional second argument selects `fma` (warmed forward/reverse FMA), `discard`
+(single/two-draw visibility controls), or a new `.gputrace` path. Capture requires
+`MTL_CAPTURE_ENABLED=1` in that process's environment. Replays and profiling can
+run at a different performance state: use uncaptured timings for throughput,
+and captured counters to investigate execution, never interchange their times.
+
+`MATHSTAGE` rates count **submitted** pixel-steps. In the no-discard two-draw
+control the first draw can be culled, so its printed rate does not represent two
+executed loops. Its image differs too. This control must not populate formal
+`results.json` or replace any existing score. All raw 7-sample timings, including
+startup outliers, are retained; the fixed-step summary is their median.
+The `mathFloatingPointFunctions` setting needs the macOS 15 SDK or newer.

@@ -1,0 +1,3 @@
+GPU: Apple M4 Pro
+mathMode=2 mathFloatingPointFunctions=0 languageVersion=262145
+Capture: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/metal-math-diagnosis-20261017/discard-control.gputrace

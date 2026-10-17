@@ -1,0 +1,2 @@
+ld: open() failed, errno=2 (No such file or directory) for '/tmp/metal-math-probe/burn_stage_probe'
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)

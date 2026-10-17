@@ -1,0 +1,299 @@
+Window: "", App: Xcode.
+0 standard window ID: Xcode.WorkspaceWindow, Secondary Actions: Raise
+	1 split group Files.xcfilescontainer, ID: Workspace window tab content, Description: /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.1-27A9275/Xcode/FilesWorkspaces/E71A4EB1-28C7-4863-96E8-3DD47B90C376/Files.xcfilescontainer
+		2 container navigator
+			3 scroll area
+				4 outline Description: Debug Navigator, ID: debug navigator
+					5 row (selectable, expanded) Value: discard-control, Secondary Actions: Collapse
+						6 disclosure triangle 1
+					7 row (selectable) Description: Text below a photo, Value: Summary
+					8 row (selectable) Description: App rectangle connected to an app below, filled, Value: Dependencies
+					9 row (selected) Description: stopwatch, Value: Performance
+77.57 ms
+					10 row (selectable) Description: Memory chip, Value: Memory
+17.88 MiB
+					11 row (selectable) Description: GPU Navigator Mode, Value: Group by API Call
+					12 row (selectable, collapsed) Description: MTLCommandBuffer 1, Secondary Actions: Expand, Value: MTLCommandBuffer 1
+4.60%
+						13 disclosure triangle 0
+					14 row (selectable, collapsed) Description: MTLCommandBuffer 2, Secondary Actions: Expand, Value: MTLCommandBuffer 2
+17.92%
+						15 disclosure triangle 0
+					16 row (selectable, collapsed) Description: Unmodified engine shader (2), Secondary Actions: Expand, Value: Unmodified engine shader (2)
+59.12%
+						17 disclosure triangle 0
+					18 row (selectable, collapsed) Description: Diagnostic only: no discard (2), Secondary Actions: Expand, Value: Diagnostic only: no discard (2)
+18.37%
+						19 disclosure triangle 0
+			20 search text field Description: Filter the trace list, Placeholder: Filter
+				21 checkbox Show only related stack frames, Value: 0
+				22 checkbox Show only calls with issues, Value: 0
+				23 checkbox Show only commands and markers, Value: 0
+				24 button Icon View Drop Down
+					25 image
+			26 tab group two-level chooser segmented control
+				27 tab Description: Project, Help: Show the Project navigator, Value: 0
+				28 tab Description: Source Control, Help: Show the Source Control navigator, Value: 0
+				29 tab Description: Bookmarks, Help: Show the Bookmark navigator, Value: 0
+				30 tab Description: Find, Help: Show the Find navigator, Value: 0
+				31 tab Description: Issues, Help: Show the Issue navigator, Value: 0
+				32 tab Description: Tests, Help: Show the Test navigator, Value: 0
+				33 tab Description: Debug, Help: Show the Debug Navigator, Value: 1
+				34 tab Description: Breakpoints, Help: Show the Breakpoints Navigator, Value: 0
+				35 tab Description: Reports, Help: Show the Report navigator, Value: 0
+		36 splitter (disabled, settable, float) 290
+		37 container editor area
+			38 split group
+				39 container Performance
+					40 container Description: Performance, ID: editor context
+						41 split group
+							42 table (disabled)
+								43 container
+									44 column (disabled) Cost
+									45 column (disabled) Name
+									46 column (disabled) Type, ID: ProgramType
+									47 column (disabled) Pipeline State, ID: PipelineState
+									48 column (disabled) # SIMD Groups, ID: NumberOfCliques
+									49 column (disabled) # Allocated Registers, ID: AllocatedGPR
+									50 column (disabled) High Register, ID: HighRegisterUsage
+									51 column (disabled) Spilled Bytes, ID: SpilledBytes
+								52 scroll area Secondary Actions: Scroll Left, Scroll Right, Scroll Up, Scroll Down
+									53 container
+										54 row (disabled)
+											55 cell (disabled)
+												56 text 59.12%
+											57 cell (disabled)
+												58 text gpuBurnFragment
+											59 cell (disabled)
+												60 text Fragment
+											61 cell (disabled)
+												62 text Unmodified engine shader
+											63 cell (disabled)
+												64 text 14970
+											65 cell (disabled)
+												66 text 134
+											67 cell (disabled)
+												68 text 134
+											69 cell (disabled)
+												70 text 0 bytes
+										71 row (disabled)
+											72 cell (disabled)
+												73 text 18.37%
+											74 cell (disabled)
+												75 text gpuBurnFragment (2)
+											76 cell (disabled)
+												77 text Fragment
+											78 cell (disabled)
+												79 text Diagnostic only: no discard
+											80 cell (disabled)
+												81 text 8489
+											82 cell (disabled)
+												83 text 126
+											84 cell (disabled)
+												85 text 126
+											86 cell (disabled)
+												87 text 0 bytes
+										88 row (disabled)
+											89 cell (disabled)
+												90 text 17.91%
+											91 cell (disabled)
+												92 text f_burn_step
+											93 cell (disabled)
+												94 text Fragment
+											95 cell (disabled)
+												96 text Simplified fragment loop
+											97 cell (disabled)
+												98 text 28920
+											99 cell (disabled)
+												100 text 68
+											101 cell (disabled)
+												102 text 68
+											103 cell (disabled)
+												104 text 0 bytes
+										105 row (disabled)
+											106 cell (disabled)
+												107 text 4.13%
+											108 cell (disabled)
+												109 text k_burn_step
+											110 cell (disabled)
+												111 text Compute
+											112 cell (disabled)
+												113 text MTLComputePipelineState 1
+											114 cell (disabled)
+												115 text 3824
+											116 cell (disabled)
+												117 text 72
+											118 cell (disabled)
+												119 text 72
+											120 cell (disabled)
+												121 text 0 bytes
+										122 row (disabled)
+											123 cell (disabled)
+												124 text 0.00%
+											125 cell (disabled)
+												126 text gpuBurnVertex (2)
+											127 cell (disabled)
+												128 text Vertex
+											129 cell (disabled)
+												130 text Diagnostic only: no discard
+											131 cell (disabled)
+												132 text 0
+											133 cell (disabled)
+												134 text 4
+											135 cell (disabled)
+												136 text 4
+											137 cell (disabled)
+												138 text 0 bytes
+										139 row (disabled)
+											140 cell (disabled)
+												141 text 0.00%
+											142 cell (disabled)
+												143 text gpuBurnVertex
+											144 cell (disabled)
+												145 text Vertex
+											146 cell (disabled)
+												147 text Unmodified engine shader
+											148 cell (disabled)
+												149 text 4
+											150 cell (disabled)
+												151 text 4
+											152 cell (disabled)
+												153 text 4
+											154 cell (disabled)
+												155 text 0 bytes
+										156 row (disabled)
+											157 cell (disabled)
+												158 text 0.00%
+											159 cell (disabled)
+												160 text v_fullscreen
+											161 cell (disabled)
+												162 text Vertex
+											163 cell (disabled)
+												164 text Simplified fragment loop
+											165 cell (disabled)
+												166 text 2
+											167 cell (disabled)
+												168 text 4
+											169 cell (disabled)
+												170 text 4
+											171 cell (disabled)
+												172 text 0 bytes
+									173 scroll bar (settable, float) 0
+										174 value indicator (settable, float) 0
+										175 increment arrow button
+										176 decrement arrow button
+										177 increment page button
+										178 decrement page button
+									179 scroll bar (disabled, settable, float) 0
+							180 button Encoders, Description: move
+							181 scroll area TimelineNavigator
+								182 outline
+									183 row (selectable, collapsed) Secondary Actions: Expand, Value: MTLRenderCommandEncoder 2
+59.12%
+										184 disclosure triangle 0
+									185 row (selectable, collapsed) Secondary Actions: Expand, Value: MTLRenderCommandEncoder 3
+18.37%
+										186 disclosure triangle 0
+									187 row (selectable, collapsed) Secondary Actions: Expand, Value: MTLRenderCommandEncoder 1
+17.92%
+										188 disclosure triangle 0
+									189 row (selectable, collapsed) Secondary Actions: Expand, Value: MTLComputeCommandEncoder 1
+4.60%
+										190 disclosure triangle 0
+									191 container
+										192 sort button Encoders
+										193 sort button Cost
+							194 search text field (settable) Description: Filter the profiling timeline, Placeholder: Filter Encoder
+								195 button Icon View Drop Down
+									196 image
+							197 splitter (disabled, settable, float) 292
+							198 splitter (disabled, settable, float) 793
+							199 button Description: Inset filled lefthalf in a rectangle, Help: Toggle Navigator, ID: GTTimelineSidebarButton
+							200 button Description: Inset filled righthalf in a rectangle, Help: Toggle Sidebar, ID: GTTimelineSidebarButton
+							201 button Share
+							202 button Gauge with dots and needle at 67 percent
+							203 button Overview
+							204 button Timeline
+							205 button Shaders
+							206 button Counters
+							207 button Cost Graph
+							208 button Heat Map
+						209 container Description: Jump Bar, ID: jump bar
+							210 container
+								211 menu button Description: Related Items, Help: Navigate to Related Items, ID: related items
+								212 pop up button Performance
+								213 pop up button No Selection
+			214 container debug bar
+				215 button Description: Breakpoints, Help: Deactivate Breakpoints, Value: 1
+				216 button Stop GPU workload, Help: Stop debugging the GPU workload, Details: Xcode.GPUDebugger.debuggerBarStopFrameAXDescription, ID: GPUDebugger.CaptureSettings
+				217 button (disabled) Help: Debug Shader, Value: -1
+				218 button Help: Profile GPU trace, Value: 2, Details: GPU Performance State, ID: InducePerformanceStateButton
+				219 button Description: main, Help: Shows a list of available branches
+				220 button Description: hide debug area, Help: Hide the Debug Area, Value: 1
+			221 splitter (disabled, settable, float) 760
+			222 container debug area
+				223 container
+					224 pop up button Auto
+					225 button Quick Look
+					226 search text field (settable) Description: VariablesViewFilter, Placeholder: Filter, ID: filter
+						227 button toggle filter, Description: VariablesViewFilter, ID: search field menu
+				228 scroll area
+					229 outline variables view
+				230 splitter (disabled, settable, float) 595
+				231 scroll area Secondary Actions: Scroll Up, Scroll Down
+					232 text entry area (settable) Description: Console, Secondary Actions: Jump to Definition
+					233 scroll bar (disabled, settable, float) 1
+				234 scroll area Secondary Actions: Scroll Up, Scroll Down
+					235 text entry area (settable) Description: debug console, Secondary Actions: Jump to Definition
+					236 scroll bar (settable, float) 0
+						237 value indicator (settable, float) 0
+						238 increment arrow button
+						239 decrement arrow button
+						240 increment page button
+						241 decrement page button
+				242 container
+					243 button Quick Look
+					244 button Description: Metadata Options, Value: 1
+					245 search text field Description: Console Filter Field, Placeholder: Filter
+						246 button Icon View Drop Down
+							247 image
+					248 button Clear Console
+		249 splitter (disabled, settable, float) 1085.5
+	250 toolbar
+		251 Navigators/Coding Assistant
+			252 radio button Description: Navigators, Value: 1
+			253 radio button Description: Coding Assistant, Value: 0
+		254 container Back/Forward
+			255 button Description: Go Back, Help: Show Previous Location in History
+			256 button (disabled) Description: Go Forward, Help: Show Next Location in History
+		257 container Window Title/Activity
+			258 progress indicator 1
+			259 text Performance macOS App - Debugging GPU Workload
+		260 button Description: New Conversation, Secondary Actions: Move previous, Move next, Remove from toolbar
+		261 menu button Description: Add Editor, Secondary Actions: Move previous, Move next, Remove from toolbar
+		262 menu button Description: Editor Options, Secondary Actions: Move previous, Move next, Remove from toolbar
+		263 Editor Mode
+			264 radio button Description: Canvas, Help: Show Canvas, Value: 1
+			265 radio button Description: Assistant, Help: Show Assistant, Value: 0
+			266 radio button Description: Code Review, Help: Show Code Review, Value: 0
+		267 button Description: Show Inspector, Secondary Actions: Move previous, Remove from toolbar
+	268 close button
+	269 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	270 minimize button
+271 menu bar
+	272 Xcode
+	273 File
+	274 Edit
+	275 View
+	276 Find
+	277 Navigate
+	278 Editor
+	279 Product
+	280 Integrate
+	281 Window
+	282 Help
+
+Selected:
+	9 row (selected)
+
+Note: Pay special attention to the content selected by the user. If the user asks a question or refers to the content they are looking at on-screen, they might be referring to the selected content (but they might be referring to something else that's visible, too).

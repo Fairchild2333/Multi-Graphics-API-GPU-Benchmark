@@ -1,0 +1,29 @@
+{
+  "buildCommand": [
+    "xcrun",
+    "clang++",
+    "-std=c++17",
+    "-O2",
+    "-fobjc-arc",
+    "-framework",
+    "Foundation",
+    "-framework",
+    "Metal",
+    "scripts/metal-math-probe/burn_stage_probe.mm",
+    "-o",
+    "/var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/T/metal-math-probe/burn_stage_probe"
+  ],
+  "command": [
+    "/var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/T/metal-math-probe/burn_stage_probe",
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/shaders/gpu_burn.metal"
+  ],
+  "startedAt": "2026-10-17T18:29:26.385477+11:00",
+  "sources": {
+    "scripts/metal-math-probe/burn_stage_probe.mm": "fdc45ae431871340d151b782d614e49dbc54ca059180d0d1b028fc05fc67d523",
+    "scripts/metal-math-probe/metal_math_probe.mm": "ae632ee63dd8222e56e062d1bb0a80b6936401de08759bf939725605f67aa74d",
+    "shaders/gpu_burn.metal": "f7f376d2ca7e43eb3606a055bba2b9bb43fd2b5bfd523e6f002d5c6cf62622aa"
+  },
+  "binarySha256": "eb9924d933181ca5af217ca6fda4badad00425c0fc86dda532121a490604ac61",
+  "returnCode": 0,
+  "finishedAt": "2026-10-17T18:29:30.473471+11:00"
+}

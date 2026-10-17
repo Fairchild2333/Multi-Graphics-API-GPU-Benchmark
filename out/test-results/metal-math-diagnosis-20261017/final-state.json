@@ -1,0 +1,13 @@
+{
+  "thermalCommand": [
+    "xcrun",
+    "swift",
+    "-e",
+    "import Foundation; print(\"thermalState=\\(ProcessInfo.processInfo.thermalState.rawValue)\")"
+  ],
+  "thermalReturnCode": 0,
+  "thermalOutput": "thermalState=0\n",
+  "thermalStderr": "",
+  "runningProbeProcesses": [],
+  "productionCodeUnchanged": true
+}

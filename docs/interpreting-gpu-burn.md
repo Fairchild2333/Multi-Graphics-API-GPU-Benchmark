@@ -50,7 +50,7 @@ Per measured TFLOPS the M4 Pro reaches 0.46 - 0.83 of the others. An earlier
 version of this page used an estimated 9 TFLOPS for the M4 Pro and said "about
 half"; that holds only against the RTX 5090.
 
-The maths probes split the gap in two (2026-10-17):
+The maths probes separate compute-loop cost from the complete shader path (2026-10-17):
 
 - **Inside the compute loop the difference is small.** One GPU Burn step,
   run as a compute kernel, costs the time of 238 FMAs on the M4 Pro, 180 - 239
@@ -59,8 +59,8 @@ The maths probes split the gap in two (2026-10-17):
   5090 and 0.24 on the iGPU, while `exp`, square root, division, `pow` and
   `atan2` are relatively as fast or faster on the M4 Pro. Special functions
   explain only part of the gap.
-- **The larger part is the same loop run as a fragment shader.** The real GPU
-  Burn reaches 66 % of the speed of its own compute loop on the M4 Pro, against
+- **The larger part appears with the complete Burn shader.** The real GPU
+  Burn reaches 66 % of the speed of its simplified compute loop on the M4 Pro, against
   97 - 109 % on the RTX 5090 and 69 - 86 % on the iGPU.
 
 The 16, 64 and 256-step results split a frame into a fixed cost per pixel (the
@@ -76,23 +76,51 @@ and measured at 9.40, the iGPU's Vulkan 1.039 against 1.042.
 | Radeon iGPU | Vulkan | 1.14 | 1.62 | 70 % | about 6 steps |
 | Radeon iGPU | DX11 | 1.43 | 1.62 | 88 % | about 7 steps |
 
-So the shading after the loop costs the M4 Pro under 1 % at 256 steps, and the
-second pass of a frame repeats the same work. What is slower is each step of the
-loop in the fragment shader. The iGPU loses a similar share under Vulkan but
-much less under DX11, so the path a shader is compiled through matters.
+The small fitted intercept does not prove that post-loop code has no effect on
+how the whole shader runs. In particular, the final discard depends on values
+computed by the scored loop. The score counts two submitted draws, while the
+hardware can execute additional fragment work to resolve visibility.
 
-Why the M4 Pro's fragment shader runs the loop slower is not known. Candidates,
-none tested, all only measurable on a Mac: occupancy limited by register use,
-the scheduling of tile-based rendering, different code from the Metal compiler
-for the fragment stage. `scripts/metal-math-probe` now also draws the step as a
-full-screen fragment shader (`Burn fragment`), which shows whether the fragment
-stage alone accounts for the 67 %.
+### M4 Pro follow-up: discard and visibility execution
 
-Still open: whether 6.96 TFLOPS is the M4 Pro's FMA peak. On the RTX 5090 the
-same FMA kernel ran 25 % below a version with literal constants. The Metal probe
-now has the literal version too (`fma (literal)`), not yet run. Reports:
-[M4 Pro probe](../out/test-results/metal-math-probe-20261016-233740/output.txt),
-[Windows probe and comparison](../out/test-results/gpu-math-probe-windows-20261017-031454/report.md).
+The newer probe rows were built and run on the Mac on 2026-10-17, followed by
+fixed-step controls and Xcode GPU captures. Full evidence, timings and limits
+are in the [diagnosis report](../out/test-results/metal-math-diagnosis-20261017/report.md).
+
+| Same 256 steps, two fixed phases | Gpix-step/s |
+|---|---:|
+| Simplified compute loop | 14.57–14.62 |
+| Simplified fragment loop | 14.27–14.34 |
+| Unmodified complete shader, two draws | 9.41–9.43 |
+
+The simplified fragment is **97.7–98.4%** of compute. The 67% deficit is therefore
+not inherent to the fragment stage alone. Xcode captures of the complete shader
+showed **2.756–2.785 million fragment invocations** for **1.8432 million submitted
+pixel-draws**, about 50% extra execution. The complete shader allocated 134
+registers against 68 for the simple fragment, but neither spilled; captured FS
+occupancy was 90.18% versus 85.79%, so lower occupancy is not established as the
+cause.
+
+A diagnostic copy removing only the final `discard_fragment()` reduced a single
+draw from about 35.6 ms to 18.4 ms at 256 steps. Together with the extra invocations,
+this supports the discard/visibility path as the main source of the gap. Exact
+internal scheduling remains an inference; see Apple's [GPU architecture](https://developer.apple.com/videos/play/wwdc2020/10602/)
+and [counter guidance](https://developer.apple.com/videos/play/wwdc2020/10603/).
+It does not establish the same cause on every Apple device or graphics API.
+
+**Deleting discard is not a valid benchmark fix.** With no discard, the opaque
+second draw hides the first, and the capture shows roughly one screen of fragment
+work. Dividing two submitted draws by that time produces an invalid replacement
+score of 25–26. It also changes the image. Any production change must preserve the
+observable work of both draws and the image; this diagnosis changed neither the
+engine/shader nor the stored results.
+
+Literal FMA was initially 7.291 versus 6.783 TFLOPS. A warmed forward/reverse
+pairing gave 7.030 versus 6.817, a 3.13% difference, far smaller than the Windows
+probe's literal gain. Neither FMA row establishes the M4 Pro's hardware peak.
+The earlier probe and Windows comparison remain historical evidence:
+[M4 initial output](../out/test-results/metal-math-probe-20261016-233740/output.txt),
+[Windows comparison](../out/test-results/gpu-math-probe-windows-20261017-031454/report.md).
 
 The mobile Apple GPUs rank lower in GPU Burn than in an outside ranking:
 - socpk's GPU index, mostly game benchmarks with Snapdragon 865 = 100, has

@@ -1,0 +1,25 @@
+{
+  "verified": true,
+  "fixedStageCases": 30,
+  "discardControlCases": 24,
+  "timedSamples": 378,
+  "warmedPairedFmaTFLOPS": {
+    "buffered": 6.8169705,
+    "literal": 7.0301504999999995,
+    "literalGainPercent": 3.1271955775663107
+  },
+  "initialCapture": {
+    "fullFragmentInvocations": 2785280,
+    "twoSubmittedDrawsPixels": 1843200,
+    "extraInvocationPercent": 51.11111111111111,
+    "fullFSOccupancy": "90.18%",
+    "simpleFSOccupancy": "85.79%"
+  },
+  "controlCapture": {
+    "fullFragmentInvocations": 2756032,
+    "noDiscardFragmentInvocations": 889952,
+    "warning": "Removing discard changes visibility; one of the two opaque draws is culled. Rates are submitted work, not two executed loops."
+  },
+  "allFiveCanonicalHistoriesAndLiveMacUnchanged": true,
+  "xcodeReplayStopped": true
+}

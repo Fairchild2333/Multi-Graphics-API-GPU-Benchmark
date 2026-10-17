@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/T/metal-math-probe/burn_stage_probe",
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/shaders/gpu_burn.metal",
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/metal-math-diagnosis-20261017/burn-stages.gputrace"
+  ],
+  "environment": {
+    "MTL_CAPTURE_ENABLED": "1"
+  },
+  "returnCode": 0
+}

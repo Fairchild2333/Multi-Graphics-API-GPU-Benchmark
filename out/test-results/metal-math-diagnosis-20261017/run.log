@@ -1,0 +1,53 @@
+Host: Mac16,8 / macOS 27.0.1
+GPU: Apple M4 Pro
+
+Maths: fast (as the engine compiles GPU Burn)
+function       iterations    GPU ms    G results/s     vs fma
+fma                 11155    48.497        3391.69      1.000   (6.78 FP32 TFLOPS)
+MATHPROBE	maths=fast	function=k_fma	iterations=11155	group=256	seconds=0.048497	rate=3.391689e+12
+fma (literal)       12363    50.010        3645.26      1.075   (7.29 FP32 TFLOPS)
+MATHPROBE	maths=fast	function=k_fma_literal	iterations=12363	group=256	seconds=0.050010	rate=3.645259e+12
+sin                  1434    49.976         423.11      0.125
+MATHPROBE	maths=fast	function=k_sin	iterations=1434	group=256	seconds=0.049976	rate=4.231090e+11
+cos                  1454    49.973         429.03      0.126
+MATHPROBE	maths=fast	function=k_cos	iterations=1454	group=256	seconds=0.049973	rate=4.290337e+11
+atan2                 789    49.976         232.80      0.069
+MATHPROBE	maths=fast	function=k_atan2	iterations=789	group=256	seconds=0.049976	rate=2.327973e+11
+exp                  3406    49.982        1004.84      0.296
+MATHPROBE	maths=fast	function=k_exp	iterations=3406	group=256	seconds=0.049982	rate=1.004837e+12
+pow                  1652    49.988         487.31      0.144
+MATHPROBE	maths=fast	function=k_pow	iterations=1652	group=256	seconds=0.049988	rate=4.873124e+11
+sqrt                 3391    49.986        1000.32      0.295
+MATHPROBE	maths=fast	function=k_sqrt	iterations=3391	group=256	seconds=0.049986	rate=1.000319e+12
+division             3403    49.991        1003.77      0.296
+MATHPROBE	maths=fast	function=k_div	iterations=3403	group=256	seconds=0.049991	rate=1.003772e+12
+GPU Burn step         793    49.806         14.674          -   (G pixel-steps/s)
+MATHPROBE	maths=fast	function=k_burn_step	iterations=793	group=256	seconds=0.049806	rate=1.467358e+10
+Burn fragment         737    50.749         13.384          -   (G pixel-steps/s; 0.912 of the compute step)
+MATHPROBE	maths=fast	function=f_burn_step	iterations=737	group=0	seconds=0.050749	rate=1.338379e+10
+
+Maths: precise
+function       iterations    GPU ms    G results/s     vs fma
+fma                 11962    49.933        3532.51      1.000   (7.07 FP32 TFLOPS)
+MATHPROBE	maths=precise	function=k_fma	iterations=11962	group=256	seconds=0.049933	rate=3.532506e+12
+fma (literal)       11788    48.904        3554.35      1.006   (7.11 FP32 TFLOPS)
+MATHPROBE	maths=precise	function=k_fma_literal	iterations=11788	group=256	seconds=0.048904	rate=3.554355e+12
+sin                   463    49.592         137.67      0.039
+MATHPROBE	maths=precise	function=k_sin	iterations=463	group=256	seconds=0.049592	rate=1.376684e+11
+cos                   446    48.674         135.11      0.038
+MATHPROBE	maths=precise	function=k_cos	iterations=446	group=256	seconds=0.048674	rate=1.351129e+11
+atan2                 208    49.637          61.79      0.017
+MATHPROBE	maths=precise	function=k_atan2	iterations=208	group=256	seconds=0.049637	rate=6.179003e+10
+exp                  2052    49.386         612.68      0.173
+MATHPROBE	maths=precise	function=k_exp	iterations=2052	group=256	seconds=0.049386	rate=6.126816e+11
+pow                   115    49.431          34.31      0.010
+MATHPROBE	maths=precise	function=k_pow	iterations=115	group=256	seconds=0.049431	rate=3.430501e+10
+sqrt                 1073    50.046         316.15      0.089
+MATHPROBE	maths=precise	function=k_sqrt	iterations=1073	group=256	seconds=0.050046	rate=3.161513e+11
+division              610    49.193         182.85      0.052
+MATHPROBE	maths=precise	function=k_div	iterations=610	group=256	seconds=0.049193	rate=1.828464e+11
+GPU Burn step         220    49.496          4.096          -   (G pixel-steps/s)
+MATHPROBE	maths=precise	function=k_burn_step	iterations=220	group=256	seconds=0.049496	rate=4.096321e+09
+Burn fragment         217    49.814          4.015          -   (G pixel-steps/s; 0.980 of the compute step)
+MATHPROBE	maths=precise	function=f_burn_step	iterations=217	group=0	seconds=0.049814	rate=4.014675e+09
+Saved: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/metal-math-probe-20261017-182719/output.txt

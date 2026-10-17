@@ -1,0 +1,117 @@
+{
+  "startedAt": "2026-10-17T18:27:16.107647+11:00",
+  "commit": "257a24653205e90a3189c58863879d10c8aa75ea",
+  "command": [
+    "bash",
+    "scripts/metal-math-probe/run.sh"
+  ],
+  "sourceSha256": "ae632ee63dd8222e56e062d1bb0a80b6936401de08759bf939725605f67aa74d",
+  "historiesBefore": [
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/m4-single-core-check-20261017/results-after.json",
+      "sha256": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f"
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-v3-cpu-confirm-20261017/phone-final/results/results.json",
+      "sha256": "8f3a379f29ad0fd3b3b7607f0ff5ff96610cdcf0090f50ec75543afdf6e3a2a6"
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ios-vulkan-memory-platform-fix-20261017/phone-final/results/results.json",
+      "sha256": "89a175ace875c15cf336a479e7a67df96988206f89e5bb95d0bad710ec5dc6d0"
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad81-design-review-20261016/phone-final/results/results.json",
+      "sha256": "43d43fb16d87ade98bdb80c7c319d8b8e04434eb69cf1c8f8f777e2284b6531b"
+    },
+    {
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a16-full-suite-20261016/phone-final/results/results.json",
+      "sha256": "da2a2612d9dfbb8381792987ea2b98f6a47e947f108cd7c39298498930dd7df1"
+    },
+    {
+      "path": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/results/results.json",
+      "sha256": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f"
+    }
+  ],
+  "environment": [
+    {
+      "args": [
+        "uname",
+        "-m"
+      ],
+      "returnCode": 0,
+      "stdout": "arm64\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "sysctl",
+        "-n",
+        "hw.model"
+      ],
+      "returnCode": 0,
+      "stdout": "Mac16,8\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "sw_vers"
+      ],
+      "returnCode": 0,
+      "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0.1\nBuildVersion:\t\t26A434\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "pmset",
+        "-g",
+        "batt"
+      ],
+      "returnCode": 0,
+      "stdout": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=22872163)\t57%; AC attached; not charging present: true\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "pmset",
+        "-g",
+        "custom"
+      ],
+      "returnCode": 0,
+      "stdout": "Battery Power:\n Sleep On Power Button 1\n powermode            0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         30\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n powermode            2\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         180\n womp                 1\n networkoversleep     0\n sleep                1\n tcpkeepalive         1\n disksleep            10\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "xcodebuild",
+        "-version"
+      ],
+      "returnCode": 0,
+      "stdout": "Xcode 27.1\nBuild version 27A9275\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "xcrun",
+        "swift",
+        "-e",
+        "import Foundation; print(\"thermalState=\\(ProcessInfo.processInfo.thermalState.rawValue)\")"
+      ],
+      "returnCode": 0,
+      "stdout": "thermalState=0\n",
+      "stderr": ""
+    }
+  ],
+  "returnCode": 0,
+  "finishedAt": "2026-10-17T18:27:27.053724+11:00",
+  "thermalAfter": {
+    "args": [
+      "xcrun",
+      "swift",
+      "-e",
+      "import Foundation; print(\"thermalState=\\(ProcessInfo.processInfo.thermalState.rawValue)\")"
+    ],
+    "returnCode": 0,
+    "stdout": "thermalState=0\n",
+    "stderr": ""
+  }
+}

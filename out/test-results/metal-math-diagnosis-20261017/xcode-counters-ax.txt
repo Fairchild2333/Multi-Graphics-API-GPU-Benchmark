@@ -1,0 +1,451 @@
+Window: "", App: Xcode.
+0 standard window ID: Xcode.WorkspaceWindow, Secondary Actions: Raise
+	1 split group Files.xcfilescontainer, ID: Workspace window tab content, Description: /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.1-27A9275/Xcode/FilesWorkspaces/3F044057-6649-4E81-B2E6-D6D8D8BD0BB6/Files.xcfilescontainer
+		2 container navigator
+			3 scroll area
+				4 outline Description: Debug Navigator, ID: debug navigator
+					5 row (selectable, expanded) Value: burn-stages, Secondary Actions: Collapse
+						6 disclosure triangle 1
+					7 row (selectable) Description: Text below a photo, Value: Summary
+					8 row (selectable) Description: App rectangle connected to an app below, filled, Value: Dependencies
+					9 row (selected) Description: stopwatch, Value: Performance
+130.29 ms
+					10 row (selectable) Description: Memory chip, Value: Memory
+17.88 MiB
+					11 row (selectable) Description: GPU Navigator Mode, Value: Group by API Call
+					12 row (selectable, collapsed) Description: MTLCommandBuffer 1, Secondary Actions: Expand, Value: MTLCommandBuffer 1
+1.96%
+						13 disclosure triangle 0
+					14 row (selectable, collapsed) Description: MTLCommandBuffer 2, Secondary Actions: Expand, Value: MTLCommandBuffer 2
+22.67%
+						15 disclosure triangle 0
+					16 row (selectable, collapsed) Description: Unmodified GPU Burn, fixed steps, Secondary Actions: Expand, Value: Unmodified GPU Burn, fixed steps
+75.37%
+						17 disclosure triangle 0
+			18 search text field Description: Filter the trace list, Placeholder: Filter
+				19 checkbox Show only related stack frames, Value: 0
+				20 checkbox Show only calls with issues, Value: 0
+				21 checkbox Show only commands and markers, Value: 0
+				22 button Icon View Drop Down
+					23 image
+			24 tab group two-level chooser segmented control
+				25 tab Description: Project, Help: Show the Project navigator, Value: 0
+				26 tab Description: Source Control, Help: Show the Source Control navigator, Value: 0
+				27 tab Description: Bookmarks, Help: Show the Bookmark navigator, Value: 0
+				28 tab Description: Find, Help: Show the Find navigator, Value: 0
+				29 tab Description: Issues, Help: Show the Issue navigator, Value: 0
+				30 tab Description: Tests, Help: Show the Test navigator, Value: 0
+				31 tab Description: Debug, Help: Show the Debug Navigator, Value: 1
+				32 tab Description: Breakpoints, Help: Show the Breakpoints Navigator, Value: 0
+				33 tab Description: Reports, Help: Show the Report navigator, Value: 0
+		34 splitter (disabled, settable, float) 290
+		35 container editor area
+			36 split group
+				37 container Performance
+					38 container Description: Performance, ID: editor context
+						39 split group
+							40 table (disabled)
+								41 container
+									42 column (disabled) Thumbnails
+									43 column (disabled) Name
+									44 column (disabled) Execution Cost
+									45 column (disabled) Occupancy Manager Target
+									46 column (disabled) Instruction Throughput Limiter
+									47 column (disabled) Instruction Throughput Utilization
+									48 column (disabled) ALU Utilization
+									49 column (disabled) F32 Limiter
+									50 column (disabled) F32 Utilization
+									51 column (disabled) F16 Limiter
+									52 column (disabled) F16 Utilization
+									53 column (disabled) Integer and Complex Limiter
+									54 column (disabled) Integer and Complex Utilization
+									55 column (disabled) Integer and Conditional Limiter
+									56 column (disabled) Integer and Conditional Utilization
+									57 column (disabled) Texture Read Limiter
+									58 column (disabled) Texture Read Utilization
+									59 column (disabled) Texture Write Limiter
+									60 column (disabled) Texture Write Utilization
+									61 column (disabled) MMU Limiter
+									62 column (disabled) MMU Utilization
+									63 column (disabled) Last Level Cache Limiter
+									64 column (disabled) Last Level Cache Utilization
+									65 column (disabled) Partial Render Count
+									66 column (disabled) Shaded Vertex Read Limiter
+									67 column (disabled) Cull Unit Limiter
+									68 column (disabled) Clip Unit Limiter
+									69 column (disabled) Register L1 Read Accesses
+									70 column (disabled) Register L1 Write Accesses
+									71 column (disabled) Other L1 Write Accesses
+									72 column (disabled) Other L1 Read Accesses
+									73 column (disabled) Control Flow Utilization
+									74 column (disabled) Control Flow Limiter
+									75 column (disabled) Compute Shader Launch Utilization
+									76 column (disabled) Compute Shader Launch Limiter
+									77 column (disabled) Fragment Shader Launch Utilization
+									78 column (disabled) Fragment Shader Launch Limiter
+									79 column (disabled) Vertex Shader Launch Limiter
+									80 column (disabled) Vertex Shader Launch Utilization
+								81 scroll area Secondary Actions: Scroll Left, Scroll Right, Scroll Up, Scroll Down
+									82 container
+										83 row (disabled)
+											84 cell (disabled)
+												85 text 2 MTLComputeCommandEncoder 1
+											86 cell (disabled)
+												87 text 1.957%
+											88 cell (disabled)
+												89 text 28.39%
+											90 cell (disabled)
+												91 text 97.93%
+											92 cell (disabled)
+												93 text 33.05%
+											94 cell (disabled)
+												95 text 65.72%
+											96 cell (disabled)
+												97 text 97.32%
+											98 cell (disabled)
+												99 text 80.22%
+											100 cell (disabled)
+												101 text 0.00%
+											102 cell (disabled)
+												103 text 0.00%
+											104 cell (disabled)
+												105 text 26.78%
+											106 cell (disabled)
+												107 text 21.82%
+											108 cell (disabled)
+												109 text 51.98%
+											110 cell (disabled)
+												111 text 40.32%
+											112 cell (disabled)
+												113 text 0.00%
+											114 cell (disabled)
+												115 text 0.00%
+											116 cell (disabled)
+												117 text 0.00%
+											118 cell (disabled)
+												119 text 0.00%
+											120 cell (disabled)
+												121 text 23.80%
+											122 cell (disabled)
+												123 text 22.96%
+											124 cell (disabled)
+												125 text 7.49%
+											126 cell (disabled)
+												127 text 7.49%
+											128 cell (disabled)
+												129 text 0 
+											130 cell (disabled)
+												131 text 0.00%
+											132 cell (disabled)
+												133 text 0.00%
+											134 cell (disabled)
+												135 text 0.00%
+											136 cell (disabled)
+												137 text 3.06%
+											138 cell (disabled)
+												139 text 2.76%
+											140 cell (disabled)
+												141 text 0.04%
+											142 cell (disabled)
+												143 text 0.04%
+											144 cell (disabled)
+												145 text 0.73%
+											146 cell (disabled)
+												147 text 0.73%
+											148 cell (disabled)
+												149 text 0.02%
+											150 cell (disabled)
+												151 text 93.26%
+											152 cell (disabled)
+												153 text 0.00%
+											154 cell (disabled)
+												155 text 0.00%
+											156 cell (disabled)
+												157 text 0.00%
+											158 cell (disabled)
+												159 text 0.00%
+										160 row (disabled)
+											161 cell (disabled)
+												162 text 14 MTLRenderCommandEncoder 1
+											163 cell (disabled)
+												164 text 22.673%
+											165 cell (disabled)
+												166 text 100.00%
+											167 cell (disabled)
+												168 text 95.68%
+											169 cell (disabled)
+												170 text 32.16%
+											171 cell (disabled)
+												172 text 63.96%
+											173 cell (disabled)
+												174 text 95.29%
+											175 cell (disabled)
+												176 text 78.50%
+											177 cell (disabled)
+												178 text 0.00%
+											179 cell (disabled)
+												180 text 0.00%
+											181 cell (disabled)
+												182 text 26.23%
+											183 cell (disabled)
+												184 text 21.33%
+											185 cell (disabled)
+												186 text 49.90%
+											187 cell (disabled)
+												188 text 38.75%
+											189 cell (disabled)
+												190 text 0.00%
+											191 cell (disabled)
+												192 text 0.00%
+											193 cell (disabled)
+												194 text 0.04%
+											195 cell (disabled)
+												196 text 0.04%
+											197 cell (disabled)
+												198 text 0.01%
+											199 cell (disabled)
+												200 text 0.01%
+											201 cell (disabled)
+												202 text 0.33%
+											203 cell (disabled)
+												204 text 0.33%
+											205 cell (disabled)
+												206 text 0 
+											207 cell (disabled)
+												208 text 0.00%
+											209 cell (disabled)
+												210 text 0.00%
+											211 cell (disabled)
+												212 text 0.00%
+											213 cell (disabled)
+												214 text 2.61%
+											215 cell (disabled)
+												216 text 2.61%
+											217 cell (disabled)
+												218 text 1.12%
+											219 cell (disabled)
+												220 text 1.14%
+											221 cell (disabled)
+												222 text 0.72%
+											223 cell (disabled)
+												224 text 0.72%
+											225 cell (disabled)
+												226 text 0.00%
+											227 cell (disabled)
+												228 text 0.00%
+											229 cell (disabled)
+												230 text 0.01%
+											231 cell (disabled)
+												232 text 89.02%
+											233 cell (disabled)
+												234 text 0.00%
+											235 cell (disabled)
+												236 text 0.00%
+										237 row (disabled)
+											238 cell (disabled)
+												239 text 26 MTLRenderCommandEncoder 2
+											240 cell (disabled)
+												241 text 75.370%
+											242 cell (disabled)
+												243 text 100.00%
+											244 cell (disabled)
+												245 text 95.27%
+											246 cell (disabled)
+												247 text 31.56%
+											248 cell (disabled)
+												249 text 62.76%
+											250 cell (disabled)
+												251 text 94.83%
+											252 cell (disabled)
+												253 text 76.69%
+											254 cell (disabled)
+												255 text 0.00%
+											256 cell (disabled)
+												257 text 0.00%
+											258 cell (disabled)
+												259 text 25.67%
+											260 cell (disabled)
+												261 text 20.78%
+											262 cell (disabled)
+												263 text 50.11%
+											264 cell (disabled)
+												265 text 38.44%
+											266 cell (disabled)
+												267 text 0.00%
+											268 cell (disabled)
+												269 text 0.00%
+											270 cell (disabled)
+												271 text 0.01%
+											272 cell (disabled)
+												273 text 0.01%
+											274 cell (disabled)
+												275 text 0.05%
+											276 cell (disabled)
+												277 text 0.05%
+											278 cell (disabled)
+												279 text 0.17%
+											280 cell (disabled)
+												281 text 0.17%
+											282 cell (disabled)
+												283 text 0 
+											284 cell (disabled)
+												285 text 0.00%
+											286 cell (disabled)
+												287 text 0.00%
+											288 cell (disabled)
+												289 text 0.00%
+											290 cell (disabled)
+												291 text 0.43%
+											292 cell (disabled)
+												293 text 0.40%
+											294 cell (disabled)
+												295 text 24.93%
+											296 cell (disabled)
+												297 text 25.40%
+											298 cell (disabled)
+												299 text 0.73%
+											300 cell (disabled)
+												301 text 0.78%
+											302 cell (disabled)
+												303 text 0.00%
+											304 cell (disabled)
+												305 text 0.00%
+											306 cell (disabled)
+												307 text 0.01%
+											308 cell (disabled)
+												309 text 89.77%
+											310 cell (disabled)
+												311 text 0.00%
+											312 cell (disabled)
+												313 text 0.00%
+									314 scroll bar (settable, float) 0
+										315 value indicator (settable, float) 0
+										316 increment arrow button
+										317 decrement arrow button
+										318 increment page button
+										319 decrement page button
+									320 scroll bar (disabled, settable, float) 0
+							321 button Performance Limiters
+							322 button Memory
+							323 button Vertices
+							324 button Vertex Shader
+							325 button Primitives
+							326 button Pre-Fragment Stage
+							327 button Fragment Shader
+							328 button
+							329 button tag
+							330 search text field (settable) Description: Filter the profiling timeline, Placeholder: Filter
+								331 button Icon View Drop Down
+									332 image
+							333 button Encoders
+							334 button GPU Commands
+							335 button Edit Counters..., Help: Edit Counters
+							336 button Encoders, Description: move
+							337 scroll area TimelineNavigator
+								338 outline
+									339 row (selectable, collapsed) Secondary Actions: Expand, Value: MTLRenderCommandEncoder 2
+75.37%
+										340 disclosure triangle 0
+									341 row (selectable, collapsed) Secondary Actions: Expand, Value: MTLRenderCommandEncoder 1
+22.67%
+										342 disclosure triangle 0
+									343 row (selectable, collapsed) Secondary Actions: Expand, Value: MTLComputeCommandEncoder 1
+1.96%
+										344 disclosure triangle 0
+									345 container
+										346 sort button Encoders
+										347 sort button Cost
+							348 search text field (settable) Description: Filter the profiling timeline, Placeholder: Filter Encoder
+								349 button Icon View Drop Down
+									350 image
+							351 splitter (disabled, settable, float) 292
+							352 splitter (disabled, settable, float) 793
+							353 button Description: Inset filled lefthalf in a rectangle, Help: Toggle Navigator, ID: GTTimelineSidebarButton
+							354 button Description: Inset filled righthalf in a rectangle, Help: Toggle Sidebar, ID: GTTimelineSidebarButton
+							355 button Share
+							356 button Gauge with dots and needle at 67 percent
+							357 button Overview
+							358 button Timeline
+							359 button Shaders
+							360 button Counters
+							361 button Cost Graph
+							362 button Heat Map
+						363 container Description: Jump Bar, ID: jump bar
+							364 container
+								365 menu button Description: Related Items, Help: Navigate to Related Items, ID: related items
+								366 pop up button Performance
+								367 pop up button No Selection
+			368 container debug bar
+				369 button Description: Breakpoints, Help: Deactivate Breakpoints, Value: 1
+				370 button Stop GPU workload, Help: Stop debugging the GPU workload, Details: Xcode.GPUDebugger.debuggerBarStopFrameAXDescription, ID: GPUDebugger.CaptureSettings
+				371 button (disabled) Help: Debug Shader, Value: -1
+				372 button Help: Profile GPU trace, Value: 2, Details: GPU Performance State, ID: InducePerformanceStateButton
+				373 button Description: main, Help: Shows a list of available branches
+				374 button Description: hide debug area, Help: Hide the Debug Area, Value: 1
+			375 splitter (disabled, settable, float) 760
+			376 container debug area
+				377 container
+					378 pop up button Auto
+					379 button Quick Look
+					380 search text field (settable) Description: VariablesViewFilter, Placeholder: Filter, ID: filter
+						381 button toggle filter, Description: VariablesViewFilter, ID: search field menu
+				382 scroll area
+					383 outline variables view
+				384 splitter (disabled, settable, float) 595
+				385 scroll area Secondary Actions: Scroll Up, Scroll Down
+					386 text entry area (settable) Description: Console, Secondary Actions: Jump to Definition
+					387 scroll bar (disabled, settable, float) 1
+				388 scroll area Secondary Actions: Scroll Up, Scroll Down
+					389 text entry area (settable) Description: debug console, Secondary Actions: Jump to Definition
+					390 scroll bar (settable, float) 0
+						391 value indicator (settable, float) 0
+						392 increment arrow button
+						393 decrement arrow button
+						394 increment page button
+						395 decrement page button
+				396 container
+					397 button Quick Look
+					398 button Description: Metadata Options, Value: 1
+					399 search text field Description: Console Filter Field, Placeholder: Filter
+						400 button Icon View Drop Down
+							401 image
+					402 button Clear Console
+		403 splitter (disabled, settable, float) 1085.5
+	404 toolbar
+		405 Navigators/Coding Assistant
+			406 radio button Description: Navigators, Value: 1
+			407 radio button Description: Coding Assistant, Value: 0
+		408 container Back/Forward
+			409 button Description: Go Back, Help: Show Previous Location in History
+			410 button (disabled) Description: Go Forward, Help: Show Next Location in History
+		411 container Window Title/Activity
+			412 progress indicator 1
+			413 text Performance macOS App - Debugging GPU Workload
+		414 button Description: New Conversation, Secondary Actions: Move previous, Move next, Remove from toolbar
+		415 menu button Description: Add Editor, Secondary Actions: Move previous, Move next, Remove from toolbar
+		416 menu button Description: Editor Options, Secondary Actions: Move previous, Move next, Remove from toolbar
+		417 Editor Mode
+			418 radio button Description: Canvas, Help: Show Canvas, Value: 1
+			419 radio button Description: Assistant, Help: Show Assistant, Value: 0
+			420 radio button Description: Code Review, Help: Show Code Review, Value: 0
+		421 button Description: Show Inspector, Secondary Actions: Move previous, Remove from toolbar
+	422 close button
+	423 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	424 minimize button
+425 menu bar
+	426 Xcode
+	427 File
+	428 Edit
+	429 View
+	430 Find
+	431 Navigate
+	432 Editor
+	433 Product
+	434 Integrate
+	435 Window
+	436 Help
+
+Selected:
+	9 row (selected)
+
+Note: Pay special attention to the content selected by the user. If the user asks a question or refers to the content they are looking at on-screen, they might be referring to the selected content (but they might be referring to something else that's visible, too).

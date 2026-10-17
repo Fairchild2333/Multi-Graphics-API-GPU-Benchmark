@@ -2,6 +2,31 @@
 
 > **2026-10-17：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** iOS Vulkan固定256 MiB限制已修复，iPad8,7新预算版本确认56.657 GB/s平台，历史74条。A15/另一台iPad仍需接回补这一新版本；旧记录保留。
 
+## 2026-10-17 M4 Pro GPU Burn diagnosis completed (M5)
+
+- Built and ran the new literal-FMA/fragment rows unchanged. Initial fast FMA
+  buffered/literal6.783/7.291TFLOPS; warmed forward/reverse pairing6.817/7.030,
+  gain3.13%, not a peak claim or an explanation of the main Burn deficit.
+- Added only isolated scripts/metal-math-probe/burn_stage_probe.mm, reading the
+  engine gpu_burn.metal unchanged for full-shader controls. Fixed256-step
+  simplified fragment/compute97.7-98.4%; full2draws9.41-9.43Gpix-step/s,
+  64.4-64.7% of compute. Pure fragment-stage penalty is not the main explanation.
+- Xcode capture/profiling succeeded without installing the optional instruction
+  toolchain. Full shader134 registers vs simplified68/compute72, no spilling.
+  Full FS occupancy90.18% vs simple85.79%, so register-induced occupancy loss
+  is NOT established. Full2draws FS invocations2.756-2.785M vs1.8432M submitted.
+- Diagnostic-only removal of the final discard changes single-draw256 timing
+  ~35.6ms to18.4ms, supporting extra visibility/discard execution as the main
+  cause. Exact internal scheduling is an inference, not instruction-level proof.
+  No-discard2draws invokes~one screen: first opaque draw is culled, image changes,
+  its encoded25-26 rate MUST NOT replace formal scores. Engine/shader unchanged.
+- 30 stage cases+24 controls/378 raw samples, both captures' AX/CSV/PNG, commands,
+  hashes and report under out/test-results/metal-math-diagnosis-20261017/;
+  initial unmodified output metal-math-probe-20261017-182719/output.txt.
+- M5 checked complete; interpreting-gpu-burn.md corrected the earlier overstrong
+  attribution. All5 canonical histories/live Mac unchanged (Mac171), probes
+  exited and Xcode replay stopped. A15/A12X/A16 pending physical work unchanged.
+
 ## 2026-10-17 iOS Vulkan platform fixed and physically verified
 
 - Root cause:ios_host hard-coded256MiB, so V3's three tail sets could never

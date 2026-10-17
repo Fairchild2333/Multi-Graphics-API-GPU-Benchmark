@@ -1,0 +1,6 @@
+Cost,Name,Type,Pipeline State,# SIMD Groups,# Allocated Registers,High Register,Spilled Bytes
+75.37%,gpuBurnFragment,Fragment,MTLRenderPipelineState 2,86979,134,134,0 bytes
+22.67%,f_burn_step,Fragment,MTLRenderPipelineState 1,28920,68,68,0 bytes
+1.45%,k_burn_step,Compute,MTLComputePipelineState 1,2662,72,72,0 bytes
+0.00%,gpuBurnVertex,Vertex,MTLRenderPipelineState 2,4,4,4,0 bytes
+0.00%,v_fullscreen,Vertex,MTLRenderPipelineState 1,2,4,4,0 bytes

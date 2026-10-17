@@ -1,0 +1,152 @@
+GPU: Apple M4 Pro
+mathMode=2 mathFloatingPointFunctions=0 languageVersion=262145
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=16	passes=2	sample=0	seconds=0.003852750
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=16	passes=2	sample=1	seconds=0.003475000
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=16	passes=2	sample=2	seconds=0.003470792
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=16	passes=2	sample=3	seconds=0.003476708
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=16	passes=2	sample=4	seconds=0.003916583
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=16	passes=2	sample=5	seconds=0.003803500
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=16	passes=2	sample=6	seconds=0.003480500
+MATHSTAGE	case=original_two_passes	phase=0.999	steps=16	passes=2	medianSeconds=0.003480500	minSeconds=0.003470792	maxSeconds=0.003916583	GpixStepsPerSec=8.473265
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=16	passes=1	sample=0	seconds=0.001459250
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=16	passes=1	sample=1	seconds=0.001460000
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=16	passes=1	sample=2	seconds=0.001456625
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=16	passes=1	sample=3	seconds=0.001605250
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=16	passes=1	sample=4	seconds=0.001736458
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=16	passes=1	sample=5	seconds=0.001456625
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=16	passes=1	sample=6	seconds=0.001532125
+MATHSTAGE	case=no_discard_pass0	phase=0.999	steps=16	passes=1	medianSeconds=0.001460000	minSeconds=0.001456625	maxSeconds=0.001736458	GpixStepsPerSec=10.099726
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=16	passes=2	sample=0	seconds=0.001459083
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=16	passes=2	sample=1	seconds=0.001459000
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=16	passes=2	sample=2	seconds=0.001459208
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=16	passes=2	sample=3	seconds=0.001668208
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=16	passes=2	sample=4	seconds=0.001458250
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=16	passes=2	sample=5	seconds=0.001460708
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=16	passes=2	sample=6	seconds=0.001458750
+MATHSTAGE	case=no_discard_two_passes	phase=0.999	steps=16	passes=2	medianSeconds=0.001459083	minSeconds=0.001458250	maxSeconds=0.001668208	GpixStepsPerSec=20.212142
+STAGEOUTPUT	case=no_discard_two_passes	fnv1a64=f996ad3e1cda1646	colorMin=1	colorMax=255
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=64	passes=2	sample=0	seconds=0.013233167
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=64	passes=2	sample=1	seconds=0.013221292
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=64	passes=2	sample=2	seconds=0.014675542
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=64	passes=2	sample=3	seconds=0.012936708
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=64	passes=2	sample=4	seconds=0.014119250
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=64	passes=2	sample=5	seconds=0.013276417
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=64	passes=2	sample=6	seconds=0.013052583
+MATHSTAGE	case=original_two_passes	phase=0.999	steps=64	passes=2	medianSeconds=0.013233167	minSeconds=0.012936708	maxSeconds=0.014675542	GpixStepsPerSec=8.914329
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=64	passes=1	sample=0	seconds=0.004566292
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=64	passes=1	sample=1	seconds=0.004613750
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=64	passes=1	sample=2	seconds=0.004845917
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=64	passes=1	sample=3	seconds=0.004810125
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=64	passes=1	sample=4	seconds=0.004682042
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=64	passes=1	sample=5	seconds=0.005031625
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=64	passes=1	sample=6	seconds=0.005334583
+MATHSTAGE	case=no_discard_pass0	phase=0.999	steps=64	passes=1	medianSeconds=0.004810125	minSeconds=0.004566292	maxSeconds=0.005334583	GpixStepsPerSec=12.262135
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=64	passes=2	sample=0	seconds=0.004807708
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=64	passes=2	sample=1	seconds=0.004848833
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=64	passes=2	sample=2	seconds=0.004566375
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=64	passes=2	sample=3	seconds=0.004888292
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=64	passes=2	sample=4	seconds=0.004735792
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=64	passes=2	sample=5	seconds=0.004633375
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=64	passes=2	sample=6	seconds=0.004757625
+MATHSTAGE	case=no_discard_two_passes	phase=0.999	steps=64	passes=2	medianSeconds=0.004757625	minSeconds=0.004566375	maxSeconds=0.004888292	GpixStepsPerSec=24.794892
+STAGEOUTPUT	case=no_discard_two_passes	fnv1a64=f4d41bb08f082e70	colorMin=1	colorMax=255
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=256	passes=2	sample=0	seconds=0.053995458
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=256	passes=2	sample=1	seconds=0.052514208
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=256	passes=2	sample=2	seconds=0.054685750
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=256	passes=2	sample=3	seconds=0.052313792
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=256	passes=2	sample=4	seconds=0.052264875
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=256	passes=2	sample=5	seconds=0.052278750
+STAGESAMPLE	case=original_two_passes	phase=0.999	steps=256	passes=2	sample=6	seconds=0.055002750
+MATHSTAGE	case=original_two_passes	phase=0.999	steps=256	passes=2	medianSeconds=0.052514208	minSeconds=0.052264875	maxSeconds=0.055002750	GpixStepsPerSec=8.985363
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=256	passes=1	sample=0	seconds=0.019147417
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=256	passes=1	sample=1	seconds=0.018285875
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=256	passes=1	sample=2	seconds=0.019050208
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=256	passes=1	sample=3	seconds=0.018851500
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=256	passes=1	sample=4	seconds=0.019860667
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=256	passes=1	sample=5	seconds=0.018720375
+STAGESAMPLE	case=no_discard_pass0	phase=0.999	steps=256	passes=1	sample=6	seconds=0.018315208
+MATHSTAGE	case=no_discard_pass0	phase=0.999	steps=256	passes=1	medianSeconds=0.018851500	minSeconds=0.018285875	maxSeconds=0.019860667	GpixStepsPerSec=12.515163
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=256	passes=2	sample=0	seconds=0.018519417
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=256	passes=2	sample=1	seconds=0.018354083
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=256	passes=2	sample=2	seconds=0.018267750
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=256	passes=2	sample=3	seconds=0.018344500
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=256	passes=2	sample=4	seconds=0.019416375
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=256	passes=2	sample=5	seconds=0.018329583
+STAGESAMPLE	case=no_discard_two_passes	phase=0.999	steps=256	passes=2	sample=6	seconds=0.018673375
+MATHSTAGE	case=no_discard_two_passes	phase=0.999	steps=256	passes=2	medianSeconds=0.018354083	minSeconds=0.018267750	maxSeconds=0.019416375	GpixStepsPerSec=25.708677
+STAGEOUTPUT	case=no_discard_two_passes	fnv1a64=6db883477858cb00	colorMin=1	colorMax=255
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=16	passes=2	sample=0	seconds=0.003661625
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=16	passes=2	sample=1	seconds=0.003475792
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=16	passes=2	sample=2	seconds=0.003473792
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=16	passes=2	sample=3	seconds=0.003473292
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=16	passes=2	sample=4	seconds=0.003776875
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=16	passes=2	sample=5	seconds=0.003651125
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=16	passes=2	sample=6	seconds=0.003682792
+MATHSTAGE	case=original_two_passes	phase=3.000	steps=16	passes=2	medianSeconds=0.003651125	minSeconds=0.003473292	maxSeconds=0.003776875	GpixStepsPerSec=8.077291
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=16	passes=1	sample=0	seconds=0.001458625
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=16	passes=1	sample=1	seconds=0.001457750
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=16	passes=1	sample=2	seconds=0.001543625
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=16	passes=1	sample=3	seconds=0.001582000
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=16	passes=1	sample=4	seconds=0.001459500
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=16	passes=1	sample=5	seconds=0.001458000
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=16	passes=1	sample=6	seconds=0.001457375
+MATHSTAGE	case=no_discard_pass0	phase=3.000	steps=16	passes=1	medianSeconds=0.001458625	minSeconds=0.001457375	maxSeconds=0.001582000	GpixStepsPerSec=10.109247
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=16	passes=2	sample=0	seconds=0.001459708
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=16	passes=2	sample=1	seconds=0.001458958
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=16	passes=2	sample=2	seconds=0.001458750
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=16	passes=2	sample=3	seconds=0.001459875
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=16	passes=2	sample=4	seconds=0.001786500
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=16	passes=2	sample=5	seconds=0.001459750
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=16	passes=2	sample=6	seconds=0.001461250
+MATHSTAGE	case=no_discard_two_passes	phase=3.000	steps=16	passes=2	medianSeconds=0.001459750	minSeconds=0.001458750	maxSeconds=0.001786500	GpixStepsPerSec=20.202911
+STAGEOUTPUT	case=no_discard_two_passes	fnv1a64=e60f90cb794ec014	colorMin=1	colorMax=255
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=64	passes=2	sample=0	seconds=0.014351250
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=64	passes=2	sample=1	seconds=0.013805167
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=64	passes=2	sample=2	seconds=0.013337583
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=64	passes=2	sample=3	seconds=0.014053750
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=64	passes=2	sample=4	seconds=0.013398875
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=64	passes=2	sample=5	seconds=0.013152625
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=64	passes=2	sample=6	seconds=0.013588625
+MATHSTAGE	case=original_two_passes	phase=3.000	steps=64	passes=2	medianSeconds=0.013588625	minSeconds=0.013152625	maxSeconds=0.014351250	GpixStepsPerSec=8.681143
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=64	passes=1	sample=0	seconds=0.005123042
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=64	passes=1	sample=1	seconds=0.004797250
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=64	passes=1	sample=2	seconds=0.004565625
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=64	passes=1	sample=3	seconds=0.004896917
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=64	passes=1	sample=4	seconds=0.004699208
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=64	passes=1	sample=5	seconds=0.004566292
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=64	passes=1	sample=6	seconds=0.005248750
+MATHSTAGE	case=no_discard_pass0	phase=3.000	steps=64	passes=1	medianSeconds=0.004797250	minSeconds=0.004565625	maxSeconds=0.005248750	GpixStepsPerSec=12.295044
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=64	passes=2	sample=0	seconds=0.004565000
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=64	passes=2	sample=1	seconds=0.005180667
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=64	passes=2	sample=2	seconds=0.004823000
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=64	passes=2	sample=3	seconds=0.004565000
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=64	passes=2	sample=4	seconds=0.005010833
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=64	passes=2	sample=5	seconds=0.004763250
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=64	passes=2	sample=6	seconds=0.004566125
+MATHSTAGE	case=no_discard_two_passes	phase=3.000	steps=64	passes=2	medianSeconds=0.004763250	minSeconds=0.004565000	maxSeconds=0.005180667	GpixStepsPerSec=24.765612
+STAGEOUTPUT	case=no_discard_two_passes	fnv1a64=bef60f347c382a12	colorMin=1	colorMax=255
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=256	passes=2	sample=0	seconds=0.053481000
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=256	passes=2	sample=1	seconds=0.054541167
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=256	passes=2	sample=2	seconds=0.053628750
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=256	passes=2	sample=3	seconds=0.052619500
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=256	passes=2	sample=4	seconds=0.052344250
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=256	passes=2	sample=5	seconds=0.057171250
+STAGESAMPLE	case=original_two_passes	phase=3.000	steps=256	passes=2	sample=6	seconds=0.055779333
+MATHSTAGE	case=original_two_passes	phase=3.000	steps=256	passes=2	medianSeconds=0.053628750	minSeconds=0.052344250	maxSeconds=0.057171250	GpixStepsPerSec=8.798624
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=256	passes=1	sample=0	seconds=0.018284375
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=256	passes=1	sample=1	seconds=0.018352792
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=256	passes=1	sample=2	seconds=0.018865500
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=256	passes=1	sample=3	seconds=0.019004875
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=256	passes=1	sample=4	seconds=0.018505208
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=256	passes=1	sample=5	seconds=0.018231167
+STAGESAMPLE	case=no_discard_pass0	phase=3.000	steps=256	passes=1	sample=6	seconds=0.019039125
+MATHSTAGE	case=no_discard_pass0	phase=3.000	steps=256	passes=1	medianSeconds=0.018505208	minSeconds=0.018231167	maxSeconds=0.019039125	GpixStepsPerSec=12.749362
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=256	passes=2	sample=0	seconds=0.018357875
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=256	passes=2	sample=1	seconds=0.018449208
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=256	passes=2	sample=2	seconds=0.017625083
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=256	passes=2	sample=3	seconds=0.017797542
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=256	passes=2	sample=4	seconds=0.018037083
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=256	passes=2	sample=5	seconds=0.017754042
+STAGESAMPLE	case=no_discard_two_passes	phase=3.000	steps=256	passes=2	sample=6	seconds=0.019244250
+MATHSTAGE	case=no_discard_two_passes	phase=3.000	steps=256	passes=2	medianSeconds=0.018037083	minSeconds=0.017625083	maxSeconds=0.019244250	GpixStepsPerSec=26.160505
+STAGEOUTPUT	case=no_discard_two_passes	fnv1a64=5dccf9f19524f5f0	colorMin=1	colorMax=255

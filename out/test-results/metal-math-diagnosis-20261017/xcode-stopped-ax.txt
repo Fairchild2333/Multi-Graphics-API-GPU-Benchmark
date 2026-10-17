@@ -1,0 +1,89 @@
+Window: "discard-control.gputrace", App: Xcode.
+0 standard window discard-control.gputrace, ID: Xcode.WorkspaceWindow, Secondary Actions: Raise, URL: file:///Users/fairchild/VSCode%20Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/metal-math-diagnosis-20261017/discard-control.gputrace
+	1 split group Files.xcfilescontainer, ID: Workspace window tab content, Description: /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/C/com.apple.DeveloperTools/27.1-27A9275/Xcode/FilesWorkspaces/E71A4EB1-28C7-4863-96E8-3DD47B90C376/Files.xcfilescontainer
+		2 splitter (disabled, settable, float) -1
+		3 container editor area
+			4 split group
+				5 container discard-control.gputrace
+					6 split group
+						7 container Description: discard-control.gputrace, ID: editor context
+							8 split group
+								9 image
+								10 text discard-control.gputrace 17 Oct 2026 at 6:33 pm
+Captured from shins-MacBook-Pro-4.local (Apple M4 Pro) on macOS 27.0.1
+								11 button Replay
+								12 pop up button (disabled) Value: 刘子箴’s MacBook Pro (Apple M4 Pro, macOS 27.0.1), ID: devicePopup
+								13 checkbox Profile after replay, Value: 1, ID: profileCheckbox
+							14 container Description: Jump Bar, ID: jump bar
+								15 container
+									16 menu button Description: Related Items, Help: Navigate to Related Items, ID: related items
+									17 pop up button Files
+									18 pop up button discard-control
+									19 pop up button No Selection
+			20 container debug bar
+				21 button Description: Breakpoints, Help: Deactivate Breakpoints, Value: 1
+				22 button Description: main, Help: Shows a list of available branches
+				23 button Description: hide debug area, Help: Hide the Debug Area, Value: 1
+			24 splitter (disabled, settable, float) 760
+			25 container debug area
+				26 container
+					27 pop up button Auto
+					28 button Quick Look
+					29 button Print Description
+					30 search text field (settable) Description: VariablesViewFilter, Placeholder: Filter, ID: filter
+						31 button toggle filter, Description: VariablesViewFilter, ID: search field menu
+				32 scroll area
+					33 outline variables view
+				34 splitter (disabled, settable, float) 912
+				35 scroll area Secondary Actions: Scroll Up, Scroll Down
+					36 text entry area (settable) Description: Console, Secondary Actions: Jump to Definition
+					37 scroll bar (disabled, settable, float) 0
+				38 scroll area Secondary Actions: Scroll Up, Scroll Down
+					39 text entry area (settable) Description: debug console, Secondary Actions: Jump to Definition
+					40 scroll bar (settable, float) 0
+						41 value indicator (settable, float) 0
+						42 increment arrow button
+						43 decrement arrow button
+						44 increment page button
+						45 decrement page button
+				46 container
+					47 button Quick Look
+					48 button Description: Metadata Options, Value: 1
+					49 search text field Description: Console Filter Field, Placeholder: Filter
+						50 button Icon View Drop Down
+							51 image
+					52 button Clear Console
+		53 splitter (disabled, settable, float) 1376.5
+	54 toolbar
+		55 Navigators/Coding Assistant
+			56 radio button Description: Navigators, Value: 0
+			57 radio button Description: Coding Assistant, Value: 0
+		58 container Back/Forward
+			59 button (disabled) Description: Go Back, Help: Show Previous Location in History
+			60 button (disabled) Description: Go Forward, Help: Show Next Location in History
+		61 container Window Title/Activity
+			62 progress indicator 1
+			63 text discard-control.gputrace Finished running macOS App
+		64 button Description: New Conversation, Secondary Actions: Move previous, Move next, Remove from toolbar
+		65 menu button Description: Add Editor, Secondary Actions: Move previous, Move next, Remove from toolbar
+		66 menu button Description: Editor Options, Secondary Actions: Move previous, Move next, Remove from toolbar
+		67 Editor Mode
+			68 radio button Description: Canvas, Help: Show Canvas, Value: 0
+			69 radio button Description: Assistant, Help: Show Assistant, Value: 1
+			70 radio button Description: Code Review, Help: Show Code Review, Value: 0
+		71 button Description: Show Inspector, Secondary Actions: Move previous, Remove from toolbar
+	72 close button
+	73 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	74 minimize button
+75 menu bar
+	76 Xcode
+	77 File
+	78 Edit
+	79 View
+	80 Find
+	81 Navigate
+	82 Editor
+	83 Product
+	84 Integrate
+	85 Window
+	86 Help

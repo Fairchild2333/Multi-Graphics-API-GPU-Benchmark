@@ -28,6 +28,7 @@ Mac 最新修复见 [报告、曲线、原生日志及跨平台构建验证](mac
 - Mac 本轮 14 条新增记录中 10 条通过、3 条旧查询对照保留 review、1 条小容量负向复核正确保留 preview/review。默认内存三轮读取 245.897/245.908/250.419 GB/s。新版身份为 `membw_v3_streaming`，旧 V1/V2 不自动变成新版设备成绩。
 - A16 实际进度及 3 项警告数值见 [设备记录](../../docs/a16-partial-run-20261016.md)。
 - [A15最新两项真机补测](a15-v3-cpu-confirm-20261017/report.md)：CPU通过，V3内存77点/34次校验通过，但iOS软件预览上限256 MiB，正式平台未建立。没有重跑其他稳定项目。
+- [M4 GPU Burn最新诊断](metal-math-diagnosis-20261017/report.md)：固定步数简化片元达到计算的约98%；完整着色器约50%额外FS调用，discard控制支持可见性执行为主要因素。正式成绩未改，不能把无discard的遮挡剔除速率当新分数。
 - [M4独立单核研究](m4-single-core-research-20261017/report.md)：本机Geekbench 6.7.1为3675/22129，另做编译目标和分支对照。约6%的参考单核差距尚未归因；独立基准及控制程序均未混入项目主历史。
 - [12.9英寸A12X最新V3补测](ipad87-v3-memory-20261017/report.md)：仅跑待补内存，77点/34次校验通过，53.932 GB/s仍为未达平台的参考值；原72条保留，App已停止。
 - [随后完成iOS内存平台修复](ios-vulkan-memory-platform-fix-20261017/report.md)：默认512 MiB并按App余量缩小；iPad8,7平台56.657通过，模拟器预算未知时正确回退review。A15/另一台iPad尚需新配置实测。

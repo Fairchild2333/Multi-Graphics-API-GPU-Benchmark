@@ -1,0 +1,23 @@
+{
+  "buildCommand": [
+    "xcrun",
+    "clang++",
+    "-std=c++17",
+    "-O2",
+    "-fobjc-arc",
+    "-framework",
+    "Foundation",
+    "-framework",
+    "Metal",
+    "scripts/metal-math-probe/burn_stage_probe.mm",
+    "-o",
+    "/var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/T/metal-math-probe/burn_stage_probe"
+  ],
+  "command": [
+    "/var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/T/metal-math-probe/burn_stage_probe",
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/shaders/gpu_burn.metal",
+    "discard"
+  ],
+  "returnCode": 0,
+  "sourceSha256": "bc132f77ebdea792b9dbb5278b1a189545ae6e0305f6b9e59ee1a2c9edc4a73c"
+}

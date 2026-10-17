@@ -1,0 +1,6 @@
+GPU: Apple M4 Pro
+mathMode=2 mathFloatingPointFunctions=0 languageVersion=262145
+FMAPAIR	case=buffered	steps=4096	medianSeconds=0.017804833	minSeconds=0.017346083	maxSeconds=0.018109167	TFLOPS=6.784447
+FMAPAIR	case=literal	steps=4096	medianSeconds=0.017295750	minSeconds=0.016809333	maxSeconds=0.017550000	TFLOPS=6.984141
+FMAPAIR	case=literal	steps=4096	medianSeconds=0.017070833	minSeconds=0.016819167	maxSeconds=0.017645750	TFLOPS=7.076160
+FMAPAIR	case=buffered	steps=4096	medianSeconds=0.017635750	minSeconds=0.017502375	maxSeconds=0.018450250	TFLOPS=6.849494
