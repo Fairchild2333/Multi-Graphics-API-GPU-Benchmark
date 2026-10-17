@@ -193,7 +193,9 @@ workloads run. OpenGL is not available (the backend needs 4.3; the Pi offers
 R32_SFLOAT 3D images, as on Adreno).
 
 **1. Dependencies.** Everything is packaged, `glslc` included, so the shaders
-are built on the Pi. `xvfb` is only needed without a monitor.
+are built on the Pi. Every GPU run calls `glfwInit()`, headless ones too, so a
+display server must be running: the desktop session, or `xvfb-run` on an image
+without one.
 
 ```bash
 sudo apt-get install -y cmake libglfw3-dev libvulkan-dev glslc xvfb
@@ -217,16 +219,25 @@ ctest --test-dir build
 - `--gpu 0` is V3D; llvmpipe is listed as GPU 1. `--complete-suite` would run
   every GPU job a second time on llvmpipe, so run the V3D jobs on their own
   with the suite's arguments.
-- Without a monitor, run GPU commands under `xvfb-run -a -s "-screen 0
-  1920x1080x24"`. Headless runs then measure the GPU normally; windowed runs
-  present through software and are not results (below).
+- Without a monitor, headless runs measure the GPU normally, but windowed
+  runs have no valid way to present. The desktop (labwc, Wayland) keeps
+  running with no output, and GLFW 3.4 connects to it (`wayland-0`) even over
+  SSH; frames then go to a desktop that has no screen. Forced onto Xvfb
+  (`WAYLAND_DISPLAY` pointing nowhere, under `xvfb-run`), V3D cannot present at
+  all and the run stops with `Requested GPU index unsuitable`. Connect a
+  monitor, or an HDMI dummy plug, for windowed runs.
 
 **Known limits on V3D.**
 
-- Windowed particle runs: the compute timestamps of a windowed frame do not
-  bracket the work (0.01 - 93 ms for the same step), so 65K/1M/4M read
-  70.5/5.5/4.9 GB/s against about 2.0 headless. Use the headless figures; the
-  windowed ones were seen on Xvfb only and still need a check with a monitor.
+- Windowed particle runs without a monitor (on the screenless labwc desktop):
+  the compute timestamps of a frame jumped between 0.01 and 93 ms for the same
+  step, so 65K/1M/4M read 70.5/5.5/4.9 GB/s against about 2.0 headless, and
+  16M stopped with an out-of-date swapchain. The startup timestamp check that
+  embedded hosts run (`CheckTimestampsAgainstWallClock`) passed there (324 ms
+  both ways), so it would not catch this. Not results; repeat with a monitor.
+  GPU Burn ran on the same screenless desktop; its GPU time matched the frame
+  time at 16 and 256 steps, so its figures were kept, but they too should be
+  checked once with a monitor.
 - V3D allows 65,535 work groups per dispatch, and 16,777,216 particles need
   65,536. Before 2026-10-17 that dispatch did no work (15,086 GB/s); the
   Vulkan backend now splits such a step into dispatches over separate parts
