@@ -1,6 +1,33 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
-> **2026-10-17：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** iOS Vulkan固定256 MiB限制已修复，iPad8,7新预算版本确认56.657 GB/s平台，历史74条。A15/另一台iPad仍需接回补这一新版本；旧记录保留。
+> **2026-10-17晚：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** A15新版Vulkan内存29.803 GB/s平台及八个粒子同步计时组合已补完，31项有当前合同覆盖、历史141条；1M纯计算5.41%下降提示保留。11英寸iPad仍需新版内存，12.9英寸iPad另缺五个粒子新计时组合。
+
+## 2026-10-17 A15 current-contract follow-ups completed
+
+- Wired/unlocked iPhone14,2, iOS27.0.1; fresh signed Release based onaddfaee.
+  Backed up132 rows byte-identical to prior canonical history before install.
+  No production code or thresholds changed. Latest App model found22/31 jobs
+  covered, not30/31: eight Vulkan particle records still used old GPU queries.
+- Ran9 actual targeted App jobs: new-budget Vulkan memory plus64K/1M/4M/16M
+  rendered+headless particles. Memory512MiB read29.803/write30.4/copy27.8 GB/s,
+  83points/38checks, anomalies0, flat full-traversal256/384/512MiB tails; passed.
+- All9 finish at thermal0->0. Eight passed, 1M headless review: full mean14.337,
+  stable13.835GB/s CV0.56%, drop5.41%; GPU2.926/frame2.932ms. No direct frequency
+  evidence. 64K headless passed but grew30.22% early-to-late; retain variation,
+  not a stable peak. No repeats solely to remove flags or select higher scores.
+- Production Swift verifies requests/versions/unique rows and all31 jobs/33
+  selected records. CPU retained147.000/89.287/634.868 and267 memory curve points,
+  page/storage measured. Metal memory remains preview/unverified platform;
+  independent GPU/SLC attribution still excluded. This was9 targeted jobs,
+  not a new31-job physical one-button click. Optional full UI acceptance remains.
+- History132->141, old132 unchanged. Other canonical histories/liveMac unchanged.
+  New A15 canonical index points to final141-row export. App PID48000 stopped.
+  Commands, signatures/hashes, logs, JSON, manifests, curves/timelines, production
+  audit and verifier:out/test-results/a15-app-budget-completion-20261017/report.md.
+- Read-only particle contract check: iPad8,1/A16 eight each match; iPad8,7 has
+  only3 current headless matches. Add64K rendered+headless and1M/4M/16M rendered
+  to iPad8,7 pending (I4). No other device executed; avoid prior stale no-rerun
+  claims based only on record presence. A16 nine jobs/iPad8,1 two jobs unchanged.
 
 ## 2026-10-17 independent watchOS CPU app implemented
 

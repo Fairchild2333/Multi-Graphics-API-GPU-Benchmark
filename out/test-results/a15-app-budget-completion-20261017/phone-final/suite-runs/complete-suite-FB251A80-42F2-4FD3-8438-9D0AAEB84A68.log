@@ -1,0 +1,78 @@
+iOS complete suite complete-suite-FB251A80-42F2-4FD3-8438-9D0AAEB84A68
+Started: 2026-10-14T04:46:12Z
+
+Thermal precheck stream-1048576: nominal after 0s cooling.
+
+=== 1/1 stream-1048576: passed ===
+=== Preview stream?particles=1048576&vsync=0&api=metal&coverage=fixed 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A15 GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 1048576 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 5.156 ms | Render: 23.508 ms | Total: 30.259 ms | FPS: 34 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 2.244 ms | Render: 23.313 ms | Total: 26.378 ms | FPS: 36 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 2.375 ms | Render: 22.006 ms | Total: 25.138 ms | FPS: 38 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 2.021 ms | Render: 21.640 ms | Total: 24.539 ms | FPS: 39 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 1.996 ms | Render: 22.375 ms | Total: 25.287 ms | FPS: 38 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 1.904 ms | Render: 21.765 ms | Total: 24.565 ms | FPS: 39 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 1.920 ms | Render: 21.862 ms | Total: 24.687 ms | FPS: 39 | T: 2.9 s
+[GPU Timing] Compute: 1.906 ms | Render: 22.097 ms | Total: 24.869 ms | FPS: 38 | T: 3.9 s
+[GPU Timing] Compute: 1.957 ms | Render: 22.108 ms | Total: 24.955 ms | FPS: 38 | T: 4.9 s
+[GPU Timing] Compute: 1.905 ms | Render: 22.206 ms | Total: 25.005 ms | FPS: 38 | T: 6.0 s
+[GPU Timing] Compute: 1.926 ms | Render: 22.479 ms | Total: 25.328 ms | FPS: 37 | T: 7.0 s
+[GPU Timing] Compute: 1.921 ms | Render: 22.277 ms | Total: 25.127 ms | FPS: 38 | T: 8.0 s
+[GPU Timing] Compute: 1.927 ms | Render: 22.038 ms | Total: 25.081 ms | FPS: 38 | T: 9.0 s
+[GPU Timing] Compute: 1.925 ms | Render: 21.754 ms | Total: 24.578 ms | FPS: 39 | T: 10.0 s
+[GPU Timing] Compute: 1.912 ms | Render: 21.193 ms | Total: 23.991 ms | FPS: 40 | T: 11.0 s
+[GPU Timing] Compute: 1.909 ms | Render: 20.985 ms | Total: 23.855 ms | FPS: 40 | T: 12.0 s
+[GPU Timing] Compute: 1.955 ms | Render: 21.249 ms | Total: 24.127 ms | FPS: 39 | T: 13.0 s
+[GPU Timing] Compute: 1.899 ms | Render: 21.514 ms | Total: 24.337 ms | FPS: 39 | T: 14.1 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    1048576 (Medium)
+Buffer:       32.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 510 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         1.924     1.748     3.064
+Render:         21.799    20.614    23.059
+Total GPU:      24.647    23.376    29.615
+
+--- Throughput ---
+Avg FPS:      39
+Particles:    1048576
+Working set:  32.00 MiB
+VRAM rate:   21.80 GB/s  (1.924 ms compute)
+
+--- Analysis ---
+Avg frame time:  25.567 ms
+Avg GPU time:    24.647 ms
+GPU utilisation: 96.4%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 21.85 GB/s  (CV 0.99%)
+Throughput:   early vs late mean change (drop positive) -0.2%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261014-154627-847 -> /var/mobile/Containers/Data/Application/7287B165-FAB5-43E7-8289-6876AF2CD830/Documents/results/results.json

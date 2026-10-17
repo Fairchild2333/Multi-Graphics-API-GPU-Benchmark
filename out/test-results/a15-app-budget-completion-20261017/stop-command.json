@@ -1,0 +1,15 @@
+[
+  "xcrun",
+  "devicectl",
+  "device",
+  "process",
+  "signal",
+  "--device",
+  "00008110-00164D591485401E",
+  "--pid",
+  "48000",
+  "--signal",
+  "SIGTERM",
+  "--json-output",
+  "out/test-results/a15-app-budget-completion-20261017/stop-device.json"
+]

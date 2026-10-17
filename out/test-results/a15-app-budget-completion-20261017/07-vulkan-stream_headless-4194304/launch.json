@@ -1,0 +1,69 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "process",
+      "launch",
+      "--device",
+      "00008110-00164D591485401E",
+      "--terminate-existing",
+      "--console",
+      "--json-output",
+      "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-app-budget-completion-20261017/07-vulkan-stream_headless-4194304/launch.json",
+      "com.fairchild.Mangekyo",
+      "--ios-allow-translated-api",
+      "--ios-complete-suite",
+      "--ios-suite-jobs",
+      "vulkan/stream_headless-4194304"
+    ],
+    "commandType" : "devicectl.device.process.launch",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "45159977-97BF-543B-A3BE-3FFC567B816E",
+    "launchOptions" : {
+      "activatedWhenStarted" : true,
+      "arguments" : [
+        "--ios-allow-translated-api",
+        "--ios-complete-suite",
+        "--ios-suite-jobs",
+        "vulkan/stream_headless-4194304"
+      ],
+      "environmentVariables" : {
+        "TERM" : "dumb"
+      },
+      "platformSpecificOptions" : {
+
+      },
+      "startStopped" : false,
+      "terminateExistingInstances" : true,
+      "user" : {
+        "active" : true
+      }
+    },
+    "process" : {
+      "auditToken" : [
+        4294967295,
+        501,
+        501,
+        501,
+        501,
+        47997,
+        0,
+        129913
+      ],
+      "executable" : "file:///private/var/containers/Bundle/Application/3177BF74-9B1C-45B1-A3A4-08D2A5AE4C64/Mangekyo.app/Mangekyo",
+      "processIdentifier" : 47997
+    },
+    "terminationResult" : {
+      "terminatingSignal" : 9,
+      "wasCoreDumpCreated" : false
+    }
+  }
+}

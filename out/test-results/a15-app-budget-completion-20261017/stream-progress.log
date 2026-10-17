@@ -1,0 +1,40 @@
+START 2/9 vulkan/stream-65536
+STATE vulkan/stream-65536 ('running', 'running')
+STATE vulkan/stream-65536 ('passed', 'passed')
+END vulkan/stream-65536 passed ids=['20261017-192417-139'] thermal=0->0 error=
+REST 25s
+START 3/9 vulkan/stream_headless-65536
+STATE vulkan/stream_headless-65536 ('running', 'running')
+STATE vulkan/stream_headless-65536 ('passed', 'passed')
+END vulkan/stream_headless-65536 passed ids=['20261017-192503-385'] thermal=0->0 error=
+REST 25s
+START 4/9 vulkan/stream-1048576
+STATE vulkan/stream-1048576 ('running', 'running')
+STATE vulkan/stream-1048576 ('passed', 'passed')
+END vulkan/stream-1048576 passed ids=['20261017-192549-633'] thermal=0->0 error=
+REST 25s
+START 5/9 vulkan/stream_headless-1048576
+STATE vulkan/stream_headless-1048576 ('running', 'running')
+STATE vulkan/stream_headless-1048576 ('review', 'review')
+END vulkan/stream_headless-1048576 review ids=['20261017-192635-978'] thermal=0->0 error=运行中吞吐下降超过 5%
+REST 25s
+START 6/9 vulkan/stream-4194304
+STATE vulkan/stream-4194304 ('running', 'running')
+STATE vulkan/stream-4194304 ('passed', 'passed')
+END vulkan/stream-4194304 passed ids=['20261017-192722-653'] thermal=0->0 error=
+REST 25s
+START 7/9 vulkan/stream_headless-4194304
+STATE vulkan/stream_headless-4194304 ('running', 'running')
+STATE vulkan/stream_headless-4194304 ('passed', 'passed')
+END vulkan/stream_headless-4194304 passed ids=['20261017-192808-814'] thermal=0->0 error=
+REST 25s
+START 8/9 vulkan/stream-16777216
+STATE vulkan/stream-16777216 ('running', 'running')
+STATE vulkan/stream-16777216 ('passed', 'passed')
+END vulkan/stream-16777216 passed ids=['20261017-192856-326'] thermal=0->0 error=
+REST 25s
+START 9/9 vulkan/stream_headless-16777216
+STATE vulkan/stream_headless-16777216 ('running', 'running')
+STATE vulkan/stream_headless-16777216 ('passed', 'passed')
+END vulkan/stream_headless-16777216 passed ids=['20261017-192941-927'] thermal=0->0 error=
+DONE; all raw Documents copied to phone-final

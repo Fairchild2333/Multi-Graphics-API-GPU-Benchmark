@@ -1,0 +1,6 @@
+[
+  "bash",
+  "scripts/build-ios.sh",
+  "--sdk",
+  "iphoneos"
+]

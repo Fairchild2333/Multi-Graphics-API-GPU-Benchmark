@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "",
+  "id" : "complete-suite-D36E2B34-170A-4981-BFBD-55F266294580",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "",
+      "id" : "gpu_cache-v2",
+      "request" : "gpu_cache?api=metal",
+      "resultIDs" : [
+
+      ],
+      "startedAt" : "2026-10-14T08:03:54Z",
+      "status" : "running",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · GPU Cache-state Diagnostic"
+    }
+  ],
+  "startedAt" : "2026-10-14T08:03:54Z",
+  "status" : "running"
+}

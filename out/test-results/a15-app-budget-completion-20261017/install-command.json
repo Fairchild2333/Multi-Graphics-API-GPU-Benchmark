@@ -1,0 +1,12 @@
+[
+  "xcrun",
+  "devicectl",
+  "device",
+  "install",
+  "app",
+  "--device",
+  "00008110-00164D591485401E",
+  "--json-output",
+  "out/test-results/a15-app-budget-completion-20261017/install-device.json",
+  "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-a15-app-budget/Build/Products/Release-iphoneos/Mangekyo.app"
+]

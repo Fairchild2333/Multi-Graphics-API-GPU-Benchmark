@@ -1,0 +1,11 @@
+[
+  "vulkan/memory_sweep",
+  "vulkan/stream-65536",
+  "vulkan/stream_headless-65536",
+  "vulkan/stream-1048576",
+  "vulkan/stream_headless-1048576",
+  "vulkan/stream-4194304",
+  "vulkan/stream_headless-4194304",
+  "vulkan/stream-16777216",
+  "vulkan/stream_headless-16777216"
+]

@@ -1,0 +1,103 @@
+{
+  "error" : {
+    "code" : -1,
+    "domain" : "com.apple.dt.CoreDeviceError",
+    "userInfo" : {
+      "Backtrace" : {
+        "array" : [
+          {
+            "string" : "0   CoreFoundation                      0x000000019e29e8c0 __exceptionPreprocess + 176"
+          },
+          {
+            "string" : "1   libobjc.A.dylib                     0x000000019dcfc60c objc_exception_throw + 88"
+          },
+          {
+            "string" : "2   Foundation                          0x000000019f939a60 -[NSInPredicateOperator performPrimitiveOperationUsingObject:andObject:] + 452"
+          },
+          {
+            "string" : "3   Foundation                          0x000000019f938038 -[NSComparisonPredicate evaluateWithObject:substitutionVariables:] + 356"
+          },
+          {
+            "string" : "4   CoreDeviceCLISupport                0x0000000102f9a2c8 -[NSPredicate(CoreDeviceAdditions) cd_evaluateWithObject:substitutionVariables:error:] + 72"
+          },
+          {
+            "string" : "5   CoreDeviceCLISupport                0x0000000103095180 _swift_implicitisolationactor_to_executor_cast + 4284"
+          },
+          {
+            "string" : "6   CoreDeviceCLISupport                0x0000000102ffbed0 __swift_closure_destructor.49 + 27312"
+          },
+          {
+            "string" : "7   CoreDeviceCLISupport                0x0000000102ffeea0 __swift_closure_destructor.8 + 260"
+          },
+          {
+            "string" : "8   CoreDeviceCLISupport                0x0000000102ff8a08 __swift_closure_destructor.49 + 13800"
+          },
+          {
+            "string" : "9   CoreDeviceCLISupport                0x0000000102ffa6d0 __swift_closure_destructor.49 + 21168"
+          },
+          {
+            "string" : "10  CoreDeviceCLISupport                0x0000000102ffc070 __swift_closure_destructor.49 + 27728"
+          },
+          {
+            "string" : "11  devicectl                           0x000000010259fa4c __swift_memcpy0_1 + 57656"
+          },
+          {
+            "string" : "12  devicectl                           0x000000010253d1e9 __swift_noop_void_return + 20197"
+          },
+          {
+            "string" : "13  CoreDeviceCLISupport                0x0000000102fbcd2d __swift_closure_destructor.15 + 36649"
+          },
+          {
+            "string" : "14  CoreDeviceCLISupport                0x0000000102fbd1f1 __swift_closure_destructor.15 + 37869"
+          },
+          {
+            "string" : "15  devicectl                           0x000000010253d4c9 __swift_noop_void_return + 20933"
+          },
+          {
+            "string" : "16  devicectl                           0x0000000102748f59 __swift_closure_destructor.15 + 23205"
+          },
+          {
+            "string" : "17  devicectl                           0x000000010253751d async_MainTQ4_ + 1"
+          },
+          {
+            "string" : "18  devicectl                           0x00000001025377c9 async_MainTY6_ + 313"
+          },
+          {
+            "string" : "19  libswift_Concurrency.dylib          0x00000002caa6ae69 _ZL22completeTaskAndReleasePN5swift12AsyncContextEPNS_10SwiftErrorE + 1"
+          }
+        ]
+      },
+      "NSLocalizedDescription" : {
+        "string" : "An error occurred evaluating a value using the specified filter."
+      },
+      "NSLocalizedFailureReason" : {
+        "string" : "Can't use in/contains operator with collection file:///System/Library/PrivateFrameworks/SiriAppIntentsRuntime.framework/siriappintentsd (not a collection)"
+      },
+      "Name" : {
+        "string" : "NSInvalidArgumentException"
+      }
+    }
+  },
+  "errorSignature" : "(com.apple.dt.CoreDeviceError -1)",
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "processes",
+      "--device",
+      "00008110-00164D591485401E",
+      "--filter",
+      "executable CONTAINS \"Mangekyo.app/Mangekyo\"",
+      "--json-output",
+      "out/test-results/a15-app-budget-completion-20261017/processes-before-stop.json"
+    ],
+    "commandType" : "devicectl.device.info.processes",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "failed",
+    "version" : "651.13.5"
+  }
+}

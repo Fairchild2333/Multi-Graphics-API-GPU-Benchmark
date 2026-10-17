@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "2026-10-14T08:06:45Z",
+  "id" : "complete-suite-0CE19A79-BC40-4663-83FF-E8DCA7D70085",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-14T08:06:45Z",
+      "id" : "gpu_cache-v2",
+      "request" : "gpu_cache?api=metal",
+      "resultIDs" : [
+        "20261014-190645-149-metal-cache"
+      ],
+      "startedAt" : "2026-10-14T08:06:07Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · GPU Cache-state Diagnostic"
+    }
+  ],
+  "startedAt" : "2026-10-14T08:06:07Z",
+  "status" : "passed"
+}

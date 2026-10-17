@@ -1,0 +1,10 @@
+job,resultID,status,scoreGBps,stableScoreGBps,stableCVPct,earlyLateDropPct,gpuMs,frameMs,thermalStart,thermalEnd,review
+vulkan/memory_sweep,20261017-192326-416-membw,passed,29.803,0.0,-1.0,0.0,0.0,0.0,0,0,
+vulkan/stream-65536,20261017-192417-139,passed,2.864,2.868,1.72,0.22,16.375,16.735,0,0,
+vulkan/stream_headless-65536,20261017-192503-385,passed,3.898,3.499,1.67,-30.22,0.672,0.675,0,0,
+vulkan/stream-1048576,20261017-192549-633,passed,14.555,14.507,0.76,-3.27,27.096,27.47,0,0,
+vulkan/stream_headless-1048576,20261017-192635-978,review,14.337,13.835,0.56,5.41,2.926,2.932,0,0,运行中吞吐下降超过 5%
+vulkan/stream-4194304,20261017-192722-653,passed,16.859,17.149,0.61,-2.42,107.405,107.859,0,0,
+vulkan/stream_headless-4194304,20261017-192808-814,passed,17.363,17.399,0.21,-0.75,9.663,9.67,0,0,
+vulkan/stream-16777216,20261017-192856-326,passed,18.369,18.37,0.77,-0.27,426.716,426.93,0,0,
+vulkan/stream_headless-16777216,20261017-192941-927,passed,18.505,18.599,0.39,-1.2,36.265,36.277,0,0,

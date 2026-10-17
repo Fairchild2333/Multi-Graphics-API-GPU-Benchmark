@@ -1,0 +1,48 @@
+{
+  "newPhysicalCpuTestsRun": false,
+  "reason": "Current-version CPU compute and P/E cache/memory/page/storage already covered; raw records retained unchanged.",
+  "jobs": [
+    {
+      "complete": true,
+      "cpuMemoryPoints": 0,
+      "expectedRecords": 3,
+      "job": "cpu_compute",
+      "request": "gpu_benchmark --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2",
+      "resultIDs": [
+        "20261017-012813-905-cpu-single-performance",
+        "20261017-012813-917-cpu-single-efficiency",
+        "20261017-012813-928-cpu-multi"
+      ],
+      "reviewReasons": [],
+      "scores": [
+        147,
+        89.287,
+        634.868
+      ],
+      "versions": [
+        "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_standalone_qos_bound_v1_performance_ios_preview",
+        "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_standalone_qos_bound_v1_efficiency_foreground_e_p_load_v1_ios_preview",
+        "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_before_percore_ios_preview"
+      ],
+      "vulkanMemoryPoints": 0
+    },
+    {
+      "complete": true,
+      "cpuMemoryPoints": 267,
+      "expectedRecords": 1,
+      "job": "cpu_memory",
+      "request": "gpu_benchmark --cpu-membw",
+      "resultIDs": [
+        "20261014-171607-442-cpu-membw"
+      ],
+      "reviewReasons": [],
+      "scores": [
+        35.178
+      ],
+      "versions": [
+        "cpu_membw_v1_ios_preview_qos_bound_v1_both_foreground_e_p_load_v1"
+      ],
+      "vulkanMemoryPoints": 0
+    }
+  ]
+}

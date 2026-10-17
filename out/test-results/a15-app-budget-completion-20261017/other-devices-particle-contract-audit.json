@@ -1,0 +1,442 @@
+[
+  {
+    "device": "iPad8,7",
+    "history": "ios-vulkan-memory-platform-fix-20261017/phone-final/results/results.json",
+    "checkedScope": "Only eight Vulkan particle contracts, using current production MobileSuiteJob.matches; other jobs ignored",
+    "matched": 3,
+    "needsCurrentContract": [
+      "vulkan/stream-65536",
+      "vulkan/stream_headless-65536",
+      "vulkan/stream-1048576",
+      "vulkan/stream-4194304",
+      "vulkan/stream-16777216"
+    ],
+    "jobs": [
+      {
+        "complete": false,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream-65536",
+        "request": "stream?particles=65536&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [],
+        "reviewReasons": [],
+        "scores": [],
+        "versions": [],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": false,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream_headless-65536",
+        "request": "stream_headless?particles=65536&vsync=0&api=vulkan",
+        "resultIDs": [],
+        "reviewReasons": [],
+        "scores": [],
+        "versions": [],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": false,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream-1048576",
+        "request": "stream?particles=1048576&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [],
+        "reviewReasons": [],
+        "scores": [],
+        "versions": [],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream_headless-1048576",
+        "request": "stream_headless?particles=1048576&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261014-030240-428"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          22.618
+        ],
+        "versions": [
+          "stream_v1_ios_preview_sync_timing_moltenvk"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": false,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream-4194304",
+        "request": "stream?particles=4194304&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [],
+        "reviewReasons": [],
+        "scores": [],
+        "versions": [],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream_headless-4194304",
+        "request": "stream_headless?particles=4194304&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261014-030256-629"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          27.317
+        ],
+        "versions": [
+          "stream_v1_ios_preview_sync_timing_moltenvk"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": false,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream-16777216",
+        "request": "stream?particles=16777216&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [],
+        "reviewReasons": [],
+        "scores": [],
+        "versions": [],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream_headless-16777216",
+        "request": "stream_headless?particles=16777216&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261014-030313-400"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          28.935
+        ],
+        "versions": [
+          "stream_v1_ios_preview_sync_timing_moltenvk"
+        ],
+        "vulkanMemoryPoints": 0
+      }
+    ],
+    "physicalTestsRun": false
+  },
+  {
+    "device": "iPad8,1",
+    "history": "ipad81-design-review-20261016/phone-final/results/results.json",
+    "checkedScope": "Only eight Vulkan particle contracts, using current production MobileSuiteJob.matches; other jobs ignored",
+    "matched": 8,
+    "needsCurrentContract": [],
+    "jobs": [
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream-65536",
+        "request": "stream?particles=65536&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [
+          "20261016-192037-301"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          2.135
+        ],
+        "versions": [
+          "stream_v1_fixed_coverage_v2_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream_headless-65536",
+        "request": "stream_headless?particles=65536&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261016-192226-325"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          5.475
+        ],
+        "versions": [
+          "stream_v1_ios_preview_sync_timing_moltenvk"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream-1048576",
+        "request": "stream?particles=1048576&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [
+          "20261016-195521-226"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          21.318
+        ],
+        "versions": [
+          "stream_v1_fixed_coverage_v2_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream_headless-1048576",
+        "request": "stream_headless?particles=1048576&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261016-193924-796"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          18.481
+        ],
+        "versions": [
+          "stream_v1_ios_preview_sync_timing_moltenvk"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream-4194304",
+        "request": "stream?particles=4194304&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [
+          "20261016-195537-852"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          26.999
+        ],
+        "versions": [
+          "stream_v1_fixed_coverage_v2_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream_headless-4194304",
+        "request": "stream_headless?particles=4194304&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261016-193940-826"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          26.642
+        ],
+        "versions": [
+          "stream_v1_ios_preview_sync_timing_moltenvk"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream-16777216",
+        "request": "stream?particles=16777216&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [
+          "20261016-195556-067"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          28.952
+        ],
+        "versions": [
+          "stream_v1_fixed_coverage_v2_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream_headless-16777216",
+        "request": "stream_headless?particles=16777216&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261016-193957-335"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          28.754
+        ],
+        "versions": [
+          "stream_v1_ios_preview_sync_timing_moltenvk"
+        ],
+        "vulkanMemoryPoints": 0
+      }
+    ],
+    "physicalTestsRun": false
+  },
+  {
+    "device": "iPhone15,3",
+    "history": "a16-full-suite-20261016/phone-final/results/results.json",
+    "checkedScope": "Only eight Vulkan particle contracts, using current production MobileSuiteJob.matches; other jobs ignored",
+    "matched": 8,
+    "needsCurrentContract": [],
+    "jobs": [
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream-65536",
+        "request": "stream?particles=65536&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [
+          "20261016-212445-219"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          2.122
+        ],
+        "versions": [
+          "stream_v1_fixed_coverage_v2_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream_headless-65536",
+        "request": "stream_headless?particles=65536&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261016-212501-194"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          3.764
+        ],
+        "versions": [
+          "stream_v1_ios_preview_sync_timing_moltenvk"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream-1048576",
+        "request": "stream?particles=1048576&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [
+          "20261016-212517-195"
+        ],
+        "reviewReasons": [
+          "Stable throughput was not reached"
+        ],
+        "scores": [
+          15.218
+        ],
+        "versions": [
+          "stream_v1_fixed_coverage_v2_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream_headless-1048576",
+        "request": "stream_headless?particles=1048576&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261016-212533-203"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          17.099
+        ],
+        "versions": [
+          "stream_v1_ios_preview_sync_timing_moltenvk"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream-4194304",
+        "request": "stream?particles=4194304&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [
+          "20261016-212549-272"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          22.833
+        ],
+        "versions": [
+          "stream_v1_fixed_coverage_v2_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream_headless-4194304",
+        "request": "stream_headless?particles=4194304&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261016-212605-300"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          23.928
+        ],
+        "versions": [
+          "stream_v1_ios_preview_sync_timing_moltenvk"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream-16777216",
+        "request": "stream?particles=16777216&vsync=0&api=vulkan&coverage=fixed",
+        "resultIDs": [
+          "20261016-212622-347"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          24.937
+        ],
+        "versions": [
+          "stream_v1_fixed_coverage_v2_ios_preview_sync_timing_moltenvk_viewport1280x720_v1"
+        ],
+        "vulkanMemoryPoints": 0
+      },
+      {
+        "complete": true,
+        "cpuMemoryPoints": 0,
+        "expectedRecords": 1,
+        "job": "vulkan/stream_headless-16777216",
+        "request": "stream_headless?particles=16777216&vsync=0&api=vulkan",
+        "resultIDs": [
+          "20261016-212638-688"
+        ],
+        "reviewReasons": [],
+        "scores": [
+          26.432
+        ],
+        "versions": [
+          "stream_v1_ios_preview_sync_timing_moltenvk"
+        ],
+        "vulkanMemoryPoints": 0
+      }
+    ],
+    "physicalTestsRun": false
+  }
+]

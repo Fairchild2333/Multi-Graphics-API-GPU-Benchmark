@@ -1,0 +1,23 @@
+{
+  "finishedAt" : "2026-10-16T14:27:00Z",
+  "id" : "complete-suite-E05152D4-7AD5-41B5-8F24-705BE26A6E0B",
+  "jobs" : [
+    {
+      "error" : "尚未达到内存带宽平台",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-16T14:26:59Z",
+      "id" : "vulkan\/memory_sweep",
+      "request" : "memory_sweep?api=vulkan",
+      "resultIDs" : [
+        "20261017-012659-180-membw"
+      ],
+      "startedAt" : "2026-10-16T14:26:05Z",
+      "status" : "review",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan · GPU Cache & Memory"
+    }
+  ],
+  "startedAt" : "2026-10-16T14:26:05Z",
+  "status" : "review"
+}

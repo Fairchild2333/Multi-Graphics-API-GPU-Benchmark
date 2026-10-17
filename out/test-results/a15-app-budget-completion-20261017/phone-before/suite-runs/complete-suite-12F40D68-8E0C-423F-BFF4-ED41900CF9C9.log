@@ -1,0 +1,79 @@
+iOS complete suite complete-suite-12F40D68-8E0C-423F-BFF4-ED41900CF9C9
+Started: 2026-10-14T04:43:07Z
+
+Thermal precheck stream-1048576: nominal after 0s cooling.
+
+=== 1/1 stream-1048576: review ===
+=== Preview stream?particles=1048576&vsync=0&api=metal&coverage=legacy 15.0s ===
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[Profiling] Metal serialized command-buffer timing v2 (one frame).
+Selected GPU: Apple A15 GPU
+[Metal] Render target follows host layer: 1280x720
+Created particle buffer: 1048576 particles (MTLResourceStorageModeShared / Unified-memory)
+[Profiling] GPU command-buffer timestamps enabled
+[GPU Timing] Compute: 2.533 ms | Render: 23.289 ms | Total: 28.959 ms | FPS: 36 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 2.447 ms | Render: 24.381 ms | Total: 27.535 ms | FPS: 34 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 2.340 ms | Render: 22.601 ms | Total: 25.670 ms | FPS: 37 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 2.124 ms | Render: 21.804 ms | Total: 24.824 ms | FPS: 38 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 1.918 ms | Render: 22.020 ms | Total: 24.821 ms | FPS: 38 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 1.978 ms | Render: 21.308 ms | Total: 24.198 ms | FPS: 39 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 1.929 ms | Render: 19.932 ms | Total: 22.773 ms | FPS: 42 | T: 2.9 s
+[GPU Timing] Compute: 1.926 ms | Render: 18.450 ms | Total: 21.316 ms | FPS: 44 | T: 3.9 s
+[GPU Timing] Compute: 1.949 ms | Render: 16.827 ms | Total: 19.711 ms | FPS: 48 | T: 4.9 s
+[GPU Timing] Compute: 1.945 ms | Render: 14.831 ms | Total: 17.692 ms | FPS: 53 | T: 5.9 s
+[GPU Timing] Compute: 1.955 ms | Render: 13.248 ms | Total: 16.130 ms | FPS: 58 | T: 6.9 s
+[GPU Timing] Compute: 2.401 ms | Render: 11.275 ms | Total: 14.617 ms | FPS: 60 | T: 7.9 s
+[GPU Timing] Compute: 2.529 ms | Render: 9.917 ms | Total: 13.364 ms | FPS: 59 | T: 8.9 s
+[GPU Timing] Compute: 2.580 ms | Render: 10.607 ms | Total: 14.044 ms | FPS: 59 | T: 9.9 s
+[GPU Timing] Compute: 2.668 ms | Render: 9.892 ms | Total: 13.444 ms | FPS: 60 | T: 10.9 s
+[GPU Timing] Compute: 2.800 ms | Render: 10.012 ms | Total: 13.700 ms | FPS: 59 | T: 11.9 s
+[GPU Timing] Compute: 2.948 ms | Render: 9.741 ms | Total: 13.590 ms | FPS: 59 | T: 12.9 s
+[GPU Timing] Compute: 3.097 ms | Render: 9.808 ms | Total: 13.796 ms | FPS: 59 | T: 13.9 s
+[GPU Timing] Compute: 2.995 ms | Render: 9.192 ms | Total: 13.090 ms | FPS: 60 | T: 15.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Metal
+GPU:          Apple A15 GPU
+Driver:       iOS 27.0.1
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Unified-memory
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    1048576 (Medium)
+Buffer:       32.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 732 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         2.484     1.747     3.558
+Render:         12.129     5.921    21.093
+Total GPU:      15.519     9.315    23.884
+
+--- Throughput ---
+Avg FPS:      56
+Particles:    1048576
+Working set:  32.00 MiB
+VRAM rate:   16.89 GB/s  (2.484 ms compute)
+
+--- Analysis ---
+Avg frame time:  17.788 ms
+Avg GPU time:    15.519 ms
+GPU utilisation: 87.2%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 21.61 GB/s  (CV 0.58%)
+Throughput:   early vs late mean change (drop positive) 32.9%  (>> review workload, timing and scheduling)
+>> Throughput declined; retain the full-run mean and curve. A stable window may be earlier in the run.
+==========================================================
+
+[Results] Saved as 20261014-154322-867 -> /var/mobile/Containers/Data/Application/7287B165-FAB5-43E7-8289-6876AF2CD830/Documents/results/results.json

@@ -1,0 +1,14 @@
+[
+  "xcrun",
+  "swiftc",
+  "-swift-version",
+  "6",
+  "-O",
+  "ios-gui/Mangekyo/Models/MobileBenchmark.swift",
+  "ios-gui/Mangekyo/Models/BenchResult.swift",
+  "ios-gui/Mangekyo/Models/EngineOutput.swift",
+  "ios-gui/Mangekyo/Models/Localization.swift",
+  "out/test-results/a15-app-budget-completion-20261017/production-audit/main.swift",
+  "-o",
+  "out/test-results/a15-app-budget-completion-20261017/production-audit/check"
+]

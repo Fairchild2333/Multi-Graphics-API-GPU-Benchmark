@@ -1,0 +1,18 @@
+[
+  "xcrun",
+  "devicectl",
+  "device",
+  "process",
+  "launch",
+  "--device",
+  "00008110-00164D591485401E",
+  "--terminate-existing",
+  "--console",
+  "--json-output",
+  "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-app-budget-completion-20261017/07-vulkan-stream_headless-4194304/launch.json",
+  "com.fairchild.Mangekyo",
+  "--ios-allow-translated-api",
+  "--ios-complete-suite",
+  "--ios-suite-jobs",
+  "vulkan/stream_headless-4194304"
+]

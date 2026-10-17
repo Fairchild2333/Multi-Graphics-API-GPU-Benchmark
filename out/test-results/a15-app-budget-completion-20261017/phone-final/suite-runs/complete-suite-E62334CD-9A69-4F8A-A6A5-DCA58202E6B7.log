@@ -1,0 +1,80 @@
+iOS complete suite complete-suite-E62334CD-9A69-4F8A-A6A5-DCA58202E6B7
+Started: 2026-10-17T08:27:53Z
+
+Thermal precheck vulkan/stream_headless-4194304: nominal after 0s cooling.
+
+=== 1/1 vulkan/stream_headless-4194304: passed ===
+=== Preview stream_headless?particles=4194304&vsync=0&api=vulkan 15.0s ===
+[iOS] Vulkan via MoltenVK -> Metal (translated)
+Available GPUs:
+  [0] Apple A15 GPU (Integrated GPU)
+Selected GPU [0]: Apple A15 GPU  |  Driver: 0.2.2210
+Created particle buffer (device-local via staging): 4194304 particles
+[Profiling] Timestamp queries enabled (period = 1 ns/tick)
+[Profiling] Vulkan timestamp queries cannot be used (MoltenVK particles require per-frame completion timing); using synchronized wall-clock timing.
+[GPU Timing] Compute: 12.570 ms | Render: 0.000 ms | Total: 12.570 ms | FPS: 81 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 9.914 ms | Render: 0.000 ms | Total: 9.914 ms | FPS: 100 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 9.924 ms | Render: 0.000 ms | Total: 9.924 ms | FPS: 100 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 9.813 ms | Render: 0.000 ms | Total: 9.813 ms | FPS: 101 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 9.762 ms | Render: 0.000 ms | Total: 9.762 ms | FPS: 102 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 9.828 ms | Render: 0.000 ms | Total: 9.828 ms | FPS: 101 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 9.732 ms | Render: 0.000 ms | Total: 9.732 ms | FPS: 102 | T: 2.8 s
+[GPU Timing] Compute: 9.750 ms | Render: 0.000 ms | Total: 9.750 ms | FPS: 102 | T: 3.9 s
+[GPU Timing] Compute: 9.766 ms | Render: 0.000 ms | Total: 9.766 ms | FPS: 102 | T: 4.9 s
+[GPU Timing] Compute: 9.650 ms | Render: 0.000 ms | Total: 9.650 ms | FPS: 103 | T: 5.9 s
+[GPU Timing] Compute: 9.676 ms | Render: 0.000 ms | Total: 9.676 ms | FPS: 103 | T: 6.9 s
+[GPU Timing] Compute: 9.595 ms | Render: 0.000 ms | Total: 9.595 ms | FPS: 104 | T: 7.9 s
+[GPU Timing] Compute: 9.643 ms | Render: 0.000 ms | Total: 9.643 ms | FPS: 103 | T: 8.9 s
+[GPU Timing] Compute: 9.667 ms | Render: 0.000 ms | Total: 9.667 ms | FPS: 103 | T: 9.9 s
+[GPU Timing] Compute: 9.641 ms | Render: 0.000 ms | Total: 9.641 ms | FPS: 103 | T: 10.9 s
+[GPU Timing] Compute: 9.639 ms | Render: 0.000 ms | Total: 9.639 ms | FPS: 103 | T: 11.9 s
+[GPU Timing] Compute: 9.617 ms | Render: 0.000 ms | Total: 9.617 ms | FPS: 103 | T: 12.9 s
+[GPU Timing] Compute: 9.636 ms | Render: 0.000 ms | Total: 9.636 ms | FPS: 103 | T: 13.9 s
+[GPU Timing] Compute: 9.680 ms | Render: 0.000 ms | Total: 9.680 ms | FPS: 103 | T: 14.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Apple A15 GPU
+Driver:       0.2.2210
+CPU:          Apple Silicon (iPhone14,2)
+OS:           iOS 27.0.1
+System:       iOS ARM64
+Memory:       Device-local VRAM
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    4194304 (Heavy)
+Buffer:       128.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 1345 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         9.663     9.162    11.809
+Render:          0.000     0.000     0.000
+Total GPU:       9.663     9.162    11.809
+
+--- Throughput ---
+Avg FPS:      103
+Particles:    4194304
+Working set:  128.00 MiB
+VRAM rate:   17.36 GB/s  (9.663 ms compute)
+
+--- Analysis ---
+Avg frame time:  9.670 ms
+Avg GPU time:    9.663 ms
+GPU utilisation: 99.9%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 17.40 GB/s  (CV 0.21%)
+Throughput:   early vs late mean change (drop positive) -0.7%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261017-192808-814 -> /var/mobile/Containers/Data/Application/C8B31026-1006-448F-BD0A-F6B22FC787A8/Documents/results/results.json
