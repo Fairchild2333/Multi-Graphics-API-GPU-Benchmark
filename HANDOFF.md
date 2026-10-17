@@ -1636,6 +1636,26 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-10-17 Jetson Xavier NX：刷到 JetPack 5.1.7，在真机上编译并跑完整套
+
+- **板子：** 二手 Xavier NX 开发者套件（P3668-0000 模块，带 SD 卡槽，8 GB）。原来是 JetPack 4.6（Ubuntu 18.04，用户 `cheny` 密码未知），用户在树莓派上用脚本重设了密码，随后决定重装。
+- **刷机：** WSL 里装 Ubuntu 20.04 和 usbipd-win，Linux 版 SDK Manager 下好 JetPack 5.1.7（L4T R35.6.5）。SDK Manager 自己刷时读完板子信息会让板子重启进恢复模式、2 秒后再找板子，usbipd 还没把重连的设备转进 WSL，于是报“probing the target board failed”退出；改为在 `Linux_for_Tegra` 里手动 `l4t_create_default_user.sh`（用户 `fairchild`、自动登录、主机名 `xaviernx`）、把这台电脑的公钥放进 rootfs，再 `sudo ./flash.sh jetson-xavier-nx-devkit mmcblk0p1` 刷到 SD 卡，成功。M.2 SSD 没动。系统分区只有 14 GB（刷机默认大小），以后要用满整张卡得另外扩。
+- **编译：** Ubuntu 20.04 的 Vulkan 头文件 1.2.131 没有 `VK_KHR_portability_enumeration`，`f5833ec` 用 `#ifdef` 包住后编译通过、0 警告、`ctest` 6/6；CMake 用 pip 装的 3.31（系统 3.16 低于要求的 3.22），着色器从 Windows 拷 57 个 `.spv`。
+- **测法：** `nvpmodel -m 8`（MODE_20W_6CORE：6 核 1420.8 MHz、GPU 1109 MHz、EMC 1866 MHz）；不锁频。桌面自动登录、接 4K 60 Hz 显示器，测试期间用 `gnome-session-inhibit` 临时阻止熄屏锁屏（不改设置）。桌面版完整测试的 26 项（Vulkan 13、OpenGL 11、CPU 2）逐个跑，全部成功，CPU 43–48 °C。副本 `out\linux\JetsonXavierNX-series-20261017-084617\`（带 `DEVICE-STATE.txt`、`tegrastats.log`）。
+
+  | 项目 | Vulkan | OpenGL |
+  |---|---|---|
+  | 粒子 显示画面 65K/1M/4M/16M | 23.6 / 24.3 / 19.2 / 20.4 | 26.4 / 25.5 / 20.8 / 22.0 GB/s |
+  | 粒子 headless 65K/1M/4M/16M | 23.9 / 24.8 / 24.7 / 24.0 | 26.9 / 26.1 / 26.2 / 25.6 GB/s |
+  | GPU Burn 16/64/256 步 | 1.73 / 2.18 / 2.33 | 1.73 / 2.20 / 2.36 Gpix-step/s |
+  | 流体 | 6.36 MParticle-step/s | — |
+  | GPU 显存读取（V3，858 MiB，到平台） | 56.3 GB/s | — |
+  | CPU 单核 / 全核 | 54.7 / 335.2 MWork/s | |
+  | CPU 内存读取 单线程 / 全核 | 13.4 / 37.2 GB/s | |
+
+  - 显存 56.3 GB/s 比文档原来写的 51.2 GB/s 理论值还高：51.2 是 10/15 W 模式下 EMC 1600 MHz 的数，20 W 模式 EMC 1866 MHz、理论 59.7 GB/s，56.3 是 94%；曲线从 12 MiB 到 858 MiB 一直平在 55–56，GPU 时间对墙钟 78.6 对 79.4 ms。`docs/building.md` 的合理性说明已改成按功耗模式算。
+- **锁频对比（`jetson_clocks`，存到临时目录，不进正式成绩）：** 1M 粒子 24.65（默认 24.77）、GPU Burn 64 步 2.18（2.18）、显存 56.27（56.27），GPU 和内存完全一样；CPU 单核 58.3（默认 54.7，+7%，各核也更整齐）、全核 341.0（335.2，+1.7%），默认调度下单线程负载不总能停在 1420.8 MHz。正式成绩用默认频率，和手机一样。日志在副本的 `locked-clocks-comparison\`。
+
 ### 2026-10-17 树莓派 4：第一台 ARM Linux 实机；修掉 16M 粒子派发超限
 
 - **设备：** 树莓派 4B Rev 1.5（4 GB），Raspberry Pi OS 64 位（Debian 13 trixie），Mesa 26.2.2（V3DV，Vulkan 1.3，64 位时间戳），走 Wi-Fi，没接显示器。在板子上用 GCC 14 编译（约 15 分钟），`ctest` 6/6。散热是 Pimoroni Fan SHIM（GPIO18，一开始没插到底），用户加了 `gpio-fan` 50 °C 起转；全程最高 60.8 °C，`get_throttled` 一直 0x0，负载下 CPU 1.8 GHz、GPU 500 MHz。

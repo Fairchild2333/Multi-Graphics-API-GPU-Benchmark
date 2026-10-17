@@ -146,13 +146,22 @@ Results are appended to
 
 **Plausibility checks.**
 
-- The Xavier NX CPU and GPU share LPDDR4x memory (51.2 GB/s theoretical), and
-  its caches cannot hold the 32 MiB working set of 1M particles. A Particle
-  result above 51.2 GB/s therefore indicates a timing or accounting error.
-  These results are not directly comparable with discrete GPUs whose L2 cache
-  holds the whole working set (for example, the RTX 5090's 96 MB L2).
-- A rough estimate from FP32 throughput and memory bandwidth puts Cinematic
-  Liquid at about 1 FPS on Xavier NX.
+- The Xavier NX CPU and GPU share 128-bit LPDDR4x. Its ceiling depends on the
+  power mode: the 20 W modes allow EMC 1866 MHz (59.7 GB/s), the 10 W and
+  15 W modes 1600 MHz (51.2 GB/s); `/etc/nvpmodel.conf` lists `EMC MAX_FREQ`
+  per mode. Its caches cannot hold the 32 MiB working set of 1M particles, so
+  a Particle result above the ceiling of the mode in use indicates a timing or
+  accounting error. These results are not directly comparable with discrete
+  GPUs whose L2 cache holds the whole working set (for example, the RTX
+  5090's 96 MB L2).
+- Measured on 2026-10-17 (JetPack 5.1.7, MODE_20W_6CORE, no `jetson_clocks`):
+  particles about 24 GB/s Vulkan and 26 GB/s OpenGL headless, GPU Burn
+  1.73 / 2.18 / 2.33 Gpix-step/s at 16 / 64 / 256 steps, Cinematic Liquid
+  6.36 MParticle-step/s (about 2 FPS), GPU memory read 56.3 GB/s (94 % of
+  59.7), CPU 54.7 per core and 335.2 all cores MWork/s. With `jetson_clocks`
+  the GPU and memory figures were the same; the CPU read 7 % higher per core
+  (58.3) and 1.7 % higher on all cores, because the default governor does not
+  always hold a single-thread load at 1420.8 MHz.
 
 **CPU software rendering (Mesa).** Linux uses Mesa's CPU rasterisers:
 lavapipe for Vulkan and llvmpipe for OpenGL. `--warp` applies only to
