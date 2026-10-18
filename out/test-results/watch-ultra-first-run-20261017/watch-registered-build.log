@@ -1,0 +1,16 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild build -project watch-gui/MangekyoWatch.xcodeproj -scheme MangekyoWatch -configuration Release -destination id=00008301-C88A1D40260BC02E -derivedDataPath build-watchos/watch-ultra-signed -allowProvisioningUpdates -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=2W6PXCJAM6 CODE_SIGN_STYLE=Automatic "CODE_SIGN_IDENTITY=Apple Development" CODE_SIGNING_ALLOWED=YES CODE_SIGNING_REQUIRED=YES
+
+Build settings from command line:
+    CODE_SIGN_IDENTITY = Apple Development
+    CODE_SIGN_STYLE = Automatic
+    CODE_SIGNING_ALLOWED = YES
+    CODE_SIGNING_REQUIRED = YES
+    DEVELOPMENT_TEAM = 2W6PXCJAM6
+
+2026-10-17 20:00:29.186 xcodebuild[35044:5925101] Writing error result bundle to /var/folders/4d/8c_lnk153f51kkznm34hh9x80000gn/T/ResultBundle_2026-17-10_20-00-0029.xcresult
+xcodebuild: error: Timed out waiting for all destinations matching the provided destination specifier to become available
+
+
+	Destinations compatible with the "MangekyoWatch" scheme:
+		{ platform:watchOS, arch:arm64_32, id:00008301-C88A1D40260BC02E, name:Xiaomi Watch S4 Sport, error:Browsing on the local area network for Xiaomi Watch S4 Sport, which has previously reported preparation errors Ensure the device is unlocked and discoverable via Bluetooth. }

@@ -1,0 +1,30 @@
+{
+  "executionEnvironment" : "device",
+  "id" : "5FBB959F-7D19-4CBA-9D95-12ECA7A35E08",
+  "jobs" : [
+    {
+      "id" : "cpu_compute",
+      "notes" : [
+        "App entered background"
+      ],
+      "resultIDs" : [
+
+      ],
+      "status" : "cancelled"
+    },
+    {
+      "id" : "cpu_memory",
+      "notes" : [
+
+      ],
+      "resultIDs" : [
+
+      ],
+      "status" : "pending"
+    }
+  ],
+  "profile" : "standard",
+  "startedAt" : 813921193.477474,
+  "status" : "cancelled",
+  "updatedAt" : 813921203.70762
+}

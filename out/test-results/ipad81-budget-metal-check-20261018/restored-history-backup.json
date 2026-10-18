@@ -1,0 +1,38 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "copy",
+      "from",
+      "--device",
+      "00008027-001969920A87002E",
+      "--source",
+      "Documents",
+      "--domain-type",
+      "appDataContainer",
+      "--domain-identifier",
+      "com.fairchild.Mangekyo",
+      "--destination",
+      "out/test-results/ipad81-budget-metal-check-20261018/phone-before",
+      "--timeout",
+      "20",
+      "--json-output",
+      "out/test-results/ipad81-budget-metal-check-20261018/restored-history-backup.json"
+    ],
+    "commandType" : "devicectl.device.copy.from",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "destination" : "file:///Users/fairchild/VSCode%20Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad81-budget-metal-check-20261018/phone-before",
+    "deviceIdentifier" : "9A44542D-75A2-58C6-B79C-18BEAED61843",
+    "domain" : "appDataContainer",
+    "domainIdentifier" : "com.fairchild.Mangekyo",
+    "source" : "Documents"
+  }
+}

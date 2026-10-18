@@ -1,0 +1,32 @@
+{
+  "error" : {
+    "code" : 2,
+    "domain" : "ArgumentParserInternal.ExitCode",
+    "userInfo" : {
+
+    }
+  },
+  "errorSignature" : "(ArgumentParserInternal.ExitCode 2)",
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "details",
+      "--device",
+      "00008301-C88A1D40260BC02E",
+      "--json-output",
+      "out/test-results/watch-ultra-first-run-20261017/watch-developer-enabled-details.json",
+      "--timeout",
+      "25"
+    ],
+    "commandType" : "devicectl.device.info.details",
+    "details" : "Exceeded command timeout",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "timeout",
+    "version" : "651.13.5"
+  }
+}

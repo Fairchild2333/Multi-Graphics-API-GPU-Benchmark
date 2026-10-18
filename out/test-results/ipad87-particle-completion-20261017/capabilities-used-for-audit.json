@@ -1,0 +1,15 @@
+{
+  "deviceModel": "iPad8,7",
+  "particleFixedCoverage": true,
+  "vulkanLiquid": false,
+  "gles2MaxSteps": 256,
+  "gpuCacheParallelSteps": 512,
+  "cpuCoreTypes": true,
+  "cpuEfficiencyForeground": true,
+  "cpuMemoryEfficiencyForeground": false,
+  "basis": [
+    "GpuCacheDefaultParallelSteps: device Apple5, not Apple6 ->512",
+    "DefaultCpuMemoryEfficiencyForeground: A12X direct-accounting models retain background memory profile",
+    "Device history and production Bridge defaults; matcher unchanged"
+  ]
+}

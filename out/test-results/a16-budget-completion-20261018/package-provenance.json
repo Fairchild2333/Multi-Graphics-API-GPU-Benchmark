@@ -1,0 +1,10 @@
+{
+  "binarySha256": "59e2e668793fc4840d31c119ad52a3c3c0a65dc967ff2d73bdda7dbe7900f1cf",
+  "profileExpiresUTC": "2026-10-23 10:17:25",
+  "deviceIncluded": true,
+  "team": [
+    "2W6PXCJAM6"
+  ],
+  "app": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-ios/DerivedData-ios-memory-platform-fix/Build/Products/Release-iphoneos/Mangekyo.app",
+  "reuse": "Previously validated signed Release; no new build"
+}

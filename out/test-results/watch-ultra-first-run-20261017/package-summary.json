@@ -1,0 +1,21 @@
+{
+  "app": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-signed/Build/Products/Release-watchos/MangekyoWatch.app",
+  "binarySha256": "09319592aebc9ff99c5ecb12012a9aef6bbeb4ea30420524d3f5ebd61740601c",
+  "signedBuildCompleted": true,
+  "physicalWatchInstalled": true,
+  "physicalWatchTested": true,
+  "waitingFor": null,
+  "physicalWatchDiscovered": true,
+  "watchModel": "Watch6,18",
+  "watchOS": "26.5",
+  "watchDeveloperMode": "enabled",
+  "physicalDestinationBuildCompleted": false,
+  "physicalDestinationBuildExitCode": 70,
+  "completePhysicalScores": true,
+  "actualArchitecture": "arm64_32",
+  "rawArchitectureLabel": "ARM64 (old exporter label; preserved)",
+  "suiteStatus": "review",
+  "memoryPlateauVerified": false,
+  "results": 3,
+  "curvePoints": 126
+}

@@ -1,0 +1,10 @@
+{
+  "physical-standard": 65,
+  "physical-standard-fixed-signing": 143,
+  "physical-standard-awake-retry": 143,
+  "physical-lifecycle-fixed": 143,
+  "physical-keepawake": 143,
+  "build-lifecycle-fix": 0,
+  "physical-prebuild-system-settings": 0,
+  "note": "143 sessions terminated after logged automation error or failed UI assertions; their xcresult did not finalize. Native logs and on-device manifests retained. No successful full physical benchmark yet."
+}

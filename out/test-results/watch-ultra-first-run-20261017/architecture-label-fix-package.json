@@ -1,0 +1,6 @@
+{
+  "buildExitCode": 0,
+  "installed": true,
+  "binarySha256": "018d04b36cafad998d014baf87709ab8c7b4a7aa3cce36b18997fbc575104802",
+  "change": "Recognize __ILP32__ on AArch64 as ARM64_32. No benchmark kernel change; no rerun or rewriting of historical results."
+}

@@ -1,0 +1,11 @@
+[
+  "vulkan/gpu_burn-64",
+  "vulkan/gpu_burn-256",
+  "vulkan/memory_sweep",
+  "gpu_cache-v2",
+  "cpu_compute",
+  "cpu_memory",
+  "gles2/gpu_burn-16",
+  "gles2/gpu_burn-64",
+  "gles2/gpu_burn-256"
+]

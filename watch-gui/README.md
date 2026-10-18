@@ -19,7 +19,8 @@ Watch 没有本项目已验证的编号核心绑定或大小核驻留测法，�
 在 Watch 上不能解释为绑定到了不同物理核心。混合内核与其他平台复用，但 Watch
 编译目标、调度和内存预算单独记录，不直接混排旧平台成绩。
 
-运行时“停止测试”位于顶部。离开前台会请求取消；系统终止进程后，重启会把未完成
+运行时“停止测试”位于顶部。进入background会请求取消；inactive仍可能是前台，
+不因该状态单独取消。运行时状态变化保存在`suite-runs/lifecycle.log`。系统终止进程后，重启会把未完成
 任务标为中断。保持 App 前台，测试前等待设备冷却。没有创建后台健身会话。
 
 ## 内存和结果解释
@@ -76,6 +77,13 @@ xcodebuild test -project watch-gui/MangekyoWatch.xcodeproj \
 
 真机安装：在 Xcode 打开 `MangekyoWatch.xcodeproj`，选择开发 Team 和实际 Watch，
 由 Xcode 完成开发签名。按手表系统要求启用开发者模式并信任签名；当前构建脚本的
-unsigned 包不能直接安装。尚未验证真机的执行时长、前台保持、热状态或速度。
-当前流程验收及原始模拟器记录见
+unsigned 包不能直接安装。首台Ultra（Watch6,18，watchOS26.5）已签名安装并自动点击，
+初始后台转换反复取消，调整系统设置后完整一键通过：2/2任务、3条成绩、126曲线点。
+单线程53.672、双核116.499 MWork/s；内存5.614 GB/s仍为未确认平台的参考值。
+测试前佩戴并解锁，可将系统Display & Brightness → Wake Duration设为70秒，
+General → Return to Clock中的本App设为Custom → After1hour；本轮据此完成，
+不能保证避免离腕锁定。普通App不能以旧frontmost接口强制常驻（watchOS7起已失效），
+也没有伪装健康或健身后台会话。标准界面测试跟随系统语言；中文专用快速测试另指定中文。
+真机原始成绩与限制见[Ultra完整测试](../out/test-results/watch-ultra-first-run-20261017/report.md)。
+原始模拟器记录见
 [实现与验证报告](../out/test-results/watchos-cpu-implementation-20261017/report.md)。

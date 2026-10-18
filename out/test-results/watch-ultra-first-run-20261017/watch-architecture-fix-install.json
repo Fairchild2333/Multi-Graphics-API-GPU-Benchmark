@@ -1,0 +1,41 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "install",
+      "app",
+      "--device",
+      "00008301-C88A1D40260BC02E",
+      "build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app",
+      "--timeout",
+      "35",
+      "--json-output",
+      "out/test-results/watch-ultra-first-run-20261017/watch-architecture-fix-install.json",
+      "--log-output",
+      "out/test-results/watch-ultra-first-run-20261017/watch-architecture-fix-install.log"
+    ],
+    "commandType" : "devicectl.device.install.app",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "86A3E302-4C86-578B-A753-31E86EA1DD09",
+    "installedApplications" : [
+      {
+        "bundleID" : "com.fairchild.Mangekyo.cpu.watchkitapp",
+        "databaseSequenceNumber" : 6140,
+        "databaseUUID" : "A8275CC4-45C4-4D93-A02A-89FFE133192F",
+        "installationURL" : "file:///private/var/containers/Bundle/Application/A4595F49-17CF-4C23-95F7-1C75308A0E96/MangekyoWatch.app/",
+        "launchServicesIdentifier" : "unknown",
+        "options" : {
+
+        }
+      }
+    ]
+  }
+}

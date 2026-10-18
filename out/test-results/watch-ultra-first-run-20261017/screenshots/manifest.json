@@ -1,0 +1,17 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "00008301-C88A1D40260BC02E",
+        "deviceName" : "Xiaomi Watch S4 Sport",
+        "exportedFileName" : "1115C68E-3CE5-4976-9955-52611F78884F.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "watch-standard-completed_0_D6F6ED34-A553-4B1E-BD22-7F8D55AE0FDB.png",
+        "timestamp" : 1792228906.89
+      }
+    ],
+    "testIdentifier" : "WatchFlowTests/testStandardProfileCompletes()",
+    "testIdentifierURL" : "test://com.apple.xcode/MangekyoWatch/MangekyoWatchUITests/WatchFlowTests/testStandardProfileCompletes"
+  }
+]

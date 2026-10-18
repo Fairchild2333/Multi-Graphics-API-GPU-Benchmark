@@ -1,0 +1,31 @@
+{
+  "executionEnvironment" : "device",
+  "id" : "3446014B-215B-4F2E-AA30-B9F4FFE302E9",
+  "jobs" : [
+    {
+      "id" : "cpu_compute",
+      "notes" : [
+
+      ],
+      "resultIDs" : [
+        "20261017-202115-726-cpu-single",
+        "20261017-202115-737-cpu-multi"
+      ],
+      "status" : "passed"
+    },
+    {
+      "id" : "cpu_memory",
+      "notes" : [
+
+      ],
+      "resultIDs" : [
+
+      ],
+      "status" : "running"
+    }
+  ],
+  "profile" : "standard",
+  "startedAt" : 813921629.994716,
+  "status" : "running",
+  "updatedAt" : 813921675.870728
+}

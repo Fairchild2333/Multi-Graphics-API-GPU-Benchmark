@@ -1,0 +1,50 @@
+{
+  "error" : {
+    "code" : -1,
+    "domain" : "com.apple.dt.CoreDeviceError",
+    "userInfo" : {
+      "NSLocalizedDescription" : {
+        "string" : "An unknown error occurred."
+      },
+      "NSUnderlyingError" : {
+        "error" : {
+          "code" : -1,
+          "domain" : "ContainerLookupErrorDomain",
+          "userInfo" : {
+
+          }
+        }
+      }
+    }
+  },
+  "errorSignature" : "(com.apple.dt.CoreDeviceError -1 (ContainerLookupErrorDomain -1))",
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "copy",
+      "from",
+      "--device",
+      "00008027-001969920A87002E",
+      "--source",
+      "Documents",
+      "--domain-type",
+      "appDataContainer",
+      "--domain-identifier",
+      "com.fairchild.Mangekyo",
+      "--destination",
+      "out/test-results/ipad81-budget-metal-check-20261018/phone-before",
+      "--timeout",
+      "35",
+      "--json-output",
+      "out/test-results/ipad81-budget-metal-check-20261018/backup-device.json"
+    ],
+    "commandType" : "devicectl.device.copy.from",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "failed",
+    "version" : "651.13.5"
+  }
+}

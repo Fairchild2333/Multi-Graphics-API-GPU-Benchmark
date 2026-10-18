@@ -1,0 +1,34 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "processes",
+      "--device",
+      "00008301-C88A1D40260BC02E",
+      "--search",
+      "Mangekyo",
+      "--timeout",
+      "15",
+      "--json-output",
+      "out/test-results/watch-ultra-first-run-20261017/watch-processes-test-start.json"
+    ],
+    "commandType" : "devicectl.device.info.processes",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "86A3E302-4C86-578B-A753-31E86EA1DD09",
+    "runningProcesses" : [
+      {
+        "executable" : "file:///private/var/containers/Bundle/Application/8450F5B2-2FED-4D7E-83DE-C9BBE9568B87/MangekyoWatchUITests-Runner.app/MangekyoWatchUITests-Runner",
+        "processIdentifier" : 428
+      }
+    ]
+  }
+}

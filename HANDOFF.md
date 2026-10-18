@@ -1,6 +1,91 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
-> **2026-10-17晚：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** A15 Vulkan九项必补及额外一次14项Metal确认已完成，31项有当前合同覆盖、历史155条。Vulkan1M/Metal64K纯计算波动提示保留；Metal内存仍是预览。11英寸iPad仍需新版内存，12.9英寸iPad另缺五个粒子新计时组合。
+> **2026-10-18：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** A16九项已补齐，8passed/1review、35条历史；A15为155条、12.9英寸A12X为79条、11英寸A12X为53条，四台当前各31项有匹配覆盖。A16 CPU169.945/100.672/721.677，Vulkan平台45.044GB/s。历史波动、A16大核内存分项未稳定和Metal内存预览仍保留。Watch Ultra完整CPU一键已完成，3条成绩、126曲线点，内存仍参考。
+
+跨设备最新对比：[Apple实测表、测法差异与原始ID](docs/apple-device-comparison-20261018.md)。
+派生CSV、源文件SHA及逐项版本在out/test-results/apple-device-comparison-20261018/。
+该对比仅分析已存档结果，未重测或修改任何主历史。
+
+## 2026-10-18 A16 nine pending jobs completed
+
+- User said continue with wired iPhone15,3/iOS27.0.1; this supersedes historical
+  do-not-resume notes. Backed up24rows byte-identical to16Oct canonical history.
+  Reused verified signed Release package (binary59e2e668...), checked signature,
+  profile expiry/device inclusion; installed update, no rebuild or source change.
+- Existing suite targeted nine jobs: VulkanBurn64/256, VulkanV3 memory,
+  MetalGPU cache diagnostic, CPUcompute/memory, GLES2Burn16/64/256. All9finish
+  in398s,8passed/1review,0execution failures, each thermal0->0, lowpower off.
+- CPU P/E/all169.945/100.672/721.677MWork/s; P/E residency lower bounds at least
+  99.935%/99.9989%, six worker contributions sum to all-core score. All-core
+  scheduler-managed/unclassified workers, not verified numbered/type pinning.
+- CPU267curve points,186single-thread residency points, page16KiB/1563ns,
+  1GiB directIOseq563/390MBps, rand4K49/30MBps. Page/file tests are not swap.
+  Main all-memory29.770GB/s settled1; P-only memory49.6 settled0=>reference,
+  E-memory24.6 settled1. App task passed does not imply every subcurve settled.
+- Vulkan512MiB read45.044/write46.4/copy43.4GB/s;83points/38checks,0timestamp
+  anomalies, ordered full-dataset256/384/512MiB tails flat, platform verified.
+  Metal cache379.452ns/load,124points/checksum valid, attribution unverified.
+  Native Metal memory remains previous preview, not a formal DRAM plateau.
+- New GLES2Burn256 review:13.237Gpix-step/s, stable14.088/CV0.80%, drop13.54%.
+  Three old warnings retained=>four current throughput flags. No confirmed
+  frequency throttling; no repetitions solely to remove review/select scores.
+- History24->35, old24 unchanged, positive-score production coverage22/31->31/31,
+  33selected records. Original0-score canceled Burn64 excluded from coverage.
+  Exact request/version/group/quality/saved-curve model audits and verify.py pass.
+- Full Documents exported before AppPID3140 SIGTERM. Consoleexit1 intentional,
+  not suite failure; user told safe to unplug. Other canonical/liveMac hashes
+  unchanged; only A16 canonical index advanced to new35-row export. No commit
+  or push performed for this run. Not a fresh full31-job physical UI-button run.
+- Report/raw histories/manifests/logs/CSVs/production audit:
+  out/test-results/a16-budget-completion-20261018/report.md.
+- Supersedes earlier A16 nine-pending and CPU-not-yet-tested statements below.
+
+## 2026-10-18 11-inch A12X two follow-ups completed
+
+- Wired iPad8,1/iPadOS26.7.1. Mangekyo was not installed; fresh App Documents
+  empty. Installed the previously verified/signed iOS-memory-platform package,
+  exact binarySHA matches prior provenance, includes thisUDID, no rebuild.
+- Restored this same device's51 archived result rows byte-for-byte, verified by
+  re-export. These are old results, not51new measurements. Original archives,
+  all other devices/liveMac untouched. App now retains old51 plus new2=53rows.
+- Targeted existing suite ran Metal16M headless and Vulkan memory only,77s,
+  2passed/0review/0failures, thermal0->0. Metal29.089GB/s, stable29.121/CV0.26%,
+  GPU23.070/frame23.105ms. Old20.086/queryGPU33.411/frame33.455 retained; lower
+  value not reproduced, cause not established and timing contract differs.
+- Vulkan512MiB read56.524/write58.6/copy52.8GB/s,83points/38checks,0timestamp
+  anomalies, ordered full-dataset256/384/512MiB tails flat. Platform verified.
+- Production matcher verifies both exact requests/versions/result groups and
+  quality; device-specific full plan30/31->31/31,33selected records, no current
+  measurementReviewReasons. Metal memory remains preview/unverified platform.
+- App PID9797 stopped after full export; user told safe to unplug. Console exits1
+  due intentionalSIGTERM after successful suite. No more device access needed.
+- Canonical index advanced only iPad8,1 to53rows. Report, restoration provenance,
+  rawJSON/manifests/logs,83-pointCSV/Metal timeline and verifier:
+  out/test-results/ipad81-budget-metal-check-20261018/report.md.
+- This supersedes earlier 11-inch pending-memory/low-Metal references below.
+
+## 2026-10-17 12.9-inch A12X five particle follow-ups completed
+
+- Wired iPad8,7/iPadOS26.7.1, reused installed0.2.6, no build/install or method
+  changes. Backed up74rows byte-identical to prior canonical before running.
+- Existing suite targeted Vulkan64K render/headless and1M/4M/16M render only.
+  All5 complete in83s,4passed/1review/0execution failures, thermal0->0 each.
+  Scores3.172/4.954/20.363/26.601/27.364GB/s, correct synchronized_wall_clock
+  versions, fixed1280x720 coverage for render. Actual present mode remainsFIFO.
+- 1M render has no stable window; early/late drop-2.68% means slight improvement,
+  not demonstrated thermal throttling. No repeats solely to remove review.
+  Old Metal16M rendered review remains too; coverage does not mean peak/stable.
+- Device-specific production plan uses GPU cacheparallel512 and background E
+  CPU-memory strategy for A12X. Coverage26/31->31/31,33selected records. Generic
+  default plan would falsely mark cache-v2/foreground memory missing; do not use.
+- History74->79, all74old rows and other histories/liveMac unchanged; index now
+  points to ipad87-particle-completion-20261017/phone-final/results/results.json.
+  CPU111.527/60.013/656.340 and memory267points retained, GPU platform56.657
+  (83points/38checks) retained; none rerun. CPU/storage/page records present.
+- App PID4638 stopped after export; console exits1 from deliberateSIGTERM,
+  not benchmark failure. Full JSON/manifests/native logs/timeline/production
+  matcher/verification and report:out/test-results/ipad87-particle-completion-20261017/report.md.
+- Latest status supersedes the earlier five-missing-particle references below.
 
 ## 2026-10-17 A15 native Metal one-pass confirmation completed
 
@@ -54,6 +139,49 @@
   to iPad8,7 pending (I4). No other device executed; avoid prior stale no-rerun
   claims based only on record presence. A16 nine jobs/iPad8,1 two jobs unchanged.
 
+## 2026-10-17 Apple Watch Ultra physical one-button CPU suite completed
+
+- User adjusted wake duration/return-to-clock settings and wore/unlocked Watch.
+  Prebuilt test-without-building actually tapped the button:2/2jobs,3rows,
+  XCTest1/1passed,0failures,88.1s including startup/screenshot. Natural exit0.
+  Standard15s config, no smoke or synthetic keepawake touches; English UI.
+- Single53.672, dual116.499MWork/s, six curves126points, page/storage complete.
+  Memory5.614GB/s is an unverified-platform reference=>review, not a formal
+  DRAM plateau. Actual arm64_32 CPU32bit contract separate from other ABIs.
+- Old exporter mislabeled architecture ARM64 because Apple Clang uses
+  __arm64__+__ILP32__. Added ILP32 detection, rebuilt both Watch architectures
+  and installed. Original3rows byte-identical after update, no score rerun.
+  Keep original labels; see architecture-label-fix-package.json for later app.
+- Export/verifier pass, five other histories/liveMac unchanged. Index now has
+  six physical Apple devices; Watch canonical watch-final/results/results.json.
+  No promise of background/off-wrist operation or hardware peak; thermal start/
+  end coverage not captured. Actual chart navigation/cancel UI remain prior
+  simulator checks; physical run covered the full one-button flow.
+- Report: out/test-results/watch-ultra-first-run-20261017/report.md.
+
+### Earlier connection and cancelled attempts (superseded by successful run above)
+
+- First physical Ultra is now discovered over localNetwork: Watch6,18,
+  arm64_32, watchOS26.5(23T570). Developer Mode is now enabled and DDI usable.
+  Actual Watch included in new5-device profile; signed Release installed and
+  remote launch succeeded while display was awake.
+- Fixed missing test-target Bundle IDs in project.yml and generated project.
+  UI automation initially timed out, later actual button tap succeeded. Three
+  suites cancelled before complete compute: first7s, then10s with lifecycle fix,
+  then15s despite repeated synthetic touches. Latest two log inactive followed
+  by background; no complete Watch score existed at that point. Cancelled manifests retained.
+- App now cancels on background rather than inactive, logs lifecycle/thermal
+  transitions and cancellation reason. Standard UI test no longer forces Chinese;
+  current actual attempts used a Chinese test override, not the Watch language.
+  Ineffective keepawake touch loop removed; executed source copy retained.
+- All test binaries prebuilt successfully (physical-prebuild-system-settings.log).
+  User then completed wake-duration/return-to-clock settings. Successful run
+  above used the generated arm64/arm64_32 xctestrun without another compile.
+- Stopped iPhone screen sharing after user reported a white focus box near its
+  clock. Cause/disappearance unconfirmed. User already trusted the Watch;
+  do not reset trust or erase/unpair the Watch as a routine next step.
+- Evidence: out/test-results/watch-ultra-first-run-20261017/connection-status.md.
+
 ## 2026-10-17 independent watchOS CPU app implemented
 
 - New `watch-gui/` watchOS10+ standalone CPU app and `scripts/build-watchos.sh`.
@@ -71,8 +199,8 @@
   and storage measured; plateau unconfirmed =>review correctly. Final UI run
   opens actual6-series chart, persists history after relaunch and cancels.
 - All15 archived rows are simulator-only, flaggedsoftware/host CPU with
-  separate versions. No physical Apple Watch tested or signed/installed;
-  hardware performance, headroom/thermals and foreground behavior remain open.
+  separate versions. At that initial implementation stage no physical Watch
+  was installed/tested; the later Ultra run is recorded separately above.
 - Five canonical Apple histories/liveMac unchanged. Dedicated simulator shut
   down. Docs/raw logs/failures/JSON/CSV/screenshots/hashes and verification:
   out/test-results/watchos-cpu-implementation-20261017/report.md.

@@ -1,0 +1,30 @@
+{
+  "executionEnvironment" : "device",
+  "id" : "3FAC0869-890B-4FC1-B4E8-D81C4E4E65E0",
+  "jobs" : [
+    {
+      "id" : "cpu_compute",
+      "notes" : [
+
+      ],
+      "resultIDs" : [
+
+      ],
+      "status" : "cancelled"
+    },
+    {
+      "id" : "cpu_memory",
+      "notes" : [
+
+      ],
+      "resultIDs" : [
+
+      ],
+      "status" : "pending"
+    }
+  ],
+  "profile" : "standard",
+  "startedAt" : 813920999.492865,
+  "status" : "cancelled",
+  "updatedAt" : 813921189.381093
+}

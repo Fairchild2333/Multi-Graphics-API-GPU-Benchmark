@@ -49,6 +49,7 @@ targets:
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.fairchild.Mangekyo.cpu.watchkitapp.tests
   MangekyoWatchUITests:
     type: bundle.ui-testing
     platform: watchOS
@@ -59,6 +60,7 @@ targets:
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.fairchild.Mangekyo.cpu.watchkitapp.uitests
 schemes:
   MangekyoWatch:
     build:

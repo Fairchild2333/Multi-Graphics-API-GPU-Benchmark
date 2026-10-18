@@ -1,0 +1,44 @@
+{
+  "cpu_performance": {
+    "a16": 169.945,
+    "a15": 147.0,
+    "unit": "MWork/s",
+    "changePct": 15.608843537414963
+  },
+  "cpu_efficiency": {
+    "a16": 100.672,
+    "a15": 89.287,
+    "unit": "MWork/s",
+    "changePct": 12.751016385364045
+  },
+  "cpu_all": {
+    "a16": 721.677,
+    "a15": 634.868,
+    "unit": "MWork/s",
+    "changePct": 13.673551037380992
+  },
+  "cpu_memory": {
+    "a16": 29.77,
+    "a15": 35.178,
+    "unit": "GB/s",
+    "changePct": -15.37324464153732
+  },
+  "metal_particle_1m_headless": {
+    "a16": 27.233,
+    "a15": 20.974,
+    "unit": "GB/s",
+    "changePct": 29.8417087823019
+  },
+  "metal_burn256": {
+    "a16": 1.269,
+    "a15": 1.59,
+    "unit": "Gpix-step/s",
+    "changePct": -20.188679245283026
+  },
+  "vulkan_memory": {
+    "a16": 45.044,
+    "a15": 29.803,
+    "unit": "GB/s",
+    "changePct": 51.13914706573161
+  }
+}

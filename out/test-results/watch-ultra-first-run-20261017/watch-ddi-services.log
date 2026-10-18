@@ -1,0 +1,24 @@
+Checking developer disk image content on device…
+Developer Disk Image services information for Xiaomi Watch S4 Sport:
+• buildUpdate: 27A9275
+• contentIsCompatible: true
+• coreDeviceVersionChecksIncludeDevelopmentRevision: true
+• developmentRevision: 0
+• enforcingCoreDeviceVersionChecks: true
+• platform: watchOS
+▿ projectMetadata:
+    • Citrine-2084
+    • CoreDevice-651.13.5
+    • DTDeveloperDiskImageSupport-14.0.0
+    • DTOCMock-23002
+    • GPUToolsDevice_DDI-2027.0.5
+    • JetsamProperties-2999
+    • LiveExecutionResultsLogger-20101
+    • Mercury-78
+    • Playgrounds-103
+    • XCResultKitBNI-25115
+    • XCTest-25229
+• isUsable: true
+• variant: external
+• isCryptexDDI: true
+Saving JSON output file to /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/watch-ultra-first-run-20261017/watch-ddi-services.json

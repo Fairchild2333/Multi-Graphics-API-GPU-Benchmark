@@ -1,0 +1,7 @@
+{
+  "deviceHadNoInstalledMangekyo": true,
+  "path": "out/test-results/ipad81-design-review-20261016/phone-final/results/results.json",
+  "rows": 51,
+  "sha256": "43d43fb16d87ade98bdb80c7c319d8b8e04434eb69cf1c8f8f777e2284b6531b",
+  "action": "Restore archived results for this same physical device into fresh App before appending actual new runs; preserve original JSON bytes and IDs."
+}

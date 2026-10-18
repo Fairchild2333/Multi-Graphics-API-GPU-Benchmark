@@ -1,0 +1,7 @@
+{
+  "consoleReturnCode": 1,
+  "reason": "Sent SIGTERM to completed App PID9797 only after export.",
+  "appSuiteStatus": "passed",
+  "completedJobs": 2,
+  "executionFailures": 0
+}

@@ -1,0 +1,41 @@
+{
+  "error" : {
+    "code" : 7000,
+    "domain" : "com.apple.dt.CoreDeviceError",
+    "userInfo" : {
+      "NSLocalizedDescription" : {
+        "string" : "Failed to retrieve the file node for Documents/Mangekyo"
+      }
+    }
+  },
+  "errorSignature" : "(com.apple.dt.CoreDeviceError 7000)",
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "copy",
+      "from",
+      "--device",
+      "00008027-000C39923E85002E",
+      "--source",
+      "Documents/Mangekyo",
+      "--domain-type",
+      "appDataContainer",
+      "--domain-identifier",
+      "com.fairchild.Mangekyo",
+      "--destination",
+      "out/test-results/ipad87-particle-completion-20261017/phone-before",
+      "--timeout",
+      "35",
+      "--json-output",
+      "out/test-results/ipad87-particle-completion-20261017/backup-command.json"
+    ],
+    "commandType" : "devicectl.device.copy.from",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "failed",
+    "version" : "651.13.5"
+  }
+}

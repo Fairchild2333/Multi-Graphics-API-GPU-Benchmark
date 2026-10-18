@@ -1,0 +1,8 @@
+{
+  "ios-gui/Mangekyo/Models/MobileBenchmark.swift": "d9e38cea3a393843bfaab5a421f0be3f5992fa799d1d7e602149a8b26a366358",
+  "ios-gui/Mangekyo/Models/BenchResult.swift": "728460e2a6b205d3615e272d32641906c8107c5ff68596fb96262b770ac498b8",
+  "ios-gui/Mangekyo/Models/EngineOutput.swift": "e094c95500f9c96231c83ba1abe6f7a0b92e75532123e8564dddebe5bb2e6c07",
+  "ios-gui/Mangekyo/Engine/GpuBenchBridge.mm": "0574cee813e7babc6fa590af86ebaad9f0e62dbc09b72ee4f77fa2e3d5692be1",
+  "src/cpu_scheduling.h": "29dbb43da134eee245d057516cc60cdf8cde97c080618cb34971ef59a5dff9b2",
+  "src/gpu_cache_probe.mm": "a3042a18dd3fcfb690612a34c341757ee05abe75a6162328251f2e19d094e088"
+}

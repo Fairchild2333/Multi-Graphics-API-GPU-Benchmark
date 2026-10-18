@@ -1,0 +1,38 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "files",
+      "--device",
+      "00008027-001969920A87002E",
+      "--domain-type",
+      "appDataContainer",
+      "--domain-identifier",
+      "com.fairchild.Mangekyo",
+      "--subdirectory",
+      "Documents",
+      "--recurse",
+      "--timeout",
+      "15",
+      "--json-output",
+      "out/test-results/ipad81-budget-metal-check-20261018/fresh-install-files.json"
+    ],
+    "commandType" : "devicectl.device.info.files",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "9A44542D-75A2-58C6-B79C-18BEAED61843",
+    "domain" : "appDataContainer",
+    "domainIdentifier" : "com.fairchild.Mangekyo",
+    "files" : [
+
+    ]
+  }
+}

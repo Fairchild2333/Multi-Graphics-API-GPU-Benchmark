@@ -1,0 +1,39 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "install",
+      "app",
+      "--device",
+      "00008027-001969920A87002E",
+      "build-ios/DerivedData-ios-memory-platform-fix/Build/Products/Release-iphoneos/Mangekyo.app",
+      "--timeout",
+      "45",
+      "--json-output",
+      "out/test-results/ipad81-budget-metal-check-20261018/install-device.json"
+    ],
+    "commandType" : "devicectl.device.install.app",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "9A44542D-75A2-58C6-B79C-18BEAED61843",
+    "installedApplications" : [
+      {
+        "bundleID" : "com.fairchild.Mangekyo",
+        "databaseSequenceNumber" : 1720,
+        "databaseUUID" : "7AA7B9B6-B8AF-43AC-9E28-E5778C0F4DDC",
+        "installationURL" : "file:///private/var/containers/Bundle/Application/E4C7DB09-6B91-4EE9-8016-D065917D7027/Mangekyo.app/",
+        "launchServicesIdentifier" : "unknown",
+        "options" : {
+
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,281 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test-without-building -xctestrun build-watchos/watch-ultra-physical-tests/Build/Products/MangekyoWatch_watchos27.0-arm64-arm64_32.xctestrun -destination id=00008301-C88A1D40260BC02E -destination-timeout 30 -resultBundlePath out/test-results/watch-ultra-first-run-20261017/physical-system-settings.xcresult "-only-testing:MangekyoWatchUITests/WatchFlowTests/testStandardProfileCompletes" -parallel-testing-enabled NO
+
+Writing result bundle at path:
+	/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/watch-ultra-first-run-20261017/physical-system-settings.xcresult
+
+2026-10-17 20:20:17.764908+1100 MangekyoWatchUITests-Runner[1168:20166] [Default] Running tests...
+Test Suite 'Selected tests' started at 2026-10-17 20:20:18.929.
+Test Suite 'MangekyoWatchUITests.xctest' started at 2026-10-17 20:20:18.943.
+Test Suite 'WatchFlowTests' started at 2026-10-17 20:20:18.948.
+Test Case '-[MangekyoWatchUITests.WatchFlowTests testStandardProfileCompletes]' started.
+    t =     0.01s Start Test at 2026-10-17 20:20:18.961
+    t =     0.44s Set Up
+    t =     0.52s Open com.fairchild.Mangekyo.cpu.watchkitapp
+    t =     0.53s     Launch com.fairchild.Mangekyo.cpu.watchkitapp
+    t =     0.55s         Waiting for system app quiescence
+2026-10-17 20:20:19.595599+1100 MangekyoWatchUITests-Runner[1168:20166] Successfully load keyboard extensions
+    t =     0.72s         Terminate com.fairchild.Mangekyo.cpu.watchkitapp:1163
+2026-10-17 20:20:20.772 xcodebuild[39231:5966376] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-10-17 20:20:20.772 xcodebuild[39231:5966376] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     6.56s         Setting up automation session
+    t =     8.29s         Wait for com.fairchild.Mangekyo.cpu.watchkitapp to idle
+    t =     9.37s Waiting 15.0s for "watch-run-all" Button to exist
+    t =    10.38s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-run-all" Button`
+    t =    10.39s         Checking existence of `"watch-run-all" Button`
+    t =    10.69s Tap "watch-run-all" Button
+    t =    10.69s     Wait for com.fairchild.Mangekyo.cpu.watchkitapp to idle
+    t =    10.71s     Find the "watch-run-all" Button
+    t =    10.77s     Check for interrupting elements affecting "watch-run-all" Button
+    t =    10.85s     Synthesize event
+    t =    11.24s     Wait for com.fairchild.Mangekyo.cpu.watchkitapp to idle
+    t =    11.55s Waiting 420.0s for "watch-suite-status" StaticText to exist
+    t =    12.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    12.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    12.60s         Capturing element debug description
+    t =    13.61s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    13.62s         Checking existence of `"watch-suite-status" StaticText`
+    t =    13.65s         Capturing element debug description
+    t =    14.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    14.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    14.59s         Capturing element debug description
+    t =    15.62s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    15.62s         Checking existence of `"watch-suite-status" StaticText`
+    t =    15.65s         Capturing element debug description
+    t =    16.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    16.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    16.59s         Capturing element debug description
+    t =    17.61s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    17.61s         Checking existence of `"watch-suite-status" StaticText`
+    t =    17.65s         Capturing element debug description
+    t =    18.57s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    18.57s         Checking existence of `"watch-suite-status" StaticText`
+    t =    18.60s         Capturing element debug description
+    t =    19.62s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    19.62s         Checking existence of `"watch-suite-status" StaticText`
+    t =    19.65s         Capturing element debug description
+    t =    20.57s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    20.57s         Checking existence of `"watch-suite-status" StaticText`
+    t =    20.60s         Capturing element debug description
+    t =    21.62s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    21.62s         Checking existence of `"watch-suite-status" StaticText`
+    t =    21.66s         Capturing element debug description
+    t =    22.58s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    22.58s         Checking existence of `"watch-suite-status" StaticText`
+    t =    22.62s         Capturing element debug description
+    t =    23.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    23.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    23.59s         Capturing element debug description
+    t =    24.61s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    24.61s         Checking existence of `"watch-suite-status" StaticText`
+    t =    24.65s         Capturing element debug description
+    t =    25.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    25.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    25.59s         Capturing element debug description
+    t =    26.57s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    26.57s         Checking existence of `"watch-suite-status" StaticText`
+    t =    26.60s         Capturing element debug description
+    t =    27.62s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    27.62s         Checking existence of `"watch-suite-status" StaticText`
+    t =    27.65s         Capturing element debug description
+    t =    28.57s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    28.57s         Checking existence of `"watch-suite-status" StaticText`
+    t =    28.60s         Capturing element debug description
+    t =    29.62s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    29.63s         Checking existence of `"watch-suite-status" StaticText`
+    t =    29.67s         Capturing element debug description
+    t =    30.55s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    30.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    30.59s         Capturing element debug description
+    t =    31.60s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    31.60s         Checking existence of `"watch-suite-status" StaticText`
+    t =    31.63s         Capturing element debug description
+    t =    32.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    32.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    32.59s         Capturing element debug description
+    t =    33.61s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    33.61s         Checking existence of `"watch-suite-status" StaticText`
+    t =    33.64s         Capturing element debug description
+    t =    34.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    34.57s         Checking existence of `"watch-suite-status" StaticText`
+    t =    34.60s         Capturing element debug description
+    t =    35.60s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    35.60s         Checking existence of `"watch-suite-status" StaticText`
+    t =    35.64s         Capturing element debug description
+    t =    36.55s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    36.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    36.59s         Capturing element debug description
+    t =    37.64s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    37.64s         Checking existence of `"watch-suite-status" StaticText`
+    t =    37.67s         Capturing element debug description
+    t =    38.58s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    38.58s         Checking existence of `"watch-suite-status" StaticText`
+    t =    38.62s         Capturing element debug description
+    t =    39.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    39.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    39.60s         Capturing element debug description
+    t =    40.61s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    40.61s         Checking existence of `"watch-suite-status" StaticText`
+    t =    40.65s         Capturing element debug description
+    t =    41.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    41.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    41.59s         Capturing element debug description
+    t =    42.62s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    42.62s         Checking existence of `"watch-suite-status" StaticText`
+    t =    42.65s         Capturing element debug description
+    t =    43.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    43.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    43.60s         Capturing element debug description
+    t =    44.60s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    44.61s         Checking existence of `"watch-suite-status" StaticText`
+    t =    44.64s         Capturing element debug description
+    t =    45.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    45.57s         Checking existence of `"watch-suite-status" StaticText`
+    t =    45.60s         Capturing element debug description
+    t =    46.55s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    46.55s         Checking existence of `"watch-suite-status" StaticText`
+    t =    46.59s         Capturing element debug description
+    t =    47.57s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    47.57s         Checking existence of `"watch-suite-status" StaticText`
+    t =    47.60s         Capturing element debug description
+    t =    48.60s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    48.60s         Checking existence of `"watch-suite-status" StaticText`
+    t =    48.64s         Capturing element debug description
+    t =    49.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    49.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    49.60s         Capturing element debug description
+    t =    50.55s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    50.55s         Checking existence of `"watch-suite-status" StaticText`
+    t =    50.59s         Capturing element debug description
+    t =    51.55s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    51.55s         Checking existence of `"watch-suite-status" StaticText`
+    t =    51.59s         Capturing element debug description
+    t =    52.60s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    52.61s         Checking existence of `"watch-suite-status" StaticText`
+    t =    52.64s         Capturing element debug description
+    t =    53.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    53.57s         Checking existence of `"watch-suite-status" StaticText`
+    t =    53.60s         Capturing element debug description
+    t =    54.64s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    54.64s         Checking existence of `"watch-suite-status" StaticText`
+    t =    54.67s         Capturing element debug description
+    t =    55.59s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    55.59s         Checking existence of `"watch-suite-status" StaticText`
+    t =    55.62s         Capturing element debug description
+    t =    56.55s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    56.55s         Checking existence of `"watch-suite-status" StaticText`
+    t =    56.58s         Capturing element debug description
+    t =    57.62s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    57.62s         Checking existence of `"watch-suite-status" StaticText`
+    t =    57.65s         Capturing element debug description
+    t =    58.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    58.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    58.60s         Capturing element debug description
+    t =    59.62s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    59.62s         Checking existence of `"watch-suite-status" StaticText`
+    t =    59.66s         Capturing element debug description
+    t =    60.55s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    60.55s         Checking existence of `"watch-suite-status" StaticText`
+    t =    60.58s         Capturing element debug description
+    t =    61.60s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    61.60s         Checking existence of `"watch-suite-status" StaticText`
+    t =    61.63s         Capturing element debug description
+    t =    62.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    62.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    62.60s         Capturing element debug description
+    t =    63.62s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    63.62s         Checking existence of `"watch-suite-status" StaticText`
+    t =    63.65s         Capturing element debug description
+    t =    64.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    64.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    64.60s         Capturing element debug description
+    t =    65.61s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    65.61s         Checking existence of `"watch-suite-status" StaticText`
+    t =    65.65s         Capturing element debug description
+    t =    66.55s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    66.55s         Checking existence of `"watch-suite-status" StaticText`
+    t =    66.58s         Capturing element debug description
+    t =    67.58s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    67.58s         Checking existence of `"watch-suite-status" StaticText`
+    t =    67.62s         Capturing element debug description
+    t =    68.60s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    68.60s         Checking existence of `"watch-suite-status" StaticText`
+    t =    68.65s         Capturing element debug description
+    t =    69.57s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    69.57s         Checking existence of `"watch-suite-status" StaticText`
+    t =    69.60s         Capturing element debug description
+    t =    70.64s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    70.64s         Checking existence of `"watch-suite-status" StaticText`
+    t =    70.68s         Capturing element debug description
+    t =    71.60s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    71.60s         Checking existence of `"watch-suite-status" StaticText`
+    t =    71.63s         Capturing element debug description
+    t =    72.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    72.57s         Checking existence of `"watch-suite-status" StaticText`
+    t =    72.60s         Capturing element debug description
+    t =    73.58s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    73.59s         Checking existence of `"watch-suite-status" StaticText`
+    t =    73.62s         Capturing element debug description
+    t =    74.63s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    74.63s         Checking existence of `"watch-suite-status" StaticText`
+    t =    74.68s         Capturing element debug description
+    t =    75.60s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    75.60s         Checking existence of `"watch-suite-status" StaticText`
+    t =    75.64s         Capturing element debug description
+    t =    76.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    76.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    76.59s         Capturing element debug description
+    t =    77.62s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    77.62s         Checking existence of `"watch-suite-status" StaticText`
+    t =    77.65s         Capturing element debug description
+    t =    78.58s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    78.58s         Checking existence of `"watch-suite-status" StaticText`
+    t =    78.61s         Capturing element debug description
+    t =    79.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    79.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    79.59s         Capturing element debug description
+    t =    80.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    80.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    80.60s         Capturing element debug description
+    t =    81.60s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    81.61s         Checking existence of `"watch-suite-status" StaticText`
+    t =    81.68s         Capturing element debug description
+    t =    82.57s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    82.57s         Checking existence of `"watch-suite-status" StaticText`
+    t =    82.60s         Capturing element debug description
+    t =    83.57s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    83.58s         Checking existence of `"watch-suite-status" StaticText`
+    t =    83.62s         Capturing element debug description
+    t =    84.63s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    84.63s         Checking existence of `"watch-suite-status" StaticText`
+    t =    84.67s         Capturing element debug description
+    t =    85.56s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    85.56s         Checking existence of `"watch-suite-status" StaticText`
+    t =    85.59s         Capturing element debug description
+    t =    86.61s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    86.61s         Checking existence of `"watch-suite-status" StaticText`
+    t =    86.64s         Capturing element debug description
+    t =    87.57s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    87.57s         Checking existence of `"watch-suite-status" StaticText`
+    t =    87.64s Find the "watch-suite-status" StaticText
+    t =    87.72s Find the "watch-suite-status" StaticText
+    t =    87.77s Find the Target Application 'com.fairchild.Mangekyo.cpu.watchkitapp'
+    t =    87.93s Added attachment named 'watch-standard-completed'
+    t =    87.94s Tear Down
+Test Case '-[MangekyoWatchUITests.WatchFlowTests testStandardProfileCompletes]' passed (88.097 seconds).
+Test Suite 'WatchFlowTests' passed at 2026-10-17 20:21:47.059.
+	 Executed 1 test, with 0 failures (0 unexpected) in 88.097 (88.111) seconds
+Test Suite 'MangekyoWatchUITests.xctest' passed at 2026-10-17 20:21:47.064.
+	 Executed 1 test, with 0 failures (0 unexpected) in 88.097 (88.121) seconds
+Test Suite 'Selected tests' passed at 2026-10-17 20:21:47.069.
+	 Executed 1 test, with 0 failures (0 unexpected) in 88.097 (88.140) seconds
+2026-10-17 20:21:47.586 xcodebuild[39231:5966376] [MT] IDETestOperationsObserverDebug: 96.420 elapsed -- Testing started completed.
+2026-10-17 20:21:47.586 xcodebuild[39231:5966376] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-17 20:21:47.586 xcodebuild[39231:5966376] [MT] IDETestOperationsObserverDebug: 96.420 sec, +96.420 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/watch-ultra-first-run-20261017/physical-system-settings.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started

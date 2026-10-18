@@ -1,0 +1,38 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "copy",
+      "from",
+      "--device",
+      "00008027-000C39923E85002E",
+      "--source",
+      "Documents",
+      "--domain-type",
+      "appDataContainer",
+      "--domain-identifier",
+      "com.fairchild.Mangekyo",
+      "--destination",
+      "out/test-results/ipad87-particle-completion-20261017/phone-before",
+      "--timeout",
+      "35",
+      "--json-output",
+      "out/test-results/ipad87-particle-completion-20261017/backup-device.json"
+    ],
+    "commandType" : "devicectl.device.copy.from",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "destination" : "file:///Users/fairchild/VSCode%20Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad87-particle-completion-20261017/phone-before",
+    "deviceIdentifier" : "26FF195B-5CEA-513C-B531-19954AE9DF2B",
+    "domain" : "appDataContainer",
+    "domainIdentifier" : "com.fairchild.Mangekyo",
+    "source" : "Documents"
+  }
+}

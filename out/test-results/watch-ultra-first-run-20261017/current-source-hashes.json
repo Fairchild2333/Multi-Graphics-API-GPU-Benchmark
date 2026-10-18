@@ -1,0 +1,7 @@
+{
+  "watch-gui/project.yml": "b0fc809a2dafdeb164a9649c13c6e066bc28f5e088fe554da6168adf11c43f32",
+  "watch-gui/MangekyoWatch.xcodeproj/project.pbxproj": "504db449b5f516f03a8878d6e73c514bd9d29abbaceb84504d7acbc730089387",
+  "watch-gui/MangekyoWatch/MangekyoWatchApp.swift": "69b71f780ff4d2f374e4e28ef496bf571c2ff68cd330286057fae8206177806c",
+  "watch-gui/MangekyoWatch/WatchEngine.swift": "58855f3ac37161f848c63d307f12d2b99f1ced53886da1f2ad3ca3dd6dfc4289",
+  "watch-gui/MangekyoWatchUITests/WatchFlowTests.swift": "55e28c130ee6ad3d36b325361475cabc3d20bb10c7d226497f353efd9048d5ba"
+}

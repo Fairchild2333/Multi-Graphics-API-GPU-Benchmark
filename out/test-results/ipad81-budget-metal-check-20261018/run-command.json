@@ -1,0 +1,18 @@
+[
+  "xcrun",
+  "devicectl",
+  "device",
+  "process",
+  "launch",
+  "--device",
+  "00008027-001969920A87002E",
+  "--terminate-existing",
+  "--console",
+  "--json-output",
+  "out/test-results/ipad81-budget-metal-check-20261018/launch.json",
+  "com.fairchild.Mangekyo",
+  "--ios-allow-translated-api",
+  "--ios-complete-suite",
+  "--ios-suite-jobs",
+  "stream_headless-16777216,vulkan/memory_sweep"
+]

@@ -1,0 +1,587 @@
+[
+  {
+    "device": "Mac M4 Pro",
+    "model": "Mac16,8",
+    "source": "m4-single-core-check-20261017/results-after.json",
+    "sourceSha256": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f",
+    "metrics": {
+      "cpu_performance": {
+        "id": "20261017-011441-244-cpu-single-performance",
+        "score": 216.737,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_kept_branch_formal_r3_t15000ms_w200ms_sequence_standalone_qos_bound_v1_performance",
+        "config": {
+          "scoreContract": "formal",
+          "coreType": "performance",
+          "residencyVerified": "1"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_efficiency": {
+        "id": "20261017-011441-246-cpu-single-efficiency",
+        "score": 76.322,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_kept_branch_formal_r3_t15000ms_w200ms_sequence_standalone_qos_bound_v1_efficiency",
+        "config": {
+          "scoreContract": "formal",
+          "coreType": "efficiency",
+          "residencyVerified": "1",
+          "efficiencyPolicy": "background"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_all": {
+        "id": "20261016-233709-785-cpu-multi",
+        "score": 2436.328,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_kept_branch_formal_r3_t15000ms_w200ms_sequence_before_percore",
+        "config": {
+          "scoreContract": "formal",
+          "affinityMode": "scheduler_managed",
+          "threads": "14"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_memory": {
+        "id": "20261013-214534-490-cpu-membw",
+        "score": 240.615,
+        "unit": "GB/s",
+        "version": "cpu_membw_v1_qos_bound_v1_both",
+        "config": {
+          "single_memory_settled": "1",
+          "single_1_memory_settled": "1",
+          "all_memory_settled": "1",
+          "maxDatasetMiB": "1024",
+          "coreType": "both",
+          "residencyVerified": "1"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "metal_particle_1m_headless": {
+        "id": "20261017-000116-161",
+        "score": 161.361,
+        "unit": "GB/s",
+        "version": "stream_v1_command_buffer_timing_v1",
+        "config": {
+          "timingMode": "command_buffer_gpu_time"
+        },
+        "throttlePct": -0.45,
+        "stableScore": 161.722,
+        "stableVariancePct": 0.33
+      },
+      "metal_burn256": {
+        "id": "20261014-035348-639",
+        "score": 9.658,
+        "unit": "Gpix-step/s",
+        "version": "gpu_burn_v3_fixed_steps_256_kaleidoscope_serial_timing_v2",
+        "config": {
+          "timingMode": "serialized_command_buffer_gpu_time"
+        },
+        "throttlePct": -0.0,
+        "stableScore": 9.656,
+        "stableVariancePct": 0.07
+      },
+      "vulkan_memory": {
+        "id": "20261017-003510-928-membw",
+        "score": 250.419,
+        "unit": "GB/s",
+        "version": "membw_v3_streaming_moltenvk",
+        "config": {
+          "maxDatasetMiB": "2048",
+          "memoryPlateauReached": "1"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      }
+    }
+  },
+  {
+    "device": "iPhone 13 Pro / A15",
+    "model": "iPhone14,2",
+    "source": "a15-metal-confirm-20261017/phone-final/results/results.json",
+    "sourceSha256": "441c731effdfb365c76d58c6d09d04a72cbe1fd0d4eb84f6adfb192bfefb9024",
+    "metrics": {
+      "cpu_performance": {
+        "id": "20261017-012813-905-cpu-single-performance",
+        "score": 147.0,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_standalone_qos_bound_v1_performance_ios_preview",
+        "config": {
+          "scoreContract": "formal",
+          "coreType": "performance",
+          "residencyVerified": "1"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_efficiency": {
+        "id": "20261017-012813-917-cpu-single-efficiency",
+        "score": 89.287,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_standalone_qos_bound_v1_efficiency_foreground_e_p_load_v1_ios_preview",
+        "config": {
+          "scoreContract": "formal",
+          "coreType": "efficiency",
+          "residencyVerified": "1",
+          "efficiencyPolicy": "foreground_with_performance_load"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_all": {
+        "id": "20261017-012813-928-cpu-multi",
+        "score": 634.868,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_before_percore_ios_preview",
+        "config": {
+          "scoreContract": "formal",
+          "affinityMode": "scheduler_managed",
+          "threads": "6"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_memory": {
+        "id": "20261014-171607-442-cpu-membw",
+        "score": 35.178,
+        "unit": "GB/s",
+        "version": "cpu_membw_v1_ios_preview_qos_bound_v1_both_foreground_e_p_load_v1",
+        "config": {
+          "single_memory_settled": "1",
+          "single_1_memory_settled": "1",
+          "all_memory_settled": "1",
+          "maxDatasetMiB": "256",
+          "coreType": "both",
+          "residencyVerified": "1",
+          "efficiencyPolicy": "foreground_with_performance_load"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "metal_particle_1m_headless": {
+        "id": "20261017-193817-837",
+        "score": 20.974,
+        "unit": "GB/s",
+        "version": "stream_v1_ios_preview_command_buffer_timing_v1",
+        "config": {
+          "scoreContract": "preview_not_desktop_15s",
+          "timingMode": "command_buffer_gpu_time"
+        },
+        "throttlePct": -0.22,
+        "stableScore": 20.995,
+        "stableVariancePct": 0.5
+      },
+      "metal_burn256": {
+        "id": "20261017-194012-441",
+        "score": 1.59,
+        "unit": "Gpix-step/s",
+        "version": "gpu_burn_v3_fixed_steps_256_kaleidoscope_ios_preview_serial_timing_v2",
+        "config": {
+          "scoreContract": "preview_not_desktop_15s",
+          "timingMode": "serialized_command_buffer_gpu_time"
+        },
+        "throttlePct": 0.17,
+        "stableScore": 1.589,
+        "stableVariancePct": 0.35
+      },
+      "vulkan_memory": {
+        "id": "20261017-192326-416-membw",
+        "score": 29.803,
+        "unit": "GB/s",
+        "version": "membw_v3_streaming_ios_preview_app_budget_v1_moltenvk",
+        "config": {
+          "maxDatasetMiB": "512",
+          "memoryPlateauReached": "1"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      }
+    }
+  },
+  {
+    "device": "12.9-inch iPad Pro / A12X",
+    "model": "iPad8,7",
+    "source": "ipad87-particle-completion-20261017/phone-final/results/results.json",
+    "sourceSha256": "62589d5d0f8790e388edad10d516044e4826e56e93279f828cce736c46d435f9",
+    "metrics": {
+      "cpu_performance": {
+        "id": "20261014-221600-131-cpu-single-performance",
+        "score": 111.527,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_standalone_qos_bound_v1_performance_ios_preview",
+        "config": {
+          "scoreContract": "formal",
+          "coreType": "performance",
+          "residencyVerified": "1"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_efficiency": {
+        "id": "20261014-221600-146-cpu-single-efficiency",
+        "score": 60.013,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_standalone_qos_bound_v1_efficiency_foreground_e_utility_v1_ios_preview",
+        "config": {
+          "scoreContract": "formal",
+          "coreType": "efficiency",
+          "residencyVerified": "1",
+          "efficiencyPolicy": "foreground_utility_without_helpers"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_all": {
+        "id": "20261014-221600-154-cpu-multi",
+        "score": 656.34,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_before_percore_apple_pe_qos_workers_v1_ios_preview",
+        "config": {
+          "scoreContract": "formal",
+          "affinityMode": "scheduler_managed",
+          "threads": "8"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_memory": {
+        "id": "20261014-214819-212-cpu-membw",
+        "score": 53.737,
+        "unit": "GB/s",
+        "version": "cpu_membw_v1_ios_preview_qos_bound_v1_both",
+        "config": {
+          "single_memory_settled": "0",
+          "single_1_memory_settled": "1",
+          "all_memory_settled": "1",
+          "maxDatasetMiB": "256",
+          "coreType": "both",
+          "residencyVerified": "1",
+          "efficiencyPolicy": "background"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "metal_particle_1m_headless": {
+        "id": "20261014-020006-305",
+        "score": 30.186,
+        "unit": "GB/s",
+        "version": "stream_v1_ios_preview",
+        "config": {
+          "scoreContract": "preview_not_desktop_15s",
+          "timingMode": "gpu_timestamp_query"
+        },
+        "throttlePct": 0.44,
+        "stableScore": 30.095,
+        "stableVariancePct": 0.21
+      },
+      "metal_burn256": {
+        "id": "20261014-030207-428",
+        "score": 1.527,
+        "unit": "Gpix-step/s",
+        "version": "gpu_burn_v3_fixed_steps_256_kaleidoscope_ios_preview_serial_timing_v2",
+        "config": {
+          "scoreContract": "preview_not_desktop_15s",
+          "timingMode": "serialized_command_buffer_gpu_time"
+        },
+        "throttlePct": 0.04,
+        "stableScore": 1.526,
+        "stableVariancePct": 0.43
+      },
+      "vulkan_memory": {
+        "id": "20261017-020806-775-membw",
+        "score": 56.657,
+        "unit": "GB/s",
+        "version": "membw_v3_streaming_ios_preview_app_budget_v1_moltenvk",
+        "config": {
+          "maxDatasetMiB": "512",
+          "memoryPlateauReached": "1"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      }
+    }
+  },
+  {
+    "device": "11-inch iPad Pro / A12X",
+    "model": "iPad8,1",
+    "source": "ipad81-budget-metal-check-20261018/phone-final/results/results.json",
+    "sourceSha256": "efe49ed77a2e735fd1da68d7bd4cee2d359c1c9e135c8726707b8a4d350253ce",
+    "metrics": {
+      "cpu_performance": {
+        "id": "20261016-195643-008-cpu-single-performance",
+        "score": 111.076,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_standalone_qos_bound_v1_performance_ios_preview",
+        "config": {
+          "scoreContract": "formal",
+          "coreType": "performance",
+          "residencyVerified": "1"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_efficiency": {
+        "id": "20261016-195643-019-cpu-single-efficiency",
+        "score": 60.791,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_standalone_qos_bound_v1_efficiency_foreground_e_utility_v1_ios_preview",
+        "config": {
+          "scoreContract": "formal",
+          "coreType": "efficiency",
+          "residencyVerified": "1",
+          "efficiencyPolicy": "foreground_utility_without_helpers"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_all": {
+        "id": "20261016-195643-025-cpu-multi",
+        "score": 657.976,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_before_percore_apple_pe_qos_workers_v1_aggregate_occupancy_v1_ios_preview",
+        "config": {
+          "scoreContract": "formal",
+          "affinityMode": "scheduler_managed",
+          "threads": "8"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_memory": {
+        "id": "20261016-193221-142-cpu-membw",
+        "score": 51.79,
+        "unit": "GB/s",
+        "version": "cpu_membw_v1_ios_preview_qos_bound_v1_both",
+        "config": {
+          "single_memory_settled": "1",
+          "single_1_memory_settled": "1",
+          "all_memory_settled": "1",
+          "maxDatasetMiB": "256",
+          "coreType": "both",
+          "residencyVerified": "1",
+          "efficiencyPolicy": "background"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "metal_particle_1m_headless": {
+        "id": "20261016-191803-475",
+        "score": 29.126,
+        "unit": "GB/s",
+        "version": "stream_v1_ios_preview",
+        "config": {
+          "scoreContract": "preview_not_desktop_15s",
+          "timingMode": "gpu_timestamp_query"
+        },
+        "throttlePct": 0.31,
+        "stableScore": 29.07,
+        "stableVariancePct": 0.59
+      },
+      "metal_burn256": {
+        "id": "20261016-191959-297",
+        "score": 1.504,
+        "unit": "Gpix-step/s",
+        "version": "gpu_burn_v3_fixed_steps_256_kaleidoscope_ios_preview_serial_timing_v2",
+        "config": {
+          "scoreContract": "preview_not_desktop_15s",
+          "timingMode": "serialized_command_buffer_gpu_time"
+        },
+        "throttlePct": 0.24,
+        "stableScore": 1.501,
+        "stableVariancePct": 0.25
+      },
+      "vulkan_memory": {
+        "id": "20261018-173519-035-membw",
+        "score": 56.524,
+        "unit": "GB/s",
+        "version": "membw_v3_streaming_ios_preview_app_budget_v1_moltenvk",
+        "config": {
+          "maxDatasetMiB": "512",
+          "memoryPlateauReached": "1"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      }
+    }
+  },
+  {
+    "device": "iPhone 14 Pro Max / A16",
+    "model": "iPhone15,3",
+    "source": "a16-budget-completion-20261018/phone-final/results/results.json",
+    "sourceSha256": "2e5b166cc0a9374ce1649d4fbed12bb480a13f2f0f0ab5c697a831d0adfcab48",
+    "metrics": {
+      "cpu_performance": {
+        "id": "20261018-180942-117-cpu-single-performance",
+        "score": 169.945,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_standalone_qos_bound_v1_performance_ios_preview",
+        "config": {
+          "scoreContract": "formal",
+          "coreType": "performance",
+          "residencyVerified": "1"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_efficiency": {
+        "id": "20261018-180942-121-cpu-single-efficiency",
+        "score": 100.672,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_standalone_qos_bound_v1_efficiency_foreground_e_p_load_v1_ios_preview",
+        "config": {
+          "scoreContract": "formal",
+          "coreType": "efficiency",
+          "residencyVerified": "1",
+          "efficiencyPolicy": "foreground_with_performance_load"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_all": {
+        "id": "20261018-180942-123-cpu-multi",
+        "score": 721.677,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_formal_r3_t15000ms_w200ms_sequence_before_percore_ios_preview",
+        "config": {
+          "scoreContract": "formal",
+          "affinityMode": "scheduler_managed",
+          "threads": "6"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_memory": {
+        "id": "20261018-181227-993-cpu-membw",
+        "score": 29.77,
+        "unit": "GB/s",
+        "version": "cpu_membw_v1_ios_preview_qos_bound_v1_both_foreground_e_p_load_v1",
+        "config": {
+          "single_memory_settled": "0",
+          "single_1_memory_settled": "1",
+          "all_memory_settled": "1",
+          "maxDatasetMiB": "256",
+          "coreType": "both",
+          "residencyVerified": "1",
+          "efficiencyPolicy": "foreground_with_performance_load"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "metal_particle_1m_headless": {
+        "id": "20261016-212212-694",
+        "score": 27.233,
+        "unit": "GB/s",
+        "version": "stream_v1_ios_preview",
+        "config": {
+          "scoreContract": "preview_not_desktop_15s",
+          "timingMode": "gpu_timestamp_query"
+        },
+        "throttlePct": 1.33,
+        "stableScore": 27.095,
+        "stableVariancePct": 1.05
+      },
+      "metal_burn256": {
+        "id": "20261016-212406-668",
+        "score": 1.269,
+        "unit": "Gpix-step/s",
+        "version": "gpu_burn_v3_fixed_steps_256_kaleidoscope_ios_preview_serial_timing_v2",
+        "config": {
+          "scoreContract": "preview_not_desktop_15s",
+          "timingMode": "serialized_command_buffer_gpu_time"
+        },
+        "throttlePct": 16.69,
+        "stableScore": 1.188,
+        "stableVariancePct": 1.2
+      },
+      "vulkan_memory": {
+        "id": "20261018-180806-931-membw",
+        "score": 45.044,
+        "unit": "GB/s",
+        "version": "membw_v3_streaming_ios_preview_app_budget_v1_moltenvk",
+        "config": {
+          "maxDatasetMiB": "512",
+          "memoryPlateauReached": "1"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      }
+    }
+  },
+  {
+    "device": "Apple Watch Ultra",
+    "model": "Watch6,18",
+    "source": "watch-ultra-first-run-20261017/watch-final/results/results.json",
+    "sourceSha256": "451acaa82c81d79bec3889b82c7bc6cb4c7dfc10af71dd6367f90e7c42753e0b",
+    "metrics": {
+      "cpu_all": {
+        "id": "20261017-202115-737-cpu-multi",
+        "score": 116.499,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_32bit_formal_r3_t15000ms_w200ms_sequence_before_percore_watchos_preview",
+        "config": {
+          "scoreContract": "formal",
+          "affinityMode": "scheduler_managed",
+          "threads": "2"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_memory": {
+        "id": "20261017-202146-120-cpu-membw",
+        "score": 5.614,
+        "unit": "GB/s",
+        "version": "cpu_membw_v1_watchos_preview",
+        "config": {
+          "single_memory_settled": "0",
+          "all_memory_settled": "0",
+          "maxDatasetMiB": "16"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      },
+      "cpu_single_32bit": {
+        "id": "20261017-202115-726-cpu-single",
+        "score": 53.672,
+        "unit": "MWork/s",
+        "version": "cpu_mixed_v1_scheduler_managed_32bit_formal_r3_t15000ms_w200ms_sequence_standalone_watchos_preview",
+        "config": {
+          "scoreContract": "formal"
+        },
+        "throttlePct": 0.0,
+        "stableScore": 0.0,
+        "stableVariancePct": -1.0
+      }
+    }
+  }
+]

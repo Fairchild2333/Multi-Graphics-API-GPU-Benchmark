@@ -1,0 +1,6 @@
+{
+  "path": "src/benchmark_results.cpp",
+  "testedBeforeLabelFixSha256": "d387b4c18446564d0260ad78b639190329d5c7161d8b2c3720568dc15f7228b9",
+  "installedAfterLabelFixSha256": "d2e95b3829f8d4b20cb3d1b667c9c9255f6aa814c5a1de5906a51bb2801f1492",
+  "buildExitCode": 0
+}

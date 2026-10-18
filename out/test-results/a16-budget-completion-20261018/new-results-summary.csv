@@ -1,0 +1,12 @@
+job,resultID,workload,api,score,unit,status,review,thermalStart,thermalEnd
+vulkan/gpu_burn-64,20261018-180653-275,gpu_burn,Vulkan,1.016,Gpix-step/s,passed,,0,0
+vulkan/gpu_burn-256,20261018-180709-910,gpu_burn,Vulkan,1.097,Gpix-step/s,passed,,0,0
+vulkan/memory_sweep,20261018-180806-931-membw,membw,Vulkan,45.044,GB/s,passed,,0,0
+gpu_cache-v2,20261018-180850-475-metal-cache,gpu_cache,Metal,379.452,ns/load,passed,,0,0
+cpu_compute,20261018-180942-117-cpu-single-performance,cpu_single_core,CPU,169.945,MWork/s,passed,,0,0
+cpu_compute,20261018-180942-121-cpu-single-efficiency,cpu_single_core,CPU,100.672,MWork/s,passed,,0,0
+cpu_compute,20261018-180942-123-cpu-multi,cpu_multi_core,CPU,721.677,MWork/s,passed,,0,0
+cpu_memory,20261018-181227-993-cpu-membw,cpu_membw,CPU,29.77,GB/s,passed,,0,0
+gles2/gpu_burn-16,20261018-181243-886,gpu_burn,OpenGL ES 2.0,1.773,Gpix-step/s,passed,,0,0
+gles2/gpu_burn-64,20261018-181259-870,gpu_burn,OpenGL ES 2.0,7.085,Gpix-step/s,passed,,0,0
+gles2/gpu_burn-256,20261018-181315-967,gpu_burn,OpenGL ES 2.0,13.237,Gpix-step/s,review,运行中吞吐下降超过 5%,0,0

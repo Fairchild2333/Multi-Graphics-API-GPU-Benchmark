@@ -1,0 +1,48 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "apps",
+      "--device",
+      "00008027-000C39923E85002E",
+      "--filter",
+      "bundleIdentifier CONTAINS \"Mangekyo\"",
+      "--timeout",
+      "15",
+      "--json-output",
+      "/tmp/mangekyo-ipad87-apps-20261017.json"
+    ],
+    "commandType" : "devicectl.device.info.apps",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "apps" : [
+      {
+        "appClip" : false,
+        "builtByDeveloper" : true,
+        "bundleIdentifier" : "com.fairchild.Mangekyo",
+        "bundleVersion" : "1",
+        "containerAccessible" : true,
+        "defaultApp" : false,
+        "hidden" : false,
+        "internalApp" : false,
+        "name" : "Mangekyo",
+        "removable" : true,
+        "url" : "file:///private/var/containers/Bundle/Application/935DCC01-C3CF-481B-8D07-B1EAC2070459/Mangekyo.app/",
+        "version" : "0.2.6"
+      }
+    ],
+    "defaultAppsIncluded" : false,
+    "deviceIdentifier" : "26FF195B-5CEA-513C-B531-19954AE9DF2B",
+    "hiddenAppsIncluded" : false,
+    "internalAppsIncluded" : false,
+    "removableAppsIncluded" : true
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "auditPassed": true,
+  "device": "iPad8,1 / A12X",
+  "newJobs": 2,
+  "passed": 2,
+  "review": 0,
+  "executionFailures": 0,
+  "historyRows": 53,
+  "restoredOldRowsUnchanged": 51,
+  "currentPlanCoverage": "31/31 jobs, 33 selected records",
+  "metal16MGBps": 29.089,
+  "metalStableCVPct": 0.26,
+  "vulkanReadMemoryGBps": 56.524,
+  "vulkanMemoryPoints": 83,
+  "writeCopyChecks": 38,
+  "largeDatasetTailsGBps": {
+    "read": [
+      56.224,
+      56.524,
+      56.746
+    ],
+    "write": [
+      57.833,
+      58.56,
+      58.79
+    ],
+    "copy": [
+      52.567,
+      52.81,
+      52.98
+    ]
+  },
+  "allPriorSnapshotsAndLiveMacUnchanged": true
+}

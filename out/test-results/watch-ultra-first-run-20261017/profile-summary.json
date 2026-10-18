@@ -1,0 +1,14 @@
+{
+  "platform": [
+    "iOS",
+    "xrOS",
+    "visionOS"
+  ],
+  "applicationIdentifier": "2W6PXCJAM6.com.fairchild.Mangekyo.cpu.watchkitapp",
+  "deviceCount": 4,
+  "expiration": "2026-10-24 08:48:02",
+  "team": [
+    "2W6PXCJAM6"
+  ],
+  "profileName": "iOS Team Provisioning Profile: com.fairchild.Mangekyo.cpu.watchkitapp"
+}

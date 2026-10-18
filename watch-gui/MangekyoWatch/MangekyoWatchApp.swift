@@ -7,8 +7,8 @@ struct MangekyoWatchApp: App {
     @Environment(\.scenePhase) private var scenePhase
     var body: some Scene {
         WindowGroup { WatchHome().environmentObject(engine) }
-            .onChange(of: scenePhase) { _, phase in
-                if phase != .active { engine.cancel() }
+            .onChange(of: scenePhase, initial: true) { _, phase in
+                engine.sceneChanged(phase)
             }
     }
 }
@@ -45,7 +45,7 @@ struct WatchHome: View {
                             .font(.caption2).foregroundStyle(.orange)
                     }
                     if engine.smoke { Text("UI smoke profile").font(.caption2).foregroundStyle(.orange) }
-                    Text(watchText("自动调度，不绑定编号核心。离开前台即停止；抬腕保持前台。", "Scheduler managed; no numbered-core pinning. Keep the app active; leaving the foreground stops the test."))
+                    Text(watchText("自动调度，不绑定编号核心。屏幕变暗不取消，进入后台时停止；请保持前台。", "Scheduler managed; no numbered-core pinning. Dimming does not cancel; entering the background stops the test. Keep the app frontmost."))
                         .font(.caption2)
                     Text(watchText("JSON 与日志保存在手表 App 的 Documents/Mangekyo；页面测试测首次访问，存储测试不代表交换内存。", "JSON and logs: app Documents/Mangekyo. Page tests measure first touch; file I/O is not swap performance."))
                         .font(.caption2).foregroundStyle(.secondary)

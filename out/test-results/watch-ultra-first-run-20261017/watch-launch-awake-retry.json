@@ -1,0 +1,60 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "process",
+      "launch",
+      "--device",
+      "00008301-C88A1D40260BC02E",
+      "com.fairchild.Mangekyo.cpu.watchkitapp",
+      "--timeout",
+      "15",
+      "--json-output",
+      "out/test-results/watch-ultra-first-run-20261017/watch-launch-awake-retry.json",
+      "--log-output",
+      "out/test-results/watch-ultra-first-run-20261017/watch-launch-awake-retry.log"
+    ],
+    "commandType" : "devicectl.device.process.launch",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "86A3E302-4C86-578B-A753-31E86EA1DD09",
+    "launchOptions" : {
+      "activatedWhenStarted" : true,
+      "arguments" : [
+
+      ],
+      "environmentVariables" : {
+        "TERM" : "dumb"
+      },
+      "platformSpecificOptions" : {
+
+      },
+      "startStopped" : false,
+      "terminateExistingInstances" : false,
+      "user" : {
+        "active" : true
+      }
+    },
+    "process" : {
+      "auditToken" : [
+        4294967295,
+        501,
+        501,
+        501,
+        501,
+        607,
+        0,
+        1653
+      ],
+      "executable" : "file:///private/var/containers/Bundle/Application/77AF5837-CF55-491F-9F95-5D079042AC89/MangekyoWatch.app/MangekyoWatch",
+      "processIdentifier" : 607
+    }
+  }
+}

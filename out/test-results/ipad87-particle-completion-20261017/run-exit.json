@@ -1,0 +1,7 @@
+{
+  "consoleReturnCode": 1,
+  "reason": "App PID4638 was sent SIGTERM only after all five jobs completed and full Documents export succeeded.",
+  "appSuiteStatus": "review",
+  "completedJobs": 5,
+  "executionFailures": 0
+}

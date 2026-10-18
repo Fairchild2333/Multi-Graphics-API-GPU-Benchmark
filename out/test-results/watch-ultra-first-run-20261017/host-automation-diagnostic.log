@@ -1,0 +1,5 @@
+Timestamp               Ty Process[PID:TID]
+2026-10-17 20:03:59.310 Df xcodebuild[35574:5a884f] [com.apple.dt.xctest:XCTHarness] Test configuration using path to XCTAS: /System/Developer/Library/PrivateFrameworks/XCTAutomationSupport.framework
+2026-10-17 20:03:59.313 E  xcodebuild[35574:5a884f] [com.apple.dt.xctest:XCTHarness] Error looking for performance baseline in test bundle at path /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatchUITests-Runner.app/PlugIns/MangekyoWatchUITests.xctest: (extension in XCTHarness):__C.XCTHTestRunSpecification.Errors.noBaselinesDirectory
+2026-10-17 20:05:16.870 E  xcodebuild[35574:5a9867] [com.apple.dt.coredevice:stdio] Could not shutdown read side of spliced stdout socket, error: POSIXError(_nsError: Error Domain=NSPOSIXErrorDomain Code=57 "Socket is not connected")
+2026-10-17 20:05:17.089 Df xcodebuild[35574:5a884f] [com.apple.dt.xctest:XCTHarness] Test runner for (null) will finish with error: The test runner failed to initialize for UI testing (canceled: 0)

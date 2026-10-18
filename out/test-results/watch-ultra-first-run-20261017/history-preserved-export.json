@@ -1,0 +1,38 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "copy",
+      "from",
+      "--device",
+      "86A3E302-4C86-578B-A753-31E86EA1DD09",
+      "--source",
+      "Documents/Mangekyo/results/results.json",
+      "--domain-type",
+      "appDataContainer",
+      "--domain-identifier",
+      "com.fairchild.Mangekyo.cpu.watchkitapp",
+      "--destination",
+      "out/test-results/watch-ultra-first-run-20261017/results-after-label-install.json",
+      "--timeout",
+      "25",
+      "--json-output",
+      "out/test-results/watch-ultra-first-run-20261017/history-preserved-export.json"
+    ],
+    "commandType" : "devicectl.device.copy.from",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "destination" : "file:///Users/fairchild/VSCode%20Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/watch-ultra-first-run-20261017/results-after-label-install.json",
+    "deviceIdentifier" : "86A3E302-4C86-578B-A753-31E86EA1DD09",
+    "domain" : "appDataContainer",
+    "domainIdentifier" : "com.fairchild.Mangekyo.cpu.watchkitapp",
+    "source" : "Documents/Mangekyo/results/results.json"
+  }
+}

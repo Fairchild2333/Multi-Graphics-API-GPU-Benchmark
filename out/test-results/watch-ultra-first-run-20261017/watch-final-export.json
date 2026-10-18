@@ -1,0 +1,52 @@
+{
+  "error" : {
+    "code" : -1,
+    "domain" : "com.apple.dt.CoreDeviceError",
+    "userInfo" : {
+      "NSLocalizedDescription" : {
+        "string" : "An unknown error occurred."
+      },
+      "NSUnderlyingError" : {
+        "error" : {
+          "code" : -1,
+          "domain" : "com.apple.dt.remoteservices.error",
+          "userInfo" : {
+            "NSLocalizedDescription" : {
+              "string" : "The connection to the remote device is no longer valid."
+            }
+          }
+        }
+      }
+    }
+  },
+  "errorSignature" : "(com.apple.dt.CoreDeviceError -1 (com.apple.dt.remoteservices.error -1))",
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "copy",
+      "from",
+      "--device",
+      "00008301-C88A1D40260BC02E",
+      "--source",
+      "Documents/Mangekyo",
+      "--domain-type",
+      "appDataContainer",
+      "--domain-identifier",
+      "com.fairchild.Mangekyo.cpu.watchkitapp",
+      "--destination",
+      "out/test-results/watch-ultra-first-run-20261017/watch-final",
+      "--timeout",
+      "35",
+      "--json-output",
+      "out/test-results/watch-ultra-first-run-20261017/watch-final-export.json"
+    ],
+    "commandType" : "devicectl.device.copy.from",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "failed",
+    "version" : "651.13.5"
+  }
+}

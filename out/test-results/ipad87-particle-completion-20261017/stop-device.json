@@ -1,0 +1,39 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "process",
+      "signal",
+      "--device",
+      "00008027-000C39923E85002E",
+      "--pid",
+      "4638",
+      "--signal",
+      "SIGTERM",
+      "--timeout",
+      "15",
+      "--json-output",
+      "out/test-results/ipad87-particle-completion-20261017/stop-device.json"
+    ],
+    "commandType" : "devicectl.device.process.signal",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "26FF195B-5CEA-513C-B531-19954AE9DF2B",
+    "deviceTimestamp" : "2026-10-17T09:37:10.089Z",
+    "process" : {
+      "executable" : "file:///private/var/containers/Bundle/Application/935DCC01-C3CF-481B-8D07-B1EAC2070459/Mangekyo.app/Mangekyo",
+      "processIdentifier" : 4638
+    },
+    "signal" : {
+      "name" : "SIGTERM",
+      "value" : 15
+    }
+  }
+}

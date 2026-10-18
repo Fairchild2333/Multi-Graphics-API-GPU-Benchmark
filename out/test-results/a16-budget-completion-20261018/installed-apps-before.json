@@ -1,0 +1,48 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "apps",
+      "--device",
+      "00008120-000E2D3E0CEBC01E",
+      "--filter",
+      "bundleIdentifier CONTAINS[c] \"mangekyo\"",
+      "--json-output",
+      "out/test-results/a16-budget-completion-20261018/installed-apps-before.json",
+      "--timeout",
+      "15"
+    ],
+    "commandType" : "devicectl.device.info.apps",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "apps" : [
+      {
+        "appClip" : false,
+        "builtByDeveloper" : true,
+        "bundleIdentifier" : "com.fairchild.Mangekyo",
+        "bundleVersion" : "1",
+        "containerAccessible" : true,
+        "defaultApp" : false,
+        "hidden" : false,
+        "internalApp" : false,
+        "name" : "Mangekyo",
+        "removable" : true,
+        "url" : "file:///private/var/containers/Bundle/Application/9D6E173F-9345-4D40-9261-38347409C35C/Mangekyo.app/",
+        "version" : "0.2.6"
+      }
+    ],
+    "defaultAppsIncluded" : false,
+    "deviceIdentifier" : "256C41DC-AC03-5FF9-9D3F-8FDFFC83CDBE",
+    "hiddenAppsIncluded" : false,
+    "internalAppsIncluded" : false,
+    "removableAppsIncluded" : true
+  }
+}

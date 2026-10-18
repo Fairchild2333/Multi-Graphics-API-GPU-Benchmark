@@ -1,0 +1,85 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "ddiServices",
+      "--device",
+      "00008301-C88A1D40260BC02E",
+      "--timeout",
+      "35",
+      "--json-output",
+      "out/test-results/watch-ultra-first-run-20261017/watch-ddi-services.json",
+      "--log-output",
+      "out/test-results/watch-ultra-first-run-20261017/watch-ddi-services.log"
+    ],
+    "commandType" : "devicectl.device.info.ddiServices",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "ddiMetadata" : {
+      "buildUpdate" : "27A9275",
+      "contentIsCompatible" : true,
+      "coreDeviceVersionChecksIncludeDevelopmentRevision" : true,
+      "developmentRevision" : 0,
+      "enforcingCoreDeviceVersionChecks" : true,
+      "isCryptexDDI" : true,
+      "isUsable" : true,
+      "platform" : "watchOS",
+      "projectMetadata" : [
+        {
+          "name" : "Citrine",
+          "version" : "2084"
+        },
+        {
+          "name" : "CoreDevice",
+          "version" : "651.13.5"
+        },
+        {
+          "name" : "DTDeveloperDiskImageSupport",
+          "version" : "14.0.0"
+        },
+        {
+          "name" : "DTOCMock",
+          "version" : "23002"
+        },
+        {
+          "name" : "GPUToolsDevice_DDI",
+          "version" : "2027.0.5"
+        },
+        {
+          "name" : "JetsamProperties",
+          "version" : "2999"
+        },
+        {
+          "name" : "LiveExecutionResultsLogger",
+          "version" : "20101"
+        },
+        {
+          "name" : "Mercury",
+          "version" : "78"
+        },
+        {
+          "name" : "Playgrounds",
+          "version" : "103"
+        },
+        {
+          "name" : "XCResultKitBNI",
+          "version" : "25115"
+        },
+        {
+          "name" : "XCTest",
+          "version" : "25229"
+        }
+      ],
+      "variant" : "external"
+    },
+    "deviceIdentifier" : "86A3E302-4C86-578B-A753-31E86EA1DD09"
+  }
+}

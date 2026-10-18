@@ -1,0 +1,173 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test -project watch-gui/MangekyoWatch.xcodeproj -scheme MangekyoWatch -configuration Release -destination id=00008301-C88A1D40260BC02E -destination-timeout 30 -derivedDataPath build-watchos/watch-ultra-physical-tests -resultBundlePath out/test-results/watch-ultra-first-run-20261017/physical-standard-awake-retry.xcresult -allowProvisioningUpdates -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=2W6PXCJAM6 CODE_SIGN_STYLE=Automatic "CODE_SIGN_IDENTITY=Apple Development" CODE_SIGNING_ALLOWED=YES CODE_SIGNING_REQUIRED=YES ENABLE_TESTABILITY=YES "-only-testing:MangekyoWatchUITests/WatchFlowTests/testStandardProfileCompletes" -parallel-testing-enabled NO
+
+Build settings from command line:
+    CODE_SIGN_IDENTITY = Apple Development
+    CODE_SIGN_STYLE = Automatic
+    CODE_SIGNING_ALLOWED = YES
+    CODE_SIGNING_REQUIRED = YES
+    DEVELOPMENT_TEAM = 2W6PXCJAM6
+    ENABLE_TESTABILITY = YES
+
+Writing result bundle at path:
+	/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/watch-ultra-first-run-20261017/physical-standard-awake-retry.xcresult
+
+note: Using codesigning identity override: Apple Development
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (3 targets)
+    Target 'MangekyoWatchUITests' in project 'MangekyoWatch'
+        ➜ Explicit dependency on target 'MangekyoWatch' in project 'MangekyoWatch'
+    Target 'MangekyoWatchTests' in project 'MangekyoWatch'
+        ➜ Explicit dependency on target 'MangekyoWatch' in project 'MangekyoWatch'
+    Target 'MangekyoWatch' in project 'MangekyoWatch' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS27.0.sdk -x objective-c++ -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS27.0.sdk -x c++ -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/watch-gui/MangekyoWatch/Assets.xcassets
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64_32 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS27.0.sdk -x objective-c++ -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64_32 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64_32 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS27.0.sdk -x c++ -c /dev/null
+
+Build description signature: d66bfbdcb51ae53326cc3372438da1fb
+Build description path: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Intermediates.noindex/XCBuildData/d66bfbdcb51ae53326cc3372438da1fb.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS27.0.sdk /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/SDKStatCaches.noindex/watchos27.0-24R360-84ee5e44e35145daf7706869e872e73f.sdkstatcache
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/watch-gui/MangekyoWatch.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/SDKs/WatchOS27.0.sdk -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/SDKStatCaches.noindex/watchos27.0-24R360-84ee5e44e35145daf7706869e872e73f.sdkstatcache
+
+CopySwiftLibs /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app (in target 'MangekyoWatch' from project 'MangekyoWatch')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/watch-gui
+    builtin-swiftStdLibTool --copy --verbose --sign A52C1C37D7819FCC2948BFD4DAA0E2C49C1F4C6C --scan-executable /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app/MangekyoWatch --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app/Frameworks --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app/PlugIns --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app/SystemExtensions --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app/Extensions --platform watchos --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Intermediates.noindex/MangekyoWatch.build/Release-watchos/MangekyoWatch.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+
+ProcessInfoPlistFile /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app/Info.plist /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Intermediates.noindex/MangekyoWatch.build/Release-watchos/MangekyoWatch.build/empty-MangekyoWatch.plist (in target 'MangekyoWatch' from project 'MangekyoWatch')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/watch-gui
+    builtin-infoPlistUtility /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Intermediates.noindex/MangekyoWatch.build/Release-watchos/MangekyoWatch.build/empty-MangekyoWatch.plist -producttype com.apple.product-type.application -genpkginfo /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app/PkgInfo -expandbuildsettings -format binary -platform watchos -additionalcontentfile /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Intermediates.noindex/MangekyoWatch.build/Release-watchos/MangekyoWatch.build/assetcatalog_generated_info.plist -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app/Info.plist
+
+ProcessInfoPlistFile /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app/PlugIns/MangekyoWatchTests.xctest/Info.plist /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Intermediates.noindex/MangekyoWatch.build/Release-watchos/MangekyoWatchTests.build/empty-MangekyoWatchTests.plist (in target 'MangekyoWatchTests' from project 'MangekyoWatch')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/watch-gui
+    builtin-infoPlistUtility /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Intermediates.noindex/MangekyoWatch.build/Release-watchos/MangekyoWatchTests.build/empty-MangekyoWatchTests.plist -producttype com.apple.product-type.bundle.unit-test -expandbuildsettings -format binary -platform watchos -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app/PlugIns/MangekyoWatchTests.xctest/Info.plist
+
+CodeSign /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app (in target 'MangekyoWatch' from project 'MangekyoWatch')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/watch-gui
+    
+    Signing Identity:     "Apple Development: lzz288898@126.com (5R4X379M4R)"
+    Provisioning Profile: "iOS Team Provisioning Profile: com.fairchild.Mangekyo.cpu.watchkitapp"
+                          (c0ee3875-d153-4fcd-9c10-c74e79c931c8)
+    
+    /usr/bin/codesign --force --sign A52C1C37D7819FCC2948BFD4DAA0E2C49C1F4C6C --entitlements /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Intermediates.noindex/MangekyoWatch.build/Release-watchos/MangekyoWatch.build/MangekyoWatch.app.xcent --timestamp\=none --generate-entitlement-der /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app: replacing existing signature
+
+Validate /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app (in target 'MangekyoWatch' from project 'MangekyoWatch')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/watch-gui
+    builtin-validationUtility /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatch.app -shallow-bundle -infoplist-subpath Info.plist
+
+ProcessInfoPlistFile /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatchUITests-Runner.app/PlugIns/MangekyoWatchUITests.xctest/Info.plist /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Intermediates.noindex/MangekyoWatch.build/Release-watchos/MangekyoWatchUITests.build/empty-MangekyoWatchUITests.plist (in target 'MangekyoWatchUITests' from project 'MangekyoWatch')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/watch-gui
+    builtin-infoPlistUtility /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Intermediates.noindex/MangekyoWatch.build/Release-watchos/MangekyoWatchUITests.build/empty-MangekyoWatchUITests.plist -producttype com.apple.product-type.bundle.ui-testing -expandbuildsettings -format binary -platform watchos -additionalcontentfile /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Intermediates.noindex/MangekyoWatch.build/Release-watchos/MangekyoWatchUITests.build/ProductTypeInfoPlistAdditions.plist -o /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatchUITests-Runner.app/PlugIns/MangekyoWatchUITests.xctest/Info.plist
+
+CopySwiftLibs /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatchUITests-Runner.app/PlugIns/MangekyoWatchUITests.xctest (in target 'MangekyoWatchUITests' from project 'MangekyoWatch')
+    cd /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/watch-gui
+    builtin-swiftStdLibTool --copy --verbose --sign A52C1C37D7819FCC2948BFD4DAA0E2C49C1F4C6C --scan-executable /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatchUITests-Runner.app/PlugIns/MangekyoWatchUITests.xctest/MangekyoWatchUITests --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatchUITests-Runner.app/PlugIns/MangekyoWatchUITests.xctest/Frameworks --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatchUITests-Runner.app/PlugIns/MangekyoWatchUITests.xctest/PlugIns --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatchUITests-Runner.app/PlugIns/MangekyoWatchUITests.xctest/SystemExtensions --scan-folder /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatchUITests-Runner.app/PlugIns/MangekyoWatchUITests.xctest/Extensions --platform watchos --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Products/Release-watchos/MangekyoWatchUITests-Runner.app/PlugIns/MangekyoWatchUITests.xctest/Frameworks --strip-bitcode --scan-executable /Applications/Xcode.app/Contents/Developer/Platforms/WatchOS.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/fairchild/VSCode\ Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Intermediates.noindex/MangekyoWatch.build/Release-watchos/MangekyoWatchUITests.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build-watchos/watch-ultra-physical-tests/SDKExplicitPrecompiledModules
+
+2026-10-17 20:09:16.770 xcodebuild[37008:5944965] [MT] Run Destination Preflight: The destination is not ready.
+Error Domain=com.apple.dt.deviceprep Code=-3 "Unlock Xiaomi Watch S4 Sport to Continue" UserInfo={NSRecoveryAttempter=<_DVTErrorRecoveryAttempter: 0x77be845240>, NSLocalizedRecoveryOptions=(
+    "Cancel Testing"
+), NSLocalizedRecoverySuggestion=Xcode cannot launch MangekyoWatchUITests on Xiaomi Watch S4 Sport because the device is locked., DVTRecoveryBlockKey=<__NSMallocBlock__: 0x77be93f4e0>, NSLocalizedDescription=Unlock Xiaomi Watch S4 Sport to Continue}
+2026-10-17 20:09:16.770 xcodebuild[37008:5944965] [MT] Run Destination Preflight: Waiting for the destination to become ready.
+2026-10-17 20:09:36.067557+1100 MangekyoWatchUITests-Runner[618:10664] [Default] Running tests...
+2026-10-17 20:09:43.865547+1100 MangekyoWatchUITests-Runner[618:10664] Successfully load keyboard extensions
+Test Suite 'Selected tests' started at 2026-10-17 20:09:44.741.
+Test Suite 'MangekyoWatchUITests.xctest' started at 2026-10-17 20:09:44.746.
+Test Suite 'WatchFlowTests' started at 2026-10-17 20:09:44.747.
+Test Case '-[MangekyoWatchUITests.WatchFlowTests testStandardProfileCompletes]' started.
+    t =     0.00s Start Test at 2026-10-17 20:09:44.786
+    t =     0.55s Set Up
+    t =     0.59s Open com.fairchild.Mangekyo.cpu.watchkitapp
+    t =     0.61s     Launch com.fairchild.Mangekyo.cpu.watchkitapp
+    t =     0.62s         Waiting for system app quiescence
+    t =     1.76s         Terminate com.fairchild.Mangekyo.cpu.watchkitapp:607
+2026-10-17 20:09:47.754 xcodebuild[37008:5944965] [MT] IDELaunchParametersSnapshot: debugger version lookup failed for path '<nil>': noURL
+2026-10-17 20:09:47.754 xcodebuild[37008:5944965] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =    10.25s         Setting up automation session
+    t =    10.97s         Wait for com.fairchild.Mangekyo.cpu.watchkitapp to idle
+    t =    12.92s Waiting 15.0s for "watch-run-all" Button to exist
+    t =    13.94s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-run-all" Button`
+    t =    13.94s         Checking existence of `"watch-run-all" Button`
+    t =    14.22s Tap "watch-run-all" Button
+    t =    14.22s     Wait for com.fairchild.Mangekyo.cpu.watchkitapp to idle
+    t =    14.23s     Find the "watch-run-all" Button
+    t =    14.28s     Check for interrupting elements affecting "watch-run-all" Button
+    t =    14.42s     Synthesize event
+    t =    14.89s     Wait for com.fairchild.Mangekyo.cpu.watchkitapp to idle
+    t =    15.26s Waiting 420.0s for "watch-suite-status" StaticText to exist
+    t =    16.27s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    16.27s         Checking existence of `"watch-suite-status" StaticText`
+    t =    16.32s         Capturing element debug description
+    t =    17.33s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    17.33s         Checking existence of `"watch-suite-status" StaticText`
+    t =    17.36s         Capturing element debug description
+    t =    18.28s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    18.29s         Checking existence of `"watch-suite-status" StaticText`
+    t =    18.32s         Capturing element debug description
+    t =    19.33s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    19.34s         Checking existence of `"watch-suite-status" StaticText`
+    t =    19.37s         Capturing element debug description
+    t =    20.29s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    20.29s         Checking existence of `"watch-suite-status" StaticText`
+    t =    20.32s         Capturing element debug description
+    t =    21.41s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    21.43s         Checking existence of `"watch-suite-status" StaticText`
+    t =    21.93s         Capturing element debug description
+    t =    22.36s     Checking `Expect predicate `existsNoRetry == 1` for object "watch-suite-status" StaticText`
+    t =    22.36s         Checking existence of `"watch-suite-status" StaticText`
+    t =    22.44s Find the "watch-suite-status" StaticText
+    t =    22.54s Find the "watch-suite-status" StaticText
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/watch-gui/MangekyoWatchUITests/WatchFlowTests.swift:13: error: -[MangekyoWatchUITests.WatchFlowTests testStandardProfileCompletes] : XCTAssertTrue failed - 0/2 · 已取消
+    t =    22.69s Find the "watch-suite-status" StaticText
+/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/watch-gui/MangekyoWatchUITests/WatchFlowTests.swift:14: error: -[MangekyoWatchUITests.WatchFlowTests testStandardProfileCompletes] : XCTAssertTrue failed
+    t =    22.77s Find the Target Application 'com.fairchild.Mangekyo.cpu.watchkitapp'
+    t =    23.75s Added attachment named 'watch-standard-completed'
+    t =    23.76s Tear Down
+Test Case '-[MangekyoWatchUITests.WatchFlowTests testStandardProfileCompletes]' failed (23.973 seconds).
+Test Suite 'WatchFlowTests' failed at 2026-10-17 20:10:08.761.
+	 Executed 1 test, with 2 failures (0 unexpected) in 23.973 (24.013) seconds
+Test Suite 'MangekyoWatchUITests.xctest' failed at 2026-10-17 20:10:08.762.
+	 Executed 1 test, with 2 failures (0 unexpected) in 23.973 (24.016) seconds
+Test Suite 'Selected tests' failed at 2026-10-17 20:10:08.763.
+	 Executed 1 test, with 2 failures (0 unexpected) in 23.973 (24.022) seconds
+** BUILD INTERRUPTED **

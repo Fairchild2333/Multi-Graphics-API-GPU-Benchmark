@@ -1,0 +1,51 @@
+[
+  {
+    "device": "Mac M4 Pro",
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/m4-single-core-check-20261017/results-after.json",
+    "rows": 171,
+    "sha256": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f",
+    "bytes": 336781
+  },
+  {
+    "device": "iPhone 13 Pro / A15",
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-metal-confirm-20261017/phone-final/results/results.json",
+    "rows": 155,
+    "sha256": "441c731effdfb365c76d58c6d09d04a72cbe1fd0d4eb84f6adfb192bfefb9024",
+    "bytes": 408760
+  },
+  {
+    "device": "12.9-inch iPad Pro / A12X",
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad87-particle-completion-20261017/phone-final/results/results.json",
+    "rows": 79,
+    "sha256": "62589d5d0f8790e388edad10d516044e4826e56e93279f828cce736c46d435f9",
+    "bytes": 185616
+  },
+  {
+    "device": "11-inch iPad Pro / A12X",
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad81-budget-metal-check-20261018/phone-final/results/results.json",
+    "rows": 53,
+    "sha256": "efe49ed77a2e735fd1da68d7bd4cee2d359c1c9e135c8726707b8a4d350253ce",
+    "bytes": 129422
+  },
+  {
+    "device": "iPhone 14 Pro Max / A16",
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a16-full-suite-20261016/phone-final/results/results.json",
+    "rows": 24,
+    "sha256": "da2a2612d9dfbb8381792987ea2b98f6a47e947f108cd7c39298498930dd7df1",
+    "bytes": 46368
+  },
+  {
+    "device": "Apple Watch Ultra",
+    "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/watch-ultra-first-run-20261017/watch-final/results/results.json",
+    "rows": 3,
+    "sha256": "451acaa82c81d79bec3889b82c7bc6cb4c7dfc10af71dd6367f90e7c42753e0b",
+    "bytes": 9100
+  },
+  {
+    "device": "Mac live",
+    "path": "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/results/results.json",
+    "rows": 171,
+    "sha256": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f",
+    "bytes": 336781
+  }
+]

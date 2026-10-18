@@ -208,7 +208,7 @@ std::string CurrentPlatform() {
 }
 
 std::string CurrentProcessArchitecture() {
-#if defined(__arm64_32__)
+#if defined(__arm64_32__) || ((defined(__arm64__) || defined(__aarch64__)) && defined(__ILP32__))
     return "ARM64_32";
 #elif defined(_M_ARM64) || defined(__aarch64__) || defined(__arm64__)
     return "ARM64";

@@ -1,0 +1,53 @@
+{
+  "error" : {
+    "code" : 260,
+    "domain" : "NSCocoaErrorDomain",
+    "userInfo" : {
+      "NSFilePath" : {
+        "string" : "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad81-budget-metal-check-20261018/fresh-install-documents"
+      },
+      "NSURL" : {
+        "url" : "file:///Users/fairchild/VSCode%20Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad81-budget-metal-check-20261018/fresh-install-documents"
+      },
+      "NSUnderlyingError" : {
+        "error" : {
+          "code" : 2,
+          "domain" : "NSPOSIXErrorDomain",
+          "userInfo" : {
+
+          }
+        }
+      }
+    }
+  },
+  "errorSignature" : "(NSCocoaErrorDomain 260 (NSPOSIXErrorDomain 2))",
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "copy",
+      "from",
+      "--device",
+      "00008027-001969920A87002E",
+      "--source",
+      "Documents",
+      "--domain-type",
+      "appDataContainer",
+      "--domain-identifier",
+      "com.fairchild.Mangekyo",
+      "--destination",
+      "out/test-results/ipad81-budget-metal-check-20261018/fresh-install-documents",
+      "--timeout",
+      "20",
+      "--json-output",
+      "out/test-results/ipad81-budget-metal-check-20261018/fresh-install-export.json"
+    ],
+    "commandType" : "devicectl.device.copy.from",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "failed",
+    "version" : "651.13.5"
+  }
+}

@@ -1,0 +1,6 @@
+job,resultID,status,scoreGBps,stableScoreGBps,stableCVPct,earlyLateDropPct,computeMs,renderMs,totalGpuMs,frameMs,thermalStart,thermalEnd,review
+vulkan/stream-65536,20261017-203523-941,passed,3.172,0.0,-1.0,0.06,0.826,7.004,7.83,8.387,0,0,
+vulkan/stream_headless-65536,20261017-203539-768,passed,4.954,4.911,1.63,-3.68,0.529,0.0,0.529,0.534,0,0,
+vulkan/stream-1048576,20261017-203555-736,review,20.363,0.0,-1.0,-2.68,2.06,58.19,60.25,60.815,0,0,Stable throughput was not reached
+vulkan/stream-4194304,20261017-203612-094,passed,26.601,27.245,1.5,-5.16,6.307,262.83,269.137,270.015,0,0,
+vulkan/stream-16777216,20261017-203630-515,passed,27.364,27.183,1.89,-0.04,24.525,1175.96,1200.484,1198.203,0,0,

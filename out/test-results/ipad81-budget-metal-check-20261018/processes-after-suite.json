@@ -1,0 +1,34 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "processes",
+      "--device",
+      "00008027-001969920A87002E",
+      "--search",
+      "Mangekyo",
+      "--timeout",
+      "15",
+      "--json-output",
+      "out/test-results/ipad81-budget-metal-check-20261018/processes-after-suite.json"
+    ],
+    "commandType" : "devicectl.device.info.processes",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "9A44542D-75A2-58C6-B79C-18BEAED61843",
+    "runningProcesses" : [
+      {
+        "executable" : "file:///private/var/containers/Bundle/Application/E4C7DB09-6B91-4EE9-8016-D065917D7027/Mangekyo.app/Mangekyo",
+        "processIdentifier" : 9797
+      }
+    ]
+  }
+}

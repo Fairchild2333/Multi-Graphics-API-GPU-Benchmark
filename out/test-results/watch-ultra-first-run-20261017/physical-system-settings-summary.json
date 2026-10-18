@@ -1,0 +1,45 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64_32",
+        "deviceId" : "00008301-C88A1D40260BC02E",
+        "deviceName" : "Xiaomi Watch S4 Sport",
+        "modelName" : "Apple Watch Ultra",
+        "osBuildNumber" : "23T570",
+        "osVersion" : "26.5",
+        "platform" : "watchOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 0,
+      "passedTests" : 1,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "MangekyoWatch · Built with macOS 27.0.1",
+  "expectedFailures" : 0,
+  "failedTests" : 0,
+  "finishTime" : 1792228907.588,
+  "passedTests" : 1,
+  "result" : "Passed",
+  "runtimeWarnings" : [
+
+  ],
+  "skippedTests" : 0,
+  "startTime" : 1792228811.134,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+
+  ],
+  "title" : "Test - MangekyoWatch",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 1
+}

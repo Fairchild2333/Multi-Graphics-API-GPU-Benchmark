@@ -1,0 +1,60 @@
+{
+  "snapshotDate": "2026-10-18",
+  "purpose": "Verbatim benchmark-history backup; histories are not all accepted current-version scores. Simulator and control runs are separate.",
+  "devices": [
+    {
+      "device": "Mac M4 Pro",
+      "deviceModel": "Mac16,8",
+      "rows": 171,
+      "path": "m4-single-core-check-20261017/results-after.json",
+      "bytes": 336781,
+      "sha256": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f",
+      "notes": "Mac 主历史 171 条；单核原方法确认大核216.737、后台小核76.322，原169条不变。V3内存和粒子修复结果及诊断对照继续保留。"
+    },
+    {
+      "device": "iPhone 13 Pro / A15",
+      "deviceModel": "iPhone14,2",
+      "rows": 155,
+      "path": "a15-metal-confirm-20261017/phone-final/results/results.json",
+      "bytes": 408760,
+      "sha256": "441c731effdfb365c76d58c6d09d04a72cbe1fd0d4eb84f6adfb192bfefb9024",
+      "notes": "A15主历史155条；原141条不变。Vulkan512MiB平台29.803及八个粒子同步计时已齐；额外14项Metal确认236秒、13通过/1波动提示。Metal内存30.679仍preview。当前31项覆盖，Metal64K纯计算18.18%及Vulkan1M纯计算5.41%下降提示保留。CPU147.000/89.287/634.868沿用。"
+    },
+    {
+      "device": "12.9-inch iPad Pro / A12X",
+      "deviceModel": "iPad8,7",
+      "rows": 79,
+      "path": "ipad87-particle-completion-20261017/phone-final/results/results.json",
+      "bytes": 185616,
+      "sha256": "62589d5d0f8790e388edad10d516044e4826e56e93279f828cce736c46d435f9",
+      "notes": "主历史79条；新增五个Vulkan粒子同步计时组合，4passed/1review（1M绘制未达稳定窗口），旧74条不变。当前31项/33记录有覆盖。原512MiB平台56.657及83点/38校验沿用；Metal内存仍预览，旧Metal16M提示保留。"
+    },
+    {
+      "device": "11-inch iPad Pro / A12X",
+      "deviceModel": "iPad8,1",
+      "rows": 53,
+      "path": "ipad81-budget-metal-check-20261018/phone-final/results/results.json",
+      "bytes": 129422,
+      "sha256": "efe49ed77a2e735fd1da68d7bd4cee2d359c1c9e135c8726707b8a4d350253ce",
+      "notes": "首轮51条历史从项目原样恢复后，新增Metal16M纯计算29.089（CV0.26%）及Vulkan512MiB平台56.524（83点/38校验）；2passed，当前31项/33记录覆盖，旧51条未改。Metal内存仍预览。"
+    },
+    {
+      "device": "iPhone 14 Pro Max / A16",
+      "deviceModel": "iPhone15,3",
+      "rows": 35,
+      "path": "a16-budget-completion-20261018/phone-final/results/results.json",
+      "bytes": 90233,
+      "sha256": "2e5b166cc0a9374ce1649d4fbed12bb480a13f2f0f0ab5c697a831d0adfcab48",
+      "notes": "九项补齐8passed/1review，当前31项/33记录覆盖；CPU169.945/100.672/721.677、267曲线点，Vulkan512MiB平台45.044及83点/38校验。旧24条含两条中断诊断均不变；四个吞吐提示及大核内存分项未稳定保留。"
+    },
+    {
+      "device": "Apple Watch Ultra",
+      "deviceModel": "Watch6,18",
+      "rows": 3,
+      "path": "watch-ultra-first-run-20261017/watch-final/results/results.json",
+      "bytes": 9100,
+      "sha256": "451acaa82c81d79bec3889b82c7bc6cb4c7dfc10af71dd6367f90e7c42753e0b",
+      "notes": "首台Ultra一键2/2完成，单线程53.672、双核116.499 MWork/s；6条曲线126点，页面/存储已测。5.614GB/s仍为未确认内存平台的参考值。实际arm64_32，原始ARM64标签保留，导出器已修正；前台设置调整后完成，非通用防锁保证。"
+    }
+  ]
+}

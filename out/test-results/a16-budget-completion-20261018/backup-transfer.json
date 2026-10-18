@@ -1,0 +1,38 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "copy",
+      "from",
+      "--device",
+      "00008120-000E2D3E0CEBC01E",
+      "--domain-type",
+      "appDataContainer",
+      "--domain-identifier",
+      "com.fairchild.Mangekyo",
+      "--source",
+      "Documents",
+      "--destination",
+      "out/test-results/a16-budget-completion-20261018/phone-before",
+      "--json-output",
+      "out/test-results/a16-budget-completion-20261018/backup-transfer.json",
+      "--timeout",
+      "30"
+    ],
+    "commandType" : "devicectl.device.copy.from",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "destination" : "file:///Users/fairchild/VSCode%20Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a16-budget-completion-20261018/phone-before",
+    "deviceIdentifier" : "256C41DC-AC03-5FF9-9D3F-8FDFFC83CDBE",
+    "domain" : "appDataContainer",
+    "domainIdentifier" : "com.fairchild.Mangekyo",
+    "source" : "Documents"
+  }
+}

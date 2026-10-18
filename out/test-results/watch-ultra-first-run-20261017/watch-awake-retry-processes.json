@@ -1,0 +1,38 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "processes",
+      "--device",
+      "00008301-C88A1D40260BC02E",
+      "--search",
+      "Mangekyo",
+      "--timeout",
+      "12",
+      "--json-output",
+      "out/test-results/watch-ultra-first-run-20261017/watch-awake-retry-processes.json"
+    ],
+    "commandType" : "devicectl.device.info.processes",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "deviceIdentifier" : "86A3E302-4C86-578B-A753-31E86EA1DD09",
+    "runningProcesses" : [
+      {
+        "executable" : "file:///private/var/containers/Bundle/Application/77AF5837-CF55-491F-9F95-5D079042AC89/MangekyoWatch.app/MangekyoWatch",
+        "processIdentifier" : 607
+      },
+      {
+        "executable" : "file:///private/var/containers/Bundle/Application/A8625261-5CCF-402E-BD1C-51EA8C22ED90/MangekyoWatchUITests-Runner.app/MangekyoWatchUITests-Runner",
+        "processIdentifier" : 618
+      }
+    ]
+  }
+}

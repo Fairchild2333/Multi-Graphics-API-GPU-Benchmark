@@ -1,0 +1,223 @@
+{
+  "auditPassed": true,
+  "device": "iPhone15,3 / A16",
+  "newJobs": 9,
+  "newRows": 11,
+  "passed": 8,
+  "review": 1,
+  "executionFailures": 0,
+  "historyRows": 35,
+  "oldRowsUnchanged": 24,
+  "currentPlanCoverage": "31/31 jobs, 33 selected records",
+  "readMemoryGBps": 45.044,
+  "vulkanMemoryPoints": 83,
+  "largeDatasetTailsGBps": {
+    "read": [
+      44.898,
+      45.344,
+      45.044
+    ],
+    "write": [
+      45.962,
+      46.071,
+      46.381
+    ],
+    "copy": [
+      43.417,
+      43.645,
+      43.405
+    ]
+  },
+  "cpuSingleCores": [
+    {
+      "coreType": "performance",
+      "score": 169.945,
+      "minimumResidencyLowerBound": 0.999351498,
+      "minimumWorkerBusyFraction": 0.999992858,
+      "roundEffectiveGHz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "coreType": "efficiency",
+      "score": 100.672,
+      "minimumResidencyLowerBound": 0.999989062,
+      "minimumWorkerBusyFraction": 0.996853966,
+      "roundEffectiveGHz": [
+        2.01565615,
+        2.0155557,
+        2.0156279
+      ]
+    }
+  ],
+  "cpuAllCore": {
+    "score": 721.677,
+    "workers": [
+      120.387298,
+      119.858098,
+      120.001457,
+      121.134404,
+      120.20216,
+      120.094026
+    ],
+    "typedPerWorkerParticipationVerified": false
+  },
+  "cpuMemoryGBps": 29.77,
+  "cpuMemoryPoints": 267,
+  "cpuMemoryDetails": {
+    "single_memory_read": "49.6",
+    "single_memory_settled": "0",
+    "single_1_memory_read": "24.6",
+    "single_1_memory_settled": "1",
+    "all_memory_read": "29.8",
+    "all_memory_settled": "1",
+    "pageFaultNsPerPage": "1563",
+    "pageBytes": "16384",
+    "storageDirectIo": "1",
+    "storageFileMiB": "1024",
+    "storageSeqReadMBps": "563",
+    "storageSeqWriteMBps": "390",
+    "storageRandReadMBps": "49",
+    "storageRandWriteMBps": "30"
+  },
+  "cpuResidencyPoints": 186,
+  "gpuCachePoints": 124,
+  "independentGpuCacheAttributionVerified": false,
+  "oldCanonicalHistoriesAndLiveMacUnchanged": true,
+  "newResults": [
+    {
+      "job": "vulkan/gpu_burn-64",
+      "resultID": "20261018-180653-275",
+      "workload": "gpu_burn",
+      "api": "Vulkan",
+      "score": 1.016,
+      "unit": "Gpix-step/s",
+      "status": "passed",
+      "review": "",
+      "thermalStart": 0,
+      "thermalEnd": 0
+    },
+    {
+      "job": "vulkan/gpu_burn-256",
+      "resultID": "20261018-180709-910",
+      "workload": "gpu_burn",
+      "api": "Vulkan",
+      "score": 1.097,
+      "unit": "Gpix-step/s",
+      "status": "passed",
+      "review": "",
+      "thermalStart": 0,
+      "thermalEnd": 0
+    },
+    {
+      "job": "vulkan/memory_sweep",
+      "resultID": "20261018-180806-931-membw",
+      "workload": "membw",
+      "api": "Vulkan",
+      "score": 45.044,
+      "unit": "GB/s",
+      "status": "passed",
+      "review": "",
+      "thermalStart": 0,
+      "thermalEnd": 0
+    },
+    {
+      "job": "gpu_cache-v2",
+      "resultID": "20261018-180850-475-metal-cache",
+      "workload": "gpu_cache",
+      "api": "Metal",
+      "score": 379.452,
+      "unit": "ns/load",
+      "status": "passed",
+      "review": "",
+      "thermalStart": 0,
+      "thermalEnd": 0
+    },
+    {
+      "job": "cpu_compute",
+      "resultID": "20261018-180942-117-cpu-single-performance",
+      "workload": "cpu_single_core",
+      "api": "CPU",
+      "score": 169.945,
+      "unit": "MWork/s",
+      "status": "passed",
+      "review": "",
+      "thermalStart": 0,
+      "thermalEnd": 0
+    },
+    {
+      "job": "cpu_compute",
+      "resultID": "20261018-180942-121-cpu-single-efficiency",
+      "workload": "cpu_single_core",
+      "api": "CPU",
+      "score": 100.672,
+      "unit": "MWork/s",
+      "status": "passed",
+      "review": "",
+      "thermalStart": 0,
+      "thermalEnd": 0
+    },
+    {
+      "job": "cpu_compute",
+      "resultID": "20261018-180942-123-cpu-multi",
+      "workload": "cpu_multi_core",
+      "api": "CPU",
+      "score": 721.677,
+      "unit": "MWork/s",
+      "status": "passed",
+      "review": "",
+      "thermalStart": 0,
+      "thermalEnd": 0
+    },
+    {
+      "job": "cpu_memory",
+      "resultID": "20261018-181227-993-cpu-membw",
+      "workload": "cpu_membw",
+      "api": "CPU",
+      "score": 29.77,
+      "unit": "GB/s",
+      "status": "passed",
+      "review": "",
+      "thermalStart": 0,
+      "thermalEnd": 0
+    },
+    {
+      "job": "gles2/gpu_burn-16",
+      "resultID": "20261018-181243-886",
+      "workload": "gpu_burn",
+      "api": "OpenGL ES 2.0",
+      "score": 1.773,
+      "unit": "Gpix-step/s",
+      "status": "passed",
+      "review": "",
+      "thermalStart": 0,
+      "thermalEnd": 0
+    },
+    {
+      "job": "gles2/gpu_burn-64",
+      "resultID": "20261018-181259-870",
+      "workload": "gpu_burn",
+      "api": "OpenGL ES 2.0",
+      "score": 7.085,
+      "unit": "Gpix-step/s",
+      "status": "passed",
+      "review": "",
+      "thermalStart": 0,
+      "thermalEnd": 0
+    },
+    {
+      "job": "gles2/gpu_burn-256",
+      "resultID": "20261018-181315-967",
+      "workload": "gpu_burn",
+      "api": "OpenGL ES 2.0",
+      "score": 13.237,
+      "unit": "Gpix-step/s",
+      "status": "review",
+      "review": "运行中吞吐下降超过 5%",
+      "thermalStart": 0,
+      "thermalEnd": 0
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "finishedAt" : "2026-10-18T06:35:19Z",
+  "id" : "complete-suite-C61E0464-8A10-4959-92AD-88417C52E3CF",
+  "jobs" : [
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-18T06:34:19Z",
+      "id" : "stream_headless-16777216",
+      "request" : "stream_headless?particles=16777216&vsync=0&api=metal",
+      "resultIDs" : [
+        "20261018-173418-759"
+      ],
+      "startedAt" : "2026-10-18T06:34:02Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Metal · Particle 16777216 · Compute"
+    },
+    {
+      "error" : "",
+      "expectedRecords" : 1,
+      "finishedAt" : "2026-10-18T06:35:19Z",
+      "id" : "vulkan\/memory_sweep",
+      "request" : "memory_sweep?api=vulkan",
+      "resultIDs" : [
+        "20261018-173519-035-membw"
+      ],
+      "startedAt" : "2026-10-18T06:34:19Z",
+      "status" : "passed",
+      "thermalStateEnd" : 0,
+      "thermalStateStart" : 0,
+      "title" : "Vulkan · GPU Cache & Memory"
+    }
+  ],
+  "startedAt" : "2026-10-18T06:34:02Z",
+  "status" : "passed"
+}

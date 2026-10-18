@@ -4,7 +4,6 @@ final class WatchFlowTests: XCTestCase {
     @MainActor
     func testStandardProfileCompletes() {
         let app = XCUIApplication()
-        app.launchArguments = ["-AppleLanguages", "(zh-Hans)", "-AppleLocale", "zh_CN"]
         app.launch()
         XCTAssertTrue(app.buttons["watch-run-all"].waitForExistence(timeout: 15))
         app.buttons["watch-run-all"].tap()

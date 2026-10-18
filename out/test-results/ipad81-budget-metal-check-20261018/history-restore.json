@@ -1,0 +1,62 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "copy",
+      "to",
+      "--device",
+      "00008027-001969920A87002E",
+      "--source",
+      "out/test-results/ipad81-design-review-20261016/phone-final/results",
+      "--destination",
+      "Documents/results",
+      "--domain-type",
+      "appDataContainer",
+      "--domain-identifier",
+      "com.fairchild.Mangekyo",
+      "--timeout",
+      "20",
+      "--json-output",
+      "out/test-results/ipad81-budget-metal-check-20261018/history-restore.json"
+    ],
+    "commandType" : "devicectl.device.copy.to",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "destination" : "file:///private/var/mobile/Containers/Data/Application/E0C753BB-2B4E-4463-B779-80BEE8317DAA/Documents/results",
+    "deviceIdentifier" : "9A44542D-75A2-58C6-B79C-18BEAED61843",
+    "domain" : "appDataContainer",
+    "domainIdentifier" : "com.fairchild.Mangekyo",
+    "file" : {
+      "metadata" : {
+        "extendedAttributes" : {
+
+        },
+        "lastModDate" : "2026-10-18T06:33:41.000Z",
+        "ownerGid" : 501,
+        "ownerUid" : 501,
+        "permissions" : 493,
+        "size" : 96
+      },
+      "name" : "/private/var/mobile/Containers/Data/Application/E0C753BB-2B4E-4463-B779-80BEE8317DAA/Documents/results",
+      "relativePath" : "/private/var/mobile/Containers/Data/Application/E0C753BB-2B4E-4463-B779-80BEE8317DAA/Documents/results",
+      "resources" : {
+        "isDirectory" : true,
+        "isHidden" : false,
+        "isReadable" : true,
+        "isSymbolicLink" : false,
+        "isWritable" : true
+      }
+    },
+    "source" : "file:///Users/fairchild/VSCode%20Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad81-design-review-20261016/phone-final/results/",
+    "sources" : [
+      "file:///Users/fairchild/VSCode%20Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad81-design-review-20261016/phone-final/results/"
+    ]
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "apps",
+      "--device",
+      "00008301-C88A1D40260BC02E",
+      "--filter",
+      "bundleIdentifier CONTAINS \"Mangekyo\"",
+      "--timeout",
+      "15",
+      "--json-output",
+      "out/test-results/watch-ultra-first-run-20261017/watch-installed-apps-current.json"
+    ],
+    "commandType" : "devicectl.device.info.apps",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "success",
+    "version" : "651.13.5"
+  },
+  "result" : {
+    "apps" : [
+      {
+        "appClip" : false,
+        "builtByDeveloper" : true,
+        "bundleIdentifier" : "com.fairchild.Mangekyo.cpu.watchkitapp.uitests.xctrunner",
+        "bundleVersion" : "1",
+        "containerAccessible" : true,
+        "defaultApp" : false,
+        "hidden" : false,
+        "internalApp" : false,
+        "name" : "MangekyoWatchUITests-Runner",
+        "removable" : true,
+        "url" : "file:///private/var/containers/Bundle/Application/8450F5B2-2FED-4D7E-83DE-C9BBE9568B87/MangekyoWatchUITests-Runner.app/",
+        "version" : "1.0"
+      }
+    ],
+    "defaultAppsIncluded" : false,
+    "deviceIdentifier" : "86A3E302-4C86-578B-A753-31E86EA1DD09",
+    "hiddenAppsIncluded" : false,
+    "internalAppsIncluded" : false,
+    "removableAppsIncluded" : true
+  }
+}

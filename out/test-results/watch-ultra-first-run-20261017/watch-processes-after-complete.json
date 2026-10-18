@@ -1,0 +1,34 @@
+{
+  "error" : {
+    "code" : 2,
+    "domain" : "ArgumentParserInternal.ExitCode",
+    "userInfo" : {
+
+    }
+  },
+  "errorSignature" : "(ArgumentParserInternal.ExitCode 2)",
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "info",
+      "processes",
+      "--device",
+      "00008301-C88A1D40260BC02E",
+      "--search",
+      "Mangekyo",
+      "--timeout",
+      "15",
+      "--json-output",
+      "out/test-results/watch-ultra-first-run-20261017/watch-processes-after-complete.json"
+    ],
+    "commandType" : "devicectl.device.info.processes",
+    "details" : "Exceeded command timeout",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 5,
+    "outcome" : "timeout",
+    "version" : "651.13.5"
+  }
+}

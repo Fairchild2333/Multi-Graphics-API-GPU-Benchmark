@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import SwiftUI
 
 @MainActor
 final class WatchEngine: ObservableObject {
@@ -62,8 +63,24 @@ final class WatchEngine: ObservableObject {
     private func failure(_ message: String) -> NSError {
         NSError(domain: "MangekyoWatch", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
     }
-    func cancel() {
+    func sceneChanged(_ phase: ScenePhase) {
         guard running else { return }
+        let line = "\(Date().timeIntervalSince1970) phase=\(phase) thermal=\(ProcessInfo.processInfo.thermalState.rawValue)\n"
+        let path = dataDirectory.appendingPathComponent("suite-runs/lifecycle.log")
+        if let data = line.data(using: .utf8) {
+            if let file = try? FileHandle(forWritingTo: path) {
+                defer { try? file.close() }
+                try? file.seekToEnd(); try? file.write(contentsOf: data)
+            } else { try? data.write(to: path) }
+        }
+        // Inactive can still be frontmost on watchOS (including Always On).
+        if phase == .background { cancel(reason: "App entered background") }
+    }
+    func cancel(reason: String? = nil) {
+        guard running else { return }
+        if let reason, let index = suite?.jobs.firstIndex(where: { $0.status == "running" }) {
+            suite?.jobs[index].notes.append(reason)
+        }
         cancelled = true; wcpu_cancel()
         stage = watchText("正在停止…", "Stopping…")
     }

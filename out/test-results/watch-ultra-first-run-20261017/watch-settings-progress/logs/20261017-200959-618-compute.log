@@ -1,0 +1,24 @@
+WATCH_PROFILE	profile=standard	core_placement=scheduler_managed_unclassified
+CPU_META	workload_version=cpu_mixed_v1_scheduler_managed_32bit	name=Apple Silicon (Watch6,18)	logical_count=2	physical_count=2	topology_source=AppleSchedulerManagedEstimate	affinity_capability=scheduler_managed
+CPU_TOPOLOGY	core_index=0	group=0	logical_index=0	physical_core=0	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TOPOLOGY	core_index=1	group=0	logical_index=1	physical_core=1	smt_index=0	smt_width=1	cpu_set_id=0	efficiency_class=-1	performance_level=-1	core_class=Unclassified	classification_source=unavailable	parked=0
+CPU_TYPE_CAPS	verified_scheduling=0	performance_count=0	efficiency_count=0	residency_method=unavailable_watchos
+CPU_SCHEDULING	core_type=auto	efficiency_policy=background	residency_threshold=0.99	scope=single_thread_stages
+
+--- Native CPU mixed benchmark ---
+CPU: Apple Silicon (Watch6,18)
+Topology: AppleSchedulerManagedEstimate, affinity: scheduler_managed
+Workload: cpu_mixed_v1_scheduler_managed_32bit, 3 rounds, median aggregation (the requested measurement time is split across rounds).
+Score contract: formal (formal = 15.0 s measurement, 0.2 s warm-up, 3 rounds).
+Each score is million mixed integer/branch/FP32/FP64 work units per second.
+The checksum is a dead-code-elimination sink, not a correctness oracle.
+
+--- CPU all-logical-processor test ---
+CPU_PROGRESS	mode=multi	phase=warmup	core_index=-1	core_count=2	core_fraction=0.000000	overall_fraction=0.000000	elapsed=0.000000	round_index=-1	round_count=3
+CPU_MULTI_WORKER	round=1	worker=0	work_units=267223040	common_seconds=5.000036125	score=53.444221865	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_WORKER	round=1	worker=1	work_units=266080256	common_seconds=5.000036125	score=53.215666717	classification=unclassified_worker	requested_lower_bound=0.000000000	worker_cpu_seconds=0.000000000	busy_fraction=0.000000000
+CPU_MULTI_ACCOUNTING	round=1	process_cpu_seconds=0.000000000	performance_cpu_seconds=0.000000000	includes_warmup_seconds=0.200000000
+CPU_PROGRESS	mode=multi	phase=measure	core_index=-1	core_count=2	core_fraction=0.333333	overall_fraction=0.111111	elapsed=5.000000	round_index=0	round_count=3
+All-core score (0 threads): 0.00 MWork/s [INVALID: nothing was measured]
+CPU_RESULT	kind=multi	mode=multi	core_index=-1	workload_version=cpu_mixed_v1_scheduler_managed_32bit	score_contract=formal	aggregation=median	core_count=2	thread_count=0	pinned_threads=0	affinity=	valid=0	score=0.000000	unit=MWork/s	seconds=0.000000	requested_seconds=15.000000	round_count=0	median_round=0	checksum=0000000000000000	checksum_role=dce_sink
+CPU_CANCELLED

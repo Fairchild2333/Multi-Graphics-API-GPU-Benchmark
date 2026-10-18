@@ -1,0 +1,47 @@
+{
+  "result": "passed",
+  "physicalDevice": "Watch6,18",
+  "suiteID": "3446014B-215B-4F2E-AA30-B9F4FFE302E9",
+  "actualArchitecture": "arm64_32",
+  "rawArchitectureLabels": [
+    "ARM64"
+  ],
+  "suiteStatus": "review",
+  "historyRows": 3,
+  "selectedResults": [
+    {
+      "id": "20261017-202115-726-cpu-single",
+      "workload": "cpu_single_core",
+      "score": 53.672,
+      "unit": "MWork/s"
+    },
+    {
+      "id": "20261017-202115-737-cpu-multi",
+      "workload": "cpu_multi_core",
+      "score": 116.499,
+      "unit": "MWork/s"
+    },
+    {
+      "id": "20261017-202146-120-cpu-membw",
+      "workload": "cpu_membw",
+      "score": 5.614,
+      "unit": "GB/s"
+    }
+  ],
+  "curvePoints": {
+    "curve_single_read": 23,
+    "curve_single_write": 23,
+    "curve_single_copy": 23,
+    "curve_all_read": 19,
+    "curve_all_write": 19,
+    "curve_all_copy": 19
+  },
+  "unchangedHistories": [
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/m4-single-core-check-20261017/results-after.json",
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-metal-confirm-20261017/phone-final/results/results.json",
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ios-vulkan-memory-platform-fix-20261017/phone-final/results/results.json",
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad81-design-review-20261016/phone-final/results/results.json",
+    "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a16-full-suite-20261016/phone-final/results/results.json",
+    "/Users/fairchild/Library/Application Support/GpuComputeBenchmark/results/results.json"
+  ]
+}
