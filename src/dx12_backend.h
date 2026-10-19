@@ -18,12 +18,17 @@ public:
     std::string GetBackendName()    const override { return "DX12"; }
     std::string GetDeviceName()     const override { return deviceName_; }
     std::string GetDriverVersion()  const override { return driverVersion_; }
+    std::string GetTimingMode()     const override {
+        return synchronizedTimingFallback_
+            ? "synchronized_wall_clock" : "gpu_timestamp_query";
+    }
 
 protected:
     void InitBackend()              override;
     void DrawFrame(float deltaTime) override;
     void CleanupBackend()           override;
     void WaitIdle()                 override;
+    bool UseSynchronizedTimingInstead(const char* reason) override;
 
 private:
     template<typename T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -129,6 +134,8 @@ private:
     std::vector<ComPtr<ID3D12Resource>> afrTimestampReadbacks_;
     std::vector<UINT64>             afrGpuFrequencies_;
     bool                            timestampsSupported_ = false;
+    // Each frame is timed by the wall clock around a fence wait instead.
+    bool                            synchronizedTimingFallback_ = false;
 
     ComPtr<ID3D12Fence>             fence_;
     HANDLE                          fenceEvent_ = nullptr;

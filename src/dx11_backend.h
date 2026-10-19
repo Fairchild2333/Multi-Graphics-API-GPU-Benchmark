@@ -28,6 +28,7 @@ protected:
     void DrawFrame(float deltaTime) override;
     void CleanupBackend()           override;
     void WaitIdle()                 override;
+    bool UseSynchronizedTimingInstead(const char* reason) override;
 
 private:
     template<typename T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -93,6 +94,9 @@ private:
     ComPtr<ID3D11Query> disjointQueries_[kTimestampSlotCount];
     ComPtr<ID3D11Query> timestampQueries_[kTimestampSlotCount][kTimestampsPerFrame];
     ComPtr<ID3D11Query> synchronizedCompletionQuery_;
+    // Used instead of the event query when a driver never completes it.
+    ComPtr<ID3D11Buffer> syncSource_, syncStaging_;
+    bool syncByStagingCopy_ = false;
     bool timestampsSupported_    = false;
     bool synchronizedTimingFallback_ = false;
     bool tearingSupported_       = false;

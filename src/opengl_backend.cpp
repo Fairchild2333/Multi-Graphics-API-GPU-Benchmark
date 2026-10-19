@@ -208,6 +208,32 @@ void OpenGLBackend::CreateParticleBuffers() {
     std::cout << "Created particle buffers: " << config_.particleCount
               << " particles" << std::endl;
 
+    // 16,777,216 particles need 65,536 work groups, one more than OpenGL
+    // guarantees in one dispatch. The LX 7G100 driver (Mesa 22.0.4 based,
+    // 2026-10-20) then did no work at all (1,520,641 GB/s). As in the Vulkan
+    // backend, such a step runs as dispatches over separate parts of the
+    // buffer; the shader indexes from the start of its binding.
+    if (config_.workload == Workload::Stream) {
+        const std::uint32_t groups = config_.particleCount / kComputeWorkGroupSize;
+        GLint limit = 0;
+        glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &limit);
+        if (limit > 0 && groups > static_cast<std::uint32_t>(limit)) {
+            GLint align = 1;
+            glGetIntegerv(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, &align);
+            const std::uint64_t groupBytes =
+                static_cast<std::uint64_t>(kComputeWorkGroupSize) * sizeof(Particle);
+            std::uint32_t slice = static_cast<std::uint32_t>(limit);
+            while (slice > 1 && (slice * groupBytes) % static_cast<std::uint64_t>((std::max)(align, 1)) != 0)
+                --slice;
+            streamSliceGroups_ = slice;
+            std::cout << "[OpenGL] " << config_.particleCount << " particles need " << groups
+                      << " work groups; this driver allows " << limit
+                      << " in one dispatch, so each step runs as "
+                      << (groups + slice - 1) / slice
+                      << " dispatches over separate parts of the buffer.\n";
+        }
+    }
+
     // VAO — bind the same SSBO as vertex buffer (not needed in headless)
     if (!config_.headless) {
         glGenVertexArrays(1, &vao_);
@@ -325,6 +351,12 @@ void OpenGLBackend::EnableSynchronizedTimingFallback(const char* reason) {
     std::cout << "[Profiling] OpenGL timestamp queries are unreliable ("
               << reason << "); using synchronized wall-clock timing."
               << std::endl;
+}
+
+bool OpenGLBackend::UseSynchronizedTimingInstead(const char* reason) {
+    if (synchronizedTimingFallback_) return false;
+    EnableSynchronizedTimingFallback(reason);
+    return true;
 }
 
 // -----------------------------------------------------------------------
@@ -455,7 +487,21 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
 
     GLuint groups = (config_.particleCount + kComputeWorkGroupSize - 1)
                     / kComputeWorkGroupSize;
-    glDispatchCompute(groups, 1, 1);
+    if (streamSliceGroups_ == 0) {
+        glDispatchCompute(groups, 1, 1);
+    } else {
+        // Parts of the buffer are disjoint, so the dispatches need no barrier.
+        const GLsizeiptr groupBytes =
+            static_cast<GLsizeiptr>(kComputeWorkGroupSize) * sizeof(Particle);
+        for (GLuint first = 0; first < groups; first += streamSliceGroups_) {
+            const GLuint count = (std::min)(streamSliceGroups_, groups - first);
+            glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 0, ssbo_,
+                              static_cast<GLintptr>(first) * groupBytes,
+                              static_cast<GLsizeiptr>(count) * groupBytes);
+            glDispatchCompute(count, 1, 1);
+        }
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo_);
+    }
 
     // -- Timestamp: compute end --
     if (useQueries)

@@ -656,20 +656,60 @@ void DX11Backend::EnableSynchronizedTimingFallback(const char* reason) {
 
 bool DX11Backend::WaitForSynchronizedGpu() {
     if (!synchronizedCompletionQuery_) return false;
-    context_->End(synchronizedCompletionQuery_.Get());
-    context_->Flush();
-    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
-    BOOL completed = FALSE;
-    while (std::chrono::steady_clock::now() < deadline) {
-        const HRESULT hr = context_->GetData(
-            synchronizedCompletionQuery_.Get(), &completed, sizeof(completed),
-            D3D11_ASYNC_GETDATA_DONOTFLUSH);
-        if (hr == S_OK) return completed != FALSE;
-        if (FAILED(hr)) return false;
-        std::this_thread::yield();
+    if (!syncByStagingCopy_) {
+        context_->End(synchronizedCompletionQuery_.Get());
+        context_->Flush();
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
+        BOOL completed = FALSE;
+        while (std::chrono::steady_clock::now() < deadline) {
+            const HRESULT hr = context_->GetData(
+                synchronizedCompletionQuery_.Get(), &completed, sizeof(completed),
+                D3D11_ASYNC_GETDATA_DONOTFLUSH);
+            if (hr == S_OK && completed) return true;
+            if (hr == S_OK || FAILED(hr)) {
+                // The LX 7G100 driver (2026-10-20) never reported the event
+                // query complete, so no frame was ever timed. Mapping a staging
+                // copy waits for every command before it just as well.
+                std::cout << "[Profiling] DX11 event query returned 0x" << std::hex
+                          << static_cast<unsigned long>(hr) << std::dec
+                          << (hr == S_OK ? " without completion" : "")
+                          << "; waiting on a staging copy instead.\n";
+                syncByStagingCopy_ = true;
+                break;
+            }
+            std::this_thread::yield();
+        }
+        if (!syncByStagingCopy_) {
+            std::cout << "[Profiling] DX11 synchronized timing wait timed out.\n";
+            return false;
+        }
     }
-    std::cout << "[Profiling] DX11 synchronized timing wait timed out.\n";
-    return false;
+    if (!syncStaging_) {
+        D3D11_BUFFER_DESC source{};
+        source.ByteWidth = 16;
+        source.Usage = D3D11_USAGE_DEFAULT;
+        source.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        D3D11_BUFFER_DESC staging{};
+        staging.ByteWidth = 16;
+        staging.Usage = D3D11_USAGE_STAGING;
+        staging.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        if (FAILED(device_->CreateBuffer(&source, nullptr, &syncSource_)) ||
+            FAILED(device_->CreateBuffer(&staging, nullptr, &syncStaging_))) {
+            std::cout << "[Profiling] DX11 staging copy for synchronized timing could not be created.\n";
+            synchronizedCompletionQuery_.Reset();
+            return false;
+        }
+    }
+    context_->CopyResource(syncStaging_.Get(), syncSource_.Get());
+    D3D11_MAPPED_SUBRESOURCE mapped{};
+    if (FAILED(context_->Map(syncStaging_.Get(), 0, D3D11_MAP_READ, 0, &mapped))) return false;
+    context_->Unmap(syncStaging_.Get(), 0);
+    return true;
+}
+
+bool DX11Backend::UseSynchronizedTimingInstead(const char* reason) {
+    EnableSynchronizedTimingFallback(reason);
+    return synchronizedTimingFallback_;
 }
 
 void DX11Backend::CollectTimestampResults() {

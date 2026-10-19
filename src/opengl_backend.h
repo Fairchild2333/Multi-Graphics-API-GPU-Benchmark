@@ -26,9 +26,13 @@ protected:
     void DrawFrame(float deltaTime) override;
     void CleanupBackend()           override;
     void WaitIdle()                 override;
+    bool UseSynchronizedTimingInstead(const char* reason) override;
 
 private:
     bool gl41GraphicsOnly_ = false;
+    // Work groups in one particle dispatch when a step needs more than the
+    // driver allows at once; 0 = one dispatch.
+    std::uint32_t streamSliceGroups_ = 0;
     void CreateShaders();
     void CreateParticleBuffers();
     void CreateTimestampQueries();

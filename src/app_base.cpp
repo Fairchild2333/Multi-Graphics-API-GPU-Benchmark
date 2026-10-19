@@ -737,6 +737,16 @@ void AppBase::ReportTimingIfDue(double deltaTime) {
         }
         std::cout << std::endl;
 
+        // A GPU Burn frame is all GPU work, so with V-Sync off its GPU time
+        // is close to the frame time. Timestamps that make it a few percent
+        // of it (LX 7G100 on DX12: 0.006 ms in a 9 ms frame) do not time the
+        // frame; the backend then times it by the wall clock from here on,
+        // while the warm-up is still running.
+        if (isGpuBurnWorkload(config_.workload) && !warmupDone_ &&
+            !config_.headless && !config_.vsync && !presentFollowsDisplay_ &&
+            fps > 0.0 && avgTotal < 0.05 * (1000.0 / fps))
+            UseSynchronizedTimingInstead("GPU time under 5% of the frame time on a GPU Burn frame");
+
         // Calibrate GraphicsBurn exactly once during the first warmup window.
         // The target is long enough to keep fast GPUs occupied, while four
         // independent draws retain pre-emption points and avoid a monolithic

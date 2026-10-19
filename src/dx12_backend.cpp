@@ -8,6 +8,7 @@
 #include <GLFW/glfw3native.h>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
@@ -1066,8 +1067,21 @@ void DX12Backend::WaitIdle() {
     WaitForGpu();
 }
 
+bool DX12Backend::UseSynchronizedTimingInstead(const char* reason) {
+    // Only a frame that is one piece of GPU work on one GPU (the headless
+    // step, a fragment-only frame such as GPU Burn) can be timed by a fence
+    // wait around its submission.
+    if (synchronizedTimingFallback_ || linkedAfr_ || linkedSfr_ || fluid_.active ||
+        !(config_.headless || isFragmentOnlyWorkload(config_.workload)))
+        return false;
+    synchronizedTimingFallback_ = true;
+    std::cout << "[Profiling] DX12 timestamp queries are unreliable (" << reason
+              << "); using synchronized wall-clock timing.\n";
+    return true;
+}
+
 void DX12Backend::CollectTimestampResults() {
-    if (!timestampsSupported_) return;
+    if (!timestampsSupported_ || synchronizedTimingFallback_) return;
 
     const UINT node = linkedSfr_ ? 0u : (linkedAfr_ ? (frameIndex_ % afrNodeCount_) : 0u);
     auto& readback = afrTimestampReadbacks_[node];
@@ -1381,12 +1395,20 @@ void DX12Backend::DrawFrame(float deltaTime) {
 
         ThrowIfFailed(commandList_->Close(), "CommandList Close failed");
         ID3D12CommandList* lists[] = { commandList_.Get() };
+        const auto submitBegin = std::chrono::steady_clock::now();
         commandQueue_->ExecuteCommandLists(1, lists);
 
         const UINT64 signalValue = afrNextFenceValues_[activeNode]++;
         commandQueue_->Signal(afrFences_[activeNode].Get(), signalValue);
         frameFenceValues_[frameIndex_] = signalValue;
         frameIndex_ = (frameIndex_ + 1) % frameCount_;
+        if (synchronizedTimingFallback_) {
+            afrFences_[activeNode]->SetEventOnCompletion(signalValue, afrFenceEvents_[activeNode]);
+            WaitForSingleObjectEx(afrFenceEvents_[activeNode], INFINITE, FALSE);
+            const double ms = std::chrono::duration<double, std::milli>(
+                std::chrono::steady_clock::now() - submitBegin).count();
+            AccumulateTiming(ms, 0.0, ms);
+        }
         return;
     }
 
@@ -1545,7 +1567,18 @@ void DX12Backend::DrawFrame(float deltaTime) {
     ThrowIfFailed(commandList_->Close(), "CommandList Close failed");
 
     ID3D12CommandList* lists[] = { commandList_.Get() };
+    const auto submitBegin = std::chrono::steady_clock::now();
     commandQueue_->ExecuteCommandLists(1, lists);
+    if (synchronizedTimingFallback_) {
+        // Set only for fragment-only frames: the whole list is the render pass.
+        const UINT64 done = afrNextFenceValues_[activeNode]++;
+        commandQueue_->Signal(afrFences_[activeNode].Get(), done);
+        afrFences_[activeNode]->SetEventOnCompletion(done, afrFenceEvents_[activeNode]);
+        WaitForSingleObjectEx(afrFenceEvents_[activeNode], INFINITE, FALSE);
+        const double ms = std::chrono::duration<double, std::milli>(
+            std::chrono::steady_clock::now() - submitBegin).count();
+        AccumulateTiming(0.0, ms, ms);
+    }
 
     UINT presentFlags = 0;
     if (!config_.vsync && tearingSupported_)

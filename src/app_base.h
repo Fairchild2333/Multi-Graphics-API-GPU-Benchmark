@@ -74,6 +74,11 @@ protected:
     void AccumulateTiming(double computeMs, double renderMs, double totalGpuMs);
     bool HasMeasuredTiming() const { return benchSampleCount_ > 0; }
 
+    // Called during the warm-up when the GPU time of a frame cannot be right.
+    // A backend that can time a frame by the wall clock around a full GPU
+    // wait switches to that and returns true; the default keeps the timestamps.
+    virtual bool UseSynchronizedTimingInstead(const char* /*reason*/) { return false; }
+
     static std::vector<char> ReadFileBytes(const std::string& filename);
     static std::string GetCpuName();
     static std::string GetOsVersion();
