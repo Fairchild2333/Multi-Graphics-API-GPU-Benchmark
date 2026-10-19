@@ -419,7 +419,12 @@ static bool SuiteResultHasCapture(const gpu_bench::BenchmarkResult& result) {
 }
 
 
-static bool SuiteCaptureExists(const CompleteSuiteJob& job) {
+// The worker names its capture after the device it actually opened, which for
+// a software job ("Microsoft WARP (CPU Software Renderer)") differs from the
+// enumerated name ("Microsoft Basic Render Driver"); pass the saved result's
+// deviceName to look for that file too.
+static bool SuiteCaptureExists(const CompleteSuiteJob& job,
+                               const std::string& deviceName = {}) {
     if (!job.captureRequired) return true;
     gpu_bench::BenchmarkConfig captureConfig;
     captureConfig.workload = job.workload == "stream" ? gpu_bench::Workload::Stream
@@ -427,7 +432,8 @@ static bool SuiteCaptureExists(const CompleteSuiteJob& job) {
     captureConfig.particleCount = job.particleCount;
     captureConfig.particlesOverridden = job.workload == "stream";
     captureConfig.gpuBurnIter = job.burnSteps;
-    std::string expected = gpu_bench::CaptureFileStem(job.apiName, job.gpuName, captureConfig);
+    std::string expected = gpu_bench::CaptureFileStem(
+        job.apiName, deviceName.empty() ? job.gpuName : deviceName, captureConfig);
     std::transform(expected.begin(), expected.end(), expected.begin(),
                    [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
@@ -2267,6 +2273,12 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                 caps.cacheState = backend == "metal" && gpu_bench::GpuCacheProbeAvailable(static_cast<std::uint32_t>(gi));
 #endif
                 for (const auto& variant : gpu_bench::SupportedSuiteVariants(caps)) {
+                    // AppBase::MainLoop clamps GPU Burn on a software rasterizer
+                    // to the 64-step tier, so a 256-step job there could never
+                    // save a matching result.
+                    if (gpu.isSoftware &&
+                        variant.burnSteps > gpu_bench::gpuBurnMaxFixedIter(gpu_bench::Workload::GpuBurnV1))
+                        continue;
                     CompleteSuiteJob job;
                     job.gpuIndex = static_cast<std::int32_t>(gi);
                     job.gpuName = gpu.name;
@@ -2347,10 +2359,12 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             // Old result schemas did not record captureCount.  The actual
             // capture directory is authoritative for both old and new scores;
             // this also detects captures that were deleted after a run.
-            const bool hasCapture = SuiteCaptureExists(job);
+            bool hasCapture = SuiteCaptureExists(job);
             for (const auto& result : savedResults) {
                 if (!SuiteResultMatches(result, job)) continue;
                 hasResult = true;
+                if (!hasCapture && result.deviceName != job.gpuName)
+                    hasCapture = SuiteCaptureExists(job, result.deviceName);
                 hasCpuSingle = hasCpuSingle || result.workload == "cpu_single_core";
                 hasCpuMulti = hasCpuMulti || result.workload == "cpu_multi_core";
                 hasCpuPerformance = hasCpuPerformance || (result.workload == "cpu_single_core" &&
@@ -2522,7 +2536,8 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                 ++captureUnsupported;
                 ++passed;
             } else if (job.captureRequired &&
-                       (!SuiteResultHasCapture(*newMatch) || !SuiteCaptureExists(job))) {
+                       (!SuiteResultHasCapture(*newMatch) ||
+                        !SuiteCaptureExists(job, newMatch->deviceName))) {
                 status = fillMissingSuite ? "capture_failed" : "capture_missing";
                 reason = "benchmark completed but no required GPU capture was recorded";
                 ++captureMissing;

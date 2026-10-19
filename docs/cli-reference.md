@@ -781,7 +781,9 @@ memory budget. Cancellation or failed GPU commands do not save a result.
 `SUITE_JOB` records without measuring or saving scores. `--complete-suite` now
 uses that available-job list: four rendered and four compute-only particle
 sizes, GPU Burn 16/64/256, fluid and GPU memory where supported, then CPU compute
-and CPU cache/memory once per machine. Native macOS OpenGL 4.1 runs GPU Burn
+and CPU cache/memory once per machine. Software rasterizers (WARP / Basic
+Render, llvmpipe) get GPU Burn 16/64 only, because the engine clamps them to
+the 64-step tier. Native macOS OpenGL 4.1 runs GPU Burn
 only, with no capture request. Unified-memory Metal devices also include the
 independent GPU cache-state diagnostic. The current Metal + OpenGL Mac has 19 jobs;
 Android adb's 29 jobs include additional OpenGL ES API variants.
