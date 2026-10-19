@@ -1,0 +1,85 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  LX 7G100 (Discrete)                          11821 MB  YES   YES   YES    -    YES 
+  AMD Radeon(TM) Graphics (Integrated)         2021 MB  YES   YES   YES    -     -  
+  Microsoft Basic Render Driver (Software)         -    -    YES   YES    -     -  
+============================================================
+
+
+[OpenGL] Windows assigned GL_RENDERER to LX 7G100.
+  To change it, use Windows Settings > System > Display > Graphics, then re-run detection.
+
+Backend: OpenGL  |  V-Sync: OFF  |  Memory: Device-local  |  Particles: 16777216 (Medium)  |  Auto-stop: 15s
+[OpenGL Init] Loading GL functions...
+[OpenGL Init] GLAD loaded GL 4.6
+[OpenGL Init] LX 7G100  |  GL 4.6 (Core Profile) Mesa 22.0.4 
+[OpenGL Init] Compiling shaders...
+[OpenGL Init] Creating particle buffers...
+Created particle buffers: 16777216 particles
+[OpenGL] 16777216 particles need 65536 work groups; this driver allows 65535 in one dispatch, so each step runs as 2 dispatches over separate parts of the buffer.
+[OpenGL Init] Creating timestamp queries...
+[Profiling] OpenGL timestamp queries enabled.
+[OpenGL Init] Initialisation complete.
+[GPU Timing] Compute: 80.626 ms | Render: 0.001 ms | Total: 80.627 ms | FPS: 17 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 81.158 ms | Render: 0.001 ms | Total: 81.160 ms | FPS: 10 | T: 1.4 s (warm-up)
+[GPU Timing] Compute: 81.348 ms | Render: 0.001 ms | Total: 81.350 ms | FPS: 11 | T: 2.8 s
+[GPU Timing] Compute: 81.542 ms | Render: 0.001 ms | Total: 81.544 ms | FPS: 11 | T: 4.1 s
+[GPU Timing] Compute: 81.141 ms | Render: 0.001 ms | Total: 81.143 ms | FPS: 11 | T: 5.5 s
+[GPU Timing] Compute: 81.138 ms | Render: 0.001 ms | Total: 81.140 ms | FPS: 11 | T: 6.9 s
+[GPU Timing] Compute: 80.853 ms | Render: 0.001 ms | Total: 80.854 ms | FPS: 11 | T: 8.2 s
+[GPU Timing] Compute: 81.314 ms | Render: 0.001 ms | Total: 81.315 ms | FPS: 11 | T: 9.6 s
+[GPU Timing] Compute: 81.194 ms | Render: 0.001 ms | Total: 81.195 ms | FPS: 11 | T: 10.9 s
+[GPU Timing] Compute: 80.897 ms | Render: 0.001 ms | Total: 80.898 ms | FPS: 11 | T: 12.3 s
+[GPU Timing] Compute: 80.597 ms | Render: 0.001 ms | Total: 80.598 ms | FPS: 11 | T: 13.6 s
+[GPU Timing] Compute: 80.838 ms | Render: 0.001 ms | Total: 80.839 ms | FPS: 11 | T: 15.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: OpenGL
+GPU:          LX 7G100
+Driver:       4.6 (Core Profile) Mesa 22.0.4 
+CPU:          AMD Ryzen 7 9800X3D 8-Core Processor
+OS:           Windows 11 (NT 10.0.26300)
+System:       Windows x64
+Memory:       Device-local VRAM
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    16777216 (Medium)
+Buffer:       512.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     12.4 s (warmup: 2.0 s, measured: 149 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        81.042    80.492    81.994
+Render:          0.001     0.001     0.001
+Total GPU:      81.044    80.493    81.996
+
+--- Throughput ---
+Avg FPS:      11
+Particles:    16777216
+Working set:  512.00 MiB
+VRAM rate:   8.28 GB/s  (81.042 ms compute)
+
+--- Analysis ---
+Avg frame time:  83.524 ms
+Avg GPU time:    81.044 ms
+GPU utilisation: 97.0%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      10 x 1s
+Stable window: 8.29 GB/s  (CV 0.32%)
+Throughput:   early vs late mean change (drop positive) -0.3%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261020-025153-132 -> C:\Users\lzz28\AppData\Local\GpuComputeBenchmark\results\results.json

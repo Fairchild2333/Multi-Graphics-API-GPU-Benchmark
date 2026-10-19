@@ -1,0 +1,43 @@
+﻿
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  LX 7G100 (Discrete)                          11821 MB  YES   YES   YES    -    YES 
+  AMD Radeon(TM) Graphics (Integrated)         2021 MB  YES   YES   YES    -     -  
+  Microsoft Basic Render Driver (Software)         -    -    YES   YES    -     -  
+============================================================
+
+
+[OpenGL] Windows assigned GL_RENDERER to LX 7G100.
+  To change it, use Windows Settings > System > Display > Graphics, then re-run detection.
+
+gpu_benchmark.exe : [warn] Short timed run: reducing warmup from 2s to 1.25s so measured frames and GPU timestamps are 
+available.
+At line:1 char:613
++ ... atch-data"; & build\Release\gpu_benchmark.exe --backend opengl --gpu  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([warn] Short ti... are available.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Backend: OpenGL  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: GPU Burn v1 r2 / Plasma x Kaleidoscope  |  Auto-stop: 5s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[OpenGL Init] Loading GL functions...
+[OpenGL Init] GLAD loaded GL 4.6
+[OpenGL Init] LX 7G100  |  GL 4.6 (Core Profile) Mesa 22.0.4 
+[OpenGL Init] Compiling shaders...
+[OpenGL Init] Creating particle buffers...
+[OpenGL Init] Creating timestamp queries...
+[Profiling] OpenGL timestamp queries enabled.
+[OpenGL Init] Initialisation complete.
+GLTRACE frame begin
+GLTRACE after query 1
+GLTRACE after clear
+GLTRACE after use program
+GLTRACE after bind vao
+GLTRACE after ubo update
+GLTRACE after draw
+GLTRACE after ubo update
+GLTRACE after draw
+GLTRACE before swap

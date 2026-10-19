@@ -1,0 +1,96 @@
+﻿
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  LX 7G100 (Discrete)                          11821 MB  YES   YES   YES    -    YES 
+  AMD Radeon(TM) Graphics (Integrated)         2021 MB  YES   YES   YES    -     -  
+  Microsoft Basic Render Driver (Software)         -    -    YES   YES    -     -  
+============================================================
+
+Backend: DX12  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: GPU Burn v1 r2 / Plasma x Kaleidoscope  |  Auto-stop: 10s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[DX12 Init] Creating device...
+Available GPUs:
+  [0] LX 7G100 (Hardware)  VRAM: 11821 MB
+    -> D3D12 supported (Feature Level 12_1)
+  [1] AMD Radeon(TM) Graphics (Hardware)  VRAM: 2021 MB
+    -> D3D12 supported (Feature Level 12_1)
+  [2] LX 7G100 (Hardware)  VRAM: 11821 MB
+    -> D3D12 supported (Feature Level 12_1)
+  [3] LX 7G100 (Hardware)  VRAM: 11821 MB
+    -> D3D12 supported (Feature Level 12_1)
+  [4] Microsoft Basic Render Driver (Software)  VRAM: 0 MB
+    -> D3D12 supported (Feature Level 12_1)
+Selected GPU: AMD Radeon(TM) Graphics (FL 12_1)  |  Driver: 32.0.21045.5002
+[DX12 Init] Creating command queue...
+[DX12 Init] Creating swap chain...
+[DX12 Init] Creating descriptor heaps...
+[DX12 Init] Creating render targets...
+[DX12 Init] Creating command allocators...
+[DX12 Init] Creating fence...
+[DX12 Init] Creating root signatures...
+[DX12 Init] Creating pipeline states (compiling shaders)...
+[DX12 Init] Creating particle buffer...
+Created particle buffer: 256 particles
+[DX12 Init] Creating timestamp resources...
+[Profiling] DX12 timestamp queries enabled on 1 node(s)
+[DX12 Init] Initialisation complete.
+[GPU Timing] Compute: 0.000 ms | Render: 91.810 ms | Total: 91.813 ms | FPS: 18 | T: 0.5 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 91.816 ms | Total: 91.817 ms | FPS: 10 | T: 0.8 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 91.819 ms | Total: 91.820 ms | FPS: 10 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 91.820 ms | Total: 91.821 ms | FPS: 10 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 91.835 ms | Total: 91.836 ms | FPS: 10 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 91.826 ms | Total: 91.826 ms | FPS: 10 | T: 2.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 91.775 ms | Total: 91.775 ms | FPS: 10 | T: 4.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 91.729 ms | Total: 91.730 ms | FPS: 10 | T: 5.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 91.774 ms | Total: 91.775 ms | FPS: 10 | T: 6.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 91.810 ms | Total: 91.811 ms | FPS: 10 | T: 7.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 91.809 ms | Total: 91.810 ms | FPS: 10 | T: 8.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 91.809 ms | Total: 91.810 ms | FPS: 10 | T: 9.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 91.805 ms | Total: 91.806 ms | FPS: 10 | T: 10.0 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: DX12
+GPU:          AMD Radeon(TM) Graphics (FL 12_1)
+Driver:       32.0.21045.5002
+CPU:          AMD Ryzen 7 9800X3D 8-Core Processor
+OS:           Windows 11 (NT 10.0.26300)
+System:       Windows x64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     8.1 s (warmup: 2.0 s, measured: 88 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:         91.792    91.603    91.835
+Total GPU:      91.792    91.605    91.836
+
+--- Throughput ---
+Avg FPS:      10
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 64 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    1.29 Gpix-step/s  (91.792 ms render)
+
+--- Analysis ---
+Avg frame time:  91.809 ms
+Avg GPU time:    91.792 ms
+GPU utilisation: 100.0%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      8 x 1s
+Stable window: 1.28 Gpix-step/s  (CV 0.02%)
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261020-024147-358 -> C:\Users\lzz28\AppData\Local\Temp\claude\C--Users-lzz28-VSCode-Project-Vulkan-GPU-Compute-Microbenchmark\1bf33747-49ec-4c90-afbe-e055b3051df7\scratchpad\lx-scratch-data\results\results.json

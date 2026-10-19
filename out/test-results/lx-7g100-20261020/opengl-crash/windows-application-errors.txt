@@ -1,0 +1,154 @@
+﻿2026-10-20 02:44:18
+Faulting application name: gpu_benchmark.exe, version: 0.0.0.0, time stamp: 0x6ad63abe
+Faulting module name: LSOGLICD_64.dll, version: 30.0.2260.773, time stamp: 0x6ab3914b
+Exception code: 0xc0000409
+Fault offset: 0x0000000000507ec5
+Faulting process id: 0x92B4
+Faulting application start time: 0x1DD5FE0B2BF9A29
+Faulting application path: C:\Users\lzz28\VSCode Project\Vulkan-GPU-Compute-Microbenchmark\build\Release\gpu_benchmark.exe
+Faulting module path: C:\WINDOWS\System32\DriverStore\FileRepository\ls_universial64.inf_amd64_0d67ace2d2d9289f\LSOGLICD_64.dll
+Report Id: 861c9327-ec73-4d26-bd0e-78a71bebec4b
+
+2026-10-20 02:44:14
+Faulting application name: gpu_benchmark.exe, version: 0.0.0.0, time stamp: 0x6ad63abe
+Faulting module name: LSOGLICD_64.dll, version: 30.0.2260.773, time stamp: 0x6ab3914b
+Exception code: 0xc0000409
+Fault offset: 0x0000000000507ec5
+Faulting process id: 0x2308
+Faulting application start time: 0x1DD5FE0B0288F52
+Faulting application path: C:\Users\lzz28\VSCode Project\Vulkan-GPU-Compute-Microbenchmark\build\Release\gpu_benchmark.exe
+Faulting module path: C:\WINDOWS\System32\DriverStore\FileRepository\ls_universial64.inf_amd64_0d67ace2d2d9289f\LSOGLICD_64.dll
+Report Id: 6a884590-6d57-466a-8fff-cf37c6b3df84
+
+2026-10-20 02:44:09
+Faulting application name: gpu_benchmark.exe, version: 0.0.0.0, time stamp: 0x6ad63abe
+Faulting module name: LSOGLICD_64.dll, version: 30.0.2260.773, time stamp: 0x6ab3914b
+Exception code: 0xc0000409
+Fault offset: 0x0000000000507ec5
+Faulting process id: 0x5F90
+Faulting application start time: 0x1DD5FE0AB29397B
+Faulting application path: C:\Users\lzz28\VSCode Project\Vulkan-GPU-Compute-Microbenchmark\build\Release\gpu_benchmark.exe
+Faulting module path: C:\WINDOWS\System32\DriverStore\FileRepository\ls_universial64.inf_amd64_0d67ace2d2d9289f\LSOGLICD_64.dll
+Report Id: e1a18eda-3595-46e1-ae97-209642da5dbe
+
+2026-10-20 02:44:01
+Faulting application name: gpu_benchmark.exe, version: 0.0.0.0, time stamp: 0x6ad63abe
+Faulting module name: LSOGLICD_64.dll, version: 30.0.2260.773, time stamp: 0x6ab3914b
+Exception code: 0xc0000409
+Fault offset: 0x0000000000507ec5
+Faulting process id: 0x2984
+Faulting application start time: 0x1DD5FE0A8612D88
+Faulting application path: C:\Users\lzz28\VSCode Project\Vulkan-GPU-Compute-Microbenchmark\build\Release\gpu_benchmark.exe
+Faulting module path: C:\WINDOWS\System32\DriverStore\FileRepository\ls_universial64.inf_amd64_0d67ace2d2d9289f\LSOGLICD_64.dll
+Report Id: 6f056c10-14b6-437c-9588-cb46eff142ae
+
+2026-10-20 02:43:02
+Faulting application name: gpu_benchmark.exe, version: 0.0.0.0, time stamp: 0x6ad63a84
+Faulting module name: LSOGLICD_64.dll, version: 30.0.2260.773, time stamp: 0x6ab3914b
+Exception code: 0xc0000409
+Fault offset: 0x0000000000507ec5
+Faulting process id: 0x1C44
+Faulting application start time: 0x1DD5FE08586B2F7
+Faulting application path: C:\Users\lzz28\VSCode Project\Vulkan-GPU-Compute-Microbenchmark\build\Release\gpu_benchmark.exe
+Faulting module path: C:\WINDOWS\System32\DriverStore\FileRepository\ls_universial64.inf_amd64_0d67ace2d2d9289f\LSOGLICD_64.dll
+Report Id: 416d952c-3ca1-49e0-9f73-c9d8da56d676
+
+2026-10-20 02:42:17
+Faulting application name: gpu_benchmark.exe, version: 0.0.0.0, time stamp: 0x6ad639e5
+Faulting module name: LSOGLICD_64.dll, version: 30.0.2260.773, time stamp: 0x6ab3914b
+Exception code: 0xc0000409
+Fault offset: 0x0000000000507ec5
+Faulting process id: 0x5D80
+Faulting application start time: 0x1DD5FE06A4E4C85
+Faulting application path: C:\Users\lzz28\VSCode Project\Vulkan-GPU-Compute-Microbenchmark\build\Release\gpu_benchmark.exe
+Faulting module path: C:\WINDOWS\System32\DriverStore\FileRepository\ls_universial64.inf_amd64_0d67ace2d2d9289f\LSOGLICD_64.dll
+Report Id: 8a3401f5-c225-4bca-bc8b-c710aa2b65ec
+
+2026-10-20 02:27:45
+Faulting application name: gpu_benchmark.exe, version: 0.0.0.0, time stamp: 0x6ad5f1fa
+Faulting module name: LSOGLICD_64.dll, version: 30.0.2260.773, time stamp: 0x6ab3914b
+Exception code: 0xc0000409
+Fault offset: 0x0000000000507ec5
+Faulting process id: 0x9BBC
+Faulting application start time: 0x1DD5FDE62FEFF3A
+Faulting application path: C:\Users\lzz28\VSCode Project\Vulkan-GPU-Compute-Microbenchmark\build\Release\gpu_benchmark.exe
+Faulting module path: C:\WINDOWS\System32\DriverStore\FileRepository\ls_universial64.inf_amd64_0d67ace2d2d9289f\LSOGLICD_64.dll
+Report Id: 9922ba2f-3e09-4cfc-ac0d-6f0900aa4ca9
+
+2026-10-20 02:25:45
+Faulting application name: gpu_benchmark.exe, version: 0.0.0.0, time stamp: 0x6ad5f1fa
+Faulting module name: LSOGLICD_64.dll, version: 30.0.2260.773, time stamp: 0x6ab3914b
+Exception code: 0xc0000409
+Fault offset: 0x0000000000507ec5
+Faulting process id: 0x5C1C
+Faulting application start time: 0x1DD5FDE1B322F91
+Faulting application path: C:\Users\lzz28\VSCode Project\Vulkan-GPU-Compute-Microbenchmark\build\Release\gpu_benchmark.exe
+Faulting module path: C:\WINDOWS\System32\DriverStore\FileRepository\ls_universial64.inf_amd64_0d67ace2d2d9289f\LSOGLICD_64.dll
+Report Id: ebc35200-0a6b-4062-b1e4-3562d7d98846
+
+2026-10-20 02:25:40
+Faulting application name: gpu_benchmark.exe, version: 0.0.0.0, time stamp: 0x6ad5f1fa
+Faulting module name: LSOGLICD_64.dll, version: 30.0.2260.773, time stamp: 0x6ab3914b
+Exception code: 0xc0000409
+Fault offset: 0x0000000000507ec5
+Faulting process id: 0x4CBC
+Faulting application start time: 0x1DD5FDE187A27C2
+Faulting application path: C:\Users\lzz28\VSCode Project\Vulkan-GPU-Compute-Microbenchmark\build\Release\gpu_benchmark.exe
+Faulting module path: C:\WINDOWS\System32\DriverStore\FileRepository\ls_universial64.inf_amd64_0d67ace2d2d9289f\LSOGLICD_64.dll
+Report Id: 24bd7a6f-185b-4eaa-8ac1-aeba42a8c0fb
+
+2026-10-20 02:25:36
+Faulting application name: gpu_benchmark.exe, version: 0.0.0.0, time stamp: 0x6ad5f1fa
+Faulting module name: LSOGLICD_64.dll, version: 30.0.2260.773, time stamp: 0x6ab3914b
+Exception code: 0xc0000409
+Fault offset: 0x0000000000507ec5
+Faulting process id: 0x49F0
+Faulting application start time: 0x1DD5FDE15C2DF26
+Faulting application path: C:\Users\lzz28\VSCode Project\Vulkan-GPU-Compute-Microbenchmark\build\Release\gpu_benchmark.exe
+Faulting module path: C:\WINDOWS\System32\DriverStore\FileRepository\ls_universial64.inf_amd64_0d67ace2d2d9289f\LSOGLICD_64.dll
+Report Id: 602c5a9c-e69a-4f84-8947-e66a6f2de976
+
+2026-10-20 02:24:25
+Faulting application name: gpu_benchmark.exe, version: 0.0.0.0, time stamp: 0x6ad5f1fa
+Faulting module name: LSOGLICD_64.dll, version: 30.0.2260.773, time stamp: 0x6ab3914b
+Exception code: 0xc0000409
+Fault offset: 0x0000000000507ec5
+Faulting process id: 0x2160
+Faulting application start time: 0x1DD5FDDEBE1B4EF
+Faulting application path: C:\Users\lzz28\VSCode Project\Vulkan-GPU-Compute-Microbenchmark\build\Release\gpu_benchmark.exe
+Faulting module path: C:\WINDOWS\System32\DriverStore\FileRepository\ls_universial64.inf_amd64_0d67ace2d2d9289f\LSOGLICD_64.dll
+Report Id: bcc06572-1a6e-4381-8c07-0f323136e966
+
+2026-10-20 02:24:21
+Faulting application name: gpu_benchmark.exe, version: 0.0.0.0, time stamp: 0x6ad5f1fa
+Faulting module name: LSOGLICD_64.dll, version: 30.0.2260.773, time stamp: 0x6ab3914b
+Exception code: 0xc0000409
+Fault offset: 0x0000000000507ec5
+Faulting process id: 0x2200
+Faulting application start time: 0x1DD5FDDE92D6781
+Faulting application path: C:\Users\lzz28\VSCode Project\Vulkan-GPU-Compute-Microbenchmark\build\Release\gpu_benchmark.exe
+Faulting module path: C:\WINDOWS\System32\DriverStore\FileRepository\ls_universial64.inf_amd64_0d67ace2d2d9289f\LSOGLICD_64.dll
+Report Id: eeb93856-868e-428c-82c6-9d1094daefb9
+
+2026-10-20 02:24:16
+Faulting application name: gpu_benchmark.exe, version: 0.0.0.0, time stamp: 0x6ad5f1fa
+Faulting module name: LSOGLICD_64.dll, version: 30.0.2260.773, time stamp: 0x6ab3914b
+Exception code: 0xc0000409
+Fault offset: 0x0000000000507ec5
+Faulting process id: 0x3014
+Faulting application start time: 0x1DD5FDDE67FD3AC
+Faulting application path: C:\Users\lzz28\VSCode Project\Vulkan-GPU-Compute-Microbenchmark\build\Release\gpu_benchmark.exe
+Faulting module path: C:\WINDOWS\System32\DriverStore\FileRepository\ls_universial64.inf_amd64_0d67ace2d2d9289f\LSOGLICD_64.dll
+Report Id: cfbed580-7d43-48d6-babc-d0f76ac34e92
+
+2026-10-20 02:24:11
+Faulting application name: gpu_benchmark.exe, version: 0.0.0.0, time stamp: 0x6ad5f1fa
+Faulting module name: LSOGLICD_64.dll, version: 30.0.2260.773, time stamp: 0x6ab3914b
+Exception code: 0xc0000409
+Fault offset: 0x0000000000507ec5
+Faulting process id: 0x99E0
+Faulting application start time: 0x1DD5FDDE3346593
+Faulting application path: C:\Users\lzz28\VSCode Project\Vulkan-GPU-Compute-Microbenchmark\build\Release\gpu_benchmark.exe
+Faulting module path: C:\WINDOWS\System32\DriverStore\FileRepository\ls_universial64.inf_amd64_0d67ace2d2d9289f\LSOGLICD_64.dll
+Report Id: ac638600-d338-48b7-a480-32152886bce2
+

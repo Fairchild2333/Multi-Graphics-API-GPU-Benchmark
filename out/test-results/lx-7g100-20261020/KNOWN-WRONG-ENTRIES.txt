@@ -1,0 +1,25 @@
+Entries of the LX 7G100 run on 2026-10-20 that are known to be wrong or empty.
+At the user's request they were NOT removed from the PC results file
+(%LOCALAPPDATA%\GpuComputeBenchmark\results\results.json); each is superseded by a
+later entry of the same test, measured with the fixed engine.
+
+Wrong scores:
+  20261020-020724-152  DX12 GPU Burn 16: timestamps ~0 in a 9 ms frame (GPU utilisation 0.1%); 4,688.8 is impossible. Superseded by 20261020-024804-055 (wall clock).
+  20261020-020740-975  DX12 GPU Burn 64: same timestamp fault, 18,383.7. Superseded by 20261020-024821-047.
+  20261020-020758-209  DX12 GPU Burn 256: same timestamp fault, 72,417.5. Superseded by 20261020-024838-059.
+  20261020-022336-371  DX11 GPU Burn 16: timestamps a few percent of the frame (GPU utilisation ~1%), 1,291.4. Superseded by 20261020-024854-484.
+  20261020-022352-832  DX11 GPU Burn 64: same, 1,262.2. Superseded by 20261020-024910-781.
+  20261020-022409-254  DX11 GPU Burn 256: same, 1,151.8. Superseded by 20261020-024927-171.
+  20261020-022534-181  OpenGL 16M headless: 65,536 work groups exceed the driver limit of 65,535, the dispatch did nothing, 1,520,641 GB/s. Superseded by 20261020-025153-132 (split dispatch).
+
+Scoreless (0) entries: DX11 particle runs whose wall-clock fallback never timed a frame
+(the DX11 event query never reported completion on this driver). Superseded by the
+DX11 particle reruns 20261020-024943-256 ... 20261020-025136-360:
+  20261020-020814-340
+  20261020-020830-544
+  20261020-020846-853
+  20261020-020903-501
+  20261020-020919-585
+  20261020-020943-745
+  20261020-021106-738
+  20261020-021530-439

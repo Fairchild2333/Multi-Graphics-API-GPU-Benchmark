@@ -1,0 +1,110 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  LX 7G100 (Discrete)                          11821 MB  YES   YES   YES    -    YES 
+  AMD Radeon(TM) Graphics (Integrated)         2021 MB  YES   YES   YES    -     -  
+  Microsoft Basic Render Driver (Software)         -    -    YES   YES    -     -  
+============================================================
+
+Backend: DX11  |  V-Sync: OFF  |  Memory: Device-local  |  Particles: 4194304 (Medium)  |  Auto-stop: 15s
+
+============================================
+  RenderDoc detected! (API 1.7.0)
+  Loaded from: C:\Program Files\RenderDoc\renderdoc.dll
+  Press F12 during rendering to capture a frame.
+  Captures saved to: C:\Users\lzz28\AppData\Local\GpuComputeBenchmark\captures\
+============================================
+
+[DX11 Init] Creating device and swap chain...
+Available GPUs:
+  [0] LX 7G100 (Hardware)  VRAM: 11821 MB
+  [1] AMD Radeon(TM) Graphics (Hardware)  VRAM: 2021 MB
+  [2] LX 7G100 (Hardware)  VRAM: 11821 MB
+  [3] LX 7G100 (Hardware)  VRAM: 11821 MB
+  [4] Microsoft Basic Render Driver (Software)  VRAM: 0 MB
+Selected GPU: LX 7G100
+  Driver type:   Hardware
+  Feature Level: 11_1
+  Shader Model:  5.0
+  DirectCompute: available
+  Driver:        30.0.2260.773;D3D_FL=11_1;SM=5.0;DirectCompute=yes
+[DX11 Init] Creating render target...
+[DX11 Init] Compiling shaders...
+[DX11 Init] Creating particle buffers...
+Created particle buffers: 4194304 particles
+[DX11 Init] Creating compute params CB...
+[DX11 Init] Creating timestamp queries...
+[Profiling] DX11 timestamp queries enabled.
+[DX11 Init] Initialisation complete.
+[Profiling] DX11 timestamp queries are unreliable (implausible stream timestamp result); using synchronized wall-clock timing.
+[Profiling] DX11 event query returned 0x0 without completion; waiting on a staging copy instead.
+[GPU Timing] Compute: 5.797 ms | Render: 27.707 ms | Total: 33.504 ms | FPS: 30 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 1.386 ms | Render: 27.469 ms | Total: 28.855 ms | FPS: 34 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 1.160 ms | Render: 27.249 ms | Total: 28.409 ms | FPS: 34 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 1.162 ms | Render: 27.254 ms | Total: 28.416 ms | FPS: 34 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 1.201 ms | Render: 27.257 ms | Total: 28.458 ms | FPS: 34 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 1.172 ms | Render: 27.261 ms | Total: 28.432 ms | FPS: 34 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 1.137 ms | Render: 27.219 ms | Total: 28.355 ms | FPS: 35 | T: 3.0 s
+[GPU Timing] Compute: 1.155 ms | Render: 27.246 ms | Total: 28.402 ms | FPS: 35 | T: 4.0 s
+[GPU Timing] Compute: 1.156 ms | Render: 27.246 ms | Total: 28.402 ms | FPS: 35 | T: 5.0 s
+[RenderDoc] Captured at 5.3s (frame 174)
+  -> C:\Users\lzz28\AppData\Local\GpuComputeBenchmark\captures\DX11_LX_7G100_stream_particles4194304_capture.rdc
+[GPU Timing] Compute: 5.909 ms | Render: 25.786 ms | Total: 31.695 ms | FPS: 27 | T: 6.0 s
+[GPU Timing] Compute: 1.171 ms | Render: 27.246 ms | Total: 28.417 ms | FPS: 34 | T: 7.0 s
+[GPU Timing] Compute: 1.166 ms | Render: 27.246 ms | Total: 28.412 ms | FPS: 34 | T: 8.1 s
+[GPU Timing] Compute: 1.138 ms | Render: 27.213 ms | Total: 28.351 ms | FPS: 35 | T: 9.1 s
+[GPU Timing] Compute: 1.239 ms | Render: 27.265 ms | Total: 28.504 ms | FPS: 34 | T: 10.1 s
+[GPU Timing] Compute: 1.165 ms | Render: 27.247 ms | Total: 28.411 ms | FPS: 34 | T: 11.1 s
+[GPU Timing] Compute: 1.136 ms | Render: 27.215 ms | Total: 28.351 ms | FPS: 35 | T: 12.1 s
+[GPU Timing] Compute: 1.158 ms | Render: 27.247 ms | Total: 28.405 ms | FPS: 35 | T: 13.1 s
+[GPU Timing] Compute: 1.163 ms | Render: 27.244 ms | Total: 28.407 ms | FPS: 34 | T: 14.1 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: DX11
+GPU:          LX 7G100
+Driver:       30.0.2260.773;D3D_FL=11_1;SM=5.0;DirectCompute=yes
+CPU:          AMD Ryzen 7 9800X3D 8-Core Processor
+OS:           Windows 11 (NT 10.0.26300)
+System:       Windows x64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    4194304 (Medium)
+Buffer:       128.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     12.8 s (warmup: 2.0 s, measured: 447 frames)
+Capture:      0.257 s excluded from score; async samples discarded (1 attempt(s), 1 saved)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         1.292     1.089    58.602
+Render:         27.196    10.218    27.803
+Total GPU:      28.488    28.287    68.821
+
+--- Throughput ---
+Avg FPS:      35
+Particles:    4194304
+Working set:  128.00 MiB
+VRAM rate:   129.85 GB/s  (1.292 ms compute)
+
+--- Analysis ---
+Avg frame time:  28.559 ms
+Avg GPU time:    28.488 ms
+GPU utilisation: 99.8%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: not detected; this run has not reached a stable plateau.
+Throughput:   early vs late mean change (drop positive) -17.5%
+==========================================================
+
+[Results] Saved as 20261020-025015-769 -> C:\Users\lzz28\AppData\Local\GpuComputeBenchmark\results\results.json

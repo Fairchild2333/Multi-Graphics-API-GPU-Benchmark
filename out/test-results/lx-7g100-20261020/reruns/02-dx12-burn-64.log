@@ -1,0 +1,114 @@
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  LX 7G100 (Discrete)                          11821 MB  YES   YES   YES    -    YES 
+  AMD Radeon(TM) Graphics (Integrated)         2021 MB  YES   YES   YES    -     -  
+  Microsoft Basic Render Driver (Software)         -    -    YES   YES    -     -  
+============================================================
+
+Backend: DX12  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: GPU Burn v1 r2 / Plasma x Kaleidoscope  |  Auto-stop: 15s
+
+============================================
+  RenderDoc detected! (API 1.7.0)
+  Loaded from: C:\Program Files\RenderDoc\renderdoc.dll
+  Press F12 during rendering to capture a frame.
+  Captures saved to: C:\Users\lzz28\AppData\Local\GpuComputeBenchmark\captures\
+============================================
+
+[DX12 Init] Creating device...
+Available GPUs:
+  [0] LX 7G100 (Hardware)  VRAM: 11821 MB
+    -> D3D12 supported (Feature Level 12_1)
+  [1] AMD Radeon(TM) Graphics (Hardware)  VRAM: 2021 MB
+    -> D3D12 supported (Feature Level 12_1)
+  [2] LX 7G100 (Hardware)  VRAM: 11821 MB
+    -> D3D12 supported (Feature Level 12_1)
+  [3] LX 7G100 (Hardware)  VRAM: 11821 MB
+    -> D3D12 supported (Feature Level 12_1)
+  [4] Microsoft Basic Render Driver (Software)  VRAM: 0 MB
+    -> D3D12 supported (Feature Level 12_1)
+Selected GPU: LX 7G100 (FL 12_1)  |  Driver: 30.0.2260.773
+[DX12 Init] Creating command queue...
+[DX12 Init] Creating swap chain...
+[DX12 Init] Creating descriptor heaps...
+[DX12 Init] Creating render targets...
+[DX12 Init] Creating command allocators...
+[DX12 Init] Creating fence...
+[DX12 Init] Creating root signatures...
+[DX12 Init] Creating pipeline states (compiling shaders)...
+[DX12 Init] Creating particle buffer...
+Created particle buffer: 256 particles
+[DX12 Init] Creating timestamp resources...
+[Profiling] DX12 timestamp queries enabled on 1 node(s)
+[DX12 Init] Initialisation complete.
+[GPU Timing] Compute: 0.000 ms | Render: 0.007 ms | Total: 0.008 ms | FPS: 99 | T: 0.3 s (warm-up)
+[Profiling] DX12 timestamp queries are unreliable (GPU time under 5% of the frame time on a GPU Burn frame); using synchronized wall-clock timing.
+[GPU Timing] Compute: 0.000 ms | Render: 7.041 ms | Total: 7.041 ms | FPS: 125 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 6.717 ms | Total: 6.717 ms | FPS: 143 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 6.720 ms | Total: 6.720 ms | FPS: 143 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 6.703 ms | Total: 6.703 ms | FPS: 143 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 6.700 ms | Total: 6.700 ms | FPS: 143 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 6.705 ms | Total: 6.705 ms | FPS: 143 | T: 2.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 6.710 ms | Total: 6.710 ms | FPS: 143 | T: 3.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 6.708 ms | Total: 6.708 ms | FPS: 143 | T: 4.9 s
+[RenderDoc] Captured at 5.1s (frame 699)
+  -> C:\Users\lzz28\AppData\Local\GpuComputeBenchmark\captures\DX12_LX_7G100_gpu_burn_v1_shader3_steps64_capture.rdc
+[GPU Timing] Compute: 0.000 ms | Render: 6.697 ms | Total: 6.697 ms | FPS: 132 | T: 5.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 6.699 ms | Total: 6.699 ms | FPS: 143 | T: 6.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 6.698 ms | Total: 6.698 ms | FPS: 143 | T: 7.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 6.702 ms | Total: 6.702 ms | FPS: 143 | T: 8.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 6.722 ms | Total: 6.722 ms | FPS: 143 | T: 9.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 6.716 ms | Total: 6.716 ms | FPS: 143 | T: 10.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 6.687 ms | Total: 6.687 ms | FPS: 144 | T: 11.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 6.683 ms | Total: 6.683 ms | FPS: 144 | T: 12.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 8.565 ms | Total: 8.565 ms | FPS: 114 | T: 13.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 13.325 ms | Total: 13.325 ms | FPS: 73 | T: 14.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: DX12
+GPU:          LX 7G100 (FL 12_1)
+Driver:       30.0.2260.773
+CPU:          AMD Ryzen 7 9800X3D 8-Core Processor
+OS:           Windows 11 (NT 10.0.26300)
+System:       Windows x64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     12.9 s (warmup: 2.0 s, measured: 1749 frames)
+Capture:      0.085 s excluded from score; async samples discarded (1 attempt(s), 1 saved)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:          7.139     6.670    14.281
+Total GPU:       7.139     6.670    14.281
+
+--- Throughput ---
+Avg FPS:      135
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 64 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    16.52 Gpix-step/s  (7.139 ms render)
+
+--- Analysis ---
+Avg frame time:  7.393 ms
+Avg GPU time:    7.139 ms
+GPU utilisation: 96.6%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 17.60 Gpix-step/s  (CV 0.23%)
+Throughput:   early vs late mean change (drop positive) 14.2%  (>> review workload, timing and scheduling)
+>> Throughput declined; retain the full-run mean and curve. A stable window may be earlier in the run.
+==========================================================
+
+[Results] Saved as 20261020-024821-047 -> C:\Users\lzz28\AppData\Local\GpuComputeBenchmark\results\results.json

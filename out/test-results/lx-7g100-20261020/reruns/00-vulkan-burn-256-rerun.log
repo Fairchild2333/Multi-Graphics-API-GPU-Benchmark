@@ -1,0 +1,95 @@
+[RenderDoc] Configured Vulkan layer: C:\Program Files\RenderDoc
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  LX 7G100 (Discrete)                          11821 MB  YES   YES   YES    -    YES 
+  AMD Radeon(TM) Graphics (Integrated)         2021 MB  YES   YES   YES    -     -  
+  Microsoft Basic Render Driver (Software)         -    -    YES   YES    -     -  
+============================================================
+
+Backend: Vulkan  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: GPU Burn v1 r2 / Plasma x Kaleidoscope  |  Auto-stop: 15s
+
+============================================
+  RenderDoc detected! (API 1.7.0)
+  Loaded from: C:\Program Files\RenderDoc\renderdoc.dll
+  Press F12 during rendering to capture a frame.
+  Captures saved to: C:\Users\lzz28\AppData\Local\GpuComputeBenchmark\captures\
+============================================
+
+Available GPUs:
+  [0] AMD Radeon(TM) Graphics (Integrated GPU)
+  [1] LX 7G100 (Discrete GPU)
+Selected GPU [1]: LX 7G100  |  Driver: gf Mesa VK driver 1.3.0
+[Vulkan] Present mode: fifo (frames follow the refresh rate)
+[Vulkan] This device offers no unsynchronised presentation; the frame rate is limited by the display.
+Created particle buffer (device-local via staging): 256 particles
+[Profiling] Timestamp queries enabled (period = 37.037 ns/tick)
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 43 | T: 0.4 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 40 | T: 0.7 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 41 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 22.453 ms | Total: 22.453 ms | FPS: 41 | T: 1.3 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 41 | T: 1.6 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 41 | T: 1.9 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 41 | T: 3.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 41 | T: 4.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 41 | T: 5.0 s
+[RenderDoc] Captured at 5.2s (frame 207)
+  -> C:\Users\lzz28\AppData\Local\GpuComputeBenchmark\captures\Vulkan_LX_7G100_gpu_burn_v1_shader3_steps256_capture.rdc
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 37 | T: 6.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 41 | T: 7.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 41 | T: 8.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 41 | T: 9.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 40 | T: 10.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 41 | T: 11.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 41 | T: 12.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 41 | T: 13.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 22.450 ms | Total: 22.450 ms | FPS: 41 | T: 14.1 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          LX 7G100
+Driver:       gf Mesa VK driver 1.3.0
+CPU:          AMD Ryzen 7 9800X3D 8-Core Processor
+OS:           Windows 11 (NT 10.0.26300)
+System:       Windows x64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     12.9 s (warmup: 2.0 s, measured: 532 frames)
+Capture:      0.149 s excluded from score; async samples discarded (1 attempt(s), 1 saved)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:         22.450    22.448    22.457
+Total GPU:      22.450    22.448    22.457
+
+--- Throughput ---
+Avg FPS:      41
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 256 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    21.02 Gpix-step/s  (22.450 ms render)
+
+--- Analysis ---
+Avg frame time:  24.228 ms
+Avg GPU time:    22.450 ms
+GPU utilisation: 92.7%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      12 x 1s
+Stable window: 21.02 Gpix-step/s  (CV 0.00%)
+Throughput:   early vs late mean change (drop positive) 0.0%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261020-022956-053 -> C:\Users\lzz28\AppData\Local\GpuComputeBenchmark\results\results.json

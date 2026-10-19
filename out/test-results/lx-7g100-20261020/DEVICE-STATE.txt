@@ -1,0 +1,29 @@
+State of this PC during the LX 7G100 runs of 2026-10-20, 01:59 - 02:52.
+Read it before comparing these results with another GPU's.
+
+GPU       Lisuan LX 7G100 (砺算), the only discrete GPU; the RTX 5090 had been
+          taken out (Windows still lists it, status Unknown). Published
+          figures: 12 GB GDDR6 on a 192-bit bus, 432 GB/s, 24.6 TFLOPS FP32
+          (12.3 without dual issue), 225 W, PCIe 4.0 x16. The engine reads
+          11,821 MB of VRAM.
+Driver    30.0.2260.773 (ls_universial64.inf). DX11: feature level 11_1,
+          SM 5.0. OpenGL: 4.6 Core Profile "Mesa 22.0.4", ICD LSOGLICD_64.dll.
+          Vulkan timestamp period 37.037 ns (27 MHz).
+Displays  Xiaomi 27" 3840x2160 160 Hz on the LX 7G100 (primary, 150 %
+          scaling); a "Virtual Display Driver" monitor was also active; the
+          AMD iGPU of the 9800X3D drives no display.
+Load      Before the run the GPU's 3D engine was used by the Claude app (4 %)
+          and dwm (1.5 %); total CPU load was 17 - 42 % (mostly svchost,
+          Windows Update running), higher than on 2026-10-19.
+
+Engine    The 46-job suite (suite/) ran on commit 6f01530. The reruns
+          (reruns/01..15) and the checks in verify/ ran on 6f01530 plus the
+          three fixes described in docs/lx-7g100-20261020.md, not committed at
+          the time. reruns/00 (Vulkan GPU Burn 256) is 6f01530 unchanged.
+Memory    membw-nonvolatile-temp/ is a temporary build: the read and copy
+          kernels without `volatile`, the system-memory pass skipped, and the
+          version name membw_v3_streaming_lx7g100_nonvolatile_temp. Its first
+          run (read 295.8) saved into its own results file there; the second
+          (read 296.0, 20261020-030605-785-membw) saved into the PC results
+          file under that version name, at the user's request. The source was
+          restored afterwards.
