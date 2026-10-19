@@ -4583,13 +4583,13 @@ void MainWindow::OnCpuTimeChanged(NumberBox const& sender,
 void MainWindow::OnGpuAll(IInspectable const&, RoutedEventArgs const&)
 {
     if (m_enginePath.empty() || !m_gpuEnumerationComplete) return;
-    launchJobs({{m_enginePath, "--gui-worker", "--gpu-suite"}}, true);
+    launchJobs({{m_enginePath, "--gui-worker", "--gpu-suite"}}, true, {});
 }
 
 void MainWindow::OnMachineAll(IInspectable const&, RoutedEventArgs const&)
 {
     if (m_enginePath.empty() || !m_gpuEnumerationComplete) return;
-    launchJobs({{m_enginePath, "--gui-worker", "--complete-suite", "--no-renderdoc"}}, true);
+    launchJobs({{m_enginePath, "--gui-worker", "--complete-suite", "--no-renderdoc"}}, true, {});
 }
 
 void MainWindow::OnCpuAll(IInspectable const&, RoutedEventArgs const&)
