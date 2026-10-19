@@ -160,7 +160,7 @@ ctest --test-dir build -C Release
 | `--no-time-limit` | run until window closed |
 | `--benchmark [frames]` | **frame mode** (default 2000), then exit |
 | `--run-all` | iterate every GPU×API, then exit |
-| `--complete-suite` | run the formal 15-second matrix on every GPU and compiled API: Particle 65K/1M/4M/16M both windowed and headless, GPU Burn 64 steps, and Cinematic Liquid; windowed jobs request a 5-second capture and unsupported combinations are attempted and recorded |
+| `--complete-suite` | run the formal 15-second matrix on every GPU and compiled API: Particle 65K/1M/4M/16M both windowed and headless, GPU Burn 16/64/256 steps (16/64 on software rasterizers), Cinematic Liquid and GPU memory where supported, then CPU compute and CPU cache/memory once; windowed jobs request a 5-second capture (see "Available complete series" below) |
 | `--fill-missing` | inspect both `results.json` and the real capture directory, then offer to run only missing scores/captures; known unsupported and previously failed combinations are reported but not retried |
 | `--yes` | confirm `--fill-missing` non-interactively (used by the GUI after its confirmation dialog) |
 | `--capture [sec]` | GPU capture at T seconds (default 5): RenderDoc `.rdc` where available, native Metal `.gputrace` on macOS |
@@ -344,7 +344,10 @@ panel. When several GPUs run in one job list, the charts show the last one.
   its normal clocks and 52.68 at the highest stock clocks, so the clocks do
   not move this test. The Switch's memory clock stays wherever a boot leaves
   it (400 or 800 MHz); it was rebooted until it read 800 MHz, as in its 10-08
-  series, and held there through the run.
+  series, and held there through the run. After a reflash to Android 15
+  (LineageOS 22.2, 2026-10-19) the clock is set at boot by `ram_oc`; at
+  1862.4 MHz the Switch read 26.50 GB/s (89 % of 29.8), while 2131.2 MHz
+  failed the data check at every size.
   | MateBook Pro | 1024 MiB | 256 MiB (unchanged) | 512/768/1024 MiB: 53.7, 55.0, 55.1 |
 - **Data check:** before anything is timed, the buffer is filled by the write
   kernel and a fifth kernel (`membw_check.comp`, never timed) loads every
