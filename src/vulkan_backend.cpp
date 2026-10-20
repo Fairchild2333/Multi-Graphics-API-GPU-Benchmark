@@ -99,6 +99,21 @@ void VulkanBackend::InitBackend() {
     if (config_.workload == Workload::Stream)
         EnableSynchronizedTimingFallback("MoltenVK particles require per-frame completion timing");
 #endif
+#if !defined(GPU_BENCH_EMBEDDED_VULKAN) && !defined(GPU_BENCH_MOLTENVK)
+    // V3D (Raspberry Pi 4, Mesa V3DV): in a shown frame its compute
+    // timestamps do not bracket the work, on a desktop without a screen
+    // (2026-10-17) and with one (2026-10-20: 0.014 - 29.6 ms for a 1M step
+    // that takes 21 ms headless; 65K read 61.7 GB/s against 2.0 headless).
+    // The startup check of the embedded hosts passed there (324 against
+    // 324 ms), so the GPU is named. Headless runs keep their timestamps,
+    // which are right.
+    if (config_.workload == Workload::Stream && !config_.headless) {
+        VkPhysicalDeviceProperties props{};
+        vkGetPhysicalDeviceProperties(physicalDevice_, &props);
+        if (props.vendorID == 0x14E4)   // Broadcom
+            EnableSynchronizedTimingFallback("V3D compute timestamps do not bracket the work of a shown frame");
+    }
+#endif
     CheckTimestampsAgainstWallClock();
 
     SetObjectName(VK_OBJECT_TYPE_BUFFER,   reinterpret_cast<std::uint64_t>(particleBuffer_),   "Particle SSBO");

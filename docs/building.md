@@ -191,8 +191,8 @@ __GLX_VENDOR_LIBRARY_NAME=mesa LIBGL_ALWAYS_SOFTWARE=1 DISPLAY=:0 ./build/gpu_be
 ### Raspberry Pi 4 (Raspberry Pi OS 64-bit, aarch64)
 
 > **Verification status: run on real hardware** (Pi 4 Model B Rev 1.5, 4 GB,
-> Raspberry Pi OS based on Debian 13 trixie, Mesa 26.2.2, 2026-10-17). The
-> first ARM Linux board the CLI has run on.
+> Raspberry Pi OS based on Debian 13 trixie, Mesa 26.2.2, 2026-10-17; windowed
+> runs with a monitor 2026-10-20). The first ARM Linux board the CLI has run on.
 
 Use the 64-bit image: a 32-bit build costs the CPU compute test a factor of
 about 2.6 on the same core type (see the TCL TV). The GPU (V3D 4.2) has
@@ -238,15 +238,21 @@ ctest --test-dir build
 
 **Known limits on V3D.**
 
-- Windowed particle runs without a monitor (on the screenless labwc desktop):
-  the compute timestamps of a frame jumped between 0.01 and 93 ms for the same
-  step, so 65K/1M/4M read 70.5/5.5/4.9 GB/s against about 2.0 headless, and
-  16M stopped with an out-of-date swapchain. The startup timestamp check that
-  embedded hosts run (`CheckTimestampsAgainstWallClock`) passed there (324 ms
-  both ways), so it would not catch this. Not results; repeat with a monitor.
-  GPU Burn ran on the same screenless desktop; its GPU time matched the frame
-  time at 16 and 256 steps, so its figures were kept, but they too should be
-  checked once with a monitor.
+- In a windowed particle frame V3D's compute timestamps do not bracket the
+  work, with or without a monitor: the same step read 0.01 - 93 ms on the
+  screenless desktop (2026-10-17) and 0.014 - 29.6 ms with a monitor at
+  1920x1080 120 Hz (2026-10-20), so 65K/1M/4M read up to 70 GB/s against
+  about 2.0 headless. The startup check of the embedded hosts
+  (`CheckTimestampsAgainstWallClock`) passed there (324 ms both ways). The
+  Vulkan backend therefore times a shown particle test on Broadcom V3D by
+  the wall clock (compute part submitted alone and waited for): 65K/1M/4M
+  1.32 / 1.52 / 1.68 GB/s, the submit-and-wait included.
+- 16M windowed cannot run: drawing 16,777,216 points in one frame hangs V3D
+  and the kernel resets the GPU about once a second (`v3d_reset ... Resetting
+  GPU for hang` in dmesg); the run then stops with an out-of-date swapchain.
+  Headless 16M runs.
+- GPU Burn gives the same figures with a monitor as on the screenless desktop
+  (0.027 / 0.036 / 0.039 Gpix-step/s at 16 / 64 / 256 steps).
 - V3D allows 65,535 work groups per dispatch, and 16,777,216 particles need
   65,536. Before 2026-10-17 that dispatch did no work (15,086 GB/s); the
   Vulkan backend now splits such a step into dispatches over separate parts
