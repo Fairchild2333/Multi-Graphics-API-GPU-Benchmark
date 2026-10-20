@@ -1,0 +1,22 @@
+State of this PC during the RTX 2080 run of 2026-10-20 (46 jobs, `--fill-missing --yes`).
+
+GPU       NVIDIA GeForce RTX 2080, the only discrete GPU (it replaced the
+          Lisuan LX 7G100 that day). 8 GB GDDR6, 256-bit, 448 GB/s on paper;
+          the engine reads 7,989 MB. Driver 617.42 (32.0.16.1742).
+          PCIe 3.0 x16, the card's own maximum.
+Displays  Xiaomi 27" 3840x2160 160 Hz on the RTX 2080; a "Virtual Display
+          Driver" monitor was also active.
+Load      Before the run: GPU 12 % busy at 1,245 MHz and 52 W (desktop at
+          4K 160 Hz: dwm 0.6 %, the Claude app 1.6 % of the 3D engine);
+          CPU 10 - 15 %.
+Engine    Commit 00bbd86, which includes the timing fixes of 4fca1da. No job
+          switched to wall-clock timing: all ran on GPU timestamps.
+Results   46 new entries in %LOCALAPPDATA%\GpuComputeBenchmark\results\
+          results.json (all in results-rtx2080.json here, with the 16
+          scoreless entries of 2026-05-18 that the old schema left without a
+          score). 35 passed, 11 marked for review, 0 failed. Three windowed
+          runs were marked for a drop of more than 5 % (Vulkan 1M and 4M,
+          OpenGL 65K). Eight headless runs (Vulkan 1M/4M, DX12 and DX11
+          1M/4M/16M) found no stable window: they swing 5 - 7 % from second
+          to second (DX12 16M: 2.99 - 3.41 ms a step) without a trend, and
+          their means agree across the APIs (204 - 212 GB/s at 1M - 16M).

@@ -1,0 +1,22 @@
+﻿[RenderDoc] Configured Vulkan layer: C:\Program Files\RenderDoc
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  NVIDIA GeForce RTX 2080 (Discrete)           7989 MB  YES   YES   YES    -    YES 
+  AMD Radeon(TM) Graphics (Integrated)         2021 MB  YES   YES   YES    -     -  
+  Microsoft Basic Render Driver (Software)         -    -    YES   YES    -     -  
+============================================================
+
+
+========== Fill Missing v2 ==========
+Duration: GPU passes 15 s, CPU compute 15 s per step; memory/cache sweeps use their own schedule.
+Capture at 5 s where supported; headless and macOS OpenGL do not request capture.
+Matrix: 65K/1M/4M/16M Particle windowed + headless, GPU Burn 16/64/256 steps, Cinematic Liquid, GPU memory/cache where supported; CPU compute and CPU memory once per machine.
+Planned now: 46 / 103
+Already complete: 57; known unsupported: 0; prior failed/unsupported: 0
+Status ledger: C:\Users\lzz28\AppData\Local\GpuComputeBenchmark\results\complete-suite-status.tsv
+============================================
+Run these 46 missing score/capture pass(es)? [y/N]: Fill-missing cancelled; nothing was started.
