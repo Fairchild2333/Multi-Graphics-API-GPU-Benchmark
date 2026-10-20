@@ -1,0 +1,6 @@
+[0] LX 7G100 | vendor 0x4c54 device 0x5006 | LUID 00000000-00019789 | VRAM 11821 MB | outputs 2 | flags 0
+[1] AMD Radeon(TM) Graphics | vendor 0x1002 device 0x13c0 | LUID 00000000-00019dc2 | VRAM 2021 MB | outputs 0 | flags 0
+[2] LX 7G100 | vendor 0x4c54 device 0x5006 | LUID 00000000-0002c674 | VRAM 11821 MB | outputs 0 | flags 0
+[3] LX 7G100 | vendor 0x4c54 device 0x5006 | LUID 00000000-00029e53 | VRAM 11821 MB | outputs 0 | flags 0
+[4] Microsoft Basic Render Driver | vendor 0x1414 device 0x008c | LUID 00000000-00019d47 | VRAM 0 MB | outputs 0 | flags 2
+
