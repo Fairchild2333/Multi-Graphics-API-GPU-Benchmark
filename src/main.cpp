@@ -246,6 +246,19 @@ static LONG WINAPI CrashHandler(EXCEPTION_POINTERS* ep) {
     DWORD code = ep->ExceptionRecord->ExceptionCode;
     std::cout << "\n[CRASH] Unhandled exception: 0x"
               << std::hex << code << std::dec << std::endl;
+    // Name the module the fault is in: a driver's DLL tells a driver fault
+    // from one of ours without a debugger.
+    HMODULE faulting = nullptr;
+    char modulePath[MAX_PATH] = {};
+    const auto address = reinterpret_cast<const char*>(ep->ExceptionRecord->ExceptionAddress);
+    if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                           GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                           address, &faulting) &&
+        GetModuleFileNameA(faulting, modulePath, MAX_PATH) > 0) {
+        std::cout << "  -> in " << modulePath << " + 0x" << std::hex
+                  << static_cast<std::uintptr_t>(address - reinterpret_cast<const char*>(faulting))
+                  << std::dec << std::endl;
+    }
 
     switch (code) {
     case EXCEPTION_ACCESS_VIOLATION:
