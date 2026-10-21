@@ -295,7 +295,9 @@ ssh fairchild@mk-xxxxxx.local 'sh -s' < scripts/linux/setup-desktop.sh
 
 It sends this checkout (uncommitted changes included), builds it on the
 machine, runs `scripts/linux/series.sh` there detached from SSH (the
-desktop-suite jobs of every hardware GPU, then the two CPU jobs) and fetches
+desktop-suite jobs of every hardware GPU; the OpenGL ES 2.0 GPU Burn at 16 /
+64 / 256 steps on the GPU behind EGL, unless that is a software renderer;
+then the two CPU jobs) and fetches
 the run to `out\linux\<host>-series-<time>\`. `-Only <regex>` runs some jobs,
 `-SkipBuild` keeps the build already there, `-BuildOnly` stops after the
 build, and `-Attach <run>` follows a run that is already going.
@@ -319,6 +321,52 @@ build, and `-Attach <run>` follows a run that is already going.
   lower than Vulkan's (4.6 against 26.9 GB/s headless at 65K); from 4M on
   they agree within a few per cent. GPU Burn draws only and keeps its
   timestamps.
+
+**Zhaoxin KX-6000 / KX-6900 (C-960 GPU).** Mainline Linux has no driver for
+the C-960 (PCI `1d17:3a04`); only the firmware framebuffer (simpledrm) runs.
+Zhaoxin's own driver (the UOS build, `KX-6000_6900-UOS_x64-21.00.93.zip` from
+zhaoxin.com) offers OpenGL 3.2 and OpenGL ES 2.0, no Vulkan, and supports
+Linux 4.19 / 5.10 / 6.6. Its kernel module is ported to 7.0 by
+`scripts/linux/zhaoxin/zx-21.00.93-linux-7.0.patch`; copy the `.deb` to the
+machine, send the source with `-BuildOnly`, then run
+`sh ~/mangekyo/scripts/linux/install-zhaoxin.sh ~/<the .deb>` and reboot.
+
+- The engine's GPU jobs need Vulkan or OpenGL 4.3, so the only GPU test is
+  the stand-alone OpenGL ES 2.0 GPU Burn (`mangekyo_es2burn`, built by
+  `scripts/linux/build.sh`). Its figures stay in the logs.
+- The driver hangs the GPU when it draws into a pbuffer, and its EGL fences
+  and `glFinish` can return before a frame is drawn. On renderer "ZX ..."
+  the tool draws into a texture of the same size and reads one pixel back
+  after every frame.
+- GTK 4 needs OpenGL 3.3 / ES 3.0 and draws blank windows on this driver;
+  the install script sets `GSK_RENDERER=cairo` for the user.
+- On 7.0 the driver has no framebuffer console of its own (the fbdev helpers
+  it used are gone); the desktop drives the screen through KMS.
+
+### Loongson 3A4000 with UnionTech OS 20 (MIPS64)
+
+> **Verification status: CPU tests run on real hardware** (Loongson
+> LS3A4000-7A1000-NUC-SE, UOS 20 Pro, kernel 4.19, 2026-10-21). No GPU test.
+
+UOS 20 on this board has no C++ compiler, and without activation its main
+package source refuses access. The CPU tool is cross-built on the PC with
+Docker instead, statically linked, from the four sources the Android build
+of `mangekyo_cpumem` uses (run from the repository root in PowerShell):
+
+```powershell
+docker run --rm -v "${PWD}\src:/src:ro" -v "${PWD}\out\mips64:/out" debian:bookworm bash -c "apt-get update -qq && apt-get install -y -qq g++-mips64el-linux-gnuabi64 && mips64el-linux-gnuabi64-g++ -std=c++17 -O2 -Wall -Wextra -static -pthread -I /src /src/cpu_membw.cpp /src/cpu_benchmark.cpp /src/system_info.cpp /src/cpumem_cli.cpp -o /out/mangekyo_cpumem"
+```
+
+Copy it to the machine and run `./mangekyo_cpumem --compute`, then
+`./mangekyo_cpumem`; the results stay in the output. On MIPS the cache
+figures are those of the generic 8-byte path (no Loongson vector
+instructions).
+
+The GPU in the 7A1000 bridge (Vivante GC1000, PCI `0014:7a15`) is held by
+the built-in Galcore driver, but UOS installs none of Vivante's user-space
+libraries, so OpenGL is llvmpipe. etnaviv knows the PCI ID, yet LS7A1000
+support never fully reached upstream etnaviv / Mesa, and unbinding Galcore
+at run time froze the machine.
 
 ---
 

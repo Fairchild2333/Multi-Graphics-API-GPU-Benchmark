@@ -1764,6 +1764,34 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-10-21 联想开天 T630Z（兆芯 KX-6640A + C-960）：兆芯驱动移植到 Linux 7.0，ES 2.0 GPU Burn 和 CPU
+
+- **机器：** 开天 T630Z（90LYZ52NCN），兆芯开先 KX-6640A（4 核 2.6 GHz，有 AVX 无 AVX2，4 MB 共享 L2、无 L3），2 x 8 GB DDR4-2666，NVMe。和 ThinkCentre 一样自动装 Ubuntu 26.04.1（主机名 `mk-2753ce`）。
+- **驱动：** 主线内核没有 C-960（`1d17:3a04`）的驱动，只有 simpledrm。用户从兆芯官网下了 UOS 版驱动 21.00.93（OpenGL 3.2 / ES 2.0、EGL 1.4，没有 Vulkan，官方只支持内核 4.19/5.10/6.6）。它的内核模块在 7.0 上编不过，按 7.0 的接口改了 12 个文件 19 处（全部包在版本判断里）：Kbuild 不再读 `EXTRA_CFLAGS`、`shmem_file_setup` 的 `vma_flags_t`、去掉 `pfn_t`、`drm_fb_helper_restore_fbdev_mode_unlocked` 多一个参数、sysfs 和 `mode_valid` 回调的 const、`fb_create` 和 `drm_helper_mode_fill_fb_struct` 多了 format info、`struct_mutex` 删了（换成驱动自己的锁）、fbdev 帮助函数整套重做（7.0 上关掉兆芯自己的帧缓冲控制台，桌面走 KMS）、加 `aperture_remove_conflicting_pci_devices` 接管 simpledrm。补丁和安装脚本入库：`scripts\linux\zhaoxin\zx-21.00.93-linux-7.0.patch`、`scripts\linux\install-zhaoxin.sh`。装好后 GNOME 跑在兆芯 GL 上，glxgears 60 FPS。GTK 4 要 GL 3.3 / ES 3.0，设置之类窗口发白，用 `GSK_RENDERER=cairo`。
+- **兆芯驱动的两个毛病（ES 2.0 工具绕开，`src/es2burn_cli.cpp`，只对渲染器名 "ZX " 生效）：** 往 pbuffer 画就把 GPU 卡死、约 3 秒后被驱动复位（Mesa 的 `peglgears` 也一样，纯色着色器也一样），改画到同尺寸的纹理；EGL 栅栏会提前报完成、`glFinish` 在几百毫秒的长帧上也会提前返回，改为每帧读回一个像素来等。第一遍用 `glFinish` 的 0.46 / 0.25 / 0.39 作废（64 步有一帧 0.062 ms，256 步跑了 52 秒），日志留在 `out\linux\mk-2753ce-series-20261021-233201`。
+- **Linux 测试脚本：** `build.sh` 顺带编 `mangekyo_es2burn`，`series.sh` 在硬件 EGL 渲染器上加跑 `gles2-gpu-burn-16/64/256`（软件渲染器跳过，结果只在日志）；自动安装加了 `libegl-dev`、`libgles-dev`。
+
+  | 项目 | 成绩 |
+  |---|---|
+  | ES 2.0 GPU Burn 16 / 64 / 256 步（读回像素） | 0.44 / 0.38 / 0.46 Gpix-step/s（66.64 / 308.76 / 1027.58 ms 一帧，波动 < 2%） |
+  | CPU 单核 / 全核 | 45.79 / 181.42 MWork/s（2.6 GHz，每单元约 57 周期） |
+  | 内存读取 单线程 / 全核 | 8.9 / 16.8 GB/s（42.7 的 39%） |
+  | L1 / L2 读取 全核 | 129.8 / 54.5 GB/s |
+
+  - 16 和 256 步算出每步 4.00 ms 加每帧约 2.6 ms；64 步每步慢约 19%，每帧都一样，是兆芯着色器编译器对 64 次循环的处理，不是计时问题。量级：Tegra K1 同一测试 3.50 / 4.47 / 4.97。
+  - CPU 每单元约 57 周期（Skylake、A72、龙芯 GS464V 都约 24）；Geekbench 5 单核同频约为 i5-6400T 的 0.45，我们 0.42，对得上。
+- **副本：** `out\linux\mk-2753ce-series-20261021-233201`（CPU 有效，GPU 作废）和 `out\linux\mk-2753ce-gles2-readback-series-20261021-234306`（GPU 结果），各带 `DEVICE-STATE.txt`。
+- **顺带处理：** 装桌面带进来的 NetworkManager 和服务器版 netplan 的 systemd-networkd 同时管有线网卡，NM 改 IPv6 时 networkd 断言崩溃、断网约一分钟，现在 NM 不管有线网卡（两台都改了，`setup-desktop.sh` 也加了）；Apport 每次登录弹今天已解决的三份崩溃报告，报告移到 `~/crash-reports-20261021/`，两台都关了 Apport（脚本也加了）。显示器在兆芯驱动下 1080p 最高 60 Hz，按用户要求从 4K@24 改成 1080p@60。
+- **mk-ea0ffb 重启后没画面也没网：** 23:53 的正常重启之后到用户强制重启（00:02）之间没有任何开机记录，卡在系统加载之前（固件或接 DP 转 HDMI 转接器有关），不是系统设置的问题。
+
+### 2026-10-21 龙芯 3A4000 NUC（统信 UOS 20，MIPS64）：只测了 CPU；GPU 没有可用驱动；HDMI 和这台显示器不兼容
+
+- **机器：** 龙芯 LS3A4000-7A1000-NUC-SE，3A4000（MIPS64，4 核，这台 1.5 GHz），一根 4 GB DDR4 笔记本内存（单通道），NVMe；统信 UOS 20 Pro（Debian 10 底子，内核 4.19），未激活，主软件源 401，驱动、打印机、安全三个源能用。二手机器，带着前一个主人的固定 IP（192.168.16.93）和 DNS，用户改成自动获取后我把残留的 DNS 也清了。SSH 用户 `USER@192.168.20.81`，免密 sudo。
+- **CPU（命令行工具，结果只在日志，同小米 3）：** 这台没有 C++ 编译器，在 PC 的 Docker（Debian 12，`mips64el-linux-gnuabi64-g++` 12.2，`-O2 -static`）交叉编译 `mangekyo_cpumem`。单核 58.90（四核 58.81–58.96）、全核 233.46 MWork/s，1.5 GHz 下每单元 25.5 周期；内存读取单线程 / 全核 3.8 / 7.3 GB/s（单通道 DDR4-2133 理论 17 的 43%）；缓存几项是 MIPS 上通用 8 字节读写的速度（没有用龙芯向量指令）。副本 `out\linux\UOS-3A4000-cpu-20261021-225611`。
+- **GPU 没测：** 7A1000 里的 Vivante GC1000（`0014:7a15`）由内建的 Galcore 4.6.9.6622 驱动（`loongson-gpu`）占着，但 Vivante 的用户态库从装机（2022-10-21）起就没装过，能用的源里也没有，桌面 GL 是 llvmpipe。etnaviv 模块有这个 PCI ID，但龙芯 2021–2023 年的 etnaviv / Mesa 补丁没完整进上游（2026-03 LKML 仍说 LS7A1000 GPU 不受支持），运行中把 Galcore 解绑去试 etnaviv 时整机卡死（用户强制重启）。龙芯官方 GPU 驱动包面向 3A5000（LoongArch），不适用。
+- **显示器：** HDMI 经板上 MS7210（DVO 转 HDMI）。接 Redmi G Pro 时画面横向卷动约三分之一宽、多一行（1920x1081、800x601），开机自检和 BIOS 就这样，换显示器正常。改时序、同步极性、DVI 的 EDID 都无效，已全部撤回。
+- **系统调整（用户同意）：** 时区改悉尼；统信清空了 timesyncd 的服务器、它又只认 networkd 的联网状态，改用 chrony（另加 Cloudflare 的 IP 地址），校正了 131 秒；插电不熄屏、不锁屏、不睡眠（deepin 电源设置）；前一个主人的登录密钥环改名留底；天翼云电脑和六个后台小工具的自启动对本用户关掉（`~/.config/autostart`）。
+
 ### 2026-10-21 ThinkCentre M700（i5-6400T + HD 530）：第一台自动安装 Ubuntu 的测试机，整套 26 项
 
 - **装机：** 用户有几台闲置电脑，统一装 Ubuntu 给 Claude 用 SSH 测。做法写进 `docs/building.md` 新的 x86-64 测试机一节：26.04 live-server ISO（26.10 桌面 ISO 在 casper "Generating APT cache" 卡住），U 盘根目录放 `autoinstall.yaml`（模板 `scripts/linux/autoinstall.template.yaml`，`make-autoinstall.ps1` 填公钥，密码哈希手填，填好的文件在被忽略的 `out\linux-autoinstall\`，不入库），无人值守：清空最大的 SSD、装编译依赖、免密 sudo、屏蔽睡眠、主机名 `mk-<MAC 后 6 位>`。第一次没插网线，装到 `ubuntu-desktop-minimal` 失败，所以桌面改为装好后用 `scripts/linux/setup-desktop.sh` 通过 SSH 装 GNOME 并自动登录。
@@ -1776,6 +1804,7 @@ PathService 已把 results/captures/reports/logs 改到
   | 粒子 headless 65K/1M/4M/16M | 26.90 / 14.15 / 14.44 / 14.39 | 4.59 / 13.11 / 14.05 / 14.59 GB/s（墙钟） |
   | GPU Burn 16/64/256 步 | 0.40 / 0.51 / 0.54 | 0.41 / 0.51 / 0.54 Gpix-step/s |
   | 流体 | 2.09 MParticle-step/s | — |
+  | OpenGL ES 2.0 GPU Burn 16/64/256 步（10-22 补跑，单独成组） | — | 7.23 / 5.21 / 5.35 Gpix-step/s |
   | GPU 显存读取（V3） | 23.4 GB/s（34.1 的 69%），缓存平台 55.6 | — |
   | CPU 单核 / 全核 | 116.9 / 431.7 MWork/s（每单元约 24 个周期） | |
   | CPU 内存读取 单线程 / 全核 | 16.1 / 20.0 GB/s | |
@@ -1786,6 +1815,7 @@ PathService 已把 results/captures/reports/logs 改到
 - **核对：** 粒子 1M 起 12.6–14.6 GB/s（每粒子 40 B），显存读 23.4 是理论的 69%，CPU 全核内存读 20.0 是 59%；GPU Burn 两个 API 一样；CPU 每单元约 24 个周期，和树莓派 4 的 A72 相同。
 - **验证新规则：** 用户把超时改回 640 后，在临时数据目录里再跑 OpenGL 256 步：同样被 i915 重置（dmesg 有记录），引擎报 "No GPU timing data was collected; no score is saved"、退出码 1，没有建结果文件。Mesa Intel 墙钟规则也在临时目录核对过：粒子 65K / 4M headless 4.51 / 14.24（整套 4.59 / 14.05），GPU Burn 16 步仍用时间戳 0.41。
 - **熄屏锁屏：** 整套跑完、`gnome-session-inhibit` 退出 5 分钟后 GNOME 熄屏并锁屏，用户要输密码才解开；锁着屏开始的窗口测试会画在锁屏后面。用户同意后 `setup-desktop.sh` 加了系统级 dconf 默认值（`/etc/dconf/profile/user` + `/etc/dconf/db/local.d/90-mangekyo`：不熄屏、不锁屏、空闲不睡眠），mk-ea0ffb 上单独执行了这一段，`gsettings` 读回 0 / false / nothing。
+- **ES 2.0 补跑（2026-10-22）：** 这一组是测兆芯时才加进 `series.sh` 的，补跑在 `out\linux\mk-ea0ffb-gles2-series-20261022-001026\`：EGL 无窗口 pbuffer、栅栏等待，三档单帧波动都在 3% 内，没有 GPU 复位。16 步每步更快，多半是编译器把 16 次循环展开了。约为兆芯 C-960 的 12 倍，和 Tegra K1（4.97）同一量级。
 - **还没做：** 其他几台机器装好后照同样流程测。
 
 ### 2026-10-20 Intel Arc A380：完整测试 46 项（用户不在时自行完成）
