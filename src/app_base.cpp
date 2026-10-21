@@ -370,6 +370,13 @@ void AppBase::Run() {
     if (!IsTimingContractValid())
         throw std::runtime_error("GPU timing source changed during measurement; mixed timing is rejected and no score is saved");
 
+    // No GPU timing at all means no score: the driver may have reset the GPU
+    // without telling the API (Mesa OpenGL after an i915 preemption timeout
+    // keeps "rendering" at thousands of empty frames). A 0 entry would look
+    // like a measured result, so the run fails instead.
+    if (result.timingSamples == 0 && !(result.score > 0.0))
+        throw std::runtime_error("No GPU timing data was collected; no score is saved");
+
     if (AppendResult(result)) {
         std::cout << "[Results] Saved as " << result.id
                   << " -> " << ResultsFilePath() << std::endl;

@@ -324,6 +324,18 @@ void OpenGLBackend::CreateTimestampQueries() {
         return;
     }
 
+    // Mesa's Intel drivers (iris, crocus) submit compute dispatches in a
+    // batch of their own, while GL timestamp queries always go to the render
+    // batch (iris_create_query: batch_idx = IRIS_BATCH_RENDER). The queries
+    // around a dispatch therefore never contain it; an HD 530 read 0.001 ms
+    // for a step Vulkan times at 0.111 ms. Draw-only workloads (GPU Burn)
+    // stay on the render batch and keep their timestamps.
+    if (renderer.rfind("Mesa Intel", 0) == 0 && !isFragmentOnlyWorkload(config_.workload)) {
+        EnableSynchronizedTimingFallback(
+            "Mesa Intel runs compute in its own batch; GL timestamps never cover it");
+        return;
+    }
+
     GLint bits = 0;
     glGetQueryiv(GL_TIMESTAMP, GL_QUERY_COUNTER_BITS, &bits);
     timestampsSupported_ = (bits > 0);
