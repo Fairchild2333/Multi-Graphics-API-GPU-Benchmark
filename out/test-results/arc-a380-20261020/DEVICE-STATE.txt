@@ -1,0 +1,41 @@
+State of this PC during the Intel Arc A380 run of 2026-10-20 (46 jobs, `--fill-missing --yes`).
+
+GPU       Intel Arc A380, the only discrete GPU (it replaced the RTX 2080 that
+          day). 6 GB GDDR6, 96-bit, 186 GB/s on paper; 8 Xe cores, 1,024
+          FP32 lanes (about 4 TFLOPS at 2 GHz, not an Intel figure). The
+          engine reads 6,058 MB. Driver 32.0.101.9150.
+Displays  Two, each 2560x1440 in desktop coordinates.
+Load      Before the run: CPU 5 - 14 %, the GPU's 3D engine used only by the
+          Claude app (1.8 %).
+Engine    Commit c991ead. No job switched to wall-clock timing.
+
+Results   46 new entries in %LOCALAPPDATA%\GpuComputeBenchmark\results\
+          results.json, plus one rerun (all in results-arc-a380.json).
+          45 passed, 0 review, 1 failed: OpenGL 65K headless.
+
+OpenGL 65K headless (Intel OpenGL driver faults, not the measurement)
+- It is CPU-bound (about 12,700 steps a second, GPU idle 59 %). After about
+  6 s the Intel OpenGL driver slows down: the GPU time of a step grows from
+  0.041 to 0.099 ms and the rate falls to about 4,000 steps a second. The
+  same test on Vulkan stays at 13,000 a second and 0.032 ms throughout.
+- After the result is saved the process crashes while the window and its
+  GL context are destroyed (glfwDestroyWindow): access violation in
+  igxehpgicd64.dll + 0x249272, in 2 of 3 and then 4 of 4 short runs and in
+  the suite run, so the suite records it as failed. Releasing the context
+  first or a final glFinish did not avoid it (not kept). 1M headless did
+  not crash in two runs. The engine now prints the faulting module and
+  offset on a crash (src/main.cpp), which is how this was found.
+- Saved: 20261020-170616-513 (suite, 56.61 GB/s, decline 18.8 %, stable
+  window 62.89) and 20261020-171606-620 (rerun, 48.10 GB/s, decline 55 %).
+  Use the suite run, the steadier of the two.
+
+Checked and kept
+- Vulkan GPU Burn (4.59 / 6.57 / 7.31) is about 30 % below DX12, DX11 and
+  OpenGL (9.80 / 10.17 / 11.54 at 256 steps). Its timing is sound: GPU
+  utilisation 100 %, 15 frames a second at 64.6 ms a frame. Intel's
+  Vulkan driver runs this shader slower than its other drivers.
+- GPU memory read 120.4 GB/s (65 % of 186): data check on 1,514.5 MiB,
+  4096 MiB read in 35.87 ms by the GPU clock and 35.97 ms by wall clock;
+  system memory read about 11.5 GB/s (the A380 is a PCIe 4.0 x8 card).
+- OpenGL 16M ran as two dispatches (the driver allows 65,535 work groups),
+  the fix of 4fca1da: 64.10 / 66.23 GB/s windowed / headless.

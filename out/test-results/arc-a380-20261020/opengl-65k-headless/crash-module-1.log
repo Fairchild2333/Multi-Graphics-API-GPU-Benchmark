@@ -1,0 +1,82 @@
+﻿
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Intel(R) Arc(TM) A380 Graphics (Discrete)    6058 MB  YES   YES   YES    -    YES 
+  AMD Radeon(TM) Graphics (Integrated)         2021 MB  YES   YES   YES    -     -  
+  Microsoft Basic Render Driver (Software)         -    -    YES   YES    -     -  
+============================================================
+
+
+[OpenGL] Windows assigned GL_RENDERER to Intel(R) Arc(TM) A380 Graphics.
+  To change it, use Windows Settings > System > Display > Graphics, then re-run detection.
+
+gpu_benchmark.exe : [warn] Short timed run: reducing warmup from 2s to 0.75s so measured frames and GPU timestamps are 
+available.
+At line:1 char:785
++ ...  in 1..4) { & build\Release\gpu_benchmark.exe --backend opengl --gpu  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([warn] Short ti... are available.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Backend: OpenGL  |  V-Sync: OFF  |  Memory: Device-local  |  Particles: 65536 (Medium)  |  Auto-stop: 3s
+[OpenGL Init] Loading GL functions...
+[OpenGL Init] GLAD loaded GL 4.3
+[OpenGL Init] Intel(R) Arc(TM) A380 Graphics  |  GL 4.3.0 - Build 32.0.101.9150
+[OpenGL Init] Compiling shaders...
+[OpenGL Init] Creating particle buffers...
+Created particle buffers: 65536 particles
+[OpenGL Init] Creating timestamp queries...
+[Profiling] OpenGL timestamp queries enabled.
+[OpenGL Init] Initialisation complete.
+[GPU Timing] Compute: 0.044 ms | Render: 0.001 ms | Total: 0.046 ms | FPS: 11882 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.041 ms | Render: 0.001 ms | Total: 0.043 ms | FPS: 12601 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.041 ms | Render: 0.001 ms | Total: 0.043 ms | FPS: 12642 | T: 1.6 s
+[GPU Timing] Compute: 0.041 ms | Render: 0.001 ms | Total: 0.043 ms | FPS: 12538 | T: 2.6 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: OpenGL
+GPU:          Intel(R) Arc(TM) A380 Graphics
+Driver:       4.3.0 - Build 32.0.101.9150
+CPU:          AMD Ryzen 7 9800X3D 8-Core Processor
+OS:           Windows 11 (NT 10.0.26300)
+System:       Windows x64
+Memory:       Device-local VRAM
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    65536 (Medium)
+Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     2.2 s (warmup: 0.8 s, measured: 28114 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.041     0.039     0.046
+Render:          0.001     0.001     0.002
+Total GPU:       0.043     0.041     0.047
+
+--- Throughput ---
+Avg FPS:      12495
+Particles:    65536
+Working set:  2.00 MiB
+VRAM rate:   63.46 GB/s  (0.041 ms compute)
+
+--- Analysis ---
+Avg frame time:  0.080 ms
+Avg GPU time:    0.043 ms
+GPU utilisation: 53.8%
+>> Balanced: CPU and GPU workloads are roughly matched.
+==========================================================
+
+[Results] Saved as 20261020-171054-173 -> C:\Users\lzz28\AppData\Local\Temp\claude\C--Users-lzz28-VSCode-Project-Vulkan-GPU-Compute-Microbenchmark\1bf33747-49ec-4c90-afbe-e055b3051df7\scratchpad\lx-scratch-data\results\results.json
+
+[CRASH] Unhandled exception: 0xc0000005
+  -> in C:\WINDOWS\System32\DriverStore\FileRepository\iigd_dch_d.inf_amd64_dac34f82ca5b66d5\igxehpgicd64.dll + 0x24948a
+  -> Access violation (segfault)

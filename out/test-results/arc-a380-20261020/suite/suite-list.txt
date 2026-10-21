@@ -1,0 +1,115 @@
+﻿
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Intel(R) Arc(TM) A380 Graphics (Discrete)    6058 MB  YES   YES   YES    -    YES 
+  AMD Radeon(TM) Graphics (Integrated)         2021 MB  YES   YES   YES    -     -  
+  Microsoft Basic Render Driver (Software)         -    -    YES   YES    -     -  
+============================================================
+
+SUITE_PLAN	total=103
+SUITE_JOB	index=1	backend=vulkan	workload=stream	particles=65536	steps=0	headless=0	capture=1
+SUITE_JOB	index=2	backend=vulkan	workload=stream	particles=1048576	steps=0	headless=0	capture=1
+SUITE_JOB	index=3	backend=vulkan	workload=stream	particles=4194304	steps=0	headless=0	capture=1
+SUITE_JOB	index=4	backend=vulkan	workload=stream	particles=16777216	steps=0	headless=0	capture=1
+SUITE_JOB	index=5	backend=vulkan	workload=stream	particles=65536	steps=0	headless=1	capture=0
+SUITE_JOB	index=6	backend=vulkan	workload=stream	particles=1048576	steps=0	headless=1	capture=0
+SUITE_JOB	index=7	backend=vulkan	workload=stream	particles=4194304	steps=0	headless=1	capture=0
+SUITE_JOB	index=8	backend=vulkan	workload=stream	particles=16777216	steps=0	headless=1	capture=0
+SUITE_JOB	index=9	backend=vulkan	workload=gpu_burn	particles=0	steps=16	headless=0	capture=1
+SUITE_JOB	index=10	backend=vulkan	workload=gpu_burn	particles=0	steps=64	headless=0	capture=1
+SUITE_JOB	index=11	backend=vulkan	workload=gpu_burn	particles=0	steps=256	headless=0	capture=1
+SUITE_JOB	index=12	backend=vulkan	workload=cinematic_liquid	particles=0	steps=0	headless=0	capture=1
+SUITE_JOB	index=13	backend=vulkan	workload=membw	particles=0	steps=0	headless=1	capture=0
+SUITE_JOB	index=14	backend=dx12	workload=stream	particles=65536	steps=0	headless=0	capture=1
+SUITE_JOB	index=15	backend=dx12	workload=stream	particles=1048576	steps=0	headless=0	capture=1
+SUITE_JOB	index=16	backend=dx12	workload=stream	particles=4194304	steps=0	headless=0	capture=1
+SUITE_JOB	index=17	backend=dx12	workload=stream	particles=16777216	steps=0	headless=0	capture=1
+SUITE_JOB	index=18	backend=dx12	workload=stream	particles=65536	steps=0	headless=1	capture=0
+SUITE_JOB	index=19	backend=dx12	workload=stream	particles=1048576	steps=0	headless=1	capture=0
+SUITE_JOB	index=20	backend=dx12	workload=stream	particles=4194304	steps=0	headless=1	capture=0
+SUITE_JOB	index=21	backend=dx12	workload=stream	particles=16777216	steps=0	headless=1	capture=0
+SUITE_JOB	index=22	backend=dx12	workload=gpu_burn	particles=0	steps=16	headless=0	capture=1
+SUITE_JOB	index=23	backend=dx12	workload=gpu_burn	particles=0	steps=64	headless=0	capture=1
+SUITE_JOB	index=24	backend=dx12	workload=gpu_burn	particles=0	steps=256	headless=0	capture=1
+SUITE_JOB	index=25	backend=dx11	workload=stream	particles=65536	steps=0	headless=0	capture=1
+SUITE_JOB	index=26	backend=dx11	workload=stream	particles=1048576	steps=0	headless=0	capture=1
+SUITE_JOB	index=27	backend=dx11	workload=stream	particles=4194304	steps=0	headless=0	capture=1
+SUITE_JOB	index=28	backend=dx11	workload=stream	particles=16777216	steps=0	headless=0	capture=1
+SUITE_JOB	index=29	backend=dx11	workload=stream	particles=65536	steps=0	headless=1	capture=0
+SUITE_JOB	index=30	backend=dx11	workload=stream	particles=1048576	steps=0	headless=1	capture=0
+SUITE_JOB	index=31	backend=dx11	workload=stream	particles=4194304	steps=0	headless=1	capture=0
+SUITE_JOB	index=32	backend=dx11	workload=stream	particles=16777216	steps=0	headless=1	capture=0
+SUITE_JOB	index=33	backend=dx11	workload=gpu_burn	particles=0	steps=16	headless=0	capture=1
+SUITE_JOB	index=34	backend=dx11	workload=gpu_burn	particles=0	steps=64	headless=0	capture=1
+SUITE_JOB	index=35	backend=dx11	workload=gpu_burn	particles=0	steps=256	headless=0	capture=1
+SUITE_JOB	index=36	backend=opengl	workload=stream	particles=65536	steps=0	headless=0	capture=1
+SUITE_JOB	index=37	backend=opengl	workload=stream	particles=1048576	steps=0	headless=0	capture=1
+SUITE_JOB	index=38	backend=opengl	workload=stream	particles=4194304	steps=0	headless=0	capture=1
+SUITE_JOB	index=39	backend=opengl	workload=stream	particles=16777216	steps=0	headless=0	capture=1
+SUITE_JOB	index=40	backend=opengl	workload=stream	particles=65536	steps=0	headless=1	capture=0
+SUITE_JOB	index=41	backend=opengl	workload=stream	particles=1048576	steps=0	headless=1	capture=0
+SUITE_JOB	index=42	backend=opengl	workload=stream	particles=4194304	steps=0	headless=1	capture=0
+SUITE_JOB	index=43	backend=opengl	workload=stream	particles=16777216	steps=0	headless=1	capture=0
+SUITE_JOB	index=44	backend=opengl	workload=gpu_burn	particles=0	steps=16	headless=0	capture=1
+SUITE_JOB	index=45	backend=opengl	workload=gpu_burn	particles=0	steps=64	headless=0	capture=1
+SUITE_JOB	index=46	backend=opengl	workload=gpu_burn	particles=0	steps=256	headless=0	capture=1
+SUITE_JOB	index=47	backend=vulkan	workload=stream	particles=65536	steps=0	headless=0	capture=1
+SUITE_JOB	index=48	backend=vulkan	workload=stream	particles=1048576	steps=0	headless=0	capture=1
+SUITE_JOB	index=49	backend=vulkan	workload=stream	particles=4194304	steps=0	headless=0	capture=1
+SUITE_JOB	index=50	backend=vulkan	workload=stream	particles=16777216	steps=0	headless=0	capture=1
+SUITE_JOB	index=51	backend=vulkan	workload=stream	particles=65536	steps=0	headless=1	capture=0
+SUITE_JOB	index=52	backend=vulkan	workload=stream	particles=1048576	steps=0	headless=1	capture=0
+SUITE_JOB	index=53	backend=vulkan	workload=stream	particles=4194304	steps=0	headless=1	capture=0
+SUITE_JOB	index=54	backend=vulkan	workload=stream	particles=16777216	steps=0	headless=1	capture=0
+SUITE_JOB	index=55	backend=vulkan	workload=gpu_burn	particles=0	steps=16	headless=0	capture=1
+SUITE_JOB	index=56	backend=vulkan	workload=gpu_burn	particles=0	steps=64	headless=0	capture=1
+SUITE_JOB	index=57	backend=vulkan	workload=gpu_burn	particles=0	steps=256	headless=0	capture=1
+SUITE_JOB	index=58	backend=vulkan	workload=cinematic_liquid	particles=0	steps=0	headless=0	capture=1
+SUITE_JOB	index=59	backend=vulkan	workload=membw	particles=0	steps=0	headless=1	capture=0
+SUITE_JOB	index=60	backend=dx12	workload=stream	particles=65536	steps=0	headless=0	capture=1
+SUITE_JOB	index=61	backend=dx12	workload=stream	particles=1048576	steps=0	headless=0	capture=1
+SUITE_JOB	index=62	backend=dx12	workload=stream	particles=4194304	steps=0	headless=0	capture=1
+SUITE_JOB	index=63	backend=dx12	workload=stream	particles=16777216	steps=0	headless=0	capture=1
+SUITE_JOB	index=64	backend=dx12	workload=stream	particles=65536	steps=0	headless=1	capture=0
+SUITE_JOB	index=65	backend=dx12	workload=stream	particles=1048576	steps=0	headless=1	capture=0
+SUITE_JOB	index=66	backend=dx12	workload=stream	particles=4194304	steps=0	headless=1	capture=0
+SUITE_JOB	index=67	backend=dx12	workload=stream	particles=16777216	steps=0	headless=1	capture=0
+SUITE_JOB	index=68	backend=dx12	workload=gpu_burn	particles=0	steps=16	headless=0	capture=1
+SUITE_JOB	index=69	backend=dx12	workload=gpu_burn	particles=0	steps=64	headless=0	capture=1
+SUITE_JOB	index=70	backend=dx12	workload=gpu_burn	particles=0	steps=256	headless=0	capture=1
+SUITE_JOB	index=71	backend=dx11	workload=stream	particles=65536	steps=0	headless=0	capture=1
+SUITE_JOB	index=72	backend=dx11	workload=stream	particles=1048576	steps=0	headless=0	capture=1
+SUITE_JOB	index=73	backend=dx11	workload=stream	particles=4194304	steps=0	headless=0	capture=1
+SUITE_JOB	index=74	backend=dx11	workload=stream	particles=16777216	steps=0	headless=0	capture=1
+SUITE_JOB	index=75	backend=dx11	workload=stream	particles=65536	steps=0	headless=1	capture=0
+SUITE_JOB	index=76	backend=dx11	workload=stream	particles=1048576	steps=0	headless=1	capture=0
+SUITE_JOB	index=77	backend=dx11	workload=stream	particles=4194304	steps=0	headless=1	capture=0
+SUITE_JOB	index=78	backend=dx11	workload=stream	particles=16777216	steps=0	headless=1	capture=0
+SUITE_JOB	index=79	backend=dx11	workload=gpu_burn	particles=0	steps=16	headless=0	capture=1
+SUITE_JOB	index=80	backend=dx11	workload=gpu_burn	particles=0	steps=64	headless=0	capture=1
+SUITE_JOB	index=81	backend=dx11	workload=gpu_burn	particles=0	steps=256	headless=0	capture=1
+SUITE_JOB	index=82	backend=dx12	workload=stream	particles=65536	steps=0	headless=0	capture=1
+SUITE_JOB	index=83	backend=dx12	workload=stream	particles=1048576	steps=0	headless=0	capture=1
+SUITE_JOB	index=84	backend=dx12	workload=stream	particles=4194304	steps=0	headless=0	capture=1
+SUITE_JOB	index=85	backend=dx12	workload=stream	particles=16777216	steps=0	headless=0	capture=1
+SUITE_JOB	index=86	backend=dx12	workload=stream	particles=65536	steps=0	headless=1	capture=0
+SUITE_JOB	index=87	backend=dx12	workload=stream	particles=1048576	steps=0	headless=1	capture=0
+SUITE_JOB	index=88	backend=dx12	workload=stream	particles=4194304	steps=0	headless=1	capture=0
+SUITE_JOB	index=89	backend=dx12	workload=stream	particles=16777216	steps=0	headless=1	capture=0
+SUITE_JOB	index=90	backend=dx12	workload=gpu_burn	particles=0	steps=16	headless=0	capture=1
+SUITE_JOB	index=91	backend=dx12	workload=gpu_burn	particles=0	steps=64	headless=0	capture=1
+SUITE_JOB	index=92	backend=dx11	workload=stream	particles=65536	steps=0	headless=0	capture=1
+SUITE_JOB	index=93	backend=dx11	workload=stream	particles=1048576	steps=0	headless=0	capture=1
+SUITE_JOB	index=94	backend=dx11	workload=stream	particles=4194304	steps=0	headless=0	capture=1
+SUITE_JOB	index=95	backend=dx11	workload=stream	particles=16777216	steps=0	headless=0	capture=1
+SUITE_JOB	index=96	backend=dx11	workload=stream	particles=65536	steps=0	headless=1	capture=0
+SUITE_JOB	index=97	backend=dx11	workload=stream	particles=1048576	steps=0	headless=1	capture=0
+SUITE_JOB	index=98	backend=dx11	workload=stream	particles=4194304	steps=0	headless=1	capture=0
+SUITE_JOB	index=99	backend=dx11	workload=stream	particles=16777216	steps=0	headless=1	capture=0
+SUITE_JOB	index=100	backend=dx11	workload=gpu_burn	particles=0	steps=16	headless=0	capture=1
+SUITE_JOB	index=101	backend=dx11	workload=gpu_burn	particles=0	steps=64	headless=0	capture=1
+SUITE_JOB	index=102	backend=cpu	workload=cpu_all	particles=0	steps=0	headless=1	capture=0
+SUITE_JOB	index=103	backend=cpu	workload=cpu_membw	particles=0	steps=0	headless=1	capture=0
