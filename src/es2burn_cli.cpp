@@ -41,6 +41,7 @@ typedef EGLint (*ClientWaitSyncFn)(EGLDisplay, EGLSyncKHR, EGLint, EGLTimeKHR);
 CreateSyncFn g_createSync = nullptr;
 DestroySyncFn g_destroySync = nullptr;
 ClientWaitSyncFn g_clientWaitSync = nullptr;
+bool g_waitByReadback = false;
 
 double Now() {
     timespec now;
@@ -49,6 +50,12 @@ double Now() {
 }
 
 void WaitForGpu(EGLDisplay display) {
+    if (g_waitByReadback) {
+        // A pixel read back cannot arrive before the frame is drawn.
+        unsigned char pixel[4];
+        glReadPixels(0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+        return;
+    }
     if (g_createSync) {
         EGLSyncKHR fence = g_createSync(display, EGL_SYNC_FENCE_KHR, nullptr);
         if (fence != EGL_NO_SYNC_KHR) {
@@ -166,8 +173,16 @@ int main(int argc, char* argv[]) {
                 eglGetError());
         return 1;
     }
-    printf("[OpenGL ES Init] %s  |  %s\n", reinterpret_cast<const char*>(glGetString(GL_RENDERER)),
+    const char* renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+    printf("[OpenGL ES Init] %s  |  %s\n", renderer,
            reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+    // Zhaoxin's driver (21.00.93 on a KX-6000 C-960) hangs the GPU whenever it
+    // draws into a pbuffer, and its EGL fences can report a frame done long
+    // before the GPU is (single frames read 0.03 ms and 2.8 s); glFinish
+    // holds for frames of 64 ms but returned at once on some frames of a few
+    // hundred ms. On that driver the frames go into a texture of the same
+    // size and every frame is waited for by reading one pixel back.
+    const bool zhaoxin = renderer && strncmp(renderer, "ZX ", 3) == 0;
 
     const char* extensions = eglQueryString(display, EGL_EXTENSIONS);
     if (extensions && strstr(extensions, "EGL_KHR_fence_sync")) {
@@ -175,7 +190,12 @@ int main(int argc, char* argv[]) {
         g_destroySync = reinterpret_cast<DestroySyncFn>(eglGetProcAddress("eglDestroySyncKHR"));
         g_clientWaitSync = reinterpret_cast<ClientWaitSyncFn>(eglGetProcAddress("eglClientWaitSyncKHR"));
     }
-    if (!g_createSync || !g_destroySync || !g_clientWaitSync) {
+    if (zhaoxin) {
+        g_createSync = nullptr;
+        g_waitByReadback = true;
+        printf("[Profiling] Zhaoxin driver: its EGL fences and glFinish can return before the GPU "
+               "is done; waiting for every frame by reading one pixel back.\n");
+    } else if (!g_createSync || !g_destroySync || !g_clientWaitSync) {
         g_createSync = nullptr;
         printf("[Profiling] No EGL fence on this device: waiting for the GPU with glFinish, "
                "which may round a wait up to the system's timer tick.\n");
@@ -221,6 +241,23 @@ int main(int argc, char* argv[]) {
     glGenBuffers(1, &triangle);
     glBindBuffer(GL_ARRAY_BUFFER, triangle);
     glBufferData(GL_ARRAY_BUFFER, sizeof(corners), corners, GL_STATIC_DRAW);
+    if (zhaoxin) {
+        GLuint texture = 0, framebuffer = 0;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, kWidth, kHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glGenFramebuffers(1, &framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            fprintf(stderr, "The %dx%d texture could not be drawn into.\n", kWidth, kHeight);
+            return 1;
+        }
+        printf("[Zhaoxin] Drawing into a %dx%d texture: the driver hangs the GPU when it draws "
+               "into a pbuffer.\n", kWidth, kHeight);
+    }
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
     glViewport(0, 0, kWidth, kHeight);
