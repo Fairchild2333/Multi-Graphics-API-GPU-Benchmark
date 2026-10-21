@@ -1,0 +1,251 @@
+diff -ruN a/Makefile b/Makefile
+--- a/Makefile	2026-10-21 22:13:51.297212500 +1100
++++ b/Makefile	2026-10-21 22:13:51.791856600 +1100
+@@ -205,3 +205,6 @@
+ 	install -c -m 0744 ./zx_core.ko $(KERNEL_ZX_DIR)
+ 
+ 
++
++# Kbuild in Linux 7.0 no longer reads EXTRA_CFLAGS.
++ccflags-y += $(EXTRA_CFLAGS)
+diff -ruN a/src/os_interface.c b/src/os_interface.c
+--- a/src/os_interface.c	2026-10-21 22:13:51.561123900 +1100
++++ b/src/os_interface.c	2026-10-21 22:14:15.155089000 +1100
+@@ -2167,7 +2167,11 @@
+ 
+ void *zx_pages_memory_swapout(struct os_pages_memory *pages_memory)
+ {
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7,0,0)
++    struct file          *file_storage = shmem_file_setup("zx gmem", pages_memory->size, EMPTY_VMA_FLAGS);
++#else
+     struct file          *file_storage = shmem_file_setup("zx gmem", pages_memory->size, 0);
++#endif
+     struct address_space *file_addr_space;
+     struct page          **pages;
+     struct page          *src_page, *dst_page;
+diff -ruN a/src/zx_connector.c b/src/zx_connector.c
+--- a/src/zx_connector.c	2026-10-21 22:13:51.403541500 +1100
++++ b/src/zx_connector.c	2026-10-21 22:14:15.158090000 +1100
+@@ -302,8 +302,14 @@
+     return added_num;
+ }
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0)
++#define ZX_MODE_VALID_CONST const
++#else
++#define ZX_MODE_VALID_CONST
++#endif
++
+ enum drm_mode_status 
+-zx_connector_mode_valid(struct drm_connector *connector, struct drm_display_mode *mode)
++zx_connector_mode_valid(struct drm_connector *connector, ZX_MODE_VALID_CONST struct drm_display_mode *mode)
+ {
+     struct drm_device *dev = connector->dev;
+     zx_card_t *zx_card = dev->dev_private;
+diff -ruN a/src/zx_drmfb.c b/src/zx_drmfb.c
+--- a/src/zx_drmfb.c	2026-10-21 22:13:51.556126300 +1100
++++ b/src/zx_drmfb.c	2026-10-21 22:14:15.159089200 +1100
+@@ -65,6 +65,9 @@
+ 
+ #if DRM_VERSION_CODE < KERNEL_VERSION(4, 11, 0)
+     drm_helper_mode_fill_fb_struct(&zxfb->base, mode_cmd);
++#elif LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0)
++    drm_helper_mode_fill_fb_struct(dev, &zxfb->base,
++        drm_get_format_info(dev, mode_cmd->pixel_format, mode_cmd->modifier[0]), mode_cmd);
+ #else
+     drm_helper_mode_fill_fb_struct(dev, &zxfb->base, mode_cmd);
+ #endif
+@@ -83,6 +86,9 @@
+ struct drm_framebuffer *
+ zx_fb_create(struct drm_device *dev,
+               struct drm_file *file,
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0)
++              const struct drm_format_info *info,
++#endif
+ #if DRM_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
+               struct drm_mode_fb_cmd2 *user_mode_cmd
+ #else
+diff -ruN a/src/zx_drmfb.h b/src/zx_drmfb.h
+--- a/src/zx_drmfb.h	2026-10-21 22:13:51.554120300 +1100
++++ b/src/zx_drmfb.h	2026-10-21 22:14:15.160087800 +1100
+@@ -14,6 +14,9 @@
+ struct drm_framebuffer *
+ zx_fb_create(struct drm_device *dev,
+                               struct drm_file *file_priv,
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0)
++                              const struct drm_format_info *info,
++#endif
+                               #if DRM_VERSION_CODE >= KERNEL_VERSION(4, 5, 0)
+                               const struct drm_mode_fb_cmd2 *mode_cmd
+                               #else
+diff -ruN a/src/zx_fbdev.c b/src/zx_fbdev.c
+--- a/src/zx_fbdev.c	2026-10-21 22:13:51.549656100 +1100
++++ b/src/zx_fbdev.c	2026-10-21 22:14:15.161089600 +1100
+@@ -6,6 +6,8 @@
+ #include <drm/drm_fb_helper.h>
+ #if DRM_VERSION_CODE < KERNEL_VERSION(4, 11, 0)
+ #include <linux/async.h>
++
++#if !(LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0))
+ #endif
+ 
+ static int zxfb_mmap(struct fb_info *info, struct vm_area_struct *vma)
+@@ -455,3 +457,5 @@
+         drm_fb_helper_hotplug_event(&fbdev->helper);
+     }
+ }
++
++#endif /* not Linux 7.0 */
+diff -ruN a/src/zx_fbdev.h b/src/zx_fbdev.h
+--- a/src/zx_fbdev.h	2026-10-21 22:13:51.539626000 +1100
++++ b/src/zx_fbdev.h	2026-10-21 22:14:15.162088600 +1100
+@@ -14,9 +14,18 @@
+ #define to_zx_fbdev(helper) container_of(helper, struct zx_fbdev, helper)
+ 
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0)
++/* No fbdev emulation on Linux 7.0 (see zx_fbdev.c). */
++static inline void zx_fbdev_disable_vesa(zx_card_t *zx) {}
++static inline int zx_fbdev_init(zx_card_t *zx) { return 0; }
++static inline int zx_fbdev_deinit(zx_card_t *zx) { return 0; }
++static inline void zx_fbdev_set_suspend(zx_card_t *zx, int state) {}
++static inline void zx_fbdev_poll_changed(struct drm_device *dev) {}
++#else
+ void zx_fbdev_disable_vesa(zx_card_t *zx);
+ int zx_fbdev_init(zx_card_t *zx);
+ int zx_fbdev_deinit(zx_card_t *zx);
+ void zx_fbdev_set_suspend(zx_card_t *zx, int state);
+ void zx_fbdev_poll_changed(struct drm_device *dev);
+ #endif
++#endif
+diff -ruN a/src/zx_gem.c b/src/zx_gem.c
+--- a/src/zx_gem.c	2026-10-21 22:13:51.536622400 +1100
++++ b/src/zx_gem.c	2026-10-21 22:14:15.163200900 +1100
+@@ -1654,7 +1654,9 @@
+ 
+ 
+         retval= vmf_insert_mixed(vma, address,
+-#if DRM_VERSION_CODE >= KERNEL_VERSION(4, 5, 0) && !(defined(YHQILIN) && DRM_VERSION_CODE == KERNEL_VERSION(4, 9, 0))
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0)
++              pfn);
++#elif DRM_VERSION_CODE >= KERNEL_VERSION(4, 5, 0) && !(defined(YHQILIN) && DRM_VERSION_CODE == KERNEL_VERSION(4, 9, 0))
+               __pfn_to_pfn_t(pfn, PFN_DEV));
+ #else
+               pfn);
+diff -ruN a/src/zx_gem.h b/src/zx_gem.h
+--- a/src/zx_gem.h	2026-10-21 22:13:51.398537400 +1100
++++ b/src/zx_gem.h	2026-10-21 22:14:15.164193000 +1100
+@@ -20,7 +20,9 @@
+ #include "os_interface.h"
+ #include "zx_gem_debug.h"
+ 
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 5, 0) || \
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0)
++/* pfn_t is gone; vmf_insert_mixed() takes a plain pfn. */
++#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 5, 0) || \
+     DRM_VERSION_CODE >= KERNEL_VERSION(4, 10, 0)
+ #include <linux/pfn_t.h>
+ #else
+diff -ruN a/src/zx_pcie.c b/src/zx_pcie.c
+--- a/src/zx_pcie.c	2026-10-21 22:13:51.543626200 +1100
++++ b/src/zx_pcie.c	2026-10-21 22:14:15.166193300 +1100
+@@ -19,6 +19,10 @@
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ #include "zx.h"
++#include <linux/version.h>
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0)
++#include <linux/aperture.h>
++#endif
+ #include "zx_driver.h"
+ #include "os_interface.h"
+ #include "zx_ioctl.h"
+@@ -410,7 +414,11 @@
+         return;
+     }
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0)
++    drm_fb_helper_restore_fbdev_mode_unlocked(&fbdev->helper, false);
++#else
+     drm_fb_helper_restore_fbdev_mode_unlocked(&fbdev->helper);
++#endif
+ }
+ 
+ #if DRM_VERSION_CODE < KERNEL_VERSION(4,11,0)
+@@ -651,6 +659,12 @@
+             INIT_LIST_HEAD(&zx_drm_driver.base.legacy_dev_list);
+     #endif
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0)
++    ret = aperture_remove_conflicting_pci_devices(pdev, zx_drm_driver.base.name);
++    if (ret)
++            return ret;
++#endif
++
+     dev = drm_dev_alloc(&zx_drm_driver.base, &pdev->dev);
+     if (IS_ERR(dev))
+             return PTR_ERR(dev);
+diff -ruN a/src/zx_plane.c b/src/zx_plane.c
+--- a/src/zx_plane.c	2026-10-21 22:13:51.562124200 +1100
++++ b/src/zx_plane.c	2026-10-21 22:14:15.166193300 +1100
+@@ -1,4 +1,9 @@
+ #include "zx_plane.h"
++
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0)
++#include <linux/mutex.h>
++static DEFINE_MUTEX(zx_plane_flip_mutex);
++#endif
+ #include "zx_drmfb.h"
+ #include "zx_fence.h"
+ #include "zx_modifies.h"
+@@ -726,7 +731,11 @@
+     arg.src_w = src_w;
+     arg.src_h = src_h;
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0)
++    mutex_lock(&zx_plane_flip_mutex);
++#else
+     mutex_lock(&dev->struct_mutex);
++#endif
+ 
+     //need add wait fence back? intel is to pin fence
+     disp_cbios_crtc_flip(card->disp_info, &arg);
+@@ -739,7 +748,11 @@
+     zx_plane->dst_pos = crtc_x | (crtc_y << 16);
+     zx_plane->dst_size = crtc_w | (crtc_h << 16);
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0)
++    mutex_unlock(&zx_plane_flip_mutex);
++#else
+     mutex_unlock(&dev->struct_mutex);
++#endif
+ out:
+     return ret;
+ }
+diff -ruN a/src/zx_sysfs.c b/src/zx_sysfs.c
+--- a/src/zx_sysfs.c	2026-10-21 22:13:51.558124100 +1100
++++ b/src/zx_sysfs.c	2026-10-21 22:14:15.167193300 +1100
+@@ -212,7 +212,13 @@
+     NULL
+ };
+ 
+-static ssize_t zx_sysfs_trace_read(struct file *filp, struct kobject *kobj, struct bin_attribute *bin_attr, char *buf, loff_t pos, size_t size)
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7, 0, 0)
++#define ZX_BIN_ATTR_CONST const
++#else
++#define ZX_BIN_ATTR_CONST
++#endif
++
++static ssize_t zx_sysfs_trace_read(struct file *filp, struct kobject *kobj, ZX_BIN_ATTR_CONST struct bin_attribute *bin_attr, char *buf, loff_t pos, size_t size)
+ {
+     struct pci_dev*    pdev    = to_pci_dev(kobj_to_dev(kobj));
+     struct drm_device* drm_dev = pci_get_drvdata(pdev);
+@@ -231,7 +237,7 @@
+     return ret;
+ }
+ 
+-static ssize_t zx_sysfs_trace_write(struct file *filp, struct kobject *kobj, struct bin_attribute *bin_attr, char *buf, loff_t pos, size_t size)
++static ssize_t zx_sysfs_trace_write(struct file *filp, struct kobject *kobj, ZX_BIN_ATTR_CONST struct bin_attribute *bin_attr, char *buf, loff_t pos, size_t size)
+ {
+     struct pci_dev*    pdev    = to_pci_dev(kobj_to_dev(kobj));
+     struct drm_device* drm_dev = pci_get_drvdata(pdev);

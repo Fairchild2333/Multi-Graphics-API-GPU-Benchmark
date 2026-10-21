@@ -119,6 +119,30 @@ while IFS="$(printf '\t')" read -r _ idx gname vk _ _ gl _ _ _ sw _ glcs _; do
         fi
     done
 done < "$out/gpus.tsv"
+
+# OpenGL ES 2.0 GPU Burn (its own score group, as on Android), drawn off-screen
+# by build/mangekyo_es2burn on the GPU behind EGL. It is the only GPU test a
+# driver with OpenGL ES 2.0 alone can run (Zhaoxin C-960). Not saved in
+# results.json; the figures are in the logs. Skipped on a software renderer.
+es2=$root/build/mangekyo_es2burn
+es2gpu=$(EGL_PLATFORM=surfaceless eglinfo -B 2>/dev/null | sed -n 's/^OpenGL ES profile renderer: //p' | head -1)
+if [ -x "$es2" ] && [ -n "$es2gpu" ] && ! echo "$es2gpu" | grep -q -i -E "llvmpipe|softpipe|lavapipe"; then
+    tag=$(echo "$es2gpu" | tr -c 'A-Za-z0-9\n' '-' | sed 's/--*/-/g; s/-$//')
+    for s in 16 64 256; do
+        if [ -n "$only" ] && ! echo "$tag-gles2-gpu-burn-$s" | grep -E -q "$only"; then continue; fi
+        n=$((n + 1))
+        log=$(printf "%s/%02d-%s-gles2-gpu-burn-%s.log" "$out" "$n" "$tag" "$s")
+        start=$(date +%s)
+        echo "== $n $tag-gles2-gpu-burn-$s: $(date +%T) cpu $(cpu_temp)C" | tee -a "$out/summary.txt"
+        EGL_PLATFORM=surfaceless "$es2" --steps "$s" --seconds 15 --shader-dir "$root/shaders" > "$log" 2>&1 < /dev/null
+        code=$?
+        end=$(date +%s)
+        result=$(grep -a -E "Burn rate:|Last frame:|did not|failed|offers no" "$log" | tr '\n' ' ')
+        echo "   exit=$code $((end - start)) s cpu $(cpu_temp)C  $result" | tee -a "$out/summary.txt"
+        sleep "$cool"
+    done
+fi
+
 run "cpu-compute" --cpu-benchmark all --cpu-time 15 --cpu-warmup 0.2
 run "cpu-cache-memory" --cpu-membw
 

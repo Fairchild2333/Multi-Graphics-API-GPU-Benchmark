@@ -34,3 +34,6 @@ CMakeLists.txt text eol=lf
 # Preserve archived results, counters and console logs byte for byte.
 out/test-results/** -text
 results/** -text
+
+# Applied with patch(1) on Linux; keep LF whatever the checkout.
+scripts/linux/zhaoxin/*.patch text eol=lf

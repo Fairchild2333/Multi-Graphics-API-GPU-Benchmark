@@ -5,4 +5,9 @@ set -eu
 cd "$(dirname "$0")/../.."
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DGPU_BENCH_ENABLE_PACKAGING=OFF
 cmake --build build -j"$(nproc)"
+# The stand-alone OpenGL ES 2.0 GPU Burn, for GPUs whose driver offers only
+# OpenGL ES 2.0 (Zhaoxin C-960); needs the EGL and GLES headers.
+if [ -e /usr/include/EGL/egl.h ] && [ -e /usr/include/GLES2/gl2.h ]; then
+    g++ -std=c++17 -O2 -Wall -Wextra src/es2burn_cli.cpp -lEGL -lGLESv2 -lm -o build/mangekyo_es2burn
+fi
 ctest --test-dir build --output-on-failure

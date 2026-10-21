@@ -32,6 +32,19 @@ sleep-inactive-battery-type='nothing'
 EOF
 sudo dconf update
 
+# The desktop brings NetworkManager, but the wired port is already set up by
+# the server install's netplan (systemd-networkd). With both managing it, a
+# NetworkManager IPv6 change crashed networkd and dropped the network for a
+# minute; NetworkManager leaves wired ports alone.
+sudo mkdir -p /etc/NetworkManager/conf.d
+printf '[keyfile]\nunmanaged-devices=type:ethernet\n' | sudo tee /etc/NetworkManager/conf.d/90-mangekyo-unmanaged.conf > /dev/null
+
+# No crash pop-ups: Apport's "System program problem detected" came back at
+# every login for crashes that were long dealt with, and would collect a core
+# dump in the middle of a series. A crash shows in the job's log anyway.
+sudo sed -i 's/^enabled=1/enabled=0/' /etc/default/apport 2>/dev/null || true
+sudo systemctl disable --now apport.service apport-forward.socket apport-autoreport.path apport-autoreport.timer 2>/dev/null || true
+
 sudo systemctl set-default graphical.target
 echo "Desktop installed; rebooting into an automatic login of $user."
 sudo systemctl reboot

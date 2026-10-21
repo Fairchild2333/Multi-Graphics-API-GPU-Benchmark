@@ -44,6 +44,8 @@ autoinstall:
     - libvulkan-dev
     - vulkan-tools
     - glslc
+    - libegl-dev
+    - libgles-dev
     - mesa-utils
     - lm-sensors
     - pciutils
