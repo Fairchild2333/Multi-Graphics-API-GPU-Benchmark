@@ -258,6 +258,68 @@ ctest --test-dir build
   Vulkan backend now splits such a step into dispatches over separate parts
   of the buffer, and 16M reads 1.98 GB/s like the other sizes.
 
+### x86-64 test machines (Ubuntu 26.04 LTS, installed unattended)
+
+> **Verification status: run on real hardware** (Lenovo ThinkCentre M700 Tiny,
+> i5-6400T with HD 530, 2026-10-21).
+
+Spare PCs are wiped and installed the same way, then driven from the Windows
+PC over SSH. The machine needs a monitor (or an HDMI dummy plug) and a wired
+network during the install.
+
+**1. Install.** Write the Ubuntu 26.04 live-server ISO to a USB stick (Rufus,
+ISO mode). Run `scripts\linux\make-autoinstall.ps1`, put the hash of the
+test user's password (`openssl passwd -6`) in place of `__PASSWORD_HASH__`,
+and copy `out\linux-autoinstall\autoinstall.yaml` to the root of the stick,
+next to `casper`. Boot from the stick and pick the first GRUB entry. The
+install asks nothing: it **wipes the largest SSD** (the largest disk without
+one), installs the build packages, gives the user passwordless sudo and this
+PC's SSH key, masks sleep, names the machine `mk-<last 6 hex digits of the
+wired MAC>` and reboots.
+
+**2. Desktop.** The windowed tests need a running session, so GNOME is added
+after the first boot and logs the user in by itself. The script also turns
+off screen blanking, the lock screen and idle suspend (system dconf
+defaults): a series started on a locked screen would draw its windowed tests
+behind the lock.
+
+```bash
+ssh fairchild@mk-xxxxxx.local 'sh -s' < scripts/linux/setup-desktop.sh
+```
+
+**3. Run the series.** From the repository on the Windows PC:
+
+```powershell
+.\scripts\linux-suite.ps1 fairchild@mk-xxxxxx.local
+```
+
+It sends this checkout (uncommitted changes included), builds it on the
+machine, runs `scripts/linux/series.sh` there detached from SSH (the
+desktop-suite jobs of every hardware GPU, then the two CPU jobs) and fetches
+the run to `out\linux\<host>-series-<time>\`. `-Only <regex>` runs some jobs,
+`-SkipBuild` keeps the build already there, `-BuildOnly` stops after the
+build, and `-Attach <run>` follows a run that is already going.
+
+**Known limits on Intel GPUs (Mesa, i915).**
+
+- i915 resets a GPU context that cannot be pre-empted within 640 ms
+  (`/sys/class/drm/card*/engine/rcs0/preempt_timeout_ms`; Windows allows 2 s).
+  A draw is not pre-empted part way, and GPU Burn at 256 steps draws about
+  435 ms twice a frame on an HD 530 at 900 MHz, well over 1 s while the
+  clock is still at 350 MHz. Vulkan then reports a lost device; OpenGL
+  carries on with empty frames, which the engine now refuses to save (no
+  timing data). For that job the user raised the limit to 2000 ms and set it
+  back afterwards (`echo 2000 | sudo tee .../rcs0/preempt_timeout_ms`); it
+  also returns to 640 at a reboot.
+- Mesa's Intel OpenGL drivers run compute dispatches in a batch of their own
+  and put GL timestamp queries in the render batch, so the queries never
+  cover compute. The OpenGL backend times compute workloads on "Mesa Intel"
+  by the wall clock (compute submitted alone and waited for). The wait costs
+  about 0.5 - 0.9 ms a step, so OpenGL particle results at 65K and 1M read
+  lower than Vulkan's (4.6 against 26.9 GB/s headless at 65K); from 4M on
+  they agree within a few per cent. GPU Burn draws only and keeps its
+  timestamps.
+
 ---
 
 ## Windows (x64 / ARM64)

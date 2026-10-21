@@ -216,6 +216,7 @@
       - 流体预计约 1 FPS；
       - CPU 应得到 6 行单核结果。
     - **顺带：** 在 Volta 核显上重复粒子字节数对照实验（原 kernel 对比整粒子读写），补齐第三个厂商架构的数据。
+  - [ ] **Linux 图形界面（用户 2026-10-21 排入待办）**：Linux 现在只有命令行引擎 `gpu_benchmark`。做法同 macOS 版：照搬 Windows 版（`gui/`）的测试名、每项设置、预设、默认值和中英日文字，用 `--gui-worker` 调用同一个引擎，成绩写进同一个 `results.json`。建议用 GTK 4 + libadwaita（Ubuntu 默认 GNOME；只用 26.04 自带的稳定版），Qt 6 备选。做成可选的 CMake 目标，默认关闭，引擎的 Linux 构建不变。先给用户看界面样子和计划，同意后再写。
 - [ ] **6. WebGPU**：按既定路线——capability registry P0 → 固定 Dawn 版本原生后端（Stream → GPU Burn → Cinematic Liquid）→ `/web` 浏览器前端；独立版本 id（`stream_webgpu_v1` 等），无可靠 timestamp 不产生正式 score（对应上方“原生 WebGPU 后端”与 `/web` 两条任务）。
 - [ ] **7. HarmonyOS PC / 鸿蒙**：把 `ohos/` 升级为正式产品端口。
   - [x] **接入共享引擎（2026-10-06）**：原来的独立粒子演示已换成和安卓版对齐的 App（粒子测试、GPU Burn、CPU 算力测试、缓存 / 内存带宽扫描、历史、图表、中英文界面）。`scripts\build-ohos.ps1` 用 DevEco Studio 26.0 的工具链编出未签名的 HAP。**没有运行过。**

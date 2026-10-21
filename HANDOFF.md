@@ -1000,7 +1000,7 @@ without a new request. Android's adb/hdc lists remain unchanged.
      - **计时**：Tegra 3/4 无可靠 GPU timer query，legacy tier 只用墙钟 FPS，成绩自成体系；**用户已确认不要求 RenderDoc/抓帧**，抓帧标注 unavailable 即可。
      - **打包**：这些设备停在 Android 4.1–5.1，现代 NDK 最低 minSdk 21；Tegra 4 的 4.4 设备可能需旧 NDK。做**独立 legacy APK**，主 Android 包（Vulkan/ES 3.1+）不背此包袱。
 4. **iOS**（**2026-07-24 事实：代码已写，本机未编译、未模拟器/真机验收**——`ios-gui/` + `ios_engine_host` + `gpb_*` 桥；`CollectResult` 在 iPhone 目标下追加 `_ios_preview`）。用户锁定细节见 **§3.0.3**（最低 **iOS 16**；**iOS 26/27 = Liquid Glass**）。摘要：Metal-only + SwiftUI；无 RenderDoc；`MTLCaptureManager`；App Store/沙盒；温控/正式 duration 合同仍开放。
-5. **Debian Linux**：技术摩擦最低——Vulkan/OpenGL 后端、GLFW、RenderDoc、XDG 数据路径全部已有；主要是构建修正、`.deb` 打包、CI 与实机验证。**2026-09-30**：Ubuntu 20.04 / JetPack 5 的构建阻塞已修复（提交 `a894c8a`，仅做过容器验证，未在真机上运行），见第 10 节。
+5. **Debian Linux**：技术摩擦最低——Vulkan/OpenGL 后端、GLFW、RenderDoc、XDG 数据路径全部已有；主要是构建修正、`.deb` 打包、CI 与实机验证。**2026-09-30**：Ubuntu 20.04 / JetPack 5 的构建阻塞已修复（提交 `a894c8a`，仅做过容器验证，未在真机上运行），见第 10 节。**待办（2026-10-21 用户排入）**：Linux 图形界面，GTK 4 + libadwaita，照搬 Windows 版，经 `--gui-worker` 调用引擎；要点见 `docs/TODO.md` 第 5 项。
 6. **WebGPU**：按第 11 节既定路线执行——先统一 capability registry（P0），再固定 Dawn 版本的原生后端，依次移植 Stream、GPU Burn、Cinematic Liquid，最后 `/web` 浏览器前端。结果使用独立临时版本 id（如 `stream_webgpu_v1`），记录 `apiImplementation/underlyingBackend/timingMode`；timestamp-query 是可选能力，没有可靠 GPU timestamp 不产生正式 score；浏览器无 RenderDoc，抓帧标注不可用。
 7. **HarmonyOS PC / 鸿蒙**：**2026-10-06 起 `ohos/` 已改为接入共享 `gpu_engine` 的 App**（粒子测试、GPU Burn、CPU 算力测试、缓存 / 内存带宽扫描、历史和图表），能用 DevEco Studio 26.0 的工具链编出未签名的 HAP，但**没有在任何设备或模拟器上运行过**。成绩使用独立的结果组（`_ohos_preview` 后缀）。流体测试、抓帧编排、正式的 15 秒结果合同、签名和发布包都还没有做，不能写成已完成移植。见 `ohos/README.zh-CN.md` 和第 10 节验证记录。
 8. **Windows 7 专用 GUI（排在 HarmonyOS 之后、PS3 之前）**：当前 WinUI 3 / Windows App SDK 与现有安装器最低版本是 Windows 10 1809，不能通过改 manifest 假装支持 Windows 7。另建共享 `gpu_engine`/CLI worker/结果 schema 的原生 Win32 兼容前端与独立安装包；优先使用 DWM/Aero 能力（例如玻璃区域、非客户区整合、主题化控件、Direct2D/DirectWrite），但必须运行时探测 DWM composition，并在 Aero Basic、经典主题、远程桌面或 DWM 关闭时正常回退，不能把透明/模糊当硬依赖。
@@ -1763,6 +1763,30 @@ PathService 已把 results/captures/reports/logs 改到
 6. 之后按第 2 节顺序继续 Android → iOS → Debian → WebGPU → HarmonyOS → **Windows 7 Aero GUI** → PS3（探索）→ Lumia 1520 legacy WP（探索）→ iPhone 4 legacy iOS（探索）→ Dual-GPU Collaboration → HTC HD2（探索）；后期 RT/路径追踪/厂商超分不得抢占用户当前指定的平台刀。
 
 ## 10. 验证记录
+
+### 2026-10-21 ThinkCentre M700（i5-6400T + HD 530）：第一台自动安装 Ubuntu 的测试机，整套 26 项
+
+- **装机：** 用户有几台闲置电脑，统一装 Ubuntu 给 Claude 用 SSH 测。做法写进 `docs/building.md` 新的 x86-64 测试机一节：26.04 live-server ISO（26.10 桌面 ISO 在 casper "Generating APT cache" 卡住），U 盘根目录放 `autoinstall.yaml`（模板 `scripts/linux/autoinstall.template.yaml`，`make-autoinstall.ps1` 填公钥，密码哈希手填，填好的文件在被忽略的 `out\linux-autoinstall\`，不入库），无人值守：清空最大的 SSD、装编译依赖、免密 sudo、屏蔽睡眠、主机名 `mk-<MAC 后 6 位>`。第一次没插网线，装到 `ubuntu-desktop-minimal` 失败，所以桌面改为装好后用 `scripts/linux/setup-desktop.sh` 通过 SSH 装 GNOME 并自动登录。
+- **测法：** 新写的 `scripts/linux-suite.ps1`：把这个工作区（含未提交改动）同步过去、在机器上编译并跑 `ctest`、用 `setsid` 脱离 SSH 跑 `scripts/linux/series.sh`（每块硬件 GPU 的桌面版完整测试任务，再加两项 CPU；llvmpipe 跳过；每 2 秒记温度和频率），跑完拉回 `out\linux\<主机>-series-<时间>\`。窗口走 Wayland（GLFW 3.4），1280x720。副本 `out\linux\mk-ea0ffb-series-20261021-182831\`（带 `DEVICE-STATE.txt`）和 `out\linux\mk-ea0ffb-burn256-preempt2000-series-20261021-185143\`。
+- **机器：** 联想 ThinkCentre M700 Tiny，i5-6400T（4 核 4 线程，全核约 2.69 GHz），2 x 4 GB DDR4-2133 双通道（理论 34.1 GB/s），HD 530（24 EU，负载 900 MHz），Ubuntu 26.04.1、内核 7.0、Mesa 26.0.8。CPU 52–62 °C。
+
+  | 项目 | Vulkan | OpenGL |
+  |---|---|---|
+  | 粒子 显示画面 65K/1M/4M/16M | 23.70 / 12.90 / 12.56 / 13.59 | 2.58 / 11.58 / 12.20 / 13.87 GB/s（墙钟） |
+  | 粒子 headless 65K/1M/4M/16M | 26.90 / 14.15 / 14.44 / 14.39 | 4.59 / 13.11 / 14.05 / 14.59 GB/s（墙钟） |
+  | GPU Burn 16/64/256 步 | 0.40 / 0.51 / 0.54 | 0.41 / 0.51 / 0.54 Gpix-step/s |
+  | 流体 | 2.09 MParticle-step/s | — |
+  | GPU 显存读取（V3） | 23.4 GB/s（34.1 的 69%），缓存平台 55.6 | — |
+  | CPU 单核 / 全核 | 116.9 / 431.7 MWork/s（每单元约 24 个周期） | |
+  | CPU 内存读取 单线程 / 全核 | 16.1 / 20.0 GB/s | |
+
+- **GPU Burn 256 步两项第一次都失败，原因是 i915 的抢占超时：** i915 给不能让出的 GPU 任务 640 ms（`/sys/class/drm/card1/engine/rcs0/preempt_timeout_ms`；Windows TDR 是 2 秒）。256 步一次绘制在 900 MHz 下约 435 ms，刚开始 GPU 还在 350 MHz 时超过 1 秒，dmesg 写 "Resetting rcs0 for preemption time out"。Vulkan 报设备丢失退出、没存；OpenGL 被重置后继续“跑”空帧（每秒 10,784 帧），存了一条 0 分、0 个计时样本的 `20261021-184708-715`——**已知错误，按“先别删”留在机器的成绩文件里**。用户选择方案 A：临时把超时改到 2000 ms（用户自己执行，系统设置不由 Claude 改），只重跑这两项：Vulkan 0.54（`20261021-185202-699`）、OpenGL 0.54（`20261021-185250-054`），没有再重置。
+- **引擎改动（用户同意）：** `app_base.cpp` 里一次运行没有任何 GPU 计时样本、也没有分数时不再保存，报 "No GPU timing data was collected; no score is saved" 并以失败退出。以前存下的同类 0 分记录（Windows DX11 粒子 59 条、ES 2.0 GPU Burn 8 条、Vulkan 5 条、Metal 粒子 5 条等）不动；Metal `gpu_cache` 那类有分数但没有逐帧样本的记录照常保存。
+- **OpenGL 粒子在 Mesa Intel 上只能用墙钟：** iris（还有老一代的 crocus）把计算派发放在单独的 compute 批次里，而 GL 时间戳查询固定放在 render 批次（`iris_create_query` 里 `batch_idx = IRIS_BATCH_RENDER`，Debian 的 Mesa 26.2.5 源码核对过），所以时间戳框不住计算（一步读到 0.001 ms，Vulkan 是 0.111 ms）。引擎的合理性检查当时自动切到了墙钟；现在 `opengl_backend.cpp` 对渲染器名以 "Mesa Intel" 开头、带计算的测试一开始就用墙钟，日志写明原因；GPU Burn 只有绘制，继续用时间戳（核对过 0.41，和整套一致）。墙钟每步多 0.5–0.9 ms 的等待，所以 OpenGL 65K/1M 偏低，4M 起和 Vulkan 差几个百分点；这块 GPU 小粒子数看 Vulkan。
+- **核对：** 粒子 1M 起 12.6–14.6 GB/s（每粒子 40 B），显存读 23.4 是理论的 69%，CPU 全核内存读 20.0 是 59%；GPU Burn 两个 API 一样；CPU 每单元约 24 个周期，和树莓派 4 的 A72 相同。
+- **验证新规则：** 用户把超时改回 640 后，在临时数据目录里再跑 OpenGL 256 步：同样被 i915 重置（dmesg 有记录），引擎报 "No GPU timing data was collected; no score is saved"、退出码 1，没有建结果文件。Mesa Intel 墙钟规则也在临时目录核对过：粒子 65K / 4M headless 4.51 / 14.24（整套 4.59 / 14.05），GPU Burn 16 步仍用时间戳 0.41。
+- **熄屏锁屏：** 整套跑完、`gnome-session-inhibit` 退出 5 分钟后 GNOME 熄屏并锁屏，用户要输密码才解开；锁着屏开始的窗口测试会画在锁屏后面。用户同意后 `setup-desktop.sh` 加了系统级 dconf 默认值（`/etc/dconf/profile/user` + `/etc/dconf/db/local.d/90-mangekyo`：不熄屏、不锁屏、空闲不睡眠），mk-ea0ffb 上单独执行了这一段，`gsettings` 读回 0 / false / nothing。
+- **还没做：** 其他几台机器装好后照同样流程测。
 
 ### 2026-10-20 Intel Arc A380：完整测试 46 项（用户不在时自行完成）
 
