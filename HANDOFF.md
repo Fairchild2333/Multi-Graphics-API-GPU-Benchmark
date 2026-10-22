@@ -1764,6 +1764,36 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-10-22 飞腾 D2000 + Radeon HD 6450（Caicos）：银河麒麟 V10 和 Ubuntu 26.04 各测一遍；板载网卡驱动；radeon 上 ES 2.0 计时修正
+
+- **机器：** 飞腾 D2000/8（ARMv8，8 核 2.3 GHz，L1d 32 KB、L2 每两核 2 MB、L3 4 MB），4 GB 内存，NVMe（SM2263 无缓存），独显 AMD Caicos（HD 6450 / R5 230 级，1 GB 64 位显存，PCIe 2.0 跑在 5 GT/s x8），片上两个千兆网口（ACPI `PHYT0004`，PHY 裕太 YT8521），Wi-Fi RTL8852BE。CMOS 电池没电，每次断电时钟回到 07-28，联网后才校准。
+- **开机认卡时好时坏：** 有时开机固件就没训练出显卡的 PCIe 链路（连 BIOS 画面都没有，根端口 00:01.0 下面没有设备、也没分配地址窗口），冷启动、热启动、拔电都出现过，用户说只要开机有画面就一直稳定。麒麟时期一次热重启后丢卡、冷启动恢复；Ubuntu 上一次热重启卡在 `Rebooting.`、拔电后仍丢卡，再一次关机拔电后正常。原因未查清（换 CMOS 电池、重插显卡、BIOS 限 Gen2 可以试）；这台尽量不重启，Ubuntu 的 `setup-desktop.sh` 去掉最后的重启、直接启动 gdm。
+- **银河麒麟 V10 SP1（内核 5.4.18、Mesa 20.0.8、X11/UKUI，用户 `qwer@qwer-pc`）：** 源里 CMake 3.16，用 pip 装新版（`build.sh` 找 `~/.local/bin`）。Mesa 只给 OpenGL 3.3（缺 fp64），用 `linux-suite.ps1` 新的 `-Env` 参数加 `MESA_GL_VERSION_OVERRIDE=4.3 MESA_GLSL_VERSION_OVERRIDE=430`（用到的功能都在），`state.txt` 记下这些变量。没有 `eglinfo`，`series.sh` 改用 `glxinfo` 读渲染器。关屏保（UKUI `idle-delay`）、开 LightDM 自动登录。
+  - 第一遍（`Kylin-D2000-series-20261022-004317`）的 OpenGL 11 项有效；GPU Burn 256 收尾触发 radeon 卡死复位，之后窗口管理器 `ukui-kwin_x11` 空转占 69% CPU，紧接着的 CPU 两项（全核 650.20）作废；ES 2.0 那遍因为没有 `eglinfo` 被跳过。冷启动后重跑（`Kylin-D2000-rerun-series-20261022-011037`）：ES 2.0 和 CPU 有效；第二次只跑 CPU（`Kylin-D2000-cpu-series-20261022-013026`）全核 700.06。
+  - 麒麟上 0 号核单核只有 37.85 / 36.93（其余 7 核 95.28–95.31），两次冷启动后都这样；同一台机器换 Ubuntu 后 0 号核 94.98，和其他核一样，所以是麒麟这边有东西占着 0 号核，不是芯片。缓存内存测试在麒麟上 640–660 秒（Ubuntu 42 秒），慢在存储那一步，当时安全服务 `kysec` 一直忙，麒麟的存储数字只作参考。
+- **Ubuntu 26.04.1（内核 7.0.0-38、Mesa 26.0.8、GNOME Wayland，主机名 `mk-bcfa5e`，有线 192.168.20.79）：** 板载网口在 Ubuntu 内核里没有驱动，所以用 Wi-Fi 无人值守安装（`make-autoinstall.ps1 -Wifi`；networkd 的 Wi-Fi 只认接口名 `wlp5s0`，不认 match；early-commands 等安装器自己装好 `wpa_supplicant`）。装机时网络没起来，安装按 `fallback: offline-install` 从 ISO 装完，目标系统没有 `wpasupplicant`：`apt-cdrom` 签名校验失败，改用 `deb [trusted=yes] file:/mnt resolute main restricted` 从 U 盘装上。模板也改成网络失败也一定装完：编译包挪到最后一条可失败的 late-command，`drivers.install: false`，主机名没默认路由时取第一个网口。
+  - **板载网卡：** Armbian 的 `dwmac-phytium.c`（uefi-arm64-7.3 补丁）做成 DKMS（`scripts/linux/install-phytium-gmac.sh`、`scripts/linux/phytium/`），stmmac 内部头文件从同版本 `linux-source-7.0.0` 包里取，`BUILD_EXCLUSIVE_KERNEL="^7\.0\."`。7.0 的 `stmmac_plat_dat_alloc()` 还不分配 `dma_cfg`（7.3 才分配），第一次加载在 probe 里空指针 oops，补了一段"没有就自己分配"。两个口 `enaphyt4i0/1`，MAC 来自固件（固定），1 Gbps 全双工；裸 TCP 发送 117 MB/s、接收约 60 MB/s。7.0.0-30 和 7.0.0-38 都编好，开机自动加载。
+  - **软件源：** 装机时 `geoip: false`，系统用了英国的 archive.ubuntu.com，桌面 750 个包 494 MB 下了 26 分半（0.31 MB/s）；PC 上实测 au.archive.ubuntu.com 快约 8 倍（96.9 对 11.7 MB/s），且有 arm64。这台改成澳洲镜像，模板 `apt.primary` 也写成 au.archive。unattended-upgrades 一联网就把内核升到 7.0.0-38。
+  - Mesa 26 给 Caicos **原生 OpenGL 4.6**，不用版本覆盖；Vulkan 只有 llvmpipe（r600 没有 Vulkan），序列跳过。Ubuntu 默认给 kdump 预留 512 MB，可用内存 3.2 GiB，内存测试上限降到 888 MiB；透明大页是 madvise（麒麟 always），新页映射 1.37 GB/s（麒麟 2.38）。swap 是 3.7 GB 的 `/swap.img`。
+- **radeon 上 ES 2.0 计时修正（`src/es2burn_cli.cpp`，只对渲染器名含 "(DRM 2." 生效，即 radeon 内核驱动；amdgpu 是 DRM 3.x）：** 轮询的 EGL fence 只在 radeon 每半秒一次的检查时才变成已完成，1 步到 128 步每帧都读 504.000 ms（500 ms 加一个 4 ms 节拍），中断本身正常。改为每帧读回一个像素（兆芯那条路径）后帧时间随步数线性增长：16 / 64 / 128 步 14.1 / 51.4 / 99.9 ms。第一遍的 0.06 / 0.23 作废，日志留在 `mk-bcfa5e-series-20261022-131824`。麒麟 5.4 内核上轮询正常，那边的数字不受影响。另外 `series.sh` 判断 ES 2.0 渲染器时取了 `eglinfo` 第一段（GBM 平台，这台是 llvmpipe），改为只看测试实际用的 Surfaceless 段。
+- **GPU Burn 256 和 radeon 的 10 秒卡死判定：** 两边 OpenGL 256 步每帧 2.4–3.2 秒，测完收尾时 ring 0 超过 10 秒没进展，radeon 判卡死并软复位，测量本身在这之前结束，成绩有效。麒麟上复位后窗口管理器失常（见上）；Ubuntu 上复位成功、黑屏一下就恢复，GNOME 没崩，复位后 ES 2.0 16 步仍是 14.08 ms。所以 256 步两边都单独放在最后跑。
+
+  | 项目 | 银河麒麟 V10（Mesa 20.0.8，GL 版本覆盖 4.3） | Ubuntu 26.04（Mesa 26.0.8，GL 4.6） |
+  |---|---|---|
+  | OpenGL 粒子 带窗口 65K / 1M / 4M / 16M | 2.49 / 3.23 / 3.28 / 3.09 GB/s | 2.05 / 2.08 / 2.12 / 2.08 GB/s |
+  | OpenGL 粒子 无窗口 65K / 1M / 4M / 16M | 3.30 / 3.27 / 3.26 / 3.25 GB/s | 2.07 / 2.06 / 2.06 / 2.06 GB/s |
+  | OpenGL GPU Burn 16 / 64 / 256 步 | 0.14 / 0.16 / 0.15 Gpix-step/s | 0.16 / 0.19 / 0.20 Gpix-step/s |
+  | ES 2.0 GPU Burn 16 / 64 / 256 步 | 1.77 / 1.21 / 1.14（16.6 / 97.1 / 413.4 ms） | 2.09 / 2.29 / 1.37（14.1 / 51.4 / 344.2 ms，读回像素） |
+  | CPU 单核 | 1–7 号核 95.28–95.31，0 号核 37.85 | 94.83–95.01（8 个核都一样） |
+  | CPU 全核 | 704.39 / 700.06 MWork/s | 756.85 MWork/s |
+  | 内存读取 单线程 / 全核 | 5.0–5.4 / 11.6 GB/s | 5.3 / 10.9 GB/s |
+  | L1 / L2 读取 全核 | 172.3 / 132.2 GB/s | 184.4 / 142.7 GB/s |
+  | 存储 顺序读写 / 随机 4K 读（QD1） | 1485 / 534 / 62.9 MB/s（kysec 期间） | 1429 / 536 / 58.3 MB/s |
+
+  - 粒子流 Ubuntu 慢约 37%：同一块卡，着色器编译路径不同（Mesa 20 的 r600 从 TGSI 编译，Mesa 26 用 NIR 后端 sfn），原因没有再往下查。ES 2.0 和 GPU Burn 反过来是 Ubuntu 快。ES 2.0 到 256 步两边速率都掉一截，是这块卡跑长循环着色器的特点。
+  - CPU 2.3 GHz 下每单元约 24 个周期，和 Skylake、A72、龙芯 GS464V 一样；全核 Ubuntu 高 7%，主要是 0 号核正常了。
+- **副本：** 麒麟 `out\linux\Kylin-D2000-series-20261022-004317`（OpenGL 有效，CPU、ES 2.0 作废）、`Kylin-D2000-rerun-series-20261022-011037`、`Kylin-D2000-gles2-series-20261022-005934`（被重跑取代）、`Kylin-D2000-cpu-series-20261022-013026`；Ubuntu `mk-bcfa5e-series-20261022-131824`（ES 2.0 两项作废，其余有效）、`mk-bcfa5e-series-20261022-133619`（ES 2.0 读回像素）、`mk-bcfa5e-series-20261022-133905`（OpenGL 256 步），各带 `DEVICE-STATE.txt`。
+
 ### 2026-10-21 联想开天 T630Z（兆芯 KX-6640A + C-960）：兆芯驱动移植到 Linux 7.0，ES 2.0 GPU Burn 和 CPU
 
 - **机器：** 开天 T630Z（90LYZ52NCN），兆芯开先 KX-6640A（4 核 2.6 GHz，有 AVX 无 AVX2，4 MB 共享 L2、无 L3），2 x 8 GB DDR4-2666，NVMe。和 ThinkCentre 一样自动装 Ubuntu 26.04.1（主机名 `mk-2753ce`）。

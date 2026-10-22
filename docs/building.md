@@ -275,7 +275,13 @@ next to `casper`. Boot from the stick and pick the first GRUB entry. The
 install asks nothing: it **wipes the largest SSD** (the largest disk without
 one), installs the build packages, gives the user passwordless sudo and this
 PC's SSH key, masks sleep, names the machine `mk-<last 6 hex digits of the
-wired MAC>` and reboots.
+wired MAC>` and reboots. Packages come from the Australian mirror
+(`au.archive.ubuntu.com`). Without a network the install still finishes,
+from the ISO; the build packages are then installed later over SSH. A
+machine whose wired port has no driver in Ubuntu's kernel installs over
+Wi-Fi: run `make-autoinstall.ps1 -Wifi` (add `-WifiInterface <name>` if the
+installer's `ip -br link` names it other than `wlp5s0`) and fill in the
+network's name and password in the written file.
 
 **2. Desktop.** The windowed tests need a running session, so GNOME is added
 after the first boot and logs the user in by itself. The script also turns
@@ -300,7 +306,9 @@ desktop-suite jobs of every hardware GPU; the OpenGL ES 2.0 GPU Burn at 16 /
 then the two CPU jobs) and fetches
 the run to `out\linux\<host>-series-<time>\`. `-Only <regex>` runs some jobs,
 `-SkipBuild` keeps the build already there, `-BuildOnly` stops after the
-build, and `-Attach <run>` follows a run that is already going.
+build, `-Env "NAME=value ..."` sets environment variables for the series
+(recorded in its `state.txt`), and `-Attach <run>` follows a run that is
+already going.
 
 **Known limits on Intel GPUs (Mesa, i915).**
 
@@ -342,6 +350,60 @@ machine, send the source with `-BuildOnly`, then run
   the install script sets `GSK_RENDERER=cairo` for the user.
 - On 7.0 the driver has no framebuffer console of its own (the fbdev helpers
   it used are gone); the desktop drives the screen through KMS.
+
+### Phytium D2000 (arm64) with a Radeon HD 6450
+
+> **Verification status: run on real hardware** (Phytium D2000/8 board with
+> an AMD Caicos card, Ubuntu 26.04.1 and Kylin V10 SP1, 2026-10-22).
+
+The same unattended install works on arm64, over Wi-Fi: the D2000's two
+on-chip Gigabit ports (DesignWare GMAC, ACPI `PHYT0004`) have no driver in
+Ubuntu's kernel, which has the stmmac core but not Phytium's glue. Once the
+machine is reachable over Wi-Fi, send the source with `-BuildOnly` and run
+
+```bash
+sh ~/mangekyo/scripts/linux/install-phytium-gmac.sh
+```
+
+It builds Armbian's `dwmac-phytium` glue (`scripts/linux/phytium/`) with
+DKMS for every installed kernel, taking the stmmac driver's internal headers
+from the running kernel's `linux-source` package (about 190 MB, once), and
+loads it. The installer's netplan gives any wired port named `e*` an address
+by DHCP, so the ports (`enaphyt4i0`, `enaphyt4i1`) come up at once and at
+every boot after. DKMS builds it only for 7.0 kernels, whose stmmac headers
+it was taken from.
+
+If the install ran without a network, the installed system lacks
+`wpasupplicant`. Install it from the stick, mounted at `/mnt`: `apt-cdrom`
+rejects the stick's signature (the key is not on the installed system), so
+add it as a trusted local source instead:
+
+```bash
+echo "deb [trusted=yes] file:/mnt resolute main restricted" | sudo tee /etc/apt/sources.list.d/usb.list
+sudo apt update; sudo apt install -y wpasupplicant && sudo netplan apply
+```
+
+Remove `/etc/apt/sources.list.d/usb.list` once the machine is online.
+
+- Mesa 26 gives the Caicos OpenGL 4.6; there is no Vulkan driver for it (only
+  llvmpipe, which the series skips). Kylin V10's Mesa 20 offers 3.3 (no
+  fp64); there the series ran with
+  `-Env "MESA_GL_VERSION_OVERRIDE=4.3 MESA_GLSL_VERSION_OVERRIDE=430"`.
+- On this board the firmware sometimes fails to bring up the card's PCIe
+  link at power-on (no picture, not even the firmware's), after cold and warm
+  starts alike; once the screen comes up the card stays. Reboot it as little
+  as possible: run `setup-desktop.sh` without its final reboot
+  (`grep -v "systemctl reboot"`) and start the desktop with
+  `sudo systemctl start gdm`.
+- The radeon kernel driver declares the GPU hung when a ring makes no
+  progress for 10 s. OpenGL GPU Burn at 256 steps takes 2.4 s a frame, and
+  the frames still queued at its end trip that check; the driver resets the
+  GPU (the screen goes black for a moment) after the measurement has ended.
+  Run that job last (`-Only 'opengl-gpu-burn-256$'`).
+- On the radeon kernel driver (Mesa renderer "... (DRM 2.x ...)") a polled EGL
+  fence only reads done at the driver's half-second check, so the OpenGL ES
+  2.0 GPU Burn waits for each frame by reading one pixel back, as on
+  Zhaoxin's driver.
 
 ### Loongson 3A4000 with UnionTech OS 20 (MIPS64)
 
