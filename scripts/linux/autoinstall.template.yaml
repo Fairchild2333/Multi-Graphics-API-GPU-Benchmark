@@ -3,7 +3,11 @@
 # the first boot, over SSH (scripts/linux/setup-desktop.sh): installed in the
 # installer's chroot it needs the network at install time and pulls in snaps.
 # The 26.10 desktop ISO hung while its live system was being prepared.
-# Needs a wired network during the install (drivers, build packages).
+# The install always finishes, with or without a network: without a mirror it
+# installs from the ISO, and the build packages that need the network are
+# installed last and may fail (then installed later over SSH). Wired, or Wi-Fi
+# with make-autoinstall.ps1 -Wifi (Phytium D2000's on-chip Ethernet has no
+# driver in Ubuntu's kernel).
 # scripts/linux/make-autoinstall.ps1 fills in the SSH key; the password hash is
 # added by hand (openssl passwd -6) and never committed. The filled file goes to
 # the root of the USB stick, next to the casper directory.
@@ -33,35 +37,39 @@ autoinstall:
         - ssd: true
           size: largest
         - size: largest
+  # Whatever the network does, the install must finish: without a mirror it
+  # installs from the ISO, and drivers and packages come later over SSH.
+  # The Australian mirror, not archive.ubuntu.com: apt fetches the desktop's
+  # 750 packages one after another, and from the UK that ran at 0.3 MB/s.
+  # It carries arm64 as well (since 26.04 on the same archive as amd64).
+  apt:
+    fallback: offline-install
+    geoip: false
+    primary:
+      - arches: [default]
+        uri: http://au.archive.ubuntu.com/ubuntu
   drivers:
-    install: true
-  packages:
-    - build-essential
-    - cmake
-    - git
-    - pkg-config
-    - libglfw3-dev
-    - libvulkan-dev
-    - vulkan-tools
-    - glslc
-    - libegl-dev
-    - libgles-dev
-    - mesa-utils
-    - lm-sensors
-    - pciutils
-    - avahi-daemon
-    - curl
+    install: false
   late-commands:
+    # The packages are installed here rather than in a packages: list, so that
+    # a network that fails during the install leaves a working system to fix
+    # later instead of stopping the install.
+    - curtin in-target -- sh -c 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential cmake git pkg-config libglfw3-dev libvulkan-dev vulkan-tools glslc libegl-dev libgles-dev mesa-utils lm-sensors pciutils avahi-daemon curl' || true
     # Passwordless sudo for the test user, so the PC can drive the machine.
     - echo 'fairchild ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/90-mangekyo
     - chmod 440 /target/etc/sudoers.d/90-mangekyo
     # Never sleep: a suspended machine cannot be reached over SSH.
-    - curtin in-target -- systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+    - curtin in-target -- systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target || true
     # A name of its own, from the last 6 digits of the wired MAC: mk-xxxxxx.local
+    # Without a default route (no network), the first network interface.
     - |
       dev=$(ip route show default | awk '{print $5; exit}')
-      mac=$(tr -d ':' < /sys/class/net/$dev/address)
-      host="mk-${mac#??????}"
-      echo "$host" > /target/etc/hostname
-      sed -i "s/mk-new/$host/g" /target/etc/hosts
+      [ -n "$dev" ] || dev=$(ls /sys/class/net | grep -v -E '^(lo|sit|ip6tnl|can|docker|virbr)' | head -1)
+      mac=$(tr -d ':' < /sys/class/net/$dev/address 2>/dev/null)
+      if [ -n "$mac" ]; then
+        host="mk-${mac#??????}"
+        echo "$host" > /target/etc/hostname
+        sed -i "s/mk-new/$host/g" /target/etc/hosts
+      fi
+      true
   shutdown: reboot

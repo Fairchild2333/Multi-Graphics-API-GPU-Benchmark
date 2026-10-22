@@ -61,6 +61,7 @@ telemetry() {
     echo "cpu: $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2-), $(nproc) threads, governor $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null)"
     echo "power profile: $(powerprofilesctl get 2>/dev/null || echo n/a)"
     echo "session: ${WAYLAND_DISPLAY:+wayland }${DISPLAY:+x11 $DISPLAY}"
+    env | grep -E "^(MESA|EGL|LIBGL|GALLIUM)_" | sed "s/^/env: /"
     lspci | grep -i -E 'vga|3d|display'
     command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi --query-gpu=name,driver_version,pcie.link.gen.current,pcie.link.width.current --format=csv,noheader
     # Xwayland of a GNOME session wants its key; the engine itself is left to
@@ -125,7 +126,12 @@ done < "$out/gpus.tsv"
 # driver with OpenGL ES 2.0 alone can run (Zhaoxin C-960). Not saved in
 # results.json; the figures are in the logs. Skipped on a software renderer.
 es2=$root/build/mangekyo_es2burn
-es2gpu=$(EGL_PLATFORM=surfaceless eglinfo -B 2>/dev/null | sed -n 's/^OpenGL ES profile renderer: //p' | head -1)
+# eglinfo lists every EGL platform whatever EGL_PLATFORM says; take the
+# surfaceless one the test runs on (GBM gave llvmpipe on a Radeon HD 6450).
+es2gpu=$(eglinfo -B 2>/dev/null | sed -n '/^Surfaceless platform:/,/ platform:$/ s/^OpenGL ES profile renderer: //p' | head -1)
+# Older distributions (Kylin V10, Ubuntu 20.04) have no eglinfo; the GLX
+# renderer is the same GPU.
+[ -z "$es2gpu" ] && es2gpu=$(glxinfo -B 2>/dev/null | sed -n 's/^OpenGL renderer string: //p' | head -1)
 if [ -x "$es2" ] && [ -n "$es2gpu" ] && ! echo "$es2gpu" | grep -q -i -E "llvmpipe|softpipe|lavapipe"; then
     tag=$(echo "$es2gpu" | tr -c 'A-Za-z0-9\n' '-' | sed 's/--*/-/g; s/-$//')
     for s in 16 64 256; do

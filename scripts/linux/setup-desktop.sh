@@ -35,9 +35,10 @@ sudo dconf update
 # The desktop brings NetworkManager, but the wired port is already set up by
 # the server install's netplan (systemd-networkd). With both managing it, a
 # NetworkManager IPv6 change crashed networkd and dropped the network for a
-# minute; NetworkManager leaves wired ports alone.
+# minute; NetworkManager leaves wired ports and Wi-Fi (set up by netplan when
+# installed with make-autoinstall.ps1 -Wifi) alone.
 sudo mkdir -p /etc/NetworkManager/conf.d
-printf '[keyfile]\nunmanaged-devices=type:ethernet\n' | sudo tee /etc/NetworkManager/conf.d/90-mangekyo-unmanaged.conf > /dev/null
+printf '[keyfile]\nunmanaged-devices=type:ethernet;type:wifi\n' | sudo tee /etc/NetworkManager/conf.d/90-mangekyo-unmanaged.conf > /dev/null
 
 # No crash pop-ups: Apport's "System program problem detected" came back at
 # every login for crashes that were long dealt with, and would collect a core

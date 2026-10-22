@@ -49,6 +49,11 @@
 .PARAMETER BuildOnly
     Sends the source and builds it, then stops; runs no job.
 
+.PARAMETER Env
+    Environment variables for every job, e.g. -Env "MESA_GL_VERSION_OVERRIDE=4.3"
+    (space-separated NAME=value pairs, no quotes inside). They are listed in
+    state.txt.
+
 .PARAMETER Attach
     Follows a run that is already going (its folder name, as printed when it
     started) and fetches it when it is done. Sends, builds and starts nothing.
@@ -66,12 +71,14 @@ param(
     [int]$CoolDownSeconds = 30,
     [switch]$SkipBuild,
     [switch]$BuildOnly,
+    [string]$Env = "",
     [string]$Attach = ""
 )
 
 $repo = Split-Path -Parent $PSScriptRoot
-$sshOptions = @("-o", "BatchMode=yes", "-o", "ConnectTimeout=15", "-o", "ServerAliveInterval=20")
+$sshOptions = @("-o", "BatchMode=yes", "-o", "ConnectTimeout=15", "-o", "ServerAliveInterval=20", "-o", "LogLevel=ERROR")
 if ($Only -match "'") { Write-Host "-Only cannot contain a single quote."; exit 2 }
+if ($Env -and $Env -notmatch '^([A-Za-z_][A-Za-z0-9_]*=[^\s''"]*\s*)+$') { Write-Host "-Env takes NAME=value pairs without quotes."; exit 2 }
 
 # Runs one command on the machine. Remote commands are written with single
 # quotes only: Windows PowerShell drops double quotes inside native arguments.
@@ -150,7 +157,7 @@ if ($Attach) {
     }
 
     $dir = "mangekyo-runs/$run"
-    Invoke-Remote ("COOL=$CoolDownSeconds setsid nohup sh mangekyo/scripts/linux/series.sh `$HOME/$dir '$Only' " +
+    Invoke-Remote ("$Env COOL=$CoolDownSeconds setsid nohup sh mangekyo/scripts/linux/series.sh `$HOME/$dir '$Only' " +
         "> $dir/series.out 2>&1 < /dev/null & echo `$! > $dir/series.pid")
     if ($LASTEXITCODE -ne 0) { Write-Host "Starting the series failed."; exit 1 }
     Write-Host "Series started: $run"

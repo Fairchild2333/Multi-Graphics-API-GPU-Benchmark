@@ -3,6 +3,8 @@
 # without the install and packaging rules, then runs the result-file test.
 set -eu
 cd "$(dirname "$0")/../.."
+# A newer CMake from pip (the distribution's is older than 3.22) sits here.
+[ -d "$HOME/.local/bin" ] && PATH="$HOME/.local/bin:$PATH"
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DGPU_BENCH_ENABLE_PACKAGING=OFF
 cmake --build build -j"$(nproc)"
 # The stand-alone OpenGL ES 2.0 GPU Burn, for GPUs whose driver offers only

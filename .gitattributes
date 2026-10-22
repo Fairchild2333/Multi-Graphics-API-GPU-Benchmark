@@ -37,3 +37,5 @@ results/** -text
 
 # Applied with patch(1) on Linux; keep LF whatever the checkout.
 scripts/linux/zhaoxin/*.patch text eol=lf
+# Built by DKMS on Linux (dkms.conf is read by the shell).
+scripts/linux/phytium/* text eol=lf
