@@ -183,6 +183,11 @@ int main(int argc, char* argv[]) {
     // hundred ms. On that driver the frames go into a texture of the same
     // size and every frame is waited for by reading one pixel back.
     const bool zhaoxin = renderer && strncmp(renderer, "ZX ", 3) == 0;
+    // The radeon kernel driver (Mesa names it "(DRM 2.x ...)"; amdgpu is DRM
+    // 3.x) marks a polled fence done only at its half-second check: every
+    // frame of a Radeon HD 6450 read 504 ms, at 1 step as at 128. A pixel
+    // read back waits in the kernel, which wakes when the GPU is done.
+    const bool radeonKernel = renderer && strstr(renderer, "(DRM 2.") != nullptr;
 
     const char* extensions = eglQueryString(display, EGL_EXTENSIONS);
     if (extensions && strstr(extensions, "EGL_KHR_fence_sync")) {
@@ -195,6 +200,11 @@ int main(int argc, char* argv[]) {
         g_waitByReadback = true;
         printf("[Profiling] Zhaoxin driver: its EGL fences and glFinish can return before the GPU "
                "is done; waiting for every frame by reading one pixel back.\n");
+    } else if (radeonKernel) {
+        g_createSync = nullptr;
+        g_waitByReadback = true;
+        printf("[Profiling] radeon kernel driver: a polled fence reads done only every half second; "
+               "waiting for every frame by reading one pixel back.\n");
     } else if (!g_createSync || !g_destroySync || !g_clientWaitSync) {
         g_createSync = nullptr;
         printf("[Profiling] No EGL fence on this device: waiting for the GPU with glFinish, "
