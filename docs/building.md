@@ -431,6 +431,27 @@ libraries, so OpenGL is llvmpipe. etnaviv knows the PCI ID, yet LS7A1000
 support never fully reached upstream etnaviv / Mesa, and unbinding Galcore
 at run time froze the machine.
 
+### Synology DSM NAS (x86-64, CPU only)
+
+> **Verification status: CPU tests run on real hardware** (Synology DS923+,
+> AMD Ryzen Embedded R1600, DSM 7.4.1, 2026-10-24).
+
+DSM has no compiler, so the CPU tool is cross-built on the PC with Docker
+like the Loongson one, statically, with the flags of the Linux CMake Release
+build (run from the repository root in PowerShell):
+
+```powershell
+docker run --rm -v "${PWD}\src:/src:ro" -v "${PWD}\out\x64-static:/out" debian:bookworm bash -c "apt-get update -qq && apt-get install -y -qq g++ && g++ -std=c++17 -O3 -DNDEBUG -Wall -Wextra -static -pthread -I /src /src/cpu_membw.cpp /src/cpu_benchmark.cpp /src/system_info.cpp /src/cpumem_cli.cpp -o /out/mangekyo_cpumem"
+```
+
+Turn on SSH (Control Panel > Terminal & SNMP) and the user home service
+(Control Panel > User & Group > Advanced); DSM leaves home folders open to
+everyone, and SSH ignores a key in them until the folder is `chmod 755`. Copy
+the tool with `ssh nas 'cat > ~/mangekyo-cpumem/mangekyo_cpumem' < ...` (a
+recent scp goes through SFTP, which DSM turns on separately), and run it from a folder on `/volume1`, so that the
+storage test writes there and not into the small system partition. DSM swaps
+to zram, so the storage figures are those of the data volume.
+
 ---
 
 ## Windows (x64 / ARM64)

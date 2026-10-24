@@ -1764,6 +1764,24 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-10-24 群晖 DS923+（AMD Ryzen Embedded R1600）：NAS 上只测 CPU
+
+- **机器：** 群晖 DS923+（主机名 BigHouse），AMD Ryzen Embedded R1600（Zen，2 核 4 线程，2.6 GHz、加速 3.1 GHz，L2 每核 512 KB、L3 4 MB，没有核显），7.7 GiB DDR4，DSM 7.4.1（内核 4.4，调频 performance，swap 是 zram）。SSH `fairchild@192.168.20.102`，公钥登录（DSM 要先启用家目录服务，家目录权限改成 755 才认公钥），没有配免密 sudo，CPU 测试用不着。
+- **做法（同龙芯那台，结果只在日志）：** DSM 没有编译器，在 PC 的 Docker（debian:bookworm，GCC 12.2）按 Linux CMake Release 的参数（`-std=c++17 -O3 -DNDEBUG`）静态编译 `mangekyo_cpumem`，用 `ssh … 'cat > …'` 传到 `~/mangekyo-cpumem`（在 `/volume1` 上，测试文件不会写进 7.9 GB 的系统分区），先 `--compute` 再默认测试，测完删掉程序。测时 CPU 空闲（负载 0.00–0.09），硬盘在读写（I/O 负载 0.6–0.9）。
+
+  | 项目 | 成绩 |
+  |---|---|
+  | CPU 单线程（每个逻辑核） / 全核（4 线程） | 124.13–124.37 / 420.88 MWork/s |
+  | 内存读取 单线程 / 两个核 | 21.0 / 29.5 GB/s |
+  | L1 / L2 / L3 读取（两个核） | 166.7 / 125.3 / 84.8 GB/s |
+  | 新页映射 | 3.77 GB/s，1086 ns/页 |
+  | 存储（数据卷，加密）顺序读 / 写，随机 4K 读 / 写 | 564 / 58 MB/s，5.4 / 4.5 MB/s |
+
+  - 加速频率 3.1 GHz 下每单元约 25 个周期，和 Skylake、A72、龙芯一样。单线程是目前 Linux 这几台里最高的（i5-6400T 116.9、飞腾 D2000 95.0）。
+  - 超线程：4 线程比两个核单跑之和高约 69%，全核追平 4 核的 i5-6400T（431.7）。这个测试主要耗在分支预测失败上，超线程能补上这段空闲。
+  - 存储测的是数据卷而不是换页（DSM 的 swap 是内存里的 zram），文件只写了 233 MiB，只作参考。
+- **副本：** `out\linux\DS923-R1600-cpu-20261024-1359`（两份日志和 `DEVICE-STATE.txt`）。
+
 ### 2026-10-22 飞腾 D2000 + Radeon HD 6450（Caicos）：银河麒麟 V10 和 Ubuntu 26.04 各测一遍；板载网卡驱动；radeon 上 ES 2.0 计时修正
 
 - **机器：** 飞腾 D2000/8（ARMv8，8 核 2.3 GHz，L1d 32 KB、L2 每两核 2 MB、L3 4 MB），4 GB 内存，NVMe（SM2263 无缓存），独显 AMD Caicos（HD 6450 / R5 230 级，1 GB 64 位显存，PCIe 2.0 跑在 5 GT/s x8），片上两个千兆网口（ACPI `PHYT0004`，PHY 裕太 YT8521），Wi-Fi RTL8852BE。CMOS 电池没电，每次断电时钟回到 07-28，联网后才校准。
