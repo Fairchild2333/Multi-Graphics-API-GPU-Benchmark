@@ -389,12 +389,13 @@ Remove `/etc/apt/sources.list.d/usb.list` once the machine is online.
   llvmpipe, which the series skips). Kylin V10's Mesa 20 offers 3.3 (no
   fp64); there the series ran with
   `-Env "MESA_GL_VERSION_OVERRIDE=4.3 MESA_GLSL_VERSION_OVERRIDE=430"`.
-- On this board the firmware sometimes fails to bring up the card's PCIe
-  link at power-on (no picture, not even the firmware's), after cold and warm
-  starts alike; once the screen comes up the card stays. Reboot it as little
-  as possible: run `setup-desktop.sh` without its final reboot
-  (`grep -v "systemctl reboot"`) and start the desktop with
-  `sudo systemctl start gdm`.
+- The firmware sometimes failed to bring up the card's PCIe link at power-on
+  (no picture, not even the firmware's), after cold and warm starts alike,
+  while the same monitor was also connected to another running PC. With that
+  PC's cable unplugged the card came up at every one of several power
+  cycles: probably the card is fed through the display cable and not reset
+  cleanly (not verified). Do not share the monitor with another PC at power-on,
+  or use an HDMI dummy plug.
 - The radeon kernel driver declares the GPU hung when a ring makes no
   progress for 10 s. OpenGL GPU Burn at 256 steps takes 2.4 s a frame, and
   the frames still queued at its end trip that check; the driver resets the
