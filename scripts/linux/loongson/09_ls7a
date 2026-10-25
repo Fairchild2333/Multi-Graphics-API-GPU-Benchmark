@@ -1,0 +1,26 @@
+#!/bin/sh
+# GRUB menu entry for AOSC OS on the Loongson LS3A4000-7A1000-NUC-SE, first in
+# the menu so that GRUB_DEFAULT=0 picks it: the newest kernel in /boot,
+# without an initramfs (NVMe and ext4 are built into AOSC's kernel), the root
+# given by PARTUUID, which the kernel resolves itself. The HDMI port hangs off
+# DVO output DPI-2 through an MS7210 bridge that passes no EDID: the output is
+# forced on and given the 1080p60 EDID /usr/lib/firmware/edid/ls7a-dvo.bin.
+# AOSC's own entries (dracut initramfs, root by UUID) follow from 10_linux.
+set -e
+
+kernel=$(ls -1 /boot/vmlinuz-* 2>/dev/null | sort -V | tail -1)
+[ -n "$kernel" ] || exit 0
+device=$(grub-probe --target=device /)
+partuuid=$(grub-probe --target=partuuid --device "$device")
+fsuuid=$(grub-probe --target=fs_uuid --device "$device")
+version=${kernel#/boot/vmlinuz-}
+echo "Found LS7A1000 entry for $version (root PARTUUID=$partuuid)" >&2
+
+cat <<EOF
+menuentry 'AOSC OS ($version, LS7A1000)' --class aosc --class gnu-linux --class gnu --class os \$menuentry_id_option 'aosc-ls7a' {
+	insmod part_gpt
+	insmod ext2
+	search --no-floppy --fs-uuid --set=root $fsuuid
+	linux	$kernel root=PARTUUID=$partuuid rootfstype=ext4 rootwait rw panic=10 video=DPI-2:e drm.edid_firmware=DPI-2:edid/ls7a-dvo.bin
+}
+EOF

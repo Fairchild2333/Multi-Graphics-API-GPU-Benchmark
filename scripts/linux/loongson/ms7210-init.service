@@ -1,0 +1,11 @@
+[Unit]
+Description=Initialise the MS7210 HDMI bridge (LS7A1000 DVO, 1080p60)
+After=systemd-modules-load.service systemd-udev-trigger.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/ms7210-init
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target

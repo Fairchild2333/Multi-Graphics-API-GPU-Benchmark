@@ -1,0 +1,31 @@
+Mesa's render-only driver (kmsro) for the Loongson LS7A1000: pair the display
+controller, a PCI device driven by "loongson", with the etnaviv GPU beside it.
+Upstream pairs only display devices on the platform bus with a render GPU, so
+GBM and EGL on the display card fell back to llvmpipe and the X server's
+glamor could not use the GC1000. Made against Mesa 26.1.5; applied by
+../install-ls7a.sh with patch -p1 to the Mesa built into /opt/mesa-ls7a.
+
+diff -ruN a/src/gallium/auxiliary/pipe-loader/pipe_loader_drm.c b/src/gallium/auxiliary/pipe-loader/pipe_loader_drm.c
+--- a/src/gallium/auxiliary/pipe-loader/pipe_loader_drm.c
++++ b/src/gallium/auxiliary/pipe-loader/pipe_loader_drm.c
+@@ -407,9 +407,17 @@
+    pipe_loader_release(&dev, 1);
+ 
+    /* For display-only devices that are not on the platform bus, we can't assume
+-    * that any of the rendering devices are compatible. */
+-   if (!is_platform_device)
+-      return NULL;
++    * that any of the rendering devices are compatible. The exception is the
++    * display controller of Loongson's LS7A1000 bridge: a PCI device whose
++    * VRAM the GC1000 GPU beside it (etnaviv) draws into. */
++   if (!is_platform_device) {
++      char *kms_driver = loader_get_kernel_driver_name(kms_only_fd);
++      bool ls7a = kms_driver && strcmp(kms_driver, "loongson") == 0;
++
++      free(kms_driver);
++      if (!ls7a)
++         return NULL;
++   }
+ 
+    /* For platform display-only devices, we try to find a render-capable device
+     * on the platform bus and that should be compatible with the display-only

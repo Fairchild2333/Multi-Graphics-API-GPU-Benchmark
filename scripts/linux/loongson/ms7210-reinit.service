@@ -1,0 +1,8 @@
+[Unit]
+Description=Initialise the MS7210 HDMI bridge again after a display change
+
+[Service]
+Type=oneshot
+# Gives Xorg time to re-probe the outputs and set the mode first.
+ExecStartPre=/bin/sleep 3
+ExecStart=/usr/local/sbin/ms7210-init

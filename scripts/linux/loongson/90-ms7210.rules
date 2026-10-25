@@ -1,0 +1,4 @@
+# Xorg re-probes the outputs on every DRM card event (a GPU driver loading or
+# unloading, a monitor plugged in) and may set the mode again, which leaves the
+# MS7210 HDMI bridge showing black: initialise the bridge again afterwards.
+SUBSYSTEM=="drm", KERNEL=="card[0-9]", ACTION=="add|change|remove", RUN+="/usr/bin/systemctl --no-block start ms7210-reinit.service"
