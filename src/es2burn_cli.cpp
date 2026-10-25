@@ -315,6 +315,18 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "No frame was measured in %.1f s.\n", seconds);
         return 1;
     }
+    // The pattern has colour everywhere, and at the centre both draws add the
+    // same colour: a black centre means the driver dropped the draws. Mesa's
+    // etnaviv does that without a GL error when the shader is longer than the
+    // GPU can hold (a GC1000 takes 8 steps, not 16); the frames are then empty
+    // and their times say nothing about the GPU.
+    if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+        printf("Last frame:   centre pixel 0 0 0, GL error 0x%x\n", error);
+        fprintf(stderr, "The GPU did not draw the frames: the centre of the last frame is black. "
+                        "No rate is given. A driver can drop the draws of a shader longer than the "
+                        "GPU can hold without a GL error.\n");
+        return 1;
+    }
     const double average = sumMs / frames;
     const double pixels = static_cast<double>(kWidth) * kHeight;
     const double rate = pixels * steps * kDrawsPerFrame / (average / 1000.0) / 1e9;
