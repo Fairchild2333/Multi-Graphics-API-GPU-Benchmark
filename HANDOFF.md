@@ -1764,6 +1764,23 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-10-24–25 龙芯 3A4000 NUC 换成安同 OS（MIPS64）：HDMI 1080p60；GC1000 接上 etnaviv，驱动和 Mesa 打补丁后桌面走 GPU；ES 2.0 标准步数跑不了；UOS 删除
+
+- **系统：** 统信 UOS 换成安同 OS 14.0.0 loongson3（内核 7.1.13、GCC 16.2、Mesa 26.1.5、包管理 oma），主机名 `mk-2b3470`，`fairchild@mk-2b3470.local`（192.168.20.81；这个 IP 在 `known_hosts` 里还是 UOS 的密钥，用 `.local` 名字连），密钥登录、免密 sudo。账号没有密码（控制台登录要用户自己 `sudo passwd fairchild`）。内核包 `linux+kernel`、`linux-kernel-7.1.13` 已 hold。
+- **安装：** 安同安装盘（外接 SSD）一启动 HDMI 就没信号（原因见下），所以从 UOS 里装：基础系统包 `aosc-os_base_20261017_loongson3.tar.xz` 解到空闲的 Rootb 分区（nvme0n1p4），chroot 里建用户、公钥、sudo、fstab（基础包的 sudoers 是 0644，要改 440；chroot 里 zh_CN 语言让脚本解析出错，用 `env -i LC_ALL=C`）。先挂在 UOS 的 GRUB 2.02 上开机：dracut 的 initramfs 从它起不来，改成不带 initramfs、`root=PARTUUID=`（NVMe 和 ext4 编进了内核）；它读的是 ESP 里的 `grubenv`，不是 `/boot/grub` 那份。
+- **HDMI（DPI-2，经 MS7210 DVO 转 HDMI）：** 主线 `drm/loongson` 不管这颗转接芯片，像素时钟只到约 98 MHz（1600x900 减消隐 97.75 MHz 能亮，108 MHz 起无信号），转接芯片也不给 EDID。在 UOS 内核命令行加 `trace_event=i2c:i2c_write,i2c:i2c_reply trace_buf_size=16M` 录下开机时厂商驱动写给它的 91 个寄存器（I2C 0x59，第二条 I2C 总线，16 位寄存器号低字节在前），`ms7210-init` 原样重放后 1080p60（148.5 MHz）正常。EDID 用 `drm.edid_firmware` 给（内核已经不带内置 EDID）。之后又发现：显卡驱动加载、Xorg 重新探测输出都会重新设模式，转接芯片就变成有信号但黑屏，所以加了 udev 规则，DRM 设备一有事件就重新初始化（`ms7210-reinit.service`）。开机时显示驱动 3.6 秒接管屏幕、5.6 秒才初始化好转接芯片，中间约 2 秒没画面；启动参数原来有 `loglevel=4`，内核信息不上屏，已去掉。
+- **GPU（7A1000 里的 Vivante GC1000 rev 5037，PCI `0014:7a15`）：**
+  - 主线 etnaviv 不支持 PCI（龙芯的补丁系列没合进去）。写了 `etnaviv-ls7a` 小模块：按 PCI ID 加载，造出 etnaviv 要的平台设备（BAR0 前 64 KiB 寄存器、PCI 中断、固定 396 MHz 的 core 时钟，driver_override 匹配），Mesa 认出 "Vivante GC1000 rev 5037"，OpenGL ES 2.0 / OpenGL 2.0。
+  - 第一个问题：读回的结果落后一帧或者不变。桥片的 DMA 是缓存一致的，GPU 写的数据留在 CPU 缓存里，etnaviv 用写合并映射去读就读到旧内存（用 64 MB 冲缓存的测试证实）。补丁让一致性设备上的缓冲区一律缓存映射，之后 20 次读回 20 次对，GPU 运行时休眠唤醒也正常。
+  - 第二个问题：Mesa 的 kmsro 只把平台总线上的显示设备和 GPU 配对，7A1000 的显示控制器是 PCI 设备，桌面只能 llvmpipe。显示控制器只能扫显存，而 loongson 驱动共享缓冲区时会挪到系统内存，所以要三处补丁：loongson 把显存里的缓冲区按一段显存地址原样共享，etnaviv 接受没有 struct page 的缓冲区，Mesa 放行 loongson。验证：GPU 直接画进显存（debugfs 看到缓冲区一直钉在 VRAM，GTT 0），读回正确。Mesa 另编一份装 `/opt/mesa-ls7a`，只给 X 服务器用（LightDM 加 `LD_LIBRARY_PATH`），Xorg 改 `AccelMethod glamor`，日志 "glamor X acceleration enabled on Vivante GC1000"；普通程序照旧 llvmpipe。
+  - 运行中卸载 etnaviv 在它的拆除流程里 oops，之后关机卡死，只能强制断电；别卸载，重启。etnaviv 先于显示驱动加载时会占掉 `card0`，加了 modprobe 的 softdep 让显示驱动先加载。
+- **GC1000 有多快：** 1080p 全屏一层贴图复制 12.4 ms（167 Mpixel/s，llvmpipe 5.4 ms），透明混合 12.7 ms（llvmpipe 34.2 ms）；画进屏幕上的显存缓冲区一帧 20.5 ms，画进 GPU 自己的内存 7.6 ms（它只能画分块格式，Mesa 每帧再整帧复制成显示用的线性格式）。各项都卡在约 1.3 GB/s，应该是桥片和 CPU 之间的链路。用户试桌面：不再卡顿，xfwm4 不等垂直同步（off）时拖动的窗口落后鼠标，`xpresent` 跟手但一顿一顿，关阴影没区别；用户选 off。
+- **ES 2.0 GPU Burn：** GC1000 没有指令缓存，一个着色器最多 256 条指令，Mesa 把循环展开后 16 步起就装不下，etnaviv 直接丢掉绘制、不报 GL 错误，64 步还让 GPU 卡死一次（etnaviv 自己恢复了）。我们的程序照样打出了 Burn rate（16 / 64 / 256 步 2.80 / 0.21 / 0.84，全是假数，`out\linux\mk-2b3470-series-20261025-133743` 作废）。`src/es2burn_cli.cpp` 改为最后一帧中心全黑就报 "The GPU did not draw the frames"、不给成绩、退出码 1。8 步能画，按标准参数单独测了一次作参考：451.89 ms 一帧（0.03 Gpix-step/s），`out\linux\mk-2b3470-es2-8steps-20261025-142113`。同一着色器 llvmpipe 8 步 152 ms。
+- **CPU（10-24，安同上本机 GCC 16 编译）：** 单核 65.06、全核 259.70 MWork/s，比 UOS 上交叉编译（GCC 12）的 58.90 / 233.46 高约 11%；内存读取单线程 / 全核 3.3 / 7.3 GB/s。副本 `out\linux\mk-2b3470-series-20261024-144926`。
+- **桌面和设置：** Xfce + LightDM 自动登录；按用户要求默认不进桌面（multi-user，`sudo systemctl start lightdm` 再开）；Xfce 锁屏和屏保关了（账号没密码，锁上就解不开）；显示器不熄屏。
+- **删除 UOS（用户确认方案）：** 先装安同自己的 GRUB 2.14（`grub-install --target=mips64el-efi --efi-directory=/efi --removable`，写到 `\EFI\BOOT\BOOTMIPS.EFI`；固件没有可写的 EFI 变量，用户看开机菜单确认固件走这条路径），`/etc/grub.d/09_ls7a` 给最新内核生成不带 initramfs 的启动项排第一（安同装包时会自动重建 initramfs 和 grub.cfg，所以不靠挪走 initramfs）。然后删 p2、p3、p5、p6，安同分区在线扩到 92.4 GB（PARTUUID 不变），原 p2+p3 处建 16.5 GB 的 `/data`，ESP 只留安同的 GRUB，硬件时钟改回 UTC。UOS 里没有要留的东西（那次 CPU 测试早已拷出）。分区表前后备份在机器 `/root/nvme0n1-*-uos-removal.sfdisk` 和 `out\linux\mk-2b3470-partitions-before-uos-removal.txt`，ESP 备份 `/root/esp-backup-uos-20261025.tar`。
+- **入库：** `scripts/linux/install-ls7a.sh` 和 `scripts/linux/loongson/`（转接芯片初始化和录到的 trace、EDID 生成、udev 规则和服务、GRUB 项、`etnaviv-ls7a`、内核和 Mesa 两份补丁、X 和 LightDM 配置、四个 GPU 小测试），说明在 `docs/building.md` 龙芯一节。安装脚本在这台上从头完整跑过一遍。
+
 ### 2026-10-24 群晖 DS923+（AMD Ryzen Embedded R1600）：NAS 上只测 CPU
 
 - **机器：** 群晖 DS923+（主机名 BigHouse），AMD Ryzen Embedded R1600（Zen，2 核 4 线程，2.6 GHz、加速 3.1 GHz，L2 每核 512 KB、L3 4 MB，没有核显），7.7 GiB DDR4，DSM 7.4.1（内核 4.4，调频 performance，swap 是 zram）。SSH `fairchild@192.168.20.102`，公钥登录（DSM 要先启用家目录服务，家目录权限改成 755 才认公钥），没有配免密 sudo，CPU 测试用不着。

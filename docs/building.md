@@ -406,10 +406,122 @@ Remove `/etc/apt/sources.list.d/usb.list` once the machine is online.
   2.0 GPU Burn waits for each frame by reading one pixel back, as on
   Zhaoxin's driver.
 
-### Loongson 3A4000 with UnionTech OS 20 (MIPS64)
+### Loongson 3A4000 (MIPS64) with AOSC OS
 
-> **Verification status: CPU tests run on real hardware** (Loongson
-> LS3A4000-7A1000-NUC-SE, UOS 20 Pro, kernel 4.19, 2026-10-21). No GPU test.
+> **Verification status: run on real hardware** (Loongson
+> LS3A4000-7A1000-NUC-SE, AOSC OS 14.0.0 loongson3, Linux 7.1.13, Mesa
+> 26.1.5, 2026-10-25): the CPU jobs of the series, and the OpenGL ES 2.0 GPU
+> Burn up to 8 steps only (see below). The board came with UnionTech OS 20,
+> removed since (its CPU run is at the end of this section).
+
+AOSC OS's loongson3 port is a current distribution for this MIPS64 board
+(kernel 7.1, GCC 16, Mesa 26). Its installer showed nothing on the board's
+HDMI port (see below), so it was installed from the system the board came
+with: the base tarball (`aosc-os_base_<date>_loongson3.tar.xz`) unpacked
+into a spare partition, set up in a chroot (user, SSH key, passwordless sudo,
+fstab) and booted through the old system's GRUB first. Then the old system was
+deleted, the AOSC partition grown into its space, and AOSC's own GRUB
+installed:
+
+```bash
+sudo grub-install --target=mips64el-efi --efi-directory=/efi --removable
+```
+
+The firmware has no writable EFI variables and starts `\EFI\BOOT\BOOTMIPS.EFI`,
+the removable path. With the source sent (`linux-suite.ps1 -BuildOnly`) and
+Xorg, LightDM and Xfce installed, run
+
+```bash
+sh ~/mangekyo/scripts/linux/install-ls7a.sh
+```
+
+and reboot. It installs the files in `scripts/linux/loongson/` and builds
+the GPU stack below (about 15 minutes, most of it Mesa).
+
+- **Boot without initramfs.** NVMe and ext4 are built into AOSC's kernel, and
+  the kernel finds its root by PARTUUID itself; the dracut initramfs did not
+  boot from the old system's GRUB. `/etc/grub.d/09_ls7a` writes such an entry
+  for the newest kernel, first in the menu (`GRUB_DEFAULT=0`), with the
+  display options below. AOSC rebuilds the initramfs and `grub.cfg` whenever a
+  package asks for it; its own entries (initramfs, root by UUID) come after.
+- **HDMI.** The port hangs off DVO output DPI-2 of the LS7A1000's display
+  controller through an MS7210 DVO-to-HDMI bridge. Mainline `drm/loongson`
+  treats the bridge as transparent, which leaves it able to carry pixel
+  clocks up to about 98 MHz only: 1080p60 (148.5 MHz) gave no signal.
+  `ms7210-init` replays the 91 register writes UnionTech OS's driver makes at
+  boot (I2C address 0x59 on the controller's second bus, 16-bit register
+  numbers low byte first; recorded with an I2C trace of that boot,
+  `ms7210-boot-trace.txt`), after the driver has set the mode
+  (`ms7210-init.service`, and LightDM's `display-setup-script`). A mode set
+  later (a GPU driver loading, a monitor plugged in, Xorg re-probing) leaves
+  the bridge black again, so a udev rule runs it again after every DRM card
+  event (`ms7210-reinit.service`). The bridge passes no EDID: the kernel
+  command line forces DPI-2 on and gives it a 1080p60 EDID
+  (`video=DPI-2:e drm.edid_firmware=DPI-2:edid/ls7a-dvo.bin`, written by
+  `make-edid.py`). Until the bridge is set up, about 2 s after the driver
+  takes the screen, there is no picture.
+- **The GPU.** The bridge's Vivante GC1000 (rev 5037, PCI `0014:7a15`,
+  registers in the first 64 KiB of BAR 0, 64 MiB VRAM behind BAR 2) is a PCI
+  function, and mainline etnaviv has no PCI support (Loongson's patch series
+  never landed). `etnaviv-ls7a` creates the platform devices etnaviv looks
+  for, with a fixed 396 MHz "core" clock, and loads with the GPU's PCI ID;
+  `/etc/modprobe.d/etnaviv-ls7a.conf` loads the display driver first, so the
+  display stays `card0`. `ls7a-gpu-linux-7.1.patch` changes etnaviv and
+  loongson; the built modules go to `/lib/modules/<kernel>/updates`:
+  - The bridge's DMA is cache coherent, so GPU writes can stay in the CPU's
+    caches; etnaviv's write-combined CPU mappings then read stale memory
+    (readbacks a frame behind, or never changing). Buffers are mapped cached
+    on a coherent device.
+  - The display controller scans out of VRAM only, and loongson moved every
+    buffer it shared to system memory. Now a VRAM buffer is shared as it is,
+    as one DMA range, and etnaviv imports memory without struct pages: the
+    GC1000 draws straight into the buffer on screen.
+  - Unloading etnaviv at run time oopsed in its teardown and left the next
+    shutdown hanging (power-cycled); reboot instead.
+- **Mesa for the X server.** Mesa's render-only driver (kmsro) pairs a
+  display device with a GPU only when the display device is on the platform
+  bus; the LS7A1000's is a PCI device, so GBM on `card0` fell back to
+  llvmpipe. `mesa-26.1-kmsro-ls7a.patch` makes the exception; that Mesa goes
+  to `/opt/mesa-ls7a`, and LightDM starts the X server with
+  `LD_LIBRARY_PATH=/opt/mesa-ls7a/lib` (`lightdm-90-mangekyo.conf`) and
+  `AccelMethod glamor` (`xorg-20-mangekyo.conf`). Applications keep the
+  system Mesa and llvmpipe (OpenGL 4.6); with
+  `LD_LIBRARY_PATH=/opt/mesa-ls7a/lib` one runs on the GC1000 instead
+  (OpenGL 2.0 / ES 2.0).
+- **What the GC1000 does.** It is slower than the CPU at most things, and
+  everything it does runs at about 1.3 GB/s, probably the link between the
+  bridge and the CPU. Measured with `scripts/linux/loongson/tests/`
+  (`EGL_PLATFORM=surfaceless`):
+
+  | 1920x1080, one full-screen layer | GC1000 | llvmpipe (4 cores) |
+  |---|---|---|
+  | Texture copy | 12.4 ms (167 Mpixel/s) | 5.4 ms (387 Mpixel/s) |
+  | Texture alpha blend | 12.7 ms | 34.2 ms |
+  | ES 2.0 GPU Burn, 8 steps, 1280x720 frame | 452 ms | 152 ms |
+
+  A frame drawn into the VRAM buffer on screen takes 20.5 ms, one into the
+  GPU's own memory 7.6 ms: the GC1000 renders tiled, and Mesa copies each
+  frame into the linear buffer the controller scans out. With glamor the
+  desktop no longer stutters, but a dragged window trails the pointer when
+  xfwm4 composites without waiting for vblank (`vblank_mode off`), and keeps
+  up in steps with `xpresent`; window shadows make no difference. The
+  framebuffer console is copied to VRAM in batches (every 50 ms), so text
+  scrolls in blocks.
+- **ES 2.0 GPU Burn.** The GC1000 has no instruction cache and takes 256
+  instructions a shader. Mesa unrolls the burn loop, and from 16 steps the
+  shader no longer fits: etnaviv drops every draw with no GL error, and at 64
+  steps the GPU hung (etnaviv recovered it). `mangekyo_es2burn` now reports a
+  black frame as "did not draw" and gives no rate. Up to 8 steps it draws;
+  8 steps took 451.89 ms a frame (0.03 Gpix-step/s), a reference only.
+- **Desktop off by default.** The machine boots to the console
+  (`systemctl set-default multi-user.target`); `sudo systemctl start lightdm`
+  starts Xfce, logged in as the user. The ES 2.0 job draws off-screen and
+  needs no desktop.
+
+#### Before: UnionTech OS 20
+
+> **Verification status: CPU tests run on real hardware** (UOS 20 Pro, kernel
+> 4.19, 2026-10-21). No GPU test.
 
 UOS 20 on this board has no C++ compiler, and without activation its main
 package source refuses access. The CPU tool is cross-built on the PC with
