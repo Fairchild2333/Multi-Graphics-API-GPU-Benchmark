@@ -1764,6 +1764,35 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-01 同一台 Z97 换景嘉微 JM9100：UOS 驱动移植到 Linux 7.0；OpenGL 4.0 也能跑 GPU Burn；GTX 570 在 nouveau 下没有有效成绩
+
+- **卡和环境：** JM9100（`0731:9100`，2 GB），第一个槽，PCIe 8 GT/s x8，3D 上限 1000 MHz。Ubuntu 26.04.1、内核 7.0.0-42、Xfce + X.org + LightDM，显示 HDMI 3840x2160@60。驱动 1.8.0：OpenGL 4.0（GLSL 4.00）、ES 3.2，没有 Vulkan 驱动（`vulkaninfo` 只有 llvmpipe）。
+- **移植（原包 `JM9_1.8.0-driver-uos25-desktop-release-x86_64`，针对 UOS 25）：** 改过的内核模块源码只在测试机 `~/jm9-src`（有自己的 git 历史，第一个提交是原版），不在本仓库。主因是 Linux 7.0 的 kbuild 不再读 `EXTRA_CFLAGS`，换成 `ccflags-y` 后 118 个错误降到 48 个；其余是内核接口变化（`hrtimer_setup`、`mode_valid` 的 const、`drm_helper_mode_fill_fb_struct`、`MODULE_IMPORT_NS` 带引号、`aperture_remove_conflicting_pci_devices` 等）。
+  - **`FOP_UNSIGNED_OFFSET` 必须加：** 缺它时编译正常，但 `drm_open` 报警告、Xorg 打开 `/dev/dri/card0` 得到 `Invalid argument`，LightDM 反复失败，显示器无信号。
+  - **fbdev 关掉了：** 所以驱动加载后没有文字控制台，`/dev/fb0` 不存在。
+  - **用户态：** 只装库和 X 配置（40 个文件，清单 `~/jm9-userspace.list`），没跑包的 postinst，它会改 sudoers、`bash.bashrc`、`pci.ids`，注册服务，还把 KWin 改成 XRender。
+  - 加载模块和安装第三方文件被权限系统拦下，由用户在终端运行（`~/jm9-load.sh`、`~/jm9-userspace.sh`、`~/jm9-autoload.sh`）。
+- **开机自动加载：** `~/jm9-autoload.sh` 把模块装到 `/lib/modules/7.0.0-42-generic/updates/`，写 `/etc/modules-load.d/jmgpu.conf`。**还没经过一次重启验证。** 机器开着自动更新，内核升级后要重新编译模块。
+- **GL 的选择：** GLVND 必须设 `__GLX_VENDOR_LIBRARY_NAME=mwv207`，否则走 Mesa 落到 llvmpipe。`/etc/profile.d/mwv207_glvnd.sh` 只对登录 shell 生效，SSH 跑要自己设（`linux-suite.ps1 -Env`）。Xorg 日志的 `AIGLX error: jmgpu exports no extensions` 不影响直接渲染。
+- **ES 2.0 的路径：** surfaceless 落到 llvmpipe，`series.sh` 的 ES 项不能用，要 `DISPLAY=:0 EGL_PLATFORM=x11` 手动跑 `mangekyo_es2burn`。日志第一行的 `Fail to load library: libOpenVG.so` 不影响结果。
+- **代码改动（OpenGL 4.0～4.2 的桌面驱动）：** 程序原来要 4.3（macOS 4.1 例外），这张卡在 `--list-gpus` 里没有 OpenGL 项。现在 4.3 建不了上下文时退到 4.0，只提供 GPU Burn，着色器用 `#version 400`；标签 `OpenGL 4.0+ (GPU Burn)`。macOS 不变，4.3 及以上不变。其他 4.0～4.2 的桌面卡也会多出这 3 项。
+- **计时修复：** JM9100 的 GPU 时间戳几乎全是 0（0.000～0.001 ms）。`AppBase` 的“GPU 时间不到帧时间 5%”检查只在预热期做，慢卡的 64、256 步错过了它（64 步第一遍读出 1958400 Gpix-step/s，256 步没有 Burn rate）。`CollectTimestampResults` 现在把 GPU Burn 帧不到 10 微秒的样本丢弃并改用墙钟。Windows 5090 的 OpenGL 16 步一帧 0.223 ms，不触发，132.29 Gpix-step/s。
+- **成绩（各 15 秒，都退出码 0，内核日志没有崩溃或卡死）：**
+
+  | 步数 | OpenGL 4.0 窗口（Gpix-step/s） | 每帧 | ES 2.0 经 X11（Gpix-step/s） | 每帧 |
+  |---|---|---|---|---|
+  | 16 | 0.232 | 127.2 ms | 5.79 | 5.091 ms |
+  | 64 | 0.309 | 381.5 ms | 5.71 | 20.659 ms |
+  | 256 | 0.337 | 1400.8 ms | 5.87 | 80.326 ms |
+
+  - OpenGL 都是 `synchronized_wall_clock`。16 步在 `out\linux\mk-93f8a3-jm9100-gl40-series-20261101-021200`，那个目录的 64、256 步作废（`results.json` 里的两条已删，本地副本还留着）；64、256 步在 `out\linux\mk-93f8a3-jm9100-gl40-rerun-series-20261101-023148`。
+  - ES 2.0 在 `out\linux\mk-93f8a3-jm9100-es2-20261031-224757`，16、64 步和 256 步隔了一次重启。成绩只有日志。
+  - 两列不能直接比：着色器不同（OpenGL 是 Plasma x Kaleidoscope，ES 2.0 是 legacy quasicrystal plasma），路径也不同。同样的比法 GTX 680 是 3.90 / 5.04 / 5.42 对 46.83 / 51.88 / 53.71。
+  - 频率和温度都没采集到，不知道测试时实际多少 MHz。CPU 项按用户要求不跑。
+- **没做或没解决：** 用户决定不试 GNOME（比 Xfce 麻烦，这张卡没验证过）。`~/bin/desktop-scale 4k` 后设置和截图都是 DPI 144、顶栏 40、Dock 72，但用户说 DPI 还是不对，具体哪里不对还没说清。
+- **截图提醒：** 这张卡的 `xwd` 头写每像素 24 位（3 字节），行宽却是 15360，按 4 字节读会变成 3/4 宽加条纹，那是读法错了，不是屏幕问题。
+- **GTX 570（NVC8）在 nouveau 下没有有效成绩：** 开机核心只有 50 MHz，上游 `gf100.c` 关掉了改频率。那份成绩（`out\linux\mk-93f8a3-gtx570-nouveau-series-20261031-220248`，OpenGL GPU Burn 0.11 / 0.13 / 0.14）只留作记录，不进对比。打补丁强开后，中档把核心升到 405 MHz，显存停在 135 MHz，一跑负载整机卡死，要断电重启，没有抓到日志。满速没有再试。要真实成绩只能走 Windows 或 Ubuntu 22.04 + 390。
+
 ### 2026-10-31 同一台 Z97 换 GTX 680（NVIDIA 470 + Xfce）：GPU 项 27 项；GTX 570 的 390 驱动在 Ubuntu 26.04 上不可用
 
 - **为什么换驱动和桌面：** GTX 680（GK104，2 GB）不被 580 支持，内核提示要 470；26.04 的源里没有 470，GNOME 50 又去掉了 X.org，而 470 在 GNOME 的 Wayland 上跑不了。所以桌面换成 Xfce + X.org + LightDM 自动登录（GNOME 留着，不启动）。
