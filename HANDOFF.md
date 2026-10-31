@@ -1764,6 +1764,41 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-10-31 Xeon E3-1285 v4 + GTX 970（华硕 Z97）：Ubuntu 26.04 整套 29 项和 CPU 烤机；PCIe 只到 x8；开机等网络修复
+
+- **机器：** 主机名 `mk-93f8a3`（有线 `eno1`，192.168.20.94），华硕 MAXIMUS VII FORMULA（Z97），BIOS 3503。Xeon E3-1285 v4（4 核 8 线程，负载 3.6 GHz），英特尔原装散热。2 x 4 GB DDR3-1600 双通道（A2、B2，理论 25.6 GB/s）。系统盘 1 TB NVMe。GTX 970，NVIDIA 580.178.04（`ubuntu-drivers` 推荐的分支，在 7.0 内核上 DKMS 编译正常，Secure Boot 关闭）。Ubuntu 26.04.1、内核 7.0.0-42、GNOME Wayland，Vulkan 1.4、OpenGL 4.6。
+- **L4 和核显（用户要求先查）：** L4 开着并在工作：CPUID 和 sysfs 报 128 MiB；指针追逐 16 MiB 约 33–36 ns，超过 128 MiB 稳定在约 66 ns，128 MiB 以内两轮波动较大，大页全覆盖，所以不是 TLB。内存扫描也单独给出一档 L4（单线程 / 全核读 21.2 / 50.5 GB/s）。核显已关：`DEVEN` 的 D2EN 为 0，PCI 上没有 00:02.0，插独显时被固件关掉，所以只测了 GTX 970。
+- **PCIe 没有修到 x16，成绩都按 x8 看：** 第一次开机负载下是 Gen3 x2（内核启动时也记 x2，没有 AER 错误）。用户擦金手指、清 CMOS，换到第二个槽 Gen3 x4（应为 x8）；第三个槽接芯片组，Gen2 x4 是满速；回到第一个槽 Gen3 x8，重开后一直 x8。同一张卡同一个槽从 x2 变 x8，说明通道本身没坏，更像接触；我一度判断是 CPU 底座，这个判断不成立，CPU 没拆。没有 x16 的对照数据，x8 的影响没有测过。
+- **整套测试（`out\linux\mk-93f8a3-series-20261031-173706`，带 `DEVICE-STATE.txt`、`thermal.csv`）：**
+
+  | 项目 | Vulkan | OpenGL |
+  |---|---|---|
+  | 粒子 65K 窗口 / 无窗口（GB/s） | 82.75 / 87.37 | 91.53 / 93.05 |
+  | 粒子 1M 窗口 / 无窗口 | 97.65 / 97.53 | 98.88 / 98.43 |
+  | 粒子 4M 窗口 / 无窗口 | 98.63 / 98.45 | 99.26 / 99.04 |
+  | 粒子 16M 窗口 / 无窗口 | 99.74 / 98.70 | 99.43 / 99.26 |
+  | GPU Burn 16 / 64 / 256（Gpix-step/s） | 5.42 / 6.89 / 7.39 | 5.34 / 6.84 / 7.35 |
+  | 流体（MParticle-step/s） | 22.13 | — |
+  | 显存读取 / 缓存平台（GB/s） | 178.7 / 365.5 | — |
+
+  | 项目 | 成绩 |
+  |---|---|
+  | ES 2.0 GPU Burn 16 / 64 / 256（离屏，独立成绩组） | 67.71 / 75.10 / 80.19 Gpix-step/s |
+  | CPU 单线程 / 全核（8 线程） | 168.06 / 890.79 MWork/s |
+  | L1 / L2 / L3 / L4 / 内存 读取 单线程 | 173.5 / 101.5 / 47.9 / 21.2 / 16.0 GB/s |
+  | L1 / L2 / L3 / L4 / 内存 读取 全核 | 696.3 / 370.3 / 169.1 / 50.5 / 23.8 GB/s |
+  | 新页映射 | 3.12 GB/s，1314 ns/页 |
+  | 换页存储读 / 写 | 745 / 762 MB/s |
+
+  - 内存全核读 23.8 GB/s 是理论值的 93%，和固件报告的双通道一致。GPU 负载时最高 71°C、约 150 W、1278 MHz。
+  - 7 项 OpenGL 窗口测试（粒子四档、Burn 三档）退出码 139：段错误在 `libwayland-client`，发生在成绩保存之后，成绩有效，无窗口的 OpenGL 项不崩。Bug 没修。
+- **CPU 烤机（用户担心原装散热，10 分钟各一轮，不存成绩）：** `cpu_mixed` 全核封装最高 69°C，约 3600 MHz，成绩 891.87，和 15 秒短测一样。自写 AVX2/FMA 负载（12 组 FMA，8 线程，229.1 GFLOP/s，到了理论上限约 230）封装最高 78°C，第 1 分钟起稳定在 76–78°C，全程 3600 MHz。两轮降频计数都是 0，离固件报告的 85°C 还有 7°C。负载基本不碰内存，也不是最狠的压力程序；只代表这次的室温。RAPL 满载只读 18–21 W，明显不对，不当功耗数字用。
+- **装机踩的坑：**
+  - 第一次安装在网络配置这步停住（`netplan apply` 退出 1）：U 盘上是 10-22 给飞腾生成的 `-Wifi` 配置，写的 `wlp5s0`，这台是 `wlp6s0`。不带 `-Wifi` 重新生成后装完。安装盘是 USB 接的 2 TB 固态，内核报成旋转盘，脚本选中了 NVMe，安装盘没被清。
+  - 开机每次等满 2 分钟：没连网的 Wi-Fi 落到 dracut 的 `zzzz-dracut-default.network`，被算作必须在线。`setup-desktop.sh` 现在给无线写 `RequiredForOnline=no`。网线松了又等了 59 秒，所以 `systemd-networkd-wait-online` 也改成 `--any --timeout=5`，超时不算失败。拔线开机没实测。
+  - 这台按用户要求单独让 NetworkManager 管 Wi-Fi（GNOME 原来显示 No Wi-Fi Adapter Found），networkd 不碰无线，原配置在 `/root/nm-before-wifi/`；脚本默认没变。
+- **Linux GUI：** 这轮之后交给 Linux GUI 会话（GTK 4 + libadwaita）开始移植，在 `claude/nostalgic-chaplygin-1d773a` 分支上。
+
 ### 2026-10-24–25 龙芯 3A4000 NUC 换成安同 OS（MIPS64）：HDMI 1080p60；GC1000 接上 etnaviv，驱动和 Mesa 打补丁后桌面走 GPU；ES 2.0 标准步数跑不了；UOS 删除
 
 - **系统：** 统信 UOS 换成安同 OS 14.0.0 loongson3（内核 7.1.13、GCC 16.2、Mesa 26.1.5、包管理 oma），主机名 `mk-2b3470`，`fairchild@mk-2b3470.local`（192.168.20.81；这个 IP 在 `known_hosts` 里还是 UOS 的密钥，用 `.local` 名字连），密钥登录、免密 sudo。账号没有密码（控制台登录要用户自己 `sudo passwd fairchild`）。内核包 `linux+kernel`、`linux-kernel-7.1.13` 已 hold。

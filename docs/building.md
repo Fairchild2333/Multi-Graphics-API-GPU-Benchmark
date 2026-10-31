@@ -281,13 +281,16 @@ from the ISO; the build packages are then installed later over SSH. A
 machine whose wired port has no driver in Ubuntu's kernel installs over
 Wi-Fi: run `make-autoinstall.ps1 -Wifi` (add `-WifiInterface <name>` if the
 installer's `ip -br link` names it other than `wlp5s0`) and fill in the
-network's name and password in the written file.
+network's name and password in the written file. That file only suits a
+machine with that interface: on another one the install stopped at
+`netplan apply`, and a file written without `-Wifi` finished.
 
 **2. Desktop.** The windowed tests need a running session, so GNOME is added
 after the first boot and logs the user in by itself. The script also turns
 off screen blanking, the lock screen and idle suspend (system dconf
 defaults): a series started on a locked screen would draw its windowed tests
-behind the lock.
+behind the lock. A boot waits at most 5 s for any network port: an unconnected
+Wi-Fi port or a loose cable used to hold it for up to 2 minutes.
 
 ```bash
 ssh fairchild@mk-xxxxxx.local 'sh -s' < scripts/linux/setup-desktop.sh
@@ -309,6 +312,15 @@ the run to `out\linux\<host>-series-<time>\`. `-Only <regex>` runs some jobs,
 build, `-Env "NAME=value ..."` sets environment variables for the series
 (recorded in its `state.txt`), and `-Attach <run>` follows a run that is
 already going.
+
+**NVIDIA GPUs.** A GTX 970 (Maxwell) needs `nvidia-driver-580`, the branch
+`ubuntu-drivers devices` recommends; it builds on 7.0, and nouveau is replaced
+at the next boot. Windowed OpenGL jobs under Wayland exit with a segmentation
+fault in `libwayland-client` after the result is saved (exit 139), so their
+results stand. Before a series, read the PCIe link under load: a card seen at
+Gen3 x2 in an x16 slot came up at x8 after cleaning and reseating
+(`nvidia-smi --query-gpu=pcie.link.gen.gpucurrent,pcie.link.width.current --format=csv`;
+at idle the link speed drops by design).
 
 **Known limits on Intel GPUs (Mesa, i915).**
 
