@@ -1764,11 +1764,33 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-10-31 同一台 Z97 换 GTX 680（NVIDIA 470 + Xfce）：GPU 项 27 项；GTX 570 的 390 驱动在 Ubuntu 26.04 上不可用
+
+- **为什么换驱动和桌面：** GTX 680（GK104，2 GB）不被 580 支持，内核提示要 470；26.04 的源里没有 470，GNOME 50 又去掉了 X.org，而 470 在 GNOME 的 Wayland 上跑不了。所以桌面换成 Xfce + X.org + LightDM 自动登录（GNOME 留着，不启动）。
+- **装 470：** 官方 `NVIDIA-Linux-x86_64-470.256.02.run` 加社区补丁 `joanbm/nvidia-470xx-linux-mainline`（`49f2ce2`，补到 Linux 7.4），`./buildtest` 先只编译（7.0.0-42 上 5 个模块全过），再 `./install --dkms --ui=none --no-questions`。这些第三方脚本由用户在终端运行，权限系统不让我跑。步骤：卸 580（`apt-get purge`）、`/etc/modprobe.d/` 里禁用 nouveau、更新 initramfs、以 multi-user 重启、装驱动、再切 graphical。没配 xorg.conf，X 自动选中 NVIDIA。470 下 Vulkan 1.2、OpenGL 4.6、ES 3.2。
+- **成绩（`out\linux\mk-93f8a3-gtx680-series-20261031-185729`，负载下 PCIe Gen3 x16，CPU 项按用户要求不跑）：**
+
+  | 项目 | Vulkan | OpenGL |
+  |---|---|---|
+  | 粒子 65K 窗口 / 无窗口（GB/s） | 61.43 / 59.83 | 71.62 / 71.07 |
+  | 粒子 1M 窗口 / 无窗口 | 73.78 / 73.47 | 83.48 / 83.31 |
+  | 粒子 4M 窗口 / 无窗口 | 75.66 / 75.58 | 85.09 / 84.92 |
+  | 粒子 16M 窗口 / 无窗口 | 75.76 / 75.77 | 85.43 / 85.08 |
+  | GPU Burn 16 / 64 / 256（Gpix-step/s） | 3.84 / 5.01 / 5.44 | 3.90 / 5.04 / 5.42 |
+  | 流体（MParticle-step/s） | 11.43 | — |
+  | 显存读取 / 缓存平台（GB/s） | 150.0 / 258.9 | — |
+
+  - ES 2.0 GPU Burn 16 / 64 / 256：46.83 / 51.88 / 53.71 Gpix-step/s。470 没有 surfaceless EGL（Mesa 给 llvmpipe，`series.sh` 跳过），是手动经 X11（`DISPLAY=:0`）各跑 15 秒，和 970 的离屏路径不同。
+  - 24 项退出码全是 0（窗口项走 X11，不经过 Wayland 那个段错误）。GPU 最高 59°C。这张卡 `nvidia-smi` 只报温度。
+  - GUI 会话的 `apt-get`（19:14:44–19:14:55）落在第 23、24 项之间的冷却里，没和测量重叠；第 24 项 5.42 对 Vulkan 5.44，不重测。
+- **界面：** Xfce 默认在 4K 上太小，设了 DPI 144，顶栏 40、状态栏图标 24、Dock 72、桌面图标 72，`Default-hdpi` 标题栏，鼠标 36。Xfce 默认壁纸文件不存在，桌面是空的，手动设了 Ubuntu 自带的 4K 壁纸。
+- **GTX 570 + 390 不可用：** GF110 要 390 旧版驱动。官方 390.157 加 AUR `nvidia-390xx-utils`（`777edd1`）的 20 个补丁，内核模块能编过、能加载，`nvidia-smi` 正常。但用户态坏了：Xorg（要写 `Driver "nvidia"`，否则自动选 nouveau）设好模式后在加载 GLX 时段错误（`libglx.so` → `AddCallback` → glibc 2.43 `malloc`），`glxinfo`、`eglinfo` 也崩。试过 `glibc.malloc.tcache_count=0`、`glibc.rtld.optional_static_tls=8192`、`glibc.mem.tagging=0`，崩溃点不变。根因没查到，所以 390 下没有成绩。
+
 ### 2026-10-31 Xeon E3-1285 v4 + GTX 970（华硕 Z97）：Ubuntu 26.04 整套 29 项和 CPU 烤机；PCIe 只到 x8；开机等网络修复
 
 - **机器：** 主机名 `mk-93f8a3`（有线 `eno1`，192.168.20.94），华硕 MAXIMUS VII FORMULA（Z97），BIOS 3503。Xeon E3-1285 v4（4 核 8 线程，负载 3.6 GHz），英特尔原装散热。2 x 4 GB DDR3-1600 双通道（A2、B2，理论 25.6 GB/s）。系统盘 1 TB NVMe。GTX 970，NVIDIA 580.178.04（`ubuntu-drivers` 推荐的分支，在 7.0 内核上 DKMS 编译正常，Secure Boot 关闭）。Ubuntu 26.04.1、内核 7.0.0-42、GNOME Wayland，Vulkan 1.4、OpenGL 4.6。
 - **L4 和核显（用户要求先查）：** L4 开着并在工作：CPUID 和 sysfs 报 128 MiB；指针追逐 16 MiB 约 33–36 ns，超过 128 MiB 稳定在约 66 ns，128 MiB 以内两轮波动较大，大页全覆盖，所以不是 TLB。内存扫描也单独给出一档 L4（单线程 / 全核读 21.2 / 50.5 GB/s）。核显已关：`DEVEN` 的 D2EN 为 0，PCI 上没有 00:02.0，插独显时被固件关掉，所以只测了 GTX 970。
-- **PCIe 没有修到 x16，成绩都按 x8 看：** 第一次开机负载下是 Gen3 x2（内核启动时也记 x2，没有 AER 错误）。用户擦金手指、清 CMOS，换到第二个槽 Gen3 x4（应为 x8）；第三个槽接芯片组，Gen2 x4 是满速；回到第一个槽 Gen3 x8，重开后一直 x8。同一张卡同一个槽从 x2 变 x8，说明通道本身没坏，更像接触；我一度判断是 CPU 底座，这个判断不成立，CPU 没拆。没有 x16 的对照数据，x8 的影响没有测过。
+- **PCIe 没有修到 x16，成绩都按 x8 看：** 第一次开机负载下是 Gen3 x2（内核启动时也记 x2，没有 AER 错误）。用户擦金手指、清 CMOS，换到第二个槽 Gen3 x4（应为 x8）；第三个槽接芯片组，Gen2 x4 是满速；回到第一个槽 Gen3 x8，重开后一直 x8。同一张卡同一个槽从 x2 变 x8，说明通道本身没坏；我一度判断是 CPU 底座，这个判断不成立，CPU 没拆。后来 GTX 680 和 GTX 570 插同一个槽都是 x16，所以问题多半在这张 970 上（用户判断是它的金手指）。这张 970 没有 x16 的成绩，x8 的影响没有测过。
 - **整套测试（`out\linux\mk-93f8a3-series-20261031-173706`，带 `DEVICE-STATE.txt`、`thermal.csv`）：**
 
   | 项目 | Vulkan | OpenGL |

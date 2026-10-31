@@ -313,6 +313,17 @@ build, `-Env "NAME=value ..."` sets environment variables for the series
 (recorded in its `state.txt`), and `-Attach <run>` follows a run that is
 already going.
 
+**Older NVIDIA GPUs.** Kepler cards (GTX 680) need the 470 driver, which is
+not in Ubuntu 26.04's packages. The official installer with the patches of
+[nvidia-470xx-linux-mainline](https://github.com/joanbm/nvidia-470xx-linux-mainline)
+builds on 7.0 (`./buildtest`, then `./install --dkms` from the console, with the
+580 packages purged and nouveau disabled). GNOME 50 has no X.org session and
+this driver cannot run its Wayland session, so install Xfce and LightDM. It
+has no surfaceless EGL either: run `mangekyo_es2burn` by hand with `DISPLAY=:0`;
+`series.sh` skips it. Fermi cards (GTX 570) need the 390 driver, whose kernel
+modules build with the AUR `nvidia-390xx-utils` patches, but its X and client
+libraries crash on this system (glibc 2.43, in `malloc` when GLX loads).
+
 **NVIDIA GPUs.** A GTX 970 (Maxwell) needs `nvidia-driver-580`, the branch
 `ubuntu-drivers devices` recommends; it builds on 7.0, and nouveau is replaced
 at the next boot. Under Wayland, `glfwTerminate()` after an OpenGL window
