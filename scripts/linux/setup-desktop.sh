@@ -40,6 +40,18 @@ sudo dconf update
 sudo mkdir -p /etc/NetworkManager/conf.d
 printf '[keyfile]\nunmanaged-devices=type:ethernet;type:wifi\n' | sudo tee /etc/NetworkManager/conf.d/90-mangekyo-unmanaged.conf > /dev/null
 
+# A Wi-Fi port no one has connected falls to dracut's catch-all network file,
+# which makes it required for online: every boot then waited out the 2 minutes
+# of systemd-networkd-wait-online. Netplan's own files (10-netplan-*) sort
+# first, so a port set up with make-autoinstall.ps1 -Wifi keeps its settings.
+sudo mkdir -p /etc/systemd/network
+printf '[Match]\nType=wlan\n\n[Link]\nRequiredForOnline=no\n' | sudo tee /etc/systemd/network/90-mangekyo-wlan-optional.network > /dev/null
+
+# A boot must not hang on a loose network cable either: wait for any port, for
+# 5 s at most, and go on without a network (the leading - accepts the timeout).
+sudo mkdir -p /etc/systemd/system/systemd-networkd-wait-online.service.d
+printf '[Service]\nExecStart=\nExecStart=-/usr/lib/systemd/systemd-networkd-wait-online --any --timeout=5\n' | sudo tee /etc/systemd/system/systemd-networkd-wait-online.service.d/90-mangekyo.conf > /dev/null
+
 # No crash pop-ups: Apport's "System program problem detected" came back at
 # every login for crashes that were long dealt with, and would collect a core
 # dump in the middle of a series. A crash shows in the job's log anyway.
