@@ -418,6 +418,15 @@ void AppBase::InitWindow() {
     window_ = glfwCreateWindow(static_cast<int>(kWindowWidth),
                                static_cast<int>(kWindowHeight),
                                title.c_str(), nullptr, nullptr);
+#if !defined(__APPLE__)
+    // GPU Burn needs no compute, so it also runs on a driver below OpenGL 4.3.
+    if (window_ == nullptr && NeedsOpenGLContext() && isGpuBurnWorkload(config_.workload)) {
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+        window_ = glfwCreateWindow(static_cast<int>(kWindowWidth),
+                                   static_cast<int>(kWindowHeight),
+                                   title.c_str(), nullptr, nullptr);
+    }
+#endif
     if (window_ == nullptr) {
         glfwTerminate();
         throw std::runtime_error("glfwCreateWindow failed");

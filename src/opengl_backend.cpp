@@ -24,10 +24,10 @@ namespace gpu_bench {
 
 std::uint32_t OpenGLBackend::CompileShaderGL(const std::string& path, std::uint32_t type) {
     auto src = ReadFileBytes(path);
-    if (gl41GraphicsOnly_) {
+    if (glGraphicsOnly_) {
         std::string text(src.begin(), src.end());
         const auto version = text.find("#version 430");
-        if (version != std::string::npos) text.replace(version, 12, "#version 410");
+        if (version != std::string::npos) text.replace(version, 12, gl40_ ? "#version 400" : "#version 410");
         const std::string layout = "layout(binding = 1, std140)";
         const auto binding = text.find(layout);
         if (binding != std::string::npos) text.replace(binding, layout.size(), "layout(std140)");
@@ -91,11 +91,11 @@ void OpenGLBackend::InitBackend() {
     driverVersion_ = glVerStr;
     std::cout << "[OpenGL Init] " << deviceName_ << "  |  GL " << glVerStr << std::endl;
 
-    gl41GraphicsOnly_ = GLAD_VERSION_MAJOR(gladVer) == 4 && GLAD_VERSION_MINOR(gladVer) < 3;
+    glGraphicsOnly_ = GLAD_VERSION_MAJOR(gladVer) == 4 && GLAD_VERSION_MINOR(gladVer) < 3;
+    gl40_ = GLAD_VERSION_MAJOR(gladVer) == 4 && GLAD_VERSION_MINOR(gladVer) == 0;
     if (GLAD_VERSION_MAJOR(gladVer) < 4 ||
-        (GLAD_VERSION_MAJOR(gladVer) == 4 && GLAD_VERSION_MINOR(gladVer) < 1) ||
-        (gl41GraphicsOnly_ && !isGpuBurnWorkload(config_.workload))) {
-        throw std::runtime_error("OpenGL 4.1 supports GPU Burn only; compute workloads require OpenGL 4.3+");
+        (glGraphicsOnly_ && !isGpuBurnWorkload(config_.workload))) {
+        throw std::runtime_error("OpenGL below 4.3 supports GPU Burn only; compute workloads require OpenGL 4.3+");
     }
 
     if (config_.vsync)
@@ -174,7 +174,7 @@ void OpenGLBackend::CreateShaders() {
         auto vs = CompileShaderGL(shaderDir_ + vsf, GL_VERTEX_SHADER);
         auto fs = CompileShaderGL(shaderDir_ + fsf, GL_FRAGMENT_SHADER);
         renderProgram_ = LinkProgramGL(vs, fs);
-        if (gl41GraphicsOnly_) {
+        if (glGraphicsOnly_) {
             const GLuint block = glGetUniformBlockIndex(renderProgram_, "GpuBurnV1Params");
             if (block == GL_INVALID_INDEX) throw std::runtime_error("GPU Burn uniform block missing");
             glUniformBlockBinding(renderProgram_, block, 1);
@@ -655,6 +655,14 @@ void OpenGLBackend::CollectTimestampResults() {
     double computeMs = static_cast<double>(ts[1] - ts[0]) / 1e6;
     double renderMs  = static_cast<double>(ts[3] - ts[2]) / 1e6;
     double totalMs   = static_cast<double>(ts[3] - ts[0]) / 1e6;
+
+    // A slow GPU can leave the warm-up before the frame-time check in AppBase
+    // first runs (JM9100: 0.000 ms in a 390 ms frame at 64 steps). No GPU Burn
+    // frame takes under 10 us, so such a timer is broken; discard this sample.
+    if (isGpuBurnWorkload(config_.workload) && renderMs < 0.01) {
+        EnableSynchronizedTimingFallback("GPU Burn frame timed under 10 us");
+        return;
+    }
 
     // A stream result above 10 TB/s is outside a deliberately generous
     // plausibility envelope for this workload and indicates a broken timer,

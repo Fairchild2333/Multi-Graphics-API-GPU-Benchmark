@@ -29,7 +29,8 @@ protected:
     bool UseSynchronizedTimingInstead(const char* reason) override;
 
 private:
-    bool gl41GraphicsOnly_ = false;
+    bool glGraphicsOnly_ = false;
+    bool gl40_ = false;
     // Work groups in one particle dispatch when a step needs more than the
     // driver allows at once; 0 = one dispatch.
     std::uint32_t streamSliceGroups_ = 0;

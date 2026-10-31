@@ -787,7 +787,8 @@ sizes, GPU Burn 16/64/256, fluid and GPU memory where supported, then CPU comput
 and CPU cache/memory once per machine. Software rasterizers (WARP / Basic
 Render, llvmpipe) get GPU Burn 16/64 only, because the engine clamps them to
 the 64-step tier. Native macOS OpenGL 4.1 runs GPU Burn
-only, with no capture request. Unified-memory Metal devices also include the
+only, with no capture request; so does a desktop driver with OpenGL 4.0 to 4.2,
+which has no compute. Unified-memory Metal devices also include the
 independent GPU cache-state diagnostic. The current Metal + OpenGL Mac has 19 jobs;
 Android adb's 29 jobs include additional OpenGL ES API variants.
 

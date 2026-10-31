@@ -106,6 +106,13 @@ static bool VulkanLoaderAvailable() {
 }
 #endif
 
+// A GPU whose OpenGL has no compute (below 4.3) runs GPU Burn only.
+#ifdef __APPLE__
+static const char* const kOpenGlBurnOnlyLabel = "OpenGL 4.1 (GPU Burn)";
+#else
+static const char* const kOpenGlBurnOnlyLabel = "OpenGL 4.0+ (GPU Burn)";
+#endif
+
 static bool SafeStoi(const std::string& s, int& out) {
     try { out = std::stoi(s); return true; }
     catch (...) { return false; }
@@ -857,7 +864,7 @@ static std::vector<GpuInfo> ProbeGpus(
     }
 #endif
 
-    // --- OpenGL probe: macOS graphics 4.1, desktop compute 4.3+ ---
+    // --- OpenGL probe: macOS graphics 4.1, desktop compute 4.3+, else graphics 4.0 ---
 #ifdef HAVE_OPENGL
     {
         if (glfwInit() == GLFW_FALSE)
@@ -877,6 +884,12 @@ static std::vector<GpuInfo> ProbeGpus(
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT,  GLFW_TRUE);
 #endif
         GLFWwindow* probe = glfwCreateWindow(1, 1, "", nullptr, nullptr);
+#ifndef __APPLE__
+        if (!probe) {
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+            probe = glfwCreateWindow(1, 1, "", nullptr, nullptr);
+        }
+#endif
         if (probe) {
             glfwMakeContextCurrent(probe);
 
@@ -2266,7 +2279,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     else if (recommendedApi == "vulkan")  recommendedApiLabel = "Vulkan";
     else if (recommendedApi == "dx12")    recommendedApiLabel = "DirectX 12";
     else if (recommendedApi == "dx11")    recommendedApiLabel = "DirectX 11";
-    else if (recommendedApi == "opengl")  recommendedApiLabel = recGpu.supportsOpenGLCompute ? "OpenGL 4.3+" : "OpenGL 4.1 (GPU Burn)";
+    else if (recommendedApi == "opengl")  recommendedApiLabel = recGpu.supportsOpenGLCompute ? "OpenGL 4.3+" : kOpenGlBurnOnlyLabel;
 
     bool hasLastRun = false;
 
@@ -2645,7 +2658,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
 #endif
 #ifdef HAVE_OPENGL
             if (g.supportsOpenGL && (g.supportsOpenGLCompute || gpu_bench::isGpuBurnWorkload(benchCfg.workload)))
-                entries.push_back({rawIdx(gi, "opengl"), "opengl", g.name, g.supportsOpenGLCompute ? "OpenGL 4.3+" : "OpenGL 4.1 (GPU Burn)", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
+                entries.push_back({rawIdx(gi, "opengl"), "opengl", g.name, g.supportsOpenGLCompute ? "OpenGL 4.3+" : kOpenGlBurnOnlyLabel, g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
         }
 
@@ -3014,9 +3027,9 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                     if (g.supportsOpenGL) {
 #ifdef _WIN32
                         if (gi == 0)
-                            entries.push_back({faRawIdx("opengl"), "opengl", g.name, g.supportsOpenGLCompute ? "OpenGL 4.3+" : "OpenGL 4.1 (GPU Burn)", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
+                            entries.push_back({faRawIdx("opengl"), "opengl", g.name, g.supportsOpenGLCompute ? "OpenGL 4.3+" : kOpenGlBurnOnlyLabel, g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #else
-                        entries.push_back({faRawIdx("opengl"), "opengl", g.name, g.supportsOpenGLCompute ? "OpenGL 4.3+" : "OpenGL 4.1 (GPU Burn)", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
+                        entries.push_back({faRawIdx("opengl"), "opengl", g.name, g.supportsOpenGLCompute ? "OpenGL 4.3+" : kOpenGlBurnOnlyLabel, g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
                     }
 #endif
@@ -3374,9 +3387,9 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                     if (g.supportsOpenGL) {
 #ifdef _WIN32
                         if (gchoice == 0)
-                            entries.push_back({faRawIdx("opengl"), "opengl", g.name, g.supportsOpenGLCompute ? "OpenGL 4.3+" : "OpenGL 4.1 (GPU Burn)", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
+                            entries.push_back({faRawIdx("opengl"), "opengl", g.name, g.supportsOpenGLCompute ? "OpenGL 4.3+" : kOpenGlBurnOnlyLabel, g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #else
-                        entries.push_back({faRawIdx("opengl"), "opengl", g.name, g.supportsOpenGLCompute ? "OpenGL 4.3+" : "OpenGL 4.1 (GPU Burn)", g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
+                        entries.push_back({faRawIdx("opengl"), "opengl", g.name, g.supportsOpenGLCompute ? "OpenGL 4.3+" : kOpenGlBurnOnlyLabel, g.luidHigh, g.luidLow, static_cast<std::uint32_t>(g.vramMB), g.dx12NodeIndex, g.dx12NodeCount});
 #endif
                     }
 #endif
