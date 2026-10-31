@@ -61,6 +61,10 @@
 #include <cerrno>
 #endif
 
+#if defined(__linux__)
+#include <unistd.h>
+#endif
+
 #if !defined(GPU_BENCH_NO_GLFW)
 #include <GLFW/glfw3.h>
 #endif
@@ -1171,6 +1175,28 @@ static int RunMemoryBandwidthCli(const std::vector<GpuInfo>& gpus,
     return 2;
 #endif
 }
+
+#if !defined(GPU_BENCH_NO_GLFW)
+// Ends GLFW after a benchmark run. With the NVIDIA 580 driver under Wayland,
+// glfwTerminate() after an OpenGL window segfaults in wl_display_disconnect()
+// (GTX 970, GLFW 3.4, every windowed OpenGL job, Vulkan and headless not). The
+// results are saved by then, but the process would exit 139, which reads as a
+// failed run. There the process ends here instead, with the run's exit code.
+static void TerminateGlfwAfterRun(int exitCode) {
+    if (gpu_bench::skipGlfwTerminate) return;
+#if defined(__linux__) && defined(GLFW_PLATFORM_WAYLAND)
+    if (gpu_bench::openglWindowOpened && glfwGetPlatform() == GLFW_PLATFORM_WAYLAND) {
+        std::cout.flush();
+        std::cerr.flush();
+        std::fflush(nullptr);
+        _exit(exitCode);
+    }
+#else
+    (void)exitCode;
+#endif
+    glfwTerminate();
+}
+#endif
 
 int gpu_bench::cliMain(int argc, char* argv[]) {
 #ifdef _WIN32
@@ -2572,7 +2598,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
                   << "; capture-incompatible fallbacks: " << captureUnsupported << "\n"
                   << "====================================\n";
 #if !defined(GPU_BENCH_NO_GLFW)
-        if (!gpu_bench::skipGlfwTerminate) glfwTerminate();
+        TerminateGlfwAfterRun(failed ? 1 : 0);
 #endif
         return failed ? 1 : 0;
     }
@@ -2747,8 +2773,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
             gpu_bench::PrintComparisonTable(allResults);
 
 #if !defined(GPU_BENCH_NO_GLFW)
-        if (!gpu_bench::skipGlfwTerminate)
-            glfwTerminate();
+        TerminateGlfwAfterRun(failed > 0 ? 1 : 0);
 #endif
         // GUI Full Analysis treats the worker exit code as its success signal.
         // A partial matrix is not a successful full analysis: preserve the
@@ -3901,8 +3926,7 @@ int gpu_bench::cliMain(int argc, char* argv[]) {
     }
 
 #if !defined(GPU_BENCH_NO_GLFW)
-    if (!gpu_bench::skipGlfwTerminate)
-        glfwTerminate();
+    TerminateGlfwAfterRun(0);
 #endif
     return 0;
 }

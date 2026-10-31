@@ -20,6 +20,8 @@ bool StopRequested();
 // Legacy embedding hook: when true, cliMain() skips glfwTerminate() on exit.
 #if !defined(GPU_BENCH_NO_GLFW)
 inline bool skipGlfwTerminate = false;
+// Set once a window with an OpenGL context has been created in this process.
+inline bool openglWindowOpened = false;
 #endif
 
 }  // namespace gpu_bench

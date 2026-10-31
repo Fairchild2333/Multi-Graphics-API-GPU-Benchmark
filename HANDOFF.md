@@ -1791,7 +1791,7 @@ PathService 已把 results/captures/reports/logs 改到
   | 换页存储读 / 写 | 745 / 762 MB/s |
 
   - 内存全核读 23.8 GB/s 是理论值的 93%，和固件报告的双通道一致。GPU 负载时最高 71°C、约 150 W、1278 MHz。
-  - 7 项 OpenGL 窗口测试（粒子四档、Burn 三档）退出码 139：段错误在 `libwayland-client`，发生在成绩保存之后，成绩有效，无窗口的 OpenGL 项不崩。Bug 没修。
+  - 7 项 OpenGL 窗口测试（粒子四档、Burn 三档）退出码 139：段错误在 `libwayland-client`，发生在成绩保存之后，成绩有效，无窗口的 OpenGL 项和 Vulkan 窗口项不崩。gdb 栈：`cliMain` → `glfwTerminate` → `wl_display_disconnect` → `libwayland-client`，库没有符号，根因没查到（最可疑的是 NVIDIA 在 Wayland 上的 EGL 路径）。已绕过：Linux 的 Wayland 下开过 OpenGL 窗口时，`TerminateGlfwAfterRun`（`src/main.cpp`）刷新输出后直接 `_exit`，不调 `glfwTerminate`。短跑验证：OpenGL 窗口 Burn 和粒子退出码都是 0、成绩照存，正式结果不受影响，没有重测。这次系列的日志里还是 139。
 - **CPU 烤机（用户担心原装散热，10 分钟各一轮，不存成绩）：** `cpu_mixed` 全核封装最高 69°C，约 3600 MHz，成绩 891.87，和 15 秒短测一样。自写 AVX2/FMA 负载（12 组 FMA，8 线程，229.1 GFLOP/s，到了理论上限约 230）封装最高 78°C，第 1 分钟起稳定在 76–78°C，全程 3600 MHz。两轮降频计数都是 0，离固件报告的 85°C 还有 7°C。负载基本不碰内存，也不是最狠的压力程序；只代表这次的室温。RAPL 满载只读 18–21 W，明显不对，不当功耗数字用。
 - **装机踩的坑：**
   - 第一次安装在网络配置这步停住（`netplan apply` 退出 1）：U 盘上是 10-22 给飞腾生成的 `-Wifi` 配置，写的 `wlp5s0`，这台是 `wlp6s0`。不带 `-Wifi` 重新生成后装完。安装盘是 USB 接的 2 TB 固态，内核报成旋转盘，脚本选中了 NVMe，安装盘没被清。

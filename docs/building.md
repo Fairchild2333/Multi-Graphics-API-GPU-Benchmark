@@ -315,9 +315,10 @@ already going.
 
 **NVIDIA GPUs.** A GTX 970 (Maxwell) needs `nvidia-driver-580`, the branch
 `ubuntu-drivers devices` recommends; it builds on 7.0, and nouveau is replaced
-at the next boot. Windowed OpenGL jobs under Wayland exit with a segmentation
-fault in `libwayland-client` after the result is saved (exit 139), so their
-results stand. Before a series, read the PCIe link under load: a card seen at
+at the next boot. Under Wayland, `glfwTerminate()` after an OpenGL window
+segfaults in `libwayland-client` on this driver, after the result is saved, so
+the engine ends the process directly there and exits with the run's own code.
+Before a series, read the PCIe link under load: a card seen at
 Gen3 x2 in an x16 slot came up at x8 after cleaning and reseating
 (`nvidia-smi --query-gpu=pcie.link.gen.gpucurrent,pcie.link.width.current --format=csv`;
 at idle the link speed drops by design).

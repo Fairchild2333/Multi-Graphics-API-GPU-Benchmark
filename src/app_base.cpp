@@ -1,6 +1,7 @@
 #include "app_base.h"
 #include "cpu_cancel.h"
 #include "capture_naming.h"
+#include "gpu_engine.h"
 #include "path_service.h"
 #include "system_info.h"
 #include "renderdoc_app.h"
@@ -421,6 +422,7 @@ void AppBase::InitWindow() {
         glfwTerminate();
         throw std::runtime_error("glfwCreateWindow failed");
     }
+    if (NeedsOpenGLContext()) gpu_bench::openglWindowOpened = true;
 }
 #endif
 
