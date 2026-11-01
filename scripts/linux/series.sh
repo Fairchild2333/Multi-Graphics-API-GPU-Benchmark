@@ -29,9 +29,11 @@ if [ -z "${SERIES_INHIBITED:-}" ] && command -v gnome-session-inhibit >/dev/null
 fi
 
 gpu_mhz() {
+    # The NVIDIA driver can stay installed under another vendor's card; then
+    # nvidia-smi prints an error on stdout.
     if command -v nvidia-smi >/dev/null 2>&1; then
-        nvidia-smi --query-gpu=clocks.gr,temperature.gpu,power.draw --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ' | tr ',' ' '
-        return
+        v=$(nvidia-smi --query-gpu=clocks.gr,temperature.gpu,power.draw --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ' | tr ',' ' ')
+        case "$v" in [0-9]*) echo "$v"; return ;; esac
     fi
     for f in /sys/class/drm/card*/gt_act_freq_mhz /sys/class/drm/card*/device/tile0/gt0/freq0/act_freq; do
         [ -r "$f" ] && { echo "$(cat "$f") - -"; return; }
