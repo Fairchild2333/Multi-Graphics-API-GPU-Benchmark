@@ -40,6 +40,7 @@ private:
     void CollectTimestampResults();
     bool UseTimestampQueries() const;
     void EnableSynchronizedTimingFallback(const char* reason);
+    void FinishComputeForTiming();
     void CreateFluidResources();
     void CleanupFluidResources();
     void RecordFluidFrame(float deltaTime);
@@ -78,6 +79,7 @@ private:
     bool   timestampsSupported_ = false;
     bool   timestampQueriesAllocated_ = false;
     bool   synchronizedTimingFallback_ = false;
+    bool   glFinishSkipsCompute_ = false;
     int    timestampFrameCount_ = 0;
     int    currentFrame_        = 0;
     float  fractalElapsed_      = 0.0f;   // StressFractal palette time

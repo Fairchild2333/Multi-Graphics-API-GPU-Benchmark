@@ -305,6 +305,12 @@ void OpenGLBackend::CreateTimestampQueries() {
     const std::string version = versionText ? versionText : "";
     const std::string renderer = rendererText ? rendererText : "";
 
+    // Arise2030 on Linux: glFinish returns in 0.02 ms with a dispatch of 4M items
+    // still running; a fence takes 21 ms and scales with the count (18202 GB/s
+    // before this). The draw after a dispatch returns early too, and its cost
+    // landed on the next frame's compute. A draw alone (GPU Burn) does wait.
+    glFinishSkipsCompute_ = renderer.find("Glenfly Arise2030") != std::string::npos;
+
     // Intel's legacy 10.18.15 OpenGL stack advertises GL_TIMESTAMP but can
     // return essentially constant (for example 0.002 ms) values for large
     // compute dispatches.  Use a synchronized wall-clock measurement on this
@@ -384,6 +390,16 @@ void OpenGLBackend::EnableSynchronizedTimingFallback(const char* reason) {
               << std::endl;
 }
 
+void OpenGLBackend::FinishComputeForTiming() {
+    if (!glFinishSkipsCompute_) {
+        glFinish();
+        return;
+    }
+    GLsync fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, 60000000000ULL);
+    glDeleteSync(fence);
+}
+
 bool OpenGLBackend::UseSynchronizedTimingInstead(const char* reason) {
     if (synchronizedTimingFallback_) return false;
     EnableSynchronizedTimingFallback(reason);
@@ -416,7 +432,7 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
     if (fluid_.active) {
         RecordFluidFrame(deltaTime);
         if (synchronizedTiming) {
-            glFinish();
+            FinishComputeForTiming();
             const double totalMs = elapsedMs(synchronizedFrameBegin, Clock::now());
             AccumulateTiming(totalMs, 0.0, totalMs);
         }
@@ -541,7 +557,7 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
     double synchronizedComputeMs = 0.0;
     if (synchronizedTiming) {
         glMemoryBarrier(GL_ALL_BARRIER_BITS);
-        glFinish();
+        FinishComputeForTiming();
         synchronizedComputeMs = elapsedMs(synchronizedComputeBegin, Clock::now());
     }
 
@@ -595,7 +611,7 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
             glQueryCounter(timestampQueries_[slot][3], GL_TIMESTAMP);
 
         if (synchronizedTiming) {
-            glFinish();
+            FinishComputeForTiming();
             const double totalMs = elapsedMs(synchronizedFrameBegin, Clock::now());
             const double renderMs = (std::max)(0.0, totalMs - synchronizedComputeMs);
             AccumulateTiming(synchronizedComputeMs, renderMs, totalMs);
@@ -628,7 +644,7 @@ void OpenGLBackend::DrawFrame(float deltaTime) {
             glQueryCounter(timestampQueries_[slot][3], GL_TIMESTAMP);
 
         if (synchronizedTiming) {
-            glFinish();
+            FinishComputeForTiming();
             const double totalMs = elapsedMs(synchronizedFrameBegin, Clock::now());
             const double renderMs = (std::max)(0.0, totalMs - synchronizedComputeMs);
             AccumulateTiming(synchronizedComputeMs, renderMs, totalMs);
