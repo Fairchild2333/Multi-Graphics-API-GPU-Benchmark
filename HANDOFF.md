@@ -1764,6 +1764,30 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-01 同一台 Z97 换 RX 580：amdgpu 自动开 8 GB BAR，GNOME 下全部 28 项，遥测修复验证通过
+
+- **卡和环境：** 蓝宝石 Nitro+ RX 580（Polaris 10，`1002:67df` rev e7，子系统 `1da2:e366`），8 GB，VBIOS 113-3E366DU-S4Y，第一个槽，PCIe 8 GT/s x16。内核 `amdgpu`，Mesa 26.0.8：Vulkan 1.4（RADV）、OpenGL 4.6（radeonsi）、ES 3.2。不用装驱动。核心最高 1411 MHz，显存 2000 MHz，功耗上限 175 W。GNOME 50.1 Wayland，4K 60 Hz，用户确认显示器正常。显示接在 `HDMI-2`，`monitors.xml` 里 `HDMI-1` 的 1080p 设置没有生效。
+- **Resizable BAR：** Above 4G Decoding 开着时，`amdgpu` 开机自己把 BAR 0 调到 8 GB，全部显存 CPU 可见，不需要脚本。
+- **成绩（`out\linux\mk-93f8a3-rx580-series-20261101-160925`，28 项都退出码 0，内核 0 条警告，没有 GPU 重置）：**
+
+  | 粒子（GB/s） | Vulkan 窗口 | Vulkan 无窗口 | OpenGL 窗口 | OpenGL 无窗口 |
+  |---|---|---|---|---|
+  | 65K | 151.00 | 151.06 | 182.15 | 153.69 |
+  | 1M | 114.15 | 114.31 | 115.18 | 115.46 |
+  | 4M | 112.22 | 112.47 | 112.41 | 113.01 |
+  | 16M | 111.18 | 111.33 | 111.22 | 111.82 |
+
+  | GPU Burn（Gpix-step/s，每帧） | 8 步 | 16 步 | 64 步 | 256 步 |
+  |---|---|---|---|---|
+  | Vulkan | — | 6.83，4.317 ms | 8.51，13.869 ms | 9.08，51.986 ms |
+  | OpenGL | — | 6.84，4.311 ms | 8.50，13.884 ms | 9.07，52.002 ms |
+  | ES 2.0（成绩只有日志） | 53.04，0.278 ms | 64.44，0.458 ms | 76.94，1.533 ms | 78.27，6.028 ms |
+
+  - 流体 19.29 MParticle-step/s（137.936 ms compute + 28.454 ms render）。显存读 / 写 / 复制 209.7 / 170.0 / 169.5 GB/s；读的缓存段 717.6 GB/s（1～3 MiB），缓存供数可到 12 MiB。
+  - 65K 一帧不到 0.02 ms，读数不够可靠。CPU 项按用户要求不跑。
+- **遥测修复验证通过：** `series.sh` 的新逻辑跟完整的一轮，540 个样本都是有效频率，最高 1411 MHz，没有 `nvidia-smi` 的错误文本。AMD 路径没有温度和功耗，虽然 hwmon 有（`temp1_input`、`power1_input`），脚本没读。
+- **今天这台 Z97 的对比（OpenGL Burn 256 步 / 16M 粒子无窗口）：** RTX 4070 51.93 / 282.81，RTX 2080 30.21 / 245.31，Vega FE 17.12 / 202.54，Arc A380 9.83 / 83.83，RX 580 9.07 / 111.82，GTX 660 OEM（`nouveau`）2.18 / 48.98。驱动和 BAR 大小都不同（2080 是 256 MB），Arc 的 OpenGL 粒子是墙钟，比较时要考虑。
+
 ### 2026-11-01 同一台 Z97 换 Radeon Vega Frontier Edition：amdgpu 自动开 16 GB BAR，GNOME 下全部 28 项
 
 - **卡和环境：** Radeon Vega Frontier Edition（Vega 10 XTX，子系统 `1002:6b76`），16 GB，第一个槽。PCIe 8 GT/s x16，卡有内部交换机，GPU 在 `03:00.0`，真实链路看 `01:00.0`。内核 `amdgpu`，Mesa 26.0.8：Vulkan 1.4（RADV）、OpenGL 4.6（radeonsi）、ES 3.2。不用装驱动。核心最高 1600 MHz，显存 945 MHz，功耗上限 264 W。GNOME 50.1 Wayland 正常，用户确认显示器正常。
