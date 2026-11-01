@@ -1779,7 +1779,7 @@ PathService 已把 results/captures/reports/logs 改到
   - **OpenGL 落到 llvmpipe（`src/main.cpp`）：** 探测结束后 GLFW 卸载 libGLX，再次加载时 `libGLX_fh2m` 不工作，GLVND 退到 Mesa。第一轮 OpenGL 11 项全跑在 llvmpipe 上，却记成 Fantasy II-M（Burn 0.11 / 0.15 / 0.15，stream 3.35～18.33 GB/s），已作废。现在 Linux 上探测前 `dlopen("libGLX.so.0", RTLD_NODELETE)`。设 `__GLX_VENDOR_LIBRARY_NAME=fh2m` 没用；`glxinfo` 只加载一次，所以看不出来。
   - **防止假成绩（`src/opengl_backend.cpp`）：** Linux 上选了硬件 GPU 却落到软件渲染时报错，不存成绩。这条还没有实际触发过。
   - **时间戳（`src/opengl_backend.cpp`）：** Fantasy 的 GL 时间戳盖不住 GPU 的工作，256 步读 0.5 ms（算出 916.80 Gpix-step/s），16 步在 0.1～139 ms 之间跳。渲染器名以 `Fantasy` 开头时直接用墙钟。
-  - **状态：** Linux 上编译并在 Fantasy II-M 上实跑；Windows 编译通过，5090 OpenGL 16 步 132.84 Gpix-step/s，时间戳仍启用。**没有在 JM9100 上实跑**，它的成绩是这些改动之前的。macOS 没编译（前两处有 `__linux__` 守卫，第三处只看渲染器名字）。
+  - **状态：** Linux 上编译并在 Fantasy II-M 上实跑；Windows 编译通过，5090 OpenGL 16 步 132.84 Gpix-step/s，时间戳仍启用。JM9100 上用这份代码（`f89ee3b`）跑了一次 OpenGL GPU Burn 16 步：渲染器 `Jingjia JM9100`，0.23 Gpix-step/s，127.141 ms，改动前是 0.232、127.2 ms，内核 0 条警告（`out\linux\mk-93f8a3-jm9100-verify-series-20261101-123023`；只为验证，测试机 `results.json` 里这条已删）。它的其他成绩仍是改动之前的。macOS 没编译（前两处有 `__linux__` 守卫，第三处只看渲染器名字）。
 - **成绩（OpenGL 全部 `synchronized_wall_clock`）：**
 
   | 项目 | Vulkan | OpenGL |
