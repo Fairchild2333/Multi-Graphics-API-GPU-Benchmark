@@ -375,6 +375,27 @@ machine, send the source with `-BuildOnly`, then run
 - On 7.0 the driver has no framebuffer console of its own (the fbdev helpers
   it used are gone); the desktop drives the screen through KMS.
 
+### Resizable BAR on a board without it (Arc A380 on an ASUS Z97)
+
+An Arc on a Z97 board comes up with a 256 MB BAR, and i915 reports `Can't resize
+LMEM BAR` until Above 4G Decoding is on in the BIOS. After that the driver tries
+8 GB and still fails with `no space`: the card's own PCIe switch has an 8 MB BAR
+that the firmware placed below 4 GB, so the root port's window cannot move.
+
+`scripts/linux/arc-rebar/` gets past this on every boot, before the desktop
+starts: it unbinds the HDMI audio and i915, writes the size into the card's
+Resizable BAR control register, removes the root port's subtree and rescans.
+The kernel then places the whole path in the 64-bit window, and i915 binds again
+with the full BAR (about 7 seconds). Install it as its header says.
+
+- It is written for this slot and card: root port `00:01.0`, GPU `03:00.0`,
+  device `8086:56a5`, capability at `0x420`. With any other GPU it does nothing.
+- It is Linux only. The firmware has not changed, so Windows still sees 256 MB.
+- Unbinding i915 with the audio still bound gives two kernel warnings; the script
+  unbinds the audio first.
+- The `no space` lines left in the log come from the driver's own attempt earlier
+  in the boot.
+
 ### Phytium D2000 (arm64) with a Radeon HD 6450
 
 > **Verification status: run on real hardware** (Phytium D2000/8 board with

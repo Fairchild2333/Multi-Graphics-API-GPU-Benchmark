@@ -1,0 +1,38 @@
+#!/bin/bash
+# Give an Arc A380 behind the root port 00:01.0 its full BAR on boards whose
+# firmware cannot (ASUS Z97, with Above 4G Decoding on): the switch's own BAR
+# pins the root port's window below 4 GB, so the driver's resize fails with
+# "no space". Set the size, drop the whole subtree, and rescan; the kernel then
+# places everything in the 64-bit window.
+# Runs as root with no desktop on the card. Does nothing for any other GPU.
+#
+#   sudo install -m755 arc-rebar /usr/local/sbin/arc-rebar
+#   sudo install -m644 arc-rebar.service /etc/systemd/system/
+#   sudo systemctl enable arc-rebar.service
+ROOT=0000:00:01.0
+GPU=0000:03:00.0
+SIZE_CODE=13     # 8 GB
+[ "$(cat /sys/bus/pci/devices/$GPU/vendor 2>/dev/null)" = 0x8086 ] || { echo "no Intel GPU at $GPU"; exit 0; }
+[ "$(cat /sys/bus/pci/devices/$GPU/device 2>/dev/null)" = 0x56a5 ] || { echo "not an Arc A380"; exit 0; }
+cap=$(setpci -s ${GPU#0000:} 420.w)
+[ "$cap" = 0015 ] || { echo "no Resizable BAR capability at 0x420 ($cap)"; exit 1; }
+ctl=$(setpci -s ${GPU#0000:} 428.l)
+echo "control register before: $ctl"
+[ $(( (0x$ctl >> 8) & 0x3f )) -eq $SIZE_CODE ] && { echo "already the full size"; exit 0; }
+# The HDMI audio holds a reference on the display driver; let go of it first.
+AUDIO=0000:04:00.0
+if [ -e /sys/bus/pci/drivers/snd_hda_intel/$AUDIO ]; then
+    echo "$AUDIO" > /sys/bus/pci/drivers/snd_hda_intel/unbind && echo "audio unbound"
+fi
+if [ -e /sys/bus/pci/drivers/i915/$GPU ]; then
+    echo "$GPU" > /sys/bus/pci/drivers/i915/unbind && echo "i915 unbound"
+fi
+setpci -s ${GPU#0000:} COMMAND=0:2
+new=$(printf '%08x' $(( (0x$ctl & ~0x3f00) | (SIZE_CODE << 8) )))
+setpci -s ${GPU#0000:} 428.l=$new
+echo "control register after: $(setpci -s ${GPU#0000:} 428.l)"
+echo 1 > /sys/bus/pci/devices/$ROOT/remove && echo "subtree removed"
+sleep 2
+echo 1 > /sys/bus/pci/rescan && echo "rescanned"
+sleep 3
+lspci -vs ${GPU#0000:} | grep -E 'Kernel driver|Region 2'

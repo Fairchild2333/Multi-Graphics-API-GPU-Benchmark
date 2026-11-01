@@ -1,0 +1,13 @@
+[Unit]
+Description=Full BAR for an Arc A380 on a board that cannot assign it
+After=systemd-udev-settle.service systemd-modules-load.service plymouth-start.service
+Before=display-manager.service lightdm.service
+
+[Service]
+Type=oneshot
+ExecStartPre=-/usr/bin/plymouth quit
+ExecStart=/usr/local/sbin/arc-rebar
+StandardOutput=journal
+
+[Install]
+WantedBy=graphical.target
