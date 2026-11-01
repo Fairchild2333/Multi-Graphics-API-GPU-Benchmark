@@ -1764,6 +1764,31 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-01 同一台 Z97 换 RTX 2080：Ubuntu 官方源 NVIDIA 595，GNOME Wayland 下全部 28 项
+
+- **卡和环境：** 华硕 RTX 2080（TU104，`10de:1e87`，子系统 `1043:8660`），8 GB，VBIOS 90.04.23.00.63，第一个槽，上限 PCIe Gen3 x16。BAR1 256 MB，VBIOS 上限就是 256 MB，开不了 Resizable BAR。Ubuntu 26.04.1、内核 7.0.0-42、GNOME 50.1 Wayland，4K 60 Hz。
+- **驱动：** 开机是 `nouveau` + GSP（RM 570.144），Vulkan 是 NVK，OpenGL 走 zink，没有测。按 `ubuntu-drivers` 的推荐 `sudo apt-get install nvidia-driver-595-open`（595.99.02，开源内核模块），DKMS 编译通过，不用改代码。Vulkan 1.4、OpenGL 4.6、ES 3.2。`gnome-shell` 用 NVIDIA 的 EGL，着色器失败 0 次，用户确认显示器正常。
+- **对其他卡的影响：** `/etc/modprobe.d` 没有屏蔽 `nouveau` 的配置，但这个驱动装着时 GTX 660 的 `nouveau` 能不能正常加载没测过。`~/.config/monitors.xml` 已从 1080p 120 Hz 改回 4K 60 Hz，再换 GTX 660 这类 HDMI 1.4 的卡要改回去。
+- **成绩（`out\linux\mk-93f8a3-rtx2080-series-20261101-142910`，28 项都退出码 0，内核 0 条警告，没有 Xid）：**
+
+  | 粒子（GB/s） | Vulkan 窗口 | Vulkan 无窗口 | OpenGL 窗口 | OpenGL 无窗口 |
+  |---|---|---|---|---|
+  | 65K | 264.76 | 282.83 | 209.23 | 321.79 |
+  | 1M | 239.83 | 243.35 | 239.88 | 242.44 |
+  | 4M | 245.39 | 246.51 | 243.88 | 244.59 |
+  | 16M | 242.94 | 247.27 | 240.86 | 245.31 |
+
+  | GPU Burn（Gpix-step/s，每帧） | 8 步 | 16 步 | 64 步 | 256 步 |
+  |---|---|---|---|---|
+  | Vulkan | — | 22.78，1.295 ms | 28.39，4.155 ms | 30.15，15.649 ms |
+  | OpenGL | — | 22.30，1.322 ms | 28.27，4.172 ms | 30.21，15.618 ms |
+  | ES 2.0（成绩只有日志） | 160.19，0.092 ms | 201.46，0.146 ms | 280.55，0.420 ms | 301.50，1.565 ms |
+
+  - 流体 56.70 MParticle-step/s（32.006 ms compute + 24.598 ms render）。显存读 / 写 / 复制 437.5 / 359.7 / 356.7 GB/s，读的缓存段（1～6 MiB）1810.3 GB/s。
+  - 遥测有数据：负载下核心 1845～1950 MHz，最高 221 W（`nvidia-smi` 的功耗上限 215 W），最高 50°C。
+  - 65K 每帧 GPU 时间只有 0.008～0.013 ms，四种模式差到 209～322 GB/s，主要是时间太短造成的波动，看 1M 以上。
+  - ES 2.0 全程墙钟，一帧很短时开销占比大，8 步到 256 步差将近一倍，256 步最接近真实水平。CPU 项按用户要求不跑。
+
 ### 2026-11-01 同一台 Z97 换 GTX 660 OEM：nouveau 手动升频后在 GNOME 下跑；VBIOS 其实带 UEFI，读 ROM 被截断过；HDMI 增强模式下 GOP 没画面
 
 - **卡和环境：** GTX 660 OEM（`10de:1185`，子系统 `10de:098a`，GK104，Kepler，不是零售版常见的 GK106），1.5 GB。VBIOS 80.04.48.00.02。Ubuntu 26.04.1、内核 7.0.0-42、GNOME 50.1 Wayland。驱动 `nouveau`：OpenGL 4.3、ES 3.2（渲染器名 `NVE4`），Vulkan 1.2（NVK，`GeForce GTX 660 (NVK GK104)`）。
