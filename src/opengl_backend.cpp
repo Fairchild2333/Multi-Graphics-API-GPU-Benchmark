@@ -369,6 +369,16 @@ void OpenGLBackend::CreateTimestampQueries() {
         return;
     }
 
+#if defined(__linux__)
+    // LX 7G100 on Linux: 8225 GB/s at 65536 particles against 148 on Vulkan.
+    // Its Windows driver times these dispatches correctly.
+    if (renderer.rfind("LISUAN", 0) == 0) {
+        EnableSynchronizedTimingFallback(
+            "LISUAN GL timestamps do not cover the GPU's work on Linux");
+        return;
+    }
+#endif
+
     GLint bits = 0;
     glGetQueryiv(GL_TIMESTAMP, GL_QUERY_COUNTER_BITS, &bits);
     timestampsSupported_ = (bits > 0);
