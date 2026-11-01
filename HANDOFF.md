@@ -1764,6 +1764,38 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-01 同一台 Z97 换 Intel Arc A380：不支持 Resizable BAR 的主板上开到 8 GB
+
+- **卡和环境：** Intel Arc A380（蓝戟，`8086:56a5`，DG2），第一个槽。PCIe 8 GT/s x8（卡支持 16 GT/s，主板只到 8 GT/s；端点 `03:00.0` 显示的 2.5 GT/s x1 是卡内部交换机的虚拟链路，真实链路看 `01:00.0`）。内核自带 `i915`（DMC、GuC 70.53.0、HuC 都加载），Mesa 26.0.8：Vulkan 1.4、OpenGL 4.6、ES 3.2。GNOME 50.1 Wayland 走默认路径正常，4K 60 Hz。
+- **Resizable BAR（华硕 Z97，BIOS 3503，主板本身不支持）：**
+  - 默认 BAR 256 MB，`i915` 报 `Can't resize LMEM BAR - platform support is missing`。
+  - 用户在 BIOS 开 Above 4G Decoding 后，系统多了约 31 GB 的 64 位地址窗口（`0x800000000-0xfbfffffff`），`i915` 开始尝试 8 GB，但报 `no space`。日志 `was not released (still contains assigned resources)`：卡上交换机 `01:00.0` 有一个 8 MB 的 BAR，固件放在 4 GB 以下，根端口 `00:01.0` 的窗口挪不走。这一步没有 Above 4G 就走不通。
+  - 办法（`scripts/linux/arc-rebar/`）：解绑 HDMI 音频和 `i915`，把 8 GB 写进卡的 Resizable BAR 控制寄存器（`0x428`，大小编码 13），删除根端口整棵子树再 `rescan`。内核把整条路径分到 64 位窗口，`i915` 自动重新绑定。开机服务 `arc-rebar.service` 在桌面启动前运行，约 7 秒。
+  - **验证（重启一次）：** BAR 地址 `0x800000000`，大小 8 GB；寄存器显示 `current size: 8GB`；根端口窗口 `800000000-a007fffff`；真实链路仍是 8 GT/s x8；GNOME 正常，内核 0 条警告。Vulkan 显存堆从 5.70 GiB 变成 5.95 GiB，差不多多出 256 MB，推断是原来单独分开的那块合并了（之前没看完整堆列表）。
+  - 第一次手动试时音频还连着，卸载 `i915` 打了两条内核警告（`audio power refcount 1 after unbind`、`snd_hdac_acomp_exit`），脚本改成先解绑音频后没有了。
+  - **局限：** 只对 Linux 有效，固件没变，Windows 仍是 256 MB。脚本写死了插槽和型号（`00:01.0`、`03:00.0`、`8086:56a5`、`0x420`），换别的卡什么都不做。没有测 256 MB 的对照，不知道成绩差多少。测试机上的服务和文件要手动装。
+  - 测试前停 `lightdm` 手动试时屏幕会黑，那是桌面没启动，不是卡的问题。
+- **成绩（`out\linux\mk-93f8a3-arc-a380-series-20261101-132244`，28 项都退出码 0，内核 0 条警告，都在 GNOME 和 8 GB BAR 下；没有 256 MB 的对照）：**
+
+  | 项目 | Vulkan 窗口 | Vulkan 无窗口 | OpenGL 窗口 | OpenGL 无窗口 |
+  |---|---|---|---|---|
+  | 粒子 65K（GB/s） | 96.78 | 47.27 | 6.48 | 7.47 |
+  | 粒子 1M | 91.93 | 92.36 | 53.89 | 55.27 |
+  | 粒子 4M | 89.39 | 90.53 | 73.86 | 75.90 |
+  | 粒子 16M | 86.94 | 90.10 | 80.49 | 83.83 |
+
+  | GPU Burn（Gpix-step/s，每帧） | 8 步 | 16 步 | 64 步 | 256 步 |
+  |---|---|---|---|---|
+  | Vulkan | — | 7.35，4.013 ms | 9.23，12.785 ms | 9.87，47.789 ms |
+  | OpenGL | — | 7.35，4.013 ms | 9.20，12.822 ms | 9.83，48.006 ms |
+  | ES 2.0（成绩只有日志） | 63.66，0.232 ms | 94.51，0.312 ms | 81.60，1.446 ms | 90.69，5.203 ms |
+
+  - 流体 27.86 MParticle-step/s（86.110 ms compute + 29.068 ms render）。显存读 / 写 / 复制 119.5 / 122.6 / 135.1 GB/s。
+  - **Vulkan 65K 无窗口的 47.27 不代表硬件：** 这一项遥测 GPU 只有 600～800 MHz，其他项都是 2450 MHz。负载太轻（一帧 0.176 ms 里 GPU 只忙 0.055 ms），GPU 没升频。没有重跑。
+  - OpenGL 粒子是墙钟（`Mesa Intel` 的 compute 不在时间戳那个批次），小粒子数偏低主要是同步开销。
+  - ES 2.0 全程墙钟。8 步一帧 0.232 ms，开销占比大，所以低于 16 步。64 步低于 16 步和 256 步，帧时间稳定、频率都是 2450 MHz，原因不明。
+  - 遥测有频率，没有温度和功耗（`gpu_temp_c`、`gpu_power_w` 全是 `-`），虽然 `i915` 的 hwmon 有这些数据，`series.sh` 没读到。CPU 项按用户要求不跑。
+
 ### 2026-11-01 同一台 Z97 换 Glenfly Arise2030：厂商 deb 直接能用，GNOME 不用特殊设置；`glFinish` 不等 compute，修了计时；ES 2.0 系列加 8 步
 
 - **卡和环境：** Glenfly Arise2030（`6766:3d07`，28 nm），第一个槽，PCIe 8 GT/s x8（卡的上限），4 GB 显存，VBIOS 1a.11.00.26。Ubuntu 26.04.1、内核 7.0.0-42。驱动 25.00.55：OpenGL 4.5、ES 3.2，包里没有 Vulkan（`vulkaninfo` 只有 llvmpipe）。显示 HDMI 3840x2160@60。
