@@ -1764,6 +1764,35 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-02 同一台 Z97 换砺算 LX 7G100：官方 Linux 驱动在内核 7.0 上直接可用，GNOME 下全部 28 项
+
+- **卡和环境：** 砺算 LX 7G100（`4c54:5006`，子系统 `4c54:5000`），驱动日志显存 `0x3000 M`（约 12 GB），PCIe 8 GT/s x16（卡支持 16 GT/s，Z97 最高 8）。GNOME Wayland，DP-4，测试时 4K 120 Hz、缩放 1.5（临时设置，没保存）。Vulkan 1.3.246，OpenGL 4.6、ES 3.2（Mesa 22.0.4 基础）。Windows 的记录见 [docs/lx-7g100-20261020.md](docs/lx-7g100-20261020.md)。
+- **驱动：** 用户提供的 `LisuanTechDriver-v262-1963`，`lisuangpu-dkms` 和 `lisuangpu-lib` 262.2.0.56。内核驱动是完整源码，版本判断到 7.0，**一行没改就在 7.0.0-42 上编译通过**。用户运行 `~/lisuan-install.sh`（`dpkg -i` 两个包、`modprobe gf`）。模块名 `gf`，PCI 驱动名 `lisuan`，有 `/etc/modules-load.d/gf.conf`，开机自动加载。可以用 `dpkg -r` 卸载。包解开在 `~/lisuan-pkg`。
+- **Resizable BAR：** 开机只有 512 MB，驱动加载时自己开到 16 GB，全部显存 CPU 可见，不需要脚本。
+- **GNOME 正常：** 不需要 `COGL_DRIVER=gles2`，`vkcube` 和 `glxgears` 在 Wayland 窗口里都不卡（S80 不行）。用户确认画面和设置都正常。GNOME 只提供色彩模式 0 和 2，没有 `bt2100`，开不了 HDR；原因没查（Windows 上也打不开 HDR）。
+- **成绩（`out\linux\mk-93f8a3-lx7g100-series-20261102-004109` 20 项，OpenGL 粒子 8 项在 `out\linux\mk-93f8a3-lx7g100-glfix-series-20261102-010810`；都退出码 0，内核 0 条错误）：**
+
+  | 粒子（GB/s） | Vulkan 窗口 | Vulkan 无窗口 | OpenGL 窗口 | OpenGL 无窗口 |
+  |---|---|---|---|---|
+  | 65K | 139.20 | 148.39 | 25.03 | 36.17 |
+  | 1M | 206.27 | 207.25 | 93.33 | 129.86 |
+  | 4M | 172.46 | 172.77 | 122.96 | 149.75 |
+  | 16M | 164.39 | 164.51 | 128.64 | 156.36 |
+
+  | GPU Burn（Gpix-step/s，每帧） | 8 步 | 16 步 | 64 步 | 256 步 |
+  |---|---|---|---|---|
+  | Vulkan | — | 14.65，2.013 ms | 19.38，6.088 ms | 18.70，25.229 ms |
+  | OpenGL | — | 13.53，2.180 ms | 17.30，6.820 ms | 17.58，26.846 ms |
+  | ES 2.0（成绩只有日志） | 75.32，0.196 ms | 105.76，0.279 ms | 137.47，0.858 ms | 152.26，3.099 ms |
+
+  - 流体 36.40 MParticle-step/s（75.713 ms compute + 12.444 ms render）。显存读 / 写 / 复制 5.9 / 239.4 / 11.6 GB/s。
+  - **显存读 5.9 不是硬件能力：** 和 Windows 一样是 `volatile` 读走慢路径的数字，Windows 临时去掉 `volatile` 后读 296 GB/s。复制 11.6 我猜是同一原因，这次没验证。
+  - 65K 的 OpenGL 一步只有 0.07～0.1 ms，墙钟的等待开销可能占了不少（推测），参考价值不大。遥测没有 GPU 频率、温度和功耗。CPU 项按用户要求不跑。
+- **OpenGL 时间戳不可信，Linux 下改用墙钟（`src/opengl_backend.cpp`，渲染器名以 `LISUAN` 开头，只在 `__linux__`）：** 修复前粒子读到 6088～8939 GB/s，个别项触发异常检测。Windows 驱动的计时是对的，所以不动 Windows；这个改动没有在 Windows 上编译。第一个目录里 OpenGL 粒子 8 项都不要用，它的 `results.json` 也带着其中的错误记录；测试机上的已删，备份 `results.json.before-lx7g100-gl-fix`。OpenGL Burn 3 项第一轮已自动切到墙钟，复测 256 步 17.84，和 17.58 接近，保留。
+- **换下一张卡先检查 ES 2.0：** 这个驱动带 `/usr/share/glvnd/egl_vendor.d/10_gf.json`，排在 Mesa 前面，可能和 S80 的 `00_mtgpu.json` 一样让 ES 2.0 被静默跳过，还没验证。
+
+**同一天的 GT 730（只跑了 3 项，已停）：** GK208B（`10de:1287`，子系统 `103c:2b4e`），2 GB DDR3，VBIOS 80.28.92.00.57。595 不支持，`nouveau` 被 NVIDIA 驱动的黑名单挡住，用 `modprobe -C /dev/null nouveau` 临时加载（OpenGL 4.3、NVK Vulkan），`0f` 升到 901 / 1800 MHz，重启都恢复。PCIe 5 GT/s x4（卡支持 x8），原因没查。Vulkan 窗口粒子 65K / 1M / 4M 约 6 GB/s，8 秒的 Burn 16 步约 0.4 Gpix-step/s。用户决定不测 `nouveau`，等重装 20.04 后用 470 测。这 3 条还留在测试机的 `results.json` 里，日志在 `out\linux\mk-93f8a3-gt730-nouveau-series-20261102-002918`，不算完整成绩。
+
 ### 2026-11-02 同一台 Z97 换 RX 6900 XT：amdgpu 自动开 16 GB BAR，GNOME 下全部 28 项
 
 - **卡和环境：** Radeon RX 6900 XT（Navi 21，子系统 `1002:0e3a`），16 GB，PCIe 8 GT/s x16，BAR 0 由 `amdgpu` 开到 16 GB。内核 `amdgpu`，Mesa 26.0.8（RADV、radeonsi），GNOME Wayland，4K 120 Hz，缩放 2.0。GNOME 提供 `bt2100`（色彩模式 0、2、1）。
