@@ -1,0 +1,13 @@
+[Unit]
+Description=Full BAR for an RTX 4070 on a board that cannot assign it
+After=systemd-udev-settle.service systemd-modules-load.service plymouth-start.service
+Before=display-manager.service lightdm.service
+
+[Service]
+Type=oneshot
+ExecStartPre=-/usr/bin/plymouth quit
+ExecStart=/usr/local/sbin/rtx4070-rebar
+StandardOutput=journal
+
+[Install]
+WantedBy=graphical.target

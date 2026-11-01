@@ -396,6 +396,12 @@ with the full BAR (about 7 seconds). Install it as its header says.
 - The `no space` lines left in the log come from the driver's own attempt earlier
   in the boot.
 
+`scripts/linux/rtx4070-rebar/` does the same for an RTX 4070 (`10de:2786`, BAR 1
+control register at `0xbc0`, 16 GB) at `01:00.0`, unloading the NVIDIA modules
+instead of unbinding i915, and needs the display manager not to have started. An
+RTX 2080 cannot take this route: its VBIOS declares 256 MB at most, so there is no
+larger size to write.
+
 ### Phytium D2000 (arm64) with a Radeon HD 6450
 
 > **Verification status: run on real hardware** (Phytium D2000/8 board with

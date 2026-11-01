@@ -1,0 +1,44 @@
+#!/bin/bash
+# Give an RTX 4070 behind the root port 00:01.0 a 16 GB BAR on boards whose firmware
+# cannot (ASUS Z97, with Above 4G Decoding on). The firmware leaves the root port's
+# window below 4 GB; set the size, drop the subtree, and rescan so the kernel places
+# it in the 64-bit window. Runs as root with no desktop on the card. Does nothing for
+# any other GPU.
+#
+#   sudo install -m755 rtx4070-rebar /usr/local/sbin/rtx4070-rebar
+#   sudo install -m644 rtx4070-rebar.service /etc/systemd/system/
+#   sudo systemctl enable rtx4070-rebar.service
+ROOT=0000:00:01.0
+GPU=0000:01:00.0
+AUDIO=0000:01:00.1
+CTL=bc0          # Resizable BAR control register of BAR 1
+SIZE_CODE=14     # 16 GB
+[ "$(cat /sys/bus/pci/devices/$GPU/vendor 2>/dev/null)" = 0x10de ] || { echo "no NVIDIA GPU at $GPU"; exit 0; }
+[ "$(cat /sys/bus/pci/devices/$GPU/device 2>/dev/null)" = 0x2786 ] || { echo "not an RTX 4070"; exit 0; }
+s=${GPU#0000:}
+ctl=$(setpci -s $s $CTL.l)
+echo "control register before: $ctl"
+[ $(( 0x$ctl & 7 )) -eq 1 ] || { echo "$CTL is not BAR 1's control register ($ctl)"; exit 1; }
+[ $(( (0x$ctl >> 8) & 0x3f )) -eq $SIZE_CODE ] && { echo "already the full size"; exit 0; }
+systemctl stop nvidia-persistenced 2>/dev/null
+for v in /sys/class/vtconsole/vtcon*/bind; do echo 0 > "$v" 2>/dev/null; done
+if [ -e /sys/bus/pci/drivers/snd_hda_intel/$AUDIO ]; then
+    echo "$AUDIO" > /sys/bus/pci/drivers/snd_hda_intel/unbind && echo "audio unbound"
+fi
+for m in nvidia_drm nvidia_uvm nvidia_modeset nvidia; do
+    rmmod $m 2>&1 && echo "removed $m"
+done
+if lsmod | grep -q '^nvidia '; then echo "nvidia still loaded; nothing changed"; lsmod | grep nvidia; exit 1; fi
+setpci -s $s COMMAND=0:2
+new=$(printf '%08x' $(( (0x$ctl & ~0x3f00) | (SIZE_CODE << 8) )))
+setpci -s $s $CTL.l=$new
+echo "control register after: $(setpci -s $s $CTL.l)"
+echo 1 > /sys/bus/pci/devices/$ROOT/remove && echo "subtree removed"
+sleep 2
+echo 1 > /sys/bus/pci/rescan && echo "rescanned"
+sleep 2
+modprobe nvidia_drm modeset=1 2>&1 && echo "nvidia_drm loaded"
+sleep 2
+for v in /sys/class/vtconsole/vtcon*/bind; do echo 1 > "$v" 2>/dev/null; done
+systemctl start nvidia-persistenced 2>/dev/null
+lspci -vs $s | grep -E 'Kernel driver|Memory at'
