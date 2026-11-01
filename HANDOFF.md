@@ -1764,6 +1764,50 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-01 同一台 Z97 换 Fantasy II-M：驱动移植到 Linux 7.0；OpenGL 落到 llvmpipe 和时间戳不可信都修了；GNOME 要走 GLES
+
+- **卡和环境：** Fantasy II-M（`1ec8:9810`），第一个槽，PCIe 8 GT/s x8（卡的上限）。Ubuntu 26.04.1、内核 7.0.0-42、Xfce + X.org + LightDM，显示 HDMI 3840x2160@60。驱动 3.3.9.135：OpenGL 4.3（有 compute、SSBO、timer query）、ES 3.2、Vulkan 1.3.264。Vulkan 设备本地堆 1.5 GiB，另有一个 460 MiB 的堆，`maxStorageBufferRange` 128 MiB。驱动是 PowerVR 系（srvkm/rogue）。
+- **开机没信号：** ROM 里 5 个镜像全是 UEFI（x86-64、ARM64、LoongArch64 等），没有传统 BIOS 镜像。这次开机主板没运行它（`boot_vga=0`），系统又没驱动，所以没信号。主板为什么不运行没有证实（猜是 CSM 开着）。fbdev 关了，没有文字控制台，桌面起来才有画面。
+- **移植（原包 `fantgpu-fh2m_3.3.9.135-driver-linux-desktop-sp-generic_amd64.deb`）：** 改过的源码只在测试机 `~/fant-src`（有自己的 git 历史，第一个提交是原版），不在本仓库。编译 250 个错误修到 0，产物 `fantgpu.ko` 约 101.5 MB。内核接口的改动集中在 `fant_compat.h` 和 `Kbuild`。
+  - **预编译对象的栈保护：** 5 个 GCC 7.5 的 `.o_shipped` 用 `%gs:0x28` 取 canary，6.15 以后 x86-64 不再放在那里。约 1149 对 mov/xor 等长替换成常量 `0x5afe1234`。objtool 的 `naked return` 警告只是没用 rethunk，不影响功能。
+  - **`FOP_UNSIGNED_OFFSET` 必须加：** 和 JM9100 一样，缺它时 Xorg 打开 `/dev/dri/card0` 得到 `Invalid argument`。
+  - **提交时的警告：** `pdp0_crtc.c` 两处改用 `drm_atomic_get_old_crtc_state` 后，内核警告 0 条。
+  - **用户态：** 只装库（62 个文件，清单 `~/fant-userspace.list`），没跑 postinst。`sw-fant-gl.service` 开机按 PCI ID 增删 `/etc/ld.so.conf.d/0-fantgpu.conf`，换回 JM9100 后这个文件确实不在。
+  - 加载模块和安装第三方文件由用户在终端运行（`~/fant-load.sh`、`~/fant-autoload.sh`）。机器开着自动更新，内核升级后两个驱动都要重新编译。
+- **开机自动加载：** 两张卡都靠 PCI 别名，`~/fant-autoload.sh` 删了 `/etc/modules-load.d/jmgpu.conf`。两边换卡重启后都已实测加载成功。
+- **代码改动：**
+  - **OpenGL 落到 llvmpipe（`src/main.cpp`）：** 探测结束后 GLFW 卸载 libGLX，再次加载时 `libGLX_fh2m` 不工作，GLVND 退到 Mesa。第一轮 OpenGL 11 项全跑在 llvmpipe 上，却记成 Fantasy II-M（Burn 0.11 / 0.15 / 0.15，stream 13～18 GB/s），已作废。现在 Linux 上探测前 `dlopen("libGLX.so.0", RTLD_NODELETE)`。设 `__GLX_VENDOR_LIBRARY_NAME=fh2m` 没用；`glxinfo` 只加载一次，所以看不出来。
+  - **防止假成绩（`src/opengl_backend.cpp`）：** Linux 上选了硬件 GPU 却落到软件渲染时报错，不存成绩。这条还没有实际触发过。
+  - **时间戳（`src/opengl_backend.cpp`）：** Fantasy 的 GL 时间戳盖不住 GPU 的工作，256 步读 0.5 ms（算出 916.80 Gpix-step/s），16 步在 0.1～139 ms 之间跳。渲染器名以 `Fantasy` 开头时直接用墙钟。
+  - **状态：** Linux 上编译并在 Fantasy II-M 上实跑；Windows 编译通过，5090 OpenGL 16 步 132.84 Gpix-step/s，时间戳仍启用。**没有在 JM9100 上实跑**，它的成绩是这些改动之前的。macOS 没编译（前两处有 `__linux__` 守卫，第三处只看渲染器名字）。
+- **成绩（OpenGL 全部 `synchronized_wall_clock`）：**
+
+  | 项目 | Vulkan | OpenGL |
+  |---|---|---|
+  | 粒子 65K 窗口 / 无窗口（GB/s） | 6.83 / 8.31 | 1.88 / 3.04 |
+  | 粒子 1M 窗口 / 无窗口 | 9.31 / 9.93 | 5.90 / 7.64 |
+  | 粒子 4M 窗口 / 无窗口 | 9.88 / 10.12 | 8.21 / 8.29 |
+  | 粒子 16M 窗口 / 无窗口 | `vkAllocateMemory failed`，显存不够 | 0.53 / 0.52 |
+  | GPU Burn 16 步（Gpix-step/s，每帧） | 0.238，123.8 ms | 0.204，144.4 ms |
+  | GPU Burn 64 步 | 0.313，377.4 ms | 0.299，395.1 ms |
+  | GPU Burn 256 步 | 0.339，1393 ms | 0.333，1415 ms |
+  | 流体（MParticle-step/s） | 1.81 | — |
+  | 显存读 / 写 / 复制（GB/s） | 24.1 / 8.6 / 10.9 | — |
+
+  - ES 2.0 GPU Burn（surfaceless，日志是 Fantasy II-M）16 / 64 / 256 步：2.38 / 2.58 / 2.63 Gpix-step/s（12.397 / 45.787 / 179.104 ms）。成绩只有日志。
+  - Vulkan、ES 2.0 在 `out\linux\mk-93f8a3-fantasy2m-series-20261101-025704`，那个目录的 OpenGL 11 项作废（测试机 `results.json` 里已删，本地副本还留着）。OpenGL 在 `out\linux\mk-93f8a3-fantasy2m-gl-series-20261101-032223`。
+  - OpenGL 16M 比 4M 低约 16 倍，一帧 1.3 秒，疑似超出显存后溢出到系统内存，没有单独验证，不算显存成绩。
+  - OpenGL 每帧要等 `glFinish`，粒子越少这个开销占比越大，65K 比 Vulkan 低很多不代表硬件差这么多。
+  - Vulkan Burn 和 JM9100 的 OpenGL（0.232 / 0.309 / 0.337）几乎相同。日志显示两边都是各自的硬件，判断为巧合，没有更多证据。
+  - 频率和温度都没采集到。CPU 项按用户要求不跑。
+- **GNOME：** GNOME 50.1 Wayland 能在这张卡上跑，但要 `COGL_DRIVER=gles2`。Mutter 默认的 GL 路径生成 `#version 140` 的着色器，里面调用 `texture2D`，这个驱动报 `'texture2D' : undeclared identifier`，带贴图的绘制都失败，画面几乎全白。走 GLES 后着色器是 `#version 100`，失败 0 次，用户确认显示器上正常。
+  - 配置在 `~/.config/environment.d/90-fantasy-gnome.conf`，只影响 Mutter。这个文件只经过 `systemctl --user daemon-reload` 验证，没有在 Fantasy II-M 上重启验证。
+  - 默认桌面仍是 Xfce。想用 GNOME，在 `/etc/lightdm/lightdm.conf.d/` 加一个文件，`[Seat:*]` 下写 `autologin-session=ubuntu` 和 `user-session=ubuntu`，试完要删掉。
+  - GNOME 读 `~/.config/monitors.xml`，这里跑的是 1080p 120 Hz，不是 Xfce 的 4K 60 Hz。
+  - 从 GNOME 切走时，`systemctl restart lightdm` 太快，旧会话没退完，新会话起不来，会停在登录界面。要先 `stop`，等十几秒再 `start`。
+  - Wayland 下截图被拒（`Screenshot is not allowed`）。可以用 `org.gnome.Mutter.ScreenCast` 加 `pipewiresrc` 抓一帧，抓到的是合成结果，不等于显示器实际显示。
+  - GNOME 进程还会加载 JM9100 的用户态，日志打印 `Failed to open device`，没看出影响，没处理。
+
 ### 2026-11-01 同一台 Z97 换景嘉微 JM9100：UOS 驱动移植到 Linux 7.0；OpenGL 4.0 也能跑 GPU Burn；GTX 570 在 nouveau 下没有有效成绩
 
 - **卡和环境：** JM9100（`0731:9100`，2 GB），第一个槽，PCIe 8 GT/s x8，3D 上限 1000 MHz。Ubuntu 26.04.1、内核 7.0.0-42、Xfce + X.org + LightDM，显示 HDMI 3840x2160@60。驱动 1.8.0：OpenGL 4.0（GLSL 4.00）、ES 3.2，没有 Vulkan 驱动（`vulkaninfo` 只有 llvmpipe）。
@@ -1772,7 +1816,7 @@ PathService 已把 results/captures/reports/logs 改到
   - **fbdev 关掉了：** 所以驱动加载后没有文字控制台，`/dev/fb0` 不存在。
   - **用户态：** 只装库和 X 配置（40 个文件，清单 `~/jm9-userspace.list`），没跑包的 postinst，它会改 sudoers、`bash.bashrc`、`pci.ids`，注册服务，还把 KWin 改成 XRender。
   - 加载模块和安装第三方文件被权限系统拦下，由用户在终端运行（`~/jm9-load.sh`、`~/jm9-userspace.sh`、`~/jm9-autoload.sh`）。
-- **开机自动加载：** `~/jm9-autoload.sh` 把模块装到 `/lib/modules/7.0.0-42-generic/updates/`，写 `/etc/modules-load.d/jmgpu.conf`。**还没经过一次重启验证。** 机器开着自动更新，内核升级后要重新编译模块。
+- **开机自动加载：** `~/jm9-autoload.sh` 把模块装到 `/lib/modules/7.0.0-42-generic/updates/`，写 `/etc/modules-load.d/jmgpu.conf`。后来这个文件被 `~/fant-autoload.sh` 删了，改靠 PCI 别名（别名表含 `0731:9100`）；同一天换回这张卡重启，模块自动加载，桌面正常。机器开着自动更新，内核升级后要重新编译模块。
 - **GL 的选择：** GLVND 必须设 `__GLX_VENDOR_LIBRARY_NAME=mwv207`，否则走 Mesa 落到 llvmpipe。`/etc/profile.d/mwv207_glvnd.sh` 只对登录 shell 生效，SSH 跑要自己设（`linux-suite.ps1 -Env`）。Xorg 日志的 `AIGLX error: jmgpu exports no extensions` 不影响直接渲染。
 - **ES 2.0 的路径：** surfaceless 落到 llvmpipe，`series.sh` 的 ES 项不能用，要 `DISPLAY=:0 EGL_PLATFORM=x11` 手动跑 `mangekyo_es2burn`。日志第一行的 `Fail to load library: libOpenVG.so` 不影响结果。
 - **代码改动（OpenGL 4.0～4.2 的桌面驱动）：** 程序原来要 4.3（macOS 4.1 例外），这张卡在 `--list-gpus` 里没有 OpenGL 项。现在 4.3 建不了上下文时退到 4.0，只提供 GPU Burn，着色器用 `#version 400`；标签 `OpenGL 4.0+ (GPU Burn)`。macOS 不变，4.3 及以上不变。其他 4.0～4.2 的桌面卡也会多出这 3 项。
@@ -1789,7 +1833,7 @@ PathService 已把 results/captures/reports/logs 改到
   - ES 2.0 在 `out\linux\mk-93f8a3-jm9100-es2-20261031-224757`，16、64 步和 256 步隔了一次重启。成绩只有日志。
   - 两列不能直接比：着色器不同（OpenGL 是 Plasma x Kaleidoscope，ES 2.0 是 legacy quasicrystal plasma），路径也不同。同样的比法 GTX 680 是 3.90 / 5.04 / 5.42 对 46.83 / 51.88 / 53.71。
   - 频率和温度都没采集到，不知道测试时实际多少 MHz。CPU 项按用户要求不跑。
-- **没做或没解决：** 用户决定不试 GNOME（比 Xfce 麻烦，这张卡没验证过）。`~/bin/desktop-scale 4k` 后设置和截图都是 DPI 144、顶栏 40、Dock 72，但用户说 DPI 还是不对，具体哪里不对还没说清。
+- **没做或没解决：** 用户决定不试 GNOME（比 Xfce 麻烦）。后来换 Fantasy II-M 留下的 GNOME 配置让这张卡登录了一次 GNOME：`gnome-shell` 启动约 2 秒崩溃（SIGFPE），退回登录界面。当时 `COGL_DRIVER=gles2` 还在，原因没查。删掉配置后回到 Xfce，正常。`~/bin/desktop-scale 4k` 后设置和截图都是 DPI 144、顶栏 40、Dock 72，用户说过 DPI 不对，后来决定不管了。
 - **截图提醒：** 这张卡的 `xwd` 头写每像素 24 位（3 字节），行宽却是 15360，按 4 字节读会变成 3/4 宽加条纹，那是读法错了，不是屏幕问题。
 - **GTX 570（NVC8）在 nouveau 下没有有效成绩：** 开机核心只有 50 MHz，上游 `gf100.c` 关掉了改频率。那份成绩（`out\linux\mk-93f8a3-gtx570-nouveau-series-20261031-220248`，OpenGL GPU Burn 0.11 / 0.13 / 0.14）只留作记录，不进对比。打补丁强开后，中档把核心升到 405 MHz，显存停在 135 MHz，一跑负载整机卡死，要断电重启，没有抓到日志。满速没有再试。要真实成绩只能走 Windows 或 Ubuntu 22.04 + 390。
 
