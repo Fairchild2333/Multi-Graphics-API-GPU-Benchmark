@@ -1764,6 +1764,67 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-02 同一台 Z97 换 RX 6900 XT：amdgpu 自动开 16 GB BAR，GNOME 下全部 28 项
+
+- **卡和环境：** Radeon RX 6900 XT（Navi 21，子系统 `1002:0e3a`），16 GB，PCIe 8 GT/s x16，BAR 0 由 `amdgpu` 开到 16 GB。内核 `amdgpu`，Mesa 26.0.8（RADV、radeonsi），GNOME Wayland，4K 120 Hz，缩放 2.0。GNOME 提供 `bt2100`（色彩模式 0、2、1）。
+- **第一次开机是 x8：** 根端口和卡的上游口都显示 8 GT/s x8。用户重新开机后变成 x16，具体动了什么没有记录。换卡后先看 `00:01.0` 的 `LnkSta`。卡有内部交换机，GPU 在 `03:00.0`，那里显示的 16 GT/s 不是真实链路。
+- **成绩（`out\linux\mk-93f8a3-rx6900xt-series-20261101-235411` 24 项，`out\linux\mk-93f8a3-rx6900xt-es2-series-20261102-001432` ES 2.0 4 项，都退出码 0，内核 0 条警告，没有 GPU 重置）：**
+
+  | 粒子（GB/s） | Vulkan 窗口 | Vulkan 无窗口 | OpenGL 窗口 | OpenGL 无窗口 |
+  |---|---|---|---|---|
+  | 65K | 690.15 | 659.46 | 597.61 | 775.67 |
+  | 1M | 971.17 | 980.93 | 934.20 | 843.87 |
+  | 4M | 883.82 | 1013.35 | 911.05 | 1006.71 |
+  | 16M | 304.09 | 274.82 | 301.68 | 271.96 |
+
+  | GPU Burn（Gpix-step/s，每帧） | 8 步 | 16 步 | 64 步 | 256 步 |
+  |---|---|---|---|---|
+  | Vulkan | — | 31.15，0.947 ms | 39.26，3.005 ms | 41.95，11.249 ms |
+  | OpenGL | — | 31.61，0.933 ms | 39.83，2.961 ms | 44.63，10.573 ms |
+  | ES 2.0（成绩只有日志） | 127.84，0.115 ms | 170.26，0.173 ms | 317.14，0.372 ms | 393.99，1.198 ms |
+
+  - 流体 63.39 MParticle-step/s（45.543 ms compute + 5.087 ms render）。显存读 / 写 / 复制 504.3 / 326.4 / 411.6 GB/s；读的缓存段 4948.7 GB/s（1～8 MiB），缓存供数可到 128 MiB。
+  - 65K 一帧只有 0.003～0.004 ms，读数不够可靠。16M 掉到约 300 GB/s，应该是数据放不进显卡缓存（推测）。CPU 项按用户要求不跑。遥测 153 个有效频率样本，最高 2535 MHz；AMD 路径没有温度和功耗。
+- **ES 2.0 第一轮被静默跳过：** S80 装进系统的 `/usr/share/glvnd/egl_vendor.d/00_mtgpu.json` 排在 Mesa 前面。它接管 surfaceless 平台后 `eglInitialize` 失败（0x3001），`eglinfo` 取不到 surfaceless 的渲染器名，`series.sh` 就不跑这 4 项，也不报错。把它改名成 `.off` 后正常。
+
+### 2026-11-01 同一台 Z97 换 MTT S80：驱动 3.3.0 移植到内核 7.0，GNOME 带窗口的测试全卡住，Xfce 下全部 28 项
+
+- **卡和环境：** 摩尔线程 MTT S80（`1ed5:0201`），16 GB，BAR 16 GB（驱动自己开），PCIe 8 GT/s x16。OpenGL 4.5、ES 3.2、Vulkan 1.3.225。系列在 Xfce（原生 Xorg，`mtgpu_drv.so`）、4K 60 Hz、`xfwm4` 关闭合成下跑。
+- **驱动：** 3.3.0（2025-09-23）是 S80 官方能用的最新 Linux 版，3.3.2～5.2.0 只列 S4000/S5000，官方环境是 Ubuntu 22.04 + 5.15。3.0.0 固件起不来（`Polling for 'FW started' flag failed`），3.3.0 用 `bootconf-gen1.bin` 正常。
+- **移植只在测试机上，不在仓库：** `~/mtgpu33-src`（git）。conftest 要加 `-std=gnu11 -fms-extensions -include linux/kconfig.h -include linux/compiler_types.h`；预编译的 `mtgpu_core.o` 缺 `.cmd`，Makefile 要补。`OSGetUserPages` 加了 mmap 读锁，并用 `mtgpu_sched_mode=0`，这之后 RCU 卡死和 `find_vma` 警告都是 0，两处改动分别起多大作用没有拆开验证。
+- **模块不自动加载（有意的，防止卡死时开机起不来）：** 每次开机都要用户运行：
+
+  ```bash
+  ~/mtgpu33-load.sh mtgpu_sched_mode=0
+  ```
+
+- **再测这张卡要改回来：** `/usr/share/glvnd/egl_vendor.d/00_mtgpu.json.off` 和 `~/.config/environment.d/90-pvr-gnome.conf.off`（内容是 `COGL_DRIVER=gles2`、`GSK_RENDERER=cairo`，后者是因为 GTK4 的 Vulkan 崩溃、GL 卡住）。默认会话已改回 GNOME，要 Xfce 就把 `lightdm.conf.d/91-gnome.conf` 移开，Xfce 的合成现在是关着的。
+- **GNOME 下带窗口的测试全部卡住，原因没有确定：**
+  - Vulkan 窗口、OpenGL 窗口、`vkcube --wsi wayland`、经 Xwayland 的 `vkcube --wsi xcb` 都卡。Vulkan 粒子窗口的主线程停在 `wsi_wl_swapchain_acquire_next_image`，等不到空闲缓冲。无窗口的测试正常，GNOME 自己的桌面也能显示。
+  - 推测 Mutter 在等缓冲的隐式 fence，驱动一直不发信号，设置页面点了没反应可能是同一原因。也可能和 7.0 的移植有关（之前的卡死就在 `mtgpu_buffer_sync_create_syncobj` 附近）。都没有验证。
+  - 26.04 的 GNOME 没有 Xorg 会话。驱动的 Xorg 模块是 ABI 25.2，20.04 的 Xorg 记忆中是 24，大概率加载不上，所以这张卡要 GNOME 应该用 22.04（未试）。依赖要求 glibc 2.29、内核 3.6～6.6。
+- **HDR：** S80 上 GNOME 只提供色彩模式 0 和 2（`sdr-native`），没有 `bt2100`；显示器 EDID 支持 HDR，公开源码里也没有 HDR 属性。之前把模式 2 当 HDR 是错的。
+- **Xfce 下切 120 Hz 全屏发白：** 只剩鼠标。切回 60 Hz、关掉合成后过一会儿恢复，具体是哪一步修好的不确定。4K 120 Hz 在 GNOME 下正常（DSC）。
+- **成绩（内核 0 条警告）：** Vulkan 13 项和 OpenGL Burn 3 项看 `out\linux\mk-93f8a3-mtt-s80-xfce-series-20261101-230812`，OpenGL 粒子 8 项和 ES 2.0 4 项看 `out\linux\mk-93f8a3-mtt-s80-xfce-glfix-series-20261101-233311`。第一个目录里 OpenGL 粒子（最高 4690.85 GB/s）和 ES 2.0（段错误）都不要用，它的 `results.json` 也还带着那些错误记录；测试机的 `results.json` 已删，备份是 `results.json.before-s80-tests`、`results.json.before-s80-gl-fix`。
+
+  | 粒子（GB/s） | Vulkan 窗口 | Vulkan 无窗口 | OpenGL 窗口 | OpenGL 无窗口 |
+  |---|---|---|---|---|
+  | 65K | 24.23 | 27.44 | 25.10 | 27.50 |
+  | 1M | 60.46 | 63.02 | 63.57 | 63.87 |
+  | 4M | 67.01 | 67.95 | 69.45 | 70.74 |
+  | 16M | 69.39 | 69.78 | 72.29 | 72.70 |
+
+  | GPU Burn（Gpix-step/s，每帧） | 8 步 | 16 步 | 64 步 | 256 步 |
+  |---|---|---|---|---|
+  | Vulkan | — | 6.26，4.709 ms | 8.33，14.157 ms | 9.13，51.660 ms |
+  | OpenGL | — | 5.94，4.961 ms | 7.85，15.027 ms | 8.51，55.439 ms |
+  | ES 2.0（成绩只有日志） | 38.89，0.379 ms | 49.78，0.592 ms | 65.11，1.812 ms | 70.05，6.736 ms |
+
+  - 流体 7.32 MParticle-step/s（326.053 ms compute + 112.277 ms render）。显存读 / 写 / 复制 10.2 / 11.2 / 11.1 GB/s，明显偏低，原因没查；读的缓存段 14.1 GB/s（1～32 MiB）。CPU 项按用户要求不跑。
+- **OpenGL 时间戳不可信，改用墙钟（`src/opengl_backend.cpp`，渲染器名以 `MTT` 开头）：** 修复前 65K 读 0.013 ms（195 GB/s），16M 触发了程序自带的异常检测。修复后和 Vulkan 对得上（Vulkan 本来就没有时间戳，也是墙钟）。OpenGL Burn 3 项是修复前用时间戳测的，保留了：修复后 16 步复测 5.82，和 5.94 只差约 2%。
+- **ES 2.0 在 surfaceless 平台段错误（`scripts/linux/series.sh`，只对 `MTT` 走 `EGL_PLATFORM=x11`）：** 驱动在那里仍然调用 `xcb_get_window_attributes`。仍是离屏绘制。
+- **没做的：** 没试 GNOME 的根本修复，GNOME 下没有成绩。这几项带窗口的成绩和其他卡的 GNOME 环境不完全相同，无窗口的基本不受影响。
+
 ### 2026-11-01 同一台 Z97 换 RX 580：amdgpu 自动开 8 GB BAR，GNOME 下全部 28 项，遥测修复验证通过
 
 - **卡和环境：** 蓝宝石 Nitro+ RX 580（Polaris 10，`1002:67df` rev e7，子系统 `1da2:e366`），8 GB，VBIOS 113-3E366DU-S4Y，第一个槽，PCIe 8 GT/s x16。内核 `amdgpu`，Mesa 26.0.8：Vulkan 1.4（RADV）、OpenGL 4.6（radeonsi）、ES 3.2。不用装驱动。核心最高 1411 MHz，显存 2000 MHz，功耗上限 175 W。GNOME 50.1 Wayland，4K 60 Hz，用户确认显示器正常。显示接在 `HDMI-2`，`monitors.xml` 里 `HDMI-1` 的 1080p 设置没有生效。
@@ -1993,7 +2054,7 @@ PathService 已把 results/captures/reports/logs 改到
   - Vulkan Burn 和 JM9100 的 OpenGL（0.232 / 0.309 / 0.337）几乎相同。日志显示两边都是各自的硬件，判断为巧合，没有更多证据。
   - 频率和温度都没采集到。CPU 项按用户要求不跑。
 - **GNOME：** GNOME 50.1 Wayland 能在这张卡上跑，但要 `COGL_DRIVER=gles2`。Mutter 默认的 GL 路径生成 `#version 140` 的着色器，里面调用 `texture2D`，这个驱动报 `'texture2D' : undeclared identifier`，带贴图的绘制都失败，画面几乎全白。走 GLES 后着色器是 `#version 100`，失败 0 次，用户确认显示器上正常。
-  - 配置在 `~/.config/environment.d/90-fantasy-gnome.conf`，只影响 Mutter，但对所有卡都生效。后来换 Arise2030 时改名成 `.off`，**换回这张卡要改回来**。这个文件只经过 `systemctl --user daemon-reload` 验证，没有在 Fantasy II-M 上重启验证。
+  - 配置在 `~/.config/environment.d/90-fantasy-gnome.conf`，只影响 Mutter，但对所有卡都生效。后来换 Arise2030 时改名成 `.off`，测 S80 时又改名成 `90-pvr-gnome.conf.off` 并加了 `GSK_RENDERER=cairo`，**换回这张卡要改回来**。这个文件只经过 `systemctl --user daemon-reload` 验证，没有在 Fantasy II-M 上重启验证。
   - 这张卡的成绩是在 Xfce 下跑的。选 GNOME 的办法是在 `/etc/lightdm/lightdm.conf.d/` 加一个文件，`[Seat:*]` 下写 `autologin-session=ubuntu` 和 `user-session=ubuntu`；现在这个文件是 `91-gnome.conf`，换 JM9100 这种跑不了 GNOME 的卡前要删掉。
   - GNOME 读 `~/.config/monitors.xml`，这里跑的是 1080p 120 Hz，不是 Xfce 的 4K 60 Hz。
   - 从 GNOME 切走时，`systemctl restart lightdm` 太快，旧会话没退完，新会话起不来，会停在登录界面。要先 `stop`，等十几秒再 `start`。
