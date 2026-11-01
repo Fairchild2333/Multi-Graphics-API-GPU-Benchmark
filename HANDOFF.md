@@ -1764,6 +1764,31 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-01 同一台 Z97 换 Radeon Vega Frontier Edition：amdgpu 自动开 16 GB BAR，GNOME 下全部 28 项
+
+- **卡和环境：** Radeon Vega Frontier Edition（Vega 10 XTX，子系统 `1002:6b76`），16 GB，第一个槽。PCIe 8 GT/s x16，卡有内部交换机，GPU 在 `03:00.0`，真实链路看 `01:00.0`。内核 `amdgpu`，Mesa 26.0.8：Vulkan 1.4（RADV）、OpenGL 4.6（radeonsi）、ES 3.2。不用装驱动。核心最高 1600 MHz，显存 945 MHz，功耗上限 264 W。GNOME 50.1 Wayland 正常，用户确认显示器正常。
+- **Resizable BAR：** Above 4G Decoding 开着时，`amdgpu` 开机自己把 BAR 0 调到 16 GB，全部显存 CPU 可见，根端口窗口也挪到了 `0x800000000`。不需要脚本。Arc 那个问题这张卡没遇到，虽然它也有内部交换机。
+- **显示器标准模式的 EDID：** 这次显示器在 HDMI 标准模式，EDID 首选 3840x2160 30 Hz、297 MHz，HDMI VSDB 上限 340 MHz，没有 HDMI Forum 块；增强模式是 594 MHz、600 MHz（见 GTX 660 一节）。和“GOP 选了超限的首选分辨率”的推断吻合，但不是在 UEFI 阶段直接测的。开机是 4K 30 Hz，按用户要求改成 1080p 120 Hz 并写进 `~/.config/monitors.xml`。
+- **成绩（`out\linux\mk-93f8a3-vega-fe-series-20261101-153803`，28 项都退出码 0，内核 0 条警告，没有 GPU 重置）：**
+
+  | 粒子（GB/s） | Vulkan 窗口 | Vulkan 无窗口 | OpenGL 窗口 | OpenGL 无窗口 |
+  |---|---|---|---|---|
+  | 65K | 279.93 | 287.54 | 245.42 | 258.23 |
+  | 1M | 204.67 | 207.34 | 201.89 | 206.88 |
+  | 4M | 201.35 | 203.48 | 200.34 | 203.36 |
+  | 16M | 200.47 | 202.60 | 200.58 | 202.54 |
+
+  | GPU Burn（Gpix-step/s，每帧） | 8 步 | 16 步 | 64 步 | 256 步 |
+  |---|---|---|---|---|
+  | Vulkan | — | 13.00，2.269 ms | 15.74，7.495 ms | 17.08，27.631 ms |
+  | OpenGL | — | 13.07，2.256 ms | 15.96，7.390 ms | 17.12，27.559 ms |
+  | ES 2.0（成绩只有日志） | 77.05，0.191 ms | 135.05，0.218 ms | 184.85，0.638 ms | 174.76，2.700 ms |
+
+  - 流体 37.90 MParticle-step/s（67.221 ms compute + 17.455 ms render）。显存读 / 写 / 复制 276.9 / 177.8 / 302.3 GB/s；缓存段读 1542.2 GB/s（1～6 MiB），写 386.8 GB/s（3～16 MiB）。
+  - 65K 一帧约 0.01 ms，读数不够可靠。ES 2.0 全程墙钟，256 步低于 64 步，原因不明，Arc 上也有类似波动。CPU 项按用户要求不跑。
+- **遥测没有成绩外的数据：** 之前为 RTX 2080 装的 NVIDIA 驱动还在，`nvidia-smi` 没有 NVIDIA 卡时把错误提示打到标准输出，`scripts/linux/series.sh` 当成了数据，这轮的频率、温度和功耗都不可用，成绩不受影响。已修：输出是数字才采用，否则走 sysfs。这段函数在这张卡上单独跑过，读到 852 MHz；没有跟完整的一轮测试。AMD 这条路径只有频率。
+- 日志有两条 `REG_WAIT timeout ... program_formatter_reset_dig_resync`，来自显示部分，认为和切换分辨率有关，没查证，测试没受影响。
+
 ### 2026-11-01 同一台 Z97 换 RTX 4070：BAR 开到 16 GB，GNOME 下全部 28 项
 
 - **卡和环境：** RTX 4070（AD104，`10de:2786`，子系统 `10de:17ff`），12 GB，VBIOS 95.04.49.00.03，第一个槽，这块主板到 PCIe Gen3 x16（卡支持 16 GT/s）。驱动沿用 NVIDIA 595.99.02，不用重装。Vulkan 1.4、OpenGL 4.6、ES 3.2。GNOME 50.1 Wayland，4K 60 Hz，用户确认显示器正常。
@@ -1789,7 +1814,7 @@ PathService 已把 results/captures/reports/logs 改到
   - 负载下核心 2715～2865 MHz，最高 199.92 W（上限 200 W），最高 78°C。
   - 1M 明显高于 4M、16M，判断是数据落在 GPU 缓存里（显存测试读的缓存段到 32 MiB），1M 的实际占用没核算。显存真实速度看 16M。65K 一帧约 0.009 ms，接近计时精度。
   - ES 2.0 全程墙钟，帧很短，可能被低估。
-- **BAR 的影响还是没量出来：** 256 MB 只跑完 1 项（Vulkan 65K 窗口 282.93，16 GB 下 289.60），在这项的波动范围内，说明不了什么。按用户要求中断了，第 2 项跑到一半。目录只在测试机 `~/mangekyo-runs/mk-93f8a3-rtx4070-bar256-series-20261101-145617`，没拷回本地（当时机器连不上）。这条记录还留在测试机 `results.json` 里，和 16 GB 的记录没有字段区分。
+- **BAR 的影响还是没量出来：** 256 MB 只跑完 1 项（Vulkan 65K 窗口 282.93，16 GB 下 289.60），在这项的波动范围内，说明不了什么。按用户要求中断了，第 2 项跑到一半。目录 `out\linux\mk-93f8a3-rtx4070-bar256-series-20261101-145617`。这条记录还留在测试机 `results.json` 里，和 16 GB 的记录没有字段区分。
 - **在 SSH 里 `pkill -f` 的坑：** 模式写成字面的 `build/gpu_benchmark` 会匹配到这条命令自己的 shell，把 SSH 连接杀掉。用 `gpu_benchmar[k]` 这种写法。
 
 ### 2026-11-01 同一台 Z97 换 RTX 2080：Ubuntu 官方源 NVIDIA 595，GNOME Wayland 下全部 28 项
