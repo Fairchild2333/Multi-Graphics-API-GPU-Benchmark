@@ -1764,6 +1764,35 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-01 同一台 Z97 换 GTX 660 OEM：nouveau 手动升频后在 GNOME 下跑；VBIOS 其实带 UEFI，读 ROM 被截断过；HDMI 增强模式下 GOP 没画面
+
+- **卡和环境：** GTX 660 OEM（`10de:1185`，子系统 `10de:098a`，GK104，Kepler，不是零售版常见的 GK106），1.5 GB。VBIOS 80.04.48.00.02。Ubuntu 26.04.1、内核 7.0.0-42、GNOME 50.1 Wayland。驱动 `nouveau`：OpenGL 4.3、ES 3.2（渲染器名 `NVE4`），Vulkan 1.2（NVK，`GeForce GTX 660 (NVK GK104)`）。
+- **频率：** 开机只有核心 324 MHz、显存 648 MHz。`echo 0f > /sys/kernel/debug/dri/0/pstate` 后显存 5600 MHz，核心负载下一直 823 MHz（TechPowerUp 记录基础 823.5、Boost 888.5，所以有基础频率，没有 Boost；列表里的 1202 MHz 用不到）。先切 `0a`（705 / 1620 MHz）再切 `0f`，负载下稳定，手动记录的 16 步最高 52°C，内核 0 条警告。**重启就恢复低频，没做开机服务。**
+- **为什么 GTX 570 不行：** 上游 `gf100.c` 关了 Fermi 的改频率，强开后显存停在 135 MHz、负载下卡死（见下面 JM9100 一节）；`nouveau` 支持 Kepler 手动改频率。Kepler 的 NVIDIA 驱动最后一代就是 470，470 跑不了 GNOME Wayland，所以优先走 `nouveau`。还没装 470 对比。
+- **成绩（`out\linux\mk-93f8a3-gtx660-nouveau-series-20261101-135703`；两项 16 步在 `mk-93f8a3-gtx660-try-series-20261101-135539`。时间戳计时，帧时间对得上）：**
+
+  | 粒子（GB/s） | Vulkan 窗口 | Vulkan 无窗口 | OpenGL 窗口 | OpenGL 无窗口 |
+  |---|---|---|---|---|
+  | 65K | 48.47 | 49.08 | 43.54 | 42.92 |
+  | 1M | 54.96 | 54.98 | 48.56 | 49.04 |
+  | 4M | 55.53 | 55.55 | 49.24 | 48.97 |
+  | 16M | 55.63 | 55.63 | 49.88 | 48.98 |
+
+  | GPU Burn（Gpix-step/s，每帧） | 8 步 | 16 步 | 64 步 | 256 步 |
+  |---|---|---|---|---|
+  | Vulkan | — | 1.12，26.271 ms | 1.39，84.980 ms | 1.48，318.992 ms |
+  | OpenGL | — | 1.49，19.762 ms | 1.98，59.532 ms | 2.18，216.780 ms |
+  | ES 2.0（成绩只有日志） | 20.21，0.730 ms | 22.94，1.286 ms | 22.26，5.299 ms | 23.07，20.457 ms |
+
+  - 显存读 / 写 / 复制 106.0 / 113.1 / 96.9 GB/s。
+  - **流体没有成绩：** 退出码 1，`Cinematic Liquid v2 raymarch pipeline failed`，原因没查。
+  - 约为 GTX 680（470 驱动，OpenGL 3.90 / 5.04 / 5.42，ES 46.83 / 51.88 / 53.71）的 40%，比估计的规格差距（约 60%）大，驱动不同，也没有 Boost，不能直接比，原因没验证。Vulkan Burn 比 OpenGL 低约三成，原因没查。
+  - 遥测没有 GPU 频率、温度和功耗（全是 `-`），上面的频率和温度来自那两项 16 步时的手动记录，后面的项目没有确认过。
+- **UEFI，先前结论是错的：** `/sys/bus/pci/devices/.../rom` 只读到 58880 字节，只有传统镜像，我因此说卡没有 UEFI。实际第一镜像带 `NPDE` 扩展、没有“最后镜像”标记，内核读到它就停了。`/sys/kernel/debug/dri/0/vbios.rom` 有完整的 166912 字节：传统 64512 + UEFI 65024（`0xfc00` 起）。**判断 NVIDIA 卡有没有 GOP 不要看 sysfs 的 `rom`，也要看标记位。** 副本 `out\linux\mk-93f8a3-gtx660-vbios-full-from-nouveau.rom`。TechPowerUp 同型号同版本（Dell GTX 660，146747）标注支持 UEFI，大小 162 KB，校验值和这份不同。
+- **开机没画面：** CSM 关着时开机看不到画面，SSH 也连不上；用户把 CSM 改成自动后马上有显示。卡在哪一步没有记录。用户之前给 GTX 680 自己刷过带 GOP 的 VBIOS（nvflash，来源记不清），UEFI 下 HDMI 增强模式是深灰色纯色、标准模式基本正常；这张卡上没有单独看到过这个现象。显示器增强模式的 EDID：首选 4K60、594 MHz，HDMI Forum 上限 600 MHz；这张卡的 HDMI 约 297 MHz（记忆中的规格）。**推断**是 GOP 直接用了首选分辨率，输出不了。没在 UEFI 下单独验证：要测切 HDMI 标准模式再关 CSM。另一种可能是 GOP 在这块主板上启动不了，没排除。CSM 自动不影响测试，留在自动。不用刷 VBIOS。
+- **桌面：** 显示器 4K 只有 60 / 50 / 24 Hz，这张卡的 HDMI 只能 4K 24 Hz，按用户要求改成 1080p 120 Hz。测试时是 4K 24 Hz，分数按 GPU 时间算。GNOME 的 `ApplyMonitorsConfig` 持久模式（method 2）会弹“保留设置”并在超时后恢复，所以用 method 1 切换，并直接改 `~/.config/monitors.xml`，没重启验证。这个文件按接口存，以后插 `HDMI-1` 的卡都默认 1080p 120 Hz，能跑 4K60 的卡要改回来；备份 `~/.config/monitors.xml.before-gtx660`。
+- **查进程的坑：** 在 SSH 命令里写 `pgrep -f series.sh` 会匹配到这条命令自己的 shell，永远显示在跑，要写成 `series\.s[h]`。
+
 ### 2026-11-01 同一台 Z97 换 Intel Arc A380：不支持 Resizable BAR 的主板上开到 8 GB
 
 - **卡和环境：** Intel Arc A380（蓝戟，`8086:56a5`，DG2），第一个槽。PCIe 8 GT/s x8（卡支持 16 GT/s，主板只到 8 GT/s；端点 `03:00.0` 显示的 2.5 GT/s x1 是卡内部交换机的虚拟链路，真实链路看 `01:00.0`）。内核自带 `i915`（DMC、GuC 70.53.0、HuC 都加载），Mesa 26.0.8：Vulkan 1.4、OpenGL 4.6、ES 3.2。GNOME 50.1 Wayland 走默认路径正常，4K 60 Hz。
