@@ -91,6 +91,16 @@ void OpenGLBackend::InitBackend() {
     driverVersion_ = glVerStr;
     std::cout << "[OpenGL Init] " << deviceName_ << "  |  GL " << glVerStr << std::endl;
 
+#ifdef __linux__
+    // The GPU was chosen from the Vulkan list, but GLVND chooses the GL driver.
+    // A software renderer's score must not be saved under a hardware GPU's name.
+    if (isSoftwareRendererName(deviceName_) && !config_.gpuDisplayName.empty() &&
+        !isSoftwareRendererName(config_.gpuDisplayName)) {
+        throw std::runtime_error("OpenGL landed on " + deviceName_ + " instead of " +
+                                 config_.gpuDisplayName + "; no score is saved");
+    }
+#endif
+
     glGraphicsOnly_ = GLAD_VERSION_MAJOR(gladVer) == 4 && GLAD_VERSION_MINOR(gladVer) < 3;
     gl40_ = GLAD_VERSION_MAJOR(gladVer) == 4 && GLAD_VERSION_MINOR(gladVer) == 0;
     if (GLAD_VERSION_MAJOR(gladVer) < 4 ||
@@ -333,6 +343,15 @@ void OpenGLBackend::CreateTimestampQueries() {
     if (renderer.rfind("Mesa Intel", 0) == 0 && !isFragmentOnlyWorkload(config_.workload)) {
         EnableSynchronizedTimingFallback(
             "Mesa Intel runs compute in its own batch; GL timestamps never cover it");
+        return;
+    }
+
+    // Fantasy II: timestamps do not bracket the GPU's work. A GPU Burn frame of
+    // 256 steps read 0.5 ms in a frame taking over a second (916 Gpix-step/s),
+    // and 16 steps ranged from 0.1 to 139 ms.
+    if (renderer.rfind("Fantasy", 0) == 0) {
+        EnableSynchronizedTimingFallback(
+            "Fantasy GL timestamps do not cover the GPU's work");
         return;
     }
 

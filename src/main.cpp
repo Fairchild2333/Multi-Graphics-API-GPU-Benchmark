@@ -33,6 +33,9 @@
 #endif
 #ifdef HAVE_OPENGL
 #include "opengl_backend.h"
+#ifdef __linux__
+#include <dlfcn.h>
+#endif
 #endif
 
 #include <algorithm>
@@ -867,6 +870,12 @@ static std::vector<GpuInfo> ProbeGpus(
     // --- OpenGL probe: macOS graphics 4.1, desktop compute 4.3+, else graphics 4.0 ---
 #ifdef HAVE_OPENGL
     {
+#ifdef __linux__
+        // glfwTerminate() unloads libGLX, and this probe is followed by a second
+        // glfwInit() for the run. The Fantasy II driver does not survive that:
+        // GLVND falls back to Mesa and the run lands on llvmpipe. Keep it loaded.
+        dlopen("libGLX.so.0", RTLD_LAZY | RTLD_NODELETE);
+#endif
         if (glfwInit() == GLFW_FALSE)
             return gpus;  // GLFW not available — skip OpenGL probe
 
