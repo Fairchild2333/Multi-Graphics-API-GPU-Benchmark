@@ -134,7 +134,9 @@ es2gpu=$(eglinfo -B 2>/dev/null | sed -n '/^Surfaceless platform:/,/ platform:$/
 [ -z "$es2gpu" ] && es2gpu=$(glxinfo -B 2>/dev/null | sed -n 's/^OpenGL renderer string: //p' | head -1)
 if [ -x "$es2" ] && [ -n "$es2gpu" ] && ! echo "$es2gpu" | grep -q -i -E "llvmpipe|softpipe|lavapipe"; then
     tag=$(echo "$es2gpu" | tr -c 'A-Za-z0-9\n' '-' | sed 's/--*/-/g; s/-$//')
-    for s in 16 64 256; do
+    # 8 is not a preset: it is the highest count a Vivante GC1000 can draw, and
+    # gives every other GPU a figure to set beside it.
+    for s in 8 16 64 256; do
         if [ -n "$only" ] && ! echo "$tag-gles2-gpu-burn-$s" | grep -E -q "$only"; then continue; fi
         n=$((n + 1))
         log=$(printf "%s/%02d-%s-gles2-gpu-burn-%s.log" "$out" "$n" "$tag" "$s")

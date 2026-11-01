@@ -304,7 +304,7 @@ ssh fairchild@mk-xxxxxx.local 'sh -s' < scripts/linux/setup-desktop.sh
 
 It sends this checkout (uncommitted changes included), builds it on the
 machine, runs `scripts/linux/series.sh` there detached from SSH (the
-desktop-suite jobs of every hardware GPU; the OpenGL ES 2.0 GPU Burn at 16 /
+desktop-suite jobs of every hardware GPU; the OpenGL ES 2.0 GPU Burn at 8 / 16 /
 64 / 256 steps on the GPU behind EGL, unless that is a software renderer;
 then the two CPU jobs) and fetches
 the run to `out\linux\<host>-series-<time>\`. `-Only <regex>` runs some jobs,
