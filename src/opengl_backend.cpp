@@ -361,6 +361,14 @@ void OpenGLBackend::CreateTimestampQueries() {
         return;
     }
 
+    // MTT S80: the same PowerVR family. A step of 65536 particles read 0.013 ms
+    // (195 GB/s) where Vulkan, with no timestamps at all, takes about 0.1 ms.
+    if (renderer.rfind("MTT", 0) == 0) {
+        EnableSynchronizedTimingFallback(
+            "MTT GL timestamps do not cover the GPU's work");
+        return;
+    }
+
     GLint bits = 0;
     glGetQueryiv(GL_TIMESTAMP, GL_QUERY_COUNTER_BITS, &bits);
     timestampsSupported_ = (bits > 0);

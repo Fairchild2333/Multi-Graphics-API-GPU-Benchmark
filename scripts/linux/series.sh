@@ -136,6 +136,9 @@ es2gpu=$(eglinfo -B 2>/dev/null | sed -n '/^Surfaceless platform:/,/ platform:$/
 [ -z "$es2gpu" ] && es2gpu=$(glxinfo -B 2>/dev/null | sed -n 's/^OpenGL renderer string: //p' | head -1)
 if [ -x "$es2" ] && [ -n "$es2gpu" ] && ! echo "$es2gpu" | grep -q -i -E "llvmpipe|softpipe|lavapipe"; then
     tag=$(echo "$es2gpu" | tr -c 'A-Za-z0-9\n' '-' | sed 's/--*/-/g; s/-$//')
+    # The MTT S80's EGL calls X11 even on the surfaceless platform and crashes.
+    es2platform=surfaceless
+    case "$es2gpu" in MTT*) es2platform=x11 ;; esac
     # 8 is not a preset: it is the highest count a Vivante GC1000 can draw, and
     # gives every other GPU a figure to set beside it.
     for s in 8 16 64 256; do
@@ -144,7 +147,7 @@ if [ -x "$es2" ] && [ -n "$es2gpu" ] && ! echo "$es2gpu" | grep -q -i -E "llvmpi
         log=$(printf "%s/%02d-%s-gles2-gpu-burn-%s.log" "$out" "$n" "$tag" "$s")
         start=$(date +%s)
         echo "== $n $tag-gles2-gpu-burn-$s: $(date +%T) cpu $(cpu_temp)C" | tee -a "$out/summary.txt"
-        EGL_PLATFORM=surfaceless "$es2" --steps "$s" --seconds 15 --shader-dir "$root/shaders" > "$log" 2>&1 < /dev/null
+        EGL_PLATFORM=$es2platform "$es2" --steps "$s" --seconds 15 --shader-dir "$root/shaders" > "$log" 2>&1 < /dev/null
         code=$?
         end=$(date +%s)
         result=$(grep -a -E "Burn rate:|Last frame:|did not|failed|offers no" "$log" | tr '\n' ' ')
