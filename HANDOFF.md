@@ -1764,6 +1764,35 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-01 同一台 Z97 换 Glenfly Arise2030：厂商 deb 直接能用，GNOME 不用特殊设置；`glFinish` 不等 compute，修了计时；ES 2.0 系列加 8 步
+
+- **卡和环境：** Glenfly Arise2030（`6766:3d07`，28 nm），第一个槽，PCIe 8 GT/s x8（卡的上限），4 GB 显存，VBIOS 1a.11.00.26。Ubuntu 26.04.1、内核 7.0.0-42。驱动 25.00.55：OpenGL 4.5、ES 3.2，包里没有 Vulkan（`vulkaninfo` 只有 llvmpipe）。显示 HDMI 3840x2160@60。
+- **驱动：** `gf-arise-linux-graphics-driver-glvnd-dri_25.00.55_amd64.deb` 带完整内核源码，已经适配到 7.0，也已有 `FOP_UNSIGNED_OFFSET`，没改代码，0 错误。读过 `postinst`（改自己的配置、DKMS、更新 initramfs）后，由用户运行 `sudo apt install ./gf.deb`，重启后 PCI 别名自动加载，内核 0 条警告。内核升级时 DKMS 会重新编译。卡有传统 ROM，开机 `boot_vga=1`，没驱动也有基本显示。Xorg 日志的 `open /dev/dri/card0: No such file or directory` 是因为设备这次是 `card1`，不影响使用。
+- **GNOME：** 用户要求今后优先在 GNOME 下测试。GNOME 50.1 Wayland 走默认路径就正常，着色器失败 0 次，`gnome-shell` 加载 Arise 驱动，EGL 和 Xwayland 都报 `Glenfly Arise2030`，用户确认显示器上正常。默认会话改成了 GNOME（`/etc/lightdm/lightdm.conf.d/91-gnome.conf`）；Fantasy 那个对所有卡都生效的设置改名成 `~/.config/environment.d/90-fantasy-gnome.conf.off`。这次全部成绩都在 GNOME 下，同一台机器之前的成绩大多在 Xfce 下。
+- **代码改动（`src/opengl_backend.cpp`）：** 这张卡的 GL 时间戳读 0.000 ms（代码早已把它列入不可信名单，改用墙钟），而墙钟靠的 `glFinish` 也不等 compute。独立小程序测 4M 项：`glFinish` 0.017 ms 返回，fence 21.09 ms（1M 是 5.49 ms，线性），读回 24.78 ms，数据每次都正确增加，说明计算确实执行了。
+  - 第一轮读出 131 / 1369 / 5483 / 18203 GB/s，全是假数。compute 改用 fence 后，窗口模式仍只有 1.4 GB/s，而最短 compute 157.035 ms 和无窗口的 157.065 ms 相同、绘制只读 0.17 ms：compute 之后的绘制 `glFinish` 也不等，上一帧的绘制算进了下一帧的 compute。这两处都改成 fence（`FinishComputeForTiming`）。
+  - 单独的绘制不受影响：GPU Burn 16 步计时 49.09 ms、实际帧时间 49.61 ms，所以 GPU Burn 还用 `glFinish`，没有重跑。
+  - **状态：** Linux 上编译并在 Arise2030 上实跑。Windows、macOS 没编译。修复按渲染器名字生效，Windows 上的这张卡也会走 fence，没验证过。其他卡代码路径不变。
+- **成绩（OpenGL 全部 `synchronized_wall_clock`，内核 0 条警告）：**
+
+  | OpenGL 粒子（GB/s） | 窗口 | 无窗口 |
+  |---|---|---|
+  | 65K | 2.67 | 2.97 |
+  | 1M | 4.16 | 4.17 |
+  | 4M | 4.25 | 4.26 |
+  | 16M | 4.28 | 4.27 |
+
+  | GPU Burn（Gpix-step/s，每帧） | 8 步 | 16 步 | 64 步 | 256 步 |
+  |---|---|---|---|---|
+  | OpenGL 窗口 | — | 0.60，49.1 ms | 0.79，150.2 ms | 0.87，539.5 ms |
+  | ES 2.0（surfaceless，成绩只有日志） | 7.74，1.906 ms | 8.44，3.496 ms | 8.87，13.306 ms | 8.92，52.871 ms |
+
+  - 窗口模式 16M 一帧 510.5 ms，其中 compute 156.8 ms、绘制 347.7 ms。
+  - 目录都在 `out\linux\`：`mk-93f8a3-arise2030-series-20261101-124144`（GPU Burn，ES 2.0 16 / 64 / 256 步有效，粒子 8 项作废）；`mk-93f8a3-arise2030-fix-series-20261101-125446`（粒子无窗口 4 项、ES 2.0 8 步有效，粒子窗口 4 项作废）；`mk-93f8a3-arise2030-shown-series-20261101-130311`（粒子窗口 4 项）。作废的 12 条已从测试机 `results.json` 删除，备份在 `~/results-before-arise-drop-*.json`，本地副本还留着。
+  - 没有 Vulkan、流体和显存带宽成绩。频率和温度都没采集到。CPU 项按用户要求不跑。
+- **ES 2.0 系列加 8 步（`scripts/linux/series.sh`）：** 用户要求今后每张卡都跑 8 / 16 / 64 / 256 步。8 步不是标准预设，是龙芯 GC1000 能画的最高步数，加上后才有同步数的对比：GC1000 0.03，Arise2030 7.74 Gpix-step/s。在此之前的卡都没有 8 步。
+- **GNOME 进程仍会加载 JM9100 的用户态，** ES 2.0 日志开头也打印 `Failed to open device`，没看出影响，没处理。
+
 ### 2026-11-01 同一台 Z97 换 Fantasy II-M：驱动移植到 Linux 7.0；OpenGL 落到 llvmpipe 和时间戳不可信都修了；GNOME 要走 GLES
 
 - **卡和环境：** Fantasy II-M（`1ec8:9810`），第一个槽，PCIe 8 GT/s x8（卡的上限）。Ubuntu 26.04.1、内核 7.0.0-42、Xfce + X.org + LightDM，显示 HDMI 3840x2160@60。驱动 3.3.9.135：OpenGL 4.3（有 compute、SSBO、timer query）、ES 3.2、Vulkan 1.3.264。Vulkan 设备本地堆 1.5 GiB，另有一个 460 MiB 的堆，`maxStorageBufferRange` 128 MiB。驱动是 PowerVR 系（srvkm/rogue）。
@@ -1801,8 +1830,8 @@ PathService 已把 results/captures/reports/logs 改到
   - Vulkan Burn 和 JM9100 的 OpenGL（0.232 / 0.309 / 0.337）几乎相同。日志显示两边都是各自的硬件，判断为巧合，没有更多证据。
   - 频率和温度都没采集到。CPU 项按用户要求不跑。
 - **GNOME：** GNOME 50.1 Wayland 能在这张卡上跑，但要 `COGL_DRIVER=gles2`。Mutter 默认的 GL 路径生成 `#version 140` 的着色器，里面调用 `texture2D`，这个驱动报 `'texture2D' : undeclared identifier`，带贴图的绘制都失败，画面几乎全白。走 GLES 后着色器是 `#version 100`，失败 0 次，用户确认显示器上正常。
-  - 配置在 `~/.config/environment.d/90-fantasy-gnome.conf`，只影响 Mutter。这个文件只经过 `systemctl --user daemon-reload` 验证，没有在 Fantasy II-M 上重启验证。
-  - 默认桌面仍是 Xfce。想用 GNOME，在 `/etc/lightdm/lightdm.conf.d/` 加一个文件，`[Seat:*]` 下写 `autologin-session=ubuntu` 和 `user-session=ubuntu`，试完要删掉。
+  - 配置在 `~/.config/environment.d/90-fantasy-gnome.conf`，只影响 Mutter，但对所有卡都生效。后来换 Arise2030 时改名成 `.off`，**换回这张卡要改回来**。这个文件只经过 `systemctl --user daemon-reload` 验证，没有在 Fantasy II-M 上重启验证。
+  - 这张卡的成绩是在 Xfce 下跑的。选 GNOME 的办法是在 `/etc/lightdm/lightdm.conf.d/` 加一个文件，`[Seat:*]` 下写 `autologin-session=ubuntu` 和 `user-session=ubuntu`；现在这个文件是 `91-gnome.conf`，换 JM9100 这种跑不了 GNOME 的卡前要删掉。
   - GNOME 读 `~/.config/monitors.xml`，这里跑的是 1080p 120 Hz，不是 Xfce 的 4K 60 Hz。
   - 从 GNOME 切走时，`systemctl restart lightdm` 太快，旧会话没退完，新会话起不来，会停在登录界面。要先 `stop`，等十几秒再 `start`。
   - Wayland 下截图被拒（`Screenshot is not allowed`）。可以用 `org.gnome.Mutter.ScreenCast` 加 `pipewiresrc` 抓一帧，抓到的是合成结果，不等于显示器实际显示。
