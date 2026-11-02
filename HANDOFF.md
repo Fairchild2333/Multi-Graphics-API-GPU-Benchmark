@@ -1774,7 +1774,7 @@ PathService 已把 results/captures/reports/logs 改到
   - 启动时登录界面的 GNOME 还会崩 1 次，自动登录的会话正常。
 - **亮度只有约 10%（驱动原本的错误，和移植无关）：** 驱动注册 `drm_crtc_enable_color_mgmt(..., 768, true, 768)`，提交时却只读 `gamma_lut` 的前 256 项。GNOME 按 768 项填 0～65535 的线性表，读到的最大值是 1/3，经 gamma 2.2 约 9%，和用户看到的一样；鼠标看着更亮。Xfce 不设这张表，所以以前没发现。修法：`jmgpu_package.c` 里按 `i * (n - 1) / 255` 取样。抓屏看不出来，因为这张表在抓屏之后。
 - **有限范围 RGB：** 驱动对 HDMI 的 CEA 模式（4K 60 Hz）默认 16～235。用户要求调，`jmgpu_nicely.c` 改成 `rgb_limited_range = false`。这不是偏暗的主因。
-- **这两处修复只在测试机的 `~/jm9-src`，副本 `out\linux\mk-a39638-jm9-src-20261102.tar.gz`（含 26.04 的移植），不在仓库。** 模块临时加载，每次开机运行 `~/jm9-gnome.sh`；它要卸载正在用的模块时会失败，所以换模块要先重启。
+- **这两处修复只在测试机的 `~/jm9-src`，没有副本，也不在仓库。** 想备份时测试机已经关机。移植本身在 `out\linux\mk-93f8a3-before-reinstall-20261102.tar.gz` 的 `jm9-src`，重做只要改两处：`jmgpu_nicely.c` 把 `rgb_limited_range` 的赋值改成 `false`；`jmgpu_package.c` 的 `atomic_flush` 里加 `n = crtc->state->gamma_lut->length / sizeof(*lut);`，循环内取 `lut[(u32)i * (n - 1) / 255]`。模块临时加载，每次开机运行 `~/jm9-gnome.sh`；它要卸载正在用的模块时会失败，所以换模块要先重启。
 - **Wi-Fi 找不到是我的脚本造成的：** `setup-desktop.sh` 让 NetworkManager 不管 Wi-Fi。改成只有 netplan 里配了 `wifis:` 才这样（`scripts/linux/setup-desktop.sh`，这个分支没实跑，这台是手动改的配置）。AX210 正常，还有一块 BCM4360 没驱动。
 - **ES 2.0 只能走 GBM（`scripts/linux/series.sh`）：** surfaceless 是 llvmpipe，X11 报 `X_GetImage BadMatch`。`eglinfo` 的 ES 渲染器名读成 `(null)`，所以从 GBM 段取核心渲染器名判断。`Jingjia` 才走这条路。
 - **JM9100 成绩（`out\linux\mk-a39638-jm9100-gnome-series-20261102-182234`，7 项都退出码 0，GNOME 全程正常，OpenGL 走墙钟）：**
