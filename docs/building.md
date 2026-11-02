@@ -377,8 +377,8 @@ machine, send the source with `-BuildOnly`, then run
 
 ### x86-64 test machines for old NVIDIA cards (Ubuntu 20.04)
 
-> **Verification status:** run once on an ASUS Z97 (2026-11-02); GTX 570 on 390.157
-> and GT 120 on 340.108 under GNOME on X.org, 470 not yet. The install needed the
+> **Verification status:** run once on an ASUS Z97 (2026-11-02); GTX 570 on 390.157,
+> GT 120 on 340.108 and GTX 660 on 470.256.02 under GNOME on X.org. The install needed the
 > repair in step 4, which the template does not avoid.
 
 NVIDIA's drivers for Tesla (340), Fermi (390) and Kepler (470) cards are real
