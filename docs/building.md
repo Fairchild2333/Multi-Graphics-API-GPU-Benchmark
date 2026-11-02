@@ -412,6 +412,18 @@ so this is a system for a test machine only.
 7. `glslc` is not packaged, so copy the `*.spv` files of a Windows build into
    `~/mangekyo/build/` after the first build (see the Jetson section above).
 
+### GRUB `out of memory` after installing the NVIDIA driver
+
+`nvidia-driver-595` packs its module and firmware into the initrd (215 MB here, 60 MB
+without). On an ASUS Z590 that stopped booting once the discrete card was out: GRUB
+`error: out of memory`, then `Unable to mount root fs on unknown-block(0,0)`. Pick the
+older kernel under Advanced options, then keep the initrd small:
+
+```bash
+echo 'MODULES=dep' | sudo tee /etc/initramfs-tools/conf.d/90-mangekyo-small.conf
+sudo update-initramfs -u -k 7.0.0-42-generic
+```
+
 ### Resizable BAR on a board without it (Arc A380 on an ASUS Z97)
 
 An Arc on a Z97 board comes up with a 256 MB BAR, and i915 reports `Can't resize
