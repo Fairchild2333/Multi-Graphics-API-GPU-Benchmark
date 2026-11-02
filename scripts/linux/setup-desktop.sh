@@ -38,7 +38,9 @@ sudo dconf update
 # minute; NetworkManager leaves wired ports and Wi-Fi (set up by netplan when
 # installed with make-autoinstall.ps1 -Wifi) alone.
 sudo mkdir -p /etc/NetworkManager/conf.d
-printf '[keyfile]\nunmanaged-devices=type:ethernet;type:wifi\n' | sudo tee /etc/NetworkManager/conf.d/90-mangekyo-unmanaged.conf > /dev/null
+unmanaged=type:ethernet
+sudo grep -qs '^ *wifis:' /etc/netplan/*.yaml && unmanaged='type:ethernet;type:wifi'
+printf '[keyfile]\nunmanaged-devices=%s\n' "$unmanaged" | sudo tee /etc/NetworkManager/conf.d/90-mangekyo-unmanaged.conf > /dev/null
 
 # A Wi-Fi port no one has connected falls to dracut's catch-all network file,
 # which makes it required for online: every boot then waited out the 2 minutes

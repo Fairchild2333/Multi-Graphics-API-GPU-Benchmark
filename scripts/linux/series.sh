@@ -134,10 +134,14 @@ es2gpu=$(eglinfo -B 2>/dev/null | sed -n '/^Surfaceless platform:/,/ platform:$/
 # Older distributions (Kylin V10, Ubuntu 20.04) have no eglinfo; the GLX
 # renderer is the same GPU.
 [ -z "$es2gpu" ] && es2gpu=$(glxinfo -B 2>/dev/null | sed -n 's/^OpenGL renderer string: //p' | head -1)
+# The JM9100 draws only through GBM: surfaceless is llvmpipe and X11 fails on
+# GNOME, and eglinfo reads its ES renderer as (null), so take the core name.
+es2platform=surfaceless
+jm=$(eglinfo -B 2>/dev/null | sed -n '/^GBM platform:/,/ platform:$/ s/^OpenGL core profile renderer: //p' | head -1)
+case "$jm" in Jingjia*) es2gpu=$jm; es2platform=gbm ;; esac
 if [ -x "$es2" ] && [ -n "$es2gpu" ] && ! echo "$es2gpu" | grep -q -i -E "llvmpipe|softpipe|lavapipe"; then
     tag=$(echo "$es2gpu" | tr -c 'A-Za-z0-9\n' '-' | sed 's/--*/-/g; s/-$//')
     # The MTT S80's EGL calls X11 even on the surfaceless platform and crashes.
-    es2platform=surfaceless
     case "$es2gpu" in MTT*) es2platform=x11 ;; esac
     # 8 is not a preset: it is the highest count a Vivante GC1000 can draw, and
     # gives every other GPU a figure to set beside it.
