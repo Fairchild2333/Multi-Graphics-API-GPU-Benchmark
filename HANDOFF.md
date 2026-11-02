@@ -1764,6 +1764,32 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-02 Arc A380 在 i9-10900K 上 256 MB 和 8 GB BAR 各跑一轮：BAR 只影响 OpenGL 大缓冲，CPU 几乎不影响 GPU 成绩
+
+- **环境：** `mk-a39638`，Gunnir Arc A380，`i915`，Mesa 26.0.8，GNOME Wayland，HDMI 4K 60 Hz，缩放 1.5，PCIe 8 GT/s x8（卡的满速）。两轮之间用户只在 BIOS 里切了 Resizable BAR（Z590 原生支持，关时 `Failed to resize BAR2 to 8192M (-ENOSPC)`）。换这张卡前去掉了 `/etc/environment` 里 JM9100 的三行，并把 `10_mwv207.json` 改成 `.off`，**再测 JM9100 要改回来**；只重启 GDM 不会自动登录，要重启整机。
+- **成绩（`out\linux\mk-a39638-arc-a380-bar256-series-20261102-185807`，26 项成功，OpenGL 16M 两项 `Aborted`；`out\linux\mk-a39638-arc-a380-bar8g-series-20261102-192823`，28 项都成功；两轮 0 次 GPU 挂起。第三列是 Z97 那轮，见下面 Arc A380 一节）：**
+
+  | 项目 | i9 + 256 MB | i9 + 8 GB | E3-1285 v4 + 8 GB |
+  |---|---|---|---|
+  | OpenGL 粒子 65K 窗口 / 无窗口 | 14.10 / 15.56 | 12.94 / 15.56 | 6.48 / 7.47 |
+  | OpenGL 粒子 1M 窗口 / 无窗口 | 54.74 / 43.35 | 53.55 / 47.15 | 53.89 / 55.27 |
+  | OpenGL 粒子 4M 窗口 / 无窗口 | **4.13 / 4.24** | 71.56 / 75.73 | 73.86 / 75.90 |
+  | OpenGL 粒子 16M 窗口 / 无窗口 | **崩溃** | 77.36 / 83.22 | 80.49 / 83.83 |
+  | Vulkan 粒子 65K 窗口 / 无窗口 | 96.88 / 69.22 | 96.57 / 69.44 | 96.78 / 47.27 |
+  | Vulkan 粒子 1M 窗口 / 无窗口 | 91.97 / 92.36 | 91.99 / 92.37 | 91.93 / 92.36 |
+  | Vulkan 粒子 4M 窗口 / 无窗口 | 89.26 / 90.45 | 88.40 / 90.50 | 89.39 / 90.53 |
+  | Vulkan 粒子 16M 窗口 / 无窗口 | 86.46 / 90.03 | 82.93 / 90.09 | 86.94 / 90.10 |
+  | Vulkan Burn 16 / 64 / 256 | 7.27 / 9.09 / 9.72 | 7.28 / 9.09 / 9.72 | 7.35 / 9.23 / 9.87 |
+  | OpenGL Burn 16 / 64 / 256 | 7.25 / 9.08 / 9.71 | 7.27 / 9.09 / 9.72 | 7.35 / 9.20 / 9.83 |
+  | ES 2.0 8 / 16 / 64 / 256 | 65.42 / 94.39 / 82.52 / 91.86 | 63.51 / 94.42 / 82.55 / 92.07 | 63.66 / 94.51 / 81.60 / 90.69 |
+  | 流体 | 27.84 | 27.71 | 27.86 |
+  | 显存读 / 写 / 复制 | 119.5 / 122.6 / 135.4 | 119.5 / 122.6 / 135.6 | 119.5 / 122.6 / 135.1 |
+
+- **BAR 的影响（前两列）：** 只有 OpenGL 粒子 4M、16M。4M 两个缓冲共约 320 MB，超过 256 MB 时掉到约 1/18，16M 程序 `Aborted`；1M 约 80 MB 放得下。Vulkan 同样规模不受影响。
+  - **Vulkan 不受影响的原因：** 程序明确申请 `DEVICE_LOCAL` 的粒子缓冲，再用 `HOST_VISIBLE` 的暂存缓冲复制（`src/vulkan_backend.cpp`），CPU 不用直接看到显存。OpenGL 用 `glBufferStorage` 只能给标志，放在哪由 Mesa 决定，推测它要占可见显存或退到系统内存，没读 Mesa 代码验证。所以不是 Vulkan 天生不受影响，是这段程序用了暂存复制。
+- **CPU 的影响（后两列，主板和内存也不同）：** 单线程 216 对 168，Vulkan、Burn、流体、显存带宽都没有提升。OpenGL 65K 翻倍，那档一步不到 0.2 ms，等待开销占比大。OpenGL 1M 无窗口这台反而低（43～47 对 55），原因没查。
+- **Vulkan 65K 无窗口的 47.27 是 GPU 没升频：** 负载太轻，遥测 600～800 MHz，不是温度问题，也不是 CPU 差。
+
 ### 2026-11-02 新测试机 i9-10900K：JM9100 第一次跑通 GNOME，10% 亮度是驱动的 gamma 错误；CPU 成绩
 
 - **机器 `mk-a39638`（192.168.20.96）：** 华硕 ROG MAXIMUS XIII EXTREME，i9-10900K，两条 32 GB，Ubuntu 26.04.1，内核 7.0.0-42，GNOME 50.1 Wayland（GDM）。系统在 HS-SSD C2000 Pro（`nvme1n1`，被安装程序清空，用户说没有重要数据）。Intel Optane 900P（`nvme0n1`）上是 BitLocker 的 Windows，没动。**`autoinstall.template.yaml` 选“最大的 SSD”，多盘机器要先看清楚，它不问。** 内存运行频率只看到以 36 开头，没确认。
@@ -1774,7 +1800,7 @@ PathService 已把 results/captures/reports/logs 改到
   - 启动时登录界面的 GNOME 还会崩 1 次，自动登录的会话正常。
 - **亮度只有约 10%（驱动原本的错误，和移植无关）：** 驱动注册 `drm_crtc_enable_color_mgmt(..., 768, true, 768)`，提交时却只读 `gamma_lut` 的前 256 项。GNOME 按 768 项填 0～65535 的线性表，读到的最大值是 1/3，经 gamma 2.2 约 9%，和用户看到的一样；鼠标看着更亮。Xfce 不设这张表，所以以前没发现。修法：`jmgpu_package.c` 里按 `i * (n - 1) / 255` 取样。抓屏看不出来，因为这张表在抓屏之后。
 - **有限范围 RGB：** 驱动对 HDMI 的 CEA 模式（4K 60 Hz）默认 16～235。用户要求调，`jmgpu_nicely.c` 改成 `rgb_limited_range = false`。这不是偏暗的主因。
-- **这两处修复只在测试机的 `~/jm9-src`，没有副本，也不在仓库。** 想备份时测试机已经关机。移植本身在 `out\linux\mk-93f8a3-before-reinstall-20261102.tar.gz` 的 `jm9-src`，重做只要改两处：`jmgpu_nicely.c` 把 `rgb_limited_range` 的赋值改成 `false`；`jmgpu_package.c` 的 `atomic_flush` 里加 `n = crtc->state->gamma_lut->length / sizeof(*lut);`，循环内取 `lut[(u32)i * (n - 1) / 255]`。模块临时加载，每次开机运行 `~/jm9-gnome.sh`；它要卸载正在用的模块时会失败，所以换模块要先重启。
+- **这两处修复在测试机的 `~/jm9-src`，副本 `out\linux\mk-a39638-jm9-src-20261102.tar.gz`（已确认含这两处和 `jm9-gnome.sh`），不在仓库。** 重做只要改两处：`jmgpu_nicely.c` 把 `rgb_limited_range` 的赋值改成 `false`；`jmgpu_package.c` 的 `atomic_flush` 里加 `n = crtc->state->gamma_lut->length / sizeof(*lut);`，循环内取 `lut[(u32)i * (n - 1) / 255]`。模块临时加载，每次开机运行 `~/jm9-gnome.sh`；它要卸载正在用的模块时会失败，所以换模块要先重启。
 - **Wi-Fi 找不到是我的脚本造成的：** `setup-desktop.sh` 让 NetworkManager 不管 Wi-Fi。改成只有 netplan 里配了 `wifis:` 才这样（`scripts/linux/setup-desktop.sh`，这个分支没实跑，这台是手动改的配置）。AX210 正常，还有一块 BCM4360 没驱动。
 - **ES 2.0 只能走 GBM（`scripts/linux/series.sh`）：** surfaceless 是 llvmpipe，X11 报 `X_GetImage BadMatch`。`eglinfo` 的 ES 渲染器名读成 `(null)`，所以从 GBM 段取核心渲染器名判断。`Jingjia` 才走这条路。
 - **JM9100 成绩（`out\linux\mk-a39638-jm9100-gnome-series-20261102-182234`，7 项都退出码 0，GNOME 全程正常，OpenGL 走墙钟）：**
