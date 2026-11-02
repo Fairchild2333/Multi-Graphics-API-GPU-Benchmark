@@ -1764,6 +1764,50 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-02 新测试机 i9-10900K：JM9100 第一次跑通 GNOME，10% 亮度是驱动的 gamma 错误；CPU 成绩
+
+- **机器 `mk-a39638`（192.168.20.96）：** 华硕 ROG MAXIMUS XIII EXTREME，i9-10900K，两条 32 GB，Ubuntu 26.04.1，内核 7.0.0-42，GNOME 50.1 Wayland（GDM）。系统在 HS-SSD C2000 Pro（`nvme1n1`，被安装程序清空，用户说没有重要数据）。Intel Optane 900P（`nvme0n1`）上是 BitLocker 的 Windows，没动。**`autoinstall.template.yaml` 选“最大的 SSD”，多盘机器要先看清楚，它不问。** 内存运行频率只看到以 36 开头，没确认。
+- **JM9100 上 GNOME 的三个崩溃或错误，都解决了（`/etc/environment` 三行，只适合这张卡，换卡前要去掉）：**
+  - `cogl_context_new` 调用空函数指针（`segfault at 0`）：驱动缺 GL 函数。`COGL_DRIVER=gles2` 绕开。
+  - `libgbm_jm.so` 除零（SIGFPE，`gbm_jm_surface_get_free_buffer`，缓冲区数量是 0）：系统 Mesa 的 `libgbm` 和驱动的 GBM 后端不配套。`LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/mwv207` 改用驱动自带的那份。之前 10 月底两次 SIGFPE 也是这个，我当时怪 `COGL_DRIVER=gles2` 是错的，这个设置其实是需要的。
+  - 窗口外一圈纯黑矩形：GTK4 走 GL 时透明通道丢了。`GSK_RENDERER=cairo`。
+  - 启动时登录界面的 GNOME 还会崩 1 次，自动登录的会话正常。
+- **亮度只有约 10%（驱动原本的错误，和移植无关）：** 驱动注册 `drm_crtc_enable_color_mgmt(..., 768, true, 768)`，提交时却只读 `gamma_lut` 的前 256 项。GNOME 按 768 项填 0～65535 的线性表，读到的最大值是 1/3，经 gamma 2.2 约 9%，和用户看到的一样；鼠标看着更亮。Xfce 不设这张表，所以以前没发现。修法：`jmgpu_package.c` 里按 `i * (n - 1) / 255` 取样。抓屏看不出来，因为这张表在抓屏之后。
+- **有限范围 RGB：** 驱动对 HDMI 的 CEA 模式（4K 60 Hz）默认 16～235。用户要求调，`jmgpu_nicely.c` 改成 `rgb_limited_range = false`。这不是偏暗的主因。
+- **这两处修复只在测试机的 `~/jm9-src`，副本 `out\linux\mk-a39638-jm9-src-20261102.tar.gz`（含 26.04 的移植），不在仓库。** 模块临时加载，每次开机运行 `~/jm9-gnome.sh`；它要卸载正在用的模块时会失败，所以换模块要先重启。
+- **Wi-Fi 找不到是我的脚本造成的：** `setup-desktop.sh` 让 NetworkManager 不管 Wi-Fi。改成只有 netplan 里配了 `wifis:` 才这样（`scripts/linux/setup-desktop.sh`，这个分支没实跑，这台是手动改的配置）。AX210 正常，还有一块 BCM4360 没驱动。
+- **ES 2.0 只能走 GBM（`scripts/linux/series.sh`）：** surfaceless 是 llvmpipe，X11 报 `X_GetImage BadMatch`。`eglinfo` 的 ES 渲染器名读成 `(null)`，所以从 GBM 段取核心渲染器名判断。`Jingjia` 才走这条路。
+- **JM9100 成绩（`out\linux\mk-a39638-jm9100-gnome-series-20261102-182234`，7 项都退出码 0，GNOME 全程正常，OpenGL 走墙钟）：**
+
+  | GPU Burn（Gpix-step/s，每帧） | 8 步 | 16 步 | 64 步 | 256 步 |
+  |---|---|---|---|---|
+  | OpenGL 4.0 | — | 0.23，129.494 ms | 0.30，389.028 ms | 0.32，1497.652 ms |
+  | ES 2.0（成绩只有日志） | 5.20，2.837 ms | 5.85，5.042 ms | 5.77，20.455 ms | 5.91，79.820 ms |
+
+  和 Z97 的 Xfce（0.232 / 0.309 / 0.337，ES 5.79 / 5.71 / 5.87）基本一样，OpenGL 256 步低约 5%。没有 Vulkan 和计算着色器。
+- **i9-10900K（`out\linux\mk-a39638-i9-10900k-cpu-series-20261102-182819`，调度 `powersave`，最高 79°C，最高记到 5.1 GHz）：** 单线程 215.90（214.05～221.21），全核 20 线程 2982.88 MWork/s。单线程读 / 写 / 复制：L1 247.5 / 162.5 / 324，L2 131.4 / 83.0 / 116，L3 69.9 / 47.3 / 60，内存 25.7 / 18.0 / 22 GB/s。全核：L3 427.8 / 252.7 / 322，内存 45.0 / 19.2 / 26。新页映射 5.86 GB/s。HS-SSD 顺序读 2882、写 2434 MB/s。
+  - **和 9800X3D（Windows，203.3 / 2819.2，全核内存读 56.6）比：** 单线程高约 6%，这项测试几乎只看频率除以周期，吃不到 3D 缓存，系统和编译器也不同，**不说明它更强**。全核看每个核心：352 对 298，单线程的 1.73 倍对 1.38 倍；i7-4770、E3-1285 v4、i3-4170 也都约 1.3 倍。原因推测是 Zen 5 超线程增益更大，加上全核降频，没单独验证。
+
+### 2026-11-02 Fantasy II-M 在 Ubuntu 20.04 的 GNOME Xorg 下重跑，官方包不用改，和 26.04 几乎一样
+
+- **环境（`mk-93f8a3`）：** Ubuntu 20.04.6，内核 5.4，i7-4770。用户提供的 `fantgpu-fh2m_3.3.9.135` 用 `dpkg -i` 直接装好，DKMS 编译通过，不用移植，也不用 `COGL_DRIVER=gles2`。OpenGL 4.3、ES 3.2、Vulkan。HDMI 4K 60 Hz。抓屏里桌面颜色正常，显示器上的画面用户当时没单独确认。包还装在测试机上，`00_fh2m.json` 可能挡住其他卡的 ES 2.0，换卡先查。**JM9100 在 20.04 上不行：`jmgpu_dri.so` 要 glibc 2.38。**
+- **成绩（`out\linux\mk-93f8a3-fantasy2m-gnome-series-20261102-145523`，28 项 26 项成功）：** Vulkan 16M 两项 `vkAllocateMemory failed`，和 26.04 一样是显存不够。
+
+  | 粒子（GB/s） | Vulkan 窗口 | Vulkan 无窗口 | OpenGL 窗口 | OpenGL 无窗口 |
+  |---|---|---|---|---|
+  | 65K | 6.23 | 8.16 | 2.09 | 4.02 |
+  | 1M | 9.29 | 10.01 | 6.24 | 7.57 |
+  | 4M | 9.80 | 10.05 | 8.40 | 8.25 |
+  | 16M | 失败 | 失败 | 1.25 | 1.25 |
+
+  | GPU Burn（Gpix-step/s，每帧） | 8 步 | 16 步 | 64 步 | 256 步 |
+  |---|---|---|---|---|
+  | Vulkan | — | 0.24，123.768 ms | 0.31，377.676 ms | 0.34，1393.090 ms |
+  | OpenGL | — | 0.21，142.567 ms | 0.30，398.262 ms | 0.33，1413.187 ms |
+  | ES 2.0（成绩只有日志） | 2.15，6.855 ms | 2.37，12.446 ms | 2.57，45.816 ms | 2.63，179.229 ms |
+
+  流体 1.80 MParticle-step/s（658.520 ms compute + 1123.460 ms render）。显存读 / 写 / 复制 24.1 / 8.6 / 10.9 GB/s。和 26.04 几乎一样；OpenGL 16M 这次 1.25，26.04 是 0.52，都疑似溢出到系统内存，不算显存成绩。
+
 ### 2026-11-02 GT 730 换官方 470，GNOME Xorg 下全部 28 项；20.04 计划的卡都测完了
 
 - **环境：** GT 730（GK208B，`10de:1287`，子系统 `103c:2b4e`，HP 版），1999 MiB DDR3。`nvidia-driver-470` 470.256.02，Ubuntu 20.04.6，i7-4770，16 GB，GNOME Xorg，DP 1080p 119.88 Hz，用户确认画面正常。PCIe 能力 5 GT/s x8，这次是 x8（上次在 26.04 是 x4）；测完闲置显示 2.5 GT/s，负载下的速度没有记录。遥测没有频率和功耗。
