@@ -1764,6 +1764,39 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-02 Z97 重装 Ubuntu 20.04.6：官方 NVIDIA 340 / 390 在 GNOME Xorg 下可用；GTX 570 全部 15 项，GT 120 只有 ES 2.0
+
+- **为什么重装：** 官方 340 只有 20.04 还是真驱动。26.04 能测的测完后整盘重装。**26.04 没了**，JM9100、Fantasy II-M、MTT S80、LX 7G100 要测得换回 26.04。只在测试机上的东西（各驱动移植源码、加载脚本、全部结果）备份在 `out\linux\mk-93f8a3-before-reinstall-20261102.tar.gz`（546 MB，已校验）；`~/musa33`、`~/nv470`、`~/nv390` 没备份，可以从原始安装包重建。
+- **系统：** Ubuntu 20.04.6，内核 5.4.0-216（锁定），GNOME 3.36 Xorg（GDM 自动登录，`WaylandEnable=false`），i7-4770，16 GB。安装用 `scripts/linux/autoinstall-2004.template.yaml`、`make-autoinstall.ps1 -Focal`、`setup-focal.sh`，`docs/building.md` 有步骤。程序用 GCC 9、GLFW 3.3 和 pip 的 CMake 3.31 一次编译通过，结果文件测试通过。没有 `glslc`，机器上没有 `.spv`，**测 Kepler 的 Vulkan 前要从 Windows 编译结果拷过去**。
+- **安装踩到的问题（都写进 `docs/building.md` 了）：**
+  - 第一版配置写的是“最大的硬盘”，而这个 U 盘有 1.9 TB，比 1 TB NVMe 大，启动前才发现。改成按名字 `/dev/nvme0n1`。这个写法实测可用。
+  - 安装程序的 `unattended-upgrades` 退出码 1（`ubuntu-pro-client` 有 conffile 提示，更新本身 `All upgrades installed`），整个安装判定失败。之后的步骤都没跑：`late-commands`（免密 sudo、avahi、主机名、休眠屏蔽、时区）全没执行，`sources.list` 也留在 `file:///cdrom`。当场在 shell 写 sudoers 再重启，其余都通过 SSH 补，系统正常。这个错误下次大概率还会出现，**没有在配置里解决**。
+  - 我说 `stage-late: executing late commands` 就是我写的配置，这是错的，那是 curtin 自己的步骤。
+  - 必须用 live-server ISO 的 20.04.6；用户先下载的是桌面版（不读这套配置），后来又是 20.04.0（908 MB），都换了。Rufus 要用 ISO 模式。
+- **GTX 570（`nvidia-driver-390` 390.157）：** GF110（`10de:1086`，子系统 `1043:8387`），1216 MiB，OpenGL 4.6，没有 Vulkan。HDMI 1080p 59.94 Hz。**这是这张卡第一次有官方驱动下 GNOME 的成绩**（`nouveau` 下没有有效成绩）。`out\linux\mk-93f8a3-gtx570-nv390-series-20261102-041411`，15 项都退出码 0，0 个 Xid。遥测没有频率和功耗。
+
+  | 粒子（OpenGL，GB/s） | 窗口 | 无窗口 |
+  |---|---|---|
+  | 65K | 20.54 | 20.80 |
+  | 1M | 56.87 | 58.43 |
+  | 4M | 63.93 | 64.93 |
+  | 16M | 66.73 | 66.99 |
+
+  | GPU Burn（Gpix-step/s，每帧） | 8 步 | 16 步 | 64 步 | 256 步 |
+  |---|---|---|---|---|
+  | OpenGL | — | 1.78，16.601 ms | 2.34，50.428 ms | 2.53，186.480 ms |
+  | ES 2.0（成绩只有日志） | 19.57，0.753 ms | 22.52，1.309 ms | 23.94，4.928 ms | 24.70，19.107 ms |
+
+- **GT 120（`nvidia-340` 340.108）：** `lspci` 写 G96C / 9500 GT（`10de:0640`，子系统 `106b:00b3`，苹果版），NVIDIA 驱动报 `GeForce GT 120`，所以这就是用户说的 GT 120。511 MiB，5 GT/s x16，DP 1080p 120 Hz。OpenGL 3.3，程序开不了 4.x 窗口（`glfwCreateWindow failed`），`--list-gpus` 也不列它，所以只有 ES 2.0。`mangekyo_es2burn` 的初始化日志确认是 GPU。`out\linux\mk-93f8a3-gt120-nv340-series-20261102-130447`，4 项都退出码 0。
+
+  | ES 2.0 Burn（Gpix-step/s，每帧） | 8 步 | 16 步 | 64 步 | 256 步 |
+  |---|---|---|---|---|
+  | GT 120 | 1.87，7.866 ms | 2.00，14.755 ms | 2.21，53.435 ms | 2.25，209.537 ms |
+
+  - **和国产卡比（ES 2.0 256 步，CPU、系统、驱动都不同，差 20% 不算数）：** LX 7G100 152.26、MTT S80 70.05、Arise2030 8.92、JM9100 5.87、Fantasy II-M 2.63、GT 120 2.25、C-960 0.46。
+- **换驱动：** `apt-get purge 'nvidia-*' 'libnvidia-*'`，再装 `nvidia-340` 或 `nvidia-driver-390`，重启。两个都是 Ubuntu 源的包，DKMS 在 5.4 上都编译通过。340 替换了 `libEGL`，`egl_vendor.d` 里只剩 Mesa；surfaceless 的 ES 2.0 仍走 NVIDIA。机器上没有 `eglinfo`，`series.sh` 走 `glxinfo` 取渲染器名，正常。
+- **还没测：** GT 730、GTX 660、GTX 680（都要 470，而且要 `.spv`）。
+
 ### 2026-11-02 同一台 Z97 换 CPU：i7-4770 + 核显 HD 4600，29 项；流体同样超过 GPU 心跳时限
 
 - **机器：** Core i7-4770（Haswell，型号 60、步进 3，四核八线程，3.4 GHz，最高 3.9 GHz，L3 8 MB），核显 HD Graphics 4600（HSW GT2，`i915`，Mesa 26.0.8：Vulkan 1.2、OpenGL 4.6、ES 3.2）。内存同 i3 那节（四条 4 GB，16 GB，DDR3-1600 双通道）。GNOME，HDMI-2，1080p 120 Hz。遥测 609 个有效频率样本，最高 1250 MHz。
@@ -1865,7 +1898,7 @@ PathService 已把 results/captures/reports/logs 改到
   - OpenGL 粒子走已有的 Mesa Intel 墙钟分支。65K 的 4～6 GB/s 大部分是等待开销（推测），不要参考；65K、1M 和 4M 无窗口都没有稳定窗口，波动较大。
   - 4M 的两个 Vulkan 数不是同一轮：20.47 在挂起之前，25.71 在重启之后，差多少来自重启没验证。
 - **GPU 挂起，只出现一次：** 第一轮第 7 项（Vulkan 无窗口 4M）刚启动就开始，开机后约 346 秒：`GPU HANG: ecode 8:0:00000000`、`Resetting rcs0 for stopped heartbeat`，每 3 秒一次，gnome-shell 也出现 fence 超时。程序卡在 hasvk 的 ioctl 里，还没创建粒子缓冲。结束第 7、8 项后仍继续，只能重启。重启后同一项正常，其余 21 项 0 次挂起，所以是偶发的，原因没查。错误状态存在测试机 `~/p6300-gpu-error.txt`、`~/p6300-hang-dmesg.txt`，第一轮第 8 项没有成绩，已在第二轮补跑。
-- **同一天的 9500 GT，没测：** 第一次开机链路 x0、总线上没有设备（`PresDet+`），用户重新处理后识别为 G96C（`10de:0640`，子系统 `106b:00b3`，苹果版），5 GT/s x16。官方驱动只有 340，放进重装 20.04 的计划，和 GT 120 同代。
+- **同一天的另一张卡，当时没测：** 第一次开机链路 x0、总线上没有设备（`PresDet+`），用户重新处理后识别为 G96C（`10de:0640`，子系统 `106b:00b3`，苹果版），5 GT/s x16。我当时按 `lspci` 叫它 9500 GT，其实就是 GT 120，见上面重装 20.04 那节。
 
 ### 2026-11-02 同一台 Z97 换 Radeon HD 5770：PCIe 只有 x1，GNOME 下 OpenGL 和 ES 2.0 共 15 项
 
