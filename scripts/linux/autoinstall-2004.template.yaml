@@ -1,0 +1,66 @@
+# Unattended install of an Ubuntu 20.04 LTS test machine from the live-server ISO
+# (ubuntu-20.04.6-live-server-amd64.iso), for GPUs whose last NVIDIA driver is
+# 340, 390 or 470: Tesla, Fermi, Kepler. Those need an X.org GNOME session and
+# an older kernel; 26.04 stays the system for everything else.
+# After the first boot, over SSH: scripts/linux/setup-focal.sh
+# The installer on this ISO is older than the one autoinstall.template.yaml was
+# written for, so this file uses only keys it knows and stays on the ISO's
+# installer. No glslc, and CMake 3.16 only: setup-focal.sh and docs/building.md.
+# scripts/linux/make-autoinstall.ps1 -Focal fills in the SSH key and writes
+# user-data and meta-data; the password hash is added by hand (openssl passwd -6)
+# and never committed. Both files go to the root of the USB stick, and grub.cfg
+# gets  autoinstall ds=nocloud\;s=/cdrom/  on its install line (docs/building.md).
+# WARNING: wipes /dev/nvme0n1 and needs UEFI. Change the path for another machine.
+autoinstall:
+  version: 1
+  refresh-installer:
+    update: no
+  locale: en_AU.UTF-8
+  keyboard:
+    layout: us
+  identity:
+    realname: Mangekyo
+    hostname: mk-new
+    username: fairchild
+    password: "__PASSWORD_HASH__"
+  ssh:
+    install-server: true
+    allow-pw: false
+    authorized-keys:
+      - "__SSH_PUBLIC_KEY__"
+  # The disk by name: "largest" could pick a big USB stick (a 2 TB one here).
+  storage:
+    config:
+      - {id: disk0, type: disk, ptable: gpt, path: /dev/nvme0n1, wipe: superblock-recursive, preserve: false, grub_device: false}
+      - {id: efi-part, type: partition, device: disk0, number: 1, size: 512M, flag: boot, grub_device: true, wipe: superblock, preserve: false}
+      - {id: efi-fmt, type: format, volume: efi-part, fstype: fat32, preserve: false}
+      - {id: root-part, type: partition, device: disk0, number: 2, size: -1, wipe: superblock, preserve: false}
+      - {id: root-fmt, type: format, volume: root-part, fstype: ext4, preserve: false}
+      - {id: root-mnt, type: mount, device: root-fmt, path: /}
+      - {id: efi-mnt, type: mount, device: efi-fmt, path: /boot/efi}
+  apt:
+    geoip: false
+    primary:
+      - arches: [default]
+        uri: http://au.archive.ubuntu.com/ubuntu
+  late-commands:
+    # mk-xxxxxx.local must answer before setup-focal.sh runs. May fail without a
+    # network, which leaves a working system reached by its IP address.
+    - curtin in-target -- sh -c 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y avahi-daemon' || true
+    # Passwordless sudo for the test user, so the PC can drive the machine.
+    - echo 'fairchild ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/90-mangekyo
+    - chmod 440 /target/etc/sudoers.d/90-mangekyo
+    # Never sleep: a suspended machine cannot be reached over SSH.
+    - curtin in-target -- systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target || true
+    - curtin in-target -- ln -sf /usr/share/zoneinfo/Australia/Sydney /etc/localtime || true
+    # A name of its own, from the last 6 digits of the wired MAC: mk-xxxxxx.local
+    - |
+      dev=$(ip route show default | awk '{print $5; exit}')
+      [ -n "$dev" ] || dev=$(ls /sys/class/net | grep -v -E '^(lo|sit|ip6tnl|can|docker|virbr)' | head -1)
+      mac=$(tr -d ':' < /sys/class/net/$dev/address 2>/dev/null)
+      if [ -n "$mac" ]; then
+        host="mk-${mac#??????}"
+        echo "$host" > /target/etc/hostname
+        sed -i "s/mk-new/$host/g" /target/etc/hosts
+      fi
+      true

@@ -20,17 +20,26 @@
     The Wi-Fi interface, as the installer names it (`ip -br link` in its
     shell). systemd-networkd, which the installer uses, accepts Wi-Fi only by
     interface name, not by a match. Default wlp5s0 (the Phytium D2000 board).
+
+.PARAMETER Focal
+    Writes out\linux-autoinstall\focal\user-data and meta-data for an Ubuntu 20.04
+    test machine instead (autoinstall-2004.template.yaml). Both go to the root of
+    the USB stick written from the 20.04 live-server ISO. Takes the password hash
+    from an earlier autoinstall.yaml if there is one. Not with -Wifi.
 #>
 param(
     [string]$PublicKey = (Join-Path $env:USERPROFILE ".ssh\id_ed25519.pub"),
     [switch]$Wifi,
-    [string]$WifiInterface = "wlp5s0"
+    [string]$WifiInterface = "wlp5s0",
+    [switch]$Focal
 )
 $ErrorActionPreference = "Stop"
+if ($Focal -and $Wifi) { throw "-Focal does not support -Wifi" }
 $repo = Split-Path (Split-Path $PSScriptRoot)
 $key = (Get-Content $PublicKey -Raw).Trim()
 if ($key -notmatch '^ssh-(ed25519|rsa) ') { throw "$PublicKey does not look like an SSH public key" }
-$template = Get-Content (Join-Path $PSScriptRoot "autoinstall.template.yaml") -Raw
+$templateName = if ($Focal) { "autoinstall-2004.template.yaml" } else { "autoinstall.template.yaml" }
+$template = Get-Content (Join-Path $PSScriptRoot $templateName) -Raw
 $outDir = Join-Path $repo "out\linux-autoinstall"
 New-Item -ItemType Directory -Force $outDir | Out-Null
 $out = Join-Path $outDir "autoinstall.yaml"
@@ -76,7 +85,17 @@ if ($Wifi) {
     $text = $text.Replace(" avahi-daemon ", " avahi-daemon wpasupplicant ")
 }
 
-[IO.File]::WriteAllText($out, $text.Replace("`r`n", "`n"), (New-Object Text.UTF8Encoding $false))
+$utf8 = New-Object Text.UTF8Encoding $false
+if ($Focal) {
+    # This ISO's installer takes a NoCloud seed from the stick (see the template).
+    $focalDir = Join-Path $outDir "focal"
+    New-Item -ItemType Directory -Force $focalDir | Out-Null
+    $out = Join-Path $focalDir "user-data"
+    [IO.File]::WriteAllText($out, "#cloud-config`n" + $text.Replace("`r`n", "`n"), $utf8)
+    [IO.File]::WriteAllText((Join-Path $focalDir "meta-data"), "", $utf8)
+} else {
+    [IO.File]::WriteAllText($out, $text.Replace("`r`n", "`n"), $utf8)
+}
 Write-Host "Wrote $out"
 if ($hashKept) { Write-Host "The password hash of the earlier file was kept." }
 else { Write-Host "Next: replace __PASSWORD_HASH__ with the output of 'openssl passwd -6' (Git Bash)." }

@@ -375,6 +375,43 @@ machine, send the source with `-BuildOnly`, then run
 - On 7.0 the driver has no framebuffer console of its own (the fbdev helpers
   it used are gone); the desktop drives the screen through KMS.
 
+### x86-64 test machines for old NVIDIA cards (Ubuntu 20.04)
+
+> **Verification status:** run once on an ASUS Z97 (2026-11-02); GTX 570 on 390.157
+> and GT 120 on 340.108 under GNOME on X.org, 470 not yet. The install needed the
+> repair in step 4, which the template does not avoid.
+
+NVIDIA's drivers for Tesla (340), Fermi (390) and Kepler (470) cards are real
+packages on Ubuntu 20.04. On 22.04 `nvidia-340` only installs nouveau; 24.04 has no
+390; 26.04 has neither and no 470. 20.04's standard maintenance ended in May 2025,
+so this is a system for a test machine only.
+
+1. Write `ubuntu-20.04.6-live-server-amd64.iso` to a USB stick (Rufus, ISO mode).
+2. Run `scripts\linux\make-autoinstall.ps1 -Focal`, put the password hash in
+   place of `__PASSWORD_HASH__` if it is still there, and copy
+   `out\linux-autoinstall\focal\user-data` and `meta-data` to the root of the stick.
+3. On the stick, add `autoinstall ds=nocloud\;s=/cdrom/` to the `linux` line of the
+   first entry in `boot\grub\grub.cfg`, before the `---`. Booting it **wipes
+   `/dev/nvme0n1`** (UEFI boot; the path is in the template, change it for another
+   machine). Copy anything still needed off the machine first.
+4. The install ends in `An error occurred. Press enter to start a shell`: the
+   security-update step exits 1 although the updates are in (`ubuntu-pro-client` has a
+   conffile prompt). Everything after it is skipped: the template's `late-commands`, and
+   `/etc/apt/sources.list` stays on `file:///cdrom`. The system itself is fine. In that
+   shell run `echo 'fairchild ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/90; sync; reboot`
+   and pull the stick. Over SSH by IP address, then write the mirror into `sources.list`,
+   `apt-get update`, install `avahi-daemon`, `hostnamectl set-hostname mk-xxxxxx`, mask the
+   sleep targets, set the time zone and `touch /etc/cloud/cloud-init.disabled`.
+5. The host key changes, so remove the old one on the PC
+   (`ssh-keygen -R mk-xxxxxx.local`), then
+   `ssh fairchild@mk-xxxxxx.local 'sh -s' < scripts/linux/setup-focal.sh`. It adds
+   CMake from pip, GNOME on X.org with an automatic login, and holds the 5.4 kernel.
+6. Install the card's driver: `nvidia-340`, `nvidia-driver-390` or `nvidia-driver-470`.
+   To change it, `apt-get purge 'nvidia-*' 'libnvidia-*'` first, and reboot afterwards.
+   OpenGL 3.3 cards (340) run only the ES 2.0 test.
+7. `glslc` is not packaged, so copy the `*.spv` files of a Windows build into
+   `~/mangekyo/build/` after the first build (see the Jetson section above).
+
 ### Resizable BAR on a board without it (Arc A380 on an ASUS Z97)
 
 An Arc on a Z97 board comes up with a 256 MB BAR, and i915 reports `Can't resize
