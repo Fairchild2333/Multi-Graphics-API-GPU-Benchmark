@@ -39,19 +39,34 @@ gpu_mhz() {
         [ -r "$f" ] && { echo "$(cat "$f") - -"; return; }
     done
     for f in /sys/class/drm/card*/device/pp_dpm_sclk; do
-        [ -r "$f" ] && { echo "$(grep '\*' "$f" | awk '{print $2}' | tr -dc '0-9') - -"; return; }
+        [ -r "$f" ] || continue
+        t=-; w=-
+        for h in "${f%/*}"/hwmon/hwmon*; do
+            [ -r "$h/temp1_input" ] && t=$(($(cat "$h/temp1_input") / 1000))
+            for p in "$h/power1_average" "$h/power1_input"; do
+                [ -r "$p" ] && w=$(awk '{printf "%.1f", $1 / 1000000}' "$p") && break
+            done
+        done
+        echo "$(grep '\*' "$f" | awk '{print $2}' | tr -dc '0-9') $t $w"
+        return
     done
     echo "- - -"
 }
 cpu_temp() {
     t=$(cat /sys/class/thermal/thermal_zone*/temp 2>/dev/null | sort -n | tail -1)
+    # A Hygon C86 has no thermal zone; k10temp has the die temperature.
+    if [ -z "$t" ]; then
+        for h in /sys/class/hwmon/hwmon*; do
+            [ "$(cat "$h/name" 2>/dev/null)" = k10temp ] && t=$(cat "$h/temp1_input") && break
+        done
+    fi
     [ -n "$t" ] && echo $((t / 1000)) || echo -
 }
 telemetry() {
-    echo "time,cpu_temp_c,cpu0_khz,gpu_mhz,gpu_temp_c,gpu_power_w" > "$out/telemetry.csv"
+    echo "time,cpu_temp_c,cpu0_khz,gpu_mhz,gpu_temp_c,gpu_power_w,cpu_max_khz" > "$out/telemetry.csv"
     while :; do
         set -- $(gpu_mhz)
-        echo "$(date +%T),$(cpu_temp),$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq 2>/dev/null || echo -),$1,$2,$3" >> "$out/telemetry.csv"
+        echo "$(date +%T),$(cpu_temp),$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq 2>/dev/null || echo -),$1,$2,$3,$(cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq 2>/dev/null | sort -n | tail -1)" >> "$out/telemetry.csv"
         sleep 2
     done
 }

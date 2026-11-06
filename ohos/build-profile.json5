@@ -1,6 +1,20 @@
 {
   "app": {
-    "signingConfigs": [],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\lzz28\\.ohos\\config\\default_ohos_-mvFO915r2PwVc7vL-bRBbTfwWBArAf-QKBsEQsup10=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001BF381FB4333F3FF07A19A4A02E104F76FC2DE1963B227ADBD6D944599AC72AEBF97FA601688A0B6",
+          "profile": "C:\\Users\\lzz28\\.ohos\\config\\default_ohos_-mvFO915r2PwVc7vL-bRBbTfwWBArAf-QKBsEQsup10=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\lzz28\\.ohos\\config\\default_ohos_-mvFO915r2PwVc7vL-bRBbTfwWBArAf-QKBsEQsup10=.p12",
+          "storePassword": "0000001B4AC98B4D23F6990CBAC6D6365BAAAABD71582FB49AACCCA3D0989E3A7036BA663307F3BAD25A66"
+        }
+      }
+    ],
     "products": [
       {
         "name": "default",
@@ -11,8 +25,12 @@
       }
     ],
     "buildModeSet": [
-      { "name": "debug" },
-      { "name": "release" }
+      {
+        "name": "debug"
+      },
+      {
+        "name": "release"
+      }
     ]
   },
   "modules": [
@@ -20,7 +38,12 @@
       "name": "entry",
       "srcPath": "./entry",
       "targets": [
-        { "name": "default", "applyToProducts": ["default"] }
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
       ]
     }
   ]
