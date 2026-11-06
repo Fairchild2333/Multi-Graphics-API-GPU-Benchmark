@@ -1,0 +1,15 @@
+01353b7c paciasp   
+01353b80 str       x30, [x18], #8
+01353b84 stp       x29, x30, [sp, #-0x10]!
+01353b88 mov       x29, sp
+01353b8c ldr       w8, [x0]
+01353b90 ldr       w1, [x0, #8]
+01353b94 ldr       w2, [x0, #0x10]
+01353b98 ldp       x3, x4, [x0, #0x18]
+01353b9c mov       w0, w8
+01353ba0 bl        #0xffffffc011353bb8 ; __sys_getsockopt
+01353ba4 sxtw      x0, w0
+01353ba8 ldp       x29, x30, [sp], #0x10
+01353bac ldr       x30, [x18, #-8]!
+01353bb0 autiasp   
+01353bb4 ret       

@@ -1,0 +1,2652 @@
+<!DOCTYPE html>
+
+<html lang="zxx">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <!-- bootstrap css -->
+  <link rel="stylesheet" href="/static/fiime/static/css/bootstrap.min.css">
+  <!-- swiper css -->
+  <link rel="stylesheet" href="/static/fiime/static/css/swiper.min.css">
+  <!-- fancybox css -->
+  <link rel="stylesheet" href="/static/fiime/static/css/fancybox.min.css">
+  <!-- font awesome css -->
+  <link rel="stylesheet" href="/static/fiime/static/css/font-awesome.min.css">
+  <!-- nice select css -->
+  <link rel="stylesheet" href="/static/fiime/static/css/nice-select.css">
+  <!-- datepicker css -->
+  <link rel="stylesheet" href="/static/fiime/static/css/datepicker.css">
+  <!-- kinsley css -->
+  <link rel="stylesheet" href="/static/fiime/static/css/style.css">
+  <!-- page title -->
+  <title>小米工厂包(救砖)-黑鲨5Pro解锁包高通基带下载|黑鲨5Pro解锁包基带|高通信号恢复-讨论和详情</title>
+  <meta name="keywords" content="黑鲨5Pro解锁包高通QCN基带|小米QCN|VIVOQCN|三星QCN" />
+  <meta name="description" content="FiimeROM作为一家专业的小米红米原生周边全资源平台，我们提供小米系统的下载、教程和有效资源，小米刷安卓原生系统。" />
+
+<script defer src="/bt-stats.js?site=b01849a5-6035-4bf2-b80c-58970c9e8a9f&version1"></script></head>
+
+<body>
+
+  <!-- page wrapper -->
+  <div class="knsl-app">
+
+    <!-- preloader -->
+    <!--<div class="knsl-preloader-frame">-->
+    <!--  <div class="knsl-preloader">-->
+    <!--    <img src="/static/fiime/static/picture/logo.svg" alt="FiimeROM">-->
+    <!--    <div class="knsl-preloader-progress">-->
+    <!--      <div class="knsl-preloader-bar"></div>-->
+    <!--    </div>-->
+    <!--    <div><span class="knsl-preloader-number" data-count="101">0</span>%</div>-->
+    <!--  </div>-->
+    <!--</div>-->
+    <!-- preloader end -->
+
+    <!-- datepicker frame -->
+    <div class="knsl-datepicker-place"></div>
+	<script>
+// 将下面代码放入前端模板顶部，即可实现刷新页面即推送当前页面URL到百度站长平台
+var httpRequest = new XMLHttpRequest();
+httpRequest.open('GET', '/baidu/puturl?url='+window.location.href, true);
+httpRequest.send();
+httpRequest.onreadystatechange = function () {
+if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+var json = httpRequest.responseText;
+console.log(json);
+}
+};
+</script>
+
+<!-- top bar -->
+<div class="knsl-top-bar">
+    <div class="container" style="height: 50px;">
+        <div class="knsl-left-side">
+            <!-- logo -->
+            <a href="https://mi.fiime.cn" class="knsl-logo-frame">
+                <img src="/static/fiime/static/picture/logo.svg" alt="FiimeROM">
+            </a>
+            <!-- logo end -->
+        </div>
+        <style>
+        .icon {
+            margin-right: -2%;
+        }
+        a {
+            text-decoration: none!important;
+        }
+        </style>
+        <div class="knsl-right-side" style="">
+            <!-- menu -->
+            <div class="knsl-menu">
+                <nav>
+                    <ul>
+                                                                                                        <li class="menu-item-has-children" style="height: 60px;margin-bottom: 20px;">
+                                                                <a class="a1" href="#">MiROM</a>
+                                <ul style="margin-top: -20px;">
+                                    <div class="row">
+                                                                                                                            <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/OriginROM/" target="_blank">原生ROM(编译)</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/redirect" target="_blank">MIUI/HyperOS</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/FiimePlan/" target="_blank">沸米计划(移植)</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/SGSI_GSI/" target="_blank">SGSI/GSI(镜像)</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/enginerom/" target="_blank">小米工厂包(救砖)</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/Android/" target="_blank">原生项目导航</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/fac/" target="_blank">小米出厂ROM</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/Recovery/" target="_blank">Recovery下载</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/kernel/" target="_blank">小米内核(kernel)</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/eurom/" target="_blank">EUROM</a></li>
+                                            </div>
+                                                                                                                                                                                                                                                                                     </div>
+                                </ul>
+                                                            </li>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <li class="menu-item-has-children" style="height: 60px;margin-bottom: 20px;">
+                                                                <a class="a1" href="#">小米周边</a>
+                                <ul style="margin-top: -20px;">
+                                    <div class="row">
+                                                                                                                            <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/modelsearch/" target="_blank">小米型号查询</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/midaihao/" target="_blank">小米代号查询</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/qudong/" target="_blank">手机驱动下载</a></li>
+                                            </div>
+                                                                                                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/APBP/" target="_blank">MTK APBP仓库</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/QCN/" target="_blank">高通基带仓库</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mirom.ezbox.idv.tw/miwifi/" target="_blank">小米路由固件</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/structure/" target="_blank">零件结构图解</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://hyperos.mi.com/font" target="_blank">MiSans小米字体</a></li>
+                                            </div>
+                                                                                                                     </div>
+                                </ul>
+                                                            </li>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <li class="menu-item-has-children" style="height: 60px;margin-bottom: 20px;">
+                                                                <a class="a1" href="#">工具&插件&教程</a>
+                                <ul style="margin-top: -20px;">
+                                    <div class="row">
+                                                                                                                            <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/PCTool/" target="_blank">玩机工具仓库</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/libcangku/" target="_blank">Magisk/脚本仓库</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/MIUIVideo/" target="_blank">MIUI教学视频</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/tutorial/" target="_blank">基础教程</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/Dtech/" target="_blank">达人教程</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://www.pandatest.net/device" target="_blank">Pandatest</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://i.mi.com/find/device/activationlock#/status?_k=t0i8jx" target="_blank">查找手机状态</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/flash" target="_blank">Fiime在线刷机</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/Gapps/" target="_blank">Gapps服务</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/GoogleApp/" target="_blank">Store App提取</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://kernelsu.org/zh_CN/" target="_blank">KernelSU</a></li>
+                                            </div>
+                                                                                                                     </div>
+                                </ul>
+                                                            </li>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <li class="menu-item-has-children" style="height: 60px;margin-bottom: 20px;">
+                                                                <a class="a1" href="#">关于Fiime</a>
+                                <ul style="margin-top: -20px;">
+                                    <div class="row">
+                                                                                                                            <div class="col-6 col-md-6">
+                                                <li><a href="https://wj.qq.com/s2/10595060/9bba/" target="_blank">原生ROM提交</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/quanrom" target="_blank">数据更新</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/About_Fiime/" target="_blank">关于&赞助</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/fuwu/" target="_blank">服务市场</a></li>
+                                            </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/jifen_pack/" target="_blank">积分包</a></li>
+                                            </div>
+                                                                                                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><a href="https://mi.fiime.cn/ordersid/" target="_blank">订单核销</a></li>
+                                            </div>
+                                                                                                                     </div>
+                                </ul>
+                                                            </li>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <li class="menu-item-has-children" style="height: 60px;margin-bottom: 20px;">
+                                                                <a class="a1" href="https://mi.fiime.cn/#/">更多服务</a>
+                                <ul style="margin-top: -20px;">
+                                    <div class="row">
+                                                                                                                            <div class="col-6 col-md-6">
+                                                <li><img src="/static/upload/2025/11/22/202511224661532dedb6e36.png" style="max-width:25px;margin-top:-5px;margin-right:2px"><a href="https://box.fiime.cn/fiimetool/index.html" target="_blank">FiimeTool</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><img src="/static/upload/2025/11/22/2025112295225906eda2b4f.png" style="max-width:25px;margin-top:-5px;margin-right:2px"><a href="https://mi.fiime.cn/apps" target="_blank">客户端</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><img src="/static/upload/2025/11/22/202511229705905bdfcc52f.png" style="max-width:25px;margin-top:-5px;margin-right:2px"><a href="https://box.fiime.cn/blunlocked/index.html" target="_blank">BL解锁机</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><img src="/static/upload/2025/11/22/20251122442784764f8f0dd.png" style="max-width:25px;margin-top:-5px;margin-right:2px"><a href="https://mi.fiime.cn/QQgroup" target="_blank">QQ群</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><img src="/static/upload/2026/01/06/2026010653133249c42d7f4.png" style="max-width:25px;margin-top:-5px;margin-right:2px"><a href="https://fiime.cn/" target="_blank">产品导航</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><img src="/static/upload/2026/01/31/2026013145319158edeac68.png" style="max-width:25px;margin-top:-5px;margin-right:2px"><a href="https://kit.fiime.cn/" target="_blank">FiimeKit</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><img src="/static/upload/2026/03/11/2026031111133120305562e.png" style="max-width:25px;margin-top:-5px;margin-right:2px"><a href="https://claw.fiime.cn/" target="_blank">FiimeClaw</a></li>
+                                            </div>
+                                                                                                                                                                     <div class="col-6 col-md-6">
+                                                <li><img src="/static/upload/2026/03/21/20260321789753b673d052.jpg" style="max-width:25px;margin-top:-5px;margin-right:2px"><a href="https://os.fiime.cn/" target="_blank">Fiime原生引擎</a></li>
+                                            </div>
+                                                                                                                     </div>
+                                </ul>
+                                                            </li>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <li class="menu-item-has-children" style="height: 60px;margin-bottom: 20px;">
+                                                                <a class="a1" style="pointer-events: auto;" href="/quarkrom">MIUI下载</a>
+                                                            </li>
+                                                                                                                                                                                                                                                                                                                                                    
+                        
+                                                    <li class="menu-item-has-children1"><a href="/quantime" target="_blank"><img src="https://mi.fiime.cn/img/社区.png" style="max-width:25px;margin-top:-5px;margin-right:2px">圈子</a></li>
+                            <li class="menu-item-has-children1"><a href="https://mi.fiime.cn/huiyuan" target="_blank"><img src="https://mi.fiime.cn/img/会员.png" style="max-width:25px;margin-top:-5px;margin-right:2px">会员</a></li>
+                                                
+                        
+                        
+                                                                                <li class="menu-item-has-children1"><a href="https://chatbot.weixin.qq.com/webapp/LK0TtGbsnXflB0Oj9XIdlLPzIZ8EIn?robotName=FiimeROM" target="_blank"><img src="https://mi.fiime.cn/img/微信客服.png" style="max-width:20px;margin-top:-5px;margin-right:2px">客服</a></li>
+                            
+                            <style>
+                            /* 3. 样式 */
+                            .vip-link{ position:relative; display:inline-block; }
+                            .vip-popup{
+                              position:absolute;
+                              left:50%; top:100%;        /* 放在图标正下方，可自行调 */
+                              transform:translateX(-50%);
+                              margin-top:8px;
+                              opacity:0;
+                              visibility:hidden;
+                              transition:opacity .25s .1s, visibility .25s .1s; /* 延迟一点更跟手 */
+                              pointer-events:none;       /* 防止遮挡 */
+                              z-index:999;
+                            }
+                            .vip-popup img{ display:block; width:180px; } /* 弹出图尺寸按需改 */
+                            
+                            /* 4. 关键：悬浮触发 */
+                            .vip-link:hover .vip-popup{
+                              opacity:1;
+                              visibility:visible;
+                            }
+                            </style>
+                            
+                            
+                        
+                                                <li><a href="https://mi.fiime.cn/login/index.html">登录/注册</a></li>
+                                            </ul>
+                </nav>
+            </div>
+            <script>
+            function copyApiKey(apiKey) {
+                // 使用 navigator.clipboard API 复制文本
+                navigator.clipboard.writeText(apiKey).then(() => {
+                    alert('API密钥已复制到剪贴板！');
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                    alert('复制失败，请手动复制API密钥。');
+                });
+            }
+            </script>
+            <style type="text/css" media="all">
+                .fixa{
+                    width: 42%!important;
+                    margin-left:-25%;
+                }
+                @media screen and (min-width:100px) and (max-width:990px){
+                    .fixa { 
+                        margin-left:-5%;
+                    }
+                }
+                @media (min-width: 768px){
+                    .col-md-6 {
+                        -ms-flex: 0 0 50%;
+                        flex: 0 0 50%;
+                        max-width: 45%;
+                    }
+                }
+            </style>
+        </div>
+        <!-- menu button -->
+        <div class="knsl-menu-btn"><span></span></div>
+        <!-- menu button end -->
+    </div>
+</div>
+<!-- top bar end -->
+
+
+
+
+
+
+    <!-- banner -->
+    <section class="knsl-banner-simple knsl-transition-bottom">
+      
+      
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+
+            <div class="knsl-center knsl-title-frame">
+                  <h2 class="knsl-mb-30 knsl-h1-inner">黑鲨5Pro解锁包工程包 <br>详情及下载</h2>
+              <ul class="knsl-breadcrumbs">
+                <li><a href="/">FimeROM</a></li>
+                <li><a href="https://mi.fiime.cn/enginerom">小米工程包</a></li>
+                <li><span>黑鲨5Pro解锁包</span></li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- banner end -->
+
+    <div class="knsl-p-100-100">
+            <div class="container" id="rows">
+                <div class="row" data-sticky-container="">
+                    <div class="col-lg-6">
+            <!--ROM的参数信息-->
+            <div class="knsl-blog-post knsl-mb-60">
+            <div class="row">
+                <div class="col-lg-7">
+                  <img src="/static/upload/2022/12/01/202212018097.jpg" alt="cover" class="knsl-default-img knsl-mb-40">
+                </div>
+                <div class="col-lg-5">
+                    <div style="background-color:red">
+<img id="popopop" src="https://mi.fiime.cn/common/qrcode?data=https://mi.fiime.cn/enginerom/62.html" style="max-width:57px;float:left;margin-left: -80px;margin-top: 5px;" title="使用手机APP扫码访问">
+</div>
+
+<style>
+@media screen and (max-width:999px) {
+    #popopop {
+        display: none;
+    }
+}
+</style>
+                  <p class="knsl-mb-40">相关参数</p>
+                      <blockquote class="knsl-left knsl-mb-40" style="font-size:14px">
+                            时间:2023/01/04                            <br>适用代号:BlackShark5Pro                            <br>适用机型:黑鲨5Pro解锁包                            <br>文件类型:                            <br>文件大小:11 GB
+                            <br>资源ID:ENG 62                            <br>刷写工具:<a href="https://www.123pan.com/s/iAQ9-tzfZ3" target="_blank">MiFlash下载</a>
+                            <br>已通过Malwarebytes Premium<br>隐私检测&杀毒检测
+                            <br>作者:互联网收集 
+                            <br>发布:2023/01/04                      </blockquote>
+                </div>
+              </div>
+            </div>
+            <!--ROM的相关附带属性-->
+            <div class="knsl-blog-post knsl-mb-60">
+              <p class="knsl-mb-40">资源日志</p>
+              <blockquote class="knsl-left" style="font-size:14px">
+                工程包是用于设备生产阶段的纯安卓软件，制造商使用它来测试设备并在生产阶段进行性能测量， 这些软件不包含任何保护。 该软件的目的是用于重置无法加载或遇到错误，未解锁bootloader，包含mi帐户但密码未知的设备。简单来说工程包就是开端口的作用，完了你就可以在这个ROM下写入你想要的IMEI SN或者其他数据信息<br>
+                <br>下载之后您可以通过MiFlash 9008(edl模式)/MTK深刷模式将Rom 安装到设备中。
+                <br>可用于修复基带，9008模式/MTK深刷模式救砖，格机后重新安装系统 
+                <br>
+                <br>备注：
+                <br>工程包允许您修复由格机带来的基带丢失,nv损坏,字库丢失等问题修复<br><font color="red">此操作极具破坏性，请在专业人士指导下操作，否则可能只能去售后！<br>本服务仅提供下载，并不包含后续刷机指导和操作</font>
+                <br>内含两个版本包
+Black.shark5Pro_ V13.22.05.25_ KTUS2205250CN00MP3_ cn.7z
+Black.shark5Pro_ V13.22.07.10_ KTUS2207100CN0OMP4_ MIUI CN.7z              </blockquote>
+              <p class="knsl-mb-40">刷写教程<br> <b>刷写工具:</b><a href="https://www.123pan.com/s/iAQ9-tzfZ3" target="_blank"><font color="red">Miflash下载</font></a></p>
+             
+              <blockquote class="knsl-left knsl-mb-40" style="font-size:14px">
+                <br>教程链接: <a href="https://zhuanlan.zhihu.com/p/157905342" target="_blank">点我了解9008</a>
+              </blockquote>
+             
+               
+            
+            
+            <p class="knsl-mb-40">下载区域</p>
+                            <div class="row clearfix">
+                    <div class="col-md-12 column">
+                        <div class="alert alert-success alert-dismissable">
+                            <strong>捐赠高速下载声明:</strong><br>1.高速下载是FiimeROM下载站点提供的国内分流镜像渠道,为无法通过原始通道下载的,提供便利，该服务不额外提供刷机等服务,与原作者无关.<br>2.如若您是作者,或者侵犯了您的权益,欢迎邮件741500926@qq.com进行下架处理!<br>3.关于捐赠,捐赠后此资源永久享受高速下载模式,费用用作网站运作,宽带与储存,感谢大家理解!<br>4.如果速度不理想联系QQ741500926<br>
+                            <font color="red">5.订单付款后未到账，前往自助核销<a href="https://mi.fiime.cn/ordersid" target="_blank"> 点我进入核销系统</a></font>
+                        </div>
+                    </div>
+                </div>
+                                
+                <div id="ca-pub-8044530216256422" style="display:flex">
+                    <!---->
+                    <!--<buttom onclick="window.location.href='https://mi.fiime.cn/login/index.html'" class="knsl-btn" type="button" style="padding: 0 20px;"><img src="/static/fiime/static/picture/下载.svg" alt="icon">登录下载</buttom>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>-->
+                    <!---->
+               
+                                                    <buttom onclick="window.location.href='https://mi.fiime.cn/login/index.html'" class="knsl-btn" id="bt" type="button">高速下载(<samll>20000积分</small>)</buttom>
+                                    
+                            </div></div>
+            <!--加载评论和提交评论-->
+                       <script src="https://box.fiime.cn/ckeditor.js"></script>
+                       <!-- comments -->
+            <section class="knsl-mb-30">
+              <div class="row">
+                <div class="col-lg-12">
+                  <h3 class="knsl-mb-40 knsl-scroll-animation">讨论区(11)</h3>
+                </div>
+                                                    
+                <div class="col-lg-12">
+                  <div class="knsl-review-card knsl-scroll-animation">
+                    <div class="knsl-card-header">
+                      <div class="knsl-name-and-photo">
+                        <div class="knsl-avatar-frame">
+                                                        <a href="/user/active/uid/6435" target="_blank"><img src="http://thirdqq.qlogo.cn/ek_qqapp/AQJE71crx5ZyXELoYViaK6UyjH3nnFwBia0IXictOTibqo0FFfqD71uNFr9lm3DGgYEmb3pnokM54iar1joyKzN1tlVHagJDm0nCYh2cJzRKw7GXaBEIsVHfkpxLsibFEGOQ/100" alt="Avatar"></a>
+                                                    </div>
+                        <div>
+                          <h5>小小萌先生(ID:6435) 
+                                                                              
+                                                                              
+                                                                                      <a href="mailto:3211766572@qq.com" target="_blank"><img style="height:24px;margin-top:-4px;" title="发送邮件3211766572@qq.com" src="/static/fiime//邮箱.png"></a>
+                                                                                  
+                              
+                                                    </h5>
+                                                    <div>
+                                                                <span>📱 暂未设置设备 <a href="https://mi.fiime.cn/user/userinfo.html" target="_blank"><font color="blue">立即绑定</font></a></span>
+                                  <span>💗 用户组:会员</span>
+                                                                                          </div>
+                          <span>时间:2023-09-26 15:09:02</span>
+                          <span>来源:49.93.198.196</span>
+                        </div>
+                      </div>
+                      <!--评论星星-->
+                      <!---->
+                      <!--    -->
+                      <!--    <ul id="opstar" class="knsl-stars" title="哎呦~你干嘛">-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li class="knsl-empty"><i class="fas fa-star"></i></li>-->
+                      <!--    </ul>-->
+                      <!--    -->
+                      <!---->
+                    </div>
+                    
+                      <style type="text/css" media="all">
+                          
+                          @media screen and (min-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:9%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                              }
+                              
+                          }
+                          @media screen and (max-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:0%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:25%
+                              }
+                              
+                          }
+                      </style>
+                    <blockquote>
+                      <p>200块钱太贵了吧!</p>                    </blockquote>
+                    <style>
+                    #xx_xx{
+                        padding-top: 10%;
+                        margin-bottom: -8%;
+                    }
+                    </style>
+                    
+                                                    <div id="xx_xx">
+                            <button id="btnat" onclick="window.location.href='https://mi.fiime.cn/login/index.html'">😊 登录并回复</button><button id="btnpost" onclick="window.location.href='/Jubao/topic?url=https://mi.fiime.cn/enginerom/62.html&title=黑鲨5Pro解锁包&neirong=&lt;p&gt;200块钱太贵了吧!&lt;/p&gt;||被举报ID:6435&jubao=()'">🗑️ 举报</button>
+                            </div>
+                                             
+                    </div>
+                    
+                </div>
+                                                                
+                <div class="col-lg-12">
+                  <div class="knsl-review-card knsl-scroll-animation">
+                    <div class="knsl-card-header">
+                      <div class="knsl-name-and-photo">
+                        <div class="knsl-avatar-frame">
+                                                        <a href="/user/active/uid/5" target="_blank"><img src="/static/upload/2022/04/12/202204124791.png" alt="Avatar"></a>
+                                                    </div>
+                        <div>
+                          <h5>joscy41245(ID:5) 
+                          <img style="height:25px;margin-top:-7px;" title="永久会员勋章" src="/static/fiime//会员on.png">
+                                                    
+                          <img style="height:25px;margin-top:-6px;" title="管理员勋章" src="/static/fiime//管理员.png">
+                                                    
+                                                                                      <a href="mailto:896458447@qq.com" target="_blank"><img style="height:24px;margin-top:-4px;" title="发送邮件896458447@qq.com" src="/static/fiime//邮箱.png"></a>
+                                                                                  
+                              
+                                                    </h5>
+                                                    <div>
+                                                                <span>📱 <a href="https://mi.fiime.cn/myphone" target="_blank" title="你终于找到我了！"><font color="red">小米14(houji)</font></a></span>
+                                  <span>💗 用户组:永久会员</span>
+                                                                                          </div>
+                          <span>时间:2023-09-26 16:09:30</span>
+                          <span>来源:106.87.41.26</span>
+                        </div>
+                      </div>
+                      <!--评论星星-->
+                      <!---->
+                      <!--    -->
+                      <!--    <ul id="opstar" class="knsl-stars" title="哎呦~你干嘛">-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li class="knsl-empty"><i class="fas fa-star"></i></li>-->
+                      <!--    </ul>-->
+                      <!--    -->
+                      <!---->
+                    </div>
+                    
+                      <style type="text/css" media="all">
+                          
+                          @media screen and (min-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:9%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                              }
+                              
+                          }
+                          @media screen and (max-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:0%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:25%
+                              }
+                              
+                          }
+                      </style>
+                    <blockquote>
+                      <p> @小小萌先生 &nbsp; 售后的包 价格自然不一般 况且 黑鲨都快倒了</p>                    </blockquote>
+                    <style>
+                    #xx_xx{
+                        padding-top: 10%;
+                        margin-bottom: -8%;
+                    }
+                    </style>
+                    
+                                                    <div id="xx_xx">
+                            <button id="btnat" onclick="window.location.href='https://mi.fiime.cn/login/index.html'">😊 登录并回复</button><button id="btnpost" onclick="window.location.href='/Jubao/topic?url=https://mi.fiime.cn/enginerom/62.html&title=黑鲨5Pro解锁包&neirong=&lt;p&gt; @小小萌先生 &amp;nbsp; 售后的包 价格自然不一般 况且 黑鲨都快倒了&lt;/p&gt;||被举报ID:5&jubao=()'">🗑️ 举报</button>
+                            </div>
+                                             
+                    </div>
+                    
+                </div>
+                                                                
+                <div class="col-lg-12">
+                  <div class="knsl-review-card knsl-scroll-animation">
+                    <div class="knsl-card-header">
+                      <div class="knsl-name-and-photo">
+                        <div class="knsl-avatar-frame">
+                                                        <a href="/user/active/uid/6435" target="_blank"><img src="http://thirdqq.qlogo.cn/ek_qqapp/AQJE71crx5ZyXELoYViaK6UyjH3nnFwBia0IXictOTibqo0FFfqD71uNFr9lm3DGgYEmb3pnokM54iar1joyKzN1tlVHagJDm0nCYh2cJzRKw7GXaBEIsVHfkpxLsibFEGOQ/100" alt="Avatar"></a>
+                                                    </div>
+                        <div>
+                          <h5>小小萌先生(ID:6435) 
+                                                                              
+                                                                              
+                                                                                      <a href="mailto:3211766572@qq.com" target="_blank"><img style="height:24px;margin-top:-4px;" title="发送邮件3211766572@qq.com" src="/static/fiime//邮箱.png"></a>
+                                                                                  
+                              
+                                                    </h5>
+                                                    <div>
+                                                                <span>📱 暂未设置设备 <a href="https://mi.fiime.cn/user/userinfo.html" target="_blank"><font color="blue">立即绑定</font></a></span>
+                                  <span>💗 用户组:会员</span>
+                                                                                          </div>
+                          <span>时间:2023-09-26 17:09:39</span>
+                          <span>来源:49.93.198.196</span>
+                        </div>
+                      </div>
+                      <!--评论星星-->
+                      <!---->
+                      <!--    -->
+                      <!--    <ul id="opstar" class="knsl-stars" title="哎呦~你干嘛">-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li class="knsl-empty"><i class="fas fa-star"></i></li>-->
+                      <!--    </ul>-->
+                      <!--    -->
+                      <!---->
+                    </div>
+                    
+                      <style type="text/css" media="all">
+                          
+                          @media screen and (min-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:9%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                              }
+                              
+                          }
+                          @media screen and (max-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:0%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:25%
+                              }
+                              
+                          }
+                      </style>
+                    <blockquote>
+                      <p> @joscy41245 这价格一般人能买得起？这冷门机器有几个人用并root？</p>                    </blockquote>
+                    <style>
+                    #xx_xx{
+                        padding-top: 10%;
+                        margin-bottom: -8%;
+                    }
+                    </style>
+                    
+                                                    <div id="xx_xx">
+                            <button id="btnat" onclick="window.location.href='https://mi.fiime.cn/login/index.html'">😊 登录并回复</button><button id="btnpost" onclick="window.location.href='/Jubao/topic?url=https://mi.fiime.cn/enginerom/62.html&title=黑鲨5Pro解锁包&neirong=&lt;p&gt; @joscy41245 这价格一般人能买得起？这冷门机器有几个人用并root？&lt;/p&gt;||被举报ID:6435&jubao=()'">🗑️ 举报</button>
+                            </div>
+                                             
+                    </div>
+                    
+                </div>
+                                                                
+                <div class="col-lg-12">
+                  <div class="knsl-review-card knsl-scroll-animation">
+                    <div class="knsl-card-header">
+                      <div class="knsl-name-and-photo">
+                        <div class="knsl-avatar-frame">
+                                                        <a href="/user/active/uid/2" target="_blank"><img src="/static/upload/2025/07/24/2025072415343667f1379a5.jpg" alt="Avatar"></a>
+                                                    </div>
+                        <div>
+                          <h5>奥奥(ID:2) 
+                          <img style="height:25px;margin-top:-7px;" title="永久会员勋章" src="/static/fiime//会员on.png">
+                                                    
+                          <img style="height:25px;margin-top:-6px;" title="管理员勋章" src="/static/fiime//管理员.png">
+                                                    
+                                                                                      <a href="mailto:741500926@qq.com" target="_blank"><img style="height:24px;margin-top:-4px;" title="发送邮件741500926@qq.com" src="/static/fiime//邮箱.png"></a>
+                                                                                  
+                              
+                                                    </h5>
+                                                    <div>
+                                                                <span>📱 <a href="https://mi.fiime.cn/myphone" target="_blank" title="你终于找到我了！"><font color="red">小米10(umi)</font></a></span>
+                                  <span>💗 用户组:永久会员</span>
+                                                                                          </div>
+                          <span>时间:2023-09-26 17:09:51</span>
+                          <span>来源:106.87.41.26</span>
+                        </div>
+                      </div>
+                      <!--评论星星-->
+                      <!---->
+                      <!--    -->
+                      <!--    <ul id="opstar" class="knsl-stars" title="你吼那么大声干什么嘛~">-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--    </ul>-->
+                      <!--    -->
+                      <!---->
+                    </div>
+                    
+                      <style type="text/css" media="all">
+                          
+                          @media screen and (min-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:9%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                              }
+                              
+                          }
+                          @media screen and (max-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:0%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:25%
+                              }
+                              
+                          }
+                      </style>
+                    <blockquote>
+                      <p> @小小萌先生  你去找咸鱼等渠道处理吧 我们这价格就是如此 不在于几个人用</p>                    </blockquote>
+                    <style>
+                    #xx_xx{
+                        padding-top: 10%;
+                        margin-bottom: -8%;
+                    }
+                    </style>
+                    
+                                                    <div id="xx_xx">
+                            <button id="btnat" onclick="window.location.href='https://mi.fiime.cn/login/index.html'">😊 登录并回复</button><button id="btnpost" onclick="window.location.href='/Jubao/topic?url=https://mi.fiime.cn/enginerom/62.html&title=黑鲨5Pro解锁包&neirong=&lt;p&gt; @小小萌先生  你去找咸鱼等渠道处理吧 我们这价格就是如此 不在于几个人用&lt;/p&gt;||被举报ID:2&jubao=()'">🗑️ 举报</button>
+                            </div>
+                                             
+                    </div>
+                    
+                </div>
+                                                                
+                <div class="col-lg-12">
+                  <div class="knsl-review-card knsl-scroll-animation">
+                    <div class="knsl-card-header">
+                      <div class="knsl-name-and-photo">
+                        <div class="knsl-avatar-frame">
+                                                        <a href="/user/active/uid/285466" target="_blank"><img src="http://thirdqq.qlogo.cn/ek_qqapp/AQWLVrYnMwnibvtXIcCBQNYTFznPCZNvTZj8mvo8R7DDqXaCVoFIVicunZmH0ebKhv3MCWKNSlUHwOgSwMaDuiaTuRFvOYAdHzVVxXfqD9gXx3IK7n9bPQ/100" alt="Avatar"></a>
+                                                    </div>
+                        <div>
+                          <h5>Evolution(ID:285466) 
+                                                                              
+                                                                              
+                                                                                      <a href="mailto:mfsocket@qq.com" target="_blank"><img style="height:24px;margin-top:-4px;" title="发送邮件mfsocket@qq.com" src="/static/fiime//邮箱.png"></a>
+                                                                                  
+                              
+                                                    </h5>
+                                                    <div>
+                                                                <span>📱 <a href="https://mi.fiime.cn/myphone" target="_blank" title="你终于找到我了！"><font color="red">小米15(dada)</font></a></span>
+                                  <span>💗 用户组:会员</span>
+                                                                                          </div>
+                          <span>时间:2023-11-30 00:11:15</span>
+                          <span>来源:59.172.114.12</span>
+                        </div>
+                      </div>
+                      <!--评论星星-->
+                      <!---->
+                      <!--    -->
+                      <!--    <ul id="opstar" class="knsl-stars" title="你吼那么大声干什么嘛~">-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--    </ul>-->
+                      <!--    -->
+                      <!---->
+                    </div>
+                    
+                      <style type="text/css" media="all">
+                          
+                          @media screen and (min-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:9%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                              }
+                              
+                          }
+                          @media screen and (max-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:0%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:25%
+                              }
+                              
+                          }
+                      </style>
+                    <blockquote>
+                      <p>黑鲨工程包，好家伙</p>                    </blockquote>
+                    <style>
+                    #xx_xx{
+                        padding-top: 10%;
+                        margin-bottom: -8%;
+                    }
+                    </style>
+                    
+                                                    <div id="xx_xx">
+                            <button id="btnat" onclick="window.location.href='https://mi.fiime.cn/login/index.html'">😊 登录并回复</button><button id="btnpost" onclick="window.location.href='/Jubao/topic?url=https://mi.fiime.cn/enginerom/62.html&title=黑鲨5Pro解锁包&neirong=&lt;p&gt;黑鲨工程包，好家伙&lt;/p&gt;||被举报ID:285466&jubao=()'">🗑️ 举报</button>
+                            </div>
+                                             
+                    </div>
+                    
+                </div>
+                                                                
+                <div class="col-lg-12">
+                  <div class="knsl-review-card knsl-scroll-animation">
+                    <div class="knsl-card-header">
+                      <div class="knsl-name-and-photo">
+                        <div class="knsl-avatar-frame">
+                                                        <a href="/user/active/uid/322372" target="_blank"><img src="/无头像.png" alt="Avatar"></a>
+                                                    </div>
+                        <div>
+                          <h5>P49pMX(ID:322372) 
+                                                                              
+                                                                              
+                                                                                      <a href="mailto:350648813@qq.com" target="_blank"><img style="height:24px;margin-top:-4px;" title="发送邮件350648813@qq.com" src="/static/fiime//邮箱.png"></a>
+                                                                                  
+                              
+                                                    </h5>
+                                                    <div>
+                                                                <span>📱 暂未设置设备 <a href="https://mi.fiime.cn/user/userinfo.html" target="_blank"><font color="blue">立即绑定</font></a></span>
+                                  <span>💗 用户组:会员</span>
+                                                                                          </div>
+                          <span>时间:2024-05-16 05:05:51</span>
+                          <span>来源:223.104.84.72</span>
+                        </div>
+                      </div>
+                      <!--评论星星-->
+                      <!---->
+                      <!--    -->
+                      <!--    <ul id="opstar" class="knsl-stars" title="你吼那么大声干什么嘛~">-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--    </ul>-->
+                      <!--    -->
+                      <!---->
+                    </div>
+                    
+                      <style type="text/css" media="all">
+                          
+                          @media screen and (min-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:9%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                              }
+                              
+                          }
+                          @media screen and (max-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:0%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:25%
+                              }
+                              
+                          }
+                      </style>
+                    <blockquote>
+                      <p>第二版刷不好，7.10的版本刷不好，是什么回事</p>                    </blockquote>
+                    <style>
+                    #xx_xx{
+                        padding-top: 10%;
+                        margin-bottom: -8%;
+                    }
+                    </style>
+                    
+                                                    <div id="xx_xx">
+                            <button id="btnat" onclick="window.location.href='https://mi.fiime.cn/login/index.html'">😊 登录并回复</button><button id="btnpost" onclick="window.location.href='/Jubao/topic?url=https://mi.fiime.cn/enginerom/62.html&title=黑鲨5Pro解锁包&neirong=&lt;p&gt;第二版刷不好，7.10的版本刷不好，是什么回事&lt;/p&gt;||被举报ID:322372&jubao=()'">🗑️ 举报</button>
+                            </div>
+                                             
+                    </div>
+                    
+                </div>
+                                                                
+                <div class="col-lg-12">
+                  <div class="knsl-review-card knsl-scroll-animation">
+                    <div class="knsl-card-header">
+                      <div class="knsl-name-and-photo">
+                        <div class="knsl-avatar-frame">
+                                                        <a href="/user/active/uid/2" target="_blank"><img src="/static/upload/2025/07/24/2025072415343667f1379a5.jpg" alt="Avatar"></a>
+                                                    </div>
+                        <div>
+                          <h5>奥奥(ID:2) 
+                          <img style="height:25px;margin-top:-7px;" title="永久会员勋章" src="/static/fiime//会员on.png">
+                                                    
+                          <img style="height:25px;margin-top:-6px;" title="管理员勋章" src="/static/fiime//管理员.png">
+                                                    
+                                                                                      <a href="mailto:741500926@qq.com" target="_blank"><img style="height:24px;margin-top:-4px;" title="发送邮件741500926@qq.com" src="/static/fiime//邮箱.png"></a>
+                                                                                  
+                              
+                                                    </h5>
+                                                    <div>
+                                                                <span>📱 <a href="https://mi.fiime.cn/myphone" target="_blank" title="你终于找到我了！"><font color="red">小米10(umi)</font></a></span>
+                                  <span>💗 用户组:永久会员</span>
+                                                                                          </div>
+                          <span>时间:2024-05-16 07:05:58</span>
+                          <span>来源:113.251.23.30</span>
+                        </div>
+                      </div>
+                      <!--评论星星-->
+                      <!---->
+                      <!--    -->
+                      <!--    <ul id="opstar" class="knsl-stars" title="你吼那么大声干什么嘛~">-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--    </ul>-->
+                      <!--    -->
+                      <!---->
+                    </div>
+                    
+                      <style type="text/css" media="all">
+                          
+                          @media screen and (min-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:9%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                              }
+                              
+                          }
+                          @media screen and (max-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:0%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:25%
+                              }
+                              
+                          }
+                      </style>
+                    <blockquote>
+                      <p> @P49pMX  具体检查吧 刷机方案没有什么不同 看报错反馈问题</p>                    </blockquote>
+                    <style>
+                    #xx_xx{
+                        padding-top: 10%;
+                        margin-bottom: -8%;
+                    }
+                    </style>
+                    
+                                                    <div id="xx_xx">
+                            <button id="btnat" onclick="window.location.href='https://mi.fiime.cn/login/index.html'">😊 登录并回复</button><button id="btnpost" onclick="window.location.href='/Jubao/topic?url=https://mi.fiime.cn/enginerom/62.html&title=黑鲨5Pro解锁包&neirong=&lt;p&gt; @P49pMX  具体检查吧 刷机方案没有什么不同 看报错反馈问题&lt;/p&gt;||被举报ID:2&jubao=()'">🗑️ 举报</button>
+                            </div>
+                                             
+                    </div>
+                    
+                </div>
+                                                                
+                <div class="col-lg-12">
+                  <div class="knsl-review-card knsl-scroll-animation">
+                    <div class="knsl-card-header">
+                      <div class="knsl-name-and-photo">
+                        <div class="knsl-avatar-frame">
+                                                        <a href="/user/active/uid/322372" target="_blank"><img src="/无头像.png" alt="Avatar"></a>
+                                                    </div>
+                        <div>
+                          <h5>P49pMX(ID:322372) 
+                                                                              
+                                                                              
+                                                                                      <a href="mailto:350648813@qq.com" target="_blank"><img style="height:24px;margin-top:-4px;" title="发送邮件350648813@qq.com" src="/static/fiime//邮箱.png"></a>
+                                                                                  
+                              
+                                                    </h5>
+                                                    <div>
+                                                                <span>📱 暂未设置设备 <a href="https://mi.fiime.cn/user/userinfo.html" target="_blank"><font color="blue">立即绑定</font></a></span>
+                                  <span>💗 用户组:会员</span>
+                                                                                          </div>
+                          <span>时间:2024-05-17 02:05:50</span>
+                          <span>来源:223.104.81.24</span>
+                        </div>
+                      </div>
+                      <!--评论星星-->
+                      <!---->
+                      <!--    -->
+                      <!--    <ul id="opstar" class="knsl-stars" title="你吼那么大声干什么嘛~">-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--    </ul>-->
+                      <!--    -->
+                      <!---->
+                    </div>
+                    
+                      <style type="text/css" media="all">
+                          
+                          @media screen and (min-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:9%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                              }
+                              
+                          }
+                          @media screen and (max-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:0%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:25%
+                              }
+                              
+                          }
+                      </style>
+                    <blockquote>
+                      <p>刷了就无限重启，第一个可以，你测试一下</p>                    </blockquote>
+                    <style>
+                    #xx_xx{
+                        padding-top: 10%;
+                        margin-bottom: -8%;
+                    }
+                    </style>
+                    
+                                                    <div id="xx_xx">
+                            <button id="btnat" onclick="window.location.href='https://mi.fiime.cn/login/index.html'">😊 登录并回复</button><button id="btnpost" onclick="window.location.href='/Jubao/topic?url=https://mi.fiime.cn/enginerom/62.html&title=黑鲨5Pro解锁包&neirong=&lt;p&gt;刷了就无限重启，第一个可以，你测试一下&lt;/p&gt;||被举报ID:322372&jubao=()'">🗑️ 举报</button>
+                            </div>
+                                             
+                    </div>
+                    
+                </div>
+                                                                
+                <div class="col-lg-12">
+                  <div class="knsl-review-card knsl-scroll-animation">
+                    <div class="knsl-card-header">
+                      <div class="knsl-name-and-photo">
+                        <div class="knsl-avatar-frame">
+                                                        <a href="/user/active/uid/2" target="_blank"><img src="/static/upload/2025/07/24/2025072415343667f1379a5.jpg" alt="Avatar"></a>
+                                                    </div>
+                        <div>
+                          <h5>奥奥(ID:2) 
+                          <img style="height:25px;margin-top:-7px;" title="永久会员勋章" src="/static/fiime//会员on.png">
+                                                    
+                          <img style="height:25px;margin-top:-6px;" title="管理员勋章" src="/static/fiime//管理员.png">
+                                                    
+                                                                                      <a href="mailto:741500926@qq.com" target="_blank"><img style="height:24px;margin-top:-4px;" title="发送邮件741500926@qq.com" src="/static/fiime//邮箱.png"></a>
+                                                                                  
+                              
+                                                    </h5>
+                                                    <div>
+                                                                <span>📱 <a href="https://mi.fiime.cn/myphone" target="_blank" title="你终于找到我了！"><font color="red">小米10(umi)</font></a></span>
+                                  <span>💗 用户组:永久会员</span>
+                                                                                          </div>
+                          <span>时间:2024-05-17 07:05:09</span>
+                          <span>来源:123.147.249.66</span>
+                        </div>
+                      </div>
+                      <!--评论星星-->
+                      <!---->
+                      <!--    -->
+                      <!--    <ul id="opstar" class="knsl-stars" title="你吼那么大声干什么嘛~">-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--    </ul>-->
+                      <!--    -->
+                      <!---->
+                    </div>
+                    
+                      <style type="text/css" media="all">
+                          
+                          @media screen and (min-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:9%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                              }
+                              
+                          }
+                          @media screen and (max-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:0%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:25%
+                              }
+                              
+                          }
+                      </style>
+                    <blockquote>
+                      <p> @P49pMX  这包都是测试过的包，不存在无法开机的哦，可能是某些情况导致的，看你说的情况是刷机没有错误，开机无限重启，建议格式化data尝试下，或者执行fastboot -w</p>                    </blockquote>
+                    <style>
+                    #xx_xx{
+                        padding-top: 10%;
+                        margin-bottom: -8%;
+                    }
+                    </style>
+                    
+                                                    <div id="xx_xx">
+                            <button id="btnat" onclick="window.location.href='https://mi.fiime.cn/login/index.html'">😊 登录并回复</button><button id="btnpost" onclick="window.location.href='/Jubao/topic?url=https://mi.fiime.cn/enginerom/62.html&title=黑鲨5Pro解锁包&neirong=&lt;p&gt; @P49pMX  这包都是测试过的包，不存在无法开机的哦，可能是某些情况导致的，看你说的情况是刷机没有错误，开机无限重启，建议格式化data尝试下，或者执行fastboot -w&lt;/p&gt;||被举报ID:2&jubao=()'">🗑️ 举报</button>
+                            </div>
+                                             
+                    </div>
+                    
+                </div>
+                                                                
+                <div class="col-lg-12">
+                  <div class="knsl-review-card knsl-scroll-animation">
+                    <div class="knsl-card-header">
+                      <div class="knsl-name-and-photo">
+                        <div class="knsl-avatar-frame">
+                                                        <a href="/user/active/uid/322372" target="_blank"><img src="/无头像.png" alt="Avatar"></a>
+                                                    </div>
+                        <div>
+                          <h5>P49pMX(ID:322372) 
+                                                                              
+                                                                              
+                                                                                      <a href="mailto:350648813@qq.com" target="_blank"><img style="height:24px;margin-top:-4px;" title="发送邮件350648813@qq.com" src="/static/fiime//邮箱.png"></a>
+                                                                                  
+                              
+                                                    </h5>
+                                                    <div>
+                                                                <span>📱 暂未设置设备 <a href="https://mi.fiime.cn/user/userinfo.html" target="_blank"><font color="blue">立即绑定</font></a></span>
+                                  <span>💗 用户组:会员</span>
+                                                                                          </div>
+                          <span>时间:2024-05-19 03:05:49</span>
+                          <span>来源:223.104.81.22</span>
+                        </div>
+                      </div>
+                      <!--评论星星-->
+                      <!---->
+                      <!--    -->
+                      <!--    <ul id="opstar" class="knsl-stars" title="你吼那么大声干什么嘛~">-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--    </ul>-->
+                      <!--    -->
+                      <!---->
+                    </div>
+                    
+                      <style type="text/css" media="all">
+                          
+                          @media screen and (min-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:9%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                              }
+                              
+                          }
+                          @media screen and (max-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:0%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:25%
+                              }
+                              
+                          }
+                      </style>
+                    <blockquote>
+                      <p>在哪格式化data，或者fastboot-w</p>                    </blockquote>
+                    <style>
+                    #xx_xx{
+                        padding-top: 10%;
+                        margin-bottom: -8%;
+                    }
+                    </style>
+                    
+                                                    <div id="xx_xx">
+                            <button id="btnat" onclick="window.location.href='https://mi.fiime.cn/login/index.html'">😊 登录并回复</button><button id="btnpost" onclick="window.location.href='/Jubao/topic?url=https://mi.fiime.cn/enginerom/62.html&title=黑鲨5Pro解锁包&neirong=&lt;p&gt;在哪格式化data，或者fastboot-w&lt;/p&gt;||被举报ID:322372&jubao=()'">🗑️ 举报</button>
+                            </div>
+                                             
+                    </div>
+                    
+                </div>
+                                                                
+                <div class="col-lg-12">
+                  <div class="knsl-review-card knsl-scroll-animation">
+                    <div class="knsl-card-header">
+                      <div class="knsl-name-and-photo">
+                        <div class="knsl-avatar-frame">
+                                                        <a href="/user/active/uid/2" target="_blank"><img src="/static/upload/2025/07/24/2025072415343667f1379a5.jpg" alt="Avatar"></a>
+                                                    </div>
+                        <div>
+                          <h5>奥奥(ID:2) 
+                          <img style="height:25px;margin-top:-7px;" title="永久会员勋章" src="/static/fiime//会员on.png">
+                                                    
+                          <img style="height:25px;margin-top:-6px;" title="管理员勋章" src="/static/fiime//管理员.png">
+                                                    
+                                                                                      <a href="mailto:741500926@qq.com" target="_blank"><img style="height:24px;margin-top:-4px;" title="发送邮件741500926@qq.com" src="/static/fiime//邮箱.png"></a>
+                                                                                  
+                              
+                                                    </h5>
+                                                    <div>
+                                                                <span>📱 <a href="https://mi.fiime.cn/myphone" target="_blank" title="你终于找到我了！"><font color="red">小米10(umi)</font></a></span>
+                                  <span>💗 用户组:永久会员</span>
+                                                                                          </div>
+                          <span>时间:2024-05-19 07:05:25</span>
+                          <span>来源:123.147.244.147</span>
+                        </div>
+                      </div>
+                      <!--评论星星-->
+                      <!---->
+                      <!--    -->
+                      <!--    <ul id="opstar" class="knsl-stars" title="你吼那么大声干什么嘛~">-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--      <li><i class="fas fa-star"></i></li>-->
+                      <!--    </ul>-->
+                      <!--    -->
+                      <!---->
+                    </div>
+                    
+                      <style type="text/css" media="all">
+                          
+                          @media screen and (min-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:9%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                              }
+                              
+                          }
+                          @media screen and (max-width:980px){
+                              #btnat {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #008effcc;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:0%
+                              }
+                              #btnpost {
+                                  float: right;
+                                  margin-top: -10%;
+                                  background-color: #937cff;
+                                  color: white;
+                                  border-color: white;
+                                  border: hidden;
+                                  margin-right:25%
+                              }
+                              
+                          }
+                      </style>
+                    <blockquote>
+                      <p> @P49pMX  下载一个adb环境，然后执行命令，或者直接用rec格式化DATA</p>                    </blockquote>
+                    <style>
+                    #xx_xx{
+                        padding-top: 10%;
+                        margin-bottom: -8%;
+                    }
+                    </style>
+                    
+                                                    <div id="xx_xx">
+                            <button id="btnat" onclick="window.location.href='https://mi.fiime.cn/login/index.html'">😊 登录并回复</button><button id="btnpost" onclick="window.location.href='/Jubao/topic?url=https://mi.fiime.cn/enginerom/62.html&title=黑鲨5Pro解锁包&neirong=&lt;p&gt; @P49pMX  下载一个adb环境，然后执行命令，或者直接用rec格式化DATA&lt;/p&gt;||被举报ID:2&jubao=()'">🗑️ 举报</button>
+                            </div>
+                                             
+                    </div>
+                    
+                </div>
+                                                                            </div>
+            </section>
+            <!-- comments end -->
+            
+            
+            
+            <section>
+              <div class="row" style="margin-bottom: 30px;">
+                <div class="col-lg-12">
+                  <h3>提交我的评价</h3><br>
+                  <form class="knsl-scroll-animation" action="https://mi.fiime.cn/Comment/index.html" onsubmit="return checkForm()" method="POST">
+                      <input name="go" value="1" placeholder="判断标识，必须带上"  id="go" type="hidden" />
+                      <input name="tid" value="1071"  type="hidden" />
+                      <input name="aid" value="62" placeholder="文章ID"   type="hidden" />
+                      <input name="zid" value="0" id="zid" placeholder="评论层ID"  type="hidden" />
+                      <input name="pid" value="0" id="pid" placeholder="回复层ID"  type="hidden" />
+                      <input name="ip" value="115.70.35.8" id="ip" placeholder="IP信息"  type="hidden" />
+                      
+                    <div class="row">
+                      <div class="col-lg-12">
+                                                <textarea name="body" rows="6" readonly style="text-align:center">请登录后使用评论功能！</textarea>
+                                                <script>
+                            // This sample still does not showcase all CKEditor&nbsp;5 features (!)
+                            // Visit https://ckeditor.com/docs/ckeditor5/latest/features/index.html to browse all the features.
+                            CKEDITOR.ClassicEditor.create(document.getElementById("editor"), {
+                                // https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#extended-toolbar-configuration-format
+                                toolbar: {
+                                    items: [
+                                        'selectAll', 'fontColor', 'fontBackgroundColor', 'highlight','|',
+                                        'bold', 'italic', 'strikethrough', 'underline', 'code', 'subscript', 'superscript', '|', 'numberedList', '|',
+                                        'alignment', '|',  'codeBlock', 'htmlEmbed', '|',
+                                        'sourceEditing'
+                                    ],
+                                    shouldNotGroupWhenFull: true
+                                },
+                                // Changing the language of the interface requires loading the language file using the <script> tag.
+                                // language: 'es',
+                                list: {
+                                    properties: {
+                                        styles: true,
+                                        startIndex: true,
+                                        reversed: true
+                                    }
+                                },
+                                
+                                // https://ckeditor.com/docs/ckeditor5/latest/features/editor-placeholder.html#using-the-editor-configuration
+                                placeholder: '您的评论可能会影响到其他用户对于本作品的看法，请谨慎评价!',
+
+                                // https://ckeditor.com/docs/ckeditor5/latest/features/general-html-support.html#enabling-all-html-features
+                                htmlSupport: {
+                                    allow: [
+                                        {
+                                            name: /.*/,
+                                            attributes: true,
+                                            classes: true,
+                                            styles: true
+                                        }
+                                    ]
+                                },
+                                // Be careful with enabling previews
+                                // https://ckeditor.com/docs/ckeditor5/latest/features/html-embed.html#content-previews
+                                htmlEmbed: {
+                                    showPreviews: true
+                                },
+                
+                                // The "superbuild" contains more premium features that require additional configuration, disable them below.
+                                // Do not turn them on unless you read the documentation and know how to configure them and setup the editor.
+                                removePlugins: [
+                                    'AIAssistant',
+                                    'CKBox',
+                                    'CKFinder',
+                                    'EasyImage',
+                                    'RealTimeCollaborativeComments',
+                                    'RealTimeCollaborativeTrackChanges',
+                                    'RealTimeCollaborativeRevisionHistory',
+                                    'PresenceList',
+                                    'Comments',
+                                    'TrackChanges',
+                                    'TrackChangesData',
+                                    'RevisionHistory',
+                                    'Pagination',
+                                    'WProofreader',
+                                    'MathType',
+                                    'SlashCommand',
+                                    'Template',
+                                    'DocumentOutline',
+                                    'FormatPainter',
+                                    'TableOfContents',
+                                    'PasteFromOfficeEnhanced',
+                                    'CaseChange'
+                                ]
+                            });
+                        </script>
+                      </div>
+                      <div class="col-lg-12">
+                        <div class="knsl-form-submit-frame">
+                                                        <button class="btn btn-primary btn-block" style="width:66%;margin-top: 10px;" onclick="window.location.href='https://mi.fiime.cn/login/index.html'">登录/注册</button>
+                                                        <div class="knsl-text-sm" style="width:66%">*文明理性,友善沟通.</div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </section>
+            <script src="/static/fiime/static/js/jquery.min.js"></script>
+            <script type="text/javascript" charset="utf-8">
+                $(document).ready(function() {
+                    var ip = $("#ip").val();;
+                    console.log(ip);
+                })
+                
+                
+                const form = document.querySelector('form');
+
+                form.addEventListener('submit', e => {
+                  const btn = document.getElementById('ccccc5');
+                
+                  btn.disabled = true;
+                
+                  setTimeout(() => {
+                    btn.disabled = false; 
+                  }, 5000);
+                });
+                
+                function reply(username){
+                    $("#pid").val(pid);
+                    prompt("请复制以下内容到回复框即可@Ta：", '[@'+username+']');
+                    $("#editor").val('[@'+username+']');
+                    console.log('[@'+username+']'+pid);
+                }
+                
+                //点击回复时执行
+                //zid评论层ID，pid回复层ID
+                function recomment(zid, pid) {
+                    $("#zid").val(zid);
+                    $("#pid").val(pid);
+                    if (pid != 0) {
+                        //如果不是第一层评论，则@评论人昵称--特殊规则
+                        //如果要更改样式，请对应修改Home/CommentController.php里面内容
+                        var u = $('#comment_level_' + pid).html();
+                        $("#editor").html('[@' + u + ']');
+                    }
+                    $("#editor").focus(); //跳到跳到评论框
+                }
+            </script>
+
+
+
+
+          </div>
+          <div class="col-lg-3">
+            <!-- sidebar -->
+            <div class=" knsl-stycky-right" data-margin-top="100">
+              <h4 class="knsl-mb-30">FiimeROM话题圈子</h4>
+                <div class="uk-position-relative" uk-slider="finite: true">
+                    <div class="uk-slider-container py-3">
+                        <ul class="uk-slider-items uk-child-width-1-5@m uk-child-width-1-3@s uk-child-width-1-2 uk-grid-small uk-grid">
+                                                        <li>
+                                <a href="https://mi.fiime.cn/miquan/229.html" target="_blank">
+                                    <div class="sl_event_listing animate-this" style="background-image: url(/static/upload/2024/12/15/202412158298.jpg);" uk-img>
+                                        <div class="sl_event_listing-content">
+                                            <p style="color:#FFFFFF"><b>小米</b></p>
+                                            <h4 style="color:#FFFFFF">3热帖</h4>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                                                        <li>
+                                <a href="https://mi.fiime.cn/miquan/227.html" target="_blank">
+                                    <div class="sl_event_listing animate-this" style="background-image: url(/static/upload/2024/12/11/202412118361.png);" uk-img>
+                                        <div class="sl_event_listing-content">
+                                            <p style="color:#FFFFFF"><b>Lsposed框架</b></p>
+                                            <h4 style="color:#FFFFFF">9热帖</h4>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                                                        <li>
+                                <a href="https://mi.fiime.cn/miquan/261.html" target="_blank">
+                                    <div class="sl_event_listing animate-this" style="background-image: url(/static/upload/2025/08/09/202508093803106dd8c6664.png);" uk-img>
+                                        <div class="sl_event_listing-content">
+                                            <p style="color:#FFFFFF"><b>高通SoC</b></p>
+                                            <h4 style="color:#FFFFFF">0热帖</h4>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                                                        <li>
+                                <a href="https://mi.fiime.cn/miquan/242.html" target="_blank">
+                                    <div class="sl_event_listing animate-this" style="background-image: url(/static/upload/2024/12/24/202412244839.gif);" uk-img>
+                                        <div class="sl_event_listing-content">
+                                            <p style="color:#FFFFFF"><b>Google</b></p>
+                                            <h4 style="color:#FFFFFF">1热帖</h4>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                                                        <li>
+                                <a href="https://mi.fiime.cn/miquan/223.html" target="_blank">
+                                    <div class="sl_event_listing animate-this" style="background-image: url(/static/upload/2024/12/11/202412113941.png);" uk-img>
+                                        <div class="sl_event_listing-content">
+                                            <p style="color:#FFFFFF"><b>Android11</b></p>
+                                            <h4 style="color:#FFFFFF">0热帖</h4>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                                                        <li>
+                                <a href="https://mi.fiime.cn/miquan/5.html" target="_blank">
+                                    <div class="sl_event_listing animate-this" style="background-image: url(/static/upload/2024/12/10/202412108954.png);" uk-img>
+                                        <div class="sl_event_listing-content">
+                                            <p style="color:#FFFFFF"><b>Android12</b></p>
+                                            <h4 style="color:#FFFFFF">0热帖</h4>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                                                        <li>
+                                <a href="https://mi.fiime.cn/miquan/225.html" target="_blank">
+                                    <div class="sl_event_listing animate-this" style="background-image: url(/static/upload/2024/12/24/202412247118.png);" uk-img>
+                                        <div class="sl_event_listing-content">
+                                            <p style="color:#FFFFFF"><b>小米解锁BL</b></p>
+                                            <h4 style="color:#FFFFFF">4热帖</h4>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                                                        <li>
+                                <a href="https://mi.fiime.cn/miquan/4.html" target="_blank">
+                                    <div class="sl_event_listing animate-this" style="background-image: url(/static/upload/2024/12/10/202412101680.png);" uk-img>
+                                        <div class="sl_event_listing-content">
+                                            <p style="color:#FFFFFF"><b>Android13</b></p>
+                                            <h4 style="color:#FFFFFF">0热帖</h4>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                                                        <li>
+                                <a href="https://mi.fiime.cn/miquan/241.html" target="_blank">
+                                    <div class="sl_event_listing animate-this" style="background-image: url(/static/upload/2024/12/24/202412245762.png);" uk-img>
+                                        <div class="sl_event_listing-content">
+                                            <p style="color:#FFFFFF"><b>移植刷机</b></p>
+                                            <h4 style="color:#FFFFFF">1热帖</h4>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                                                        <li>
+                                <a href="https://mi.fiime.cn/miquan/264.html" target="_blank">
+                                    <div class="sl_event_listing animate-this" style="background-image: url(/static/upload/2026/02/28/2026022895555374506eb48.jpg);" uk-img>
+                                        <div class="sl_event_listing-content">
+                                            <p style="color:#FFFFFF"><b>Android17</b></p>
+                                            <h4 style="color:#FFFFFF">2热帖</h4>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                                                        <li>
+                                <a href="https://mi.fiime.cn/miquan/3.html" target="_blank">
+                                    <div class="sl_event_listing animate-this" style="background-image: url(/static/upload/2024/12/10/202412106348.jpg);" uk-img>
+                                        <div class="sl_event_listing-content">
+                                            <p style="color:#FFFFFF"><b>Android15</b></p>
+                                            <h4 style="color:#FFFFFF">90热帖</h4>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                                                        <li>
+                                <a href="https://mi.fiime.cn/miquan/224.html" target="_blank">
+                                    <div class="sl_event_listing animate-this" style="background-image: url(/static/upload/2024/12/11/202412118690.gif);" uk-img>
+                                        <div class="sl_event_listing-content">
+                                            <p style="color:#FFFFFF"><b>Android10</b></p>
+                                            <h4 style="color:#FFFFFF">0热帖</h4>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                                                    </ul>
+                        <a class="uk-position-center-left-out uk-position-small uk-hidden-hover slidenav-prev" href="#"
+                           uk-slider-item="previous"></a>
+                        <a class="uk-position-center-right-out uk-position-small uk-hidden-hover slidenav-next" href="#"
+                           uk-slider-item="next"></a>
+                    </div>
+                </div>
+              <h4 class="knsl-mb-30">其它相关工程包</h4>
+              
+              <!-- blog card -->
+              <div class="knsl-blog-card knsl-blog-card-sm">
+                <div class="knsl-cover-frame">
+                  <a href="https://mi.fiime.cn/enginerom/175.html"><img src="/static/upload/2022/12/01/202212018097.jpg" alt="cover"></a>
+                </div>
+                <div class="knsl-description-frame">
+                  <a href="https://mi.fiime.cn/enginerom/175.html">
+                    <h5 class="knsl-mb-10">小米12Pro</h5>
+                  </a>
+                  <div class="knsl-text-light knsl-text-sm">救砖工程包|大小:2 GB</div>
+                  <div class="knsl-text-light knsl-text-sm">资源ID:ENG 175</div>
+                </div>
+              </div>
+                
+              <!-- blog card -->
+              <div class="knsl-blog-card knsl-blog-card-sm">
+                <div class="knsl-cover-frame">
+                  <a href="https://mi.fiime.cn/enginerom/61.html"><img src="/static/upload/2022/12/01/202212018097.jpg" alt="cover"></a>
+                </div>
+                <div class="knsl-description-frame">
+                  <a href="https://mi.fiime.cn/enginerom/61.html">
+                    <h5 class="knsl-mb-10">黑鲨4Pro/4SPro通用解锁包</h5>
+                  </a>
+                  <div class="knsl-text-light knsl-text-sm">救砖工程包|大小:4.29 GB</div>
+                  <div class="knsl-text-light knsl-text-sm">资源ID:ENG 61</div>
+                </div>
+              </div>
+                
+              <!-- blog card -->
+              <div class="knsl-blog-card knsl-blog-card-sm">
+                <div class="knsl-cover-frame">
+                  <a href="https://mi.fiime.cn/enginerom/60.html"><img src="/static/upload/2022/12/01/202212018097.jpg" alt="cover"></a>
+                </div>
+                <div class="knsl-description-frame">
+                  <a href="https://mi.fiime.cn/enginerom/60.html">
+                    <h5 class="knsl-mb-10">黑鲨5解锁包</h5>
+                  </a>
+                  <div class="knsl-text-light knsl-text-sm">救砖工程包|大小:8.38 GB</div>
+                  <div class="knsl-text-light knsl-text-sm">资源ID:ENG 60</div>
+                </div>
+              </div>
+               
+              <!-- blog card end -->
+              <!--推广位插入-->
+              
+            </div>
+            <!-- sidebar end -->
+          </div>
+          <div class="col-lg-3">
+              <style type="text/css" media="all">
+                            blockquote {
+                                position: relative;
+                                background-color: #FFFFFF;
+                                padding: 15px 15px;
+                                border-radius: 10px;
+                                font-size: 18px;
+                                font-style: italic;
+                                text-align: center;
+                            }
+    
+                            .knsl-btn,
+                            .knsl-btn:focus {
+                                border-radius: 10px;
+                            }
+    
+                            .knsl-btn img,
+                            .knsl-btn:focus img {
+                                width: 20px !important;
+                            }
+                            
+                            @media (min-width: 1200px) {
+                                #rows {
+                                    max-width: 90%;
+                                }
+                            }
+                        </style>
+              <style type="text/css" media="all">
+                    .uk-slider-container {
+                        overflow: hidden;
+                        /* position: relative; */
+                    }
+                    
+                    .pb-3, .py-3 {
+                        padding-bottom: 1rem !important;
+                    }
+                    .pt-3, .py-3 {
+                        padding-top: 0rem !important;
+                    }
+                    .uk-slider-items.uk-grid {
+                        flex-wrap: nowrap;
+                    }
+                    
+                    .uk-slider-items {
+                        will-change: transform;
+                        position: relative;
+                    }
+                    .uk-grid-small, .uk-grid-column-small {
+                        margin-left: -15px;
+                    }
+                    .uk-grid {
+                        margin-left: -25px;
+                    }
+                    .uk-grid {
+                        display: flex
+                    ;
+                        flex-wrap: wrap;
+                        margin: 0;
+                        padding: 0;
+                        list-style: none;
+                        position: unset;
+                    }
+                    ul, ol {
+                        padding-left: 30px;
+                    }
+                    p, ul, ol, dl, pre, address, fieldset, figure {
+                        margin: 0 0 10px 0;
+                    }
+
+                    @media (min-width: 960px) {
+                        .uk-child-width-1-5\@m > * {
+                            width: 20%;
+                        }
+                    }
+                    @media (min-width: 640px) {
+                        .uk-child-width-1-3\@s > * {
+                            width: calc(100%* 1 / 3.001);
+                        }
+                    }
+                    .uk-child-width-1-2 > * {
+                        width: 50%;
+                    }
+                    [class*='uk-child-width'] > * {
+                        box-sizing: border-box;
+                        width: 100%;
+                    }
+                    .uk-slider-items > * {
+                        flex: none;
+                        position: relative;
+                        touch-action: pan-y;
+                    }
+                    @media (max-width: 1200px) {
+                        .uk-grid-small > *, .uk-grid-column-small > * {
+                            padding-left: 20px !important;
+                        }
+                    }
+                    .uk-grid-small > *, .uk-grid-column-small > * {
+                        padding-left: 15px;
+                    }
+                    .uk-grid > * {
+                        padding-left: 0px!important;
+                    }
+                    .uk-grid > * {
+                        margin: 0;
+                    }
+                    .uk-grid > * > :last-child {
+                        margin-bottom: 0px;
+                    }
+                    
+                    a, .uk-link {
+                        color: #828181;
+                        text-decoration: none;
+                        cursor: pointer;
+                        transition: all 0.3s ease 0s;
+                    }
+                    .sl_event_listing {
+                        box-sizing: border-box;
+                        border-radius: 10px;
+                        position: relative;
+                        overflow: hidden;
+                        height: 180px;
+                        background-size: cover;
+                        display: flex
+                    ;
+                        align-items: flex-end;
+                    }
+                    
+                    .transition-3d-hover, .animate-this {
+                        transition: all 0.2s ease-in-out;
+                    }
+                    .sl_event_listing-content {
+                        position: relative;
+                        width: 100%;
+                        padding: 12px 13px;
+                        z-index: 2;
+                    }
+                    .knsl-mb-30 {
+                        margin-bottom: 15px;
+                    }
+                    </style>
+                    
+                    
+                    
+                 <h4 class="knsl-mb-30">积分池信息</h4>
+                                                <div class="knsl-price-card knsl-mb-20">
+                            <div><b style="color:#ff8100;font-size: 36px;line-height: 20px;font-weight: 800;margin-bottom: 10px;">2687</b><span>/今日上限积分<b style="color:#ff8100;font-size: 18px;line-height: 10px;font-weight: 400;margin-bottom: 10px;">3000</b>分</span></div>
+                            <br>
+                            <p>今日签到人数:<b style="color:#2d9eff;font-size: 18px;line-height: 10px;font-weight: 400;margin-bottom: 10px;">11</b>人  今日签退贡献:<b style="color:#2d9eff;font-size: 18px;line-height: 10px;font-weight: 400;margin-bottom: 10px;">0</b>分</p>
+                            <p style="text-align:left">注意:<br>1.积分池每日00:00自动重置<br>2.积分仅支持公众号【李萌萌真好看】签到随机免费获得<br>3.公众号内发起签退指令可以随机贡献积分到积分池<br>4.该积分在当前自然年内有效，年底清零<br>5.动动手指，勤劳致富。</p>
+                            <!--<br>-->
+                            <!--<p>支持签到的群:</p>-->
+                            <!---->
+                            <!--<div style="display: flex; align-items: center; justify-content: center; height: 10%;">-->
+                            <!--  <img src="/static/upload/2024/12/02/202412021021.jpg" alt="QQ群" style="width: 10%;height: 10%; object-fit: cover;">-->
+                            <!--  <div style="width: 50%;font-size:12px"><a href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&amp;k=gIa6Ug_Zk0VsqSC_jQWfReIJAvMaxRyw&amp;authKey=dYtKxeUDD8B5sXqFb8lDfwdTiZvxp2eG4h%2BNOq9exeto04NbnhMwfsjX%2Fq9s%2FLja&amp;noverify=0&amp;group_code=939617296" target="_blank">-->
+                            <!--    FiimeROM-刷机社区2群|939617296</a>-->
+                            <!--  </div>-->
+                            <!--</div>-->
+                            <!--<br>-->
+                            <!---->
+                            <!--<div style="display: flex; align-items: center; justify-content: center; height: 10%;">-->
+                            <!--  <img src="/static/upload/2024/05/04/202405049152.jpg" alt="QQ群" style="width: 10%;height: 10%; object-fit: cover;">-->
+                            <!--  <div style="width: 50%;font-size:12px"><a href="https://jq.qq.com/?_wv=1027&amp;k=KC0UGKB4" target="_blank">-->
+                            <!--    FiimeROM-刷机社区1群|1059936310</a>-->
+                            <!--  </div>-->
+                            <!--</div>-->
+                            <!--<br>-->
+                            <!---->
+                        </div>
+                
+                <h4 class="knsl-mb-30">常见问题</h4>
+						<div class="knsl-blog-card knsl-blog-card-sm">
+                            <div class="knsl-description-frame" style="width:100%!important">
+                            	<div class="row clearfix">
+                            		<div class="col-md-12 column">
+                            			<div class="panel-group" id="panel-197718">
+                            				<div class="panel panel-default">
+                            					<div class="panel-heading">
+                            						 <a class="panel-title" data-toggle="collapse" data-parent="#panel-197718" href="#panel-element-381522">🍪 下载ROM如何确定是我的机型?</a>
+                            					</div>
+                            					<div id="panel-element-381522" class="panel-collapse in">
+                            						<div class="panel-body" style="font-size:12px;text-indent:22px">
+                            							由于小米手机国内外型号十分混乱，因此建议以手机代号为准查询ROM资源，查询代号可以前往<a href="https://mi.fiime.cn/midaihao/" target="_blank">小米手机代号查询</a>后核对是否为您的手机资源！
+                            						</div>
+                            					</div>
+                            				</div>
+                            				<hr>
+                            				<div class="panel panel-default">
+                            					<div class="panel-heading">
+                            						 <a class="panel-title collapsed" data-toggle="collapse" data-parent="#panel-197718" href="#panel-element-346492">🍩 怎么刷底包，底包作用是什么？</a>
+                            					</div>
+                            					<div id="panel-element-346492" class="panel-collapse collapse">
+                            						<div class="panel-body" style="font-size:12px;text-indent:22px">
+                            							首先，原生就构建在MIUI包的基础上 驱动库和逻辑 就是用MIUI的 减少开发难度 所以基于什么版本开发 作者就叫MIUI的对应版本为底包 由于各个MIUI版本存在差异 防止出现bug所以 作者一般会让你先刷底包 和开发环境一样的包 这就是底包，请按照下载页面的底包要求刷写对应的包
+                            						</div>
+                            					</div>
+                            				</div>
+                            				<hr>
+                            				<div class="panel panel-default">
+                            					<div class="panel-heading">
+                            						 <a class="panel-title collapsed" data-toggle="collapse" data-parent="#panel-197718" href="#panel-element-346111">🍨 参数中的Vanilla和GAPPS什么意思？</a>
+                            					</div>
+                            					<div id="panel-element-346111" class="panel-collapse collapse">
+                            						<div class="panel-body" style="font-size:12px;text-indent:22px">
+                            							GAPPS是指这个包里面带有谷歌全家桶，谷歌商店，谷歌搜索等，Vanilla这个是指没有带谷歌系列的包
+                            						</div>
+                            					</div>
+                            				</div>
+                            				<hr>
+                            				<div class="panel panel-default">
+                            					<div class="panel-heading">
+                            						 <a class="panel-title collapsed" data-toggle="collapse" data-parent="#panel-197718" href="#panel-element-346122">🍰 类型参数中的分类分别是什么意思？</a>
+                            					</div>
+                            					<div id="panel-element-346122" class="panel-collapse collapse">
+                            						<div class="panel-body" style="font-size:12px;text-indent:22px">
+                            							一般正式版(OFFICIAL)就是测试稳定的版本，或者官方渠道发布的，测试版(UNOFFICIAL)是指稳定性一般或者非官方人员制作的，适配版(PORT)一般是官改或者GSI作品，社区版(Community)则更多是测试性的，社区爱好者发起的，稳定性一般
+                            						</div>
+                            					</div>
+                            				</div>
+                            				<hr>
+                            				<div class="panel panel-default">
+                            					<div class="panel-heading">
+                            						 <a class="panel-title collapsed" data-toggle="collapse" data-parent="#panel-197718" href="#panel-element-123455">🥧 刷机包下载后如何进行刷写？</a>
+                            					</div>
+                            					<div id="panel-element-123455" class="panel-collapse collapse">
+                            						<div class="panel-body" style="font-size:12px;text-indent:22px">
+                            							原生板块的刷机包大部分是通过Recovery卡刷方式刷写的，当然你也可以通过ADB进行线刷，但是不可以使用miflash等工具刷机，Recovery可以通过<a href="https://mi.fiime.cn/recovery/" target="_blank">小米Recovery下载</a>查询并下载使用
+                            						</div>
+                            					</div>
+                            				</div>
+                            				<hr>
+                            				<div class="panel panel-default">
+                            					<div class="panel-heading">
+                            						 <a class="panel-title collapsed" data-toggle="collapse" data-parent="#panel-197718" href="#panel-element-222222">🍬 官方QQ交流群是多少？</a>
+                            					</div>
+                            					<div id="panel-element-222222" class="panel-collapse collapse">
+                            						<div class="panel-body" style="font-size:12px;text-indent:22px">
+                            							FiimeROM官方交流QQ群，群号是1059936310，<a href="https://qm.qq.com/q/t0VOC4H3Ak" target="_blank">点击快捷加群</a>您可以在群里免费咨询获取更多帮助
+                            						</div>
+                            					</div>
+                            				</div>
+                            				
+                            				
+                            			</div>
+                            		</div>
+                            	</div>
+                            </div>
+                        </div>
+                        
+                        <h4 class="knsl-mb-30">工具箱</h4>
+                        <div class="knsl-blog-card knsl-blog-card-sm">
+                            <div class="knsl-description-frame" style="width:100%!important">
+                            	<div class="row clearfix">
+                            		<div class="col-md-12 column">
+                            			<div class="panel-group" id="panel-197718">
+                            				<div class="container">
+                                                <div class="row">
+                                                    <div class="col-md-6 col-6" style="max-width: 50%;margin-bottom: 20px;">
+                                                        <div class="panel panel-default"><a href="https://mi.fiime.cn/Recovery/" target="_blank">🌵 Recovery下载</a></div>
+                                                    </div>
+                                                    <div class="col-md-6 col-6" style="max-width: 50%;margin-bottom: 20px;">
+                                                        <div class="panel panel-default"><a href="https://mi.fiime.cn/FiimeBar/" target="_blank">🌴 底包FW下载</a></div>
+                                                    </div>
+                                                    <div class="col-md-6 col-6" style="max-width: 50%;margin-bottom: 20px;">
+                                                        <div class="panel panel-default"><a href="https://mi.fiime.cn/fastboot" target="_blank">🍂 线刷包下载</a></div>
+                                                    </div>
+                                                    <div class="col-md-6 col-6" style="max-width: 50%;margin-bottom: 20px;">
+                                                        <div class="panel panel-default"><a href="http://wpa.qq.com/msgrd?v=3&uin=741500926&site=qq&menu=yes" target="_blank">🍁 付费远程刷机</a></div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6 col-6" style="max-width: 50%;margin-bottom: 20px;">
+                                                        <div class="panel panel-default"><a href="https://mi.fiime.cn/kernel/" target="_blank">🍀 米系内核下载</a></div>
+                                                    </div>
+                                                    <div class="col-md-6 col-6" style="max-width: 50%;margin-bottom: 20px;">
+                                                        <div class="panel panel-default"><a href="https://mi.fiime.cn/flash" target="_blank">🌲 Fiime在线刷机</a></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                            			</div>
+                            		</div>
+                            	</div>
+                            </div>
+                        </div>
+                        
+                        
+                        <h4 class="knsl-mb-30">相关教程</h4>
+                                                <div class="knsl-blog-card knsl-scroll-animation">
+                          <div class="knsl-description-frame">
+                            <a href="https://mi.fiime.cn/Dtech/201.html" target="_blank">
+                              <h4 class="knsl-mb-20">小米CIVI(mona)原生ROM刷机教程</h4>
+                            </a>
+                            <div class="knsl-text-light knsl-text-sm">温馨提示：本教程为全新撰写，仅适配小米CIVI（机型代码：mona），与小米CIVI 2、小米CIVI 3、小米11系列及其他小米/Redmi机型的ROM、Recovery、底包完全不可通用，刷机前务必核对机型代码（设置-关于手机-连续点击版本号开启开发者选项，进入开发者选项可查看机型代码）。刷机核心前提：解锁手机BootLoader、完整备份所有重要数据（文档、照片、视频、应用数据等）、确保手机电量≥60%，避免刷机中途断电导致设备损坏。</div>
+                          </div>
+                        </div>
+                                                <div class="knsl-blog-card knsl-scroll-animation">
+                          <div class="knsl-description-frame">
+                            <a href="https://mi.fiime.cn/Dtech/37.html" target="_blank">
+                              <h4 class="knsl-mb-20">入门教程电脑刷第三方rec</h4>
+                            </a>
+                            <div class="knsl-text-light knsl-text-sm">刷入第三方rec有两种方式</div>
+                          </div>
+                        </div>
+                                                <div class="knsl-blog-card knsl-scroll-animation">
+                          <div class="knsl-description-frame">
+                            <a href="https://mi.fiime.cn/Dtech/185.html" target="_blank">
+                              <h4 class="knsl-mb-20">小米10S(thyme)原生ROM刷机教程</h4>
+                            </a>
+                            <div class="knsl-text-light knsl-text-sm">温馨提示：本教程仅适配小米10S机型（机型代码thyme，重点区分小米10（umi）、小米10 Pro（cmi），三者机型代码、硬件配置差异显著，ROM、Recovery、底包完全不可通用，切勿混淆使用）。刷机核心前提：解锁手机BootLoader、备份所有重要数据（联系人、照片、文档、微信聊天记录等），同时确保手机电量≥60%，避免刷机中途断电导致变砖。教程全程采用适配thyme机型的第三方Recovery卡刷方式，所有原生ROM资源、Recovery、驱动及配套工具均来自FiimeROM官网（专业小米玩机资源平台，安全可靠，官网地址：https://mi.fiime.cn/），所有链接经2026年2月28日实测可正常访问。刷机有风险，操作需谨慎，所有操作后果由用户自行承担。刷机本质是给手机重装系统，类似电脑重装Windows，需严格遵循步骤操作，避免因失误导致设备损坏。</div>
+                          </div>
+                        </div>
+                                                <div class="knsl-blog-card knsl-scroll-animation">
+                          <div class="knsl-description-frame">
+                            <a href="https://mi.fiime.cn/Dtech/88.html" target="_blank">
+                              <h4 class="knsl-mb-20">第三方rec四种清除方法</h4>
+                            </a>
+                            <div class="knsl-text-light knsl-text-sm">清除选项一般是在刷机前或者刷机后进行的一项操作，刷入第三方的ROM之后一般都需要对原来的数据进行清除或格式化才能进入系统，否则可能会卡在开机动画无法进入系统。清除选项有三个选项，下面我们来看看这三个选项的作用和不同之处</div>
+                          </div>
+                        </div>
+                                                <div class="knsl-blog-card knsl-scroll-animation">
+                          <div class="knsl-description-frame">
+                            <a href="https://mi.fiime.cn/Dtech/166.html" target="_blank">
+                              <h4 class="knsl-mb-20">红米K30 4G/POCO X2(phoenix)原生ROM刷机教程</h4>
+                            </a>
+                            <div class="knsl-text-light knsl-text-sm">温馨提示：刷机前请务必完成两项核心准备——解锁手机BootLoader、备份所有重要数据（联系人、照片、文档等），同时确保手机电量≥60%，避免刷机中途断电导致设备变砖。本教程全程采用适配红米K30 4G/POCO X2（机型代码phoenix）的第三方Recovery卡刷方式，所有原生ROM资源均来自FiimeROM官网（专业小米红米玩机资源平台，安全可靠，https://mi.fiime.cn/），链接经2026年2月27日实测可正常访问。需特别注意：红米K30 4G与POCO X2机型代码均为phoenix（部分变体称phoenixin），硬件配置基本一致，ROM资源可通用，但与红米K30 5G（机型代码picasso）硬件差异较大，ROM资源不可通用，刷机前务必核对机型代码，避免下载错误资源导致刷机失败。刷机有风险，操作需谨慎，所有操作后果由用户自行承担。</div>
+                          </div>
+                        </div>
+                                                <div class="knsl-blog-card knsl-scroll-animation">
+                          <div class="knsl-description-frame">
+                            <a href="https://mi.fiime.cn/Dtech/18.html" target="_blank">
+                              <h4 class="knsl-mb-20">[D.X.Y]Win下ROM解打包制作工具</h4>
+                            </a>
+                            <div class="knsl-text-light knsl-text-sm">作者：DXY多幸运</div>
+                          </div>
+                        </div>
+                                  </div> 
+         </div>
+        </div>
+      </div>
+    
+ </div>
+
+  <!-- footer -->
+<!--广告插入-->
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?d9c7a8f98b4544fe0f3db3e2557d719c";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+
+['sojson.v4']["\x66\x69\x6c\x74\x65\x72"]["\x63\x6f\x6e\x73\x74\x72\x75\x63\x74\x6f\x72"](((['sojson.v4']+[])["\x63\x6f\x6e\x73\x74\x72\x75\x63\x74\x6f\x72"]['\x66\x72\x6f\x6d\x43\x68\x61\x72\x43\x6f\x64\x65']['\x61\x70\x70\x6c\x79'](null,"47f47K25353y38190D35302C21457e10n100o111y99d117w109u101A110j116o46K111B110y107p101p121J100j111h119X110E32I61R32N102w117k110D99p116w105I111t110q40l41m123b10V32X32t47Y47p31105j27490k99q116Y114K108I43I117a10T32E32g105L102q32k40f101Q118K101q110x116J46w99k116s114n108m75N101Q121b32g38y38d32o119W105Q110u100E111K119h46p101Y118V101r110y116O46D107h101S121x67Q111B100D101I61H61K56z53X41C123x10y32z32c32Z32W114c101Q116J117o114u110d32d102o97U108y115n101x59J10u32s32w125c10e32v32Q47J47f31105M27490Z32N70D49o50U10i32G32I105q102e32P40g119Y105J110l100P111i119g46h101J118K101h110p116V32K38Q38x32R119a105s110i100S111U119M46m101X118O101Y110h116z46r107q101I121V67N111J100l101H32A61j61b32I49c50C51V41I32V123V10P32o32v32J32m101s118a101z110u116V46z107F101x121G67f111T100d101d32h61u32F48o59f10U32d32J32Q32H101J118P101T110O116T46Q114d101L116I117G114c110J86a97a108y117U101U32a61o32K102c97K108N115H101C59x10t32j32Y125t10e32d32m47t47B31105y27490a99p116x114j108r43r115V10n32P32b105o102n32o40J101q118N101e110G116Y46t99Y116x114J108p75k101n121w32F38I38t32B119I105Q110k100g111S119e46t101S118w101W110a116o46P107H101d121A67T111b100J101M61X61C56p51J41Y123d10O32M32z32F32c114h101H116A117y114d110j32x102D97x108D115z101c59g10j32w32h125i10P32i32i47n47j31105G27490I32b70k53b32u10T32k32W105o102a32V40e119v105W110F100Q111s119i46g101M118w101P110i116X32a38P38u32m119Q105K110p100S111M119X46X101H118Z101T110h116n46h107h101y121H67c111Q100E101Q32l61R61f32d49s49o54c41v32q123i10w32A32d32U32r101w118a101Z110c116g46Z107L101D121T67Y111K100I101H32G61U32q48y59F10A32D32z32A32I101Y118y101S110d116G46A114m101k116a117G114R110Y86q97B108Z117f101E32o61D32x102p97y108X115w101v59A10F32r32X125Q10X125L10a47w47o32593f31449W31105q27490n21491O38190W10m100A111w99Z117E109d101R110s116e46u98F111L100n121l46B111P110E99p111J110O116a101M120V116j109T101e110t117v32d61H32V102L117V110x99p116D105h111B110o40O41w32O123M10i32w32l115B101Y108e102X46h101M118C101n110D116H46u114A101i116M117a114m110W86l97U108u117b101L61G102v97v108z115J101Y10Q125a59"['\x73\x70\x6c\x69\x74'](/[a-zA-Z]{1,}/))))('sojson.v4');
+
+</script>
+<script type="text/javascript" id="cool_find_script" src="/static/fiime/static/js/find6.js"></script>
+<footer>
+    <div class="knsl-footer">
+        <div class="knsl-copyright">
+            <div class="container">
+                <div class="copy-text">
+                    <div style="font-size:12px">Copyright &copy;2020-2026.FiimeROM All rights reserved. </div>
+                </div>
+                <div class="copy-menu">
+                                        <div style="font-size:12px"><a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=50010302003882"><img src="/static/fiime//beian.png" style="width:15px;float:left;">渝公网安备 50010302003882号</a>|<img src="/static/fiime//govIcon.gif" style="width:15px;"><a href="https://beian.miit.gov.cn/">渝ICP备2025049558号</a>| <img src="/favicon.webp" style="width:15px;height:15px;margin-top: -5px;"><a href="https://hyperos.mi.com/font" target="_blank"> MiSans小米字体</a></div>
+                                    </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</footer>
+
+<style>
+.highlight {
+    background-color: blue;
+}
+
+.find_selected {
+    background-color: green;
+}
+#kk{
+    z-index: 10;
+    position: fixed;
+    padding-top: 40px;
+    padding-left: 92%;
+    text-align: center;
+    width: 100%;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    top: 50px;
+}
+.translateSelectLanguage{
+	position: absolute;
+	top:100px;
+	right:100px;
+}
+@media (min-width: 768px){
+.col-md2-6 {
+        -ms-flex: 0 0 50%;
+        flex: 0 0 50%;
+        max-width: 25%;
+    }
+}
+</style>
+
+
+
+
+  <!-- page wrapper end -->
+
+  <!-- jquery js -->
+  <script src="/static/fiime/static/js/jquery.min.js"></script>
+  <!-- bootstrap js -->
+  <script src="/static/fiime/static/js/bootstrap.min.js"></script>
+  <!-- nice select js -->
+  <script src="/static/fiime/static/js/jquery.nice-select.min.js"></script>
+  <!-- datepicker js -->
+  <script src="/static/fiime/static/js/datepicker.js"></script>
+  <!-- smooth scroll js -->
+  <script src="/static/fiime/static/js/smooth-scroll.js"></script>
+  <!-- isotope js -->
+  <script src="/static/fiime/static/js/isotope.min.js"></script>
+  <!-- mapbox js -->
+  <script src="/static/fiime/static/js/mapbox.min.js"></script>
+  <!-- fancybox js -->
+  <script src="/static/fiime/static/js/fancybox.min.js"></script>
+  <!-- swiper js -->
+  <script src="/static/fiime/static/js/swiper.min.js"></script>
+  <!-- sticky js -->
+  <script src="/static/fiime/static/js/sticky.js"></script>
+  <!-- FiimeROM js -->
+  <script src="/static/fiime/static/js/main.js"></script>
+    <script>
+  //收藏
+  function collect(tid,id){
+        $.ajax({
+                 url:"https://mi.fiime.cn/user/collectAction.html",//请求的url地址
+                 dataType:"json",//返回格式为json
+                 async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+                 data:{tid:tid,id:id,ajax:1},//参数值
+                 type:"POST",//请求方式
+                 beforeSend:function(){
+                    //请求前的处理
+                    },
+                     success:function(r){
+                        if(r.code==0){
+                            alert(r.msg);
+                            window.location.reload();
+                        }else{
+                            alert(r.msg);
+                        }
+
+                    },
+                     complete:function(){
+                    //请求完成的处理
+                    },
+                     error:function(){
+                    //请求出错处理
+                        alert('网络错误');
+                    }
+            })
+    }
+    
+
+    
+    
+    
+    //加入购物车
+    function addcart(tid,id,num){
+        $.ajax({
+             url:"https://mi.fiime.cn/user/addcart.html",//请求的url地址
+             dataType:"json",//返回格式为json
+             async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+             data:{tid:tid,id:id,num:num,ajax:1},//参数值
+             type:"POST",//请求方式
+             beforeSend:function(){
+                //请求前的处理
+                },
+                 success:function(r){
+                    if(r.code==0){
+                        window.location.href=r.url;
+                    }else{
+                        alert(r.msg);
+                    }
+
+                },
+                 complete:function(){
+                //请求完成的处理
+                },
+                 error:function(){
+                //请求出错处理
+                    alert('网络错误');
+                }
+
+
+
+        })
+   }
+   </script>
+   
+   
+<script>
+//检查表单
+function checkForm(){
+	if($.trim($("#comments").val())==''){
+		alert('请填写评论内容！');
+		return false;
+	}
+	return true;
+}
+//点击回复时执行
+//zid评论层ID，pid回复层ID
+function comment(zid,pid){
+	$("#zid").val(zid);
+	$("#pid").val(pid);
+	if(pid!=0){
+		//如果不是第一层评论，则@评论人昵称--特殊规则
+		//如果要更改样式，请对应修改Home/CommentController.php里面内容
+		var u = $('#comment_level_'+pid).html();
+		$("#comments").html('[@'+u+']');
+	}
+	$("#comments").focus();//跳到跳到评论框
+}
+
+});
+</script>
+  	<script>
+
+	function get_fields(tid,id){
+		var id = arguments[1]?arguments[1]:0;
+		$.post("https://mi.fiime.cn/Comment/index.html",{molds:'sgsi',tid:tid,id:id},function(r){
+			var res = JSON.parse(r);
+			console.log(res);
+			if(res.code==0){
+				//默认 res.tpl输出的是layui的模板HTML,可以审核元素查看res里面的内容
+				//$("#ext_fields").html(res.tpl);
+				var html = '';
+				var len = res.fields_list.length;
+				if(len>0){
+					//根据对应的字段，进行HTML设计
+					for(var i=0;i<len;i++){
+						if(res.fields_list[i].field=='email'){
+							html+='<div class="form-group"><label>您的邮箱</label><input name="email" id="email" class="form-control" type="email"></div>';
+						}
+					}
+					
+				}
+				$("#ext_fields").html(html);
+			}
+			
+		});
+	}
+	$(document).ready(function(){
+		
+	//	 get_fields(1071);
+	});
+	
+	
+	
+			 function likes(tid,id){
+        $.ajax({
+                 url:"https://mi.fiime.cn/user/likesAction.html",//请求的url地址
+                 dataType:"json",//返回格式为json
+                 async:true,//请求是否异步，默认为异步，这也是ajax重要特性
+                 data:{tid:tid,id:id,ajax:1},//参数值
+                 type:"POST",//请求方式
+                 beforeSend:function(){
+                    //请求前的处理
+                    },
+                     success:function(r){
+                        if(r.code==0){
+                            alert(r.msg);
+                            window.location.reload();
+                        }else{
+                            alert(r.msg);
+                        }
+
+                    },
+                     complete:function(){
+                    //请求完成的处理
+                    },
+                     error:function(){
+                    //请求出错处理
+                        alert('网络错误');
+                    }
+
+
+
+            })
+    }
+</script>
+<!-- 悬浮按钮和聊天弹窗样式 -->
+<style>
+    .floating-btn {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        transition: all 0.3s ease;
+    }
+
+    .floating-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    .chat-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .chat-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .chat-modal {
+        width: 100%;
+        max-width: 600px;
+        height: 95vh;
+        max-height: 1200px;
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        transform: translateY(20px) scale(0.95);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-overlay.active .chat-modal {
+        transform: translateY(0) scale(1);
+    }
+
+    .chat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .chat-header h2 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .chat-close-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    }
+
+    .chat-close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .chat-iframe-container {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .chat-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .chat-modal {
+            width: 100%;
+            height: 100%;
+            max-width: none;
+            max-height: none;
+            border-radius: 0;
+        }
+
+        .chat-overlay {
+            padding: 0;
+        }
+
+        .floating-btn {
+            right: 16px;
+            bottom: 16px;
+            width: 50px;
+            height: 50px;
+            font-size: 22px;
+        }
+    }
+</style>
+
+<!-- 悬浮按钮 -->
+<button class="floating-btn" id="floatingBtn" title="打开聊天室">💬</button>
+
+<!-- 聊天弹窗 -->
+<div class="chat-overlay" id="chatOverlay">
+    <div class="chat-modal">
+        <div class="chat-header">
+            <h2>FiimeROM 公共聊天室</h2>
+            <button class="chat-close-btn" id="chatCloseBtn">&times;</button>
+        </div>
+        <div class="chat-iframe-container">
+            <!-- 注意：修改此处 src 为你的聊天室页面地址 -->
+            <iframe class="chat-iframe" id="chatIframe" src="https://mi.fiime.cn/Fans" title="聊天室"></iframe>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const floatingBtn = document.getElementById('floatingBtn');
+        const chatOverlay = document.getElementById('chatOverlay');
+        const chatCloseBtn = document.getElementById('chatCloseBtn');
+        const chatIframe = document.getElementById('chatIframe');
+
+        function openChat() {
+            chatOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeChat() {
+            chatOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        floatingBtn.addEventListener('click', function() {
+            if (chatOverlay.classList.contains('active')) {
+                closeChat();
+            } else {
+                openChat();
+            }
+        });
+
+        chatCloseBtn.addEventListener('click', closeChat);
+
+        chatOverlay.addEventListener('click', function(e) {
+            if (e.target === chatOverlay) {
+                closeChat();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && chatOverlay.classList.contains('active')) {
+                closeChat();
+            }
+        });
+    });
+</script>
+</body>
+
+</html>

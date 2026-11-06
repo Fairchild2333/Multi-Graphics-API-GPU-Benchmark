@@ -187,3 +187,31 @@ scripts/__pycache__/
 !/results/*.log
 !/results/*.txt
 !/results/*.md
+
+# ---- root/ research folders: docs, scripts and small evidence only ----
+# Raw firmware images, ROM payloads and public tools live on the NAS
+# (\BigHouse\搞机\刷机\临时root), not in the repo.
+root/**/payload.bin
+root/**/boot.img
+root/**/init_boot.img
+root/**/vendor_boot.img
+root/**/Image
+root/**/vmlinux*.elf
+root/**/jadx*/
+root/**/analysis-pydeps/
+root/**/scrcpy*/
+root/**/payload-dumper-go*/
+root/**/KernelSU/
+root/**/apk-dex-disassembly.txt
+root/**/logcat-current.txt
+root/Katyusha-root-analysis/ghostlock-src/build/
+root/**/__pycache__/
+# Device-run logs and the captured libextract.so override the global ignores.
+!root/**/*.log
+!root/**/device-capture/libextract.so
+root/**/OTA-system-app.apk
+root/**/ota-manifest-summary.json
+root/Katyusha-root-analysis/OTA-app-decompiled/
+root/Katyusha-root-analysis/OTA-app-resources/
+root/**/settings.json
+!root/**/settings.example.json

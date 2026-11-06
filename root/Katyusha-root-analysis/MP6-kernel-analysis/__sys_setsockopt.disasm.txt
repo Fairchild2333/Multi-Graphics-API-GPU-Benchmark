@@ -1,0 +1,186 @@
+01350500 paciasp   
+01350504 sub       sp, sp, #0x80
+01350508 str       x30, [x18], #8
+0135050c stp       x29, x30, [sp, #0x20]
+01350510 str       x27, [sp, #0x30]
+01350514 stp       x26, x25, [sp, #0x40]
+01350518 stp       x24, x23, [sp, #0x50]
+0135051c stp       x22, x21, [sp, #0x60]
+01350520 stp       x20, x19, [sp, #0x70]
+01350524 add       x29, sp, #0x20
+01350528 adrp      x8, #0xffffffc012999000
+0135052c ldr       x8, [x8, #0xd48]
+01350530 mov       w20, w1
+01350534 stur      x8, [x29, #-8]
+01350538 stur      w1, [x29, #-0xc]
+0135053c stp       w4, w2, [sp, #0xc]
+01350540 str       xzr, [sp]
+01350544 tbnz      w4, #0x1f, #0xffffffc0113505b8
+01350548 mrs       x25, sp_el0
+0135054c ldr       x8, [x25, #0x7c0]
+01350550 mov       x21, x3
+01350554 mov       w22, w2
+01350558 mov       w1, w0
+0135055c ldar      w9, [x8]
+01350560 cmp       w9, #1
+01350564 b.ne      #0xffffffc0113505c0
+01350568 add       x8, x8, #0x20
+0135056c ldar      x8, [x8]
+01350570 ldr       w9, [x8]
+01350574 cmp       w9, w1
+01350578 b.ls      #0xffffffc011350600
+0135057c mov       w10, w1
+01350580 cmp       x10, x9
+01350584 ngc       x9, xzr
+01350588 csdb      
+0135058c ldr       x8, [x8, #8]
+01350590 and       w9, w9, w1
+01350594 add       x8, x8, w9, uxtw #3
+01350598 ldar      x8, [x8]
+0135059c cbz       x8, #0xffffffc011350600
+013505a0 ldrb      w9, [x8, #0x45]
+013505a4 tst       w9, #0x40
+013505a8 csel      x24, x8, xzr, eq
+013505ac ands      x0, x24, #-4
+013505b0 b.ne      #0xffffffc0113505e0
+013505b4 b         #0xffffffc011350600 ; 
+013505b8 mov       w23, #-0x16
+013505bc b         #0xffffffc011350604 ; 
+013505c0 ldr       x0, [x25, #0x7c0]
+013505c4 mov       w2, #0x4000
+013505c8 mov       w3, #1
+013505cc bl        #0xffffffc01059e43c ; __fget_files
+013505d0 cbz       x0, #0xffffffc011350600
+013505d4 orr       x24, x0, #1
+013505d8 ands      x0, x24, #-4
+013505dc b.eq      #0xffffffc011350600
+013505e0 ldr       x8, [x0, #0x28]
+013505e4 adrp      x9, #0xffffffc012497000
+013505e8 add       x9, x9, #0x210
+013505ec cmp       x8, x9
+013505f0 b.eq      #0xffffffc011350644
+013505f4 mov       w23, #-0x58
+013505f8 tbnz      w24, #0, #0xffffffc011350748
+013505fc b         #0xffffffc011350604 ; 
+01350600 mov       w23, #-9
+01350604 adrp      x9, #0xffffffc012999000
+01350608 ldur      x8, [x29, #-8]
+0135060c ldr       x9, [x9, #0xd48]
+01350610 cmp       x9, x8
+01350614 b.ne      #0xffffffc0113507a4
+01350618 ldp       x29, x30, [sp, #0x20]
+0135061c mov       w0, w23
+01350620 ldp       x20, x19, [sp, #0x70]
+01350624 ldp       x22, x21, [sp, #0x60]
+01350628 ldp       x24, x23, [sp, #0x50]
+0135062c ldp       x26, x25, [sp, #0x40]
+01350630 ldr       x27, [sp, #0x30]
+01350634 ldr       x30, [x18, #-8]!
+01350638 add       sp, sp, #0x80
+0135063c autiasp   
+01350640 ret       
+01350644 ldr       x19, [x0, #0xd8]
+01350648 cbz       x19, #0xffffffc011350754
+0135064c adrp      x8, #0xffffffc0124c3000
+01350650 ldr       x26, [x8, #0xf78]
+01350654 cbz       x26, #0xffffffc0113506b4
+01350658 adrp      x27, #0xffffffc011a09000
+0135065c add       x27, x27, #0x230
+01350660 ldr       x23, [x26, #0x18]
+01350664 sub       x8, x23, x27
+01350668 ror       x8, x8, #3
+0135066c cmp       x8, #2
+01350670 b.hs      #0xffffffc011350694
+01350674 mov       x0, x19
+01350678 mov       w1, w20
+0135067c mov       w2, w22
+01350680 blr       x23
+01350684 cbnz      w0, #0xffffffc01135073c
+01350688 ldr       x26, [x26]
+0135068c cbnz      x26, #0xffffffc011350660
+01350690 b         #0xffffffc0113506b4 ; 
+01350694 mov       x0, #0x417a
+01350698 movk      x0, #0xb74, lsl #16
+0135069c movk      x0, #0xb9c8, lsl #32
+013506a0 movk      x0, #0xbe0b, lsl #48
+013506a4 mov       x1, x23
+013506a8 mov       x2, xzr
+013506ac bl        #0xffffffc0103e0860 ; __cfi_slowpath
+013506b0 b         #0xffffffc011350674 ; 
+013506b4 ldr       x8, [x25]
+013506b8 tbz       w8, #0x16, #0xffffffc011350760
+013506bc mov       x22, xzr
+013506c0 cmp       x22, #0
+013506c4 cset      w23, ne
+013506c8 csel      x21, x21, x22, eq
+013506cc cmp       w20, #1
+013506d0 b.ne      #0xffffffc0113506f0
+013506d4 ldp       w5, w2, [sp, #0xc]
+013506d8 mov       w1, #1
+013506dc mov       x0, x19
+013506e0 mov       x3, x21
+013506e4 mov       x4, x23
+013506e8 bl        #0xffffffc011358508 ; sock_setsockopt
+013506ec b         #0xffffffc01135072c ; 
+013506f0 ldr       x8, [x19, #0x20]
+013506f4 ldr       x8, [x8, #0x70]
+013506f8 cbz       x8, #0xffffffc01135079c
+013506fc adrp      x9, #0xffffffc011a3b000
+01350700 add       x9, x9, #0x260
+01350704 sub       x9, x8, x9
+01350708 ror       x9, x9, #3
+0135070c cmp       x9, #0xe
+01350710 b.hs      #0xffffffc0113507a8
+01350714 ldp       w5, w2, [sp, #0xc]
+01350718 mov       x0, x19
+0135071c mov       w1, w20
+01350720 mov       x3, x21
+01350724 mov       x4, x23
+01350728 blr       x8
+0135072c mov       w23, w0
+01350730 mov       x0, x22
+01350734 bl        #0xffffffc0104f2c1c ; kfree
+01350738 b         #0xffffffc011350740 ; 
+0135073c mov       w23, w0
+01350740 tbz       w24, #0, #0xffffffc011350604
+01350744 ldr       x0, [x19, #0x10]
+01350748 mov       w1, #1
+0135074c bl        #0xffffffc0105577f0 ; fput_many
+01350750 b         #0xffffffc011350604 ; 
+01350754 mov       w23, #-9
+01350758 tbnz      w24, #0, #0xffffffc011350748
+0135075c b         #0xffffffc011350604 ; 
+01350760 nop       
+01350764 b         #0xffffffc0113506bc ; 
+01350768 bti       j
+0135076c ldr       x0, [x19, #0x18]
+01350770 sub       x1, x29, #0xc
+01350774 add       x2, sp, #0x10
+01350778 add       x4, sp, #0xc
+0135077c mov       x5, sp
+01350780 mov       x3, x21
+01350784 bl        #0xffffffc0103db394 ; __cgroup_bpf_run_filter_setsockopt
+01350788 mov       w23, w0
+0135078c tbnz      w0, #0x1f, #0xffffffc011350740
+01350790 cbz       w23, #0xffffffc0113507d0
+01350794 mov       w23, wzr
+01350798 b         #0xffffffc011350740 ; 
+0135079c mov       w23, #-0x5f
+013507a0 b         #0xffffffc011350730 ; 
+013507a4 bl        #0xffffffc01182bec0 ; __stack_chk_fail
+013507a8 mov       x0, #0x29e6
+013507ac movk      x0, #0x3b66, lsl #16
+013507b0 movk      x0, #0x3881, lsl #32
+013507b4 movk      x0, #0xb326, lsl #48
+013507b8 mov       x1, x8
+013507bc mov       x2, xzr
+013507c0 mov       x25, x8
+013507c4 bl        #0xffffffc0103e0860 ; __cfi_slowpath
+013507c8 mov       x8, x25
+013507cc b         #0xffffffc011350714 ; 
+013507d0 ldr       x22, [sp]
+013507d4 ldur      w20, [x29, #-0xc]
+013507d8 b         #0xffffffc0113506c0 ; 
+013507dc ldapr     w9, [x8]
+013507e0 ldapr     x8, [x8]
+013507e4 ldapr     x8, [x8]

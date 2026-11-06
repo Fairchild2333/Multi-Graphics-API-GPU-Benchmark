@@ -1,0 +1,23 @@
+[
+  {
+    "Filename": "boot.img",
+    "ReadbackPath": "C:\\Users\\lzz28\\Downloads\\Katyusha-root-analysis\\MP6-phone-readback-20261011-160453\\boot.img",
+    "ExpectedSha256": "2db977b918e1b3af0ecb37d9c77f89816db9f7e2e65495cbdfd94b88cfcc550b",
+    "ActualSha256": "2db977b918e1b3af0ecb37d9c77f89816db9f7e2e65495cbdfd94b88cfcc550b",
+    "Verified": true
+  },
+  {
+    "Filename": "xbl_config.img",
+    "ReadbackPath": "C:\\Users\\lzz28\\Downloads\\Katyusha-root-analysis\\MP6-phone-readback-20261011-160453\\xbl_config.img",
+    "ExpectedSha256": "743553af722a9ebad0856cf352653e36db15d2b0141706c9d2297a9f36354ec3",
+    "ActualSha256": "743553af722a9ebad0856cf352653e36db15d2b0141706c9d2297a9f36354ec3",
+    "Verified": true
+  },
+  {
+    "Filename": "uefi.img",
+    "ReadbackPath": "C:\\Users\\lzz28\\Downloads\\Katyusha-root-analysis\\MP6-phone-readback-20261011-160453\\uefi.img",
+    "ExpectedSha256": "e1b2e415567fad4e4e7e70dd04b220519bc1b856329fb121dd09d1e80af0fbeb",
+    "ActualSha256": "e1b2e415567fad4e4e7e70dd04b220519bc1b856329fb121dd09d1e80af0fbeb",
+    "Verified": true
+  }
+]

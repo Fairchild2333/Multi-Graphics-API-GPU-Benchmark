@@ -1,0 +1,42 @@
+01505d50 paciasp   
+01505d54 sub       sp, sp, #0x40
+01505d58 str       x30, [x18], #8
+01505d5c stp       x29, x30, [sp, #0x30]
+01505d60 add       x29, sp, #0x30
+01505d64 cmp       w1, #6
+01505d68 b.ne      #0xffffffc011505d80
+01505d6c mov       w1, w2
+01505d70 mov       x2, x3
+01505d74 mov       x3, x4
+01505d78 bl        #0xffffffc011505df8 ; do_tcp_getsockopt
+01505d7c b         #0xffffffc011505da4 ; 
+01505d80 ldr       x8, [x0, #0x500]
+01505d84 adrp      x9, #0xffffffc011a32000
+01505d88 add       x9, x9, #0x868
+01505d8c ldr       x8, [x8, #0x40]
+01505d90 sub       x9, x8, x9
+01505d94 ror       x9, x9, #3
+01505d98 cmp       x9, #9
+01505d9c b.hs      #0xffffffc011505db8
+01505da0 blr       x8
+01505da4 ldp       x29, x30, [sp, #0x30]
+01505da8 ldr       x30, [x18, #-8]!
+01505dac add       sp, sp, #0x40
+01505db0 autiasp   
+01505db4 ret       
+01505db8 stur      x0, [x29, #-8]
+01505dbc mov       x0, #0x9716
+01505dc0 movk      x0, #0xac26, lsl #16
+01505dc4 movk      x0, #0x737e, lsl #32
+01505dc8 movk      x0, #0x7623, lsl #48
+01505dcc stp       w2, w1, [x29, #-0x10]
+01505dd0 mov       x1, x8
+01505dd4 mov       x2, xzr
+01505dd8 stp       x8, x4, [sp, #0x10]
+01505ddc str       x3, [sp, #8]
+01505de0 bl        #0xffffffc0103e0860 ; __cfi_slowpath
+01505de4 ldp       x3, x8, [sp, #8]
+01505de8 ldur      x0, [x29, #-8]
+01505dec ldp       w2, w1, [x29, #-0x10]
+01505df0 ldr       x4, [sp, #0x18]
+01505df4 b         #0xffffffc011505da0 ; 

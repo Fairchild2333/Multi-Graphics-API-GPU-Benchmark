@@ -1,0 +1,12 @@
+total 101678
+drwxrwxrwx 2 shell shell      3452 2026-10-10 23:18 .
+drwxrwx--x 4 shell shell      3452 2026-10-10 22:41 ..
+-rw-rw-rw- 1 shell shell      1186 2026-10-10 22:41 analysis.json
+-rw-rw-rw- 1 shell shell 100663296 2026-10-10 22:40 boot.img
+-rw-rw-r-- 1 shell shell    182363 2026-10-10 23:28 current-ui.png
+-rw-rw-rw- 1 shell shell     17780 2026-10-10 23:28 current-ui.xml
+-rw-rw-rw- 1 shell shell      1440 2026-10-10 22:42 profile-candidate.conf
+-rw-rw-rw- 1 shell shell   2945024 2026-10-10 22:42 uefi.img
+-rw-rw-rw- 1 shell shell    188416 2026-10-10 22:42 xbl_config.img
+-rw-rw---- 1 u0_a239 media_rw        110 2026-01-07 03:42 .TlogPersistent_com.infoldgames.infinitynikkien
+drwxrws--- 3 u0_a239 media_rw       3452 2026-10-10 23:30 ghostlock-debug-log

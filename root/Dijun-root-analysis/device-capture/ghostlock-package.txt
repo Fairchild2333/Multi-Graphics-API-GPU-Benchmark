@@ -1,0 +1,1162 @@
+Activity Resolver Table:
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        53209c4 com.ghostlock.app/.ui.MainActivity filter 6e010ad
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LAUNCHER"
+
+Receiver Resolver Table:
+  Non-Data Actions:
+      androidx.profileinstaller.action.SAVE_PROFILE:
+        549ffe2 com.ghostlock.app/androidx.profileinstaller.ProfileInstallReceiver filter d9a0aa9
+          Action: "androidx.profileinstaller.action.SAVE_PROFILE"
+      androidx.profileinstaller.action.INSTALL_PROFILE:
+        549ffe2 com.ghostlock.app/androidx.profileinstaller.ProfileInstallReceiver filter 744ff73
+          Action: "androidx.profileinstaller.action.INSTALL_PROFILE"
+      androidx.profileinstaller.action.SKIP_FILE:
+        549ffe2 com.ghostlock.app/androidx.profileinstaller.ProfileInstallReceiver filter 427fe30
+          Action: "androidx.profileinstaller.action.SKIP_FILE"
+      androidx.profileinstaller.action.BENCHMARK_OPERATION:
+        549ffe2 com.ghostlock.app/androidx.profileinstaller.ProfileInstallReceiver filter 18c382e
+          Action: "androidx.profileinstaller.action.BENCHMARK_OPERATION"
+
+Domain verification status:
+
+Permissions:
+  Permission [com.ghostlock.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] (8c598c9):
+    sourcePackage=com.ghostlock.app
+    uid=10106 gids=[] type=0 prot=signature
+    perm=PermissionInfo{db2e75e com.ghostlock.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION}
+    flags=0x0
+
+Registered ContentProviders:
+  com.ghostlock.app/rikka.shizuku.ShizukuProvider:
+    Provider{85f573f com.ghostlock.app/rikka.shizuku.ShizukuProvider}
+  com.ghostlock.app/androidx.startup.InitializationProvider:
+    Provider{6e7880c com.ghostlock.app/androidx.startup.InitializationProvider}
+
+ContentProvider Authorities:
+  [com.ghostlock.app.androidx-startup]:
+    Provider{6e7880c com.ghostlock.app/androidx.startup.InitializationProvider}
+      applicationInfo=ApplicationInfo{5257bce com.ghostlock.app}
+  [com.ghostlock.app.shizuku]:
+    Provider{85f573f com.ghostlock.app/rikka.shizuku.ShizukuProvider}
+      applicationInfo=ApplicationInfo{c02aaef com.ghostlock.app}
+
+Key Set Manager:
+  [com.ghostlock.app]
+      Signing KeySets: 239
+
+Packages:
+  Package [com.ghostlock.app] (38aa286):
+    appId=10106
+    pccId=-1
+    pkg=Package{e7c285b com.ghostlock.app}
+    codePath=/data/app/~~-V_gAJBk0QGPxoRYDtAX6A==/com.ghostlock.app-zJBuGoLVijuslx5ZsywkKw==
+    resourcePath=/data/app/~~-V_gAJBk0QGPxoRYDtAX6A==/com.ghostlock.app-zJBuGoLVijuslx5ZsywkKw==
+    legacyNativeLibraryDir=/data/app/~~-V_gAJBk0QGPxoRYDtAX6A==/com.ghostlock.app-zJBuGoLVijuslx5ZsywkKw==/lib
+    extractNativeLibs=true
+    primaryCpuAbi=arm64-v8a
+    secondaryCpuAbi=null
+    cpuAbiOverride=null
+    versionCode=566 minSdk=31 targetSdk=37
+    minExtensionVersions=[]
+    versionName=1.2
+    hiddenApiEnforcementPolicy=2
+    usesNonSdkApi=false
+    isMiuiPreinstall=false
+    splits=[base]
+    apkSigningVersion=3
+    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP KILL_AFTER_RESTORE ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    forceQueryable=false
+    pageSizeCompat=0
+    queriesPackages=[moe.shizuku.privileged.api, me.weishu.kernelsu.pr, me.weishu.kernelsu, com.resukisu.resukisu, com.kowx712.supermanager]
+    scannedAsStoppedSystemApp=false
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    usesOptionalLibraries:
+      androidx.window.extensions
+      androidx.window.sidecar
+    usesLibraryFiles:
+      /system_ext/framework/androidx.window.extensions.jar
+      /system_ext/framework/androidx.window.sidecar.jar
+    timeStamp=2026-10-10 22:30:50
+    lastUpdateTime=2026-10-10 22:30:52
+    installerPackageName=null
+    installerPackageUid=-1
+    initiatingPackageName=com.android.shell
+    originatingPackageName=null
+    packageSource=1
+    appMetadataFilePath=null
+    appMetadataSource=0
+    signatures=PackageSignatures{8b18f8 version:3, signatures:[3496cd4c], past signatures:[]}
+    installPermissionsFixed=false
+    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP KILL_AFTER_RESTORE ]
+    privatePkgFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    apexModuleName=null
+    declared permissions:
+      com.ghostlock.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: prot=signature
+    requested permissions:
+      com.ghostlock.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+      android.permission.INTERNET
+      moe.shizuku.manager.permission.API_V23
+    install permissions:
+      com.ghostlock.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: granted=true
+      android.permission.INTERNET: granted=true
+    User 0: ceDataInode=939085 deDataInode=938894 pccCeDataInode=0 pccDeDataInode=0 installed=true hidden=false suspended=false appLockEnabled=false distractionFlags=0 stopped=true notLaunched=false enabled=0 instant=false virtual=false quarantined=false
+      installReason=0
+      dataDir=/data/user/0/com.ghostlock.app
+      firstInstallTime=2026-10-10 22:30:52
+      uninstallReason=0
+      overlay paths:
+        /product/overlay/GestureLineOverlay.apk
+        /data/resource-cache/com.android.systemui-neutral-WB1U.frro
+        /data/resource-cache/com.android.systemui-accent-QBDG.frro
+        /data/resource-cache/com.android.systemui-dynamic-Geeg.frro
+      legacy overlay paths:
+        /product/overlay/GestureLineOverlay.apk
+      gids=[3003]
+      runtime permissions:
+    User 999: ceDataInode=0 deDataInode=0 pccCeDataInode=0 pccDeDataInode=0 installed=false hidden=false suspended=false appLockEnabled=false distractionFlags=0 stopped=true notLaunched=true enabled=0 instant=false virtual=false quarantined=false
+      installReason=0
+      dataDir=null
+      firstInstallTime=1970-01-01 10:00:00
+      uninstallReason=0
+      gids=[3003]
+      runtime permissions:
+PackageUsageManager Dump:
+  Priority Dexopt Packages:
+    [empty]
+  Verify Dexopt Packages:
+    [com.android.fileexplorer, com.android.htmlviewer, com.google.android.documentsui, com.miHoYo.Yuanshen, com.miHoYo.cloudgames.ys]
+  Abort Dexopt Map:
+    [empty]
+  Use Top Packages:
+    [com.tencent.tmgp.sgame, com.miui.home, com.mangekyo.benchmark, com.android.settings, com.miui.securitycenter, com.tencent.mobileqq, com.ghostlock.app, com.xiaomi.market, com.tencent.gamehelper.smoba, com.android.systemui, com.android.quicksearchbox, com.mfashiongallery.emag, com.miui.screenrecorder, com.xiaomi.cameramind, com.mediatek.ims, com.github.shadowsocks, com.quark.browser, au.com.buyathome.android, com.android.adservices.api, com.hungrypanda.waimai, com.gubulin.il, com.farproc.wifi.analyzer, com.android.providers.telephony, com.miui.powerkeeper, com.tencent.tmgp.cod, com.tencent.tmgp.dfm, com.android.providers.calendar, com.tencent.game.rhythmmaster, com.xiaomi.vipaccount, com.milink.service, moe.low.arc, com.miui.dmregservice, com.qiyi.video, com.miHoYo.cloudgames.ys, com.mediatek.location.lppe.main, com.xiaomi.account, com.activision.callofduty.shooter, com.xiaomi.mi_connect_service, com.miui.themestore, com.iceasy.chip, com.miHoYo.cloudgames.Nap, com.kroegerama.appchecker, com.iapp.app, com.miui.packageinstaller, com.github.kr328.clash, com.njlabs.showjava, com.unicostudio.braintest, com.hj119.sygjx, com.fobwifi.transocks, com.xiaomi.gamecenter.sdk.service, com.phoenix.read, com.android.htmlviewer, com.miui.securityadd, com.lerist.go_hosts, de.android.telnet, com.miui.gallery, com.android.providers.downloads, com.codesector.speedview.pro, com.dianping.v1, com.mihoyo.hyperion, store.dpos.com.ilovepizza, com.knowyou.perception, com.openai.chatgpt, com.aliyun.tongyi, com.tencent.cmocmna, com.macropinch.hydra.android, com.onemore.app.smartheadset.android, com.grilld.grilld, com.android.browser, com.miui.systemAdSolution, com.xiaomi.aiasst.vision, com.Gaggle.fun.GooseGooseDuck, com.miui.tsmclient, ioncannon.com.qboost, com.dmzj.manhua, com.easi.customer, lybh.llztt, com.futuremark.dmandroid.application, com.android.soundrecorder, com.baidu.input_mi, com.antutu.benchmark.full, com.xiaomi.trustservice, com.chaozh.iReaderFree, com.xmvideo.app, org.freeandroidtools.root_checker, com.harkhark.harkhark, com.miui.guardprovider, org.zwanoo.android.speedtest, com.android.vending, in.zhaoj.shadowsocksr, com.android.networkstack, com.xingin.xhs, com.miui.notification, com.miui.micloudsync, com.xiaomi.barrage, com.tencent.mm, com.xiaomi.ab, com.taobao.meta.avatar, com.xiaomi.mibrain.speech, com.umetrip.android.msky.app]
+  App Launch Information:
+    AppLaunchData[size=34, allApps=[com.miui.home:-1:138, com.tencent.tmgp.sgame:8:63, com.android.settings:8:14, com.miui.securitycenter:8:11, com.xiaomi.market:8:9, org.localsend.localsend_app:8:6, com.android.permissioncontroller:8:6, flar2.devcheck:8:6, com.yifeng.tools:8:5, com.android.updater:8:5, com.tencent.mobileqq:8:4, com.miui.packageinstaller:8:4, com.android.vending:8:4, com.mfashiongallery.emag:8:3, ru.andr7e.deviceinfohw:8:3, com.liuzh.deviceinfo:8:3, com.google.android.gms:8:2, com.android.fileexplorer:4:2, com.android.systemui:8:2, miui.systemui.plugin:9:2, com.miui.weather2:-1:2, com.ghostlock.app:8:2, com.cpuid.cpu_z:8:1, com.miHoYo.cloudgames.ys:4:1, com.android.contacts:8:1, com.android.quicksearchbox:8:1, com.zggame.xuanji.public:8:1, com.google.android.documentsui:4:1, com.socpk.cyberroom:8:1, com.miHoYo.Yuanshen:4:1, com.tencent.gamehelper.smoba:8:1, com.android.camera:8:1, com.miui.gallery:-1:1, com.android.htmlviewer:4:1]]
+  bg-dexopt-ex compile info:
+    2026-10-10 22:27:29 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=28.139 lastCompile=2026-10-10 22:27:29 sinceLastCompile=3d16h14m22s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-10 22:27:29 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=28.139 lastCompile=2026-10-10 22:27:29 sinceLastCompile=3d16h14m22s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-10 22:27:29 pkg=com.android.fileexplorer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=28.139 lastCompile=2026-10-10 22:27:29 sinceLastCompile=3d16h14m22s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-10 22:27:29 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=28.139 lastCompile=2026-10-10 22:27:29 sinceLastCompile=3d16h14m22s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-10 22:27:29 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=28.139 lastCompile=2026-10-07 06:13:06 sinceLastCompile=3d16h14m22s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-10 22:27:29 pkg=com.mangekyo.benchmark status=Compile result=20 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=28.139 lastCompile=2026-10-07 06:13:06 sinceLastCompile=4d1h14m32s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-07 06:13:06 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=35.178 lastCompile=2026-10-07 06:13:06 sinceLastCompile=4d1h14m32s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-07 06:13:06 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=35.178 lastCompile=2026-10-07 06:13:06 sinceLastCompile=4d1h14m32s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-07 06:13:06 pkg=com.google.android.gms status=Compile result=20 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=35.178 lastCompile=2026-10-07 06:12:59 sinceLastCompile=4d1h14m32s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-07 06:12:59 pkg=com.android.fileexplorer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.852 lastCompile=2026-10-07 06:12:59 sinceLastCompile=4d1h14m32s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-07 06:12:59 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.852 lastCompile=2026-10-07 06:12:59 sinceLastCompile=4d1h14m32s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-07 06:12:59 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.852 lastCompile=2026-10-03 03:58:26 sinceLastCompile=4d1h14m32s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-03 03:58:26 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=35.693 lastCompile=2026-10-03 03:58:26 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-03 03:58:26 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=35.693 lastCompile=2026-10-03 03:58:26 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-03 03:58:26 pkg=com.android.fileexplorer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=35.693 lastCompile=2026-10-03 03:58:25 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-03 03:58:25 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=35.693 lastCompile=2026-10-03 03:58:25 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-10-03 03:58:25 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=35.693 lastCompile=1970-01-01 10:00:00 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 19:09:58 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=30.555 lastCompile=2026-09-25 19:09:58 sinceLastCompile=59m16s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 19:09:58 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=30.555 lastCompile=2026-09-25 19:09:58 sinceLastCompile=59m16s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 19:09:58 pkg=com.android.fileexplorer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=30.555 lastCompile=2026-09-25 19:09:58 sinceLastCompile=59m16s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 19:09:58 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=30.555 lastCompile=2026-09-25 19:09:58 sinceLastCompile=59m16s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 19:09:58 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=30.555 lastCompile=2026-09-25 19:09:58 sinceLastCompile=59m16s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 19:09:58 pkg=com.tencent.tmgp.sgame status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=30.555 lastCompile=2026-09-25 18:10:41 sinceLastCompile=59m16s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 18:10:41 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.061 lastCompile=2026-09-25 18:10:41 sinceLastCompile=17m53s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 18:10:41 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.061 lastCompile=2026-09-25 18:10:40 sinceLastCompile=17m53s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 18:10:40 pkg=com.android.fileexplorer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.061 lastCompile=2026-09-25 18:10:40 sinceLastCompile=17m53s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 18:10:40 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.061 lastCompile=2026-09-25 18:10:40 sinceLastCompile=17m53s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 18:10:40 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.061 lastCompile=2026-09-25 18:10:40 sinceLastCompile=17m53s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 18:10:40 pkg=com.tencent.tmgp.sgame status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.061 lastCompile=2026-09-25 17:52:47 sinceLastCompile=17m53s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:52:47 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=33.355 lastCompile=2026-09-25 17:52:47 sinceLastCompile=31m14s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:52:47 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=33.355 lastCompile=2026-09-25 17:52:46 sinceLastCompile=31m14s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:52:46 pkg=com.android.fileexplorer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=33.355 lastCompile=2026-09-25 17:52:46 sinceLastCompile=31m14s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:52:46 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=33.355 lastCompile=2026-09-25 17:52:46 sinceLastCompile=31m14s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:52:46 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=33.355 lastCompile=2026-09-25 17:21:31 sinceLastCompile=31m14s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:21:31 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.042 lastCompile=2026-09-25 17:21:31 sinceLastCompile=16m14s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:21:31 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.042 lastCompile=2026-09-25 17:21:31 sinceLastCompile=16m14s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:21:31 pkg=com.android.fileexplorer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.042 lastCompile=2026-09-25 17:21:31 sinceLastCompile=16m14s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:21:31 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.042 lastCompile=2026-09-25 17:21:31 sinceLastCompile=16m14s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:21:31 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.042 lastCompile=2026-09-25 17:05:16 sinceLastCompile=16m14s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:05:16 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=35.68 lastCompile=2026-09-25 17:05:16 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:05:16 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=35.68 lastCompile=2026-09-25 17:05:16 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:05:16 pkg=com.android.fileexplorer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=35.68 lastCompile=2026-09-25 17:05:16 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:05:16 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=35.68 lastCompile=2026-09-25 17:05:16 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:05:16 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=35.68 lastCompile=2026-09-25 17:05:16 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-25 17:05:16 pkg=com.tencent.tmgp.sgame status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=35.68 lastCompile=1970-01-01 10:00:00 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-18 02:12:09 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=28.846 lastCompile=2026-09-18 02:12:09 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-18 02:12:09 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=28.846 lastCompile=2026-09-18 02:12:09 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-18 02:12:09 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=28.846 lastCompile=2026-09-18 02:12:09 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-18 02:12:09 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=28.846 lastCompile=2026-09-18 02:12:09 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-18 02:12:09 pkg=com.android.camera status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=28.846 lastCompile=2026-09-18 02:12:09 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-18 02:12:09 pkg=com.android.fileexplorer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=28.846 lastCompile=2026-09-18 02:12:09 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-18 02:12:09 pkg=com.android.permissioncontroller status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=28.846 lastCompile=1970-01-01 10:00:00 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-18 00:33:21 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.676 lastCompile=2026-09-18 00:33:21 sinceLastCompile=5h15m31s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-18 00:33:21 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.676 lastCompile=2026-09-18 00:33:20 sinceLastCompile=5h15m31s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-18 00:33:20 pkg=com.android.camera status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.676 lastCompile=2026-09-18 00:33:20 sinceLastCompile=5h15m31s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-18 00:33:20 pkg=com.android.fileexplorer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.676 lastCompile=2026-09-18 00:33:20 sinceLastCompile=5h15m31s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-18 00:33:20 pkg=com.android.permissioncontroller status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.676 lastCompile=2026-09-18 00:33:20 sinceLastCompile=5h15m31s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-18 00:33:20 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.676 lastCompile=2026-09-18 00:33:20 sinceLastCompile=5h15m31s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-18 00:33:20 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.676 lastCompile=2026-09-17 19:17:48 sinceLastCompile=5h15m31s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 19:17:48 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.025 lastCompile=2026-09-17 19:17:48 sinceLastCompile=5h21s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 19:17:48 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.025 lastCompile=2026-09-17 19:17:48 sinceLastCompile=5h21s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 19:17:48 pkg=com.android.camera status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.025 lastCompile=2026-09-17 19:17:48 sinceLastCompile=5h21s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 19:17:48 pkg=com.android.fileexplorer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.025 lastCompile=2026-09-17 19:17:48 sinceLastCompile=5h21s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 19:17:48 pkg=com.android.permissioncontroller status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.025 lastCompile=2026-09-17 19:17:48 sinceLastCompile=5h21s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 19:17:48 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.025 lastCompile=2026-09-17 19:17:48 sinceLastCompile=5h21s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 19:17:48 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.025 lastCompile=2026-09-17 14:17:26 sinceLastCompile=5h21s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 14:17:26 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=26.529 lastCompile=2026-09-17 14:17:26 sinceLastCompile=1h34m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 14:17:26 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=26.529 lastCompile=2026-09-17 14:17:26 sinceLastCompile=1h34m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 14:17:26 pkg=com.liuzh.deviceinfo status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=26.529 lastCompile=2026-09-17 14:17:26 sinceLastCompile=1h34m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 14:17:26 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=26.529 lastCompile=2026-09-17 14:17:26 sinceLastCompile=1h34m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 14:17:26 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=26.529 lastCompile=2026-09-17 12:42:26 sinceLastCompile=1h34m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 12:42:26 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=26.962 lastCompile=2026-09-17 12:42:26 sinceLastCompile=14h49m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 12:42:26 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=26.962 lastCompile=2026-09-17 12:42:26 sinceLastCompile=14h49m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 12:42:26 pkg=com.liuzh.deviceinfo status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=26.962 lastCompile=2026-09-17 12:42:26 sinceLastCompile=14h49m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 12:42:26 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=26.962 lastCompile=2026-09-17 12:42:26 sinceLastCompile=14h49m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-17 12:42:26 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=26.962 lastCompile=2026-09-16 21:52:26 sinceLastCompile=14h49m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-16 21:52:26 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.448 lastCompile=2026-09-16 21:52:26 sinceLastCompile=1h4m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-16 21:52:26 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.448 lastCompile=2026-09-16 21:52:26 sinceLastCompile=1h4m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-16 21:52:26 pkg=com.liuzh.deviceinfo status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.448 lastCompile=2026-09-16 21:52:26 sinceLastCompile=1h4m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-16 21:52:26 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.448 lastCompile=2026-09-16 21:52:26 sinceLastCompile=1h4m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-16 21:52:26 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=32.448 lastCompile=2026-09-16 20:47:26 sinceLastCompile=1h4m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-16 20:47:26 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.334 lastCompile=2026-09-16 20:47:26 sinceLastCompile=22h29m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-16 20:47:26 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.334 lastCompile=2026-09-16 20:47:26 sinceLastCompile=22h29m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-16 20:47:26 pkg=com.liuzh.deviceinfo status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.334 lastCompile=2026-09-16 20:47:26 sinceLastCompile=22h29m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-16 20:47:26 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.334 lastCompile=2026-09-16 20:47:26 sinceLastCompile=22h29m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-16 20:47:26 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=34.334 lastCompile=2026-09-15 22:17:26 sinceLastCompile=22h29m59s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-15 22:17:26 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=36.299 lastCompile=2026-09-15 22:17:26 sinceLastCompile=5d7h55m41s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-15 22:17:26 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=36.299 lastCompile=2026-09-15 22:17:26 sinceLastCompile=5d7h55m41s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-15 22:17:26 pkg=com.liuzh.deviceinfo status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=36.299 lastCompile=2026-09-15 22:17:26 sinceLastCompile=5d7h55m41s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-15 22:17:26 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=36.299 lastCompile=2026-09-15 22:17:26 sinceLastCompile=5d7h55m41s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-15 22:17:26 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=36.299 lastCompile=2026-09-10 14:21:44 sinceLastCompile=5d7h55m41s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-10 14:21:44 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=27.769 lastCompile=2026-09-10 14:21:44 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-10 14:21:44 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=27.769 lastCompile=2026-09-10 14:21:44 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-10 14:21:44 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=27.769 lastCompile=2026-09-10 14:21:44 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-10 14:21:44 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=27.769 lastCompile=2026-09-10 14:21:44 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-10 14:21:43 pkg=com.liuzh.deviceinfo status=Compile result=10 screenOn=false startBattery=100 currentBattery=100 usedBattery=0 powered=true temp=27.769 lastCompile=1970-01-01 10:00:00 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-04 10:28:10 pkg=com.google.android.documentsui status=Compile result=10 screenOn=false startBattery=97 currentBattery=97 usedBattery=0 powered=true temp=36.617 lastCompile=2026-09-04 10:28:09 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-04 10:28:09 pkg=com.miHoYo.cloudgames.ys status=Compile result=10 screenOn=false startBattery=97 currentBattery=97 usedBattery=0 powered=true temp=36.617 lastCompile=2026-09-04 10:28:09 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-04 10:28:09 pkg=com.miHoYo.Yuanshen status=Compile result=10 screenOn=false startBattery=97 currentBattery=97 usedBattery=0 powered=true temp=36.617 lastCompile=2026-09-04 10:28:09 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+    2026-09-04 10:28:09 pkg=com.android.htmlviewer status=Compile result=10 screenOn=false startBattery=97 currentBattery=97 usedBattery=0 powered=true temp=36.617 lastCompile=2026-09-04 10:28:09 sinceLastCompile=0s deviceWorkingState { audio=false downloading=false dexopting=false}
+==== Boot Dexopt Results ====
+  Start time: 2026-09-26 03:05:16
+  Total packages: 484
+  [1/484] com.miui.misightservice | SKIPPED | verify arm64-v8a
+  [2/484] com.xiaomi.aiservice | SKIPPED | verify arm64-v8a
+  [3/484] com.xiaomi.aicr | SKIPPED | verify arm64-v8a
+  [4/484] com.xiaomi.migameservice | SKIPPED | verify arm64-v8a
+  [5/484] com.tencent.tmgp.sgame | SKIPPED | verify arm64-v8a
+  [6/484] com.miui.securitycore | SKIPPED | verify arm64-v8a
+  [7/484] com.miui.wmsvc | SKIPPED | verify arm64-v8a
+  [8/484] com.xiaomi.xmsf | SKIPPED | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a
+  [9/484] com.android.vending | SKIPPED | verify arm64-v8a
+  [10/484] com.android.permissioncontroller | SKIPPED | verify arm64-v8a
+  [11/484] com.xiaomi.misettings | SKIPPED | verify arm64-v8a
+  [12/484] com.tencent.mm | SKIPPED | verify arm64-v8a
+  [13/484] com.xiaomi.mirror | SKIPPED | verify arm64-v8a
+  [14/484] com.android.settings | SKIPPED | verify arm64-v8a
+  [15/484] com.xiaomi.market | SKIPPED | verify arm64-v8a
+  [16/484] com.android.calendar | SKIPPED | verify arm64-v8a
+  [17/484] com.android.bluetooth | SKIPPED | verify arm64-v8a
+  [18/484] com.miui.passwords | SKIPPED | verify arm64-v8a
+  [19/484] com.miui.guardprovider | SKIPPED | verify arm64-v8a
+  [20/484] com.android.keychain | SKIPPED | verify arm64-v8a
+  [21/484] com.android.traceur | SKIPPED | verify arm64-v8a
+  [22/484] com.miui.misound | SKIPPED | verify arm64-v8a
+  [23/484] com.android.phone | SKIPPED | verify arm64-v8a
+  [24/484] com.miui.core | SKIPPED | verify arm64-v8a
+  [25/484] com.xiaomi.registration | SKIPPED | verify arm64-v8a
+  [26/484] com.android.deskclock | SKIPPED | verify arm64-v8a
+  [27/484] com.xring.poweroffalarm | SKIPPED | verify arm64-v8a
+  [28/484] com.mi.health | SKIPPED | verify arm64-v8a
+  [29/484] com.miui.analytics | SKIPPED | verify arm64-v8a
+  [30/484] com.android.cellbroadcastreceiver | SKIPPED | verify arm64-v8a
+  [31/484] com.google.android.accessibility.switchaccess | SKIPPED | verify arm64-v8a
+  [32/484] com.tencent.tmgp.pubgmhd | SKIPPED | verify arm64-v8a
+  [33/484] com.android.contacts | SKIPPED | verify arm64-v8a
+  [34/484] com.miui.yellowpage | SKIPPED | verify arm64-v8a
+  [35/484] com.miui.notification | SKIPPED | verify arm64-v8a
+  [36/484] com.android.soundrecorder | SKIPPED | verify arm64-v8a
+  [37/484] com.miui.systemAdSolution | SKIPPED | verify arm64-v8a
+  [38/484] com.android.carrierconfig | SKIPPED | verify arm64-v8a
+  [39/484] android.ext.services | SKIPPED | verify arm64-v8a
+  [40/484] com.miui.cleanmaster | SKIPPED | verify arm64-v8a
+  [41/484] com.miui.voiceassist | SKIPPED | verify arm64-v8a
+  [42/484] com.android.calllogbackup | SKIPPED | verify arm64-v8a
+  [43/484] com.xiaomi.aiasst.vision | SKIPPED | verify arm64-v8a
+  [44/484] com.miui.notes | SKIPPED | verify arm64-v8a
+  [45/484] com.android.nfc | SKIPPED | verify arm64-v8a
+  [46/484] com.miui.phrase | SKIPPED | verify arm64-v8a
+  [47/484] com.miui.greenguard | SKIPPED | verify arm64-v8a
+  [48/484] com.debug.loggerui | SKIPPED | verify arm64-v8a
+  [49/484] androidx.core.uwb.backend | SKIPPED | verify arm64-v8a
+  [50/484] com.miui.miwallpaper | SKIPPED | verify arm64-v8a
+  [51/484] com.google.android.webview | SKIPPED | verify arm64-v8a | verify armeabi-v7a
+  [52/484] com.google.android.configupdater | SKIPPED | verify arm64-v8a
+  [53/484] com.xiaomi.finddevice | SKIPPED | verify arm64-v8a
+  [54/484] com.miui.micloudsync | SKIPPED | verify arm64-v8a
+  [55/484] com.android.providers.blockednumber | SKIPPED | verify arm64-v8a
+  [56/484] com.miui.securitymanager | SKIPPED | verify arm64-v8a
+  [57/484] com.miui.tsmclient | SKIPPED | verify arm64-v8a
+  [58/484] com.xiaomi.minigame | SKIPPED | verify arm64-v8a
+  [59/484] com.android.wallpaperbackup | SKIPPED | verify arm64-v8a
+  [60/484] com.android.camera | SKIPPED | verify arm64-v8a
+  [61/484] com.baidu.input_mi | SKIPPED | verify arm64-v8a
+  [62/484] com.xiaomi.macro | SKIPPED | verify arm64-v8a
+  [63/484] com.miui.cloudbackup | SKIPPED | verify arm64-v8a
+  [64/484] com.android.managedprovisioning | SKIPPED | verify arm64-v8a
+  [65/484] com.android.shell | SKIPPED | verify arm64-v8a
+  [66/484] com.miui.personalassistant | SKIPPED | verify arm64-v8a
+  [67/484] com.miui.touchassistant | SKIPPED | verify arm64-v8a
+  [68/484] com.miui.player | SKIPPED | verify arm64-v8a
+  [69/484] com.xiaomi.simactivate.service | SKIPPED | verify arm64-v8a
+  [70/484] com.android.fileexplorer | SKIPPED | verify arm64-v8a
+  [71/484] com.xiaomi.phone | SKIPPED | verify arm64-v8a
+  [72/484] com.xiaomi.ab | SKIPPED | verify arm64-v8a
+  [73/484] com.android.externalstorage | SKIPPED | verify arm64-v8a
+  [74/484] com.android.imsserviceentitlement | SKIPPED | verify arm64-v8a
+  [75/484] com.xiaomi.gnss.polaris | SKIPPED | verify arm64-v8a
+  [76/484] com.mediatek.engineermode | SKIPPED | verify arm64-v8a
+  [77/484] com.mediatek.atci.service | SKIPPED | verify arm64-v8a
+  [78/484] com.android.ondevicepersonalization.services | SKIPPED | verify arm64-v8a
+  [79/484] com.android.dynsystem | SKIPPED | verify arm64-v8a
+  [80/484] com.miui.powerinsight | SKIPPED | verify arm64-v8a
+  [81/484] com.xiaomi.trustservice | SKIPPED | verify arm64-v8a
+  [82/484] com.xiaomi.joyose | SKIPPED | verify arm64-v8a
+  [83/484] com.android.localtransport | SKIPPED | verify arm64-v8a
+  [84/484] com.miui.cloudservice | SKIPPED | verify arm64-v8a
+  [85/484] com.lbe.security.miui | SKIPPED | verify arm64-v8a
+  [86/484] com.xiaomi.metoknlp | SKIPPED | verify arm64-v8a
+  [87/484] vendor.xring.geofence | SKIPPED | verify arm64-v8a
+  [88/484] com.android.browser | SKIPPED | verify arm64-v8a
+  [89/484] com.miui.hybrid | SKIPPED | verify arm64-v8a
+  [90/484] com.tencent.soter.soterserver | SKIPPED | verify arm64-v8a
+  [91/484] com.xiaomi.xmsfkeeper | SKIPPED | verify arm64-v8a
+  [92/484] com.android.providers.media.module | SKIPPED | verify arm64-v8a
+  [93/484] com.android.thememanager | SKIPPED | verify arm64-v8a
+  [94/484] com.google.android.marvin.talkback | SKIPPED | verify arm64-v8a
+  [95/484] com.xiaomi.bluetooth | SKIPPED | verify arm64-v8a
+  [96/484] com.miui.audiomonitor | SKIPPED | verify arm64-v8a
+  [97/484] com.android.se | SKIPPED | verify arm64-v8a
+  [98/484] com.android.networkstack | SKIPPED | verify arm64-v8a
+  [99/484] com.xiaomi.hypercomm | SKIPPED | verify arm64-v8a
+  [100/484] com.google.android.documentsui | SKIPPED | verify arm64-v8a
+  [101/484] com.vortex | SKIPPED | verify arm64-v8a
+  [102/484] com.xiaomi.carrierconfig | SKIPPED | verify arm64-v8a
+  [103/484] com.android.mms | SKIPPED | verify arm64-v8a
+  [104/484] com.rocket.ef792a2e0dbdf51 | SKIPPED | verify arm64-v8a
+  [105/484] com.xiaomi.aiasst.service | SKIPPED | verify arm64-v8a
+  [106/484] com.miui.aod | SKIPPED | verify arm64-v8a
+  [107/484] com.android.systemui | SKIPPED | speed-profile arm64-v8a
+  [108/484] com.xiaomi.mibrain.speech | SKIPPED | verify arm64-v8a
+  [109/484] com.xiaomi.aon | SKIPPED | verify arm64-v8a
+  [110/484] com.cpuid.cpu_z | SKIPPED | verify arm64-v8a
+  [111/484] ru.andr7e.deviceinfohw | SKIPPED | verify arm64-v8a
+  [112/484] com.harkhark.harkhark | SKIPPED | verify arm64-v8a
+  [113/484] com.liuzh.deviceinfo | SKIPPED | verify arm64-v8a
+  [114/484] com.os.callservice | SKIPPED | verify arm64-v8a
+  [115/484] ioncannon.com.qboost | SKIPPED | verify arm64-v8a
+  [116/484] kr.co.robin.android.easteregg | SKIPPED | verify arm64-v8a
+  [117/484] com.xiaomi.app.toolbox | SKIPPED | verify arm64-v8a
+  [118/484] com.tencent.mobileqq | SKIPPED | verify arm64-v8a
+  [119/484] eu.thedarken.sdm | SKIPPED | verify arm64-v8a
+  [120/484] org.freeandroidtools.root_checker | SKIPPED | verify arm64-v8a
+  [121/484] com.android.systemui.accessibility.accessibilitymenu | SKIPPED | verify arm64-v8a
+  [122/484] com.cultivation.zmda | SKIPPED | verify arm64-v8a
+  [123/484] com.tencent.game.rhythmmaster | SKIPPED | verify arm64-v8a
+  [124/484] mark.via | SKIPPED | verify arm64-v8a
+  [125/484] com.miui.autoui.ext | SKIPPED | verify arm64-v8a
+  [126/484] com.uhu.community.beauty | SKIPPED | verify armeabi-v7a
+  [127/484] com.miui.miuibbs | SKIPPED | verify armeabi-v7a
+  [128/484] com.appgo.appgopro | SKIPPED | verify arm64-v8a
+  [129/484] com.xiaomi.tuiservice | SKIPPED | verify arm64-v8a
+  [130/484] com.hippo.ehviewer | SKIPPED | verify armeabi-v7a
+  [131/484] com.huawei.experience.ec | SKIPPED | verify arm64-v8a
+  [132/484] com.hyper.gallery.plugin | SKIPPED | verify arm64-v8a
+  [133/484] com.kuro.cloudgame | SKIPPED | verify arm64-v8a
+  [134/484] com.easytech.ew5 | SKIPPED | verify arm64-v8a
+  [135/484] com.xiaomi.barrage | SKIPPED | verify arm64-v8a
+  [136/484] com.tencent.tmgp.cf | SKIPPED | verify arm64-v8a
+  [137/484] com.miui.newhome | SKIPPED | verify arm64-v8a
+  [138/484] com.android.chrome | SKIPPED | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a
+  [139/484] com.miui.screenshot | SKIPPED | verify arm64-v8a
+  [140/484] com.miui.video | SKIPPED | verify arm64-v8a
+  [141/484] com.android.providers.contacts | SKIPPED | verify arm64-v8a
+  [142/484] com.miui.accessibility | SKIPPED | verify arm64-v8a
+  [143/484] com.kurogame.mingchao | SKIPPED | verify arm64-v8a
+  [144/484] com.miui.mishare.connectivity | SKIPPED | verify arm64-v8a
+  [145/484] com.xiaomi.apn | SKIPPED | verify arm64-v8a
+  [146/484] miui.systemui.plugin | SKIPPED | speed arm64-v8a
+  [147/484] com.jingdong.app.mall | SKIPPED | verify arm64-v8a
+  [148/484] com.tencent.jkchess | SKIPPED | verify arm64-v8a
+  [149/484] com.mihoyo.desktopportal | SKIPPED | verify arm64-v8a
+  [150/484] com.yifeng.tools | SKIPPED | verify arm64-v8a
+  [151/484] com.coolapk.market | SKIPPED | verify arm64-v8a
+  [152/484] com.autonavi.minimap | SKIPPED | verify arm64-v8a
+  [153/484] org.localsend.localsend_app | SKIPPED | verify arm64-v8a
+  [154/484] jackpal.androidterm | SKIPPED | verify armeabi-v7a
+  [155/484] com.taobao.taobao | SKIPPED | verify arm64-v8a
+  [156/484] com.xs.fm.lite | SKIPPED | verify arm64-v8a
+  [157/484] com.Miui.Hide | SKIPPED | verify arm64-v8a
+  [158/484] com.miHoYo.ys.mi | SKIPPED | verify arm64-v8a
+  [159/484] com.socpk.cyberroom | SKIPPED | verify arm64-v8a
+  [160/484] com.gof.global | SKIPPED | verify arm64-v8a
+  [161/484] com.miui.carlink | SKIPPED | verify arm64-v8a
+  [162/484] com.zggame.xuanji.public | SKIPPED | verify arm64-v8a
+  [163/484] com.miui.uireporter | SKIPPED | verify arm64-v8a
+  [164/484] com.android.printspooler | SKIPPED | verify arm64-v8a
+  [165/484] com.miHoYo.Yuanshen | SKIPPED | verify arm64-v8a
+  [166/484] com.miui.mediaeditor | SKIPPED | verify arm64-v8a
+  [167/484] com.Xiangshe.Iris | SKIPPED | verify armeabi-v7a
+  [168/484] com.bsp.catchlog | SKIPPED | verify arm64-v8a
+  [169/484] com.miui.securityinputmethod | SKIPPED | verify arm64-v8a
+  [170/484] com.miHoYo.Nap | SKIPPED | verify arm64-v8a
+  [171/484] com.miui.voicetrigger | SKIPPED | verify arm64-v8a
+  [172/484] com.onemore.app.smartheadset.android | SKIPPED | verify arm64-v8a
+  [173/484] com.af.benchaf | SKIPPED | verify arm64-v8a
+  [174/484] com.mnyq.fssd | SKIPPED | verify arm64-v8a
+  [175/484] bin.mt.plus | SKIPPED | verify arm64-v8a
+  [176/484] com.miui.contentcatcher | SKIPPED | verify arm64-v8a
+  [177/484] com.miui.system | SKIPPED | verify arm64-v8a | verify armeabi-v7a
+  [178/484] com.android.mtp | SKIPPED | verify arm64-v8a
+  [179/484] com.xiaomi.micloud.sdk | SKIPPED | verify arm64-v8a | verify armeabi-v7a
+  [180/484] com.xiaomi.continuity.sdkapp | SKIPPED | verify arm64-v8a
+  [181/484] com.android.providers.contactkeys | SKIPPED | verify arm64-v8a
+  [182/484] com.android.providers.userdictionary | SKIPPED | verify arm64-v8a
+  [183/484] com.android.ons | SKIPPED | verify arm64-v8a
+  [184/484] com.xiaomi.radio | SKIPPED | verify arm64-v8a
+  [185/484] com.xiaomi.ecc | SKIPPED | verify arm64-v8a
+  [186/484] com.android.cellbroadcastservice | SKIPPED | verify arm64-v8a
+  [187/484] com.xiaomi.smarthome | SKIPPED | verify arm64-v8a
+  [188/484] com.android.stk | SKIPPED | verify arm64-v8a
+  [189/484] com.android.webapp.service | SKIPPED | verify arm64-v8a
+  [190/484] com.android.wm.shell | SKIPPED | verify arm64-v8a
+  [191/484] com.android.networkstack.tethering | SKIPPED | verify arm64-v8a
+  [192/484] com.xiaomi.healthkit | SKIPPED | verify arm64-v8a
+  [193/484] com.google.android.gms.policy_sidecar_aps | SKIPPED | verify arm64-v8a
+  [194/484] com.android.carrierdefaultapp | SKIPPED | verify arm64-v8a
+  [195/484] com.xiaomi.type | SKIPPED | verify arm64-v8a
+  [196/484] com.android.server.telecomui | SKIPPED | verify arm64-v8a
+  [197/484] com.android.privatespace | SKIPPED | verify arm64-v8a
+  [198/484] com.android.eyedropper | SKIPPED | verify arm64-v8a
+  [199/484] com.xiaomi.aireco | SKIPPED | verify arm64-v8a
+  [200/484] com.android.contactspicker | SKIPPED | verify arm64-v8a
+  [201/484] com.android.DeviceAsWebcam | SKIPPED | verify arm64-v8a
+  [202/484] com.zmifi.blepb | SKIPPED | verify arm64-v8a
+  [203/484] org.ifaa.aidl.manager | SKIPPED | verify arm64-v8a
+  [204/484] com.miui.thirdappassistant | SKIPPED | verify arm64-v8a
+  [205/484] com.xiaomi.touchservice | SKIPPED | verify arm64-v8a
+  [206/484] com.miui.vsimcore | SKIPPED | verify arm64-v8a
+  [207/484] com.xiaomi.bbs | SKIPPED | verify armeabi-v7a
+  [208/484] com.everblue.myseed | SKIPPED | verify armeabi-v7a
+  [209/484] com.xiaomi.digitalkey | SKIPPED | verify arm64-v8a
+  [210/484] com.android.provision | SKIPPED | verify arm64-v8a
+  [211/484] io.github.naco_siren.gmgard | SKIPPED | verify arm64-v8a
+  [212/484] com.knowyou.perception | SKIPPED | verify arm64-v8a
+  [213/484] com.sorasu.armiku | SKIPPED | verify arm64-v8a
+  [214/484] com.vmos.app | SKIPPED | verify armeabi-v7a
+  [215/484] com.ioncannon.cpuburn.gpugflops | SKIPPED | verify arm64-v8a
+  [216/484] com.taptap | SKIPPED | verify arm64-v8a
+  [217/484] com.android.wifi.dialog | SKIPPED | verify arm64-v8a
+  [218/484] com.android.vpndialogs | SKIPPED | verify arm64-v8a
+  [219/484] com.android.intentresolver | SKIPPED | verify arm64-v8a
+  [220/484] com.androits.gps.test.pro | SKIPPED | verify arm64-v8a
+  [221/484] com.alibaba.mnnllm.android | SKIPPED | verify arm64-v8a
+  [222/484] com.sticktoit | SKIPPED | verify arm64-v8a
+  [223/484] com.miuix.editor | SKIPPED | verify arm64-v8a
+  [224/484] com.miui.extraphoto | SKIPPED | verify arm64-v8a
+  [225/484] com.hottagames.hotta.mi | SKIPPED | verify arm64-v8a
+  [226/484] com.android.virtualization.terminal | SKIPPED | verify arm64-v8a
+  [227/484] com.codestation.henkakuserver | SKIPPED | verify arm64-v8a
+  [228/484] com.miHoYo.bh3.mi | SKIPPED | verify arm64-v8a
+  [229/484] com.miui.contentextension | SKIPPED | verify arm64-v8a
+  [230/484] com.unionpay.tsmservice.mi | SKIPPED | verify arm64-v8a
+  [231/484] com.run.tower.defense | SKIPPED | verify arm64-v8a
+  [232/484] com.miHoYo.enterprise.NGHSoD | SKIPPED | verify arm64-v8a
+  [233/484] com.readygo.barrel.gp | SKIPPED | verify arm64-v8a
+  [234/484] com.apkpure.aegon | SKIPPED | verify arm64-v8a
+  [235/484] pw.lkz.pvp.blade | SKIPPED | verify armeabi-v7a
+  [236/484] com.miHoYo.hkrpg | SKIPPED | verify arm64-v8a
+  [237/484] com.lerist.syslock | SKIPPED | verify armeabi-v7a
+  [238/484] com.tencent.cmocmna | SKIPPED | verify arm64-v8a
+  [239/484] com.android.providers.downloads.ui | SKIPPED | verify arm64-v8a
+  [240/484] com.n0n3m4.droidc | SKIPPED | verify armeabi-v7a
+  [241/484] com.papegames.infinitynikki | SKIPPED | verify arm64-v8a
+  [242/484] com.S1T2.UNSWCyber | SKIPPED | verify armeabi-v7a
+  [243/484] com.ludashi.benchmark2 | SKIPPED | verify arm64-v8a
+  [244/484] com.lerist.fakelocation | SKIPPED | verify armeabi-v7a
+  [245/484] com.aurora.store | SKIPPED | verify arm64-v8a
+  [246/484] com.futuremark.dmandroid.application | SKIPPED | verify arm64-v8a
+  [247/484] com.Gaggle.fun.GooseGooseDuck | SKIPPED | verify arm64-v8a
+  [248/484] com.whatsbug.litiaotiao | SKIPPED | verify armeabi-v7a
+  [249/484] nico.styTool | SKIPPED | verify arm64-v8a
+  [250/484] com.github.xiaofei_dev.vibrator | SKIPPED | verify arm64-v8a
+  [251/484] com.porsche.missionear | SKIPPED | verify armeabi-v7a
+  [252/484] lysesoft.andftp | SKIPPED | verify arm64-v8a
+  [253/484] com.android.email | SKIPPED | verify arm64-v8a
+  [254/484] com.taobao.meta.avatar | SKIPPED | verify arm64-v8a
+  [255/484] com.activision.callofduty.shooter | SKIPPED | verify arm64-v8a
+  [256/484] com.miui.voiceassistProxy | SKIPPED | verify arm64-v8a
+  [257/484] com.levelinfinite.sgameGlobal | SKIPPED | verify arm64-v8a | verify arm64-v8a
+  [258/484] com.android.soundpicker | SKIPPED | verify arm64-v8a
+  [259/484] com.android.photopicker | SKIPPED | verify arm64-v8a
+  [260/484] com.miui.compass | SKIPPED | verify arm64-v8a
+  [261/484] com.iflytek.inputmethod.miui | SKIPPED | verify arm64-v8a
+  [262/484] com.sohu.inputmethod.sogou.xiaomi | SKIPPED | verify arm64-v8a
+  [263/484] org.zwanoo.android.speedtest | SKIPPED | verify arm64-v8a
+  [264/484] com.limelight | SKIPPED | verify arm64-v8a
+  [265/484] com.chaozh.iReaderFree | SKIPPED | verify arm64-v8a
+  [266/484] xzr.La.systemtoolbox | SKIPPED | verify arm64-v8a
+  [267/484] com.topjohnwu.magisk | SKIPPED | verify arm64-v8a
+  [268/484] com.xiaomi.youpin | SKIPPED | verify arm64-v8a
+  [269/484] com.fun.lastwar.gp | SKIPPED | verify arm64-v8a
+  [270/484] com.estrongs.android.pop | SKIPPED | verify arm64-v8a
+  [271/484] com.yougan233.wordjourney | SKIPPED | verify armeabi-v7a
+  [272/484] com.android.credentialmanager | SKIPPED | verify arm64-v8a
+  [273/484] com.openai.chatgpt | SKIPPED | verify arm64-v8a
+  [274/484] com.fido.asm | SKIPPED | verify arm64-v8a
+  [275/484] com.xiaoe.client | SKIPPED | verify arm64-v8a
+  [276/484] com.unicostudio.braintest | SKIPPED | verify arm64-v8a
+  [277/484] com.gyg.gomex | SKIPPED | verify arm64-v8a
+  [278/484] com.grilld.grilld | SKIPPED | verify arm64-v8a
+  [279/484] au.com.dominos.olo.android.app | SKIPPED | verify arm64-v8a
+  [280/484] com.redcat.PeriPerks | SKIPPED | verify arm64-v8a
+  [281/484] com.webling.hungryjacks | SKIPPED | verify arm64-v8a
+  [282/484] com.kfcaus.ordering | SKIPPED | verify arm64-v8a
+  [283/484] com.android.healthconnect.controller | SKIPPED | verify arm64-v8a
+  [284/484] com.miui.qr | SKIPPED | verify arm64-v8a
+  [285/484] android.miui.home.launcher.res | SKIPPED | verify arm64-v8a
+  [286/484] com.android.health.connect.backuprestore | SKIPPED | verify arm64-v8a
+  [287/484] com.ubercab.eats | SKIPPED | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a
+  [288/484] com.dd.doordash | SKIPPED | verify arm64-v8a
+  [289/484] com.google.android.ext.shared | SKIPPED | verify arm64-v8a
+  [290/484] com.xiaomi.cameratools | SKIPPED | verify arm64-v8a
+  [291/484] com.mediatek.autodialer | SKIPPED | verify arm64-v8a
+  [292/484] com.mediatek.ygps | SKIPPED | verify arm64-v8a
+  [293/484] com.android.companiondevicemanager | SKIPPED | verify arm64-v8a
+  [294/484] com.android.mms.service | SKIPPED | verify arm64-v8a
+  [295/484] com.android.federatedcompute.services | SKIPPED | verify arm64-v8a
+  [296/484] com.android.safetycenter.resources | SKIPPED | verify arm64-v8a
+  [297/484] com.android.pacprocessor | SKIPPED | verify arm64-v8a
+  [298/484] com.goodix.fingerprint.producttest | SKIPPED | verify arm64-v8a
+  [299/484] com.android.simappdialog | SKIPPED | verify arm64-v8a
+  [300/484] com.miui.backup | SKIPPED | verify arm64-v8a
+  [301/484] com.xiaomi.payment | SKIPPED | verify arm64-v8a
+  [302/484] com.android.connectivity.resources | SKIPPED | verify arm64-v8a
+  [303/484] com.android.backupconfirm | SKIPPED | verify arm64-v8a
+  [304/484] com.mcdonalds.au.gma | SKIPPED | verify arm64-v8a
+  [305/484] com.android.certinstaller | SKIPPED | verify arm64-v8a
+  [306/484] com.android.egg | SKIPPED | verify arm64-v8a
+  [307/484] com.android.settings.intelligence | SKIPPED | verify arm64-v8a
+  [308/484] com.android.providers.settings | SKIPPED | verify arm64-v8a
+  [309/484] com.android.sharedstoragebackup | SKIPPED | verify arm64-v8a
+  [310/484] com.miui.cit | SKIPPED | verify arm64-v8a
+  [311/484] com.android.dreams.basic | SKIPPED | verify arm64-v8a
+  [312/484] com.android.incallui | SKIPPED | verify arm64-v8a
+  [313/484] com.android.inputdevices | SKIPPED | verify arm64-v8a
+  [314/484] com.miui.bugreport | SKIPPED | verify arm64-v8a
+  [315/484] com.android.rkpdapp | SKIPPED | verify arm64-v8a
+  [316/484] com.android.providers.settings.auto_generated_rro_vendor__ | SKIPPED | verify arm64-v8a
+  [317/484] com.android.musicfx | SKIPPED | verify arm64-v8a
+  [318/484] com.android.cameraextensions | SKIPPED | verify arm64-v8a
+  [319/484] com.android.server.telecom | SKIPPED | verify arm64-v8a
+  [320/484] com.android.packageinstaller | SKIPPED | verify arm64-v8a
+  [321/484] com.android.proxyhandler | SKIPPED | verify arm64-v8a
+  [322/484] com.google.android.printservice.recommendation | SKIPPED | verify arm64-v8a
+  [323/484] com.miui.nextpay | SKIPPED | verify arm64-v8a
+  [324/484] com.xiaomi.otrpbroker | SKIPPED | verify arm64-v8a
+  [325/484] com.xiaomi.mtb | SKIPPED | verify arm64-v8a
+  [326/484] com.android.devicediagnostics | SKIPPED | verify arm64-v8a
+  [327/484] com.android.providers.partnerbookmarks | SKIPPED | verify arm64-v8a
+  [328/484] com.android.apps.tag | SKIPPED | verify arm64-v8a
+  [329/484] com.android.wallpaper.livepicker | SKIPPED | verify arm64-v8a
+  [330/484] com.xiaomi.mis | SKIPPED | verify arm64-v8a
+  [331/484] com.android.appsearch.apk | SKIPPED | verify arm64-v8a
+  [332/484] com.android.storagemanager | SKIPPED | verify arm64-v8a
+  [333/484] com.android.sdksandbox | SKIPPED | verify arm64-v8a
+  [334/484] com.mediatek.lbs.em2.ui | SKIPPED | verify arm64-v8a
+  [335/484] com.android.emergency | SKIPPED | verify arm64-v8a
+  [336/484] com.android.hotspot2.osulogin | SKIPPED | verify arm64-v8a
+  [337/484] com.android.bluetoothmidiservice | SKIPPED | verify arm64-v8a
+  [338/484] com.android.location.fused | SKIPPED | verify arm64-v8a
+  [339/484] com.android.captiveportallogin | SKIPPED | verify arm64-v8a
+  [340/484] com.miui.mediaviewer | SKIPPED | verify arm64-v8a
+  [341/484] com.android.devicelockcontroller | SKIPPED | verify arm64-v8a
+  [342/484] com.wapi.wapicertmanager | SKIPPED | verify arm64-v8a
+  [343/484] android.auto_generated_rro_vendor__ | SKIPPED | verify arm64-v8a
+  [344/484] com.x1y9.probe | SKIPPED | verify arm64-v8a
+  [345/484] com.xiaomi.wifichain | SKIPPED | verify arm64-v8a
+  [346/484] com.gameloft.android.GloftANPH | SKIPPED | verify armeabi-v7a
+  [347/484] com.xiaomi.mico | SKIPPED | verify arm64-v8a
+  [348/484] com.miui.newmidrive | SKIPPED | verify arm64-v8a
+  [349/484] com.jiaohua_browser | SKIPPED | verify arm64-v8a
+  [350/484] com.eg.android.AlipayGphone.giaiahfcicjfb | SKIPPED | verify armeabi-v7a
+  [351/484] lybh.jlsnsqmg | SKIPPED | verify armeabi-v7a
+  [352/484] com.picacomic.fregata | SKIPPED | verify arm64-v8a
+  [353/484] com.xmvideo.app | SKIPPED | verify arm64-v8a
+  [354/484] com.tencent.gamereva | SKIPPED | verify arm64-v8a
+  [355/484] com.app.pornhub | SKIPPED | verify armeabi-v7a
+  [356/484] com.amahua.ywofnbfd | SKIPPED | verify armeabi-v7a
+  [357/484] hcps.ipsz.fdyb.qeys | SKIPPED | verify arm64-v8a
+  [358/484] lybh.llztt | SKIPPED | verify armeabi-v7a
+  [359/484] com.macropinch.hydra.android | SKIPPED | verify arm64-v8a
+  [360/484] nl.richardvijgen.architectureofradioAndroid | SKIPPED | verify armeabi-v7a
+  [361/484] com.waterdaaan.cpufloat | SKIPPED | verify arm64-v8a
+  [362/484] make.more.r2d2.cellular_z | SKIPPED | verify arm64-v8a
+  [363/484] com.GiTeam.PuzzleSchoolGame | SKIPPED | verify arm64-v8a
+  [364/484] org.amalgam.laboratory | SKIPPED | verify arm64-v8a
+  [365/484] com.dmzj.manhua | SKIPPED | verify arm64-v8a
+  [366/484] com.dewmobile.kuaiya | SKIPPED | verify arm64-v8a
+  [367/484] com.One.WoodenLetter | SKIPPED | verify arm64-v8a
+  [368/484] eu.tsoml.graphicssettings | SKIPPED | verify arm64-v8a
+  [369/484] org.autojs.autojspro | SKIPPED | verify armeabi-v7a
+  [370/484] com.guxiaqiubai.jarvis | SKIPPED | verify arm64-v8a
+  [371/484] com.tratao.xtransfer | SKIPPED | verify arm64-v8a
+  [372/484] com.miHoYo.cloudgames.hkrpg | SKIPPED | verify arm64-v8a
+  [373/484] com.fortinet.forticlient_vpn | SKIPPED | verify arm64-v8a
+  [374/484] com.huawei.genexcloud.speedtest | SKIPPED | verify arm64-v8a
+  [375/484] lybh.llzhhpxf | SKIPPED | verify armeabi-v7a
+  [376/484] com.easi.customer | SKIPPED | verify arm64-v8a
+  [377/484] in.zhaoj.shadowsocksr | SKIPPED | verify armeabi-v7a
+  [378/484] com.ct.realname | SKIPPED | verify armeabi-v7a
+  [379/484] cc.oasis.minor1 | SKIPPED | verify arm64-v8a
+  [380/484] com.digidust.elokence.akinator.freemium | SKIPPED | verify arm64-v8a
+  [381/484] com.tencent.start | SKIPPED | verify arm64-v8a
+  [382/484] com.miui.miwallpaper.moon | SKIPPED | verify arm64-v8a
+  [383/484] com.zx.a2_quickfox | SKIPPED | verify arm64-v8a
+  [384/484] com.umetrip.android.msky.app | SKIPPED | verify arm64-v8a
+  [385/484] com.ludashi.aibench | SKIPPED | verify arm64-v8a
+  [386/484] com.miui.calculator | SKIPPED | verify arm64-v8a
+  [387/484] com.antutu.benchmark.full.lite | SKIPPED | verify arm64-v8a
+  [388/484] com.antutu.aibenchmark | SKIPPED | verify arm64-v8a
+  [389/484] com.ludashi.benchmark | SKIPPED | verify arm64-v8a
+  [390/484] com.antutu.benchmark.full | SKIPPED | verify arm64-v8a
+  [391/484] flar2.devcheck | SKIPPED | verify arm64-v8a
+  [392/484] com.tencent.tmgp.cod | SKIPPED | verify arm64-v8a
+  [393/484] com.tencent.gamehelper.smoba | SKIPPED | verify arm64-v8a
+  [394/484] com.microsoft.emmx | SKIPPED | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a
+  [395/484] com.yuanshi.wenxiaobai | SKIPPED | verify arm64-v8a
+  [396/484] ctrip.android.view | SKIPPED | verify arm64-v8a
+  [397/484] com.ruanmei.ithome | SKIPPED | verify arm64-v8a
+  [398/484] com.zhihu.android | SKIPPED | verify arm64-v8a
+  [399/484] com.mi.car.mobile | SKIPPED | verify arm64-v8a
+  [400/484] com.aliyun.tongyi | SKIPPED | verify arm64-v8a
+  [401/484] com.deepseek.chat | SKIPPED | verify arm64-v8a
+  [402/484] com.miui.huanji | SKIPPED | verify arm64-v8a
+  [403/484] com.tencent.hunyuan.app.chat | SKIPPED | verify arm64-v8a
+  [404/484] com.netease.cloudmusic | SKIPPED | verify arm64-v8a
+  [405/484] com.xs.fm | SKIPPED | verify arm64-v8a
+  [406/484] com.xunmeng.pinduoduo | SKIPPED | verify arm64-v8a
+  [407/484] tv.danmaku.bili | SKIPPED | verify arm64-v8a
+  [408/484] com.xingin.xhs | SKIPPED | verify arm64-v8a
+  [409/484] com.xiaomi.tinygame | SKIPPED | verify arm64-v8a
+  [410/484] com.larus.nova | SKIPPED | verify arm64-v8a
+  [411/484] com.tongcheng.android | SKIPPED | verify arm64-v8a
+  [412/484] com.taobao.idlefish | SKIPPED | verify arm64-v8a
+  [413/484] com.ss.android.article.news | SKIPPED | verify arm64-v8a
+  [414/484] com.sina.weibo | SKIPPED | verify arm64-v8a
+  [415/484] com.ss.android.ugc.aweme | SKIPPED | verify arm64-v8a
+  [416/484] com.smile.gifmaker | SKIPPED | verify arm64-v8a
+  [417/484] com.eg.android.AlipayGphone | SKIPPED | verify arm64-v8a
+  [418/484] com.dragon.read | SKIPPED | verify arm64-v8a
+  [419/484] com.UCMobile | SKIPPED | verify arm64-v8a
+  [420/484] cn.wps.moffice_eng | SKIPPED | verify arm64-v8a
+  [421/484] com.baidu.searchbox | SKIPPED | verify arm64-v8a
+  [422/484] com.hunantv.imgo.activity | SKIPPED | verify arm64-v8a
+  [423/484] com.alibaba.wireless | SKIPPED | verify arm64-v8a
+  [424/484] com.duokan.phone.remotecontroller | SKIPPED | verify arm64-v8a
+  [425/484] cn.wps.moffice_eng.xiaomi.lite | SKIPPED | verify arm64-v8a
+  [426/484] com.xiaomi.scanner | SKIPPED | verify arm64-v8a
+  [427/484] com.miui.virtualsim | SKIPPED | verify arm64-v8a
+  [428/484] com.baidu.BaiduMap | SKIPPED | verify arm64-v8a
+  [429/484] com.mipay.wallet | SKIPPED | verify arm64-v8a
+  [430/484] com.android.wallpapercropper | SKIPPED | verify arm64-v8a
+  [431/484] com.android.avatarpicker | SKIPPED | verify arm64-v8a
+  [432/484] com.android.bips | SKIPPED | verify arm64-v8a
+  [433/484] com.xiaomi.shop | SKIPPED | verify arm64-v8a
+  [434/484] com.miui.packageinstaller | SKIPPED | speed-profile arm64-v8a
+  [435/484] com.xiaomi.gamecenter | SKIPPED | verify arm64-v8a
+  [436/484] com.duokan.reader | SKIPPED | verify arm64-v8a
+  [437/484] com.miui.screenrecorder | SKIPPED | verify arm64-v8a
+  [438/484] com.mfashiongallery.emag | SKIPPED | speed-profile arm64-v8a
+  [439/484] com.xiaomi.cameramind | SKIPPED | speed-profile arm64-v8a
+  [440/484] com.mediatek.ims | SKIPPED | verify arm64-v8a
+  [441/484] com.github.shadowsocks | SKIPPED | speed-profile arm64-v8a
+  [442/484] au.com.buyathome.android | SKIPPED | speed-profile arm64-v8a
+  [443/484] com.android.adservices.api | SKIPPED | verify arm64-v8a
+  [444/484] com.gubulin.il | SKIPPED | speed-profile arm64-v8a
+  [445/484] com.farproc.wifi.analyzer | SKIPPED | verify arm64-v8a
+  [446/484] com.quark.browser | SKIPPED | verify arm64-v8a
+  [447/484] com.hungrypanda.waimai | SKIPPED | speed-profile arm64-v8a
+  [448/484] com.tencent.tmgp.dfm | SKIPPED | verify arm64-v8a
+  [449/484] com.google.android.gms | SKIPPED | speed-profile arm64-v8a | verify arm64-v8a | speed-profile arm64-v8a | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a | verify arm64-v8a
+  [450/484] com.android.providers.telephony | SKIPPED | speed-profile arm64-v8a
+  [451/484] com.android.providers.calendar | SKIPPED | verify arm64-v8a
+  [452/484] com.miui.powerkeeper | SKIPPED | speed-profile arm64-v8a
+  [453/484] com.xiaomi.vipaccount | SKIPPED | speed-profile arm64-v8a
+  [454/484] com.miui.dmregservice | SKIPPED | verify arm64-v8a
+  [455/484] moe.low.arc | SKIPPED | speed-profile arm64-v8a
+  [456/484] com.mediatek.location.lppe.main | SKIPPED | verify arm64-v8a
+  [457/484] com.miHoYo.cloudgames.ys | SKIPPED | verify arm64-v8a
+  [458/484] com.xiaomi.account | SKIPPED | speed-profile arm64-v8a
+  [459/484] com.qiyi.video | SKIPPED | speed-profile arm64-v8a
+  [460/484] com.iceasy.chip | SKIPPED | verify arm64-v8a
+  [461/484] com.miHoYo.cloudgames.Nap | SKIPPED | verify arm64-v8a
+  [462/484] com.kroegerama.appchecker | SKIPPED | speed-profile arm64-v8a
+  [463/484] com.iapp.app | SKIPPED | verify arm64-v8a
+  [464/484] com.miui.themestore | PERFORMED | speed-profile arm64-v8a wall=131ms cpu=160ms 1.6MB->1.6MB
+  [465/484] com.github.kr328.clash | SKIPPED | speed-profile arm64-v8a
+  [466/484] com.njlabs.showjava | SKIPPED | speed-profile arm64-v8a
+  [467/484] com.hj119.sygjx | SKIPPED | verify arm64-v8a
+  [468/484] com.android.updater | SKIPPED | verify arm64-v8a
+  [469/484] com.fobwifi.transocks | SKIPPED | speed-profile arm64-v8a
+  [470/484] com.xiaomi.gamecenter.sdk.service | SKIPPED | speed-profile arm64-v8a
+  [471/484] com.android.htmlviewer | SKIPPED | verify arm64-v8a
+  [472/484] com.miui.securityadd | SKIPPED | speed-profile arm64-v8a
+  [473/484] com.phoenix.read | SKIPPED | verify arm64-v8a
+  [474/484] com.lerist.go_hosts | SKIPPED | verify armeabi-v7a
+  [475/484] de.android.telnet | SKIPPED | verify arm64-v8a
+  [476/484] com.android.quicksearchbox | SKIPPED | speed-profile arm64-v8a
+  [477/484] com.codesector.speedview.pro | SKIPPED | verify arm64-v8a
+  [478/484] com.android.providers.downloads | SKIPPED | speed-profile arm64-v8a
+  [479/484] com.dianping.v1 | SKIPPED | verify arm64-v8a
+  [480/484] com.miui.securitycenter | SKIPPED | speed-profile arm64-v8a
+  [481/484] com.mihoyo.hyperion | SKIPPED | speed-profile arm64-v8a
+  [482/484] com.xiaomi.mi_connect_service | PERFORMED | speed-profile arm64-v8a wall=503ms cpu=1380ms 3.7MB->5.4MB
+  [483/484] store.dpos.com.ilovepizza | PERFORMED | speed-profile arm64-v8a wall=498ms cpu=1140ms 1.6MB->1.6MB
+  [484/484] com.milink.service | PERFORMED | speed-profile arm64-v8a wall=1155ms cpu=2800ms 51.7MB->53.4MB
+  Summary: 484 total, 4 performed, 480 skipped, 0 failed, 0 cancelled
+  End time: 2026-09-26 03:05:19
+  Duration: 3s
+==== Pre-Reboot Dexopt Results ====
+  Status: STATUS_FINISHED
+  Job type: JOB_TYPE_OTA
+  Total: 484, Optimized: 183, Skipped: 298, Failed: 3
+  Artifacts: 184 before reboot, 184 after reboot (33 usable)
+  Job runs: 2, Duration: 6min 30s, Latency: 10s
+  End status: COMMITTED, Age: 9h 3min 20s
+  ---- Per-package details (184 packages) ----
+  com.kfcaus.ordering | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.grilld.grilld | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.zmifi.blepb | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.cultivation.zmda | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.milink.service | NOT_USABLE | speed-profile arm64-v8a reason=boot-after-ota-ex
+  com.macropinch.hydra.android | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.hybrid | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.rocket.ef792a2e0dbdf51 | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xunmeng.pinduoduo | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.miui.player | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.tencent.mobileqq | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.x1y9.probe | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  moe.low.arc | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.digidust.elokence.akinator.freemium | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.hungrypanda.waimai | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.android.permissioncontroller | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.futuremark.dmandroid.application | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.qiyi.video | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.guardprovider | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.ludashi.benchmark2 | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.newhome | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.android.providers.telephony | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.unionpay.tsmservice.mi | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  miui.systemui.plugin | NOT_USABLE | speed arm64-v8a reason=ab-ota-sync
+  com.sorasu.armiku | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.antutu.benchmark.full.lite | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.gof.global | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.easi.customer | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  org.zwanoo.android.speedtest | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.type | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xingin.xhs | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.github.xiaofei_dev.vibrator | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.run.tower.defense | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.limelight | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.Gaggle.fun.GooseGooseDuck | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  hcps.ipsz.fdyb.qeys | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.appgo.appgopro | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.cloudservice | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.notification | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.android.providers.media.module | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  flar2.devcheck | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.miui.powerinsight | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miHoYo.cloudgames.hkrpg | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.porsche.missionear | NOT_USABLE | speed-profile armeabi-v7a reason=ab-ota-sync
+  com.S1T2.UNSWCyber | NOT_USABLE | speed-profile armeabi-v7a reason=ab-ota-sync
+  com.vortex | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.bluetooth | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.sina.weibo | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.mfashiongallery.emag | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.market | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.payment | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.njlabs.showjava | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.youpin | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.android.systemui | USABLE | speed-profile arm64-v8a reason=ab-ota
+  au.com.buyathome.android | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  kr.co.robin.android.easteregg | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.analytics | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  au.com.dominos.olo.android.app | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.kroegerama.appchecker | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.dewmobile.kuaiya | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.account | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.onemore.app.smartheadset.android | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.virtualsim | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.android.quicksearchbox | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.yougan233.wordjourney | NOT_USABLE | speed-profile armeabi-v7a reason=ab-ota-sync
+  com.xiaomi.aiservice | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.app.pornhub | NOT_USABLE | speed-profile armeabi-v7a reason=ab-ota-sync
+  com.xs.fm.lite | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.aurora.store | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.apkpure.aegon | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.socpk.cyberroom | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.smarthome | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.gyg.gomex | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.hypercomm | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.miwallpaper | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.taobao.idlefish | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.aliyun.tongyi | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.github.shadowsocks | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  eu.tsoml.graphicssettings | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.aiasst.service | NOT_USABLE | verify arm64-v8a reason=ab-ota-sync
+  com.xiaomi.cameramind | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.android.camera | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.fobwifi.transocks | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.miuibbs | NOT_USABLE | speed-profile armeabi-v7a reason=ab-ota-sync
+  com.github.kr328.clash | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xmvideo.app | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.antutu.aibenchmark | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.xiaomi.aicr | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.activision.callofduty.shooter | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.deepseek.chat | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.tencent.cmocmna | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.mcdonalds.au.gma | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.mirror | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.jingdong.app.mall | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.larus.nova | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.ss.android.ugc.aweme | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.mnyq.fssd | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miHoYo.enterprise.NGHSoD | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xs.fm | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.yifeng.tools | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.mipay.wallet | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.tencent.mm | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.cleanmaster | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.systemAdSolution | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.google.android.webview | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.wifichain | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.easytech.ew5 | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.vipaccount | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.af.benchaf | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.android.phone | NOT_USABLE | verify arm64-v8a reason=ab-ota-sync
+  com.microsoft.emmx | USABLE | speed-profile arm64-v8a reason=ab-ota | verify arm64-v8a reason=vdex | verify arm64-v8a reason=vdex-dm
+  xzr.La.systemtoolbox | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.core | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  org.localsend.localsend_app | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.packageinstaller | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.mi.health | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.netease.cloudmusic | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.autonavi.minimap | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.voiceassist | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.securitycenter | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.webling.hungryjacks | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.android.vending | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.cloudbackup | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.tencent.soter.soterserver | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.tongcheng.android | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.duokan.reader | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.android.chrome | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync | verify arm64-v8a reason=vdex | verify arm64-v8a reason=vdex-dm | verify arm64-v8a reason=vdex-dm | verify arm64-v8a reason=vdex-dm
+  com.tencent.tmgp.sgame | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.liuzh.deviceinfo | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.ubercab.eats | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync | verify arm64-v8a reason=vdex-dm | verify arm64-v8a reason=vdex
+  com.dd.doordash | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.misightservice | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  tv.danmaku.bili | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.One.WoodenLetter | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.openai.chatgpt | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.tencent.start | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.mihoyo.hyperion | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.fortinet.forticlient_vpn | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.levelinfinite.sgameGlobal | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync | verify arm64-v8a reason=vdex-dm
+  com.redcat.PeriPerks | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.sticktoit | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  ru.andr7e.deviceinfohw | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.google.android.gms | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync | verify arm64-v8a reason=vdex | speed-profile arm64-v8a reason=ab-ota-sync | verify arm64-v8a reason=vdex-dm | verify arm64-v8a reason=vdex-dm | verify arm64-v8a reason=vdex-dm | verify arm64-v8a reason=vdex-dm | verify arm64-v8a reason=vdex-dm | verify arm64-v8a reason=vdex-dm | verify arm64-v8a reason=vdex-dm
+  com.gameloft.android.GloftANPH | NOT_USABLE | speed-profile armeabi-v7a reason=ab-ota-sync
+  com.cpuid.cpu_z | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.alibaba.wireless | USABLE | speed-profile arm64-v8a reason=ab-ota
+  nl.richardvijgen.architectureofradioAndroid | NOT_USABLE | speed-profile armeabi-v7a reason=ab-ota-sync
+  com.google.android.marvin.talkback | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.zx.a2_quickfox | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.xiaomi.gamecenter | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.smile.gifmaker | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.papegames.infinitynikki | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.taobao.taobao | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  lybh.jlsnsqmg | NOT_USABLE | speed-profile armeabi-v7a reason=ab-ota-sync
+  com.unicostudio.braintest | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.android.browser | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.minigame | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.bbs | NOT_USABLE | speed-profile armeabi-v7a reason=ab-ota-sync
+  com.tencent.hunyuan.app.chat | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.xiaomi.mis | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.taptap | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.android.providers.downloads | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.powerkeeper | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.kuro.cloudgame | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.fun.lastwar.gp | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.zggame.xuanji.public | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.video | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.android.bluetooth | NOT_USABLE | verify arm64-v8a reason=ab-ota-sync
+  cn.wps.moffice_eng | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.xiaomi.mi_connect_service | NOT_USABLE | speed-profile arm64-v8a reason=boot-after-ota-ex
+  com.estrongs.android.pop | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.securityadd | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.miui.personalassistant | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.gamecenter.sdk.service | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.topjohnwu.magisk | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  eu.thedarken.sdm | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.yuanshi.wenxiaobai | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.google.android.accessibility.switchaccess | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  mark.via | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.baidu.input_mi | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  ctrip.android.view | USABLE | speed-profile arm64-v8a reason=ab-ota
+  com.gubulin.il | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+  com.xiaomi.xmsf | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync | speed-profile arm64-v8a reason=ab-ota-sync | speed-profile arm64-v8a reason=ab-ota-sync | verify arm64-v8a reason=vdex | verify arm64-v8a reason=vdex | verify arm64-v8a reason=vdex | speed-profile arm64-v8a reason=ab-ota-sync | verify arm64-v8a reason=vdex | verify arm64-v8a reason=vdex
+  com.antutu.benchmark.full | NOT_USABLE | speed-profile arm64-v8a reason=ab-ota-sync
+==== ArtDexoptJobManager Monitor Records (4/7) ====
+  [1] reason=bg-dexopt, start=2026-10-03 04:27:42.888, end=2026-10-03 04:29:36.099, duration=113s, exit=JOB_COMPLETED, battery=100%, temp=32.492℃, charging=true, screen=off
+  [2] reason=bg-dexopt, start=2026-10-03 04:31:43.529, end=2026-10-03 04:32:46.249, duration=62s, exit=JOB_COMPLETED, battery=100%, temp=30.02℃, charging=true, screen=off
+  [3] reason=bg-dexopt, start=2026-10-07 06:41:32.691, end=2026-10-07 06:43:32.494, duration=119s, exit=JOB_COMPLETED, battery=100%, temp=32.901℃, charging=true, screen=off
+  [4] reason=bg-dexopt, start=2026-10-07 06:52:09.160, end=2026-10-07 06:53:12.386, duration=63s, exit=JOB_COMPLETED, battery=100%, temp=29.984℃, charging=true, screen=off
+
+Queries:
+  system apps queryable: false
+  queries via forceQueryable:
+  queries via package name:
+  queries via component:
+    [com.miui.securitycore,com.xiaomi.gnss.polaris,com.wapi.wapicertmanager,com.xiaomi.digitalkey,com.xiaomi.misettings,com.xiaomi.aiasst.vision,com.miui.qr,com.miui.notification,com.miui.securitycenter,com.xiaomi.joyose,com.miui.thirdappassistant,com.android.systemui,com.xiaomi.otrpbroker,com.miui.audiomonitor,com.miui.uireporter,com.android.providers.settings,com.xiaomi.aon,com.xiaomi.barrage,com.android.inputdevices,miui.systemui.plugin,vendor.xring.geofence,com.xiaomi.trustservice,com.android.provision,com.android.dynsystem,com.miui.contentcatcher,com.xiaomi.mi_connect_service,com.android.server.telecom,com.android.keychain,com.android.DeviceAsWebcam,com.xiaomi.aiasst.service,com.android.settings,com.miui.aod,com.miui.cit,android,com.miui.misightservice,com.miui.powerkeeper,com.miui.bugreport,com.xiaomi.touchservice,com.mediatek.atci.service,com.android.location.fused,com.android.localtransport,com.miui.wmsvc,com.xiaomi.mtb,com.bsp.catchlog,com.xiaomi.mirror,com.miui.touchassistant,com.mediatek.location.lppe.main]:
+      com.ghostlock.app
+    [com.xiaomi.bluetooth,com.android.bluetooth]:
+      com.ghostlock.app
+    [com.android.nfc,com.miui.tsmclient]:
+      com.ghostlock.app
+    [com.miui.huanji,com.miui.backup]:
+      com.ghostlock.app
+    com.xiaomi.finddevice:
+      com.ghostlock.app
+    com.levelinfinite.sgameGlobal:
+      com.ghostlock.app
+    com.xiaomi.aicr:
+      com.ghostlock.app
+    com.android.browser:
+      com.ghostlock.app
+    com.miui.packageinstaller:
+      com.ghostlock.app
+    com.miui.personalassistant:
+      com.ghostlock.app
+    com.android.contacts:
+      com.ghostlock.app
+    com.xiaomi.gamecenter.sdk.service:
+      com.ghostlock.app
+    com.android.settings.intelligence:
+      com.ghostlock.app
+    com.android.mms:
+      com.ghostlock.app
+    com.miui.carlink:
+      com.ghostlock.app
+    com.xiaomi.mis:
+      com.ghostlock.app
+    com.miui.nextpay:
+      com.ghostlock.app
+    com.miui.hybrid:
+      com.ghostlock.app
+    com.miui.securityadd:
+      com.ghostlock.app
+    com.xiaomi.market:
+      com.ghostlock.app
+    com.xiaomi.account:
+      com.ghostlock.app
+    com.miui.greenguard:
+      com.ghostlock.app
+    com.miui.systemAdSolution:
+      com.ghostlock.app
+    com.xiaomi.payment:
+      com.ghostlock.app
+    com.xiaomi.simactivate.service:
+      com.ghostlock.app
+    com.miui.core:
+      com.ghostlock.app
+    com.miui.voiceassist:
+      com.ghostlock.app
+    com.xiaomi.xmsf:
+      com.ghostlock.app
+    com.android.providers.downloads.ui:
+      com.ghostlock.app
+    com.baidu.input_mi:
+      com.ghostlock.app
+    com.mfashiongallery.emag:
+      com.ghostlock.app
+    com.mi.health:
+      com.ghostlock.app
+    com.android.calendar:
+      com.ghostlock.app
+    com.duokan.reader:
+      com.ghostlock.app
+    com.xiaomi.gamecenter:
+      com.ghostlock.app
+    com.android.email:
+      com.ghostlock.app
+    com.miui.player:
+      com.ghostlock.app
+    com.miui.newhome:
+      com.ghostlock.app
+    com.android.soundrecorder:
+      com.ghostlock.app
+    com.miui.video:
+      com.ghostlock.app
+    com.miui.virtualsim:
+      com.ghostlock.app
+    com.mipay.wallet:
+      com.ghostlock.app
+    com.xiaomi.shop:
+      com.ghostlock.app
+    com.xiaomi.vipaccount:
+      com.ghostlock.app
+    com.duokan.phone.remotecontroller:
+      com.ghostlock.app
+    com.xiaomi.smarthome:
+      com.ghostlock.app
+    com.iflytek.inputmethod.miui:
+      com.ghostlock.app
+    com.baidu.BaiduMap:
+      com.ghostlock.app
+    com.UCMobile:
+      com.ghostlock.app
+    com.hunantv.imgo.activity:
+      com.ghostlock.app
+    com.qiyi.video:
+      com.ghostlock.app
+    com.quark.browser:
+      com.ghostlock.app
+    com.sina.weibo:
+      com.ghostlock.app
+    com.taobao.idlefish:
+      com.ghostlock.app
+    com.tongcheng.android:
+      com.ghostlock.app
+    com.taobao.taobao:
+      com.ghostlock.app
+    com.xiaomi.tinygame:
+      com.ghostlock.app
+    com.xunmeng.pinduoduo:
+      com.ghostlock.app
+    com.xingin.xhs:
+      com.ghostlock.app
+    com.mi.car.mobile:
+      com.ghostlock.app
+    com.coolapk.market:
+      com.ghostlock.app
+    com.netease.cloudmusic:
+      com.ghostlock.app
+    com.tencent.mm:
+      com.ghostlock.app
+    com.ruanmei.ithome:
+      com.ghostlock.app
+    com.autonavi.minimap:
+      com.ghostlock.app
+    com.aliyun.tongyi:
+      com.ghostlock.app
+    ctrip.android.view:
+      com.ghostlock.app
+    com.jingdong.app.mall:
+      com.ghostlock.app
+    com.zhihu.android:
+      com.ghostlock.app
+    com.hottagames.hotta.mi:
+      com.ghostlock.app
+    com.tencent.tmgp.pubgmhd:
+      com.ghostlock.app
+    com.ludashi.benchmark:
+      com.ghostlock.app
+    com.antutu.aibenchmark:
+      com.ghostlock.app
+    com.tencent.gamehelper.smoba:
+      com.ghostlock.app
+    com.taptap:
+      com.ghostlock.app
+    com.fobwifi.transocks:
+      com.ghostlock.app
+    com.zx.a2_quickfox:
+      com.ghostlock.app
+    cc.oasis.minor1:
+      com.ghostlock.app
+    com.apkpure.aegon:
+      com.ghostlock.app
+    ru.andr7e.deviceinfohw:
+      com.ghostlock.app
+    com.tencent.start:
+      com.ghostlock.app
+    com.kfcaus.ordering:
+      com.ghostlock.app
+    com.iapp.app:
+      com.ghostlock.app
+    com.digidust.elokence.akinator.freemium:
+      com.ghostlock.app
+    com.xiaomi.minigame:
+      com.ghostlock.app
+    eu.tsoml.graphicssettings:
+      com.ghostlock.app
+    com.dmzj.manhua:
+      com.ghostlock.app
+    com.dewmobile.kuaiya:
+      com.ghostlock.app
+    make.more.r2d2.cellular_z:
+      com.ghostlock.app
+    com.hj119.sygjx:
+      com.ghostlock.app
+    com.liuzh.deviceinfo:
+      com.ghostlock.app
+    com.xiaomi.mico:
+      com.ghostlock.app
+    com.mcdonalds.au.gma:
+      com.ghostlock.app
+    com.dd.doordash:
+      com.ghostlock.app
+    com.xiaoe.client:
+      com.ghostlock.app
+    com.run.tower.defense:
+      com.ghostlock.app
+    com.gof.global:
+      com.ghostlock.app
+    com.fun.lastwar.gp:
+      com.ghostlock.app
+    com.unicostudio.braintest:
+      com.ghostlock.app
+    com.estrongs.android.pop:
+      com.ghostlock.app
+    com.chaozh.iReaderFree:
+      com.ghostlock.app
+    com.tencent.cmocmna:
+      com.ghostlock.app
+    com.cultivation.zmda:
+      com.ghostlock.app
+    com.mnyq.fssd:
+      com.ghostlock.app
+    com.xiaomi.healthkit:
+      com.ghostlock.app
+    com.xiaomi.type:
+      com.ghostlock.app
+    com.yifeng.tools:
+      com.ghostlock.app
+  queryable via interaction:
+    User 0:
+      [com.miui.securitycore,com.xiaomi.gnss.polaris,com.wapi.wapicertmanager,com.xiaomi.digitalkey,com.xiaomi.misettings,com.xiaomi.aiasst.vision,com.miui.qr,com.miui.notification,com.miui.securitycenter,com.xiaomi.joyose,com.miui.thirdappassistant,com.android.systemui,com.xiaomi.otrpbroker,com.miui.audiomonitor,com.miui.uireporter,com.android.providers.settings,com.xiaomi.aon,com.xiaomi.barrage,com.android.inputdevices,miui.systemui.plugin,vendor.xring.geofence,com.xiaomi.trustservice,com.android.provision,com.android.dynsystem,com.miui.contentcatcher,com.xiaomi.mi_connect_service,com.android.server.telecom,com.android.keychain,com.android.DeviceAsWebcam,com.xiaomi.aiasst.service,com.android.settings,com.miui.aod,com.miui.cit,android,com.miui.misightservice,com.miui.powerkeeper,com.miui.bugreport,com.xiaomi.touchservice,com.mediatek.atci.service,com.android.location.fused,com.android.localtransport,com.miui.wmsvc,com.xiaomi.mtb,com.bsp.catchlog,com.xiaomi.mirror,com.miui.touchassistant,com.mediatek.location.lppe.main]:
+        com.ghostlock.app
+      [com.google.android.gms,com.google.android.gsf]:
+        com.ghostlock.app
+      com.baidu.input_mi:
+        com.ghostlock.app
+    User 999:
+  queryable via uses-library:
+
+Dexopt state:
+  [com.ghostlock.app]
+    path: /data/app/~~-V_gAJBk0QGPxoRYDtAX6A==/com.ghostlock.app-zJBuGoLVijuslx5ZsywkKw==/base.apk
+      arm64: [status=speed-profile] [reason=baseline] [primary-abi]
+        [location is /data/app/~~-V_gAJBk0QGPxoRYDtAX6A==/com.ghostlock.app-zJBuGoLVijuslx5ZsywkKw==/oat/arm64/base.odex]
+    base APK odex file size: base.art: 522Kb base.odex: 5374Kb base.vdex: 2961Kb 

@@ -1,0 +1,295 @@
+{
+  "release": "5.10.101-android12-9-gece0cc04d1a5",
+  "status": "read-only static analysis, not an importable GhostLock profile",
+  "upstream_commit": "67215cfe204940fe71ff67213e76329e1adce7d2",
+  "kernel_sha256": "136177a1c360eb64a8556cb4e6385a06e34c2ceabc05c7da714428837309bf6f",
+  "symbol_count": 136128,
+  "image_base": "0xffffffc010000000",
+  "task_struct_candidates": {
+    "prio": {
+      "offset": 132,
+      "hex": "0x84",
+      "evidence": [
+        {
+          "image_offset": "0x1e530c",
+          "bytes": "888640b9",
+          "instruction": "ldr w8, [x20, #0x84]"
+        },
+        {
+          "image_offset": "0x1a0820",
+          "bytes": "998600b9",
+          "instruction": "str w25, [x20, #0x84]"
+        }
+      ]
+    },
+    "normal_prio": {
+      "offset": 140,
+      "hex": "0x8c",
+      "evidence": [
+        {
+          "image_offset": "0x1a0480",
+          "bytes": "998e40b9",
+          "instruction": "ldr w25, [x20, #0x8c]"
+        }
+      ]
+    },
+    "sched_task_group": {
+      "offset": 784,
+      "hex": "0x310",
+      "evidence": [
+        {
+          "image_offset": "0x1a45e0",
+          "bytes": "688a01f9",
+          "instruction": "str x8, [x19, #0x310]"
+        },
+        {
+          "image_offset": "0x1a4624",
+          "bytes": "778a41f9",
+          "instruction": "ldr x23, [x19, #0x310]"
+        }
+      ]
+    },
+    "pi_lock": {
+      "offset": 2156,
+      "hex": "0x86c",
+      "evidence": [
+        {
+          "image_offset": "0x1e52dc",
+          "bytes": "58b02191",
+          "instruction": "add x24, x2, #0x86c"
+        },
+        {
+          "image_offset": "0x1e5a58",
+          "bytes": "95b22191",
+          "instruction": "add x21, x20, #0x86c"
+        }
+      ]
+    },
+    "pi_waiters": {
+      "offset": 2176,
+      "hex": "0x880",
+      "evidence": [
+        {
+          "image_offset": "0x1e55a0",
+          "bytes": "e1022291",
+          "instruction": "add x1, x23, #0x880"
+        },
+        {
+          "image_offset": "0x1e5b6c",
+          "bytes": "a1022291",
+          "instruction": "add x1, x21, #0x880"
+        }
+      ]
+    },
+    "pi_top_task": {
+      "offset": 2192,
+      "hex": "0x890",
+      "evidence": [
+        {
+          "image_offset": "0x1a0494",
+          "bytes": "884a44f9",
+          "instruction": "ldr x8, [x20, #0x890]"
+        },
+        {
+          "image_offset": "0x1a06d0",
+          "bytes": "954a04f9",
+          "instruction": "str x21, [x20, #0x890]"
+        }
+      ]
+    },
+    "pi_blocked_on": {
+      "offset": 2200,
+      "hex": "0x898",
+      "evidence": [
+        {
+          "image_offset": "0x1e53e0",
+          "bytes": "964e04f9",
+          "instruction": "str x22, [x20, #0x898]"
+        },
+        {
+          "image_offset": "0x1e5ac4",
+          "bytes": "9f4e04f9",
+          "instruction": "str xzr, [x20, #0x898]"
+        }
+      ]
+    },
+    "real_cred": {
+      "offset": 1912,
+      "hex": "0x778",
+      "evidence": [
+        {
+          "image_offset": "0x181a04",
+          "bytes": "93be43f9",
+          "instruction": "ldr x19, [x20, #0x778]"
+        },
+        {
+          "image_offset": "0x181c28",
+          "bytes": "88e21d91",
+          "instruction": "add x8, x20, #0x778"
+        }
+      ]
+    },
+    "cred": {
+      "offset": 1920,
+      "hex": "0x780",
+      "evidence": [
+        {
+          "image_offset": "0x181a08",
+          "bytes": "88c243f9",
+          "instruction": "ldr x8, [x20, #0x780]"
+        },
+        {
+          "image_offset": "0x1812a0",
+          "bytes": "14c143f9",
+          "instruction": "ldr x20, [x8, #0x780]"
+        }
+      ]
+    },
+    "comm": {
+      "offset": 1936,
+      "hex": "0x790",
+      "evidence": [
+        {
+          "image_offset": "0x565c04",
+          "bytes": "76421e91",
+          "instruction": "add x22, x19, #0x790"
+        }
+      ]
+    },
+    "seccomp": {
+      "offset": 2120,
+      "hex": "0x848",
+      "evidence": [
+        {
+          "image_offset": "0x2ff1bc",
+          "bytes": "094948b9",
+          "instruction": "ldr w9, [x8, #0x848]"
+        }
+      ]
+    }
+  },
+  "task_struct_not_derived": [
+    "pid",
+    "tgid",
+    "tasks",
+    "atomic_flags"
+  ],
+  "cred_candidate": {
+    "copy_size": 168,
+    "caps_offset": 48,
+    "caps_count": 3,
+    "caps_value": 2199023255551,
+    "refs": [
+      {
+        "offset": 128,
+        "image": 18446743799143854576,
+        "symbol": "root_user"
+      },
+      {
+        "offset": 136,
+        "image": 18446743799143854728,
+        "symbol": "init_user_ns"
+      },
+      {
+        "offset": 144,
+        "image": 18446743799143859992,
+        "symbol": "init_groups"
+      }
+    ],
+    "size_evidence": [
+      {
+        "image_offset": "0x26b4c9c",
+        "bytes": "01158052",
+        "instruction": "mov w1, #0xa8"
+      },
+      {
+        "image_offset": "0x1812a4",
+        "bytes": "02158052",
+        "instruction": "mov w2, #0xa8"
+      }
+    ],
+    "note": "Static candidate only; no device or exploit validation."
+  },
+  "primitive_pattern": {
+    "current_read": {
+      "image_offset": "0x1e5a40",
+      "bytes": "144138d5",
+      "instruction": "mrs x20, sp_el0"
+    },
+    "clears_current_pi_blocked_on": {
+      "image_offset": "0x1e5ac4",
+      "bytes": "9f4e04f9",
+      "instruction": "str xzr, [x20, #0x898]"
+    },
+    "note": "Matches upstream static unpatched-pattern check; does not prove end-to-end exploitability."
+  },
+  "stack_frames": {
+    "__arm64_sys_futex": 144,
+    "do_futex": 32,
+    "futex_wait_requeue_pi": 416,
+    "__arm64_sys_setsockopt": 16,
+    "__sys_setsockopt": 128,
+    "sock_common_setsockopt": 64,
+    "udp_setsockopt": 16,
+    "ip_setsockopt": 672,
+    "__arm64_sys_pselect6": 160,
+    "core_sys_select": 448
+  },
+  "routes": {
+    "multicast_waiter": {
+      "status": "current IPv4 UDP copy window cannot reach the task/lock fields",
+      "buffer_depth": 864,
+      "waiter_depth": 448,
+      "waiter_offset": 416,
+      "copy_size": 264,
+      "task_field_offset": 48,
+      "lock_field_offset": 56,
+      "required_end": 480
+    },
+    "select_stack": {
+      "status": "required task/lock words outside user copied input sets",
+      "buffer_depth": 528,
+      "waiter_depth": 448,
+      "delta_bytes": 80,
+      "raw_waiter_word": 10,
+      "nfds": 320,
+      "input_words": 15,
+      "task_word": 16,
+      "lock_word": 17
+    },
+    "tcp_zerocopy": {
+      "status": "current GhostLock payload fields not copied by this old kernel ABI",
+      "kernel_copy_max": 24,
+      "upstream_task_payload_offset": 40,
+      "upstream_lock_payload_offset": 48,
+      "evidence": [
+        {
+          "image_offset": "0x150699c",
+          "bytes": "5f670071",
+          "instruction": "cmp w26, #0x19"
+        },
+        {
+          "image_offset": "0x1506a80",
+          "bytes": "14038052",
+          "instruction": "mov w20, #0x18"
+        },
+        {
+          "image_offset": "0x1506a84",
+          "bytes": "fa03142a",
+          "instruction": "mov w26, w20"
+        },
+        {
+          "image_offset": "0x15076b8",
+          "bytes": "e20314aa",
+          "instruction": "mov x2, x20"
+        }
+      ]
+    }
+  },
+  "limits": [
+    "No BTF or original DWARF was recovered.",
+    "No code was installed or run on any phone.",
+    "No working exploit profile was generated.",
+    "Alternate syscall paths or new runtime adaptations are not ruled out."
+  ]
+}

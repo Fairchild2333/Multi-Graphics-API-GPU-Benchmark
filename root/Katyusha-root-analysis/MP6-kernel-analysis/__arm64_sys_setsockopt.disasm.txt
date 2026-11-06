@@ -1,0 +1,16 @@
+013504c0 paciasp   
+013504c4 str       x30, [x18], #8
+013504c8 stp       x29, x30, [sp, #-0x10]!
+013504cc mov       x29, sp
+013504d0 ldr       w8, [x0]
+013504d4 ldr       w1, [x0, #8]
+013504d8 ldr       w2, [x0, #0x10]
+013504dc ldr       x3, [x0, #0x18]
+013504e0 ldr       w4, [x0, #0x20]
+013504e4 mov       w0, w8
+013504e8 bl        #0xffffffc011350500 ; __sys_setsockopt
+013504ec sxtw      x0, w0
+013504f0 ldp       x29, x30, [sp], #0x10
+013504f4 ldr       x30, [x18, #-8]!
+013504f8 autiasp   
+013504fc ret       

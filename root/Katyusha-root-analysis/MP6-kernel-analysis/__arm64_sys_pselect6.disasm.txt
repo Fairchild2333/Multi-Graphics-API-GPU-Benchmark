@@ -1,0 +1,115 @@
+00583f60 paciasp   
+00583f64 sub       sp, sp, #0xa0
+00583f68 str       x30, [x18], #8
+00583f6c stp       x29, x30, [sp, #0x40]
+00583f70 stp       x28, x27, [sp, #0x50]
+00583f74 stp       x26, x25, [sp, #0x60]
+00583f78 stp       x24, x23, [sp, #0x70]
+00583f7c stp       x22, x21, [sp, #0x80]
+00583f80 stp       x20, x19, [sp, #0x90]
+00583f84 add       x29, sp, #0x40
+00583f88 adrp      x8, #0xffffffc012999000
+00583f8c ldr       x8, [x8, #0xd48]
+00583f90 stur      x8, [x29, #-8]
+00583f94 ldr       x1, [x0, #0x28]
+00583f98 ldr       w20, [x0]
+00583f9c ldp       x21, x22, [x0, #8]
+00583fa0 ldp       x23, x19, [x0, #0x18]
+00583fa4 add       x0, sp, #8
+00583fa8 stp       xzr, xzr, [sp, #8]
+00583fac bl        #0xffffffc01058412c ; get_sigset_argpack
+00583fb0 cbz       w0, #0xffffffc010583ff4
+00583fb4 mov       x0, #-0xe
+00583fb8 adrp      x9, #0xffffffc012999000
+00583fbc ldur      x8, [x29, #-8]
+00583fc0 ldr       x9, [x9, #0xd48]
+00583fc4 cmp       x9, x8
+00583fc8 b.ne      #0xffffffc010584128
+00583fcc ldp       x29, x30, [sp, #0x40]
+00583fd0 ldp       x20, x19, [sp, #0x90]
+00583fd4 ldp       x22, x21, [sp, #0x80]
+00583fd8 ldp       x24, x23, [sp, #0x70]
+00583fdc ldp       x26, x25, [sp, #0x60]
+00583fe0 ldp       x28, x27, [sp, #0x50]
+00583fe4 ldr       x30, [x18, #-8]!
+00583fe8 add       sp, sp, #0xa0
+00583fec autiasp   
+00583ff0 ret       
+00583ff4 ldp       x24, x25, [sp, #8]
+00583ff8 stp       xzr, xzr, [sp, #0x18]
+00583ffc cbz       x19, #0xffffffc0105840d4
+00584000 sub       x0, x29, #0x18
+00584004 mov       w2, #0x10
+00584008 mov       x1, x19
+0058400c stp       xzr, xzr, [x29, #-0x18]
+00584010 bl        #0xffffffc0102584dc ; _copy_from_user.6330
+00584014 cbnz      w0, #0xffffffc010583fb4
+00584018 mrs       x8, sp_el0
+0058401c ldp       x26, x9, [x29, #-0x18]
+00584020 ldr       x8, [x8]
+00584024 mov       x0, #-0x16
+00584028 and       x10, x9, #0xffffffff
+0058402c tst       x8, #0x400000
+00584030 csel      x28, x9, x10, eq
+00584034 tbnz      x26, #0x3f, #0xffffffc010583fb8
+00584038 mov       w27, #0xc9ff
+0058403c movk      w27, #0x3b9a, lsl #16
+00584040 add       x8, x27, #1
+00584044 cmp       x28, x8
+00584048 b.hs      #0xffffffc010583fb8
+0058404c orr       x8, x28, x26
+00584050 cbz       x8, #0xffffffc0105840dc
+00584054 add       x0, sp, #0x18
+00584058 bl        #0xffffffc010267314 ; ktime_get_ts64
+0058405c ldp       x10, x9, [sp, #0x18]
+00584060 add       x9, x28, x9
+00584064 add       x8, x26, x10
+00584068 cmp       x9, x27
+0058406c stur      x9, [x29, #-0x18]
+00584070 b.le      #0xffffffc010584090
+00584074 mov       x11, #-0xca00
+00584078 movk      x11, #0xc465, lsl #16
+0058407c add       x9, x9, x11
+00584080 cmp       x9, x27
+00584084 add       x8, x8, #1
+00584088 stur      x9, [x29, #-0x18]
+0058408c b.gt      #0xffffffc01058407c
+00584090 tbz       x9, #0x3f, #0xffffffc0105840a8
+00584094 add       x9, x27, x9
+00584098 add       x9, x9, #1
+0058409c sub       x8, x8, #1
+005840a0 stur      x9, [x29, #-0x18]
+005840a4 tbnz      x9, #0x3f, #0xffffffc010584094
+005840a8 cmp       x8, x10
+005840ac cset      w11, lt
+005840b0 cmp       x8, x26
+005840b4 cset      w12, lt
+005840b8 orr       w11, w11, w12
+005840bc mov       x10, #0x7fffffffffffffff
+005840c0 cmp       w11, #0
+005840c4 csel      x8, x10, x8, ne
+005840c8 csel      x9, xzr, x9, ne
+005840cc stp       x8, x9, [sp, #0x18]
+005840d0 b         #0xffffffc0105840e0 ; 
+005840d4 mov       x26, xzr
+005840d8 b         #0xffffffc0105840e4 ; 
+005840dc stp       xzr, xzr, [sp, #0x18]
+005840e0 add       x26, sp, #0x18
+005840e4 mov       x0, x24
+005840e8 mov       x1, x25
+005840ec bl        #0xffffffc010156374 ; set_user_sigmask
+005840f0 cbnz      w0, #0xffffffc010584120
+005840f4 mov       w0, w20
+005840f8 mov       x1, x21
+005840fc mov       x2, x22
+00584100 mov       x3, x23
+00584104 mov       x4, x26
+00584108 bl        #0xffffffc010582a74 ; core_sys_select
+0058410c mov       w3, w0
+00584110 add       x0, sp, #0x18
+00584114 mov       w2, #2
+00584118 mov       x1, x19
+0058411c bl        #0xffffffc010582e58 ; poll_select_finish
+00584120 sxtw      x0, w0
+00584124 b         #0xffffffc010583fb8 ; 
+00584128 bl        #0xffffffc01182bec0 ; __stack_chk_fail

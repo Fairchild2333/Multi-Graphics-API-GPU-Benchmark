@@ -1,0 +1,17 @@
+[
+  [
+    "https://ota-api.blackshark.com/upgrade_check/",
+    200,
+    "{\"Code\":603,\"Message\":\"SIGN_ERROR\",\"Data\":null}"
+  ],
+  [
+    "https://gl-ota-api.blackshark.com/upgrade_check/",
+    "URLError",
+    "<urlopen error timed out>"
+  ],
+  [
+    "https://oversea-otaapi.blackshark.com:443/V1/Ota/Check/",
+    "URLError",
+    "<urlopen error timed out>"
+  ]
+]

@@ -1,0 +1,132 @@
+00194010 paciasp   
+00194014 str       x30, [x18], #8
+00194018 stp       x29, x30, [sp, #-0x40]!
+0019401c str       x23, [sp, #0x10]
+00194020 stp       x22, x21, [sp, #0x20]
+00194024 stp       x20, x19, [sp, #0x30]
+00194028 mov       x29, sp
+0019402c ldr       x8, [x0, #0x30]
+00194030 mov       x19, x0
+00194034 mov       w20, w1
+00194038 cbz       x8, #0xffffffc010194050
+0019403c ldr       x8, [x19, #0x30]
+00194040 cmp       x8, #0x200
+00194044 b.eq      #0xffffffc010194050
+00194048 ldr       w8, [x19, #0x80]
+0019404c cbz       w8, #0xffffffc01019418c
+00194050 ldr       x8, [x19, #0x30]
+00194054 cbnz      x8, #0xffffffc010194084
+00194058 ldr       x8, [x19, #0x98]
+0019405c adrp      x9, #0xffffffc0124c2000
+00194060 add       x9, x9, #0xb20
+00194064 cmp       x8, x9
+00194068 b.ne      #0xffffffc010194084
+0019406c ldr       w8, [x19, #0x80]
+00194070 cbz       w8, #0xffffffc010194084
+00194074 add       x8, x19, #0x80
+00194078 ldar      w8, [x8]
+0019407c cmp       w8, #2
+00194080 b.ne      #0xffffffc01019419c
+00194084 add       w8, w20, #0x3f
+00194088 cmp       w20, #0
+0019408c csel      w8, w8, w20, lt
+00194090 adrp      x9, #0xffffffc012999000
+00194094 asr       w8, w8, #6
+00194098 add       x9, x9, #0xde0
+0019409c ldr       x8, [x9, w8, sxtw #3]
+001940a0 lsr       x8, x8, x20
+001940a4 tbz       w8, #0, #0xffffffc010194184
+001940a8 mov       x0, x19
+001940ac mov       w1, w20
+001940b0 bl        #0xffffffc010194304 ; trace_sched_migrate_task
+001940b4 add       x8, x19, #0x60
+001940b8 ldar      w8, [x8]
+001940bc cmp       w8, w20
+001940c0 b.eq      #0xffffffc010194108
+001940c4 ldr       x8, [x19, #0x98]
+001940c8 ldr       x8, [x8, #0x58]
+001940cc cbz       x8, #0xffffffc0101940f4
+001940d0 adrp      x9, #0xffffffc011a02000
+001940d4 add       x9, x9, #0x358
+001940d8 sub       x9, x8, x9
+001940dc ror       x9, x9, #3
+001940e0 cmp       x9, #5
+001940e4 b.hs      #0xffffffc0101941a4
+001940e8 mov       x0, x19
+001940ec mov       w1, w20
+001940f0 blr       x8
+001940f4 ldr       x8, [x19, #0x120]
+001940f8 add       x8, x8, #1
+001940fc str       x8, [x19, #0x120]
+00194100 nop       
+00194104 nop       
+00194108 ldr       x21, [x19, #0x310]
+0019410c ldr       x9, [x19, #0x210]
+00194110 mov       w22, w20
+00194114 ldr       x8, [x21, #0xf0]
+00194118 ldr       x8, [x8, w20, uxtw #3]
+0019411c nop       
+00194120 cbz       x9, #0xffffffc010194148
+00194124 ldr       x10, [x19, #0x240]
+00194128 cbz       x10, #0xffffffc010194148
+0019412c ldr       x0, [x9, #0x80]
+00194130 ldr       x23, [x8, #0x80]
+00194134 add       x1, x19, #0xc0
+00194138 bl        #0xffffffc0101d1b44 ; __update_load_avg_blocked_se
+0019413c str       x23, [x19, #0x240]
+00194140 ldr       x8, [x21, #0xf0]
+00194144 ldr       x8, [x8, x22, lsl #3]
+00194148 bti       j
+0019414c str       x8, [x19, #0x210]
+00194150 ldr       x8, [x21, #0xe8]
+00194154 ldr       x8, [x8, x22, lsl #3]
+00194158 str       x8, [x19, #0x208]
+0019415c dmb       ishst
+00194160 str       w20, [x19, #0x60]
+00194164 str       w20, [x19, #0x7c]
+00194168 ldp       x20, x19, [sp, #0x30]
+0019416c ldp       x22, x21, [sp, #0x20]
+00194170 ldr       x23, [sp, #0x10]
+00194174 ldp       x29, x30, [sp], #0x40
+00194178 ldr       x30, [x18, #-8]!
+0019417c autiasp   
+00194180 ret       
+00194184 brk       #0x800
+00194188 b         #0xffffffc0101940a8 ; 
+0019418c brk       #0x800
+00194190 ldr       x8, [x19, #0x30]
+00194194 cbnz      x8, #0xffffffc010194084
+00194198 b         #0xffffffc010194058 ; 
+0019419c brk       #0x800
+001941a0 b         #0xffffffc010194084 ; 
+001941a4 mov       x0, #0x6c4f
+001941a8 movk      x0, #0xe34e, lsl #16
+001941ac movk      x0, #0xf760, lsl #32
+001941b0 movk      x0, #0x544a, lsl #48
+001941b4 mov       x1, x8
+001941b8 mov       x2, xzr
+001941bc mov       x21, x8
+001941c0 bl        #0xffffffc0103e0860 ; __cfi_slowpath
+001941c4 mov       x8, x21
+001941c8 b         #0xffffffc0101940e8 ; 
+001941cc bti       j
+001941d0 ldrb      w8, [x19, #0x584]
+001941d4 orr       w8, w8, #4
+001941d8 strb      w8, [x19, #0x584]
+001941dc b         #0xffffffc010194104 ; 
+001941e0 bti       j
+001941e4 adrp      x8, #0xffffffc012b3b000
+001941e8 ldr       x21, [x8, #0x808]
+001941ec cbz       x21, #0xffffffc010194108
+001941f0 ldr       x8, [x21], #0x18
+001941f4 ldur      x0, [x21, #-0x10]
+001941f8 mov       x1, x19
+001941fc mov       w2, w20
+00194200 blr       x8
+00194204 ldar      x8, [x21]
+00194208 add       x21, x21, #0x18
+0019420c cbnz      x8, #0xffffffc0101941f4
+00194210 b         #0xffffffc010194108 ; 
+00194214 ldapr     w8, [x8]
+00194218 ldapr     w8, [x8]
+0019421c ldapr     x8, [x21]

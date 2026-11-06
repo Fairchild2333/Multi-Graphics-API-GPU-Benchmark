@@ -1,0 +1,29 @@
+Drop box contents: 22 entries
+Max entries: 1000
+Low priority rate limit period: 2000 ms
+Low priority tags: {data_app_wtf, keymaster, system_server_wtf, system_app_strictmode, system_app_wtf, system_server_strictmode, data_app_strictmode, netstats}
+
+2026-10-08 01:51:29 SYSTEM_BOOT (text, 482 bytes)
+2026-10-08 14:07:33 SYSTEM_BOOT (text, 482 bytes)
+2026-10-08 14:08:03 VirusScanHistory (text, 178 bytes)
+2026-10-08 15:43:51 VirusScanHistory (text, 3884 bytes)
+2026-10-08 15:43:51 VirusScanHistory (text, 729 bytes)
+2026-10-08 16:21:47 SYSTEM_BOOT (text, 482 bytes)
+2026-10-08 20:37:25 VirusScanHistory (text, 781 bytes)
+2026-10-08 23:51:48 VirusScanHistory (text, 778 bytes)
+2026-10-09 03:03:19 VirusScanHistory (text, 779 bytes)
+2026-10-09 07:03:50 VirusScanHistory (text, 778 bytes)
+2026-10-09 13:04:41 VirusScanHistory (text, 4785 bytes)
+2026-10-09 13:05:14 VirusScanHistory (text, 181 bytes)
+2026-10-09 13:05:14 VirusScanHistory (text, 730 bytes)
+2026-10-09 17:29:42 VirusScanHistory (text, 820 bytes)
+2026-10-09 21:40:43 VirusScanHistory (text, 821 bytes)
+2026-10-10 03:03:05 VirusScanHistory (text, 821 bytes)
+2026-10-10 07:03:37 VirusScanHistory (text, 821 bytes)
+2026-10-10 13:04:11 VirusScanHistory (text, 3827 bytes)
+2026-10-10 13:04:25 VirusScanHistory (text, 180 bytes)
+2026-10-10 13:04:25 VirusScanHistory (text, 734 bytes)
+2026-10-10 20:05:24 VirusScanHistory (text, 821 bytes)
+2026-10-10 23:31:55 SYSTEM_BOOT (text, 482 bytes)
+
+Usage: dumpsys dropbox [--print|--file] [YYYY-mm-dd] [HH:MM:SS] [tag]

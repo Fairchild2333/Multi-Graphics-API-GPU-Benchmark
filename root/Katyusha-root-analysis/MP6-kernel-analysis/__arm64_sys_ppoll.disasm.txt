@@ -1,0 +1,106 @@
+0058445c: paciasp 
+00584460: sub sp, sp, #0x80
+00584464: str x30, [x18], #8
+00584468: stp x29, x30, [sp, #0x30]
+0058446c: stp x26, x25, [sp, #0x40]
+00584470: stp x24, x23, [sp, #0x50]
+00584474: stp x22, x21, [sp, #0x60]
+00584478: stp x20, x19, [sp, #0x70]
+0058447c: add x29, sp, #0x30
+00584480: adrp x8, #0xffffffc012999000
+00584484: ldr x8, [x8, #0xd48]
+00584488: stur x8, [x29, #-8]
+0058448c: ldr x20, [x0]
+00584490: ldr w21, [x0, #8]
+00584494: ldp x19, x22, [x0, #0x10]
+00584498: ldr x23, [x0, #0x20]
+0058449c: stp xzr, xzr, [sp, #8]
+005844a0: cbz x19, #0xffffffc0105844c4
+005844a4: add x0, sp, #0x18
+005844a8: mov w2, #0x10
+005844ac: mov x1, x19
+005844b0: stp xzr, xzr, [sp, #0x18]
+005844b4: bl #0xffffffc0102584dc ; _copy_from_user.6330
+005844b8: cbz w0, #0xffffffc0105844cc
+005844bc: mov x0, #-0xe
+005844c0: b #0xffffffc0105845c8 ; ?
+005844c4: mov x24, xzr
+005844c8: b #0xffffffc010584590 ; ?
+005844cc: mrs x8, sp_el0
+005844d0: ldp x24, x9, [sp, #0x18]
+005844d4: ldr x8, [x8]
+005844d8: mov x0, #-0x16
+005844dc: and x10, x9, #0xffffffff
+005844e0: tst x8, #0x400000
+005844e4: csel x26, x9, x10, eq
+005844e8: tbnz x24, #0x3f, #0xffffffc0105845c8
+005844ec: mov w25, #0xc9ff
+005844f0: movk w25, #0x3b9a, lsl #16
+005844f4: add x8, x25, #1
+005844f8: cmp x26, x8
+005844fc: b.hs #0xffffffc0105845c8
+00584500: orr x8, x26, x24
+00584504: cbz x8, #0xffffffc010584588
+00584508: add x0, sp, #8
+0058450c: bl #0xffffffc010267314 ; ktime_get_ts64
+00584510: ldp x10, x9, [sp, #8]
+00584514: add x9, x26, x9
+00584518: add x8, x24, x10
+0058451c: cmp x9, x25
+00584520: str x9, [sp, #0x18]
+00584524: b.le #0xffffffc010584544
+00584528: mov x11, #-0xca00
+0058452c: movk x11, #0xc465, lsl #16
+00584530: add x9, x9, x11
+00584534: cmp x9, x25
+00584538: add x8, x8, #1
+0058453c: str x9, [sp, #0x18]
+00584540: b.gt #0xffffffc010584530
+00584544: tbz x9, #0x3f, #0xffffffc01058455c
+00584548: add x9, x25, x9
+0058454c: add x9, x9, #1
+00584550: sub x8, x8, #1
+00584554: str x9, [sp, #0x18]
+00584558: tbnz x9, #0x3f, #0xffffffc010584548
+0058455c: cmp x8, x10
+00584560: cset w11, lt
+00584564: cmp x8, x24
+00584568: cset w12, lt
+0058456c: orr w11, w11, w12
+00584570: mov x10, #0x7fffffffffffffff
+00584574: cmp w11, #0
+00584578: csel x8, x10, x8, ne
+0058457c: csel x9, xzr, x9, ne
+00584580: stp x8, x9, [sp, #8]
+00584584: b #0xffffffc01058458c ; ?
+00584588: stp xzr, xzr, [sp, #8]
+0058458c: add x24, sp, #8
+00584590: mov x0, x22
+00584594: mov x1, x23
+00584598: bl #0xffffffc010156374 ; set_user_sigmask
+0058459c: cbnz w0, #0xffffffc0105845c4
+005845a0: mov x0, x20
+005845a4: mov w1, w21
+005845a8: mov x2, x24
+005845ac: bl #0xffffffc010584604 ; do_sys_poll
+005845b0: mov w3, w0
+005845b4: add x0, sp, #8
+005845b8: mov w2, #2
+005845bc: mov x1, x19
+005845c0: bl #0xffffffc010582e58 ; poll_select_finish
+005845c4: sxtw x0, w0
+005845c8: adrp x9, #0xffffffc012999000
+005845cc: ldur x8, [x29, #-8]
+005845d0: ldr x9, [x9, #0xd48]
+005845d4: cmp x9, x8
+005845d8: b.ne #0xffffffc010584600
+005845dc: ldp x29, x30, [sp, #0x30]
+005845e0: ldp x20, x19, [sp, #0x70]
+005845e4: ldp x22, x21, [sp, #0x60]
+005845e8: ldp x24, x23, [sp, #0x50]
+005845ec: ldp x26, x25, [sp, #0x40]
+005845f0: ldr x30, [x18, #-8]!
+005845f4: add sp, sp, #0x80
+005845f8: autiasp 
+005845fc: ret 
+00584600: bl #0xffffffc01182bec0 ; __stack_chk_fail

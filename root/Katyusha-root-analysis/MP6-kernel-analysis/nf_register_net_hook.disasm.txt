@@ -1,0 +1,45 @@
+0148463c paciasp   
+01484640 str       x30, [x18], #8
+01484644 stp       x29, x30, [sp, #-0x30]!
+01484648 str       x21, [sp, #0x10]
+0148464c stp       x20, x19, [sp, #0x20]
+01484650 mov       x29, sp
+01484654 mov       x19, x1
+01484658 ldrb      w1, [x1, #0x18]
+0148465c mov       x20, x0
+01484660 cmp       w1, #1
+01484664 b.ne      #0xffffffc011484678
+01484668 ldr       w8, [x19, #0x1c]
+0148466c cmp       w8, #5
+01484670 b.ne      #0xffffffc011484690
+01484674 mov       w1, #1
+01484678 mov       x0, x20
+0148467c mov       x2, x19
+01484680 bl        #0xffffffc0114846f0 ; __nf_register_net_hook
+01484684 tbnz      w0, #0x1f, #0xffffffc0114846d0
+01484688 mov       w21, wzr
+0148468c b         #0xffffffc0114846d4 ; 
+01484690 mov       w1, #2
+01484694 mov       x0, x20
+01484698 mov       x2, x19
+0148469c bl        #0xffffffc0114846f0 ; __nf_register_net_hook
+014846a0 tbnz      w0, #0x1f, #0xffffffc0114846d0
+014846a4 mov       w1, #0xa
+014846a8 mov       x0, x20
+014846ac mov       x2, x19
+014846b0 bl        #0xffffffc0114846f0 ; __nf_register_net_hook
+014846b4 tbz       w0, #0x1f, #0xffffffc011484688
+014846b8 mov       w21, w0
+014846bc mov       w1, #2
+014846c0 mov       x0, x20
+014846c4 mov       x2, x19
+014846c8 bl        #0xffffffc011483d60 ; __nf_unregister_net_hook
+014846cc b         #0xffffffc0114846d4 ; 
+014846d0 mov       w21, w0
+014846d4 mov       w0, w21
+014846d8 ldp       x20, x19, [sp, #0x20]
+014846dc ldr       x21, [sp, #0x10]
+014846e0 ldp       x29, x30, [sp], #0x30
+014846e4 ldr       x30, [x18, #-8]!
+014846e8 autiasp   
+014846ec ret       

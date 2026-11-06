@@ -1,0 +1,110 @@
+0028da6c paciasp   
+0028da70 sub       sp, sp, #0x20
+0028da74 str       x30, [x18], #8
+0028da78 stp       x29, x30, [sp, #0x10]
+0028da7c add       x29, sp, #0x10
+0028da80 adrp      x11, #0xffffffc012999000
+0028da84 ldr       x11, [x11, #0xd48]
+0028da88 mov       w12, #1
+0028da8c mov       w8, w5
+0028da90 mov       w10, w2
+0028da94 mov       w9, w1
+0028da98 bic       w1, w12, w1, lsr #7
+0028da9c str       x11, [sp, #8]
+0028daa0 str       w6, [sp, #4]
+0028daa4 tbz       w9, #8, #0xffffffc01028dabc
+0028daa8 mov       w11, #-0x183
+0028daac and       w11, w9, w11
+0028dab0 cmp       w11, #9
+0028dab4 b.ne      #0xffffffc01028db08
+0028dab8 orr       w1, w1, #2
+0028dabc and       w11, w9, #0xfffffe7f
+0028dac0 cmp       w11, #0xc
+0028dac4 mov       x9, #-0x26
+0028dac8 b.hi      #0xffffffc01028dbf0
+0028dacc adrp      x12, #0xffffffc0122ed000
+0028dad0 mov       w11, w11
+0028dad4 add       x12, x12, #0x5b8
+0028dad8 adr       x13, #0xffffffc01028dae8
+0028dadc ldrb      w14, [x12, x11]
+0028dae0 add       x13, x13, x14, lsl #2
+0028dae4 br        x13
+0028dae8 bti       j
+0028daec mov       w6, #-1
+0028daf0 str       w6, [sp, #4]
+0028daf4 bti       j
+0028daf8 mov       w2, w10
+0028dafc mov       w4, w6
+0028db00 bl        #0xffffffc01028dc24 ; futex_wait
+0028db04 b         #0xffffffc01028dbec ; 
+0028db08 mov       x9, #-0x26
+0028db0c b         #0xffffffc01028dbf0 ; 
+0028db10 bti       j
+0028db14 mov       w6, #-1
+0028db18 str       w6, [sp, #4]
+0028db1c bti       j
+0028db20 mov       w2, w10
+0028db24 mov       w3, w6
+0028db28 bl        #0xffffffc01028de40 ; futex_wake
+0028db2c b         #0xffffffc01028dbec ; 
+0028db30 bti       j
+0028db34 mov       x2, x4
+0028db38 mov       w3, w10
+0028db3c mov       w4, w8
+0028db40 mov       x5, xzr
+0028db44 mov       w6, wzr
+0028db48 b         #0xffffffc01028dbe8 ; 
+0028db4c bti       j
+0028db50 add       x5, sp, #4
+0028db54 mov       x2, x4
+0028db58 mov       w3, w10
+0028db5c mov       w4, w8
+0028db60 mov       w6, wzr
+0028db64 b         #0xffffffc01028dbe8 ; 
+0028db68 bti       j
+0028db6c mov       x2, x4
+0028db70 mov       w3, w10
+0028db74 mov       w4, w8
+0028db78 mov       w5, w6
+0028db7c bl        #0xffffffc01028f974 ; futex_wake_op
+0028db80 b         #0xffffffc01028dbec ; 
+0028db84 bti       j
+0028db88 mov       x2, x3
+0028db8c mov       w3, wzr
+0028db90 bl        #0xffffffc0102905a8 ; futex_lock_pi
+0028db94 b         #0xffffffc01028dbec ; 
+0028db98 bti       j
+0028db9c bl        #0xffffffc010291200 ; futex_unlock_pi
+0028dba0 b         #0xffffffc01028dbec ; 
+0028dba4 bti       j
+0028dba8 mov       w3, #1
+0028dbac mov       x2, xzr
+0028dbb0 bl        #0xffffffc0102905a8 ; futex_lock_pi
+0028dbb4 b         #0xffffffc01028dbec ; 
+0028dbb8 bti       j
+0028dbbc mov       w8, #-1
+0028dbc0 mov       w2, w10
+0028dbc4 str       w8, [sp, #4]
+0028dbc8 bl        #0xffffffc010291d40 ; futex_wait_requeue_pi
+0028dbcc b         #0xffffffc01028dbec ; 
+0028dbd0 bti       j
+0028dbd4 add       x5, sp, #4
+0028dbd8 mov       w6, #1
+0028dbdc mov       x2, x4
+0028dbe0 mov       w3, w10
+0028dbe4 mov       w4, w8
+0028dbe8 bl        #0xffffffc01028e314 ; futex_requeue
+0028dbec sxtw      x9, w0
+0028dbf0 bti       j
+0028dbf4 adrp      x10, #0xffffffc012999000
+0028dbf8 ldr       x8, [sp, #8]
+0028dbfc ldr       x10, [x10, #0xd48]
+0028dc00 cmp       x10, x8
+0028dc04 b.ne      #0xffffffc01028dc20
+0028dc08 ldp       x29, x30, [sp, #0x10]
+0028dc0c ldr       x30, [x18, #-8]!
+0028dc10 mov       x0, x9
+0028dc14 add       sp, sp, #0x20
+0028dc18 autiasp   
+0028dc1c ret       
+0028dc20 bl        #0xffffffc01182bec0 ; __stack_chk_fail

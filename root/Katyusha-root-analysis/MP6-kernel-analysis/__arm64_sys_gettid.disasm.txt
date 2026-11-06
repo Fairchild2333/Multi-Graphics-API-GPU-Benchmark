@@ -1,0 +1,45 @@
+0015cd04 paciasp   
+0015cd08 str       x30, [x18], #8
+0015cd0c stp       x29, x30, [sp, #-0x20]!
+0015cd10 str       x19, [sp, #0x10]
+0015cd14 mov       x29, sp
+0015cd18 mrs       x0, sp_el0
+0015cd1c ldr       w8, [x0, #0x448]
+0015cd20 add       w8, w8, #1
+0015cd24 str       w8, [x0, #0x448]
+0015cd28 ldr       x8, [x0, #0x630]
+0015cd2c cbz       x8, #0xffffffc01015cd3c
+0015cd30 ldr       w9, [x8, #4]
+0015cd34 add       x8, x8, x9, lsl #4
+0015cd38 ldr       x8, [x8, #0x68]
+0015cd3c add       x9, x0, #0x630
+0015cd40 ldar      x9, [x9]
+0015cd44 cbz       x9, #0xffffffc01015cd68
+0015cd48 ldr       w10, [x8, #0x48]
+0015cd4c ldr       w11, [x9, #4]
+0015cd50 cmp       w10, w11
+0015cd54 b.hi      #0xffffffc01015cd68
+0015cd58 add       x9, x9, x10, lsl #4
+0015cd5c ldr       x10, [x9, #0x68]
+0015cd60 cmp       x10, x8
+0015cd64 b.eq      #0xffffffc01015cda0
+0015cd68 mov       x19, xzr
+0015cd6c ldr       w8, [x0, #0x448]
+0015cd70 subs      w8, w8, #1
+0015cd74 str       w8, [x0, #0x448]
+0015cd78 b.ne      #0xffffffc01015cd88
+0015cd7c add       x8, x0, #0x44c
+0015cd80 ldar      w8, [x8]
+0015cd84 cbnz      w8, #0xffffffc01015cda8
+0015cd88 mov       x0, x19
+0015cd8c ldr       x19, [sp, #0x10]
+0015cd90 ldp       x29, x30, [sp], #0x20
+0015cd94 ldr       x30, [x18, #-8]!
+0015cd98 autiasp   
+0015cd9c ret       
+0015cda0 ldrsw     x19, [x9, #0x60]
+0015cda4 b         #0xffffffc01015cd6c
+0015cda8 bl        #0xffffffc01023d608
+0015cdac b         #0xffffffc01015cd88
+0015cdb0 ldapr     x9, [x9]
+0015cdb4 ldapr     w8, [x8]

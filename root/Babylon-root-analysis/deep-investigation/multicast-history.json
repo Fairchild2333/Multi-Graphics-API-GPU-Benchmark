@@ -1,0 +1,576 @@
+[
+  {
+    "sha": "fae103ab8347b0132aa4add2ba8d93940a51d5ff",
+    "node_id": "C_kwDOTmwoQtoAKGZhZTEwM2FiODM0N2IwMTMyYWE0YWRkMmJhOGQ5Mzk0MGE1MWQ1ZmY",
+    "commit": {
+      "author": {
+        "name": "Nick Ji",
+        "email": "nickji2019@outlook.com",
+        "date": "2026-09-27T04:28:59Z"
+      },
+      "committer": {
+        "name": "Nick Ji",
+        "email": "nickji2019@outlook.com",
+        "date": "2026-09-27T04:28:59Z"
+      },
+      "message": "feat(profile)!: object-section wire v2, native v1 removal, debug profile dumps\n\nReplace the position-coded 68-slot profile wire with a self-describing\nobject-section format on both sides of the Kotlin<->native contract, drop the\nnative v1 JSON path, and dump the effective runtime profile into the exported\ndebug folder.\n\nBREAKING CHANGE: the transport is now wire v2 only. Kotlin and native are\nversion-bound: the old v2 (12-byte header + 68 u64 core) and v3 (core +\nmiddleware/option sections) containers are gone, native no longer parses v1\noffsets.json, and a v1 document must be converted on the Kotlin side first.\n\nNative\n- profile/binary.cpp: parse/serialize v2 as a 16-byte little-endian header\n  `u32 magic + u16 version(2) + u16 frontend + u16 backend + u16 middleware +\n  u16 release_len + u16 reserved`, then the release string, `u16 section_count`,\n  then per section `u8 name_len + name + u32 entry_count` and per entry\n  `u8 key_len + key + u64 value`. Presence is key occurrence (an omitted field\n  is not a provided 0); values are raw u64 bit patterns (signed = two's\n  complement) and are never clamped; only the active route's `route.*` section\n  is written or accepted; unknown sections/keys are ignored; duplicate keys are\n  last-wins. `kSections` is the single section/key authority.\n- profile/model.h: split `kernel_offsets` into ProfileMeta, TaskStructOffsets,\n  CredTemplate, KernelOffsets, KernelMisc (optional), RouteGeometry (optional)\n  and the execution settings; route layouts keep `std::optional` members.\n- Migrate util/address_space/runtime_struct_offsets/select_stack_route/backend\n  to the split model and drop the optional-value clamps.\n- Delete `core/legacy/` (v1 JSON offsets.json parser, converter, entrypoint\n  starter) and its host test; drop them from CMakeLists/Makefile.\n- Make the one-shot multicast int32 -> size_t widening explicit, clearing a\n  -Wsign-conversion warning (codegen unchanged).\n\nAndroid / app\n- profile-core/NativeProfile.kt: rewrite to the v2 object-section codec\n  (`toBinary`/`fromBinary`), optional fields as nullable, and add\n  `patchSafeMode()` (scans the meta section; replaces the removed fixed-offset\n  `safeModeOffset()`).\n- route configs (Multicast/Select/Tcp/RouteConfig/RouteKind): `entries()` now\n  yields the short section keys (`waiter_off`, `waiter_shift`, `attempts`, ...)\n  with `ULong` raw values and `apply()` restores typed fields; drop the\n  `toConfigUInt/toConfigULong` clamps and make route fields nullable where the\n  native layout is `std::optional`.\n- Profile/ProfileResolver/ProfileExporter: align to the nullable/typed model and\n  the v2 reader; execution values keep their raw bits.\n- AndroidProfileConfigController: fail-closed validation now rejects negative or\n  out-of-range unsigned route fields instead of silently clamping; add a\n  verbatim `renderResolvedForDebug()`.\n- Debug export: write the effective runtime profile into the same per-attempt\n  folder as `profile.conf` (resolved HOCON, nothing trimmed) and `profile.bin`\n  (the exact GLK1 bytes handed to native) via MediaStore.\n- GhostlockUserService/AndroidGhostlockRepository: safe_mode now goes through\n  `patchSafeMode()`; the blob length check follows the 16-byte header.\n\nDocs\n- AGENTS.md: pin the branch to wire v2, forbid ad-hoc version bumps, and note\n  that the native v1 path is gone.\n- PROFILE_SCHEMA(.md/_ZH): document the v2 layout and section/key tables.\n- SUPPORTED_DEVICES(.md/_ZH): register Red Magic 8 Pro (5.15.167), the only\n  builtin profile that was missing a row.\n- src/core/README, the wire-v2 object-sections plan and the Kotlin handoff.\n\nVerification\n- `./gradlew :app:testDebugUnitTest :profile-core:test` green, golden refrozen.\n- `make -C src native-host-tests` green; NDK build zero-warning; `lint-tidy` 0.\n- `cmp_disasm` against the pre-fix build: strict-IDENTICAL for every present\n  target, including `do_kernel5_fake_lock_route`; the two multicast workers are\n  inlined in both builds.\n- Device gate (cold boot, single multicast route) still pending.",
+      "tree": {
+        "sha": "757a15bafee402490b1776af42355587ab72a243",
+        "url": "https://api.github.com/repos/YuKongA/ghostlock-app/git/trees/757a15bafee402490b1776af42355587ab72a243"
+      },
+      "url": "https://api.github.com/repos/YuKongA/ghostlock-app/git/commits/fae103ab8347b0132aa4add2ba8d93940a51d5ff",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAg+j++LbYgnubYuBwgfPegu+Ttdr\nGgxyUhTDl+C5xUVt4AAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5\nAAAAQGZZBnw0WU69GFw1C302qgvexw06SPEJQ0mRpuXX6msx54/HnEInOYofwh87KHm+/9\nXi62BXddq1ukkmmwcM6As=\n-----END SSH SIGNATURE-----",
+        "payload": "tree 757a15bafee402490b1776af42355587ab72a243\nparent 1b4538718adc8fd22e9970501cc9a221ade2b294\nauthor Nick Ji <nickji2019@outlook.com> 1790483339 -0400\ncommitter Nick Ji <nickji2019@outlook.com> 1790483339 -0400\n\nfeat(profile)!: object-section wire v2, native v1 removal, debug profile dumps\n\nReplace the position-coded 68-slot profile wire with a self-describing\nobject-section format on both sides of the Kotlin<->native contract, drop the\nnative v1 JSON path, and dump the effective runtime profile into the exported\ndebug folder.\n\nBREAKING CHANGE: the transport is now wire v2 only. Kotlin and native are\nversion-bound: the old v2 (12-byte header + 68 u64 core) and v3 (core +\nmiddleware/option sections) containers are gone, native no longer parses v1\noffsets.json, and a v1 document must be converted on the Kotlin side first.\n\nNative\n- profile/binary.cpp: parse/serialize v2 as a 16-byte little-endian header\n  `u32 magic + u16 version(2) + u16 frontend + u16 backend + u16 middleware +\n  u16 release_len + u16 reserved`, then the release string, `u16 section_count`,\n  then per section `u8 name_len + name + u32 entry_count` and per entry\n  `u8 key_len + key + u64 value`. Presence is key occurrence (an omitted field\n  is not a provided 0); values are raw u64 bit patterns (signed = two's\n  complement) and are never clamped; only the active route's `route.*` section\n  is written or accepted; unknown sections/keys are ignored; duplicate keys are\n  last-wins. `kSections` is the single section/key authority.\n- profile/model.h: split `kernel_offsets` into ProfileMeta, TaskStructOffsets,\n  CredTemplate, KernelOffsets, KernelMisc (optional), RouteGeometry (optional)\n  and the execution settings; route layouts keep `std::optional` members.\n- Migrate util/address_space/runtime_struct_offsets/select_stack_route/backend\n  to the split model and drop the optional-value clamps.\n- Delete `core/legacy/` (v1 JSON offsets.json parser, converter, entrypoint\n  starter) and its host test; drop them from CMakeLists/Makefile.\n- Make the one-shot multicast int32 -> size_t widening explicit, clearing a\n  -Wsign-conversion warning (codegen unchanged).\n\nAndroid / app\n- profile-core/NativeProfile.kt: rewrite to the v2 object-section codec\n  (`toBinary`/`fromBinary`), optional fields as nullable, and add\n  `patchSafeMode()` (scans the meta section; replaces the removed fixed-offset\n  `safeModeOffset()`).\n- route configs (Multicast/Select/Tcp/RouteConfig/RouteKind): `entries()` now\n  yields the short section keys (`waiter_off`, `waiter_shift`, `attempts`, ...)\n  with `ULong` raw values and `apply()` restores typed fields; drop the\n  `toConfigUInt/toConfigULong` clamps and make route fields nullable where the\n  native layout is `std::optional`.\n- Profile/ProfileResolver/ProfileExporter: align to the nullable/typed model and\n  the v2 reader; execution values keep their raw bits.\n- AndroidProfileConfigController: fail-closed validation now rejects negative or\n  out-of-range unsigned route fields instead of silently clamping; add a\n  verbatim `renderResolvedForDebug()`.\n- Debug export: write the effective runtime profile into the same per-attempt\n  folder as `profile.conf` (resolved HOCON, nothing trimmed) and `profile.bin`\n  (the exact GLK1 bytes handed to native) via MediaStore.\n- GhostlockUserService/AndroidGhostlockRepository: safe_mode now goes through\n  `patchSafeMode()`; the blob length check follows the 16-byte header.\n\nDocs\n- AGENTS.md: pin the branch to wire v2, forbid ad-hoc version bumps, and note\n  that the native v1 path is gone.\n- PROFILE_SCHEMA(.md/_ZH): document the v2 layout and section/key tables.\n- SUPPORTED_DEVICES(.md/_ZH): register Red Magic 8 Pro (5.15.167), the only\n  builtin profile that was missing a row.\n- src/core/README, the wire-v2 object-sections plan and the Kotlin handoff.\n\nVerification\n- `./gradlew :app:testDebugUnitTest :profile-core:test` green, golden refrozen.\n- `make -C src native-host-tests` green; NDK build zero-warning; `lint-tidy` 0.\n- `cmp_disasm` against the pre-fix build: strict-IDENTICAL for every present\n  target, including `do_kernel5_fake_lock_route`; the two multicast workers are\n  inlined in both builds.\n- Device gate (cold boot, single multicast route) still pending.\n",
+        "verified_at": "2026-09-27T04:32:58Z"
+      }
+    },
+    "url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/fae103ab8347b0132aa4add2ba8d93940a51d5ff",
+    "html_url": "https://github.com/YuKongA/ghostlock-app/commit/fae103ab8347b0132aa4add2ba8d93940a51d5ff",
+    "comments_url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/fae103ab8347b0132aa4add2ba8d93940a51d5ff/comments",
+    "author": {
+      "login": "NickJi2019",
+      "id": 72794669,
+      "node_id": "MDQ6VXNlcjcyNzk0NjY5",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72794669?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NickJi2019",
+      "html_url": "https://github.com/NickJi2019",
+      "followers_url": "https://api.github.com/users/NickJi2019/followers",
+      "following_url": "https://api.github.com/users/NickJi2019/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NickJi2019/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NickJi2019/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NickJi2019/subscriptions",
+      "organizations_url": "https://api.github.com/users/NickJi2019/orgs",
+      "repos_url": "https://api.github.com/users/NickJi2019/repos",
+      "events_url": "https://api.github.com/users/NickJi2019/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NickJi2019/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "NickJi2019",
+      "id": 72794669,
+      "node_id": "MDQ6VXNlcjcyNzk0NjY5",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72794669?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NickJi2019",
+      "html_url": "https://github.com/NickJi2019",
+      "followers_url": "https://api.github.com/users/NickJi2019/followers",
+      "following_url": "https://api.github.com/users/NickJi2019/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NickJi2019/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NickJi2019/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NickJi2019/subscriptions",
+      "organizations_url": "https://api.github.com/users/NickJi2019/orgs",
+      "repos_url": "https://api.github.com/users/NickJi2019/repos",
+      "events_url": "https://api.github.com/users/NickJi2019/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NickJi2019/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "1b4538718adc8fd22e9970501cc9a221ade2b294",
+        "url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/1b4538718adc8fd22e9970501cc9a221ade2b294",
+        "html_url": "https://github.com/YuKongA/ghostlock-app/commit/1b4538718adc8fd22e9970501cc9a221ade2b294"
+      }
+    ]
+  },
+  {
+    "sha": "1b4538718adc8fd22e9970501cc9a221ade2b294",
+    "node_id": "C_kwDOTmwoQtoAKDFiNDUzODcxOGFkYzhmZDIyZTk5NzA1MDFjYzlhMjIxYWRlMmIyOTQ",
+    "commit": {
+      "author": {
+        "name": "Nick Ji",
+        "email": "nickji2019@outlook.com",
+        "date": "2026-09-27T03:08:58Z"
+      },
+      "committer": {
+        "name": "Nick Ji",
+        "email": "nickji2019@outlook.com",
+        "date": "2026-09-27T03:08:58Z"
+      },
+      "message": "feat(multicast,extract,app): one-shot-only multicast, offline geometry, import UX\n\nRemove the unmaintained multicast resident writer and make the one-shot route\nthe single multicast path; teach the extractor to derive the whole 5.x one-shot\ngeometry offline (no root/device); rework the local-image import flow.\n\nBREAKING CHANGE: the resident multicast writer and its profile fields are gone.\n5.15 runs one-shot multicast only.\n\nNative\n- Delete MulticastWaiterRoute (class + header), resident_route(),\n  kernel5_resident_{start,write,stop}, the resident_write / w1_resident_repair\n  middleware hooks, the backend resident fast path, the w1c step and\n  release_resident_heap.\n- Drop profile fields: multicast_resident, mcast_fake_lock/task_offset,\n  mcast_lock_slots_*, off_mcast_fake_bss, multicast_*_settle timings;\n  MulticastWaiterLayout keeps only waiter/buffer/task/lock offsets.\n- attack_write now always heap-sprays and runs the middleware route; the\n  one-shot do_kernel5_fake_lock_route and w2_fast_repair_* are unchanged.\n\nExtractor (tools/extract_rs)\n- Every 5.x multicast profile emits the full one-shot geometry (probe-derived\n  waiter_off/buffer_size + BTF task/lock + compact_waiter) and the 5.x\n  KernelSnitch defaults, no longer gated on the android13 train tag.\n- waiter_off is derived statically from the target image's setsockopt/futex\n  stack frames: (Σsetsockopt − greqs_off) − (Σfutex − waiter_local). The\n  A301SO image reproduces its hardware-probed 0x60; a unit golden pins it\n  (PD2361 yields 0x50).\n- kernel_phys_load: parse the UEFI platform memory-map table\n  (`0x<base>,0x<size>,\"Kernel\"`) when xbl_config carries no FDT map; payload/OTA\n  extraction now also pulls the uefi partition; add a --uefi flag.\n- Legacy JSON maps exactly the remote/main field set (no mcast, no\n  kernel_major, no empty_zero_page, no shizuku); kernel_major defaults to 6.\n- New tools/verify_kernels.py batch verification harness; golden: A301SO\n  `--format conf` matches the bundled profile field-for-field (only\n  recommend_shizuku differs, intentionally 0).\n\nAndroid / UI\n- \"Import offsets.conf (HOCON)\" -> \"(v2)\"; parse-local-image is now a\n  two-level menu: payload.bin, or boot.img with optional xbl_config.img /\n  uefi.img (both selectable). A profile missing sidecar-only fields\n  (kernel_phys_load) gets a fill-it hint after parsing.\n- Parsed profiles auto-load on save; the status \"go to configuration\" link is\n  no longer a no-op; export no longer gains a \".txt\" suffix.\n- BuiltinProfileCatalog excludes *-template from device matching, so a\n  template can no longer mark a device \"supported\".\n- Builtin profiles: restore Xperia 1V (5.15.189) and register Red Magic 8 Pro\n  (5.15.167).\n\nDocs\n- docs/analysis/remove-multicast-resident-plan.md (L-level plan + verification);\n  PROFILE_SCHEMA/defaults/templates and component docs updated.\n\nVerification\n- native: host tests pass, NDK build zero-warning, lint 0 findings, cmp_disasm\n  reviewed (do_one_write loses only the resident fast path; workers MISSING).\n- app: testDebugUnitTest green; extractor: cargo test (34) + fmt clean.\n- device: one-shot multicast gate PASS; parse -> save -> auto-load flow tested.",
+      "tree": {
+        "sha": "9d8d1024d9a5b6340882be30040cf2e8449de055",
+        "url": "https://api.github.com/repos/YuKongA/ghostlock-app/git/trees/9d8d1024d9a5b6340882be30040cf2e8449de055"
+      },
+      "url": "https://api.github.com/repos/YuKongA/ghostlock-app/git/commits/1b4538718adc8fd22e9970501cc9a221ade2b294",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAg+j++LbYgnubYuBwgfPegu+Ttdr\nGgxyUhTDl+C5xUVt4AAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5\nAAAAQHFfpUSnQDG+SyxqClzEWpJk0vYvM0zI1/mzvRg6AF1Ov68g29XpBFZ06rrRHRH3Ao\nLxTluRvC+KhTFSuywMnAs=\n-----END SSH SIGNATURE-----",
+        "payload": "tree 9d8d1024d9a5b6340882be30040cf2e8449de055\nparent a5a72434855ae4d626d89ab570934e34655333d2\nauthor Nick Ji <nickji2019@outlook.com> 1790478538 -0400\ncommitter Nick Ji <nickji2019@outlook.com> 1790478538 -0400\n\nfeat(multicast,extract,app): one-shot-only multicast, offline geometry, import UX\n\nRemove the unmaintained multicast resident writer and make the one-shot route\nthe single multicast path; teach the extractor to derive the whole 5.x one-shot\ngeometry offline (no root/device); rework the local-image import flow.\n\nBREAKING CHANGE: the resident multicast writer and its profile fields are gone.\n5.15 runs one-shot multicast only.\n\nNative\n- Delete MulticastWaiterRoute (class + header), resident_route(),\n  kernel5_resident_{start,write,stop}, the resident_write / w1_resident_repair\n  middleware hooks, the backend resident fast path, the w1c step and\n  release_resident_heap.\n- Drop profile fields: multicast_resident, mcast_fake_lock/task_offset,\n  mcast_lock_slots_*, off_mcast_fake_bss, multicast_*_settle timings;\n  MulticastWaiterLayout keeps only waiter/buffer/task/lock offsets.\n- attack_write now always heap-sprays and runs the middleware route; the\n  one-shot do_kernel5_fake_lock_route and w2_fast_repair_* are unchanged.\n\nExtractor (tools/extract_rs)\n- Every 5.x multicast profile emits the full one-shot geometry (probe-derived\n  waiter_off/buffer_size + BTF task/lock + compact_waiter) and the 5.x\n  KernelSnitch defaults, no longer gated on the android13 train tag.\n- waiter_off is derived statically from the target image's setsockopt/futex\n  stack frames: (Σsetsockopt − greqs_off) − (Σfutex − waiter_local). The\n  A301SO image reproduces its hardware-probed 0x60; a unit golden pins it\n  (PD2361 yields 0x50).\n- kernel_phys_load: parse the UEFI platform memory-map table\n  (`0x<base>,0x<size>,\"Kernel\"`) when xbl_config carries no FDT map; payload/OTA\n  extraction now also pulls the uefi partition; add a --uefi flag.\n- Legacy JSON maps exactly the remote/main field set (no mcast, no\n  kernel_major, no empty_zero_page, no shizuku); kernel_major defaults to 6.\n- New tools/verify_kernels.py batch verification harness; golden: A301SO\n  `--format conf` matches the bundled profile field-for-field (only\n  recommend_shizuku differs, intentionally 0).\n\nAndroid / UI\n- \"Import offsets.conf (HOCON)\" -> \"(v2)\"; parse-local-image is now a\n  two-level menu: payload.bin, or boot.img with optional xbl_config.img /\n  uefi.img (both selectable). A profile missing sidecar-only fields\n  (kernel_phys_load) gets a fill-it hint after parsing.\n- Parsed profiles auto-load on save; the status \"go to configuration\" link is\n  no longer a no-op; export no longer gains a \".txt\" suffix.\n- BuiltinProfileCatalog excludes *-template from device matching, so a\n  template can no longer mark a device \"supported\".\n- Builtin profiles: restore Xperia 1V (5.15.189) and register Red Magic 8 Pro\n  (5.15.167).\n\nDocs\n- docs/analysis/remove-multicast-resident-plan.md (L-level plan + verification);\n  PROFILE_SCHEMA/defaults/templates and component docs updated.\n\nVerification\n- native: host tests pass, NDK build zero-warning, lint 0 findings, cmp_disasm\n  reviewed (do_one_write loses only the resident fast path; workers MISSING).\n- app: testDebugUnitTest green; extractor: cargo test (34) + fmt clean.\n- device: one-shot multicast gate PASS; parse -> save -> auto-load flow tested.\n",
+        "verified_at": "2026-09-27T04:32:58Z"
+      }
+    },
+    "url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/1b4538718adc8fd22e9970501cc9a221ade2b294",
+    "html_url": "https://github.com/YuKongA/ghostlock-app/commit/1b4538718adc8fd22e9970501cc9a221ade2b294",
+    "comments_url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/1b4538718adc8fd22e9970501cc9a221ade2b294/comments",
+    "author": {
+      "login": "NickJi2019",
+      "id": 72794669,
+      "node_id": "MDQ6VXNlcjcyNzk0NjY5",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72794669?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NickJi2019",
+      "html_url": "https://github.com/NickJi2019",
+      "followers_url": "https://api.github.com/users/NickJi2019/followers",
+      "following_url": "https://api.github.com/users/NickJi2019/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NickJi2019/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NickJi2019/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NickJi2019/subscriptions",
+      "organizations_url": "https://api.github.com/users/NickJi2019/orgs",
+      "repos_url": "https://api.github.com/users/NickJi2019/repos",
+      "events_url": "https://api.github.com/users/NickJi2019/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NickJi2019/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "NickJi2019",
+      "id": 72794669,
+      "node_id": "MDQ6VXNlcjcyNzk0NjY5",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72794669?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NickJi2019",
+      "html_url": "https://github.com/NickJi2019",
+      "followers_url": "https://api.github.com/users/NickJi2019/followers",
+      "following_url": "https://api.github.com/users/NickJi2019/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NickJi2019/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NickJi2019/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NickJi2019/subscriptions",
+      "organizations_url": "https://api.github.com/users/NickJi2019/orgs",
+      "repos_url": "https://api.github.com/users/NickJi2019/repos",
+      "events_url": "https://api.github.com/users/NickJi2019/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NickJi2019/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "a5a72434855ae4d626d89ab570934e34655333d2",
+        "url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/a5a72434855ae4d626d89ab570934e34655333d2",
+        "html_url": "https://github.com/YuKongA/ghostlock-app/commit/a5a72434855ae4d626d89ab570934e34655333d2"
+      }
+    ]
+  },
+  {
+    "sha": "b8ce39543090dac6f1918247f2a976f486a4e6ab",
+    "node_id": "C_kwDOTmwoQtoAKGI4Y2UzOTU0MzA5MGRhYzZmMTkxODI0N2YyYTk3NmY0ODZhNGU2YWI",
+    "commit": {
+      "author": {
+        "name": "Nick Ji",
+        "email": "nickji2019@outlook.com",
+        "date": "2026-09-25T03:32:05Z"
+      },
+      "committer": {
+        "name": "Nick Ji",
+        "email": "nickji2019@outlook.com",
+        "date": "2026-09-25T03:32:05Z"
+      },
+      "message": "fix(race): enforce attack resource lifetimes",
+      "tree": {
+        "sha": "21b26adc71935e66727436c75b0ae3bb3a352a0e",
+        "url": "https://api.github.com/repos/YuKongA/ghostlock-app/git/trees/21b26adc71935e66727436c75b0ae3bb3a352a0e"
+      },
+      "url": "https://api.github.com/repos/YuKongA/ghostlock-app/git/commits/b8ce39543090dac6f1918247f2a976f486a4e6ab",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAg+j++LbYgnubYuBwgfPegu+Ttdr\nGgxyUhTDl+C5xUVt4AAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5\nAAAAQIpc4tb7ngIizxgTuKJQ0EdOfNbdsE1l6h7uekOurhqkVGXTtqa7aMS2iaWWhXr7UY\n+i8TceSOVqZpQLyzKEcQ4=\n-----END SSH SIGNATURE-----",
+        "payload": "tree 21b26adc71935e66727436c75b0ae3bb3a352a0e\nparent 3bc924b1ea5d31ee75d5b6aa5e23795ff4405cb0\nauthor Nick Ji <nickji2019@outlook.com> 1790307125 -0400\ncommitter Nick Ji <nickji2019@outlook.com> 1790307125 -0400\n\nfix(race): enforce attack resource lifetimes\n",
+        "verified_at": "2026-09-25T04:59:20Z"
+      }
+    },
+    "url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/b8ce39543090dac6f1918247f2a976f486a4e6ab",
+    "html_url": "https://github.com/YuKongA/ghostlock-app/commit/b8ce39543090dac6f1918247f2a976f486a4e6ab",
+    "comments_url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/b8ce39543090dac6f1918247f2a976f486a4e6ab/comments",
+    "author": {
+      "login": "NickJi2019",
+      "id": 72794669,
+      "node_id": "MDQ6VXNlcjcyNzk0NjY5",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72794669?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NickJi2019",
+      "html_url": "https://github.com/NickJi2019",
+      "followers_url": "https://api.github.com/users/NickJi2019/followers",
+      "following_url": "https://api.github.com/users/NickJi2019/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NickJi2019/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NickJi2019/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NickJi2019/subscriptions",
+      "organizations_url": "https://api.github.com/users/NickJi2019/orgs",
+      "repos_url": "https://api.github.com/users/NickJi2019/repos",
+      "events_url": "https://api.github.com/users/NickJi2019/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NickJi2019/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "NickJi2019",
+      "id": 72794669,
+      "node_id": "MDQ6VXNlcjcyNzk0NjY5",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72794669?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NickJi2019",
+      "html_url": "https://github.com/NickJi2019",
+      "followers_url": "https://api.github.com/users/NickJi2019/followers",
+      "following_url": "https://api.github.com/users/NickJi2019/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NickJi2019/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NickJi2019/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NickJi2019/subscriptions",
+      "organizations_url": "https://api.github.com/users/NickJi2019/orgs",
+      "repos_url": "https://api.github.com/users/NickJi2019/repos",
+      "events_url": "https://api.github.com/users/NickJi2019/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NickJi2019/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "3bc924b1ea5d31ee75d5b6aa5e23795ff4405cb0",
+        "url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/3bc924b1ea5d31ee75d5b6aa5e23795ff4405cb0",
+        "html_url": "https://github.com/YuKongA/ghostlock-app/commit/3bc924b1ea5d31ee75d5b6aa5e23795ff4405cb0"
+      }
+    ]
+  },
+  {
+    "sha": "1241cedebe6dabb355bc4c88bb5eb9b5b59c7414",
+    "node_id": "C_kwDOTmwoQtoAKDEyNDFjZWRlYmU2ZGFiYjM1NWJjNGM4OGJiNWViOWI1YjU5Yzc0MTQ",
+    "commit": {
+      "author": {
+        "name": "Nick Ji",
+        "email": "nickji2019@outlook.com",
+        "date": "2026-09-25T01:02:30Z"
+      },
+      "committer": {
+        "name": "Nick Ji",
+        "email": "nickji2019@outlook.com",
+        "date": "2026-09-25T01:02:30Z"
+      },
+      "message": "refactor(session): land run_pipeline and retire ExploitProcedure (Batch 4)\n\n- session/stage_types.hpp: StageResult/VictimRound/VictimChain/write_stage_verify_fn\n  move out of the retired procedure\n- cve_2026_43499_backend: Cve2026_43499Policy::run owns setup -> W1 -> W2/W3;\n  attack_write/run_setup move with it; W1b and retry/park are unit helpers\n- root_child_frontend: RootChildPolicy::run owns the handoff step\n- route/pipeline.hpp: run_pipeline<F,B,M> (backend steps -> frontend handoff)\n- route/orchestrator.hpp: run_orchestrated_pipeline nested switch over catalogued\n  combinations with direct template calls\n- main.cpp calls the orchestrator directly; exploit_procedure.* and the empty\n  route procedure bindings/factories are deleted\n- cmp_disasm vs fed6b7cf: 7 functions IDENTICAL; do_one_write 138 -> 132\n  (this->parameter plus LTO reordering; all 20 call targets identical)",
+      "tree": {
+        "sha": "53b0e8b2f2db9d08e44dab3b7487b695e5a5831c",
+        "url": "https://api.github.com/repos/YuKongA/ghostlock-app/git/trees/53b0e8b2f2db9d08e44dab3b7487b695e5a5831c"
+      },
+      "url": "https://api.github.com/repos/YuKongA/ghostlock-app/git/commits/1241cedebe6dabb355bc4c88bb5eb9b5b59c7414",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAg+j++LbYgnubYuBwgfPegu+Ttdr\nGgxyUhTDl+C5xUVt4AAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5\nAAAAQOfrNUNouAMVzsalOEO64hKnK3YjX0SpfXY4q66SdsFiGeZpiInqUmgyITu+8D8FI8\nuTBJtfuiQNdWEqaJGT+QA=\n-----END SSH SIGNATURE-----",
+        "payload": "tree 53b0e8b2f2db9d08e44dab3b7487b695e5a5831c\nparent 6ba3c32903b509cf62956ed82af52ff898ed26ca\nauthor Nick Ji <nickji2019@outlook.com> 1790298150 -0400\ncommitter Nick Ji <nickji2019@outlook.com> 1790298150 -0400\n\nrefactor(session): land run_pipeline and retire ExploitProcedure (Batch 4)\n\n- session/stage_types.hpp: StageResult/VictimRound/VictimChain/write_stage_verify_fn\n  move out of the retired procedure\n- cve_2026_43499_backend: Cve2026_43499Policy::run owns setup -> W1 -> W2/W3;\n  attack_write/run_setup move with it; W1b and retry/park are unit helpers\n- root_child_frontend: RootChildPolicy::run owns the handoff step\n- route/pipeline.hpp: run_pipeline<F,B,M> (backend steps -> frontend handoff)\n- route/orchestrator.hpp: run_orchestrated_pipeline nested switch over catalogued\n  combinations with direct template calls\n- main.cpp calls the orchestrator directly; exploit_procedure.* and the empty\n  route procedure bindings/factories are deleted\n- cmp_disasm vs fed6b7cf: 7 functions IDENTICAL; do_one_write 138 -> 132\n  (this->parameter plus LTO reordering; all 20 call targets identical)\n",
+        "verified_at": "2026-09-25T04:59:20Z"
+      }
+    },
+    "url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/1241cedebe6dabb355bc4c88bb5eb9b5b59c7414",
+    "html_url": "https://github.com/YuKongA/ghostlock-app/commit/1241cedebe6dabb355bc4c88bb5eb9b5b59c7414",
+    "comments_url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/1241cedebe6dabb355bc4c88bb5eb9b5b59c7414/comments",
+    "author": {
+      "login": "NickJi2019",
+      "id": 72794669,
+      "node_id": "MDQ6VXNlcjcyNzk0NjY5",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72794669?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NickJi2019",
+      "html_url": "https://github.com/NickJi2019",
+      "followers_url": "https://api.github.com/users/NickJi2019/followers",
+      "following_url": "https://api.github.com/users/NickJi2019/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NickJi2019/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NickJi2019/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NickJi2019/subscriptions",
+      "organizations_url": "https://api.github.com/users/NickJi2019/orgs",
+      "repos_url": "https://api.github.com/users/NickJi2019/repos",
+      "events_url": "https://api.github.com/users/NickJi2019/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NickJi2019/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "NickJi2019",
+      "id": 72794669,
+      "node_id": "MDQ6VXNlcjcyNzk0NjY5",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72794669?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NickJi2019",
+      "html_url": "https://github.com/NickJi2019",
+      "followers_url": "https://api.github.com/users/NickJi2019/followers",
+      "following_url": "https://api.github.com/users/NickJi2019/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NickJi2019/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NickJi2019/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NickJi2019/subscriptions",
+      "organizations_url": "https://api.github.com/users/NickJi2019/orgs",
+      "repos_url": "https://api.github.com/users/NickJi2019/repos",
+      "events_url": "https://api.github.com/users/NickJi2019/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NickJi2019/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "6ba3c32903b509cf62956ed82af52ff898ed26ca",
+        "url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/6ba3c32903b509cf62956ed82af52ff898ed26ca",
+        "html_url": "https://github.com/YuKongA/ghostlock-app/commit/6ba3c32903b509cf62956ed82af52ff898ed26ca"
+      }
+    ]
+  },
+  {
+    "sha": "722230a514182dd5c39074b801873e5cb69e986a",
+    "node_id": "C_kwDOTmwoQtoAKDcyMjIzMGE1MTQxODJkZDVjMzkwNzRiODAxODczZTVjYjY5ZTk4NmE",
+    "commit": {
+      "author": {
+        "name": "Nick Ji",
+        "email": "nickji2019@outlook.com",
+        "date": "2026-09-25T00:53:40Z"
+      },
+      "committer": {
+        "name": "Nick Ji",
+        "email": "nickji2019@outlook.com",
+        "date": "2026-09-25T00:53:40Z"
+      },
+      "message": "refactor(route): converge middleware hooks into policy static interface (Batch 4 slice 3c)\n\n- route_policy.hpp: MiddlewarePolicy concept + hook defaults; MulticastPolicy\n  host-neutral defaults with Android-only overrides declared per policy\n- route/middleware_hooks.*: new direct-dispatch unit (for_each_policy expansion,\n  no vtable/std::visit); side-effecting hooks marked [[gnu::noinline]] so LTO\n  cannot inline route bodies into the attack functions\n- exploit_procedure: drop the 7 virtual hooks; call route::middleware::*; move\n  the W1b scratch repair into the procedure behind a capability projection\n- multicast/tcp route units: policy hook definitions, empty procedure bindings\n- cmp_disasm vs 1ac25ff9: 7 functions IDENTICAL, do_one_write 6-line reviewed\n  diff (vtable indirect -> direct call, optional ABI equivalent)\n- device gate PASS (fed6b7cf, multicast direct, fixed CPU pair)",
+      "tree": {
+        "sha": "fa60dfac3cc7a8baed80654dec56fb3afae6069c",
+        "url": "https://api.github.com/repos/YuKongA/ghostlock-app/git/trees/fa60dfac3cc7a8baed80654dec56fb3afae6069c"
+      },
+      "url": "https://api.github.com/repos/YuKongA/ghostlock-app/git/commits/722230a514182dd5c39074b801873e5cb69e986a",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAg+j++LbYgnubYuBwgfPegu+Ttdr\nGgxyUhTDl+C5xUVt4AAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5\nAAAAQNFFwKyEKvOyLfVMCUSdHUFby10nkW24g11qMbgBlR79fTu9z35DJ3dFJtzHKF4YW9\nBem9azqHdNa223hrLPbw8=\n-----END SSH SIGNATURE-----",
+        "payload": "tree fa60dfac3cc7a8baed80654dec56fb3afae6069c\nparent c834037f04ce17be27e7eae08e4318fdaa8c8b41\nauthor Nick Ji <nickji2019@outlook.com> 1790297620 -0400\ncommitter Nick Ji <nickji2019@outlook.com> 1790297620 -0400\n\nrefactor(route): converge middleware hooks into policy static interface (Batch 4 slice 3c)\n\n- route_policy.hpp: MiddlewarePolicy concept + hook defaults; MulticastPolicy\n  host-neutral defaults with Android-only overrides declared per policy\n- route/middleware_hooks.*: new direct-dispatch unit (for_each_policy expansion,\n  no vtable/std::visit); side-effecting hooks marked [[gnu::noinline]] so LTO\n  cannot inline route bodies into the attack functions\n- exploit_procedure: drop the 7 virtual hooks; call route::middleware::*; move\n  the W1b scratch repair into the procedure behind a capability projection\n- multicast/tcp route units: policy hook definitions, empty procedure bindings\n- cmp_disasm vs 1ac25ff9: 7 functions IDENTICAL, do_one_write 6-line reviewed\n  diff (vtable indirect -> direct call, optional ABI equivalent)\n- device gate PASS (fed6b7cf, multicast direct, fixed CPU pair)\n",
+        "verified_at": "2026-09-25T04:59:20Z"
+      }
+    },
+    "url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/722230a514182dd5c39074b801873e5cb69e986a",
+    "html_url": "https://github.com/YuKongA/ghostlock-app/commit/722230a514182dd5c39074b801873e5cb69e986a",
+    "comments_url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/722230a514182dd5c39074b801873e5cb69e986a/comments",
+    "author": {
+      "login": "NickJi2019",
+      "id": 72794669,
+      "node_id": "MDQ6VXNlcjcyNzk0NjY5",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72794669?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NickJi2019",
+      "html_url": "https://github.com/NickJi2019",
+      "followers_url": "https://api.github.com/users/NickJi2019/followers",
+      "following_url": "https://api.github.com/users/NickJi2019/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NickJi2019/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NickJi2019/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NickJi2019/subscriptions",
+      "organizations_url": "https://api.github.com/users/NickJi2019/orgs",
+      "repos_url": "https://api.github.com/users/NickJi2019/repos",
+      "events_url": "https://api.github.com/users/NickJi2019/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NickJi2019/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "NickJi2019",
+      "id": 72794669,
+      "node_id": "MDQ6VXNlcjcyNzk0NjY5",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72794669?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NickJi2019",
+      "html_url": "https://github.com/NickJi2019",
+      "followers_url": "https://api.github.com/users/NickJi2019/followers",
+      "following_url": "https://api.github.com/users/NickJi2019/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NickJi2019/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NickJi2019/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NickJi2019/subscriptions",
+      "organizations_url": "https://api.github.com/users/NickJi2019/orgs",
+      "repos_url": "https://api.github.com/users/NickJi2019/repos",
+      "events_url": "https://api.github.com/users/NickJi2019/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NickJi2019/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "c834037f04ce17be27e7eae08e4318fdaa8c8b41",
+        "url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/c834037f04ce17be27e7eae08e4318fdaa8c8b41",
+        "html_url": "https://github.com/YuKongA/ghostlock-app/commit/c834037f04ce17be27e7eae08e4318fdaa8c8b41"
+      }
+    ]
+  },
+  {
+    "sha": "8e6dbd8c837342f79928d55764788c471ea4a332",
+    "node_id": "C_kwDOTmwoQtoAKDhlNmRiZDhjODM3MzQyZjc5OTI4ZDU1NzY0Nzg4YzQ3MWVhNGEzMzI",
+    "commit": {
+      "author": {
+        "name": "Nick Ji",
+        "email": "nickji2019@outlook.com",
+        "date": "2026-09-23T04:11:26Z"
+      },
+      "committer": {
+        "name": "Nick Ji",
+        "email": "nickji2019@outlook.com",
+        "date": "2026-09-23T04:11:26Z"
+      },
+      "message": "refactor(profile): align Kotlin and native field signedness\n\nEvery profile field now mirrors the native storage signedness end to end:\nuint8_t/uint32_t slots are UInt and uint64_t slots are ULong on the Kotlin\nside, the execution getters return uint32_t, and the wire header magic/version\nand route wire values are unsigned. Only the int32_t address fields\n(pselect_waiter_shift, mcast_waiter_off) stay signed, and the 64-bit transport\nglue keeps Long so it can carry negative int32 values and large uint64 values\nthrough the same slots.",
+      "tree": {
+        "sha": "a598a8b99939ba0fa0aea865653e09383f477e37",
+        "url": "https://api.github.com/repos/YuKongA/ghostlock-app/git/trees/a598a8b99939ba0fa0aea865653e09383f477e37"
+      },
+      "url": "https://api.github.com/repos/YuKongA/ghostlock-app/git/commits/8e6dbd8c837342f79928d55764788c471ea4a332",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAg+j++LbYgnubYuBwgfPegu+Ttdr\nGgxyUhTDl+C5xUVt4AAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5\nAAAAQAYGQYQ8lwTo1xEuNACHXCHZO3gn8grtVTYKObUsSjmr59WpmivoE5VAcLGIl4hiL3\nIfPTB7kC/y/lSdq6Yv0gQ=\n-----END SSH SIGNATURE-----",
+        "payload": "tree a598a8b99939ba0fa0aea865653e09383f477e37\nparent 8bef799ec675f8d5dd487c1f3d778797bf9a510f\nauthor Nick Ji <nickji2019@outlook.com> 1790136686 -0400\ncommitter Nick Ji <nickji2019@outlook.com> 1790136686 -0400\n\nrefactor(profile): align Kotlin and native field signedness\n\nEvery profile field now mirrors the native storage signedness end to end:\nuint8_t/uint32_t slots are UInt and uint64_t slots are ULong on the Kotlin\nside, the execution getters return uint32_t, and the wire header magic/version\nand route wire values are unsigned. Only the int32_t address fields\n(pselect_waiter_shift, mcast_waiter_off) stay signed, and the 64-bit transport\nglue keeps Long so it can carry negative int32 values and large uint64 values\nthrough the same slots.\n",
+        "verified_at": "2026-09-23T04:11:53Z"
+      }
+    },
+    "url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/8e6dbd8c837342f79928d55764788c471ea4a332",
+    "html_url": "https://github.com/YuKongA/ghostlock-app/commit/8e6dbd8c837342f79928d55764788c471ea4a332",
+    "comments_url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/8e6dbd8c837342f79928d55764788c471ea4a332/comments",
+    "author": {
+      "login": "NickJi2019",
+      "id": 72794669,
+      "node_id": "MDQ6VXNlcjcyNzk0NjY5",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72794669?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NickJi2019",
+      "html_url": "https://github.com/NickJi2019",
+      "followers_url": "https://api.github.com/users/NickJi2019/followers",
+      "following_url": "https://api.github.com/users/NickJi2019/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NickJi2019/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NickJi2019/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NickJi2019/subscriptions",
+      "organizations_url": "https://api.github.com/users/NickJi2019/orgs",
+      "repos_url": "https://api.github.com/users/NickJi2019/repos",
+      "events_url": "https://api.github.com/users/NickJi2019/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NickJi2019/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "NickJi2019",
+      "id": 72794669,
+      "node_id": "MDQ6VXNlcjcyNzk0NjY5",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72794669?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NickJi2019",
+      "html_url": "https://github.com/NickJi2019",
+      "followers_url": "https://api.github.com/users/NickJi2019/followers",
+      "following_url": "https://api.github.com/users/NickJi2019/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NickJi2019/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NickJi2019/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NickJi2019/subscriptions",
+      "organizations_url": "https://api.github.com/users/NickJi2019/orgs",
+      "repos_url": "https://api.github.com/users/NickJi2019/repos",
+      "events_url": "https://api.github.com/users/NickJi2019/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NickJi2019/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "8bef799ec675f8d5dd487c1f3d778797bf9a510f",
+        "url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/8bef799ec675f8d5dd487c1f3d778797bf9a510f",
+        "html_url": "https://github.com/YuKongA/ghostlock-app/commit/8bef799ec675f8d5dd487c1f3d778797bf9a510f"
+      }
+    ]
+  },
+  {
+    "sha": "8ea6d4c41467c1c6820cbce1e162feecb3cd6c24",
+    "node_id": "C_kwDOTmwoQtoAKDhlYTZkNGM0MTQ2N2MxYzY4MjBjYmNlMWUxNjJmZWVjYjNjZDZjMjQ",
+    "commit": {
+      "author": {
+        "name": "Nick Ji",
+        "email": "nickji2019@outlook.com",
+        "date": "2026-09-22T21:27:05Z"
+      },
+      "committer": {
+        "name": "Nick Ji",
+        "email": "nickji2019@outlook.com",
+        "date": "2026-09-23T02:31:32Z"
+      },
+      "message": "refactor(native): reorganize sources and make routes pluggable (GLK1 v4)\n\nReorganize core sources into kernel/, profile/, route/, race/, attack/,\nsupport/ and legacy/; split common.h into kernel/constants.hpp,\nprofile/accessors.hpp, support/decls.hpp and route/route_api.hpp.\n\nIntroduce ExploitProcedure (Template Method) with a single\nmake_exploit_procedure(session, RouteKind) selector, and a RoutePolicy\nconcept (Select/Tcp/Multicast) whose per-route Route class and Procedure\nare folded into each route file. RouteKind and the route catalog are\nshared across Kotlin and native with agreement tests.\n\nModernize the codebase: int->int32_t, Status as bool, FatalError on fatal\npaths, std::optional for recoverable steps, typed TargetProfile getters,\nand explicitly qualified secondary namespaces.\n\nGLK1 v4: fixed common slots plus per-route sections. Route-specific\nparameters (multicast geometry, off_mcast_fake_bss, pselect_waiter_shift,\nper-route execution tuning) move out of the shared schema on both sides;\nnative kernel_offsets stays a flat data struct and Kotlin carries a\nRouteConfig sealed hierarchy. The remote/main legacy wire format is\nunchanged.\n\nTests: native host tests, route catalog agreement, GLK1 round-trip.",
+      "tree": {
+        "sha": "aa2f5140862ee7a2ab3f004d6a834ef13d16476d",
+        "url": "https://api.github.com/repos/YuKongA/ghostlock-app/git/trees/aa2f5140862ee7a2ab3f004d6a834ef13d16476d"
+      },
+      "url": "https://api.github.com/repos/YuKongA/ghostlock-app/git/commits/8ea6d4c41467c1c6820cbce1e162feecb3cd6c24",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAg+j++LbYgnubYuBwgfPegu+Ttdr\nGgxyUhTDl+C5xUVt4AAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5\nAAAAQFAk2MBUUakK5ThWIEKS83Q/qp0RBqPq3vEHr3QUbFlJ+x6dxm+HdbS6cQ/achl//P\nErXdXZ+OAzyxO6qpZ3DQU=\n-----END SSH SIGNATURE-----",
+        "payload": "tree aa2f5140862ee7a2ab3f004d6a834ef13d16476d\nparent a07b1c47bd2c22fed3abca5f1203abe4d0378522\nauthor Nick Ji <nickji2019@outlook.com> 1790112425 -0400\ncommitter Nick Ji <nickji2019@outlook.com> 1790130692 -0400\n\nrefactor(native): reorganize sources and make routes pluggable (GLK1 v4)\n\nReorganize core sources into kernel/, profile/, route/, race/, attack/,\nsupport/ and legacy/; split common.h into kernel/constants.hpp,\nprofile/accessors.hpp, support/decls.hpp and route/route_api.hpp.\n\nIntroduce ExploitProcedure (Template Method) with a single\nmake_exploit_procedure(session, RouteKind) selector, and a RoutePolicy\nconcept (Select/Tcp/Multicast) whose per-route Route class and Procedure\nare folded into each route file. RouteKind and the route catalog are\nshared across Kotlin and native with agreement tests.\n\nModernize the codebase: int->int32_t, Status as bool, FatalError on fatal\npaths, std::optional for recoverable steps, typed TargetProfile getters,\nand explicitly qualified secondary namespaces.\n\nGLK1 v4: fixed common slots plus per-route sections. Route-specific\nparameters (multicast geometry, off_mcast_fake_bss, pselect_waiter_shift,\nper-route execution tuning) move out of the shared schema on both sides;\nnative kernel_offsets stays a flat data struct and Kotlin carries a\nRouteConfig sealed hierarchy. The remote/main legacy wire format is\nunchanged.\n\nTests: native host tests, route catalog agreement, GLK1 round-trip.\n",
+        "verified_at": "2026-09-23T02:32:55Z"
+      }
+    },
+    "url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/8ea6d4c41467c1c6820cbce1e162feecb3cd6c24",
+    "html_url": "https://github.com/YuKongA/ghostlock-app/commit/8ea6d4c41467c1c6820cbce1e162feecb3cd6c24",
+    "comments_url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/8ea6d4c41467c1c6820cbce1e162feecb3cd6c24/comments",
+    "author": {
+      "login": "NickJi2019",
+      "id": 72794669,
+      "node_id": "MDQ6VXNlcjcyNzk0NjY5",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72794669?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NickJi2019",
+      "html_url": "https://github.com/NickJi2019",
+      "followers_url": "https://api.github.com/users/NickJi2019/followers",
+      "following_url": "https://api.github.com/users/NickJi2019/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NickJi2019/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NickJi2019/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NickJi2019/subscriptions",
+      "organizations_url": "https://api.github.com/users/NickJi2019/orgs",
+      "repos_url": "https://api.github.com/users/NickJi2019/repos",
+      "events_url": "https://api.github.com/users/NickJi2019/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NickJi2019/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "NickJi2019",
+      "id": 72794669,
+      "node_id": "MDQ6VXNlcjcyNzk0NjY5",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72794669?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/NickJi2019",
+      "html_url": "https://github.com/NickJi2019",
+      "followers_url": "https://api.github.com/users/NickJi2019/followers",
+      "following_url": "https://api.github.com/users/NickJi2019/following{/other_user}",
+      "gists_url": "https://api.github.com/users/NickJi2019/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/NickJi2019/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/NickJi2019/subscriptions",
+      "organizations_url": "https://api.github.com/users/NickJi2019/orgs",
+      "repos_url": "https://api.github.com/users/NickJi2019/repos",
+      "events_url": "https://api.github.com/users/NickJi2019/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/NickJi2019/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "a07b1c47bd2c22fed3abca5f1203abe4d0378522",
+        "url": "https://api.github.com/repos/YuKongA/ghostlock-app/commits/a07b1c47bd2c22fed3abca5f1203abe4d0378522",
+        "html_url": "https://github.com/YuKongA/ghostlock-app/commit/a07b1c47bd2c22fed3abca5f1203abe4d0378522"
+      }
+    ]
+  }
+]

@@ -1,0 +1,11 @@
+warning: xbl_config FDT parse failed: xbl_config contains no unique NOMAP/Kernel memory map; trying the uefi memory map
+info: kernel_phys_load=0xa8000000 (uefi memory map)
+info: kallsyms layout pre-6.4 recovered (159574 symbols)
+info: (CVE-2026-43499 primitive present (remove_waiter@0x177b0a0 still uses current)
+warning: pselect_waiter_shift derivation failed: futex waiter stack local not unique: [("x27", 152), ("x24", 8)]
+info: nf_logger loggers=0x2b11d58 nfulnl_logger=0x2b11e30 ulog=1 slot=0x2b11d60
+warning: pselect_waiter_shift unavailable; no family fallback is defined for this release
+info: sizeof(mm_struct)=0x3E0 (MM_STRUCT_SZ=0x500 in src/core/common.h)
+info: multicast waiter_off derived = 0x60 (setsockopt depth 0x358 - futex depth 0x2f8)
+info: 5.15.194-android13-8-00019-gf4321180a397-ab15212794 profile is an unverified candidate; the app validates fields before any execution
+missing: struct_slab_cache

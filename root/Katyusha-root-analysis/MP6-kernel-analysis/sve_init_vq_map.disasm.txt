@@ -1,0 +1,19 @@
+ffffffc0126acde0: paciasp
+ffffffc0126acde4: str x30, [x18], #8
+ffffffc0126acde8: stp x29, x30, [sp, #-0x20]!
+ffffffc0126acdec: str x19, [sp, #0x10]
+ffffffc0126acdf0: mov x29, sp
+ffffffc0126acdf4: adrp x19, #0xffffffc0124c2000
+ffffffc0126acdf8: add x19, x19, #0xea8
+ffffffc0126acdfc: mov x0, x19
+ffffffc0126ace00: bl #0xffffffc010070d0c
+ffffffc0126ace04: adrp x0, #0xffffffc0124c2000
+ffffffc0126ace08: add x0, x0, #0xee8
+ffffffc0126ace0c: mov w2, #0x40
+ffffffc0126ace10: mov x1, x19
+ffffffc0126ace14: bl #0xffffffc01001d5c0
+ffffffc0126ace18: ldr x19, [sp, #0x10]
+ffffffc0126ace1c: ldp x29, x30, [sp], #0x20
+ffffffc0126ace20: ldr x30, [x18, #-8]!
+ffffffc0126ace24: autiasp
+ffffffc0126ace28: ret

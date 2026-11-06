@@ -1,0 +1,7 @@
+Linux localhost 6.18.21-android17-5-g1d099fcb35e0-abogki538445360-4k #1 SMP PREEMPT Tue Jul 28 13:29:24 UTC 2026 aarch64 Toybox
+Linux version 6.18.21-android17-5-g1d099fcb35e0-abogki538445360-4k (kleaf@build-host) (Android (15323222, +pgo, +bolt, +lto, +mlgo, based on r584948c) clang version 22.0.1 (https://android.googlesource.com/toolchain/llvm-project 2d65e4108033380e6fe8e08b1f1826cd2bfb0c99), LLD 22.0.1 (/mnt/disks/build-disk/src/googleplex-android/llvm-r584948-release/out/llvm-project/llvm 2d65e4108033380e6fe8e08b1f1826cd2bfb0c99)) #1 SMP PREEMPT Tue Jul 28 13:29:24 UTC 2026
+uid=2000(shell) gid=2000(shell) groups=2000(shell),1004(input),1007(log),1011(adb),1015(sdcard_rw),1028(sdcard_r),1078(ext_data_rw),1079(ext_obb_rw),3001(net_bt_admin),3002(net_bt),3003(inet),3006(net_bw_stats),3009(readproc),3011(uhid),3012(readtracefs) context=u:r:shell:s0
+Enforcing
+cat: /proc/iomem: Permission denied
+crw-rw-rw- 1 system graphics 10, 307 2026-09-26 03:04 /dev/mali0
+ls: /dev/kgsl-3d0: No such file or directory

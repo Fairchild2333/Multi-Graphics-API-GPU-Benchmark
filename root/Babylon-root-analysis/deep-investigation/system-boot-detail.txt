@@ -1,0 +1,17 @@
+Drop box contents: 22 entries
+Max entries: 1000
+Low priority rate limit period: 2000 ms
+Low priority tags: {data_app_wtf, keymaster, system_server_wtf, system_app_strictmode, system_app_wtf, system_server_strictmode, data_app_strictmode, netstats}
+Searching for: 2026-10-10 SYSTEM_BOOT
+
+========================================
+2026-10-10 23:31:55 SYSTEM_BOOT (text, 482 bytes)
+isPrevious: true
+Build: Xiaomi/babylon/babylon:16/BP2A.250605.031.A3/OS3.0.304.0.WMVCNXM:user/release-keys
+Hardware: kalama
+Revision: 0
+Bootloader: unknown
+Radio: null
+Kernel: Linux version 5.15.194-android13-8-00019-gf4321180a397-ab15212794 (build-user@build-host) (Android (8508608, based on r450784e) clang version 14.0.7 (https://android.googlesource.com/toolchain/llvm-project 4c603efb0cca074e9238af8b4106c30add4418f6), LLD 14.0.7) #1 SMP PREEMPT Wed Apr 15 01:39:41 UTC 2026
+
+

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "username": "fairchild",
+  "fullname": "Mangekyo",
+  "password_hash": "$6$example$REPLACE-WITH-mkpasswd--m-sha512-OUTPUT",
+  "public_keys": [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIREPLACEWITHYOURREALPUBLICKEY0000000000000000000000 user@host"
+  ],
+  "locale": "en_AU.UTF-8",
+  "timezone": "Australia/Sydney",
+  "keyboard": "us",
+  "rtc_as_localtime": false,
+  "hostname_prefix": "mk",
+  "wifi": {
+    "ssid": "YOUR_SSID",
+    "password": "replace-with-real-wifi-password"
+  },
+  "desktop": true,
+  "passwordless_sudo": true,
+  "disable_sleep": true
+}

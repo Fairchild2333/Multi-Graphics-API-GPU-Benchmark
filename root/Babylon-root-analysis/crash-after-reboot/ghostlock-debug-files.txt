@@ -1,0 +1,4 @@
+total 3
+drwxrws--- 2 u0_a239 media_rw 3452 2026-10-10 23:30 20261010-233051
+/sdcard/Download/ghostlock-debug-log/20261010-233051/ghostlock-direct-0.log.txt
+/sdcard/Download/ghostlock-debug-log/20261010-233051/profile.conf

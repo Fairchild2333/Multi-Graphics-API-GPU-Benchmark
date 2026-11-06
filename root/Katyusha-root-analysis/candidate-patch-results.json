@@ -1,0 +1,20 @@
+[
+  {
+    "partition": "boot",
+    "candidate_source_sha256": "0f641d60e99d5358719010ef52fb8b946ae49b53d4af4756995435d834a6e607",
+    "source_operation_hashes_matched": 441,
+    "source_operation_hashes_total": 442,
+    "result_sha256": "9b4901850ec20b55279601d6190792f727240eeda2a8960c4aa43c240ed6ccb2",
+    "expected_sha256": "2db977b918e1b3af0ecb37d9c77f89816db9f7e2e65495cbdfd94b88cfcc550b",
+    "target_hash_verified": false
+  },
+  {
+    "partition": "uefi",
+    "candidate_source_sha256": "ed27b6893d82495aba0260644444742664a720a38c7e101c21031784ea1d7081",
+    "source_operation_hashes_matched": 5,
+    "source_operation_hashes_total": 6,
+    "result_sha256": "49d21cd894eb75dd913161903ea7a20c07b6dc8de3da4db25e976f430f93b43f",
+    "expected_sha256": "e1b2e415567fad4e4e7e70dd04b220519bc1b856329fb121dd09d1e80af0fbeb",
+    "target_hash_verified": false
+  }
+]

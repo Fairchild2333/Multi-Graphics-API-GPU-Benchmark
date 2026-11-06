@@ -1,0 +1,314 @@
+{
+  "release": "5.10.101-android12-9-gece0cc04d1a5",
+  "status": "read-only static analysis, not an importable GhostLock profile",
+  "upstream_commit": "67215cfe204940fe71ff67213e76329e1adce7d2",
+  "kernel_sha256": "136177a1c360eb64a8556cb4e6385a06e34c2ceabc05c7da714428837309bf6f",
+  "criterion": {
+    "waiter_depth": 448,
+    "task_field_depths": [
+      384,
+      400
+    ],
+    "note": "copy window [D-N, D] covers task/lock iff D>=400 and N>=D-384"
+  },
+  "poll_family": {
+    "ppoll_frame": 128,
+    "do_sys_poll_frame": 1040,
+    "buffer_depth": 1044,
+    "copy_max": 240,
+    "required_copy": 660,
+    "status": "dead: first stack chunk max 240B at depth 1044 cannot reach depth 384-400; overflow chunks go to kmalloc",
+    "timeslot_copy": {
+      "depth": 104,
+      "len": 16,
+      "status": "dead: too shallow"
+    },
+    "evidence": [
+      {
+        "image_offset": "0x58460c",
+        "bytes": "fd7bbaa9",
+        "instruction": "stp x29, x30, [sp, #-0x60]!"
+      },
+      {
+        "image_offset": "0x584628",
+        "bytes": "ffc30ed1",
+        "instruction": "sub sp, sp, #0x3b0"
+      },
+      {
+        "image_offset": "0x5846b8",
+        "bytes": "e8c30191",
+        "instruction": "add x8, sp, #0x70"
+      },
+      {
+        "image_offset": "0x584700",
+        "bytes": "75320091",
+        "instruction": "add x21, x19, #0xc"
+      },
+      {
+        "image_offset": "0x5846c0",
+        "bytes": "c9038052",
+        "instruction": "mov w9, #0x1e"
+      },
+      {
+        "image_offset": "0x5846dc",
+        "bytes": "b532891a",
+        "instruction": "csel w21, w21, w9, lo"
+      },
+      {
+        "image_offset": "0x584704",
+        "bytes": "16f17dd3",
+        "instruction": "lsl x22, x8, #3"
+      },
+      {
+        "image_offset": "0x584748",
+        "bytes": "00410091",
+        "instruction": "add x0, x8, #0x10"
+      },
+      {
+        "image_offset": "0x584750",
+        "bytes": "a7d0fd97",
+        "instruction": "bl #0xffffffc0104f89ec"
+      },
+      {
+        "image_offset": "0x5844a4",
+        "bytes": "e0630091",
+        "instruction": "add x0, sp, #0x18"
+      },
+      {
+        "image_offset": "0x5844a8",
+        "bytes": "02028052",
+        "instruction": "mov w2, #0x10"
+      }
+    ]
+  },
+  "sigreturn_fpsimd": {
+    "chain_frames": [
+      80,
+      96,
+      592
+    ],
+    "buffer_depth": 768,
+    "waiter_offset": 320,
+    "task_offset_in_buffer": 368,
+    "lock_offset_in_buffer": 376,
+    "task_vreg_index": 23,
+    "user_controlled": {
+      "vregs": 512,
+      "fpsr": 4,
+      "fpcr": 4
+    },
+    "covers_waiter": true,
+    "post_copy_clobber": "none: restore_fpsimd_context is the last deep call; parse_user_sigframe has no callees; rt_sigreturn copies only 24B at depth 56-80",
+    "frame_requirements": {
+      "align": 16,
+      "access_ok_size": 4688,
+      "uc_sigmask": "sf+0xa8 (8B)",
+      "gprs": "sf+0x138..0x230",
+      "sp": "sf+0x230",
+      "pc": "sf+0x238",
+      "pstate": "sf+0x240 (valid_user_regs)",
+      "records": "sf+0x250, 16B-aligned offsets",
+      "record_chain": "fpsimd{magic=0x46508001,size=0x210,fpsr,fpcr,vregs[32]} then END{0,0}",
+      "vregs23": "bytes 384..400 of the record vregs = {fake_task, fake_lock}"
+    },
+    "gate": "cpu_hwcaps bit 0x10 = ARM64_HAS_NO_FPSIMD must be clear (true for SM8450); bit 0x16 = ARM64_SVE only matters for the SVE variant; bit 4 = ARM64_HAS_PAN is the copy-helper gate. Indices from AOSP android12-5.10 arch/arm64/include/asm/cpucaps.h.",
+    "evidence": [
+      {
+        "image_offset": "0x795ec",
+        "bytes": "6c720394",
+        "instruction": "bl #0xffffffc010155f9c"
+      },
+      {
+        "image_offset": "0x795fc",
+        "bytes": "69e20491",
+        "instruction": "add x9, x19, #0x138"
+      },
+      {
+        "image_offset": "0x796ec",
+        "bytes": "8c6a28f8",
+        "instruction": "str x12, [x20, x8]"
+      },
+      {
+        "image_offset": "0x79a2c",
+        "bytes": "befdff97",
+        "instruction": "bl #0xffffffc010079124"
+      },
+      {
+        "image_offset": "0x79a48",
+        "bytes": "af000094",
+        "instruction": "bl #0xffffffc010079d04"
+      },
+      {
+        "image_offset": "0x79abc",
+        "bytes": "33050094",
+        "instruction": "bl #0xffffffc01007af88"
+      },
+      {
+        "image_offset": "0x79ac0",
+        "bytes": "e4ffff17",
+        "instruction": "b #0xffffffc010079a50"
+      },
+      {
+        "image_offset": "0x79c20",
+        "bytes": "bd020094",
+        "instruction": "bl #0xffffffc01007a714"
+      },
+      {
+        "image_offset": "0x79440",
+        "bytes": "02038052",
+        "instruction": "mov w2, #0x18"
+      },
+      {
+        "image_offset": "0x7af90",
+        "bytes": "fd7bbda9",
+        "instruction": "stp x29, x30, [sp, #-0x30]!"
+      },
+      {
+        "image_offset": "0x7afa0",
+        "bytes": "ff8308d1",
+        "instruction": "sub sp, sp, #0x220"
+      },
+      {
+        "image_offset": "0x7afb0",
+        "bytes": "e0030091",
+        "instruction": "mov x0, sp"
+      },
+      {
+        "image_offset": "0x7afb4",
+        "bytes": "02428052",
+        "instruction": "mov w2, #0x210"
+      },
+      {
+        "image_offset": "0x7b23c",
+        "bytes": "09caa872",
+        "instruction": "movk w9, #0x4650, lsl #16"
+      },
+      {
+        "image_offset": "0x7b250",
+        "bytes": "1f4108f1",
+        "instruction": "cmp x8, #0x210"
+      },
+      {
+        "image_offset": "0x7b2bc",
+        "bytes": "e0030091",
+        "instruction": "mov x0, sp"
+      },
+      {
+        "image_offset": "0x7b2c0",
+        "bytes": "02408052",
+        "instruction": "mov w2, #0x200"
+      },
+      {
+        "image_offset": "0x7b3a4",
+        "bytes": "e90302b9",
+        "instruction": "str w9, [sp, #0x200]"
+      },
+      {
+        "image_offset": "0x7b490",
+        "bytes": "e90702b9",
+        "instruction": "str w9, [sp, #0x204]"
+      },
+      {
+        "image_offset": "0x79d08",
+        "bytes": "f70f1df8",
+        "instruction": "str x23, [sp, #-0x30]!"
+      },
+      {
+        "image_offset": "0x79d14",
+        "bytes": "23400991",
+        "instruction": "add x3, x1, #0x250"
+      },
+      {
+        "image_offset": "0x79d20",
+        "bytes": "7f0c40f2",
+        "instruction": "tst x3, #0xf"
+      },
+      {
+        "image_offset": "0x79fb8",
+        "bytes": "9f420871",
+        "instruction": "cmp w20, #0x210"
+      },
+      {
+        "image_offset": "0x7a080",
+        "bytes": "e8f142f9",
+        "instruction": "ldr x8, [x15, #0x5e0]"
+      },
+      {
+        "image_offset": "0x7a084",
+        "bytes": "a8f98736",
+        "instruction": "tbz w8, #0x10, #0xffffffc010079fb8"
+      },
+      {
+        "image_offset": "0x7a05c",
+        "bytes": "88e6b736",
+        "instruction": "tbz w8, #0x16, #0xffffffc010079d2c"
+      },
+      {
+        "image_offset": "0x7a600",
+        "bytes": "74b9ff35",
+        "instruction": "cbnz w20, #0xffffffc010079d2c"
+      }
+    ]
+  },
+  "sigreturn_sve": {
+    "chain_frames": [
+      80,
+      96,
+      624
+    ],
+    "buffer_depth": 784,
+    "waiter_offset": 336,
+    "task_offset_in_buffer": 384,
+    "lock_offset_in_buffer": 392,
+    "task_vreg_index": 24,
+    "covers_waiter": true,
+    "status": "secondary: requires cpu_hwcaps bit 0x16 (ARM64_SVE); more frame constraints (SVE vq consistency, header copy); zregs go to heap/current, not the stack window",
+    "evidence": [
+      {
+        "image_offset": "0x7a71c",
+        "bytes": "fd7bbca9",
+        "instruction": "stp x29, x30, [sp, #-0x40]!"
+      },
+      {
+        "image_offset": "0x7a730",
+        "bytes": "ffc308d1",
+        "instruction": "sub sp, sp, #0x230"
+      },
+      {
+        "image_offset": "0x7a740",
+        "bytes": "e0430091",
+        "instruction": "add x0, sp, #0x10"
+      },
+      {
+        "image_offset": "0x7a744",
+        "bytes": "02428052",
+        "instruction": "mov w2, #0x210"
+      },
+      {
+        "image_offset": "0x7a8e8",
+        "bytes": "e0430091",
+        "instruction": "add x0, sp, #0x10"
+      },
+      {
+        "image_offset": "0x7a8ec",
+        "bytes": "02408052",
+        "instruction": "mov w2, #0x200"
+      },
+      {
+        "image_offset": "0x7a9d4",
+        "bytes": "e91302b9",
+        "instruction": "str w9, [sp, #0x210]"
+      },
+      {
+        "image_offset": "0x7ab68",
+        "bytes": "e91702b9",
+        "instruction": "str w9, [sp, #0x214]"
+      }
+    ]
+  },
+  "limits": [
+    "Static analysis only; no code was installed or run on any phone.",
+    "No working exploit profile was generated; a new route implementation is L-class work needing a plan review first.",
+    "Frame construction (pc/sp continuation, sigmask, race timing with the consumer thread) is not device-validated."
+  ]
+}

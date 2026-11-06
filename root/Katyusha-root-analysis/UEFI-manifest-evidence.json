@@ -1,0 +1,271 @@
+{
+  "description": "MP6 incremental OTA contains UEFI operations, not a self-contained UEFI image.",
+  "ota_url": "https://ota-1256119282.file.myqcloud.com/KTUS-A0/20221114150403-katyusha-deltaota_2022-10-31_2022-08-11_475bbf5ab3.zip",
+  "payload_data_start": 607990,
+  "manifest_sha256": "bdd2037f41150e6131f7aeab61a57a6c1f08298729dc283afc4231a5ef636317",
+  "uefi": {
+    "name": "uefi",
+    "operations": [
+      {
+        "type": 4,
+        "type_name": "SOURCE_COPY",
+        "data_offset": 0,
+        "data_length": 0,
+        "data_sha256": "",
+        "src_extents": [
+          {
+            "start_block": 0,
+            "num_blocks": 53
+          }
+        ],
+        "dst_extents": [
+          {
+            "start_block": 0,
+            "num_blocks": 53
+          }
+        ]
+      },
+      {
+        "type": 10,
+        "type_name": "BROTLI_BSDIFF",
+        "data_offset": 1258071031,
+        "data_length": 2125747,
+        "data_sha256": "13708ffab1a1feddc0b47d8b45d79afc5af3619cffcbacd01e1e232b116b26e4",
+        "src_extents": [
+          {
+            "start_block": 0,
+            "num_blocks": 62
+          },
+          {
+            "start_block": 70,
+            "num_blocks": 603
+          }
+        ],
+        "dst_extents": [
+          {
+            "start_block": 53,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 70,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 73,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 90,
+            "num_blocks": 556
+          },
+          {
+            "start_block": 673,
+            "num_blocks": 1
+          }
+        ]
+      },
+      {
+        "type": 4,
+        "type_name": "SOURCE_COPY",
+        "data_offset": 0,
+        "data_length": 0,
+        "data_sha256": "",
+        "src_extents": [
+          {
+            "start_block": 54,
+            "num_blocks": 8
+          }
+        ],
+        "dst_extents": [
+          {
+            "start_block": 54,
+            "num_blocks": 8
+          }
+        ]
+      },
+      {
+        "type": 6,
+        "type_name": "ZERO",
+        "data_offset": 0,
+        "data_length": 0,
+        "data_sha256": "",
+        "src_extents": [],
+        "dst_extents": [
+          {
+            "start_block": 62,
+            "num_blocks": 8
+          }
+        ]
+      },
+      {
+        "type": 4,
+        "type_name": "SOURCE_COPY",
+        "data_offset": 0,
+        "data_length": 0,
+        "data_sha256": "",
+        "src_extents": [
+          {
+            "start_block": 71,
+            "num_blocks": 2
+          }
+        ],
+        "dst_extents": [
+          {
+            "start_block": 71,
+            "num_blocks": 2
+          }
+        ]
+      },
+      {
+        "type": 4,
+        "type_name": "SOURCE_COPY",
+        "data_offset": 0,
+        "data_length": 0,
+        "data_sha256": "",
+        "src_extents": [
+          {
+            "start_block": 74,
+            "num_blocks": 16
+          }
+        ],
+        "dst_extents": [
+          {
+            "start_block": 74,
+            "num_blocks": 16
+          }
+        ]
+      },
+      {
+        "type": 4,
+        "type_name": "SOURCE_COPY",
+        "data_offset": 0,
+        "data_length": 0,
+        "data_sha256": "",
+        "src_extents": [
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          },
+          {
+            "start_block": 646,
+            "num_blocks": 1
+          }
+        ],
+        "dst_extents": [
+          {
+            "start_block": 646,
+            "num_blocks": 27
+          }
+        ]
+      }
+    ],
+    "old_info": {
+      "size": 2756608,
+      "sha256": "21dbc5dd98c43f5cfd00f15b035f6b6593c0b37862e9cb768dd07e5e98446d0f"
+    },
+    "new_info": {
+      "size": 2760704,
+      "sha256": "e1b2e415567fad4e4e7e70dd04b220519bc1b856329fb121dd09d1e80af0fbeb"
+    }
+  }
+}

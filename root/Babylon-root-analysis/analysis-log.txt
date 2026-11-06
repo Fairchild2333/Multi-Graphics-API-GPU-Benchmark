@@ -1,0 +1,2 @@
+info: kallsyms layout pre-6.4 recovered (159574 symbols)
+info: (CVE-2026-43499 primitive present (remove_waiter@0x177b0a0 still uses current)

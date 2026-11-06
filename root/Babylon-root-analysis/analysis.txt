@@ -1,0 +1,17 @@
+== GhostLock kernel analysis ==
+release                 5.15.194-android13-8-00019-gf4321180a397-ab15212794
+kernel_major            5.15
+kernel_family           verified 5.15 android13 train
+kernel_phys_load        unset (no xbl_config.img; pass --phys or let the runtime derive it)
+rt_mutex_waiter         lock=0x38 pi_tree_entry=0x18 task=0x30 tree_entry=0x0 wake_state=0x40 ww_ctx=0x50 size=0x58
+mm_struct size          0x3e0
+primitive               remove_waiter@0x177b0a0 unpatched
+pselect chain           derivation failed: futex waiter stack local not unique: [("x27", 152), ("x24", 8)]
+path multicast_waiter   available (ip_mc_msfadd=absent ip_mc_source@0xffffffc00947d280)
+path select_stack       available (core_sys_select@0xffffffc00857ea04 futex_wait@0xffffffc00829618c)
+path tcp_zerocopy       available (tcp_zerocopy_receive@0xffffffc009427f5c)
+---------------------------------
+suggested route         multicast_waiter (medium)
+reasons                 - 5.x kernel with the multicast path present
+reasons                 - pselect route not derivable on this layout
+note                    a device gate with the fixed CPU pair still decides whether a route is supported

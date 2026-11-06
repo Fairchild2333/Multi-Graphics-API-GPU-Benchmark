@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="author" content="Live On Server : The Firmware & Solution Mobile Phone Thailand Technician">
+    <meta name="keywords" content="Firmware, Software, Cell-phone, Mobile, Tablet, iPhone, HTC, Nokia, Box, Flash">
+    <meta name="robots" content="all,index,follow,snippet,archive,odp">
+    <meta name="og:title" content="Black.shark5Pro_V13.22.07.10_KTUS2207100CN00MP4_MIUI_CN | Live On Server : The Firmware & Solution Mobile Phone Thailand Technician">
+    <meta name="og:image" content="https://liveonserver.com/templates/default-downloads/html/en/assets/images/defaults/file.png">
+    <meta name="og:description" content="Black.shark5Pro_V13.22.07.10_KTUS2207100CN00MP4_MIUI_CN">
+
+    <title>Black.shark5Pro_V13.22.07.10_KTUS2207100CN00MP4_MIUI_CN | Live On Server : The Firmware & Solution Mobile Phone Thailand Technician</title>
+
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/components/fancybox/jquery.fancybox.min.css">
+
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/style.css">
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/main.css">
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/green.css">
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/owl.carousel.css">
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/owl.transitions.css">
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/animate.min.css">
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/font-awesome.min.css">
+
+    <link rel="shortcut icon" href="https://liveonserver.com/favicon.ico">
+	
+	
+	<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BE9KMG2E3F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-BE9KMG2E3F');
+</script>
+	
+
+    <!-- HTML5 elements and media queries Support for IE8 : HTML5 shim and Respond.js -->
+    <!--[if lt IE 9]>
+        <script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/html5shiv.js"></script>
+        <script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/respond.min.js"></script>
+    <![endif]-->
+	
+	
+
+
+</head>
+<body class="page-sub-downloads page-sub-file page-downloads-file-home">
+<nav class="top-bar animate-dropdown">
+    <div class="container">
+        <div class="col-md-4 col-sm-4 no-margin hidden-xs">
+            <ul class="mar-t-5">
+                
+                <li><a target="_blank" href="https://www.facebook.com/tomtestmodeshop" class="fa fa-facebook"></a></li>
+               
+                
+                <li><a target="_blank" href="#" class="fa fa-twitter"></a></li>
+               
+                
+                <li><a target="_blank" href="#" class="fa fa-instagram"></a></li>
+               
+                
+                <li><a target="_blank" href="#" class="fa fa-linkedin"></a></li>
+               
+                <li><a target="_blank" href="https://liveonserver.com/index.php?a=rss"><i class="fa fa-rss"></i></a></li>
+            </ul>
+        </div>
+
+        <div class="col-md-8 col-sm-8 col-xs-12 no-margin">
+            <ul class="right">
+              
+                  <li><a href="https://liveonserver.com/index.php?a=login"><i class="fa fa-lock fw-r5"></i>Login</a></li>
+                
+                  <li><a href="https://liveonserver.com/index.php?a=register"><i class="fa fa-book fw-r5"></i>Register</a></li>
+               
+			 
+			  
+			  
+				<li class="hidden-xs">
+					<form id="change_language_form" class="form-inline" method="get" action="https://liveonserver.com/index.php">
+						<input type="hidden" name="a" value="language">
+						<select class="form-control le-select" name="language" bind-sel="en" onchange="$('#change_language_form').submit();">
+								
+								  <option value="en">English</option>
+								
+								  <option value="pt">Português</option>
+								
+								  <option value="tr">Türk</option>
+								
+								  <option value="ar">العربية</option>
+								
+						</select>
+					</form>
+				</li>
+			 
+			 
+            </ul>
+        </div>
+    </div>
+</nav><br>
+  <center>
+<h2 class="m-2"><span><img src="https://lsvunlock.com//images/gallery/../../images/gallery/banners/Front logo.gif" />&nbsp;</span></h2>
+<h2 class="m-2"><span style="vertical-align: inherit;"><span style="vertical-align: inherit;"><a href="https://m.me/100003047736643">Contact Support Team</a></span></span></h2>
+</center>
+
+<header class="no-padding-bottom header-alt">
+    <div class="container no-padding">
+        <div class="col-md-3 col-sm-6 col-xs-12 logo-holder">
+            <div class="logo">
+                <a href="https://liveonserver.com">
+                    <img src="https://liveonserver.com/media/site/1-01641971660.jpg" alt="Live On Server : The Firmware & Solution Mobile Phone Thailand Technician"/>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-6 hidden-sm hidden-xs top-search-holder no-margin">
+            <div class="search-area-top">
+                <p class="">&ensp;</p>
+            </div>
+            <div class="search-area">
+                <form id="header_search_form" method="get" action="https://liveonserver.com/index.php">
+                    <div class="control-group">
+                        <input id="header_search_for" type="hidden" name="a" value="search">
+                        <input type="hidden" name="b" value="search">
+                        <input class="search-field" name="keyword" placeholder="Search for ..." required>
+                        <ul class="categories-filter animate-dropdown">
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span id="header_search_cat">Website</span></a>
+                                <ul class="dropdown-menu" role="menu" >
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="$('#header_search_cat').text('Website');$('#header_search_for').val('search');">Website</a></li>
+                                    
+                                    
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="$('#header_search_cat').text('Downloads');$('#header_search_for').val('downloads');">Downloads</a></li>
+                                   
+                                    
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="$('#header_search_cat').text('Blog');$('#header_search_for').val('articles');">Blog</a></li>
+                                   
+                                    
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="$('#header_search_cat').text('Announcements');$('#header_search_for').val('announcements');">Announcements</a></li>
+                                   
+                                </ul>
+                            </li>
+                        </ul>
+                        <button role="button" type="submit" class="btn search-button"></button>
+                    </div>
+                </form>
+            </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6 col-xs-12 top-cart-row no-margin">
+          <div class="top-cart-row-container">
+            <div class="top-cart-holder dropdown animate-dropdown">
+
+                <div class="basket">
+                    <a class="dropdown-toggle link-secondary" data-toggle="dropdown" href="#">
+                        <div class="basket-item-count">
+                            <span class="count">0</span>
+                            <img src="https://liveonserver.com/templates/default-downloads/html/en/assets/images/icon-cart.png" alt="" />
+                        </div>
+
+                        <div class="total-price-basket">
+                            <span class="lbl">Your Cart:</span>
+                            <span class="total-price">
+                                0.00USD
+                            </span>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu">
+                      
+                        <li class="checkout">
+                            <div class="basket-item">
+                                <p class="alert text-center text-black font-16">Shopping cart is empty !</p>
+                            </div>
+                        </li>
+                     
+                    </ul>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+  <nav id="top-megamenu-nav" class="megamenu-vertical animate-dropdown">
+      <div class="container">
+          <div class="yamm navbar">
+              <div class="navbar-header">
+                  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mc-horizontal-menu-collapse">
+                      <span class="sr-only">Main Menu</span>
+                      <span class=""><i class="fa fa-list fw-r10"></i>Main Menu</span>
+                  </button>
+              </div>
+              <div class="collapse navbar-collapse" id="mc-horizontal-menu-collapse">
+                  <ul class="nav navbar-nav">
+                    <li><a href="https://liveonserver.com"><i class="fa fa-home fw-r10"></i>Home</a></li>
+                    
+                    
+                    <li><a href="https://liveonserver.com/index.php?a=downloads&b=recent"><i class="fa fa-clock-o fw-r10"></i>Recent Files</a></li>
+                    <li><a href="https://liveonserver.com/index.php?a=downloads&b=packages"><i class="fa fa-dollar fw-r10"></i>Packages & Pricing</a></li>
+                    <li><a href="https://liveonserver.com/index.php?a=pages&b=world-agents"><i class="fa fa-globe fw-r10"></i>World Agents</a></li>
+                   
+                    
+                    <li><a href="https://liveonserver.com/index.php?a=articles"><i class="fa fa-file-text fw-r10"></i>Blog</a></li>
+                   
+	  
+                    <li><a href="https://liveonserver.com/index.php?a=page&b=request-file"><i class="fa fa-send fw-r10"></i>Request File</a></li>
+                    <li><a href="https://liveonserver.com/index.php?a=contact"><i class="fa fa-envelope fw-r10"></i>Contact</a></li>
+                  </ul>
+              </div>
+          </div>
+      </div>
+  </nav>
+</header>
+
+
+<div class="downloads-recent-header  row">
+  
+  <div class="rf-mq-container mq-container container">
+      <div class="col-md-2 col-sm-3 col-xs-2 text-right">
+          <i class="fa fa-clock-o fw-r10"></i><span class="hidden-xs font-13 text-bold">Recent Files</span>
+      </div>
+      <div class="col-md-10 col-sm-9 col-xs-10">
+          <div class="marquee-set">
+            <div class="marquee-content">
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11905">CPH2631export_11_16.0.5.700EX01_2026050619180142</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:14:56 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11904">CPH2895export_16_A.54_2026050816593900</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:13:58 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11903">CPH2859export_11_16.0.9.400EX01_2026071001150293</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:13:07 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11902">CPH2853export_11_16.0.5.1000EX01_2026060321240000</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:12:00 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11901">CPH2825export_11_16.0.5.701EX01_2026031221390000</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:10:56 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11900">CPH2813export_11_16.0.10.500EX01_2026080714080151</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:10:05 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11899">CPH2783export_11_16.0.5.700EX01_2026040912080000</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:08:44 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11898">CPH2743export_11_15.0.2.622EX01_2025120514550170</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:07:25 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11897">CPH2739export_11_15.0.2.605EX01_2025111400100216</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:06:44 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11896">SAMSUNG A07 4G_A075FXXS6CZF6 DUMP FULL SCATTER.rar</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-21 08:31:25 ]</span>
+                </div>
+              
+            </div>
+          </div>
+      </div>
+  </div>
+ 
+  
+  <div class="tf-mq-container mq-container container">
+      <div class="col-md-2 col-sm-3 col-xs-2 text-right">
+          <i class="fa fa-flash fw-r10"></i><span class="hidden-xs font-13 text-bold">Top Files</span>
+      </div>
+      <div class="col-md-10 col-sm-9 col-xs-10">
+          <div class="marquee-set">
+            <div class="marquee-content">
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=65">Qcom Mtk_Driver_Setup_V2.0.1.1</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 6083 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=4782">Drivers_MTK_v2.0.1.1.7_For New OPPO,REALME DA AUth Bypass</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 4617 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=2423">Odin3_v3.14.4</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 4132 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=5701">OPPO A15,A15s,A15New_CPH2179_CPH2185_UNLOCK SIM CDM_SCATTER FILE_FIX BANK APP</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 3987 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=2234">SAMSUNG_USB_Driver_for_Mobile_Phones 2020</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 3907 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=3559">Easy Samsung FRP Tools 2020</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 3779 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=1670">NEW MTK Driver_Support Meta mode,Preloader,Vcom New Model</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 3547 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=5525">OPPO A5s CPH1909_UNLOCK ALL SIM_SCATTER FILE 8.1.0 (OLD)</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 3453 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=5626">Huawei Drivers testpoint COM 1.0</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 3452 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=5522">VIVO Y12,15,15s,17  PD1901_RPMB MDM SIM_FILE FOR Unlock Tool</a>
+                
+                
+                
+                 <span class="item_downloads item_detail">[ 3382 Downloads ]</span>
+              </div>
+            
+            </div>
+          </div>
+      </div>
+  </div>
+ 
+</div>
+
+
+
+
+<div class="animate-dropdown">
+  <div id="breadcrumb-alt" class="mar5">
+    <div class="container">
+        <div class="breadcrumb-nav-holder minimal">
+            <ul>
+              <li class="breadcrumb-item"><a href="https://liveonserver.com/index.php?a=downloads">Downloads</a></li>
+              
+              
+                <li class="breadcrumb-item">
+                    <a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=22"><i class="fa fa-folder-open fw-r10"></i>FIRMWARE</a>
+                </li>
+              
+                <li class="breadcrumb-item">
+                    <a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6579"><i class="fa fa-folder-open fw-r10"></i>BlackShark</a>
+                </li>
+              
+                <li class="breadcrumb-item">
+                    <a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6582"><i class="fa fa-folder-open fw-r10"></i>BlackShark 5 Pro (katyusha)</a>
+                </li>
+              
+             
+            </ul>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="wrapper single-file-wrapper">
+  <div class="container">
+
+      <div class="back-head">
+      
+          <a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6582">
+            <i class="fa fa-caret-left square-icon-medium primary-bg back-icon fw-r10"></i>
+            <span class="title">BlackShark 5 Pro (katyusha)</span>
+            <span class="back-description hdivs">Go Back</span>
+          </a>
+       
+      </div>
+
+      <div class="inline-width pad-b-40 width-100per single-file-content">
+        <div class="col-md-12 col-sm-12 col-xs-12 no-margin no-padding">
+            <h1 class="file-title page-title">Black.shark5Pro_V13.22.07.10_KTUS2207100CN00MP4_MIUI_CN</h1>
+            <div class="file-meta">
+              <div class="file-labels inline">
+                  
+                  <span class="label label-info">Featured</span>
+                  
+              </div>
+			  
+              <div class="star-holder inline">
+                <div class="star readonly" data-score="0"></div>
+              </div>
+			 
+            </div>
+
+            <p class="file-description section-description mar-t-20">Black.shark5Pro_V13.22.07.10_KTUS2207100CN00MP4_MIUI_CN</p>
+
+            
+
+            <div class="social-row mar-t-50">
+              <span class="st_facebook_hcount"></span>
+              <span class="st_twitter_hcount"></span>
+              <span class="st_pinterest_hcount"></span>
+            </div>
+
+            <div class="file-details">
+              
+                <div class="col-md-12 col-sm-12 col-xs-12 no-margin no-padding">
+                    <table class="table">
+                      <tbody>
+                        <tr>
+                          <td class="bold text-right">Date</td>
+                          <td class="text-left"><span>2026-04-18 10:50:45</span></td>
+                        </tr>
+                        <tr>
+                          <td class="bold text-right">Filesize</td>
+                          <td class="text-left"><span>5.40 GB</span></td>
+                        </tr>
+                        
+                          <tr>
+                            <td class="bold text-right">Visits</td>
+                            <td class="text-left"><span>194</span></td>
+                          </tr>
+                       
+                        
+                          <tr>
+                            <td class="bold text-right">Downloads</td>
+                            <td class="text-left"><span>3</span></td>
+                          </tr>
+                       
+                        
+                      </tbody>
+                    </table>
+                    
+                      <div class="file-download">
+                        
+                          <a href="https://liveonserver.com/index.php?a=downloads&b=file&c=download&id=11816" class="btn btn-lg btn-success btn-block btn-download"><i class="fa fa-download fw-r10"></i>Download</a>
+                       
+                      </div>
+                   
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <div class="single-view-tab">
+        <div class="no-container">
+            <div class="tab-holder">
+
+                  <ul class="nav nav-tabs simple" >
+                      
+                      <li class="active"><a href="#reviews" data-toggle="tab">Reviews </a></li>
+                  </ul>
+
+                  <div class="tab-content">
+                    
+
+					
+                    <div class="tab-pane active" id="reviews">
+
+                        
+
+                        <div class="add-review row">
+                            <div class="col-sm-8 col-xs-12">
+                                <div class="new-review-form">
+                                    <span class="h3">Review This!</span>
+                                    <form id="contact-form" class="contact-form" method="post">
+                                        <div class="field-row star-row">
+                                            <label>Rating</label>
+                                            <div class="star-holder">
+                                                <div class="star big" data-score="0" data-scoreName="rating_points"></div>
+                                            </div>
+                                        </div>
+                                          
+                                            <div class="center-block col-md-12 col-sm-12 col-xs-12 no-margin no-padding">
+                                              <p class="alert alert-info">Users only can review this file</p>
+                                            </div>
+                                         
+                                        <div class="field-row">
+                                            <label>Review</label>
+                                            <textarea name="review_body" rows="8" class="le-input" pattern=".{1,1000}" required></textarea>
+                                        </div>
+                                        <div class="buttons-holder">
+                                            <button type="submit" class="le-button huge disabled" disabled><i class="fa fa-pencil fw-r10"></i>Submit</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+					
+                  </div>
+
+            </div>
+         </div>
+      </div>
+
+  </div>
+</div>
+
+
+
+<footer id="footer" class="">
+    <div class="link-list-row">
+        <div class="container no-padding">
+            <div class="col-xs-12 col-md-4 ">
+                <div class="contact-info">
+                    <div class="footer-logo text-center">
+                        <img src="https://liveonserver.com/media/site/1-01641971660.jpg" alt="Live On Server : The Firmware & Solution Mobile Phone Thailand Technician"/>
+                    </div>
+
+                    
+
+                    <div class="social-icons text-center">
+                        <ul>
+                            
+                            <li><a target="_blank" href="https://www.facebook.com/tomtestmodeshop" class="fa fa-lg fa-facebook bg-light-blue"></a></li>
+                           
+                            
+                            <li><a target="_blank" href="#" class="fa fa-lg fa-twitter bg-aqua"></a></li>
+                           
+                            
+                            <li><a target="_blank" href="#" class="fa fa-lg fa-instagram bg-red"></a></li>
+                           
+                            
+                            <li><a target="_blank" href="#" class="fa fa-lg fa-linkedin bg-black"></a></li>
+                           
+                            <li><a target="_blank" href="https://liveonserver.com/index.php?a=rss" class="fa fa-lg fa-rss bg-orange"></a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-xs-12 col-md-8 no-margin">
+                <div class="link-widget">
+                    <div class="widget">
+                        <ul>
+                            <li><a href="https://liveonserver.com">Home</a></li>
+                            
+                            
+                            <li><a href="https://liveonserver.com/index.php?a=downloads">Downloads</a></li>
+                           
+                            
+                            <li><a href="https://liveonserver.com/index.php?a=articles">Blog</a></li>
+                           
+                            
+                            <li><a href="https://liveonserver.com/index.php?a=announcements">Announcements</a></li>
+                           
+                        </ul>
+                    </div>
+                </div>
+                <div class="link-widget">
+                    <div class="widget">
+                        <ul>
+                            <li><a href="https://liveonserver.com/index.php?a=pages&b=terms-of-service">Terms of Service</a></li>
+                            <li><a href="https://liveonserver.com/index.php?a=pages&b=privacy-policy">Privacy Policy</a></li>
+                            <li><a href="https://liveonserver.com/index.php?a=pages&b=return-policy">Return Policy</a></li>
+                                <li><a href="https://liveonserver.com/index.php?a=pages&b=cancellation-policy">Cancellation Policy</a></li>
+                            <li><a href="https://liveonserver.com/index.php?a=pages&b=refund-policy">Refund Policy</a></li>
+
+                        </ul>
+                    </div>
+                </div>
+                <div class="link-widget">
+                    <div class="widget">
+                        <ul>
+                            
+                              <li><a href="https://liveonserver.com/index.php?a=login">Login</a></li>
+                              
+                                <li><a href="https://liveonserver.com/index.php?a=register">Register</a></li>
+                             
+                           
+                            <li><a href="https://liveonserver.com/index.php?a=pages&b=about-us">About Us</a></li>
+                            <li><a href="https://liveonserver.com/index.php?a=contact">Contact Us</a></li>
+                        </ul>
+                    </div>
+                </div>
+              </div>
+        </div>
+    </div>
+
+    <div class="copyright-bar">
+        <div class="container">
+            <div class="col-md-6 col-sm-6 col-xs-12 no-margin">
+                <div class="copyright">
+                    <strong>Copyright © 2019 <a href="https://www.facebook.com/tomtestmodeshop/" target="_blank">GSM TH ONLINE</a> All Rights Reserved.</strong>
+					
+					<!-- DON'T REMOVE OR EDIT THE BELOW COPYRIGHT, IT MUST BE VISIBLE IN ALL PAGES -->
+					<!-- Removing or hiding the below copyrights is totally illigal and lead to license suspension -->
+                    <p>Powered by <a target="_blank" href="https://joudisoft.com/products/real-easy-store/">Real Easy Store ( joudiSoft ltd. )</a></p>
+					
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-12 no-margin">
+                <div class="payment-methods ">
+                    <ul>
+                        <li><img alt="" src="https://liveonserver.com/templates/default-downloads/html/en/assets/images/payments/payment-visa.png"></li>
+                        <li><img alt="" src="https://liveonserver.com/templates/default-downloads/html/en/assets/images/payments/payment-master.png"></li>
+                        <li><img alt="" src="https://liveonserver.com/templates/default-downloads/html/en/assets/images/payments/payment-paypal.png"></li>
+                        <li><img alt="" src="https://liveonserver.com/templates/default-downloads/html/en/assets/images/payments/payment-skrill.png"></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+
+
+<script>
+  var jsoftData = {};
+  
+      jsoftData.userID = 0;
+ 
+
+  jsoftData.page = {'a': 'downloads','a_url': 'https://liveonserver.com/index.php?a=downloads','b': 'file','b_url': 'https://liveonserver.com/index.php?a=downloads&b=file'};
+  jsoftData.system = {'siteurl': 'https://liveonserver.com',
+                      'baseurl': 'https://liveonserver.com',
+                      'templateurl': 'https://liveonserver.com/templates/default-downloads/html/en',
+                      'userapi': 'https://liveonserver.com/userapi/index.php',
+                      'currency': 'USD',
+                      'currency_prefix': '',
+                      'currency_suffix': 'USD',
+                      'currency_decimals': parseInt('2')};
+</script>
+
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/components/jquery/dist/jquery.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/components/fancybox/jquery.fancybox.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/bootstrap.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/bootstrap-hover-dropdown.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/owl.carousel.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/css_browser_selector.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/echo.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/bootstrap-slider.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/jquery.raty.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/jquery.prettyPhoto.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/jquery.customSelect.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/scripts.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/jsoft-functions.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/jsoft-scripts.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/jsoft-custom.js"></script>
+
+<script>
+  $(document).ready(function () {
+      
+      if($('.menu-links-stack').length) {
+      	if($('.menu-links-stack').find('a[href="https://liveonserver.com/index.php?a=downloads&b=file"]').length) {
+          $('.menu-links-stack').find('a[href="https://liveonserver.com/index.php?a=downloads&b=file"]').parents('li').first().not('.active').addClass('active');
+      	} else {
+      		$('.menu-links-stack').find('a[href="https://liveonserver.com/index.php?a=downloads"]').parents('li').first().not('.active').addClass('active');
+      	}
+      }
+
+     if($('.star').length > 0) {
+        $('.star').raty('set',{'path': 'https://liveonserver.com/templates/default-downloads/html/en/','scoreName':'rating_points'});
+        $('.star.readonly').raty('readOnly', 1);
+     }
+  });
+</script>
+	
+
+
+
+<script>
+  $(function() {
+    $('#header_search_cat').text('Downloads');$('#header_search_for').val('downloads');
+    
+  });
+</script>
+
+</body>
+</html>
+
+
+
+

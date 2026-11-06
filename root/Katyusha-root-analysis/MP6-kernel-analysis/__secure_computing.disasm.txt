@@ -1,0 +1,43 @@
+002ff1a8 paciasp   
+002ff1ac str       x30, [x18], #8
+002ff1b0 stp       x29, x30, [sp, #-0x10]!
+002ff1b4 mov       x29, sp
+002ff1b8 mrs       x8, sp_el0
+002ff1bc ldr       w9, [x8, #0x848]
+002ff1c0 mov       x1, x0
+002ff1c4 cbz       x0, #0xffffffc0102ff1d0
+002ff1c8 mov       x10, x1
+002ff1cc b         #0xffffffc0102ff1dc
+002ff1d0 ldr       x10, [x8, #0x38]
+002ff1d4 mov       w11, #0x3fc8
+002ff1d8 add       x10, x10, x11
+002ff1dc ldrsw     x0, [x10]
+002ff1e0 cmp       w9, #2
+002ff1e4 b.ne      #0xffffffc0102ff1f4
+002ff1e8 mov       w2, wzr
+002ff1ec bl        #0xffffffc0102ff28c
+002ff1f0 b         #0xffffffc0102ff240
+002ff1f4 cmp       w9, #1
+002ff1f8 b.ne      #0xffffffc0102ff250
+002ff1fc ldr       x8, [x8]
+002ff200 adrp      x9, #0xffffffc012321000
+002ff204 adrp      x10, #0xffffffc012321000
+002ff208 add       x9, x9, #0x82c
+002ff20c add       x10, x10, #0x818
+002ff210 tst       x8, #0x400000
+002ff214 csel      x8, x10, x9, eq
+002ff218 ldr       w9, [x8], #4
+002ff21c cmp       w9, w0
+002ff220 b.eq      #0xffffffc0102ff23c
+002ff224 ldr       w9, [x8], #4
+002ff228 cmn       w9, #1
+002ff22c b.ne      #0xffffffc0102ff21c
+002ff230 bl        #0xffffffc0102ff254
+002ff234 mov       w0, #9
+002ff238 bl        #0xffffffc010130eec
+002ff23c mov       w0, wzr
+002ff240 ldp       x29, x30, [sp], #0x10
+002ff244 ldr       x30, [x18, #-8]!
+002ff248 autiasp   
+002ff24c ret       
+002ff250 brk       #0x800

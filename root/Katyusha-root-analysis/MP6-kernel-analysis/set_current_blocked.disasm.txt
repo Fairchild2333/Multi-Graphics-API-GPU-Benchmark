@@ -1,0 +1,125 @@
+ffffffc010155f9c: paciasp
+ffffffc010155fa0: sub sp, sp, #0x30
+ffffffc010155fa4: str x30, [x18], #8
+ffffffc010155fa8: stp x29, x30, [sp, #0x10]
+ffffffc010155fac: stp x20, x19, [sp, #0x20]
+ffffffc010155fb0: add x29, sp, #0x10
+ffffffc010155fb4: adrp x8, #0xffffffc012999000
+ffffffc010155fb8: ldr x8, [x8, #0xd48]
+ffffffc010155fbc: mov x9, #-0x101
+ffffffc010155fc0: movk x9, #0xfffb, lsl #16
+ffffffc010155fc4: mrs x19, sp_el0
+ffffffc010155fc8: str x8, [sp, #8]
+ffffffc010155fcc: ldr x8, [x0]
+ffffffc010155fd0: and x8, x8, x9
+ffffffc010155fd4: str x8, [x0]
+ffffffc010155fd8: ldr x9, [x19, #0x7e8]
+ffffffc010155fdc: cmp x9, x8
+ffffffc010155fe0: b.eq #0xffffffc0101560a0
+ffffffc010155fe4: ldr x8, [x19, #0x7e0]
+ffffffc010155fe8: mov x20, x0
+ffffffc010155fec: nop
+ffffffc010155ff0: mov w9, #0x60
+ffffffc010155ff4: msr daifset, #2
+ffffffc010155ff8: add x9, x19, #0x18
+ffffffc010155ffc: ldar w9, [x9]
+ffffffc010156000: add w9, w9, #1
+ffffffc010156004: str w9, [x19, #0x18]
+ffffffc010156008: b #0xffffffc010156114
+ffffffc01015600c: b #0xffffffc010156114
+ffffffc010156010: mov x1, xzr
+ffffffc010156014: mov x0, x8
+ffffffc010156018: mov w2, #1
+ffffffc01015601c: mov w9, w1
+ffffffc010156020: casa w9, w2, [x8]
+ffffffc010156024: mov w0, w9
+ffffffc010156028: mov x1, x0
+ffffffc01015602c: cbnz w1, #0xffffffc010156128
+ffffffc010156030: ldr x8, [x19]
+ffffffc010156034: tbz w8, #0, #0xffffffc010156064
+ffffffc010156038: add x8, x19, #0x678
+ffffffc01015603c: ldar x9, [x8]
+ffffffc010156040: cmp x8, x9
+ffffffc010156044: b.eq #0xffffffc010156064
+ffffffc010156048: ldr x8, [x20]
+ffffffc01015604c: ldr x9, [x19, #0x7e8]
+ffffffc010156050: mov x1, sp
+ffffffc010156054: mov x0, x19
+ffffffc010156058: bic x8, x8, x9
+ffffffc01015605c: str x8, [sp]
+ffffffc010156060: bl #0xffffffc01014912c
+ffffffc010156064: ldr x8, [x20]
+ffffffc010156068: str x8, [x19, #0x7e8]
+ffffffc01015606c: bl #0xffffffc010149228
+ffffffc010156070: mov w8, wzr
+ffffffc010156074: ldr x9, [x19, #0x7e0]
+ffffffc010156078: stlrb w8, [x9]
+ffffffc01015607c: mov w10, #0xe0
+ffffffc010156080: msr daifclr, #2
+ffffffc010156084: add x8, x19, #0x18
+ffffffc010156088: ldar x9, [x8]
+ffffffc01015608c: subs x9, x9, #1
+ffffffc010156090: str w9, [x19, #0x18]
+ffffffc010156094: b.eq #0xffffffc0101560cc
+ffffffc010156098: ldar x9, [x8]
+ffffffc01015609c: cbz x9, #0xffffffc0101560cc
+ffffffc0101560a0: adrp x9, #0xffffffc012999000
+ffffffc0101560a4: ldr x8, [sp, #8]
+ffffffc0101560a8: ldr x9, [x9, #0xd48]
+ffffffc0101560ac: cmp x9, x8
+ffffffc0101560b0: b.ne #0xffffffc010156110
+ffffffc0101560b4: ldp x29, x30, [sp, #0x10]
+ffffffc0101560b8: ldp x20, x19, [sp, #0x20]
+ffffffc0101560bc: ldr x30, [x18, #-8]!
+ffffffc0101560c0: add sp, sp, #0x30
+ffffffc0101560c4: autiasp
+ffffffc0101560c8: ret
+ffffffc0101560cc: ldar w8, [x8]
+ffffffc0101560d0: cbnz w8, #0xffffffc0101560a0
+ffffffc0101560d4: mrs x8, daif
+ffffffc0101560d8: and w9, w8, #0x80
+ffffffc0101560dc: cbnz w9, #0xffffffc0101560a0
+ffffffc0101560e0: add x20, x19, #0x18
+ffffffc0101560e4: ldar w8, [x20]
+ffffffc0101560e8: add w8, w8, #1
+ffffffc0101560ec: str w8, [x19, #0x18]
+ffffffc0101560f0: mov w0, #1
+ffffffc0101560f4: bl #0xffffffc011c0218c
+ffffffc0101560f8: ldar w8, [x20]
+ffffffc0101560fc: sub w8, w8, #1
+ffffffc010156100: str w8, [x19, #0x18]
+ffffffc010156104: ldr x8, [x19]
+ffffffc010156108: tbnz w8, #1, #0xffffffc0101560e0
+ffffffc01015610c: b #0xffffffc0101560a0
+ffffffc010156110: bl #0xffffffc01182bec0
+ffffffc010156114: bti j
+ffffffc010156118: mov x9, xzr
+ffffffc01015611c: mov w10, #1
+ffffffc010156120: b #0xffffffc010156174
+ffffffc010156124: cbz w1, #0xffffffc010156030
+ffffffc010156128: mov x0, x8
+ffffffc01015612c: bl #0xffffffc0101e4748
+ffffffc010156130: ldr x8, [x19]
+ffffffc010156134: tbnz w8, #0, #0xffffffc010156038
+ffffffc010156138: b #0xffffffc010156064
+ffffffc01015613c: bti j
+ffffffc010156140: mov w9, #0xa0
+ffffffc010156144: b #0xffffffc010155ff4
+ffffffc010156148: msr icc_pmr_el1, x9
+ffffffc01015614c: ldapr w9, [x9]
+ffffffc010156150: ldapr x9, [x8]
+ffffffc010156154: msr icc_pmr_el1, x10
+ffffffc010156158: ldapr x9, [x8]
+ffffffc01015615c: ldapr x9, [x8]
+ffffffc010156160: ldapr w8, [x8]
+ffffffc010156164: mrs x8, icc_pmr_el1
+ffffffc010156168: eor w9, w8, #0xe0
+ffffffc01015616c: ldapr w8, [x20]
+ffffffc010156170: ldapr w8, [x20]
+ffffffc010156174: prfm pstl1strm, [x8]
+ffffffc010156178: ldaxr w1, [x8]
+ffffffc01015617c: eor w11, w1, w9
+ffffffc010156180: cbnz w11, #0xffffffc01015618c
+ffffffc010156184: stxr w11, w10, [x8]
+ffffffc010156188: cbnz w11, #0xffffffc010156178
+ffffffc01015618c: b #0xffffffc010156124

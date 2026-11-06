@@ -1,0 +1,628 @@
+00291d40 paciasp   
+00291d44 sub       sp, sp, #0x1a0
+00291d48 str       x30, [x18], #8
+00291d4c stp       x29, x30, [sp, #0x140]
+00291d50 stp       x28, x27, [sp, #0x150]
+00291d54 stp       x26, x25, [sp, #0x160]
+00291d58 stp       x24, x23, [sp, #0x170]
+00291d5c stp       x22, x21, [sp, #0x180]
+00291d60 stp       x20, x19, [sp, #0x190]
+00291d64 add       x29, sp, #0x140
+00291d68 adrp      x8, #0xffffffc012999000
+00291d6c ldr       x8, [x8, #0xd48]
+00291d70 adrp      x9, #0xffffffc012320000
+00291d74 add       x9, x9, #0x8c0
+00291d78 ldp       x10, x11, [x9, #0x50]
+00291d7c stur      x8, [x29, #-0x10]
+00291d80 ldp       x8, x12, [x9, #0x60]
+00291d84 cmp       x0, x4
+00291d88 stp       x10, x11, [sp, #0x50]
+00291d8c ldp       x10, x11, [x9, #0x30]
+00291d90 stp       x8, x12, [sp, #0x60]
+00291d94 ldp       x8, x12, [x9, #0x40]
+00291d98 stp       xzr, xzr, [x29, #-0x20]
+00291d9c stp       x10, x11, [sp, #0x30]
+00291da0 ldp       x10, x11, [x9, #0x10]
+00291da4 stp       x8, x12, [sp, #0x40]
+00291da8 ldp       x8, x12, [x9, #0x20]
+00291dac stp       xzr, xzr, [x29, #-0x30]
+00291db0 stp       x10, x11, [sp, #0x10]
+00291db4 stp       xzr, xzr, [x29, #-0x40]
+00291db8 stp       x8, x12, [sp, #0x20]
+00291dbc ldp       x8, x9, [x9]
+00291dc0 stp       xzr, xzr, [x29, #-0x50]
+00291dc4 stp       xzr, xzr, [x29, #-0x60]
+00291dc8 stp       xzr, xzr, [sp, #0xd0]
+00291dcc stp       xzr, xzr, [sp, #0xc0]
+00291dd0 stp       xzr, xzr, [sp, #0xb0]
+00291dd4 stp       xzr, xzr, [sp, #0xa0]
+00291dd8 stp       xzr, xzr, [sp, #0x90]
+00291ddc stp       xzr, xzr, [sp, #0x80]
+00291de0 stp       xzr, xzr, [sp, #0x70]
+00291de4 stp       x8, x9, [sp]
+00291de8 b.eq      #0xffffffc010291e48
+00291dec mov       x21, x4
+00291df0 mov       x22, x3
+00291df4 mov       w24, w2
+00291df8 mov       w25, w1
+00291dfc mov       x26, x0
+00291e00 mrs       x20, sp_el0
+00291e04 cbz       x3, #0xffffffc010291e50
+00291e08 ldr       x23, [x20, #0xa68]
+00291e0c mov       w8, #1
+00291e10 bic       w1, w8, w25, lsr #1
+00291e14 sub       x0, x29, #0x60
+00291e18 mov       w2, wzr
+00291e1c sub       x19, x29, #0x60
+00291e20 bl        #0xffffffc010262980 ; hrtimer_init_sleeper
+00291e24 ldr       x8, [x22]
+00291e28 mov       x9, #0x7fffffffffffffff
+00291e2c add       x10, x23, x8
+00291e30 cmp       x10, x8
+00291e34 ccmp      x10, #0, #8, ge
+00291e38 ccmp      x10, x23, #8, ge
+00291e3c csel      x9, x9, x10, lt
+00291e40 stp       x9, x8, [x29, #-0x48]
+00291e44 b         #0xffffffc010291e54 ; 
+00291e48 mov       w23, #-0x16
+00291e4c b         #0xffffffc0102923cc ; 
+00291e50 mov       x19, xzr
+00291e54 add       x27, sp, #0x90
+00291e58 add       x8, x27, #0x18
+00291e5c and       w1, w25, #1
+00291e60 add       x2, sp, #0x70
+00291e64 mov       w3, #1
+00291e68 mov       x0, x21
+00291e6c str       xzr, [sp, #0xc0]
+00291e70 str       x8, [sp, #0xa8]
+00291e74 str       x27, [sp, #0x90]
+00291e78 add       x28, sp, #0x70
+00291e7c bl        #0xffffffc010292710 ; get_futex_key
+00291e80 cbnz      w0, #0xffffffc0102921f8
+00291e84 mov       w8, #-1
+00291e88 mov       x3, sp
+00291e8c add       x4, sp, #0x88
+00291e90 mov       x0, x26
+00291e94 mov       w1, w24
+00291e98 mov       w2, w25
+00291e9c str       w8, [sp, #0x68]
+00291ea0 stp       x27, x28, [sp, #0x58]
+00291ea4 mov       x27, sp
+00291ea8 bl        #0xffffffc010292c14 ; futex_wait_setup
+00291eac mov       w23, w0
+00291eb0 cbnz      w0, #0xffffffc0102920d8
+00291eb4 cmn       x27, #0x38
+00291eb8 b.eq      #0xffffffc010291f38
+00291ebc ldr       x8, [sp, #0x40]
+00291ec0 ldr       x9, [sp, #0x78]
+00291ec4 cmp       x8, x9
+00291ec8 b.ne      #0xffffffc010291f38
+00291ecc ldr       x8, [sp, #0x38]
+00291ed0 ldr       x9, [sp, #0x70]
+00291ed4 cmp       x8, x9
+00291ed8 b.ne      #0xffffffc010291f38
+00291edc ldr       w8, [sp, #0x48]
+00291ee0 ldr       w9, [sp, #0x80]
+00291ee4 cmp       w8, w9
+00291ee8 b.ne      #0xffffffc010291f38
+00291eec ldr       x21, [sp, #0x88]
+00291ef0 mov       w8, wzr
+00291ef4 add       x9, x21, #4
+00291ef8 stlrb     w8, [x9]
+00291efc add       x8, x20, #0x18
+00291f00 ldar      x9, [x8]
+00291f04 subs      x9, x9, #1
+00291f08 str       w9, [x20, #0x18]
+00291f0c b.eq      #0xffffffc010292294
+00291f10 ldar      x9, [x8]
+00291f14 cbz       x9, #0xffffffc010292294
+00291f18 b         #0xffffffc0102923a4 ; 
+00291f1c b         #0xffffffc0102923a4 ; 
+00291f20 mov       w8, #1
+00291f24 neg       w8, w8
+00291f28 stadd     w8, [x21]
+00291f2c mov       w23, #-0x16
+00291f30 cbnz      x19, #0xffffffc0102923c0
+00291f34 b         #0xffffffc0102923cc ; 
+00291f38 ldr       x23, [sp, #0x88]
+00291f3c mov       x1, sp
+00291f40 mov       x2, x19
+00291f44 mov       x0, x23
+00291f48 bl        #0xffffffc010293144 ; futex_wait_queue_me
+00291f4c add       x8, x20, #0x18
+00291f50 ldar      w8, [x8]
+00291f54 add       w8, w8, #1
+00291f58 str       w8, [x20, #0x18]
+00291f5c add       x24, x23, #4
+00291f60 b         #0xffffffc010292370 ; 
+00291f64 b         #0xffffffc010292370 ; 
+00291f68 mov       x1, xzr
+00291f6c mov       x0, x24
+00291f70 mov       w2, #1
+00291f74 mov       w8, w1
+00291f78 casa      w8, w2, [x24]
+00291f7c mov       w0, w8
+00291f80 mov       x1, x0
+00291f84 cbnz      w1, #0xffffffc010292384
+00291f88 ldr       x8, [sp, #0x40]
+00291f8c ldr       x9, [sp, #0x78]
+00291f90 cmp       x8, x9
+00291f94 b.ne      #0xffffffc010292058
+00291f98 ldr       x8, [sp, #0x38]
+00291f9c ldr       x9, [sp, #0x70]
+00291fa0 cmp       x8, x9
+00291fa4 b.ne      #0xffffffc010292058
+00291fa8 ldr       w8, [sp, #0x48]
+00291fac ldr       w9, [sp, #0x80]
+00291fb0 cmp       w8, w9
+00291fb4 b.ne      #0xffffffc010292058
+00291fb8 mov       w8, wzr
+00291fbc stlrb     w8, [x24]
+00291fc0 add       x8, x20, #0x18
+00291fc4 ldar      x9, [x8]
+00291fc8 subs      x9, x9, #1
+00291fcc str       w9, [x20, #0x18]
+00291fd0 b.eq      #0xffffffc010292250
+00291fd4 ldar      x9, [x8]
+00291fd8 cbz       x9, #0xffffffc010292250
+00291fdc ldp       x8, x9, [sp, #0x50]
+00291fe0 cbz       x9, #0xffffffc0102920e0
+00291fe4 cbz       x8, #0xffffffc0102922d8
+00291fe8 add       x22, x8, #0x10
+00291fec add       x2, sp, #0x90
+00291ff0 mov       x0, x22
+00291ff4 mov       x1, x19
+00291ff8 bl        #0xffffffc0101e81e8 ; rt_mutex_wait_proxy_lock
+00291ffc add       x9, x20, #0x18
+00292000 ldr       x8, [sp, #0x30]
+00292004 ldar      w9, [x9]
+00292008 add       w9, w9, #1
+0029200c str       w9, [x20, #0x18]
+00292010 mov       w23, w0
+00292014 b         #0xffffffc010292410 ; 
+00292018 b         #0xffffffc010292410 ; 
+0029201c mov       x1, xzr
+00292020 mov       x0, x8
+00292024 mov       w2, #1
+00292028 mov       w9, w1
+0029202c casa      w9, w2, [x8]
+00292030 mov       w0, w9
+00292034 mov       x1, x0
+00292038 cbnz      w1, #0xffffffc010292424
+0029203c cbz       w23, #0xffffffc010292430
+00292040 add       x1, sp, #0x90
+00292044 mov       x0, x22
+00292048 bl        #0xffffffc0101e839c ; rt_mutex_cleanup_proxy_lock
+0029204c tst       w0, #1
+00292050 csel      w22, w23, wzr, ne
+00292054 b         #0xffffffc010292434 ; 
+00292058 ldr       x8, [sp, #0x30]
+0029205c cbz       x8, #0xffffffc010292068
+00292060 cmp       x24, x8
+00292064 b.ne      #0xffffffc010292248
+00292068 add       x1, x23, #8
+0029206c mov       x0, sp
+00292070 bl        #0xffffffc010aa72e8 ; plist_del
+00292074 b         #0xffffffc010292390 ; 
+00292078 b         #0xffffffc010292390 ; 
+0029207c mov       w8, #1
+00292080 neg       w8, w8
+00292084 stadd     w8, [x23]
+00292088 cbz       x19, #0xffffffc010292098
+0029208c cbz       x22, #0xffffffc01029236c
+00292090 ldr       x8, [x19, #0x48]
+00292094 cbz       x8, #0xffffffc0102920b0
+00292098 ldr       x8, [x20]
+0029209c mov       w9, #-0x201
+002920a0 tst       x8, #1
+002920a4 mov       w8, #-0xb
+002920a8 csel      w23, w8, w9, eq
+002920ac b         #0xffffffc0102920b4 ; 
+002920b0 mov       w23, #-0x6e
+002920b4 mov       w8, wzr
+002920b8 stlrb     w8, [x24]
+002920bc add       x8, x20, #0x18
+002920c0 ldar      x9, [x8]
+002920c4 subs      x9, x9, #1
+002920c8 str       w9, [x20, #0x18]
+002920cc b.eq      #0xffffffc010292204
+002920d0 ldar      x9, [x8]
+002920d4 cbz       x9, #0xffffffc010292204
+002920d8 cbnz      x19, #0xffffffc0102923c0
+002920dc b         #0xffffffc0102923cc ; 
+002920e0 cbz       x8, #0xffffffc0102921ec
+002920e4 ldr       x8, [x8, #0x30]
+002920e8 cmp       x8, x20
+002920ec b.eq      #0xffffffc0102921ec
+002920f0 add       x9, x20, #0x18
+002920f4 ldr       x8, [sp, #0x30]
+002920f8 ldar      w9, [x9]
+002920fc add       w9, w9, #1
+00292100 str       w9, [x20, #0x18]
+00292104 b         #0xffffffc010292548 ; 
+00292108 b         #0xffffffc010292548 ; 
+0029210c mov       x1, xzr
+00292110 mov       x0, x8
+00292114 mov       w2, #1
+00292118 mov       w9, w1
+0029211c casa      w9, w2, [x8]
+00292120 mov       w0, w9
+00292124 mov       x1, x0
+00292128 cbnz      w1, #0xffffffc01029255c
+0029212c ldr       x8, [sp, #0x50]
+00292130 add       x22, x8, #0x10
+00292134 nop       
+00292138 mov       w8, #0x60
+0029213c msr       daifset, #2
+00292140 add       x8, x20, #0x18
+00292144 ldar      w8, [x8]
+00292148 add       w8, w8, #1
+0029214c str       w8, [x20, #0x18]
+00292150 b         #0xffffffc010292568 ; 
+00292154 b         #0xffffffc010292568 ; 
+00292158 mov       x1, xzr
+0029215c mov       x0, x22
+00292160 mov       w2, #1
+00292164 mov       w8, w1
+00292168 casa      w8, w2, [x22]
+0029216c mov       w0, w8
+00292170 mov       x1, x0
+00292174 cbnz      w1, #0xffffffc01029257c
+00292178 mov       x1, sp
+0029217c mov       x0, x21
+00292180 mov       x2, x20
+00292184 bl        #0xffffffc0102932a0 ; __fixup_pi_state_owner
+00292188 mov       w8, wzr
+0029218c stlrb     w8, [x22]
+00292190 mov       w8, #0xe0
+00292194 msr       daifclr, #2
+00292198 add       x8, x20, #0x18
+0029219c ldar      x9, [x8]
+002921a0 mov       w21, w0
+002921a4 subs      x9, x9, #1
+002921a8 str       w9, [x20, #0x18]
+002921ac b.eq      #0xffffffc0102922e4
+002921b0 ldar      x9, [x8]
+002921b4 cbz       x9, #0xffffffc0102922e4
+002921b8 ldr       x0, [sp, #0x50]
+002921bc bl        #0xffffffc010293a54 ; put_pi_state
+002921c0 mov       w8, wzr
+002921c4 ldr       x9, [sp, #0x30]
+002921c8 stlrb     w8, [x9]
+002921cc add       x8, x20, #0x18
+002921d0 ldar      x9, [x8]
+002921d4 subs      x9, x9, #1
+002921d8 str       w9, [x20, #0x18]
+002921dc b.eq      #0xffffffc010292328
+002921e0 ldar      x9, [x8]
+002921e4 cbz       x9, #0xffffffc010292328
+002921e8 tbnz      w21, #0x1f, #0xffffffc0102924d0
+002921ec mov       w23, wzr
+002921f0 cbnz      x19, #0xffffffc0102923c0
+002921f4 b         #0xffffffc0102923cc ; 
+002921f8 mov       w23, w0
+002921fc cbnz      x19, #0xffffffc0102923c0
+00292200 b         #0xffffffc0102923cc ; 
+00292204 ldar      w8, [x8]
+00292208 cbnz      w8, #0xffffffc0102920d8
+0029220c mrs       x8, daif
+00292210 and       w9, w8, #0x80
+00292214 cbnz      w9, #0xffffffc0102920d8
+00292218 add       x21, x20, #0x18
+0029221c ldar      w8, [x21]
+00292220 add       w8, w8, #1
+00292224 str       w8, [x20, #0x18]
+00292228 mov       w0, #1
+0029222c bl        #0xffffffc011c0218c ; __schedule
+00292230 ldar      w8, [x21]
+00292234 sub       w8, w8, #1
+00292238 str       w8, [x20, #0x18]
+0029223c ldr       x8, [x20]
+00292240 tbnz      w8, #1, #0xffffffc010292218
+00292244 b         #0xffffffc0102920d8 ; 
+00292248 brk       #0x800
+0029224c b         #0xffffffc010292068 ; 
+00292250 ldar      w8, [x8]
+00292254 cbnz      w8, #0xffffffc010291fdc
+00292258 mrs       x8, daif
+0029225c and       w9, w8, #0x80
+00292260 cbnz      w9, #0xffffffc010291fdc
+00292264 add       x22, x20, #0x18
+00292268 ldar      w8, [x22]
+0029226c add       w8, w8, #1
+00292270 str       w8, [x20, #0x18]
+00292274 mov       w0, #1
+00292278 bl        #0xffffffc011c0218c ; __schedule
+0029227c ldar      w8, [x22]
+00292280 sub       w8, w8, #1
+00292284 str       w8, [x20, #0x18]
+00292288 ldr       x8, [x20]
+0029228c tbnz      w8, #1, #0xffffffc010292264
+00292290 b         #0xffffffc010291fdc ; 
+00292294 ldar      w8, [x8]
+00292298 cbnz      w8, #0xffffffc010291f18
+0029229c mrs       x8, daif
+002922a0 and       w9, w8, #0x80
+002922a4 cbnz      w9, #0xffffffc010291f18
+002922a8 add       x22, x20, #0x18
+002922ac ldar      w8, [x22]
+002922b0 add       w8, w8, #1
+002922b4 str       w8, [x20, #0x18]
+002922b8 mov       w0, #1
+002922bc bl        #0xffffffc011c0218c ; __schedule
+002922c0 ldar      w8, [x22]
+002922c4 sub       w8, w8, #1
+002922c8 str       w8, [x20, #0x18]
+002922cc ldr       x8, [x20]
+002922d0 tbnz      w8, #1, #0xffffffc0102922a8
+002922d4 b         #0xffffffc010291f18 ; 
+002922d8 brk       #0x800
+002922dc ldr       x8, [sp, #0x50]
+002922e0 b         #0xffffffc010291fe8 ; 
+002922e4 ldar      w8, [x8]
+002922e8 cbnz      w8, #0xffffffc0102921b8
+002922ec mrs       x8, daif
+002922f0 and       w9, w8, #0x80
+002922f4 cbnz      w9, #0xffffffc0102921b8
+002922f8 add       x22, x20, #0x18
+002922fc ldar      w8, [x22]
+00292300 add       w8, w8, #1
+00292304 str       w8, [x20, #0x18]
+00292308 mov       w0, #1
+0029230c bl        #0xffffffc011c0218c ; __schedule
+00292310 ldar      w8, [x22]
+00292314 sub       w8, w8, #1
+00292318 str       w8, [x20, #0x18]
+0029231c ldr       x8, [x20]
+00292320 tbnz      w8, #1, #0xffffffc0102922f8
+00292324 b         #0xffffffc0102921b8 ; 
+00292328 ldar      w8, [x8]
+0029232c cbnz      w8, #0xffffffc0102921e8
+00292330 mrs       x8, daif
+00292334 and       w9, w8, #0x80
+00292338 cbnz      w9, #0xffffffc0102921e8
+0029233c add       x22, x20, #0x18
+00292340 ldar      w8, [x22]
+00292344 add       w8, w8, #1
+00292348 str       w8, [x20, #0x18]
+0029234c mov       w0, #1
+00292350 bl        #0xffffffc011c0218c ; __schedule
+00292354 ldar      w8, [x22]
+00292358 sub       w8, w8, #1
+0029235c str       w8, [x20, #0x18]
+00292360 ldr       x8, [x20]
+00292364 tbnz      w8, #1, #0xffffffc01029233c
+00292368 b         #0xffffffc0102921e8 ; 
+0029236c brk       #1
+00292370 bti       j
+00292374 mov       x8, xzr
+00292378 mov       w9, #1
+0029237c b         #0xffffffc010292638 ; 
+00292380 cbz       w1, #0xffffffc010291f88
+00292384 mov       x0, x24
+00292388 bl        #0xffffffc0101e4748 ; queued_spin_lock_slowpath
+0029238c b         #0xffffffc010291f88 ; 
+00292390 bti       j
+00292394 mov       w8, #1
+00292398 b         #0xffffffc010292654 ; 
+0029239c cbnz      x19, #0xffffffc01029208c
+002923a0 b         #0xffffffc010292098 ; 
+002923a4 bti       j
+002923a8 mov       w8, #1
+002923ac b         #0xffffffc01029266c ; 
+002923b0 mov       w23, #-0x16
+002923b4 cbnz      x19, #0xffffffc0102923c0
+002923b8 b         #0xffffffc0102923cc ; 
+002923bc yield     
+002923c0 mov       x0, x19
+002923c4 bl        #0xffffffc010262ee4 ; hrtimer_try_to_cancel
+002923c8 tbnz      w0, #0x1f, #0xffffffc0102923bc
+002923cc adrp      x9, #0xffffffc012999000
+002923d0 ldur      x8, [x29, #-0x10]
+002923d4 ldr       x9, [x9, #0xd48]
+002923d8 cmp       x9, x8
+002923dc b.ne      #0xffffffc01029240c
+002923e0 ldp       x29, x30, [sp, #0x140]
+002923e4 mov       w0, w23
+002923e8 ldp       x20, x19, [sp, #0x190]
+002923ec ldp       x22, x21, [sp, #0x180]
+002923f0 ldp       x24, x23, [sp, #0x170]
+002923f4 ldp       x26, x25, [sp, #0x160]
+002923f8 ldp       x28, x27, [sp, #0x150]
+002923fc ldr       x30, [x18, #-8]!
+00292400 add       sp, sp, #0x1a0
+00292404 autiasp   
+00292408 ret       
+0029240c bl        #0xffffffc01182bec0 ; __stack_chk_fail
+00292410 bti       j
+00292414 mov       x9, xzr
+00292418 mov       w10, #1
+0029241c b         #0xffffffc010292684 ; 
+00292420 cbz       w1, #0xffffffc01029203c
+00292424 mov       x0, x8
+00292428 bl        #0xffffffc0101e4748 ; queued_spin_lock_slowpath
+0029242c cbnz      w23, #0xffffffc010292040
+00292430 mov       w22, wzr
+00292434 cmp       w22, #0
+00292438 cset      w2, eq
+0029243c mov       x1, sp
+00292440 mov       x0, x21
+00292444 mov       x23, sp
+00292448 bl        #0xffffffc010293de4 ; fixup_owner
+0029244c ldr       x8, [sp, #0x30]
+00292450 and       w9, w0, w0, asr #31
+00292454 cmp       w0, #0
+00292458 csel      w21, w22, w9, eq
+0029245c cbz       x8, #0xffffffc010292524
+00292460 add       x8, x23, #0x18
+00292464 ldar      x9, [x8]
+00292468 cmp       x8, x9
+0029246c b.eq      #0xffffffc01029252c
+00292470 ldr       x8, [sp, #0x30]
+00292474 mov       x0, sp
+00292478 add       x1, x8, #4
+0029247c sub       x22, x8, #4
+00292480 bl        #0xffffffc010aa72e8 ; plist_del
+00292484 b         #0xffffffc010292534 ; 
+00292488 b         #0xffffffc010292534 ; 
+0029248c mov       w8, #1
+00292490 neg       w8, w8
+00292494 stadd     w8, [x22]
+00292498 ldr       x0, [sp, #0x50]
+0029249c cbz       x0, #0xffffffc010292544
+002924a0 bl        #0xffffffc010293a54 ; put_pi_state
+002924a4 str       xzr, [sp, #0x50]
+002924a8 mov       w8, wzr
+002924ac ldr       x9, [sp, #0x30]
+002924b0 stlrb     w8, [x9]
+002924b4 add       x8, x20, #0x18
+002924b8 ldar      x9, [x8]
+002924bc subs      x9, x9, #1
+002924c0 str       w9, [x20, #0x18]
+002924c4 b.eq      #0xffffffc0102924e0
+002924c8 ldar      x9, [x8]
+002924cc cbz       x9, #0xffffffc0102924e0
+002924d0 cmn       w21, #4
+002924d4 mov       w8, #-0xb
+002924d8 csel      w23, w8, w21, eq
+002924dc b         #0xffffffc0102920d8 ; 
+002924e0 ldar      w8, [x8]
+002924e4 cbnz      w8, #0xffffffc0102924d0
+002924e8 mrs       x8, daif
+002924ec and       w9, w8, #0x80
+002924f0 cbnz      w9, #0xffffffc0102924d0
+002924f4 add       x22, x20, #0x18
+002924f8 ldar      w8, [x22]
+002924fc add       w8, w8, #1
+00292500 str       w8, [x20, #0x18]
+00292504 mov       w0, #1
+00292508 bl        #0xffffffc011c0218c ; __schedule
+0029250c ldar      w8, [x22]
+00292510 sub       w8, w8, #1
+00292514 str       w8, [x20, #0x18]
+00292518 ldr       x8, [x20]
+0029251c tbnz      w8, #1, #0xffffffc0102924f4
+00292520 b         #0xffffffc0102924d0 ; 
+00292524 brk       #0x800
+00292528 b         #0xffffffc010292498 ; 
+0029252c brk       #0x800
+00292530 b         #0xffffffc010292498 ; 
+00292534 bti       j
+00292538 mov       w8, #1
+0029253c b         #0xffffffc0102926c0 ; 
+00292540 b         #0xffffffc010292498 ; 
+00292544 brk       #0x800
+00292548 bti       j
+0029254c mov       x9, xzr
+00292550 mov       w10, #1
+00292554 b         #0xffffffc0102926d8 ; 
+00292558 cbz       w1, #0xffffffc01029212c
+0029255c mov       x0, x8
+00292560 bl        #0xffffffc0101e4748 ; queued_spin_lock_slowpath
+00292564 b         #0xffffffc01029212c ; 
+00292568 bti       j
+0029256c mov       x8, xzr
+00292570 mov       w9, #1
+00292574 b         #0xffffffc0102926f4 ; 
+00292578 cbz       w1, #0xffffffc010292178
+0029257c mov       x0, x22
+00292580 bl        #0xffffffc0101e4748 ; queued_spin_lock_slowpath
+00292584 b         #0xffffffc010292178 ; 
+00292588 bti       j
+0029258c mov       w8, #0xa0
+00292590 b         #0xffffffc01029213c ; 
+00292594 ldapr     x9, [x8]
+00292598 ldapr     x9, [x8]
+0029259c ldapr     w8, [x8]
+002925a0 ldapr     x9, [x8]
+002925a4 ldapr     x9, [x8]
+002925a8 ldapr     w9, [x9]
+002925ac ldapr     x9, [x8]
+002925b0 ldapr     x9, [x8]
+002925b4 ldapr     w9, [x9]
+002925b8 msr       icc_pmr_el1, x8
+002925bc ldapr     w8, [x8]
+002925c0 msr       icc_pmr_el1, x8
+002925c4 ldapr     x9, [x8]
+002925c8 ldapr     x9, [x8]
+002925cc ldapr     x9, [x8]
+002925d0 ldapr     x9, [x8]
+002925d4 ldapr     w8, [x8]
+002925d8 mrs       x8, icc_pmr_el1
+002925dc eor       w9, w8, #0xe0
+002925e0 ldapr     w8, [x21]
+002925e4 ldapr     w8, [x21]
+002925e8 ldapr     w8, [x8]
+002925ec mrs       x8, icc_pmr_el1
+002925f0 eor       w9, w8, #0xe0
+002925f4 ldapr     w8, [x22]
+002925f8 ldapr     w8, [x22]
+002925fc ldapr     w8, [x8]
+00292600 mrs       x8, icc_pmr_el1
+00292604 eor       w9, w8, #0xe0
+00292608 ldapr     w8, [x22]
+0029260c ldapr     w8, [x22]
+00292610 ldapr     w8, [x8]
+00292614 mrs       x8, icc_pmr_el1
+00292618 eor       w9, w8, #0xe0
+0029261c ldapr     w8, [x22]
+00292620 ldapr     w8, [x22]
+00292624 ldapr     w8, [x8]
+00292628 mrs       x8, icc_pmr_el1
+0029262c eor       w9, w8, #0xe0
+00292630 ldapr     w8, [x22]
+00292634 ldapr     w8, [x22]
+00292638 prfm      pstl1strm, [x24]
+0029263c ldaxr     w1, [x24]
+00292640 eor       w10, w1, w8
+00292644 cbnz      w10, #0xffffffc010292650
+00292648 stxr      w10, w9, [x24]
+0029264c cbnz      w10, #0xffffffc01029263c
+00292650 b         #0xffffffc010292380 ; 
+00292654 prfm      pstl1strm, [x23]
+00292658 ldxr      w9, [x23]
+0029265c sub       w9, w9, w8
+00292660 stxr      w10, w9, [x23]
+00292664 cbnz      w10, #0xffffffc010292658
+00292668 b         #0xffffffc01029239c ; 
+0029266c prfm      pstl1strm, [x21]
+00292670 ldxr      w9, [x21]
+00292674 sub       w9, w9, w8
+00292678 stxr      w10, w9, [x21]
+0029267c cbnz      w10, #0xffffffc010292670
+00292680 b         #0xffffffc0102923b0 ; 
+00292684 prfm      pstl1strm, [x8]
+00292688 ldaxr     w1, [x8]
+0029268c eor       w11, w1, w9
+00292690 cbnz      w11, #0xffffffc01029269c
+00292694 stxr      w11, w10, [x8]
+00292698 cbnz      w11, #0xffffffc010292688
+0029269c b         #0xffffffc010292420 ; 
+002926a0 ldapr     x9, [x8]
+002926a4 ldapr     x9, [x8]
+002926a8 ldapr     x9, [x8]
+002926ac ldapr     w8, [x8]
+002926b0 mrs       x8, icc_pmr_el1
+002926b4 eor       w9, w8, #0xe0
+002926b8 ldapr     w8, [x22]
+002926bc ldapr     w8, [x22]
+002926c0 prfm      pstl1strm, [x22]
+002926c4 ldxr      w9, [x22]
+002926c8 sub       w9, w9, w8
+002926cc stxr      w10, w9, [x22]
+002926d0 cbnz      w10, #0xffffffc0102926c4
+002926d4 b         #0xffffffc010292540 ; 
+002926d8 prfm      pstl1strm, [x8]
+002926dc ldaxr     w1, [x8]
+002926e0 eor       w11, w1, w9
+002926e4 cbnz      w11, #0xffffffc0102926f0
+002926e8 stxr      w11, w10, [x8]
+002926ec cbnz      w11, #0xffffffc0102926dc
+002926f0 b         #0xffffffc010292558 ; 
+002926f4 prfm      pstl1strm, [x22]
+002926f8 ldaxr     w1, [x22]
+002926fc eor       w10, w1, w8
+00292700 cbnz      w10, #0xffffffc01029270c
+00292704 stxr      w10, w9, [x22]
+00292708 cbnz      w10, #0xffffffc0102926f8
+0029270c b         #0xffffffc010292578 ; 

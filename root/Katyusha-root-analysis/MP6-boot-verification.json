@@ -1,0 +1,8 @@
+{
+  "path": "C:\\Users\\lzz28\\Downloads\\Katyusha-root-analysis\\MP6-images\\boot.img",
+  "size": 201326592,
+  "sha256": "2db977b918e1b3af0ecb37d9c77f89816db9f7e2e65495cbdfd94b88cfcc550b",
+  "target_hash_verified": true,
+  "kernel_banner": "Linux version 5.10.101-android12-9-gece0cc04d1a5 (build-user@build-host) (Android (7284624, based on r416183b) clang version 12.0.5 (https://android.googlesource.com/toolchain/llvm-project c935d99d7cf2016289302412d708641d52d2f7ee), LLD 12.0.5 (/buildbot/src/android/llvm-toolchain/out/llvm-project/lld c935d99d7cf2016289302412d708641d52d2f7ee)) #1 SMP PREEMPT Thu Sep 8 14:22:13 CST 2022\n",
+  "source_url": "https://dumps.tadiphone.dev/api/v4/projects/4705/repository/files/boot.img/raw?ref=0b3d76ba324b315f5e552221cd07def832c54bb3"
+}

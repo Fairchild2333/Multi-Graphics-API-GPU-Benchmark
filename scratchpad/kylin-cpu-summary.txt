@@ -1,0 +1,5 @@
+﻿== 1 cpu-compute: 01:30:27 cpu -C
+   exit=0 137 s cpu -C  All-core score (8 threads): 700.06 MWork/s 
+== 2 cpu-cache-memory: 01:33:14 cpu -C
+   exit=0 640 s cpu -C  [Results] Saved as 20261022-014354-437-cpu-membw -> /home/qwer/.local/share/GpuComputeBenchmark/results/results.json 
+SERIES DONE 01:44:24

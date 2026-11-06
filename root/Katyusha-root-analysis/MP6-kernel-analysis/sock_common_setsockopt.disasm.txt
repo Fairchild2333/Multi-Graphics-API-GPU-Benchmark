@@ -1,0 +1,38 @@
+01362530 paciasp   
+01362534 sub       sp, sp, #0x40
+01362538 str       x30, [x18], #8
+0136253c stp       x29, x30, [sp, #0x30]
+01362540 add       x29, sp, #0x30
+01362544 ldr       x0, [x0, #0x18]
+01362548 adrp      x9, #0xffffffc011a32000
+0136254c add       x9, x9, #0x820
+01362550 ldr       x8, [x0, #0x28]
+01362554 ldr       x8, [x8, #0x48]
+01362558 sub       x9, x8, x9
+0136255c ror       x9, x9, #3
+01362560 cmp       x9, #9
+01362564 b.hs      #0xffffffc011362580
+01362568 blr       x8
+0136256c ldp       x29, x30, [sp, #0x30]
+01362570 ldr       x30, [x18, #-8]!
+01362574 add       sp, sp, #0x40
+01362578 autiasp   
+0136257c ret       
+01362580 stur      x0, [x29, #-8]
+01362584 mov       x0, #0xda28
+01362588 movk      x0, #0xd4dd, lsl #16
+0136258c movk      x0, #0x1e55, lsl #32
+01362590 movk      x0, #0x9cf2, lsl #48
+01362594 stp       w2, w1, [x29, #-0x10]
+01362598 mov       x1, x8
+0136259c mov       x2, xzr
+013625a0 stur      w5, [x29, #-0x14]
+013625a4 stp       x4, x8, [sp]
+013625a8 str       x3, [sp, #0x10]
+013625ac bl        #0xffffffc0103e0860 ; __cfi_slowpath
+013625b0 ldp       w2, w1, [x29, #-0x10]
+013625b4 ldur      x0, [x29, #-8]
+013625b8 ldp       x8, x3, [sp, #8]
+013625bc ldr       x4, [sp]
+013625c0 ldur      w5, [x29, #-0x14]
+013625c4 b         #0xffffffc011362568 ; 

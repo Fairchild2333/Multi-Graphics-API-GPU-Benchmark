@@ -1,0 +1,9 @@
+1
+reboot
+reboot
+ 23:33:14 up 1 min,  0 users,  load average: 7.72, 3.94, 1.49
+uid=2000(shell) gid=2000(shell) groups=2000(shell),1004(input),1007(log),1011(adb),1015(sdcard_rw),1028(sdcard_r),1078(ext_data_rw),1079(ext_obb_rw),3001(net_bt_admin),3002(net_bt),3003(inet),3006(net_bw_stats),3009(readproc),3011(uhid),3012(readtracefs) context=u:r:shell:s0
+Enforcing
+1d0faa45-0f78-4894-b313-ef3379a2f1f2
+  mCurrentFocus=Window{b1451ce u0 com.ghostlock.app/com.ghostlock.app.ui.MainActivity}
+ls: /sys/fs/pstore: Permission denied

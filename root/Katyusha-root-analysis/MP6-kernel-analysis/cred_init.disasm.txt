@@ -1,0 +1,20 @@
+026b4c80 paciasp   
+026b4c84 str       x30, [x18], #8
+026b4c88 stp       x29, x30, [sp, #-0x10]!
+026b4c8c mov       x29, sp
+026b4c90 adrp      x0, #0xffffffc012220000
+026b4c94 mov       w3, #0x2000
+026b4c98 add       x0, x0, #0xafa
+026b4c9c mov       w1, #0xa8
+026b4ca0 movk      w3, #0x404, lsl #16
+026b4ca4 mov       w2, wzr
+026b4ca8 mov       w4, wzr
+026b4cac mov       w5, wzr
+026b4cb0 mov       x6, xzr
+026b4cb4 bl        #0xffffffc01047a200
+026b4cb8 adrp      x8, #0xffffffc012b9f000
+026b4cbc str       x0, [x8, #0xf28]
+026b4cc0 ldp       x29, x30, [sp], #0x10
+026b4cc4 ldr       x30, [x18, #-8]!
+026b4cc8 autiasp   
+026b4ccc ret       

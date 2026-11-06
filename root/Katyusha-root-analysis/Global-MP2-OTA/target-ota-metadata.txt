@@ -1,0 +1,12 @@
+ota-property-files=payload_metadata.bin:4767:503187,payload.bin:4767:496333934,payload_properties.txt:496338759:155,care_map.pb:3891:829,metadata:69:765,metadata.pb:902:2261                 
+ota-required-cache=0
+ota-streaming-property-files=payload.bin:4767:496333934,payload_properties.txt:496338759:155,care_map.pb:3891:829,metadata:69:765,metadata.pb:902:2261                   
+ota-type=AB
+post-build=blackshark/KTUS-H0/katyusha:12/KTUS2208100OS00MP2/V11.0.4.0.JOYUI:user/release-keys
+post-build-incremental=V11.0.0.0.SKTUSOS
+post-sdk-level=31
+post-security-patch-level=2022-06-01
+post-timestamp=1660064903
+pre-build=blackshark/KTUS-H0/katyusha:12/KTUS2206170OS00MP1/V11.0.4.0.JOYUI:user/release-keys
+pre-build-incremental=V11.0.0.0.SKTUSOS
+pre-device=katyusha

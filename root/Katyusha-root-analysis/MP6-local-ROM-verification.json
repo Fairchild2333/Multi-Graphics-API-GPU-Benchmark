@@ -1,0 +1,46 @@
+{
+  "verified_date": "2026-10-11",
+  "source_rom_directory": "C:\\Users\\lzz28\\Downloads\\New folder\\Black.shark5Pro_V13.2210310_KTUS22310CN00MP6_cn",
+  "reference_manifest": "C:\\Users\\lzz28\\Downloads\\Katyusha-root-analysis\\ota-manifest-summary.json",
+  "reference_ota_url": "https://ota-1256119282.file.myqcloud.com/KTUS-A0/20221114150403-katyusha-deltaota_2022-10-31_2022-08-11_475bbf5ab3.zip",
+  "scope": "Three image payloads match MP6 target hashes. This does not authenticate the entire modified ROM or confirm GhostLock compatibility. Original source files were not modified.",
+  "images": [
+    {
+      "partition": "boot",
+      "source_path": "C:\\Users\\lzz28\\Downloads\\New folder\\Black.shark5Pro_V13.2210310_KTUS22310CN00MP6_cn\\images\\boot.img",
+      "source_file_size": 201326592,
+      "source_file_sha256": "2db977b918e1b3af0ecb37d9c77f89816db9f7e2e65495cbdfd94b88cfcc550b",
+      "official_payload_data_size": 201326592,
+      "output_path": "C:\\Users\\lzz28\\Downloads\\Katyusha-root-analysis\\MP6-images\\boot.img",
+      "output_sha256": "2db977b918e1b3af0ecb37d9c77f89816db9f7e2e65495cbdfd94b88cfcc550b",
+      "target_hash_verified": true,
+      "trailing_bytes_excluded": 0,
+      "trailing_nonzero_bytes": 0,
+      "kernel_banner": "Linux version 5.10.101-android12-9-gece0cc04d1a5 (build-user@build-host) (Android (7284624, based on r416183b) clang version 12.0.5 (https://android.googlesource.com/toolchain/llvm-project c935d99d7cf2016289302412d708641d52d2f7ee), LLD 12.0.5 (/buildbot/src/android/llvm-toolchain/out/llvm-project/lld c935d99d7cf2016289302412d708641d52d2f7ee)) #1 SMP PREEMPT Thu Sep 8 14:22:13 CST 2022"
+    },
+    {
+      "partition": "xbl_config",
+      "source_path": "C:\\Users\\lzz28\\Downloads\\New folder\\Black.shark5Pro_V13.2210310_KTUS22310CN00MP6_cn\\images\\xbl_config.elf",
+      "source_file_size": 524288,
+      "source_file_sha256": "3afd8ca89b322240d6eba7feba62301e9115e118e48e6372bda6f744a0dc58ac",
+      "official_payload_data_size": 135168,
+      "output_path": "C:\\Users\\lzz28\\Downloads\\Katyusha-root-analysis\\MP6-images\\xbl_config.img",
+      "output_sha256": "743553af722a9ebad0856cf352653e36db15d2b0141706c9d2297a9f36354ec3",
+      "target_hash_verified": true,
+      "trailing_bytes_excluded": 389120,
+      "trailing_nonzero_bytes": 0
+    },
+    {
+      "partition": "uefi",
+      "source_path": "C:\\Users\\lzz28\\Downloads\\New folder\\Black.shark5Pro_V13.2210310_KTUS22310CN00MP6_cn\\images\\uefi.elf",
+      "source_file_size": 5242880,
+      "source_file_sha256": "5db6988b841c212e71c569bd1ecdbfa8d8bcf67e6371e4f15d4d87a9a6367c1f",
+      "official_payload_data_size": 2760704,
+      "output_path": "C:\\Users\\lzz28\\Downloads\\Katyusha-root-analysis\\MP6-images\\uefi.img",
+      "output_sha256": "e1b2e415567fad4e4e7e70dd04b220519bc1b856329fb121dd09d1e80af0fbeb",
+      "target_hash_verified": true,
+      "trailing_bytes_excluded": 2482176,
+      "trailing_nonzero_bytes": 0
+    }
+  ]
+}

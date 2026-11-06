@@ -1,0 +1,4710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="author" content="Live On Server : The Firmware & Solution Mobile Phone Thailand Technician">
+    <meta name="keywords" content="Firmware, Software, Cell-phone, Mobile, Tablet, iPhone, HTC, Nokia, Box, Flash">
+    <meta name="robots" content="all,index,follow,snippet,archive,odp">
+    <meta name="og:title" content="Recent Files | Live On Server : The Firmware & Solution Mobile Phone Thailand Technician">
+    <meta name="og:image" content="https://liveonserver.com/media/site/1-11641959966.jpg">
+    <meta name="og:description" content="Number #1 Mobile Firmware and Software Provider">
+
+    <title>Recent Files | Live On Server : The Firmware & Solution Mobile Phone Thailand Technician</title>
+
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/components/fancybox/jquery.fancybox.min.css">
+
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/style.css">
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/main.css">
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/green.css">
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/owl.carousel.css">
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/owl.transitions.css">
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/animate.min.css">
+    <link rel="stylesheet" href="https://liveonserver.com/templates/default-downloads/html/en/assets/css/font-awesome.min.css">
+
+    <link rel="shortcut icon" href="https://liveonserver.com/favicon.ico">
+	
+	
+	<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BE9KMG2E3F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-BE9KMG2E3F');
+</script>
+	
+
+    <!-- HTML5 elements and media queries Support for IE8 : HTML5 shim and Respond.js -->
+    <!--[if lt IE 9]>
+        <script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/html5shiv.js"></script>
+        <script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/respond.min.js"></script>
+    <![endif]-->
+	
+	
+
+
+</head>
+<body class="page-sub-downloads page-downloads-recent">
+<nav class="top-bar animate-dropdown">
+    <div class="container">
+        <div class="col-md-4 col-sm-4 no-margin hidden-xs">
+            <ul class="mar-t-5">
+                
+                <li><a target="_blank" href="https://www.facebook.com/tomtestmodeshop" class="fa fa-facebook"></a></li>
+               
+                
+                <li><a target="_blank" href="#" class="fa fa-twitter"></a></li>
+               
+                
+                <li><a target="_blank" href="#" class="fa fa-instagram"></a></li>
+               
+                
+                <li><a target="_blank" href="#" class="fa fa-linkedin"></a></li>
+               
+                <li><a target="_blank" href="https://liveonserver.com/index.php?a=rss"><i class="fa fa-rss"></i></a></li>
+            </ul>
+        </div>
+
+        <div class="col-md-8 col-sm-8 col-xs-12 no-margin">
+            <ul class="right">
+              
+                  <li><a href="https://liveonserver.com/index.php?a=login"><i class="fa fa-lock fw-r5"></i>Login</a></li>
+                
+                  <li><a href="https://liveonserver.com/index.php?a=register"><i class="fa fa-book fw-r5"></i>Register</a></li>
+               
+			 
+			  
+			  
+				<li class="hidden-xs">
+					<form id="change_language_form" class="form-inline" method="get" action="https://liveonserver.com/index.php">
+						<input type="hidden" name="a" value="language">
+						<select class="form-control le-select" name="language" bind-sel="en" onchange="$('#change_language_form').submit();">
+								
+								  <option value="en">English</option>
+								
+								  <option value="pt">Português</option>
+								
+								  <option value="tr">Türk</option>
+								
+								  <option value="ar">العربية</option>
+								
+						</select>
+					</form>
+				</li>
+			 
+			 
+            </ul>
+        </div>
+    </div>
+</nav><br>
+  <center>
+<h2 class="m-2"><span><img src="https://lsvunlock.com//images/gallery/../../images/gallery/banners/Front logo.gif" />&nbsp;</span></h2>
+<h2 class="m-2"><span style="vertical-align: inherit;"><span style="vertical-align: inherit;"><a href="https://m.me/100003047736643">Contact Support Team</a></span></span></h2>
+</center>
+
+<header class="no-padding-bottom header-alt">
+    <div class="container no-padding">
+        <div class="col-md-3 col-sm-6 col-xs-12 logo-holder">
+            <div class="logo">
+                <a href="https://liveonserver.com">
+                    <img src="https://liveonserver.com/media/site/1-01641971660.jpg" alt="Live On Server : The Firmware & Solution Mobile Phone Thailand Technician"/>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-6 hidden-sm hidden-xs top-search-holder no-margin">
+            <div class="search-area-top">
+                <p class="">&ensp;</p>
+            </div>
+            <div class="search-area">
+                <form id="header_search_form" method="get" action="https://liveonserver.com/index.php">
+                    <div class="control-group">
+                        <input id="header_search_for" type="hidden" name="a" value="search">
+                        <input type="hidden" name="b" value="search">
+                        <input class="search-field" name="keyword" placeholder="Search for ..." required>
+                        <ul class="categories-filter animate-dropdown">
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span id="header_search_cat">Website</span></a>
+                                <ul class="dropdown-menu" role="menu" >
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="$('#header_search_cat').text('Website');$('#header_search_for').val('search');">Website</a></li>
+                                    
+                                    
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="$('#header_search_cat').text('Downloads');$('#header_search_for').val('downloads');">Downloads</a></li>
+                                   
+                                    
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="$('#header_search_cat').text('Blog');$('#header_search_for').val('articles');">Blog</a></li>
+                                   
+                                    
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="$('#header_search_cat').text('Announcements');$('#header_search_for').val('announcements');">Announcements</a></li>
+                                   
+                                </ul>
+                            </li>
+                        </ul>
+                        <button role="button" type="submit" class="btn search-button"></button>
+                    </div>
+                </form>
+            </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6 col-xs-12 top-cart-row no-margin">
+          <div class="top-cart-row-container">
+            <div class="top-cart-holder dropdown animate-dropdown">
+
+                <div class="basket">
+                    <a class="dropdown-toggle link-secondary" data-toggle="dropdown" href="#">
+                        <div class="basket-item-count">
+                            <span class="count">0</span>
+                            <img src="https://liveonserver.com/templates/default-downloads/html/en/assets/images/icon-cart.png" alt="" />
+                        </div>
+
+                        <div class="total-price-basket">
+                            <span class="lbl">Your Cart:</span>
+                            <span class="total-price">
+                                0.00USD
+                            </span>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu">
+                      
+                        <li class="checkout">
+                            <div class="basket-item">
+                                <p class="alert text-center text-black font-16">Shopping cart is empty !</p>
+                            </div>
+                        </li>
+                     
+                    </ul>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+  <nav id="top-megamenu-nav" class="megamenu-vertical animate-dropdown">
+      <div class="container">
+          <div class="yamm navbar">
+              <div class="navbar-header">
+                  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mc-horizontal-menu-collapse">
+                      <span class="sr-only">Main Menu</span>
+                      <span class=""><i class="fa fa-list fw-r10"></i>Main Menu</span>
+                  </button>
+              </div>
+              <div class="collapse navbar-collapse" id="mc-horizontal-menu-collapse">
+                  <ul class="nav navbar-nav">
+                    <li><a href="https://liveonserver.com"><i class="fa fa-home fw-r10"></i>Home</a></li>
+                    
+                    
+                    <li><a href="https://liveonserver.com/index.php?a=downloads&b=recent"><i class="fa fa-clock-o fw-r10"></i>Recent Files</a></li>
+                    <li><a href="https://liveonserver.com/index.php?a=downloads&b=packages"><i class="fa fa-dollar fw-r10"></i>Packages & Pricing</a></li>
+                    <li><a href="https://liveonserver.com/index.php?a=pages&b=world-agents"><i class="fa fa-globe fw-r10"></i>World Agents</a></li>
+                   
+                    
+                    <li><a href="https://liveonserver.com/index.php?a=articles"><i class="fa fa-file-text fw-r10"></i>Blog</a></li>
+                   
+	  
+                    <li><a href="https://liveonserver.com/index.php?a=page&b=request-file"><i class="fa fa-send fw-r10"></i>Request File</a></li>
+                    <li><a href="https://liveonserver.com/index.php?a=contact"><i class="fa fa-envelope fw-r10"></i>Contact</a></li>
+                  </ul>
+              </div>
+          </div>
+      </div>
+  </nav>
+</header>
+
+<div class="downloads-recent-header  row">
+  
+  <div class="rf-mq-container mq-container container">
+      <div class="col-md-2 col-sm-3 col-xs-2 text-right">
+          <i class="fa fa-clock-o fw-r10"></i><span class="hidden-xs font-13 text-bold">Recent Files</span>
+      </div>
+      <div class="col-md-10 col-sm-9 col-xs-10">
+          <div class="marquee-set">
+            <div class="marquee-content">
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11905">CPH2631export_11_16.0.5.700EX01_2026050619180142</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:14:56 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11904">CPH2895export_16_A.54_2026050816593900</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:13:58 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11903">CPH2859export_11_16.0.9.400EX01_2026071001150293</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:13:07 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11902">CPH2853export_11_16.0.5.1000EX01_2026060321240000</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:12:00 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11901">CPH2825export_11_16.0.5.701EX01_2026031221390000</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:10:56 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11900">CPH2813export_11_16.0.10.500EX01_2026080714080151</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:10:05 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11899">CPH2783export_11_16.0.5.700EX01_2026040912080000</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:08:44 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11898">CPH2743export_11_15.0.2.622EX01_2025120514550170</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:07:25 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11897">CPH2739export_11_15.0.2.605EX01_2025111400100216</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-23 08:06:44 ]</span>
+                </div>
+              
+                <div class="mq-file-item inline">
+                  <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11896">SAMSUNG A07 4G_A075FXXS6CZF6 DUMP FULL SCATTER.rar</a>
+                  
+                  <span class="badge bg-blue">FEATURED</span>
+                  
+                   <span class="item_date item_detail">[ 2026-09-21 08:31:25 ]</span>
+                </div>
+              
+            </div>
+          </div>
+      </div>
+  </div>
+ 
+  
+  <div class="tf-mq-container mq-container container">
+      <div class="col-md-2 col-sm-3 col-xs-2 text-right">
+          <i class="fa fa-flash fw-r10"></i><span class="hidden-xs font-13 text-bold">Top Files</span>
+      </div>
+      <div class="col-md-10 col-sm-9 col-xs-10">
+          <div class="marquee-set">
+            <div class="marquee-content">
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=65">Qcom Mtk_Driver_Setup_V2.0.1.1</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 6083 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=4782">Drivers_MTK_v2.0.1.1.7_For New OPPO,REALME DA AUth Bypass</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 4617 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=2423">Odin3_v3.14.4</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 4132 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=5701">OPPO A15,A15s,A15New_CPH2179_CPH2185_UNLOCK SIM CDM_SCATTER FILE_FIX BANK APP</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 3987 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=2234">SAMSUNG_USB_Driver_for_Mobile_Phones 2020</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 3907 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=3559">Easy Samsung FRP Tools 2020</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 3779 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=1670">NEW MTK Driver_Support Meta mode,Preloader,Vcom New Model</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 3547 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=5525">OPPO A5s CPH1909_UNLOCK ALL SIM_SCATTER FILE 8.1.0 (OLD)</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 3453 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=5626">Huawei Drivers testpoint COM 1.0</a>
+                
+                <span class="badge bg-blue">FEATURED</span>
+                
+                 <span class="item_downloads item_detail">[ 3452 Downloads ]</span>
+              </div>
+            
+              <div class="mq-file-item inline">
+                <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=5522">VIVO Y12,15,15s,17  PD1901_RPMB MDM SIM_FILE FOR Unlock Tool</a>
+                
+                
+                
+                 <span class="item_downloads item_detail">[ 3382 Downloads ]</span>
+              </div>
+            
+            </div>
+          </div>
+      </div>
+  </div>
+ 
+</div>
+
+
+
+
+<div class="animate-dropdown">
+  <div id="breadcrumb-alt" class="mar5">
+    <div class="container">
+        <div class="breadcrumb-nav-holder minimal">
+            <ul>
+              <li class="breadcrumb-item"><a href="https://liveonserver.com/index.php?a=downloads">Downloads</a></li>
+              <li class="breadcrumb-item current"><a href="#">Latest 100 files</a></li>
+            </ul>
+        </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrapper">
+
+  
+
+  <div class="inline-width pad-b-20">
+    <div class="container text-center">
+        <h1 class="section-title">Latest 100 files</h1>
+        <p class="lead">Here is a list of our latest 100 files, don't forget to get your best subscription this gives you most benefits</p>
+    </div>
+  </div>
+
+  <div class="inline-width pad-b-50">
+    <div class="container">
+      <div class="row">
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11905">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/09/23/1-1790151296.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11905">CPH2631export_11_16.0.5.700EX01_2026050619180142</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2631export_11_16.0.5.700EX01_2026050619180142</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6272" target="_blank">CPH2631</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-09-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 16.50 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11905"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11904">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/09/23/1-1790151238.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11904">CPH2895export_16_A.54_2026050816593900</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2895export_16_A.54_2026050816593900</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6624" target="_blank">CPH2895</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-09-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 19.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11904"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11903">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/09/23/1-1790151187.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11903">CPH2859export_11_16.0.9.400EX01_2026071001150293</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2859export_11_16.0.9.400EX01_2026071001150293</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6623" target="_blank">CPH2859</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-09-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 12.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11903"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11902">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/09/23/1-1790151120.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11902">CPH2853export_11_16.0.5.1000EX01_2026060321240000</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2853export_11_16.0.5.1000EX01_2026060321240000</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6622" target="_blank">CPH2853</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-09-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 12.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11902"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11901">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/09/23/1-1790151056.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11901">CPH2825export_11_16.0.5.701EX01_2026031221390000</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2825export_11_16.0.5.701EX01_2026031221390000</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6621" target="_blank">CPH2825</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-09-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 22.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11901"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11900">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/09/23/1-1790151005.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11900">CPH2813export_11_16.0.10.500EX01_2026080714080151</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2813export_11_16.0.10.500EX01_2026080714080151</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6547" target="_blank">CPH2813</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-09-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 15.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11900"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11899">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/09/23/1-1790150924.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11899">CPH2783export_11_16.0.5.700EX01_2026040912080000</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2783export_11_16.0.5.700EX01_2026040912080000</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6620" target="_blank">CPH2783</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-09-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 20.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11899"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11898">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/09/23/1-1790150845.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11898">CPH2743export_11_15.0.2.622EX01_2025120514550170</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2743export_11_15.0.2.622EX01_2025120514550170</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6431" target="_blank">CPH2743</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-09-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 15.90 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11898"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11897">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/09/23/1-1790150804.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11897">CPH2739export_11_15.0.2.605EX01_2025111400100216</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2739export_11_15.0.2.605EX01_2025111400100216</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6432" target="_blank">CPH2739</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-09-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 16.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11897"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11896">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/09/21/1-1789979485.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11896">SAMSUNG A07 4G_A075FXXS6CZF6 DUMP FULL SCATTER.rar</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">SAMSUNG A07 4G_A075FXXS6CZF6 DUMP FULL SCATTER.rar</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6619" target="_blank">SM-A075F</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 21-09-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 3.90 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11896"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11895">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/06/01/1-1780287063.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11895">SAMSUNG A26 5G_CLONE_SM-A266B_16-64 MT6765_E79_A265_464128_FCP_RCZW_V03_20251229</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">SAMSUNG A26 5G_CLONE_SM-A266B_16-64 MT6765_E79_A265_464128_FCP_RCZW_V03_20251229</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6618" target="_blank">SAMSUNG A26 5G</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 01-06-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 1.89 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11895"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11894">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/06/01/1-1780286346.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11894">PD2420F_EX_A_15.1.24.3.W30.V000L1_vivo_osc_unisoc_sprdroid15_sys_main_W24.37.2_P1_system.tar</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">PD2420F_EX_A_15.1.24.3.W30.V000L1_vivo_osc_unisoc_sprdroid15_sys_main_W24.37.2_P1_system.tar</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6542" target="_blank">PD2420F</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 01-06-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 9.10 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11894"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11893">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/06/01/1-1780286325.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11893">PD2420F_EX_A_15.1.23.0.W20.V000L1_vivo_osc_unisoc_sprdroid15_sys_main_W24.37.2_P1_system.tar</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">PD2420F_EX_A_15.1.23.0.W20.V000L1_vivo_osc_unisoc_sprdroid15_sys_main_W24.37.2_P1_system.tar</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6542" target="_blank">PD2420F</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 01-06-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 9.60 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11893"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11892">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/06/01/1-1780286215.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11892">VIVO Y19s PD2420 V2507 eMMC Dump Full [Dead Boot Repair] [Android 15]</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">VIVO Y19s PD2420 V2507 eMMC Dump Full [Dead Boot Repair] [Android 15]</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6616" target="_blank">VIVO Y19s PD2420</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 01-06-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 12.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11892"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11891">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/27/1-1779851938.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11891">Xiaomi 15 [ DADA ] China to Global Convert Firmware</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Xiaomi 15 [ DADA ] China to Global Convert Firmware</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6615" target="_blank">Xiaomi 15 [ DADA ] </a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 27-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 7.20 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11891"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11890">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/20/1-1779262329.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11890">A075F_Bit1,2,3_DeadBootRepair Via DEBUG_EMERGENCY(A075FXXT3BZA2_eng_mid)</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">A075F_Bit1,2,3_DeadBootRepair Via DEBUG_EMERGENCY(A075FXXT3BZA2_eng_mid)</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6614" target="_blank">A075F</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 20-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 23.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11890"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11889">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/13/1-1778655986.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11889">RMX3951export_11_15.0.0.1100EX01_2025061817380000</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">RMX3951export_11_15.0.0.1100EX01_2025061817380000</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6447" target="_blank">RMX3951</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 13-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 28.10 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11889"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11888">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/13/1-1778654149.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11888">RMX3951export_11_15.0.0.1610EX01_Project 24690</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">RMX3951export_11_15.0.0.1610EX01_Project 24690</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6447" target="_blank">RMX3951</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 13-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 29.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11888"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11887">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/13/1-1778653354.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11887">RMX3951export_11_14.1.0.507EX01_PCB No: 24691</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">RMX3951export_11_14.1.0.507EX01_PCB No: 24691</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6447" target="_blank">RMX3951</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 13-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 6.80 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11887"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11886">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/08/1-1778222773.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11886">PD2227_A_14.1.15.11.W10.V000L1_vivo_qcom_LA.QSSI.14.0.R1.11.00.00.1001.027_system_split.tar</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">PD2227_A_14.1.15.11.W10.V000L1_vivo_qcom_LA.QSSI.14.0.R1.11.00.00.1001.027_system_split.tar</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6613" target="_blank">PD2227</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 08-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 10.20 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11886"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11885">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/08/1-1778222725.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11885">PD2444_A_15.0.26.0.W50.V000L1_vivo_osc_ZK_20240716190000_qcom_LA.QSSI.15.0.r1-00900-qssi.0-1_system_split.tar</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">PD2444_A_15.0.26.0.W50.V000L1_vivo_osc_ZK_20240716190000_qcom_LA.QSSI.15.0.r1-00900-qssi.0-1_system_split.tar</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6612" target="_blank">PD2444</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 08-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 8.70 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11885"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11884">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/08/1-1778222683.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11884">Vivo_PD2183_DUMP</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Vivo_PD2183_DUMP</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6611" target="_blank">PD2183</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 08-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 6.90 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11884"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11883">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/08/1-1778222613.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11883">PD2186_A_12.0.14.7.W10.V000L1_vivo_mtk_alps-release-s0-pre3_mt6891.tar</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">PD2186_A_12.0.14.7.W10.V000L1_vivo_mtk_alps-release-s0-pre3_mt6891.tar</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6610" target="_blank">PD2186</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 08-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 10.10 MB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11883"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11882">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/04/1-1777878247.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11882">Redmi Note 15 Pro Plus 5G (flourite) ENG Firmware (Engineering Rom) [COMBINATION]</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Redmi Note 15 Pro Plus 5G (flourite) ENG Firmware (Engineering Rom) [COMBINATION]</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=4306" target="_blank">ENG Firmware (Engineering Rom)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 04-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 2.70 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11882"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11881">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/04/1-1777878217.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11881">Redmi Note 15 Pro 4G _charoite_factory_images_251201.1.VPFCNXM.FACTORY_15.0</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Redmi Note 15 Pro 4G _charoite_factory_images_251201.1.VPFCNXM.FACTORY_15.0</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=4306" target="_blank">ENG Firmware (Engineering Rom)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 04-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 1.20 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11881"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11880">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/04/1-1777878191.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11880">XIAOMI 17 PRO MAX (popsicle) ENG ROM KEEPNV</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">XIAOMI 17 PRO MAX (popsicle) ENG ROM KEEPNV</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=4306" target="_blank">ENG Firmware (Engineering Rom)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 04-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 4.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11880"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11879">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/04/1-1777878165.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11879">Redmi Note 15 4G (spinel) ENG Firmware (Engineering Rom) [COMBINATION]Redmi Note 15 4G (spinel) ENG Firmware (Engineering Rom) [COMBINATION]</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Redmi Note 15 4G (spinel) ENG Firmware (Engineering Rom) [COMBINATION]</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=4306" target="_blank">ENG Firmware (Engineering Rom)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 04-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 1.30 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11879"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11878">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/04/1-1777878138.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11878">Xiaomi Redmi 15 4G-Poco M7(Creek) Eng Rom</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Xiaomi Redmi 15 4G-Poco M7(Creek) Eng Rom</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=4306" target="_blank">ENG Firmware (Engineering Rom)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 04-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 1.30 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11878"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11877">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/04/1-1777878114.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11877">Redmi Note 15 Pro 5G (lapis) ENG Firmware (Engineering Rom) [COMBINATION].7z</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Redmi Note 15 Pro 5G (lapis) ENG Firmware (Engineering Rom) [COMBINATION].7z</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=4306" target="_blank">ENG Firmware (Engineering Rom)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 04-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 2.60 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11877"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11876">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/04/1-1777878087.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11876">XIAOMI 17 PRO (pandora) ENG ROM KEEPNV</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">XIAOMI 17 PRO (pandora) ENG ROM KEEPNV</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=4306" target="_blank">ENG Firmware (Engineering Rom)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 04-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 3.90 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11876"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11875">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/04/1-1777878067.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11875">Xiaomi Redmi Note 15 5G (kunzite) KeepNV Engineering ENG ROM</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Xiaomi Redmi Note 15 5G (kunzite) KeepNV Engineering ENG ROM</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=4306" target="_blank">ENG Firmware (Engineering Rom)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 04-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 2.40 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11875"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11874">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/05/02/1-1777700732.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11874">Honor Magic 7 Lite BRP-NX3-01 Android 15 DUMP FULL</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Honor Magic 7 Lite BRP-NX3-01 Android 15 DUMP FULL</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6609" target="_blank">Honor Magic 7 Lite</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 02-05-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 7.30 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11874"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11873">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/29/1-1777443706.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11873">Honor X7 (CMA-LX1) Pandora Full DUMP_Qualcomm</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Honor X7 (CMA-LX1) Pandora Full DUMP_Qualcomm</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6608" target="_blank">Honor X7 (CMA-LX1)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 29-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 5.60 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11873"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11872">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/25/1-1777098425.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11872">Realme Note 60 RMX3933export_Android15_C.06_DUMP FULL_SPD</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Realme Note 60 RMX3933export_Android15_C.06_DUMP FULL_SPD</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6607" target="_blank">Realme Note 60 RMX3933</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 25-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 7.20 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11872"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11871">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/25/1-1777098379.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11871">Realme Note 60 RMX3933export_Android14_A_13_DUMP FULL_SPD</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Realme Note 60 RMX3933export_Android14_A_13_DUMP FULL_SPD</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6607" target="_blank">Realme Note 60 RMX3933</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 25-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 7.10 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11871"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11870">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/24/1-1777019442.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11870">CPH2467(IN) PCB_22872-NORMAL_OTA BOOT-001</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2467(IN) PCB_22872-NORMAL_OTA BOOT-001</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=5569" target="_blank">CPH2467</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 24-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 7.50 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11870"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11869">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/24/1-1777019409.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11869">CPH2487 11R AND_16-PCB 22881-005</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2487 11R AND_16-PCB 22881-005</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=5571" target="_blank">CPH2487</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 24-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 8.20 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11869"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11868">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/24/1-1777019362.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11868">CPH2585(IN)-12R AND16-PCB 23681-007</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2585(IN)-12R AND16-PCB 23681-007</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6606" target="_blank">CPH2585</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 24-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 8.20 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11868"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11867">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/24/1-1777019317.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11867">CPH2647-2691_IN(13R) AND 16-PCB_23867-006</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2647-2691_IN(13R) AND 16-PCB_23867-006</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6279" target="_blank">CPH2647</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 24-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 8.40 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11867"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11866">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/24/1-1777019273.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11866">CPH2707(IN) AND_16-PCB_24881-003</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2707(IN) AND_16-PCB_24881-003</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6452" target="_blank">CPH2707</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 24-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 8.50 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11866"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11865">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/24/1-1777019238.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11865">CPH2717 (IN) AND_16-PCB_24891-004</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2717 (IN) AND_16-PCB_24891-004</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6451" target="_blank">CPH2717</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 24-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 8.20 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11865"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11864">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/24/1-1777019190.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11864">CPH2767(IN) 15R AND_16_PCB 24877-008</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2767(IN) 15R AND_16_PCB 24877-008</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6605" target="_blank">CPH2767</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 24-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 8.40 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11864"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11863">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/24/1-1777018678.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11863">CPH2745(IN) 1+15 AND-16_PCB 24863-002</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">CPH2745(IN) 1+15 AND-16_PCB 24863-002</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6604" target="_blank">CPH2745</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 24-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 9.90 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11863"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11862">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/24/1-1777018413.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11862">fleur_global_images_OS1.0.9.0.TKEMIXM_20241206.0000.00_13.0_global_3030fec09a</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">fleur_global_images_OS1.0.9.0.TKEMIXM_20241206.0000.00_13.0_global_3030fec09a</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6603" target="_blank"> Redmi Note 11S / POCO M4 Pro 4G</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 24-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 5.40 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11862"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11861">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923741.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11861">Red Magic 8 Pro+_9008 Unbricking Package RedMagic 10.5.09</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 8 Pro+_9008 Unbricking Package RedMagic 10.5.09</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6602" target="_blank">8Pro，8Pro+，8SPro，8SPro+（NX729J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 7.90 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11861"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11860">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923720.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11860">Nubia Red Magic 8 Pro (NX729J)_V2.11_9008_[Official package]</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Nubia Red Magic 8 Pro (NX729J)_V2.11_9008_[Official package]</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6602" target="_blank">8Pro，8Pro+，8SPro，8SPro+（NX729J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 5.70 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11860"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11859">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923697.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11859">Red Magic 8S Pro+ 9008_9.0.13 _ Android 14_2024.5</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 8S Pro+ 9008_9.0.13 _ Android 14_2024.5</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6602" target="_blank">8Pro，8Pro+，8SPro，8SPro+（NX729J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 6.20 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11859"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11858">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923679.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11858">9.5.16A Card Slot 9008 Complete Package</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">9.5.16A Card Slot 9008 Complete Package</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6602" target="_blank">8Pro，8Pro+，8SPro，8SPro+（NX729J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 6.90 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11858"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11857">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923653.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11857">Red Magic 8 Pro, 8SPro_9008 Shorting Diagram</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 8 Pro, 8SPro_9008 Shorting Diagram</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6602" target="_blank">8Pro，8Pro+，8SPro，8SPro+（NX729J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 1.00 MB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11857"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11856">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923592.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11856">Redmagic9SPro_9008_EEA_RedMagicOS9.5.08__2024.9.18</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Redmagic9SPro_9008_EEA_RedMagicOS9.5.08__2024.9.18</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6601" target="_blank">9Pro，9Pro+，9SPro，9SPro+（NX769J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 4.80 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11856"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11855">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923567.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11855">Red Magic 9 Pro_9008_Package_9.0.25_2024.10.5-1</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 9 Pro_9008_Package_9.0.25_2024.10.5-1</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6601" target="_blank">9Pro，9Pro+，9SPro，9SPro+（NX769J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 8.10 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11855"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11854">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923547.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11854">Red Magic 9 Pro 9008 Flash Rescue Package 11.0.3_2026.4.2-1</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 9 Pro 9008 Flash Rescue Package 11.0.3_2026.4.2-1</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6601" target="_blank">9Pro，9Pro+，9SPro，9SPro+（NX769J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 9.60 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11854"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11853">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923520.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11853">Red Magic 9S Pro+ 9008 Flash Rescue Package _ RedMagicOS 10.0.07 _ Android 15_2025.4.27-1</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 9S Pro+ 9008 Flash Rescue Package _ RedMagicOS 10.0.07 _ Android 15_2025.4.27-1</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6601" target="_blank">9Pro，9Pro+，9SPro，9SPro+（NX769J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 10.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11853"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11852">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923481.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11852">Red Magic Gaming Phone_NX609J_V2.16_Z0_CN_VPK1O_V216</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic Gaming Phone_NX609J_V2.16_Z0_CN_VPK1O_V216</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6600" target="_blank">Red Magic (NX609J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 2.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11852"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11851">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923444.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11851">Red Magic 7s (NX679J)_prog_firehose_ddr.elf</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 7s (NX679J)_prog_firehose_ddr.elf</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6599" target="_blank">Red Magic 7s (NX679J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 2.00 MB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11851"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11850">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923412.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11850">Red Magic 7S_9008 Flash Package_NX679S_CNCommon_V5.18_Android 13_[Unlocked, Rooted] </a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 7S_9008 Flash Package_NX679S_CNCommon_V5.18_Android 13_[Unlocked, Rooted] </p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6599" target="_blank">Red Magic 7s (NX679J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 5.30 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11850"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11849">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923392.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11849">Red Magic 7s All Series Flashable NX679S Chinese Version Original V2.28  for Unbricking Bricked Phones (9008) Firmware ROM 12256</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 7s All Series Flashable NX679S Chinese Version Original V2.28  for Unbricking Bricked Phones (9008) Firmware ROM 12256</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6599" target="_blank">Red Magic 7s (NX679J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 4.80 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11849"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11848">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923371.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11848">Red Magic 7S Unbricking - Fastboot Flash Package</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 7S Unbricking - Fastboot Flash Package</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6599" target="_blank">Red Magic 7s (NX679J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 4.70 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11848"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11847">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923351.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11847">Red Magic 7S_9008 Flash Rescue Package_2.26</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 7S_9008 Flash Rescue Package_2.26</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6599" target="_blank">Red Magic 7s (NX679J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 5.30 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11847"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11846">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923304.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11846">Red Magic 10_9008 flash package_RedMagicOS10.0.24_Android 15[Switch to B drive and reboot after flashing]</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 10_9008 flash package_RedMagicOS10.0.24_Android 15[Switch to B drive and reboot after flashing]</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6598" target="_blank">Red Magic 10Pro，10Pro+（NX789J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 12.10 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11846"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11845">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923281.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11845">GEN_CN_NX789JV1.0.0B12MR1_DL</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">GEN_CN_NX789JV1.0.0B12MR1_DL</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6598" target="_blank">Red Magic 10Pro，10Pro+（NX789J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 10.10 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11845"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11844">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923257.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11844">Red Magic 10 Pro 9008 Flash Rescue Package_International Version_10.0.8_EEA_2025.7.28-1 </a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 10 Pro 9008 Flash Rescue Package_International Version_10.0.8_EEA_2025.7.28-1 </p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6598" target="_blank">Red Magic 10Pro，10Pro+（NX789J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 10.10 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11844"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11843">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923213.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11843">Red Magic 11Air(NX799J)CN-11.0.12-9008 flash recovery package</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 11Air(NX799J)CN-11.0.12-9008 flash recovery package</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6597" target="_blank">Red Magic 11Air(NX799J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 11.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11843"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11842">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923190.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11842">Red Magic 11Air(NX799J)International version EU-V11.0.10-9008</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 11Air(NX799J)International version EU-V11.0.10-9008</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6597" target="_blank">Red Magic 11Air(NX799J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 13.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11842"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11841">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923147.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11841">Red Magic 7_9008 flash recovery package_Android 13_RedMagicOS6.0_NX679J_CNCommon_V5.11</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 7_9008 flash recovery package_Android 13_RedMagicOS6.0_NX679J_CNCommon_V5.11</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6596" target="_blank">Red Magic Gaming Tablet Pro (NP03J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 5.10 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11841"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11840">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923127.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11840">Red Magic Tablet Pro_International Version_9008 Flash REDMAGICOS 10.0.8_NP03J_Android 15</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic Tablet Pro_International Version_9008 Flash REDMAGICOS 10.0.8_NP03J_Android 15</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6596" target="_blank">Red Magic Gaming Tablet Pro (NP03J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 7.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11840"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11839">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923104.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11839">Red Magic Tablet Pro 9008 Flash Rescue Package 10.0.14</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic Tablet Pro 9008 Flash Rescue Package 10.0.14</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6596" target="_blank">Red Magic Gaming Tablet Pro (NP03J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 7.30 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11839"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11838">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923083.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11838">Redmagic Tablet 3D Explorer Edition_9008 Flash Rescue Package_RedmagicOS 9.0.18_NP02J_2025.1.12-1</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Redmagic Tablet 3D Explorer Edition_9008 Flash Rescue Package_RedmagicOS 9.0.18_NP02J_2025.1.12-1</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6596" target="_blank">Red Magic Gaming Tablet Pro (NP03J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 7.10 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11838"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11837">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923040.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11837">Red Magic 11 Pro+_9008 Flash Rescue Package_REDMAGICOS 11.0.12MR2_EA International Version_Android 16_2026.3.6-1</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 11 Pro+_9008 Flash Rescue Package_REDMAGICOS 11.0.12MR2_EA International Version_Android 16_2026.3.6-1</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6595" target="_blank">Red Magic 11Pro，11Pro+（NX809J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 9.20 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11837"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11836">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776923011.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11836">Red Magic 11 Pro+ 9008 Flash Rescue Package _ RedMagicOS 11.0.13MR_2026.1.17-1</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 11 Pro+ 9008 Flash Rescue Package _ RedMagicOS 11.0.13MR_2026.1.17-1</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6595" target="_blank">Red Magic 11Pro，11Pro+（NX809J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 10.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11836"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11835">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922990.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11835">Redmagic 11 Pro NX809J_16_BQ2A_250705_001_BP2A_250605_031_A3_20251219_194656_userdebug</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Redmagic 11 Pro NX809J_16_BQ2A_250705_001_BP2A_250605_031_A3_20251219_194656_userdebug</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6595" target="_blank">Red Magic 11Pro，11Pro+（NX809J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 11.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11835"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11834">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922948.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11834">Red Magic Gaming Tablet 1st Generation_firehose.elf</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic Gaming Tablet 1st Generation_firehose.elf</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6594" target="_blank">RedMagic Gaming Tablet (NP01J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 2.00 MB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11834"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11833">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922900.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11833">Red Magic Gaming Tablet 1st Generation_9008_RedMagicOS 8.0.22MR_NP01J_Android 13</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic Gaming Tablet 1st Generation_9008_RedMagicOS 8.0.22MR_NP01J_Android 13</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6594" target="_blank">RedMagic Gaming Tablet (NP01J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 5.50 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11833"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11832">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922850.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11832">RedMagic_Pad3Pro_10.5.11_factory_9008</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">RedMagic_Pad3Pro_10.5.11_factory_9008</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6593" target="_blank">RedMagic Gaming Tablet 3 Pro (NP05J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 7.50 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11832"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11831">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922827.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11831">Red Magic Tablet 3 Pro_9008 Flash Rescue Package_RedMagicOS 10.5.14_NP05J</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic Tablet 3 Pro_9008 Flash Rescue Package_RedMagicOS 10.5.14_NP05J</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6593" target="_blank">RedMagic Gaming Tablet 3 Pro (NP05J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 7.40 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11831"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11830">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922806.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11830">Red Magic Tablet 3 Pro 9008 Flash Rescue Package_RedMagicOS 10.5.22_2025.12.29-1</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic Tablet 3 Pro 9008 Flash Rescue Package_RedMagicOS 10.5.22_2025.12.29-1</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6593" target="_blank">RedMagic Gaming Tablet 3 Pro (NP05J)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 12.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11830"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11829">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922761.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11829">Nubia_RedMagic5G_NX659J</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Nubia_RedMagic5G_NX659J</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6592" target="_blank">RedMagic5G（NX659J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 3.10 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11829"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11828">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922741.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11828">RedMagic5G（NX659J）_China Version V6.23_9008</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">RedMagic5G（NX659J）_China Version V6.23_9008</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6592" target="_blank">RedMagic5G（NX659J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 3.60 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11828"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11827">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922687.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11827">Nubia_Red Magic 6_NX669J_11_NX669J_EUCommon_V3.10_Stable_International_[2111]</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Nubia_Red Magic 6_NX669J_11_NX669J_EUCommon_V3.10_Stable_International_[2111]</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6591" target="_blank">RedMagic6，6Pro（NX669J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 4.00 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11827"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11826">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922642.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11826">Red Magic 6_9008 Flash Rescue Package_No Root Required_NX669J_CNCommon_V8.12_2024.8.29-1</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 6_9008 Flash Rescue Package_No Root Required_NX669J_CNCommon_V8.12_2024.8.29-1</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6591" target="_blank">RedMagic6，6Pro（NX669J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 5.40 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11826"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11825">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922602.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11825">Red Magic 7_9008 Flash Rescue Package_Chinese Version V2.38_Android 12_2024.6.6-1</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 7_9008 Flash Rescue Package_Chinese Version V2.38_Android 12_2024.6.6-1</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6590" target="_blank">RedMagic7</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 4.40 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11825"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11824">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922580.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11824">Red Magic 7_9008 flash recovery package_Android 13_RedMagicOS6.0_NX679J_CNCommon_V5.11</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 7_9008 flash recovery package_Android 13_RedMagicOS6.0_NX679J_CNCommon_V5.11</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6590" target="_blank">RedMagic7</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 5.40 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11824"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11823">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922452.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11823">RedMagic 6R_9008 Package_Android 12_RedMagicOS_V5.1_NX666J_CNCommon_V6.15</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">RedMagic 6R_9008 Package_Android 12_RedMagicOS_V5.1_NX666J_CNCommon_V6.15</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6589" target="_blank">RedMagic6R（NX666J）9008</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 4.10 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11823"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11822">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922428.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11822">RedMagic6R（NX666J）_Official Chinese Version 9008 Package</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">RedMagic6R（NX666J）_Official Chinese Version 9008 Package</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6589" target="_blank">RedMagic6R（NX666J）9008</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 4.60 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11822"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11821">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922389.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11821">Red Magic 7 Pro_9008 Flash Rescue Package_NX709J_CNCommon_V2.68_RedMagicOSV5.5_2025.9.16-1</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 7 Pro_9008 Flash Rescue Package_NX709J_CNCommon_V2.68_RedMagicOSV5.5_2025.9.16-1</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6588" target="_blank">RedMagic7Pro（NX709J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 5.30 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11821"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11820">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922363.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11820">Red Magic 7 Pro 9008 Flash Rescue Package_NX709J_CNCommon_V5.10_REDMAGICOS6.0_Android 13_2024.4.15-2</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 7 Pro 9008 Flash Rescue Package_NX709J_CNCommon_V5.10_REDMAGICOS6.0_Android 13_2024.4.15-2</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6588" target="_blank">RedMagic7Pro（NX709J）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 5.20 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11820"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11819">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/23/1-1776922321.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11819">Red Magic 6SPro_9008 Flash Rescue Package_NX669S_CNCommon_V8.20_Android 12_2024.5.28-1</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Red Magic 6SPro_9008 Flash Rescue Package_NX669S_CNCommon_V8.20_Android 12_2024.5.28-1</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6587" target="_blank">RedMagic6SPro（NX669S）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 23-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 4.40 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11819"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11818">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/18/1-1776509526.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11818">BlackShark3Pro_MOBS2211210CN00MR6_JOYUI12.5-9008</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">BlackShark3Pro_MOBS2211210CN00MR6_JOYUI12.5-9008</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6583" target="_blank">BlackShark3Pro（mobius）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 18-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 8.90 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11818"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11817">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/18/1-1776509490.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11817">Black.shark5Pro_220325_JOYUI13_22.03.09_Fastboot</a>
+    </div>
+    <div class="file-labels">
+        
+        
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Black.shark5Pro_220325_JOYUI13_22.03.09_Fastboot</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6582" target="_blank">BlackShark 5 Pro (katyusha)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 18-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 10.10 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11817"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11816">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/18/1-1776509445.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11816">Black.shark5Pro_V13.22.07.10_KTUS2207100CN00MP4_MIUI_CN</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">Black.shark5Pro_V13.22.07.10_KTUS2207100CN00MP4_MIUI_CN</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6582" target="_blank">BlackShark 5 Pro (katyusha)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 18-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 5.40 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11816"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11815">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/18/1-1776509412.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11815">BlackShark5（patriot_image_PTRT2203311CN00MP1_20220331.1000.00_12.0_cn_24d1aa8783_degrade</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">BlackShark5（patriot_image_PTRT2203311CN00MP1_20220331.1000.00_12.0_cn_24d1aa8783_degrade</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6581" target="_blank">BlackShark5（patriot）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 18-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 5.60 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11815"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11814">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/18/1-1776509366.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11814">BlackShark6Pro（M4_9008_2025.9.27-1</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">BlackShark6Pro（M4_9008_2025.9.27-1</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6580" target="_blank">BlackShark6Pro（M4）</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 18-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 6.50 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11814"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11813">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/18/1-1776509290.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11813">ROG 5S-5S Pro official modification package</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">ROG 5S-5S Pro official modification package</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6584" target="_blank">ROG 5S-5S Pro</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 18-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 4.10 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11813"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11812">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/17/1-1776426267.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11812">WW-AI2501-35.0600.0600.36-REL-0000-M1.3.5-ASUS_1.1.1-Phone-userdebug-202405300010</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">WW-AI2501-35.0600.0600.36-REL-0000-M1.3.5-ASUS_1.1.1-Phone-userdebug-202405300010</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6578" target="_blank">ROG9 (AI2501)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 17-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 7.40 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11812"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11811">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/17/1-1776426246.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11811">OPEN-AI2501-35.0300.0300.44-FAC-0000-M1.2.2.3-Phone-userdebug-202404290010.raw</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">OPEN-AI2501-35.0300.0300.44-FAC-0000-M1.2.2.3-Phone-userdebug-202404290010.raw</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6578" target="_blank">ROG9 (AI2501)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 17-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 2.80 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11811"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11810">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/17/1-1776426226.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11810">OPEN-AI2501-35.0500.0500.12-FAC-0000-M1.3.2.7-Phone-userdebug-202405140010.raw</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">OPEN-AI2501-35.0500.0500.12-FAC-0000-M1.3.2.7-Phone-userdebug-202405140010.raw</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6578" target="_blank">ROG9 (AI2501)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 17-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 3.60 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11810"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11809">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/17/1-1776426204.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11809">WW-AI2501-35.0600.0600.33-REL-0000-M1.3.5-Phone-userdebug-202405280643</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">WW-AI2501-35.0600.0600.33-REL-0000-M1.3.5-Phone-userdebug-202405280643</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6578" target="_blank">ROG9 (AI2501)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 17-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 7.50 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11809"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11808">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/17/1-1776426167.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11808">WW-AI2501-35.0600.0600.36-REL-0000-M1.3.5-ASUS_1.1.1-Phone-userdebug-202405300010_2</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">WW-AI2501-35.0600.0600.36-REL-0000-M1.3.5-ASUS_1.1.1-Phone-userdebug-202405300010_2</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6578" target="_blank">ROG9 (AI2501)</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 17-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 7.40 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11808"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11807">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/14/1-1776152553.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11807">yupei_global_images_OS3.0.301.0.WPZMIXM_20260320.0000.00_16.0_global_3293553652</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">yupei_global_images_OS3.0.301.0.WPZMIXM_20260320.0000.00_16.0_global_3293553652</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6577" target="_blank">Xiaomi Pad 8 </a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 14-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 9.40 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11807"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                
+<div class="file-list-item">
+  <div class="image">
+      <a href="https://liveonserver.com/index.php?a=downloads&b=file&id=11806">
+        <img src="https://liveonserver.com/media/files/thumbnails/2026/04/14/1-1776152485.jpg" class="img-responsive">
+      </a>
+  </div>
+  <div class="body">
+    <div class="title">
+        <a  href="https://liveonserver.com/index.php?a=downloads&b=file&id=11806">xun_global_images_OS2.0.207.0.VMUMIXM_20260127.0000.00_15.0_global_685d69bc4d</a>
+    </div>
+    <div class="file-labels">
+        
+        <span class="label label-info">Featured</span>
+        
+    </div>
+	
+    <div class="star-holder inline">
+      <div class="star readonly" data-score="0"></div>
+    </div>
+	
+    <p class="description">xun_global_images_OS2.0.207.0.VMUMIXM_20260127.0000.00_15.0_global_685d69bc4d</p>
+    <div class="content-controls">
+	  
+	  <span class="file-folder text-bold"><a href="https://liveonserver.com/index.php?a=downloads&b=folder&id=6576" target="_blank">Redmi Pad SE</a></span>
+	 
+	  <span class="seprator text-muted">&ensp;|&ensp;</span>
+      <span class="file-date">Date: 14-04-2026</span>
+      <span class="seprator text-muted">&ensp;|&ensp;</span><span class="file-date">Size: 5.50 GB</span>
+    </div>
+  </div>
+  <div class="content-buttons">
+    <a class="btn btn-primary content-btn" href="https://liveonserver.com/index.php?a=downloads&b=file&id=11806"><i class="fa fa-download fw-r5"></i>Download</a>
+   
+  </div>
+</div>
+
+
+            </div>
+          
+      </div>
+    </div>
+  </div>
+
+ 
+
+</div>
+
+
+<footer id="footer" class="">
+    <div class="link-list-row">
+        <div class="container no-padding">
+            <div class="col-xs-12 col-md-4 ">
+                <div class="contact-info">
+                    <div class="footer-logo text-center">
+                        <img src="https://liveonserver.com/media/site/1-01641971660.jpg" alt="Live On Server : The Firmware & Solution Mobile Phone Thailand Technician"/>
+                    </div>
+
+                    
+
+                    <div class="social-icons text-center">
+                        <ul>
+                            
+                            <li><a target="_blank" href="https://www.facebook.com/tomtestmodeshop" class="fa fa-lg fa-facebook bg-light-blue"></a></li>
+                           
+                            
+                            <li><a target="_blank" href="#" class="fa fa-lg fa-twitter bg-aqua"></a></li>
+                           
+                            
+                            <li><a target="_blank" href="#" class="fa fa-lg fa-instagram bg-red"></a></li>
+                           
+                            
+                            <li><a target="_blank" href="#" class="fa fa-lg fa-linkedin bg-black"></a></li>
+                           
+                            <li><a target="_blank" href="https://liveonserver.com/index.php?a=rss" class="fa fa-lg fa-rss bg-orange"></a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-xs-12 col-md-8 no-margin">
+                <div class="link-widget">
+                    <div class="widget">
+                        <ul>
+                            <li><a href="https://liveonserver.com">Home</a></li>
+                            
+                            
+                            <li><a href="https://liveonserver.com/index.php?a=downloads">Downloads</a></li>
+                           
+                            
+                            <li><a href="https://liveonserver.com/index.php?a=articles">Blog</a></li>
+                           
+                            
+                            <li><a href="https://liveonserver.com/index.php?a=announcements">Announcements</a></li>
+                           
+                        </ul>
+                    </div>
+                </div>
+                <div class="link-widget">
+                    <div class="widget">
+                        <ul>
+                            <li><a href="https://liveonserver.com/index.php?a=pages&b=terms-of-service">Terms of Service</a></li>
+                            <li><a href="https://liveonserver.com/index.php?a=pages&b=privacy-policy">Privacy Policy</a></li>
+                            <li><a href="https://liveonserver.com/index.php?a=pages&b=return-policy">Return Policy</a></li>
+                                <li><a href="https://liveonserver.com/index.php?a=pages&b=cancellation-policy">Cancellation Policy</a></li>
+                            <li><a href="https://liveonserver.com/index.php?a=pages&b=refund-policy">Refund Policy</a></li>
+
+                        </ul>
+                    </div>
+                </div>
+                <div class="link-widget">
+                    <div class="widget">
+                        <ul>
+                            
+                              <li><a href="https://liveonserver.com/index.php?a=login">Login</a></li>
+                              
+                                <li><a href="https://liveonserver.com/index.php?a=register">Register</a></li>
+                             
+                           
+                            <li><a href="https://liveonserver.com/index.php?a=pages&b=about-us">About Us</a></li>
+                            <li><a href="https://liveonserver.com/index.php?a=contact">Contact Us</a></li>
+                        </ul>
+                    </div>
+                </div>
+              </div>
+        </div>
+    </div>
+
+    <div class="copyright-bar">
+        <div class="container">
+            <div class="col-md-6 col-sm-6 col-xs-12 no-margin">
+                <div class="copyright">
+                    <strong>Copyright © 2019 <a href="https://www.facebook.com/tomtestmodeshop/" target="_blank">GSM TH ONLINE</a> All Rights Reserved.</strong>
+					
+					<!-- DON'T REMOVE OR EDIT THE BELOW COPYRIGHT, IT MUST BE VISIBLE IN ALL PAGES -->
+					<!-- Removing or hiding the below copyrights is totally illigal and lead to license suspension -->
+                    <p>Powered by <a target="_blank" href="https://joudisoft.com/products/real-easy-store/">Real Easy Store ( joudiSoft ltd. )</a></p>
+					
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-12 no-margin">
+                <div class="payment-methods ">
+                    <ul>
+                        <li><img alt="" src="https://liveonserver.com/templates/default-downloads/html/en/assets/images/payments/payment-visa.png"></li>
+                        <li><img alt="" src="https://liveonserver.com/templates/default-downloads/html/en/assets/images/payments/payment-master.png"></li>
+                        <li><img alt="" src="https://liveonserver.com/templates/default-downloads/html/en/assets/images/payments/payment-paypal.png"></li>
+                        <li><img alt="" src="https://liveonserver.com/templates/default-downloads/html/en/assets/images/payments/payment-skrill.png"></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+<script>
+  var jsoftData = {};
+  
+      jsoftData.userID = 0;
+ 
+
+  jsoftData.page = {'a': 'downloads','a_url': 'https://liveonserver.com/index.php?a=downloads','b': 'recent','b_url': 'https://liveonserver.com/index.php?a=downloads&b=recent'};
+  jsoftData.system = {'siteurl': 'https://liveonserver.com',
+                      'baseurl': 'https://liveonserver.com',
+                      'templateurl': 'https://liveonserver.com/templates/default-downloads/html/en',
+                      'userapi': 'https://liveonserver.com/userapi/index.php',
+                      'currency': 'USD',
+                      'currency_prefix': '',
+                      'currency_suffix': 'USD',
+                      'currency_decimals': parseInt('2')};
+</script>
+
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/components/jquery/dist/jquery.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/components/fancybox/jquery.fancybox.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/bootstrap.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/bootstrap-hover-dropdown.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/owl.carousel.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/css_browser_selector.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/echo.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/bootstrap-slider.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/jquery.raty.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/jquery.prettyPhoto.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/jquery.customSelect.min.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/theme/scripts.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/jsoft-functions.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/jsoft-scripts.js"></script>
+<script src="https://liveonserver.com/templates/default-downloads/html/en/assets/js/jsoft-custom.js"></script>
+
+<script>
+  $(document).ready(function () {
+      
+      if($('.menu-links-stack').length) {
+      	if($('.menu-links-stack').find('a[href="https://liveonserver.com/index.php?a=downloads&b=recent"]').length) {
+          $('.menu-links-stack').find('a[href="https://liveonserver.com/index.php?a=downloads&b=recent"]').parents('li').first().not('.active').addClass('active');
+      	} else {
+      		$('.menu-links-stack').find('a[href="https://liveonserver.com/index.php?a=downloads"]').parents('li').first().not('.active').addClass('active');
+      	}
+      }
+
+     if($('.star').length > 0) {
+        $('.star').raty('set',{'path': 'https://liveonserver.com/templates/default-downloads/html/en/','scoreName':'rating_points'});
+        $('.star.readonly').raty('readOnly', 1);
+     }
+  });
+</script>
+	
+
+
+  <script>
+    $('#header_search_cat').text('Downloads');$('#header_search_for').val('downloads');
+  </script>
+</body>
+</html>

@@ -24,7 +24,7 @@ adb shell uname -m                                  # 内核位数（32 位电�
 
 | 漏洞 | CVE | 受影响内核 | 修复线（安全补丁日期） | 特点 |
 |---|---|---|---|---|
-| GhostLock | CVE-2026-43499 | 2.6.39 – 7.1 之前（futex PI UAF） | 5.10.261 / 6.1.175 / 6.6.140 / 6.12.86 分支底线，对应 2026-08-01 补丁 | 竞态型，需逐内核构建做偏移表 |
+| GhostLock | CVE-2026-43499 | 2.6.39 – 7.1 之前（futex PI UAF） | 5.10.261 / 6.1.175 / 6.6.140 / 6.12.86（2026-07-24 进 stable；提交 3bfdc63936dd 已在 kernel.org 各分支 ChangeLog 逐条核对；随后的 2026-08 Android 公报纳入，具体分段未逐条核对） | 竞态型，需逐内核构建做偏移表 |
 | DirtyFrag | CVE-2026-43284（+CVE-2026-43500） | 4.14+（xfrm-ESP / rxrpc 页缓存写） | 2026-05-07 披露，2026-05 补丁线 | 确定性逻辑漏洞，不赌竞态、失败不 panic |
 | Adreno GPU | CVE-2025-21479 | 高通 Adreno 7xx 驱动 | 2025-08-05 | GPU 覆写自身页表，不依赖内核结构偏移 |
 
@@ -34,6 +34,7 @@ adb shell uname -m                                  # 内核位数（32 位电�
 
 | 设备 | 临时 root | 永久 root | 推荐路线 | 文档 |
 |---|---|---|---|---|
+| 小米 MIX Fold 3（babylon，SM8550/5.15 GKI） | ✅ **已成功**（2026-10-10 GhostLock，W1–W3 全过、uid=0 脚本已运行） | ❌ BL 锁定 | 固件停在 OS3.0.304（补丁 2026-07-01，早于修复线）勿升级 OTA；待验证 KernelSU 模块加载 | [Babylon-root-analysis/README.md](Babylon-root-analysis/README.md) |
 | 黑鲨 3 Pro（MBU，SD865/4.19） | 无移植（不必要） | ✅ 免费解锁文件 | XDA 文件解 BL → TWRP → Magisk | [blackshark-3pro.md](blackshark-3pro.md) |
 | 黑鲨 5 Pro（KTUS-A0，SD8G1/5.10） | 无移植，GKI 自适配可行性高 | ⚠️ 仅付费 | 先查 GKI 后缀；临时 root 锁频 | [blackshark-5pro.md](blackshark-5pro.md) |
 | Quest 2 / Quest 3 | ✅ 现成工具 | ❌ | Singularity（sideload） | [quest-2-quest-3.md](quest-2-quest-3.md) |
