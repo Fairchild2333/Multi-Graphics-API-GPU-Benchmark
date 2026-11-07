@@ -107,12 +107,11 @@ root 会话期间成绩**另起结果组**；`DEVICE-STATE.txt` 记录：锁频�
   SourceForge 路径 `litegapps/arm64/30/<变体>/<日期>/`。
 - ⚠️ **Magisk App 图形界面刷 LiteGapps 会静默失败**（模块目录只剩 module.prop，无任何 APK）——
   必须命令行刷：`su -c magisk --install-module /sdcard/Download/LiteGapps.zip`，看到逐项 "Installing ..." + Done 才算数。
-- ⚠️ 刷完**第一次重启可能崩溃循环**（GMS 首次 dexopt/挂载竞态），TWRP 里禁用再启用、或直接再重启一次即自愈。
-  第二次开机 GMS/Play 商店/GSF 全部就位。
+- ⚠️ 默认全量装会崩溃循环——根因是 AndroidAuto 模块撞 privapp 白名单，**必须用配置文件精简装**，见下"GApps 结局"。
 - 教训：bootloop 后若 su 消失但 magiskd 还在，先重启一次再看——脏关机后的半死状态会被下次开机清掉。
 - 槽位策略：A 槽保持出厂原版当恢复网（B 槽崩溃时 `fastboot set_active a` 回干净系统），B 槽承载 root+GApps。
 
-## 锁频终版（2026-11-07 晚实测）与充电模式大坑
+## 锁频终版（2026-11-07 晚实测）与充电模式
 
 - **CPU 用 min_freq 会被 JoyUI 电源管家打回**（写入生效几秒后被重置），必须切
   `scaling_governor = performance`（钉死在 scaling_max，电源管家碰不到 governor）。
@@ -121,21 +120,35 @@ root 会话期间成绩**另起结果组**；`DEVICE-STATE.txt` 记录：锁频�
 - 脚本终版在 `root/blackshark-3pro-lockfreq.sh` = 手机 `/data/adb/lockfreq.sh`。
   **开机后系统稳定 1 分钟再跑**（刚开机时 JoyUI 电源脚本会覆盖，等它跑完再锁）。
 
-### ⚠️ 充电模式崩溃循环（vendor 自带 bug，已绕开策略：别在充电器上关机）
+### 充电模式：正常（2026-11-07 18:04 实测，"充电循环"说法已推翻）
 
-`/vendor/etc/init/minidump.rc`：`on charger → start poweroffm64`，而 `u:r:poweroffm64:s0`
-域在加载的策略里不存在 → 充电模式开机时 init SIGABRT → 重启 → 又是充电模式 → **无限 logo 循环**。
-这就是"关机放充电器上一夜卡 logo"的真相（与系统本身的崩溃无关）。
-规避：**手机关机状态下别放充电器上**；若已循环，长按电源强制断电、拔下充电器再正常开机。
-根治：root 下 remount /vendor rw（dm 层要先 `blockdev --setrw /dev/block/mapper/vendor_b`，
-TWRP 的 dm 表是只读的绕不过去，须在正常系统里做）后注释 `start poweroffm64` 行。
+此前写的"充电模式开机 init 崩溃无限循环、关机别放充电器上"**是误判**，实测推翻：
+- 插 USB 执行 `reboot -p` → 约 25 秒后进关机充电动画（屏显 100%），之后 2.5 分钟 USB 枚举
+  （`VID_05C6&PID_F000` + Linux File-Stor Gadget）一次不变，无重启。
+- `poweroffm64` 在 `/vendor/etc/init/minidump.rc` 里是 `class late_start` + `oneshot`、**非 `critical`**，
+  正常开机也会启动；策略里根本没定义 `poweroffm64` 域（出厂漏定义，不是"损坏"），所以每次开机都在
+  init **fork 出的子进程**里 `setexeccon` 失败并 abort（走 `DefaultAborter`，pid ≠ 1）——只留一份 tombstone，
+  不会重启。出厂 2022-11-21 的 tombstone_01 就有同类记录。
+- 当时的"卡 logo 一整夜"更可能是 GApps 引起的 system_server 软循环（见下），
+  或状态矩阵里"通用包 + RPMB 解锁"的无限 logo。
+- **不需要改 vendor rc**，关机放充电器上没问题。
 
-### GApps 结局（2026-11-07 深夜）
+### GApps 结局（2026-11-07 傍晚重装成功，现役）
 
-LiteGapps 模块在 JoyUI 上不稳定：完整启用后首次开机正常（GMS/Play 全在），
-之后两次无征兆 init SIGABRT 崩溃循环（其中一次崩在 vendor 的 poweroffm64——见上，
-另一次疑似 overlay 竞态），且崩完 su 会消失（magiskd 半死，重启可自愈）。
-**已全部移除**，回到稳定基线：解锁 + root + TWRP + 无 GMS。
-跑分应用直接 sideload APK（3DMark/GFXBench 均有直装包），不需要 Play 商店。
-若日后仍要 GMS：备选是"移除 overlay 中的 Provision/ManagedProvisioning/Calendar/Contacts/
-PixelSetupWizard 只留 GmsCore+Phonesky"的外科方案（冲突面分析见上），但每试一次都是一轮崩溃风险。
+**当前状态：LiteGapps 精简装，已连续两次开机稳定**（GMS/GSF/Play 全在，Play 打开到登录页，root 不受影响）。
+
+上一轮崩溃的真凶（dropbox `system_server_crash@*` 共 76 份，最后一份 17:36，**76 份全部点名 AndroidAutoStub**）：**不是 init，是 system_server**——
+LiteGapps 的 AndroidAuto 附加模块装了 `/product/priv-app/AndroidAutoStub`，其特权权限不在 privapp 白名单里，
+本机 `ro.control_privapp_permissions=enforce` → `PermissionManagerService.systemReady` 抛
+`IllegalStateException` → system_server 每 9 秒重启一次（软循环）。
+tombstones 里那两条 init abort（`setexeccon('u:r:poweroffm64:s0')` / `setexeccon('u:r:qti-testscripts:s0')`）
+是 init **fork 的子进程**在 abort，**每次正常开机都有一对**、不影响开机，是误导项。
+
+LiteGapps v5.0 "nano" 实际会装全部 30 个附加模块（含替换系统电话/短信/联系人/日历/时钟、
+SetupWizard 屏蔽 Provision+ManagedProvisioning、Dialer/Wellbeing 的 RRO overlay）。
+它的 MIUI 保护只认 `/system/framework/boot-miui-framework.vdex`，JoyUI 只有 `boot-miuisdk`，所以不生效。
+**做法**：刷前放 `/sdcard/litegapps.config`（安装器官方开关，`<package.id>=false` 跳过该模块），
+只留 `Common=true`、`GoogleExtShared=true`，其余 28 个全部 `false`；再命令行
+`su -c magisk --install-module /sdcard/Download/LiteGapps.zip`，输出应为 28 行 `[SKIP] ... by config`。
+落地内容：GmsCore / GoogleServicesFramework / Phonesky / 两个 SyncAdapter / GoogleExtShared + 权限 XML，
+**无 `.replace`、无 overlay**，系统应用一个不动。配置文件留在手机 `/sdcard/litegapps.config`，日后重刷沿用。
