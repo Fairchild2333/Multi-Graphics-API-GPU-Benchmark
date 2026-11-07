@@ -111,3 +111,31 @@ root 会话期间成绩**另起结果组**；`DEVICE-STATE.txt` 记录：锁频�
   第二次开机 GMS/Play 商店/GSF 全部就位。
 - 教训：bootloop 后若 su 消失但 magiskd 还在，先重启一次再看——脏关机后的半死状态会被下次开机清掉。
 - 槽位策略：A 槽保持出厂原版当恢复网（B 槽崩溃时 `fastboot set_active a` 回干净系统），B 槽承载 root+GApps。
+
+## 锁频终版（2026-11-07 晚实测）与充电模式大坑
+
+- **CPU 用 min_freq 会被 JoyUI 电源管家打回**（写入生效几秒后被重置），必须切
+  `scaling_governor = performance`（钉死在 scaling_max，电源管家碰不到 governor）。
+  三集群全部生效：小核 1804800 / 中核 2419200 / 大核 2841600。
+- GPU 方案不变：max/min_pwrlevel=0 + devfreq performance + force_clk_on → 905 MHz 稳定。
+- 脚本终版在 `root/blackshark-3pro-lockfreq.sh` = 手机 `/data/adb/lockfreq.sh`。
+  **开机后系统稳定 1 分钟再跑**（刚开机时 JoyUI 电源脚本会覆盖，等它跑完再锁）。
+
+### ⚠️ 充电模式崩溃循环（vendor 自带 bug，已绕开策略：别在充电器上关机）
+
+`/vendor/etc/init/minidump.rc`：`on charger → start poweroffm64`，而 `u:r:poweroffm64:s0`
+域在加载的策略里不存在 → 充电模式开机时 init SIGABRT → 重启 → 又是充电模式 → **无限 logo 循环**。
+这就是"关机放充电器上一夜卡 logo"的真相（与系统本身的崩溃无关）。
+规避：**手机关机状态下别放充电器上**；若已循环，长按电源强制断电、拔下充电器再正常开机。
+根治：root 下 remount /vendor rw（dm 层要先 `blockdev --setrw /dev/block/mapper/vendor_b`，
+TWRP 的 dm 表是只读的绕不过去，须在正常系统里做）后注释 `start poweroffm64` 行。
+
+### GApps 结局（2026-11-07 深夜）
+
+LiteGapps 模块在 JoyUI 上不稳定：完整启用后首次开机正常（GMS/Play 全在），
+之后两次无征兆 init SIGABRT 崩溃循环（其中一次崩在 vendor 的 poweroffm64——见上，
+另一次疑似 overlay 竞态），且崩完 su 会消失（magiskd 半死，重启可自愈）。
+**已全部移除**，回到稳定基线：解锁 + root + TWRP + 无 GMS。
+跑分应用直接 sideload APK（3DMark/GFXBench 均有直装包），不需要 Play 商店。
+若日后仍要 GMS：备选是"移除 overlay 中的 Provision/ManagedProvisioning/Calendar/Contacts/
+PixelSetupWizard 只留 GmsCore+Phonesky"的外科方案（冲突面分析见上），但每试一次都是一轮崩溃风险。
