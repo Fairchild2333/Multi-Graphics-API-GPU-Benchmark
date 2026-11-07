@@ -1,59 +1,100 @@
-# 黑鲨 3 Pro —— Root 方案（2026-11-06 调研）
+# 黑鲨 3 Pro —— Root 完成实录 + 机制手册（2026-11-07 实机达成）
+
+**状态：✅ 已 root**（2026-11-07）。解锁 BL + Magisk v31.1 + 原系统 V11.0.4.0（Android 11）完好。
+本文前半是可用操作手册，后半是两天实测挖出的机制——下次碰到这台机（或同款黑鲨）直接按图索骥。
 
 ## 本仓库档案
 
-- 机队实测记录见 `HANDOFF.md`（2026-10-17 显存带宽核对：256 MiB 堆，256 MiB 起完整遍历受限）。
-- 芯片骁龙 865（SM8250），内核 4.19，出厂 JoyUI（Android 10 底）。
-- 国行型号 **MBU-A0**，全球版 **MBU-H0**（刷机文件按版本区分，见下）。
+- 机队实测记录见 `HANDOFF.md`（2026-10-17 显存带宽核对：256 MiB 堆）。
+- 骁龙 865（SM8250），内核 4.19.113-perf+，**实测系统：Android 11 / MOBS2211210CN00MR6 / V11.0.4.0.JOYUI**（2022-11-21 国行包，出厂 Android 10 后升级）。
+- 国行 **MBU-A0**（序列号 767b9490，代号 mobius，SOC serial 4e6b5320），全球版 MBU-H0。
 
-## 结论
+## 最终成功的完整流程（实测顺序，照做即可）
 
-**优先走免费解 BL → Magisk 永久 root。** 官方解锁渠道随黑鲨品牌终止（2022 年腾讯收编后停摆），
-但 XDA 有社区免费解锁文件（John Eveline 发布），配套完整 root 教程（KM7 发布）。
-临时 root 无现成移植，也没必要——能永久解锁就没理由玩临时的。
+前提：PC 端 `C:\adb\` 工具集（Unlock 目录 + MiFlash + fastboot）+ bkerler/edl（Python，走 Zadig WinUSB，
+**绕开了 QDLoader 老驱动的签名墙**——Win11 上那驱动签名报错 52，F7 会话可用但每次重启都要重按）。
 
-## 路线：免费解锁 → TWRP → Magisk
+1. **EDL 写通用解锁 oeminfo**：`python edl.py --loader=prog_ufs_firehose_sm8250_ddr_lp5.elf w oeminfo unlock.img`
+   （unlock 分区 = GPT 里的 `oeminfo`，起始扇区 3996200，64 MiB，2022 系统下扇区几何与 2020 模板完全一致）
+2. 重启进 fastboot（**注意**：此时屏幕 `DEVICE STATE` 显示 locked 是显示 bug，别信）
+3. `fastboot oem unlock`（OKAY）→ `flashing unlock`（already unlocked）→ `flashing unlock_critical`（OKAY）
+4. `fastboot erase:userdata`（冒号语法！`erase userdata` 报 unknown command）
+5. 重启 → 卡 logo（预期内！）→ 强制重启 → **引导器报 Unbootable 落回 fastboot** → `fastboot set_active:b` 清掉重试计数 → `continue`
+6. **"Cannot load Android system" 错误页 → 进 stock recovery（电源+音量上）→ Factory data reset** ←
+   **决定性一步**。TWRP 的 format data 不行（见下"机制"节），必须官方 rec 走完这次出厂重置
+7. 开机向导 → 系统正常 → 装 Magisk（需开「USB 安装」）→ App 内修补 boot → EDL 写回 boot_b → root ✅
 
-**解锁文件帖**：<https://xdaforums.com/t/blackshark-3-3-pro-3s-unlock-bootloader-files.4140001/>
-（2020-07 发布，2026-11-06 验证仍可访问；MEGA 网盘：解锁文件、TWRP、全球版 ROM）
+** Magisk 修补的 boot 镜像不走 fastboot flash**（下载缓冲只有 6.25 MB），走 EDL `w boot_b`（35 MB/s，几秒）。
 
-**完整教程帖**：<https://xdaforums.com/t/rooting-black-shark-3-3-pro-the-correct-easy-way-bl-unlocking-twrp-ota-fix.4147441/>
+## 手机当前形态与产物位置
 
-流程概要：
+- `/data/adb/lockfreq.sh`：一键锁频脚本（GPU 钉 0 档 905 MHz + CPU 三集群钉顶）。重启后跑一遍即生效。
+- Magisk v31.1（com.topjohnwu.magisk），`su -v` → `31.1:MAGISKSU`，`verifiedbootstate=orange`（解锁正常警示色）。
+- PC：`C:\adb\backup\`（68 个分区镜像）+ `C:\adb\oeminfo_backup_locked.img`（锁定态原版 oeminfo，重上锁素材）+
+  `C:\adb\fb.py`（自写 Python fastboot 客户端， JoyUI 引导器命令集怪，标准 fastboot 部分命令不通）。
+- NAS：`\\BigHouse\搞机\刷机\黑鲨3Pro\`（工具包、Magisk、教程 docx）+ `partition-backup-20261107\`（745 MB 全量镜像）。
 
-1. 开发者选项 → OEM 解锁 + USB 调试；PC 装驱动（管理员运行安装器）
-2. `adb reboot edl` 进 EDL（黑屏正常，设备管理器确认 Qualcomm HS-USB QDLoader 9008）
-3. MiFlash 选解锁文件目录刷入
-4. `fastboot flashing unlock` → `fastboot erase userdata`（**清数据**）→
-   `fastboot getvar current-slot`（记下槽位 a/b）
-5. `fastboot boot twrp.img` 临时引导 TWRP，`adb pull` 拉出 `boot_a` / `boot_b`
-6. Magisk「Select and Patch a File」修补对应槽位 stock boot
-7. `fastboot flash boot_x magisk_patched.img` → 重启，Magisk 两个绿勾即成
+## 机制手册（两天实验挖出的坑与规律）
 
-## 注意事项
+### 1. oeminfo = 锁状态载体，且内容分代
 
-- **版本区分**：XDA 文件面向全球版 MBU-H0；国行 MBU-A0 不要直接刷 H0 的 **ROM**（解锁文件本身 3/3Pro/3S 通用）。
-  国行救砖包（原厂全量 `MOBS2008250CN00MQ1`）：66ROM <https://www.66rom.com/thread-27914-1-1.html>
-  （论坛注册需 9.9 元邀请码，2026-11-06 实测）；ONFIX <https://onfix.cn/rom/566232> 只有解锁文件（付费），救砖包另找其站内页面。
-  免费渠道（XDA MEGA 等）2026-11 已失效——黑鲨救砖资源现在是付费生态，多家并存（OnFix/66ROM/ROM 乐园），资源消失风险低。
-- **MiFlash 识别不到设备是最高频的坑**：换原装数据线，或换老版 MiFlash（20170425）。
-- 解锁后指纹可能失效：拨号 `*#*#466349#*#*` → 售后校准（手指 + 黑色物体各一次全遮指纹模组）。
-- 解锁**清全盘数据**：动手前确认 `out\adb\` 成绩副本已在 PC。
-- root 后 OTA 会失效：教程帖附 OTA 修复（update.zip 放 ota 目录，拨 `*#*#1027#*#*` 本地升级）。
+- GPT 无 `unlock` 分区名，对应分区叫 `oeminfo`（PRODUCTLINE 魔数 + 厂商页结构：0x600 起是带标签的槽位页
+  ——本机 LCDEXPAND/LCDEXPAND1/LCDEXPAND2/CALIBRATION/MISC，通用包里是 CALIBRATION/MISC/FCTINFO，**布局是按设备出厂内容定的**）。
+- 引导器 `DEVICE STATE` 显示与实际锁行为**跟随 oeminfo 内容**：原版内容→显示 locked、EDL 重启被禁
+  （"in lock mode"）、AVB 失败走红屏强制关机；通用包内容→显示 unlocked、允许 fastboot 写。
+- 0x5000 页（4 KB）：原版是 base64url blob（内含 "undefined" 字样），通用包是 0x28 前缀的二进制结构——疑似锁状态/回滚记录页。
 
-## 临时 root（仅备查，不推荐投入）
+### 2. 状态矩阵（RPMB = `oem unlock` 写入的 UFS 内部标志，分区写不碰它，无法撤销）
 
-内核 4.19 在 GhostLock（2.6.39+）和 DirtyFrag（4.14+）范围内，品牌死后无补丁，
-漏洞面必然敞开——但社区无黑鲨移植，公开 payload 也无人适配 4.19/JoyUI 内核。
-能解锁的前提下没有投入价值。
+| oeminfo 内容 | RPMB 解锁标志 | 开机 |
+|---|---|---|
+| 通用包 | 无 | ✅ |
+| 通用包 | 有 | ❌ 无限 logo（复现 3 次，内核日志见 crash_dump 于 5-6 秒） |
+| 原版 | 有 | ✅（T8/T12 两次验证） |
+| 原版 | 无 | ✅（出厂态） |
 
-## 第三方系统现状（2026-11-06）
+**"通用包 + RPMB 解锁"必崩**是 V11 的 abl/TEE 校验通用凭证与本机不匹配所致；最终靠 stock recovery 的
+出厂重置（走 TEE 密钥重建）解套。**TWRP 的 format data 修不好**——它够不着 Weaver/keymaster 的密钥销毁重生成。
 
-无官方 LineageOS（整个黑鲨家族只有初代 SKW 有）；黑鲨从不放内核源码，深度移植无人做。
-无澎湃/HyperOS 移植包。想要高版本 Android 只有 GSI（Treble）实验路线，相机/肩键/指纹大概率残废。
-**对跑分而言原系统 + Magisk 就是最干净形态。**
+### 3. JoyUI 引导器的怪癖清单
 
-## 建议的最终形态
+- 屏显 DEVICE STATE 可能与实际相反，以 `getvar unlocked` + 行为为准
+- `erase:userdata` 冒号语法；`erase userdata` 不认
+- fastboot 下载缓冲 6.25 MB（`DATA0063F400`）→ 大镜像 flash 不可用，一律 EDL
+- `reboot-edl`：锁定态假 OKAY 不动作；解锁态真生效
+- `flashing unlock` 在某些状态报 "already unlocked" 但未必真解锁——**两个 Okey**（unlock + unlock_critical）才是完整
+- adb push 在 Git Bash 下必须 `export MSYS2_ARG_CONV_EXCL='*'`（Katyusha 交接文档 10 月就写过，勿忘）
 
-永久 root 后装开机脚本：设定 `devfreq` min_freq（先确认调速器认不认，见 `root/README.md`
-小米平板教训）、跑分前 `top` 确认空载。成绩按 root 状态另起组并记录 `DEVICE-STATE.txt`。
+### 4. OnFix/XDA 解锁文件真相
+
+OnFix 88.23 MB 的"解锁文件"与 XDA KM 工具包内 unlock.img **MD5 一致**（71b9390e…），纯转卖，别买。
+全网的通用文件对 3/3P/3S 机型通用，但**对固件版本不通用**：2020 年（Android 10）全成功，V11 上
+"通用包+解锁"必崩、必须靠 stock recovery 收尾才成立。XDA #126 楼 outidd 的 JoyUI 12 CN 成功案例与本文流程一致。
+
+### 5. 锁频能力（root 的兑现）
+
+- GPU：`/sys/class/kgsl/kgsl-3d0/` 档位制，9 档 305M–905M。JoyUI 出厂 `max_pwrlevel=3`（587 MHz 封顶）。
+  `max_pwrlevel/min_pwrlevel` 写 0 → **锁 905 MHz 完全生效**（devfreq min/max 窗口自动跟随）。Tegra 那套"调速器不认"不存在。
+- CPU：schedutil 下 `scaling_min_freq` = 集群顶频即锁频（小核 1.8G/中核 2.42G/大核 2.84G），全部生效。
+- 温度墙：`thermal_pwrlevel=0` 时无降档；跑分时仍需控温（老规矩）。
+
+### 6. 救砖与回滚
+
+- 9008 + firehose 全程可用（锁不锁都行），68 分区镜像在 NAS，理论可字节级复活
+- `spinor` 分区（独立小芯片）firehose 读写不了，无关键引导数据
+- 唯一没备份的是 `super`（15 GB 系统）——**在解锁实验全成后无需动它**；若日后刷写，先从 66ROM 找 V11 包
+- 重上锁素材：`oeminfo_backup_locked.img`（写回即恢复锁定显示与行为，慎用，会重新触发清数据）
+
+## 备查链接（2026-11-07 实测）
+
+- XDA 解锁文件帖（含成功案例 #126 outidd JoyUI 12 CN）：<https://xdaforums.com/t/blackshark-3-3-pro-3s-unlock-bootloader-files.4140001/>
+- XDA 完整教程帖（KM7）：<https://xdaforums.com/t/rooting-black-shark-3-3-pro-the-correct-easy-way-bl-unlocking-twrp-ota-fix.4147441/>
+- bkerler/edl 工具：<https://github.com/bkerler/edl>
+- OnFix（转卖确认，仅存档）：<https://onfix.cn/rom/566232>
+- 66ROM 国行全量包（降级备用，需 9.9 邀请码）：<https://www.66rom.com/thread-27914-1-1.html>
+- QDLoader 9008 驱动（archive.org 镜像，MD5 7cfe9c89…）：`https://archive.org/download/qdloader9008fixsoftware/Qualcomm_QDLoader_HS-USB_Driver_64bit_Setup.zip`
+
+## 跑分纪律（沿用 root/README.md）
+
+root 会话期间成绩**另起结果组**；`DEVICE-STATE.txt` 记录：锁频脚本已跑（GPU 905 / CPU 顶频）、
+`verifiedbootstate=orange`、系统 V11.0.4.0。跑前 `top` 确认空载 + 温度回稳。
