@@ -98,3 +98,16 @@ OnFix 88.23 MB 的"解锁文件"与 XDA KM 工具包内 unlock.img **MD5 一致*
 
 root 会话期间成绩**另起结果组**；`DEVICE-STATE.txt` 记录：锁频脚本已跑（GPU 905 / CPU 顶频）、
 `verifiedbootstate=orange`、系统 V11.0.4.0。跑前 `top` 确认空载 + 温度回稳。
+
+## 谷歌框架（2026-11-07 实测完成）
+
+- **NikGapps 在本机走不通**：Magisk 模块方式被安装器拒绝（"cannot be flashed as a module"）；
+  recovery 方式卡在 wzsx150 TWRP 3.4.2B 无法把 Android 11 动态分区挂为可写（Mount.log: `readwrite → Status 255`）。
+- **最终方案：LiteGapps nano（arm64/30）Magisk 模块**，systemless 叠加不碰 super。
+  SourceForge 路径 `litegapps/arm64/30/<变体>/<日期>/`。
+- ⚠️ **Magisk App 图形界面刷 LiteGapps 会静默失败**（模块目录只剩 module.prop，无任何 APK）——
+  必须命令行刷：`su -c magisk --install-module /sdcard/Download/LiteGapps.zip`，看到逐项 "Installing ..." + Done 才算数。
+- ⚠️ 刷完**第一次重启可能崩溃循环**（GMS 首次 dexopt/挂载竞态），TWRP 里禁用再启用、或直接再重启一次即自愈。
+  第二次开机 GMS/Play 商店/GSF 全部就位。
+- 教训：bootloop 后若 su 消失但 magiskd 还在，先重启一次再看——脏关机后的半死状态会被下次开机清掉。
+- 槽位策略：A 槽保持出厂原版当恢复网（B 槽崩溃时 `fastboot set_active a` 回干净系统），B 槽承载 root+GApps。
