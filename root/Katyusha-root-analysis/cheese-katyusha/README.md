@@ -82,3 +82,17 @@ adb shell "chmod 755 /data/local/tmp/cheesecake && /data/local/tmp/cheesecake"
 
 - Ben Hawkes（Project Zero Adrenaline）、Man Yue Mo（adreno_user）、zhuowei（cheese）、
   sarabpal-dev（cheese-cake 移植）、FreeXR 指南、xploitbengineer 与京东 DawnLab 分析。
+
+## 2026-11-11 追加实测（另一 agent 执行，本机核实）
+
+- `cheesecake-win id` / `getenforce` / `dmesg` / `gpuclk` / `devfreq/governor` /
+  `ls /data/data` / `cat /data/system/users/0/settings_global.xml` / `top` 全部成功
+  （GPU 285MHz 待机档、governor=msm-adreno-tz、/data/data 沙盒穿透、settings_global 明文可读）。
+- **设备健康度警告（dmesg 实证）**：本 boot 已累计 **24 条 `BUG: Bad page state/map`**，
+  其中 12 条直接来自 `cheesecake-win`（PTE 重映射的页 accounting 副作用），另有多条
+  kworker/rcu 线程的延迟显现（pfn 指向 exploit 碰过的物理页）。**当前无 panic、
+  无 watchdog、无 Internal error**，但页簿记污染随运行次数累积——这是"每 boot 只跑一次"
+  纪律的内核侧原因，也是同 boot 第 4 次运行后 kernel_panic 的合理解释。
+- kernel.dump 写不出（`Failed to open kernel.dump`）= 工作目录不可写，无害；
+  kallsyms 直接从内存缓冲解析，不影响结果。
+- dmesg 完整（含 Tainted 标志 `WC O`）可在 permissive 下直接 `adb shell dmesg` 读。
