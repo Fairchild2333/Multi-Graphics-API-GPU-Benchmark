@@ -1,0 +1,22 @@
+{
+  "_comment": "katyusha 5.10 root 盯梢基线 —— 由定时任务读取并更新。任何字段变化都值得报告。",
+  "updated": "2026-11-10T14:50+11:00",
+  "reirin00_s510": {
+    "repo": "Reirin00/ghostlock-app",
+    "branch": "s510",
+    "head_sha": "2120ba5",
+    "head_subject": "v12.15: kernelsnitch agreement 2/3 majority keep instead of 3/3 discard (SO-54C degraded timing killer)"
+  },
+  "upstream_main": {
+    "repo": "YuKongA/ghostlock-app",
+    "branch": "main",
+    "head_sha_prefix": "4ebc726b",
+    "head_subject": "feat(manager): add SukiSU Ultra support (#830)"
+  },
+  "watch_items": [
+    "PR #721 (5.10 extractor + Poco F5) 状态：OPEN，实机验证 pending",
+    "PR #578 (Sony 5 IV 5.10.236 profile) 已合并；其引擎在 Reirin00:s510 未合上游",
+    "上游 kernel_profiles 目录 5.10 conf 数量：1（仅 Sony 5 IV）",
+    "katyusha 关键几何：waiter word=10（不可行）；Sony word=0（成功）。盯任何'更深载体窗口/多 word 位置支持'的提交"
+  ]
+}
