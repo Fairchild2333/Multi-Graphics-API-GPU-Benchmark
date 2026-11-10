@@ -1,6 +1,23 @@
 # cheese-katyusha —— 黑鲨 5 Pro 临时 root（CVE-2025-21479，已实机成功）
 
 2026-11-10 实机验证：UID 0 + SELinux Permissive，无 panic，设备健康。
+**2026-11-10 23:4x 复现确认**：设备 kernel_panic 重启后的 fresh boot 上，
+归档版二进制（`cheesecake-arm64`，md5 `3abcf719…`）**首次运行即完整成功**
+（`cw2-repro-success.log`：SUCCESS 行 + UID 0 + restore + Permissive）。
+此前 21:5x-22:1x 的"7 连败"均为另一改版（`cheesecake-retry-version-0b601417.bin`，
+三层重试 + task-walk）所致，配方本身无误。**不要使用带三层重试的改版**（见下）。
+
+## 使用纪律（必读）
+
+- **每个 boot 只跑一次**。23:38 同一 boot 内第 4 次完整跑后设备
+  `kernel_panic-hw_reset`（`ro.boot.bootreason = kernel_panic` 实证；
+  `cw-r1-success-then-panic.log` 为该次成功运行的截断日志）。
+  成功一次即拿到 Permissive + UID 0，无需重跑。
+- 失败时（喷射落点有随机性）：重启设备后再跑下一次，不要同 boot 连跑。
+- 运行需亮屏（息屏断 adb）；命令形态 `cheesecake-win <命令>` 等价 sudo，
+  无参 exec `sh`。
+- 设备上的胜利版已备份为 `/data/local/tmp/cheesecake-win`（md5 `3abcf719…`，
+  与本目录 `cheesecake-arm64` 一致）。
 
 ## 这是什么
 
@@ -25,7 +42,8 @@ NDK clang -O2 -o cheesecake exploit.c
 ```
 adb push cheesecake-arm64 /data/local/tmp/cheesecake
 adb shell "chmod 755 /data/local/tmp/cheesecake && /data/local/tmp/cheesecake"
-# 需要亮屏；失败重跑即可（喷射落点有随机性，成功后 exec root sh）
+# 需要亮屏；每个 boot 只跑一次；失败就重启后再跑（喷射落点有随机性，
+# 成功后 exec root sh）
 ```
 
 效果：SELinux 翻 Permissive（**重启前持续有效**），exploit 进程本身 uid 0；
@@ -53,8 +71,12 @@ adb shell "chmod 755 /data/local/tmp/cheesecake && /data/local/tmp/cheesecake"
 
 ## 取证日志
 
+- `cw2-repro-success.log` —— fresh boot 复现成功（2026-11-10 23:4x，md5 校验一致）
 - `cc7-root-success.log` —— 完整成功链路（enforcing 1→0、UID 0、代码恢复）
+- `cw-r1-success-then-panic.log` —— 同 boot 第 4 次运行后 kernel_panic 的截断现场
 - `cc6-ctxrecreate-bug.log` —— ctx 重建生效但 ctx_id 按值传参 bug 现场
+- `cheesecake-retry-version-0b601417.bin` —— **问题改版**（三层重试 + task-walk），
+  仅作取证归档；勿用（其 task-walk 从链表尾起步撞短命任务，垃圾读连灭）
 
 ## 致谢
 

@@ -1,0 +1,30 @@
+Current process PID: 13085
+Using phyaddr: 0x96a7d0000
+can't find target
+can't get GPU r/w
+Current process PID: 13085
+Using phyaddr: 0x9e3fbe000
+can't find target
+can't get GPU r/w
+Current process PID: 13085
+Using phyaddr: 0x96e8bc000
+found it: virt addr = 0x716b76d000, phyaddr = 0x96e8bc000
+read output: 149a7fff
+kernel entry = aa6a0000
+target_read_physical_address = aa68b010
+CP_MEMCPY read for swapper_pg_dir successful.
+second read sentinel: 41414141
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: aa690003
+found CHEESE_SWAPPER_PG_DIR_OFF=0x2694000
+Found init_task_phys: 0xaa9abe00

