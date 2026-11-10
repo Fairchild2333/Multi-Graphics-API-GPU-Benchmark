@@ -8,7 +8,9 @@ import android.provider.MediaStore
 import java.io.BufferedWriter
 import java.io.Closeable
 import java.io.File
+import java.io.FileOutputStream
 import java.io.OutputStreamWriter
+import java.nio.channels.FileChannel
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -22,6 +24,8 @@ internal class DebugAttackLog private constructor(
     /** Downloads-relative folder that holds the attempt log and its dumps. */
     val folderPath: String,
     private val writer: BufferedWriter,
+    /** Backing channel for fsync; null when MediaStore hands out a pipe. */
+    private val channel: FileChannel?,
 ) : Closeable {
     /**
      * Absolute folder handed to the native process through --dump-kernel-log;
@@ -36,6 +40,10 @@ internal class DebugAttackLog private constructor(
         writer.write(line)
         writer.newLine()
         writer.flush()
+        /* flush() 只到页缓存：内核 panic 时未 fsync 的数据块会丢，而 ext4 日志
+         * 已提交的元数据（文件大小）还在——这正是 v590 里 panic 后导出文件全是
+         * 等长 NUL 的原因。每行一次 force，把日志钉到介质上。 */
+        channel?.force(true)
     }
 
     /**
@@ -55,6 +63,7 @@ internal class DebugAttackLog private constructor(
             context.contentResolver.openOutputStream(uri, "w")?.use { output ->
                 output.write(bytes)
                 output.flush()
+                (output as? FileOutputStream)?.channel?.force(true)
             }
             MediaScannerConnection.scanFile(
                 context, arrayOf(File(folderFile, name).absolutePath), null, null,
@@ -109,11 +118,13 @@ internal class DebugAttackLog private constructor(
             return try {
                 val output = resolver.openOutputStream(uri, "w")
                     ?: error("cannot open debug log output")
+                val channel = (output as? FileOutputStream)?.channel
                 DebugAttackLog(
                     context.applicationContext,
                     displayName,
                     folderPath,
                     BufferedWriter(OutputStreamWriter(output, StandardCharsets.UTF_8)),
+                    channel,
                 )
             } catch (_: Exception) {
                 resolver.delete(uri, null, null)

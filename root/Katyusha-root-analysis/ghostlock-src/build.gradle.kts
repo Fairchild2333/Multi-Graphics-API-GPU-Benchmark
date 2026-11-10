@@ -1,7 +1,7 @@
 import java.util.Properties
 
 plugins {
-    id("com.android.application") version "9.1.0" apply false
+    id("com.android.application") version "9.5.1" apply false
     id("org.jetbrains.kotlin.plugin.compose") version "2.4.20" apply false
     id("org.jetbrains.kotlin.jvm") version "2.4.20" apply false
 }
@@ -92,14 +92,25 @@ tasks.register<Delete>("clean") {
 
 tasks.register<Exec>("buildGhostlockNative") {
     description = "buildGhostlockNative"
-    workingDir(file("src"))
-    commandLine("make", "ghostlock")
+    /* 本机无 GNU make：build_native.sh 是 src/Makefile 的逐条 clang++ 等价实现
+     * （同样的 flag 与源列表，产物同为 build/native/ghostlock）。
+     * bash 必须用 Git 的绝对路径：PATH 里的 System32\bash.exe 是 WSL，
+     * 跑 Windows 路径脚本会 127。 */
+    val gitBash = System.getenv("GIT_BASH")?.takeIf(String::isNotBlank)
+        ?: listOf(
+            "C:/Program Files/Git/bin/bash.exe",
+            "C:/Program Files (x86)/Git/bin/bash.exe",
+        ).firstOrNull { File(it).isFile }
+        ?: "bash"
+    workingDir(rootDir)
+    commandLine(gitBash, "build_native.sh")
     val ndk = resolveNdkDir()
     environment("ANDROID_NDK_HOME", ndk)
     environment("NDK_ROOT", ndk)
     inputs.files(
         fileTree("src") { include("**/*.c", "**/*.h", "**/*.cpp", "**/*.hpp") },
         file("src/Makefile"),
+        file("build_native.sh"),
     )
     outputs.file(file("build/native/ghostlock"))
 }
@@ -126,31 +137,14 @@ tasks.register<Copy>("prepareGhostlockJniLibs") {
     }
 }
 
-tasks.register<Exec>("buildGhostlockExtract") {
+/* 本机无 Rust/cargo 工具链：extract_rs 的源码自 v590（2026-11-05 上游发布）起
+ * 未做任何改动，因此直接复用官方发布 APK 中的 libextract.so——它已预置在
+ * tools/extract_rs/prebuilt/ghostlock-extract，这里的产物路径与原 Exec 任务一致。 */
+tasks.register<Copy>("buildGhostlockExtract") {
     description = "buildGhostlockExtract"
-    val tools = extractNdkTools()
-    val isOndk = useOndk()
-    val command = mutableListOf(resolveCargoExecutable())
-    if (isOndk) command += "+ondk"
-    command += listOf("build", "--release", "--target", "aarch64-linux-android")
-    if (isOndk) {
-        command += listOf("-Z", "build-std=std,panic_abort")
-        command += listOf("-Z", "build-std-features=optimize_for_size")
-    }
-    workingDir(rootProject.file("tools/extract_rs"))
-    commandLine(command)
-    environment("CC_aarch64_linux_android", tools.clang)
-    environment("AR_aarch64_linux_android", tools.ar)
-    environment("CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER", tools.clang)
-    environment("RUSTFLAGS", "-C force-unwind-tables=no -C link-arg=-Wl,--icf=all")
-    if (isOndk) environment("RUSTC_BOOTSTRAP", "1")
-    inputs.files(
-        fileTree("tools/extract_rs/src") { include("**/*.rs") },
-        file("tools/extract_rs/Cargo.toml"),
-        file("tools/extract_rs/Cargo.lock"),
-    )
-    inputs.property("useOndk", isOndk)
-    outputs.file(file("build/extract/aarch64-linux-android/release/ghostlock-extract"))
+    from(file("tools/extract_rs/prebuilt/ghostlock-extract"))
+    into(file("build/extract/aarch64-linux-android/release"))
+    rename { "ghostlock-extract" }
 }
 
 tasks.register<Copy>("prepareGhostlockExtractJniLibs") {
