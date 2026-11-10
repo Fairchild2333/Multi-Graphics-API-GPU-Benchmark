@@ -86,6 +86,9 @@ namespace ghostlock::race {
         ghostlock::support::PthreadOwner consumer_owner;
         const ghostlock::memory::WriteRequest *request = nullptr;
         ghostlock::route::RouteStatus route_status{};
+        /* E11 probe: boot_id snapshot taken by the consumer's first poll;
+         * a later read differing from it means the write landed. */
+        char probe_baseline[40] = {};
 
     private:
         [[nodiscard]] int32_t abort_startup() noexcept;

