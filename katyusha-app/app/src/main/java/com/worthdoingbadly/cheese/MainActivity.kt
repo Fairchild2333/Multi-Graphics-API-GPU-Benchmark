@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material.icons.filled.Warning
@@ -126,6 +127,7 @@ class MainActivity : ComponentActivity() {
                     onStartExploit = { runExploit() },
                     onClearLogs = { clearLogs() },
                     onCopyLogs = { copyLogs() },
+                    onSaveLogs = { saveLogs() },
                     onOpenKernelSU = { openKernelSU() }
                 )
             }
@@ -144,6 +146,15 @@ class MainActivity : ComponentActivity() {
             logLines.add("[*] Qualcomm KGSL: ${if (hasKgsl) "/dev/kgsl-3d0 detected" else "node not present / sandbox"}")
             logLines.add("[*] Exploit Route: CVE-2025-21479 (Adreno KGSL UAF) -> Dynamic KernelSU")
             logLines.add("[*] Environment: 100% In-Memory (Non-persistent, safe)")
+
+            // Check if there was an abnormal panic/reboot last time
+            val panicLog = LogManager.getPreviousPanicLog(this)
+            if (panicLog != null && panicLog.isNotEmpty()) {
+                logLines.add(tr("[!] Notice: Detected incomplete session from last run (Kernel Panic / Reboot).", "[!] 提示：检测到上次运行中途异常中断（可能发生了内核 Panic 异常重启）。"))
+                logLines.add(tr("[*] Auto-saved crash log (${panicLog.size} lines) preserved. Tap [Save Logs] above to export.", "[*] 系统已完整保留崩机前最后一刻的实时日志（共 ${panicLog.size} 行），点击上方【保存日志】可导出。"))
+                logLines.add("------------------------------------------------------------")
+            }
+
             logLines.add(tr("[*] Ready: Read requirements above, then tap [Activate] below to begin.", "[*] 就绪：请阅读环境要求与限制后，点击下方按钮开始提权。"))
         }
     }
@@ -154,15 +165,25 @@ class MainActivity : ComponentActivity() {
         exploitState.value = ExploitState.RUNNING
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        logLines.add(tr("--- [Starting Qualcomm GPU Exploit & KernelSU Setup] ---", "--- [开始执行高通 GPU 提权链与 KernelSU 加载] ---"))
-        logLines.add(tr("[*] Screen kept ON (FLAG_KEEP_SCREEN_ON)", "[*] 锁定屏幕常亮 (FLAG_KEEP_SCREEN_ON)"))
+        // Start real-time auto-log session (overwrites previous auto-save log)
+        LogManager.startAutoLogSession(this@MainActivity)
+
+        val startMsg1 = tr("--- [Starting Qualcomm GPU Exploit & KernelSU Setup] ---", "--- [开始执行高通 GPU 提权链与 KernelSU 加载] ---")
+        val startMsg2 = tr("[*] Screen kept ON (FLAG_KEEP_SCREEN_ON)", "[*] 锁定屏幕常亮 (FLAG_KEEP_SCREEN_ON)")
+        logLines.add(startMsg1)
+        LogManager.writeLine(startMsg1)
+        logLines.add(startMsg2)
+        LogManager.writeLine(startMsg2)
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val assetManager = assets
                 val extractedDir = getDir("cheese", 0)
 
-                logLines.add(tr("[*] Extracting payload & KernelSU components to memory workspace...", "[*] 正在释放攻击载荷与 KernelSU 组件到内存工作目录..."))
+                val msgExtract = tr("[*] Extracting payload & KernelSU components to memory workspace...", "[*] 正在释放攻击载荷与 KernelSU 组件到内存工作目录...")
+                launch(Dispatchers.Main) { logLines.add(msgExtract) }
+                LogManager.writeLine(msgExtract)
+
                 for (filename in assetManager.list("cheese")!!) {
                     val targetFile = File(extractedDir, filename)
                     if (targetFile.exists()) {
@@ -175,21 +196,28 @@ class MainActivity : ComponentActivity() {
                     }
                     targetFile.setExecutable(true, false)
                     targetFile.setReadable(true, false)
-                    logLines.add("  - " + tr("Extracted", "释放组件") + ": $filename (executable=ok)")
+                    val msgExt = "  - " + tr("Extracted", "释放组件") + ": $filename (executable=ok)"
+                    launch(Dispatchers.Main) { logLines.add(msgExt) }
+                    LogManager.writeLine(msgExt)
                 }
 
                 // Apply any online-downloaded newer KernelSU modules or ksud
                 KernelUpdater.applyDownloadedUpdates(this@MainActivity, extractedDir) { msg ->
-                    launch(Dispatchers.Main) {
-                        logLines.add(msg)
-                    }
+                    launch(Dispatchers.Main) { logLines.add(msg) }
+                    LogManager.writeLine(msg)
                 }
 
                 val executablePath = applicationInfo.nativeLibraryDir + "/libcheese.so"
                 val launchShPath = File(extractedDir, "launch.sh").path
 
-                logLines.add("[*] " + tr("Loading core binary: ", "载入核心二进制: ") + executablePath)
-                logLines.add("[*] " + tr("Spawning child process for exploit chain...", "启动子进程执行 exploit + 提权链..."))
+                val msgLoad = "[*] " + tr("Loading core binary: ", "载入核心二进制: ") + executablePath
+                val msgSpawn = "[*] " + tr("Spawning child process for exploit chain...", "启动子进程执行 exploit + 提权链...")
+                launch(Dispatchers.Main) {
+                    logLines.add(msgLoad)
+                    logLines.add(msgSpawn)
+                }
+                LogManager.writeLine(msgLoad)
+                LogManager.writeLine(msgSpawn)
 
                 val processBuilder = ProcessBuilder().command(executablePath, "sh", launchShPath)
                     .redirectErrorStream(true)
@@ -202,6 +230,7 @@ class MainActivity : ComponentActivity() {
                     if (line.contains("uid=0") || line.contains("KernelSU setup completed successfully") || line.contains("KernelSU LKM module inserted") || line.contains("ksud installed")) {
                         hasRootSuccess = true
                     }
+                    LogManager.writeLine(line)
                     launch(Dispatchers.Main) {
                         logLines.add(line)
                     }
@@ -210,24 +239,41 @@ class MainActivity : ComponentActivity() {
                 val returnVal = process.waitFor()
                 println("cheese returned $returnVal")
 
+                val success = (returnVal == 0 || hasRootSuccess)
+                LogManager.endAutoLogSession(returnVal, success)
+
                 launch(Dispatchers.Main) {
                     window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                    logLines.add("[*] " + tr("Process exited, return code: ", "进程退出，返回码: ") + returnVal)
-                    if (returnVal == 0 || hasRootSuccess) {
+                    val msgExit = "[*] " + tr("Process exited, return code: ", "进程退出，返回码: ") + returnVal
+                    logLines.add(msgExit)
+                    if (success) {
                         exploitState.value = ExploitState.SUCCESS
-                        logLines.add("[+] [SUCCESS] " + tr("Exploit succeeded! Root acquired & KernelSU ready.", "提权流程成功完成！已获得 Root 权限并加载 KernelSU。"))
+                        val msgSucc = "[+] [SUCCESS] " + tr("Exploit succeeded! Root acquired & KernelSU ready.", "提权流程成功完成！已获得 Root 权限并加载 KernelSU。")
+                        logLines.add(msgSucc)
                     } else {
                         exploitState.value = ExploitState.FAILED
-                        logLines.add("[!] [NOTICE] " + tr("Non-zero exit. If root not obtained, please reboot and retry.", "提权返回非零状态。如未获取 Root，请重启手机后重新尝试。"))
+                        val msgFail = "[!] [NOTICE] " + tr("Non-zero exit. If root not obtained, please reboot and retry.", "提权返回非零状态。如未获取 Root，请重启手机后重新尝试。")
+                        logLines.add(msgFail)
                     }
                 }
             } catch (e: Exception) {
+                LogManager.writeLine("[!] Exception: " + e.message)
+                LogManager.endAutoLogSession(-1, false)
                 launch(Dispatchers.Main) {
                     window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     exploitState.value = ExploitState.FAILED
                     logLines.add("[!] " + tr("Exception: ", "发生异常: ") + e.message)
                 }
             }
+        }
+    }
+
+    private fun saveLogs() {
+        val (ok, path) = LogManager.saveLogsToDownloads(this, logLines)
+        if (ok) {
+            Toast.makeText(this, tr("Logs saved to: ", "日志已保存至: ") + path, Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this, tr("Failed to save logs: ", "保存日志失败: ") + path, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -297,6 +343,7 @@ fun MainAppScreen(
     onStartExploit: () -> Unit,
     onClearLogs: () -> Unit,
     onCopyLogs: () -> Unit,
+    onSaveLogs: () -> Unit,
     onOpenKernelSU: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -390,7 +437,8 @@ fun MainAppScreen(
                     .fillMaxWidth()
                     .weight(1f),
                 onClear = onClearLogs,
-                onCopy = onCopyLogs
+                onCopy = onCopyLogs,
+                onSave = onSaveLogs
             )
 
             // 4. Action Controls
@@ -774,7 +822,8 @@ private fun TerminalCard(
     logs: List<String>,
     modifier: Modifier = Modifier,
     onClear: () -> Unit,
-    onCopy: () -> Unit
+    onCopy: () -> Unit,
+    onSave: () -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -836,6 +885,18 @@ private fun TerminalCard(
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    IconButton(
+                        onClick = onSave,
+                        modifier = Modifier.size(34.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Save,
+                            contentDescription = tr("Save logs", "保存日志"),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
                     IconButton(
                         onClick = onCopy,
                         modifier = Modifier.size(34.dp)
