@@ -12,8 +12,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -34,20 +32,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Launch
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -59,7 +51,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -70,15 +61,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
@@ -135,11 +125,17 @@ class MainActivity : ComponentActivity() {
 
     private fun initLogBanner() {
         if (logLines.isEmpty()) {
+            val deviceModel = "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}"
+            val kernelVer = System.getProperty("os.version") ?: "Unknown"
+            val hasKgsl = File("/dev/kgsl-3d0").exists()
+
             logLines.add("[*] Katyusha Temp-Root & KernelSU Engine v1.0")
-            logLines.add("[*] Target: Black Shark 5 Pro (KTUS-A0 / SM8450 / Adreno 730)")
-            logLines.add("[*] Exploit: CVE-2025-21479 (Adreno KGSL UAF) -> LKM KernelSU")
-            logLines.add("[*] Environment: 100% In-Memory (Non-persistent, reboot restores state)")
-            logLines.add("[*] 就绪：请阅读执行规范后点击下方的【一键激活】按钮开始提权。")
+            logLines.add("[*] Device: $deviceModel | Hardware: ${Build.HARDWARE}")
+            logLines.add("[*] Linux Kernel: $kernelVer (Target: 5.10.x GKI)")
+            logLines.add("[*] Qualcomm KGSL: ${if (hasKgsl) "/dev/kgsl-3d0 detected" else "node not present / sandbox"}")
+            logLines.add("[*] Exploit Route: CVE-2025-21479 (Adreno KGSL UAF) -> LKM KernelSU")
+            logLines.add("[*] Environment: 100% In-Memory (Non-persistent, safe)")
+            logLines.add("[*] 就绪：请阅读环境要求与限制后，点击下方按钮开始提权。")
         }
     }
 
@@ -149,7 +145,7 @@ class MainActivity : ComponentActivity() {
         exploitState.value = ExploitState.RUNNING
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        logLines.add("--- [开始执行漏洞利用与 KernelSU 加载] ---")
+        logLines.add("--- [开始执行高通 GPU 提权链与 KernelSU 加载] ---")
         logLines.add("[*] 锁定屏幕常亮 (FLAG_KEEP_SCREEN_ON)")
 
         lifecycleScope.launch(Dispatchers.IO) {
@@ -187,7 +183,7 @@ class MainActivity : ComponentActivity() {
 
                 process.inputStream.toLineFlow().collect { line ->
                     println(line)
-                    if (line.contains("uid=0") || line.contains("KernelSU setup completed successfully") || line.contains("KernelSU LKM module inserted")) {
+                    if (line.contains("uid=0") || line.contains("KernelSU setup completed successfully") || line.contains("KernelSU LKM module inserted") || line.contains("ksud installed")) {
                         hasRootSuccess = true
                     }
                     launch(Dispatchers.Main) {
@@ -276,7 +272,7 @@ fun MainAppScreen(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "黑鲨 5 Pro · 临时 Root & KernelSU",
+                            text = "Qualcomm Adreno · 临时 Root & KernelSU",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -294,15 +290,15 @@ fun MainAppScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // 1. Device & Exploit Info Card
+            // 1. Device & Runtime Info Card
             DeviceStatusCard(state = state)
 
-            // 2. Safety / Discipline Card
-            DisciplineCard()
+            // 2. Qualcomm GPU & Linux Kernel Limitations Card
+            PlatformLimitationCard()
 
-            // 3. Monospace Terminal Execution Console
+            // 3. Clean Monospace Output Panel (Mangekyo benchmark style)
             TerminalCard(
                 logs = logs,
                 modifier = Modifier
@@ -312,7 +308,7 @@ fun MainAppScreen(
                 onCopy = onCopyLogs
             )
 
-            // 4. Hero Action Controls
+            // 4. Action Controls
             ActionSection(
                 state = state,
                 onStart = onStartExploit,
@@ -327,25 +323,17 @@ private fun DeviceStatusCard(
     state: ExploitState,
     modifier: Modifier = Modifier
 ) {
-    val deviceModel = if (Build.MODEL.contains("KTUS", ignoreCase = true) || Build.PRODUCT.contains("katyusha", ignoreCase = true)) {
-        "Black Shark 5 Pro"
-    } else {
-        "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}"
-    }
-    val soc = if (Build.HARDWARE.contains("taro") || Build.HARDWARE.contains("qcom") || Build.BOARD.contains("taro")) {
-        "SM8450 · Adreno 730"
-    } else {
-        Build.HARDWARE
-    }
+    val deviceModel = "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}"
+    val soc = Build.HARDWARE
     val kernelVer = System.getProperty("os.version") ?: "5.10.101"
 
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier
@@ -384,13 +372,13 @@ private fun DeviceStatusCard(
             ) {
                 InfoChip(
                     icon = Icons.Default.PhoneAndroid,
-                    label = "型号",
+                    label = "设备型号",
                     value = deviceModel,
                     modifier = Modifier.weight(1f)
                 )
                 InfoChip(
                     icon = Icons.Default.Memory,
-                    label = "SoC / GPU",
+                    label = "平台 / SoC",
                     value = soc,
                     modifier = Modifier.weight(1f)
                 )
@@ -402,13 +390,13 @@ private fun DeviceStatusCard(
             ) {
                 InfoChip(
                     icon = Icons.Default.Terminal,
-                    label = "内核版本",
+                    label = "Linux 内核",
                     value = kernelVer.take(18),
                     modifier = Modifier.weight(1f)
                 )
                 InfoChip(
                     icon = Icons.Default.Security,
-                    label = "提权途径",
+                    label = "提权方案",
                     value = "CVE-2025-21479 · LKM",
                     modifier = Modifier.weight(1f)
                 )
@@ -468,7 +456,7 @@ private fun InfoChip(
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.small,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh
+        color = MaterialTheme.colorScheme.surfaceContainerHighest
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
@@ -493,7 +481,7 @@ private fun InfoChip(
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -501,16 +489,16 @@ private fun InfoChip(
 }
 
 @Composable
-private fun DisciplineCard(
+private fun PlatformLimitationCard(
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f)
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.25f))
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier
@@ -529,22 +517,31 @@ private fun DisciplineCard(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "执行纪律 (重要安全提示)",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                    text = "硬件架构与 Linux 内核限制",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
 
             Text(
-                text = "• 保持屏幕常亮：提权需约 30~90 秒，锁屏会导致 GPU 驱动通道中断\n" +
-                        "• 每次开机仅限运行一次：单次开机重复喷射已被证实会导致 kernel_panic\n" +
-                        "• 失败立即重启：喷射地址随机化，若未成功请直接重启手机后再试\n" +
-                        "• 纯内存非持久化：不修改 /system 或 boot 分区，重启即可完全复原",
+                text = "• 高通 GPU 限制：仅支持 Qualcomm Adreno 系列 GPU。利用基于高通专有 KGSL 驱动 (/dev/kgsl-3d0) 的 CVE-2025-21479 UAF 漏洞；非高通平台 (天玑 / 猎户座 / Tensor) 无法运行。",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onTertiaryContainer,
-                fontWeight = FontWeight.Normal,
-                lineHeight = 19.sp
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 18.sp
+            )
+
+            Text(
+                text = "• Linux 内核限制：仅适配 Android 12 GKI Linux 5.10.x 内核。自带 KernelSU LKM 模块严格绑定 5.10 GKI 符号体系，低版本 (5.4) 或高版本 (6.x) 会因 ABI 差异拒绝加载 (Exec format error)。",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 18.sp
+            )
+
+            Text(
+                text = "• 运行纪律：提权耗时约 30~90 秒，期间屏幕需保持常亮；单次开机仅限运行一次，失败请直接重启设备后再试；纯内存运行，重启手机即恢复纯净状态。",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 18.sp
             )
         }
     }
@@ -561,25 +558,28 @@ private fun TerminalCard(
 
     LaunchedEffect(logs.size) {
         if (logs.isNotEmpty()) {
-            listState.animateScrollToItem(logs.size - 1)
+            if (logs.size > 7) {
+                listState.animateScrollToItem(logs.size - 1)
+            } else {
+                listState.scrollToItem(0)
+            }
         }
     }
 
     Card(
-        modifier = modifier
-            .border(1.dp, Color(0xFF334155), MaterialTheme.shapes.medium),
-        shape = MaterialTheme.shapes.medium,
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = TerminalBg
-        )
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Terminal Top Bar
+            // Native Material 3 Console Header (No macOS window dots)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(TerminalTopBar)
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -587,31 +587,28 @@ private fun TerminalCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Terminal mock window dots
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Box(Modifier.size(10.dp).clip(CircleShape).background(Color(0xFFEF4444)))
-                        Box(Modifier.size(10.dp).clip(CircleShape).background(Color(0xFFF59E0B)))
-                        Box(Modifier.size(10.dp).clip(CircleShape).background(Color(0xFF22C55E)))
-                    }
-
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.Default.Terminal,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
 
                     Text(
                         text = "控制台输出",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = TerminalText
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
                     )
 
                     Surface(
                         shape = CircleShape,
-                        color = Color(0xFF334155)
+                        color = MaterialTheme.colorScheme.surfaceContainerHighest
                     ) {
                         Text(
                             text = "${logs.size} 行",
                             style = MaterialTheme.typography.labelSmall,
-                            color = TerminalCyan,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                         )
                     }
                 }
@@ -619,41 +616,50 @@ private fun TerminalCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     IconButton(
                         onClick = onCopy,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(34.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.ContentCopy,
                             contentDescription = "复制日志",
-                            tint = TerminalText,
-                            modifier = Modifier.size(16.dp)
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
 
                     IconButton(
                         onClick = onClear,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(34.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.DeleteSweep,
                             contentDescription = "清空控制台",
-                            tint = TerminalText,
-                            modifier = Modifier.size(16.dp)
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
             }
 
-            // Monospace Logs View
-            SelectionContainer(modifier = Modifier.fillMaxSize()) {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 10.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(3.dp)
-                ) {
-                    itemsIndexed(logs) { index, line ->
-                        TerminalLineItem(line = line)
+            // Dark Monospace Log Panel
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 10.dp, vertical = 8.dp)
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(TerminalBg)
+            ) {
+                SelectionContainer(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        itemsIndexed(logs) { _, line ->
+                            TerminalLineItem(line = line)
+                        }
                     }
                 }
             }
@@ -698,6 +704,7 @@ private fun ActionSection(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        // Hero button matching primary call-to-action
         Button(
             onClick = onStart,
             enabled = state != ExploitState.RUNNING,
@@ -706,7 +713,8 @@ private fun ActionSection(
                 .height(52.dp),
             shape = MaterialTheme.shapes.medium,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             )
         ) {
             if (state == ExploitState.RUNNING) {
@@ -736,28 +744,23 @@ private fun ActionSection(
             }
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        OutlinedButton(
+            onClick = onOpenKernelSU,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(44.dp),
+            shape = MaterialTheme.shapes.medium
         ) {
-            OutlinedButton(
-                onClick = onOpenKernelSU,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(44.dp),
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Security,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = "打开 KernelSU",
-                    style = MaterialTheme.typography.labelLarge
-                )
-            }
+            Icon(
+                imageVector = Icons.Default.Security,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = "打开 KernelSU 管理器",
+                style = MaterialTheme.typography.labelLarge
+            )
         }
     }
 }
