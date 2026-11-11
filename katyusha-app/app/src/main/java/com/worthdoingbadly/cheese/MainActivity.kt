@@ -90,7 +90,9 @@ import com.worthdoingbadly.cheese.ui.theme.TerminalGreen
 import com.worthdoingbadly.cheese.ui.theme.TerminalRed
 import com.worthdoingbadly.cheese.ui.theme.TerminalText
 import com.worthdoingbadly.cheese.ui.theme.TerminalTopBar
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
@@ -110,8 +112,11 @@ enum class ExploitState {
 
 class MainActivity : ComponentActivity() {
 
-    private val logLines = mutableStateListOf<String>()
-    private val exploitState = mutableStateOf(ExploitState.IDLE)
+    companion object {
+        val logLines = mutableStateListOf<String>()
+        val exploitState = mutableStateOf(ExploitState.IDLE)
+        val appScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -175,7 +180,7 @@ class MainActivity : ComponentActivity() {
         logLines.add(startMsg2)
         LogManager.writeLine(startMsg2)
 
-        lifecycleScope.launch(Dispatchers.IO) {
+        appScope.launch {
             try {
                 val assetManager = assets
                 val extractedDir = getDir("cheese", 0)
@@ -227,7 +232,7 @@ class MainActivity : ComponentActivity() {
 
                 process.inputStream.toLineFlow().collect { line ->
                     println(line)
-                    if (line.contains("uid=0") || line.contains("KernelSU setup completed successfully") || line.contains("KernelSU LKM module inserted") || line.contains("ksud installed")) {
+                    if (line.contains("uid=0") || line.contains("KernelSU setup completed successfully") || line.contains("KernelSU LKM module inserted") || line.contains("ksud installed") || line.contains("ACTIVE in kernel")) {
                         hasRootSuccess = true
                     }
                     LogManager.writeLine(line)
@@ -237,22 +242,30 @@ class MainActivity : ComponentActivity() {
                 }
 
                 val returnVal = process.waitFor()
-                println("cheese returned $returnVal")
+                println("cheese returned $returnVal, hasRootSuccess=$hasRootSuccess")
 
-                val success = (returnVal == 0 || hasRootSuccess)
-                LogManager.endAutoLogSession(returnVal, success)
+                // Robust verification: check if KernelSU module is actually loaded in /proc/modules or su responsive
+                val isKsuLoaded = try {
+                    val p = Runtime.getRuntime().exec(arrayOf("sh", "-c", "grep -q kernelsu /proc/modules 2>/dev/null"))
+                    p.waitFor() == 0
+                } catch (_: Exception) {
+                    false
+                }
+
+                val reallySuccess = hasRootSuccess || isKsuLoaded
+                LogManager.endAutoLogSession(returnVal, reallySuccess)
 
                 launch(Dispatchers.Main) {
-                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    try { window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) } catch (_: Exception) {}
                     val msgExit = "[*] " + tr("Process exited, return code: ", "进程退出，返回码: ") + returnVal
                     logLines.add(msgExit)
-                    if (success) {
+                    if (reallySuccess) {
                         exploitState.value = ExploitState.SUCCESS
                         val msgSucc = "[+] [SUCCESS] " + tr("Exploit succeeded! Root acquired & KernelSU ready.", "提权流程成功完成！已获得 Root 权限并加载 KernelSU。")
                         logLines.add(msgSucc)
                     } else {
                         exploitState.value = ExploitState.FAILED
-                        val msgFail = "[!] [NOTICE] " + tr("Non-zero exit. If root not obtained, please reboot and retry.", "提权返回非零状态。如未获取 Root，请重启手机后重新尝试。")
+                        val msgFail = "[!] [NOTICE] " + tr("Exploit interrupted or incomplete. Root not verified, please keep screen steady and retry.", "提权过程被中断或未完全执行。未检测到 KernelSU 生效，请保持屏幕常亮且不要翻转手机，重启后重试。")
                         logLines.add(msgFail)
                     }
                 }
@@ -260,7 +273,7 @@ class MainActivity : ComponentActivity() {
                 LogManager.writeLine("[!] Exception: " + e.message)
                 LogManager.endAutoLogSession(-1, false)
                 launch(Dispatchers.Main) {
-                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    try { window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) } catch (_: Exception) {}
                     exploitState.value = ExploitState.FAILED
                     logLines.add("[!] " + tr("Exception: ", "发生异常: ") + e.message)
                 }
