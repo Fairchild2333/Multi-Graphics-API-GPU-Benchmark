@@ -131,9 +131,9 @@ class MainActivity : ComponentActivity() {
 
             logLines.add("[*] Katyusha Temp-Root & KernelSU Engine v1.0")
             logLines.add("[*] Device: $deviceModel | Hardware: ${Build.HARDWARE}")
-            logLines.add("[*] Linux Kernel: $kernelVer (Target: 5.10.x GKI)")
+            logLines.add("[*] Linux Kernel: $kernelVer (GKI KMI Auto-detect)")
             logLines.add("[*] Qualcomm KGSL: ${if (hasKgsl) "/dev/kgsl-3d0 detected" else "node not present / sandbox"}")
-            logLines.add("[*] Exploit Route: CVE-2025-21479 (Adreno KGSL UAF) -> LKM KernelSU")
+            logLines.add("[*] Exploit Route: CVE-2025-21479 (Adreno KGSL UAF) -> Dynamic KernelSU")
             logLines.add("[*] Environment: 100% In-Memory (Non-persistent, safe)")
             logLines.add("[*] 就绪：请阅读环境要求与限制后，点击下方按钮开始提权。")
         }
@@ -517,7 +517,7 @@ private fun PlatformLimitationCard(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "硬件架构与 Linux 内核限制",
+                    text = "硬件架构与运行环境要求",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -531,7 +531,7 @@ private fun PlatformLimitationCard(
             )
 
             Text(
-                text = "• Linux 内核限制：仅适配 Android 12 GKI Linux 5.10.x 内核。自带 KernelSU LKM 模块严格绑定 5.10 GKI 符号体系，低版本 (5.4) 或高版本 (6.x) 会因 ABI 差异拒绝加载 (Exec format error)。",
+                text = "• Linux 内核与 KernelSU：采用动态 KMI 匹配架构（支持 5.10 / 5.15 / 6.1 / 6.6 等 GKI 内核）。通过 ksud late-load 自动从已安装的 KernelSU 管理器中匹配对应内核版本的 LKM 模块注入；未安装时自动回退内置模块。",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 18.sp
@@ -599,18 +599,6 @@ private fun TerminalCard(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
-
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surfaceContainerHighest
-                    ) {
-                        Text(
-                            text = "${logs.size} 行",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                        )
-                    }
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {

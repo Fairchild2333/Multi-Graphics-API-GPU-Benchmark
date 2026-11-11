@@ -1,6 +1,6 @@
 #!/system/bin/sh
 # katyusha launch.sh — invoked with root (uid 0) and SELinux permissive.
-# Everything below stays in the app's private dir or sets up KernelSU.
+# Dynamically detects KMI and delegates KernelSU loading via ksud late-load.
 cd "$(dirname "$0")"
 umask 000
 export ASH_STANDALONE=1
@@ -12,31 +12,73 @@ echo "[katyusha] SELinux: $(getenforce 2>/dev/null)"
 if grep -q kernelsu /proc/modules 2>/dev/null; then
     echo "[katyusha] KernelSU module already loaded in kernel!"
 else
-    # 2. Attempt to load kernelsu.ko via direct insmod or ksud
-    if [ -f "./kernelsu.ko" ]; then
-        echo "[katyusha] Attempting to load kernelsu.ko into kernel..."
-        
-        # Try direct insmod first
-        insmod ./kernelsu.ko 2>/dev/null
-        
-        if grep -q kernelsu /proc/modules 2>/dev/null; then
-            echo "[katyusha] [SUCCESS] Direct insmod kernelsu.ko succeeded!"
-        elif [ -x "./ksud" ]; then
+    # 2. Locate or prepare ksud
+    KSUD=""
+    if [ -x "./ksud" ]; then
+        KSUD="./ksud"
+    elif [ -x "/data/adb/ksu/bin/ksud" ]; then
+        KSUD="/data/adb/ksu/bin/ksud"
+    fi
+
+    # If still not found, search in installed KernelSU Manager APK packages
+    if [ -z "$KSUD" ] || [ ! -x "$KSUD" ]; then
+        MANAGER_KSUD=$(find /data/app -path '*/me.weishu.kernelsu*/lib/arm64/libksud.so' 2>/dev/null | head -1)
+        if [ -n "$MANAGER_KSUD" ] && [ -f "$MANAGER_KSUD" ]; then
+            cp "$MANAGER_KSUD" ./ksud 2>/dev/null
             chmod 755 ./ksud 2>/dev/null
-            echo "[katyusha] Direct insmod returned $?; trying 'ksud insmod ./kernelsu.ko'..."
-            ./ksud insmod ./kernelsu.ko 2>&1
-            
-            if ! grep -q kernelsu /proc/modules 2>/dev/null; then
-                echo "[katyusha] Trying 'ksud late-load --kmi android12-5.10'..."
-                ./ksud late-load --kmi android12-5.10 --allow-shell 2>&1
+            KSUD="./ksud"
+            echo "[katyusha] Located ksud from KernelSU Manager: $MANAGER_KSUD"
+        fi
+    fi
+
+    chmod 755 "$KSUD" 2>/dev/null
+
+    # 3. Dynamic KMI auto-detection (supports 5.10, 5.15, 6.1, 6.6, etc.)
+    KVER=$(uname -r | cut -d. -f1-2)
+    AVER=$(uname -r | grep -o 'android[0-9]*' | head -1)
+    if [ -n "$AVER" ] && [ -n "$KVER" ]; then
+        KMI="${AVER}-${KVER}"
+        echo "[katyusha] Detected KMI: $KMI (kernel $(uname -r))"
+    else
+        KMI=""
+        echo "[katyusha] Detected kernel: $(uname -r)"
+    fi
+
+    # 4. Attempt dynamic late-load via ksud
+    LOAD_OK=0
+    if [ -n "$KSUD" ] && [ -x "$KSUD" ]; then
+        echo "[katyusha] Invoking ksud late-load (auto-matching KernelSU LKM for $KMI)..."
+        if [ -n "$KMI" ]; then
+            "$KSUD" late-load --kmi "$KMI" --allow-shell 2>&1
+        else
+            "$KSUD" late-load --allow-shell 2>&1
+        fi
+
+        if grep -q kernelsu /proc/modules 2>/dev/null; then
+            echo "[katyusha] [SUCCESS] ksud late-load successfully loaded KernelSU module!"
+            LOAD_OK=1
+        fi
+    fi
+
+    # 5. Fallback: If late-load didn't load and a local kernelsu.ko exists, try local insmod
+    if [ "$LOAD_OK" -ne 1 ]; then
+        if [ -f "./kernelsu.ko" ]; then
+            echo "[katyusha] Fallback: attempting local kernelsu.ko injection..."
+            if [ -n "$KSUD" ] && [ -x "$KSUD" ]; then
+                "$KSUD" insmod ./kernelsu.ko 2>&1
+            else
+                insmod ./kernelsu.ko 2>/dev/null
+            fi
+
+            if grep -q kernelsu /proc/modules 2>/dev/null; then
+                echo "[katyusha] [SUCCESS] Local kernelsu.ko injection succeeded!"
+                LOAD_OK=1
             fi
         fi
-    else
-        echo "[katyusha] kernelsu.ko not found in $(pwd)"
     fi
 fi
 
-# 3. If ksud is present, setup userspace components
+# 6. Setup userspace components (/data/adb and ksud install)
 if [ -x "./ksud" ]; then
     echo "[katyusha] Setting up /data/adb and ksud..."
     mkdir -p /data/adb/ksu/bin 2>/dev/null
@@ -44,12 +86,11 @@ if [ -x "./ksud" ]; then
     cp ./ksud /data/adb/ksu/bin/ksud 2>/dev/null
     chmod 755 /data/adb/ksu/bin/ksud 2>/dev/null
     
-    # Run ksud install to set up su binary and environment
     echo "[katyusha] Running 'ksud install'..."
     ./ksud install 2>&1
 fi
 
-# 4. Status report
+# 7. Final status report
 if grep -q kernelsu /proc/modules 2>/dev/null; then
     echo ""
     echo "================================================="
