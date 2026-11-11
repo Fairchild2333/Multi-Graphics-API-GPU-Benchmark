@@ -229,21 +229,46 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun openKernelSU() {
-        val ksuPkg = "me.weishu.kernelsu"
-        val launchIntent = packageManager.getLaunchIntentForPackage(ksuPkg)
-        if (launchIntent != null) {
-            startActivity(launchIntent)
-        } else {
-            Toast.makeText(this, tr("KernelSU Manager not installed, opening download page...", "未安装 KernelSU 管理器，正在前往下载页面..."), Toast.LENGTH_LONG).show()
-            try {
-                val browserIntent = Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("https://github.com/tiann/KernelSU/releases")
-                )
-                startActivity(browserIntent)
-            } catch (e: Exception) {
-                Toast.makeText(this, tr("Failed to open browser: ", "无法打开浏览器: ") + e.message, Toast.LENGTH_SHORT).show()
+        val candidatePackages = listOf(
+            "me.weishu.kernelsu",
+            "io.github.a13e300.ksu"
+        )
+        for (pkg in candidatePackages) {
+            val launchIntent = packageManager.getLaunchIntentForPackage(pkg)
+            if (launchIntent != null) {
+                startActivity(launchIntent)
+                return
             }
+        }
+
+        // Fallback: try explicit ComponentName intent
+        for (pkg in candidatePackages) {
+            try {
+                val intent = Intent(Intent.ACTION_MAIN).apply {
+                    setClassName(pkg, "$pkg.ui.MainActivity")
+                    addCategory(Intent.CATEGORY_LAUNCHER)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                startActivity(intent)
+                return
+            } catch (_: Exception) {}
+        }
+
+        // Fallback: try root shell am start if available
+        try {
+            val process = Runtime.getRuntime().exec(arrayOf("su", "-c", "am start -n me.weishu.kernelsu/.ui.MainActivity"))
+            if (process.waitFor() == 0) return
+        } catch (_: Exception) {}
+
+        Toast.makeText(this, tr("KernelSU Manager not installed, opening download page...", "未安装 KernelSU 管理器，正在前往下载页面..."), Toast.LENGTH_LONG).show()
+        try {
+            val browserIntent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://github.com/tiann/KernelSU/releases")
+            )
+            startActivity(browserIntent)
+        } catch (e: Exception) {
+            Toast.makeText(this, tr("Failed to open browser: ", "无法打开浏览器: ") + e.message, Toast.LENGTH_SHORT).show()
         }
     }
 }
