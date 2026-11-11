@@ -62,16 +62,25 @@ else
 
     # 5. Fallback: If late-load didn't load and a local kernelsu.ko exists, try local insmod
     if [ "$LOAD_OK" -ne 1 ]; then
-        if [ -f "./kernelsu.ko" ]; then
-            echo "[katyusha] Fallback: attempting local kernelsu.ko injection..."
+        TARGET_KO=""
+        if [ -n "$KMI" ] && [ -f "./lkm-aarch64-${KMI}_kernelsu.ko" ]; then
+            TARGET_KO="./lkm-aarch64-${KMI}_kernelsu.ko"
+            echo "[katyusha] Found exact matching KMI module: $TARGET_KO"
+        elif [ -f "./kernelsu.ko" ]; then
+            TARGET_KO="./kernelsu.ko"
+            echo "[katyusha] Using bundled default module: $TARGET_KO"
+        fi
+
+        if [ -n "$TARGET_KO" ] && [ -f "$TARGET_KO" ]; then
+            echo "[katyusha] Attempting insmod with $TARGET_KO..."
             if [ -n "$KSUD" ] && [ -x "$KSUD" ]; then
-                "$KSUD" insmod ./kernelsu.ko 2>&1
+                "$KSUD" insmod "$TARGET_KO" 2>&1
             else
-                insmod ./kernelsu.ko 2>/dev/null
+                insmod "$TARGET_KO" 2>/dev/null
             fi
 
             if grep -q kernelsu /proc/modules 2>/dev/null; then
-                echo "[katyusha] [SUCCESS] Local kernelsu.ko injection succeeded!"
+                echo "[katyusha] [SUCCESS] KernelSU injection succeeded with $TARGET_KO!"
                 LOAD_OK=1
             fi
         fi
