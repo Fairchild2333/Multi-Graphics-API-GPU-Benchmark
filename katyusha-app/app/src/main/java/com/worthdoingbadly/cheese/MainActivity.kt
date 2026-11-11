@@ -135,7 +135,7 @@ class MainActivity : ComponentActivity() {
             logLines.add("[*] Qualcomm KGSL: ${if (hasKgsl) "/dev/kgsl-3d0 detected" else "node not present / sandbox"}")
             logLines.add("[*] Exploit Route: CVE-2025-21479 (Adreno KGSL UAF) -> Dynamic KernelSU")
             logLines.add("[*] Environment: 100% In-Memory (Non-persistent, safe)")
-            logLines.add("[*] 就绪：请阅读环境要求与限制后，点击下方按钮开始提权。")
+            logLines.add(tr("[*] Ready: Read requirements above, then tap [Activate] below to begin.", "[*] 就绪：请阅读环境要求与限制后，点击下方按钮开始提权。"))
         }
     }
 
@@ -145,15 +145,15 @@ class MainActivity : ComponentActivity() {
         exploitState.value = ExploitState.RUNNING
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        logLines.add("--- [开始执行高通 GPU 提权链与 KernelSU 加载] ---")
-        logLines.add("[*] 锁定屏幕常亮 (FLAG_KEEP_SCREEN_ON)")
+        logLines.add(tr("--- [Starting Qualcomm GPU Exploit & KernelSU Setup] ---", "--- [开始执行高通 GPU 提权链与 KernelSU 加载] ---"))
+        logLines.add(tr("[*] Screen kept ON (FLAG_KEEP_SCREEN_ON)", "[*] 锁定屏幕常亮 (FLAG_KEEP_SCREEN_ON)"))
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val assetManager = assets
                 val extractedDir = getDir("cheese", 0)
 
-                logLines.add("[*] 正在释放攻击载荷与 KernelSU 组件到内存工作目录...")
+                logLines.add(tr("[*] Extracting payload & KernelSU components to memory workspace...", "[*] 正在释放攻击载荷与 KernelSU 组件到内存工作目录..."))
                 for (filename in assetManager.list("cheese")!!) {
                     val targetFile = File(extractedDir, filename)
                     if (targetFile.exists()) {
@@ -166,14 +166,14 @@ class MainActivity : ComponentActivity() {
                     }
                     targetFile.setExecutable(true, false)
                     targetFile.setReadable(true, false)
-                    logLines.add("  - 释放组件: $filename (executable=ok)")
+                    logLines.add("  - " + tr("Extracted", "释放组件") + ": $filename (executable=ok)")
                 }
 
                 val executablePath = applicationInfo.nativeLibraryDir + "/libcheese.so"
                 val launchShPath = File(extractedDir, "launch.sh").path
 
-                logLines.add("[*] 载入核心二进制: $executablePath")
-                logLines.add("[*] 启动子进程执行 exploit + 提权链...")
+                logLines.add("[*] " + tr("Loading core binary: ", "载入核心二进制: ") + executablePath)
+                logLines.add("[*] " + tr("Spawning child process for exploit chain...", "启动子进程执行 exploit + 提权链..."))
 
                 val processBuilder = ProcessBuilder().command(executablePath, "sh", launchShPath)
                     .redirectErrorStream(true)
@@ -196,20 +196,20 @@ class MainActivity : ComponentActivity() {
 
                 launch(Dispatchers.Main) {
                     window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                    logLines.add("[*] 进程退出，返回码: $returnVal")
+                    logLines.add("[*] " + tr("Process exited, return code: ", "进程退出，返回码: ") + returnVal)
                     if (returnVal == 0 || hasRootSuccess) {
                         exploitState.value = ExploitState.SUCCESS
-                        logLines.add("[+] [SUCCESS] 提权流程成功完成！已获得 Root 权限并加载 KernelSU。")
+                        logLines.add("[+] [SUCCESS] " + tr("Exploit succeeded! Root acquired & KernelSU ready.", "提权流程成功完成！已获得 Root 权限并加载 KernelSU。"))
                     } else {
                         exploitState.value = ExploitState.FAILED
-                        logLines.add("[!] [NOTICE] 提权返回非零状态。如未获取 Root，请重启手机后重新尝试。")
+                        logLines.add("[!] [NOTICE] " + tr("Non-zero exit. If root not obtained, please reboot and retry.", "提权返回非零状态。如未获取 Root，请重启手机后重新尝试。"))
                     }
                 }
             } catch (e: Exception) {
                 launch(Dispatchers.Main) {
                     window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     exploitState.value = ExploitState.FAILED
-                    logLines.add("[!] 发生异常: ${e.message}")
+                    logLines.add("[!] " + tr("Exception: ", "发生异常: ") + e.message)
                 }
             }
         }
@@ -225,7 +225,7 @@ class MainActivity : ComponentActivity() {
         val clipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         val allLogs = logLines.joinToString("\n")
         clipboardManager.setPrimaryClip(ClipData.newPlainText("Katyusha Logs", allLogs))
-        Toast.makeText(this, "日志已复制到剪切板", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, tr("Logs copied to clipboard", "日志已复制到剪切板"), Toast.LENGTH_SHORT).show()
     }
 
     private fun openKernelSU() {
@@ -234,7 +234,7 @@ class MainActivity : ComponentActivity() {
         if (launchIntent != null) {
             startActivity(launchIntent)
         } else {
-            Toast.makeText(this, "未安装 KernelSU 管理器，正在前往下载页面...", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, tr("KernelSU Manager not installed, opening download page...", "未安装 KernelSU 管理器，正在前往下载页面..."), Toast.LENGTH_LONG).show()
             try {
                 val browserIntent = Intent(
                     Intent.ACTION_VIEW,
@@ -242,7 +242,7 @@ class MainActivity : ComponentActivity() {
                 )
                 startActivity(browserIntent)
             } catch (e: Exception) {
-                Toast.makeText(this, "无法打开浏览器: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, tr("Failed to open browser: ", "无法打开浏览器: ") + e.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -272,7 +272,7 @@ fun MainAppScreen(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Qualcomm Adreno · 临时 Root & KernelSU",
+                            text = tr("Qualcomm Adreno · Temp Root & KernelSU", "高通 Adreno · 临时 Root & KernelSU"),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -295,7 +295,7 @@ fun MainAppScreen(
             // 1. Device & Runtime Info Card
             DeviceStatusCard(state = state)
 
-            // 2. Qualcomm GPU & Linux Kernel Limitations Card
+            // 2. Qualcomm GPU & Linux Kernel Requirements Card
             PlatformLimitationCard()
 
             // 3. Clean Monospace Output Panel (Mangekyo benchmark style)
@@ -357,7 +357,7 @@ private fun DeviceStatusCard(
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
-                        text = "设备与运行状态",
+                        text = tr("Device & Runtime Status", "设备与运行状态"),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -372,13 +372,13 @@ private fun DeviceStatusCard(
             ) {
                 InfoChip(
                     icon = Icons.Default.PhoneAndroid,
-                    label = "设备型号",
+                    label = tr("Model", "设备型号"),
                     value = deviceModel,
                     modifier = Modifier.weight(1f)
                 )
                 InfoChip(
                     icon = Icons.Default.Memory,
-                    label = "平台 / SoC",
+                    label = tr("Platform / SoC", "平台 / SoC"),
                     value = soc,
                     modifier = Modifier.weight(1f)
                 )
@@ -390,13 +390,13 @@ private fun DeviceStatusCard(
             ) {
                 InfoChip(
                     icon = Icons.Default.Terminal,
-                    label = "Linux 内核",
+                    label = tr("Linux Kernel", "Linux 内核"),
                     value = kernelVer.take(18),
                     modifier = Modifier.weight(1f)
                 )
                 InfoChip(
                     icon = Icons.Default.Security,
-                    label = "提权方案",
+                    label = tr("Route", "提权方案"),
                     value = "CVE-2025-21479 · LKM",
                     modifier = Modifier.weight(1f)
                 )
@@ -411,22 +411,22 @@ private fun StatusBadge(state: ExploitState) {
         ExploitState.IDLE -> Triple(
             MaterialTheme.colorScheme.secondaryContainer,
             MaterialTheme.colorScheme.onSecondaryContainer,
-            "就绪"
+            tr("Ready", "就绪")
         )
         ExploitState.RUNNING -> Triple(
             MaterialTheme.colorScheme.tertiaryContainer,
             MaterialTheme.colorScheme.onTertiaryContainer,
-            "提权中..."
+            tr("Exploiting...", "提权中...")
         )
         ExploitState.SUCCESS -> Triple(
             Color(0xFFDCFCE7),
             Color(0xFF166534),
-            "已激活 Root"
+            tr("Root Active", "已激活 Root")
         )
         ExploitState.FAILED -> Triple(
             MaterialTheme.colorScheme.errorContainer,
             MaterialTheme.colorScheme.onErrorContainer,
-            "需要重启"
+            tr("Reboot Required", "需要重启")
         )
     }
 
@@ -517,28 +517,37 @@ private fun PlatformLimitationCard(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "硬件架构与运行环境要求",
+                    text = tr("Hardware & Runtime Requirements", "硬件架构与运行环境要求"),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
             }
 
             Text(
-                text = "• 高通 GPU 限制：仅支持 Qualcomm Adreno 系列 GPU。利用基于高通专有 KGSL 驱动 (/dev/kgsl-3d0) 的 CVE-2025-21479 UAF 漏洞；非骁龙平台 (天玑 / 猎户座 / Tensor / 玄戒 / 麒麟) 无法运行。",
+                text = tr(
+                    "• Qualcomm GPU: Qualcomm Adreno GPUs only. Exploits CVE-2025-21479 UAF in Qualcomm proprietary KGSL driver (/dev/kgsl-3d0); non-Snapdragon platforms (Dimensity / Exynos / Tensor / Xuanjie / Kirin) are not supported.",
+                    "• 高通 GPU 限制：仅支持 Qualcomm Adreno 系列 GPU。利用基于高通专有 KGSL 驱动 (/dev/kgsl-3d0) 的 CVE-2025-21479 UAF 漏洞；非骁龙平台 (天玑 / 猎户座 / Tensor / 玄戒 / 麒麟) 无法运行。"
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 18.sp
             )
 
             Text(
-                text = "• Linux 内核与 KernelSU：采用动态 KMI 匹配架构（支持 5.10 / 5.15 / 6.1 / 6.6 等 GKI 内核）。通过 ksud late-load 自动从已安装的 KernelSU 管理器中匹配对应内核版本的 LKM 模块注入；未安装时自动回退内置模块。",
+                text = tr(
+                    "• Linux Kernel & KernelSU: Dynamic KMI auto-matching (supports 5.10 / 5.15 / 6.1 / 6.6 GKI kernels). Automatically invokes ksud late-load to match LKM modules from the installed KernelSU manager, with fallback to bundled module.",
+                    "• Linux 内核与 KernelSU：采用动态 KMI 匹配架构（支持 5.10 / 5.15 / 6.1 / 6.6 等 GKI 内核）。通过 ksud late-load 自动从已安装的 KernelSU 管理器中匹配对应内核版本的 LKM 模块注入；未安装时自动回退内置模块。"
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 18.sp
             )
 
             Text(
-                text = "• 运行纪律：提权耗时约 30~90 秒，期间屏幕需保持常亮；单次开机仅限运行一次，失败请直接重启设备后再试；纯内存运行，重启手机即恢复纯净状态。",
+                text = tr(
+                    "• Execution Discipline: Exploit takes ~30-90s, keep screen ON (screen timeout interrupts GPU driver). Run only once per boot; reboot if failed. Runs in-memory only; rebooting restores completely clean state.",
+                    "• 运行纪律：提权耗时约 30~90 秒，期间屏幕需保持常亮；单次开机仅限运行一次，失败请直接重启设备后再试；纯内存运行，重启手机即恢复纯净状态。"
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 18.sp
@@ -575,7 +584,7 @@ private fun TerminalCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Native Material 3 Console Header (No macOS window dots)
+            // Native Material 3 Console Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -595,10 +604,22 @@ private fun TerminalCard(
                     )
 
                     Text(
-                        text = "控制台输出",
+                        text = tr("Console Output", "控制台输出"),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
+
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surfaceContainerHighest
+                    ) {
+                        Text(
+                            text = "${logs.size} " + tr("lines", "行"),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -608,7 +629,7 @@ private fun TerminalCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.ContentCopy,
-                            contentDescription = "复制日志",
+                            contentDescription = tr("Copy logs", "复制日志"),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp)
                         )
@@ -620,7 +641,7 @@ private fun TerminalCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.DeleteSweep,
-                            contentDescription = "清空控制台",
+                            contentDescription = tr("Clear console", "清空控制台"),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp)
                         )
@@ -662,10 +683,10 @@ private fun TerminalLineItem(line: String) {
                 line.contains("KernelSU setup completed") || line.contains("module inserted") -> TerminalGreen
 
         line.contains("[*]") || line.contains("Starting") || line.contains("载入核心") ||
-                line.contains("释放组件") || line.contains("就绪") -> TerminalCyan
+                line.contains("释放组件") || line.contains("就绪") || line.contains("Ready") -> TerminalCyan
 
         line.contains("[!]") || line.contains("kernel_panic") || line.contains("NOTICE") ||
-                line.contains("异常") || line.contains("失败") -> TerminalRed
+                line.contains("异常") || line.contains("失败") || line.contains("Exception") -> TerminalRed
 
         line.contains("spray") || line.contains("尝试") || line.contains("waiting") -> TerminalAmber
 
@@ -692,7 +713,6 @@ private fun ActionSection(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Hero button matching primary call-to-action
         Button(
             onClick = onStart,
             enabled = state != ExploitState.RUNNING,
@@ -713,7 +733,7 @@ private fun ActionSection(
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "正在提权与注入内核模块...",
+                    text = tr("Exploiting & injecting KernelSU...", "正在提权与注入内核模块..."),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -725,7 +745,11 @@ private fun ActionSection(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (state == ExploitState.SUCCESS) "再次激活 (若已重启)" else "一键激活 Root & KernelSU",
+                    text = if (state == ExploitState.SUCCESS) {
+                        tr("Re-activate (After Reboot)", "再次激活 (若已重启)")
+                    } else {
+                        tr("Activate Root & KernelSU", "一键激活 Root & KernelSU")
+                    },
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -746,7 +770,7 @@ private fun ActionSection(
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = "打开 KernelSU 管理器",
+                text = tr("Open KernelSU Manager", "打开 KernelSU 管理器"),
                 style = MaterialTheme.typography.labelLarge
             )
         }
