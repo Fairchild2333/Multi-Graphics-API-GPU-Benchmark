@@ -93,6 +93,7 @@ import com.worthdoingbadly.cheese.ui.theme.TerminalTopBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
@@ -262,7 +263,16 @@ class MainActivity : ComponentActivity() {
                     if (reallySuccess) {
                         exploitState.value = ExploitState.SUCCESS
                         val msgSucc = "[+] [SUCCESS] " + tr("Exploit succeeded! Root acquired & KernelSU ready.", "提权流程成功完成！已获得 Root 权限并加载 KernelSU。")
+                        val msgJump = "[*] " + tr("Automatically launching KernelSU Manager...", "正在自动打开 KernelSU 管理器...")
                         logLines.add(msgSucc)
+                        logLines.add(msgJump)
+                        LogManager.writeLine(msgSucc)
+                        LogManager.writeLine(msgJump)
+
+                        launch {
+                            delay(1000)
+                            openKernelSU()
+                        }
                     } else {
                         exploitState.value = ExploitState.FAILED
                         val msgFail = "[!] [NOTICE] " + tr("Exploit interrupted or incomplete. Root not verified, please keep screen steady and retry.", "提权过程被中断或未完全执行。未检测到 KernelSU 生效，请保持屏幕常亮且不要翻转手机，重启后重试。")
