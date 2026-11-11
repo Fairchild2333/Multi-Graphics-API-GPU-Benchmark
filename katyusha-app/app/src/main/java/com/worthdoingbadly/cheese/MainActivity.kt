@@ -39,6 +39,7 @@ import java.io.File
 import java.io.InputStream
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -109,15 +110,15 @@ class MainActivity : ComponentActivity() {
             for (filename in assetManager.list("cheese")!!) {
                 val targetFile = File(extractedDir, filename)
                 if (targetFile.exists()) {
-                    // TODO(zhuowei): on new version, overwrite directory...
-                    continue
+                    targetFile.delete()
                 }
-                assetManager.open("cheese/" + filename).use {
-                    Files.copy(it, targetFile.toPath(),
-                        StandardCopyOption.REPLACE_EXISTING
-                    );
-                    targetFile.setExecutable(true)
+                assetManager.open("cheese/" + filename).use { input ->
+                    targetFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
                 }
+                targetFile.setExecutable(true, false)
+                targetFile.setReadable(true, false)
             }
             val executablePath = applicationInfo.nativeLibraryDir + "/libcheese.so"
             val launchShPath = File(extractedDir, "launch.sh").path

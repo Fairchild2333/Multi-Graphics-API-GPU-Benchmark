@@ -19,6 +19,11 @@
 /android/**/.cxx/
 /android/local.properties
 /android/app/src/main/assets/shaders/.configure.lock
+/katyusha-app/.gradle/
+/katyusha-app/.kotlin/
+/katyusha-app/build/
+/katyusha-app/**/build/
+/katyusha-app/local.properties
 
 # HarmonyOS (DevEco Studio / hvigor)
 /ohos/.hvigor/
@@ -178,6 +183,10 @@ scripts/__pycache__/
 /out/test-results/**/build/
 /out/test-results/**/CMakeFiles/
 
+# Xcode user state
+xcuserdata/
+*.xcuserdata
+
 # The default CLI history is small and should be backed up too.
 /results/*
 !/results/*.json
@@ -208,6 +217,7 @@ root/Katyusha-root-analysis/ghostlock-src/build/
 root/**/__pycache__/
 # Device-run logs and the captured libextract.so override the global ignores.
 !root/**/*.log
+!katyusha-app/app/src/main/jniLibs/**/*.so
 !root/**/device-capture/libextract.so
 root/**/OTA-system-app.apk
 root/**/ota-manifest-summary.json
