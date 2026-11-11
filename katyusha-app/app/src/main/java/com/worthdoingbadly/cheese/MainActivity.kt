@@ -524,7 +524,7 @@ private fun PlatformLimitationCard(
             }
 
             Text(
-                text = "• 高通 GPU 限制：仅支持 Qualcomm Adreno 系列 GPU。利用基于高通专有 KGSL 驱动 (/dev/kgsl-3d0) 的 CVE-2025-21479 UAF 漏洞；非高通平台 (天玑 / 猎户座 / Tensor) 无法运行。",
+                text = "• 高通 GPU 限制：仅支持 Qualcomm Adreno 系列 GPU。利用基于高通专有 KGSL 驱动 (/dev/kgsl-3d0) 的 CVE-2025-21479 UAF 漏洞；非骁龙平台 (天玑 / 猎户座 / Tensor / 玄戒 / 麒麟) 无法运行。",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 18.sp
