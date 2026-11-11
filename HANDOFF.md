@@ -1,5 +1,10 @@
 # Mangekyo Project Handoff — 当前事实、两条主线与下一步
 
+> **2026-10-20补充：**用户选择其他Mac直接跑App，不配置远程Xcode。GPU／CPU各一个
+> 全套按钮已复核：包内worker列出GPU17/30、CPU2组、整机19/32；按钮不带单项配置，
+> 回归4/4通过，原成绩不变。仅更新文档和范围核对归档，未新跑完整性能套件。
+> 见[按钮核对记录](out/test-results/macos-one-click-scope-check-20261020/report.md)。
+
 > **2026-10-18：先读 [APPLE-NEXT-TESTS.md](APPLE-NEXT-TESTS.md)。** A16九项已补齐，8passed/1review、35条历史；A15为155条、12.9英寸A12X为79条、11英寸A12X为53条，四台当前各31项有匹配覆盖。A16 CPU169.945/100.672/721.677，Vulkan平台45.044GB/s。历史波动、A16大核内存分项未稳定和Metal内存预览仍保留。Watch Ultra完整CPU一键已完成，3条成绩、126曲线点，内存仍参考。
 
 跨设备最新对比：[Apple实测表、测法差异与原始ID](docs/apple-device-comparison-20261018.md)。

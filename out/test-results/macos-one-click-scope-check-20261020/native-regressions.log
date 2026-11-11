@@ -1,0 +1,66 @@
+Start testing: Oct 20 10:43 AEDT
+----------------------------------------------------------
+2/7 Testing: result_quality
+2/7 Test: result_quality
+Command: "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build/result_quality_test"
+Directory: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build
+"result_quality" start time: Oct 20 10:43 AEDT
+Output:
+----------------------------------------------------------
+Real invalid timestamps, overlap and falling throughput flagged; verified reruns and liquid accepted.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"result_quality" end time: Oct 20 10:43 AEDT
+"result_quality" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/7 Testing: complete_suite
+3/7 Test: complete_suite
+Command: "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build/complete_suite_test"
+Directory: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build
+"complete_suite" start time: Oct 20 10:43 AEDT
+Output:
+----------------------------------------------------------
+Available APIs produce 18 jobs: Metal 13 + GL4.1 Burn 3 + CPU 2; absent APIs produce no jobs.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"complete_suite" end time: Oct 20 10:43 AEDT
+"complete_suite" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/7 Testing: cpu_cancel
+6/7 Test: cpu_cancel
+Command: "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build/cpu_cancel_test"
+Directory: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build
+"cpu_cancel" start time: Oct 20 10:43 AEDT
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   2.59 sec
+----------------------------------------------------------
+Test Passed.
+"cpu_cancel" end time: Oct 20 10:44 AEDT
+"cpu_cancel" time elapsed: 00:00:02
+----------------------------------------------------------
+
+7/7 Testing: suite_process
+7/7 Test: suite_process
+Command: "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build/suite_process_test"
+Directory: /Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/build
+"suite_process" start time: Oct 20 10:44 AEDT
+Output:
+----------------------------------------------------------
+Cancelling the controller stopped both worker and grandchild.
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"suite_process" end time: Oct 20 10:44 AEDT
+"suite_process" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 20 10:44 AEDT

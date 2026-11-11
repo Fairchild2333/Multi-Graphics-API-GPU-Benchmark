@@ -329,10 +329,10 @@ ES 2.0 and CPU. The desktop complete series uses the same particle sizes and
 three Burn tiers, but generates jobs only for available API/workload pairs.
 Unavailable APIs do not create placeholder or skipped jobs.
 
-On the verified Apple M4 Pro this gives **18 jobs**:
+On the verified Apple M4 Pro this gives **19 jobs**:
 
 - Metal: 8 particle runs (65K/1M/4M/16M, rendered + compute only), 3 GPU Burn
-  tiers (16/64/256), interactive pool and the native memory diagnostic: 13.
+  tiers (16/64/256), interactive pool, native memory and cache-state diagnostics: 14.
 - OpenGL 4.1: the 3 GPU Burn tiers. No compute shaders or SSBOs are needed.
 - CPU: one compute series and one cache/memory/storage sweep: 2.
 
@@ -344,8 +344,8 @@ out/macos/arm64/Release/Mangekyo.app/Contents/Helpers/gpu_benchmark --suite-list
 ```
 
 Timed GPU passes and CPU compute steps use 15 seconds. Memory sweeps use their
-own sample-based duration. Only rendered Metal passes request native capture;
-OpenGL capture is unavailable on macOS and is not requested. Native OpenGL
+own sample-based duration. The GPU and combined one-click score buttons do not
+request captures; the separate capture presets remain available. Native OpenGL
 uses synchronized wall-clock timing when the driver has no usable timer queries,
 with a separate `_sync_timing` score group. The current flow is not a fixed
 29-job list; its count changes with detected APIs/devices.
@@ -353,7 +353,9 @@ with a separate `_sync_timing` score group. The current flow is not a fixed
 Capture filenames now include workload, size and Burn tier, so the suite can
 verify the capture belonging to each result. Cancelling the macOS suite stops
 the worker process group as well as its controller. Short OpenGL runs at all
-three tiers passed on 2026-10-12; the full 18-job series has not been run yet.
+three tiers passed on 2026-10-12. That initial validation used an 18-job plan
+before the unified-memory GPU cache diagnostic was added; later measurements
+and their limits are indexed in `APPLE-NEXT-TESTS.md`.
 
 
 The GPU footer has a direct **Test all projects** button: it selects the complete
@@ -362,10 +364,27 @@ available series and starts it in one click, including CPU work. The adjacent
 GPU results use the same `results.json` (plural), normally under
 `~/Library/Application Support/GpuComputeBenchmark/results/`.
 
+For separate GPU and CPU runs, use these two prominent buttons:
+
+- **Run all GPU tests**: every detected GPU and supported API/workload, queued
+  sequentially. On this M4 Pro: 17 native jobs (Metal 14 + OpenGL 3), or 30 with
+  translated Vulkan enabled. Includes GPU memory and the available cache-state
+  diagnostic; excludes CPU and automatic captures.
+- **Run all CPU tests**: compute (performance single-thread, efficiency
+  single-thread where supported, and all cores), followed by cache/memory curves,
+  page first-touch and temporary-file sequential/random storage tests. The two
+  top-level tasks expand into the full set of stages automatically.
+
+Both buttons ignore the page's custom single-test mode, size and duration
+controls. Compute uses the standard 15-second configuration; all-core always
+uses every core. Results and saved curve points append to the shared JSON.
+Unsupported features do not enter the queue. Independent GPU L2/L3/SLC
+attribution and system swap-in/out speed are not claimed by the diagnostics.
+
 API labels use their standard names: Metal, Vulkan and OpenGL. The distributed
 app enables Metal and native OpenGL 4.1; Vulkan remains off by default. The **Allow translated APIs (MoltenVK)** switch
 exposes the available translation path and includes it in the complete series.
-On the verified arm64 build, the count is 18 with the switch off and 31 with
+On the verified arm64 build, the combined count is 19 with the switch off and 32 with
 it on (13 extra Vulkan jobs). The preference is saved and cannot change during
 a run. Builds without a compatible MoltenVK runtime keep Vulkan unavailable.
 
@@ -385,9 +404,11 @@ probes Vulkan nor includes it in the series, and an explicit Vulkan request is
 rejected. MoltenVK scores use a separate `_moltenvk` workload-version suffix
 and record `apiImplementation=MoltenVK;translatedTo=Metal`.
 
-Verified: build/signature checks, default policy (18 jobs, no Vulkan), explicit
-opt-in policy (31 jobs, Vulkan available), and rejection without opt-in. These
+Verified: build/signature checks, default policy, explicit
+opt-in policy, and rejection without opt-in. The 2026-10-20 scope check confirmed
+GPU 17/30, CPU 2 and combined 19/32 on the packaged arm64 worker. These
 are capability/policy checks; no translated performance run or full series was
-started during this change.
+started during that scope check. See
+`out/test-results/macos-one-click-scope-check-20261020/report.md`.
 
 CPU 页面在 Apple Silicon 自动测试大核＋小核，无核心类型选项；每轮核对至少 99% 的实际核心类型 CPU 时间。大核／小核成绩分别保存，缓存曲线使用各自容量，完整测试也使用该模式。小核后台策略成绩不代表最高频率。方法见 docs/apple-cpu-core-types.md。

@@ -1,0 +1,18 @@
+{
+  "sw_vers": {
+    "returnCode": 0,
+    "output": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0.1\nBuildVersion:\t\t26A434\n"
+  },
+  "sysctl -n hw.model": {
+    "returnCode": 1,
+    "output": "sysctl: sysctl fmt -1 1024 1: Operation not permitted\n"
+  },
+  "pmset -g batt": {
+    "returnCode": 0,
+    "output": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=22872163)\t100%; discharging; 7:08 remaining present: true\n"
+  },
+  "pmset -g therm": {
+    "returnCode": 0,
+    "output": "Error:Failed to get thermal warning level with error code 0xe00002bc\nError: Failed to get performance warning level with error code 0xe00002bc\nError: No CPU power status with error code 0xe00002bc\n"
+  }
+}

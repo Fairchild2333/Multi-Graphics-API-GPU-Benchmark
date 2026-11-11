@@ -1,0 +1,10 @@
+{
+  "appPath": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/macos/arm64/Release/Mangekyo.app",
+  "version": "0.2.6",
+  "bundleIdentifier": "com.fairchild.GPUBenchmark",
+  "guiSha256": "56ad84190e42786d33f931568b12b32649a22d7f91594d9f3e77d2994db211cf",
+  "workerSha256": "6bf03a7b6efcf55d9a79cad4e37ea7a34f40e2ec47fc685ae2f99943126548db",
+  "oldHistoryRows": 171,
+  "oldHistorySha256": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f",
+  "sourceCommit": "7f181d7ec8a551a119da55e3cba9ce21e11bcf16"
+}

@@ -1,0 +1,904 @@
+{
+  "gpu-native": [
+    {
+      "index": "1",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "65536",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "2",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "1048576",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "3",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "4194304",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "4",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "16777216",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "5",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "65536",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "6",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "1048576",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "7",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "4194304",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "8",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "16777216",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "9",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "16",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "10",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "64",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "11",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "256",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "12",
+      "backend": "metal",
+      "workload": "cinematic_liquid",
+      "particles": "0",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "13",
+      "backend": "metal",
+      "workload": "membw",
+      "particles": "0",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "14",
+      "backend": "metal",
+      "workload": "gpu_cache",
+      "particles": "0",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "15",
+      "backend": "opengl",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "16",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "16",
+      "backend": "opengl",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "64",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "17",
+      "backend": "opengl",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "256",
+      "headless": "0",
+      "capture": "0"
+    }
+  ],
+  "gpu-translated": [
+    {
+      "index": "1",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "65536",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "2",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "1048576",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "3",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "4194304",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "4",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "16777216",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "5",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "65536",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "6",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "1048576",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "7",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "4194304",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "8",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "16777216",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "9",
+      "backend": "vulkan",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "16",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "10",
+      "backend": "vulkan",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "64",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "11",
+      "backend": "vulkan",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "256",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "12",
+      "backend": "vulkan",
+      "workload": "cinematic_liquid",
+      "particles": "0",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "13",
+      "backend": "vulkan",
+      "workload": "membw",
+      "particles": "0",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "14",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "65536",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "15",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "1048576",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "16",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "4194304",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "17",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "16777216",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "18",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "65536",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "19",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "1048576",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "20",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "4194304",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "21",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "16777216",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "22",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "16",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "23",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "64",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "24",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "256",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "25",
+      "backend": "metal",
+      "workload": "cinematic_liquid",
+      "particles": "0",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "26",
+      "backend": "metal",
+      "workload": "membw",
+      "particles": "0",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "27",
+      "backend": "metal",
+      "workload": "gpu_cache",
+      "particles": "0",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "28",
+      "backend": "opengl",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "16",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "29",
+      "backend": "opengl",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "64",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "30",
+      "backend": "opengl",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "256",
+      "headless": "0",
+      "capture": "0"
+    }
+  ],
+  "cpu": [
+    {
+      "index": "1",
+      "backend": "cpu",
+      "workload": "cpu_all"
+    },
+    {
+      "index": "2",
+      "backend": "cpu",
+      "workload": "cpu_membw"
+    }
+  ],
+  "all-native": [
+    {
+      "index": "1",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "65536",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "2",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "1048576",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "3",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "4194304",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "4",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "16777216",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "5",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "65536",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "6",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "1048576",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "7",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "4194304",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "8",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "16777216",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "9",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "16",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "10",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "64",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "11",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "256",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "12",
+      "backend": "metal",
+      "workload": "cinematic_liquid",
+      "particles": "0",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "13",
+      "backend": "metal",
+      "workload": "membw",
+      "particles": "0",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "14",
+      "backend": "metal",
+      "workload": "gpu_cache",
+      "particles": "0",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "15",
+      "backend": "opengl",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "16",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "16",
+      "backend": "opengl",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "64",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "17",
+      "backend": "opengl",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "256",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "18",
+      "backend": "cpu",
+      "workload": "cpu_all",
+      "particles": "0",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "19",
+      "backend": "cpu",
+      "workload": "cpu_membw",
+      "particles": "0",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    }
+  ],
+  "all-translated": [
+    {
+      "index": "1",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "65536",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "2",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "1048576",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "3",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "4194304",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "4",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "16777216",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "5",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "65536",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "6",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "1048576",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "7",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "4194304",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "8",
+      "backend": "vulkan",
+      "workload": "stream",
+      "particles": "16777216",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "9",
+      "backend": "vulkan",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "16",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "10",
+      "backend": "vulkan",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "64",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "11",
+      "backend": "vulkan",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "256",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "12",
+      "backend": "vulkan",
+      "workload": "cinematic_liquid",
+      "particles": "0",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "13",
+      "backend": "vulkan",
+      "workload": "membw",
+      "particles": "0",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "14",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "65536",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "15",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "1048576",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "16",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "4194304",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "17",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "16777216",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "18",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "65536",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "19",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "1048576",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "20",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "4194304",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "21",
+      "backend": "metal",
+      "workload": "stream",
+      "particles": "16777216",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "22",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "16",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "23",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "64",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "24",
+      "backend": "metal",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "256",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "25",
+      "backend": "metal",
+      "workload": "cinematic_liquid",
+      "particles": "0",
+      "steps": "0",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "26",
+      "backend": "metal",
+      "workload": "membw",
+      "particles": "0",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "27",
+      "backend": "metal",
+      "workload": "gpu_cache",
+      "particles": "0",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "28",
+      "backend": "opengl",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "16",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "29",
+      "backend": "opengl",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "64",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "30",
+      "backend": "opengl",
+      "workload": "gpu_burn",
+      "particles": "0",
+      "steps": "256",
+      "headless": "0",
+      "capture": "0"
+    },
+    {
+      "index": "31",
+      "backend": "cpu",
+      "workload": "cpu_all",
+      "particles": "0",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    },
+    {
+      "index": "32",
+      "backend": "cpu",
+      "workload": "cpu_membw",
+      "particles": "0",
+      "steps": "0",
+      "headless": "1",
+      "capture": "0"
+    }
+  ]
+}

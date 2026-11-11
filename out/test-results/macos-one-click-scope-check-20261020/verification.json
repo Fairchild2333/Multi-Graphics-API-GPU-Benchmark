@@ -1,0 +1,87 @@
+{
+  "clientDate": "2026-10-20",
+  "verified": true,
+  "device": "Mac16,8 / M4 Pro",
+  "sourceCommit": "7f181d7ec8a551a119da55e3cba9ce21e11bcf16",
+  "workerSha256": "6bf03a7b6efcf55d9a79cad4e37ea7a34f40e2ec47fc685ae2f99943126548db",
+  "guiSha256": "56ad84190e42786d33f931568b12b32649a22d7f91594d9f3e77d2994db211cf",
+  "appVersion": "0.2.6",
+  "plans": {
+    "gpu-native": {
+      "count": 17,
+      "byApi": {
+        "metal": 14,
+        "opengl": 3
+      }
+    },
+    "gpu-translated": {
+      "count": 30,
+      "byApi": {
+        "vulkan": 13,
+        "metal": 14,
+        "opengl": 3
+      }
+    },
+    "cpu": {
+      "count": 2,
+      "byApi": {
+        "cpu": 2
+      }
+    },
+    "all-native": {
+      "count": 19,
+      "byApi": {
+        "metal": 14,
+        "opengl": 3,
+        "cpu": 2
+      }
+    },
+    "all-translated": {
+      "count": 32,
+      "byApi": {
+        "vulkan": 13,
+        "metal": 14,
+        "opengl": 3,
+        "cpu": 2
+      }
+    }
+  },
+  "buttonSourceBindingsChecked": true,
+  "customSingleTestSettingsNotForwarded": true,
+  "nativeTests": "result_quality, complete_suite, cpu_cancel, suite_process:4/4passed",
+  "physicalFullSuitesRunThisCheck": false,
+  "historiesUnchanged": [
+    {
+      "device": "Mac M4 Pro",
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/m4-single-core-check-20261017/results-after.json",
+      "sha256": "0693db7b09cad2199e26451a1d09ea9d713598c5e2276aa2d0f48461c712c78f"
+    },
+    {
+      "device": "iPhone 13 Pro / A15",
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a15-metal-confirm-20261017/phone-final/results/results.json",
+      "sha256": "441c731effdfb365c76d58c6d09d04a72cbe1fd0d4eb84f6adfb192bfefb9024"
+    },
+    {
+      "device": "12.9-inch iPad Pro / A12X",
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad87-particle-completion-20261017/phone-final/results/results.json",
+      "sha256": "62589d5d0f8790e388edad10d516044e4826e56e93279f828cce736c46d435f9"
+    },
+    {
+      "device": "11-inch iPad Pro / A12X",
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/ipad81-budget-metal-check-20261018/phone-final/results/results.json",
+      "sha256": "efe49ed77a2e735fd1da68d7bd4cee2d359c1c9e135c8726707b8a4d350253ce"
+    },
+    {
+      "device": "iPhone 14 Pro Max / A16",
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/a16-budget-completion-20261018/phone-final/results/results.json",
+      "sha256": "2e5b166cc0a9374ce1649d4fbed12bb480a13f2f0f0ab5c697a831d0adfcab48"
+    },
+    {
+      "device": "Apple Watch Ultra",
+      "path": "/Users/fairchild/VSCode Projects/Vulkan-GPU-Compute-Microbenchmark/out/test-results/watch-ultra-first-run-20261017/watch-final/results/results.json",
+      "sha256": "451acaa82c81d79bec3889b82c7bc6cb4c7dfc10af71dd6367f90e7c42753e0b"
+    }
+  ],
+  "liveMacRows": 171,
+  "liveMacUnchanged": true
+}
