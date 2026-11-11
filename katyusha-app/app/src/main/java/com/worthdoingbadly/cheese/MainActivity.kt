@@ -32,14 +32,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -49,11 +54,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,11 +68,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -167,6 +176,13 @@ class MainActivity : ComponentActivity() {
                     targetFile.setExecutable(true, false)
                     targetFile.setReadable(true, false)
                     logLines.add("  - " + tr("Extracted", "释放组件") + ": $filename (executable=ok)")
+                }
+
+                // Apply any online-downloaded newer KernelSU modules or ksud
+                KernelUpdater.applyDownloadedUpdates(this@MainActivity, extractedDir) { msg ->
+                    launch(Dispatchers.Main) {
+                        logLines.add(msg)
+                    }
                 }
 
                 val executablePath = applicationInfo.nativeLibraryDir + "/libcheese.so"
@@ -283,6 +299,21 @@ fun MainAppScreen(
     onCopyLogs: () -> Unit,
     onOpenKernelSU: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var showUpdateDialog by remember { mutableStateOf(false) }
+    var updateCheckResult by remember { mutableStateOf<UpdateCheckResult?>(null) }
+    var isChecking by remember { mutableStateOf(false) }
+    var isDownloading by remember { mutableStateOf(false) }
+    var updateStatusText by remember { mutableStateOf("") }
+    var hasUpdateBadge by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        val res = KernelUpdater.checkForUpdates(context)
+        updateCheckResult = res
+        hasUpdateBadge = res.hasUpdate
+    }
+
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
@@ -301,6 +332,35 @@ fun MainAppScreen(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            showUpdateDialog = true
+                            coroutineScope.launch {
+                                isChecking = true
+                                updateStatusText = ""
+                                val res = KernelUpdater.checkForUpdates(context)
+                                updateCheckResult = res
+                                hasUpdateBadge = res.hasUpdate
+                                isChecking = false
+                            }
+                        }
+                    ) {
+                        BadgedBox(
+                            badge = {
+                                if (hasUpdateBadge) {
+                                    Badge()
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CloudSync,
+                                contentDescription = tr("Check Kernel Update", "检查内核驱动更新"),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -340,6 +400,134 @@ fun MainAppScreen(
                 onOpenKernelSU = onOpenKernelSU
             )
         }
+    }
+
+    if (showUpdateDialog) {
+        AlertDialog(
+            onDismissRequest = { if (!isDownloading) showUpdateDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.CloudSync,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            title = {
+                Text(
+                    text = tr("KernelSU Module Sync & Update", "内核驱动自动同步与更新"),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val res = updateCheckResult
+                    if (isChecking) {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        Text(
+                            text = tr("Checking for latest modules on GitHub...", "正在查询 KernelSU 官方最新驱动..."),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    } else if (res != null) {
+                        Text(
+                            text = tr("• Local Module: ", "• 当前模块版本: ") + "${res.currentModuleVersion} (Build ${res.currentModuleCode})",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = tr("• Target KMI: ", "• 匹配设备 KMI: ") + res.kmi,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        if (res.installedManagerVersion != null) {
+                            Text(
+                                text = tr("• Manager App: ", "• 当前管理器版本: ") + "${res.installedManagerVersion} (Build ${res.installedManagerCode ?: "Unknown"})",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        if (res.hasUpdate) {
+                            Text(
+                                text = tr(
+                                    "✨ Found new matching module: ${res.targetTag}!\nTap [Update Now] to download automatically.",
+                                    "✨ 发现可匹配新版本：${res.targetTag}！\n点击下方【立即自动更新】即可自动拉取最新 .ko 模块。"
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        } else {
+                            Text(
+                                text = tr(
+                                    "✔️ Kernel module matches installed manager perfectly and is up to date.",
+                                    "✔️ 当前内核驱动与 KernelSU 管理器版本完全一致，处于最佳同步状态！"
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    if (updateStatusText.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = updateStatusText,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+
+                    if (isDownloading) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    }
+                }
+            },
+            confirmButton = {
+                val res = updateCheckResult
+                if (res != null && res.hasUpdate && !isChecking) {
+                    Button(
+                        enabled = !isDownloading,
+                        onClick = {
+                            coroutineScope.launch {
+                                isDownloading = true
+                                val ok = KernelUpdater.downloadUpdate(context, res) { msg ->
+                                    updateStatusText = msg
+                                }
+                                if (ok) {
+                                    val newRes = KernelUpdater.checkForUpdates(context)
+                                    updateCheckResult = newRes
+                                    hasUpdateBadge = newRes.hasUpdate
+                                }
+                                isDownloading = false
+                            }
+                        }
+                    ) {
+                        Text(tr("Update Now", "立即自动更新"))
+                    }
+                } else {
+                    TextButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                isChecking = true
+                                updateStatusText = ""
+                                val newRes = KernelUpdater.checkForUpdates(context)
+                                updateCheckResult = newRes
+                                hasUpdateBadge = newRes.hasUpdate
+                                isChecking = false
+                            }
+                        }
+                    ) {
+                        Text(tr("Check Again", "重新检查"))
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    enabled = !isDownloading,
+                    onClick = { showUpdateDialog = false }
+                ) {
+                    Text(tr("Close", "关闭"))
+                }
+            }
+        )
     }
 }
 
@@ -560,8 +748,8 @@ private fun PlatformLimitationCard(
 
             Text(
                 text = tr(
-                    "• Linux Kernel & KernelSU: Dynamic KMI auto-matching (supports 5.10 / 5.15 / 6.1 / 6.6 GKI kernels). Automatically invokes ksud late-load to match LKM modules from the installed KernelSU manager, with fallback to bundled module.",
-                    "• Linux 内核与 KernelSU：采用动态 KMI 匹配架构（支持 5.10 / 5.15 / 6.1 / 6.6 等 GKI 内核）。通过 ksud late-load 自动从已安装的 KernelSU 管理器中匹配对应内核版本的 LKM 模块注入；未安装时自动回退内置模块。"
+                    "• Linux Kernel & Auto-Sync: Dynamic KMI auto-matching (supports 5.10 / 5.15 / 6.1 / 6.6 GKI kernels). Supports auto-checking and one-tap updating latest official kernel modules (.ko), seamlessly syncing with installed KernelSU manager.",
+                    "• Linux 内核与驱动自动更新：采用动态 KMI 匹配架构（支持 5.10 / 5.15 / 6.1 / 6.6 等 GKI 内核）。支持联网自动检测与一键更新最新官方内核模块（.ko），自动与已安装的 KernelSU 管理器版本对齐。"
                 ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
