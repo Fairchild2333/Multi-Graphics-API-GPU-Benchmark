@@ -1,0 +1,10 @@
+--------- beginning of main
+11-12 15:55:00.796  4301  4301 I Mangekyo: AUTORUN accepted test=cinematic_liquid
+11-12 15:55:01.902  4301  4301 I Mangekyo: AUTORUN started test=cinematic_liquid
+11-12 15:55:01.903  4301  4511 I MangekyoEngine: [RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+11-12 15:55:01.911  4301  4511 I MangekyoEngine: Available GPUs:
+11-12 15:55:01.913  4301  4511 I MangekyoEngine:   [0] Adreno (TM) 740 (Integrated GPU)
+11-12 15:55:01.914  4301  4511 I MangekyoEngine: Selected GPU [0]: Adreno (TM) 740  |  Driver: 512.676.1
+11-12 15:55:01.919  4301  4511 I MangekyoEngine: [Vulkan] Present mode: mailbox (not tied to the refresh rate)
+11-12 15:55:01.921  4301  4511 I MangekyoEngine: Created particle buffer (device-local via staging): 256 particles
+11-12 15:55:01.971  4301  4301 I Mangekyo: RUN finished kind=gpu score=none error=Cinematic Liquid v2 fixed score requires linear-filterable R32_SFLOAT 3D images

@@ -6099,8 +6099,11 @@ PathService 已把 results/captures/reports/logs 改到
 ### 2026-11-07 Xiaomi Mi 3 (pisces) TWRP Recovery & GApps Deployment Verified
 
 - **Verified Facts**:
-  1. Bootloader Reboot Bypass: MIUI userland intercepts both db reboot bootloader and su -c reboot bootloader (eboot bootloader is disabled). Solved via static bare-metal ARM assembly binary (b_bare, -nostdlib -static) calling Linux syscall __NR_reboot=88 with LINUX_REBOOT_CMD_RESTART2 + "bootloader".
-  2. TWRP Flashing: NVIDIA Tegra 4 (pisces) requires device-specific community TWRP (MI3TD-TWRP2.8-2015-04-25.img). Fixed string-slicing bug in oot/fb.py where "DATA " length parsing was off-by-one. Successfully flashed recovery partition and booted directly into TWRP 2.8.6.0 via pyusb/WinUSB fastboot.
+  1. Bootloader Reboot Bypass: MIUI userland intercepts both db reboot bootloader and su -c reboot bootloader (
+eboot bootloader is disabled). Solved via static bare-metal ARM assembly binary (
+b_bare, -nostdlib -static) calling Linux syscall __NR_reboot=88 with LINUX_REBOOT_CMD_RESTART2 + "bootloader".
+  2. TWRP Flashing: NVIDIA Tegra 4 (pisces) requires device-specific community TWRP (MI3TD-TWRP2.8-2015-04-25.img). Fixed string-slicing bug in 
+oot/fb.py where "DATA " length parsing was off-by-one. Successfully flashed recovery partition and booted directly into TWRP 2.8.6.0 via pyusb/WinUSB fastboot.
   3. GApps Recovery & Deployment: Previous attempt with systemless Magisk module caused bootloops. In TWRP:
      - Backed up entire /system to /data/media/TWRP/BACKUPS/0a8213b8/backup_system/.
      - Relocated 95.7 MB of dead/offline MIUI 7 stock bloatware (Email, GameCenter, Mipay, MiuiVideo, etc.) to /sdcard/removed_stock_apps/, increasing free /system space from 13.7 MB to 109.3 MB.
@@ -6125,7 +6128,8 @@ PathService 已把 results/captures/reports/logs 改到
      - calls=1：E3: tree fields planted for target=0xffffff802ac51b20 正常执行，status=0 calls=1 success=1，W1 仍未落地 (Write 1 failed)。
      - 梯度提升 calls=4 与 calls=16：PI 遍历安全完成 (calls=16 success=16)，未发生内核 panic（此前 64 连射必崩），表明 E3 结构字段稳定了部分解构流程，但目标地址  xffffff802ac51b20 处依然未见翻转（enforce=1）。
   4. 符号验证：selinux_state 符号确认位于  xffffffc012c51b20，结合  xa8000000 load 换算的 direct alias 严格为  xffffff802ac51b20，地址运算自洽。
-  5. 当前瓶颈：5.10 的 b_erase 或锁清理分支在 UAF 清理时未将 stale waiter 当作叶子节点触发 parent 写穿，或需要探针回读可控内存验证写原语真实落点。
+  5. 当前瓶颈：5.10 的 
+b_erase 或锁清理分支在 UAF 清理时未将 stale waiter 当作叶子节点触发 parent 写穿，或需要探针回读可控内存验证写原语真实落点。
 ## 2026-11-08 崩溃点精准收敛实验：E3 补丁下的 consumer 调用阈值
 
 - 实验对照组（同一套 E3 树节点填充代码）：
@@ -6139,7 +6143,8 @@ PathService 已把 results/captures/reports/logs 改到
   2. 崩溃点精确锁定在 **calls ∈ (32, 64]** 区间！随着 consumer 重复对 sched_setattr 的突发调用累积，PI 链被深度遍历并最终解引用到了 ake_task 页面的未映射/非法虚存。
   3. 既然 64 发连射必崩、32 发内不崩且均未改写成功，说明：
      - 当前的 ake_task 伪造结构不足以支撑内核完整的链深走（走到一定深度就触雷）；
-     - 或者通过 sched_setattr 触发的并不是 b_erase 解链接覆盖写入路径。
+     - 或者通过 sched_setattr 触发的并不是 
+b_erase 解链接覆盖写入路径。
 ## 2026-11-08 崩溃上限再收窄：calls 阈值精准锁定在 (32, 40]
 
 - 实验对照：
@@ -6150,7 +6155,8 @@ PathService 已把 results/captures/reports/logs 改到
 
 1. 路径 A (GhostLock 深度结构研判)：
    - ake_task 在 5.10 的关键偏移经核对均准确：prio=0x84, pi_lock=0x86c, pi_waiters=0x880, pi_top_task=0x890, pi_blocked_on=0x898。
-   - 崩溃根因明确：在内核 5.10 中，t_mutex_adjust_pi 遍历时 calls > 32 会顺着 pi_top_task 或 pi_waiters 不断向下解引用。当前 ake_task 中的 pi_waiters 初始化为全 0（空树），当 consumer 反复调用超过 32 次时，重平衡算法在空树边界处发生了非预期的链指针越界解引用。
+   - 崩溃根因明确：在内核 5.10 中，
+t_mutex_adjust_pi 遍历时 calls > 32 会顺着 pi_top_task 或 pi_waiters 不断向下解引用。当前 ake_task 中的 pi_waiters 初始化为全 0（空树），当 consumer 反复调用超过 32 次时，重平衡算法在空树边界处发生了非预期的链指针越界解引用。
    - 目标地址排查：selinux_state 结构体首字段在 5.10 中即为 disabled (bool) 与 enforcing (bool)。
 2. 路径 B (DirtyFrag 评估阻断)：
    - 尽管内核包含 CONFIG_XFRM=y，但 Android SELinux 的 shell (uid=2000) 域严格被 sepolicy 禁止打开 XFRM Netlink 套接字 (Cannot open netlink socket: Permission denied)。
@@ -6174,7 +6180,8 @@ PathService 已把 results/captures/reports/logs 改到
 - 根因确凿定性：
   - 崩溃阈值直接从 > 32 提前到了 **6 < calls <= 20**！
   - **这 100% 证明：内核确实顺着我们链入的 ake_w0_pi_node 步入了真实的 PI 树遍历算法！**
-  - 之所以会在第 7~20 轮调用崩溃，是因为 ake_w0 的树字段虽然构成了合法红黑树，但在 b_erase 发生后，内核根据 Red-Black 树平衡规则需要回写或遍历更上层的父节点（或 ake_task 的互斥锁链结构），从而踩到了伪造内存中的残留未定义字段。
+  - 之所以会在第 7~20 轮调用崩溃，是因为 ake_w0 的树字段虽然构成了合法红黑树，但在 
+b_erase 发生后，内核根据 Red-Black 树平衡规则需要回写或遍历更上层的父节点（或 ake_task 的互斥锁链结构），从而踩到了伪造内存中的残留未定义字段。
 ## 2026-11-08 二分法极限逼近：pi_waiters 链入模式下的崩溃边界锁定在 (6, 8]
 
 - 实验对照（当前构建：util.cpp 开启 fake_task->pi_waiters 链入 fake_w0_pi_node）：
@@ -6184,7 +6191,8 @@ PathService 已把 results/captures/reports/logs 改到
   \text{Safe Bound} = 6 < \text{Panic Trigger} \le 8
   在真正接入了 PI 树节点后，内核的 PI 重平衡链行走步数极其有限，在**第 7 次或第 8 次**调度优先级变动时，即遭遇了深层非法解引用。
 - 根因分析：
-  之所以第 1~6 次能平稳运行，是因为 ake_w0 被成功视作了等待者。但在连续调整优先级时，内核的 t_mutex_adjust_pi 会顺着 waiter->lock（即 ake_lock）继续向上寻找持有该锁的 owner 任务（即 ake_lock->owner，当前填的是 ake_task | 1），形成了一个互斥锁与任务相互引用的闭环。当这个死循环调整超过 6 次深度时，内核栈或算法检测到了环路/异常，进而触发崩溃。
+  之所以第 1~6 次能平稳运行，是因为 ake_w0 被成功视作了等待者。但在连续调整优先级时，内核的 
+t_mutex_adjust_pi 会顺着 waiter->lock（即 ake_lock）继续向上寻找持有该锁的 owner 任务（即 ake_lock->owner，当前填的是 ake_task | 1），形成了一个互斥锁与任务相互引用的闭环。当这个死循环调整超过 6 次深度时，内核栈或算法检测到了环路/异常，进而触发崩溃。
 ## 2026-11-10 晚 — 第一板斧告捷：移植者 cheese-cake 在本机完整跑通（EDEADLK 自愈补丁），UID 0 + SELinux Permissive
 
 - 对照实验结论：OnePlus 10 Pro porter 的 cheese-cake 二进制在我们机器上能执行到完整 root——排除全部工具链/参数嫌疑；差异确在设备状态/运行上下文（会话 11 模型的旁证坐实）。
@@ -6197,3 +6205,24 @@ PathService 已把 results/captures/reports/logs 改到
 - 偏移复核（一次命中，无需再改）：idmap 0x268f000 / swapper 0x2694000 / init_task +0x31ce00 / tasks 0x4c8 / pid 0x5c8 / mm 0x518 / pgd 0x48 / selinux_state +0x5c2b20（= symbols.json 精确一致）。
 - 设备状态：健康（getenforce Permissive 为 exploit 效果，重启即恢复 Enforcing）；/data/local/tmp/cheesecake 与 cc7.log 已留机。
 - 下一步：第二板斧（retire/timestamp 激活，让挂起 fault 现形）与第三板斧（CP_NOP 逐 opcode 二分）是否仍需做由用户定；cheese 路线本身已通。
+
+### 2026-11-12 第二十台设备：三星 Galaxy S23（SM-S911B，骁龙 8 Gen 2）——第一台三星；测试搬到 Mac 上，adb-suite 有了 bash 版
+
+- **设备：** samsung SM-S911B（dm1q，序列号 RFCW10T3GCH），`QTI SM8550`，Adreno 740（驱动 **512.676.1，和 MIX Fold 3 完全相同**），Android 16（API 36，补丁 2026-09-05），内核 5.15.189-android13-8（GKI），8 GB 内存，1080 × 2340。Vulkan present mode 是 mailbox（不受刷新率限制），窗口成绩有效。root 线不可行：补丁级别晚于 Adreno CVE-2025-21479 修复线。
+- **工具链（Mac 上的三件事）：**
+  1. `android/gradle/libs.versions.toml` 里的 AGP 在 11-11 的一个 docs 提交（32fe6d2）里被顺手从 9.4.1 升到 9.5.0，`assembleDebug` 当场坏掉：AGP 9.5 新增的 Compose Preview 任务要求（a）debug 变体 `testOptions.unitTests.isIncludeAndroidResources = true`（默认 false），（b）release 变体开单元测试（默认关）。本机的 S23 正式系列先回退 9.4.1 跑完；随后**正向修好 9.5.0** 并留在 9.5.0：`app/build.gradle.kts` 加了（a），以及 `androidComponents.beforeVariants(selector().all())` 里 `(variantBuilder as HasHostTestsBuilder).hostTests[HostTestBuilder.UNIT_TEST_TYPE]?.enable = true`——注意旧的 `enableUnitTest`/`unitTestEnabled` 属性虽在字节码里存在，但被 `DeprecationLevel.HIDDEN` 标记，Kotlin DSL 里完全不可见，只能走 hostTests。**两个版本等价性已证明**：两编的 `libmangekyo_jni.so` 的 `.text`/`.rodata`/`.data` 段逐字节相同（整文件哈希不同只是 DWARF 里的构建目录名），APK 内四个 ABI 的打包后 .so 尺寸相同，单元测试 5/5，S23 真机装包并启动正常。所以本条的成绩对 9.4.1/9.5.0 两个构建都成立。
+  2. 新增 `scripts/adb-suite.sh`：`adb-suite.ps1` 的 bash 移植，29 项清单、时长、判定、断线自愈、`-Only/-Quick/-CoolDownSeconds/-StartBelowC` 参数和输出文件全部一致；多了一处冷却期内每 20 秒 `KEYCODE_WAKEUP` 防熄屏（不改任何设置）。Mac 上 adb 在 `~/Library/Android/sdk/platform-tools/adb`。
+  3. 正式系列前用 `-Only "^particle-65k$"` 冒烟过一次（out/adb/samsung SM-S911B-20261112-154114，成绩已随 `pm clear` 作废，仅作链路验证），然后 `pm clear` 从零跑正式系列。
+- **29 项结果（out/adb/samsung SM-S911B-20261112-154559，已归档到 out/test-results/samsung-s23-full-suite-20261112/）：** 26 项 ok，3 项 FAILED 全是已知驱动限制：流体（Adreno 不支持 R32_SFLOAT 3D 线性过滤，高通全系如此）、GLES 1600 万粒子窗口+Headless（65536 > 驱动上限 65535，和 Quest/Mate 60 Pro/小米 15S Pro 一样）。电池 31.2 → 36.8 °C，全程无温控限频。results.json 27 条。
+- **GPU 成绩 vs MIX Fold 3（同 SM8550、同驱动 512.676.1）：**
+
+  | 测试（Vulkan） | S23 | MIX Fold 3 |
+  |---|---|---|
+  | 粒子窗口 65K/1M/4M/16M | 22.17 / 24.44 / 23.75 / 23.69 GB/s | 15.23* / 26.85 / 25.86 / 25.69 GB/s |
+  | 粒子 Headless 65K/1M/4M/16M | 19.33 / 24.55 / 24.03 / 23.91 GB/s | 16.79 / 27.32 / 26.43 / 26.30 GB/s |
+  | GPU Burn 16/64/256 步 | 2.17 / **2.75** / 2.96 Gpix-step/s | — / **2.75** / — |
+  | 显存 读/写/复制 | **56.4 / 49.5 / 43.7 GB/s，三项都到平台** | 51.8 / 50.8 / 47.5（旧包未到平台；10-17 修复后补测到平台） |
+
+  *MIX Fold 3 的 65K 窗口当年被引擎标了降频，偏低。S23 大档粒子低 8–10%（小机身散热），GPU Burn 64 步两台**一字不差**，显存读反而高 9%。GLES 粒子 13.2–23.2 GB/s（wall-clock 计时，Adreno 时间戳不可用的老结论）；GLES 2.0 Burn 在自己的 legacy 分组，44.8–49.0 Gpix-step/s（wall-clock）。复制曲线的缓存平台 61.9 GB/s（2–4 MiB）。
+- **CPU 成绩 vs MIX Fold 3：** 3 × A510 59.5–60.8、4 个中核 171.6–183.9、X3 **194.0**（MIX Fold 3：203）MWork/s；全核 **884.67**（842.9，当年它被 core_ctl 抢过核心）。X3 单线程 L1 读 87.1/写 94.2/复制 181.6、内存读 33.2/写 56.6/复制 39.9 GB/s，和 MIX Fold 3（93.7/94.2/181.7、33.0/54.2/43.5）几乎重合；中核内存读 29.2、A510 13.4；全核内存读 46.2/写 56.0/复制 44.5。存储是 zram（顺序读 1708、写 270 MB/s，随机读 39.3 MB/s——写路径被 zram 压缩影响，和有真实闪存的设备不可比）。
+- **未做：** 成绩未提交（等用户）；katyusha-app 仍有 11-11 的 4 个文件未提交，与本次无关。

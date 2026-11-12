@@ -1,0 +1,192 @@
+--------- beginning of main
+11-12 15:55:03.583  4659  4659 I Mangekyo: AUTORUN accepted test=membw
+11-12 15:55:04.008  4659  4659 I Mangekyo: AUTORUN started test=membw
+11-12 15:55:04.011  4659  4769 I MangekyoEngine: ============================================================
+11-12 15:55:04.011  4659  4769 I MangekyoEngine:                     GPU & API Detection
+11-12 15:55:04.011  4659  4769 I MangekyoEngine: ============================================================
+11-12 15:55:04.011  4659  4769 I MangekyoEngine:   GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+11-12 15:55:04.011  4659  4769 I MangekyoEngine:   -------------------------------------------- ------  ------  ----  ----  -----  ------
+11-12 15:55:04.011  4659  4769 I MangekyoEngine:   Adreno (TM) 740 (Integrated)                     -   YES    -     -     -     -  
+11-12 15:55:04.011  4659  4769 I MangekyoEngine: ============================================================
+11-12 15:55:04.013  4659  4769 I MangekyoEngine: MEMBW_COUNTERS	extension_advertised=0	status=extension_not_advertised	inventory=	cache_attribution=unverified
+11-12 15:55:04.138  4659  4769 I MangekyoEngine: [membw] Data check: the kernels load from the buffer of 128 MiB what was stored in it.
+11-12 15:55:04.419  4659  4769 I MangekyoEngine: [membw] Timing check: a read of 4096 MiB took 76.545 ms by the GPU's clock, 77.614 ms by wall clock.
+11-12 15:55:04.419  4659  4769 I MangekyoEngine: ========== Memory Bandwidth Sweep (membw_v3_streaming) ==========
+11-12 15:55:04.419  4659  4769 I MangekyoEngine: Device:    Adreno (TM) 740 (Integrated GPU)
+11-12 15:55:04.419  4659  4769 I MangekyoEngine: Driver:    Qualcomm Technologies Inc. Adreno Vulkan Driver Driver Build: 3df4c357f0, I515341007c, 1769513954
+11-12 15:55:04.419  4659  4769 I MangekyoEngine: Date: 01/27/26
+11-12 15:55:04.419  4659  4769 I MangekyoEngine: Compiler Version: E031.41.03.64
+11-12 15:55:04.419  4659  4769 I MangekyoEngine: Driver Branch: 
+11-12 15:55:04.419  4659  4769 I MangekyoEngine: Memory:    7072 MiB device-local heap, measured as system memory
+11-12 15:55:04.419  4659  4769 I MangekyoEngine: Sweep:     1 MiB - 128 MiB in 0.5 MiB chunks (ceiling lowered by the device)
+11-12 15:55:04.419  4659  4769 I MangekyoEngine: Timing:    GPU timestamps, 3 warm-up + 10 measured samples per point, median reported
+11-12 15:55:04.419  4659  4769 I MangekyoEngine: Traversal: complete ordered data-set passes from 32 MiB; smaller points retain cache-workgroup repetition.
+11-12 15:55:04.419  4659  4769 I MangekyoEngine: [read] 16 B loads
+11-12 15:55:04.419  4659  4769 I MangekyoEngine:     Data set   Passes   Dispatch MiB   Median ms     Min ms   Median GB/s   Best GB/s
+11-12 15:55:04.489  4659  4769 I MangekyoEngine:        1 MiB     1038           1038       3.952      3.949         275.4       275.6
+11-12 15:55:04.489  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=1048576	passes=1038	dispatch_bytes=1088421888	dispatches_per_sample=1	median_ms=3.951614	min_ms=3.948750	median_gbps=275.437	best_gbps=275.637
+11-12 15:55:04.567  4659  4769 I MangekyoEngine:      1.5 MiB      564            846       4.704      4.538         188.6       195.5
+11-12 15:55:04.567  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=1572864	passes=564	dispatch_bytes=887095296	dispatches_per_sample=1	median_ms=4.703906	min_ms=4.538437	median_gbps=188.587	best_gbps=195.463
+11-12 15:55:04.646  4659  4769 I MangekyoEngine:        2 MiB      291            582       4.582      4.500         133.2       135.6
+11-12 15:55:04.646  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=2097152	passes=291	dispatch_bytes=610271232	dispatches_per_sample=1	median_ms=4.582161	min_ms=4.499531	median_gbps=133.184	best_gbps=135.630
+11-12 15:55:04.690  4659  4769 I MangekyoEngine:        3 MiB       85            255       2.562      2.493         104.4       107.3
+11-12 15:55:04.690  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=3145728	passes=85	dispatch_bytes=267386880	dispatches_per_sample=1	median_ms=2.561823	min_ms=2.492604	median_gbps=104.374	best_gbps=107.272
+11-12 15:55:04.741  4659  4769 I MangekyoEngine:        4 MiB       64            256       3.030      2.986          88.6        89.9
+11-12 15:55:04.741  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=4194304	passes=64	dispatch_bytes=268435456	dispatches_per_sample=1	median_ms=3.030260	min_ms=2.985885	median_gbps=88.585	best_gbps=89.901
+11-12 15:55:04.801  4659  4769 I MangekyoEngine:        6 MiB       42            252       3.593      3.531          73.6        74.8
+11-12 15:55:04.801  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=6291456	passes=42	dispatch_bytes=264241152	dispatches_per_sample=1	median_ms=3.592604	min_ms=3.531198	median_gbps=73.551	best_gbps=74.830
+11-12 15:55:04.868  4659  4769 I MangekyoEngine:        8 MiB       32            256       4.072      4.023          65.9        66.7
+11-12 15:55:04.868  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=8388608	passes=32	dispatch_bytes=268435456	dispatches_per_sample=1	median_ms=4.072161	min_ms=4.022917	median_gbps=65.920	best_gbps=66.727
+11-12 15:55:04.946  4659  4769 I MangekyoEngine:       12 MiB       21            252       4.468      4.432          59.1        59.6
+11-12 15:55:04.946  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=12582912	passes=21	dispatch_bytes=264241152	dispatches_per_sample=1	median_ms=4.467630	min_ms=4.431614	median_gbps=59.146	best_gbps=59.626
+11-12 15:55:05.022  4659  4769 I MangekyoEngine:       16 MiB       16            256       4.618      4.599          58.1        58.4
+11-12 15:55:05.022  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=16777216	passes=16	dispatch_bytes=268435456	dispatches_per_sample=1	median_ms=4.618437	min_ms=4.599219	median_gbps=58.123	best_gbps=58.365
+11-12 15:55:05.095  4659  4769 I MangekyoEngine:       24 MiB       10            240       4.472      4.443          56.3        56.6
+11-12 15:55:05.095  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=25165824	passes=10	dispatch_bytes=251658240	dispatches_per_sample=1	median_ms=4.472474	min_ms=4.442552	median_gbps=56.268	best_gbps=56.647
+11-12 15:55:05.176  4659  4769 I MangekyoEngine:       32 MiB        8            256       4.777      4.767          56.2        56.3
+11-12 15:55:05.176  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=33554432	passes=8	dispatch_bytes=268435456	dispatches_per_sample=8	median_ms=4.777370	min_ms=4.766927	median_gbps=56.189	best_gbps=56.312
+11-12 15:55:05.250  4659  4769 I MangekyoEngine:       48 MiB        5            240       4.485      4.476          56.1        56.2
+11-12 15:55:05.250  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=50331648	passes=5	dispatch_bytes=251658240	dispatches_per_sample=5	median_ms=4.484739	min_ms=4.476146	median_gbps=56.114	best_gbps=56.222
+11-12 15:55:05.328  4659  4769 I MangekyoEngine:       64 MiB        4            256       4.794      4.758          56.0        56.4
+11-12 15:55:05.328  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=67108864	passes=4	dispatch_bytes=268435456	dispatches_per_sample=4	median_ms=4.794375	min_ms=4.757656	median_gbps=55.990	best_gbps=56.422
+11-12 15:55:05.387  4659  4769 I MangekyoEngine:       96 MiB        2            192       3.571      3.562          56.4        56.5
+11-12 15:55:05.387  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=100663296	passes=2	dispatch_bytes=201326592	dispatches_per_sample=2	median_ms=3.571172	min_ms=3.562031	median_gbps=56.375	best_gbps=56.520
+11-12 15:55:05.465  4659  4769 I MangekyoEngine:      128 MiB        2            256       4.758      4.748          56.4        56.5
+11-12 15:55:05.465  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=read	dataset_bytes=134217728	passes=2	dispatch_bytes=268435456	dispatches_per_sample=2	median_ms=4.757604	min_ms=4.748073	median_gbps=56.422	best_gbps=56.536
+11-12 15:55:05.465  4659  4769 I MangekyoEngine: [write] 16 B stores
+11-12 15:55:05.465  4659  4769 I MangekyoEngine:     Data set   Passes   Dispatch MiB   Median ms     Min ms   Median GB/s   Best GB/s
+11-12 15:55:05.581  4659  4769 I MangekyoEngine:        1 MiB      256            256       7.240      7.225          37.1        37.2
+11-12 15:55:05.582  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=1048576	passes=256	dispatch_bytes=268435456	dispatches_per_sample=1	median_ms=7.239713	min_ms=7.224739	median_gbps=37.078	best_gbps=37.155
+11-12 15:55:05.669  4659  4769 I MangekyoEngine:      1.5 MiB      170            255       4.904      4.856          54.5        55.1
+11-12 15:55:05.669  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=1572864	passes=170	dispatch_bytes=267386880	dispatches_per_sample=1	median_ms=4.903880	min_ms=4.855729	median_gbps=54.526	best_gbps=55.066
+11-12 15:55:05.757  4659  4769 I MangekyoEngine:        2 MiB      128            256       5.096      5.084          52.7        52.8
+11-12 15:55:05.757  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=2097152	passes=128	dispatch_bytes=268435456	dispatches_per_sample=1	median_ms=5.095625	min_ms=5.083646	median_gbps=52.680	best_gbps=52.804
+11-12 15:55:05.851  4659  4769 I MangekyoEngine:        3 MiB       85            255       5.724      5.287          46.7        50.6
+11-12 15:55:05.851  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=3145728	passes=85	dispatch_bytes=267386880	dispatches_per_sample=1	median_ms=5.724427	min_ms=5.286771	median_gbps=46.710	best_gbps=50.577
+11-12 15:55:05.942  4659  4769 I MangekyoEngine:        4 MiB       64            256       5.273      5.255          50.9        51.1
+11-12 15:55:05.942  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=4194304	passes=64	dispatch_bytes=268435456	dispatches_per_sample=1	median_ms=5.273125	min_ms=5.255312	median_gbps=50.906	best_gbps=51.079
+11-12 15:55:06.032  4659  4769 I MangekyoEngine:        6 MiB       42            252       5.257      5.244          50.3        50.4
+11-12 15:55:06.032  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=6291456	passes=42	dispatch_bytes=264241152	dispatches_per_sample=1	median_ms=5.257031	min_ms=5.243906	median_gbps=50.264	best_gbps=50.390
+11-12 15:55:06.128  4659  4769 I MangekyoEngine:        8 MiB       32            256       5.578      5.511          48.1        48.7
+11-12 15:55:06.128  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=8388608	passes=32	dispatch_bytes=268435456	dispatches_per_sample=1	median_ms=5.578229	min_ms=5.511302	median_gbps=48.122	best_gbps=48.706
+11-12 15:55:06.225  4659  4769 I MangekyoEngine:       12 MiB       21            252       5.428      5.290          48.7        50.0
+11-12 15:55:06.225  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=12582912	passes=21	dispatch_bytes=264241152	dispatches_per_sample=1	median_ms=5.428489	min_ms=5.289896	median_gbps=48.677	best_gbps=49.952
+11-12 15:55:06.317  4659  4769 I MangekyoEngine:       16 MiB       16            256       5.427      5.381          49.5        49.9
+11-12 15:55:06.317  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=16777216	passes=16	dispatch_bytes=268435456	dispatches_per_sample=1	median_ms=5.426667	min_ms=5.381042	median_gbps=49.466	best_gbps=49.885
+11-12 15:55:06.403  4659  4769 I MangekyoEngine:       24 MiB       10            240       5.066      5.051          49.7        49.8
+11-12 15:55:06.404  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=25165824	passes=10	dispatch_bytes=251658240	dispatches_per_sample=1	median_ms=5.066068	min_ms=5.050573	median_gbps=49.675	best_gbps=49.828
+11-12 15:55:06.496  4659  4769 I MangekyoEngine:       32 MiB        8            256       5.413      5.401          49.6        49.7
+11-12 15:55:06.496  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=33554432	passes=8	dispatch_bytes=268435456	dispatches_per_sample=8	median_ms=5.413307	min_ms=5.400937	median_gbps=49.588	best_gbps=49.702
+11-12 15:55:06.584  4659  4769 I MangekyoEngine:       48 MiB        5            240       5.286      5.057          47.6        49.8
+11-12 15:55:06.584  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=50331648	passes=5	dispatch_bytes=251658240	dispatches_per_sample=5	median_ms=5.286146	min_ms=5.056927	median_gbps=47.607	best_gbps=49.765
+11-12 15:55:06.677  4659  4769 I MangekyoEngine:       64 MiB        4            256       5.420      5.386          49.5        49.8
+11-12 15:55:06.677  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=67108864	passes=4	dispatch_bytes=268435456	dispatches_per_sample=4	median_ms=5.419661	min_ms=5.386250	median_gbps=49.530	best_gbps=49.837
+11-12 15:55:06.750  4659  4769 I MangekyoEngine:       96 MiB        2            192       4.063      4.053          49.5        49.7
+11-12 15:55:06.750  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=100663296	passes=2	dispatch_bytes=201326592	dispatches_per_sample=2	median_ms=4.063359	min_ms=4.053021	median_gbps=49.547	best_gbps=49.673
+11-12 15:55:06.849  4659  4769 I MangekyoEngine:      128 MiB        2            256       5.595      5.412          48.0        49.6
+11-12 15:55:06.849  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=write	dataset_bytes=134217728	passes=2	dispatch_bytes=268435456	dispatches_per_sample=2	median_ms=5.595260	min_ms=5.412396	median_gbps=47.976	best_gbps=49.596
+11-12 15:55:06.849  4659  4769 I MangekyoEngine: [copy] 16 B load + 16 B store
+11-12 15:55:06.849  4659  4769 I MangekyoEngine:     Data set   Passes   Dispatch MiB   Median ms     Min ms   Median GB/s   Best GB/s
+11-12 15:55:06.955  4659  4769 I MangekyoEngine:        1 MiB       66            132       4.169      4.082          33.2        33.9
+11-12 15:55:06.956  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=1048576	passes=66	dispatch_bytes=138412032	dispatches_per_sample=1	median_ms=4.168516	min_ms=4.082448	median_gbps=33.204	best_gbps=33.904
+11-12 15:55:07.053  4659  4769 I MangekyoEngine:      1.5 MiB       57            171       4.028      3.478          44.5        51.6
+11-12 15:55:07.053  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=1572864	passes=57	dispatch_bytes=179306496	dispatches_per_sample=1	median_ms=4.027604	min_ms=3.477552	median_gbps=44.519	best_gbps=51.561
+11-12 15:55:07.212  4659  4769 I MangekyoEngine:        2 MiB      128            512       8.675      8.484          61.9        63.3
+11-12 15:55:07.213  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=2097152	passes=128	dispatch_bytes=536870912	dispatches_per_sample=1	median_ms=8.675104	min_ms=8.484010	median_gbps=61.886	best_gbps=63.280
+11-12 15:55:07.357  4659  4769 I MangekyoEngine:        3 MiB       85            510       8.434      6.680          63.4        80.1
+11-12 15:55:07.357  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=3145728	passes=85	dispatch_bytes=534773760	dispatches_per_sample=1	median_ms=8.433828	min_ms=6.680156	median_gbps=63.408	best_gbps=80.054
+11-12 15:55:07.529  4659  4769 I MangekyoEngine:        4 MiB       64            512       9.576      9.539          56.1        56.3
+11-12 15:55:07.529  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=4194304	passes=64	dispatch_bytes=536870912	dispatches_per_sample=1	median_ms=9.575573	min_ms=9.538698	median_gbps=56.067	best_gbps=56.283
+11-12 15:55:07.624  4659  4769 I MangekyoEngine:        6 MiB       15            180       4.017      3.976          47.0        47.5
+11-12 15:55:07.624  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=6291456	passes=15	dispatch_bytes=188743680	dispatches_per_sample=1	median_ms=4.017500	min_ms=3.975833	median_gbps=46.980	best_gbps=47.473
+11-12 15:55:07.731  4659  4769 I MangekyoEngine:        8 MiB       12            192       4.392      4.374          45.8        46.0
+11-12 15:55:07.731  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=8388608	passes=12	dispatch_bytes=201326592	dispatches_per_sample=1	median_ms=4.392292	min_ms=4.374114	median_gbps=45.836	best_gbps=46.027
+11-12 15:55:07.834  4659  4769 I MangekyoEngine:       12 MiB        8            192       4.376      4.358          46.0        46.2
+11-12 15:55:07.834  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=12582912	passes=8	dispatch_bytes=201326592	dispatches_per_sample=1	median_ms=4.375703	min_ms=4.358489	median_gbps=46.010	best_gbps=46.192
+11-12 15:55:07.936  4659  4769 I MangekyoEngine:       16 MiB        6            192       4.404      4.392          45.7        45.8
+11-12 15:55:07.936  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=16777216	passes=6	dispatch_bytes=201326592	dispatches_per_sample=1	median_ms=4.403880	min_ms=4.392187	median_gbps=45.716	best_gbps=45.837
+11-12 15:55:08.040  4659  4769 I MangekyoEngine:       24 MiB        4            192       4.473      4.466          45.0        45.1
+11-12 15:55:08.040  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=25165824	passes=4	dispatch_bytes=201326592	dispatches_per_sample=1	median_ms=4.472760	min_ms=4.465937	median_gbps=45.012	best_gbps=45.080
+11-12 15:55:08.145  4659  4769 I MangekyoEngine:       32 MiB        3            192       4.560      4.552          44.1        44.2
+11-12 15:55:08.145  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=33554432	passes=3	dispatch_bytes=201326592	dispatches_per_sample=3	median_ms=4.560234	min_ms=4.552500	median_gbps=44.148	best_gbps=44.223
+11-12 15:55:08.250  4659  4769 I MangekyoEngine:       48 MiB        2            192       4.563      4.541          44.1        44.3
+11-12 15:55:08.250  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=50331648	passes=2	dispatch_bytes=201326592	dispatches_per_sample=2	median_ms=4.563333	min_ms=4.540677	median_gbps=44.118	best_gbps=44.338
+11-12 15:55:08.380  4659  4769 I MangekyoEngine:       64 MiB        2            256       6.162      6.108          43.6        43.9
+11-12 15:55:08.380  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=67108864	passes=2	dispatch_bytes=268435456	dispatches_per_sample=2	median_ms=6.162292	min_ms=6.108281	median_gbps=43.561	best_gbps=43.946
+11-12 15:55:08.543  4659  4769 I MangekyoEngine:       96 MiB        2            384       9.182      9.164          43.9        43.9
+11-12 15:55:08.543  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=100663296	passes=2	dispatch_bytes=402653184	dispatches_per_sample=2	median_ms=9.181823	min_ms=9.164114	median_gbps=43.853	best_gbps=43.938
+11-12 15:55:08.675  4659  4769 I MangekyoEngine:      128 MiB        1            256       6.137      6.123          43.7        43.8
+11-12 15:55:08.675  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=copy	dataset_bytes=134217728	passes=1	dispatch_bytes=268435456	dispatches_per_sample=1	median_ms=6.137396	min_ms=6.123125	median_gbps=43.738	best_gbps=43.840
+11-12 15:55:08.675  4659  4769 I MangekyoEngine: [l1] every workgroup re-reads a private block (all SMs/CUs busy)
+11-12 15:55:08.675  4659  4769 I MangekyoEngine:        Block  Repeats   Dispatch MiB   Median ms     Min ms   Median GB/s   Best GB/s
+11-12 15:55:08.753  4659  4769 I MangekyoEngine:       16 KiB       16           1024       4.608      4.590         233.0       233.9
+11-12 15:55:08.753  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1	dataset_bytes=16384	passes=16	dispatch_bytes=1073741824	dispatches_per_sample=1	median_ms=4.608385	min_ms=4.590104	median_gbps=232.997	best_gbps=233.925
+11-12 15:55:08.919  4659  4769 I MangekyoEngine:       24 KiB       10            960       9.513      9.443         105.8       106.6
+11-12 15:55:08.919  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1	dataset_bytes=24576	passes=10	dispatch_bytes=1006632960	dispatches_per_sample=1	median_ms=9.512942	min_ms=9.442604	median_gbps=105.817	best_gbps=106.605
+11-12 15:55:09.051  4659  4769 I MangekyoEngine:       32 KiB        3            384       5.911      5.902          68.1        68.2
+11-12 15:55:09.051  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1	dataset_bytes=32768	passes=3	dispatch_bytes=402653184	dispatches_per_sample=1	median_ms=5.911276	min_ms=5.902396	median_gbps=68.116	best_gbps=68.219
+11-12 15:55:09.152  4659  4769 I MangekyoEngine:       48 KiB        2            255       4.028      4.020          66.6        66.8
+11-12 15:55:09.152  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1	dataset_bytes=49152	passes=2	dispatch_bytes=268369920	dispatches_per_sample=1	median_ms=4.028203	min_ms=4.020417	median_gbps=66.623	best_gbps=66.752
+11-12 15:55:09.287  4659  4769 I MangekyoEngine:       64 KiB        3            384       6.031      6.015          66.8        66.9
+11-12 15:55:09.287  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1	dataset_bytes=65536	passes=3	dispatch_bytes=402653184	dispatches_per_sample=1	median_ms=6.030885	min_ms=6.014739	median_gbps=66.765	best_gbps=66.944
+11-12 15:55:09.396  4659  4769 I MangekyoEngine:       96 KiB        2            255       4.434      4.399          60.5        61.0
+11-12 15:55:09.396  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1	dataset_bytes=98304	passes=2	dispatch_bytes=268369920	dispatches_per_sample=1	median_ms=4.433854	min_ms=4.398594	median_gbps=60.527	best_gbps=61.013
+11-12 15:55:09.514  4659  4769 I MangekyoEngine:      128 KiB        2            256       4.635      4.628          57.9        58.0
+11-12 15:55:09.514  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1	dataset_bytes=131072	passes=2	dispatch_bytes=268435456	dispatches_per_sample=1	median_ms=4.634713	min_ms=4.628021	median_gbps=57.918	best_gbps=58.002
+11-12 15:55:09.634  4659  4769 I MangekyoEngine:      192 KiB        2            255       4.730      4.728          56.7        56.7
+11-12 15:55:09.634  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1	dataset_bytes=196608	passes=2	dispatch_bytes=268173312	dispatches_per_sample=1	median_ms=4.730469	min_ms=4.727552	median_gbps=56.691	best_gbps=56.726
+11-12 15:55:09.754  4659  4769 I MangekyoEngine:      256 KiB        2            256       4.743      4.737          56.6        56.7
+11-12 15:55:09.754  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1	dataset_bytes=262144	passes=2	dispatch_bytes=268435456	dispatches_per_sample=1	median_ms=4.743463	min_ms=4.737292	median_gbps=56.591	best_gbps=56.664
+11-12 15:55:09.877  4659  4769 I MangekyoEngine:      384 KiB        2            255       4.773      4.742          56.2        56.5
+11-12 15:55:09.877  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1	dataset_bytes=393216	passes=2	dispatch_bytes=268173312	dispatches_per_sample=1	median_ms=4.773281	min_ms=4.742344	median_gbps=56.182	best_gbps=56.549
+11-12 15:55:09.998  4659  4769 I MangekyoEngine:      512 KiB        2            256       4.770      4.744          56.3        56.6
+11-12 15:55:09.998  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1	dataset_bytes=524288	passes=2	dispatch_bytes=268435456	dispatches_per_sample=1	median_ms=4.770469	min_ms=4.744062	median_gbps=56.270	best_gbps=56.583
+11-12 15:55:10.124  4659  4769 I MangekyoEngine:      768 KiB        2            255       4.780      4.744          55.9        56.4
+11-12 15:55:10.124  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1	dataset_bytes=786432	passes=2	dispatch_bytes=267386880	dispatches_per_sample=1	median_ms=4.780078	min_ms=4.744479	median_gbps=55.938	best_gbps=56.357
+11-12 15:55:10.245  4659  4769 I MangekyoEngine:        1 MiB        2            256       4.774      4.744          56.2        56.6
+11-12 15:55:10.245  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1	dataset_bytes=1048576	passes=2	dispatch_bytes=268435456	dispatches_per_sample=1	median_ms=4.774219	min_ms=4.743698	median_gbps=56.226	best_gbps=56.588
+11-12 15:55:10.245  4659  4769 I MangekyoEngine: [l1_single] one workgroup re-reads one block (one SM/CU)
+11-12 15:55:10.245  4659  4769 I MangekyoEngine:        Block  Repeats   Dispatch MiB   Median ms     Min ms   Median GB/s   Best GB/s
+11-12 15:55:10.303  4659  4769 I MangekyoEngine:       16 KiB     4096             64       3.480      3.453          19.3        19.4
+11-12 15:55:10.303  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1_single	dataset_bytes=16384	passes=4096	dispatch_bytes=67108864	dispatches_per_sample=1	median_ms=3.480260	min_ms=3.452812	median_gbps=19.283	best_gbps=19.436
+11-12 15:55:10.360  4659  4769 I MangekyoEngine:       24 KiB     2730             63       3.473      3.452          19.3        19.4
+11-12 15:55:10.360  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1_single	dataset_bytes=24576	passes=2730	dispatch_bytes=67092480	dispatches_per_sample=1	median_ms=3.472656	min_ms=3.452187	median_gbps=19.320	best_gbps=19.435
+11-12 15:55:10.419  4659  4769 I MangekyoEngine:       32 KiB     2048             64       3.476      3.462          19.3        19.4
+11-12 15:55:10.419  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1_single	dataset_bytes=32768	passes=2048	dispatch_bytes=67108864	dispatches_per_sample=1	median_ms=3.476146	min_ms=3.462448	median_gbps=19.306	best_gbps=19.382
+11-12 15:55:10.478  4659  4769 I MangekyoEngine:       48 KiB     1365             63       3.459      3.448          19.4        19.5
+11-12 15:55:10.478  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1_single	dataset_bytes=49152	passes=1365	dispatch_bytes=67092480	dispatches_per_sample=1	median_ms=3.458958	min_ms=3.448125	median_gbps=19.397	best_gbps=19.458
+11-12 15:55:10.538  4659  4769 I MangekyoEngine:       64 KiB     1024             64       3.451      3.451          19.4        19.4
+11-12 15:55:10.538  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1_single	dataset_bytes=65536	passes=1024	dispatch_bytes=67108864	dispatches_per_sample=1	median_ms=3.451406	min_ms=3.451406	median_gbps=19.444	best_gbps=19.444
+11-12 15:55:10.598  4659  4769 I MangekyoEngine:       96 KiB      682             63       3.457      3.452          19.4        19.4
+11-12 15:55:10.598  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1_single	dataset_bytes=98304	passes=682	dispatch_bytes=67043328	dispatches_per_sample=1	median_ms=3.457500	min_ms=3.451771	median_gbps=19.391	best_gbps=19.423
+11-12 15:55:10.657  4659  4769 I MangekyoEngine:      128 KiB      512             64       3.461      3.453          19.4        19.4
+11-12 15:55:10.657  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1_single	dataset_bytes=131072	passes=512	dispatch_bytes=67108864	dispatches_per_sample=1	median_ms=3.461146	min_ms=3.453125	median_gbps=19.389	best_gbps=19.434
+11-12 15:55:10.723  4659  4769 I MangekyoEngine:      192 KiB      341             63       3.808      3.796          17.6        17.7
+11-12 15:55:10.723  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1_single	dataset_bytes=196608	passes=341	dispatch_bytes=67043328	dispatches_per_sample=1	median_ms=3.807891	min_ms=3.795521	median_gbps=17.606	best_gbps=17.664
+11-12 15:55:10.789  4659  4769 I MangekyoEngine:      256 KiB      256             64       3.817      3.803          17.6        17.6
+11-12 15:55:10.789  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1_single	dataset_bytes=262144	passes=256	dispatch_bytes=67108864	dispatches_per_sample=1	median_ms=3.817266	min_ms=3.803281	median_gbps=17.580	best_gbps=17.645
+11-12 15:55:10.854  4659  4769 I MangekyoEngine:      384 KiB      170             63       3.807      3.787          17.6        17.7
+11-12 15:55:10.854  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1_single	dataset_bytes=393216	passes=170	dispatch_bytes=66846720	dispatches_per_sample=1	median_ms=3.807135	min_ms=3.787135	median_gbps=17.558	best_gbps=17.651
+11-12 15:55:10.917  4659  4769 I MangekyoEngine:      512 KiB      128             64       3.829      3.813          17.5        17.6
+11-12 15:55:10.917  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1_single	dataset_bytes=524288	passes=128	dispatch_bytes=67108864	dispatches_per_sample=1	median_ms=3.828724	min_ms=3.812969	median_gbps=17.528	best_gbps=17.600
+11-12 15:55:10.985  4659  4769 I MangekyoEngine:      768 KiB       85             63       3.812      3.803          17.5        17.6
+11-12 15:55:10.985  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1_single	dataset_bytes=786432	passes=85	dispatch_bytes=66846720	dispatches_per_sample=1	median_ms=3.811849	min_ms=3.802656	median_gbps=17.537	best_gbps=17.579
+11-12 15:55:11.051  4659  4769 I MangekyoEngine:        1 MiB       64             64       3.835      3.827          17.5        17.5
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: MEMBW_POINT	kernel=l1_single	dataset_bytes=1048576	passes=64	dispatch_bytes=67108864	dispatches_per_sample=1	median_ms=3.834583	min_ms=3.826667	median_gbps=17.501	best_gbps=17.537
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: MEMBW_DEVICE	name=Adreno (TM) 740	memory=system	timing=gpu_timestamp	data_verified=1	write_copy_checks=30	max_dataset_bytes=134217728
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: --- Summary (system memory plateau = median of the largest data sets) ---
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: read       56.4 GB/s system memory | no distinct cache plateau
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: MEMBW_SUMMARY	kernel=read	memory_gbps=56.375	cache_gbps=0.000	cache_from_bytes=0	cache_to_bytes=0	cache_knee_bytes=0	memory_plateau_reached=1
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: write      49.5 GB/s system memory | no distinct cache plateau
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: MEMBW_SUMMARY	kernel=write	memory_gbps=49.530	cache_gbps=0.000	cache_from_bytes=0	cache_to_bytes=0	cache_knee_bytes=0	memory_plateau_reached=1
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: copy       43.7 GB/s system memory | cache plateau 61.9 GB/s (2 MiB - 4 MiB)
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: MEMBW_SUMMARY	kernel=copy	memory_gbps=43.738	cache_gbps=61.886	cache_from_bytes=2097152	cache_to_bytes=4194304	cache_knee_bytes=4194304	memory_plateau_reached=1
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: L1        233.0 GB/s with all SMs/CUs busy, for private blocks up to 16 KiB per workgroup
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: L1         19.3 GB/s on one SM/CU | no drop inside the 16 KiB - 1 MiB block sweep
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: MEMBW_L1	full_load_gbps=232.997	full_load_block_bytes=16384	single_group_gbps=19.283	capacity_low_bytes=0	capacity_high_bytes=0
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: host    skipped: integrated or software device: all of its memory is system memory
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: MEMBW_HOST	measured=0	read_gbps=0.000	write_gbps=0.000	copy_to_device_gbps=0.000	copy_to_host_gbps=0.000	copy_bytes=0
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: Duration:  7.0 s
+11-12 15:55:11.052  4659  4769 I MangekyoEngine: ==========================================================
+11-12 15:55:11.089  4659  4769 I MangekyoEngine: [Results] Saved as 20261112-155511-087-membw -> /storage/emulated/0/Android/data/com.mangekyo.benchmark/files/results/results.json
+11-12 15:55:11.110  4659  4659 I Mangekyo: RUN finished kind=gpu score=Memory rate: 56.375 GB/s

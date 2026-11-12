@@ -1,0 +1,78 @@
+--------- beginning of main
+11-12 15:50:54.821  2458  2458 I Mangekyo: AUTORUN accepted test=stream_headless?particles=4194304
+11-12 15:50:55.245  2458  2458 I Mangekyo: AUTORUN started test=stream_headless?particles=4194304
+11-12 15:50:55.248  2458  2493 I MangekyoEngine: ============================================================
+11-12 15:50:55.248  2458  2493 I MangekyoEngine:                     GPU & API Detection
+11-12 15:50:55.248  2458  2493 I MangekyoEngine: ============================================================
+11-12 15:50:55.248  2458  2493 I MangekyoEngine:   GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+11-12 15:50:55.248  2458  2493 I MangekyoEngine:   -------------------------------------------- ------  ------  ----  ----  -----  ------
+11-12 15:50:55.248  2458  2493 I MangekyoEngine:   Adreno (TM) 740 (Integrated)                     -   YES    -     -     -     -  
+11-12 15:50:55.248  2458  2493 I MangekyoEngine: ============================================================
+11-12 15:50:55.248  2458  2493 I MangekyoEngine: Backend: Vulkan  |  V-Sync: OFF  |  Memory: Device-local  |  Particles: 4194304 (Medium)  |  Auto-stop: 15s
+11-12 15:50:55.401  2458  2493 I MangekyoEngine: Available GPUs:
+11-12 15:50:55.401  2458  2493 I MangekyoEngine:   [0] Adreno (TM) 740 (Integrated GPU)
+11-12 15:50:55.401  2458  2493 I MangekyoEngine: Selected GPU [0]: Adreno (TM) 740  |  Driver: 512.676.1
+11-12 15:50:55.529  2458  2493 I MangekyoEngine: Created particle buffer (device-local via staging): 4194304 particles
+11-12 15:50:55.535  2458  2493 I MangekyoEngine: [Profiling] Timestamp queries enabled (period = 52.0833 ns/tick)
+11-12 15:50:55.814  2458  2493 I MangekyoEngine: [Profiling] Timestamp check: 27.9519 ms by the GPU's clock (27.8669 ms with one frame behind the other), 49.6883 ms by wall clock.
+11-12 15:50:56.129  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.935 ms | Render: 0.000 ms | Total: 6.936 ms | FPS: 153 | T: 0.3 s (warm-up)
+11-12 15:50:56.435  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.937 ms | Render: 0.000 ms | Total: 6.938 ms | FPS: 143 | T: 0.6 s (warm-up)
+11-12 15:50:56.740  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 7.060 ms | Render: 0.000 ms | Total: 7.061 ms | FPS: 140 | T: 0.9 s (warm-up)
+11-12 15:50:57.048  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.951 ms | Render: 0.000 ms | Total: 6.953 ms | FPS: 143 | T: 1.2 s (warm-up)
+11-12 15:50:57.354  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.953 ms | Render: 0.000 ms | Total: 6.954 ms | FPS: 143 | T: 1.5 s (warm-up)
+11-12 15:50:57.654  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.948 ms | Render: 0.000 ms | Total: 6.950 ms | FPS: 143 | T: 1.8 s (warm-up)
+11-12 15:50:58.656  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.977 ms | Render: 0.000 ms | Total: 6.978 ms | FPS: 142 | T: 2.8 s
+11-12 15:50:59.658  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.981 ms | Render: 0.000 ms | Total: 6.982 ms | FPS: 142 | T: 3.8 s
+11-12 15:51:00.665  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 7.012 ms | Render: 0.000 ms | Total: 7.013 ms | FPS: 142 | T: 4.8 s
+11-12 15:51:01.670  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.950 ms | Render: 0.000 ms | Total: 6.952 ms | FPS: 143 | T: 5.9 s
+11-12 15:51:02.672  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.978 ms | Render: 0.000 ms | Total: 6.979 ms | FPS: 142 | T: 6.9 s
+11-12 15:51:03.674  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.982 ms | Render: 0.000 ms | Total: 6.983 ms | FPS: 142 | T: 7.9 s
+11-12 15:51:04.676  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.981 ms | Render: 0.000 ms | Total: 6.982 ms | FPS: 142 | T: 8.9 s
+11-12 15:51:05.680  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.996 ms | Render: 0.000 ms | Total: 6.998 ms | FPS: 142 | T: 9.9 s
+11-12 15:51:06.686  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.952 ms | Render: 0.000 ms | Total: 6.953 ms | FPS: 143 | T: 10.9 s
+11-12 15:51:07.688  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.981 ms | Render: 0.000 ms | Total: 6.982 ms | FPS: 142 | T: 11.9 s
+11-12 15:51:08.692  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.991 ms | Render: 0.000 ms | Total: 6.992 ms | FPS: 142 | T: 12.9 s
+11-12 15:51:09.695  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.990 ms | Render: 0.000 ms | Total: 6.991 ms | FPS: 142 | T: 13.9 s
+11-12 15:51:10.701  2458  2493 I MangekyoEngine: [GPU Timing] Compute: 6.958 ms | Render: 0.000 ms | Total: 6.959 ms | FPS: 143 | T: 14.9 s
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: ==========================================================
+11-12 15:51:10.839  2458  2493 I MangekyoEngine:                    Benchmark Summary
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: ==========================================================
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Graphics API: Vulkan
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: GPU:          Adreno (TM) 740
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Driver:       512.676.1
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: CPU:          QTI SM8550
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: OS:           Android 16 (API 36)
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: System:       Android ARM64
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Memory:       Device-local VRAM
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Mode:         Headless (compute only)
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Resolution:   1280x720
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Particles:    4194304 (Medium)
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Buffer:       128.0 MB
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Flights:      2
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Multi-GPU:    Off
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: V-Sync:       OFF
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Duration:     13.0 s (warmup: 2.0 s, measured: 1856 frames)
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: --- GPU Timing (ms) ---
+11-12 15:51:10.839  2458  2493 I MangekyoEngine:                      Avg       Min       Max
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Compute:         6.982     6.919    10.790
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Render:          0.000     0.000     0.001
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Total GPU:       6.983     6.920    10.791
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: --- Throughput ---
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Avg FPS:      142
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Particles:    4194304
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Working set:  128.00 MiB
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: VRAM rate:   24.03 GB/s  (6.982 ms compute)
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: --- Analysis ---
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Avg frame time:  7.010 ms
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Avg GPU time:    6.983 ms
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: GPU utilisation: 99.6%
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: >> GPU-bound: GPU is the bottleneck.
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: --- Throughput Stability ---
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Windows:      13 x 1s
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Stable window: 24.06 GB/s  (CV 0.23%)
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: Throughput:   early vs late mean change (drop positive) -0.1%
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: >> Stable throughput window detected; no hardware frequency was measured.
+11-12 15:51:10.839  2458  2493 I MangekyoEngine: ==========================================================
+11-12 15:51:10.868  2458  2493 I MangekyoEngine: [Results] Saved as 20261112-155110-839 -> /storage/emulated/0/Android/data/com.mangekyo.benchmark/files/results/results.json
+11-12 15:51:10.910  2458  2458 I Mangekyo: RUN finished kind=gpu score=VRAM rate: 24.03 GB/s (6.982 ms compute)
