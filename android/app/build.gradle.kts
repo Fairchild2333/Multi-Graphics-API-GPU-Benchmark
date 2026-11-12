@@ -1,3 +1,6 @@
+import com.android.build.api.variant.HasHostTestsBuilder
+import com.android.build.api.variant.HostTestBuilder
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -50,6 +53,26 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    // AGP 9.5's Compose Preview task generation requires unit tests to see
+    // compiled Android resources; the default (false) fails the build.
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+}
+
+// AGP 9.5 also wants to generate Compose Preview runfiles for the release
+// variant, which has unit tests off by default; enableUnitTest only adds the
+// test tasks, it changes nothing about the packaged app.
+androidComponents {
+    beforeVariants(selector().all()) { variantBuilder ->
+        // AGP 9.5 also wants to generate Compose Preview runfiles for the
+        // release variant, which has unit tests off by default. enableUnitTest
+        // is HIDDEN-deprecated in Kotlin; the surviving API is hostTests.
+        (variantBuilder as HasHostTestsBuilder)
+            .hostTests[HostTestBuilder.UNIT_TEST_TYPE]?.enable = true
     }
 }
 
