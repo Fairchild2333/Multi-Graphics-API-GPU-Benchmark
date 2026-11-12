@@ -7,9 +7,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -32,15 +34,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
@@ -60,6 +66,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -108,15 +115,25 @@ enum class ExploitState {
     IDLE,
     RUNNING,
     SUCCESS,
-    FAILED
+    FAILED,
+    ROOTED_EXTERNAL
 }
 
 class MainActivity : ComponentActivity() {
 
     companion object {
+        const val SETTINGS_PREFS = "katyusha_settings"
+        const val KEY_FORCE_RUN = "force_run"
+        const val KEY_MANUAL_ROOTED_BOOT = "manual_rooted_boot"
+
         val logLines = mutableStateListOf<String>()
         val exploitState = mutableStateOf(ExploitState.IDLE)
+        val showRunConfirm = mutableStateOf(false)
         val appScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        var bootStateRestored = false
+        var externalRootAnnounced = false
+        var forceModeWarned = false
+        var managerHintShown = false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -124,6 +141,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         initLogBanner()
+        evaluateRootGuard()
 
         setContent {
             CheeseTheme {
@@ -134,41 +152,280 @@ class MainActivity : ComponentActivity() {
                     onClearLogs = { clearLogs() },
                     onCopyLogs = { copyLogs() },
                     onSaveLogs = { saveLogs() },
-                    onOpenKernelSU = { openKernelSU() }
+                    onOpenKernelSU = { openKernelSU() },
+                    onForceModeChanged = { evaluateRootGuard() },
+                    onForceStart = { runExploit(confirmed = true) },
+                    onProbeRoot = { probeSuRoot() },
+                    currentBoot = currentBootCount()
                 )
             }
         }
     }
 
     private fun initLogBanner() {
-        if (logLines.isEmpty()) {
-            val deviceModel = "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}"
-            val kernelVer = System.getProperty("os.version") ?: "Unknown"
-            val hasKgsl = File("/dev/kgsl-3d0").exists()
+        val deviceModel = "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}"
+        val kernelVer = System.getProperty("os.version") ?: "Unknown"
+        val hasKgsl = File("/dev/kgsl-3d0").exists()
 
-            logLines.add("[*] Katyusha Temp-Root & KernelSU Engine v1.0")
-            logLines.add("[*] Device: $deviceModel | Hardware: ${Build.HARDWARE}")
-            logLines.add("[*] Linux Kernel: $kernelVer (GKI KMI Auto-detect)")
-            logLines.add("[*] Qualcomm KGSL: ${if (hasKgsl) "/dev/kgsl-3d0 detected" else "node not present / sandbox"}")
-            logLines.add("[*] Exploit Route: CVE-2025-21479 (Adreno KGSL UAF) -> Dynamic KernelSU")
-            logLines.add("[*] Environment: 100% In-Memory (Non-persistent, safe)")
+        logLines.add("[*] Katyusha Temp-Root & KernelSU Engine v1.0")
+        logLines.add("[*] Device: $deviceModel | Hardware: ${Build.HARDWARE}")
+        logLines.add("[*] Linux Kernel: $kernelVer (GKI KMI Auto-detect)")
+        logLines.add("[*] Qualcomm KGSL: ${if (hasKgsl) "/dev/kgsl-3d0 detected" else "node not present / sandbox"}")
+        logLines.add("[*] Exploit Route: CVE-2025-21479 (Adreno KGSL UAF) -> Dynamic KernelSU")
+        logLines.add("[*] Environment: 100% In-Memory (Non-persistent, safe)")
 
-            // Check if there was an abnormal panic/reboot last time
-            val panicLog = LogManager.getPreviousPanicLog(this)
-            if (panicLog != null && panicLog.isNotEmpty()) {
-                logLines.add(tr("[!] Notice: Detected incomplete session from last run (Kernel Panic / Reboot).", "[!] 提示：检测到上次运行中途异常中断（可能发生了内核 Panic 异常重启）。"))
-                logLines.add(tr("[*] Auto-saved crash log (${panicLog.size} lines) preserved. Tap [Save Logs] above to export.", "[*] 系统已完整保留崩机前最后一刻的实时日志（共 ${panicLog.size} 行），点击上方【保存日志】可导出。"))
-                logLines.add("------------------------------------------------------------")
+        // Check if there was an abnormal panic/reboot last time
+        val panicLog = LogManager.getPreviousPanicLog(this)
+        if (panicLog != null && panicLog.isNotEmpty()) {
+            logLines.add(tr("[!] Notice: Detected incomplete session from last run (Kernel Panic / Reboot).", "[!] 提示：检测到上次运行中途异常中断（可能发生了内核 Panic 异常重启）。"))
+            logLines.add(tr("[*] Auto-saved crash log (${panicLog.size} lines) preserved. Tap [Save Logs] above to export.", "[*] 系统已完整保留崩机前最后一刻的实时日志（共 ${panicLog.size} 行），点击上方【保存日志】可导出。"))
+            logLines.add("------------------------------------------------------------")
+        }
+
+        logLines.add(tr("[*] Ready: Read requirements above, then tap [Activate] below to begin.", "[*] 就绪：请阅读环境要求与限制后，点击下方按钮开始提权。"))
+    }
+
+    // ---- Boot-scoped run state ------------------------------------------------
+    // Temp root lives in kernel memory only and never survives a reboot, so
+    // "engine already ran in THIS boot" (Settings.Global.BOOT_COUNT marker) is
+    // authoritative: restore the state and lock the button instead of offering
+    // another run (repeated runs per boot carry a real kernel-panic risk).
+
+    private fun bootStatePrefs() = getSharedPreferences("katyusha_boot_state", Context.MODE_PRIVATE)
+
+    private fun currentBootCount(): Int = try {
+        Settings.Global.getInt(contentResolver, Settings.Global.BOOT_COUNT)
+    } catch (_: Exception) {
+        Int.MIN_VALUE
+    }
+
+    private fun markRunStarted() {
+        val boot = currentBootCount()
+        if (boot == Int.MIN_VALUE) return
+        bootStatePrefs().edit()
+            .putInt("ran_boot", boot)
+            .putBoolean("last_success", false)
+            .apply()
+    }
+
+    private fun markRunResult(success: Boolean) {
+        bootStatePrefs().edit().putBoolean("last_success", success).apply()
+    }
+
+    private fun restoreBootState() {
+        if (exploitState.value == ExploitState.RUNNING) return
+        val prefs = bootStatePrefs()
+        val ranBoot = prefs.getInt("ran_boot", Int.MIN_VALUE)
+        if (ranBoot == Int.MIN_VALUE || ranBoot != currentBootCount()) return
+
+        val success = prefs.getBoolean("last_success", false)
+        val target = if (success) ExploitState.SUCCESS else ExploitState.FAILED
+        if (exploitState.value == target && bootStateRestored) return
+        exploitState.value = target
+
+        if (!bootStateRestored) {
+            bootStateRestored = true
+            logLines.add("")
+            if (success) {
+                logLines.add(tr(
+                    "[+] Detected active temp root from an earlier run in THIS boot (KernelSU already loaded).",
+                    "[+] 检测到本次开机已成功激活临时 Root（KernelSU 已在内核中运行）。"
+                ))
+                logLines.add(tr(
+                    "[*] No action needed — root stays available until the device reboots.",
+                    "[*] 无需重复提权，直接使用即可；重启手机后自动恢复纯净系统。"
+                ))
+            } else {
+                logLines.add(tr(
+                    "[!] An exploit run was already attempted in THIS boot and did not complete.",
+                    "[!] 检测到本次开机已运行过一次提权且未成功。"
+                ))
+                logLines.add(tr(
+                    "[*] For safety (kernel panic risk), reboot the device before running again.",
+                    "[*] 为避免内核 Panic 风险，请重启手机后再重新运行。"
+                ))
             }
-
-            logLines.add(tr("[*] Ready: Read requirements above, then tap [Activate] below to begin.", "[*] 就绪：请阅读环境要求与限制后，点击下方按钮开始提权。"))
         }
     }
 
-    private fun runExploit() {
+    // ---- External-root guard ---------------------------------------------------
+    // The exploit itself can panic the kernel regardless of prior success, so
+    // if the device is ALREADY rooted by any means (KernelSU, Magisk, another
+    // temp-root, ...) we refuse to run — unless the user explicitly enables
+    // "force run" in settings.
+
+    private fun isForceModeEnabled(): Boolean =
+        getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_FORCE_RUN, false)
+
+    /** Passive detection only: never executes su, so no grant prompt ever fires. */
+    private fun detectExternalRootPath(): String? {
+        val candidates = listOf(
+            "/system/bin/su", "/system/xbin/su", "/sbin/su", "/system/sbin/su",
+            "/vendor/bin/su", "/product/bin/su", "/su/bin/su", "/debug_ramdisk/su",
+            "/data/local/tmp/su", "/data/adb/ksu/bin/su", "/data/adb/magisk/su"
+        )
+        for (p in candidates) {
+            if (File(p).exists()) return p
+        }
+        return try {
+            val proc = ProcessBuilder("sh", "-c", "command -v su")
+                .redirectErrorStream(false)
+                .start()
+            val out = proc.inputStream.bufferedReader().readText().trim()
+            proc.waitFor()
+            out.takeIf { it.isNotEmpty() }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /** Re-evaluates both guards: same-boot restore first, then external-root probe. */
+    private fun evaluateRootGuard() {
+        if (exploitState.value == ExploitState.RUNNING) return
+        restoreBootState()          // our own run this boot wins (richer info)
+        if (exploitState.value != ExploitState.IDLE) return
+
+        if (isForceModeEnabled()) {
+            if (!forceModeWarned) {
+                forceModeWarned = true
+                logLines.add(tr(
+                    "[!] Force run enabled: exploit may be launched even on a rooted device (panic risk on you).",
+                    "[!] 兼容模式已开启：即使检测到已有 Root 也允许运行引擎（内核 Panic 风险自负）。"
+                ))
+            }
+            return                  // stay IDLE — button stays usable
+        }
+
+        // Manual "already rooted" mark, boot-scoped: auto-expires after reboot.
+        val manualBoot = getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE)
+            .getInt(KEY_MANUAL_ROOTED_BOOT, Int.MIN_VALUE)
+        if (manualBoot != Int.MIN_VALUE && manualBoot == currentBootCount()) {
+            exploitState.value = ExploitState.ROOTED_EXTERNAL
+            if (!externalRootAnnounced) {
+                externalRootAnnounced = true
+                logLines.add("")
+                logLines.add(tr(
+                    "[!] Manual mark active: device is already rooted in THIS boot.",
+                    "[!] 手动标记生效：本次开机设备已处于 Root 状态。"
+                ))
+                logLines.add(tr(
+                    "[*] Engine locked. The mark clears automatically after reboot (Settings to change).",
+                    "[*] 引擎已锁定。重启手机后标记自动失效（可在设置中更改）。"
+                ))
+            }
+            return
+        }
+
+        // Passive su-path probe (catches Magisk-style mounts; KernelSU hides su
+        // from unauthorized apps, so also hint if a root manager is installed).
+        appScope.launch {
+            val suPath = detectExternalRootPath()
+            val manager = detectRootManager()
+            launch(Dispatchers.Main) {
+                if (manager != null && !managerHintShown) {
+                    managerHintShown = true
+                    logLines.add(tr(
+                        "[*] Root manager installed: $manager. Auto-detection cannot see through it — if the device is already rooted, mark it in Settings.",
+                        "[*] 检测到已安装 Root 管理器：$manager。自动探测无法穿透其隐藏机制——若设备已 Root，请在设置中手动标记。"
+                    ))
+                }
+                if (suPath == null || exploitState.value != ExploitState.IDLE) return@launch
+                exploitState.value = ExploitState.ROOTED_EXTERNAL
+                if (!externalRootAnnounced) {
+                    externalRootAnnounced = true
+                    logLines.add("")
+                    logLines.add(tr(
+                        "[!] Detected an existing root environment (su at $suPath).",
+                        "[!] 检测到设备已处于 Root 状态（su 位于 $suPath）。"
+                    ))
+                    logLines.add(tr(
+                        "[*] Running the exploit again is blocked — no need to re-root. Force run can be enabled in Settings (gear icon, top right).",
+                        "[*] 已阻止再次提权 —— 已有 Root 无需重跑。如确有必要，可在右上角设置中开启「强制运行（兼容模式）」。"
+                    ))
+                }
+            }
+        }
+    }
+
+    private fun detectRootManager(): String? {
+        val pkgs = listOf("me.weishu.kernelsu", "io.github.a13e300.ksu", "com.topjohnwu.magisk", "me.bmax.apatch")
+        for (pkg in pkgs) {
+            try {
+                packageManager.getPackageInfo(pkg, 0)
+                return pkg
+            } catch (_: Exception) {
+            }
+        }
+        return null
+    }
+
+    /**
+     * Active root test via `su -c id`. Deliberately user-initiated (from the
+     * confirm dialog): KernelSU may pop its grant prompt, and a denial or
+     * timeout simply means "inconclusive" — never treated as "no root".
+     */
+    private fun probeSuRoot() {
+        appScope.launch {
+            var output = ""
+            var code = -1
+            try {
+                val proc = ProcessBuilder("sh", "-c", "su -c id")
+                    .redirectErrorStream(false)
+                    .start()
+                output = proc.inputStream.bufferedReader().readText().trim()
+                code = if (proc.waitFor(3, java.util.concurrent.TimeUnit.SECONDS)) {
+                    proc.exitValue()
+                } else {
+                    proc.destroy()
+                    -1
+                }
+            } catch (_: Exception) {
+            }
+            val rooted = code == 0 && output.contains("uid=0")
+            launch(Dispatchers.Main) {
+                if (rooted) {
+                    if (exploitState.value == ExploitState.IDLE) {
+                        exploitState.value = ExploitState.ROOTED_EXTERNAL
+                    }
+                    if (!externalRootAnnounced) externalRootAnnounced = true
+                    logLines.add("")
+                    logLines.add(tr(
+                        "[!] su probe: root IS active ($output) — exploit blocked, no need to re-run.",
+                        "[!] su 检测：Root 已生效（$output）——已阻止再次提权，无需重跑。"
+                    ))
+                } else {
+                    logLines.add(tr(
+                        "[?] su probe inconclusive (exit=$code, output='$output'). Grant or deny did not prove root; decide yourself.",
+                        "[?] su 检测无法确认（exit=$code，输出='$output'）。授权被拒或超时都不代表没有 Root，请自行判断。"
+                    ))
+                }
+            }
+        }
+    }
+
+    private fun runExploit(confirmed: Boolean = false) {
         if (exploitState.value == ExploitState.RUNNING) return
 
+        if (exploitState.value == ExploitState.ROOTED_EXTERNAL && !isForceModeEnabled()) {
+            // Belt & suspenders: the button is already disabled in this state.
+            logLines.add(tr(
+                "[!] Blocked: device is already rooted. Enable force run in Settings if you really mean it.",
+                "[!] 已阻止：设备已处于 Root 状态。如确需强制运行，请在设置中开启兼容模式。"
+            ))
+            return
+        }
+
+        // High-risk action: always confirm before launching (KernelSU-style root
+        // hides su from us, so auto-detection alone cannot prove "not rooted").
+        if (!confirmed && !isForceModeEnabled()) {
+            showRunConfirm.value = true
+            return
+        }
+
         exploitState.value = ExploitState.RUNNING
+        markRunStarted()
+        bootStateRestored = true // this run's own outcome now drives the UI
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         // Start real-time auto-log session (overwrites previous auto-save log)
@@ -255,6 +512,7 @@ class MainActivity : ComponentActivity() {
 
                 val reallySuccess = hasRootSuccess || isKsuLoaded
                 LogManager.endAutoLogSession(returnVal, reallySuccess)
+                markRunResult(reallySuccess)
 
                 launch(Dispatchers.Main) {
                     try { window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) } catch (_: Exception) {}
@@ -282,6 +540,7 @@ class MainActivity : ComponentActivity() {
             } catch (e: Exception) {
                 LogManager.writeLine("[!] Exception: " + e.message)
                 LogManager.endAutoLogSession(-1, false)
+                markRunResult(false)
                 launch(Dispatchers.Main) {
                     try { window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) } catch (_: Exception) {}
                     exploitState.value = ExploitState.FAILED
@@ -304,6 +563,7 @@ class MainActivity : ComponentActivity() {
         logLines.clear()
         exploitState.value = ExploitState.IDLE
         initLogBanner()
+        evaluateRootGuard()
     }
 
     private fun copyLogs() {
@@ -368,20 +628,162 @@ fun MainAppScreen(
     onCopyLogs: () -> Unit,
     onSaveLogs: () -> Unit,
     onOpenKernelSU: () -> Unit,
+    onForceModeChanged: () -> Unit,
+    onForceStart: () -> Unit,
+    onProbeRoot: () -> Unit,
+    currentBoot: Int,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var showUpdateDialog by remember { mutableStateOf(false) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
     var updateCheckResult by remember { mutableStateOf<UpdateCheckResult?>(null) }
     var isChecking by remember { mutableStateOf(false) }
     var isDownloading by remember { mutableStateOf(false) }
     var updateStatusText by remember { mutableStateOf("") }
     var hasUpdateBadge by remember { mutableStateOf(false) }
+    var consoleFullscreen by remember { mutableStateOf(false) }
+
+    // System back exits console fullscreen first
+    BackHandler(enabled = consoleFullscreen) { consoleFullscreen = false }
 
     LaunchedEffect(Unit) {
         val res = KernelUpdater.checkForUpdates(context)
         updateCheckResult = res
         hasUpdateBadge = res.hasUpdate
+    }
+
+    if (showSettingsDialog) {
+        val settingsPrefs = context.getSharedPreferences(
+            MainActivity.SETTINGS_PREFS, Context.MODE_PRIVATE
+        )
+        var forceRun by remember {
+            mutableStateOf(settingsPrefs.getBoolean(MainActivity.KEY_FORCE_RUN, false))
+        }
+        var manualRooted by remember {
+            mutableStateOf(
+                settingsPrefs.getInt(MainActivity.KEY_MANUAL_ROOTED_BOOT, Int.MIN_VALUE) != Int.MIN_VALUE &&
+                    settingsPrefs.getInt(MainActivity.KEY_MANUAL_ROOTED_BOOT, Int.MIN_VALUE) == currentBoot
+            )
+        }
+        AlertDialog(
+            onDismissRequest = {
+                showSettingsDialog = false
+                onForceModeChanged()
+            },
+            title = { Text(tr("Settings", "设置")) },
+            text = {
+                Column {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Switch(
+                            checked = manualRooted,
+                            onCheckedChange = {
+                                manualRooted = it
+                                if (it) {
+                                    settingsPrefs.edit()
+                                        .putInt(MainActivity.KEY_MANUAL_ROOTED_BOOT, currentBoot)
+                                        .apply()
+                                } else {
+                                    settingsPrefs.edit()
+                                        .remove(MainActivity.KEY_MANUAL_ROOTED_BOOT)
+                                        .apply()
+                                }
+                                onForceModeChanged()
+                            }
+                        )
+                        Text(
+                            text = tr("Device already rooted (this boot)", "设备已 Root（本次开机）"),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Text(
+                        text = tr(
+                            "Manually mark the device as rooted — the engine stays locked until reboot (auto-clears). Use this when root was gained by other means (KernelSU hides su, so auto-detection can miss it).",
+                            "手动标记设备已处于 Root 状态，引擎将锁定直至重启（重启后自动失效）。当 Root 来自其他途径时请使用：KernelSU 会向应用隐藏 su，自动探测可能探测不到。"
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Switch(
+                            checked = forceRun,
+                            onCheckedChange = {
+                                forceRun = it
+                                settingsPrefs.edit().putBoolean(MainActivity.KEY_FORCE_RUN, it).apply()
+                                onForceModeChanged()
+                            }
+                        )
+                        Text(
+                            text = tr("Force run (compat mode)", "强制运行（兼容模式）"),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = tr(
+                            "When enabled, the exploit can be launched even if the device is already rooted by any means (KernelSU, Magisk, other temp-root). Only for debugging: re-rooting an already rooted device has no benefit and can trigger a kernel panic.",
+                            "开启后，即使设备已通过任何方式获得 Root（KernelSU、Magisk、其他临时 Root），也允许运行提权引擎。仅供调试使用：对已 Root 的设备重复提权没有任何收益，且可能引发内核 Panic。"
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showSettingsDialog = false
+                        onForceModeChanged()
+                    }
+                ) { Text(tr("Done", "完成")) }
+            }
+        )
+    }
+
+    if (MainActivity.showRunConfirm.value) {
+        AlertDialog(
+            onDismissRequest = { MainActivity.showRunConfirm.value = false },
+            title = { Text(tr("Confirm exploit launch", "确认运行提权")) },
+            text = {
+                Text(
+                    tr(
+                        "Auto-detection cannot reliably rule out an existing root (KernelSU hides su from apps). Running the exploit can kernel-panic the device even on a clean boot. Continue?",
+                        "自动检测无法可靠排除设备已处于 Root 状态（KernelSU 会向应用隐藏 su）。且即使设备未 Root，运行提权也存在内核 Panic 风险。确定继续？"
+                    ),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            dismissButton = {
+                TextButton(onClick = { MainActivity.showRunConfirm.value = false }) {
+                    Text(tr("Cancel", "取消"))
+                }
+            },
+            confirmButton = {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextButton(onClick = {
+                        MainActivity.showRunConfirm.value = false
+                        onProbeRoot()
+                    }) {
+                        Text(tr("Test su first", "先检测 Root"))
+                    }
+                    TextButton(onClick = {
+                        MainActivity.showRunConfirm.value = false
+                        onForceStart()
+                    }) {
+                        Text(tr("Run exploit", "运行提权"), fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        )
     }
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -405,6 +807,13 @@ fun MainAppScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { showSettingsDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = tr("Settings", "设置"),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                     IconButton(
                         onClick = {
                             showUpdateDialog = true
@@ -448,10 +857,12 @@ fun MainAppScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             // 1. Device & Runtime Info Card
-            DeviceStatusCard(state = state)
+            if (!consoleFullscreen) {
+                DeviceStatusCard(state = state)
 
-            // 2. Qualcomm GPU & Linux Kernel Requirements Card
-            PlatformLimitationCard()
+                // 2. Qualcomm GPU & Linux Kernel Requirements Card
+                PlatformLimitationCard()
+            }
 
             // 3. Clean Monospace Output Panel (Mangekyo benchmark style)
             TerminalCard(
@@ -459,17 +870,21 @@ fun MainAppScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
+                isFullscreen = consoleFullscreen,
+                onToggleFullscreen = { consoleFullscreen = !consoleFullscreen },
                 onClear = onClearLogs,
                 onCopy = onCopyLogs,
                 onSave = onSaveLogs
             )
 
             // 4. Action Controls
-            ActionSection(
-                state = state,
-                onStart = onStartExploit,
-                onOpenKernelSU = onOpenKernelSU
-            )
+            if (!consoleFullscreen) {
+                ActionSection(
+                    state = state,
+                    onStart = onStartExploit,
+                    onOpenKernelSU = onOpenKernelSU
+                )
+            }
         }
     }
 
@@ -712,6 +1127,11 @@ private fun StatusBadge(state: ExploitState) {
             MaterialTheme.colorScheme.onErrorContainer,
             tr("Reboot Required", "需要重启")
         )
+        ExploitState.ROOTED_EXTERNAL -> Triple(
+            Color(0xFFFFEDD5),
+            Color(0xFF9A3412),
+            tr("Root Detected", "已有 Root")
+        )
     }
 
     Box(
@@ -844,6 +1264,8 @@ private fun PlatformLimitationCard(
 private fun TerminalCard(
     logs: List<String>,
     modifier: Modifier = Modifier,
+    isFullscreen: Boolean = false,
+    onToggleFullscreen: () -> Unit = {},
     onClear: () -> Unit,
     onCopy: () -> Unit,
     onSave: () -> Unit
@@ -908,6 +1330,22 @@ private fun TerminalCard(
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    IconButton(
+                        onClick = onToggleFullscreen,
+                        modifier = Modifier.size(34.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isFullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
+                            contentDescription = if (isFullscreen) {
+                                tr("Exit fullscreen", "退出全屏")
+                            } else {
+                                tr("Fullscreen console", "控制台全屏")
+                            },
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
                     IconButton(
                         onClick = onSave,
                         modifier = Modifier.size(34.dp)
@@ -1012,7 +1450,7 @@ private fun ActionSection(
     ) {
         Button(
             onClick = onStart,
-            enabled = state != ExploitState.RUNNING,
+            enabled = state == ExploitState.IDLE,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
@@ -1034,6 +1472,42 @@ private fun ActionSection(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
+            } else if (state == ExploitState.SUCCESS) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = tr("Root Active — Reboot to Reset", "Root 已激活 · 重启后自动解除"),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            } else if (state == ExploitState.FAILED) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = tr("Reboot Device Before Retrying", "请重启手机后再重试"),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            } else if (state == ExploitState.ROOTED_EXTERNAL) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = tr("Already Rooted — Run Blocked", "已有 Root · 已阻止运行"),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
             } else {
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
@@ -1042,11 +1516,7 @@ private fun ActionSection(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (state == ExploitState.SUCCESS) {
-                        tr("Re-activate (After Reboot)", "再次激活 (若已重启)")
-                    } else {
-                        tr("Activate Root & KernelSU", "一键激活 Root & KernelSU")
-                    },
+                    text = tr("Activate Root & KernelSU", "一键激活 Root & KernelSU"),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )

@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.worthdoingbadly.cheese"
-        minSdk = 31 // katyusha runs Android 12 / API 31 (template's 32 was Quest-only)
+        minSdk = 30 // katyusha targets Android 12+; 30 only so older devices can install the shell (engine won't run there)
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"

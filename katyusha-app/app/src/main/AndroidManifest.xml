@@ -5,6 +5,8 @@
     <queries>
         <package android:name="me.weishu.kernelsu" />
         <package android:name="io.github.a13e300.ksu" />
+        <package android:name="com.topjohnwu.magisk" />
+        <package android:name="me.bmax.apatch" />
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
@@ -18,7 +20,7 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="CheeseKatyusha"
+        android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:extractNativeLibs="true"

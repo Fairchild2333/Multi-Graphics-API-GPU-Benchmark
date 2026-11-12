@@ -94,9 +94,22 @@ if [ -x "./ksud" ]; then
     chmod 700 /data/adb 2>/dev/null
     cp ./ksud /data/adb/ksu/bin/ksud 2>/dev/null
     chmod 755 /data/adb/ksu/bin/ksud 2>/dev/null
-    
+
     echo "[katyusha] Running 'ksud install'..."
     ./ksud install 2>&1
+
+    # 6.5 Start the userspace su-session daemon.
+    # Without it, adb-shell su works (kernel direct via --allow-shell) but every
+    # APP-context su request dies in <10ms (no daemon endpoint to mediate the
+    # session) — apps then fall back to the system installer / report no root.
+    echo "[katyusha] Starting sulogd (userspace su-session daemon)..."
+    "./ksud" debug sulogd >/dev/null 2>&1 &
+    sleep 1
+    if [ -f /data/adb/ksu/log/sulogd.lock ] || pgrep -f sulogd >/dev/null 2>&1; then
+        echo "[katyusha] sulogd is up — app su should now work."
+    else
+        echo "[katyusha] [WARN] sulogd may not have started; app su could be denied."
+    fi
 fi
 
 # 7. Final status report
