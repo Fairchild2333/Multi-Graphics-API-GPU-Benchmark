@@ -1,0 +1,74 @@
+--------- beginning of main
+11-13 15:06:52.184 23088 23088 I Mangekyo: AUTORUN accepted test=stream_headless?particles=4194304&api=gles
+11-13 15:06:52.508 23088 23088 I Mangekyo: AUTORUN started test=stream_headless?particles=4194304&api=gles
+11-13 15:06:52.609 23088 23117 I MangekyoEngine: [OpenGL ES Init] Creating the context...
+11-13 15:06:52.610 23088 23117 I MangekyoEngine: [OpenGL ES Init] Adreno (TM) 740  |  OpenGL ES 3.2 V@0676.77.1 (GIT@3df4c357f0, I515341007c, 1769513954) (Date:01/27/26)
+11-13 15:06:52.610 23088 23117 I MangekyoEngine: [OpenGL ES Init] Compiling shaders...
+11-13 15:06:52.610 23088 23117 I MangekyoEngine: [OpenGL ES Init] Creating particle buffers...
+11-13 15:06:52.693 23088 23117 I MangekyoEngine: Created particle buffers: 4194304 particles
+11-13 15:06:52.693 23088 23117 I MangekyoEngine: [OpenGL ES Init] Creating timestamp queries...
+11-13 15:06:52.694 23088 23117 I MangekyoEngine: [Profiling] OpenGL ES timestamp queries enabled (40 bits).
+11-13 15:06:52.719 23088 23117 I MangekyoEngine: [Profiling] Timestamp check: 0.002135 ms by the GPU's clock, 8.05281 ms by wall clock.
+11-13 15:06:52.719 23088 23117 I MangekyoEngine: [Profiling] OpenGL ES timestamp queries are unreliable (its timestamps do not cover the GPU's work); using synchronized wall-clock timing.
+11-13 15:06:52.833 23088 23117 I MangekyoEngine: [Profiling] Wait check: over 16 particle steps the wait took 114.228 ms and glFinish found 0.012812 ms of work left after it.
+11-13 15:06:52.833 23088 23117 I MangekyoEngine: [OpenGL ES Init] Initialisation complete.
+11-13 15:06:53.148 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.137 ms | Render: 0.000 ms | Total: 7.137 ms | FPS: 143 | T: 0.3 s (warm-up)
+11-13 15:06:53.452 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.234 ms | Render: 0.000 ms | Total: 7.234 ms | FPS: 138 | T: 0.6 s (warm-up)
+11-13 15:06:53.758 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.130 ms | Render: 0.000 ms | Total: 7.130 ms | FPS: 140 | T: 0.9 s (warm-up)
+11-13 15:06:54.065 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.115 ms | Render: 0.000 ms | Total: 7.115 ms | FPS: 140 | T: 1.2 s (warm-up)
+11-13 15:06:54.372 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.132 ms | Render: 0.000 ms | Total: 7.132 ms | FPS: 140 | T: 1.5 s (warm-up)
+11-13 15:06:54.674 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.205 ms | Render: 0.000 ms | Total: 7.205 ms | FPS: 138 | T: 1.8 s (warm-up)
+11-13 15:06:55.678 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.114 ms | Render: 0.000 ms | Total: 7.114 ms | FPS: 140 | T: 2.8 s
+11-13 15:06:56.681 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.164 ms | Render: 0.000 ms | Total: 7.164 ms | FPS: 139 | T: 3.8 s
+11-13 15:06:57.686 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.272 ms | Render: 0.000 ms | Total: 7.272 ms | FPS: 137 | T: 4.9 s
+11-13 15:06:58.689 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.166 ms | Render: 0.000 ms | Total: 7.166 ms | FPS: 139 | T: 5.9 s
+11-13 15:06:59.696 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.133 ms | Render: 0.000 ms | Total: 7.133 ms | FPS: 140 | T: 6.9 s
+11-13 15:07:00.698 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.158 ms | Render: 0.000 ms | Total: 7.158 ms | FPS: 139 | T: 7.9 s
+11-13 15:07:01.703 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.171 ms | Render: 0.000 ms | Total: 7.171 ms | FPS: 139 | T: 8.9 s
+11-13 15:07:02.708 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.225 ms | Render: 0.000 ms | Total: 7.225 ms | FPS: 138 | T: 9.9 s
+11-13 15:07:03.713 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.336 ms | Render: 0.000 ms | Total: 7.336 ms | FPS: 136 | T: 10.9 s
+11-13 15:07:04.716 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.261 ms | Render: 0.000 ms | Total: 7.261 ms | FPS: 137 | T: 11.9 s
+11-13 15:07:05.719 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.316 ms | Render: 0.000 ms | Total: 7.316 ms | FPS: 136 | T: 12.9 s
+11-13 15:07:06.727 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 7.299 ms | Render: 0.000 ms | Total: 7.299 ms | FPS: 137 | T: 13.9 s
+11-13 15:07:07.727 23088 23117 I MangekyoEngine: [GPU Timing] Compute: 8.470 ms | Render: 0.000 ms | Total: 8.470 ms | FPS: 117 | T: 14.9 s
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: ==========================================================
+11-13 15:07:07.844 23088 23117 I MangekyoEngine:                    Benchmark Summary
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: ==========================================================
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Graphics API: OpenGL ES
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: GPU:          Adreno (TM) 740
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Driver:       OpenGL ES 3.2 V@0676.77.1 (GIT@3df4c357f0, I515341007c, 1769513954) (Date:01/27/26)
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: CPU:          QTI SM8550
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: OS:           Android 16 (API 36)
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: System:       Android ARM64
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Memory:       Device-local VRAM
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Mode:         Headless (compute only)
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Resolution:   1280x720
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Particles:    4194304 (Heavy)
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Buffer:       128.0 MB
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Flights:      2
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Multi-GPU:    Off
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: V-Sync:       OFF
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Duration:     13.0 s (warmup: 2.0 s, measured: 1778 frames)
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: --- GPU Timing (ms) ---
+11-13 15:07:07.844 23088 23117 I MangekyoEngine:                      Avg       Min       Max
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Compute:         7.311     7.017    11.594
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Render:          0.000     0.000     0.000
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Total GPU:       7.311     7.017    11.594
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: --- Throughput ---
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Avg FPS:      136
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Particles:    4194304
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Working set:  128.00 MiB
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: VRAM rate:   22.95 GB/s  (7.311 ms compute)
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: --- Analysis ---
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Avg frame time:  7.315 ms
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Avg GPU time:    7.311 ms
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: GPU utilisation: 99.9%
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: >> GPU-bound: GPU is the bottleneck.
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: --- Throughput Stability ---
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Windows:      13 x 1s
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Stable window: 23.02 GB/s  (CV 0.55%)
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: Throughput:   early vs late mean change (drop positive) 4.5%  (small throughput change)
+11-13 15:07:07.844 23088 23117 I MangekyoEngine: ==========================================================
+11-13 15:07:07.853 23088 23117 I MangekyoEngine: [Results] Saved as 20261113-150707-844 -> /storage/emulated/0/Android/data/com.mangekyo.benchmark/files/results/results.json
+11-13 15:07:08.096 23088 23088 I Mangekyo: RUN finished kind=gpu score=VRAM rate: 22.95 GB/s (7.311 ms compute)

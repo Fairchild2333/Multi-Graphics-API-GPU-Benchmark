@@ -6240,3 +6240,15 @@ t_mutex_adjust_pi 会顺着 waiter->lock（即 ake_lock）继续向上寻找持
   - CPU：A510/中核三档几乎相同，X3 大核 **196.7 vs 194.0**（+1.4%），全核 **901.88 vs 884.67**（+1.9%，两次都通过了 8 核绑核合同）；X3 单线程 L1 88.7/94.2/181.9、内存读 34.8/写 57.4/复制 42.4 GB/s，与 GCH（87.1/94.2/181.6、33.2/56.6/39.9）一致。
   - **结论：同型号同固件的 S23 个体差异在 2% 以内，GPU Burn 完全复现**——MIX Fold 3 当年"同一项重跑会差很多"（降频 41.7–48.3%）是热状态差异，不是个体差异；S23 这个体积 + 这次的开局温度下成绩高度可重复。
 - **未做：** archive-index 未更新（苹果线脚本维护的清单，不动）；成绩与脚本改进同批提交。
+
+### 2026-11-13 S23 第二台的 root 锁频专项：小负载暴涨、大负载不变、持续 CPU 反而更差
+
+- **前提：** 用户把第二台 S23（KVV，BL 解锁 + KernelSU）root 了。实测 KernelSU 的 `su -c` **能力集是空的**（CapEff=0，bounding 只有 SETUID/SETGID/IPC_LOCK），uid=0 也写不了 sysfs——要写频率节点得用 **`/data/adb/ksu/bin/ksud debug su`**（stdin 喂命令，CapEff=0x1ffffffffff 全能力）再 `setenforce 0`；这套当时只在这台机器验证过。跑完已恢复原频率并 `setenforce 1`。详见归档里的 DEVICE-STATE.txt。
+- **锁定：** GPU devfreq min=max=719 MHz；policy0/3/7 的 scaling min=max=2.016/2.8032/3.36 GHz。`clocks-every-2s.txt` 全程采样（新增能力）确认锁死：83/97 个 GPU 采样在 719 MHz（burn-256 有一次 2 秒掉到 615）。
+- **结果（29 项全跑，26 ok + 同样 3 个已知驱动限制；out/test-results/samsung-s23-unit2-lockedfreq-20261113，跑前 pm clear，只含锁频成绩）：**
+  - **小负载暴涨（CPU 提交延迟主导）：** 粒子 65K 窗口 50.98（标准 21.76，**+134%**）、65K Headless 52.66（19.35，**+172%**），compute 每步 0.118→0.051 ms；GLES wall-clock 项也受益（65K 19.25 vs 16.56，GLES2 Burn 52.94 vs 44.80，+18%）。
+  - **大负载纹丝不动（纯 GPU 边界）：** 粒子 1M/4M/16M 窗口和 Headless 差异 <1%；**GPU Burn 64 步 2.75 / 42.872 ms——这个数字第三次原样复现**（两台标准跑 + 这次锁频跑）；显存 56.306（56.34/56.375，-0.06%）。
+  - **持续 CPU 测试更差：** 全核 **865.76（标准 901.88，-4%）**；X3 单核 **174.2（196.7，-11%）**；四个中核 135.7–146.7（标准 171.6–184.0，**-15%~-20%**）；A510 不变。原因：全部核心钉满频持续发热（cpu-compute 起跑时电池已 38.7 °C，标准跑是 36.7），温控把中核/大核压得比调度器自己选的还低——**小米平板 K1 那条"root 是锁频的必要非充分条件，降温比锁频便宜"的教训在一台干净的新机子上原样重演**。
+  - GLES Burn 16 步在热状态下 2.01（标准 2.27）偏慢、256 步 3.12（2.91）偏快，窗口小、波动大，不单独下结论。
+- **结论：** 锁频只对"CPU 提交延迟主导"的短小负载有收益；正式成绩体系维持标准调度器跑法（条件公平且持续负载更好）。锁频数据只作专项对照，不进正式对比。
+- **adb-suite 增强（bash + ps1 双端同步）：** ① 每项测试期间每 2 秒采样 GPU + 各 policy CPU 频率，归档 clocks-every-2s.txt；② 新增 `-Freeze`（root，pm suspend 全部第三方应用、保留 launcher/输入法/本 App，结束自动解冻，名单存 frozen-packages.txt）；launcher 探测用 `cmd shortcut get-default-launcher`（resolve-activity --brief 在三星上返回 No activity found）；③ ps1 端用 `adb shell sh < clock-cmd.sh` 喂采样脚本（Start-Process 转义限制），bash 端直接内联。冒烟（-Freeze 冻 34 个应用 + 解冻）通过。

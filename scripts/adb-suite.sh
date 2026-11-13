@@ -11,11 +11,15 @@
 # Usage:
 #   ./scripts/adb-suite.sh [-s serial] [-i] [-q] [-Only pattern]
 #                          [-CoolDownSeconds n] [-StartBelowC degrees]
+#                          [-Freeze]
 #
 #   -i    install android/app/build/outputs/apk/debug/app-debug.apk first
 #   -q    3 s GPU tests and 1 s CPU steps, no pause between tests (not for
 #         results)
 #   -Only run only the tests whose name matches this pattern, e.g. "burn|fluid"
+#   -Freeze suspend third-party background apps for the whole series (root
+#         required); everything is unsuspended again at the end. A quieter
+#         machine changes the conditions, so mark such runs in DEVICE-STATE.
 #   -StartBelowC  before every test, wait until the battery is no warmer than
 #         this and the system reports no throttling (max ten minutes)
 
@@ -29,6 +33,7 @@ Quick=0
 Only=""
 CoolDownSeconds=30
 StartBelowC=0
+Freeze=0
 while [ $# -gt 0 ]; do
     case "$1" in
         -s|-Serial) Serial="$2"; shift 2 ;;
@@ -41,6 +46,7 @@ while [ $# -gt 0 ]; do
         -CoolDownSeconds=*) CoolDownSeconds="${1#*=}"; shift ;;
         -StartBelowC) StartBelowC="$2"; shift 2 ;;
         -StartBelowC=*) StartBelowC="${1#*=}"; shift ;;
+        -f|-Freeze) Freeze=1; shift ;;
         *) echo "Unknown argument: $1"; exit 2 ;;
     esac
 done
@@ -156,6 +162,46 @@ if ! "${ADB[@]}" shell pm list packages "$package" | tr -d '\r' | grep -q "$pack
     exit 2
 fi
 
+# Suspend every third-party app except the benchmark, the launcher and the
+# input method, so the CPU tests see a quieter machine. Everything is
+# unsuspended at the end and on any exit. A suspended app keeps its data;
+# this changes nothing on disk.
+frozen_list=""
+cleanup_freeze() {
+    if [ -n "$frozen_list" ]; then
+        for p in $frozen_list; do
+            "${ADB[@]}" shell su -c "pm unsuspend $p" > /dev/null 2>&1
+        done
+        echo "Unsuspended $(echo $frozen_list | wc -w | tr -d ' ') apps."
+        frozen_list=""
+    fi
+}
+trap cleanup_freeze EXIT
+if [ $Freeze -eq 1 ]; then
+    uid=$("${ADB[@]}" shell su -c id -u 2>/dev/null | tr -d '\r' | tr -d ' ')
+    if [ "$uid" != "0" ]; then
+        echo "-Freeze needs root (su); the device did not give it (uid: '$uid')."
+        exit 2
+    fi
+    # Samsung answers get-default-launcher with a ComponentInfo{...}; older
+    # devices may only answer resolve-activity. Keep the package name.
+    launcher=$("${ADB[@]}" shell cmd shortcut get-default-launcher 2>/dev/null | tr -d '\r' | sed -n 's/.*ComponentInfo{\([^/}]*\).*/\1/p')
+    if [ -z "$launcher" ]; then
+        launcher=$("${ADB[@]}" shell cmd package resolve-activity --brief -c android.intent.category.HOME 2>/dev/null | tr -d '\r' | grep -v '^$' | tail -1 | cut -d/ -f1)
+    fi
+    case "$launcher" in *No\ activity*|"") echo "Could not identify the launcher; not freezing (a frozen launcher can leave the phone without a home screen)."; exit 2 ;; esac
+    ime=$("${ADB[@]}" shell settings get secure default_input_method 2>/dev/null | tr -d '\r' | cut -d/ -f1)
+    keep="com.mangekyo.benchmark $launcher $ime"
+    for p in $("${ADB[@]}" shell pm list packages -3 | tr -d '\r' | sed 's/package://'); do
+        case " $keep " in *" $p "*) continue ;; esac
+        if "${ADB[@]}" shell su -c "pm suspend $p" > /dev/null 2>&1; then
+            frozen_list="$frozen_list $p"
+        fi
+    done
+    echo "$frozen_list" > "$out/frozen-packages.txt"
+    echo "Frozen $(echo $frozen_list | wc -w | tr -d ' ') third-party apps (launcher: $launcher, ime: $ime)."
+fi
+
 if [ $Quick -eq 1 ]; then gpu_seconds=3; cpu_seconds=1; CoolDownSeconds=0; else gpu_seconds=15; cpu_seconds=15; fi
 
 # name|what adb asks the app for|seconds given to the app|how long to wait for the end
@@ -247,6 +293,13 @@ for entry in $tests; do
     fi
     capture_pid=$!
 
+    # Sample GPU and per-cluster CPU clocks every two seconds while the test
+    # runs: read-only evidence of what the device actually did, appended to
+    # one file for the whole series.
+    echo "=== $(printf '%02d' $index) $name (battery $temperature C) ===" >> "$out/clocks-every-2s.txt"
+    "$adb_bin" ${Serial:+-s "$Serial"} shell 'while :; do printf "%s gpu=%s" "$(date +%H:%M:%S)" "$(cat /sys/class/kgsl/kgsl-3d0/devfreq/cur_freq 2>/dev/null)"; for p in /sys/devices/system/cpu/cpufreq/policy*; do printf " %s=%s" "$(basename "$p")" "$(cat "$p/scaling_cur_freq" 2>/dev/null)"; done; echo; sleep 2; done' >> "$out/clocks-every-2s.txt" 2>/dev/null &
+    sampler_pid=$!
+
     command="am start -S -n $package/.MainActivity --es run '$run'"
     if [ "$seconds" -gt 0 ]; then command="$command --ei seconds $seconds"; fi
     "${ADB[@]}" shell "$command" > /dev/null
@@ -288,8 +341,12 @@ for entry in $tests; do
     else
         capture_lost=1
     fi
+    kill $sampler_pid 2>/dev/null
+    wait $sampler_pid 2>/dev/null
 
     if [ $lost -eq 1 ]; then
+        kill $sampler_pid 2>/dev/null; wait $sampler_pid 2>/dev/null
+        kill $capture_pid 2>/dev/null; wait $capture_pid 2>/dev/null
         echo " DEVICE LOST after $elapsed s"
         summary="$summary
 $name|DEVICE LOST|$elapsed|$temperature|adb lost the phone during this test|"

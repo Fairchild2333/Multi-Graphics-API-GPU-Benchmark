@@ -1,0 +1,17 @@
+锁频专项测试状态记录 — 2026-11-13
+设备: samsung SM-S911B, 序列号 RFCW10T3KVV (第二台 S23)
+root: KernelSU 3.3.1 (katyusha cheese 链 ksud); su -c 能力集为空(CapEff=0),
+  写 sysfs 用 "ksud debug su"(CapEff=0x1ffffffffff 全能力) + setenforce 0;
+  跑完已 setenforce 1 并验证 Enforcing。
+
+锁定参数(每项测试前已生效, clocks-every-2s.txt 每 2 秒采样可证):
+  GPU  devfreq min=max=719000000 (719 MHz, Adreno 740 满频)
+  CPU  policy0(A520×3) min=max=2016000
+       policy3(A715×4) min=max=2803200
+       policy7(X3)     min=max=3360000
+原始值(已恢复并验证): GPU 124800000/719000000; policy0 672000/2016000;
+  policy3 614400/2803200; policy7 864000/3360000。
+后台冻结: 未使用(-Freeze), 只改频率一个变量, 与同日标准跑严格可比。
+results.json: 跑前 pm clear, 只含本次锁频 27 条(同日标准跑已另档
+  samsung-s23-unit2-full-suite-20261113)。
+电池: 开跑 100% / 28.6 °C, 结束 38.9 °C, 全程未插充电(USB 数据线)。

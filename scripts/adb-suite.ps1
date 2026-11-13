@@ -78,7 +78,8 @@ param(
     [switch]$Quick,
     [string]$Only = "",
     [int]$CoolDownSeconds = 30,
-    [double]$StartBelowC = 0
+    [double]$StartBelowC = 0,
+    [switch]$Freeze
 )
 
 $repo = Split-Path -Parent $PSScriptRoot
@@ -190,6 +191,29 @@ if (-not ((Invoke-Adb shell pm list packages $package) -join "").Contains($packa
     exit 2
 }
 
+# Suspend third-party background apps during the series so the CPU tests see
+# a quieter machine (root required). Everything is unsuspended after the loop.
+$frozen = @()
+if ($Freeze) {
+    $uid = ((Invoke-Adb shell su -c id -u) -join "").Trim()
+    if ($uid -ne "0") {
+        Write-Host "-Freeze needs root (su); the device did not give it (uid: '$uid')."
+        exit 2
+    }
+    $launcher = (Invoke-Adb shell cmd shortcut get-default-launcher 2>$null | Select-Object -First 1)
+    if ($launcher -match "ComponentInfo\{([^/}]+)") { $launcher = $Matches[1] }
+    else { Write-Host "Could not identify the launcher; not freezing (a frozen launcher can leave the phone without a home screen)."; exit 2 }
+    $ime = (((Invoke-Adb shell settings get secure default_input_method) -join "").Trim() -split "/")[0]
+    $keep = @("com.mangekyo.benchmark", $launcher, $ime)
+    foreach ($p in (Invoke-Adb shell pm list packages -3 | ForEach-Object { ($_ -replace "^package:", "").Trim() })) {
+        if ($keep -contains $p) { continue }
+        Invoke-Adb shell su -c "pm suspend $p" > $null 2>&1
+        if ($LASTEXITCODE -eq 0) { $frozen += $p }
+    }
+    $frozen | Set-Content -Encoding utf8 (Join-Path $out "frozen-packages.txt")
+    Write-Host ("Frozen {0} third-party apps (launcher: {1}, ime: {2})." -f $frozen.Count, $launcher, $ime)
+}
+
 $gpuSeconds = if ($Quick) { 3 } else { 15 }
 $cpuSeconds = if ($Quick) { 1 } else { 15 }
 if ($Quick) { $CoolDownSeconds = 0 }
@@ -270,6 +294,17 @@ foreach ($test in $tests) {
     if ($Serial) { $captureArgs += "-s", $Serial }
     $captureArgs += "logcat", "-s", "Mangekyo:V", "MangekyoEngine:V"
     $capture = Start-Process $adb -ArgumentList $captureArgs -RedirectStandardOutput $log -WindowStyle Hidden -PassThru
+
+    # Sample GPU and per-cluster CPU clocks every two seconds while the test
+    # runs; the per-test files are merged into clocks-every-2s.txt at the end.
+    $clockFile = Join-Path $out ("{0:D2}-{1}.clocks" -f $index, $test.name)
+    $clockSh = Join-Path $out "clock-cmd.sh"
+    Set-Content -Encoding ascii $clockSh 'while :; do printf "%s gpu=%s" "$(date +%H:%M:%S)" "$(cat /sys/class/kgsl/kgsl-3d0/devfreq/cur_freq 2>/dev/null)"; for p in /sys/devices/system/cpu/cpufreq/policy*; do printf " %s=%s" "$(basename "$p")" "$(cat "$p/scaling_cur_freq" 2>/dev/null)"; done; echo; sleep 2; done'
+    $samplerArgs = @()
+    if ($Serial) { $samplerArgs += "-s", $Serial }
+    $samplerArgs += "shell", "sh"
+    $sampler = Start-Process $adb -ArgumentList $samplerArgs -RedirectStandardInput $clockSh -RedirectStandardOutput $clockFile -WindowStyle Hidden -PassThru
+
     $command = "am start -S -n $package/.MainActivity --es run '$($test.run)'"
     if ($test.seconds -gt 0) { $command += " --ei seconds $($test.seconds)" }
     Invoke-Adb shell $command | Out-Null
@@ -301,7 +336,11 @@ foreach ($test in $tests) {
     $captureLost = $capture.HasExited
     if (-not $captureLost) { Stop-Process -Id $capture.Id -Force -ErrorAction SilentlyContinue }
     $capture.WaitForExit(5000) | Out-Null
+    if (-not $sampler.HasExited) { Stop-Process -Id $sampler.Id -Force -ErrorAction SilentlyContinue }
+    $sampler.WaitForExit(5000) | Out-Null
     if ($lost) {
+        if (-not $sampler.HasExited) { Stop-Process -Id $sampler.Id -Force -ErrorAction SilentlyContinue }
+        if (-not $capture.HasExited) { Stop-Process -Id $capture.Id -Force -ErrorAction SilentlyContinue }
         Write-Host (" DEVICE LOST after {0:N0} s" -f $watch.Elapsed.TotalSeconds)
         $summary += [pscustomobject]@{
             Test = $test.name; Status = "DEVICE LOST"; Seconds = [int]$watch.Elapsed.TotalSeconds
@@ -368,6 +407,24 @@ foreach ($test in $tests) {
     # A test the device refused at once did no work: there is nothing to cool.
     $refusedAtOnce = $status -eq "FAILED" -and $watch.Elapsed.TotalSeconds -lt 6
     if ($CoolDownSeconds -gt 0 -and -not $refusedAtOnce) { Start-Sleep -Seconds $CoolDownSeconds }
+}
+
+# Unsuspend what -Freeze suspended (also covers NOT STARTED and DEVICE LOST).
+if ($frozen.Count -gt 0) {
+    foreach ($p in $frozen) { Invoke-Adb shell su -c "pm unsuspend $p" > $null 2>&1 }
+    Write-Host ("Unsuspended {0} apps." -f $frozen.Count)
+    $frozen = @()
+}
+# Merge the per-test clock samples into one evidence file.
+$clockLines = @()
+Get-ChildItem $out -Filter "*.clocks" -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
+    $clockLines += ("=== {0} ===" -f $_.BaseName)
+    $clockLines += @(Get-Content $_.FullName -ErrorAction SilentlyContinue)
+}
+if ($clockLines.Count -gt 0) {
+    $clockLines | Set-Content -Encoding utf8 (Join-Path $out "clocks-every-2s.txt")
+    Get-ChildItem $out -Filter "*.clocks" | Remove-Item
+    Remove-Item $clockSh -ErrorAction SilentlyContinue
 }
 
 if (Test-Device) {
