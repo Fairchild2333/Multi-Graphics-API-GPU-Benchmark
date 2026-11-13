@@ -123,12 +123,15 @@ function Test-Device {
 }
 
 $model = ("{0} {1}" -f (Get-Prop "ro.product.manufacturer"), (Get-Prop "ro.product.model")).Trim()
-$folderName = (($model -replace "[^A-Za-z0-9]+", "-").Trim("-")) + "-" + (Get-Date -Format "yyyyMMdd-HHmmss")
+# Two units of the same model must stay distinguishable, so the serial goes
+# into the folder name and device.txt.
+$folderName = (($model -replace "[^A-Za-z0-9]+", "-").Trim("-")) + "-" + $device + "-" + (Get-Date -Format "yyyyMMdd-HHmmss")
 $out = Join-Path $repo "out\adb\$folderName"
 New-Item -ItemType Directory -Force $out | Out-Null
 
 @(
     "model:        $model",
+    "serial:       $device",
     "device:       $(Get-Prop 'ro.product.device')",
     "chip:         $(Get-Prop 'ro.soc.manufacturer') $(Get-Prop 'ro.soc.model')",
     "hardware:     $(Get-Prop 'ro.hardware')",

@@ -1,0 +1,30 @@
+Test                       Status       Seconds  BatteryC Result                                       Note
+particle-65k               ok                18      29.7 VRAM rate: 21.76 GB/s (0.120 ms compute)     
+particle-1m                ok                18      29.6 VRAM rate: 24.40 GB/s (1.719 ms compute)     
+particle-4m                ok                18      30.1 VRAM rate: 23.75 GB/s (7.064 ms compute)     
+particle-16m               ok                20        31 VRAM rate: 23.59 GB/s (28.451 ms compute)    
+particle-65k-headless      ok                16      31.1 VRAM rate: 19.35 GB/s (0.135 ms compute)     
+particle-1m-headless       ok                16      30.6 VRAM rate: 24.41 GB/s (1.718 ms compute)     
+particle-4m-headless       ok                18      31.7 VRAM rate: 23.92 GB/s (7.015 ms compute)     
+particle-16m-headless      ok                18      31.8 VRAM rate: 23.40 GB/s (28.675 ms compute)    
+gpu-burn-16                ok                18      32.5 Burn rate: 2.17 Gpix-step/s (13.619 ms render) 
+gpu-burn-64                ok                18      33.3 Burn rate: 2.75 Gpix-step/s (42.873 ms render) 
+gpu-burn-256               ok                18      33.3 Burn rate: 2.96 Gpix-step/s (159.611 ms render) 
+fluid                      FAILED             2      34.6 Cinematic Liquid v2 fixed score requires linear-filterable R32_SFLOAT 3D images 
+vram-bandwidth             ok                 8      34.6 Memory rate: 56.340 GB/s                     
+gles-particle-65k          ok                18      33.5 VRAM rate: 16.56 GB/s (0.158 ms compute)      timed by wall clock
+gles-particle-1m           ok                18      34.3 VRAM rate: 20.76 GB/s (2.021 ms compute)      timed by wall clock
+gles-particle-4m           ok                18      34.2 VRAM rate: 22.86 GB/s (7.341 ms compute)      timed by wall clock
+gles-particle-16m          FAILED             2      33.9 16777216 particles need 65536 compute work groups in one dispatch; this OpenGL ES driver allows 65535 
+gles-particle-65k-headless ok                16      33.9 VRAM rate: 13.33 GB/s (0.197 ms compute)      timed by wall clock
+gles-particle-1m-headless  ok                16      34.9 VRAM rate: 21.75 GB/s (1.928 ms compute)      timed by wall clock
+gles-particle-4m-headless  ok                16      34.6 VRAM rate: 23.08 GB/s (7.269 ms compute)      timed by wall clock
+gles-particle-16m-headless FAILED             2        35 16777216 particles need 65536 compute work groups in one dispatch; this OpenGL ES driver allows 65535 
+gles-gpu-burn-16           ok                18        35 Burn rate: 2.27 Gpix-step/s (13.013 ms render) 
+gles-gpu-burn-64           ok                18      36.1 Burn rate: 2.76 Gpix-step/s (42.784 ms render) 
+gles-gpu-burn-256          ok                18      35.8 Burn rate: 3.01 Gpix-step/s (156.799 ms render) 
+gles2-gpu-burn-16          ok                18      36.7 Burn rate: 45.98 Gpix-step/s (0.641 ms render)  timed by wall clock
+gles2-gpu-burn-64          ok                18      36.9 Burn rate: 43.48 Gpix-step/s (2.713 ms render)  timed by wall clock
+gles2-gpu-burn-256         ok                18      36.2 Burn rate: 50.19 Gpix-step/s (9.402 ms render)  timed by wall clock
+cpu-compute                ok               136        37 all cores 11-13 13:03:46.707 24422 24458 I MangekyoEngine: 901.88 MWork/s 
+cpu-cache-memory           ok                72      36.9                                              

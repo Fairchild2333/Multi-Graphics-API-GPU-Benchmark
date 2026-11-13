@@ -1,0 +1,12 @@
+model:        samsung SM-S911B
+serial:       RFCW10T3KVV
+device:       dm1q
+chip:         QTI SM8550
+hardware:     qcom
+platform:     kalama
+android:      16 (API 36)
+build:        BP4A.251205.006.S911BXXSAFZI1
+abi:          arm64-v8a,armeabi-v7a,armeabi
+display:      Physical size: 1080x2340
+series:       formal durations
+started:      2026-11-13 12:43:55

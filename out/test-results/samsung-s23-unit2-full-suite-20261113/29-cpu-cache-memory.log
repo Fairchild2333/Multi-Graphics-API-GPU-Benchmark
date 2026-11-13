@@ -1,0 +1,690 @@
+--------- beginning of main
+11-13 13:06:20.614 25539 25539 I Mangekyo: AUTORUN accepted test=cpu_membw
+11-13 13:06:21.150 25539 25539 I Mangekyo: AUTORUN started test=cpu_membw
+11-13 13:06:21.152 25539 25577 I MangekyoEngine: ========== CPU Memory Bandwidth Sweep (cpu_membw_v1) ==========
+11-13 13:06:21.152 25539 25577 I MangekyoEngine: CPU:       QTI SM8550 (8 cores / 8 threads)
+11-13 13:06:21.152 25539 25577 I MangekyoEngine: Vectors:   NEON, 16-byte loads and stores
+11-13 13:06:21.152 25539 25577 I MangekyoEngine: Class 0:   InferredPerformance, 1 core, reference logical processor 7
+11-13 13:06:21.152 25539 25577 I MangekyoEngine:            sizes not reported by the OS; levels are read off the curve
+11-13 13:06:21.152 25539 25577 I MangekyoEngine: Class 1:   InferredEfficiency, 4 cores, reference logical processor 4
+11-13 13:06:21.152 25539 25577 I MangekyoEngine:            sizes not reported by the OS; levels are read off the curve
+11-13 13:06:21.152 25539 25577 I MangekyoEngine: Class 2:   InferredLowPowerEfficiency, 3 cores, reference logical processor 1
+11-13 13:06:21.152 25539 25577 I MangekyoEngine:            sizes not reported by the OS; levels are read off the curve
+11-13 13:06:21.152 25539 25577 I MangekyoEngine: Memory:    6.9 GiB installed, 3.6 GiB free
+11-13 13:06:21.152 25539 25577 I MangekyoEngine: Sweep:     4 KiB - 256 MiB on one thread of each core class; 4 KiB - 64 MiB per thread on 8 threads
+11-13 13:06:21.152 25539 25577 I MangekyoEngine: Timing:    wall clock, 2 warm-up + 7 measured samples of 10 ms per point, median reported
+11-13 13:06:21.152 25539 25577 I MangekyoEngine: CPUMEM_META	name=QTI SM8550	vector=NEON	vector_bytes=16	physical_count=8	logical_count=8	core_type=auto	efficiency_policy=background	all_threads=8	reference_logical_index=7	class_count=3	cache_source=curve
+11-13 13:06:21.152 25539 25577 I MangekyoEngine: CPUMEM_CLASS	rank=0	mode=single	name=InferredPerformance	cores=1	reference_logical_index=7	cache_source=curve
+11-13 13:06:21.152 25539 25577 I MangekyoEngine: CPUMEM_CLASS	rank=1	mode=single_1	name=InferredEfficiency	cores=4	reference_logical_index=4	cache_source=curve
+11-13 13:06:21.152 25539 25577 I MangekyoEngine: CPUMEM_CLASS	rank=2	mode=single_2	name=InferredLowPowerEfficiency	cores=3	reference_logical_index=1	cache_source=curve
+11-13 13:06:21.152 25539 25577 I MangekyoEngine: [single] one thread on logical processor 7 (class 0, InferredPerformance)
+11-13 13:06:21.152 25539 25577 I MangekyoEngine:     Data set       Read      Write       Copy   Write NT    Copy NT  Zero fill   GB/s (median)
+11-13 13:06:21.575 25539 25577 I MangekyoEngine:        4 KiB       87.9       94.3      183.8          -          -          -
+11-13 13:06:21.575 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=4096	threads=1	median_gbps=87.887	best_gbps=92.175	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:21.575 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=4096	threads=1	median_gbps=94.281	best_gbps=94.347	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:21.575 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=4096	threads=1	median_gbps=183.783	best_gbps=184.008	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:21.575 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0082
+11-13 13:06:21.857 25539 25577 I MangekyoEngine:        8 KiB       90.7       94.2      183.7          -          -          -
+11-13 13:06:21.857 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=8192	threads=1	median_gbps=90.661	best_gbps=93.449	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:21.857 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=8192	threads=1	median_gbps=94.244	best_gbps=94.373	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:21.857 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=8192	threads=1	median_gbps=183.685	best_gbps=183.843	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:21.858 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0164
+11-13 13:06:22.133 25539 25577 I MangekyoEngine:       16 KiB       90.8       94.2      180.7          -          -          -
+11-13 13:06:22.133 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=16384	threads=1	median_gbps=90.846	best_gbps=91.947	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:22.133 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=16384	threads=1	median_gbps=94.249	best_gbps=94.360	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:22.133 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=16384	threads=1	median_gbps=180.652	best_gbps=180.961	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:22.133 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0246
+11-13 13:06:22.418 25539 25577 I MangekyoEngine:       24 KiB       90.5       94.2      181.1          -          -          -
+11-13 13:06:22.418 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=24576	threads=1	median_gbps=90.544	best_gbps=93.100	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:22.418 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=24576	threads=1	median_gbps=94.230	best_gbps=94.344	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:22.418 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=24576	threads=1	median_gbps=181.072	best_gbps=181.412	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:22.418 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0328
+11-13 13:06:22.704 25539 25577 I MangekyoEngine:       32 KiB       89.8       94.2      181.7          -          -          -
+11-13 13:06:22.704 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=32768	threads=1	median_gbps=89.833	best_gbps=90.569	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:22.704 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=32768	threads=1	median_gbps=94.216	best_gbps=94.367	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:22.704 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=32768	threads=1	median_gbps=181.674	best_gbps=181.864	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:22.704 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0410
+11-13 13:06:22.977 25539 25577 I MangekyoEngine:       48 KiB       89.8       94.2      182.0          -          -          -
+11-13 13:06:22.977 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=49152	threads=1	median_gbps=89.815	best_gbps=90.541	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:22.977 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=49152	threads=1	median_gbps=94.224	best_gbps=94.320	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:22.977 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=49152	threads=1	median_gbps=182.038	best_gbps=182.349	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:22.977 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0492
+11-13 13:06:23.250 25539 25577 I MangekyoEngine:       64 KiB       89.5       94.3      182.5          -          -          -
+11-13 13:06:23.250 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=65536	threads=1	median_gbps=89.502	best_gbps=90.182	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:23.250 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=65536	threads=1	median_gbps=94.302	best_gbps=94.382	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:23.250 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=65536	threads=1	median_gbps=182.533	best_gbps=182.591	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:23.250 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0574
+11-13 13:06:23.523 25539 25577 I MangekyoEngine:       96 KiB       86.1       94.2      182.4          -          -          -
+11-13 13:06:23.523 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=98304	threads=1	median_gbps=86.114	best_gbps=86.545	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:23.524 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=98304	threads=1	median_gbps=94.231	best_gbps=94.395	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:23.524 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=98304	threads=1	median_gbps=182.356	best_gbps=182.605	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:23.524 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0656
+11-13 13:06:23.797 25539 25577 I MangekyoEngine:      128 KiB       85.5       94.2      182.3          -          -          -
+11-13 13:06:23.797 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=131072	threads=1	median_gbps=85.469	best_gbps=86.639	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:23.797 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=131072	threads=1	median_gbps=94.244	best_gbps=94.343	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:23.797 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=131072	threads=1	median_gbps=182.252	best_gbps=182.315	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:23.797 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0738
+11-13 13:06:24.070 25539 25577 I MangekyoEngine:      192 KiB       83.7       94.3      170.1          -          -          -
+11-13 13:06:24.070 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=196608	threads=1	median_gbps=83.739	best_gbps=84.450	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:24.070 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=196608	threads=1	median_gbps=94.343	best_gbps=94.372	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:24.070 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=196608	threads=1	median_gbps=170.061	best_gbps=170.329	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:24.070 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0820
+11-13 13:06:24.343 25539 25577 I MangekyoEngine:      256 KiB       81.0       94.3      165.2          -          -          -
+11-13 13:06:24.343 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=262144	threads=1	median_gbps=81.006	best_gbps=81.421	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:24.343 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=262144	threads=1	median_gbps=94.259	best_gbps=94.336	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:24.343 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=262144	threads=1	median_gbps=165.203	best_gbps=165.390	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:24.343 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0902
+11-13 13:06:24.616 25539 25577 I MangekyoEngine:      384 KiB       79.1       94.2      158.9          -          -          -
+11-13 13:06:24.616 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=393216	threads=1	median_gbps=79.105	best_gbps=79.821	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:24.616 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=393216	threads=1	median_gbps=94.203	best_gbps=94.297	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:24.616 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=393216	threads=1	median_gbps=158.946	best_gbps=159.116	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:24.616 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.0984
+11-13 13:06:24.889 25539 25577 I MangekyoEngine:      512 KiB       77.2       94.3      155.7          -          -          -
+11-13 13:06:24.889 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=524288	threads=1	median_gbps=77.203	best_gbps=77.271	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:24.889 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=524288	threads=1	median_gbps=94.262	best_gbps=94.347	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:24.890 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=524288	threads=1	median_gbps=155.678	best_gbps=156.173	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:24.890 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1066
+11-13 13:06:25.163 25539 25577 I MangekyoEngine:      768 KiB       77.1       94.1      152.3          -          -          -
+11-13 13:06:25.163 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=786432	threads=1	median_gbps=77.094	best_gbps=78.053	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:25.163 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=786432	threads=1	median_gbps=94.119	best_gbps=94.310	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:25.163 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=786432	threads=1	median_gbps=152.344	best_gbps=152.612	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:25.163 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1148
+11-13 13:06:25.436 25539 25577 I MangekyoEngine:        1 MiB       74.9       94.1      149.0          -          -          -
+11-13 13:06:25.436 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=1048576	threads=1	median_gbps=74.927	best_gbps=75.282	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:25.437 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=1048576	threads=1	median_gbps=94.102	best_gbps=94.268	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:25.437 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=1048576	threads=1	median_gbps=148.965	best_gbps=149.719	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:25.437 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1230
+11-13 13:06:25.710 25539 25577 I MangekyoEngine:      1.5 MiB       73.9       94.0      140.3          -          -          -
+11-13 13:06:25.710 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=1572864	threads=1	median_gbps=73.873	best_gbps=75.117	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:25.710 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=1572864	threads=1	median_gbps=94.035	best_gbps=94.162	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:25.710 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=1572864	threads=1	median_gbps=140.327	best_gbps=141.746	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:25.710 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1311
+11-13 13:06:25.984 25539 25577 I MangekyoEngine:        2 MiB       70.3       90.5      118.6          -          -          -
+11-13 13:06:25.984 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=2097152	threads=1	median_gbps=70.335	best_gbps=70.983	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:25.984 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=2097152	threads=1	median_gbps=90.544	best_gbps=91.604	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:25.984 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=2097152	threads=1	median_gbps=118.609	best_gbps=123.265	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:25.984 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1393
+11-13 13:06:26.258 25539 25577 I MangekyoEngine:        3 MiB       59.7       82.3      117.4          -          -          -
+11-13 13:06:26.258 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=3145728	threads=1	median_gbps=59.703	best_gbps=60.747	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:26.258 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=3145728	threads=1	median_gbps=82.313	best_gbps=82.882	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:26.258 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=3145728	threads=1	median_gbps=117.396	best_gbps=119.897	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:26.258 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1475
+11-13 13:06:26.531 25539 25577 I MangekyoEngine:        4 MiB       55.5       76.9       98.0          -          -          -
+11-13 13:06:26.531 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=4194304	threads=1	median_gbps=55.502	best_gbps=55.730	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:26.531 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=4194304	threads=1	median_gbps=76.915	best_gbps=77.736	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:26.532 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=4194304	threads=1	median_gbps=98.008	best_gbps=99.056	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:26.532 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1557
+11-13 13:06:26.806 25539 25577 I MangekyoEngine:        6 MiB       54.6       70.9       88.6          -          -          -
+11-13 13:06:26.806 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=6291456	threads=1	median_gbps=54.550	best_gbps=54.919	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:26.806 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=6291456	threads=1	median_gbps=70.910	best_gbps=72.601	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:26.806 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=6291456	threads=1	median_gbps=88.646	best_gbps=90.122	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:26.806 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1639
+11-13 13:06:27.082 25539 25577 I MangekyoEngine:        8 MiB       48.4       69.1       87.5          -          -          -
+11-13 13:06:27.082 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=8388608	threads=1	median_gbps=48.401	best_gbps=50.792	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:27.082 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=8388608	threads=1	median_gbps=69.086	best_gbps=69.298	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:27.082 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=8388608	threads=1	median_gbps=87.515	best_gbps=89.809	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:27.082 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1721
+11-13 13:06:27.358 25539 25577 I MangekyoEngine:       12 MiB       50.4       64.6       75.7          -          -          -
+11-13 13:06:27.358 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=12582912	threads=1	median_gbps=50.413	best_gbps=50.529	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:27.358 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=12582912	threads=1	median_gbps=64.569	best_gbps=66.775	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:27.358 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=12582912	threads=1	median_gbps=75.694	best_gbps=77.067	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:27.358 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1803
+11-13 13:06:27.636 25539 25577 I MangekyoEngine:       16 MiB       37.7       62.4       71.0          -          -          -
+11-13 13:06:27.636 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=16777216	threads=1	median_gbps=37.657	best_gbps=37.821	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:27.636 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=16777216	threads=1	median_gbps=62.420	best_gbps=65.138	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:27.636 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=16777216	threads=1	median_gbps=71.011	best_gbps=72.410	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:27.636 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1885
+11-13 13:06:27.916 25539 25577 I MangekyoEngine:       24 MiB       36.2       62.7       55.5          -          -          -
+11-13 13:06:27.916 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=25165824	threads=1	median_gbps=36.182	best_gbps=36.723	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:27.916 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=25165824	threads=1	median_gbps=62.670	best_gbps=63.027	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:27.916 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=25165824	threads=1	median_gbps=55.503	best_gbps=56.819	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:27.916 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.1967
+11-13 13:06:28.198 25539 25577 I MangekyoEngine:       32 MiB       35.4       61.9       47.7          -          -          -
+11-13 13:06:28.198 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=33554432	threads=1	median_gbps=35.357	best_gbps=36.477	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:28.198 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=33554432	threads=1	median_gbps=61.900	best_gbps=62.391	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:28.198 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=33554432	threads=1	median_gbps=47.738	best_gbps=48.323	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:28.198 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.2049
+11-13 13:06:28.486 25539 25577 I MangekyoEngine:       48 MiB       35.9       60.6       43.3          -          -          -
+11-13 13:06:28.486 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=50331648	threads=1	median_gbps=35.911	best_gbps=36.242	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:28.486 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=50331648	threads=1	median_gbps=60.571	best_gbps=62.396	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:28.486 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=50331648	threads=1	median_gbps=43.259	best_gbps=43.425	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:28.486 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.2131
+11-13 13:06:28.778 25539 25577 I MangekyoEngine:       64 MiB       34.8       57.4       42.4          -          -          -
+11-13 13:06:28.778 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=67108864	threads=1	median_gbps=34.818	best_gbps=35.512	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:28.778 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=67108864	threads=1	median_gbps=57.351	best_gbps=59.469	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:28.778 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=67108864	threads=1	median_gbps=42.442	best_gbps=42.665	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:28.778 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.2213
+11-13 13:06:29.080 25539 25577 I MangekyoEngine:       96 MiB       33.4       57.2       39.6          -          -          -
+11-13 13:06:29.080 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=100663296	threads=1	median_gbps=33.353	best_gbps=35.686	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:29.080 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=100663296	threads=1	median_gbps=57.160	best_gbps=59.736	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:29.080 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=100663296	threads=1	median_gbps=39.565	best_gbps=41.162	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:29.080 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.2295
+11-13 13:06:29.390 25539 25577 I MangekyoEngine:      128 MiB       33.8       55.6       39.0          -          -          -
+11-13 13:06:29.390 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=134217728	threads=1	median_gbps=33.775	best_gbps=35.827	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:29.390 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=134217728	threads=1	median_gbps=55.581	best_gbps=57.270	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:29.390 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=134217728	threads=1	median_gbps=39.046	best_gbps=40.132	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:29.390 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.2377
+11-13 13:06:29.720 25539 25577 I MangekyoEngine:      192 MiB       34.8       54.5       38.4          -          -          -
+11-13 13:06:29.721 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=201326592	threads=1	median_gbps=34.784	best_gbps=35.231	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:29.721 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=201326592	threads=1	median_gbps=54.476	best_gbps=55.013	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:29.721 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=201326592	threads=1	median_gbps=38.434	best_gbps=39.641	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:29.721 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.2459
+11-13 13:06:30.077 25539 25577 I MangekyoEngine:      256 MiB       33.0       55.0       39.2          -          -          -
+11-13 13:06:30.077 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=read	block_bytes=268435456	threads=1	median_gbps=33.006	best_gbps=34.855	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:30.077 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=write	block_bytes=268435456	threads=1	median_gbps=54.999	best_gbps=57.013	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:30.077 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single	kernel=copy	block_bytes=268435456	threads=1	median_gbps=39.184	best_gbps=39.743	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:30.077 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single	fraction=0.2541
+11-13 13:06:30.087 25539 25577 I MangekyoEngine: [single_1] one thread on logical processor 4 (class 1, InferredEfficiency)
+11-13 13:06:30.087 25539 25577 I MangekyoEngine:     Data set       Read      Write       Copy   Write NT    Copy NT  Zero fill   GB/s (median)
+11-13 13:06:30.364 25539 25577 I MangekyoEngine:        4 KiB       75.2       88.3      175.5          -          -          -
+11-13 13:06:30.364 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=4096	threads=1	median_gbps=75.152	best_gbps=75.378	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:30.364 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=4096	threads=1	median_gbps=88.307	best_gbps=89.108	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:30.364 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=4096	threads=1	median_gbps=175.526	best_gbps=176.154	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:30.364 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.2623
+11-13 13:06:30.644 25539 25577 I MangekyoEngine:        8 KiB       76.8       78.2      165.8          -          -          -
+11-13 13:06:30.644 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=8192	threads=1	median_gbps=76.785	best_gbps=78.492	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:30.644 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=8192	threads=1	median_gbps=78.239	best_gbps=80.724	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:30.644 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=8192	threads=1	median_gbps=165.791	best_gbps=175.687	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:30.644 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.2705
+11-13 13:06:30.917 25539 25577 I MangekyoEngine:       16 KiB       84.0       75.0      153.3          -          -          -
+11-13 13:06:30.917 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=16384	threads=1	median_gbps=84.017	best_gbps=84.393	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:30.917 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=16384	threads=1	median_gbps=75.000	best_gbps=76.448	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:30.917 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=16384	threads=1	median_gbps=153.343	best_gbps=159.991	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:30.917 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.2787
+11-13 13:06:31.190 25539 25577 I MangekyoEngine:       24 KiB       83.5       73.4      158.3          -          -          -
+11-13 13:06:31.190 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=24576	threads=1	median_gbps=83.543	best_gbps=83.832	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:31.190 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=24576	threads=1	median_gbps=73.440	best_gbps=75.597	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:31.190 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=24576	threads=1	median_gbps=158.345	best_gbps=161.885	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:31.190 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.2869
+11-13 13:06:31.464 25539 25577 I MangekyoEngine:       32 KiB       85.2       73.0      154.1          -          -          -
+11-13 13:06:31.464 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=32768	threads=1	median_gbps=85.158	best_gbps=85.335	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:31.464 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=32768	threads=1	median_gbps=73.024	best_gbps=73.453	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:31.464 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=32768	threads=1	median_gbps=154.146	best_gbps=154.860	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:31.464 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.2951
+11-13 13:06:31.737 25539 25577 I MangekyoEngine:       48 KiB       39.6       72.9      154.4          -          -          -
+11-13 13:06:31.737 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=49152	threads=1	median_gbps=39.568	best_gbps=39.613	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:31.737 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=49152	threads=1	median_gbps=72.865	best_gbps=73.440	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:31.737 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=49152	threads=1	median_gbps=154.435	best_gbps=159.273	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:31.737 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.3033
+11-13 13:06:32.011 25539 25577 I MangekyoEngine:       64 KiB       39.4       72.1      140.5          -          -          -
+11-13 13:06:32.011 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=65536	threads=1	median_gbps=39.427	best_gbps=39.534	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:32.011 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=65536	threads=1	median_gbps=72.072	best_gbps=72.608	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:32.011 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=65536	threads=1	median_gbps=140.464	best_gbps=140.658	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:32.011 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.3115
+11-13 13:06:32.284 25539 25577 I MangekyoEngine:       96 KiB       38.9       71.6       51.5          -          -          -
+11-13 13:06:32.284 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=98304	threads=1	median_gbps=38.865	best_gbps=38.993	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:32.284 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=98304	threads=1	median_gbps=71.585	best_gbps=71.946	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:32.284 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=98304	threads=1	median_gbps=51.473	best_gbps=51.684	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:32.284 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.3197
+11-13 13:06:32.557 25539 25577 I MangekyoEngine:      128 KiB       39.0       71.7       51.7          -          -          -
+11-13 13:06:32.557 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=131072	threads=1	median_gbps=38.970	best_gbps=39.098	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:32.557 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=131072	threads=1	median_gbps=71.692	best_gbps=71.886	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:32.557 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=131072	threads=1	median_gbps=51.673	best_gbps=51.842	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:32.557 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.3279
+11-13 13:06:32.831 25539 25577 I MangekyoEngine:      192 KiB       39.3       71.5       51.7          -          -          -
+11-13 13:06:32.831 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=196608	threads=1	median_gbps=39.313	best_gbps=39.515	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:32.831 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=196608	threads=1	median_gbps=71.524	best_gbps=71.676	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:32.831 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=196608	threads=1	median_gbps=51.742	best_gbps=51.933	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:32.831 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.3361
+11-13 13:06:33.105 25539 25577 I MangekyoEngine:      256 KiB       39.3       71.4       51.9          -          -          -
+11-13 13:06:33.105 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=262144	threads=1	median_gbps=39.334	best_gbps=39.451	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:33.105 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=262144	threads=1	median_gbps=71.407	best_gbps=71.521	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:33.105 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=262144	threads=1	median_gbps=51.886	best_gbps=51.919	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:33.105 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.3443
+11-13 13:06:33.379 25539 25577 I MangekyoEngine:      384 KiB       39.7       71.2       52.2          -          -          -
+11-13 13:06:33.379 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=393216	threads=1	median_gbps=39.660	best_gbps=39.792	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:33.379 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=393216	threads=1	median_gbps=71.157	best_gbps=71.535	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:33.379 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=393216	threads=1	median_gbps=52.228	best_gbps=52.301	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:33.379 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.3525
+11-13 13:06:33.793 25539 25577 I MangekyoEngine:      512 KiB       40.1       39.0       53.9          -          -          -
+11-13 13:06:33.793 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=524288	threads=1	median_gbps=40.097	best_gbps=40.223	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:33.793 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=524288	threads=1	median_gbps=38.998	best_gbps=70.696	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:33.793 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=524288	threads=1	median_gbps=53.949	best_gbps=54.469	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:33.793 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.3607
+11-13 13:06:34.208 25539 25577 I MangekyoEngine:      768 KiB       37.6       45.1       54.5          -          -          -
+11-13 13:06:34.208 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=786432	threads=1	median_gbps=37.571	best_gbps=37.924	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:34.208 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=786432	threads=1	median_gbps=45.097	best_gbps=64.748	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:34.208 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=786432	threads=1	median_gbps=54.477	best_gbps=54.807	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:34.208 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.3689
+11-13 13:06:34.623 25539 25577 I MangekyoEngine:        1 MiB       36.1       42.3       57.5          -          -          -
+11-13 13:06:34.623 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=1048576	threads=1	median_gbps=36.071	best_gbps=36.388	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:34.623 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=1048576	threads=1	median_gbps=42.299	best_gbps=61.263	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:34.623 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=1048576	threads=1	median_gbps=57.450	best_gbps=58.196	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:34.623 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.3770
+11-13 13:06:35.039 25539 25577 I MangekyoEngine:      1.5 MiB       35.7       45.6       65.3          -          -          -
+11-13 13:06:35.039 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=1572864	threads=1	median_gbps=35.708	best_gbps=35.901	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:35.039 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=1572864	threads=1	median_gbps=45.617	best_gbps=58.725	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:35.039 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=1572864	threads=1	median_gbps=65.284	best_gbps=66.939	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:35.039 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.3852
+11-13 13:06:35.460 25539 25577 I MangekyoEngine:        2 MiB       36.3       35.6       73.1          -          -          -
+11-13 13:06:35.460 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=2097152	threads=1	median_gbps=36.277	best_gbps=36.572	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:35.460 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=2097152	threads=1	median_gbps=35.570	best_gbps=52.650	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:35.460 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=2097152	threads=1	median_gbps=73.111	best_gbps=76.943	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:35.460 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.3934
+11-13 13:06:35.876 25539 25577 I MangekyoEngine:        3 MiB       36.3       41.2       60.2          -          -          -
+11-13 13:06:35.876 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=3145728	threads=1	median_gbps=36.252	best_gbps=36.796	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:35.876 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=3145728	threads=1	median_gbps=41.189	best_gbps=61.910	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:35.876 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=3145728	threads=1	median_gbps=60.236	best_gbps=63.152	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:35.876 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.4016
+11-13 13:06:36.292 25539 25577 I MangekyoEngine:        4 MiB       36.0       41.4       59.4          -          -          -
+11-13 13:06:36.292 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=4194304	threads=1	median_gbps=35.966	best_gbps=36.780	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:36.293 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=4194304	threads=1	median_gbps=41.408	best_gbps=54.536	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:36.293 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=4194304	threads=1	median_gbps=59.448	best_gbps=68.335	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:36.293 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.4098
+11-13 13:06:36.710 25539 25577 I MangekyoEngine:        6 MiB       36.3       38.0       66.9          -          -          -
+11-13 13:06:36.710 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=6291456	threads=1	median_gbps=36.337	best_gbps=36.979	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:36.710 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=6291456	threads=1	median_gbps=38.047	best_gbps=58.953	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:36.710 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=6291456	threads=1	median_gbps=66.929	best_gbps=70.285	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:36.710 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.4180
+11-13 13:06:37.129 25539 25577 I MangekyoEngine:        8 MiB       38.7       30.1       63.3          -          -          -
+11-13 13:06:37.129 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=8388608	threads=1	median_gbps=38.681	best_gbps=40.221	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:37.129 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=8388608	threads=1	median_gbps=30.084	best_gbps=52.845	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:37.129 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=8388608	threads=1	median_gbps=63.322	best_gbps=63.770	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:37.129 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.4262
+11-13 13:06:37.478 25539 25577 I MangekyoEngine:       12 MiB       36.3       42.0       62.8          -          -          -
+11-13 13:06:37.478 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=12582912	threads=1	median_gbps=36.312	best_gbps=36.718	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:37.478 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=12582912	threads=1	median_gbps=41.973	best_gbps=48.248	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:37.478 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=12582912	threads=1	median_gbps=62.844	best_gbps=63.478	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:37.478 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.4344
+11-13 13:06:37.898 25539 25577 I MangekyoEngine:       16 MiB       32.7       27.4       54.1          -          -          -
+11-13 13:06:37.898 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=16777216	threads=1	median_gbps=32.663	best_gbps=33.193	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:37.898 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=16777216	threads=1	median_gbps=27.433	best_gbps=48.788	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:37.898 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=16777216	threads=1	median_gbps=54.136	best_gbps=54.654	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:37.898 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.4426
+11-13 13:06:38.180 25539 25577 I MangekyoEngine:       24 MiB       30.7       25.6       47.2          -          -          -
+11-13 13:06:38.180 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=25165824	threads=1	median_gbps=30.736	best_gbps=32.170	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:38.180 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=25165824	threads=1	median_gbps=25.638	best_gbps=25.808	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:38.180 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=25165824	threads=1	median_gbps=47.213	best_gbps=47.638	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:38.180 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.4508
+11-13 13:06:38.465 25539 25577 I MangekyoEngine:       32 MiB       30.6       25.0       43.1          -          -          -
+11-13 13:06:38.465 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=33554432	threads=1	median_gbps=30.636	best_gbps=31.077	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:38.465 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=33554432	threads=1	median_gbps=24.958	best_gbps=25.642	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:38.465 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=33554432	threads=1	median_gbps=43.106	best_gbps=43.436	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:38.465 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.4590
+11-13 13:06:38.896 25539 25577 I MangekyoEngine:       48 MiB       30.4       25.1       37.3          -          -          -
+11-13 13:06:38.897 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=50331648	threads=1	median_gbps=30.445	best_gbps=30.632	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:38.897 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=50331648	threads=1	median_gbps=25.144	best_gbps=31.569	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:38.897 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=50331648	threads=1	median_gbps=37.303	best_gbps=38.533	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:38.897 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.4672
+11-13 13:06:39.193 25539 25577 I MangekyoEngine:       64 MiB       30.9       24.5       38.1          -          -          -
+11-13 13:06:39.193 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=67108864	threads=1	median_gbps=30.855	best_gbps=31.373	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:39.193 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=67108864	threads=1	median_gbps=24.540	best_gbps=25.412	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:39.193 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=67108864	threads=1	median_gbps=38.127	best_gbps=38.302	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:39.193 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.4754
+11-13 13:06:39.640 25539 25577 I MangekyoEngine:       96 MiB       31.3       29.5       37.5          -          -          -
+11-13 13:06:39.640 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=100663296	threads=1	median_gbps=31.267	best_gbps=31.490	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:39.640 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=100663296	threads=1	median_gbps=29.483	best_gbps=42.372	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:39.640 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=100663296	threads=1	median_gbps=37.528	best_gbps=38.908	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:39.640 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.4836
+11-13 13:06:40.099 25539 25577 I MangekyoEngine:      128 MiB       31.1       31.9       37.9          -          -          -
+11-13 13:06:40.099 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=134217728	threads=1	median_gbps=31.071	best_gbps=31.378	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:40.099 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=134217728	threads=1	median_gbps=31.889	best_gbps=43.707	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:40.099 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=134217728	threads=1	median_gbps=37.853	best_gbps=38.538	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:40.099 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.4918
+11-13 13:06:40.437 25539 25577 I MangekyoEngine:      192 MiB       30.9       46.9       37.2          -          -          -
+11-13 13:06:40.437 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=201326592	threads=1	median_gbps=30.914	best_gbps=31.426	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:40.437 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=201326592	threads=1	median_gbps=46.910	best_gbps=47.804	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:40.437 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=201326592	threads=1	median_gbps=37.228	best_gbps=38.221	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:40.437 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.5000
+11-13 13:06:40.803 25539 25577 I MangekyoEngine:      256 MiB       30.7       45.5       37.6          -          -          -
+11-13 13:06:40.803 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=read	block_bytes=268435456	threads=1	median_gbps=30.672	best_gbps=31.000	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:40.803 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=write	block_bytes=268435456	threads=1	median_gbps=45.472	best_gbps=45.982	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:40.803 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_1	kernel=copy	block_bytes=268435456	threads=1	median_gbps=37.640	best_gbps=38.142	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:40.803 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_1	fraction=0.5082
+11-13 13:06:40.815 25539 25577 I MangekyoEngine: [single_2] one thread on logical processor 1 (class 2, InferredLowPowerEfficiency)
+11-13 13:06:40.815 25539 25577 I MangekyoEngine:     Data set       Read      Write       Copy   Write NT    Copy NT  Zero fill   GB/s (median)
+11-13 13:06:41.090 25539 25577 I MangekyoEngine:        4 KiB       20.5       24.0       26.9          -          -          -
+11-13 13:06:41.090 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=4096	threads=1	median_gbps=20.499	best_gbps=20.553	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:41.091 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=4096	threads=1	median_gbps=24.016	best_gbps=24.071	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:41.091 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=4096	threads=1	median_gbps=26.930	best_gbps=27.070	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:41.091 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.5164
+11-13 13:06:41.367 25539 25577 I MangekyoEngine:        8 KiB       20.7       24.3       27.4          -          -          -
+11-13 13:06:41.367 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=8192	threads=1	median_gbps=20.746	best_gbps=20.876	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:41.367 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=8192	threads=1	median_gbps=24.308	best_gbps=24.778	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:41.367 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=8192	threads=1	median_gbps=27.376	best_gbps=27.559	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:41.367 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.5246
+11-13 13:06:41.643 25539 25577 I MangekyoEngine:       16 KiB       21.0       22.4       27.5          -          -          -
+11-13 13:06:41.643 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=16384	threads=1	median_gbps=21.022	best_gbps=21.038	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:41.643 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=16384	threads=1	median_gbps=22.362	best_gbps=25.135	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:41.643 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=16384	threads=1	median_gbps=27.525	best_gbps=27.892	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:41.643 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.5328
+11-13 13:06:41.920 25539 25577 I MangekyoEngine:       24 KiB       20.9       21.7       27.7          -          -          -
+11-13 13:06:41.920 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=24576	threads=1	median_gbps=20.924	best_gbps=21.063	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:41.920 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=24576	threads=1	median_gbps=21.668	best_gbps=24.763	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:41.920 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=24576	threads=1	median_gbps=27.744	best_gbps=27.977	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:41.920 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.5410
+11-13 13:06:42.197 25539 25577 I MangekyoEngine:       32 KiB       20.7       23.7       26.7          -          -          -
+11-13 13:06:42.197 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=32768	threads=1	median_gbps=20.728	best_gbps=20.792	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:42.197 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=32768	threads=1	median_gbps=23.657	best_gbps=24.131	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:42.197 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=32768	threads=1	median_gbps=26.726	best_gbps=27.992	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:42.197 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.5492
+11-13 13:06:42.474 25539 25577 I MangekyoEngine:       48 KiB       19.4       24.3       26.9          -          -          -
+11-13 13:06:42.474 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=49152	threads=1	median_gbps=19.369	best_gbps=19.604	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:42.474 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=49152	threads=1	median_gbps=24.271	best_gbps=24.967	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:42.474 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=49152	threads=1	median_gbps=26.886	best_gbps=27.739	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:42.474 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.5574
+11-13 13:06:42.893 25539 25577 I MangekyoEngine:       64 KiB       19.1       17.7       26.1          -          -          -
+11-13 13:06:42.893 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=65536	threads=1	median_gbps=19.067	best_gbps=19.223	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:42.893 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=65536	threads=1	median_gbps=17.664	best_gbps=24.738	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:42.893 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=65536	threads=1	median_gbps=26.146	best_gbps=26.981	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:42.893 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.5656
+11-13 13:06:43.311 25539 25577 I MangekyoEngine:       96 KiB       19.5       18.5       26.9          -          -          -
+11-13 13:06:43.311 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=98304	threads=1	median_gbps=19.468	best_gbps=19.527	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:43.311 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=98304	threads=1	median_gbps=18.508	best_gbps=24.463	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:43.311 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=98304	threads=1	median_gbps=26.932	best_gbps=27.045	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:43.311 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.5738
+11-13 13:06:43.729 25539 25577 I MangekyoEngine:      128 KiB       19.1       19.2       27.0          -          -          -
+11-13 13:06:43.729 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=131072	threads=1	median_gbps=19.087	best_gbps=19.229	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:43.729 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=131072	threads=1	median_gbps=19.181	best_gbps=24.707	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:43.729 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=131072	threads=1	median_gbps=26.955	best_gbps=27.153	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:43.729 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.5820
+11-13 13:06:44.147 25539 25577 I MangekyoEngine:      192 KiB       19.1       18.0       27.3          -          -          -
+11-13 13:06:44.147 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=196608	threads=1	median_gbps=19.081	best_gbps=19.255	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:44.147 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=196608	threads=1	median_gbps=18.024	best_gbps=24.380	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:44.147 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=196608	threads=1	median_gbps=27.251	best_gbps=27.361	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:44.147 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.5902
+11-13 13:06:44.423 25539 25577 I MangekyoEngine:      256 KiB       18.9       20.9       27.5          -          -          -
+11-13 13:06:44.423 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=262144	threads=1	median_gbps=18.853	best_gbps=19.037	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:44.423 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=262144	threads=1	median_gbps=20.943	best_gbps=23.806	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:44.423 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=262144	threads=1	median_gbps=27.490	best_gbps=27.658	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:44.423 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.5984
+11-13 13:06:44.699 25539 25577 I MangekyoEngine:      384 KiB       18.7       20.3       27.4          -          -          -
+11-13 13:06:44.699 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=393216	threads=1	median_gbps=18.742	best_gbps=18.933	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:44.699 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=393216	threads=1	median_gbps=20.310	best_gbps=21.815	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:44.699 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=393216	threads=1	median_gbps=27.412	best_gbps=27.667	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:44.699 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.6066
+11-13 13:06:45.048 25539 25577 I MangekyoEngine:      512 KiB       18.8       21.0       27.5          -          -          -
+11-13 13:06:45.048 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=524288	threads=1	median_gbps=18.778	best_gbps=19.080	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:45.048 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=524288	threads=1	median_gbps=21.040	best_gbps=22.899	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:45.048 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=524288	threads=1	median_gbps=27.475	best_gbps=27.696	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:45.048 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.6148
+11-13 13:06:45.468 25539 25577 I MangekyoEngine:      768 KiB       18.7       13.7       27.7          -          -          -
+11-13 13:06:45.468 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=786432	threads=1	median_gbps=18.672	best_gbps=19.043	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:45.468 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=786432	threads=1	median_gbps=13.735	best_gbps=22.556	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:45.468 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=786432	threads=1	median_gbps=27.667	best_gbps=27.800	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:45.468 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.6230
+11-13 13:06:45.746 25539 25577 I MangekyoEngine:        1 MiB       18.9       21.6       27.5          -          -          -
+11-13 13:06:45.746 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=1048576	threads=1	median_gbps=18.865	best_gbps=19.063	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:45.746 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=1048576	threads=1	median_gbps=21.635	best_gbps=22.372	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:45.746 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=1048576	threads=1	median_gbps=27.527	best_gbps=27.796	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:45.746 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.6311
+11-13 13:06:46.024 25539 25577 I MangekyoEngine:      1.5 MiB       18.7       23.0       27.2          -          -          -
+11-13 13:06:46.024 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=1572864	threads=1	median_gbps=18.682	best_gbps=19.005	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:46.024 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=1572864	threads=1	median_gbps=23.039	best_gbps=24.789	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:46.024 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=1572864	threads=1	median_gbps=27.217	best_gbps=27.709	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:46.024 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.6393
+11-13 13:06:46.447 25539 25577 I MangekyoEngine:        2 MiB       18.2       17.7       27.3          -          -          -
+11-13 13:06:46.447 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=2097152	threads=1	median_gbps=18.226	best_gbps=18.880	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:46.448 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=2097152	threads=1	median_gbps=17.720	best_gbps=24.157	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:46.448 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=2097152	threads=1	median_gbps=27.274	best_gbps=27.474	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:46.448 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.6475
+11-13 13:06:46.801 25539 25577 I MangekyoEngine:        3 MiB       18.6       22.6       27.0          -          -          -
+11-13 13:06:46.801 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=3145728	threads=1	median_gbps=18.646	best_gbps=18.883	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:46.801 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=3145728	threads=1	median_gbps=22.589	best_gbps=24.278	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:46.801 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=3145728	threads=1	median_gbps=26.978	best_gbps=27.409	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:46.801 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.6557
+11-13 13:06:47.156 25539 25577 I MangekyoEngine:        4 MiB       18.5       20.2       27.1          -          -          -
+11-13 13:06:47.156 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=4194304	threads=1	median_gbps=18.466	best_gbps=18.911	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:47.156 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=4194304	threads=1	median_gbps=20.193	best_gbps=22.801	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:47.156 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=4194304	threads=1	median_gbps=27.126	best_gbps=27.654	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:47.156 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.6639
+11-13 13:06:47.445 25539 25577 I MangekyoEngine:        6 MiB       17.0       22.2       26.7          -          -          -
+11-13 13:06:47.445 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=6291456	threads=1	median_gbps=17.028	best_gbps=17.754	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:47.445 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=6291456	threads=1	median_gbps=22.221	best_gbps=23.289	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:47.445 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=6291456	threads=1	median_gbps=26.691	best_gbps=27.482	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:47.445 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.6721
+11-13 13:06:47.737 25539 25577 I MangekyoEngine:        8 MiB       17.0       19.9       26.5          -          -          -
+11-13 13:06:47.737 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=8388608	threads=1	median_gbps=17.043	best_gbps=17.821	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:47.737 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=8388608	threads=1	median_gbps=19.920	best_gbps=23.145	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:47.737 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=8388608	threads=1	median_gbps=26.493	best_gbps=27.045	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:47.737 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.6803
+11-13 13:06:48.036 25539 25577 I MangekyoEngine:       12 MiB       12.9       21.4       25.6          -          -          -
+11-13 13:06:48.036 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=12582912	threads=1	median_gbps=12.906	best_gbps=14.947	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:48.036 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=12582912	threads=1	median_gbps=21.403	best_gbps=22.557	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:48.036 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=12582912	threads=1	median_gbps=25.564	best_gbps=26.367	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:48.036 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.6885
+11-13 13:06:48.342 25539 25577 I MangekyoEngine:       16 MiB       12.9       20.5       25.5          -          -          -
+11-13 13:06:48.342 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=16777216	threads=1	median_gbps=12.899	best_gbps=14.332	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:48.342 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=16777216	threads=1	median_gbps=20.537	best_gbps=23.538	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:48.342 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=16777216	threads=1	median_gbps=25.545	best_gbps=25.958	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:48.342 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.6967
+11-13 13:06:48.662 25539 25577 I MangekyoEngine:       24 MiB       13.8       21.3       20.5          -          -          -
+11-13 13:06:48.662 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=25165824	threads=1	median_gbps=13.751	best_gbps=14.628	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:48.662 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=25165824	threads=1	median_gbps=21.277	best_gbps=23.241	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:48.662 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=25165824	threads=1	median_gbps=20.495	best_gbps=22.238	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:48.662 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.7049
+11-13 13:06:48.998 25539 25577 I MangekyoEngine:       32 MiB       13.8       22.4       18.0          -          -          -
+11-13 13:06:48.998 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=33554432	threads=1	median_gbps=13.775	best_gbps=15.060	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:48.998 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=33554432	threads=1	median_gbps=22.446	best_gbps=23.322	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:48.998 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=33554432	threads=1	median_gbps=18.003	best_gbps=19.718	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:48.998 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.7131
+11-13 13:06:49.360 25539 25577 I MangekyoEngine:       48 MiB       14.0       21.3       19.1          -          -          -
+11-13 13:06:49.360 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=50331648	threads=1	median_gbps=14.016	best_gbps=14.597	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:49.360 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=50331648	threads=1	median_gbps=21.250	best_gbps=23.560	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:49.360 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=50331648	threads=1	median_gbps=19.096	best_gbps=20.654	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:49.360 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.7213
+11-13 13:06:49.748 25539 25577 I MangekyoEngine:       64 MiB       13.2       12.3       20.5          -          -          -
+11-13 13:06:49.748 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=67108864	threads=1	median_gbps=13.189	best_gbps=14.885	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:49.748 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=67108864	threads=1	median_gbps=12.278	best_gbps=12.494	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:49.748 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=67108864	threads=1	median_gbps=20.486	best_gbps=22.025	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:49.748 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.7295
+11-13 13:06:50.268 25539 25577 I MangekyoEngine:       96 MiB       13.8       19.8       21.4          -          -          -
+11-13 13:06:50.268 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=100663296	threads=1	median_gbps=13.766	best_gbps=15.281	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:50.268 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=100663296	threads=1	median_gbps=19.802	best_gbps=22.838	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:50.268 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=100663296	threads=1	median_gbps=21.391	best_gbps=21.583	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:50.268 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.7377
+11-13 13:06:50.777 25539 25577 I MangekyoEngine:      128 MiB       14.4       12.3       20.7          -          -          -
+11-13 13:06:50.778 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=134217728	threads=1	median_gbps=14.387	best_gbps=16.394	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:50.778 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=134217728	threads=1	median_gbps=12.281	best_gbps=13.046	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:50.778 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=134217728	threads=1	median_gbps=20.654	best_gbps=22.459	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:50.778 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.7459
+11-13 13:06:51.392 25539 25577 I MangekyoEngine:      192 MiB       15.6       12.3       22.7          -          -          -
+11-13 13:06:51.392 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=201326592	threads=1	median_gbps=15.615	best_gbps=16.810	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:51.392 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=201326592	threads=1	median_gbps=12.313	best_gbps=12.902	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:51.392 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=201326592	threads=1	median_gbps=22.679	best_gbps=23.115	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:51.392 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.7541
+11-13 13:06:52.209 25539 25577 I MangekyoEngine:      256 MiB       15.7       21.8       21.8          -          -          -
+11-13 13:06:52.209 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=read	block_bytes=268435456	threads=1	median_gbps=15.697	best_gbps=16.593	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:52.209 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=write	block_bytes=268435456	threads=1	median_gbps=21.769	best_gbps=22.261	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:52.209 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=single_2	kernel=copy	block_bytes=268435456	threads=1	median_gbps=21.764	best_gbps=23.061	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:52.209 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=single_2	fraction=0.7623
+11-13 13:06:52.264 25539 25577 I MangekyoEngine: [all] 8 threads, one per physical core, each with a private data set
+11-13 13:06:52.264 25539 25577 I MangekyoEngine:     Data set       Read      Write       Copy   Write NT    Copy NT  Zero fill   GB/s (median)
+11-13 13:06:53.386 25539 25577 I MangekyoEngine:        4 KiB      430.8      497.1      876.6          -          -          -
+11-13 13:06:53.386 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=4096	threads=8	median_gbps=430.846	best_gbps=435.971	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:53.386 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=4096	threads=8	median_gbps=497.131	best_gbps=505.117	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:53.386 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=4096	threads=8	median_gbps=876.551	best_gbps=887.592	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:53.386 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.7705
+11-13 13:06:54.146 25539 25577 I MangekyoEngine:        8 KiB      393.7      485.9      796.2          -          -          -
+11-13 13:06:54.146 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=8192	threads=8	median_gbps=393.718	best_gbps=396.445	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:54.146 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=8192	threads=8	median_gbps=485.919	best_gbps=490.973	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:54.146 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=8192	threads=8	median_gbps=796.165	best_gbps=805.327	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:54.146 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.7787
+11-13 13:06:54.910 25539 25577 I MangekyoEngine:       16 KiB      374.1      464.0      750.0          -          -          -
+11-13 13:06:54.910 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=16384	threads=8	median_gbps=374.108	best_gbps=380.188	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:54.910 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=16384	threads=8	median_gbps=463.965	best_gbps=470.128	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:54.910 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=16384	threads=8	median_gbps=749.995	best_gbps=756.111	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:54.910 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.7869
+11-13 13:06:55.654 25539 25577 I MangekyoEngine:       24 KiB      357.3      455.6      723.3          -          -          -
+11-13 13:06:55.654 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=24576	threads=8	median_gbps=357.296	best_gbps=370.409	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:55.654 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=24576	threads=8	median_gbps=455.611	best_gbps=457.158	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:55.654 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=24576	threads=8	median_gbps=723.326	best_gbps=741.083	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:55.654 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.7951
+11-13 13:06:56.418 25539 25577 I MangekyoEngine:       32 KiB      351.2      436.6      715.7          -          -          -
+11-13 13:06:56.418 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=32768	threads=8	median_gbps=351.234	best_gbps=360.812	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:56.418 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=32768	threads=8	median_gbps=436.630	best_gbps=448.355	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:56.418 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=32768	threads=8	median_gbps=715.710	best_gbps=723.661	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:56.418 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8033
+11-13 13:06:57.458 25539 25577 I MangekyoEngine:       48 KiB      260.1      443.0      705.7          -          -          -
+11-13 13:06:57.458 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=49152	threads=8	median_gbps=260.071	best_gbps=263.165	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:57.458 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=49152	threads=8	median_gbps=443.029	best_gbps=447.746	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:57.458 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=49152	threads=8	median_gbps=705.671	best_gbps=713.238	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:57.458 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8115
+11-13 13:06:58.210 25539 25577 I MangekyoEngine:       64 KiB      253.3      421.1      656.6          -          -          -
+11-13 13:06:58.210 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=65536	threads=8	median_gbps=253.311	best_gbps=260.292	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:58.210 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=65536	threads=8	median_gbps=421.053	best_gbps=435.803	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:58.210 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=65536	threads=8	median_gbps=656.583	best_gbps=665.531	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:58.210 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8197
+11-13 13:06:58.974 25539 25577 I MangekyoEngine:       96 KiB      249.2      427.6      478.9          -          -          -
+11-13 13:06:58.974 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=98304	threads=8	median_gbps=249.247	best_gbps=251.670	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:58.974 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=98304	threads=8	median_gbps=427.550	best_gbps=436.260	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:58.974 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=98304	threads=8	median_gbps=478.911	best_gbps=483.667	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:58.974 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8279
+11-13 13:06:59.730 25539 25577 I MangekyoEngine:      128 KiB      247.7      419.1      471.7          -          -          -
+11-13 13:06:59.730 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=131072	threads=8	median_gbps=247.748	best_gbps=252.658	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:59.730 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=131072	threads=8	median_gbps=419.053	best_gbps=432.946	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:59.730 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=131072	threads=8	median_gbps=471.677	best_gbps=478.097	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:06:59.730 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8361
+11-13 13:07:00.490 25539 25577 I MangekyoEngine:      192 KiB      236.0      416.1      462.8          -          -          -
+11-13 13:07:00.490 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=196608	threads=8	median_gbps=236.018	best_gbps=247.081	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:00.490 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=196608	threads=8	median_gbps=416.091	best_gbps=419.939	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:00.490 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=196608	threads=8	median_gbps=462.843	best_gbps=466.269	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:00.490 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8443
+11-13 13:07:01.238 25539 25577 I MangekyoEngine:      256 KiB      235.3      413.0      456.7          -          -          -
+11-13 13:07:01.238 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=262144	threads=8	median_gbps=235.251	best_gbps=244.586	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:01.238 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=262144	threads=8	median_gbps=412.970	best_gbps=427.859	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:01.238 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=262144	threads=8	median_gbps=456.675	best_gbps=462.111	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:01.238 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8525
+11-13 13:07:01.986 25539 25577 I MangekyoEngine:      384 KiB      237.1      295.8      448.4          -          -          -
+11-13 13:07:01.986 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=393216	threads=8	median_gbps=237.081	best_gbps=238.370	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:01.986 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=393216	threads=8	median_gbps=295.818	best_gbps=318.210	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:01.986 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=393216	threads=8	median_gbps=448.370	best_gbps=452.973	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:01.986 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8607
+11-13 13:07:03.222 25539 25577 I MangekyoEngine:      512 KiB      230.1      204.7      421.6          -          -          -
+11-13 13:07:03.222 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=524288	threads=8	median_gbps=230.067	best_gbps=233.786	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:03.222 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=524288	threads=8	median_gbps=204.726	best_gbps=294.807	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:03.222 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=524288	threads=8	median_gbps=421.632	best_gbps=425.091	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:03.222 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8689
+11-13 13:07:04.566 25539 25577 I MangekyoEngine:      768 KiB      180.4      156.7      257.1          -          -          -
+11-13 13:07:04.566 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=786432	threads=8	median_gbps=180.422	best_gbps=186.826	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:04.566 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=786432	threads=8	median_gbps=156.732	best_gbps=201.754	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:04.566 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=786432	threads=8	median_gbps=257.119	best_gbps=260.242	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:04.566 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8770
+11-13 13:07:06.214 25539 25577 I MangekyoEngine:        1 MiB      122.4      143.3      205.1          -          -          -
+11-13 13:07:06.214 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=1048576	threads=8	median_gbps=122.385	best_gbps=155.539	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:06.214 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=1048576	threads=8	median_gbps=143.335	best_gbps=173.129	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:06.214 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=1048576	threads=8	median_gbps=205.055	best_gbps=224.275	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:06.214 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8852
+11-13 13:07:07.050 25539 25577 I MangekyoEngine:      1.5 MiB       76.0      118.0      133.8          -          -          -
+11-13 13:07:07.050 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=1572864	threads=8	median_gbps=75.999	best_gbps=83.303	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:07.050 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=1572864	threads=8	median_gbps=118.023	best_gbps=125.250	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:07.050 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=1572864	threads=8	median_gbps=133.808	best_gbps=135.402	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:07.050 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.8934
+11-13 13:07:08.186 25539 25577 I MangekyoEngine:        2 MiB       59.0      115.0      101.1          -          -          -
+11-13 13:07:08.186 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=2097152	threads=8	median_gbps=58.982	best_gbps=68.831	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:08.186 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=2097152	threads=8	median_gbps=114.968	best_gbps=125.254	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:08.186 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=2097152	threads=8	median_gbps=101.142	best_gbps=120.797	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:08.186 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9016
+11-13 13:07:08.950 25539 25577 I MangekyoEngine:        3 MiB       57.7      116.6       86.6          -          -          -
+11-13 13:07:08.950 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=3145728	threads=8	median_gbps=57.706	best_gbps=61.576	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:08.950 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=3145728	threads=8	median_gbps=116.575	best_gbps=122.560	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:08.950 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=3145728	threads=8	median_gbps=86.621	best_gbps=93.611	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:08.950 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9098
+11-13 13:07:09.814 25539 25577 I MangekyoEngine:        4 MiB       57.3       96.7       72.7          -          -          -
+11-13 13:07:09.814 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=4194304	threads=8	median_gbps=57.337	best_gbps=60.299	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:09.814 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=4194304	threads=8	median_gbps=96.690	best_gbps=101.056	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:09.814 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=4194304	threads=8	median_gbps=72.688	best_gbps=74.881	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:09.814 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9180
+11-13 13:07:10.778 25539 25577 I MangekyoEngine:        6 MiB       52.2       78.8       57.6          -          -          -
+11-13 13:07:10.778 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=6291456	threads=8	median_gbps=52.189	best_gbps=54.706	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:10.778 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=6291456	threads=8	median_gbps=78.843	best_gbps=80.435	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:10.778 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=6291456	threads=8	median_gbps=57.570	best_gbps=59.167	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:10.778 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9262
+11-13 13:07:12.534 25539 25577 I MangekyoEngine:        8 MiB       48.2       70.0       52.9          -          -          -
+11-13 13:07:12.534 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=8388608	threads=8	median_gbps=48.227	best_gbps=64.947	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:12.534 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=8388608	threads=8	median_gbps=70.034	best_gbps=72.431	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:12.534 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=8388608	threads=8	median_gbps=52.860	best_gbps=61.540	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:12.534 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9344
+11-13 13:07:13.314 25539 25577 I MangekyoEngine:       12 MiB       45.9       61.7       47.5          -          -          -
+11-13 13:07:13.314 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=12582912	threads=8	median_gbps=45.913	best_gbps=50.024	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:13.314 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=12582912	threads=8	median_gbps=61.674	best_gbps=65.280	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:13.314 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=12582912	threads=8	median_gbps=47.549	best_gbps=48.725	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:13.314 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9426
+11-13 13:07:14.082 25539 25577 I MangekyoEngine:       16 MiB       46.8       57.2       45.9          -          -          -
+11-13 13:07:14.082 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=16777216	threads=8	median_gbps=46.759	best_gbps=49.127	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:14.082 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=16777216	threads=8	median_gbps=57.244	best_gbps=59.555	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:14.082 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=16777216	threads=8	median_gbps=45.914	best_gbps=46.829	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:14.082 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9508
+11-13 13:07:14.878 25539 25577 I MangekyoEngine:       24 MiB       48.3       56.9       44.5          -          -          -
+11-13 13:07:14.878 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=25165824	threads=8	median_gbps=48.336	best_gbps=51.787	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:14.878 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=25165824	threads=8	median_gbps=56.878	best_gbps=58.754	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:14.878 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=25165824	threads=8	median_gbps=44.459	best_gbps=45.526	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:14.878 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9590
+11-13 13:07:15.706 25539 25577 I MangekyoEngine:       32 MiB       44.1       55.0       44.9          -          -          -
+11-13 13:07:15.706 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=33554432	threads=8	median_gbps=44.105	best_gbps=45.462	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:15.706 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=33554432	threads=8	median_gbps=55.025	best_gbps=56.893	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:15.706 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=33554432	threads=8	median_gbps=44.892	best_gbps=45.504	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:15.706 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9672
+11-13 13:07:16.566 25539 25577 I MangekyoEngine:       48 MiB       46.1       51.4       44.3          -          -          -
+11-13 13:07:16.566 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=50331648	threads=8	median_gbps=46.141	best_gbps=48.822	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:16.566 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=50331648	threads=8	median_gbps=51.373	best_gbps=52.653	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:16.566 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=50331648	threads=8	median_gbps=44.334	best_gbps=51.611	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:16.566 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9754
+11-13 13:07:17.490 25539 25577 I MangekyoEngine:       64 MiB       47.6       50.5       44.1          -          -          -
+11-13 13:07:17.491 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=read	block_bytes=67108864	threads=8	median_gbps=47.591	best_gbps=47.881	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:17.491 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=write	block_bytes=67108864	threads=8	median_gbps=50.454	best_gbps=51.475	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:17.491 25539 25577 I MangekyoEngine: CPUMEM_POINT	mode=all	kernel=copy	block_bytes=67108864	threads=8	median_gbps=44.140	best_gbps=44.970	core_type=auto	residency_verified=0	requested_lower_bound=1.000000	residency_retries=0	max_sample_ms=10.000000
+11-13 13:07:17.491 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=all	fraction=0.9836
+11-13 13:07:18.213 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=pagefault	fraction=0.9918
+11-13 13:07:32.484 25539 25577 I MangekyoEngine: CPUMEM_PROGRESS	mode=storage	fraction=1.0000
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: --- Summary: class 0, InferredPerformance, one thread (logical processor 7) ---
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Level              Cache size          Data sets used       Read      Write       Copy   GB/s
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: L1        384 KiB - 512 KiB *         4 KiB - 384 KiB       88.7       94.2      181.9
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: CPUMEM_LEVEL	mode=single	level=L1	cache_bytes=0	from_bytes=4096	to_bytes=393216	read_gbps=88.694	write_gbps=94.244	copy_gbps=181.856	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=79.105	read_high_gbps=90.846	from_curve=1	capacity_low_bytes=393216	capacity_high_bytes=524288	measured=1	settled=1
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: L2            2 MiB - 3 MiB *         512 KiB - 2 MiB       74.9       94.1      149.0
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: CPUMEM_LEVEL	mode=single	level=L2	cache_bytes=0	from_bytes=524288	to_bytes=2097152	read_gbps=74.927	write_gbps=94.102	copy_gbps=148.965	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=70.335	read_high_gbps=77.203	from_curve=1	capacity_low_bytes=2097152	capacity_high_bytes=3145728	measured=1	settled=1
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: L3           6 MiB - 16 MiB *           3 MiB - 6 MiB       55.5       76.9       98.0
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: CPUMEM_LEVEL	mode=single	level=L3	cache_bytes=0	from_bytes=3145728	to_bytes=6291456	read_gbps=55.502	write_gbps=76.915	copy_gbps=98.008	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=54.550	read_high_gbps=59.703	from_curve=1	capacity_low_bytes=6291456	capacity_high_bytes=16777216	measured=1	settled=1
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Memory                      -        16 MiB - 256 MiB       34.8       57.4       42.4
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: CPUMEM_LEVEL	mode=single	level=memory	cache_bytes=0	from_bytes=16777216	to_bytes=268435456	read_gbps=34.818	write_gbps=57.351	copy_gbps=42.442	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=33.006	read_high_gbps=37.657	from_curve=1	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=1
+11-13 13:07:32.485 25539 25577 I MangekyoEngine:          * read off the curve, because the OS reports no size for this cache: its
+11-13 13:07:32.485 25539 25577 I MangekyoEngine:            capacity lies between the two data sets shown
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: --- Summary: class 1, InferredEfficiency, one thread (logical processor 4) ---
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Level              Cache size          Data sets used       Read      Write       Copy   GB/s
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: L1          32 KiB - 48 KiB *          4 KiB - 32 KiB       83.5       75.0      158.3
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: CPUMEM_LEVEL	mode=single_1	level=L1	cache_bytes=0	from_bytes=4096	to_bytes=32768	read_gbps=83.543	write_gbps=75.000	copy_gbps=158.345	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=75.152	read_high_gbps=85.158	from_curve=1	capacity_low_bytes=32768	capacity_high_bytes=49152	measured=1	settled=1
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: L2        512 KiB - 768 KiB *        48 KiB - 512 KiB       39.4       71.6       52.1
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: CPUMEM_LEVEL	mode=single_1	level=L2	cache_bytes=0	from_bytes=49152	to_bytes=524288	read_gbps=39.381	write_gbps=71.554	copy_gbps=52.057	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=38.865	read_high_gbps=40.097	from_curve=1	capacity_low_bytes=524288	capacity_high_bytes=786432	measured=1	settled=1
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Memory                      -       768 KiB - 256 MiB       34.2       36.8       54.3
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: CPUMEM_LEVEL	mode=single_1	level=memory	cache_bytes=0	from_bytes=786432	to_bytes=268435456	read_gbps=34.185	write_gbps=36.809	copy_gbps=54.307	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=30.445	read_high_gbps=38.681	from_curve=1	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=1
+11-13 13:07:32.485 25539 25577 I MangekyoEngine:          * read off the curve, because the OS reports no size for this cache: its
+11-13 13:07:32.485 25539 25577 I MangekyoEngine:            capacity lies between the two data sets shown
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: --- Summary: class 2, InferredLowPowerEfficiency, one thread (logical processor 1) ---
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Level              Cache size          Data sets used       Read      Write       Copy   GB/s
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: L1           4 MiB - 12 MiB *           4 KiB - 4 MiB       19.1       21.0       27.3
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: CPUMEM_LEVEL	mode=single_2	level=L1	cache_bytes=0	from_bytes=4096	to_bytes=4194304	read_gbps=19.067	write_gbps=21.040	copy_gbps=27.251	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=18.226	read_high_gbps=21.022	from_curve=1	capacity_low_bytes=4194304	capacity_high_bytes=12582912	measured=1	settled=1
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Memory                      -        12 MiB - 256 MiB       13.8       20.9       21.0
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: CPUMEM_LEVEL	mode=single_2	level=memory	cache_bytes=0	from_bytes=12582912	to_bytes=268435456	read_gbps=13.771	write_gbps=20.894	copy_gbps=21.022	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=12.899	read_high_gbps=15.697	from_curve=1	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=1
+11-13 13:07:32.485 25539 25577 I MangekyoEngine:          * read off the curve, because the OS reports no size for this cache: its
+11-13 13:07:32.485 25539 25577 I MangekyoEngine:            capacity lies between the two data sets shown
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: --- Summary: all cores (8 threads, data set sizes are per thread) ---
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Level              Cache size          Data sets used       Read      Write       Copy   GB/s
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Memory                      -          4 MiB - 64 MiB       47.6       57.2       45.9
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: CPUMEM_LEVEL	mode=all	level=memory	cache_bytes=0	from_bytes=4194304	to_bytes=67108864	read_gbps=47.591	write_gbps=57.244	copy_gbps=45.914	write_nt_gbps=0.000	copy_nt_gbps=0.000	zero_gbps=0.000	read_low_gbps=44.105	read_high_gbps=57.337	from_curve=1	capacity_low_bytes=0	capacity_high_bytes=0	measured=1	settled=1
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: --- Virtual memory ---
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Mapping new pages: 4.85 GB/s, 844 ns per 4 KiB page (first write to every page of a 256 MiB region, one thread)
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Transparent huge pages are set to 'always', so the kernel may map 2 MiB at a time.
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: CPUMEM_PAGEFAULT	measured=1	page_bytes=4096	region_bytes=268435456	gbps=4.854	ns_per_page=843.787	transparent_huge_pages=1
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: --- Storage behind virtual memory ---
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Paging target: swap of 8191 MiB, held by something this process may not see (on Android normally zram: memory is compressed in RAM, no drive is involved)
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Test file:     1 GiB in /data/user/0/com.mangekyo.benchmark/files/, unbuffered I/O
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Sequential 1 MiB:   read 1758 MB/s, write 262 MB/s
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Random 4 KiB, QD1:  read 39.6 MB/s (9663 IOPS), write 96.4 MB/s (23533 IOPS)
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Paging issues random 4 KiB requests, so that line is the closer estimate of
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: how fast memory comes back from the drive.
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: CPUMEM_STORAGE	measured=1	backing=swap of 8191 MiB, held by something this process may not see (on Android normally zram: memory is compressed in RAM, no drive is involved)	directory=/data/user/0/com.mangekyo.benchmark/files/	on_paging_drive=0	direct_io=1	file_bytes=1073741824	seq_read_mbps=1757.6	seq_write_mbps=261.6	rand_read_mbps=39.6	rand_write_mbps=96.4	rand_read_iops=9662.7	rand_write_iops=23532.5	skipped=
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Note: write and copy use ordinary stores. Outside the caches every stored line is
+11-13 13:07:32.485 25539 25577 I MangekyoEngine:       first read from memory, so the memory traffic is 2x the write figure and 1.5x
+11-13 13:07:32.485 25539 25577 I MangekyoEngine:       the copy figure. Streaming stores skip that read.
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Note: cache-level figures are limited by how fast the core issues 16-byte loads and
+11-13 13:07:32.485 25539 25577 I MangekyoEngine:       stores, so they depend on the vector size and the clock.
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Note: this CPU mixes core types. Every class has its own single-thread sweep;
+11-13 13:07:32.485 25539 25577 I MangekyoEngine:       the all-core sweep reports memory only, because the classes leave their
+11-13 13:07:32.485 25539 25577 I MangekyoEngine:       caches at different data sets.
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Note: 33 of 360 points were measured again because other activity on the machine
+11-13 13:07:32.485 25539 25577 I MangekyoEngine:       disturbed their first round.
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: CPUMEM_DONE	affinity=strict	remeasured_points=33	duration_sec=71.3
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: Duration:  71.3 s
+11-13 13:07:32.485 25539 25577 I MangekyoEngine: ==========================================================
+11-13 13:07:32.488 25539 25577 I MangekyoEngine: [Results] Saved as 20261113-130732-485-cpu-membw -> /storage/emulated/0/Android/data/com.mangekyo.benchmark/files/results/results.json
+11-13 13:07:32.524 25539 25539 I Mangekyo: RUN finished kind=cpu exit=0

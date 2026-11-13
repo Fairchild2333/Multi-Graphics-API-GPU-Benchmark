@@ -92,13 +92,16 @@ if [ -n "$Serial" ]; then device="$Serial"; else device=$(echo "$devices" | head
 test_device() { "$adb_bin" devices | grep -q "^$(echo "$device" | sed 's/[^A-Za-z0-9_.-]/\\&/g')[[:space:]]*device$"; }
 
 model="$(get_prop ro.product.manufacturer) $(get_prop ro.product.model)"
-folder_name=$(echo "$model" | sed 's/[^A-Za-z0-9]\+/-/g;s/^-*//;s/-*$//')-$(date +%Y%m%d-%H%M%S)
+# Two units of the same model must stay distinguishable, so the serial goes
+# into the folder name and device.txt.
+folder_name=$(echo "$model" | sed 's/[^A-Za-z0-9]\+/-/g;s/^-*//;s/-*$//')-"$device"-$(date +%Y%m%d-%H%M%S)
 out="$repo/out/adb/$folder_name"
 mkdir -p "$out"
 
 if [ "$Quick" -eq 1 ]; then series_note="quick check, not for results"; else series_note="formal durations"; fi
 {
     echo "model:        $model"
+    echo "serial:       $device"
     echo "device:       $(get_prop ro.product.device)"
     echo "chip:         $(get_prop ro.soc.manufacturer) $(get_prop ro.soc.model)"
     echo "hardware:     $(get_prop ro.hardware)"
