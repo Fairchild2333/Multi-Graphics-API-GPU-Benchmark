@@ -1,0 +1,78 @@
+Couldn't open plugin directory: No such file or directory
+No plugins found, falling back on no decorations
+Couldn't open plugin directory: No such file or directory
+No plugins found, falling back on no decorations
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Intel(R) HD Graphics 620 (KBL GT2) (Integ...     -   YES    -     -     -    YES 
+  AMD Radeon R5 M445 Series (RADV ICELAND) ...     -   YES    -     -     -     -  
+  llvmpipe (LLVM 21.1.8, 256 bits) (Software)      -   YES    -     -     -     -  
+============================================================
+
+Backend: Vulkan  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: Cinematic Liquid v2 (fixed pool quality)  |  Auto-stop: 15s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Intel(R) HD Graphics 620 (KBL GT2) (Integrated GPU)
+  [1] AMD Radeon R5 M445 Series (RADV ICELAND) (Discrete GPU)
+  [2] llvmpipe (LLVM 21.1.8, 256 bits) (CPU)
+Selected GPU [0]: Intel(R) HD Graphics 620 (KBL GT2)  |  Driver: Intel open-source Mesa driver Mesa 26.0.8-1ubuntu0.3
+[Vulkan] Present mode: mailbox (not tied to the refresh rate)
+Created particle buffer (device-local via staging): 256 particles
+[Cinematic Liquid v2] MLS-MPM 320920 particles, grid 128x64x96, particle-splat surface 128x64x96, 7 coupled bodies, whitewater raymarch linear filtering
+[Profiling] Timestamp queries enabled (period = 83.3333 ns/tick)
+[GPU Timing] Compute: 767.029 ms | Render: 301.031 ms | Total: 1068.061 ms | FPS: 2 | T: 2.1 s (warm-up)
+[GPU Timing] Compute: 765.627 ms | Render: 339.293 ms | Total: 1104.923 ms | FPS: 0 | T: 3.2 s
+[GPU Timing] Compute: 775.094 ms | Render: 334.818 ms | Total: 1109.913 ms | FPS: 0 | T: 4.4 s
+[GPU Timing] Compute: 792.535 ms | Render: 331.609 ms | Total: 1124.145 ms | FPS: 0 | T: 5.5 s
+[GPU Timing] Compute: 759.994 ms | Render: 413.885 ms | Total: 1173.880 ms | FPS: 0 | T: 6.7 s
+[GPU Timing] Compute: 765.831 ms | Render: 416.169 ms | Total: 1182.001 ms | FPS: 0 | T: 7.8 s
+[GPU Timing] Compute: 783.205 ms | Render: 400.165 ms | Total: 1183.370 ms | FPS: 0 | T: 9.0 s
+[GPU Timing] Compute: 794.734 ms | Render: 386.528 ms | Total: 1181.263 ms | FPS: 0 | T: 10.2 s
+[GPU Timing] Compute: 810.909 ms | Render: 355.937 ms | Total: 1166.846 ms | FPS: 0 | T: 11.4 s
+[GPU Timing] Compute: 820.961 ms | Render: 342.297 ms | Total: 1163.259 ms | FPS: 0 | T: 12.5 s
+[GPU Timing] Compute: 820.597 ms | Render: 301.396 ms | Total: 1121.994 ms | FPS: 0 | T: 13.7 s
+[GPU Timing] Compute: 836.375 ms | Render: 272.335 ms | Total: 1108.710 ms | FPS: 0 | T: 14.8 s
+[GPU Timing] Compute: 868.831 ms | Render: 259.512 ms | Total: 1128.344 ms | FPS: 0 | T: 15.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          Intel(R) HD Graphics 620 (KBL GT2)
+Driver:       Intel open-source Mesa driver Mesa 26.0.8-1ubuntu0.3
+CPU:          Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz
+OS:           Ubuntu 26.04.1 LTS (kernel 7.0.0-44-generic)
+System:       Linux x64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    320920 (Cinematic Liquid v2)
+Flights:      1
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     14.9 s (warmup: 2.0 s, measured: 13 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:       810.267   759.994   894.135
+Render:        340.385   259.512   416.169
+Total GPU:    1150.652  1108.710  1183.370
+
+--- Throughput ---
+Avg FPS:      0
+Liquid:       320920 particles, 128x64x96 grid, 10 substeps
+Surface:      R32F density volume, 352-step raymarch, particle Spiky^2 splat 128x64x96 + adaptive 5x5x5 filter, 4-interface optics, finite pool overflow + clear PVC environment, 7 coupled rigid bodies
+Fluid rate:   2.79 MParticle-step/s  (810.267 ms compute + 340.385 ms render)
+
+--- Analysis ---
+Avg frame time:  1148.447 ms
+Avg GPU time:    1150.652 ms
+GPU utilisation: 100.2%
+>> GPU-bound: GPU is the bottleneck.
+==========================================================
+
+[Results] Saved as 20261120-152014-966 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json

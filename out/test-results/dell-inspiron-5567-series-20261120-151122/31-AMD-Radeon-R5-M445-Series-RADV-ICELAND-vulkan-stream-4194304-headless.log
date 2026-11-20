@@ -1,0 +1,89 @@
+Couldn't open plugin directory: No such file or directory
+No plugins found, falling back on no decorations
+Couldn't open plugin directory: No such file or directory
+No plugins found, falling back on no decorations
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Intel(R) HD Graphics 620 (KBL GT2) (Integ...     -   YES    -     -     -    YES 
+  AMD Radeon R5 M445 Series (RADV ICELAND) ...     -   YES    -     -     -     -  
+  llvmpipe (LLVM 21.1.8, 256 bits) (Software)      -   YES    -     -     -     -  
+============================================================
+
+Backend: Vulkan  |  V-Sync: OFF  |  Memory: Device-local  |  Particles: 4194304 (Medium)  |  Auto-stop: 15s
+Available GPUs:
+  [0] Intel(R) HD Graphics 620 (KBL GT2) (Integrated GPU)
+  [1] AMD Radeon R5 M445 Series (RADV ICELAND) (Discrete GPU)
+  [2] llvmpipe (LLVM 21.1.8, 256 bits) (CPU)
+Selected GPU [1]: AMD Radeon R5 M445 Series (RADV ICELAND)  |  Driver: radv Mesa 26.0.8-1ubuntu0.3
+Created particle buffer (device-local via staging): 4194304 particles
+[Profiling] Timestamp queries enabled (period = 37.037 ns/tick)
+[GPU Timing] Compute: 10.523 ms | Render: 0.001 ms | Total: 10.528 ms | FPS: 102 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 10.438 ms | Render: 0.001 ms | Total: 10.444 ms | FPS: 92 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 10.470 ms | Render: 0.001 ms | Total: 10.475 ms | FPS: 90 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 10.478 ms | Render: 0.001 ms | Total: 10.483 ms | FPS: 90 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 10.481 ms | Render: 0.001 ms | Total: 10.487 ms | FPS: 91 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 10.482 ms | Render: 0.001 ms | Total: 10.487 ms | FPS: 91 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 10.483 ms | Render: 0.001 ms | Total: 10.488 ms | FPS: 90 | T: 2.9 s
+[GPU Timing] Compute: 10.482 ms | Render: 0.001 ms | Total: 10.488 ms | FPS: 91 | T: 3.9 s
+[GPU Timing] Compute: 10.483 ms | Render: 0.001 ms | Total: 10.488 ms | FPS: 92 | T: 4.9 s
+[GPU Timing] Compute: 10.483 ms | Render: 0.001 ms | Total: 10.489 ms | FPS: 90 | T: 5.9 s
+[GPU Timing] Compute: 10.483 ms | Render: 0.001 ms | Total: 10.489 ms | FPS: 91 | T: 6.9 s
+[GPU Timing] Compute: 10.483 ms | Render: 0.001 ms | Total: 10.488 ms | FPS: 91 | T: 7.9 s
+[GPU Timing] Compute: 10.484 ms | Render: 0.001 ms | Total: 10.489 ms | FPS: 91 | T: 8.9 s
+[GPU Timing] Compute: 10.479 ms | Render: 0.001 ms | Total: 10.484 ms | FPS: 91 | T: 9.9 s
+[GPU Timing] Compute: 10.479 ms | Render: 0.001 ms | Total: 10.484 ms | FPS: 91 | T: 10.9 s
+[GPU Timing] Compute: 10.480 ms | Render: 0.001 ms | Total: 10.485 ms | FPS: 92 | T: 11.9 s
+[GPU Timing] Compute: 10.480 ms | Render: 0.001 ms | Total: 10.486 ms | FPS: 92 | T: 12.9 s
+[GPU Timing] Compute: 10.481 ms | Render: 0.001 ms | Total: 10.487 ms | FPS: 91 | T: 13.9 s
+[GPU Timing] Compute: 10.481 ms | Render: 0.001 ms | Total: 10.487 ms | FPS: 91 | T: 14.9 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: Vulkan
+GPU:          AMD Radeon R5 M445 Series (RADV ICELAND)
+Driver:       radv Mesa 26.0.8-1ubuntu0.3
+CPU:          Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz
+OS:           Ubuntu 26.04.1 LTS (kernel 7.0.0-44-generic)
+System:       Linux x64
+Memory:       Device-local VRAM
+Mode:         Headless (compute only)
+Resolution:   1280x720
+Particles:    4194304 (Medium)
+Buffer:       128.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 1192 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        10.482    10.470    10.493
+Render:          0.001     0.001     0.001
+Total GPU:      10.487    10.476    10.498
+
+--- Throughput ---
+Avg FPS:      91
+Particles:    4194304
+Working set:  128.00 MiB
+VRAM rate:   16.01 GB/s  (10.482 ms compute)
+
+--- Analysis ---
+Avg frame time:  10.920 ms
+Avg GPU time:    10.487 ms
+GPU utilisation: 96.0%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 16.01 GB/s  (CV 0.01%)
+Throughput:   early vs late mean change (drop positive) -0.0%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261120-153519-864 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json

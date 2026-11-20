@@ -1769,6 +1769,25 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-20 戴尔 Inspiron 5567：HD Graphics 620、Radeon R5 M445 和 i5-7200U
+
+外接 SSD 启动 Ubuntu 26.04.1，内核 `7.0.0-44-generic`，Mesa `26.0.8-1ubuntu0.3`，测试源码 `6a342f8`。两张 GPU 各跑 28 项，加 CPU 计算和缓存/内存共 58 项，56 项有成绩。最终 JSON 有 49 条记录：46 条桌面 GPU 记录、2 条 CPU 计算记录和 1 条 CPU 内存记录。另有 8 项 OpenGL ES 2.0 GPU Burn 成绩保存在原生日志。
+
+| 测试 | Intel HD Graphics 620 | AMD Radeon R5 M445 |
+| --- | ---: | ---: |
+| Vulkan 粒子，16,777,216 个，窗口 / 无窗口（GB/s） | 7.77 / 7.91 | 15.90 / 15.94 |
+| OpenGL 粒子，同规模，窗口 / 无窗口（GB/s） | 7.83 / 7.85 | 15.84 / 16.07 |
+| Vulkan GPU Burn，16 / 64 / 256 步（Gpix-step/s） | 0.474 / 0.600 / 失败 | 0.627 / 0.765 / 0.816 |
+| OpenGL GPU Burn，16 / 64 / 256 步（Gpix-step/s） | 0.481 / 0.602 / 失败 | 0.625 / 0.764 / 0.815 |
+| Vulkan 流体（MParticle-step/s） | 2.789 | 5.030 |
+| Vulkan 显存带宽测试，读取（GB/s） | 15.185 | 26.872 |
+
+- **CPU**　i5-7200U（2 核 4 线程）单线程 134.29、4 线程 371.59 MWork/s。两个物理核各用一个线程时，L1 / L2 / L3 聚合读取为 300.5 / 184.0 / 105.6 GB/s，主内存读取 15.49、普通写入 6.45 GB/s。
+- **两项失败**　HD 620 在 256 步 GPU Burn 触发 i915 GPU hang。相同参数复测后，Vulkan 仍报 device lost，桌面 OpenGL 仍缺少有效 GPU 计时。R5 M445 的 11 项桌面 OpenGL 测试全部完成。
+- **存储**　USB 系统盘在首段结束时拒绝写入，ext4 随后转为只读。续跑成绩写入内存文件系统后取回 Mac，CPU 缓存和内存带宽已测，物理存储子项跳过。
+
+[最终成绩 JSON](out/test-results/dell-inspiron-5567-series-20261120-151122/results.json) · [首段日志汇总](out/test-results/dell-inspiron-5567-series-20261120-151122/summary.txt) · [续跑与复测日志](out/test-results/dell-inspiron-5567-series-20261120-151122/continuation)
+
 ### 2026-11-03 i9-10900K 上拔独显开机失败：NVIDIA 驱动把 initrd 撑到 215 MB
 
 - **现象：** 只在拔掉独显、用核显 UHD 630 时出现：GRUB `error: out of memory`，接着 `VFS: Unable to mount root fs on unknown-block(0,0)`。插独显能启动。`terminal_output console` 没用。选 7.0.0-30 能启动。

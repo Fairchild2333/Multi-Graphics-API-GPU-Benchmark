@@ -1,0 +1,89 @@
+Couldn't open plugin directory: No such file or directory
+No plugins found, falling back on no decorations
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Intel(R) HD Graphics 620 (KBL GT2) (Integ...     -   YES    -     -     -    YES 
+  AMD Radeon R5 M445 Series (RADV ICELAND) ...     -   YES    -     -     -     -  
+  llvmpipe (LLVM 21.1.8, 256 bits) (Software)      -   YES    -     -     -     -  
+============================================================
+
+[OpenGL] Set DRI_PRIME=0 for GPU selection.
+
+Couldn't open plugin directory: No such file or directory
+No plugins found, falling back on no decorations
+Backend: OpenGL  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: GPU Burn v1 r2 / Plasma x Kaleidoscope  |  Auto-stop: 15s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Invalid value (0) for DRI_PRIME. Should be > 0
+[OpenGL Init] Loading GL functions...
+[OpenGL Init] GLAD loaded GL 4.6
+[OpenGL Init] Mesa Intel(R) HD Graphics 620 (KBL GT2)  |  GL 4.6 (Core Profile) Mesa 26.0.8-1ubuntu0.3
+[OpenGL Init] Compiling shaders...
+[OpenGL Init] Creating particle buffers...
+[OpenGL Init] Creating timestamp queries...
+[Profiling] OpenGL timestamp queries enabled.
+[OpenGL Init] Initialisation complete.
+[FPS] 9
+[GPU Timing] Compute: 0.001 ms | Render: 199.912 ms | Total: 199.922 ms | FPS: 5 | T: 1.0 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 196.938 ms | Total: 196.943 ms | FPS: 5 | T: 1.4 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 196.676 ms | Total: 196.680 ms | FPS: 5 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 195.814 ms | Total: 195.819 ms | FPS: 5 | T: 2.2 s (warm-up)
+[GPU Timing] Compute: 0.000 ms | Render: 195.967 ms | Total: 195.972 ms | FPS: 5 | T: 3.4 s
+[GPU Timing] Compute: 0.000 ms | Render: 195.821 ms | Total: 195.826 ms | FPS: 5 | T: 4.5 s
+[GPU Timing] Compute: 0.000 ms | Render: 196.188 ms | Total: 196.194 ms | FPS: 5 | T: 5.7 s
+[GPU Timing] Compute: 0.000 ms | Render: 195.886 ms | Total: 195.890 ms | FPS: 5 | T: 6.9 s
+[GPU Timing] Compute: 0.000 ms | Render: 196.060 ms | Total: 196.064 ms | FPS: 5 | T: 8.1 s
+[GPU Timing] Compute: 0.000 ms | Render: 196.007 ms | Total: 196.012 ms | FPS: 5 | T: 9.3 s
+[GPU Timing] Compute: 0.000 ms | Render: 196.009 ms | Total: 196.014 ms | FPS: 5 | T: 10.5 s
+[GPU Timing] Compute: 0.000 ms | Render: 196.220 ms | Total: 196.225 ms | FPS: 5 | T: 11.6 s
+[GPU Timing] Compute: 0.000 ms | Render: 195.832 ms | Total: 195.836 ms | FPS: 5 | T: 12.8 s
+[GPU Timing] Compute: 0.000 ms | Render: 196.053 ms | Total: 196.058 ms | FPS: 5 | T: 14.0 s
+[GPU Timing] Compute: 0.000 ms | Render: 195.816 ms | Total: 195.821 ms | FPS: 5 | T: 15.2 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: OpenGL
+GPU:          Mesa Intel(R) HD Graphics 620 (KBL GT2)
+Driver:       4.6 (Core Profile) Mesa 26.0.8-1ubuntu0.3
+CPU:          Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz
+OS:           Ubuntu 26.04.1 LTS (kernel 7.0.0-44-generic)
+System:       Linux x64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.2 s (warmup: 2.0 s, measured: 67 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.000     0.000     0.000
+Render:        195.999   195.775   197.680
+Total GPU:     196.004   195.780   197.685
+
+--- Throughput ---
+Avg FPS:      5
+GPU Burn:     v1 r2 Plasma x Kaleidoscope, 2 draws x 64 fixed steps/pixel  (1280x720 px)
+Visual:       solid Plasma Bloom foreground + woven Mangekyo background
+Burn rate:    0.60 Gpix-step/s  (195.999 ms render)
+
+--- Analysis ---
+Avg frame time:  197.061 ms
+Avg GPU time:    196.004 ms
+GPU utilisation: 99.5%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      11 x 1s
+Stable window: 0.60 Gpix-step/s  (CV 0.08%)
+Throughput:   early vs late mean change (drop positive) 0.0%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261120-152910-736 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json

@@ -1,0 +1,76 @@
+== 1 Intel-R-HD-Graphics-620-KBL-GT2-vulkan-stream-65536-shown: 15:11:26 cpu 51C
+   exit=0 16 s cpu 55C  VRAM rate:   16.12 GB/s  (0.163 ms compute) [Results] Saved as 20261120-151142-112 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 2 Intel-R-HD-Graphics-620-KBL-GT2-vulkan-stream-1048576-shown: 15:12:12 cpu 44C
+   exit=0 17 s cpu 59C  VRAM rate:   7.33 GB/s  (5.720 ms compute) [Results] Saved as 20261120-151228-649 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 3 Intel-R-HD-Graphics-620-KBL-GT2-vulkan-stream-4194304-shown: 15:12:59 cpu 48C
+   exit=0 16 s cpu 56C  VRAM rate:   7.38 GB/s  (22.736 ms compute) [Results] Saved as 20261120-151314-951 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 4 Intel-R-HD-Graphics-620-KBL-GT2-vulkan-stream-16777216-shown: 15:13:45 cpu 47C
+   exit=0 18 s cpu 63C  VRAM rate:   7.77 GB/s  (86.349 ms compute) [Results] Saved as 20261120-151403-167 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 5 Intel-R-HD-Graphics-620-KBL-GT2-vulkan-stream-65536-headless: 15:14:33 cpu 48C
+   exit=0 17 s cpu 60C  VRAM rate:   29.67 GB/s  (0.088 ms compute) [Results] Saved as 20261120-151449-570 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 6 Intel-R-HD-Graphics-620-KBL-GT2-vulkan-stream-1048576-headless: 15:15:20 cpu 48C
+   exit=0 16 s cpu 56C  VRAM rate:   7.81 GB/s  (5.368 ms compute) [Results] Saved as 20261120-151536-011 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 7 Intel-R-HD-Graphics-620-KBL-GT2-vulkan-stream-4194304-headless: 15:16:06 cpu 48C
+   exit=0 17 s cpu 55C  VRAM rate:   7.80 GB/s  (21.506 ms compute) [Results] Saved as 20261120-151622-720 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 8 Intel-R-HD-Graphics-620-KBL-GT2-vulkan-stream-16777216-headless: 15:16:53 cpu 45C
+   exit=0 18 s cpu 58C  VRAM rate:   7.91 GB/s  (84.817 ms compute) [Results] Saved as 20261120-151710-662 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 9 Intel-R-HD-Graphics-620-KBL-GT2-vulkan-gpu-burn-16: 15:17:41 cpu 48C
+   exit=0 16 s cpu 56C  Burn rate:    0.47 Gpix-step/s  (62.206 ms render) [Results] Saved as 20261120-151757-393 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 10 Intel-R-HD-Graphics-620-KBL-GT2-vulkan-gpu-burn-64: 15:18:28 cpu 49C
+   exit=0 17 s cpu 58C  Burn rate:    0.60 Gpix-step/s  (196.636 ms render) [Results] Saved as 20261120-151844-538 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 11 Intel-R-HD-Graphics-620-KBL-GT2-vulkan-gpu-burn-256: 15:19:15 cpu 50C
+   exit=1 1 s cpu 54C  Fatal error: vkQueueSubmit failed (VkResult -4) -- GPU device lost; try restarting the application or rebooting 
+== 12 Intel-R-HD-Graphics-620-KBL-GT2-vulkan-fluid: 15:19:46 cpu 47C
+   exit=0 29 s cpu 55C  Fluid rate:   2.79 MParticle-step/s  (810.267 ms compute + 340.385 ms render) [Results] Saved as 20261120-152014-966 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 13 Intel-R-HD-Graphics-620-KBL-GT2-vulkan-vram-bandwidth: 15:20:45 cpu 46C
+   exit=0 43 s cpu 61C  read       15.2 GB/s system memory | no distinct cache plateau [Results] Saved as 20261120-152128-869-membw -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 14 Intel-R-HD-Graphics-620-KBL-GT2-opengl-stream-65536-shown: 15:21:58 cpu 49C
+   exit=0 16 s cpu 54C  [Profiling] OpenGL timestamp queries are unreliable (Mesa Intel runs compute in its own batch; GL timestamps never cover it); using synchronized wall-clock timing. VRAM rate:   3.44 GB/s  (0.763 ms compute) [Results] Saved as 20261120-152214-666 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 15 Intel-R-HD-Graphics-620-KBL-GT2-opengl-stream-1048576-shown: 15:22:44 cpu 47C
+   exit=0 16 s cpu 62C  [Profiling] OpenGL timestamp queries are unreliable (Mesa Intel runs compute in its own batch; GL timestamps never cover it); using synchronized wall-clock timing. VRAM rate:   7.30 GB/s  (5.748 ms compute) [Results] Saved as 20261120-152300-544 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 16 Intel-R-HD-Graphics-620-KBL-GT2-opengl-stream-4194304-shown: 15:23:30 cpu 48C
+   exit=0 16 s cpu 59C  [Profiling] OpenGL timestamp queries are unreliable (Mesa Intel runs compute in its own batch; GL timestamps never cover it); using synchronized wall-clock timing. VRAM rate:   7.41 GB/s  (22.645 ms compute) [Results] Saved as 20261120-152346-659 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 17 Intel-R-HD-Graphics-620-KBL-GT2-opengl-stream-16777216-shown: 15:24:16 cpu 48C
+   exit=0 17 s cpu 63C  [Profiling] OpenGL timestamp queries are unreliable (Mesa Intel runs compute in its own batch; GL timestamps never cover it); using synchronized wall-clock timing. VRAM rate:   7.83 GB/s  (85.691 ms compute) [Results] Saved as 20261120-152433-535 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 18 Intel-R-HD-Graphics-620-KBL-GT2-opengl-stream-65536-headless: 15:25:03 cpu 51C
+   exit=0 16 s cpu 51C  [Profiling] OpenGL timestamp queries are unreliable (Mesa Intel runs compute in its own batch; GL timestamps never cover it); using synchronized wall-clock timing. VRAM rate:   4.23 GB/s  (0.620 ms compute) [Results] Saved as 20261120-152519-420 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 19 Intel-R-HD-Graphics-620-KBL-GT2-opengl-stream-1048576-headless: 15:25:49 cpu 46C
+   exit=0 16 s cpu 54C  [Profiling] OpenGL timestamp queries are unreliable (Mesa Intel runs compute in its own batch; GL timestamps never cover it); using synchronized wall-clock timing. VRAM rate:   7.58 GB/s  (5.537 ms compute) [Results] Saved as 20261120-152605-279 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 20 Intel-R-HD-Graphics-620-KBL-GT2-opengl-stream-4194304-headless: 15:26:35 cpu 50C
+   exit=0 16 s cpu 54C  [Profiling] OpenGL timestamp queries are unreliable (Mesa Intel runs compute in its own batch; GL timestamps never cover it); using synchronized wall-clock timing. VRAM rate:   7.89 GB/s  (21.270 ms compute) [Results] Saved as 20261120-152651-323 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 21 Intel-R-HD-Graphics-620-KBL-GT2-opengl-stream-16777216-headless: 15:27:21 cpu 49C
+   exit=0 17 s cpu 67C  [Profiling] OpenGL timestamp queries are unreliable (Mesa Intel runs compute in its own batch; GL timestamps never cover it); using synchronized wall-clock timing. VRAM rate:   7.85 GB/s  (85.461 ms compute) [Results] Saved as 20261120-152738-116 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 22 Intel-R-HD-Graphics-620-KBL-GT2-opengl-gpu-burn-16: 15:28:08 cpu 47C
+   exit=0 16 s cpu 57C  Burn rate:    0.48 Gpix-step/s  (61.317 ms render) [Results] Saved as 20261120-152824-288 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 23 Intel-R-HD-Graphics-620-KBL-GT2-opengl-gpu-burn-64: 15:28:54 cpu 48C
+   exit=0 16 s cpu 59C  Burn rate:    0.60 Gpix-step/s  (195.999 ms render) [Results] Saved as 20261120-152910-736 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 24 Intel-R-HD-Graphics-620-KBL-GT2-opengl-gpu-burn-256: 15:29:40 cpu 48C
+   exit=1 16 s cpu 67C  Fatal error: No GPU timing data was collected; no score is saved 
+== 25 AMD-Radeon-R5-M445-Series-RADV-ICELAND-vulkan-stream-65536-shown: 15:30:26 cpu 48C
+   exit=0 16 s cpu 55C  VRAM rate:   16.62 GB/s  (0.158 ms compute) [Results] Saved as 20261120-153042-417 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 26 AMD-Radeon-R5-M445-Series-RADV-ICELAND-vulkan-stream-1048576-shown: 15:31:12 cpu 48C
+   exit=0 16 s cpu 56C  VRAM rate:   16.04 GB/s  (2.615 ms compute) [Results] Saved as 20261120-153128-372 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 27 AMD-Radeon-R5-M445-Series-RADV-ICELAND-vulkan-stream-4194304-shown: 15:31:58 cpu 46C
+   exit=0 16 s cpu 57C  VRAM rate:   15.97 GB/s  (10.506 ms compute) [Results] Saved as 20261120-153214-620 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 28 AMD-Radeon-R5-M445-Series-RADV-ICELAND-vulkan-stream-16777216-shown: 15:32:44 cpu 50C
+   exit=0 18 s cpu 57C  VRAM rate:   15.90 GB/s  (42.207 ms compute) [Results] Saved as 20261120-153301-979 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 29 AMD-Radeon-R5-M445-Series-RADV-ICELAND-vulkan-stream-65536-headless: 15:33:32 cpu 51C
+   exit=0 15 s cpu 58C  VRAM rate:   16.63 GB/s  (0.158 ms compute) [Results] Saved as 20261120-153347-828 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 30 AMD-Radeon-R5-M445-Series-RADV-ICELAND-vulkan-stream-1048576-headless: 15:34:17 cpu 49C
+   exit=0 16 s cpu 57C  VRAM rate:   16.07 GB/s  (2.610 ms compute) [Results] Saved as 20261120-153433-685 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 31 AMD-Radeon-R5-M445-Series-RADV-ICELAND-vulkan-stream-4194304-headless: 15:35:03 cpu 47C
+   exit=0 16 s cpu 57C  VRAM rate:   16.01 GB/s  (10.482 ms compute) [Results] Saved as 20261120-153519-864 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 32 AMD-Radeon-R5-M445-Series-RADV-ICELAND-vulkan-stream-16777216-headless: 15:35:49 cpu 52C
+   exit=0 17 s cpu 58C  VRAM rate:   15.94 GB/s  (42.090 ms compute) [Results] Saved as 20261120-153606-915 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 33 AMD-Radeon-R5-M445-Series-RADV-ICELAND-vulkan-gpu-burn-16: 15:36:37 cpu 52C
+   exit=0 16 s cpu 60C  Burn rate:    0.63 Gpix-step/s  (47.000 ms render) [Results] Saved as 20261120-153652-999 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 34 AMD-Radeon-R5-M445-Series-RADV-ICELAND-vulkan-gpu-burn-64: 15:37:23 cpu 52C
+   exit=0 16 s cpu 59C  Burn rate:    0.76 Gpix-step/s  (154.260 ms render) [Results] Saved as 20261120-153739-394 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 35 AMD-Radeon-R5-M445-Series-RADV-ICELAND-vulkan-gpu-burn-256: 15:38:09 cpu 52C
+   exit=0 18 s cpu 61C  Burn rate:    0.82 Gpix-step/s  (578.472 ms render) [Results] Saved as 20261120-153827-067 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 36 AMD-Radeon-R5-M445-Series-RADV-ICELAND-vulkan-fluid: 15:38:57 cpu 51C
+   exit=0 19 s cpu 58C  Fluid rate:   5.03 MParticle-step/s  (347.336 ms compute + 290.681 ms render) [Results] Saved as 20261120-153916-271 -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 37 AMD-Radeon-R5-M445-Series-RADV-ICELAND-vulkan-vram-bandwidth: 15:39:46 cpu 52C
+   exit=0 40 s cpu 61C  read       26.9 GB/s VRAM | cache plateau 32.8 GB/s (1 MiB - 2 MiB) [Results] Saved as 20261120-154026-303-membw -> /home/fairchild/.local/share/GpuComputeBenchmark/results/results.json 
+== 38 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-gles2-gpu-burn-8: 15:40:57 cpu 55C
+   exit=0 15 s cpu 62C  Last frame:   centre pixel 120 27 248, GL error 0x0 Burn rate:    5.97 Gpix-step/s  (2.471 ms render) 

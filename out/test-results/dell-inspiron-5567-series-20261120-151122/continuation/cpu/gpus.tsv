@@ -1,0 +1,3 @@
+GPU	0	Intel(R) HD Graphics 620 (KBL GT2)	1	0	0	1	0	0	1	0	0	1	0
+GPU	1	AMD Radeon R5 M445 Series (RADV ICELAND)	1	0	0	0	0	0	1	0	0	0	0
+GPU	2	llvmpipe (LLVM 21.1.8, 256 bits)	1	0	0	0	0	0	1	1	0	0	0

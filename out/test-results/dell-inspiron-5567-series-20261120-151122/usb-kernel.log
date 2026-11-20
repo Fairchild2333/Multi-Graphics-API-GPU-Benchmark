@@ -1,0 +1,123 @@
+[Fri Nov 20 15:08:55 2026] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[Fri Nov 20 15:08:55 2026] xhci_hcd 0000:00:14.0: xHCI Host Controller
+[Fri Nov 20 15:08:55 2026] xhci_hcd 0000:00:14.0: new USB bus registered, assigned bus number 1
+[Fri Nov 20 15:08:55 2026] xhci_hcd 0000:00:14.0: hcc params 0x200077c1 hci version 0x100 quirks 0x0000000081109810
+[Fri Nov 20 15:08:56 2026] xhci_hcd 0000:00:14.0: xHCI Host Controller
+[Fri Nov 20 15:08:56 2026] xhci_hcd 0000:00:14.0: new USB bus registered, assigned bus number 2
+[Fri Nov 20 15:08:56 2026] xhci_hcd 0000:00:14.0: Host supports USB 3.0 SuperSpeed
+[Fri Nov 20 15:08:56 2026] usb usb1: Manufacturer: Linux 7.0.0-44-generic xhci-hcd
+[Fri Nov 20 15:08:56 2026] usb usb2: Manufacturer: Linux 7.0.0-44-generic xhci-hcd
+[Fri Nov 20 15:08:56 2026] usb 1-5: new high-speed USB device number 2 using xhci_hcd
+[Fri Nov 20 15:08:56 2026] usb 2-1: new SuperSpeed USB device number 2 using xhci_hcd
+[Fri Nov 20 15:08:56 2026] usb 1-6: new high-speed USB device number 3 using xhci_hcd
+[Fri Nov 20 15:08:56 2026] usb 1-8: new full-speed USB device number 4 using xhci_hcd
+[Fri Nov 20 15:08:57 2026] usbcore: registered new interface driver uas
+[Fri Nov 20 15:08:58 2026] sd 0:0:0:0: [sdb] 488397168 512-byte logical blocks: (250 GB/233 GiB)
+[Fri Nov 20 15:08:58 2026] sd 0:0:0:0: [sdb] Write Protect is off
+[Fri Nov 20 15:08:58 2026] sd 0:0:0:0: [sdb] Mode Sense: 2f 00 00 00
+[Fri Nov 20 15:08:58 2026] sd 0:0:0:0: [sdb] Write cache: enabled, read cache: enabled, doesn't support DPO or FUA
+[Fri Nov 20 15:08:58 2026]  sdb: sdb1 sdb2
+[Fri Nov 20 15:08:58 2026] sd 0:0:0:0: [sdb] Attached SCSI disk
+[Fri Nov 20 15:09:00 2026] EXT4-fs (sdb2): mounted filesystem 57cc3064-2686-4d80-b586-3d50c0fac02c r/w with ordered data mode. Quota mode: none.
+[Fri Nov 20 15:09:01 2026] EXT4-fs (sdb2): re-mounted 57cc3064-2686-4d80-b586-3d50c0fac02c.
+[Fri Nov 20 15:09:01 2026] EXT4-fs (sdb2): resizing filesystem from 6291456 to 60918272 blocks
+[Fri Nov 20 15:09:02 2026] EXT4-fs (sdb2): resized filesystem to 60918272
+[Fri Nov 20 15:40:52 2026] sd 0:0:0:0: [sdb] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+[Fri Nov 20 15:40:52 2026] sd 0:0:0:0: [sdb] tag#0 Sense Key : Illegal Request [current] 
+[Fri Nov 20 15:40:52 2026] sd 0:0:0:0: [sdb] tag#0 Add. Sense: Invalid command operation code
+[Fri Nov 20 15:40:52 2026] sd 0:0:0:0: [sdb] tag#0 CDB: Write(10) 2a 00 00 11 99 40 00 05 80 00
+[Fri Nov 20 15:40:52 2026] critical target error, dev sdb, sector 1153344 op 0x1:(WRITE) flags 0x0 phys_seg 11 prio class 2
+[Fri Nov 20 15:40:52 2026] EXT4-fs warning (device sdb2): ext4_end_bio:369: I/O error 5 writing to inode 789528 starting block 144168)
+[Fri Nov 20 15:40:52 2026] Buffer I/O error on device sdb2, logical block 12840
+[Fri Nov 20 15:40:52 2026] Buffer I/O error on device sdb2, logical block 12841
+[Fri Nov 20 15:40:52 2026] Buffer I/O error on device sdb2, logical block 12842
+[Fri Nov 20 15:40:52 2026] Buffer I/O error on device sdb2, logical block 12843
+[Fri Nov 20 15:40:52 2026] Buffer I/O error on device sdb2, logical block 12844
+[Fri Nov 20 15:40:52 2026] Buffer I/O error on device sdb2, logical block 12845
+[Fri Nov 20 15:40:52 2026] Buffer I/O error on device sdb2, logical block 12846
+[Fri Nov 20 15:40:52 2026] Buffer I/O error on device sdb2, logical block 12847
+[Fri Nov 20 15:40:52 2026] Buffer I/O error on device sdb2, logical block 12848
+[Fri Nov 20 15:40:52 2026] Buffer I/O error on device sdb2, logical block 12849
+[Fri Nov 20 15:40:53 2026] sd 0:0:0:0: [sdb] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+[Fri Nov 20 15:40:53 2026] sd 0:0:0:0: [sdb] tag#0 Sense Key : Illegal Request [current] 
+[Fri Nov 20 15:40:53 2026] sd 0:0:0:0: [sdb] tag#0 Add. Sense: Invalid command operation code
+[Fri Nov 20 15:40:53 2026] sd 0:0:0:0: [sdb] tag#0 CDB: Write(10) 2a 00 00 14 84 e8 00 08 00 00
+[Fri Nov 20 15:40:53 2026] critical target error, dev sdb, sector 1344744 op 0x1:(WRITE) flags 0x0 phys_seg 256 prio class 2
+[Fri Nov 20 15:40:53 2026] EXT4-fs warning (device sdb2): ext4_end_bio:369: I/O error 5 writing to inode 1310767 starting block 168093)
+[Fri Nov 20 15:41:12 2026] sd 0:0:0:0: [sdb] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+[Fri Nov 20 15:41:12 2026] sd 0:0:0:0: [sdb] tag#0 Sense Key : Illegal Request [current] 
+[Fri Nov 20 15:41:12 2026] sd 0:0:0:0: [sdb] tag#0 Add. Sense: Invalid command operation code
+[Fri Nov 20 15:41:12 2026] sd 0:0:0:0: [sdb] tag#0 CDB: Write(10) 2a 00 00 14 96 28 00 08 00 00
+[Fri Nov 20 15:41:12 2026] critical target error, dev sdb, sector 1349160 op 0x1:(WRITE) flags 0x4800 phys_seg 55 prio class 3
+[Fri Nov 20 15:41:12 2026] EXT4-fs warning (device sdb2): ext4_end_bio:369: I/O error 5 writing to inode 1310767 starting block 168901)
+[Fri Nov 20 15:41:12 2026] Buffer I/O error on device sdb2, logical block 37317
+[Fri Nov 20 15:41:12 2026] Buffer I/O error on device sdb2, logical block 37318
+[Fri Nov 20 15:41:12 2026] Buffer I/O error on device sdb2, logical block 37319
+[Fri Nov 20 15:41:12 2026] Buffer I/O error on device sdb2, logical block 37320
+[Fri Nov 20 15:41:12 2026] Buffer I/O error on device sdb2, logical block 37321
+[Fri Nov 20 15:41:12 2026] Buffer I/O error on device sdb2, logical block 37322
+[Fri Nov 20 15:41:12 2026] Buffer I/O error on device sdb2, logical block 37323
+[Fri Nov 20 15:41:12 2026] Buffer I/O error on device sdb2, logical block 37324
+[Fri Nov 20 15:41:12 2026] Buffer I/O error on device sdb2, logical block 37325
+[Fri Nov 20 15:41:12 2026] Buffer I/O error on device sdb2, logical block 37326
+[Fri Nov 20 15:41:12 2026] sd 0:0:0:0: [sdb] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+[Fri Nov 20 15:41:12 2026] sd 0:0:0:0: [sdb] tag#0 Sense Key : Illegal Request [current] 
+[Fri Nov 20 15:41:12 2026] sd 0:0:0:0: [sdb] tag#0 Add. Sense: Invalid command operation code
+[Fri Nov 20 15:41:12 2026] sd 0:0:0:0: [sdb] tag#0 CDB: Write(10) 2a 00 00 14 a2 98 00 02 30 00
+[Fri Nov 20 15:41:12 2026] critical target error, dev sdb, sector 1352344 op 0x1:(WRITE) flags 0x800 phys_seg 70 prio class 3
+[Fri Nov 20 15:41:12 2026] EXT4-fs warning (device sdb2): ext4_end_bio:369: I/O error 5 writing to inode 1310767 starting block 169043)
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 Sense Key : Illegal Request [current] 
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 Add. Sense: Invalid command operation code
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 CDB: Write(6) 0a 11 8b 60 20 00
+[Fri Nov 20 15:41:23 2026] critical target error, dev sdb, sector 1149792 op 0x1:(WRITE) flags 0x0 phys_seg 1 prio class 2
+[Fri Nov 20 15:41:23 2026] EXT4-fs warning (device sdb2): ext4_end_bio:369: I/O error 5 writing to inode 789528 starting block 143724)
+[Fri Nov 20 15:41:23 2026] Buffer I/O error on device sdb2, logical block 12396
+[Fri Nov 20 15:41:23 2026] Buffer I/O error on device sdb2, logical block 12397
+[Fri Nov 20 15:41:23 2026] Buffer I/O error on device sdb2, logical block 12398
+[Fri Nov 20 15:41:23 2026] Buffer I/O error on device sdb2, logical block 12399
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 Sense Key : Illegal Request [current] 
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 Add. Sense: Invalid command operation code
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 CDB: Write(6) 0a 11 8b e0 40 00
+[Fri Nov 20 15:41:23 2026] critical target error, dev sdb, sector 1149920 op 0x1:(WRITE) flags 0x0 phys_seg 2 prio class 2
+[Fri Nov 20 15:41:23 2026] EXT4-fs warning (device sdb2): ext4_end_bio:369: I/O error 5 writing to inode 789528 starting block 143740)
+[Fri Nov 20 15:41:23 2026] Buffer I/O error on device sdb2, logical block 12412
+[Fri Nov 20 15:41:23 2026] Buffer I/O error on device sdb2, logical block 12413
+[Fri Nov 20 15:41:23 2026] Buffer I/O error on device sdb2, logical block 12414
+[Fri Nov 20 15:41:23 2026] Buffer I/O error on device sdb2, logical block 12415
+[Fri Nov 20 15:41:23 2026] Buffer I/O error on device sdb2, logical block 12416
+[Fri Nov 20 15:41:23 2026] Buffer I/O error on device sdb2, logical block 12417
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 Sense Key : Illegal Request [current] 
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 Add. Sense: Invalid command operation code
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 CDB: Write(6) 0a 11 8d c0 20 00
+[Fri Nov 20 15:41:23 2026] critical target error, dev sdb, sector 1150400 op 0x1:(WRITE) flags 0x0 phys_seg 1 prio class 2
+[Fri Nov 20 15:41:23 2026] EXT4-fs warning (device sdb2): ext4_end_bio:369: I/O error 5 writing to inode 789528 starting block 143800)
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 Sense Key : Illegal Request [current] 
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 Add. Sense: Invalid command operation code
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 CDB: Write(6) 0a 11 95 40 c0 00
+[Fri Nov 20 15:41:23 2026] critical target error, dev sdb, sector 1152320 op 0x1:(WRITE) flags 0x0 phys_seg 6 prio class 2
+[Fri Nov 20 15:41:23 2026] EXT4-fs warning (device sdb2): ext4_end_bio:369: I/O error 5 writing to inode 789528 starting block 144040)
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 Sense Key : Illegal Request [current] 
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 Add. Sense: Invalid command operation code
+[Fri Nov 20 15:41:23 2026] sd 0:0:0:0: [sdb] tag#0 CDB: Write(10) 2a 00 00 11 99 40 00 01 80 00
+[Fri Nov 20 15:41:23 2026] critical target error, dev sdb, sector 1153344 op 0x1:(WRITE) flags 0x0 phys_seg 3 prio class 2
+[Fri Nov 20 15:41:23 2026] EXT4-fs warning (device sdb2): ext4_end_bio:369: I/O error 5 writing to inode 789528 starting block 144168)
+[Fri Nov 20 15:41:24 2026] sd 0:0:0:0: [sdb] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+[Fri Nov 20 15:41:24 2026] sd 0:0:0:0: [sdb] tag#0 Sense Key : Illegal Request [current] 
+[Fri Nov 20 15:41:24 2026] sd 0:0:0:0: [sdb] tag#0 Add. Sense: Invalid command operation code
+[Fri Nov 20 15:41:24 2026] sd 0:0:0:0: [sdb] tag#0 CDB: Write(10) 2a 00 00 14 82 a0 00 04 10 00
+[Fri Nov 20 15:41:24 2026] critical target error, dev sdb, sector 1344160 op 0x1:(WRITE) flags 0x0 phys_seg 130 prio class 2
+[Fri Nov 20 15:41:24 2026] EXT4-fs warning (device sdb2): ext4_end_bio:369: I/O error 5 writing to inode 1310767 starting block 168020)
+[Fri Nov 20 15:41:28 2026] sd 0:0:0:0: [sdb] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+[Fri Nov 20 15:41:28 2026] sd 0:0:0:0: [sdb] tag#0 Sense Key : Illegal Request [current] 
+[Fri Nov 20 15:41:28 2026] sd 0:0:0:0: [sdb] tag#0 Add. Sense: Invalid command operation code
+[Fri Nov 20 15:41:28 2026] sd 0:0:0:0: [sdb] tag#0 CDB: Write(10) 2a 00 01 95 a8 c0 00 00 40 00
+[Fri Nov 20 15:41:28 2026] critical target error, dev sdb, sector 26585280 op 0x1:(WRITE) flags 0x809800 phys_seg 8 prio class 2
+[Fri Nov 20 15:41:28 2026] Aborting journal on device sdb2-8.
+[Fri Nov 20 15:41:28 2026] EXT4-fs error (device sdb2): ext4_journal_check_start:86: comm pool-2: Detected aborted journal
+[Fri Nov 20 15:41:28 2026] EXT4-fs error (device sdb2): ext4_journal_check_start:86: comm systemd-journal: Detected aborted journal
+[Fri Nov 20 15:41:28 2026] EXT4-fs (sdb2): Remounting filesystem read-only

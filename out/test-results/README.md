@@ -4,6 +4,10 @@
 本目录保留原始路径，便于查阅旧文档链接；JSON/CSV 中的曲线点与日志均不改写。
 归档文件禁用换行转换，保持提交内容与本地原件逐字节一致。
 
+## Linux 真机成绩
+
+2026-11-20，戴尔 Inspiron 5567（i5-7200U、Intel HD 620、AMD Radeon R5 M445）完成 58 项中的 56 项。归档包含最终 JSON、逐项原始日志、遥测以及 Intel 256 步 GPU Burn 的两项失败复测。最终 JSON 的 SHA256 为 `52ca8b0cd68d1c3a48a2938bd0b860f79865324b07b62dd9bfffaa12f13613a0`。[成绩与日志](dell-inspiron-5567-series-20261120-151122/) · [最终 JSON](dell-inspiron-5567-series-20261120-151122/results.json)
+
 ## Apple 设备主历史快照
 
 | 设备 | 型号 | 历史条数 | 原始文件 | 说明 |

@@ -1,0 +1,7 @@
+[OpenGL ES Init] AMD Radeon R5 M445 Series (radeonsi, iceland, ACO, DRM 3.64, 7.0.0-44-generic)  |  OpenGL ES 3.2 Mesa 26.0.8-1ubuntu0.3
+GPU Burn:     ES 2.0 legacy v1 quasicrystal plasma, 2 draws x 8 fixed steps/pixel  (1280x720 px)
+Off-screen:   drawn into a buffer of that size; nothing is shown, nothing is saved
+Duration:     13.0 s (warmup: 2.0 s, measured: 5261 frames)
+Render ms:    avg 2.471, min 2.355, max 5.451
+Last frame:   centre pixel 120 27 248, GL error 0x0
+Burn rate:    5.97 Gpix-step/s  (2.471 ms render)

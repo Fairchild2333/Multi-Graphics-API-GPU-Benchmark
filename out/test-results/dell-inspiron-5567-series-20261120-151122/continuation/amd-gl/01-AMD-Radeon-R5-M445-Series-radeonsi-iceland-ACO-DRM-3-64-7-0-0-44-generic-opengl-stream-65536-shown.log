@@ -1,0 +1,91 @@
+Couldn't open plugin directory: No such file or directory
+No plugins found, falling back on no decorations
+Couldn't open plugin directory: No such file or directory
+No plugins found, falling back on no decorations
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  AMD Radeon R5 M445 Series (radeonsi, icel...     -    -     -     -     -    YES 
+============================================================
+
+Backend: OpenGL  |  V-Sync: OFF  |  Memory: Device-local  |  Particles: 65536 (Medium)  |  Auto-stop: 15s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[OpenGL Init] Loading GL functions...
+[OpenGL Init] GLAD loaded GL 4.6
+[OpenGL Init] AMD Radeon R5 M445 Series (radeonsi, iceland, ACO, DRM 3.64, 7.0.0-44-generic)  |  GL 4.6 (Core Profile) Mesa 26.0.8-1ubuntu0.3
+[OpenGL Init] Compiling shaders...
+[OpenGL Init] Creating particle buffers...
+Created particle buffers: 65536 particles
+[OpenGL Init] Creating timestamp queries...
+[Profiling] OpenGL timestamp queries enabled.
+[OpenGL Init] Initialisation complete.
+[GPU Timing] Compute: 0.159 ms | Render: 1.735 ms | Total: 1.899 ms | FPS: 236 | T: 0.3 s (warm-up)
+[GPU Timing] Compute: 0.155 ms | Render: 1.862 ms | Total: 2.023 ms | FPS: 215 | T: 0.6 s (warm-up)
+[GPU Timing] Compute: 0.155 ms | Render: 1.967 ms | Total: 2.129 ms | FPS: 214 | T: 0.9 s (warm-up)
+[GPU Timing] Compute: 0.155 ms | Render: 2.044 ms | Total: 2.205 ms | FPS: 209 | T: 1.2 s (warm-up)
+[GPU Timing] Compute: 0.155 ms | Render: 2.086 ms | Total: 2.247 ms | FPS: 208 | T: 1.5 s (warm-up)
+[GPU Timing] Compute: 0.155 ms | Render: 2.092 ms | Total: 2.253 ms | FPS: 208 | T: 1.8 s (warm-up)
+[GPU Timing] Compute: 0.155 ms | Render: 2.048 ms | Total: 2.209 ms | FPS: 211 | T: 2.8 s
+[GPU Timing] Compute: 0.155 ms | Render: 1.930 ms | Total: 2.091 ms | FPS: 217 | T: 3.8 s
+[GPU Timing] Compute: 0.156 ms | Render: 1.791 ms | Total: 1.953 ms | FPS: 219 | T: 4.8 s
+[GPU Timing] Compute: 0.155 ms | Render: 1.643 ms | Total: 1.805 ms | FPS: 231 | T: 5.8 s
+[GPU Timing] Compute: 0.156 ms | Render: 1.478 ms | Total: 1.640 ms | FPS: 244 | T: 6.8 s
+[GPU Timing] Compute: 0.155 ms | Render: 1.311 ms | Total: 1.472 ms | FPS: 251 | T: 7.8 s
+[GPU Timing] Compute: 0.155 ms | Render: 1.148 ms | Total: 1.309 ms | FPS: 259 | T: 8.8 s
+[GPU Timing] Compute: 0.155 ms | Render: 0.995 ms | Total: 1.157 ms | FPS: 273 | T: 9.8 s
+[GPU Timing] Compute: 0.155 ms | Render: 0.870 ms | Total: 1.032 ms | FPS: 280 | T: 10.8 s
+[GPU Timing] Compute: 0.155 ms | Render: 0.770 ms | Total: 0.932 ms | FPS: 281 | T: 11.8 s
+[GPU Timing] Compute: 0.155 ms | Render: 0.694 ms | Total: 0.855 ms | FPS: 295 | T: 12.8 s
+[GPU Timing] Compute: 0.155 ms | Render: 0.633 ms | Total: 0.794 ms | FPS: 300 | T: 13.8 s
+[GPU Timing] Compute: 0.155 ms | Render: 0.582 ms | Total: 0.743 ms | FPS: 296 | T: 14.8 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: OpenGL
+GPU:          AMD Radeon R5 M445 Series (radeonsi, iceland, ACO, DRM 3.64, 7.0.0-44-generic)
+Driver:       4.6 (Core Profile) Mesa 26.0.8-1ubuntu0.3
+CPU:          Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz
+OS:           Ubuntu 26.04.1 LTS (kernel 7.0.0-44-generic)
+System:       Linux x64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    65536 (Medium)
+Buffer:       2.0 MB  [cache-resident: reads above memory bandwidth]
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 3383 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:         0.155     0.154     0.159
+Render:          1.144     0.547     2.091
+Total GPU:       1.306     0.708     2.253
+
+--- Throughput ---
+Avg FPS:      260
+Particles:    65536
+Working set:  2.00 MiB
+VRAM rate:   16.87 GB/s  (0.155 ms compute)
+
+--- Analysis ---
+Avg frame time:  3.844 ms
+Avg GPU time:    1.306 ms
+GPU utilisation: 34.0%
+>> CPU-bound: GPU is idle 66% of the time.
+   -> Try a higher difficulty for more accurate GPU benchmarking.
+
+--- Throughput Stability ---
+Windows:      13 x 1s
+Stable window: 16.87 GB/s  (CV 0.02%)
+Throughput:   early vs late mean change (drop positive) -0.1%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261120-155048-736 -> /run/user/1000/dell-benchmark-continuation/data/GpuComputeBenchmark/results/results.json

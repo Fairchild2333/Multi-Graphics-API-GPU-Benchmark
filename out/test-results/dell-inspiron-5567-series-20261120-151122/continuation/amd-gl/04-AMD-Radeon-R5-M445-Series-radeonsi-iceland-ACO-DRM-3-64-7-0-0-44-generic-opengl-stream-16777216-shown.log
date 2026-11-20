@@ -1,0 +1,85 @@
+Couldn't open plugin directory: No such file or directory
+No plugins found, falling back on no decorations
+Couldn't open plugin directory: No such file or directory
+No plugins found, falling back on no decorations
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  AMD Radeon R5 M445 Series (radeonsi, icel...     -    -     -     -     -    YES 
+============================================================
+
+Backend: OpenGL  |  V-Sync: OFF  |  Memory: Device-local  |  Particles: 16777216 (Medium)  |  Auto-stop: 15s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+[OpenGL Init] Loading GL functions...
+[OpenGL Init] GLAD loaded GL 4.6
+[OpenGL Init] AMD Radeon R5 M445 Series (radeonsi, iceland, ACO, DRM 3.64, 7.0.0-44-generic)  |  GL 4.6 (Core Profile) Mesa 26.0.8-1ubuntu0.3
+[OpenGL Init] Compiling shaders...
+[OpenGL Init] Creating particle buffers...
+Created particle buffers: 16777216 particles
+[OpenGL Init] Creating timestamp queries...
+[Profiling] OpenGL timestamp queries enabled.
+[OpenGL Init] Initialisation complete.
+[FPS] 3
+[FPS] 2
+[GPU Timing] Compute: 43.946 ms | Render: 390.557 ms | Total: 434.508 ms | FPS: 1 | T: 2.3 s (warm-up)
+[GPU Timing] Compute: 42.185 ms | Render: 434.240 ms | Total: 476.431 ms | FPS: 1 | T: 3.4 s
+[GPU Timing] Compute: 42.521 ms | Render: 506.869 ms | Total: 549.396 ms | FPS: 1 | T: 4.4 s
+[GPU Timing] Compute: 42.591 ms | Render: 481.865 ms | Total: 524.462 ms | FPS: 2 | T: 5.9 s
+[GPU Timing] Compute: 42.471 ms | Render: 429.188 ms | Total: 471.665 ms | FPS: 2 | T: 7.1 s
+[GPU Timing] Compute: 42.453 ms | Render: 375.686 ms | Total: 418.145 ms | FPS: 2 | T: 8.2 s
+[GPU Timing] Compute: 42.432 ms | Render: 324.991 ms | Total: 367.429 ms | FPS: 2 | T: 9.2 s
+[GPU Timing] Compute: 42.406 ms | Render: 274.871 ms | Total: 317.283 ms | FPS: 3 | T: 10.3 s
+[GPU Timing] Compute: 42.367 ms | Render: 230.016 ms | Total: 272.390 ms | FPS: 3 | T: 11.4 s
+[GPU Timing] Compute: 42.300 ms | Render: 198.114 ms | Total: 240.420 ms | FPS: 4 | T: 12.5 s
+[GPU Timing] Compute: 42.275 ms | Render: 174.602 ms | Total: 216.883 ms | FPS: 4 | T: 13.5 s
+[GPU Timing] Compute: 42.272 ms | Render: 156.205 ms | Total: 198.483 ms | FPS: 5 | T: 14.7 s
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: OpenGL
+GPU:          AMD Radeon R5 M445 Series (radeonsi, iceland, ACO, DRM 3.64, 7.0.0-44-generic)
+Driver:       4.6 (Core Profile) Mesa 26.0.8-1ubuntu0.3
+CPU:          Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz
+OS:           Ubuntu 26.04.1 LTS (kernel 7.0.0-44-generic)
+System:       Linux x64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Particles:    16777216 (Medium)
+Buffer:       512.0 MB
+Bandwidth:    derived, assumes 40 B moved per particle; the kernel moves ~48 B (reads 32, writes back 16)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     13.0 s (warmup: 2.0 s, measured: 43 frames)
+
+--- GPU Timing (ms) ---
+                     Avg       Min       Max
+Compute:        42.368    42.185    42.744
+Render:        275.725   141.875   508.721
+Total GPU:     318.099   184.147   551.390
+
+--- Throughput ---
+Avg FPS:      3
+Particles:    16777216
+Working set:  512.00 MiB
+VRAM rate:   15.84 GB/s  (42.368 ms compute)
+
+--- Analysis ---
+Avg frame time:  301.233 ms
+Avg GPU time:    318.099 ms
+GPU utilisation: 105.6%
+>> GPU-bound: GPU is the bottleneck.
+
+--- Throughput Stability ---
+Windows:      11 x 1s
+Stable window: 15.86 GB/s  (CV 0.13%)
+Throughput:   early vs late mean change (drop positive) -0.3%
+>> Stable throughput window detected; no hardware frequency was measured.
+==========================================================
+
+[Results] Saved as 20261120-155307-776 -> /run/user/1000/dell-benchmark-continuation/data/GpuComputeBenchmark/results/results.json

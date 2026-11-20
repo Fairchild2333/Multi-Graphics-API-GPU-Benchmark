@@ -1,0 +1,5 @@
+== 1 cpu-compute: 15:59:03 cpu 65C
+   exit=0 76 s cpu 63C  All-core score (4 threads): 371.59 MWork/s 
+== 2 cpu-cache-memory: 16:00:49 cpu 47C
+   exit=0 28 s cpu 62C  [Results] Saved as 20261120-160117-715-cpu-membw -> /run/user/1000/dell-benchmark-continuation/data/GpuComputeBenchmark/results/results.json 
+SERIES DONE 16:01:47

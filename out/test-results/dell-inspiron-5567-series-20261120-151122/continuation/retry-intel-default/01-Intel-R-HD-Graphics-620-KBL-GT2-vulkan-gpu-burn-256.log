@@ -1,0 +1,26 @@
+Couldn't open plugin directory: No such file or directory
+No plugins found, falling back on no decorations
+Couldn't open plugin directory: No such file or directory
+No plugins found, falling back on no decorations
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Intel(R) HD Graphics 620 (KBL GT2) (Integ...     -   YES    -     -     -    YES 
+  AMD Radeon R5 M445 Series (RADV ICELAND) ...     -   YES    -     -     -     -  
+  llvmpipe (LLVM 21.1.8, 256 bits) (Software)      -   YES    -     -     -     -  
+============================================================
+
+Backend: Vulkan  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: GPU Burn v1 r2 / Plasma x Kaleidoscope  |  Auto-stop: 15s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Available GPUs:
+  [0] Intel(R) HD Graphics 620 (KBL GT2) (Integrated GPU)
+  [1] AMD Radeon R5 M445 Series (RADV ICELAND) (Discrete GPU)
+  [2] llvmpipe (LLVM 21.1.8, 256 bits) (CPU)
+Selected GPU [0]: Intel(R) HD Graphics 620 (KBL GT2)  |  Driver: Intel open-source Mesa driver Mesa 26.0.8-1ubuntu0.3
+[Vulkan] Present mode: mailbox (not tied to the refresh rate)
+Created particle buffer (device-local via staging): 256 particles
+[Profiling] Timestamp queries enabled (period = 83.3333 ns/tick)
+Fatal error: vkQueueSubmit failed (VkResult -4) -- GPU device lost; try restarting the application or rebooting

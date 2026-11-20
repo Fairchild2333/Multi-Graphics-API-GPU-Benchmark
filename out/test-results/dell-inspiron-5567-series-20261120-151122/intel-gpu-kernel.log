@@ -1,0 +1,12 @@
+[Fri Nov 20 15:19:16 2026] i915 0000:00:02.0: [drm] gpu_benchmark[8768] context reset due to GPU hang
+[Fri Nov 20 15:19:16 2026] i915 0000:00:02.0: [drm] GPU HANG: ecode 9:1:85dffffb, in gpu_benchmark [8768]
+[Fri Nov 20 15:19:16 2026] i915 0000:00:02.0: [drm] GPU error state saved to /sys/class/drm/card1/error
+[Fri Nov 20 15:29:42 2026] i915 0000:00:02.0: [drm] Resetting rcs0 for preemption time out
+[Fri Nov 20 15:29:42 2026] i915 0000:00:02.0: [drm] gpu_benchmark[15773] context reset due to GPU hang
+[Fri Nov 20 15:29:42 2026] i915 0000:00:02.0: [drm] GPU HANG: ecode 9:1:85dffffb, in gpu_benchmark [15773]
+[Fri Nov 20 15:29:43 2026] i915 0000:00:02.0: [drm] Resetting rcs0 for preemption time out
+[Fri Nov 20 15:29:43 2026] i915 0000:00:02.0: [drm] gpu_benchmark[15773] context reset due to GPU hang
+[Fri Nov 20 15:29:43 2026] i915 0000:00:02.0: [drm] GPU HANG: ecode 9:1:85dffffb, in gpu_benchmark [15773]
+[Fri Nov 20 15:29:43 2026] i915 0000:00:02.0: [drm] Resetting rcs0 for preemption time out
+[Fri Nov 20 15:29:43 2026] i915 0000:00:02.0: [drm] gpu_benchmark[15773] context reset due to GPU hang
+[Fri Nov 20 15:29:43 2026] i915 0000:00:02.0: [drm] GPU HANG: ecode 9:1:85dffffb, in gpu_benchmark [15773]

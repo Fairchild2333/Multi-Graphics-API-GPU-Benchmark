@@ -1,0 +1,69 @@
+Couldn't open plugin directory: No such file or directory
+No plugins found, falling back on no decorations
+
+============================================================
+                    GPU & API Detection
+============================================================
+  GPU                                         VRAM     Vulkan  DX12  DX11  Metal  OpenGL
+  -------------------------------------------- ------  ------  ----  ----  -----  ------
+  Intel(R) HD Graphics 620 (KBL GT2) (Integ...     -   YES    -     -     -    YES 
+  AMD Radeon R5 M445 Series (RADV ICELAND) ...     -   YES    -     -     -     -  
+  llvmpipe (LLVM 21.1.8, 256 bits) (Software)      -   YES    -     -     -     -  
+============================================================
+
+[OpenGL] Set DRI_PRIME=0 for GPU selection.
+
+Couldn't open plugin directory: No such file or directory
+No plugins found, falling back on no decorations
+Backend: OpenGL  |  V-Sync: OFF  |  Memory: Device-local  |  Workload: GPU Burn v1 r2 / Plasma x Kaleidoscope  |  Auto-stop: 15s
+[RenderDoc] Disabled by configuration; DLL/API initialisation and F12 capture are off.
+Invalid value (0) for DRI_PRIME. Should be > 0
+[OpenGL Init] Loading GL functions...
+[OpenGL Init] GLAD loaded GL 4.6
+[OpenGL Init] Mesa Intel(R) HD Graphics 620 (KBL GT2)  |  GL 4.6 (Core Profile) Mesa 26.0.8-1ubuntu0.3
+[OpenGL Init] Compiling shaders...
+[OpenGL Init] Creating particle buffers...
+[OpenGL Init] Creating timestamp queries...
+[Profiling] OpenGL timestamp queries enabled.
+[OpenGL Init] Initialisation complete.
+[FPS] 4
+[FPS] 4
+[FPS] 4565
+[FPS] 14100
+[FPS] 13920
+[FPS] 11880
+[FPS] 13281
+[FPS] 13873
+[FPS] 14345
+[FPS] 13066
+[FPS] 14525
+[FPS] 13563
+[FPS] 14518
+[FPS] 14043
+[FPS] 14489
+
+==========================================================
+                   Benchmark Summary
+==========================================================
+Graphics API: OpenGL
+GPU:          Mesa Intel(R) HD Graphics 620 (KBL GT2)
+Driver:       4.6 (Core Profile) Mesa 26.0.8-1ubuntu0.3
+CPU:          Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz
+OS:           Ubuntu 26.04.1 LTS (kernel 7.0.0-44-generic)
+System:       Linux x64
+Memory:       Device-local VRAM
+Mode:         Windowed
+Resolution:   1280x720
+Workload:     GPU Burn v1 r2 / Plasma x Kaleidoscope (no particle data)
+Flights:      2
+Multi-GPU:    Off
+V-Sync:       OFF
+Duration:     12.9 s (warmup: 2.0 s, measured: 177962 frames)
+
+--- Throughput ---
+Avg FPS:      13823
+
+(No timestamp data available for analysis.)
+==========================================================
+
+Fatal error: No GPU timing data was collected; no score is saved

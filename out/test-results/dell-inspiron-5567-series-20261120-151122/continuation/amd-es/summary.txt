@@ -1,0 +1,7 @@
+== 1 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-gles2-gpu-burn-16: 15:45:10 cpu 53C
+   exit=0 15 s cpu 57C  Last frame:   centre pixel 170 15 255, GL error 0x0 Burn rate:    6.66 Gpix-step/s  (4.428 ms render) 
+== 2 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-gles2-gpu-burn-64: 15:45:55 cpu 48C
+   exit=0 16 s cpu 57C  Last frame:   centre pixel 176 14 255, GL error 0x0 Burn rate:    7.55 Gpix-step/s  (15.635 ms render) 
+== 3 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-gles2-gpu-burn-256: 15:46:41 cpu 45C
+   exit=0 15 s cpu 58C  Last frame:   centre pixel 175 17 255, GL error 0x0 Burn rate:    7.26 Gpix-step/s  (64.961 ms render) 
+SERIES DONE 15:47:26

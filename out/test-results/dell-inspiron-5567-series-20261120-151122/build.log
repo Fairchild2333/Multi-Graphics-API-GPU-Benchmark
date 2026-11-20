@@ -1,0 +1,35 @@
+-- Vulkan backend: ENABLED
+-- DX12 backend:   DISABLED (by option)
+-- DX11 backend:   DISABLED (by option)
+-- Metal backend:  DISABLED (by option)
+-- OpenGL backend: ENABLED
+-- Configuring done (0.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/fairchild/mangekyo/build
+[ 59%] Built target compile_glsl
+[ 61%] Built target glad_gl43
+[ 63%] Built target result_quality_test
+[ 69%] Built target results_compat_test
+[ 71%] Built target complete_suite_test
+[ 77%] Built target vulkan_membw_results_test
+[ 79%] Built target cpu_residency_test
+[ 95%] Built target gpu_engine
+[ 97%] Built target gpu_benchmark
+[100%] Built target cpu_cancel_test
+Test project /home/fairchild/mangekyo/build
+    Start 1: results_compat
+1/6 Test #1: results_compat ...................   Passed    0.01 sec
+    Start 2: result_quality
+2/6 Test #2: result_quality ...................   Passed    0.00 sec
+    Start 3: complete_suite
+3/6 Test #3: complete_suite ...................   Passed    0.00 sec
+    Start 4: vulkan_membw_results
+4/6 Test #4: vulkan_membw_results .............   Passed    0.01 sec
+    Start 5: cpu_residency
+5/6 Test #5: cpu_residency ....................   Passed    0.00 sec
+    Start 6: cpu_cancel
+6/6 Test #6: cpu_cancel .......................   Passed    1.31 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Total Test time (real) =   1.33 sec

@@ -1,0 +1,23 @@
+== 1 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-opengl-stream-65536-shown: 15:50:33 cpu 54C
+   exit=0 15 s cpu 57C  VRAM rate:   16.87 GB/s  (0.155 ms compute) [Results] Saved as 20261120-155048-736 -> /run/user/1000/dell-benchmark-continuation/data/GpuComputeBenchmark/results/results.json 
+== 2 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-opengl-stream-1048576-shown: 15:51:18 cpu 47C
+   exit=0 16 s cpu 58C  VRAM rate:   16.03 GB/s  (2.617 ms compute) [Results] Saved as 20261120-155134-657 -> /run/user/1000/dell-benchmark-continuation/data/GpuComputeBenchmark/results/results.json 
+== 3 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-opengl-stream-4194304-shown: 15:52:04 cpu 50C
+   exit=0 16 s cpu 60C  VRAM rate:   15.93 GB/s  (10.530 ms compute) [Results] Saved as 20261120-155220-760 -> /run/user/1000/dell-benchmark-continuation/data/GpuComputeBenchmark/results/results.json 
+== 4 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-opengl-stream-16777216-shown: 15:52:50 cpu 51C
+   exit=0 17 s cpu 60C  VRAM rate:   15.84 GB/s  (42.368 ms compute) [Results] Saved as 20261120-155307-776 -> /run/user/1000/dell-benchmark-continuation/data/GpuComputeBenchmark/results/results.json 
+== 5 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-opengl-stream-65536-headless: 15:53:37 cpu 49C
+   exit=0 16 s cpu 57C  VRAM rate:   16.86 GB/s  (0.156 ms compute) [Results] Saved as 20261120-155353-654 -> /run/user/1000/dell-benchmark-continuation/data/GpuComputeBenchmark/results/results.json 
+== 6 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-opengl-stream-1048576-headless: 15:54:23 cpu 53C
+   exit=0 16 s cpu 58C  VRAM rate:   16.12 GB/s  (2.603 ms compute) [Results] Saved as 20261120-155439-564 -> /run/user/1000/dell-benchmark-continuation/data/GpuComputeBenchmark/results/results.json 
+== 7 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-opengl-stream-4194304-headless: 15:55:09 cpu 49C
+   exit=0 16 s cpu 57C  VRAM rate:   16.08 GB/s  (10.434 ms compute) [Results] Saved as 20261120-155525-650 -> /run/user/1000/dell-benchmark-continuation/data/GpuComputeBenchmark/results/results.json 
+== 8 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-opengl-stream-16777216-headless: 15:55:55 cpu 51C
+   exit=0 17 s cpu 59C  VRAM rate:   16.07 GB/s  (41.764 ms compute) [Results] Saved as 20261120-155612-385 -> /run/user/1000/dell-benchmark-continuation/data/GpuComputeBenchmark/results/results.json 
+== 9 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-opengl-gpu-burn-16: 15:56:42 cpu 51C
+   exit=0 16 s cpu 60C  Burn rate:    0.63 Gpix-step/s  (47.177 ms render) [Results] Saved as 20261120-155658-406 -> /run/user/1000/dell-benchmark-continuation/data/GpuComputeBenchmark/results/results.json 
+== 10 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-opengl-gpu-burn-64: 15:57:28 cpu 49C
+   exit=0 16 s cpu 61C  Burn rate:    0.76 Gpix-step/s  (154.447 ms render) [Results] Saved as 20261120-155744-687 -> /run/user/1000/dell-benchmark-continuation/data/GpuComputeBenchmark/results/results.json 
+== 11 AMD-Radeon-R5-M445-Series-radeonsi-iceland-ACO-DRM-3-64-7-0-0-44-generic-opengl-gpu-burn-256: 15:58:14 cpu 50C
+   exit=0 17 s cpu 61C  Burn rate:    0.82 Gpix-step/s  (578.677 ms render) [Results] Saved as 20261120-155831-774 -> /run/user/1000/dell-benchmark-continuation/data/GpuComputeBenchmark/results/results.json 
+SERIES DONE 15:59:02

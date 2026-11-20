@@ -1,0 +1,26 @@
+host: mangekyo-portable
+source: 6a342f8c4fd4dc6777f028487d74618e17e086c3
+os: Ubuntu 26.04.1 LTS, kernel 7.0.0-44-generic
+cpu:  Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz, 4 threads, governor powersave
+power profile: n/a
+session: wayland x11 :0
+env: MESA_SHADER_CACHE_DIR=/run/user/1000/dell-benchmark-continuation/cache/mesa
+00:02.0 VGA compatible controller: Intel Corporation Kaby Lake-U GT2 [HD Graphics 620] (rev 02)
+01:00.0 Display controller: Advanced Micro Devices, Inc. [AMD/ATI] Topaz XT [Radeon R7 M260/M265 / M340/M360 / M440/M445 / 530/535 / 620/625 Mobile] (rev c3)
+	apiVersion         = 1.4.335
+	deviceName         = Intel(R) HD Graphics 620 (KBL GT2)
+	driverName         = Intel open-source Mesa driver
+	driverInfo         = Mesa 26.0.8-1ubuntu0.3
+	apiVersion         = 1.4.335
+	deviceName         = AMD Radeon R5 M445 Series (RADV ICELAND)
+	driverName         = radv
+	driverInfo         = Mesa 26.0.8-1ubuntu0.3
+	apiVersion         = 1.4.335
+	deviceName         = llvmpipe (LLVM 21.1.8, 256 bits)
+	driverName         = llvmpipe
+	driverInfo         = Mesa 26.0.8-1ubuntu0.3 (LLVM 21.1.8)
+OpenGL renderer string: Mesa Intel(R) HD Graphics 620 (KBL GT2)
+OpenGL core profile version string: 4.6 (Core Profile) Mesa 26.0.8-1ubuntu0.3
+GPU	0	Intel(R) HD Graphics 620 (KBL GT2)	1	0	0	1	0	0	1	0	0	1	0
+GPU	1	AMD Radeon R5 M445 Series (RADV ICELAND)	1	0	0	0	0	0	1	0	0	0	0
+GPU	2	llvmpipe (LLVM 21.1.8, 256 bits)	1	0	0	0	0	0	1	1	0	0	0

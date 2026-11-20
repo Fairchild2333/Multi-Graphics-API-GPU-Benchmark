@@ -1,0 +1,7 @@
+[OpenGL ES Init] Mesa Intel(R) HD Graphics 620 (KBL GT2)  |  OpenGL ES 3.2 Mesa 26.0.8-1ubuntu0.3
+GPU Burn:     ES 2.0 legacy v1 quasicrystal plasma, 2 draws x 8 fixed steps/pixel  (1280x720 px)
+Off-screen:   drawn into a buffer of that size; nothing is shown, nothing is saved
+Duration:     13.0 s (warmup: 2.0 s, measured: 5573 frames)
+Render ms:    avg 2.333, min 2.238, max 5.014
+Last frame:   centre pixel 121 26 248, GL error 0x0
+Burn rate:    6.32 Gpix-step/s  (2.333 ms render)

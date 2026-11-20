@@ -1,0 +1,5 @@
+== 1 Intel-R-HD-Graphics-620-KBL-GT2-vulkan-gpu-burn-256: 16:02:52 cpu 54C
+   exit=1 1 s cpu 55C  Fatal error: vkQueueSubmit failed (VkResult -4) -- GPU device lost; try restarting the application or rebooting 
+== 2 Intel-R-HD-Graphics-620-KBL-GT2-opengl-gpu-burn-256: 16:03:23 cpu 45C
+   exit=1 16 s cpu 66C  Fatal error: No GPU timing data was collected; no score is saved 
+SERIES DONE 16:04:10

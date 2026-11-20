@@ -1,0 +1,9 @@
+== 1 Mesa-Intel-R-HD-Graphics-620-KBL-GT2-gles2-gpu-burn-8: 15:47:28 cpu 55C
+   exit=0 15 s cpu 62C  Last frame:   centre pixel 121 26 248, GL error 0x0 Burn rate:    6.32 Gpix-step/s  (2.333 ms render) 
+== 2 Mesa-Intel-R-HD-Graphics-620-KBL-GT2-gles2-gpu-burn-16: 15:48:13 cpu 49C
+   exit=0 17 s cpu 59C  Last frame:   centre pixel 170 15 255, GL error 0x0 Burn rate:    8.42 Gpix-step/s  (3.503 ms render) 
+== 3 Mesa-Intel-R-HD-Graphics-620-KBL-GT2-gles2-gpu-burn-64: 15:49:00 cpu 50C
+   exit=0 16 s cpu 60C  Last frame:   centre pixel 175 14 255, GL error 0x0 Burn rate:    6.13 Gpix-step/s  (19.252 ms render) 
+== 4 Mesa-Intel-R-HD-Graphics-620-KBL-GT2-gles2-gpu-burn-256: 15:49:46 cpu 49C
+   exit=0 16 s cpu 56C  Last frame:   centre pixel 166 21 255, GL error 0x0 Burn rate:    6.32 Gpix-step/s  (74.669 ms render) 
+SERIES DONE 15:50:32
