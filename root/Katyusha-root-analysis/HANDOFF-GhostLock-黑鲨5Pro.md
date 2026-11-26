@@ -1,3 +1,52 @@
+# 2026-11-26 更正与现状 —— 以本节为准
+
+> 下面 10-12 的正文和 `调试进度-20261107.md` 里的多条结论已被真机实测推翻，读之前先看这一节。
+
+## 一句话
+
+黑鲨上 GhostLock 仍未跑通，但**真因已经实测定位**：引擎的"伪页"地址算错了，喷射的 payload 不在它以为的位置。
+不是"悬空态没形成"，也不是"几何上无法投递"。已决定到此为止——cheesecake 已经能 root 本机，
+GhostLock 在这里只是第二条路。要继续的话见下面"未做的事"。
+
+## 被推翻的旧结论（都有 root + kprobe 的直接读数）
+
+- **11-10 "E9 毒锁实验 → pi_blocked_on == NULL，UAF 悬挂态从未成型"：错。** 那是个假阴性：消费线程即便在伪锁上自旋，
+  也会在 W 做 disarm 后几微秒被放出来，运行看起来照样"正常"。实测：W 的系统调用返回后 `pi_blocked_on` 确定性悬空，
+  130 次只读采样内容不变，定时 `FUTEX_LOCK_PI`（disarm）能清掉它。
+- **10-11 / 11-10 "几何墙，结案"：只对上游原版三条路线成立。** sigreturn 盖章位置是对的——消费时读到的悬空 waiter
+  就是盖章值（pc = target−8、lock = 伪锁、task = 伪任务、prio = 140）。
+- **真因**：链走到 `lock = waiter->lock` 之后，在 `raw_spin_trylock(&fake_lock->wait_lock)` 上空转
+  （8 ms 内 1840 次，全部失败），直到 disarm。伪锁地址处是无关的内核数据（几个内核指针），而泄漏页前后 ±8 MB
+  逐页扫描（4098 页）没有任何 payload 页。引擎赌"刚释放的 mm_struct slab 页会被 32 KB frag 分配原样复用"
+  （`SKB_DATA_DELTA = -0xe80`、`kLockOffset = 0xe80`），这台机器上内核把它分到了别处。
+  消息本身的拆分和常数假设一致（`0xe80 + 0x8000`、`0x180 + 0x7000`），错的是落点。
+
+## 源码层面的机制（v5.10.101，结构偏移已和黑鲨机器码逐字段核对）
+
+`FUTEX_CMP_REQUEUE_PI` 触发死锁环后，`rt_mutex_start_proxy_lock()` 在出错路径调 `remove_waiter(lock, waiter)`，
+而这个函数用的是 `current`（= 重排线程 M），所以 W 的 `pi_blocked_on` 没被清；W 超时返回后指针就悬空了，是确定性的。
+消费路径（`sched_setattr(W)` → `rt_mutex_adjust_pi` → 链行走）实际只用到悬空 waiter 的三个字段：
+`tree_entry`（+0x00）、`lock`（+0x38）、`prio`（+0x40）。在 pselect 窗口里它们是第 10–12、17、18 个字，
+而用户态只能写第 0–14 个字，所以原版 select 路线够不着。
+
+## 未做的事
+
+- 上游（f44fa12，11-22）路线仍只有 multicast / select_stack / tcp_zerocopy，黑鲨没有现成 profile 可用。
+- 要跑通需要：重做堆喷射（让伪页落在已知地址，或能推出地址），再调 W2 / W3——这两个阶段在本机从没跑过。
+  每一步都有 panic 风险（本内核 `PANIC_ON_OOPS=y`）。
+- 没解的细节：skb frag 页指针到内核地址的换算（`skb_inspect.sh` 第三轮未验证）。
+
+## 工具、证据、运行要点
+
+- 工具和证据都在 cheesecake-katyusha 仓库的 `research/ghostlock-trace/`（探针、`pitrace`、`peek`、引擎补丁，
+  README 里有 trace 片段）；结论在同仓库 `DEVICE_SURVEY.md` 的 "KTUS × GhostLock" 一节。
+- 本目录的 `ghostlock-src` 原样编不过（缺 `encode_multicast_waiter_trees`），需要的改动在那个补丁里。
+- 有 root 时引擎要加 `--force-attack`，否则检测到 KernelSU 直接跳过。W1 目标必须是直接映射地址
+  （`GHOSTLOCK_W1_TARGET`）；想先拿无害的靶子试写入，用 `init_task.comm` 的别名 `0xffffff802a9ac590`。
+- tracefs 的实例不能各自定义探针（要写顶层 `kprobe_events`）。高频探针开着时 `cat trace` 会一直追着环形缓冲读
+  （拉下来过一个 3.7 GB 的文件），必须先按 pid 过滤（`event-fork` + `set_event_pid`）。用完跑 `pit_teardown.sh`。
+- 设备现状：探针、trace 实例、临时文件都已清除，没写任何分区。
+
 # GhostLock 黑鲨 5 Pro 适配 — 完整交接文档
 
 日期：2026-10-12。供任何后续 AI/工程师继续。所有结论按"已真机验证 / 已静态验证 / 未验证"分级标注。
