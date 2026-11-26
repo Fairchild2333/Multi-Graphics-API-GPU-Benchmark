@@ -1,3 +1,7 @@
+> **2026-11-26 注：已完成，只作历史参考。** 段 A（App 化）和段 B（root 后部署 KernelSU 用户态）已在独立仓库
+> `Fairchild2333/cheesecake-katyusha` 实现并在黑鲨上真机验证：`ksud late-load`（失败回退 insmod）+ `ksud install`，
+> KernelSU 模块加载成功；sulogd 实测是可选的 su 使用日志守护进程。
+
 # 计划：cheese 手机端 App + KernelSU handoff（段 A/B；段 C 明确不做）
 
 日期：2026-11-11。状态：**待用户认可**（L 类：先计划后代码）。

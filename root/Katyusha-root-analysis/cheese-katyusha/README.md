@@ -1,3 +1,8 @@
+> **2026-11-26 注：已被取代，只作历史参考。** 这里是 11 月归档的原版二进制和它的说明。现行代码与 App 在独立仓库
+> `Fairchild2333/cheesecake-katyusha`（黑鲨真机验证通过，2026-11-25）。相对这版的变化：结构偏移改为运行时解析
+> （内核自带 BTF 就取 BTF，否则用按 KMI 的表，`CHEESE_OFF_*` 可强制），内核符号从 kallsyms 运行时查找，
+> SELinux 改回 CPU 写并重试、回读校验，任务表遍历遇到失效项会从 init_task 重走，App 带"已 root 则不重复运行"的守卫。
+
 # cheese-katyusha —— 黑鲨 5 Pro 临时 root（CVE-2025-21479，已实机成功）
 
 2026-11-10 实机验证：UID 0 + SELinux Permissive，无 panic，设备健康。
