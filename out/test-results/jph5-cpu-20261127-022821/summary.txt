@@ -1,0 +1,5 @@
+== 1 cpu-compute: 02:33:44 cpu -C
+   exit=0 31 s cpu -C  All-core score (1 threads): 61.97 MWork/s 
+== 2 cpu-cache-memory: 02:34:20 cpu -C
+   exit=0 44 s cpu -C  [Results] Saved as 20261127-023504-363-cpu-membw -> /root/.local/share/GpuComputeBenchmark/results/results.json 
+SERIES DONE 02:35:09

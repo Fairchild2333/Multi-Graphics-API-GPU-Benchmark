@@ -6,6 +6,8 @@
 
 ## Linux 真机成绩
 
+2026-11-27，AkileCloud QEMU/KVM VPS（Xeon Gold 6138 单 vCPU、1.4 GiB、Ubuntu 20.04）完成 CPU-only 验证。机器只有 Bochs 虚拟显示设备，Vulkan 列表仅有 llvmpipe 软件渲染器，GPU 项目按套件规则跳过；构建及 6/6 项 ctest 通过，CPU 单线程 58.938、全核 61.972 MWork/s，内存读取 7.933 GB/s。最终 JSON 的 SHA256 为 `36efa95ca9b2f5396f836b312d3573dde17ac2f50da42bbdbbcdd8b568d7e091`。[成绩与日志](jph5-cpu-20261127-022821/) · [最终 JSON](jph5-cpu-20261127-022821/results.json)
+
 2026-11-20，戴尔 Inspiron 5567（i5-7200U、Intel HD 620、AMD Radeon R5 M445）完成 58 项中的 56 项。归档包含最终 JSON、逐项原始日志、遥测以及 Intel 256 步 GPU Burn 的两项失败复测。最终 JSON 的 SHA256 为 `52ca8b0cd68d1c3a48a2938bd0b860f79865324b07b62dd9bfffaa12f13613a0`。[成绩与日志](dell-inspiron-5567-series-20261120-151122/) · [最终 JSON](dell-inspiron-5567-series-20261120-151122/results.json)
 
 ## Apple 设备主历史快照

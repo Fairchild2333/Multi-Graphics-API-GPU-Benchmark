@@ -1769,6 +1769,16 @@ PathService 已把 results/captures/reports/logs 改到
 
 ## 10. 验证记录
 
+### 2026-11-27 AkileCloud QEMU/KVM VPS：无硬件 GPU，CPU-only 验证
+
+- **环境：** Ubuntu 20.04.6，内核 `5.4.0-156-generic`，QEMU Standard PC，Xeon Gold 6138 单 vCPU，1.4 GiB 内存；测试源码 `82f58b7`。远端主机名 `jph5-20260506001056ff9ca1`。
+- **GPU 范围：** 机器只有 Bochs 虚拟显示设备；`--list-gpus` 只看到 llvmpipe 软件渲染器。套件按既有规则跳过软件 GPU，因此这轮没有任何硬件 GPU 成绩，也不能用来判断 Vulkan/OpenGL 驱动兼容性。
+- **构建：** 远端安装 Ubuntu 20.04 所需依赖，CMake 3.31.6 / GCC 9.4.0；Release 构建完成，6/6 项 `ctest` 通过。`glslc not found` 是这台系统的预期警告，CPU 测试不受影响。
+- **CPU：** 单线程 58.938 MWork/s；全核（1 线程）61.972 MWork/s。单线程缓存/内存读取：L1 143.0、L2 68.6、L3 12.6、主内存 7.933 GB/s；主内存普通写入 5.3、复制 6.9、streaming 写入 5.5 GB/s。
+- **存储：** 无 swap；结果目录顺序读 / 写 108 / 107 MB/s，随机 4 KiB QD1 读 10.4 MB/s（2533 IOPS）、写 18.3 MB/s（4480 IOPS）。23/118 个缓存点因机器其他活动重测。
+
+[最终成绩 JSON](out/test-results/jph5-cpu-20261127-022821/results.json) · [日志汇总](out/test-results/jph5-cpu-20261127-022821/summary.txt) · [完整日志与遥测](out/test-results/jph5-cpu-20261127-022821/)
+
 ### 2026-11-20 戴尔 Inspiron 5567：HD Graphics 620、Radeon R5 M445 和 i5-7200U
 
 外接 SSD 启动 Ubuntu 26.04.1，内核 `7.0.0-44-generic`，Mesa `26.0.8-1ubuntu0.3`，测试源码 `6a342f8`。两张 GPU 各跑 28 项，加 CPU 计算和缓存/内存共 58 项，56 项有成绩。最终 JSON 有 49 条记录：46 条桌面 GPU 记录、2 条 CPU 计算记录和 1 条 CPU 内存记录。另有 8 项 OpenGL ES 2.0 GPU Burn 成绩保存在原生日志。

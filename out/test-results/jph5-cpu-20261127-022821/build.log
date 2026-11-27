@@ -1,0 +1,114 @@
+-- The C compiler identification is GNU 9.4.0
+-- The CXX compiler identification is GNU 9.4.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Vulkan backend: ENABLED
+-- DX12 backend:   DISABLED (by option)
+-- DX11 backend:   DISABLED (by option)
+-- Metal backend:  DISABLED (by option)
+-- OpenGL backend: ENABLED
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE
+CMake Warning at CMakeLists.txt:513 (message):
+  glslc not found – Vulkan shader compilation disabled.
+
+
+-- Configuring done (2.3s)
+-- Generating done (0.1s)
+-- Build files have been written to: /root/mangekyo/build
+[  2%] Building C object CMakeFiles/glad_gl43.dir/third_party/glad/src/gl.c.o
+[  5%] Linking C static library libglad_gl43.a
+[  5%] Built target glad_gl43
+[  7%] Building CXX object CMakeFiles/gpu_engine.dir/src/main.cpp.o
+/root/mangekyo/src/main.cpp: In function ‘int gpu_bench::cliMain(int, char**)’:
+/root/mangekyo/src/main.cpp:1264:10: warning: variable ‘saveMemorySweep’ set but not used [-Wunused-but-set-variable]
+ 1264 |     bool saveMemorySweep = false;
+      |          ^~~~~~~~~~~~~~~
+/root/mangekyo/src/main.cpp:1266:10: warning: variable ‘saveGpuCacheProbe’ set but not used [-Wunused-but-set-variable]
+ 1266 |     bool saveGpuCacheProbe = true;
+      |          ^~~~~~~~~~~~~~~~~
+/root/mangekyo/src/main.cpp:1268:37: warning: variable ‘sweepCfg’ set but not used [-Wunused-but-set-variable]
+ 1268 |     gpu_bench::GpuMemorySweepConfig sweepCfg{};
+      |                                     ^~~~~~~~
+/root/mangekyo/src/main.cpp: At global scope:
+/root/mangekyo/src/main.cpp:504:13: warning: ‘bool NameLooksIntegrated(const string&)’ defined but not used [-Wunused-function]
+  504 | static bool NameLooksIntegrated(const std::string& name) {
+      |             ^~~~~~~~~~~~~~~~~~~
+/root/mangekyo/src/main.cpp:484:20: warning: ‘std::string QuoteSuiteProcessArg(const string&)’ defined but not used [-Wunused-function]
+  484 | static std::string QuoteSuiteProcessArg(const std::string& value) {
+      |                    ^~~~~~~~~~~~~~~~~~~~
+[ 10%] Building CXX object CMakeFiles/gpu_engine.dir/src/suite_process.cpp.o
+[ 13%] Building CXX object CMakeFiles/gpu_engine.dir/src/app_base.cpp.o
+[ 15%] Building CXX object CMakeFiles/gpu_engine.dir/src/benchmark_results.cpp.o
+[ 18%] Building CXX object CMakeFiles/gpu_engine.dir/src/cpu_benchmark.cpp.o
+[ 21%] Building CXX object CMakeFiles/gpu_engine.dir/src/cpu_cli.cpp.o
+[ 23%] Building CXX object CMakeFiles/gpu_engine.dir/src/path_service.cpp.o
+[ 26%] Building CXX object CMakeFiles/gpu_engine.dir/src/system_info.cpp.o
+[ 28%] Building CXX object CMakeFiles/gpu_engine.dir/src/cinematic_liquid_v2_common.cpp.o
+[ 31%] Building CXX object CMakeFiles/gpu_engine.dir/src/cpu_membw.cpp.o
+[ 34%] Building CXX object CMakeFiles/gpu_engine.dir/src/vulkan_membw_results.cpp.o
+[ 36%] Building CXX object CMakeFiles/gpu_engine.dir/src/vulkan_backend.cpp.o
+[ 39%] Building CXX object CMakeFiles/gpu_engine.dir/src/vulkan_membw.cpp.o
+[ 42%] Building CXX object CMakeFiles/gpu_engine.dir/src/opengl_backend.cpp.o
+[ 44%] Linking CXX static library libgpu_engine.a
+[ 44%] Built target gpu_engine
+[ 47%] Building CXX object CMakeFiles/gpu_benchmark.dir/src/cli_main.cpp.o
+[ 50%] Linking CXX executable gpu_benchmark
+Copying OpenGL GLSL shader files next to executable
+[ 50%] Built target gpu_benchmark
+[ 52%] Building CXX object CMakeFiles/results_compat_test.dir/tests/results_compat_test.cpp.o
+[ 55%] Building CXX object CMakeFiles/results_compat_test.dir/src/benchmark_results.cpp.o
+[ 57%] Building CXX object CMakeFiles/results_compat_test.dir/src/path_service.cpp.o
+[ 60%] Building CXX object CMakeFiles/results_compat_test.dir/src/system_info.cpp.o
+[ 63%] Linking CXX executable results_compat_test
+[ 63%] Built target results_compat_test
+[ 65%] Building CXX object CMakeFiles/result_quality_test.dir/tests/result_quality_test.cpp.o
+[ 68%] Linking CXX executable result_quality_test
+[ 68%] Built target result_quality_test
+[ 71%] Building CXX object CMakeFiles/complete_suite_test.dir/tests/complete_suite_test.cpp.o
+[ 73%] Linking CXX executable complete_suite_test
+[ 73%] Built target complete_suite_test
+[ 76%] Building CXX object CMakeFiles/vulkan_membw_results_test.dir/tests/vulkan_membw_results_test.cpp.o
+[ 78%] Building CXX object CMakeFiles/vulkan_membw_results_test.dir/src/vulkan_membw_results.cpp.o
+[ 81%] Building CXX object CMakeFiles/vulkan_membw_results_test.dir/src/benchmark_results.cpp.o
+[ 84%] Building CXX object CMakeFiles/vulkan_membw_results_test.dir/src/path_service.cpp.o
+[ 86%] Building CXX object CMakeFiles/vulkan_membw_results_test.dir/src/system_info.cpp.o
+[ 89%] Linking CXX executable vulkan_membw_results_test
+[ 89%] Built target vulkan_membw_results_test
+[ 92%] Building CXX object CMakeFiles/cpu_residency_test.dir/tests/cpu_residency_test.cpp.o
+[ 94%] Linking CXX executable cpu_residency_test
+[ 94%] Built target cpu_residency_test
+[ 97%] Building CXX object CMakeFiles/cpu_cancel_test.dir/tests/cpu_cancel_test.cpp.o
+[100%] Linking CXX executable cpu_cancel_test
+[100%] Built target cpu_cancel_test
+Internal ctest changing into directory: /root/mangekyo/build
+Test project /root/mangekyo/build
+    Start 1: results_compat
+1/6 Test #1: results_compat ...................   Passed    0.03 sec
+    Start 2: result_quality
+2/6 Test #2: result_quality ...................   Passed    0.00 sec
+    Start 3: complete_suite
+3/6 Test #3: complete_suite ...................   Passed    0.00 sec
+    Start 4: vulkan_membw_results
+4/6 Test #4: vulkan_membw_results .............   Passed    0.01 sec
+    Start 5: cpu_residency
+5/6 Test #5: cpu_residency ....................   Passed    0.00 sec
+    Start 6: cpu_cancel
+6/6 Test #6: cpu_cancel .......................   Passed    1.31 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Total Test time (real) =   1.37 sec

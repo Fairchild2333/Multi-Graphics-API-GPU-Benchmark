@@ -1,0 +1,8 @@
+host: jph5-20260506001056ff9ca1
+source: 82f58b7
+os: Ubuntu 20.04.6 LTS, kernel 5.4.0-156-generic
+cpu:  Intel(R) Xeon(R) Gold 6138 CPU @ 2.00GHz, 1 threads, governor 
+power profile: n/a
+session: x11 :0
+00:02.0 VGA compatible controller: Device 1234:1111 (rev 02)
+GPU	0	llvmpipe (LLVM 12.0.0, 256 bits)	1	0	0	0	0	0	1	1	0	0	0
